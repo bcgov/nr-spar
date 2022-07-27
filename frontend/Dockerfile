@@ -1,26 +1,37 @@
-# Build
-FROM node:16.19.1-alpine3.17 AS build
+# RedHat UBI 8 with nodejs 14
+FROM registry.access.redhat.com/ubi8/ubi as builder
+RUN dnf module install -y nodejs:14
 
-# Copy and build
+# Install packages, build and keep only prod packages
 WORKDIR /app
-COPY . .
-RUN yarn install --cwd frontend --frozen-lockfile --prefer-offline && \
-    yarn --cwd frontend build:production && \
-    rm -rf node_modules
+COPY . ./
+RUN npm ci --only=prod && \
+    npm run build
 
+# Deployment container
+FROM registry.access.redhat.com/ubi8/ubi-micro
 
-# Deploy
-FROM node:16.19.1-alpine3.17
+# Set node to production 
+ENV NODE_ENV production
 
-# Copy and prep app
+# Node packages and dependencies
+COPY --from=builder /usr/bin/node /usr/bin/
+COPY --from=builder /usr/lib64/libz.so.1 /usr/lib64/
+COPY --from=builder /usr/lib64/libbrotlidec.so.1 /usr/lib64/
+COPY --from=builder /usr/lib64/libbrotlienc.so.1 /usr/lib64/
+COPY --from=builder /usr/lib64/libcrypto.so.1.1 /usr/lib64/
+COPY --from=builder /usr/lib64/libssl.so.1.1 /usr/lib64/
+COPY --from=builder /usr/lib64/libstdc++.so.6 /usr/lib64/
+COPY --from=builder /usr/lib64/libgcc_s.so.1 /usr/lib64/
+COPY --from=builder /usr/lib64/libbrotlicommon.so.1 /usr/lib64/
+
+# Copy over app
 WORKDIR /app
-COPY --from=build /app/build/ .
-RUN yarn global add serve@14.2.0 react-inject-env@2.1.0 && \
-    chmod -R g+w .
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
 
-# User and startup
+# Expose port - mostly a convention, for readability
 EXPOSE 3000
-USER 1001
-HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost/:3000
-CMD react-inject-env set -d . && \
-    serve -s .
+
+# Start up command
+ENTRYPOINT ["node", "dist/main"]
