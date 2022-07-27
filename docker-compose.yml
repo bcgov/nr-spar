@@ -1,4 +1,5 @@
-version: '3.9'
+---
+version: "3.8"
 
 services:
   database:
@@ -8,46 +9,62 @@ services:
       POSTGRES_PASSWORD: default
       POSTGRES_DB: default
     hostname: database
-    ports:
-      - "5432:5432"
+    image: postgres:12
     restart: always
     volumes:
       - /pgdata
-    build:
-      context: ./database
-      dockerfile: Dockerfile
-    healthcheck:
-      test: [ "CMD-SHELL", "psql -q -U default -d default -c 'SELECT 1'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   backend:
     container_name: backend
-    depends_on:
-      database:
-        condition: service_healthy
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "npm i && npm run start"
     environment:
-      NR_SPAR_BACKEND_VERSION: snapshot
-      KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
+      NODE_ENV: development
       POSTGRESQL_HOST: database
-      POSTGRESQL_DATABASE: default
       POSTGRESQL_USER: default
       POSTGRESQL_PASSWORD: default
-      JAVA_OPTS: ${JAVA_OPTS}
+      POSTGRESQL_DATABASE: default
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8090/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 1m30s
-      timeout: 3s
+      timeout: 10s
       retries: 3
       start_period: 40s
     hostname: backend
+    image: node:14
     links:
       - database
     ports:
-      - "8090:8090"
+      - "3001:3000"
     volumes:
-      - ./backend:/usr/share/service/backend
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+      - ./backend:/app:z
+      - /app/node_modules
+    working_dir: "/app"
+
+  frontend:
+    container_name: frontend
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "npm i && npm run start"
+    environment:
+      NODE_ENV: development
+      BACKEND_URL: backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    hostname: frontend
+    image: node:14
+    links:
+      - backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app:z
+      - /app/node_modules
+    working_dir: "/app"
