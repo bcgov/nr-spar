@@ -37,10 +37,22 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
-target/
+
+# Dependency directories
+node_modules/
+jspm_packages/
 
 # TypeScript v1 declaration files
 typings/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
 
 # Microbundle cache
 .rpt2_cache/
@@ -53,6 +65,9 @@ typings/
 
 # Output of 'npm pack'
 *.tgz
+
+# Yarn Integrity file
+.yarn-integrity
 
 # dotenv environment variables file
 .env
@@ -97,6 +112,3 @@ snyk.sarif
 
 # Docker/Podman volumes
 .volumes
-
-# Jetbrains IntelliJ IDEA
-.idea/

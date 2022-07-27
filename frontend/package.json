@@ -44,14 +44,14 @@
     "url": "git+https://github.com/bcgov/nr-spar-webapp.git"
   },
   "keywords": [
-    "fsa",
-    "nr",
-    "frontend",
+    "openshift",
+    "pipeline",
+    "node",
     "node",
     "js",
-    "react"
+    "devops"
   ],
-  "author": "Encora Team",
+  "author": "Derek Roberts",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/bcgov/nr-spar-webapp/issues"
