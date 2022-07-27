@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!-- PROJECT SHIELDS -->
 
 [![Contributors](https://img.shields.io/github/contributors/bcgov/greenfield-template)](/../../graphs/contributors)
@@ -35,47 +34,9 @@ This project is in active development.  Please visit our [issues](https://github
 
 ![2/3: PR Close](.github/graphics/pipeline2of3.png)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-- `DATABASE_HOST`
-- `DATABASE_PORT`
-- `SERVICE_NAME` (the database's name)
-- `DATABASE_USER`
-- `DATABASE_PASSWORD`
-
-<<<<<<< HEAD
-- REACT_APP_SERVER_URL
-- REACT_APP_NRSPARWEBAPP_VERSION
-- REACT_APP_KC_URL
-- REACT_APP_KC_REALM
-- REACT_APP_KC_CLIENT_ID
-- REACT_APP_ENABLE_MOCK_SERVER
-- REACT_APP_ORACLE_SERVER_URL
-
-To run the unit tests all you need is `yarn test`. For end-to-end test you need to run `yarn cypress run` to run on console or `yarn cypress open` to use the Cypress IDE.
-
-> Note that to run locally you'll need those environment variables: CYPRESS_USERNAME and CYPRESS_PASSWORD
-
-> Note that to run on github you'll need those secret variables: CYPRESS_USERNAME and CYPRESS_PASSWORD
-
-For more details about end-to-end tests check out our [confluence page](https://apps.nrs.gov.bc.ca/int/confluence/display/FSADT2/Test+strategy)
-
-Before writing your first line of code, please take a moment and check out
-our [CONTRIBUTING](CONTRIBUTING.md) guide.
-=======
-=======
->>>>>>> c3bef1c (fix(build): remove unused env vars from prod deployment (#8))
-Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
-the `status` property should have the value *UP*.
-
-Before writing your first line of code, and learn more about the checks, including
-tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
->>>>>>> 422403b (feat: add files from old branch)
-=======
 ### Workflow 3 of 3: Main Merge
 
 ![3/3: Main Merge](.github/graphics/pipeline3of3.png)
->>>>>>> 0ce9380 (Initial commit)
 
 ### Deployments
 
@@ -230,5 +191,3 @@ Please read [our setup guide](./SETUP.md) for more information.
 ## Example APIs, UIs and Metabase/Oracle Templates
 
 Templates for APIs, UIs and Metabase/Oracle can be used to kickstart or extend projects.  Please visit our collaborators' [NR Architecture Templates](https://github.com/bcgov/nr-arch-templates) repository for more information.
-=======
->>>>>>> 22545a3 (Update with Java project instead NodeJS project)
