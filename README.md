@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 <!-- PROJECT SHIELDS -->
 
 [![Contributors](https://img.shields.io/github/contributors/bcgov/greenfield-template)](/../../graphs/contributors)
@@ -232,3 +233,10 @@ Please read [our setup guide](./SETUP.md) for more information.
 Templates for APIs, UIs and Metabase/Oracle can be used to kickstart or extend projects.  Please visit our collaborators' [NR Architecture Templates](https://github.com/bcgov/nr-arch-templates) repository for more information.
 =======
 >>>>>>> 22545a3 (Update with Java project instead NodeJS project)
+=======
+[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/nr-backend-starting-api)
+
+# Natural Resources Back-End Starting API
+
+This repository holds a set of policies, standards and guides to get started with a back-end API.
+>>>>>>> 561be9f (Add project lifecycle badge to the project (#4))
