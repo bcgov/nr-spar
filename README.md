@@ -235,6 +235,7 @@ Templates for APIs, UIs and Metabase/Oracle can be used to kickstart or extend p
 >>>>>>> 22545a3 (Update with Java project instead NodeJS project)
 =======
 [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/nr-backend-starting-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-backend-starting-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-backend-starting-api)
 
 # Natural Resources Back-End Starting API
 
