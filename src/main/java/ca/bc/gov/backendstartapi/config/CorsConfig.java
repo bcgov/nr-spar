@@ -1,16 +1,19 @@
 package ca.bc.gov.backendstartapi.config;
 
+import ca.bc.gov.backendstartapi.util.ObjectUtil;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.reactive.config.CorsRegistry;
+import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 /** This class holds the configuration for CORS handling. */
 @Configuration
+@EnableWebFlux
 @Slf4j
-public class CorsConfig implements WebMvcConfigurer {
+public class CorsConfig implements WebFluxConfigurer {
 
   @Value("${server.allowed.cors.origins}")
   private String[] allowedOrigins;
@@ -22,7 +25,7 @@ public class CorsConfig implements WebMvcConfigurer {
    */
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    if (allowedOrigins != null && allowedOrigins.length != 0) {
+    if (!ObjectUtil.isEmptyOrNull(allowedOrigins)) {
       log.info("allowedOrigins: {}", Arrays.asList(allowedOrigins));
 
       registry
@@ -30,6 +33,6 @@ public class CorsConfig implements WebMvcConfigurer {
           .allowedOriginPatterns(allowedOrigins)
           .allowedMethods("GET", "PUT", "POST", "DELETE", "PATCH", "OPTIONS", "HEAD");
     }
-    WebMvcConfigurer.super.addCorsMappings(registry);
+    WebFluxConfigurer.super.addCorsMappings(registry);
   }
 }
