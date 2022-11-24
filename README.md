@@ -1,6 +1,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 <!-- PROJECT SHIELDS -->
 
 [![Contributors](https://img.shields.io/github/contributors/bcgov/greenfield-template)](/../../graphs/contributors)
@@ -364,3 +365,7 @@ Feel free to start a conversation at the `#nr-seed-planning` Rocket.Chat channel
 As mentioned, we're here to help. Feel free to start a conversation
 on Rocket chat or ask a question on Stackoverflow.
 >>>>>>> 390c840 (Doc: improving readme and contributing guide (#7))
+=======
+# nr-spar-webapp
+NR SPAR Web Application - With React
+>>>>>>> e3b54e2 (Initial commit)
