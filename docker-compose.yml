@@ -1,23 +1,21 @@
 version: '3.9'
 
 services:
-  frontned:
-    container_name: frontend
+  backend:
+    container_name: spar-api
+    image: spar-api:latest
     environment:
-      REACT_APP_NRSPARWEBAPP_VERSION: dev
-      REACT_APP_SERVER_URL: https://nr-spar-backend-test-backend.apps.silver.devops.gov.bc.ca
-      REACT_APP_KC_URL: https://test.loginproxy.gov.bc.ca/auth
-      REACT_APP_KC_REALM: standard
-      REACT_APP_KC_CLIENT_ID: seed-planning-test-4296
-      REACT_APP_ENABLE_MOCK_SERVER: "true"
+      NR_SPAR_BACKEND_VERSION: ${NR_SPAR_BACKEND_VERSION}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      SERVICE_NAME: ${SERVICE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      KEYCLOAK_REALM_URL: ${KEYCLOAK_REALM_URL}
+    hostname: spar-api
+    dns: 142.22.202.100
     ports:
-      - "3000:3000"
-    restart: always
+      - "8090:8090"
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
-    healthcheck:
-      test: [ "CMD-SHELL", "curl http://localhost:3000" ]
-      interval: 15s
-      timeout: 5s
-      retries: 5
