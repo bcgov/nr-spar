@@ -1,21 +1,29 @@
 [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/nr-spar-webapp)
 ![Cypress nightly](https://github.com/bcgov/nr-spar-webapp/actions/workflows/cypress-nightly.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-spar-webapp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-spar-webapp)
+[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/nr-spar-backend)
+![Coverage](.github/badges/jacoco.svg)
+![Branches](.github/badges/branches.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-spar-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-backend-starting-api)
 
-# Natural Resources Front-End Starting Progressive Web Application
+# Natural Resources SPAR Back-End API
 
-This repository holds a set of policies, standard, guides and pipelines to get
-started with a Progressive Web Application. Before writing your first line of code, please take a
-moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
+This repository holds a set of policies, standards, guides, and pipelines to
+get started with a back-end API. Before writing your first line of code, please
+take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
+
+Note: This repository was generated from [greenfield-template](https://github.com/bcgov/greenfield-template)
+and in case you're interested in the original README file, we still have it [here](README_template.md).
 
 ## Our Policy
 
 - Work in the open: That means that everything we do should be open, should be
 public. Please, don't create private repositories unless you have a very strong
 reason. Keeping things public is a must follow rule for BC Government.
-- Customer centred services: All the work that's been created is to improve
-users, customers, and friends usability and experience. Is important to keep
-that in mind, because as engineers sometimes we face technical issues, however, our goal is to have a good product.
+- Customer centred services: All the work that's been created is to improve users,
+customers, and friends usability and experience. Is important to keep that in mind 
+because as engineers sometimes we face technical issues, however, our goal is
+to have a good product.
 - Community based work: Remember that you're not alone. It's very likely that
 your problem is someone else's problem. Let's figure it out together. So, ask
 a question using our channels. We have [our own Stackoverflow](https://stackoverflow.developer.gov.bc.ca/)
@@ -23,34 +31,45 @@ and [our Rocket Chat](https://chat.developer.gov.bc.ca/) channel.
 
 # Stack
 
-Here you will find a comprehensive list of all the languages and tools that are
-been used in this app. And also everything you need to get started, build,
-test and deploy.
+Here you can find a comprehensive list of all languages and tools that are been used
+in this service. And also everything you need to get started, build locally, test
+and deploy it. 
 
-- React Progressive Web Application
-  - TypeScript
-  - Context API
-  - React Testing Library
-  - Jest
-  - Cypress
-- Lint
-  - Airbnb ESLint
-- Tools
+- Java ecosystem
+  - Maven
+  - Open JDK 17
+  - Spring Web MVC Framework
+  - JPA and Hibernate Framework
+- Testing
+  - JUnit 5
+  - Mockito and Mock MVC
+  - Automated tests with Postman and Newman
+- Database
+  - Remote Oracle with secure connection
+  - PostgreSQL
+- DevOps
   - Docker
-  - Microsoft Visual Studio Code
-- Styling
-  - Carbon Design System
-- Authentication
-  - Keycloak
+  - Docker Composer
+  - Sonar Cloud
+  - Deploy to OpenShift with GitHub Actions
+- Tools (Recommendations)
+  - IntelliJ IDEA
+  - Postman
+  - DBeaver
 
 # Getting started
 
-Once you have cloned this repository, you can get the app running by typing
-`yarn install` and then `yarn start` from the project root directory. Then
-head to http://localhost:3000.
+Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
+from the project root directory. You **must** provide three environment variables for database
+access configuration:
 
-Be aware of the required environment variables:
+- `DATABASE_HOST`
+- `DATABASE_PORT`
+- `SERVICE_NAME` (the database's name)
+- `DATABASE_USER`
+- `DATABASE_PASSWORD`
 
+<<<<<<< HEAD
 - REACT_APP_SERVER_URL
 - REACT_APP_NRSPARWEBAPP_VERSION
 - REACT_APP_KC_URL
@@ -69,28 +88,48 @@ For more details about end-to-end tests check out our [confluence page](https://
 
 Before writing your first line of code, please take a moment and check out
 our [CONTRIBUTING](CONTRIBUTING.md) guide.
+=======
+Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
+the `status` property should have the value *UP*.
+
+Before writing your first line of code, and learn more about the checks, including
+tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
+>>>>>>> 422403b (feat: add files from old branch)
 
 ## Quick look
 
 But if all you want is to take a quick look on the running service, you can do it by
 using Docker.
 
-> Note that you'll need those environment variables mentioned above!
-
-Build Docker image:
+Note that you'll need these environment variables:
 ```
-docker build -t grch.io/bcgov/nr-spar-webapp/frontend:dev .
+NR_SPAR_BACKEND_VERSION=local
+DATABASE_HOST=<host>
+DATABASE_PORT=<port>
+SERVICE_NAME=<service-name>
+DATABASE_USER=<user>
+DATABASE_PASSWORD=<pass>
+KEYCLOAK_REALM_URL=<realm-server-address>
+```
+
+Build the service:
+```
+docker build -t bcgov/nr-spar-backend-test-spar-api:latest .
 ```
 
 Then run with:
 ```
-docker run -p 3000:3000 \
-  --env-file .env \
-  --tty --interactive \
-  grch.io/bcgov/nr-spar-webapp/frontend:dev
+docker run -p 8090:8090 \
+  -e KEYCLOAK_REALM_URL=https://dev.loginproxy.gov.bc.ca/auth/realms/standard \
+  -t bcgov/nr-spar-backend-test-spar-api:latest
+```
+
+However, if you have docker-compose you can do:
+```
+docker-compose --env-file .env -f ./docker-compose.yml up --build --force-recreate --no-deps
 ```
 
 ## Getting help
 
 As mentioned, we're here to help. Feel free to start a conversation
-on Rocket chat, you can search for `@matheus.gaseta`, `@igor.melo`, `@ricardo.campos` or `@annibal.silva`.
+on Rocket chat or ask a question on Stackoverflow.
