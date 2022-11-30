@@ -2,10 +2,10 @@ automation:
   - .github/*
 
 coverage:
-  - src/__test__/**/*.tsx
+  - src/test/**/*.java
 
 source:
-  - src/**/*.tsx
+  - src/main/**/*.java
 
 docker:
   - any: ['Dockerfile','dockerfile-entrypoint.sh']
