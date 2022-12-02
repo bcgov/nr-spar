@@ -1,0 +1,51 @@
+{
+  "name": "NR-FSA",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "VARIANT": "16.18.1-alpine3.16"
+    }
+  },
+  "settings": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.documentSelectors": [
+      "*.js",
+      "*.ts",
+      "*.tsx",
+      "*.json"
+    ],
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": false,
+    "prettier.requireConfig": true,
+    "eslint.format.enable": true
+  },
+  "extensions": [
+    "mgmcdermott.vscode-language-babel",
+    "fabiospampinato.vscode-diff",
+    "ms-azuretools.vscode-docker",
+    "mikestead.dotenv",
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
+    "esbenp.prettier-vscode",
+    "meganrogge.template-string-converter",
+    "visualstudioexptteam.vscodeintellicode",
+    "loiane.ts-extension-pack",
+    "pkief.material-icon-theme",
+    "mads-hartmann.bash-ide-vscode",
+    "shakram02.bash-beautify"
+  ],
+  "forwardPorts": [
+    3000
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Service Port",
+      "onAutoForward": "silent"
+    }
+  },
+  "otherPortsAttributes": {
+    "onAutoForward": "notify"
+  },
+  "remoteUser": "node"
+}

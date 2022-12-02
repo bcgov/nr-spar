@@ -1,0 +1,420 @@
+name: Commits and PR Open
+
+on:
+  pull_request:
+  push:
+    branches:
+      - '*'
+      - '*/*'
+      - '**'
+    tags-ignore:
+      - '**'
+
+env:
+  REGISTRY: ghcr.io
+  NAME: nrsparwebapp
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-dependencies:
+    name: Install dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn --prefer-offline
+
+  validate-lint:
+    name: Validate codestyle
+    runs-on: ubuntu-latest
+    needs:
+      - install-dependencies
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: yarn --prefer-offline
+
+      - name: Run lint
+        run: yarn run lint
+
+  run-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs:
+      - validate-lint
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn --prefer-offline
+
+      - name: Cache for test results
+        id: cache-tests
+        uses: actions/cache@v3
+        with:
+          path: /coverage
+          key: coverage-${{ github.run_number }}
+          restore-keys: |
+            coverage-
+
+      - name: Build
+        run: |
+          yarn build
+
+      - name: Tests
+        run: |
+          yarn test -u
+
+  sonarcloud:
+    name: Static Analysis
+    needs:
+      - run-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn --prefer-offline
+
+      - name: Cache for test results
+        id: cache-tests
+        uses: actions/cache@v3
+        with:
+          path: /coverage
+          key: coverage-${{ github.run_number }}
+          restore-keys: |
+            coverage-
+
+      - name: Build
+        run: |
+          yarn build
+
+      - name: Tests
+        run: |
+          yarn test -u --coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.exclusions=**/__test__/**,.github/**/*
+            -Dsonar.coverage.exclusions=**/__test__/**,.github/**/*
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
+            -Dsonar.project.monorepo.enabled=false
+            -Dsonar.projectKey=bcgov_nr-spar-webapp
+            -Dsonar.sources=.
+            -Dsonar.tests=src/__test__/components
+
+  security:
+    name: Security checks
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    needs:
+      - validate-lint
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn --prefer-offline
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          debug: true
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      # TODO: Add SNYK Token
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/maven@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+
+  coverage-report:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    # PR only
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    needs:
+      - run-tests
+      - security
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn --prefer-offline
+
+      - name: Cache for test results
+        id: cache-tests
+        uses: actions/cache@v3
+        with:
+          path: /coverage
+          key: coverage-${{ github.run_number }}
+          restore-keys: |
+            coverage-
+
+      - name: Build
+        run: |
+          yarn build
+
+      - name: Tests
+        run: |
+          yarn test -u --coverage
+
+      - name: Report code coverage
+        uses: romeovs/lcov-reporter-action@v0.3.1
+        with:
+          title: Coverage report
+          delete-old-comments: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          lcov-file: ./coverage/lcov.info
+
+  pr-validation:
+    name: Label Validation (Only PR)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Pull request size and stability labels
+        uses: actions/labeler@v4
+        continue-on-error: true
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Conventional Label
+        uses: bcoe/conventional-release-labels@v1
+        continue-on-error: true
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ignored_types: '["chore","pr"]'
+          type_labels: '{"feat": "feature", "fix": "fix", "bug": "fix", "doc": "documentation", "ci": "ci", "chore": "chore", "breaking": "breaking", "BREAKING CHANGE": "breaking"}'
+
+      - name: Checkout branch
+        uses: actions/checkout@v3
+        with:
+          ref: refs/heads/${{ github.head_ref }}
+
+      - name: Conventional Changelog Update
+        continue-on-error: true
+        uses: TriPSs/conventional-changelog-action@v3
+        id: changelog
+        with:
+          github-token: ${{ github.token }}
+          output-file: 'CHANGELOG.md'
+          skip-version-file: 'true'
+          skip-commit: 'true'
+          git-push: 'false'
+          git-branch: refs/heads/${{ github.head_ref }}
+
+      - name: Checkout pr
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Comment PR
+        continue-on-error: true
+        uses: thollander/actions-comment-pull-request@v1
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        with:
+          message: |
+            # Current changelog
+
+            ${{ steps.changelog.outputs.clean_changelog }}
+          comment_includes: '# Current changelog'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-image:
+    name: Image Build (Only PR)
+    env:
+      COMPONENT: app
+      ZONE: ${{ github.event.number }}
+      REACT_APP_NRFESAMPLEAPP_VERSION: snapshot-${{ github.event.number }}
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    needs:
+      - run-tests
+      - security
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --prefer-offline
+
+      - name: Build
+        run: yarn build:production
+        env:
+          DISABLE_ESLINT_PLUGIN: true
+          REACT_APP_NRFESAMPLEAPP_VERSION: ${{ env.REACT_APP_NRFESAMPLEAPP_VERSION }}
+          REACT_APP_SERVER_URL: ${{ secrets.REACT_APP_SERVER_URL }}
+          REACT_APP_KC_URL: ${{ secrets.REACT_APP_KC_URL }}
+          REACT_APP_KC_REALM: ${{ secrets.REACT_APP_KC_REALM }}
+          REACT_APP_KC_CLIENT_ID: ${{ secrets.REACT_APP_KC_CLIENT_ID }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}
+
+  deploy-dev:
+    name: DEV Deployment (Only PR)
+    needs:
+      - build-image
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    timeout-minutes: 15
+    env:
+      ZONE: ${{ github.event.number }}
+      REACT_APP_NRFESAMPLEAPP_VERSION: snapshot-${{ github.event.number }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          # Clean previous image, if rebuilding
+          if [ ${{ needs.build-image.outputs.build == 'true' }} ]
+          then
+            # Clear stale images for import/replacement
+            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-app || \
+              echo "No previously imported images have been found"
+          fi
+
+          # Process and apply template
+          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
+            -p REACT_APP_NRFESAMPLEAPP_VERSION=${{ env.REACT_APP_NRFESAMPLEAPP_VERSION }} \
+            -p REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} \
+            -p REACT_APP_KC_URL=${{ secrets.REACT_APP_KC_URL }} \
+            -p REACT_APP_KC_REALM=${{ secrets.REACT_APP_KC_REALM }} \
+            -p REACT_APP_KC_CLIENT_ID=${{ secrets.REACT_APP_KC_CLIENT_ID }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-app | oc apply -f -
+
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-app -w
+
+      - name: DEV Deployment update
+        uses: mshick/add-pr-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          allow-repeats: false
+          message: |
+            DEV deployments have completed successfully!
+            Frontend: [https://${{ env.NAME }}-${{ github.event.number }}-app.apps.silver.devops.gov.bc.ca/]()
+
+  e2e-smoke:
+    name: E2E Smoke on Chrome
+    needs: 
+      - deploy-dev
+    continue-on-error: true
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          browser: chrome
+          config: baseUrl=https://${{ env.NAME }}-${{ github.event.number }}-app.apps.silver.devops.gov.bc.ca
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos

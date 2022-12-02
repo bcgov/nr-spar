@@ -1,0 +1,381 @@
+name: Merge to Main
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  NAME: nrsparwebapp
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  # https://github.com/marketplace/actions/ghcr-io-container-cleanup
+  cleanup-ghcr:
+    name: Cleanup Container Registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old packages
+        uses: davahome/ghcr-cleanup@v1.1.0.1
+        with:
+          delete_untagged: 1
+          keep_versions: 10
+          keep_versions_untagged: 0
+          minimum_days: 14
+          owner: orgs/bcgov
+          package: ${{ github.event.repository.name }}
+          skip_tags: prod-app
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  codeql:
+    name: Semantic Code Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn --prefer-offline
+
+      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+      # If this step fails, then you should remove it and run the build manually (see below)
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  sonarcloud:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn --prefer-offline
+
+      - name: Cache for test results
+        id: cache-tests
+        uses: actions/cache@v3
+        with:
+          path: /coverage
+          key: coverage-${{ github.run_number }}
+          restore-keys: |
+            coverage-
+
+      - name: Build
+        run: |
+          yarn build
+
+      - name: Tests
+        run: |
+          yarn test -u --coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.exclusions=**/__test__/**,.github/**/*
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
+            -Dsonar.project.monorepo.enabled=false
+            -Dsonar.projectKey=bcgov_nr-spar-webapp
+            -Dsonar.sources=.
+            -Dsonar.tests=src/__test__/components
+
+  # Generate release notes and update new version
+  release:
+    name: Release Notes
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.changelog.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
+
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'yarn'
+
+      - name: Conventional Changelog Update
+        uses: TriPSs/conventional-changelog-action@v3
+        id: changelog
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-file: 'CHANGELOG.md'
+          skip-version-file: 'true'
+          skip-commit: 'true'
+          git-push: 'false'
+
+      - name: Set new version output
+        run: |
+          echo "::set-output name=version::${{ steps.changelog.outputs.version }}"
+          npm version ${{ steps.changelog.outputs.version }} --git-tag-version false
+
+      - name: Commit package and changelog
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Ci Bot
+          author_email: cibot@users.noreply.github.com
+          message: 'doc: updating package to ${{ steps.changelog.outputs.version }} [ci skip]'
+          add: '["package.json","CHANGELOG.md"]'
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+
+  deploy-test:
+    name: TEST Deployment
+    needs:
+      - cleanup-ghcr
+      - codeql
+      - sonarcloud
+      - release
+    runs-on: ubuntu-latest
+    environment:
+      name: test
+    env:
+      ZONE: test
+      REACT_APP_NRFESAMPLEAPP_VERSION: ${{ needs.release.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          # Process and apply deployment templates
+          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
+            -p REACT_APP_NRFESAMPLEAPP_VERSION=test-${{ env.REACT_APP_NRFESAMPLEAPP_VERSION }} \
+            -p REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} \
+            -p REACT_APP_KC_URL=${{ secrets.REACT_APP_KC_URL }} \
+            -p REACT_APP_KC_REALM=${{ secrets.REACT_APP_KC_REALM }} \
+            -p REACT_APP_KC_CLIENT_ID=${{ secrets.REACT_APP_KC_CLIENT_ID }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-app | oc apply -f -
+
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-app -w
+
+          # Remove completed build runs, build pods and deployment pods
+          for p in $(oc get po | grep "Completed" | awk '{print $1}')
+          do
+            oc delete po ${p}
+          done
+
+  zap-app:
+    name: Service API Pen Tests
+    needs:
+      - deploy-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+          target: https://${{ env.NAME }}-test-app.apps.silver.devops.gov.bc.ca/
+          cmd_options: "-a"
+          allow_issue_writing: false
+          fail_action: false
+    
+  e2e-smoke:
+    name: E2E Smoke on Chrome
+    needs: 
+      - zap-app
+    runs-on: ubuntu-20.04
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          browser: chrome
+      
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+      
+      - name: Upload videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy-repo:
+    name: Repository Report
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.3.0
+        with:
+          scan-type: "fs"
+          ignore-unfixed: true
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  image-app:
+    name: App Image Handling
+    needs:
+      - zap-app
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    env:
+      COMPONENT: app
+      PREV: test
+      ZONE: prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for image changes
+        id: check
+        run: |
+          # Vars
+          IMG_PREV="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.PREV }}-${{ env.COMPONENT }}"
+          IMG_ZONE="${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}"
+          # Pull previous image; grab SHA
+          docker pull "${IMG_PREV}"
+          SHA_PREV=$(docker inspect -f '{{.Id}}' "${IMG_PREV}")
+          # Use blank SHA for promoted image, unless a real one exists instead
+          docker pull "${IMG_ZONE}" && \
+            SHA_ZONE=$(docker inspect -f '{{.Id}}' "${IMG_ZONE}") ||
+            SHA_ZONE=""
+          # Output SHAs
+          echo -e "\n${IMG_PREV}: ${SHA_PREV}"
+          echo -e "${IMG_ZONE}: ${SHA_ZONE}\n"
+          # If different, then trigger updates
+          if [[ "${SHA_PREV}" != "${SHA_ZONE}" ]]; then
+            echo "::set-output name=build::true"
+            echo "Image has changed"
+            exit 0
+          fi
+          echo "Image promotion not required"
+      - name: Promote App Image
+        if: steps.check.outputs.build == 'true'
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ github.repository }}
+          target: ${{ env.PREV }}-${{ env.COMPONENT }}
+          tags: |
+            ${{ env.ZONE }}-${{ env.COMPONENT }}
+
+  deploy-prod:
+    name: PROD Deployment
+    needs:
+      - image-app
+      - release
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    env:
+      ZONE: prod
+      PREV: test
+      REACT_APP_NRFESAMPLEAPP_VERSION: ${{ needs.release.outputs.version }}
+    steps:
+      - name: Remove any stale images
+        if: needs.image-app.outputs.build == 'true'
+        env:
+          COMPONENT: app
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+          oc delete is/${{ env.NAME }}-${{ env.ZONE}}-${{ env.COMPONENT }} || true
+
+      - uses: actions/checkout@v3
+
+      - name: Print REACT_APP_NRFESAMPLEAPP_VERSION env
+        run: echo REACT_APP_NRFESAMPLEAPP_VERSION:prod-${{ env.REACT_APP_NRFESAMPLEAPP_VERSION }}
+
+      - name: Deploy
+        run: |
+          # Login to OpenShift and select project
+          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
+          oc project ${{ secrets.OC_NAMESPACE }}
+
+          # Process and apply deployment templates
+          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
+            -p NRFESAMPREACT_APP_NRFESAMPLEAPP_VERSIONLEAPP_VERSION=prod-${{ env.REACT_APP_NRFESAMPLEAPP_VERSION }} \
+            -p REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} \
+            -p REACT_APP_KC_URL=${{ secrets.REACT_APP_KC_URL }} \
+            -p REACT_APP_KC_REALM=${{ secrets.REACT_APP_KC_REALM }} \
+            -p REACT_APP_KC_CLIENT_ID=${{ secrets.REACT_APP_KC_CLIENT_ID }} \
+            -p PROMOTE=${{ github.repository }}:${{ env.PREV }}-app | oc apply -f -
+
+          # Follow any active rollouts (see deploymentconfigs)
+          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-app -w
+
+          # Remove completed build runs, build pods and deployment pods
+          for p in $(oc get po | grep "Completed" | awk '{print $1}')
+          do
+            oc delete po ${p}
+          done
+
+      - name: Promote App Image to PROD
+        uses: shrink/actions-docker-registry-tag@v2
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}
+          target: ${{ env.PREV }}-app
+          tags: |
+            prod-app
