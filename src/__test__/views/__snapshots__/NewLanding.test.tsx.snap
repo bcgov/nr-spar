@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewLanding component test should match the snapshot 1`] = `
+<div
+  className="cds--css-grid cds--css-grid--full-width"
+>
+  <div
+    className="cds--lg:col-span-8 cds--css-grid-column"
+  >
+    <img
+      alt="BCGov Logo"
+      className="logo"
+      src=""
+      width={160}
+    />
+    <h1
+      className="landing-title"
+      data-testid="landing-title"
+    >
+      Welcome to SPAR
+    </h1>
+    <h2
+      className="landing-subtitle"
+      data-testid="landing-subtitle"
+    >
+      Seed Planning and Registry Application
+    </h2>
+    <p
+      className="landing-desc"
+      data-testid="landing-desc"
+    >
+      Register and storage your seed and meet your annual reforestation needs using
+      <span
+        className="spar-span"
+      >
+         SPAR
+      </span>
+    </p>
+    <button
+      aria-describedby={null}
+      aria-pressed={null}
+      className="btn-landing cds--btn cds--btn--md cds--btn--primary"
+      data-testid="landing-button__idir"
+      disabled={false}
+      onClick={[Function]}
+      tabIndex={0}
+      type="button"
+    >
+      Login with IDIR
+      <svg
+        aria-hidden={true}
+        className="cds--btn__icon"
+        fill="currentColor"
+        focusable="false"
+        height={16}
+        preserveAspectRatio="xMidYMid meet"
+        viewBox="0 0 32 32"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M26,30H14a2,2,0,0,1-2-2V25h2v3H26V4H14V7H12V4a2,2,0,0,1,2-2H26a2,2,0,0,1,2,2V28A2,2,0,0,1,26,30Z"
+        />
+        <path
+          d="M14.59 20.59L18.17 17 4 17 4 15 18.17 15 14.59 11.41 16 10 22 16 16 22 14.59 20.59z"
+        />
+      </svg>
+    </button>
+    <button
+      aria-describedby={null}
+      aria-pressed={null}
+      className="btn-landing cds--btn cds--btn--md cds--btn--tertiary"
+      data-testid="landing-button__bceid"
+      disabled={false}
+      onClick={[Function]}
+      tabIndex={0}
+      type="button"
+    >
+      Login with Business BCeID
+      <svg
+        aria-hidden={true}
+        className="cds--btn__icon"
+        fill="currentColor"
+        focusable="false"
+        height={16}
+        preserveAspectRatio="xMidYMid meet"
+        viewBox="0 0 32 32"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M26,30H14a2,2,0,0,1-2-2V25h2v3H26V4H14V7H12V4a2,2,0,0,1,2-2H26a2,2,0,0,1,2,2V28A2,2,0,0,1,26,30Z"
+        />
+        <path
+          d="M14.59 20.59L18.17 17 4 17 4 15 18.17 15 14.59 11.41 16 10 22 16 16 22 14.59 20.59z"
+        />
+      </svg>
+    </button>
+  </div>
+  <div
+    className="cds--lg:col-span-5 cds--css-grid-column"
+  >
+    <img
+      alt="Small green seedling on the dirt and watered"
+      className="seeding-img"
+      src=""
+    />
+  </div>
+</div>
+`;
