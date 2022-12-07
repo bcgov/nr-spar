@@ -3,7 +3,8 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   moduleNameMapper: {
-    '^.+\\.(css|less|scss)$': 'babel-jest'
+    '^.+\\.(css|less|scss)$': 'babel-jest',
+    '^.+\\.(jpg|ico|jpeg|png|gif|webp|svg)$': '<rootDir>/src/__test__/__mocks__/fileMock.ts'
   },
   coverageReporters: [
     'text',

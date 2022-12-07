@@ -1,0 +1,134 @@
+.landing-title {
+  margin-top: 70px;
+  font-size: 76px;
+  font-weight: 400;
+  line-height: 86px;
+}
+
+.landing-subtitle {
+  margin-top: 8px;
+  color: #0073E6;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 40px;
+}
+
+.spar-span {
+  color: #0073E6;
+}
+
+.landing-desc {
+  margin-top: 40px;
+  color: #606062;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 40px;
+  margin-bottom: 60px;
+}
+
+.btn-landing {
+  width: 288px;
+  margin-right: 10px;
+}
+
+.seeding-img {
+  width: 100vh;
+  height: auto;
+}
+
+/* Small - Up to 320px */
+@media only screen and (min-width: 320px) {
+  .landing-title {
+    font-size: 42px;
+    line-height: 50px;
+  }
+  .landing-subtitle {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .landing-desc {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .btn-landing {
+    margin-bottom: 12px;
+  }
+}
+/* Medium - Up to 672px */
+@media only screen and (min-width: 672px) {
+  .landing-title {
+    font-size: 42px;
+    line-height: 50px;
+  }
+  .landing-subtitle {
+    font-size: 24px;
+    line-height: 30px;
+  }
+  .landing-desc {
+    font-size: 24px;
+    line-height: 30px;
+  }
+}
+/* Large - Up to 1056px  */
+@media only screen and (min-width: 1056px) {
+  .landing-title {
+    font-size: 54px;
+    line-height: 64px;
+  }
+  .landing-subtitle {
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .landing-desc {
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .btn-landing {
+    margin-bottom: 12px;
+  }
+}
+/* X-Large - Up to 1312px */
+@media only screen and (min-width: 1312px) {
+  .landing-title {
+    font-size: 60px;
+    line-height: 70px;
+  }
+  .landing-subtitle {
+    font-size: 28px;
+    line-height: 36px;
+  }
+  .landing-desc {
+    font-size: 28px;
+    line-height: 36px;
+  } 
+}
+/* Max - Up to 1584px */
+@media only screen and (min-width: 1584px) {
+  .landing-title {
+    font-size: 76px;
+    line-height: 86px;
+  }
+  .landing-subtitle {
+    font-size: 32px;
+    line-height: 40px;
+  }
+  .landing-desc {
+    font-size: 32px;
+    line-height: 40px;
+  } 
+}
+/* Extra Max - Up to 1784px */
+@media only screen and (min-width: 1784px) {
+  .landing-title {
+    font-size: 76px;
+    line-height: 86px;
+  }
+  .landing-subtitle {
+    font-size: 32px;
+    line-height: 40px;
+  }
+  .landing-desc {
+    font-size: 32px;
+    line-height: 40px;
+  } 
+}
