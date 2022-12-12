@@ -118,3 +118,43 @@ $bcgov-prefix: 'bcgov';
   margin: 4px;
   border: 0;
 }
+
+.#{$bcgov-prefix}--inline-notification,
+.#{$bcgov-prefix}--toast-notification {
+  border-radius: 4px;
+}
+
+div.#{$bcgov-prefix}--inline-notification--low-contrast::before{
+  border-radius: 0px 4px 4px 0px;
+  filter: none;
+}
+
+.#{$bcgov-prefix}--toast-notification--low-contrast{
+  border-width: 1px 1px 1px 0;
+  border-style: solid;
+}
+
+
+//if carbon changes these types in the future, it has to be changed here in this list. And if the "warning-alt" is changed, you have to change the IF expression that serves only for it.
+$types: 'error', 'info', 'success', 'warning';
+
+@each $notificationType in $types {
+  div.#{$bcgov-prefix}--inline-notification--#{$notificationType}{
+    border-left: 4px solid var(--bcgov-support-#{$notificationType}-inverse);}
+  div.#{$bcgov-prefix}--inline-notification--low-contrast.#{$bcgov-prefix}--inline-notification--#{$notificationType}{
+    border-left: 4px solid var(--bcgov-support-#{$notificationType});}
+  div.#{$bcgov-prefix}--inline-notification--low-contrast.#{$bcgov-prefix}--inline-notification--#{$notificationType}::before{
+    border-color: var(--bcgov-notification-border-#{$notificationType});}
+}
+
+@each $notificationType in $types {
+  div.#{$bcgov-prefix}--toast-notification--#{$notificationType}{
+    border-left: 4px solid var(--bcgov-support-#{$notificationType}-inverse);}
+  div.#{$bcgov-prefix}--toast-notification--low-contrast.#{$bcgov-prefix}--toast-notification--#{$notificationType}{
+    border-left: 4px solid var(--bcgov-support-#{$notificationType});
+    border-top-color: var(--bcgov-notification-border-#{$notificationType});
+    border-bottom-color: var(--bcgov-notification-border-#{$notificationType});
+    border-right-color: var(--bcgov-notification-border-#{$notificationType})}
+}
+
+
