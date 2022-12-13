@@ -119,6 +119,17 @@ $bcgov-prefix: 'bcgov';
   border: 0;
 }
 
+.#{$bcgov-prefix}--side-nav__menu .#{$bcgov-prefix}--side-nav__menu-item a.#{$bcgov-prefix}--side-nav__link,
+button.#{$bcgov-prefix}--side-nav__submenu,
+.#{$bcgov-prefix}--side-nav__link
+{
+  height: 48px;
+}
+
+div.#{$bcgov-prefix}--side-nav__icon > svg{
+  fill: var(--#{$bcgov-prefix}-link-secondary)
+}
+
 .#{$bcgov-prefix}--inline-notification,
 .#{$bcgov-prefix}--toast-notification {
   border-radius: 4px;
@@ -134,8 +145,8 @@ div.#{$bcgov-prefix}--inline-notification--low-contrast::before{
   border-style: solid;
 }
 
-
-//if carbon changes these types in the future, it has to be changed here in this list. And if the "warning-alt" is changed, you have to change the IF expression that serves only for it.
+//if carbon changes these types in the future, it has to be changed here in this list. 
+//And if the "warning-alt" is changed, you have to change the IF expression that serves only for it.
 $types: 'error', 'info', 'success', 'warning';
 
 @each $notificationType in $types {
@@ -156,5 +167,3 @@ $types: 'error', 'info', 'success', 'warning';
     border-bottom-color: var(--bcgov-notification-border-#{$notificationType});
     border-right-color: var(--bcgov-notification-border-#{$notificationType})}
 }
-
-
