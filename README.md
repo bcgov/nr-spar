@@ -63,6 +63,7 @@ Once you have cloned this repository, can get it running by typing: `./mvnw spri
 from the project root directory. You **must** provide three environment variables for database
 access configuration:
 
+<<<<<<< HEAD
 - `DATABASE_HOST`
 - `DATABASE_PORT`
 - `SERVICE_NAME` (the database's name)
@@ -89,6 +90,8 @@ For more details about end-to-end tests check out our [confluence page](https://
 Before writing your first line of code, please take a moment and check out
 our [CONTRIBUTING](CONTRIBUTING.md) guide.
 =======
+=======
+>>>>>>> c3bef1c (fix(build): remove unused env vars from prod deployment (#8))
 Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
 the `status` property should have the value *UP*.
 
@@ -104,22 +107,22 @@ using Docker.
 Note that you'll need these environment variables:
 ```
 NR_SPAR_BACKEND_VERSION=local
-DATABASE_HOST=<host>
-DATABASE_PORT=<port>
-SERVICE_NAME=<service-name>
-DATABASE_USER=<user>
-DATABASE_PASSWORD=<pass>
 KEYCLOAK_REALM_URL=<realm-server-address>
 ```
 
-Build the service:
+Build the package:
+```
+./mvnw --no-transfer-progress --update-snapshots package
+```
+
+Build the Docker image:
 ```
 docker build -t bcgov/nr-spar-backend-test-spar-api:latest .
 ```
 
 Then run with:
 ```
-docker run -p 8090:8090 \
+docker run -t -i -p 8090:8090 \
   -e KEYCLOAK_REALM_URL=https://dev.loginproxy.gov.bc.ca/auth/realms/standard \
   -t bcgov/nr-spar-backend-test-spar-api:latest
 ```
