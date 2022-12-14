@@ -18,7 +18,7 @@ import getUrlQueryParam from '../../utils/UrlUtils';
 const NewLanding = () => {
   const { startKeycloak, login, signed } = useAuth();
   const navigate = useNavigate();
-  const homePage = '/home';
+  const homePage = '/dashboard';
 
   const handleLogin = (provider: LoginProviders) => {
     if (signed) {

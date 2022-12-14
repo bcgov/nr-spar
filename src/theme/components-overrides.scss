@@ -1,5 +1,7 @@
 $bcgov-prefix: 'bcgov';
 
+@use './colors.scss' as colors;
+
 @use '@carbon/styles/scss/config' with (
   $prefix: $bcgov-prefix
 );
@@ -75,7 +77,6 @@ $bcgov-prefix: 'bcgov';
   margin-right: 4px;
 }
 
-
 .#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__item-count .#{$bcgov-prefix}--select-input__wrapper select.#{$bcgov-prefix}--select-input,
 .#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__page-number .#{$bcgov-prefix}--select-input__wrapper select.#{$bcgov-prefix}--select-input {
   border-radius: 4px;
@@ -119,6 +120,57 @@ $bcgov-prefix: 'bcgov';
   border: 0;
 }
 
+.#{$bcgov-prefix}--side-nav {
+  box-shadow: inset -1px 0px 0px colors.$gray-20;
+}
+
+.#{$bcgov-prefix}--side-nav__items {
+  padding: 0px 0px !important;
+}
+
+.#{$bcgov-prefix}--side-nav__link {
+  padding: 16px !important;
+  margin: 0px;
+  width: 256px;
+}
+
+.#{$bcgov-prefix}--grid {
+  padding: 0px !important;
+}
+
+.#{$bcgov-prefix}--row {
+  padding: 0px !important;
+}
+
+.#{$bcgov-prefix}--tab-content {
+  padding: 0px !important;
+}
+
+.#{$bcgov-prefix}--data-table {
+  padding: 0px !important;
+}
+
+.#{$bcgov-prefix}--content {
+  padding: 0px !important;
+}
+
+.#{$bcgov-prefix}--header {
+  background-color: colors.$blue-60 !important;
+}
+
+.#{$bcgov-prefix}--row h1 {
+  font-size: 32px;
+  line-height: 40px;
+  color: colors.$gray-100;
+}
+
+.#{$bcgov-prefix}--row h4 {
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.16px;
+  color: colors.$gray-70;
+}
+
 .#{$bcgov-prefix}--side-nav__menu .#{$bcgov-prefix}--side-nav__menu-item a.#{$bcgov-prefix}--side-nav__link,
 button.#{$bcgov-prefix}--side-nav__submenu,
 .#{$bcgov-prefix}--side-nav__link
@@ -145,8 +197,8 @@ div.#{$bcgov-prefix}--inline-notification--low-contrast::before{
   border-style: solid;
 }
 
-//if carbon changes these types in the future, it has to be changed here in this list. 
-//And if the "warning-alt" is changed, you have to change the IF expression that serves only for it.
+// If carbon changes these types in the future, it has to be changed here in this list. 
+// And if the "warning-alt" is changed, you have to change the IF expression that serves only for it.
 $types: 'error', 'info', 'success', 'warning';
 
 @each $notificationType in $types {
