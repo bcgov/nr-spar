@@ -25,8 +25,9 @@ const BCHeader = () => {
   return (
     <Theme theme="g100">
       <Header aria-label="BC Gov's NR Sample App" data-testid="header">
-        <Link to="/home" className="header-link" data-testid="header-name">
-          BC Gov&apos;s NR Sample App
+        <Link to="/dashboard" className="header-link" data-testid="header-name">
+          SPAR
+          <span className="header-full-name"> Seed Planning and Registry System</span>
         </Link>
         <HeaderGlobalBar>
           <Button

@@ -16,7 +16,7 @@ describe('the Header component', () => {
       </BrowserRouter>
     );
 
-    expect(getByTestId('header-name').textContent).toBe("BC Gov's NR Sample App");
+    expect(getByTestId('header-name').textContent).toBe('SPAR Seed Planning and Registry System');
   });
 
   it('should match the snapshot', () => {

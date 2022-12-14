@@ -11,3 +11,7 @@ a.header-link:link {
   text-decoration: none;
   color: #fff;
 }
+
+.header-full-name {
+  font-weight: bold;
+}

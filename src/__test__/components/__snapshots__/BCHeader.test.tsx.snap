@@ -12,10 +12,10 @@ exports[`the Header component should match the snapshot 1`] = `
     <a
       className="header-link"
       data-testid="header-name"
-      href="/home"
+      href="/dashboard"
       onClick={[Function]}
     >
-      BC Gov's NR Sample App
+      SPAR Seed Planning and Registry System
     </a>
     <div
       className="cds--header__global"
