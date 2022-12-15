@@ -28,20 +28,33 @@ test and deploy.
 
 - React Progressive Web Application
   - TypeScript
-  - Redux
-  - Styled Components
-  - Jest and Cypress
+  - Context API
+  - React Testing Library
+  - Jest
+  - Cypress
 - Lint
   - Airbnb ESLint
 - Tools
   - Docker
   - Microsoft Visual Studio Code
+- Styling
+  - Carbon Design System
+- Authentication
+  - Keycloak
 
 # Getting started
 
 Once you have cloned this repository, you can get the app running by typing
 `yarn install` and then `yarn start` from the project root directory. Then
 head to http://localhost:3000.
+
+Be aware of the required environment variables:
+
+- REACT_APP_SERVER_URL
+- REACT_APP_NRFESAMPLEAPP_VERSION
+- REACT_APP_KC_URL
+- REACT_APP_KC_REALM
+- REACT_APP_KC_CLIENT_ID
 
 To run the unit tests all you need is `yarn test`. For end-to-end test you need to run `yarn cypress run` to run on console or `yarn cypress open` to use the Cypress IDE.
 
@@ -53,23 +66,22 @@ our [CONTRIBUTING](CONTRIBUTING.md) guide.
 But if all you want is to take a quick look on the running service, you can do it by
 using Docker.
 
-Note that you'll need these environment variables:
-```
-REACT_APP_SERVER_URL=<server-url>
-REACT_APP_NRFESAMPLEAPP_VERSION=dev
-REACT_APP_KC_URL=<keycloak-server-url>
-REACT_APP_KC_REALM=<realm-name>
-REACT_APP_KC_CLIENT_ID=<client-id>
-```
+> Note that you'll need those environment variables mentioned above!
 
-Build the service:
+Install dependencies:
 ```
 yarn install --frozen-lockfile
+```
 
+Build for production:
+```
 REACT_APP_NRFESAMPLEAPP_VERSION=dev \
  REACT_APP_SERVER_URL=https://nrbestapi-test-service-api.apps.silver.devops.gov.bc.ca \
  yarn build:production
+```
 
+Build Docker image:
+```
 docker build -t bcgov/nr-frontend-starting-app:latest .
 ```
 
@@ -87,4 +99,4 @@ docker run -t -i -p 3000:3000 \
 ## Getting help
 
 As mentioned, we're here to help. Feel free to start a conversation
-on Rocket chat or ask a question on Stackoverflow.
+on Rocket chat, you can search for `@matheus.gaseta`, `@igor.melo`, `@ricardo.campos` or `@annibal.silva`.

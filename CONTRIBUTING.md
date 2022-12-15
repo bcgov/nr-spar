@@ -1,11 +1,11 @@
 # Contributing guide
 
-Thanks for taking a moment and reading this guide. It's very important to have
+Thanks for taking a moment to read this guide. It's very important to have
 everyone on the same page. This guide describes how to:
 - Set up your environment
-- Run this application
+- Run the application
 - Run tests
-- Submit pull requests
+- Submit Pull Requests
 - Follow our code practices
 
 (If you are new to GitHub, you might start with a [basic tutorial](https://help.github.com/articles/set-up-git) and check out a more detailed guide to [pull requests](https://help.github.com/articles/using-pull-requests/).)
@@ -40,12 +40,35 @@ To enforce a better solution and a stronger product we decided to use
 the Airbnb ESLint check-style. This way also helps us to have a dedicated
 pipeline to check for common errors and possible bugs.
 
+> Note that if you choose VS Code as your IDE, we highly recommend one plugin called **ESLint**, by Microsoft.
+> Here's the link to the Marketplace: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
+
 ## Run this application
 
 Now that your environment is all set up, we can run the application.
-To do that, first you need to install required dependencies. Run
-`yarn install` and once is finished, you can get it up and running
-by typing `yarn start` in the project root directory.
+To do that, first you need to install required dependencies.
+
+Remember of setting up the required environment variables. You can create a `.env` file containing:
+
+```
+REACT_APP_SERVER_URL=
+REACT_APP_NRFESAMPLEAPP_VERSION=
+REACT_APP_KC_URL=
+REACT_APP_KC_REALM=
+REACT_APP_KC_CLIENT_ID=
+```
+
+> If don't have these values, please reach a member of the team
+
+Just run: 
+```
+yarn install
+```
+And once is finished, you can get it up and running
+by typing
+```
+yarn start
+```
 
 ## Run tests
 
@@ -61,9 +84,19 @@ reviewers, assign to yourself and add a label.
 
 ## Follow our best practices
 
-- Typescript source code must be formatted according to
-[Google Java Style Guide](https://google.github.io/styleguide/javaguide.html),
-as mentioned. There's a pipeline to ensure all of our code is good to go.
-- We try to use [conventional commits](https://www.conventionalcommits.org/)
-because it makes the process of generating changelogs way easier. So we encourage
-you to read at least the [summary](https://www.conventionalcommits.org/en/v1.0.0/#summary) and learn a bit about it.
+- TypeScript source code must be formatted according to Airbnb ESLint,
+as mentioned. Make sure to follow this rule and you're good to go.
+- We use [conventional commits](https://www.conventionalcommits.org/)
+because it makes the process of generating changelogs possible. If that's new for you, please take a moment to read it. You can start with the [summary](https://www.conventionalcommits.org/en/v1.0.0/#summary) and go from there.
+  - Basically you need to write your commits messages starting with a tag
+  that is related with the change that you're doing. Tags can be one of:
+  - **build**: Changes that affect the build system or external dependencies
+  - **ci**: Changes to our CI configuration files and scripts
+  - **docs**: Documentation only changes
+  - **feat**: A new feature
+  - **fix**: A bug fix
+  - **perf**: A code change that improves performance
+  - **refactor**: A code change that neither fixes a bug nor adds a feature
+  - **test**: Adding missing tests or correcting existing tests
+  
+Take a look [here](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) to read more about the commit message format.
