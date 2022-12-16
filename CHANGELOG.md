@@ -1,4 +1,8 @@
-## [0.1.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.0...v0.1.1) (2022-12-14)
+## [0.1.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.1...v0.1.2) (2022-12-16)
+
+
+
+## [0.1.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.0...v0.1.1) (2022-12-13)
 
 
 ### Bug Fixes
