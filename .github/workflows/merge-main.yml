@@ -143,6 +143,7 @@ jobs:
           output-file: 'CHANGELOG.md'
           skip-version-file: 'true'
           skip-commit: 'true'
+          skip-on-empty: 'false'
           git-push: 'false'
 
       - name: Set new version output
