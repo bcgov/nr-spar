@@ -130,15 +130,15 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.exclusions=**/__test__/**,.github/**/*
-            -Dsonar.coverage.exclusions=**/__test__/**,.github/**/*
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
             -Dsonar.project.monorepo.enabled=false
             -Dsonar.projectKey=bcgov_nr-spar-webapp
-            -Dsonar.sources=.
-            -Dsonar.tests=src/__test__/components
+            -Dsonar.sources=src/
+            -Dsonar.exclusions=src/**/__test__/**/*
+            -Dsonar.tests=src/
+            -Dsonar.test.inclusions=src/**/__test__/**/*
 
   security:
     name: Security checks
