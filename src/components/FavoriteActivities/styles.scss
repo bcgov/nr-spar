@@ -1,0 +1,10 @@
+@use '../../theme/colors.scss' as colors;
+
+.favorite-activities {
+  background-color: colors.$gray-10;
+  padding: 32px 0;
+}
+
+.favorite-activities-title {
+  padding-left: 48px;
+}

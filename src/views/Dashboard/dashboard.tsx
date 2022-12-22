@@ -6,14 +6,17 @@ import {
   Row,
   Stack
 } from '@carbon/react';
+
 import FavoriteActivities from '../../components/FavoriteActivities';
 import RecentActivities from '../../components/RecentActivities';
 
+import './styles.scss';
+
 const Dashboard = () => (
   <FlexGrid>
-    <Stack gap={6}>
+    <Stack gap={7}>
       <Row>
-        <Column sm={4} md={4}>
+        <Column sm={4} md={4} className="dashboard-title">
           <h1 data-testid="home-title">Dashboard</h1>
           <h4>
             See your favorite and recent activities inside SPAR system

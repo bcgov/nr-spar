@@ -14,7 +14,7 @@ import ActivityTable from '../ActivityTable';
 
 import RecentActivityItems from '../../mock-data/RecentActivityItems';
 
-import './styles.css';
+import './styles.scss';
 
 const RecentActivities = () => {
   const listItems = RecentActivityItems;
@@ -35,36 +35,30 @@ const RecentActivities = () => {
   ];
 
   return (
-    <>
-      <Row className="main-content recent-activity">
-        <Column sm={4}>
-          <h3>My recent activities</h3>
-        </Column>
-        <Column sm={4}>
-          <h4>Check your recent requests and files</h4>
-        </Column>
-      </Row>
-      <Row>
-        <Column sm={4}>
-          <Tabs>
-            <TabList aria-label="List of tabs">
-              <Tab>Requests</Tab>
-              <Tab>Files & Docs.</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <ActivityTable
-                  elements={listItems}
-                  clickFn={goToActivity}
-                  headers={tableHeaders}
-                />
-              </TabPanel>
-              <TabPanel>Placeholder</TabPanel>
-            </TabPanels>
-          </Tabs>
-        </Column>
-      </Row>
-    </>
+    <Row className="main-content recent-activity">
+      <Column sm={4} className="recent-activity-title">
+        <h3>My recent activities</h3>
+        <h4 className="recent-activity-subtitle">Check your recent requests and files</h4>
+      </Column>
+      <Column sm={4}>
+        <Tabs>
+          <TabList aria-label="List of tabs">
+            <Tab>Requests</Tab>
+            <Tab>Files & Docs.</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              <ActivityTable
+                elements={listItems}
+                clickFn={goToActivity}
+                headers={tableHeaders}
+              />
+            </TabPanel>
+            <TabPanel>Placeholder</TabPanel>
+          </TabPanels>
+        </Tabs>
+      </Column>
+    </Row>
   );
 };
 

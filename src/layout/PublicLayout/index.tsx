@@ -7,7 +7,7 @@ import BCHeader from '../../components/BCHeader';
 
 import LeftPanel from '../../components/LeftPanel';
 
-import './styles.css';
+import './styles.scss';
 
 import LeftPanelItems from '../../mock-data/LeftPanelItems';
 

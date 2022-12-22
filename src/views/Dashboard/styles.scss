@@ -1,0 +1,10 @@
+@use '../../theme/variables.scss' as vars;
+
+.page-content h1,
+.page-content h3 {
+  padding-bottom: 8px;
+}
+
+.dashboard-title {
+  padding-left: 48px;
+}

@@ -1,219 +1,223 @@
-$bcgov-prefix: 'bcgov';
+@use './variables.scss' as variables;
 
 @use './colors.scss' as colors;
 
 @use '@carbon/styles/scss/config' with (
-  $prefix: $bcgov-prefix
+  $prefix: variables.$bcgov-prefix
 );
 
 @use '@carbon/styles/scss/components/button/vars' with (
   $button-border-radius: 4px
 );
 
-.#{$bcgov-prefix}--data-table-header,
-.#{$bcgov-prefix}--date-picker__input,
-.#{$bcgov-prefix}--list-box__field,
-.#{$bcgov-prefix}--list-box,
-.#{$bcgov-prefix}--number input[type=number],
-.#{$bcgov-prefix}--pagination,
-.#{$bcgov-prefix}--search-input,
-.#{$bcgov-prefix}--select-input,
-.#{$bcgov-prefix}--text-input,
-.#{$bcgov-prefix}--text-area {
+.#{variables.$bcgov-prefix}--data-table-header,
+.#{variables.$bcgov-prefix}--date-picker__input,
+.#{variables.$bcgov-prefix}--list-box__field,
+.#{variables.$bcgov-prefix}--list-box,
+.#{variables.$bcgov-prefix}--number input[type=number],
+.#{variables.$bcgov-prefix}--pagination,
+.#{variables.$bcgov-prefix}--search-input,
+.#{variables.$bcgov-prefix}--select-input,
+.#{variables.$bcgov-prefix}--text-input,
+.#{variables.$bcgov-prefix}--text-area {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
 
-.#{$bcgov-prefix}--table-expand__button,
+.#{variables.$bcgov-prefix}--table-expand__button,
 .flatpickr-calendar,
 .numInputWrapper .numInput,
 .flatpickr-day,
 .flatpickr-prev-month,
 .flatpickr-next-month,
-.#{$bcgov-prefix}--list-box__menu,
-.#{$bcgov-prefix}--link,
-.#{$bcgov-prefix}--number__control-btn,
-.#{$bcgov-prefix}--pagination-nav__page,
-.#{$bcgov-prefix}--tab--overflow-nav-button,
-.#{$bcgov-prefix}--tile {
+.#{variables.$bcgov-prefix}--list-box__menu,
+.#{variables.$bcgov-prefix}--link,
+.#{variables.$bcgov-prefix}--number__control-btn,
+.#{variables.$bcgov-prefix}--pagination-nav__page,
+.#{variables.$bcgov-prefix}--tab--overflow-nav-button,
+.#{variables.$bcgov-prefix}--tile {
   border-radius: 4px;
 }
 
-.#{$bcgov-prefix}--time-picker__input > .#{$bcgov-prefix}--text-input {
+.#{variables.$bcgov-prefix}--time-picker__input > .#{variables.$bcgov-prefix}--text-input {
   border-top-left-radius: 4px;
   border-top-right-radius: 0px;
 }
 
-.#{$bcgov-prefix}--time-picker__select > .#{$bcgov-prefix}--select-input {
+.#{variables.$bcgov-prefix}--time-picker__select > .#{variables.$bcgov-prefix}--select-input {
   border-radius: 0px;
 }
 
-.#{$bcgov-prefix}--time-picker :last-child > .#{$bcgov-prefix}--select-input {
+.#{variables.$bcgov-prefix}--time-picker :last-child > .#{variables.$bcgov-prefix}--select-input {
   border-top-left-radius: 0px;
   border-top-right-radius: 4px;
 }
 
-.#{$bcgov-prefix}--modal-container {
+.#{variables.$bcgov-prefix}--modal-container {
   border-radius: 8px;
 }
 
-.#{$bcgov-prefix}--modal-close {
+.#{variables.$bcgov-prefix}--modal-close {
   margin-right: 16px;
   margin-top: 16px;
   border-radius: 4px;
 }
-.#{$bcgov-prefix}--modal-footer {
+.#{variables.$bcgov-prefix}--modal-footer {
   height: auto;
   margin: 0 16px 16px;
 }
 
-.#{$bcgov-prefix}--modal-footer .#{$bcgov-prefix}--btn {
+.#{variables.$bcgov-prefix}--modal-footer .#{variables.$bcgov-prefix}--btn {
   max-width: none;
   height: 48px;
   padding-bottom: 16px;
 }
 
-.#{$bcgov-prefix}--modal-footer .#{$bcgov-prefix}--btn:not(.#{$bcgov-prefix}--btn--primary) {
+.#{variables.$bcgov-prefix}--modal-footer .#{variables.$bcgov-prefix}--btn:not(.#{variables.$bcgov-prefix}--btn--primary) {
   margin-right: 4px;
 }
 
-.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__item-count .#{$bcgov-prefix}--select-input__wrapper select.#{$bcgov-prefix}--select-input,
-.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__page-number .#{$bcgov-prefix}--select-input__wrapper select.#{$bcgov-prefix}--select-input {
+.#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__item-count .#{variables.$bcgov-prefix}--select-input__wrapper select.#{variables.$bcgov-prefix}--select-input,
+.#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__page-number .#{variables.$bcgov-prefix}--select-input__wrapper select.#{variables.$bcgov-prefix}--select-input {
   border-radius: 4px;
   border: 0;
 }
 
-.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__item-count .#{$bcgov-prefix}--select-input__wrapper,
-.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__page-number .#{$bcgov-prefix}--select-input__wrapper {
+.#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__item-count .#{variables.$bcgov-prefix}--select-input__wrapper,
+.#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__page-number .#{variables.$bcgov-prefix}--select-input__wrapper {
   margin: 4px;
 }
 
-.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__item-count .#{$bcgov-prefix}--select-input--inline__wrapper {
-  border-right: 1px solid var(--#{$bcgov-prefix}-border-subtle);
+.#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__item-count .#{variables.$bcgov-prefix}--select-input--inline__wrapper {
+  border-right: 1px solid var(--#{variables.$bcgov-prefix}-border-subtle);
 }
 
-.#{$bcgov-prefix}--pagination .#{$bcgov-prefix}--select__page-number .#{$bcgov-prefix}--select-input--inline__wrapper {
-  border-left: 1px solid var(--#{$bcgov-prefix}-border-subtle);
+.#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__page-number .#{variables.$bcgov-prefix}--select-input--inline__wrapper {
+  border-left: 1px solid var(--#{variables.$bcgov-prefix}-border-subtle);
 }
 
-.#{$bcgov-prefix}--pagination--sm,
-.#{$bcgov-prefix}--pagination--sm .#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--popover-container {
+.#{variables.$bcgov-prefix}--pagination--sm,
+.#{variables.$bcgov-prefix}--pagination--sm .#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--popover-container {
   height: 40px;
 }
 
-.#{$bcgov-prefix}--pagination--md,
-.#{$bcgov-prefix}--pagination--md .#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--popover-container {
+.#{variables.$bcgov-prefix}--pagination--md,
+.#{variables.$bcgov-prefix}--pagination--md .#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--popover-container {
   height: 48px;
 }
 
-.#{$bcgov-prefix}--pagination--lg,
-.#{$bcgov-prefix}--pagination--lg .#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--popover-container {
+.#{variables.$bcgov-prefix}--pagination--lg,
+.#{variables.$bcgov-prefix}--pagination--lg .#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--popover-container {
   height: 56px;
 }
 
-.#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--popover-container {
-  border-left: 1px solid var(--#{$bcgov-prefix}-border-subtle);
+.#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--popover-container {
+  border-left: 1px solid var(--#{variables.$bcgov-prefix}-border-subtle);
 }
 
-.#{$bcgov-prefix}--pagination__control-buttons .#{$bcgov-prefix}--pagination__button {
+.#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--pagination__button {
   margin: 4px;
   border: 0;
 }
 
-.#{$bcgov-prefix}--side-nav {
+.#{variables.$bcgov-prefix}--side-nav {
   box-shadow: inset -1px 0px 0px colors.$gray-20;
 }
 
-.#{$bcgov-prefix}--side-nav__items {
-  padding: 0px 0px !important;
+.#{variables.$bcgov-prefix}--side-nav__items {
+  padding: 16px;
 }
 
-.#{$bcgov-prefix}--side-nav__link {
+.#{variables.$bcgov-prefix}--side-nav__link {
   padding: 16px !important;
   margin: 0px;
   width: 256px;
 }
 
-.#{$bcgov-prefix}--grid {
+.#{variables.$bcgov-prefix}--grid {
   padding: 0px !important;
 }
 
-.#{$bcgov-prefix}--row {
+.#{variables.$bcgov-prefix}--tab-content {
   padding: 0px !important;
 }
 
-.#{$bcgov-prefix}--tab-content {
+.#{variables.$bcgov-prefix}--tabs button.#{variables.$bcgov-prefix}--tabs__nav-item--selected {
+  font-weight: bold;
+}
+
+.#{variables.$bcgov-prefix}--data-table {
   padding: 0px !important;
 }
 
-.#{$bcgov-prefix}--data-table {
+.#{variables.$bcgov-prefix}--table-header-label {
+  font-weight: bold;
+}
+
+.#{variables.$bcgov-prefix}--content {
   padding: 0px !important;
 }
 
-.#{$bcgov-prefix}--content {
-  padding: 0px !important;
-}
-
-.#{$bcgov-prefix}--header {
+.#{variables.$bcgov-prefix}--header {
   background-color: colors.$blue-60 !important;
 }
 
-.#{$bcgov-prefix}--row h1 {
+.#{variables.$bcgov-prefix}--row h1 {
   font-size: 32px;
   line-height: 40px;
   color: colors.$gray-100;
 }
 
-.#{$bcgov-prefix}--row h4 {
+.#{variables.$bcgov-prefix}--row h4 {
   font-size: 14px;
   line-height: 18px;
   letter-spacing: 0.16px;
   color: colors.$gray-70;
 }
 
-.#{$bcgov-prefix}--side-nav__menu .#{$bcgov-prefix}--side-nav__menu-item a.#{$bcgov-prefix}--side-nav__link,
-button.#{$bcgov-prefix}--side-nav__submenu,
-.#{$bcgov-prefix}--side-nav__link
+.#{variables.$bcgov-prefix}--side-nav__menu .#{variables.$bcgov-prefix}--side-nav__menu-item a.#{variables.$bcgov-prefix}--side-nav__link,
+button.#{variables.$bcgov-prefix}--side-nav__submenu,
+.#{variables.$bcgov-prefix}--side-nav__link
 {
   height: 48px;
 }
 
-div.#{$bcgov-prefix}--side-nav__icon > svg{
-  fill: var(--#{$bcgov-prefix}-link-secondary)
+div.#{variables.$bcgov-prefix}--side-nav__icon > svg{
+  fill: var(--#{variables.$bcgov-prefix}-link-secondary)
 }
 
-.#{$bcgov-prefix}--inline-notification,
-.#{$bcgov-prefix}--toast-notification {
+.#{variables.$bcgov-prefix}--inline-notification,
+.#{variables.$bcgov-prefix}--toast-notification {
   border-radius: 4px;
 }
 
-div.#{$bcgov-prefix}--inline-notification--low-contrast::before{
+div.#{variables.$bcgov-prefix}--inline-notification--low-contrast::before{
   border-radius: 0px 4px 4px 0px;
   filter: none;
 }
 
-.#{$bcgov-prefix}--toast-notification--low-contrast{
+.#{variables.$bcgov-prefix}--toast-notification--low-contrast{
   border-width: 1px 1px 1px 0;
   border-style: solid;
 }
 
-// If carbon changes these types in the future, it has to be changed here in this list. 
+// If carbon changes these types in the future, it has to be changed here in this list.
 // And if the "warning-alt" is changed, you have to change the IF expression that serves only for it.
 $types: 'error', 'info', 'success', 'warning';
 
 @each $notificationType in $types {
-  div.#{$bcgov-prefix}--inline-notification--#{$notificationType}{
+  div.#{variables.$bcgov-prefix}--inline-notification--#{$notificationType}{
     border-left: 4px solid var(--bcgov-support-#{$notificationType}-inverse);}
-  div.#{$bcgov-prefix}--inline-notification--low-contrast.#{$bcgov-prefix}--inline-notification--#{$notificationType}{
+  div.#{variables.$bcgov-prefix}--inline-notification--low-contrast.#{variables.$bcgov-prefix}--inline-notification--#{$notificationType}{
     border-left: 4px solid var(--bcgov-support-#{$notificationType});}
-  div.#{$bcgov-prefix}--inline-notification--low-contrast.#{$bcgov-prefix}--inline-notification--#{$notificationType}::before{
+  div.#{variables.$bcgov-prefix}--inline-notification--low-contrast.#{variables.$bcgov-prefix}--inline-notification--#{$notificationType}::before{
     border-color: var(--bcgov-notification-border-#{$notificationType});}
 }
 
 @each $notificationType in $types {
-  div.#{$bcgov-prefix}--toast-notification--#{$notificationType}{
+  div.#{variables.$bcgov-prefix}--toast-notification--#{$notificationType}{
     border-left: 4px solid var(--bcgov-support-#{$notificationType}-inverse);}
-  div.#{$bcgov-prefix}--toast-notification--low-contrast.#{$bcgov-prefix}--toast-notification--#{$notificationType}{
+  div.#{variables.$bcgov-prefix}--toast-notification--low-contrast.#{variables.$bcgov-prefix}--toast-notification--#{$notificationType}{
     border-left: 4px solid var(--bcgov-support-#{$notificationType});
     border-top-color: var(--bcgov-notification-border-#{$notificationType});
     border-bottom-color: var(--bcgov-notification-border-#{$notificationType});
