@@ -1,0 +1,20 @@
+@use '../../theme/variables.scss' as vars;
+@use '../../theme/colors.scss' as colors;
+
+.header-link {
+  margin-left: 15px;
+  color: colors.$white;
+}
+
+a.header-link:link {
+  text-decoration: none;
+  color: colors.$white;
+}
+
+.header-full-name {
+  font-weight: bold;
+}
+
+.#{vars.$bcgov-prefix}--header__global .#{vars.$bcgov-prefix}--btn--icon-only.#{vars.$bcgov-prefix}--header__action svg {
+  fill: colors.$white;
+}

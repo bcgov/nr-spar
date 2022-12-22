@@ -1,0 +1,15 @@
+@use '../../theme/variables.scss' as vars;
+
+.mainContainer {
+  padding-top: 90px;
+  padding-left: 32px;
+}
+
+.page-content div.#{vars.$bcgov-prefix}--grid {
+  max-width: none;
+}
+
+.#{vars.$bcgov-prefix}--side-nav.#{vars.$bcgov-prefix}--side-nav--expanded ~ main.#{vars.$bcgov-prefix}--content.page-content {
+  margin-left: 14rem;
+  overflow-x: hidden;
+}

@@ -4,15 +4,15 @@ import { Tooltip, Row, Column } from '@carbon/react';
 import { Information } from '@carbon/icons-react';
 import Card from '../Card';
 
-import './styles.css';
+import './styles.scss';
 
 import FavoriteActivitiesCardItems from '../../mock-data/FavoriteActivitiesCardItems';
 
 const cards = FavoriteActivitiesCardItems;
 
 const FavoriteActivities = () => (
-  <Row className="main-content">
-    <Column lg={4}>
+  <Row className="favorite-activities">
+    <Column lg={4} className="favorite-activities-title">
       <h3>My favorite activities</h3>
       <h4>
         Quick access to your favorite activities.

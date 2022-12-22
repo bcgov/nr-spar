@@ -1,0 +1,10 @@
+@use '../../theme/variables.scss' as vars;
+
+.#{vars.$bcgov-prefix}--side-nav__items {
+  display: flex;
+  flex-direction: column;
+}
+
+.support-section {
+  margin-top: auto;
+}
