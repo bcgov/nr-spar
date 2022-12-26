@@ -51,7 +51,7 @@ head to http://localhost:3000.
 Be aware of the required environment variables:
 
 - REACT_APP_SERVER_URL
-- REACT_APP_NRFESAMPLEAPP_VERSION
+- REACT_APP_NRSPARWEBAPP_VERSION
 - REACT_APP_KC_URL
 - REACT_APP_KC_REALM
 - REACT_APP_KC_CLIENT_ID
@@ -75,25 +75,25 @@ yarn install --frozen-lockfile
 
 Build for production:
 ```
-REACT_APP_NRFESAMPLEAPP_VERSION=dev \
+REACT_APP_NRSPARWEBAPP_VERSION=dev \
  REACT_APP_SERVER_URL=https://nrbestapi-test-service-api.apps.silver.devops.gov.bc.ca \
  yarn build:production
 ```
 
 Build Docker image:
 ```
-docker build -t bcgov/nr-frontend-starting-app:latest .
+docker build -t bcgov/nr-spar-webapp:latest .
 ```
 
 Then run with:
 ```
 docker run -t -i -p 3000:3000 \
-  -e REACT_APP_NRFESAMPLEAPP_VERSION=dev \
+  -e REACT_APP_NRSPARWEBAPP_VERSION=dev \
   -e REACT_APP_SERVER_URL=<server-url> \
   -e REACT_APP_KC_URL=<keycloak-server-url> \
   -e REACT_APP_KC_REALM=<realm-name> \
   -e REACT_APP_KC_CLIENT_ID=<client-id> \
-  -t bcgov/nr-frontend-starting-app:latest
+  -t bcgov/nr-spar-webapp:latest
 ```
 
 ## Getting help

@@ -34,7 +34,7 @@ parameters:
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     value: bcgov/nr-spar-webapp:prod-app
-  - name: REACT_APP_NRFESAMPLEAPP_VERSION
+  - name: REACT_APP_NRSPARWEBAPP_VERSION
     description: Current sample app release version
     required: true
   - name: REACT_APP_SERVER_URL
@@ -99,8 +99,8 @@ objects:
               imagePullPolicy: Always
               name: ${NAME}
               env:
-                - name: REACT_APP_NRFESAMPLEAPP_VERSION
-                  value: ${REACT_APP_NRFESAMPLEAPP_VERSION}
+                - name: REACT_APP_NRSPARWEBAPP_VERSION
+                  value: ${REACT_APP_NRSPARWEBAPP_VERSION}
                 - name: REACT_APP_SERVER_URL
                   value: ${REACT_APP_SERVER_URL}
                 - name: REACT_APP_KC_URL
