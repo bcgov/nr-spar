@@ -1,3 +1,10 @@
+@use '../../theme/colors.scss' as colors;
+
+.landing-grid{
+  padding-right: 0;
+  height: 100vh;
+}
+
 .landing-title {
   margin-top: 70px;
   font-size: 76px;
@@ -7,19 +14,19 @@
 
 .landing-subtitle {
   margin-top: 8px;
-  color: #0073E6;
+  color: colors.$blue-60;
   font-size: 32px;
   font-weight: 400;
   line-height: 40px;
 }
 
 .spar-span {
-  color: #0073E6;
+  color: colors.$blue-60;
 }
 
 .landing-desc {
   margin-top: 40px;
-  color: #606062;
+  color: colors.$gray-70;
   font-size: 32px;
   font-weight: 400;
   line-height: 40px;
@@ -32,8 +39,15 @@
 }
 
 .seeding-img {
-  width: 100vh;
-  height: auto;
+  max-inline-size: 100%;
+  block-size: auto;
+  object-fit: cover;
+  height: 100%;
+}
+
+div.seeding-img-column {
+  padding: 0;
+  margin: 0;
 }
 
 /* Small - Up to 320px */
@@ -100,7 +114,7 @@
   .landing-desc {
     font-size: 28px;
     line-height: 36px;
-  } 
+  }
 }
 /* Max - Up to 1584px */
 @media only screen and (min-width: 1584px) {
@@ -115,7 +129,7 @@
   .landing-desc {
     font-size: 32px;
     line-height: 40px;
-  } 
+  }
 }
 /* Extra Max - Up to 1784px */
 @media only screen and (min-width: 1784px) {
@@ -130,5 +144,5 @@
   .landing-desc {
     font-size: 32px;
     line-height: 40px;
-  } 
+  }
 }
