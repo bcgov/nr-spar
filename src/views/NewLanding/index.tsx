@@ -8,11 +8,15 @@ import {
 import { Login } from '@carbon/icons-react';
 import { KeycloakLoginOptions } from 'keycloak-js';
 import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../../contexts/AuthContext';
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/seeding.png';
+
 import LoginProviders from '../../types/LoginProviders';
-import './styles.css';
+
+import './styles.scss';
+
 import getUrlQueryParam from '../../utils/UrlUtils';
 
 const NewLanding = () => {
@@ -44,9 +48,9 @@ const NewLanding = () => {
   }, [signed]);
 
   return (
-    <Grid fullWidth>
+    <Grid fullWidth className="landing-grid">
       {/* First - Column */}
-      <Column lg={8}>
+      <Column sm={4} md={5} lg={10}>
         {/* Logo */}
         <BCGovLogo />
 
@@ -87,7 +91,7 @@ const NewLanding = () => {
       </Column>
 
       {/* Second - Column */}
-      <Column lg={5}>
+      <Column className="seeding-img-column" sm={4} md={3} lg={6}>
         <img
           src={Seeding}
           alt="Small green seedling on the dirt and watered"
