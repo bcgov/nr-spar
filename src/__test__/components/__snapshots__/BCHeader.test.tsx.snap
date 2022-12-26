@@ -145,11 +145,11 @@ exports[`the Header component should match the snapshot 1`] = `
       >
         <button
           aria-describedby={null}
-          aria-label="App Switcher"
+          aria-label="User Settings"
           aria-labelledby="tooltip-19"
           aria-pressed={null}
           className="cds--btn--icon-only cds--header__action cds--btn cds--btn--primary cds--btn--icon-only cds--btn cds--btn--primary"
-          data-testid="header-button__switcher"
+          data-testid="header-button__user"
           disabled={false}
           onBlur={[Function]}
           onClick={[Function]}
@@ -169,7 +169,10 @@ exports[`the Header component should match the snapshot 1`] = `
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              d="M14 4H18V8H14zM4 4H8V8H4zM24 4H28V8H24zM14 14H18V18H14zM4 14H8V18H4zM24 14H28V18H24zM14 24H18V28H14zM4 24H8V28H4zM24 24H28V28H24z"
+              d="M16,8a5,5,0,1,0,5,5A5,5,0,0,0,16,8Zm0,8a3,3,0,1,1,3-3A3.0034,3.0034,0,0,1,16,16Z"
+            />
+            <path
+              d="M16,2A14,14,0,1,0,30,16,14.0158,14.0158,0,0,0,16,2ZM10,26.3765V25a3.0033,3.0033,0,0,1,3-3h6a3.0033,3.0033,0,0,1,3,3v1.3765a11.8989,11.8989,0,0,1-12,0Zm13.9925-1.4507A5.0016,5.0016,0,0,0,19,20H13a5.0016,5.0016,0,0,0-4.9925,4.9258,12,12,0,1,1,15.985,0Z"
             />
           </svg>
         </button>
@@ -182,7 +185,7 @@ exports[`the Header component should match the snapshot 1`] = `
           <span
             className="cds--popover-content cds--tooltip-content"
           >
-            App Switcher
+            User Settings
           </span>
           <span
             className="cds--popover-caret"

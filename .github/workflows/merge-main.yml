@@ -181,7 +181,7 @@ jobs:
       name: test
     env:
       ZONE: test
-      REACT_APP_NRFESAMPLEAPP_VERSION: ${{ needs.release.outputs.version }}
+      REACT_APP_NRSPARWEBAPP_VERSION: ${{ needs.release.outputs.version }}
     steps:
       - uses: actions/checkout@v3
       - name: Deploy
@@ -192,7 +192,7 @@ jobs:
 
           # Process and apply deployment templates
           oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
-            -p REACT_APP_NRFESAMPLEAPP_VERSION=test-${{ env.REACT_APP_NRFESAMPLEAPP_VERSION }} \
+            -p REACT_APP_NRSPARWEBAPP_VERSION=test-${{ env.REACT_APP_NRSPARWEBAPP_VERSION }} \
             -p REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} \
             -p REACT_APP_KC_URL=${{ secrets.REACT_APP_KC_URL }} \
             -p REACT_APP_KC_REALM=${{ secrets.REACT_APP_KC_REALM }} \
@@ -332,7 +332,7 @@ jobs:
     env:
       ZONE: prod
       PREV: test
-      REACT_APP_NRFESAMPLEAPP_VERSION: ${{ needs.release.outputs.version }}
+      REACT_APP_NRSPARWEBAPP_VERSION: ${{ needs.release.outputs.version }}
     steps:
       - name: Remove any stale images
         if: needs.image-app.outputs.build == 'true'
@@ -346,8 +346,8 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Print REACT_APP_NRFESAMPLEAPP_VERSION env
-        run: echo REACT_APP_NRFESAMPLEAPP_VERSION:prod-${{ env.REACT_APP_NRFESAMPLEAPP_VERSION }}
+      - name: Print REACT_APP_NRSPARWEBAPP_VERSION env
+        run: echo REACT_APP_NRSPARWEBAPP_VERSION:prod-${{ env.REACT_APP_NRSPARWEBAPP_VERSION }}
 
       - name: Deploy
         run: |
@@ -357,7 +357,7 @@ jobs:
 
           # Process and apply deployment templates
           oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
-            -p NRFESAMPREACT_APP_NRFESAMPLEAPP_VERSIONLEAPP_VERSION=prod-${{ env.REACT_APP_NRFESAMPLEAPP_VERSION }} \
+            -p REACT_APP_NRSPARWEBAPP_VERSION=prod-${{ env.REACT_APP_NRSPARWEBAPP_VERSION }} \
             -p REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} \
             -p REACT_APP_KC_URL=${{ secrets.REACT_APP_KC_URL }} \
             -p REACT_APP_KC_REALM=${{ secrets.REACT_APP_KC_REALM }} \
