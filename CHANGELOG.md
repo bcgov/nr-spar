@@ -1,3 +1,7 @@
+## [0.2.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.2.0...v0.2.1) (2022-12-27)
+
+
+
 # [0.2.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.4...v0.2.0) (2022-12-26)
 
 
@@ -17,15 +21,6 @@
 
 
 ## [0.1.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.1...v0.1.2) (2022-12-16)
-
-
-
-## [0.1.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.0...v0.1.1) (2022-12-13)
-
-
-### Bug Fixes
-
-* **login:** update provider hint when logging with business bceid ([#12](https://github.com/bcgov/nr-frontend-starting-app/issues/12)) ([fd0b961](https://github.com/bcgov/nr-frontend-starting-app/commit/fd0b961604ab9820bb9076b634ee7cf0af30436e))
 
 
 
