@@ -1,3 +1,6 @@
+@use '../../theme/variables.scss' as vars;
+@use '../../theme/colors.scss' as colors;
+
 .card-header {
   display: inline-flex;
   width: 200px;
@@ -10,7 +13,7 @@
   height: 24px !important;
   padding: 0px !important;
   margin: 0px !important;
-  color: #0073E6;
+  color: colors.$blue-60;
 }
 
 .card-overflow {
@@ -20,9 +23,12 @@
   height: 32px;
   align-items: center;
   justify-content: center;
+  border-radius: 4px;
 }
 
-.card-main {
+
+.card-main,
+.card-main-highlighted {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -31,8 +37,8 @@
   margin: 8px;
   width: 234px;
   height: 158px;
-  background: #FFFFFF;
-  border: 1px solid #DFDFE1;
+  background: colors.$white;
+  border: 1px solid colors.$gray-20;
   border-radius: 4px;
   flex: none;
   order: 0;
@@ -40,7 +46,7 @@
 }
 
 .card-main:hover {
-  outline: 2px solid #0073E6;
+  outline: 2px solid colors.$blue-60;
   cursor: pointer;
 }
 
@@ -49,13 +55,13 @@
   margin-top: auto;
 }
 
-.card-content > h5 {
+.card-content>h5 {
   font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-weight: 700;
   font-size: 16px;
   line-height: 24px;
-  color: #131315;
+  color: colors.$gray-100;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -63,7 +69,7 @@
   max-width: 200px;
 }
 
-.card-content > p {
+.card-content>p {
   font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-weight: 400;
@@ -71,11 +77,35 @@
   line-height: 18px;
   letter-spacing: 0.16px;
   margin-bottom: auto;
-  color: #606062;
+  color: colors.$gray-70;
   display: -webkit-box;
   max-width: 200px;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.card-main-highlighted {
+  background: colors.$blue-60;
+}
+
+.card-main-highlighted .card-icon,
+.card-main-highlighted .card-content>h5,
+.card-main-highlighted .card-content>p {
+  color: colors.$white;
+}
+
+.card-main-highlighted .card-overflow > svg{
+  fill: colors.$white;
+}
+
+.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open >svg{
+  fill: var(--bcgov-icon-primary);
+}
+
+.card-main-highlighted:hover {
+  border-color: colors.$white;
+  box-shadow: inset 0 0 0 1px colors.$white, 0 0 0 3px colors.$blue-60 ;
+  cursor: pointer;
 }

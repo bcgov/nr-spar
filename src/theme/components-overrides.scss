@@ -223,3 +223,19 @@ $types: 'error', 'info', 'success', 'warning';
     border-bottom-color: var(--bcgov-notification-border-#{$notificationType});
     border-right-color: var(--bcgov-notification-border-#{$notificationType})}
 }
+
+.#{variables.$bcgov-prefix}--overflow-menu.bcgov--overflow-menu--open{
+  border-radius: 4px 4px 0 0;
+}
+
+.#{variables.$bcgov-prefix}--overflow-menu-options{
+  border-radius: 0 4px 4px 4px;
+}
+
+li.#{variables.$bcgov-prefix}--overflow-menu-options__option:first-child{
+  border-radius: 0 4px 0 0;
+}
+
+li.#{variables.$bcgov-prefix}--overflow-menu-options__option:last-child{
+  border-radius: 0 0 4px 4px;
+}
