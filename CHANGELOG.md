@@ -1,3 +1,12 @@
+# [0.3.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.2.2...v0.3.0) (2022-12-29)
+
+
+### Features
+
+* delete favorite activities function created ([#22](https://github.com/bcgov/nr-frontend-starting-app/issues/22)) ([3eec51b](https://github.com/bcgov/nr-frontend-starting-app/commit/3eec51bb4b9dc500310b265c3bccbbeb9619a19f))
+
+
+
 ## [0.2.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.2.1...v0.2.2) (2022-12-29)
 
 
@@ -22,10 +31,6 @@
 
 
 ## [0.1.4](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.3...v0.1.4) (2022-12-22)
-
-
-
-## [0.1.3](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.2...v0.1.3) (2022-12-22)
 
 
 
