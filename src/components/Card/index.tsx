@@ -11,10 +11,11 @@ interface CardProps {
   description: string;
   highlighted?: boolean;
   highlightFunction?: () => void;
+  deleteFunction?: () => void;
 }
 
 const Card = ({
-  icon, header, description, highlighted, highlightFunction
+  icon, header, description, highlighted, highlightFunction, deleteFunction
 }: CardProps) => {
   const Icon = Icons[icon];
   return (
@@ -23,8 +24,7 @@ const Card = ({
         <Icon className="card-icon" />
         <OverflowMenu className="card-overflow" ariaLabel="overflow-menu">
           <OverflowMenuItem tabIndex="0" itemText={highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'} onClick={highlightFunction} />
-          <OverflowMenuItem itemText="Item 2" />
-          <OverflowMenuItem itemText="Item 3" />
+          <OverflowMenuItem itemText="Delete shortcut" onClick={deleteFunction} />
         </OverflowMenu>
       </span>
       <div className="card-content">

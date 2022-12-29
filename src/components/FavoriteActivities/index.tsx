@@ -5,7 +5,7 @@ import { Information } from '@carbon/icons-react';
 import Card from '../Card';
 
 import CardType from '../../types/Card';
-import './styles.css';
+import './styles.scss';
 import FavoriteActivitiesCardItems from '../../mock-data/FavoriteActivitiesCardItems';
 
 const FavoriteActivities = () => {
@@ -28,6 +28,12 @@ const FavoriteActivities = () => {
     } else {
       newCards[0].highlighted = false;
     }
+    setCards(newCards);
+  };
+
+  const deleteHighlight = (index:number) => {
+    const newCards = [...cards];
+    newCards.splice(index, 1);
     setCards(newCards);
   };
 
@@ -55,9 +61,8 @@ const FavoriteActivities = () => {
               header={card.header}
               description={card.description}
               highlighted={card.highlighted}
-              highlightFunction={() => {
-                highlightFunction(index);
-              }}
+              highlightFunction={() => { highlightFunction(index); }}
+              deleteFunction={() => { deleteHighlight(index); }}
             />
           ))}
         </Row>
