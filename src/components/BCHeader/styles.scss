@@ -1,6 +1,10 @@
 @use '../../theme/variables.scss' as vars;
 @use '../../theme/colors.scss' as colors;
 
+.spar-header {
+  overflow-x: hidden;
+}
+
 .header-link {
   margin-left: 15px;
   color: colors.$white;
@@ -15,6 +19,35 @@ a.header-link:link {
   font-weight: bold;
 }
 
-.#{vars.$bcgov-prefix}--header__global .#{vars.$bcgov-prefix}--btn--icon-only.#{vars.$bcgov-prefix}--header__action svg {
+.#{vars.$bcgov-prefix}--side-nav__items {
+  display: flex;
+  flex-direction: column;
+}
+
+.support-section {
+  margin-top: auto;
+}
+
+.#{vars.$bcgov-prefix}--header__global .#{vars.$bcgov-prefix}--btn--icon-only.#{vars.$bcgov-prefix}--header__action svg,
+button.#{vars.$bcgov-prefix}--header__action svg {
   fill: colors.$white;
+}
+
+button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__menu-trigger {
+  border-radius: 4px;
+}
+
+button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__menu-trigger:focus {
+  border-color: colors.$white;
+}
+
+button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active svg {
+  fill: colors.$gray-100;
+}
+
+/* Medium - Up to 672px */
+@media only screen and (max-width: 672px) {
+  .header-full-name {
+    display: none;
+  }
 }

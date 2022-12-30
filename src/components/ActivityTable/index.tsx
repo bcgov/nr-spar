@@ -24,7 +24,7 @@ interface TableProps {
 }
 
 const ActivityTable = ({ elements, clickFn, headers }: TableProps) => (
-  <Table size="lg" useZebraStyles={false}>
+  <Table size="lg" useZebraStyles={false} className="activity-table">
     <TableHead>
       <TableRow>
         {headers.map((header, idx) => (

@@ -13,7 +13,7 @@ import RecentActivities from '../../components/RecentActivities';
 import './styles.scss';
 
 const Dashboard = () => (
-  <FlexGrid>
+  <FlexGrid className="dashboard-page">
     <Stack gap={7}>
       <Row>
         <Column sm={4} md={4} className="dashboard-title">

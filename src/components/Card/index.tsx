@@ -20,15 +20,16 @@ const Card = ({
   const Icon = Icons[icon];
   return (
     <Tile className={highlighted ? 'card-main-highlighted' : 'card-main'}>
-      <span className="card-header">
+      <div className="card-header">
         <Icon className="card-icon" />
-        <OverflowMenu className="card-overflow" ariaLabel="overflow-menu">
+        <h5 className="card-title__small">{header}</h5>
+        <OverflowMenu className="card-overflow" ariaLabel="overflow-menu" flipped>
           <OverflowMenuItem tabIndex="0" itemText={highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'} onClick={highlightFunction} />
           <OverflowMenuItem itemText="Delete shortcut" onClick={deleteFunction} />
         </OverflowMenu>
-      </span>
+      </div>
       <div className="card-content">
-        <h5>{header}</h5>
+        <h5 className="card-title__large">{header}</h5>
         <p>{description}</p>
       </div>
     </Tile>

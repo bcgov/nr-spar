@@ -1,29 +1,50 @@
 @use '../../theme/variables.scss' as vars;
+@use '../../theme/colors.scss' as colors;
 
 h4.recent-activity-subtitle {
-  padding-bottom: 16px;
+  padding-bottom: 1rem;
 }
 
 .recent-activity {
-  background-color: #ffffff !important;
+  background-color: colors.$white !important;
 }
 
 .activity-table {
-  padding: 0px !important;
+  padding: 0 !important;
+}
+
+table.#{vars.$bcgov-prefix}--data-table th,
+table.#{vars.$bcgov-prefix}--data-table td {
+  padding-left: 2rem;
 }
 
 .recent-activity-title {
-  padding-left: 48px;
-}
-
-table.#{vars.$bcgov-prefix}--data-table th {
-  padding-left: 32px;
-}
-
-table.#{vars.$bcgov-prefix}--data-table td {
-  padding-left: 32px;
+  padding-left: 3.5rem;
 }
 
 .#{vars.$bcgov-prefix}--tabs {
-  padding-left: 16px;
+  padding-left: 1.5rem;
+}
+
+@media only screen and (max-width: 1584px) {
+  .recent-activity-title {
+    padding-left: 3rem;
+  }
+
+  .#{vars.$bcgov-prefix}--tabs {
+    padding-left: 1rem;
+  }
+}
+
+@media only screen and (max-width: 672px) {
+  .recent-activity-title {
+    padding-left: 2rem;
+  }
+
+  .#{vars.$bcgov-prefix}--tabs {
+    padding-left: 0;
+  }
+  .recent-activity {
+    overflow-x: scroll;
+  }
 }

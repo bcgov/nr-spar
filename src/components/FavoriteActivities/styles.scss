@@ -2,9 +2,35 @@
 
 .favorite-activities {
   background-color: colors.$gray-10;
-  padding: 32px 0;
+  padding: 2rem 0;
 }
 
 .favorite-activities-title {
-  padding-left: 48px;
+  padding-left: 3.5rem;
+}
+
+@media only screen and (max-width: 1584px) {
+  .favorite-activities-title {
+    padding-left: 3rem;
+  }
+}
+
+@media only screen and (max-width: 1056px) {
+  .favorite-activities-cards {
+    padding-left: 3.5rem;
+  }
+}
+
+@media only screen and (max-width: 672px) {
+  .favorite-activities-title {
+    padding-left: 2rem;
+  }
+
+  .favorite-activities-cards {
+    padding-left: 2.5rem;
+  }
+
+  .cards-row {
+    flex-direction: column;
+  }
 }
