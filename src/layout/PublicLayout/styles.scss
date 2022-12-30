@@ -1,15 +1,23 @@
 @use '../../theme/variables.scss' as vars;
 
 .mainContainer {
-  padding-top: 90px;
-  padding-left: 32px;
+  padding-top: 5.625rem;
+  padding-left: 16rem;
 }
 
 .page-content div.#{vars.$bcgov-prefix}--grid {
   max-width: none;
 }
 
-.#{vars.$bcgov-prefix}--side-nav.#{vars.$bcgov-prefix}--side-nav--expanded ~ main.#{vars.$bcgov-prefix}--content.page-content {
-  margin-left: 14rem;
-  overflow-x: hidden;
+@media only screen and (max-width: 1056px) {
+  .mainContainer {
+    padding-top: 5rem;
+    padding-left: 0;
+  }
+}
+
+@media only screen and (max-width: 672px) {
+  .mainContainer {
+    padding-top: 4.5rem;
+  }
 }
