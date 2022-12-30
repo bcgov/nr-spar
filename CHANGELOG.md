@@ -1,3 +1,12 @@
+## [0.4.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.0...v0.4.1) (2022-12-30)
+
+
+### Bug Fixes
+
+* fixed generic font on panel section component ([#25](https://github.com/bcgov/nr-frontend-starting-app/issues/25)) ([f454bd8](https://github.com/bcgov/nr-frontend-starting-app/commit/f454bd8a155ad1993ddae9fbc347b4f1df3ef81d))
+
+
+
 # [0.4.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.3.0...v0.4.0) (2022-12-30)
 
 
@@ -26,16 +35,6 @@
 
 
 ## [0.2.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.2.0...v0.2.1) (2022-12-27)
-
-
-
-# [0.2.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.4...v0.2.0) (2022-12-26)
-
-
-### Features
-
-* added breakpoints for the landing page ([#20](https://github.com/bcgov/nr-frontend-starting-app/issues/20)) ([8da7aaf](https://github.com/bcgov/nr-frontend-starting-app/commit/8da7aaf1572fb22c72a0ae45f13a823114e90164))
-* update variable name to match spar repo version ([#17](https://github.com/bcgov/nr-frontend-starting-app/issues/17)) ([213a0ef](https://github.com/bcgov/nr-frontend-starting-app/commit/213a0ef0ba7e39c519ea46cc5d8f392c2f83597b))
 
 
 
