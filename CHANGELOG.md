@@ -1,3 +1,12 @@
+# [0.4.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.3.0...v0.4.0) (2022-12-30)
+
+
+### Features
+
+* dashboard breakpoints  ([#23](https://github.com/bcgov/nr-frontend-starting-app/issues/23)) ([c183ce0](https://github.com/bcgov/nr-frontend-starting-app/commit/c183ce01f9ced95c35e8997ed5b4a6ca5bf6c962))
+
+
+
 # [0.3.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.2.2...v0.3.0) (2022-12-29)
 
 
@@ -27,10 +36,6 @@
 
 * added breakpoints for the landing page ([#20](https://github.com/bcgov/nr-frontend-starting-app/issues/20)) ([8da7aaf](https://github.com/bcgov/nr-frontend-starting-app/commit/8da7aaf1572fb22c72a0ae45f13a823114e90164))
 * update variable name to match spar repo version ([#17](https://github.com/bcgov/nr-frontend-starting-app/issues/17)) ([213a0ef](https://github.com/bcgov/nr-frontend-starting-app/commit/213a0ef0ba7e39c519ea46cc5d8f392c2f83597b))
-
-
-
-## [0.1.4](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.1.3...v0.1.4) (2022-12-22)
 
 
 
