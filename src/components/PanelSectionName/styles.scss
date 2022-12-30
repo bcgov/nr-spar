@@ -1,21 +1,21 @@
-$bcgov-prefix: 'bcgov';
+@use '../../theme/variables.scss' as vars;
 
-.PanelSectionName {
+.panel-section {
   height: 48px;
   display: flex;
   flex-direction: row;
   align-items: center;
   padding: 15px 16px;
-  background: var(--#{$bcgov-prefix}-background);
+  background: var(--#{vars.$bcgov-prefix}-background);
 }
 
-.PanelSectionName > span {
-  font-family: 'BC Sans';
+.panel-section > span {
+  font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
   letter-spacing: 0.32px;
-  color: var(--#{$bcgov-prefix}-text-secondary);
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
   user-select: none;
 }
