@@ -126,11 +126,14 @@ Pull Request template that you can fill. The more complete the better. If you
 have images, screen capture or diagrams, that helps a lot. Don't forget to add
 reviewers, assign to yourself and add a label.
 
-## React Query Conventions
-- `/posts` -> `['posts']`
-- `/posts/1` -> `['posts', post.id]`
-- `/posts?author=1` -> `['posts', { author: 1 }]`
-- `/posts/2/comments` -> `['posts', post.id, 'comments']`
+## Database versioning
+
+Any permanent alteration to the database schema (creation or alteration of tables,
+columns, etc.) should be done through Flyway. [Here's a brief explanation on how
+versioning with Flyway works](https://flywaydb.org/documentation/getstarted/how).
+
+Each migration should have its own file, which must follow [this naming
+pattern](https://flywaydb.org/documentation/concepts/migrations#naming). 
 
 ## Follow our best practices
 
