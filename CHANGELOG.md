@@ -1,3 +1,12 @@
+## [0.4.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.1...v0.4.2) (2023-01-04)
+
+
+### Bug Fixes
+
+* adjusted StatusItem component and other minor changes ([#26](https://github.com/bcgov/nr-frontend-starting-app/issues/26)) ([04cfa8d](https://github.com/bcgov/nr-frontend-starting-app/commit/04cfa8d041e28b89aa55547972a6631939a35594))
+
+
+
 ## [0.4.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.0...v0.4.1) (2022-12-30)
 
 
@@ -31,10 +40,6 @@
 ### Bug Fixes
 
 * navigation added to left panel ([#24](https://github.com/bcgov/nr-frontend-starting-app/issues/24)) ([f9d3064](https://github.com/bcgov/nr-frontend-starting-app/commit/f9d30646991992881bef691a284bde1755658d39))
-
-
-
-## [0.2.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.2.0...v0.2.1) (2022-12-27)
 
 
 
