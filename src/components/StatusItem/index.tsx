@@ -1,19 +1,22 @@
 import React from 'react';
-
-import './styles.css';
+import { Tag } from '@carbon/react';
 
 import ACTIVITY_STATUS from '../../enums/ActivityStatus';
 
 const statusClass = (param: number) => {
   switch (param) {
     case 1:
-      return 'status-item-progress';
+      // In progress
+      return 'cyan';
     case 2:
-      return 'status-item-approved';
+      // Approved
+      return 'green';
     case 3:
-      return 'status-item-canceled';
+      // Canceled
+      return 'magenta';
     default:
-      return '';
+      // Pending
+      return 'gray';
   }
 };
 
@@ -22,9 +25,9 @@ interface StatusProps {
 }
 
 const StatusItem = ({ status }: StatusProps) => (
-  <div className={`status-item ${statusClass(status)}`}>
+  <Tag type={`${statusClass(status)}`}>
     {Object.values(ACTIVITY_STATUS)[status]}
-  </div>
+  </Tag>
 );
 
 export default StatusItem;
