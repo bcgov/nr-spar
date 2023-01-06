@@ -7,6 +7,7 @@ import Card from '../Card';
 import CardType from '../../types/Card';
 import './styles.scss';
 import FavoriteActivitiesCardItems from '../../mock-data/FavoriteActivitiesCardItems';
+import EmptySection from '../EmptySection';
 
 const FavoriteActivities = () => {
   const [cards, setCards] = React.useState<CardType[]>(FavoriteActivitiesCardItems);
@@ -54,6 +55,14 @@ const FavoriteActivities = () => {
       </Column>
       <Column lg={12} className="favorite-activities-cards">
         <Row>
+          {(cards.length === 0) && (
+            <EmptySection
+              icon="Application"
+              title="You don’t have any favorites to show yet!"
+              description="You can favorite your most used activities by clicking on the heart icon
+              inside each page"
+            />
+          )}
           {cards.map((card, index) => (
             <Card
               key={card.id}
