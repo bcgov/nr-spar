@@ -37,7 +37,7 @@ interface ListItems {
 const listItems = LeftPanelItems;
 
 const BCHeader = () => {
-  const version: string = `Version: ${env.REACT_APP_NRFESAMPLEAPP_VERSION}`;
+  const version: string = `Version: ${env.REACT_APP_NRSPARWEBAPP_VERSION}`;
 
   const navigate = useNavigate();
 
