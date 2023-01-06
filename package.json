@@ -1,6 +1,6 @@
 {
   "name": "nr-spar-webapp",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "private": true,
   "dependencies": {
     "@carbon/icons-react": "^11.9.0",
