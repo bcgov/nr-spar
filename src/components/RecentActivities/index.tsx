@@ -15,6 +15,7 @@ import ActivityTable from '../ActivityTable';
 import RecentActivityItems from '../../mock-data/RecentActivityItems';
 
 import './styles.scss';
+import EmptySection from '../EmptySection';
 
 const RecentActivities = () => {
   const listItems = RecentActivityItems;
@@ -53,6 +54,16 @@ const RecentActivities = () => {
                 clickFn={goToActivity}
                 headers={tableHeaders}
               />
+              {(listItems.length === 0) && (
+              <div className="empty-recent-activities">
+                <EmptySection
+                  icon="Application"
+                  title="There is no activity to show yet!"
+                  description="Your recent requests will appear here once you generate one"
+                />
+              </div>
+
+              )}
             </TabPanel>
             <TabPanel>Placeholder</TabPanel>
           </TabPanels>
