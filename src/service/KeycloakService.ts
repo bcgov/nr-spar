@@ -44,8 +44,8 @@ const getRoles = (): string[] => {
 
 const getUser = (): KeycloakUser => {
   const displayName = keycloak.tokenParsed?.display_name;
-  const lastName = keycloak.tokenParsed?.last_name;
-  const firstName = keycloak.tokenParsed?.first_name;
+  const lastName = keycloak.tokenParsed?.family_name;
+  const firstName = keycloak.tokenParsed?.given_name;
   const idirUsername = keycloak.tokenParsed?.idir_username;
   const email = keycloak.tokenParsed?.email;
   const name = keycloak.tokenParsed?.name;

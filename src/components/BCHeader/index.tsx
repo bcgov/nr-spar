@@ -2,13 +2,13 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import {
-  Button,
   HeaderContainer,
   Header,
   SkipToContent,
   HeaderMenuButton,
   HeaderGlobalBar,
   HeaderGlobalAction,
+  HeaderPanel,
   SideNav,
   SideNavItems,
   SideNavLink
@@ -17,6 +17,9 @@ import * as Icons from '@carbon/icons-react';
 
 import { env } from '../../env';
 
+import RightPanelTitle from '../RightPanelTitle';
+import MyProfile from '../MyProfile';
+import NotificationsCentral from '../NotificationsCentral';
 import PanelSectionName from '../PanelSectionName';
 
 import LeftPanelItems from '../../mock-data/LeftPanelItems';
@@ -38,12 +41,43 @@ const listItems = LeftPanelItems;
 
 const BCHeader = () => {
   const version: string = `Version: ${env.REACT_APP_NRSPARWEBAPP_VERSION}`;
+  const [myProfile, setMyProfile] = React.useState<boolean>(false);
+  const [notifications, setNotifications] = React.useState<boolean>(false);
+  const [overlay, setOverlay] = React.useState<boolean>(false);
+
+  const handleNotificationsPanel = React.useCallback((): void => {
+    if (notifications) {
+      setOverlay(false);
+      setNotifications(false);
+    } else {
+      setOverlay(true);
+      setNotifications(true);
+    }
+    setMyProfile(false);
+  }, [notifications]);
+
+  const handleMyProfilePanel = React.useCallback((): void => {
+    if (myProfile) {
+      setOverlay(false);
+      setMyProfile(false);
+    } else {
+      setOverlay(true);
+      setMyProfile(true);
+    }
+    setNotifications(false);
+  }, [myProfile]);
+
+  const closeNotificationsPanel = React.useCallback((): void => {
+    setOverlay(false);
+    setNotifications(false);
+  }, []);
+
+  const closeMyProfilePanel = React.useCallback((): void => {
+    setOverlay(false);
+    setMyProfile(false);
+  }, []);
 
   const navigate = useNavigate();
-
-  const goOut = () => {
-    navigate('/logout');
-  };
 
   return (
     <HeaderContainer
@@ -64,22 +98,45 @@ const BCHeader = () => {
             <span className="header-full-name"> Seed Planning and Registry System</span>
           </Link>
           <HeaderGlobalBar>
-            <Button
-              onClick={() => goOut()}
-              size="sm"
+            <HeaderGlobalAction
+              aria-label="Search"
+              data-testid="header-button__search"
             >
-              Logout
-            </Button>
-            <HeaderGlobalAction aria-label="Search" data-testid="header-button__search">
               <Icons.Search size={20} />
             </HeaderGlobalAction>
-            <HeaderGlobalAction aria-label="Notifications" data-testid="header-button__notifications">
+            <HeaderGlobalAction
+              aria-label="Notifications"
+              data-testid="header-button__notifications"
+              onClick={handleNotificationsPanel}
+              isActive={notifications}
+            >
               <Icons.Notification size={20} />
             </HeaderGlobalAction>
-            <HeaderGlobalAction aria-label="User Settings" tooltipAlignment="end" data-testid="header-button__user">
+            <HeaderGlobalAction
+              aria-label="User Settings"
+              tooltipAlignment="end"
+              data-testid="header-button__user"
+              onClick={handleMyProfilePanel}
+              isActive={myProfile}
+            >
               <Icons.UserAvatar size={20} />
             </HeaderGlobalAction>
           </HeaderGlobalBar>
+          <HeaderPanel expanded={notifications} className="notifications-panel">
+            <RightPanelTitle
+              title="Notifications"
+              closeFn={closeNotificationsPanel}
+            />
+            <NotificationsCentral />
+          </HeaderPanel>
+          <HeaderPanel expanded={myProfile} className="profile-panel">
+            <RightPanelTitle
+              title="My Profile"
+              closeFn={closeMyProfilePanel}
+            />
+            <MyProfile />
+          </HeaderPanel>
+          <div className={overlay ? 'overlay-element active' : 'overlay-element'} />
           <SideNav isChildOfHeader expanded={isSideNavExpanded} aria-label="Side menu">
             <SideNavItems>
               {listItems.map((item: ListItems) => (
