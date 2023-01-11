@@ -3,24 +3,24 @@
 
 .card-header {
   display: inline-flex;
-  width: 200px;
-  max-height: 32px;
+  width: 12.5rem;
+  max-height: 2rem;
   justify-content: space-between;
 }
 
 .card-icon {
-  width: 24px !important;
-  height: 24px !important;
-  padding: 0px !important;
-  margin: 0px !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
   color: colors.$blue-60;
 }
 
 .card-overflow {
-  padding: 0px !important;
-  margin: 0px !important;
-  width: 32px;
-  height: 32px;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 2rem;
+  height: 2rem;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
@@ -32,10 +32,10 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 20px 16px;
-  margin: 8px;
-  width: 234px;
-  height: 158px;
+  padding: 1.25rem 1rem;
+  margin: 0.5rem;
+  width: 14.625rem;
+  height: 9.875rem;
   background: colors.$white;
   border: 1px solid colors.$gray-20;
   border-radius: 4px;
@@ -58,27 +58,27 @@ h5 {
   font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-weight: 700;
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 1rem;
+  line-height: 1.5rem;
   color: colors.$gray-100;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 12.5rem;
 }
 
 .card-content > p {
   font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-weight: 400;
-  font-size: 14px;
-  line-height: 18px;
-  letter-spacing: 0.16px;
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  letter-spacing: 0.01rem;
   margin-bottom: auto;
   color: colors.$gray-70;
   display: -webkit-box;
-  max-width: 200px;
+  max-width: 12.5rem;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -119,9 +119,9 @@ h5 {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 16px;
-    width: 288px;
-    height: 64px;
+    padding: 1rem;
+    width: 18rem;
+    height: 4rem;
     background: colors.$white;
     border: 1px solid colors.$gray-20;
     border-radius: 4px;

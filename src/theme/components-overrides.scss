@@ -41,15 +41,15 @@
 
 .#{variables.$bcgov-prefix}--time-picker__input > .#{variables.$bcgov-prefix}--text-input {
   border-top-left-radius: 4px;
-  border-top-right-radius: 0px;
+  border-top-right-radius: 0;
 }
 
 .#{variables.$bcgov-prefix}--time-picker__select > .#{variables.$bcgov-prefix}--select-input {
-  border-radius: 0px;
+  border-radius: 0;
 }
 
 .#{variables.$bcgov-prefix}--time-picker :last-child > .#{variables.$bcgov-prefix}--select-input {
-  border-top-left-radius: 0px;
+  border-top-left-radius: 0;
   border-top-right-radius: 4px;
 }
 
@@ -58,23 +58,23 @@
 }
 
 .#{variables.$bcgov-prefix}--modal-close {
-  margin-right: 16px;
-  margin-top: 16px;
+  margin-right: 1rem;
+  margin-top: 1rem;
   border-radius: 4px;
 }
 .#{variables.$bcgov-prefix}--modal-footer {
   height: auto;
-  margin: 0 16px 16px;
+  margin: 0 1rem 1rem;
 }
 
 .#{variables.$bcgov-prefix}--modal-footer .#{variables.$bcgov-prefix}--btn {
   max-width: none;
-  height: 48px;
-  padding-bottom: 16px;
+  height: 3rem;
+  padding-bottom: 1rem;
 }
 
 .#{variables.$bcgov-prefix}--modal-footer .#{variables.$bcgov-prefix}--btn:not(.#{variables.$bcgov-prefix}--btn--primary) {
-  margin-right: 4px;
+  margin-right: 0.25rem;
 }
 
 .#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__item-count .#{variables.$bcgov-prefix}--select-input__wrapper select.#{variables.$bcgov-prefix}--select-input,
@@ -85,7 +85,7 @@
 
 .#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__item-count .#{variables.$bcgov-prefix}--select-input__wrapper,
 .#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__page-number .#{variables.$bcgov-prefix}--select-input__wrapper {
-  margin: 4px;
+  margin: 0.25rem;
 }
 
 .#{variables.$bcgov-prefix}--pagination .#{variables.$bcgov-prefix}--select__item-count .#{variables.$bcgov-prefix}--select-input--inline__wrapper {
@@ -98,17 +98,17 @@
 
 .#{variables.$bcgov-prefix}--pagination--sm,
 .#{variables.$bcgov-prefix}--pagination--sm .#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--popover-container {
-  height: 40px;
+  height: 2.5rem;
 }
 
 .#{variables.$bcgov-prefix}--pagination--md,
 .#{variables.$bcgov-prefix}--pagination--md .#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--popover-container {
-  height: 48px;
+  height: 3rem;
 }
 
 .#{variables.$bcgov-prefix}--pagination--lg,
 .#{variables.$bcgov-prefix}--pagination--lg .#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--popover-container {
-  height: 56px;
+  height: 3.5rem;
 }
 
 .#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--popover-container {
@@ -116,30 +116,30 @@
 }
 
 .#{variables.$bcgov-prefix}--pagination__control-buttons .#{variables.$bcgov-prefix}--pagination__button {
-  margin: 4px;
+  margin: 0.25rem;
   border: 0;
 }
 
 .#{variables.$bcgov-prefix}--side-nav {
-  box-shadow: inset -1px 0px 0px colors.$gray-20;
+  box-shadow: inset -1px 0 0 colors.$gray-20;
 }
 
 .#{variables.$bcgov-prefix}--side-nav__items {
-  padding: 16px;
+  padding: 1rem;
 }
 
 .#{variables.$bcgov-prefix}--side-nav__link {
-  padding: 16px !important;
-  margin: 0px;
-  width: 256px;
+  padding: 1rem !important;
+  margin: 0;
+  width: 16rem;
 }
 
 .#{variables.$bcgov-prefix}--grid {
-  padding: 0px !important;
+  padding: 0 !important;
 }
 
 .#{variables.$bcgov-prefix}--tab-content {
-  padding: 0px !important;
+  padding: 0 !important;
 }
 
 .#{variables.$bcgov-prefix}--tabs button.#{variables.$bcgov-prefix}--tabs__nav-item--selected {
@@ -147,7 +147,7 @@
 }
 
 .#{variables.$bcgov-prefix}--data-table {
-  padding: 0px !important;
+  padding: 0 !important;
 }
 
 .#{variables.$bcgov-prefix}--table-header-label {
@@ -155,7 +155,7 @@
 }
 
 .#{variables.$bcgov-prefix}--content {
-  padding: 0px !important;
+  padding: 0 !important;
 }
 
 .#{variables.$bcgov-prefix}--header {
@@ -163,26 +163,25 @@
 }
 
 .#{variables.$bcgov-prefix}--row h1 {
-  font-size: 32px;
-  line-height: 40px;
+  font-size: 2rem;
+  line-height: 2.5rem;
   color: colors.$gray-100;
 }
 
 .#{variables.$bcgov-prefix}--row h4 {
-  font-size: 14px;
-  line-height: 18px;
-  letter-spacing: 0.16px;
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  letter-spacing: 0.01rem;
   color: colors.$gray-70;
 }
 
 .#{variables.$bcgov-prefix}--side-nav__menu .#{variables.$bcgov-prefix}--side-nav__menu-item a.#{variables.$bcgov-prefix}--side-nav__link,
 button.#{variables.$bcgov-prefix}--side-nav__submenu,
-.#{variables.$bcgov-prefix}--side-nav__link
-{
-  height: 48px;
+.#{variables.$bcgov-prefix}--side-nav__link {
+  height: 3rem;
 }
 
-div.#{variables.$bcgov-prefix}--side-nav__icon > svg{
+div.#{variables.$bcgov-prefix}--side-nav__icon > svg {
   fill: var(--#{variables.$bcgov-prefix}-link-secondary)
 }
 
@@ -192,7 +191,7 @@ div.#{variables.$bcgov-prefix}--side-nav__icon > svg{
 }
 
 div.#{variables.$bcgov-prefix}--inline-notification--low-contrast::before{
-  border-radius: 0px 4px 4px 0px;
+  border-radius: 0 4px 4px 0;
   filter: none;
 }
 
