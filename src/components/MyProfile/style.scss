@@ -1,0 +1,25 @@
+@use '../../theme/variables.scss' as vars;
+
+.user-info-section {
+  padding: 1rem;
+  display: flex;
+}
+
+.user-data {
+  margin-left: 2rem;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.divisory {
+  background-color: var(--#{vars.$bcgov-prefix}-border-subtle-01);
+  border: 0;
+  height: 1px;
+}
+
+.account-nav a {
+  width: 100%;
+  font-weight: bold;
+}

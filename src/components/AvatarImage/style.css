@@ -1,0 +1,13 @@
+.profile-image {
+  border-radius: 50%;
+}
+
+.small {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.large {
+  width: 4rem;
+  height: 4rem;
+}

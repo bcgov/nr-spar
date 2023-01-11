@@ -3,6 +3,7 @@
 
 .spar-header {
   overflow: hidden;
+  border: 0;
 }
 
 .header-link {
@@ -28,26 +29,71 @@ a.header-link:link {
   margin-top: auto;
 }
 
+button.#{vars.$bcgov-prefix}--header__action {
+  border-radius: 0;
+}
+
+button.#{vars.$bcgov-prefix}--header__action--active {
+  background: colors.$white;
+  border: 0;
+}
+
 .#{vars.$bcgov-prefix}--header__global .#{vars.$bcgov-prefix}--btn--icon-only.#{vars.$bcgov-prefix}--header__action svg,
 button.#{vars.$bcgov-prefix}--header__action svg {
   fill: colors.$white;
 }
 
-button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__menu-trigger {
-  border-radius: 4px;
+button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg,
+.#{vars.$bcgov-prefix}--popover-container button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg {
+  fill: colors.$gray-100;
 }
 
 button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__menu-trigger:focus {
   border-color: colors.$white;
 }
 
-button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active svg {
-  fill: colors.$gray-100;
+.#{vars.$bcgov-prefix}--header-panel--expanded.notifications-panel,
+.#{vars.$bcgov-prefix}--header-panel--expanded.profile-panel {
+  z-index: 10000;
+  width: 25rem;
+  height: 100vh;
+  background-color: colors.$white;
+  color: colors.$gray-100;
+  transition: width 0.11s cubic-bezier(0.2, 0, 1, 0.9);
+  will-change: width;
+}
+
+.overlay-element {
+  position: fixed;
+  top: 3rem;
+  left: 0;
+  width: 0;
+  height: 0;
+  background-color: transparent;
+  opacity: 0;
+  transition: opacity 300ms cubic-bezier(0.5, 0, 0.1, 1), background-color 300ms cubic-bezier(0.5, 0, 0.1, 1);
+}
+
+.overlay-element.active {
+  z-index: 9000;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--#{vars.$bcgov-prefix}-overlay);
+  opacity: 1;
+  transition: opacity 300ms cubic-bezier(0.5, 0, 0.1, 1), background-color 300ms cubic-bezier(0.5, 0, 0.1, 1);
 }
 
 /* Medium - Up to 672px */
 @media only screen and (max-width: 672px) {
   .header-full-name {
     display: none;
+  }
+}
+/* This rule is specific for the right panel only, it should fill the whole viewport
+   when the screen hits the panel size or smaller */
+@media only screen and (max-width: 400px) {
+  .#{vars.$bcgov-prefix}--header-panel--expanded.notifications-panel,
+  .#{vars.$bcgov-prefix}--header-panel--expanded.profile-panel {
+    width: 100vw;
   }
 }
