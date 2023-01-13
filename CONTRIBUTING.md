@@ -80,34 +80,27 @@ root directory.
 In case you want to debug with remote JVM, you can do it with this command:
 `./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"`
 
-```
-REACT_APP_SERVER_URL=
-REACT_APP_NRSPARWEBAPP_VERSION=
-REACT_APP_KC_URL=
-REACT_APP_KC_REALM=
-REACT_APP_KC_CLIENT_ID=
-REACT_APP_ENABLE_MOCK_SERVER=
+Note: You need a running Postgres service to have a fully working environment. You
+can do that with Docker or Docker Compose. Follow these steps
+
+With Docker, build and run:
+
+```shell
+cd database && docker build -t bcgov/nr-spar-backend-database:snapshot . && cd ..
+
+docker run -t -i -p 5432:5432 \
+  --name nr-spar-database \
+  -e POSTGRES_USER=${POSTGRESQL_USER} \
+  -e POSTGRES_DB=${POSTGRESQL_DATABASE} \
+  -e POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD} \
+  bcgov/nr-spar-backend-database:snapshot
 ```
 
-And if you want to run Cypress, please add:
-```
-CYPRESS_USERNAME=
-CYPRESS_PASSWORD=
-```
+With Docker Compose:
 
-> If don't have these values, please reach a member of the team
-
-Just run:
+```shell
+docker-compose -f database/docker-compose.yml up --build
 ```
-yarn install --frozen-lockfile
-```
-
-Once is finished, you can get it up and running by typing
-
-```
-yarn start
-```
-Note: TODO add here about database and running HOW-TOs.
 
 ## Run tests
 
@@ -133,7 +126,7 @@ columns, etc.) should be done through Flyway. [Here's a brief explanation on how
 versioning with Flyway works](https://flywaydb.org/documentation/getstarted/how).
 
 Each migration should have its own file, which must follow [this naming
-pattern](https://flywaydb.org/documentation/concepts/migrations#naming). 
+pattern](https://flywaydb.org/documentation/concepts/migrations#naming).
 
 ## Follow our best practices
 
