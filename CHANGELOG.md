@@ -1,3 +1,12 @@
+# [0.6.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.5.0...v0.6.0) (2023-01-17)
+
+
+### Features
+
+* added seedlot dashboard page and initial grid display for it ([#32](https://github.com/bcgov/nr-frontend-starting-app/issues/32)) ([64e7f75](https://github.com/bcgov/nr-frontend-starting-app/commit/64e7f7562d4adcc1f76660d82ead7f0ad8b73870))
+
+
+
 # [0.5.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.4...v0.5.0) (2023-01-11)
 
 
@@ -31,15 +40,6 @@
 ### Bug Fixes
 
 * adjusted StatusItem component and other minor changes ([#26](https://github.com/bcgov/nr-frontend-starting-app/issues/26)) ([04cfa8d](https://github.com/bcgov/nr-frontend-starting-app/commit/04cfa8d041e28b89aa55547972a6631939a35594))
-
-
-
-## [0.4.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.0...v0.4.1) (2022-12-30)
-
-
-### Bug Fixes
-
-* fixed generic font on panel section component ([#25](https://github.com/bcgov/nr-frontend-starting-app/issues/25)) ([f454bd8](https://github.com/bcgov/nr-frontend-starting-app/commit/f454bd8a155ad1993ddae9fbc347b4f1df3ef81d))
 
 
 
