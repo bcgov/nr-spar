@@ -1,3 +1,7 @@
+## [0.6.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.6.0...v0.6.1) (2023-01-17)
+
+
+
 # [0.6.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.5.0...v0.6.0) (2023-01-17)
 
 
@@ -31,15 +35,6 @@
 ### Bug Fixes
 
 * fixed env var name ([#28](https://github.com/bcgov/nr-frontend-starting-app/issues/28)) ([c2e3b6a](https://github.com/bcgov/nr-frontend-starting-app/commit/c2e3b6a86c82237f24103df4c22aa814b3060516))
-
-
-
-## [0.4.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.1...v0.4.2) (2023-01-04)
-
-
-### Bug Fixes
-
-* adjusted StatusItem component and other minor changes ([#26](https://github.com/bcgov/nr-frontend-starting-app/issues/26)) ([04cfa8d](https://github.com/bcgov/nr-frontend-starting-app/commit/04cfa8d041e28b89aa55547972a6631939a35594))
 
 
 
