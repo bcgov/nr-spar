@@ -11,11 +11,11 @@ interface RightPanelTitleProps {
 }
 
 const RightPanelTitle = ({ title, closeFn }: RightPanelTitleProps) => (
-  <div className="title-section">
+  <div className="right-title-section">
     <h4>
       {title}
     </h4>
-    <div className="title-buttons">
+    <div className="right-title-buttons">
       <IconButton kind="ghost" label="Settings" align="bottom">
         <Settings />
       </IconButton>

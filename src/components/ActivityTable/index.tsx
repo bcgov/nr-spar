@@ -1,6 +1,5 @@
 import React from 'react';
-
-import './styles.css';
+import { hashObject } from 'react-hash-string';
 
 import {
   Table,
@@ -12,10 +11,11 @@ import {
 } from '@carbon/react';
 import { DataViewAlt } from '@carbon/icons-react';
 
-import { hashObject } from 'react-hash-string';
+import StatusItem from '../StatusItem';
 
 import Activity from '../../types/Activity';
-import StatusItem from '../StatusItem';
+
+import './styles.css';
 
 interface TableProps {
   elements: Activity[];

@@ -2,12 +2,14 @@ import React from 'react';
 
 import { Tooltip, Row, Column } from '@carbon/react';
 import { Information } from '@carbon/icons-react';
+
 import Card from '../Card';
+import EmptySection from '../EmptySection';
 
 import CardType from '../../types/Card';
-import './styles.scss';
 import FavoriteActivitiesCardItems from '../../mock-data/FavoriteActivitiesCardItems';
-import EmptySection from '../EmptySection';
+
+import './styles.scss';
 
 const FavoriteActivities = () => {
   const [cards, setCards] = React.useState<CardType[]>(FavoriteActivitiesCardItems);

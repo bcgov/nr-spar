@@ -1,7 +1,7 @@
 import React from 'react';
 
-import './style.css';
 import emptyUser from '../../mock-data/img/EmptyUser.jpg';
+import './style.css';
 
 type Size = 'small' | 'large';
 

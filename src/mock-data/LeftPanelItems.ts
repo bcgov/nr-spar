@@ -11,7 +11,7 @@ const LeftPanelItems = [
       {
         name: 'Seedlots',
         icon: 'SoilMoistureField',
-        link: '#',
+        link: '/seedlot',
         disabled: true
       },
       {

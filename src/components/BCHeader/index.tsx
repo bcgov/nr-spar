@@ -122,14 +122,14 @@ const BCHeader = () => {
               <Icons.UserAvatar size={20} />
             </HeaderGlobalAction>
           </HeaderGlobalBar>
-          <HeaderPanel expanded={notifications} className="notifications-panel">
+          <HeaderPanel aria-label="Notifications Tab" expanded={notifications} className="notifications-panel">
             <RightPanelTitle
               title="Notifications"
               closeFn={closeNotificationsPanel}
             />
             <NotificationsCentral />
           </HeaderPanel>
-          <HeaderPanel expanded={myProfile} className="profile-panel">
+          <HeaderPanel aria-label="My Profile Tab" expanded={myProfile} className="profile-panel">
             <RightPanelTitle
               title="My Profile"
               closeFn={closeMyProfilePanel}
