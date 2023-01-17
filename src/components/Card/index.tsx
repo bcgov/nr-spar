@@ -1,9 +1,9 @@
 import React from 'react';
 
-import './styles.scss';
-
 import { Tile, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
+
+import './styles.scss';
 
 interface CardProps {
   icon: string;

@@ -1,7 +1,8 @@
 import React from 'react';
-import './styles.scss';
 
 import * as Icons from '@carbon/icons-react';
+
+import './styles.scss';
 
 interface EmptySectionProps {
   icon: string;

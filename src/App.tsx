@@ -13,8 +13,9 @@ import { useAuth } from './contexts/AuthContext';
 import SilentCheckSso from './components/SilentCheckSso';
 import Logout from './components/Logout';
 import Layout from './layout/PublicLayout';
-import Dashboard from './views/Dashboard/dashboard';
 import NewLanding from './views/NewLanding';
+import Dashboard from './views/Dashboard/dashboard';
+import SeedlotDashboard from './views/SeedlotDashboard';
 
 /**
  * Create an app structure conaining all the routes.
@@ -37,6 +38,15 @@ const App: React.FC = () => {
             element={(
               <ProtectedRoute signed={signed}>
                 <Dashboard />
+              </ProtectedRoute>
+            )}
+          />
+
+          <Route
+            path="/seedlot"
+            element={(
+              <ProtectedRoute signed={signed}>
+                <SeedlotDashboard />
               </ProtectedRoute>
             )}
           />

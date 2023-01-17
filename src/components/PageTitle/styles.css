@@ -1,0 +1,33 @@
+.title-section {
+  padding-left: 3.5rem;
+}
+
+.title-favorite {
+  display: flex;
+  align-items: center;
+}
+
+.title-favorite button{
+  margin-left: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.title-favorite button svg{
+  margin-bottom: 0.1875rem;
+}
+
+@media only screen and (max-width: 1584px) {
+  .title-section {
+    padding-left: 3rem;
+  }
+}
+
+@media only screen and (max-width: 672px) {
+  .title-section {
+    padding-left: 2rem;
+  }
+
+  .title-section h4 {
+    width: 90vw;
+  }
+}

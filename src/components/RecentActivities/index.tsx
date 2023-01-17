@@ -10,12 +10,13 @@ import {
   TabPanels,
   TabPanel
 } from '@carbon/react';
+
 import ActivityTable from '../ActivityTable';
+import EmptySection from '../EmptySection';
 
 import RecentActivityItems from '../../mock-data/RecentActivityItems';
 
 import './styles.scss';
-import EmptySection from '../EmptySection';
 
 const RecentActivities = () => {
   const listItems = RecentActivityItems;
@@ -62,7 +63,6 @@ const RecentActivities = () => {
                   description="Your recent requests will appear here once you generate one"
                 />
               </div>
-
               )}
             </TabPanel>
             <TabPanel>Placeholder</TabPanel>
