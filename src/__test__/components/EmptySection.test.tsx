@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import EmptySection from '../../components/EmptySection/index';
 import '@testing-library/jest-dom';
 
-describe('Test the Empty Section component', () => {
+describe('the Empty Section component', () => {
   it('should render correctly', () => {
     const { container } = render(
       <EmptySection

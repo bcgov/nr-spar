@@ -5,7 +5,7 @@ import FavoriteActivities from '../../components/FavoriteActivities/index';
 import '@testing-library/jest-dom';
 
 // empty section should be tested in the future
-describe('Test the Favorite Activities component', () => {
+describe('the Favorite Activities component', () => {
   it('should render correctly', () => {
     const { container } = render(
       <FavoriteActivities />
@@ -21,7 +21,7 @@ describe('Test the Favorite Activities component', () => {
       <FavoriteActivities />
     );
 
-    const cards = container.getElementsByClassName('card-main');
+    const cards = container.getElementsByClassName('fav-card-main');
     expect(cards).toHaveLength(8);
   });
 
@@ -30,8 +30,8 @@ describe('Test the Favorite Activities component', () => {
       <FavoriteActivities />
     );
 
-    const cards = container.getElementsByClassName('card-main');
-    const buttonElement = container.getElementsByClassName('card-overflow');
+    const cards = container.getElementsByClassName('fav-card-main');
+    const buttonElement = container.getElementsByClassName('fav-card-overflow');
     fireEvent.click(buttonElement[3]);
     const deleteButton = screen.getByText('Delete shortcut');
     fireEvent.click(deleteButton);
@@ -43,11 +43,11 @@ describe('Test the Favorite Activities component', () => {
       <FavoriteActivities />
     );
 
-    const buttonElement = container.getElementsByClassName('card-overflow');
+    const buttonElement = container.getElementsByClassName('fav-card-overflow');
     fireEvent.click(buttonElement[3]);
     const highlightButton = screen.getByText('Highlight shortcut');
     fireEvent.click(highlightButton);
-    const highlightedCard = container.getElementsByClassName('card-main-highlighted');
+    const highlightedCard = container.getElementsByClassName('fav-card-main-highlighted');
     expect(highlightedCard).toHaveLength(1);
   });
 });

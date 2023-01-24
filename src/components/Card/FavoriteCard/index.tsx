@@ -5,7 +5,7 @@ import * as Icons from '@carbon/icons-react';
 
 import './styles.scss';
 
-interface CardProps {
+interface FavoriteCardProps {
   icon: string;
   header: string;
   description: string;
@@ -14,26 +14,26 @@ interface CardProps {
   deleteFunction?: () => void;
 }
 
-const Card = ({
+const FavoriteCard = ({
   icon, header, description, highlighted, highlightFunction, deleteFunction
-}: CardProps) => {
+}: FavoriteCardProps) => {
   const Icon = Icons[icon];
   return (
-    <Tile className={highlighted ? 'card-main-highlighted' : 'card-main'}>
-      <div className="card-header">
-        <Icon className="card-icon" />
-        <h5 className="card-title__small">{header}</h5>
-        <OverflowMenu className="card-overflow" ariaLabel="overflow-menu" flipped>
+    <Tile className={highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}>
+      <div className="fav-card-header">
+        <Icon className="fav-card-icon" />
+        <h5 className="fav-card-title-small">{header}</h5>
+        <OverflowMenu className="fav-card-overflow" ariaLabel="overflow-menu" flipped>
           <OverflowMenuItem tabIndex="0" itemText={highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'} onClick={highlightFunction} />
           <OverflowMenuItem itemText="Delete shortcut" onClick={deleteFunction} />
         </OverflowMenu>
       </div>
-      <div className="card-content">
-        <h5 className="card-title__large">{header}</h5>
+      <div className="fav-card-content">
+        <h5 className="fav-card-title-large">{header}</h5>
         <p>{description}</p>
       </div>
     </Tile>
   );
 };
 
-export default Card;
+export default FavoriteCard;

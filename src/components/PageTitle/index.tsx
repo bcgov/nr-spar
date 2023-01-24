@@ -6,6 +6,8 @@ import {
 } from '@carbon/react';
 import { Favorite } from '@carbon/icons-react';
 
+import Subtitle from '../Subtitle';
+
 import './styles.css';
 
 interface PageTitleProps {
@@ -25,9 +27,7 @@ const PageTitle = ({ title, subtitle, favorite }: PageTitleProps) => (
         </IconButton>
       )}
     </div>
-    <h4>
-      {subtitle}
-    </h4>
+    <Subtitle text={subtitle} />
   </Column>
 );
 

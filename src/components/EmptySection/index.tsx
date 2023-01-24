@@ -2,6 +2,8 @@ import React from 'react';
 
 import * as Icons from '@carbon/icons-react';
 
+import Subtitle from '../Subtitle';
+
 import './styles.scss';
 
 interface EmptySectionProps {
@@ -20,9 +22,7 @@ const EmptySection = ({
       <p>
         {title}
       </p>
-      <h4>
-        {description}
-      </h4>
+      <Subtitle text={description} />
     </div>
   );
 };
