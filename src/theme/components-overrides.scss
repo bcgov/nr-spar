@@ -162,17 +162,16 @@
   background-color: colors.$blue-60 !important;
 }
 
+ul.#{variables.$bcgov-prefix}--accordion {
+  border-left: 1px solid var(--#{variables.$bcgov-prefix}-border-subtle);
+  border-right: 1px solid var(--#{variables.$bcgov-prefix}-border-subtle);
+  border-radius: 4px;
+}
+
 .#{variables.$bcgov-prefix}--row h1 {
   font-size: 2rem;
   line-height: 2.5rem;
   color: colors.$gray-100;
-}
-
-.#{variables.$bcgov-prefix}--row h4 {
-  font-size: 0.875rem;
-  line-height: 1.125rem;
-  letter-spacing: 0.01rem;
-  color: colors.$gray-70;
 }
 
 .#{variables.$bcgov-prefix}--side-nav__menu .#{variables.$bcgov-prefix}--side-nav__menu-item a.#{variables.$bcgov-prefix}--side-nav__link,

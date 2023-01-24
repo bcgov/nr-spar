@@ -1,0 +1,65 @@
+@use '../../../theme/variables.scss' as vars;
+@use '../../../theme/colors.scss' as colors;
+
+.std-card-header {
+  display: inline-flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.std-card-title {
+  width: 15rem;
+}
+
+.std-card-icon {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: colors.$blue-60;
+}
+
+.std-card-main {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+  width: 20.25rem;
+  height: 22.5625rem;
+  background: colors.$white;
+  border: 1px solid colors.$gray-20;
+  border-radius: 4px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.std-card-main:hover {
+  outline: 2px solid colors.$blue-60;
+  cursor: pointer;
+}
+
+.std-card-content {
+  display: inline-block;
+}
+
+.std-card-header > h5 {
+  font-weight: 700;
+  display: block;
+}
+
+.std-card-content > p {
+  font-size: 0.875rem;
+  margin-bottom: auto;
+  color: colors.$gray-70;
+  display: -webkit-box;
+  max-width: 14.5rem;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open >svg{
+  fill: var(--bcgov-icon-primary);
+}

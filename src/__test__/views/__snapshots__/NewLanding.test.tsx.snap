@@ -2,10 +2,10 @@
 
 exports[`NewLanding component test should match the snapshot 1`] = `
 <div
-  className="cds--css-grid cds--css-grid--full-width"
+  className="landing-grid cds--css-grid cds--css-grid--full-width"
 >
   <div
-    className="cds--lg:col-span-8 cds--css-grid-column"
+    className="cds--sm:col-span-4 cds--md:col-span-5 cds--lg:col-span-10 cds--css-grid-column"
   >
     <img
       alt="BCGov Logo"
@@ -98,7 +98,7 @@ exports[`NewLanding component test should match the snapshot 1`] = `
     </button>
   </div>
   <div
-    className="cds--lg:col-span-5 cds--css-grid-column"
+    className="seeding-img-column cds--sm:col-span-4 cds--md:col-span-3 cds--lg:col-span-6 cds--css-grid-column"
   >
     <img
       alt="Small green seedling on the dirt and watered"

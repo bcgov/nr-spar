@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import Card from '../../components/Card/index';
+import FavoriteCard from '../../components/Card/FavoriteCard';
 import '@testing-library/jest-dom/extend-expect';
 
-describe('Test the card component', () => {
+describe('the favorite card component', () => {
   it('should render correctly with headers', async () => {
     const { container } = render(
-      <Card
+      <FavoriteCard
         header="Test"
         description="For testing"
         icon="SoilMoistureField"
@@ -15,16 +15,16 @@ describe('Test the card component', () => {
     );
 
     const headers = await screen.findAllByText('Test');
-    expect(headers[0]).toHaveClass('card-title__small');
-    expect(headers[1]).toHaveClass('card-title__large');
+    expect(headers[0]).toHaveClass('fav-card-title-small');
+    expect(headers[1]).toHaveClass('fav-card-title-large');
     expect(screen.getByText('For testing')).toBeInTheDocument();
-    const icon = container.getElementsByClassName('card-icon');
+    const icon = container.getElementsByClassName('fav-card-icon');
     expect(icon[0]).toBeInTheDocument();
   });
 
   it('should render card highlighted with different style', () => {
     const { container } = render(
-      <Card
+      <FavoriteCard
         header="Test"
         description="For testing"
         icon="SoilMoistureField"
@@ -32,20 +32,20 @@ describe('Test the card component', () => {
       />
     );
 
-    expect(container.firstChild).not.toHaveClass('card-main');
-    expect(container.firstChild).toHaveClass('card-main-highlighted');
+    expect(container.firstChild).not.toHaveClass('fav-card-main');
+    expect(container.firstChild).toHaveClass('fav-card-main-highlighted');
   });
 
   it('should click in the button and open the options', () => {
     const { container } = render(
-      <Card
+      <FavoriteCard
         header="Test"
         description="For testing"
         icon="SoilMoistureField"
       />
     );
 
-    const buttonElement = container.getElementsByClassName('card-overflow');
+    const buttonElement = container.getElementsByClassName('fav-card-overflow');
     fireEvent.click(buttonElement[0]);
     expect(screen.getByText('Highlight shortcut')).toBeInTheDocument();
     expect(screen.getByText('Delete shortcut')).toBeInTheDocument();
@@ -53,14 +53,14 @@ describe('Test the card component', () => {
 
   it('should close the dropdown menu when click outside', () => {
     const { container } = render(
-      <Card
+      <FavoriteCard
         header="Test"
         description="For testing"
         icon="SoilMoistureField"
       />
     );
 
-    const buttonElement = container.getElementsByClassName('card-overflow');
+    const buttonElement = container.getElementsByClassName('fav-card-overflow');
     fireEvent.click(buttonElement[0]);
     fireEvent.click(document);
     expect(screen.queryByText('Highlight shortcut')).toBeNull();

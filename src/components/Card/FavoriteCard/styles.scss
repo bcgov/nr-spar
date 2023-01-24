@@ -1,14 +1,14 @@
-@use '../../theme/variables.scss' as vars;
-@use '../../theme/colors.scss' as colors;
+@use '../../../theme/variables.scss' as vars;
+@use '../../../theme/colors.scss' as colors;
 
-.card-header {
+.fav-card-header {
   display: inline-flex;
   width: 12.5rem;
   max-height: 2rem;
   justify-content: space-between;
 }
 
-.card-icon {
+.fav-card-icon {
   width: 1.5rem !important;
   height: 1.5rem !important;
   padding: 0 !important;
@@ -16,7 +16,7 @@
   color: colors.$blue-60;
 }
 
-.card-overflow {
+.fav-card-overflow {
   padding: 0 !important;
   margin: 0 !important;
   width: 2rem;
@@ -26,8 +26,8 @@
   border-radius: 4px;
 }
 
-.card-main,
-.card-main-highlighted {
+.fav-card-main,
+.fav-card-main-highlighted {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -38,23 +38,22 @@
   height: 9.875rem;
   background: colors.$white;
   border: 1px solid colors.$gray-20;
-  border-radius: 4px;
   flex: none;
   order: 0;
   flex-grow: 0;
 }
 
-.card-main:hover {
+.fav-card-main:hover {
   outline: 2px solid colors.$blue-60;
   cursor: pointer;
 }
 
-.card-content {
+.fav-card-content {
   display: inline-block;
   margin-top: auto;
 }
 
-h5 {
+.fav-card-main h5 {
   font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-weight: 700;
@@ -68,7 +67,7 @@ h5 {
   max-width: 12.5rem;
 }
 
-.card-content > p {
+.fav-card-content > p {
   font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-weight: 400;
@@ -85,17 +84,17 @@ h5 {
   text-overflow: ellipsis;
 }
 
-.card-main-highlighted {
+.fav-card-main-highlighted {
   background: colors.$blue-60;
 }
 
-.card-main-highlighted .card-icon,
-.card-main-highlighted .card-content>h5,
-.card-main-highlighted .card-content>p {
+.fav-card-main-highlighted .fav-card-icon,
+.fav-card-main-highlighted .fav-card-content>h5,
+.fav-card-main-highlighted .fav-card-content>p {
   color: colors.$white;
 }
 
-.card-main-highlighted .card-overflow > svg{
+.fav-card-main-highlighted .fav-card-overflow > svg{
   fill: colors.$white;
 }
 
@@ -103,18 +102,18 @@ h5 {
   fill: var(--bcgov-icon-primary);
 }
 
-.card-main-highlighted:hover {
+.fav-card-main-highlighted:hover {
   border-color: colors.$white;
   box-shadow: inset 0 0 0 1px colors.$white, 0 0 0 3px colors.$blue-60 ;
   cursor: pointer;
 }
 
-.card-title__small {
+h5.fav-card-title-small {
   display: none;
 }
 
 @media only screen and (max-width: 672px) {
-  .card-main {
+  .fav-card-main {
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
@@ -124,20 +123,19 @@ h5 {
     height: 4rem;
     background: colors.$white;
     border: 1px solid colors.$gray-20;
-    border-radius: 4px;
     flex: none;
     order: 0;
     align-self: stretch;
     flex-grow: 0;
   }
 
-  .card-header {
+  .fav-card-header {
     width: 100%;
     justify-content: flex-start;
     align-items: center;
   }
 
-  .card-title__small {
+  .fav-card-title-small {
     padding-left: 1rem;
     display: block;
     width: 100%;
@@ -145,11 +143,11 @@ h5 {
     white-space: nowrap;
   }
 
-  .card-title__large {
+  .fav-card-title-large {
     display: none;
   }
 
-  .card-content > p {
+  .fav-card-content > p {
     display: none;
   }
 }

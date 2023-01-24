@@ -13,6 +13,7 @@ import {
 
 import ActivityTable from '../ActivityTable';
 import EmptySection from '../EmptySection';
+import Subtitle from '../Subtitle';
 
 import RecentActivityItems from '../../mock-data/RecentActivityItems';
 
@@ -40,7 +41,7 @@ const RecentActivities = () => {
     <Row className="main-content recent-activity">
       <Column sm={4} className="recent-activity-title">
         <h3>My recent activities</h3>
-        <h4 className="recent-activity-subtitle">Check your recent requests and files</h4>
+        <Subtitle text="Check your recent requests and files" className="recent-activity-subtitle" />
       </Column>
       <Column sm={4}>
         <Tabs>
