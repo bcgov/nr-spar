@@ -1,3 +1,7 @@
+## [0.6.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.6.1...v0.6.2) (2023-01-24)
+
+
+
 ## [0.6.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.6.0...v0.6.1) (2023-01-17)
 
 
@@ -26,15 +30,6 @@
 
 
 ## [0.4.4](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.3...v0.4.4) (2023-01-06)
-
-
-
-## [0.4.3](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.2...v0.4.3) (2023-01-06)
-
-
-### Bug Fixes
-
-* fixed env var name ([#28](https://github.com/bcgov/nr-frontend-starting-app/issues/28)) ([c2e3b6a](https://github.com/bcgov/nr-frontend-starting-app/commit/c2e3b6a86c82237f24103df4c22aa814b3060516))
 
 
 
