@@ -1,3 +1,12 @@
+## [0.6.3](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.6.2...v0.6.3) (2023-02-01)
+
+
+### Bug Fixes
+
+* fixed accessibility issues on the dashboard page ([#34](https://github.com/bcgov/nr-frontend-starting-app/issues/34)) ([360b4ad](https://github.com/bcgov/nr-frontend-starting-app/commit/360b4ad308d8bf490c98d31905449580c32c198b))
+
+
+
 ## [0.6.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.6.1...v0.6.2) (2023-01-24)
 
 
@@ -26,10 +35,6 @@
 ### Features
 
 * created my profile side panel ([#29](https://github.com/bcgov/nr-frontend-starting-app/issues/29)) ([a412c60](https://github.com/bcgov/nr-frontend-starting-app/commit/a412c608a103e9d9767b5a6c030348a569ed07e7))
-
-
-
-## [0.4.4](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.4.3...v0.4.4) (2023-01-06)
 
 
 
