@@ -1,0 +1,7 @@
+@use '../../theme/variables.scss' as vars;
+@use '@carbon/type';
+
+.subtitle-section {
+  @include type.type-style('body-compact-01');
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
+}

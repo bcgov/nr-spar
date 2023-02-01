@@ -1,5 +1,12 @@
+@use '@carbon/type';
+
 .title-section {
   padding-left: 3.5rem;
+}
+
+.title-section h1 {
+  @include type.type-style('heading-05');
+  margin-bottom: 0.5rem;
 }
 
 .title-favorite {

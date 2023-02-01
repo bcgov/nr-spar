@@ -1,7 +1,8 @@
 @use '../../theme/variables.scss' as vars;
 @use '../../theme/colors.scss' as colors;
+@use '@carbon/type';
 
-h4.recent-activity-subtitle {
+p.recent-activity-subtitle {
   padding-bottom: 1rem;
 }
 
@@ -20,6 +21,11 @@ table.#{vars.$bcgov-prefix}--data-table td {
 
 .recent-activity-title {
   padding-left: 3.5rem;
+}
+
+.recent-activity-title > h2 {
+  @include type.type-style('heading-03');
+  margin-bottom: 0.5rem;
 }
 
 .#{vars.$bcgov-prefix}--tabs {

@@ -1,5 +1,6 @@
 @use '../../../theme/variables.scss' as vars;
 @use '../../../theme/colors.scss' as colors;
+@use '@carbon/type';
 
 .fav-card-header {
   display: inline-flex;
@@ -53,13 +54,10 @@
   margin-top: auto;
 }
 
-.fav-card-main h5 {
-  font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
-  font-style: normal;
+p.fav-card-title-large,
+p.fav-card-title-small {
+  @include type.type-style('heading-02');
   font-weight: 700;
-  font-size: 1rem;
-  line-height: 1.5rem;
-  color: colors.$gray-100;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -67,13 +65,8 @@
   max-width: 12.5rem;
 }
 
-.fav-card-content > p {
-  font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 0.875rem;
-  line-height: 1.125rem;
-  letter-spacing: 0.01rem;
+.fav-card-content > p.fav-card-content-description {
+  @include type.type-style('body-compact-01');
   margin-bottom: auto;
   color: colors.$gray-70;
   display: -webkit-box;
@@ -89,8 +82,8 @@
 }
 
 .fav-card-main-highlighted .fav-card-icon,
-.fav-card-main-highlighted .fav-card-content>h5,
-.fav-card-main-highlighted .fav-card-content>p {
+.fav-card-main-highlighted .fav-card-content > p,
+.fav-card-main-highlighted .fav-card-header > p {
   color: colors.$white;
 }
 
@@ -102,18 +95,27 @@
   fill: var(--bcgov-icon-primary);
 }
 
-.fav-card-main-highlighted:hover {
+.fav-card-main-highlighted:hover,
+.fav-card-main-highlighted:focus {
   border-color: colors.$white;
   box-shadow: inset 0 0 0 1px colors.$white, 0 0 0 3px colors.$blue-60 ;
   cursor: pointer;
+  outline: 0;
+  outline-offset: 0;
 }
 
-h5.fav-card-title-small {
+.fav-card-main-highlighted .fav-card-overflow:hover,
+.fav-card-main-highlighted .fav-card-overflow:focus {
+  outline: 2px solid colors.$white;
+}
+
+p.fav-card-title-small {
   display: none;
 }
 
 @media only screen and (max-width: 672px) {
-  .fav-card-main {
+  .fav-card-main,
+  .fav-card-main-highlighted {
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
@@ -121,7 +123,6 @@ h5.fav-card-title-small {
     padding: 1rem;
     width: 18rem;
     height: 4rem;
-    background: colors.$white;
     border: 1px solid colors.$gray-20;
     flex: none;
     order: 0;
@@ -135,7 +136,7 @@ h5.fav-card-title-small {
     align-items: center;
   }
 
-  .fav-card-title-small {
+  p.fav-card-title-small {
     padding-left: 1rem;
     display: block;
     width: 100%;
@@ -143,11 +144,11 @@ h5.fav-card-title-small {
     white-space: nowrap;
   }
 
-  .fav-card-title-large {
+  p.fav-card-title-large {
     display: none;
   }
 
-  .fav-card-content > p {
+  .fav-card-content > p.fav-card-content-description {
     display: none;
   }
 }

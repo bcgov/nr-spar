@@ -44,14 +44,16 @@ const FavoriteActivities = () => {
   return (
     <Row className="favorite-activities">
       <Column lg={4} className="favorite-activities-title">
-        <h3>My favorite activities</h3>
+        <h2>My favorite activities</h2>
         <Subtitle text="Quick access to your favorite activities." className="favorite-activities-subtitle" />
         <Tooltip
+          className="favorite-activity-tooltip"
           align="top"
-          tabIndex={0}
           label="You can add a shortcut to your favorite activity by clicking on the hearth icon inside each page."
         >
-          <Information />
+          <button className="tooltip-button" type="button">
+            <Information />
+          </button>
         </Tooltip>
       </Column>
       <Column lg={12} className="favorite-activities-cards">

@@ -1,4 +1,6 @@
+@use '../../theme/variables.scss' as vars;
 @use '../../theme/colors.scss' as colors;
+@use '@carbon/type';
 
 .favorite-activities {
   background-color: colors.$gray-10;
@@ -9,8 +11,28 @@
   padding-left: 3.5rem;
 }
 
+.favorite-activities-title > h2 {
+  @include type.type-style('heading-03');
+  margin-bottom: 0.5rem;
+}
+
 .favorite-activities-subtitle {
   display: inline;
+}
+
+.tooltip-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+button.tooltip-button > svg {
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
+}
+
+.favorite-activity-tooltip {
+  top: 0.1875rem;
+  padding-left: 0.3125rem;
 }
 
 @media only screen and (max-width: 1584px) {

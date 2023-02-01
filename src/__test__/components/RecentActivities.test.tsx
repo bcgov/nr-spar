@@ -16,8 +16,8 @@ describe('Recent Activities component', () => {
   });
 
   it('should render title and subtitle correctly', () => {
-    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('My recent activities');
-    expect(screen.getByRole('heading', { level: 4 })).toHaveTextContent('Check your recent requests and files');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('My recent activities');
+    expect(screen.getByText('Check your recent requests and files')).toBeInTheDocument();
   });
 
   it('should change tabs when clicked', () => {
