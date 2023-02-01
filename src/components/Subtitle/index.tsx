@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './styles.css';
+import './styles.scss';
 
 interface SubtitleProps {
   text: string;
@@ -8,9 +8,9 @@ interface SubtitleProps {
 }
 
 const Subtitle = ({ text, className }: SubtitleProps) => (
-  <h4 className={className ? `${className}  subtitle-section` : 'subtitle-section'}>
+  <p className={className ? `${className} subtitle-section` : 'subtitle-section'}>
     {text}
-  </h4>
+  </p>
 );
 
 export default Subtitle;

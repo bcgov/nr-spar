@@ -38,7 +38,7 @@ const ActivityTable = ({ elements, clickFn, headers }: TableProps) => (
         ))}
       </TableRow>
     </TableHead>
-    <TableBody>
+    <TableBody aria-live="off">
       {elements.map((item, idx) => (
         <TableRow key={hashObject(item)} id={`row${idx}`}>
           <TableCell>{item.type}</TableCell>
@@ -48,8 +48,8 @@ const ActivityTable = ({ elements, clickFn, headers }: TableProps) => (
           <TableCell>{item.request_id}</TableCell>
           <TableCell>{item.created_at}</TableCell>
           <TableCell>{item.last_viewed}</TableCell>
-          <TableCell>
-            <DataViewAlt onClick={() => clickFn(item.request_id)} />
+          <TableCell tabIndex={0} aria-label={`${item.type} view more`} onClick={() => clickFn(item.request_id)}>
+            <DataViewAlt />
           </TableCell>
         </TableRow>
       ))}

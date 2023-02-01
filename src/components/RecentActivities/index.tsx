@@ -40,7 +40,7 @@ const RecentActivities = () => {
   return (
     <Row className="main-content recent-activity">
       <Column sm={4} className="recent-activity-title">
-        <h3>My recent activities</h3>
+        <h2>My recent activities</h2>
         <Subtitle text="Check your recent requests and files" className="recent-activity-subtitle" />
       </Column>
       <Column sm={4}>

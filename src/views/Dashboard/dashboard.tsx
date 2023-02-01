@@ -19,8 +19,12 @@ const Dashboard = () => (
           subtitle="See your favorite and recent activities inside SPAR system"
         />
       </Row>
-      <FavoriteActivities />
-      <RecentActivities />
+      <section title="Favorite activities">
+        <FavoriteActivities />
+      </section>
+      <section title="Recent activities">
+        <RecentActivities />
+      </section>
     </Stack>
   </FlexGrid>
 );
