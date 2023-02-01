@@ -1,0 +1,51 @@
+@use '../../theme/variables.scss' as vars;
+@use '../../theme/colors.scss' as colors;
+
+h4.existing-seedlot-subtitle {
+  padding-bottom: 1rem;
+}
+
+.existing-seedlot {
+  background-color: colors.$white !important;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  border: 1px solid colors.$gray-20;
+  border-radius: 4px;
+}
+
+.seedlot-table {
+  padding: 0 !important;
+}
+
+table.#{vars.$bcgov-prefix}--data-table th,
+table.#{vars.$bcgov-prefix}--data-table td {
+  padding-left: 2rem;
+}
+
+.existing-seedlot-title {
+  padding-left: 2rem;
+}
+
+.existing-seedlot-table {
+  padding: 0 !important;
+}
+
+.empty-existing-seedlot {
+  margin: 3.44rem 0;
+}
+
+@media only screen and (max-width: 1584px) {
+  .existing-seedlot-title {
+    padding-left: 3rem;
+  }
+}
+
+@media only screen and (max-width: 672px) {
+  .existing-seedlot-title {
+    padding-left: 2rem;
+  }
+
+  .existing-seedlot {
+    overflow-x: scroll;
+  }
+}

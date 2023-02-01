@@ -1,0 +1,10 @@
+a {
+  color: inherit;
+  text-decoration: inherit
+}
+
+@media only screen and (max-width: 672px) {
+  .seedlot-table {
+    width: 56.25rem;
+  }
+}
