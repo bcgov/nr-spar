@@ -7,6 +7,7 @@ import {
 } from '@carbon/react';
 
 import PageTitle from '../../components/PageTitle';
+import ExistingSeedlot from '../../components/ExistingSeedlot';
 
 import './styles.css';
 
@@ -42,11 +43,7 @@ const SeedlotDashboard = () => (
           </span>
         </Column>
       </Row>
-      <Row className="seedlot-dashboard-content">
-        <Column>
-          Exisisting Seedlot Placeholder
-        </Column>
-      </Row>
+      <ExistingSeedlot />
     </Stack>
   </FlexGrid>
 );

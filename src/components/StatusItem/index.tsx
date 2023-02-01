@@ -14,6 +14,9 @@ const statusClass = (param: number) => {
     case 3:
       // Canceled
       return 'magenta';
+    case 4:
+      // Incomplete
+      return 'purple';
     default:
       // Pending
       return 'gray';
