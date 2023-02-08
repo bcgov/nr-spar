@@ -1,4 +1,5 @@
 @use './theme/light-theme.scss' as light;
+@use './theme/dark-theme.scss' as dark;
 @use './theme/colors.scss' as colors;
 @use './theme/type-family.scss' as types;
 
@@ -13,9 +14,10 @@
 @use '@carbon/react/scss/themes';
 @use '@carbon/react/scss/theme' with (
   $fallback: themes.$white,
-  $theme: light.$light-theme
+  $theme: (light.$light-theme)
 );
 @use '@carbon/themes/scss/utilities';
+
 
 // Buttons, tags and notifications components tokens doesn't work properly
 // when setting directly on the theme, so we override the tokens directly
@@ -57,4 +59,12 @@ $notification-tokens: utilities.merge(
 
 :root {
   @include theme.theme();
+}
+
+[data-carbon-theme='g100'] {
+  @include react.theme(dark.$dark-theme);
+}
+
+[data-carbon-theme='g10'] {
+  @include react.theme(light.$light-theme);
 }

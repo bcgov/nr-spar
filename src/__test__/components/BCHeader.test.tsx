@@ -5,13 +5,16 @@ import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import BCHeader from '../../components/BCHeader';
 import { AuthProvider } from '../../contexts/AuthContext';
+import { ThemePreference } from '../../utils/ThemePreference';
 
 describe('the Header component', () => {
   it('should have the correct title', () => {
     const { getByTestId } = render(
       <BrowserRouter>
         <AuthProvider>
-          <BCHeader />
+          <ThemePreference>
+            <BCHeader />
+          </ThemePreference>
         </AuthProvider>
       </BrowserRouter>
     );

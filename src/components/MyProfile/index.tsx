@@ -12,10 +12,12 @@ import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
 
 import AccountOptions from '../../mock-data/AccountOptions';
+import { useThemePreference } from '../../utils/ThemePreference';
 
 import './style.scss';
 
 const MyProfile = () => {
+  const { theme, setTheme } = useThemePreference();
   const userData = KeycloakService.getUser();
 
   const navigate = useNavigate();
@@ -25,8 +27,23 @@ const MyProfile = () => {
   }, []);
 
   const goOut = React.useCallback(() => {
+    if (theme === 'g100') {
+      setTheme('g10');
+      localStorage.setItem('mode', 'light');
+    }
     navigate('/logout');
   }, []);
+
+  const changeTheme = () => {
+    if (theme === 'g10') {
+      setTheme('g100');
+      localStorage.setItem('mode', 'dark');
+    }
+    if (theme === 'g100') {
+      setTheme('g10');
+      localStorage.setItem('mode', 'light');
+    }
+  };
 
   return (
     <>
@@ -43,7 +60,7 @@ const MyProfile = () => {
       <hr className="divisory" />
       <nav className="account-nav">
         <ul>
-          <PanelSectionName title="Change account" />
+          <PanelSectionName title="Change account" light />
           {AccountOptions.map((option) => {
             const IconComponent = Icons[option.icon];
             return (
@@ -56,7 +73,13 @@ const MyProfile = () => {
               </SideNavLink>
             );
           })}
-          <PanelSectionName title="Options" />
+          <PanelSectionName title="Options" light />
+          <SideNavLink
+            renderIcon={Icons.DataEnrichment}
+            onClick={() => { changeTheme(); }}
+          >
+            Change theme
+          </SideNavLink>
           <SideNavLink
             renderIcon={Icons.UserFollow}
             onClick={goOut}

@@ -1,15 +1,21 @@
 @use '../../theme/variables.scss' as vars;
 
-.panel-section {
+.panel-section,
+.panel-section-light {
   height: 3rem;
   display: flex;
   flex-direction: row;
   align-items: center;
   padding: 0.9375rem 1rem;
-  background: var(--#{vars.$bcgov-prefix}-background);
+  background: var(--bcgov-background-left-panel);
 }
 
-.panel-section > span {
+.panel-section-light {
+  background: var(--bcgov-layer-02);
+}
+
+.panel-section > span,
+.panel-section-light > span {
   font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
   font-size: 0.75rem;
