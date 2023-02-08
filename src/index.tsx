@@ -5,6 +5,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemePreference } from './utils/ThemePreference';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -14,10 +15,13 @@ root.render(
   <AuthProvider>
     <React.StrictMode>
       <ClassPrefix prefix="bcgov">
-        <App />
+        <ThemePreference>
+          <App />
+        </ThemePreference>
       </ClassPrefix>
     </React.StrictMode>
   </AuthProvider>
+
 );
 
 // If you want to start measuring performance in your app, pass a function
