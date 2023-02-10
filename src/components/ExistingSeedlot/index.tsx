@@ -6,7 +6,7 @@ import SeedlotTable from '../SeedlotTable';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
 
-import ExistingSeedlotItems from '../../mock-data/ExistingSeedlotItems';
+import ExistingSeedlotItems from '../../mock-api/fixtures/ExistingSeedlotItems';
 
 import './styles.scss';
 

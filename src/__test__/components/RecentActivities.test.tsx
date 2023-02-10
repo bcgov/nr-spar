@@ -1,12 +1,17 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import RecentActivities from '../../components/RecentActivities';
 import '@testing-library/jest-dom';
+import makeServer from '../../mock-api/server';
 
 // TODO test Empty Section
 describe('Recent Activities component', () => {
+  beforeAll(() => {
+    makeServer('test');
+  });
+
   beforeEach(() => {
     render(
       <BrowserRouter>
@@ -15,23 +20,27 @@ describe('Recent Activities component', () => {
     );
   });
 
-  it('should render title and subtitle correctly', () => {
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('My recent activities');
-    expect(screen.getByText('Check your recent requests and files')).toBeInTheDocument();
+  it('should render title and subtitle correctly', async () => {
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('My recent activities');
+      expect(screen.getByText('Check your recent requests and files')).toBeInTheDocument();
+    });
   });
 
-  it('should change tabs when clicked', () => {
-    const tabs = screen.getAllByRole('tab');
-    expect(tabs[0].textContent).toEqual('Requests');
-    expect(tabs[1].textContent).toEqual('Files & Docs.');
+  it('should change tabs when clicked', async () => {
+    await waitFor(() => {
+      const tabs = screen.getAllByRole('tab');
+      expect(tabs[0].textContent).toEqual('Requests');
+      expect(tabs[1].textContent).toEqual('Files & Docs.');
 
-    const tabPanelBefore = screen.getByRole('tabpanel');
-    expect(tabPanelBefore).toHaveTextContent('Seedling request');
-    expect(tabPanelBefore).not.toHaveTextContent('Placeholder');
+      const tabPanelBefore = screen.getByRole('tabpanel');
+      expect(tabPanelBefore).toHaveTextContent('Seedling request');
+      expect(tabPanelBefore).not.toHaveTextContent('Placeholder');
 
-    fireEvent.click(tabs[1]);
-    const tabPanelAfter = screen.getByRole('tabpanel');
-    expect(tabPanelAfter).not.toHaveTextContent('Seedling request');
-    expect(tabPanelAfter).toHaveTextContent('Placeholder');
+      fireEvent.click(tabs[1]);
+      const tabPanelAfter = screen.getByRole('tabpanel');
+      expect(tabPanelAfter).not.toHaveTextContent('Seedling request');
+      expect(tabPanelAfter).toHaveTextContent('Placeholder');
+    });
   });
 });

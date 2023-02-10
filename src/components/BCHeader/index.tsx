@@ -22,7 +22,7 @@ import MyProfile from '../MyProfile';
 import NotificationsCentral from '../NotificationsCentral';
 import PanelSectionName from '../PanelSectionName';
 
-import LeftPanelItems from '../../mock-data/LeftPanelItems';
+import LeftPanelItems from '../../mock-api/fixtures/LeftPanelItems';
 
 import './styles.scss';
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import axios from 'axios';
+
 import {
   Row,
   Column,
@@ -15,12 +17,36 @@ import ActivityTable from '../ActivityTable';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
 
-import RecentActivityItems from '../../mock-data/RecentActivityItems';
-
 import './styles.scss';
+import getUrl from '../../utils/ApiUtils';
+import ApiAddresses from '../../utils/ApiAddresses';
+import { useAuth } from '../../contexts/AuthContext';
 
 const RecentActivities = () => {
-  const listItems = RecentActivityItems;
+  const { token } = useAuth();
+  const [listItems, setListItems] = React.useState([]);
+
+  const getAxiosConfig = () => {
+    const axiosConfig = {};
+    if (token) {
+      const headers = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      Object.assign(axiosConfig, headers);
+    }
+    return axiosConfig;
+  };
+
+  React.useEffect(() => {
+    axios.get(getUrl(ApiAddresses.RecentActivitiesRetrieveAll), getAxiosConfig())
+      .then((response) => {
+        setListItems(response.data);
+      })
+      // eslint-disable-next-line
+      .catch((error) => console.error(`Error: ${error}`));
+  }, []);
 
   const navigate = useNavigate();
 

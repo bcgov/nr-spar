@@ -38,6 +38,7 @@
       "linebreak-style": 0,
       "react/jsx-filename-extension": [2, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
       "comma-dangle": ["error", "never"],
+      "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
       "import/extensions": [
         "error",
         "ignorePackages",

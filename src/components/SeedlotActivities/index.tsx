@@ -4,7 +4,7 @@ import { Row } from '@carbon/react';
 
 import StandardCard from '../Card/StandardCard';
 
-import SeedlotActivitiesCardItems from '../../mock-data/SeedlotActivitiesCardItems';
+import SeedlotActivitiesCardItems from '../../mock-api/fixtures/SeedlotActivitiesCardItems';
 
 import './styles.scss';
 

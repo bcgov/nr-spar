@@ -2,7 +2,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import ActivityTable from '../../components/ActivityTable';
-import RecentActivityItems from '../../mock-data/RecentActivityItems';
+import RecentActivityItems from '../../mock-api/fixtures/RecentActivityItems';
 import '@testing-library/jest-dom';
 
 describe('Activity Table component', () => {

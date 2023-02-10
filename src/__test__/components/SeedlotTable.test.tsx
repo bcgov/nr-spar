@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SeedlotTable from '../../components/SeedlotTable';
-import ExistingSeedlotItems from '../../mock-data/ExistingSeedlotItems';
+import ExistingSeedlotItems from '../../mock-api/fixtures/ExistingSeedlotItems';
 import '@testing-library/jest-dom';
 
 describe('Seedlot Table component', () => {
