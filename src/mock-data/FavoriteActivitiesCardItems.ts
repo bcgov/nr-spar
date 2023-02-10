@@ -1,7 +1,7 @@
 const FavoriteActivitiesCardItems = [
   {
     id: '1',
-    icon: 'SoilMoistureField',
+    image: 'SoilMoistureField',
     header: 'Seedlot registration',
     description:
       'Start a new registration or check on existing seedlots registrations',
@@ -10,7 +10,7 @@ const FavoriteActivitiesCardItems = [
   },
   {
     id: '2',
-    icon: 'Tree',
+    image: 'Tree',
     header: 'Parent tree orchard',
     description:
       'Manage the parent trees inside your orchard and look for their latest reports and the latest data. ',
@@ -19,7 +19,7 @@ const FavoriteActivitiesCardItems = [
   },
   {
     id: '3',
-    icon: 'CropHealth',
+    image: 'CropHealth',
     header: 'Latest sowing date recommended',
     description:
       'Check what is the latest sowing dates recommended for your seedlot.',
@@ -28,7 +28,7 @@ const FavoriteActivitiesCardItems = [
   },
   {
     id: '4',
-    icon: 'CropGrowth',
+    image: 'CropGrowth',
     header: 'Seedling request',
     description: 'Open a new seedling request for your reforestation needs.',
     link: '#',
@@ -36,7 +36,7 @@ const FavoriteActivitiesCardItems = [
   },
   {
     id: '5',
-    icon: 'MapBoundaryVegetation',
+    image: 'MapBoundaryVegetation',
     header: 'Orchard maintenance',
     description: 'Keep your orchard update with the orchard maintenance.',
     link: '#',
@@ -44,7 +44,7 @@ const FavoriteActivitiesCardItems = [
   },
   {
     id: '6',
-    icon: 'Sprout',
+    image: 'Sprout',
     header: 'Generic shortcut',
     description: 'Generic shortcut page description',
     link: '#',
@@ -52,7 +52,7 @@ const FavoriteActivitiesCardItems = [
   },
   {
     id: '7',
-    icon: 'Sprout',
+    image: 'Sprout',
     header: 'Generic shortcut',
     description: 'Generic shortcut page description',
     link: '#',
@@ -60,7 +60,7 @@ const FavoriteActivitiesCardItems = [
   },
   {
     id: '8',
-    icon: 'Sprout',
+    image: 'Sprout',
     header: 'Generic shortcut',
     description: 'Generic shortcut page description',
     link: '#',

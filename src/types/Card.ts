@@ -1,6 +1,6 @@
 type CardType = {
   id: string;
-  icon: string;
+  image: string;
   header: string;
   description: string;
   link: string;

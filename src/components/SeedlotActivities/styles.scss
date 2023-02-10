@@ -1,0 +1,16 @@
+.seedlot-activities {
+  margin-left: 2.5rem;
+  margin-right: 2.5rem;
+}
+
+@media only screen and (max-width: 1056px) {
+  .seedlot-activities-cards {
+    padding-left: 3.5rem;
+  }
+}
+
+@media only screen and (max-width: 672px) {
+  .seedlot-activities-cards {
+    padding-left: 2.5rem;
+  }
+}

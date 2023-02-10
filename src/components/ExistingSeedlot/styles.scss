@@ -1,15 +1,16 @@
 @use '../../theme/variables.scss' as vars;
-@use '../../theme/colors.scss' as colors;
+@use '@carbon/type';
 
-h4.existing-seedlot-subtitle {
+p.existing-seedlot-subtitle {
   padding-bottom: 1rem;
 }
 
 .existing-seedlot {
-  background-color: colors.$white !important;
+  background-color: var(--bcgov-layer-02) !important;
   margin-left: 2rem;
   margin-right: 2rem;
-  border: 1px solid colors.$gray-20;
+  margin-bottom: 2rem;
+  border: 1px solid var(--bcgov-border-subtle-02);
   border-radius: 4px;
 }
 
@@ -23,7 +24,12 @@ table.#{vars.$bcgov-prefix}--data-table td {
 }
 
 .existing-seedlot-title {
-  padding-left: 2rem;
+  padding-top: 1rem;
+}
+
+.existing-seedlot-title > h2 {
+  @include type.type-style('heading-03');
+  margin-bottom: 0.5rem;
 }
 
 .existing-seedlot-table {

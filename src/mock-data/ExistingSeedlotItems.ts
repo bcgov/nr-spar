@@ -63,7 +63,7 @@ const ExistingSeedlotItems = [
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
     created_at: '2021-10-10',
     last_modified: '2022-12-24',
-    approved_at: '2022-12-25'
+    approved_at: ''
   }
 ];
 
