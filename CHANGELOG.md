@@ -1,3 +1,12 @@
+## [0.8.3](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.2...v0.8.3) (2023-02-10)
+
+
+### Bug Fixes
+
+* adjusted id parameters for mock api calls ([#43](https://github.com/bcgov/nr-frontend-starting-app/issues/43)) ([82117e6](https://github.com/bcgov/nr-frontend-starting-app/commit/82117e63b66efda363b24d18aa66331ded5d17bd))
+
+
+
 ## [0.8.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.1...v0.8.2) (2023-02-10)
 
 
@@ -21,15 +30,6 @@
 
 
 ## [0.7.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.7.0...v0.7.1) (2023-02-08)
-
-
-
-# [0.7.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.6.3...v0.7.0) (2023-02-01)
-
-
-### Features
-
-* existents seedlot ([#35](https://github.com/bcgov/nr-frontend-starting-app/issues/35)) ([271dbba](https://github.com/bcgov/nr-frontend-starting-app/commit/271dbba7a26d767f15b6fbe30643b1eb5d3081f7))
 
 
 
