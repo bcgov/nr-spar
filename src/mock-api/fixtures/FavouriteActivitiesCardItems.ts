@@ -1,6 +1,6 @@
 const FavouriteActivitiesCardItems = [
   {
-    id: '0',
+    id: '1',
     image: 'SoilMoistureField',
     header: 'Seedlot registration',
     description:
@@ -9,7 +9,7 @@ const FavouriteActivitiesCardItems = [
     highlighted: false
   },
   {
-    id: '1',
+    id: '2',
     image: 'Tree',
     header: 'Parent tree orchard',
     description:
@@ -18,7 +18,7 @@ const FavouriteActivitiesCardItems = [
     highlighted: false
   },
   {
-    id: '2',
+    id: '3',
     image: 'CropHealth',
     header: 'Latest sowing date recommended',
     description:
@@ -27,7 +27,7 @@ const FavouriteActivitiesCardItems = [
     highlighted: false
   },
   {
-    id: '3',
+    id: '4',
     image: 'CropGrowth',
     header: 'Seedling request',
     description: 'Open a new seedling request for your reforestation needs.',
@@ -35,18 +35,10 @@ const FavouriteActivitiesCardItems = [
     highlighted: false
   },
   {
-    id: '4',
+    id: '5',
     image: 'MapBoundaryVegetation',
     header: 'Orchard maintenance',
     description: 'Keep your orchard update with the orchard maintenance.',
-    link: '#',
-    highlighted: false
-  },
-  {
-    id: '5',
-    image: 'Sprout',
-    header: 'Generic shortcut',
-    description: 'Generic shortcut page description',
     link: '#',
     highlighted: false
   },
@@ -60,6 +52,14 @@ const FavouriteActivitiesCardItems = [
   },
   {
     id: '7',
+    image: 'Sprout',
+    header: 'Generic shortcut',
+    description: 'Generic shortcut page description',
+    link: '#',
+    highlighted: false
+  },
+  {
+    id: '8',
     image: 'Sprout',
     header: 'Generic shortcut',
     description: 'Generic shortcut page description',

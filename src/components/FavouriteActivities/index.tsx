@@ -52,8 +52,8 @@ const FavouriteActivities = () => {
       });
   };
 
-  const updateCards = (index: number, card: CardType) => {
-    const putUrl = getUrl(ApiAddresses.FavouriteActiviteSave).replace(':id', index.toString());
+  const updateCards = (index: string, card: CardType) => {
+    const putUrl = getUrl(ApiAddresses.FavouriteActiviteSave).replace(':id', index);
     axios.put(putUrl, card, getAxiosConfig())
       .catch((error) => {
         // eslint-disable-next-line
@@ -70,11 +70,11 @@ const FavouriteActivities = () => {
 
     // We need to remove the current highlighted card
     // if it exists, so we can submit new highlighted one
-    cards.forEach((item: CardType, i: number) => {
+    cards.forEach((item: CardType) => {
       const card = item;
       if (card.highlighted && card.id !== target.id) {
         card.highlighted = false;
-        updateCards(i, card);
+        updateCards(card.id, card);
       }
     });
 
@@ -83,12 +83,12 @@ const FavouriteActivities = () => {
     } else {
       target.highlighted = false;
     }
-    updateCards(index, target);
+    updateCards(target.id, target);
     getCards();
   };
 
-  const deleteCard = (index:number) => {
-    const deleteUrl = getUrl(ApiAddresses.FavouriteActiviteDelete).replace(':id', index.toString());
+  const deleteCard = (index:string) => {
+    const deleteUrl = getUrl(ApiAddresses.FavouriteActiviteDelete).replace(':id', index);
     axios.delete(deleteUrl, getAxiosConfig())
       .then(() => {
         getCards();
@@ -132,7 +132,7 @@ const FavouriteActivities = () => {
               description={card.description}
               highlighted={card.highlighted}
               highlightFunction={() => { highlightFunction(index); }}
-              deleteFunction={() => { deleteCard(index); }}
+              deleteFunction={() => { deleteCard(card.id); }}
             />
           ))}
         </Row>
