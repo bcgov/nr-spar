@@ -4,10 +4,10 @@ import { ModelDefinition } from 'miragejs/-types';
 
 import CardType from '../../types/Card';
 
-const FavoriteModel: ModelDefinition<CardType> = Model.extend({});
+const FavouriteModel: ModelDefinition<CardType> = Model.extend({});
 
 const models = {
-  favorites: FavoriteModel
+  favourites: FavouriteModel
 };
 
 export default models;

@@ -1,8 +1,8 @@
-import FavoriteActivitiesCardItems from './FavoriteActivitiesCardItems';
+import FavouriteActivitiesCardItems from './FavouriteActivitiesCardItems';
 import RecentActivityItems from './RecentActivityItems';
 
 const fixtures = {
-  favorites: FavoriteActivitiesCardItems,
+  favourites: FavouriteActivitiesCardItems,
   recent: RecentActivityItems
 };
 

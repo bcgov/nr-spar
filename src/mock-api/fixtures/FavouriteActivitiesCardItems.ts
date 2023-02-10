@@ -1,4 +1,4 @@
-const FavoriteActivitiesCardItems = [
+const FavouriteActivitiesCardItems = [
   {
     id: '0',
     image: 'SoilMoistureField',
@@ -68,4 +68,4 @@ const FavoriteActivitiesCardItems = [
   }
 ];
 
-export default FavoriteActivitiesCardItems;
+export default FavouriteActivitiesCardItems;

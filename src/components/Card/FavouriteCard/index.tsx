@@ -5,7 +5,7 @@ import * as Icons from '@carbon/icons-react';
 
 import './styles.scss';
 
-interface FavoriteCardProps {
+interface FavouriteCardProps {
   icon: string;
   header: string;
   description: string;
@@ -14,9 +14,9 @@ interface FavoriteCardProps {
   deleteFunction?: () => void;
 }
 
-const FavoriteCard = ({
+const FavouriteCard = ({
   icon, header, description, highlighted, highlightFunction, deleteFunction
-}: FavoriteCardProps) => {
+}: FavouriteCardProps) => {
   const Icon = Icons[icon];
   return (
     <Tile className={highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'} tabIndex={0}>
@@ -36,4 +36,4 @@ const FavoriteCard = ({
   );
 };
 
-export default FavoriteCard;
+export default FavouriteCard;

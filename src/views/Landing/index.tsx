@@ -19,7 +19,7 @@ import './styles.scss';
 
 import getUrlQueryParam from '../../utils/UrlUtils';
 
-const NewLanding = () => {
+const Landing = () => {
   const { startKeycloak, login, signed } = useAuth();
   const navigate = useNavigate();
   const homePage = '/dashboard';
@@ -102,4 +102,4 @@ const NewLanding = () => {
   );
 };
 
-export default NewLanding;
+export default Landing;

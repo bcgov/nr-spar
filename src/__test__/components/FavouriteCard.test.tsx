@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import FavoriteCard from '../../components/Card/FavoriteCard';
+import FavouriteCard from '../../components/Card/FavouriteCard';
 import '@testing-library/jest-dom/extend-expect';
 
-describe('the favorite card component', () => {
+describe('the favourite card component', () => {
   it('should render correctly with headers', async () => {
     const { container } = render(
-      <FavoriteCard
+      <FavouriteCard
         header="Test"
         description="For testing"
         icon="SoilMoistureField"
@@ -24,7 +24,7 @@ describe('the favorite card component', () => {
 
   it('should render card highlighted with different style', () => {
     const { container } = render(
-      <FavoriteCard
+      <FavouriteCard
         header="Test"
         description="For testing"
         icon="SoilMoistureField"
@@ -38,7 +38,7 @@ describe('the favorite card component', () => {
 
   it('should click in the button and open the options', () => {
     const { container } = render(
-      <FavoriteCard
+      <FavouriteCard
         header="Test"
         description="For testing"
         icon="SoilMoistureField"
@@ -53,7 +53,7 @@ describe('the favorite card component', () => {
 
   it('should close the dropdown menu when click outside', () => {
     const { container } = render(
-      <FavoriteCard
+      <FavouriteCard
         header="Test"
         description="For testing"
         icon="SoilMoistureField"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import {
@@ -22,8 +22,6 @@ import MyProfile from '../MyProfile';
 import NotificationsCentral from '../NotificationsCentral';
 import PanelSectionName from '../PanelSectionName';
 
-import LeftPanelItems from '../../mock-api/fixtures/LeftPanelItems';
-
 import './styles.scss';
 
 interface ListItem {
@@ -37,15 +35,98 @@ interface ListItems {
   items: ListItem[]
 }
 
-const listItems = LeftPanelItems;
+const listItems = [
+  {
+    name: 'Main activities',
+    items: [
+      {
+        name: 'Dashboard',
+        icon: 'Dashboard',
+        link: '/dashboard',
+        disabled: false
+      },
+      {
+        name: 'Seedlots',
+        icon: 'SoilMoistureField',
+        link: '/seedlot',
+        disabled: true
+      },
+      {
+        name: 'Seedlings',
+        icon: 'CropGrowth',
+        link: '#',
+        disabled: true
+      },
+      {
+        name: 'Nurseries',
+        icon: 'CropHealth',
+        link: '#',
+        disabled: true
+      },
+      {
+        name: 'Orchards',
+        icon: 'MapBoundaryVegetation',
+        link: '#',
+        disabled: true
+      },
+      {
+        name: 'Reports',
+        icon: 'Report',
+        link: '#',
+        disabled: true
+      },
+      {
+        name: 'Tests',
+        icon: 'Chemistry',
+        link: '#',
+        disabled: true
+      },
+      {
+        name: 'Parent tree',
+        icon: 'Tree',
+        link: '#',
+        disabled: true
+      },
+      {
+        name: 'Tree seed center',
+        icon: 'Enterprise',
+        link: '#',
+        disabled: true
+      },
+      {
+        name: 'Financial',
+        icon: 'Money',
+        link: '#',
+        disabled: true
+      }
+    ]
+  },
+  {
+    name: 'Management',
+    items: [
+      {
+        name: 'Settings',
+        icon: 'Settings',
+        link: '#',
+        disabled: true
+      },
+      {
+        name: 'Notifications',
+        icon: 'Notification',
+        link: '#',
+        disabled: true
+      }
+    ]
+  }
+];
 
 const BCHeader = () => {
   const version: string = `Version: ${env.REACT_APP_NRSPARWEBAPP_VERSION}`;
-  const [myProfile, setMyProfile] = React.useState<boolean>(false);
-  const [notifications, setNotifications] = React.useState<boolean>(false);
-  const [overlay, setOverlay] = React.useState<boolean>(false);
+  const [myProfile, setMyProfile] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<boolean>(false);
+  const [overlay, setOverlay] = useState<boolean>(false);
 
-  const handleNotificationsPanel = React.useCallback((): void => {
+  const handleNotificationsPanel = useCallback((): void => {
     if (notifications) {
       setOverlay(false);
       setNotifications(false);
@@ -56,7 +137,7 @@ const BCHeader = () => {
     setMyProfile(false);
   }, [notifications]);
 
-  const handleMyProfilePanel = React.useCallback((): void => {
+  const handleMyProfilePanel = useCallback((): void => {
     if (myProfile) {
       setOverlay(false);
       setMyProfile(false);
@@ -67,12 +148,12 @@ const BCHeader = () => {
     setNotifications(false);
   }, [myProfile]);
 
-  const closeNotificationsPanel = React.useCallback((): void => {
+  const closeNotificationsPanel = useCallback((): void => {
     setOverlay(false);
     setNotifications(false);
   }, []);
 
-  const closeMyProfilePanel = React.useCallback((): void => {
+  const closeMyProfilePanel = useCallback((): void => {
     setOverlay(false);
     setMyProfile(false);
   }, []);
