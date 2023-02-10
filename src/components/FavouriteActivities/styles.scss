@@ -2,21 +2,21 @@
 @use '../../theme/colors.scss' as colors;
 @use '@carbon/type';
 
-.favorite-activities {
+.favourite-activities {
   background-color: var(--bcgov-layer-01);
   padding: 2rem 0;
 }
 
-.favorite-activities-title {
+.favourite-activities-title {
   padding-left: 3.5rem;
 }
 
-.favorite-activities-title > h2 {
+.favourite-activities-title > h2 {
   @include type.type-style('heading-03');
   margin-bottom: 0.5rem;
 }
 
-.favorite-activities-subtitle {
+.favourite-activities-subtitle {
   display: inline;
 }
 
@@ -30,29 +30,29 @@ button.tooltip-button > svg {
   color: var(--#{vars.$bcgov-prefix}-text-secondary);
 }
 
-.favorite-activity-tooltip {
+.favourite-activity-tooltip {
   top: 0.1875rem;
   padding-left: 0.3125rem;
 }
 
 @media only screen and (max-width: 1584px) {
-  .favorite-activities-title {
+  .favourite-activities-title {
     padding-left: 3rem;
   }
 }
 
 @media only screen and (max-width: 1056px) {
-  .favorite-activities-cards {
+  .favourite-activities-cards {
     padding-left: 3.5rem;
   }
 }
 
 @media only screen and (max-width: 672px) {
-  .favorite-activities-title {
+  .favourite-activities-title {
     padding-left: 2rem;
   }
 
-  .favorite-activities-cards {
+  .favourite-activities-cards {
     padding-left: 2.5rem;
   }
 

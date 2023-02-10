@@ -7,7 +7,7 @@ import {
 } from '@carbon/react';
 
 import PageTitle from '../../components/PageTitle';
-import FavoriteActivities from '../../components/FavoriteActivities';
+import FavouriteActivities from '../../components/FavouriteActivities';
 import RecentActivities from '../../components/RecentActivities';
 
 const Dashboard = () => (
@@ -16,11 +16,11 @@ const Dashboard = () => (
       <Row>
         <PageTitle
           title="Dashboard"
-          subtitle="See your favorite and recent activities inside SPAR system"
+          subtitle="See your favourite and recent activities inside SPAR system"
         />
       </Row>
-      <section title="Favorite activities">
-        <FavoriteActivities />
+      <section title="Favourite activities">
+        <FavouriteActivities />
       </section>
       <section title="Recent activities">
         <RecentActivities />
