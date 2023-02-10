@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import axios from 'axios';
@@ -24,7 +24,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const RecentActivities = () => {
   const { token } = useAuth();
-  const [listItems, setListItems] = React.useState([]);
+  const [listItems, setListItems] = useState([]);
 
   const getAxiosConfig = () => {
     const axiosConfig = {};
@@ -39,7 +39,7 @@ const RecentActivities = () => {
     return axiosConfig;
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     axios.get(getUrl(ApiAddresses.RecentActivitiesRetrieveAll), getAxiosConfig())
       .then((response) => {
         setListItems(response.data);

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import { Tooltip, Row, Column } from '@carbon/react';
 import { Information } from '@carbon/icons-react';
 
-import Card from '../Card/FavoriteCard';
+import Card from '../Card/FavouriteCard';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
 
@@ -17,7 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const FavouriteActivities = () => {
   const { token } = useAuth();
-  const [cards, setCards] = React.useState<CardType[]>([]);
+  const [cards, setCards] = useState<CardType[]>([]);
 
   const getAxiosConfig = () => {
     const axiosConfig = {};
@@ -35,7 +35,7 @@ const FavouriteActivities = () => {
   const getCards = () => {
     axios.get(getUrl(ApiAddresses.FavouriteActiviteRetrieveAll), getAxiosConfig())
       .then((response) => {
-        const newCards = response.data.favorites;
+        const newCards = response.data.favourites;
         newCards.forEach((item: CardType, i: number) => {
           const card = item;
           if (card.highlighted) {
@@ -61,7 +61,7 @@ const FavouriteActivities = () => {
       });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     getCards();
   }, []);
 

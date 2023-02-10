@@ -6,14 +6,12 @@ import {
 
 import './custom.scss';
 
-import Form from './views/Form';
-import Table from './views/Table';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { useAuth } from './contexts/AuthContext';
 import SilentCheckSso from './components/SilentCheckSso';
 import Logout from './components/Logout';
 import Layout from './layout/PrivateLayout';
-import NewLanding from './views/NewLanding';
+import Landing from './views/Landing';
 import Dashboard from './views/Dashboard/dashboard';
 import SeedlotDashboard from './views/SeedlotDashboard';
 
@@ -28,7 +26,7 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<NewLanding />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/" element={<Layout />}>
           <Route path="/silent-check-sso" element={<SilentCheckSso />} />
           <Route path="/logout" element={<Logout />} />
@@ -47,24 +45,6 @@ const App: React.FC = () => {
             element={(
               <ProtectedRoute signed={signed}>
                 <SeedlotDashboard />
-              </ProtectedRoute>
-            )}
-          />
-
-          <Route
-            path="/form"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <Form />
-              </ProtectedRoute>
-            )}
-          />
-
-          <Route
-            path="/table"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <Table />
               </ProtectedRoute>
             )}
           />

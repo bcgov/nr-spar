@@ -13,7 +13,7 @@ import makeServer from '../../mock-api/server';
 jest.setTimeout(10000);
 
 // empty section should be tested in the future
-describe('the Favorite Activities component', () => {
+describe('the Favourite Activities component', () => {
   beforeAll(() => {
     makeServer('test');
   });

@@ -14,9 +14,9 @@ describe('the page title component', () => {
     expect(screen.getByText('Test Subtitle')).toBeInTheDocument();
   });
 
-  it('should render correctly with favorite option', () => {
+  it('should render correctly with favourite option', () => {
     render(
-      <PageTitle title="Test title" subtitle="Test Subtitle" favorite />
+      <PageTitle title="Test title" subtitle="Test Subtitle" favourite />
     );
 
     expect(screen.getAllByRole('button')[0]).toBeInTheDocument();

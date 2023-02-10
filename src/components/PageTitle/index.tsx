@@ -13,16 +13,16 @@ import './styles.scss';
 interface PageTitleProps {
   title: string;
   subtitle: string;
-  favorite?: boolean;
+  favourite?: boolean;
 }
 
-// TODO: Toggle Favorite logic
-const PageTitle = ({ title, subtitle, favorite }: PageTitleProps) => (
+// TODO: Toggle Favourite logic
+const PageTitle = ({ title, subtitle, favourite }: PageTitleProps) => (
   <Column sm={4} md={4} className="title-section">
-    <div className={favorite ? 'title-favorite' : 'title-no-favorite'}>
+    <div className={favourite ? 'title-favourite' : 'title-no-favourite'}>
       <h1>{title}</h1>
-      {favorite && (
-        <IconButton kind="ghost" label="Favorite" align="right">
+      {favourite && (
+        <IconButton kind="ghost" label="Favourite" align="right">
           <Favorite size={28} />
         </IconButton>
       )}

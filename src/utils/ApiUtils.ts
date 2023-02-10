@@ -21,9 +21,9 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
   // Mocks
   if (env.REACT_APP_ENABLE_MOCK_SERVER === 'true') {
     // Favourite activities
-    favouriteActivitiesRetrieveUrl = '/favorite-activities';
-    favouriteActivitiesUpdateUrl = '/favorite-activities/del/:id';
-    favouriteActivitiesDeleteUrl = '/favorite-activities/up/:id';
+    favouriteActivitiesRetrieveUrl = '/favourite-activities';
+    favouriteActivitiesUpdateUrl = '/favourite-activities/del/:id';
+    favouriteActivitiesDeleteUrl = '/favourite-activities/up/:id';
 
     // Recent activities
     recentActivitiesRetrieveAll = '/recent-activities';

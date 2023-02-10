@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -11,10 +11,27 @@ import KeycloakService from '../../service/KeycloakService';
 import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
 
-import AccountOptions from '../../mock-api/fixtures/AccountOptions';
 import { useThemePreference } from '../../utils/ThemePreference';
 
 import './style.scss';
+
+const accountOptions = [
+  {
+    icon: 'UserAvatar',
+    header: 'My nursery account',
+    url: '#'
+  },
+  {
+    icon: 'UserAvatar',
+    header: 'My orchard account',
+    url: '#'
+  },
+  {
+    icon: 'UserFollow',
+    header: 'Add a different profile',
+    url: '#'
+  }
+];
 
 const MyProfile = () => {
   const { theme, setTheme } = useThemePreference();
@@ -22,11 +39,11 @@ const MyProfile = () => {
 
   const navigate = useNavigate();
 
-  const goTo = React.useCallback((url: string) => {
+  const goTo = useCallback((url: string) => {
     navigate(url);
   }, []);
 
-  const goOut = React.useCallback(() => {
+  const goOut = useCallback(() => {
     if (theme === 'g100') {
       setTheme('g10');
       localStorage.setItem('mode', 'light');
@@ -61,7 +78,7 @@ const MyProfile = () => {
       <nav className="account-nav">
         <ul>
           <PanelSectionName title="Change account" light />
-          {AccountOptions.map((option) => {
+          {accountOptions.map((option) => {
             const IconComponent = Icons[option.icon];
             return (
               <SideNavLink

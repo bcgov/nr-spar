@@ -1,8 +1,8 @@
-import FavoriteEndpoints from './FavoriteEndpoints';
+import FavouriteEndpoints from './FavouriteEndpoints';
 import RecentActivitiesEndpoints from './RecentActivitiesEndpoints';
 
 const endpoints = {
-  favorites: FavoriteEndpoints,
+  favourites: FavouriteEndpoints,
   recent: RecentActivitiesEndpoints
 };
 
