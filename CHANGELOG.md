@@ -1,3 +1,12 @@
+# [0.8.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.7.1...v0.8.0) (2023-02-10)
+
+
+### Features
+
+* create Seedlot Activities actions section ([#38](https://github.com/bcgov/nr-frontend-starting-app/issues/38)) ([edf65d1](https://github.com/bcgov/nr-frontend-starting-app/commit/edf65d19b513771254d49f619d76448ab55b0fc1))
+
+
+
 ## [0.7.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.7.0...v0.7.1) (2023-02-08)
 
 
@@ -21,10 +30,6 @@
 
 
 ## [0.6.2](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.6.1...v0.6.2) (2023-01-24)
-
-
-
-## [0.6.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.6.0...v0.6.1) (2023-01-17)
 
 
 
