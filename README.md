@@ -55,6 +55,7 @@ Be aware of the required environment variables:
 - REACT_APP_KC_URL
 - REACT_APP_KC_REALM
 - REACT_APP_KC_CLIENT_ID
+- REACT_APP_ENABLE_MOCK_SERVER
 
 To run the unit tests all you need is `yarn test`. For end-to-end test you need to run `yarn cypress run` to run on console or `yarn cypress open` to use the Cypress IDE.
 

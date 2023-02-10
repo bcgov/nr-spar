@@ -11,7 +11,7 @@ import KeycloakService from '../../service/KeycloakService';
 import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
 
-import AccountOptions from '../../mock-data/AccountOptions';
+import AccountOptions from '../../mock-api/fixtures/AccountOptions';
 import { useThemePreference } from '../../utils/ThemePreference';
 
 import './style.scss';

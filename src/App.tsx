@@ -12,7 +12,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import { useAuth } from './contexts/AuthContext';
 import SilentCheckSso from './components/SilentCheckSso';
 import Logout from './components/Logout';
-import Layout from './layout/PublicLayout';
+import Layout from './layout/PrivateLayout';
 import NewLanding from './views/NewLanding';
 import Dashboard from './views/Dashboard/dashboard';
 import SeedlotDashboard from './views/SeedlotDashboard';

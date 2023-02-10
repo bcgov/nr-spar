@@ -1,6 +1,6 @@
 import React from 'react';
 
-import emptyUser from '../../mock-data/img/EmptyUser.jpg';
+import emptyUser from '../../assets/img/emptyUser.jpg';
 import './style.css';
 
 type Size = 'small' | 'large';

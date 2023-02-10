@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ActivityHistory from '../../components/ActivityHistory';
-import ActivityHistoryItems from '../../mock-data/ActivityHistoryItems';
+import ActivityHistoryItems from '../../mock-api/fixtures/ActivityHistoryItems';
 import '@testing-library/jest-dom';
 
 describe('Activity History component', () => {

@@ -56,11 +56,12 @@ REACT_APP_NRSPARWEBAPP_VERSION=
 REACT_APP_KC_URL=
 REACT_APP_KC_REALM=
 REACT_APP_KC_CLIENT_ID=
+REACT_APP_ENABLE_MOCK_SERVER=
 ```
 
 > If don't have these values, please reach a member of the team
 
-Just run: 
+Just run:
 ```
 yarn install
 ```
@@ -98,5 +99,5 @@ because it makes the process of generating changelogs possible. If that's new fo
   - **perf**: A code change that improves performance
   - **refactor**: A code change that neither fixes a bug nor adds a feature
   - **test**: Adding missing tests or correcting existing tests
-  
+
 Take a look [here](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) to read more about the commit message format.
