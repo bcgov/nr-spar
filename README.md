@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 <!-- PROJECT SHIELDS -->
 
 [![Contributors](https://img.shields.io/github/contributors/bcgov/greenfield-template)](/../../graphs/contributors)
@@ -235,11 +236,14 @@ Templates for APIs, UIs and Metabase/Oracle can be used to kickstart or extend p
 >>>>>>> 22545a3 (Update with Java project instead NodeJS project)
 =======
 [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/nr-backend-starting-api)
+=======
+[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/nr-spar-oracle-api)
+>>>>>>> 0406ea1 (chore: update things to match the repository's new name (#76))
 ![Coverage](.github/badges/jacoco.svg)
 ![Branches](.github/badges/branches.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-backend-starting-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-backend-starting-api)
 
-# Natural Resources Back-End Starting API
+# Natural Resources SPAR Oracle API
 
 <<<<<<< HEAD
 This repository holds a set of policies, standards and guides to get started with a back-end API.
@@ -319,7 +323,7 @@ using Docker.
 
 Note that you'll need these environment variables:
 ```
-NRBESTAPI_VERSION=local
+NR_SPAR_ORACLE_API_VERSION=local
 DATABASE_HOST=<host>
 DATABASE_PORT=<port>
 SERVICE_NAME=<service-name>
@@ -330,14 +334,14 @@ KEYCLOAK_REALM_URL=<realm-server-address>
 
 Build the service:
 ```
-docker build -t bcgov/nrbestapi-test-service-api:latest .
+docker build -t bcgov/nr-spar-oracle-api:latest .
 ```
 
 Then run with:
 ```
 docker run -p 8090:8090 \
   -e KEYCLOAK_REALM_URL=https://dev.loginproxy.gov.bc.ca/auth/realms/standard \
-  -t bcgov/nrbestapi-test-service-api:latest
+  -t bcgov/nr-spar-oracle-api-service:latest
 ```
 
 However, if you have docker-compose you can do:
