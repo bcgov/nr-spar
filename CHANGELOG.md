@@ -1,3 +1,7 @@
+## [0.8.6](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.5...v0.8.6) (2023-02-13)
+
+
+
 ## [0.8.5](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.4...v0.8.5) (2023-02-13)
 
 
@@ -31,10 +35,6 @@
 ### Bug Fixes
 
 * code cleanup and renaming components ([#42](https://github.com/bcgov/nr-frontend-starting-app/issues/42)) ([0dde513](https://github.com/bcgov/nr-frontend-starting-app/commit/0dde513e0204b7435af300b262321a081891e8cd))
-
-
-
-## [0.8.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.0...v0.8.1) (2023-02-10)
 
 
 
