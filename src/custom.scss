@@ -24,35 +24,19 @@
 // on the components
 // (Open issue: https://github.com/carbon-design-system/carbon/issues/12376)
 @use '@carbon/react/scss/components/button/tokens' as button-tokens;
-@use './theme/buttons.scss' as button-overrides;
+@use './theme/light-buttons.scss' as light-button-overrides;
+@use './theme/dark-buttons.scss' as dark-button-overrides;
 
 @use '@carbon/react/scss/components/tag/tokens' as tag-tokens;
-@use './theme/tags.scss' as tag-overrides;
+@use './theme/light-tags.scss' as light-tag-overrides;
+@use './theme/dark-tags.scss' as dark-tag-overrides;
 
 @use '@carbon/react/scss/components/notification/tokens' as notification-tokens;
-@use './theme/notifications.scss' as notification-overrides;
+@use './theme/light-notifications.scss' as light-notification-overrides;
+@use './theme/dark-notifications.scss' as dark-notification-overrides;
 
 @use '@carbon/react';
 @use '@carbon/grid';
-
-$button-tokens: utilities.merge(
-  button-tokens.$button-tokens,
-  button-overrides.$button-token-overrides
-);
-
-$tag-tokens: utilities.merge(
-  tag-tokens.$tag-tokens,
-  tag-overrides.$tag-token-overrides
-);
-
-$notification-tokens: utilities.merge(
-  notification-tokens.$notification-tokens,
-  notification-overrides.$notification-token-overrides
-);
-
-@include theme.add-component-tokens($button-tokens);
-@include theme.add-component-tokens($tag-tokens);
-@include theme.add-component-tokens($notification-tokens);
 
 // Emit the flex-grid styles
 @include grid.flex-grid();
@@ -62,9 +46,45 @@ $notification-tokens: utilities.merge(
 }
 
 [data-carbon-theme='g100'] {
+  $button-tokens: utilities.merge(
+    button-tokens.$button-tokens,
+    dark-button-overrides.$dark-button-token-overrides
+  );
+
+  $tag-tokens: utilities.merge(
+    tag-tokens.$tag-tokens,
+    dark-tag-overrides.$dark-tag-token-overrides
+  );
+
+  $notification-tokens: utilities.merge(
+    notification-tokens.$notification-tokens,
+    dark-notification-overrides.$dark-notification-token-overrides
+  );
+
+  @include theme.add-component-tokens($button-tokens);
+  @include theme.add-component-tokens($tag-tokens);
+  @include theme.add-component-tokens($notification-tokens);
   @include react.theme(dark.$dark-theme);
 }
 
 [data-carbon-theme='g10'] {
+  $button-tokens: utilities.merge(
+    button-tokens.$button-tokens,
+    light-button-overrides.$light-button-token-overrides
+);
+
+  $tag-tokens: utilities.merge(
+    tag-tokens.$tag-tokens,
+    light-tag-overrides.$light-tag-token-overrides
+  );
+
+  $notification-tokens: utilities.merge(
+    notification-tokens.$notification-tokens,
+    light-notification-overrides.$light-notification-token-overrides
+);
+
+  @include theme.add-component-tokens($button-tokens);
+  @include theme.add-component-tokens($tag-tokens);
+  @include theme.add-component-tokens($notification-tokens);
   @include react.theme(light.$light-theme);
 }
