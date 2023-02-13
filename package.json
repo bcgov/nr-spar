@@ -55,7 +55,9 @@
     "build:production": "react-scripts build",
     "test": "jest",
     "eject": "react-scripts eject",
-    "lint": "./node_modules/.bin/eslint"
+    "lint": "./node_modules/.bin/eslint",
+    "cy:open": "cypress open",
+    "cy:run" : "cypress run"
   },
   "eslintConfig": {
     "extends": [

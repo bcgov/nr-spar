@@ -401,6 +401,12 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
+        env:
+          CYPRESS_USERNAME: ${{ secrets.BCEID_USERNAME }}
+          CYPRESS_PASSWORD: ${{ secrets.BCEID_PASSWORD }}
+          CYPRESS_REACT_APP_KC_URL: ${{ secrets.REACT_APP_KC_URL }}
+          CYPRESS_REACT_APP_KC_REALM: ${{ secrets.REACT_APP_KC_REALM }}
+          CYPRESS_REACT_APP_KC_CLIENT_ID: ${{ secrets.REACT_APP_KC_CLIENT_ID }}
         with:
           browser: chrome
           config: baseUrl=https://${{ env.NAME }}-${{ github.event.number }}-app.apps.silver.devops.gov.bc.ca

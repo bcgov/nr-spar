@@ -28,3 +28,18 @@ Cypress.Commands.add('createUser', (firstname, lastname) => {
     cy.log(response.body);
   });
 });
+
+Cypress.Commands.add('login', () => {
+  const USERNAME = Cypress.env('USERNAME');
+  const PASSWORD = Cypress.env('PASSWORD');
+
+  cy.getByDataTest('landing-button__bceid').click();
+  cy.get('#bceidLogo').should('be.visible');
+  cy.get('input[name=user]')
+        .clear()
+        .type(USERNAME, { delay: 50 });
+  cy.get('input[name=password]')
+        .clear()
+        .type(PASSWORD, { delay: 50 });
+  cy.get('input[name=btnSubmit]').click();
+});
