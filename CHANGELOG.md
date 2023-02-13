@@ -1,3 +1,12 @@
+## [0.8.4](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.3...v0.8.4) (2023-02-13)
+
+
+### Bug Fixes
+
+* added navigate calls inside useEffect hook ([#44](https://github.com/bcgov/nr-frontend-starting-app/issues/44)) ([f0b5a8d](https://github.com/bcgov/nr-frontend-starting-app/commit/f0b5a8d7510ee90899e7f2749f979a862dcebab2))
+
+
+
 ## [0.8.3](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.2...v0.8.3) (2023-02-10)
 
 
@@ -26,10 +35,6 @@
 ### Features
 
 * create Seedlot Activities actions section ([#38](https://github.com/bcgov/nr-frontend-starting-app/issues/38)) ([edf65d1](https://github.com/bcgov/nr-frontend-starting-app/commit/edf65d19b513771254d49f619d76448ab55b0fc1))
-
-
-
-## [0.7.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.7.0...v0.7.1) (2023-02-08)
 
 
 
