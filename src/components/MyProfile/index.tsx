@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -37,11 +37,10 @@ const MyProfile = () => {
   const { theme, setTheme } = useThemePreference();
   const userData = KeycloakService.getUser();
 
-  const navigate = useNavigate();
+  const [goToURL, setGoToURL] = useState<string>('');
+  const [goTo, setGoTo] = useState<boolean>(false);
 
-  const goTo = useCallback((url: string) => {
-    navigate(url);
-  }, []);
+  const navigate = useNavigate();
 
   const goOut = useCallback(() => {
     if (theme === 'g100') {
@@ -61,6 +60,13 @@ const MyProfile = () => {
       localStorage.setItem('mode', 'light');
     }
   };
+
+  useEffect(() => {
+    if (goTo) {
+      setGoTo(false);
+      navigate(goToURL);
+    }
+  }, [goTo]);
 
   return (
     <>
@@ -84,7 +90,10 @@ const MyProfile = () => {
               <SideNavLink
                 key={option.header}
                 renderIcon={IconComponent || ''}
-                onClick={goTo(option.url)}
+                onClick={() => {
+                  setGoToURL(option.url);
+                  setGoTo(true);
+                }}
               >
                 {option.header}
               </SideNavLink>

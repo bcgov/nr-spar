@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import {
@@ -122,9 +122,12 @@ const listItems = [
 
 const BCHeader = () => {
   const version: string = `Version: ${env.REACT_APP_NRSPARWEBAPP_VERSION}`;
+
   const [myProfile, setMyProfile] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<boolean>(false);
   const [overlay, setOverlay] = useState<boolean>(false);
+  const [goToURL, setGoToURL] = useState<string>('');
+  const [goTo, setGoTo] = useState<boolean>(false);
 
   const handleNotificationsPanel = useCallback((): void => {
     if (notifications) {
@@ -159,6 +162,13 @@ const BCHeader = () => {
   }, []);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (goTo) {
+      setGoTo(false);
+      navigate(goToURL);
+    }
+  }, [goTo]);
 
   return (
     <HeaderContainer
@@ -230,7 +240,8 @@ const BCHeader = () => {
                         key={subItem.name}
                         renderIcon={IconComponent || ''}
                         onClick={() => {
-                          navigate(`${subItem.link}`);
+                          setGoToURL(subItem.link);
+                          setGoTo(true);
                         }}
                         isActive={window.location.pathname === subItem.link}
                       >

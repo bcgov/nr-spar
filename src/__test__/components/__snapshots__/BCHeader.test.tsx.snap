@@ -489,6 +489,7 @@ exports[`the Header component should match the snapshot 1`] = `
         >
           <a
             className="cds--side-nav__link"
+            onClick={[Function]}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -523,6 +524,7 @@ exports[`the Header component should match the snapshot 1`] = `
         >
           <a
             className="cds--side-nav__link"
+            onClick={[Function]}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -557,6 +559,7 @@ exports[`the Header component should match the snapshot 1`] = `
         >
           <a
             className="cds--side-nav__link"
+            onClick={[Function]}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
