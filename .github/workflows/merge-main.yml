@@ -239,6 +239,9 @@ jobs:
         uses: cypress-io/github-action@v4
         with:
           browser: chrome
+        env:
+          CYPRESS_USERNAME: ${{ secrets.BCEID_USERNAME }}
+          CYPRESS_PASSWORD: ${{ secrets.BCEID_PASSWORD }}
       
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v3
