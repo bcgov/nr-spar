@@ -1,3 +1,12 @@
+## [0.8.5](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.4...v0.8.5) (2023-02-13)
+
+
+### Bug Fixes
+
+* dark mode components token override ([#41](https://github.com/bcgov/nr-frontend-starting-app/issues/41)) ([4358d0b](https://github.com/bcgov/nr-frontend-starting-app/commit/4358d0b965d0b97539bdbd7b2d4356ecff3f52fb))
+
+
+
 ## [0.8.4](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.3...v0.8.4) (2023-02-13)
 
 
@@ -26,15 +35,6 @@
 
 
 ## [0.8.1](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.8.0...v0.8.1) (2023-02-10)
-
-
-
-# [0.8.0](https://github.com/bcgov/nr-frontend-starting-app/compare/v0.7.1...v0.8.0) (2023-02-10)
-
-
-### Features
-
-* create Seedlot Activities actions section ([#38](https://github.com/bcgov/nr-frontend-starting-app/issues/38)) ([edf65d1](https://github.com/bcgov/nr-frontend-starting-app/commit/edf65d19b513771254d49f619d76448ab55b0fc1))
 
 
 
