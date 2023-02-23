@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+import { env } from '../../env';
 import { Tooltip, Row, Column } from '@carbon/react';
 import { Information } from '@carbon/icons-react';
 
@@ -14,6 +15,7 @@ import './styles.scss';
 import getUrl from '../../utils/ApiUtils';
 import ApiAddresses from '../../utils/ApiAddresses';
 import { useAuth } from '../../contexts/AuthContext';
+import getActivityProps from '../../enums/ActivityType';
 
 const FavouriteActivities = () => {
   const { token } = useAuth();
@@ -35,9 +37,15 @@ const FavouriteActivities = () => {
   const getCards = () => {
     axios.get(getUrl(ApiAddresses.FavouriteActiviteRetrieveAll), getAxiosConfig())
       .then((response) => {
-        const newCards = response.data.favourites;
+        const newCards = response.data.favourites || response.data;
         newCards.forEach((item: CardType, i: number) => {
-          const card = item;
+          let card = item;
+          if (env.REACT_APP_ENABLE_MOCK_SERVER === 'false') {
+            const activityProps = getActivityProps(item.activity);
+            card.image = activityProps.icon;
+            card.header = activityProps.header;
+            card.description = activityProps.description;
+          }
           if (card.highlighted) {
             newCards.splice(i, 1);
             newCards.unshift(item);

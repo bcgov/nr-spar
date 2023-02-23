@@ -5,6 +5,7 @@ type CardType = {
   description: string;
   link: string;
   highlighted?: boolean;
+  activity: string;
 }
 
 export default CardType;

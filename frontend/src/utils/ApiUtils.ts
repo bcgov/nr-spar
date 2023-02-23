@@ -14,6 +14,7 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
   let favouriteActivitiesRetrieveUrl = '/api/favourite-activities';
   let favouriteActivitiesUpdateUrl = '/api/favourite-activities/:id';
   let favouriteActivitiesDeleteUrl = '/api/favourite-activities/:id';
+  let favouriteActivitiesCreateUrl = '/api/favourite-activities';
 
   // Recent activities
   let recentActivitiesRetrieveAll = '/api/recent-activities';
@@ -24,6 +25,7 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
     favouriteActivitiesRetrieveUrl = '/favourite-activities';
     favouriteActivitiesUpdateUrl = '/favourite-activities/del/:id';
     favouriteActivitiesDeleteUrl = '/favourite-activities/up/:id';
+    favouriteActivitiesCreateUrl = '/favourite-activities';
 
     // Recent activities
     recentActivitiesRetrieveAll = '/recent-activities';
@@ -41,6 +43,8 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
       return `${server}${favouriteActivitiesUpdateUrl}`;
     case ApiAddresses.FavouriteActiviteDelete:
       return `${server}${favouriteActivitiesDeleteUrl}`;
+    case ApiAddresses.FavouriteActiviteCreate:
+      return `${server}${favouriteActivitiesCreateUrl}`;
     case ApiAddresses.RecentActivitiesRetrieveAll:
       return `${server}${recentActivitiesRetrieveAll}`;
     default:
