@@ -2,6 +2,7 @@ enum ApiAddresses {
   FavouriteActiviteRetrieveAll,
   FavouriteActiviteSave,
   FavouriteActiviteDelete,
+  FavouriteActiviteCreate,
 
   RecentActivitiesRetrieveAll
 }
