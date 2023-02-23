@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SmpMixVolume.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.vo.parser</a> &gt; <span class="el_source">SmpMixVolume.java</span></div><h1>SmpMixVolume.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.vo.parser;
+
+import static ca.bc.gov.backendstartapi.enums.parser.SmpMixHeader.PARENT_TREE_NUMBER;
+import static ca.bc.gov.backendstartapi.enums.parser.SmpMixHeader.POLLEN_VOLUME_ML;
+
+import ca.bc.gov.backendstartapi.enums.parser.SmpMixHeader;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Map;
+
+/** Data about the volume. */
+public record SmpMixVolume(
+    @Schema(description = &quot;The identifier of the tree inside its orchard.&quot;, minimum = &quot;1&quot;)
+        int parentTreeNumber,
+    @Schema(
+            description =
+                &quot;&quot;&quot;
+                The amount of parent tree material used for calculating the proportion of mix, in
+                millilitres.&quot;&quot;&quot;,
+            minimum = &quot;0&quot;)
+        double pollenVolume)
+    implements CsvParsingResult {
+
+  /** Create an instance from the information of the map. */
+  public static SmpMixVolume fromMap(Map&lt;SmpMixHeader, Number&gt; map) {
+<span class="fc" id="L25">    return new SmpMixVolume(</span>
+<span class="fc" id="L26">        map.get(PARENT_TREE_NUMBER).intValue(), map.get(POLLEN_VOLUME_ML).doubleValue());</span>
+  }
+
+  /** Validation of the constructor parameters. */
+<span class="fc" id="L30">  public SmpMixVolume {</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">    if (parentTreeNumber &lt;= 0) {</span>
+<span class="fc" id="L32">      throw new IllegalArgumentException(PARENT_TREE_NUMBER + &quot; must be positive&quot;);</span>
+    }
+<span class="fc bfc" id="L34" title="All 2 branches covered.">    if (pollenVolume &lt; 0) {</span>
+<span class="fc" id="L35">      throw new IllegalArgumentException(PARENT_TREE_NUMBER + &quot; cannot be negative&quot;);</span>
+    }
+<span class="fc" id="L37">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

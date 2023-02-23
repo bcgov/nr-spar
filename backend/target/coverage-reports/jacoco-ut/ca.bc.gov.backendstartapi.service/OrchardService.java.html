@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrchardService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.service</a> &gt; <span class="el_source">OrchardService.java</span></div><h1>OrchardService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.service;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
+import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
+import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
+import ca.bc.gov.backendstartapi.provider.Provider;
+import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+/** This class contains methods to handle Orchards requests. */
+@Service
+public class OrchardService {
+
+  private ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;
+
+  @Qualifier(&quot;oracleApi&quot;)
+  private Provider oracleApiProvider;
+
+  OrchardService(
+      ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository,
+<span class="fc" id="L30">      Provider oracleApiProvider) {</span>
+<span class="fc" id="L31">    this.activeOrchardSeedPlanningUnitRepository = activeOrchardSeedPlanningUnitRepository;</span>
+<span class="fc" id="L32">    this.oracleApiProvider = oracleApiProvider;</span>
+<span class="fc" id="L33">  }</span>
+
+  /**
+   * Find an active SPU ID given an Orchard ID.
+   *
+   * @param orchardId Orchard's identification.
+   * @return An Optional of {@link ActiveOrchardSpuEntity} or an empty list.
+   */
+  public Optional&lt;ActiveOrchardSpuEntity&gt; findSpuIdByOrchard(String orchardId) {
+<span class="fc" id="L42">    SparLog.info(&quot;Finding SPU id for orchard id {}&quot;, orchardId);</span>
+<span class="fc" id="L43">    return findSpuIdByOrchardWithActive(orchardId, true);</span>
+  }
+
+  /**
+   * Find all SPU IDs. It can be active or not.
+   *
+   * @param active determine if the SPU should be active or not.
+   * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
+   */
+  public List&lt;ActiveOrchardSpuEntity&gt; findAllSpu(boolean active) {
+<span class="fc" id="L53">    SparLog.info(&quot;Finding all orchard seed planning unit by active state {}&quot;, active);</span>
+
+<span class="fc" id="L55">    List&lt;ActiveOrchardSpuEntity&gt; list =</span>
+<span class="fc" id="L56">        activeOrchardSeedPlanningUnitRepository.findAllByActive(active);</span>
+<span class="fc" id="L57">    SparLog.info(&quot;{} orchard seed planning unit by active state found&quot;, list.size());</span>
+
+<span class="fc" id="L59">    return list;</span>
+  }
+
+  /**
+   * Find a SPU ID given an Orchard ID. It can be active or not.
+   *
+   * @param orchardId Orchard's identification.
+   * @param active determine if the SPU should be active or not.
+   * @return An Optional of {@link ActiveOrchardSpuEntity}.
+   */
+  public Optional&lt;ActiveOrchardSpuEntity&gt; findSpuIdByOrchardWithActive(
+      String orchardId, boolean active) {
+<span class="fc" id="L71">    SparLog.info(&quot;Finding SPU id for orchard id {} and active {}&quot;, orchardId, active);</span>
+
+<span class="fc" id="L73">    List&lt;ActiveOrchardSpuEntity&gt; list =</span>
+<span class="fc" id="L74">        activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, active);</span>
+<span class="fc" id="L75">    SparLog.info(&quot;{} Orchards for this spu id found.&quot;, list.size());</span>
+
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">    if (list.size() &gt; 1) {</span>
+<span class="nc" id="L78">      SparLog.warn(</span>
+          &quot;More than one records found for the Active SPU x Orchard relationship for&quot;
+              + &quot; orchard {}&quot;,
+          orchardId);
+    }
+
+<span class="fc" id="L84">    return list.stream().findFirst();</span>
+  }
+
+  /**
+   * Finds all Parent Tree and Genetic Quality to an Orchard.
+   *
+   * @param orchardId Orchard's identification.
+   * @return An {@link Optional} of {@link OrchardSpuDto}
+   */
+  public OrchardSpuDto findParentTreeGeneticQualityData(String orchardId) {
+<span class="fc" id="L94">    SparLog.info(&quot;Fetching Parent Tree data for Orchard ID: {}&quot;, orchardId);</span>
+
+<span class="fc" id="L96">    Optional&lt;ActiveOrchardSpuEntity&gt; spuList = findSpuIdByOrchard(orchardId);</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">    if (spuList.isEmpty()) {</span>
+<span class="fc" id="L98">      throw new NoSpuForOrchardException();</span>
+    }
+
+<span class="fc" id="L101">    int spuId = spuList.get().getSeedPlanningUnitId();</span>
+<span class="fc" id="L102">    SparLog.info(&quot;Found SPU Id {} for Orchard Id {}&quot;, spuId, orchardId);</span>
+
+<span class="fc" id="L104">    Optional&lt;OrchardSpuDto&gt; parentTreeDto =</span>
+<span class="fc" id="L105">        oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId);</span>
+
+<span class="fc" id="L107">    SparLog.info(&quot;Finished fetching Parent Tree data for Orchard ID: {}&quot;, orchardId);</span>
+
+<span class="fc" id="L109">    return parentTreeDto.orElseThrow(NoParentTreeDataException::new);</span>
+  }
+
+  /**
+   * Finds all orchards with the provided vegCode.
+   *
+   * @param vegCode Orchard's identification.
+   * @return An {@link List} of {@link OrchardDto} from oracle-api
+   */
+  public List&lt;OrchardDto&gt; findOrchardsByVegCode(String vegCode) {
+<span class="fc" id="L119">    SparLog.info(&quot;Finding all orchards by veg code for code {}&quot;, vegCode);</span>
+
+<span class="fc" id="L121">    List&lt;OrchardDto&gt; list = oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());</span>
+<span class="fc" id="L122">    SparLog.info(&quot;{} orchards found for veg code {}&quot;, list.size(), vegCode);</span>
+<span class="fc" id="L123">    return list;</span>
+  }
+
+  /**
+   * Finds all parent trees from every orchard with the provided vegCode.
+   *
+   * @param vegCode Orchard's identification.
+   * @return An {@link List} of {@link SameSpeciesTreeDto} from oracle-api
+   */
+  public List&lt;SameSpeciesTreeDto&gt; findParentTreesByVegCode(String vegCode) {
+<span class="fc" id="L133">    SparLog.info(&quot;Finding parent trees by veg code with code {}&quot;, vegCode);</span>
+<span class="fc" id="L134">    List&lt;ActiveOrchardSpuEntity&gt; spuList = findAllSpu(true);</span>
+<span class="fc" id="L135">    Map&lt;String, String&gt; orchardSpuMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L137">    spuList.stream()</span>
+<span class="fc" id="L138">        .forEach(</span>
+            spuObj -&gt;
+<span class="fc" id="L140">                orchardSpuMap.put(</span>
+<span class="fc" id="L141">                    spuObj.getOrchardId(), String.valueOf(spuObj.getSeedPlanningUnitId())));</span>
+
+<span class="fc" id="L143">    List&lt;SameSpeciesTreeDto&gt; list =</span>
+<span class="fc" id="L144">        oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase(), orchardSpuMap);</span>
+<span class="fc" id="L145">    SparLog.info(&quot;{} parent tree by veg code found.&quot;, list.size());</span>
+<span class="fc" id="L146">    return list;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

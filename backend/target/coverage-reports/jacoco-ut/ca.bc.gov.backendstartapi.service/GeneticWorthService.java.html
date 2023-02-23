@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeneticWorthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.service</a> &gt; <span class="el_source">GeneticWorthService.java</span></div><h1>GeneticWorthService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.service;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
+import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+/** This class contains all routines and database access to a list of genetic worth. */
+@Service
+public class GeneticWorthService {
+  private GeneticWorthRepository geneticWorthRepository;
+
+<span class="fc" id="L25">  public GeneticWorthService(GeneticWorthRepository geneticWorthRepository) {</span>
+<span class="fc" id="L26">    this.geneticWorthRepository = geneticWorthRepository;</span>
+<span class="fc" id="L27">  }</span>
+
+  /** Fetch all valid genetic worth from the repository. */
+  public List&lt;CodeDescriptionDto&gt; getAllGeneticWorth() {
+<span class="fc" id="L31">    SparLog.info(&quot;Fetching all genetic worth&quot;);</span>
+<span class="fc" id="L32">    List&lt;CodeDescriptionDto&gt; resultList = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L34">    geneticWorthRepository.findAll().stream()</span>
+<span class="fc" id="L35">        .filter(method -&gt; method.isValid())</span>
+<span class="fc" id="L36">        .forEach(</span>
+            method -&gt; {
+<span class="fc" id="L38">              CodeDescriptionDto methodToAdd =</span>
+<span class="fc" id="L39">                  new CodeDescriptionDto(method.getGeneticWorthCode(), method.getDescription());</span>
+<span class="fc" id="L40">              resultList.add(methodToAdd);</span>
+<span class="fc" id="L41">            });</span>
+
+<span class="fc" id="L43">    SparLog.info(&quot;{} genetic worth found.&quot;, resultList.size());</span>
+<span class="fc" id="L44">    return resultList;</span>
+  }
+
+  /** Fetch a genetic worth from the repository by code. */
+  public CodeDescriptionDto getGeneticWorthByCode(@NonNull String code) {
+<span class="fc" id="L49">    SparLog.info(&quot;Fetching genetic worth with code {}&quot;, code);</span>
+
+<span class="fc" id="L51">    Optional&lt;GeneticWorthEntity&gt; gweOptional = geneticWorthRepository.findById(code);</span>
+<span class="fc" id="L52">    gweOptional.ifPresent(entity -&gt; SparLog.info(&quot;Genetic worth {} found.&quot;, code));</span>
+
+<span class="fc" id="L54">    return gweOptional</span>
+<span class="fc" id="L55">        .map(</span>
+<span class="fc" id="L56">            entity -&gt; new CodeDescriptionDto(entity.getGeneticWorthCode(), entity.getDescription()))</span>
+<span class="fc" id="L57">        .orElseThrow(NoGeneticWorthException::new);</span>
+  }
+
+  /**
+   * Does the calculation for each genetic trait. PS: if the threshold of 70% of contribution from
+   * the parent tree is not met, the trait value will not be shown.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values to be calculated.
+   * @return A {@link GeneticWorthSummaryDto} containing all calculated values
+   */
+  public GeneticWorthSummaryDto calculateGeneticWorth(
+      List&lt;GeneticWorthTraitsRequestDto&gt; traitsDto) {
+<span class="fc" id="L70">    SparLog.info(&quot;Starting Genetic Worth calculations&quot;);</span>
+<span class="fc" id="L71">    BigDecimal minimumThreshold = new BigDecimal(&quot;0.7&quot;);</span>
+<span class="fc" id="L72">    BigDecimal neValue = calculateNe(traitsDto);</span>
+
+<span class="fc" id="L74">    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(new ArrayList&lt;&gt;(), neValue);</span>
+
+    // Iterate over all traits
+<span class="fc" id="L77">    List&lt;CodeDescriptionDto&gt; geneticWorths = getAllGeneticWorth();</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">    for (CodeDescriptionDto trait : geneticWorths) {</span>
+<span class="fc" id="L80">      BigDecimal calculatedValue = null;</span>
+<span class="fc" id="L81">      BigDecimal percentage = calcGeneticTraitThreshold(traitsDto, trait);</span>
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">      if (percentage.compareTo(minimumThreshold) &gt;= 0) {</span>
+<span class="fc" id="L84">        SparLog.info(&quot;Calculating Genetic Worth for {} trait&quot;, trait.code());</span>
+<span class="fc" id="L85">        calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);</span>
+      } else {
+<span class="fc" id="L87">        SparLog.info(</span>
+<span class="fc" id="L88">            &quot;No Genetic Worth calculations for trait {}, threshold not met.&quot;, trait.code());</span>
+      }
+
+<span class="fc" id="L91">      GeneticWorthTraitsDto traitResponse =</span>
+<span class="fc" id="L92">          new GeneticWorthTraitsDto(trait.code(), null, calculatedValue, percentage);</span>
+<span class="fc" id="L93">      summaryDto.geneticTraits().add(traitResponse);</span>
+<span class="fc" id="L94">    }</span>
+
+<span class="fc" id="L96">    return summaryDto;</span>
+  }
+
+  /**
+   * Does the Ne calculation (effective population size).
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values to be calculated.
+   * @return A {@link BigDecimal} representing the calculated value.
+   */
+  private BigDecimal calculateNe(List&lt;GeneticWorthTraitsRequestDto&gt; traitsDto) {
+<span class="fc" id="L107">    BigDecimal malePollenSum = reducePollenCount(traitsDto);</span>
+<span class="fc" id="L108">    BigDecimal femaleConeSum = reduceConeCount(traitsDto);</span>
+
+<span class="fc" id="L110">    BigDecimal piSquareSum = BigDecimal.ZERO;</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">    for (GeneticWorthTraitsRequestDto dto : traitsDto) {</span>
+<span class="fc" id="L112">      BigDecimal pi = calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);</span>
+<span class="fc" id="L113">      BigDecimal piSquare = pi.multiply(pi);</span>
+
+<span class="fc" id="L115">      piSquareSum = piSquareSum.add(piSquare);</span>
+<span class="fc" id="L116">      SparLog.debug(&quot;calculateNe - piSquareSum {}&quot;, piSquareSum);</span>
+<span class="fc" id="L117">    }</span>
+
+<span class="fc bfc" id="L119" title="All 2 branches covered.">    if (piSquareSum.compareTo(BigDecimal.ZERO) == 0) {</span>
+<span class="fc" id="L120">      SparLog.debug(&quot;calculateNe - piSquareSum is zero!&quot;);</span>
+<span class="fc" id="L121">      return BigDecimal.ZERO;</span>
+    }
+
+<span class="fc" id="L124">    BigDecimal neValue = BigDecimal.ONE.divide(piSquareSum, 10, RoundingMode.HALF_UP);</span>
+<span class="fc" id="L125">    SparLog.debug(&quot;calculateNe - neValue {}&quot;, neValue);</span>
+<span class="fc" id="L126">    return neValue;</span>
+  }
+
+  /**
+   * Do the calculations for each Genetic Worth trait. Note that in the case the parent tree does
+   * not attend the 70% threshold weight, the value for this trait will be zero.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values.
+   * @return A {@link BigDecimal} representing the value.
+   */
+  private BigDecimal calculateTraitGeneticWorth(
+      List&lt;GeneticWorthTraitsRequestDto&gt; traitsDto, CodeDescriptionDto trait) {
+<span class="fc" id="L139">    BigDecimal malePollenSum = reducePollenCount(traitsDto);</span>
+<span class="fc" id="L140">    BigDecimal femaleConeSum = reduceConeCount(traitsDto);</span>
+<span class="fc" id="L141">    BigDecimal sumGw = BigDecimal.ZERO;</span>
+
+<span class="fc bfc" id="L143" title="All 2 branches covered.">    for (GeneticWorthTraitsRequestDto dto : traitsDto) {</span>
+<span class="fc" id="L144">      BigDecimal traitBreedingValue = getTraitValue(dto, trait);</span>
+<span class="pc bpc" id="L145" title="2 of 4 branches missed.">      if (!Objects.isNull(traitBreedingValue) &amp;&amp; traitBreedingValue.floatValue() != 0) {</span>
+<span class="fc" id="L146">        BigDecimal pi =</span>
+<span class="fc" id="L147">            calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);</span>
+<span class="fc" id="L148">        BigDecimal gwValue = traitBreedingValue.multiply(pi);</span>
+<span class="fc" id="L149">        sumGw = sumGw.add(gwValue);</span>
+      }
+<span class="fc" id="L151">    }</span>
+
+<span class="fc" id="L153">    return sumGw;</span>
+  }
+
+  /**
+   * Calculate the threshold of a genetic trait. To be used to check if a given trait mets the
+   * minimum of 70% of parent tree contribution.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values to be calculated.
+   * @param trait A {@link GeneticWorth} with the trait that should be considered.
+   * @return A BigDecimal representing the trait threshold.
+   */
+  private BigDecimal calcGeneticTraitThreshold(
+      List&lt;GeneticWorthTraitsRequestDto&gt; traitsDto, CodeDescriptionDto trait) {
+<span class="fc" id="L167">    SparLog.debug(&quot;Checking genetic trait threshold for {} trait&quot;, trait);</span>
+
+<span class="fc" id="L169">    BigDecimal malePollenSum = reducePollenCount(traitsDto);</span>
+<span class="fc" id="L170">    BigDecimal femaleConeSum = reduceConeCount(traitsDto);</span>
+<span class="fc" id="L171">    BigDecimal sumPi = BigDecimal.ZERO;</span>
+
+<span class="fc" id="L173">    SparLog.debug(&quot;femaleConeSum {}&quot;, femaleConeSum);</span>
+<span class="fc" id="L174">    SparLog.debug(&quot;malePollenSum {}&quot;, malePollenSum);</span>
+
+<span class="fc bfc" id="L176" title="All 2 branches covered.">    for (GeneticWorthTraitsRequestDto traitFor : traitsDto) {</span>
+<span class="fc" id="L177">      BigDecimal traitBreedingValue = getTraitValue(traitFor, trait);</span>
+<span class="pc bpc" id="L178" title="2 of 4 branches missed.">      if (!Objects.isNull(traitBreedingValue) &amp;&amp; traitBreedingValue.floatValue() != 0) {</span>
+<span class="fc" id="L179">        BigDecimal pi =</span>
+<span class="fc" id="L180">            calculatePi(traitFor.pollenCount(), traitFor.coneCount(), malePollenSum, femaleConeSum);</span>
+<span class="fc" id="L181">        sumPi = sumPi.add(pi);</span>
+      }
+<span class="fc" id="L183">    }</span>
+
+<span class="fc" id="L185">    SparLog.debug(&quot;Finished checking Genetic Trait threshold for {} trait with: {}%&quot;, trait, sumPi);</span>
+
+<span class="fc" id="L187">    return sumPi;</span>
+  }
+
+  /**
+   * Finds the genetic trait value given the request dto and the trait that should be found.
+   *
+   * @param dto A {@link GeneticWorthTraitsRequestDto} instance with the traits value.
+   * @param trait A {@link GeneticWorth} with the trait that should be considered.
+   * @return a BigDecimal representing the trait value or BigDecimal.ZERO otherwise.
+   */
+  private BigDecimal getTraitValue(
+      GeneticWorthTraitsRequestDto traitDto, CodeDescriptionDto trait) {
+<span class="fc" id="L199">    List&lt;GeneticWorthTraitsDto&gt; geneticTraits = traitDto.geneticTraits();</span>
+<span class="fc" id="L200">    Optional&lt;GeneticWorthTraitsDto&gt; traitOptional =</span>
+<span class="fc" id="L201">        geneticTraits.stream()</span>
+<span class="fc" id="L202">            .filter(x -&gt; x.traitCode().equalsIgnoreCase(trait.code()))</span>
+<span class="fc" id="L203">            .findFirst();</span>
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">    return traitOptional.isEmpty() ? BigDecimal.ZERO : traitOptional.get().traitValue();</span>
+  }
+
+  /**
+   * Calculate the pi. The P represents the percentage of contribution for a parent tree, the sum of
+   * male and female contribution divided by two.
+   *
+   * @param pollenCount The amount of pollen for this parent tree (clone).
+   * @param coneCount The amount of cone for this parent tree (clone).
+   * @param pollenSum The sum of all pollen count for this calculation.
+   * @param coneSum The sum of all cone count for this calculation.
+   * @return A BigDecimal representing the value.
+   */
+  private BigDecimal calculatePi(
+      BigDecimal pollenCount, BigDecimal coneCount, BigDecimal pollenSum, BigDecimal coneSum) {
+<span class="fc" id="L219">    BigDecimal bigZero = BigDecimal.ZERO;</span>
+    BigDecimal mi =
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        pollenSum.compareTo(bigZero) == 0</span>
+<span class="nc" id="L222">            ? bigZero</span>
+<span class="fc" id="L223">            : pollenCount.divide(pollenSum, 10, RoundingMode.HALF_UP);</span>
+    BigDecimal fi =
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        coneSum.compareTo(bigZero) == 0</span>
+<span class="nc" id="L226">            ? bigZero</span>
+<span class="fc" id="L227">            : coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);</span>
+
+<span class="fc" id="L229">    BigDecimal calculatedPi = mi.add(fi).divide(new BigDecimal(&quot;2&quot;), 10, RoundingMode.HALF_UP);</span>
+
+<span class="fc" id="L231">    return calculatedPi;</span>
+  }
+
+  /**
+   * Sums all the pollen count.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values
+   * @return A BigDecimal representing the value
+   */
+  private BigDecimal reducePollenCount(List&lt;GeneticWorthTraitsRequestDto&gt; traitsDto) {
+<span class="fc" id="L242">    return traitsDto.stream().map(x -&gt; x.pollenCount()).reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+  }
+
+  /**
+   * Sums all the cone count.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values
+   * @return A BigDecimal representing the value
+   */
+  private BigDecimal reduceConeCount(List&lt;GeneticWorthTraitsRequestDto&gt; traitsDto) {
+<span class="fc" id="L253">    return traitsDto.stream().map(x -&gt; x.coneCount()).reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

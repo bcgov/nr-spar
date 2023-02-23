@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - "frontend/**"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Lint and Unit Tests
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: bcgov-nr/action-test-and-analyse@v0.0.1
+        with:
+          commands: |
+            yarn --prefer-offline --cwd frontend
+            yarn --cwd frontend run lint
+            yarn --cwd frontend build
+            yarn --cwd frontend test -u --coverage
+          dir: frontend
+          sonar_args: >
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
+            -Dsonar.project.monorepo.enabled=false
+            -Dsonar.projectKey=bcgov_nr-spar-webapp
+            -Dsonar.sources=src/
+            -Dsonar.exclusions=src/**/__test__/**/*
+            -Dsonar.tests=src/
+            -Dsonar.test.inclusions=src/**/__test__/**/*
+          sonar_project_token: ${{ secrets.SONAR_TOKEN }}
+
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy:
+    name: Trivy Security Scan
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.9.1
+        with:
+          format: "sarif"
+          output: "trivy-results.sarif"
+          ignore-unfixed: true
+          scan-type: "fs"
+          security-checks: "vuln,secret,config"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParentTreeService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.service</a> &gt; <span class="el_source">ParentTreeService.java</span></div><h1>ParentTreeService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.service;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
+import ca.bc.gov.backendstartapi.provider.Provider;
+import ca.bc.gov.backendstartapi.util.LatLongUtil;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+/** This class holds methods for handling Parent Trees records. */
+@Service
+<span class="fc" id="L21">@RequiredArgsConstructor</span>
+public class ParentTreeService {
+
+  @Qualifier(&quot;oracleApi&quot;)
+  private final Provider oracleApiProvider;
+
+  /**
+   * Calculate lat long and elevation values given a list of {@link LatLongRequestDto}.
+   *
+   * @param ptreeIds List of parent trees and traits.
+   * @return A List of {@link ParentTreeLocInfoDto}
+   */
+  public List&lt;ParentTreeLocInfoDto&gt; getLatLongElevation(List&lt;LatLongRequestDto&gt; ptreeIds) {
+<span class="fc" id="L34">    SparLog.info(</span>
+<span class="fc" id="L35">        &quot;{} parent tree record(s) received to calculate lat long and elevation&quot;, ptreeIds.size());</span>
+
+<span class="fc" id="L37">    List&lt;Integer&gt; ptIds = ptreeIds.stream().map(LatLongRequestDto::parentTreeId).toList();</span>
+
+<span class="fc" id="L39">    List&lt;ParentTreeLocInfoDto&gt; oracleDtoList =</span>
+<span class="fc" id="L40">        oracleApiProvider.getParentTreeLatLongByIdList(ptIds);</span>
+
+<span class="fc bfc" id="L42" title="All 2 branches covered.">    if (oracleDtoList.isEmpty()) {</span>
+<span class="fc" id="L43">      SparLog.info(&quot;No parent tree lat long data from Oracle for the given parent tree ids.&quot;);</span>
+<span class="fc" id="L44">      return List.of();</span>
+    }
+
+<span class="fc" id="L47">    Map&lt;Integer, ParentTreeLocInfoDto&gt; oracleMap =</span>
+<span class="fc" id="L48">        oracleDtoList.stream()</span>
+<span class="fc" id="L49">            .collect(Collectors.toMap(ParentTreeLocInfoDto::getParentTreeId, Function.identity()));</span>
+
+<span class="fc" id="L51">    List&lt;ParentTreeLocInfoDto&gt; resultList = new ArrayList&lt;&gt;();</span>
+
+    // Second loop through list to calculate proportion and weight values.
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    for (LatLongRequestDto dto : ptreeIds) {</span>
+      // frontend already do this:
+
+<span class="fc" id="L57">      ParentTreeLocInfoDto parentTreeDto = oracleMap.get(dto.parentTreeId());</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">      if (Objects.isNull(parentTreeDto)) {</span>
+<span class="nc" id="L59">        SparLog.info(</span>
+<span class="nc" id="L60">            &quot;Unable to calculate for parent tree {}, no data found on Oracle!&quot;, dto.parentTreeId());</span>
+<span class="nc" id="L61">        continue;</span>
+      }
+
+<span class="fc" id="L64">      parentTreeDto.setLongitudeDegrees(parentTreeDto.getLongitudeDegrees() * -1);</span>
+
+      // weighted elevation = parent tree proportion * elevation
+<span class="fc" id="L67">      BigDecimal weightedElevation =</span>
+<span class="fc" id="L68">          dto.proportion().multiply(new BigDecimal(parentTreeDto.getElevation()));</span>
+<span class="fc" id="L69">      parentTreeDto.setWeightedElevation(weightedElevation);</span>
+
+      // latitude
+<span class="fc" id="L72">      double[] latDegree =</span>
+          new double[] {
+<span class="fc" id="L74">            parentTreeDto.getLatitudeDegrees(),</span>
+<span class="fc" id="L75">            parentTreeDto.getLatitudeMinutes(),</span>
+<span class="fc" id="L76">            parentTreeDto.getLatitudeSeconds()</span>
+          };
+<span class="fc" id="L78">      BigDecimal collectionLat = LatLongUtil.degreeToMinutes(latDegree); // (degree*60)+min+(sec/60)</span>
+<span class="fc" id="L79">      parentTreeDto.setLatitudeDegreesFmt(LatLongUtil.degreeToDecimal(latDegree));</span>
+
+      // longitude
+<span class="fc" id="L82">      double[] longDegree =</span>
+          new double[] {
+<span class="fc" id="L84">            parentTreeDto.getLongitudeDegrees(),</span>
+<span class="fc" id="L85">            parentTreeDto.getLongitudeMinutes(),</span>
+<span class="fc" id="L86">            parentTreeDto.getLongitudeSeconds()</span>
+          };
+<span class="fc" id="L88">      BigDecimal collectionLong =</span>
+<span class="fc" id="L89">          LatLongUtil.degreeToMinutes(longDegree); // (degree*60)+min+(sec/60)</span>
+<span class="fc" id="L90">      parentTreeDto.setLongitudeDegreeFmt(LatLongUtil.degreeToDecimal(longDegree));</span>
+
+      // parent tree weighted lat x long
+<span class="fc" id="L93">      parentTreeDto.setWeightedLatitude(dto.proportion().multiply(collectionLat));</span>
+<span class="fc" id="L94">      parentTreeDto.setWeightedLongitude(dto.proportion().multiply(collectionLong));</span>
+
+<span class="fc" id="L96">      resultList.add(parentTreeDto);</span>
+<span class="fc" id="L97">    }</span>
+
+<span class="fc" id="L99">    return resultList;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

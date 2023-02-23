@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoggedUserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.security</a> &gt; <span class="el_source">LoggedUserService.java</span></div><h1>LoggedUserService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.security;
+
+import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
+import ca.bc.gov.backendstartapi.exception.UserNotFoundException;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+/** This class contains all user related methods and artifacts. */
+@Service
+<span class="fc" id="L11">@RequiredArgsConstructor</span>
+public class LoggedUserService {
+
+  private final UserAuthenticationHelper userAuthenticationHelper;
+
+  /**
+   * Get all user info included in the JWT decoded token.
+   *
+   * @return an optional of {@link UserInfo}. It'll be empty then not logged in
+   */
+  public Optional&lt;UserInfo&gt; getLoggedUserInfo() {
+<span class="fc" id="L22">    return userAuthenticationHelper.getUserInfo();</span>
+  }
+
+  /**
+   * Get the email address from the logged user.
+   *
+   * @return a String containing the email address if logged in
+   * @throws UserNotFoundException when not logged in
+   */
+  public String getLoggedUserEmail() {
+<span class="fc" id="L32">    Optional&lt;UserInfo&gt; userInfo = userAuthenticationHelper.getUserInfo();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">    if (userInfo.isEmpty()) {</span>
+<span class="fc" id="L34">      throw new UserNotFoundException();</span>
+    }
+
+<span class="fc" id="L37">    return userInfo.get().email();</span>
+  }
+
+  /**
+   * Get the ID from the logged user.
+   *
+   * @return a String containing the id if logged in. Or an empty string otherwise
+   * @throws UserNotFoundException when not logged in
+   */
+  public String getLoggedUserId() {
+<span class="fc" id="L47">    Optional&lt;UserInfo&gt; userInfo = userAuthenticationHelper.getUserInfo();</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (userInfo.isEmpty()) {</span>
+<span class="fc" id="L49">      throw new UserNotFoundException();</span>
+    }
+
+<span class="nc" id="L52">    return userInfo.get().id();</span>
+  }
+
+  /**
+   * Get the JWT Token from the logged user.
+   *
+   * @return a String containing the token if logged in. Or an empty string otherwise
+   * @throws UserNotFoundException when not logged in
+   */
+  public String getLoggedUserToken() {
+<span class="fc" id="L62">    Optional&lt;UserInfo&gt; userInfo = userAuthenticationHelper.getUserInfo();</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">    if (userInfo.isEmpty()) {</span>
+<span class="fc" id="L64">      throw new UserNotFoundException();</span>
+    }
+
+<span class="nc" id="L67">    return userInfo.get().jwtToken();</span>
+  }
+
+  /**
+   * Get the logged user IDIR username or Business BCeID username.
+   *
+   * @return A String containing one of the above, according to provider.
+   */
+  public String getLoggedUserIdirOrBceId() {
+<span class="fc" id="L76">    Optional&lt;UserInfo&gt; userInfoOp = userAuthenticationHelper.getUserInfo();</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">    if (userInfoOp.isEmpty()) {</span>
+<span class="fc" id="L78">      throw new UserNotFoundException();</span>
+    }
+
+<span class="fc" id="L81">    UserInfo userInfo = userInfoOp.get();</span>
+<span class="pc bpc" id="L82" title="1 of 3 branches missed.">    switch (userInfo.identityProvider()) {</span>
+      case IDIR: {
+<span class="fc" id="L84">        return userInfo.idirUsername();</span>
+      }
+      case BUSINESS_BCEID: {
+<span class="fc" id="L87">        return userInfo.businessName();</span>
+      }
+      default: {
+<span class="nc" id="L90">        return &quot;&quot;;</span>
+      }
+    }
+  }
+
+  /**
+   * Creates a new instance of {@link AuditInformation} with current logged user id.
+   *
+   * @return a {@link AuditInformation}
+   */
+  public AuditInformation createAuditCurrentUser() {
+<span class="nc" id="L101">    return new AuditInformation(getLoggedUserId());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,225 +1,36 @@
-name: Commits and PR Open
+name: PR
 
 on:
   pull_request:
-  push:
-    branches:
-      - '*'
-      - '*/*'
-      - '**'
-    tags-ignore:
-      - '**'
-
-env:
-  REGISTRY: ghcr.io
-  NAME: nrsparwebapp
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # PR open and close use the same group, allowing only one at a time
+  group: pr-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  install-dependencies:
-    name: Install dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn --prefer-offline
-
-  validate-lint:
-    name: Validate codestyle
-    runs-on: ubuntu-latest
-    needs:
-      - install-dependencies
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
-      - name: Install dependencies
-        run: yarn --prefer-offline
-
-      - name: Run lint
-        run: yarn run lint
-
-  run-tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs:
-      - validate-lint
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn --prefer-offline
-
-      - name: Cache for test results
-        id: cache-tests
-        uses: actions/cache@v3
-        with:
-          path: /coverage
-          key: coverage-${{ github.run_number }}
-          restore-keys: |
-            coverage-
-
-      - name: Build
-        run: |
-          yarn build
-
-      - name: Tests
-        run: |
-          yarn test -u
-
-  sonarcloud:
-    name: Static Analysis
-    needs:
-      - run-tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Set Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn --prefer-offline
-
-      - name: Cache for test results
-        id: cache-tests
-        uses: actions/cache@v3
-        with:
-          path: /coverage
-          key: coverage-${{ github.run_number }}
-          restore-keys: |
-            coverage-
-
-      - name: Build
-        run: |
-          yarn build
-
-      - name: Tests
-        run: |
-          yarn test -u --coverage
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
-            -Dsonar.project.monorepo.enabled=false
-            -Dsonar.projectKey=bcgov_nr-spar-webapp
-            -Dsonar.sources=src/
-            -Dsonar.exclusions=src/**/__test__/**/*
-            -Dsonar.tests=src/
-            -Dsonar.test.inclusions=src/**/__test__/**/*
-
-  security:
-    name: Security checks
-    runs-on: ubuntu-latest
+  pr-greeting:
+    name: PR Greeting
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+    runs-on: ubuntu-22.04
     permissions:
-      security-events: write
-    needs:
-      - validate-lint
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v3
-      - name: Set Node
-        uses: actions/setup-node@v3
+      - name: PR Greeting
+        uses: bcgov-nr/action-pr-description-add@v0.0.2
         with:
-          node-version: '16'
-          cache: 'yarn'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          add_markdown: |
+            ---
+            Thanks for the PR!
 
-      - name: Install dependencies
-        run: yarn --prefer-offline
+            Any successful deployments (not always required) will be available below.
+            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          debug: true
-          languages: javascript
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-
-      # TODO: Add SNYK Token
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/maven@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --sarif-file-output=snyk.sarif
-
-  coverage-report:
-    name: Coverage Report
-    runs-on: ubuntu-latest
-    # PR only
-    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
-    needs:
-      - run-tests
-      - security
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn --prefer-offline
-
-      - name: Cache for test results
-        id: cache-tests
-        uses: actions/cache@v3
-        with:
-          path: /coverage
-          key: coverage-${{ github.run_number }}
-          restore-keys: |
-            coverage-
-
-      - name: Build
-        run: |
-          yarn build
-
-      - name: Tests
-        run: |
-          yarn test -u --coverage
-
-      - name: Report code coverage
-        uses: romeovs/lcov-reporter-action@v0.3.1
-        with:
-          title: Coverage report
-          delete-old-comments: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          lcov-file: ./coverage/lcov.info
+            Once merged, code will be promoted and handed off to following workflow run.
+            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
   pr-validation:
     name: Label Validation (Only PR)
@@ -256,10 +67,10 @@ jobs:
         id: changelog
         with:
           github-token: ${{ github.token }}
-          output-file: 'CHANGELOG.md'
-          skip-version-file: 'true'
-          skip-commit: 'true'
-          git-push: 'false'
+          output-file: "CHANGELOG.md"
+          skip-version-file: "true"
+          skip-commit: "true"
+          git-push: "false"
           git-branch: refs/heads/${{ github.head_ref }}
 
       - name: Checkout pr
@@ -274,142 +85,83 @@ jobs:
         with:
           message: |
             # Current changelog
-
             ${{ steps.changelog.outputs.clean_changelog }}
-          comment_includes: '# Current changelog'
+          comment_includes: "# Current changelog"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build-image:
-    name: Image Build (Only PR)
-    env:
-      COMPONENT: app
-      ZONE: ${{ github.event.number }}
-      REACT_APP_NRSPARWEBAPP_VERSION: snapshot-${{ github.event.number }}
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
-    needs:
-      - run-tests
-      - security
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
     permissions:
       contents: read
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set Node
-        uses: actions/setup-node@v3
+        uses: actions/checkout@v3
+      - uses: bcgov-nr/action-builder-ghcr@v1.1.0
         with:
-          node-version: '16'
-          cache: 'yarn'
+          package: frontend
+          tag: ${{ github.event.number }}
+          tag_fallback: test
+          token: ${{ secrets.GITHUB_TOKEN }}
+          triggers: ('frontend/')
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --prefer-offline
-
-      - name: Build
-        run: yarn build:production
-        env:
-          DISABLE_ESLINT_PLUGIN: true
-          REACT_APP_NRSPARWEBAPP_VERSION: ${{ env.REACT_APP_NRSPARWEBAPP_VERSION }}
-          REACT_APP_SERVER_URL: ${{ secrets.REACT_APP_SERVER_URL }}
-          REACT_APP_KC_URL: ${{ secrets.REACT_APP_KC_URL }}
-          REACT_APP_KC_REALM: ${{ secrets.REACT_APP_KC_REALM }}
-          REACT_APP_KC_CLIENT_ID: ${{ secrets.REACT_APP_KC_CLIENT_ID }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Log in to the Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
-        with:
-          context: ./
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.ZONE }}-${{ env.COMPONENT }}
-
-  deploy-dev:
-    name: DEV Deployment (Only PR)
+  deploy:
+    name: Deploy
     needs:
-      - build-image
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
-    timeout-minutes: 15
-    env:
-      ZONE: ${{ github.event.number }}
-      REACT_APP_NRSPARWEBAPP_VERSION: snapshot-${{ github.event.number }}
+      - build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - name: Deploy
-        run: |
-          # Login to OpenShift and select project
-          oc login --token=${{ secrets.OC_TOKEN }} --server=${{ secrets.OC_SERVER }}
-          oc project ${{ secrets.OC_NAMESPACE }}
-
-          # Clean previous image, if rebuilding
-          if [ ${{ needs.build-image.outputs.build == 'true' }} ]
-          then
-            # Clear stale images for import/replacement
-            oc delete is ${{ env.NAME }}-${{ env.ZONE }}-app || \
-              echo "No previously imported images have been found"
-          fi
-
-          # Process and apply template
-          oc process -f .github/openshift/deploy.frontend.yml -p ZONE=${{ env.ZONE }} \
-            -p REACT_APP_NRSPARWEBAPP_VERSION=${{ env.REACT_APP_NRSPARWEBAPP_VERSION }} \
-            -p REACT_APP_SERVER_URL=${{ secrets.REACT_APP_SERVER_URL }} \
-            -p REACT_APP_KC_URL=${{ secrets.REACT_APP_KC_URL }} \
-            -p REACT_APP_KC_REALM=${{ secrets.REACT_APP_KC_REALM }} \
-            -p REACT_APP_KC_CLIENT_ID=${{ secrets.REACT_APP_KC_CLIENT_ID }} \
-            -p PROMOTE=${{ github.repository }}:${{ env.ZONE }}-app | oc apply -f -
-
-          # Follow any active rollouts (see deploymentconfigs)
-          oc rollout status dc/${{ env.NAME }}-${{ env.ZONE }}-app -w
-
-      - name: DEV Deployment update
-        uses: mshick/add-pr-comment@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.2
         with:
-          allow-repeats: false
-          message: |
-            DEV deployments have completed successfully!
-            Frontend: [https://${{ env.NAME }}-${{ github.event.number }}-app.apps.silver.devops.gov.bc.ca/]()
+          file: frontend/openshift.deploy.yml
+          oc_namespace: ${{ secrets.OC_NAMESPACE }}
+          oc_server: ${{ secrets.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          overwrite: true
+          penetration_test: false
+          parameters:
+            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+            -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
+            -p REACT_APP_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
+            -p REACT_APP_SERVER_URL=https://nr-spar-backend-test-backend.apps.silver.devops.gov.bc.ca
+            -p REACT_APP_NRSPARWEBAPP_VERSION=dev
+            -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
+            -p REACT_APP_KC_REALM=standard
+            -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
+            -p REACT_APP_ENABLE_MOCK_SERVER=true
+            -p MIN_REPLICAS=1 -p MAX_REPLICAS=2
 
   e2e-smoke:
     name: E2E Smoke on Chrome
-    needs: 
-      - deploy-dev
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+    needs:
+      - deploy
     continue-on-error: true
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "yarn"
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Install dependencies
+        run: yarn --prefer-offline --cwd frontend
 
       - name: Cypress run
-        uses: cypress-io/github-action@v4
-        env:
-          CYPRESS_USERNAME: ${{ secrets.BCEID_USERNAME }}
-          CYPRESS_PASSWORD: ${{ secrets.BCEID_PASSWORD }}
-          CYPRESS_REACT_APP_KC_URL: ${{ secrets.REACT_APP_KC_URL }}
-          CYPRESS_REACT_APP_KC_REALM: ${{ secrets.REACT_APP_KC_REALM }}
-          CYPRESS_REACT_APP_KC_CLIENT_ID: ${{ secrets.REACT_APP_KC_CLIENT_ID }}
+        uses: cypress-io/github-action@v5.0.9
         with:
-          browser: chrome
-          config: baseUrl=https://${{ env.NAME }}-${{ github.event.number }}-app.apps.silver.devops.gov.bc.ca
+          install: false
+          working-directory: frontend
+          config: baseUrl=https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
 
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v3
@@ -420,7 +172,6 @@ jobs:
 
       - name: Upload videos
         uses: actions/upload-artifact@v3
-        if: always()
         with:
           name: cypress-videos
           path: cypress/videos

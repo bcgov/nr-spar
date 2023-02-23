@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SeedlotCollectionMethodService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.service</a> &gt; <span class="el_source">SeedlotCollectionMethodService.java</span></div><h1>SeedlotCollectionMethodService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.service;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
+import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
+import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
+import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodId;
+import ca.bc.gov.backendstartapi.exception.ConeCollectionMethodNotFoundException;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+/** This class contains methods for handling the relation between Seedlots and CollectionMethods. */
+@Service
+<span class="fc" id="L23">@RequiredArgsConstructor</span>
+public class SeedlotCollectionMethodService {
+
+  private final SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
+
+  private final ConeCollectionMethodService coneCollectionMethodService;
+
+  private final LoggedUserService loggedUserService;
+
+  /**
+   * Saves a SeedlotParentTree from the Seedlot Form Registration step 1.
+   *
+   * @param seedlot The {@link Seedlot} related
+   * @param formStep1 The {@link SeedlotFormCollectionDto} to be saved
+   */
+  public void saveSeedlotFormStep1(Seedlot seedlot, SeedlotFormCollectionDto formStep1) {
+<span class="fc" id="L39">    SparLog.info(&quot;Saving Seedlot Form Step 1-Collection for seedlot number {}&quot;, seedlot.getId());</span>
+
+<span class="fc" id="L41">    seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());</span>
+<span class="fc" id="L42">    seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());</span>
+<span class="fc" id="L43">    seedlot.setCollectionStartDate(formStep1.collectionStartDate());</span>
+<span class="fc" id="L44">    seedlot.setCollectionEndDate(formStep1.collectionEndDate());</span>
+<span class="fc" id="L45">    seedlot.setNumberOfContainers(formStep1.noOfContainers());</span>
+<span class="fc" id="L46">    seedlot.setContainerVolume(formStep1.volPerContainer());</span>
+<span class="fc" id="L47">    seedlot.setTotalConeVolume(formStep1.clctnVolume());</span>
+<span class="fc" id="L48">    seedlot.setComment(formStep1.seedlotComment());</span>
+
+<span class="fc" id="L50">    SparLog.info(</span>
+        &quot;Received {} SeedlotCollectionMethod record(s) for seedlot number {}&quot;,
+<span class="fc" id="L52">        formStep1.coneCollectionMethodCodes().size(),</span>
+<span class="fc" id="L53">        seedlot.getId());</span>
+
+<span class="fc" id="L55">    List&lt;SeedlotCollectionMethod&gt; seedlotCollectionList =</span>
+<span class="fc" id="L56">        seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">    if (!seedlotCollectionList.isEmpty()) {</span>
+<span class="fc" id="L59">      SparLog.info(</span>
+          &quot;Deleting {} previous records on the SeedlotCollectionMethod table for seedlot number {}&quot;,
+<span class="fc" id="L61">          seedlotCollectionList.size(),</span>
+<span class="fc" id="L62">          seedlot.getId());</span>
+
+<span class="fc" id="L64">      List&lt;SeedlotCollectionMethodId&gt; idsToDelete = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L66" title="All 2 branches covered.">      for (SeedlotCollectionMethod methdCodeToRemove : seedlotCollectionList) {</span>
+<span class="fc" id="L67">        idsToDelete.add(</span>
+            new SeedlotCollectionMethodId(
+<span class="fc" id="L69">                seedlot.getId(),</span>
+<span class="fc" id="L70">                methdCodeToRemove.getConeCollectionMethod().getConeCollectionMethodCode()));</span>
+<span class="fc" id="L71">      }</span>
+
+<span class="fc" id="L73">      seedlotCollectionMethodRepository.deleteAllById(idsToDelete);</span>
+    }
+
+<span class="fc" id="L76">    addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());</span>
+<span class="fc" id="L77">  }</span>
+
+  /**
+   * Saves each Collection method for a given Seedlot.
+   *
+   * @param seedlotNumber The seedlot number to be saved
+   * @param methods List of Collection methods to be saved
+   */
+  private void addSeedlotCollectionMethod(Seedlot seedlot, List&lt;Integer&gt; methods) {
+<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (methods.isEmpty()) {</span>
+<span class="fc" id="L87">      SparLog.info(</span>
+          &quot;No new records to be inserted on the SeedlotCollectionMethod table for seedlot number&quot;
+              + &quot; {}&quot;,
+<span class="fc" id="L90">          seedlot.getId());</span>
+<span class="fc" id="L91">      return;</span>
+    }
+
+<span class="fc" id="L94">    SparLog.info(</span>
+        &quot;{} record(s) to be inserted on the SeedlotCollectionMethod table for seedlot number {}&quot;,
+<span class="fc" id="L96">        methods.size(),</span>
+<span class="fc" id="L97">        seedlot.getId());</span>
+
+    // Map of Cone Collection Methots
+<span class="fc" id="L100">    Map&lt;Integer, ConeCollectionMethodEntity&gt; ccmeMap =</span>
+<span class="fc" id="L101">        coneCollectionMethodService.getAllValidConeCollectionMethods().stream()</span>
+<span class="fc" id="L102">            .collect(</span>
+<span class="fc" id="L103">                Collectors.toMap(</span>
+<span class="fc" id="L104">                    ConeCollectionMethodEntity::getConeCollectionMethodCode, Function.identity()));</span>
+
+<span class="fc" id="L106">    List&lt;SeedlotCollectionMethod&gt; scmList = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L108" title="All 2 branches covered.">    for (Integer methodCode : methods) {</span>
+<span class="fc" id="L109">      ConeCollectionMethodEntity coneCollectionEntity = ccmeMap.get(methodCode);</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">      if (Objects.isNull(coneCollectionEntity)) {</span>
+<span class="nc" id="L111">        throw new ConeCollectionMethodNotFoundException();</span>
+      }
+
+<span class="fc" id="L114">      SeedlotCollectionMethod methodEntity = new SeedlotCollectionMethod();</span>
+<span class="fc" id="L115">      methodEntity.setSeedlot(seedlot);</span>
+<span class="fc" id="L116">      methodEntity.setConeCollectionMethod(coneCollectionEntity);</span>
+<span class="fc" id="L117">      methodEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());</span>
+
+<span class="fc" id="L119">      scmList.add(methodEntity);</span>
+<span class="fc" id="L120">    }</span>
+
+<span class="fc" id="L122">    seedlotCollectionMethodRepository.saveAll(scmList);</span>
+<span class="fc" id="L123">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,72 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotStatusService,39,71,2,0,10,18,3,5,2,5
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotParentTreeSmpMixService,127,15,8,0,32,1,7,1,3,1
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotSourceService,0,53,0,0,0,16,0,4,0,4
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotParentTreeGeneticQualityService,143,15,8,0,37,1,7,1,3,1
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotParentTreeService,168,213,7,11,34,48,10,7,4,4
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotOwnerQuantityService,15,174,2,6,4,39,2,6,0,4
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SmpMixService,11,89,1,3,3,19,1,5,0,4
+nr-spar-backend,ca.bc.gov.backendstartapi.service,GeneticClassService,0,92,0,0,0,21,0,7,0,7
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotGeneticWorthService,16,170,1,9,4,34,2,7,1,3
+nr-spar-backend,ca.bc.gov.backendstartapi.service,ForestClientService,70,183,6,6,18,53,7,10,2,9
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotOrchardService,10,186,1,5,3,40,1,7,0,5
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SaveSeedlotFormService,23,190,1,5,6,38,1,7,0,5
+nr-spar-backend,ca.bc.gov.backendstartapi.service,MethodOfPaymentService,0,73,0,0,0,18,0,5,0,5
+nr-spar-backend,ca.bc.gov.backendstartapi.service,ConeCollectionMethodService,27,52,0,0,5,15,2,4,2,4
+nr-spar-backend,ca.bc.gov.backendstartapi.service,GeneticWorthService,6,471,7,19,2,96,7,24,0,18
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotCollectionMethodService,4,215,1,9,1,52,1,7,0,3
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SmpMixGeneticQualityService,19,134,2,6,5,30,3,6,1,4
+nr-spar-backend,ca.bc.gov.backendstartapi.service,GameticMethodologyService,0,55,0,0,0,17,0,4,0,4
+nr-spar-backend,ca.bc.gov.backendstartapi.service,TscAdminService,6,61,1,1,2,10,1,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.service,FavouriteActivityService,0,238,2,8,0,41,2,9,0,6
+nr-spar-backend,ca.bc.gov.backendstartapi.service,ParentTreeService,10,169,1,5,3,38,1,4,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.service,OrchardService,8,220,1,3,1,42,1,9,0,8
+nr-spar-backend,ca.bc.gov.backendstartapi.service,SeedlotService,243,1204,25,35,57,288,19,29,0,18
+nr-spar-backend,ca.bc.gov.backendstartapi.enums,ForestClientExpiredEnum,3,25,0,0,1,6,1,2,1,2
+nr-spar-backend,ca.bc.gov.backendstartapi.enums,ForestClientStatusEnum,3,46,0,0,1,9,1,2,1,2
+nr-spar-backend,ca.bc.gov.backendstartapi.enums,LongitudeCodeEnum,0,28,0,0,0,7,0,3,0,3
+nr-spar-backend,ca.bc.gov.backendstartapi.enums,ForestClientTypeEnum,3,95,0,0,1,16,1,2,1,2
+nr-spar-backend,ca.bc.gov.backendstartapi.enums,LatitudeCodeEnum,0,28,0,0,0,7,0,3,0,3
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,OrchardEndpoint,0,21,0,0,0,6,0,4,0,4
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,GeneticClassEndpoint,0,15,0,0,0,5,0,3,0,3
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,MethodOfPaymentEndpoint,0,10,0,0,0,4,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,ParentTreeEndpoint,0,11,0,0,0,2,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,LongitudeCodeEndpoint,0,5,0,0,0,2,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,SeedlotStatusEndpoint,0,10,0,0,0,4,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,ActiveOrchardSeedPlanningUnitEndpoint,0,12,0,0,0,2,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,ForestClientEndpoint,18,38,0,0,3,8,0,5,0,5
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,DescribedEnumEndpoint,0,125,0,4,0,19,0,8,0,6
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,GeneticWorthEndpoint,0,20,0,0,0,6,0,4,0,4
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,TscAdminEndpoint,0,46,2,2,0,10,2,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,LatitudeCodeEndpoint,0,5,0,0,0,2,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,SeedlotEndpoint,0,177,1,7,0,30,1,17,0,14
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,SeedlotSourceEndpoint,0,10,0,0,0,4,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,GameticMethodologyEndpoint,0,10,0,0,0,4,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,FavouriteActivityEndpoint,0,31,0,0,0,9,0,5,0,5
+nr-spar-backend,ca.bc.gov.backendstartapi.endpoint,ConeCollectionMethodEndpoint,0,10,0,0,0,4,0,2,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.enums.parser,ConeAndPollenCountHeader,0,49,0,0,0,10,0,3,0,3
+nr-spar-backend,ca.bc.gov.backendstartapi.enums.parser,SmpMixHeader,0,28,0,0,0,7,0,3,0,3
+nr-spar-backend,ca.bc.gov.backendstartapi.service.parser,CsvTableParser,10,84,2,4,0,15,2,6,0,5
+nr-spar-backend,ca.bc.gov.backendstartapi.service.parser,CsvTableHeaderParser,5,80,1,3,0,19,1,8,0,7
+nr-spar-backend,ca.bc.gov.backendstartapi.service.parser,ConeAndPollenCountCsvTableParser,0,11,0,0,0,2,0,1,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.service.parser,CsvTableRowParser,5,116,1,7,0,19,1,6,0,3
+nr-spar-backend,ca.bc.gov.backendstartapi.service.parser,SmpCalculationCsvTableParser,0,11,0,0,0,2,0,1,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.vo.parser,ConeAndPollenCount,0,91,0,10,0,18,0,7,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.vo.parser,SmpMixVolume,0,41,0,4,0,8,0,4,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,OracleApiProvider.new ParameterizedTypeReference() {...},6,0,0,0,1,0,1,0,1,0
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,ForestClientApiProvider,143,691,15,17,23,121,16,14,2,12
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,ForestClientApiProvider.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,Provider,18,25,0,2,9,4,9,2,9,1
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,ForestClientApiProvider.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,ForestClientApiProvider.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,ForestClientApiProvider.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,OracleApiProvider.new ParameterizedTypeReference() {...},6,0,0,0,1,0,1,0,1,0
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,OracleApiProvider.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,OracleApiProvider.new ParameterizedTypeReference() {...},0,6,0,0,0,1,0,1,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.provider,OracleApiProvider,252,317,11,1,44,58,9,6,3,6
+nr-spar-backend,ca.bc.gov.backendstartapi.dao,GeneticWorthEntityDao,40,11,4,0,8,2,3,1,1,1
+nr-spar-backend,ca.bc.gov.backendstartapi.security,IdentityProvider,0,37,0,0,0,9,0,4,0,4
+nr-spar-backend,ca.bc.gov.backendstartapi.security,UserAuthenticationHelper,86,165,13,15,16,38,10,6,0,2
+nr-spar-backend,ca.bc.gov.backendstartapi.security,UserInfo,30,68,6,10,0,15,6,3,0,1
+nr-spar-backend,ca.bc.gov.backendstartapi.security,LoggedUserService,18,75,3,8,4,19,4,9,1,6
+nr-spar-backend,ca.bc.gov.backendstartapi.util,LatLongUtil,3,139,0,0,1,21,1,3,1,3

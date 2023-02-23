@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SaveSeedlotFormService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.service</a> &gt; <span class="el_source">SaveSeedlotFormService.java</span></div><h1>SaveSeedlotFormService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.service;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
+import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.JsonParsingException;
+import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
+import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.shaded.gson.Gson;
+import java.util.Map;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+/** This class contains methods to handle seedlot registration form saving requests. */
+@Service
+<span class="fc" id="L25">@RequiredArgsConstructor</span>
+@SuppressWarnings(&quot;unchecked&quot;)
+public class SaveSeedlotFormService {
+
+  private final SaveSeedlotProgressRepositoryClassA saveSeedlotProgressRepositoryClassA;
+  private final SeedlotRepository seedlotRepository;
+  private final LoggedUserService loggedUserService;
+
+  /** Saves the {@link SaveSeedlotFormDtoClassA} to table. */
+  public void saveFormClassA(@NonNull String seedlotNumber, SaveSeedlotFormDtoClassA data) {
+<span class="fc" id="L35">    SparLog.info(&quot;Saving A-Class seedlot progress for seedlot number: {}&quot;, seedlotNumber);</span>
+
+<span class="fc" id="L37">    Seedlot relatedSeedlot =</span>
+<span class="fc" id="L38">        seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);</span>
+
+<span class="fc" id="L40">    Optional&lt;SaveSeedlotProgressEntityClassA&gt; optionalEntityToSave =</span>
+<span class="fc" id="L41">        saveSeedlotProgressRepositoryClassA.findById(seedlotNumber);</span>
+
+<span class="fc" id="L43">    Map&lt;String, Object&gt; parsedAllStepData =</span>
+<span class="fc" id="L44">        new Gson().fromJson(data.allStepData().toString(), Map.class);</span>
+<span class="fc" id="L45">    Map&lt;String, Object&gt; parsedProgressStatus =</span>
+<span class="fc" id="L46">        new Gson().fromJson(data.progressStatus().toString(), Map.class);</span>
+
+    SaveSeedlotProgressEntityClassA entityToSave;
+    // If an entity exist then update the values, otherwise make a new entity.
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">    if (optionalEntityToSave.isEmpty()) {</span>
+<span class="fc" id="L51">      SparLog.info(</span>
+          &quot;First time saving A-class seedlot progress for seedlot number {}&quot;, seedlotNumber);
+<span class="fc" id="L53">      entityToSave =</span>
+          new SaveSeedlotProgressEntityClassA(
+              relatedSeedlot,
+              parsedAllStepData,
+              parsedProgressStatus,
+<span class="fc" id="L58">              loggedUserService.createAuditCurrentUser());</span>
+    } else {
+<span class="nc" id="L60">      SparLog.warn(</span>
+          &quot;A-class seedlot progress for seedlot number {} exists, replacing with new values&quot;,
+          seedlotNumber);
+<span class="nc" id="L63">      entityToSave = optionalEntityToSave.get();</span>
+<span class="nc" id="L64">      entityToSave.setAllStepData(parsedAllStepData);</span>
+<span class="nc" id="L65">      entityToSave.setProgressStatus(parsedProgressStatus);</span>
+    }
+
+<span class="fc" id="L68">    saveSeedlotProgressRepositoryClassA.save(entityToSave);</span>
+<span class="fc" id="L69">    SparLog.info(&quot;A-class seedlot progress for seedlot number {} saved!&quot;, seedlotNumber);</span>
+<span class="fc" id="L70">    return;</span>
+  }
+
+  /**
+   * Retreives a {@link SaveSeedlotProgressEntityClassA} then convert it to {@link
+   * SaveSeedlotFormDtoClassA} upon return.
+   */
+  public SaveSeedlotFormDtoClassA getFormClassA(@NonNull String seedlotNumber) {
+<span class="fc" id="L78">    SparLog.info(&quot;Retrieving A-class seedlot progress for seedlot number {}&quot;, seedlotNumber);</span>
+
+<span class="fc" id="L80">    ObjectMapper mapper = new ObjectMapper();</span>
+
+<span class="fc" id="L82">    Optional&lt;SaveSeedlotProgressEntityClassA&gt; form =</span>
+<span class="fc" id="L83">        saveSeedlotProgressRepositoryClassA.findById(seedlotNumber);</span>
+
+<span class="fc bfc" id="L85" title="All 2 branches covered.">    if (form.isPresent()) {</span>
+<span class="fc" id="L86">      SparLog.info(&quot;A-class seedlot progress found for seedlot number {}&quot;, seedlotNumber);</span>
+    }
+
+<span class="fc" id="L89">    return form.map(</span>
+            savedEntity -&gt;
+<span class="fc" id="L91">                new SaveSeedlotFormDtoClassA(</span>
+<span class="fc" id="L92">                    mapper.convertValue(savedEntity.getAllStepData(), JsonNode.class),</span>
+<span class="fc" id="L93">                    mapper.convertValue(savedEntity.getProgressStatus(), JsonNode.class)))</span>
+<span class="fc" id="L94">        .orElseThrow(SeedlotFormProgressNotFoundException::new);</span>
+  }
+
+  /** Retrieves the progress_status column then return it as a json object. */
+  public JsonNode getFormStatusClassA(String seedlotNumber) {
+<span class="fc" id="L99">    SparLog.info(</span>
+        &quot;Retrieving A-class seedlot progress status for seedlot number {}&quot;, seedlotNumber);
+<span class="fc" id="L101">    ObjectMapper mapper = new ObjectMapper();</span>
+
+<span class="fc" id="L103">    Optional&lt;Object&gt; form = saveSeedlotProgressRepositoryClassA.getStatusById(seedlotNumber);</span>
+
+<span class="fc bfc" id="L105" title="All 2 branches covered.">    if (form.isPresent()) {</span>
+<span class="fc" id="L106">      SparLog.info(&quot;A-class seedlot progress status found for seedlot number {}&quot;, seedlotNumber);</span>
+    }
+
+<span class="fc" id="L109">    Object progressStatus = form.orElseThrow(SeedlotFormProgressNotFoundException::new);</span>
+
+    // This needs to be converted again with readTree, otherwise it'll return a string value even
+    // without doing the asText().
+<span class="fc" id="L113">    String statusString = mapper.convertValue(progressStatus, JsonNode.class).asText();</span>
+
+    try {
+<span class="fc" id="L116">      JsonNode json = mapper.readTree(statusString);</span>
+<span class="fc" id="L117">      SparLog.info(&quot;A-class seedlot progress status successfully converted to json&quot;);</span>
+<span class="fc" id="L118">      return json;</span>
+<span class="nc" id="L119">    } catch (JsonProcessingException e) {</span>
+<span class="nc" id="L120">      throw new JsonParsingException();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

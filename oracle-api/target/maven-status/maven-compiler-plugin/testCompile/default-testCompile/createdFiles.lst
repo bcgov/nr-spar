@@ -1,0 +1,13 @@
+ca/bc/gov/backendstartapi/endpoint/VegetationCodeEndpointTest.class
+ca/bc/gov/backendstartapi/endpoint/OrchardEndpointTest.class
+ca/bc/gov/backendstartapi/repository/FundingSourceRepositoryTest.class
+ca/bc/gov/backendstartapi/repository/ParentTreeRepositoryTest.class
+ca/bc/gov/backendstartapi/util/ModelMapperTest.class
+ca/bc/gov/backendstartapi/repository/VegetationCodeRepositoryTest.class
+ca/bc/gov/backendstartapi/endpoint/CheckEndpointTest.class
+ca/bc/gov/backendstartapi/service/OrchardServiceTest.class
+ca/bc/gov/backendstartapi/repository/ParentTreeOrchardRepositoryTest.class
+ca/bc/gov/backendstartapi/repository/ParentTreeGeneticQualityRepositoryTest.class
+ca/bc/gov/backendstartapi/endpoint/OrchardEndpointTest$1.class
+ca/bc/gov/backendstartapi/repository/OrchardRepositoryTest.class
+ca/bc/gov/backendstartapi/endpoint/FundingSourceEndpointTest.class
