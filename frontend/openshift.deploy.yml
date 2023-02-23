@@ -3,8 +3,8 @@ kind: Template
 metadata:
   name: ${NAME}
   annotations:
-    description: "NR Frontend Sample App"
-    tags: "nrsparwebapp"
+    description: "NR SPAR Webapp"
+    tags: "nr-spar-webapp,frontend"
     iconClass: icon-js
 labels:
   app: ${NAME}-${ZONE}
@@ -12,10 +12,10 @@ labels:
 parameters:
   - name: NAME
     description: Module name
-    value: nrsparwebapp
+    value: nr-spar-webapp
   - name: COMPONENT
     description: Component name
-    value: app
+    value: frontend
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
@@ -25,29 +25,45 @@ parameters:
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
-    value: 100m
+    value: 25m
   - name: MEMORY_REQUEST
-    value: 0.5Gi
+    value: 256Mi
+  - name: CPU_LIMIT
+    value: "75m"
+  - name: MEMORY_LIMIT
+    value: "512Mi"
+  - name: MIN_REPLICAS
+    description: The minimum amount of replicas for the horizontal pod autoscaler.
+    value: "3"
+  - name: MAX_REPLICAS
+    description: The maximum amount of replicas for the horizontal pod autoscaler.
+    value: "5"
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
-    value: bcgov/nr-spar-webapp:prod-app
-  - name: REACT_APP_NRSPARWEBAPP_VERSION
+    value: bcgov/nr-spar-webapp/frontend:test
+  - name: REACT_APP_SPAR_BUILD_VERSION
     description: Current sample app release version
     required: true
   - name: REACT_APP_SERVER_URL
-    description: Server URL address
+    description: REACT_APP_SERVER_URL
+    required: true
+  - name: REACT_APP_NRSPARWEBAPP_VERSION
+    description: REACT_APP_NRSPARWEBAPP_VERSION
     required: true
   - name: REACT_APP_KC_URL
-    description: KeyCloak Server URL address
+    description: REACT_APP_KC_URL
     required: true
   - name: REACT_APP_KC_REALM
-    description: KeyCloak realm name
+    description: REACT_APP_KC_REALM
     required: true
   - name: REACT_APP_KC_CLIENT_ID
-    description: KeyCloak client id
+    description: REACT_APP_KC_CLIENT_ID
+    required: true
+  - name: REACT_APP_ENABLE_MOCK_SERVER
+    description: REACT_APP_ENABLE_MOCK_SERVER
     required: true
 objects:
   - apiVersion: v1
@@ -99,16 +115,20 @@ objects:
               imagePullPolicy: Always
               name: ${NAME}
               env:
-                - name: REACT_APP_NRSPARWEBAPP_VERSION
-                  value: ${REACT_APP_NRSPARWEBAPP_VERSION}
+                - name: REACT_APP_SPAR_BUILD_VERSION
+                  value: ${BUILD}
                 - name: REACT_APP_SERVER_URL
                   value: ${REACT_APP_SERVER_URL}
+                - name: REACT_APP_NRSPARWEBAPP_VERSION
+                  value: ${REACT_APP_NRSPARWEBAPP_VERSION}
                 - name: REACT_APP_KC_URL
                   value: ${REACT_APP_KC_URL}
                 - name: REACT_APP_KC_REALM
                   value: ${REACT_APP_KC_REALM}
                 - name: REACT_APP_KC_CLIENT_ID
                   value: ${REACT_APP_KC_CLIENT_ID}
+                - name: REACT_APP_ENABLE_MOCK_SERVER
+                  value: ${REACT_APP_ENABLE_MOCK_SERVER}
               ports:
                 - containerPort: 3000
                   protocol: TCP
@@ -116,24 +136,29 @@ objects:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
               readinessProbe:
+                successThreshold: 1
+                failureThreshold: 5
                 httpGet:
                   path: /
                   port: 3000
                   scheme: HTTP
                 initialDelaySeconds: 15
                 periodSeconds: 30
-                timeoutSeconds: 1
+                timeoutSeconds: 10
               livenessProbe:
                 successThreshold: 1
-                failureThreshold: 3
+                failureThreshold: 5
                 httpGet:
                   path: /
                   port: 3000
                   scheme: HTTP
                 initialDelaySeconds: 15
                 periodSeconds: 30
-                timeoutSeconds: 5
+                timeoutSeconds: 10
   - apiVersion: v1
     kind: Service
     metadata:
@@ -165,3 +190,49 @@ objects:
       tls:
         termination: edge
         insecureEdgeTerminationPolicy: Redirect
+  - apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      scaleTargetRef:
+        apiVersion: apps.openshift.io/v1
+        kind: DeploymentConfig
+        name: ${NAME}-${ZONE}-${COMPONENT}
+      minReplicas: ${{MIN_REPLICAS}}
+      maxReplicas: ${{MAX_REPLICAS}}
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 100
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-from-openshift-ingress
+      labels:
+        template: openshift-test
+    spec:
+      podSelector: {}
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  network.openshift.io/policy-group: ingress
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-same-namespace
+      labels:
+        template: nr-spar-frontend-network-security-policy
+    spec:
+      podSelector: {}
+      ingress:
+        - from:
+            - podSelector: {}
+      policyTypes:
+        - Ingress
