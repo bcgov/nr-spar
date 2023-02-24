@@ -14,6 +14,7 @@ import Layout from './layout/PrivateLayout';
 import Landing from './views/Landing';
 import Dashboard from './views/Dashboard/dashboard';
 import SeedlotDashboard from './views/SeedlotDashboard';
+import SeedlotCreatedFeedback from './views/SeedlotCreatedFeedback';
 
 /**
  * Create an app structure conaining all the routes.
@@ -45,6 +46,15 @@ const App: React.FC = () => {
             element={(
               <ProtectedRoute signed={signed}>
                 <SeedlotDashboard />
+              </ProtectedRoute>
+            )}
+          />
+
+          <Route
+            path="/seedlot/successfully-created"
+            element={(
+              <ProtectedRoute signed={signed}>
+                <SeedlotCreatedFeedback />
               </ProtectedRoute>
             )}
           />
