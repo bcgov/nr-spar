@@ -167,7 +167,7 @@ const ApplicantInformation = () => {
     } else {
       axios.post(getUrl(ApiAddresses.AClassSeedlotPost), responseBody, getAxiosConfig())
         .then(() => {
-          navigate('/seedlot');
+          navigate('/seedlot/successfully-created');
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -314,7 +314,7 @@ const ApplicantInformation = () => {
         <Row className="save-button">
           <Column lg={8}>
             <Button renderIcon={DocumentAdd} type="submit">
-              Save and create new seedlot
+              Create seedlot number
             </Button>
           </Column>
         </Row>
