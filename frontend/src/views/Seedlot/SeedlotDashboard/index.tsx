@@ -5,9 +5,9 @@ import {
   Stack
 } from '@carbon/react';
 
-import PageTitle from '../../components/PageTitle';
-import SeedlotActivities from '../../components/SeedlotActivities';
-import ExistingSeedlot from '../../components/ExistingSeedlot';
+import PageTitle from '../../../components/PageTitle';
+import SeedlotActivities from '../../../components/SeedlotActivities';
+import ExistingSeedlot from '../../../components/ExistingSeedlot';
 
 import './styles.css';
 

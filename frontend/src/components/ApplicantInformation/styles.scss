@@ -1,0 +1,36 @@
+@use '@carbon/type';
+
+.applicant-information-form {
+  margin-top: 1rem;
+  padding-left: 2.5rem;
+}
+
+.applicant-information-form h2 {
+  @include type.type-style('heading-03');
+  margin-bottom: 0.5rem;
+}
+
+.applicant-agency-title,
+.seedlot-information-title {
+  margin-bottom: 2.5rem;
+}
+
+.agency-information,
+.seedlot-species-dropdown,
+.class-source-radio,
+.registered-checkbox {
+  margin-bottom: 2rem;
+}
+
+.agency-email,
+.collected-checkbox,
+.save-button {
+  margin-bottom: 3rem;
+}
+
+
+@media only screen and (max-width: 1584px) {
+  .applicant-information-form {
+      padding-left: 2rem;
+  }
+}

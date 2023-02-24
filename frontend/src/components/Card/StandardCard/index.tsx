@@ -25,7 +25,7 @@ const StandardCard = ({
   const navigate = useNavigate();
   const Image = Pictograms[image];
   return (
-    <Tile className="std-card-main">
+    <Tile className="std-card-main" onClick={() => navigate(url)}>
       <div className="std-card-header">
         <div>
           <p className="std-card-title">{header}</p>
