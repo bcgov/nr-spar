@@ -5,7 +5,7 @@ const SeedlotActivitiesCardItems = [
     header: 'Register an A class seedlot',
     description:
       'Register a seedlot which has been collected in an orchard from parent trees',
-    link: '#',
+    link: '/seedlot/register-a-class',
     highlighted: false
   },
   {

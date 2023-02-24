@@ -56,6 +56,9 @@
           "unnamedComponents": "arrow-function"
         }
       ],
+      "jsx-a11y/label-has-associated-control": [ 2, {
+        "depth": 3
+      }],
       "no-shadow": "off",
       "no-unused-vars": "off",
       "@typescript-eslint/no-shadow": ["error"],

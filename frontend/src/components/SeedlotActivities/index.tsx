@@ -20,7 +20,7 @@ const SeedlotActivities = () => {
             image={card.image}
             header={card.header}
             description={card.description}
-            url="#"
+            url={card.link}
           />
         ))}
       </Row>

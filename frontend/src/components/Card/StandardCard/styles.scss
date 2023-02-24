@@ -67,6 +67,10 @@ p.std-card-title {
   bottom: 0;
 }
 
-.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open >svg{
+.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open >svg {
   fill: var(--bcgov-icon-primary);
+}
+
+.std-card-header .#{vars.$bcgov-prefix}--popover-container {
+  height: 2.5rem;
 }
