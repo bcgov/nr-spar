@@ -25,7 +25,7 @@ const ACTIVITY_TYPE = {
     icon: 'CropGrowth',
     header: 'Seedling request',
     description: 'Open a new seedling request for your reforestation needs.',
-    link: '#'
+    link: '/seedlot'
   }
 };
 

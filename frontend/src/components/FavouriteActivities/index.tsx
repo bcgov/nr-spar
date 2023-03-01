@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import { env } from '../../env';
-import { Tooltip, Row, Column } from '@carbon/react';
+import { Tooltip, Row, Column, Loading } from '@carbon/react';
 import { Information } from '@carbon/icons-react';
 
 import Card from '../Card/FavouriteCard';
@@ -20,6 +20,7 @@ import getActivityProps from '../../enums/ActivityType';
 const FavouriteActivities = () => {
   const { token } = useAuth();
   const [cards, setCards] = useState<CardType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const getAxiosConfig = () => {
     const axiosConfig = {};
@@ -45,6 +46,7 @@ const FavouriteActivities = () => {
             card.image = activityProps.icon;
             card.header = activityProps.header;
             card.description = activityProps.description;
+            card.link = activityProps.link;
           }
           if (card.highlighted) {
             newCards.splice(i, 1);
@@ -52,9 +54,11 @@ const FavouriteActivities = () => {
           }
         });
         setCards(newCards);
+        setLoading(false);
       })
       .catch((error) => {
         setCards([]);
+        setLoading(false);
         // eslint-disable-next-line
         console.error(`Error: ${error}`);
       });
@@ -63,6 +67,9 @@ const FavouriteActivities = () => {
   const updateCards = (index: string, card: CardType) => {
     const putUrl = getUrl(ApiAddresses.FavouriteActiviteSave).replace(':id', index);
     axios.put(putUrl, card, getAxiosConfig())
+      .then(() => {
+        getCards();
+      })
       .catch((error) => {
         // eslint-disable-next-line
         console.error(`Error: ${error}`);
@@ -71,28 +78,30 @@ const FavouriteActivities = () => {
 
   useEffect(() => {
     getCards();
+    setInterval(() => {
+      getCards();
+    }, 3*60*1000);
   }, []);
 
   const highlightFunction = (index: number) => {
     const target = cards[index];
 
-    // We need to remove the current highlighted card
-    // if it exists, so we can submit new highlighted one
-    cards.forEach((item: CardType) => {
-      const card = item;
-      if (card.highlighted && card.id !== target.id) {
-        card.highlighted = false;
-        updateCards(card.id, card);
-      }
-    });
-
     if (target.highlighted === false) {
+      // We need to remove the current highlighted card
+      // if it exists, so we can submit new highlighted one
+      cards.forEach((item: CardType) => {
+        const card = item;
+        if (card.highlighted && card.id !== target.id) {
+          card.highlighted = false;
+          updateCards(card.id, card);
+        }
+      });
       target.highlighted = true;
     } else {
       target.highlighted = false;
     }
+
     updateCards(target.id, target);
-    getCards();
   };
 
   const deleteCard = (index:string) => {
@@ -124,25 +133,29 @@ const FavouriteActivities = () => {
       </Column>
       <Column lg={12} className="favourite-activities-cards">
         <Row>
-          {(cards.length === 0) && (
-            <EmptySection
-              icon="Application"
-              title="You don't have any favourites to show yet!"
-              description="You can favourite your most used activities by clicking on the heart icon
-              inside each page"
-            />
+          {loading ? (
+            <Loading withOverlay={false} />
+          ) : (
+            (cards.length === 0) ? (           
+              <EmptySection
+                icon="Application"
+                title="You don't have any favourites to show yet!"
+                description="You can favourite your most used activities by clicking on the heart icon
+                inside each page"
+              />
+            ) : cards.map((card, index) => (
+              <Card
+                key={card.id}
+                icon={card.image}
+                header={card.header}
+                description={card.description}
+                highlighted={card.highlighted}
+                highlightFunction={() => { highlightFunction(index); }}
+                deleteFunction={() => { deleteCard(card.id); }}
+                link={card.link}
+              />
+            ))
           )}
-          {cards.map((card, index) => (
-            <Card
-              key={card.id}
-              icon={card.image}
-              header={card.header}
-              description={card.description}
-              highlighted={card.highlighted}
-              highlightFunction={() => { highlightFunction(index); }}
-              deleteFunction={() => { deleteCard(card.id); }}
-            />
-          ))}
         </Row>
       </Column>
     </Row>
