@@ -31,8 +31,12 @@ at least the version 16.10 (that includes yarn)
 
 ### IDE
 
-If you like, Microsoft Visual Studio can be a great option. Lots of plugins
+If you like, Microsoft VS Code can be a great option. Lots of extensions
 and integrations. You can learn how to install [here](https://code.visualstudio.com/).
+
+Here are some suggested extensions:
+- ESLint - Link: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
+- GitLens - Link: https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens
 
 ### Check-style
 
@@ -40,7 +44,7 @@ To enforce a better solution and a stronger product we decided to use
 the Airbnb ESLint check-style. This way also helps us to have a dedicated
 pipeline to check for common errors and possible bugs.
 
-> Note that if you choose VS Code as your IDE, we highly recommend one plugin called **ESLint**, by Microsoft.
+> Note that if you choose VS Code as your IDE, we highly recommend above mentioned extension **ESLint**, by Microsoft.
 > Here's the link to the Marketplace: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
 
 ## Run this application
@@ -59,14 +63,21 @@ REACT_APP_KC_CLIENT_ID=
 REACT_APP_ENABLE_MOCK_SERVER=
 ```
 
+And if you want to run Cypress, please add:
+```
+BCEID_USERNAME=
+BCEID_PASSWORD=
+```
+
 > If don't have these values, please reach a member of the team
 
 Just run:
 ```
-yarn install
+yarn install --frozen-lockfile
 ```
-And once is finished, you can get it up and running
-by typing
+
+Once is finished, you can get it up and running by typing
+
 ```
 yarn start
 ```
@@ -76,12 +87,15 @@ yarn start
 You can run tests running `yarn test`. Tests coverage reports can be seen
 on you command line window and also on GitHub, in your commits and pull requests.
 
+PS: We have snapshot tests, so keep in mind the tests may break if you forget to
+update snapshots. To update them run `yarn test -u`
+
 ## Submit pull requests
 
 We use git flow, so all code changes happen through Pull Requests. There's a
 Pull Request template that you can fill. The more complete the better. If you
-have images, screen capture or diagrams, that helps a lot. Don't forget to add
-reviewers, assign to yourself and add a label.
+have images, screen capture or diagrams, that helps, but it's not required.
+Don't forget to add reviewers, assign to yourself and add labels.
 
 ## Follow our best practices
 
