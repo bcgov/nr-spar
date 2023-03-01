@@ -69,32 +69,17 @@ using Docker.
 
 > Note that you'll need those environment variables mentioned above!
 
-Install dependencies:
-```
-yarn install --frozen-lockfile
-```
-
-Build for production:
-```
-REACT_APP_NRSPARWEBAPP_VERSION=dev \
- REACT_APP_SERVER_URL=https://nrbestapi-test-service-api.apps.silver.devops.gov.bc.ca \
- yarn build:production
-```
-
 Build Docker image:
 ```
-docker build -t bcgov/nr-spar-webapp:latest .
+docker build -t grch.io/bcgov/nr-spar-webapp/frontend:dev .
 ```
 
 Then run with:
 ```
-docker run -t -i -p 3000:3000 \
-  -e REACT_APP_NRSPARWEBAPP_VERSION=dev \
-  -e REACT_APP_SERVER_URL=<server-url> \
-  -e REACT_APP_KC_URL=<keycloak-server-url> \
-  -e REACT_APP_KC_REALM=<realm-name> \
-  -e REACT_APP_KC_CLIENT_ID=<client-id> \
-  -t bcgov/nr-spar-webapp:latest
+docker run -p 3000:3000 \
+  --env-file .env \
+  --tty --interactive \
+  grch.io/bcgov/nr-spar-webapp/frontend:dev
 ```
 
 ## Getting help
