@@ -102,7 +102,7 @@ const PageTitle = ({ title, subtitle, favourite, activity }: PageTitleProps) => 
       <div className={favourite ? 'title-favourite' : 'title-no-favourite'}>
         <h1>{title}</h1>
         {favourite && (
-          <IconButton kind="ghost" label="Favourite" align="right"
+          <IconButton kind="ghost" label={isFavouriteButtonPressed ? "Unfavourite" : "Favourite"} align="right"
             onClick={isFavouriteButtonPressed ? () => { unfavoritePage(favouriteActivityId)} : () => {activity && favoritePage(activity)} }>
             {isFavouriteButtonPressed ? (<FavoriteFilled size={28} />) : (<Favorite size={28} />)}            
           </IconButton>
