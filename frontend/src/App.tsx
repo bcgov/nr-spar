@@ -13,6 +13,7 @@ import Logout from './components/Logout';
 import Layout from './layout/PrivateLayout';
 import Landing from './views/Landing';
 import Dashboard from './views/Dashboard/dashboard';
+import SeedlotDetails from './views/Seedlot/SeedlotDetails';
 import SeedlotDashboard from './views/Seedlot/SeedlotDashboard';
 import CreateAClass from './views/Seedlot/CreateAClass';
 import SeedlotCreatedFeedback from './views/Seedlot/SeedlotCreatedFeedback';
@@ -56,6 +57,15 @@ const App: React.FC = () => {
             element={(
               <ProtectedRoute signed={signed}>
                 <CreateAClass />
+              </ProtectedRoute>
+            )}
+          />
+
+          <Route
+            path="/seedlot/details"
+            element={(
+              <ProtectedRoute signed={signed}>
+                <SeedlotDetails />
               </ProtectedRoute>
             )}
           />
