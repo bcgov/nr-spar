@@ -15,7 +15,7 @@ FROM node:16.19.1-alpine3.17
 # Copy and prep app
 WORKDIR /app
 COPY --from=build /app/build/ .
-RUN yarn global add serve@14.1.2 react-inject-env@2.1.0 && \
+RUN yarn global add serve@14.2.0 react-inject-env@2.1.0 && \
     chmod -R g+w .
 
 # User and startup
