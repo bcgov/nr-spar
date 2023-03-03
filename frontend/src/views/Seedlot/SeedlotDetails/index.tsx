@@ -16,6 +16,7 @@ import {
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
+import SeedlotSummary from '../../../components/SeedlotSummary';
 
 import './styles.scss';
 
@@ -48,25 +49,19 @@ const SeedlotDetails = () => {
           <BreadcrumbItem>Existing seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
-      <Stack gap={7}>
-        <Row>
-          <Column className="seedlot-details-title-column" sm={4} md={4} lg={13}>
-            <PageTitle
-              title="Seedlot 636465"
-              subtitle="Check and manage this seedlot"
-              favourite
-            />
-          </Column>
-          <Column  sm={4} md={4} lg={2}>
-            <ComboButton title="Manage Seedlot" items={manageOptions} />
-          </Column>
+      <Stack gap={6}>
+        <Row className="seedlot-summary-title">
+          <PageTitle
+            title="Seedlot 636465"
+            subtitle="Check and manage this seedlot"
+            favourite
+          />
+          <ComboButton title="Manage Seedlot" items={manageOptions} />
         </Row>
         <section title="Seedlot Summary">
           <Row className="seedlot-summary-content">
             <Column sm={4}>
-              <span>
-                Seedlot Summary Placeholder
-              </span>
+              <SeedlotSummary />
             </Column>
           </Row>
         </section>
