@@ -1,0 +1,30 @@
+@use '../../theme/variables.scss' as vars;
+@use '@carbon/type';
+
+.form-review {
+  width: auto;
+  background-color: var(--#{vars.$bcgov-prefix}-background);
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
+  border-radius: 8px;
+}
+
+.form-review-title {
+  @include type.type-style('heading-02');
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.form-review-title-section {
+  height: 2.625rem;
+  margin: 2rem;
+}
+
+.item-section {
+  padding-left: 1rem;
+}
+
+.description-section {
+  @include type.type-style('body-compact-01');
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
+  padding-top: 0.25rem;
+}
