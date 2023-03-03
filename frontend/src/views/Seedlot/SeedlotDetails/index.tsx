@@ -18,6 +18,8 @@ import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
 import SeedlotSummary from '../../../components/SeedlotSummary';
 
+import SeedlotActivityHistory from '../../../components/SeedlotActivityHistory';
+
 import './styles.scss';
 
 const manageOptions = [
@@ -75,7 +77,9 @@ const SeedlotDetails = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>Seedlot details' Tab Content Placeholder</TabPanel>
-                  <TabPanel>Activity history's Tab Content Placebolder</TabPanel>
+                  <TabPanel>
+                    <SeedlotActivityHistory />
+                  </TabPanel>
                 </TabPanels>
               </Tabs>
             </Column>
