@@ -16,6 +16,8 @@ const SeedlotRegistrationEndpoint = (server: Server) => {
       status: 'OK'
     };
   });
+
+  server.get(getUrl(ApiAddresses.SeedlotInfoRetrieveAll, true), (schema: AppSchema) => schema.all('seedlotInfos'));
 };
 
 export default SeedlotRegistrationEndpoint;

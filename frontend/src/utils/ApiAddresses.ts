@@ -10,6 +10,8 @@ enum ApiAddresses {
 
   ApplicantInfoRetrieveAll,
 
+  SeedlotInfoRetrieveAll,
+
   AClassSeedlotPost
 }
 
