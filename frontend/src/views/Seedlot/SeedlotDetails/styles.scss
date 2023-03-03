@@ -1,7 +1,7 @@
 @use '../../../theme/variables.scss' as vars;
 
 .seedlot-summary-content {
-  padding: 2.5rem !important;
+  padding: 0 2.5rem !important;
 }
 
 .seedlot-details-breadcrumb {
@@ -13,8 +13,12 @@
   cursor: pointer;
 }
 
-.seedlot-details-title-column {
-  padding-left: 0;
+.seedlot-summary-title {
+  justify-content: space-between;
+}
+
+.seedlot-summary-title > .combo-button-wrapper{
+  padding-right: 3.5rem;
 }
 
 .seedlot-details-page .#{vars.$bcgov-prefix}--tabs {
