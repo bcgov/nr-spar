@@ -8,35 +8,13 @@ import {
 import History from '../../types/History';
 
 import formatDate from '../../utils/DateUtils';
+import statusClass from '../../utils/HistoryStatus';
 
 import './styles.scss';
 
 interface ActivityHistoryProps {
   history: History;
 }
-
-const statusClass = (param: string) => {
-  let complete = false;
-  let current = false;
-  let invalid = false;
-  let disabled = false;
-  switch (param) {
-    case 'complete':
-      complete = true;
-      break;
-    case 'current':
-      current = true;
-      break;
-    case 'invalid':
-      invalid = true;
-      break;
-    default:
-      disabled = true;
-  }
-  return {
-    complete, current, invalid, disabled
-  };
-};
 
 const ActivityHistory = ({ history }: ActivityHistoryProps) => (
   <div>
