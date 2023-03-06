@@ -124,7 +124,7 @@ const FavouriteActivities = () => {
         <Tooltip
           className="favourite-activity-tooltip"
           align="top"
-          label="You can add a shortcut to your favourite activity by clicking on the hearth icon inside each page."
+          label="You can add a shortcut to your favourite activity by clicking on the heart icon inside each page."
         >
           <button className="tooltip-button" type="button">
             <Information />
