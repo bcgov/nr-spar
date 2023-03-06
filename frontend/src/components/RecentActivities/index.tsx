@@ -21,10 +21,12 @@ import './styles.scss';
 import getUrl from '../../utils/ApiUtils';
 import ApiAddresses from '../../utils/ApiAddresses';
 import { useAuth } from '../../contexts/AuthContext';
+import FilesDocsTable from '../FilesDocsTable';
 
 const RecentActivities = () => {
   const { token } = useAuth();
   const [listItems, setListItems] = useState([]);
+  const [filesDocsItems, setFilesDocsItems] = useState([]);
 
   const getAxiosConfig = () => {
     const axiosConfig = {};
@@ -63,6 +65,14 @@ const RecentActivities = () => {
     'View'
   ];
 
+  const fileDocstableHeaders: string[] = [
+    'File name',
+    'File format',
+    'Created at',
+    'Last update',
+    'Actions'
+  ];
+
   return (
     <Row className="main-content recent-activity">
       <Column sm={4} className="recent-activity-title">
@@ -92,7 +102,21 @@ const RecentActivities = () => {
               </div>
               )}
             </TabPanel>
-            <TabPanel>Placeholder</TabPanel>
+            <TabPanel>
+              <FilesDocsTable
+                elements={filesDocsItems}
+                headers={fileDocstableHeaders}
+              />
+              {(filesDocsItems.length === 0) && (
+              <div className="empty-recent-activity-files-docs">
+                <EmptySection
+                  icon="Application"
+                  title="There is no files & docs to show yet!"
+                  description="Your recent files & docs will appear here once you generate one"
+                />
+              </div>
+              )}
+            </TabPanel>
           </TabPanels>
         </Tabs>
       </Column>
