@@ -2,6 +2,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 <!-- PROJECT SHIELDS -->
 
 [![Contributors](https://img.shields.io/github/contributors/bcgov/greenfield-template)](/../../graphs/contributors)
@@ -250,6 +251,15 @@ Templates for APIs, UIs and Metabase/Oracle can be used to kickstart or extend p
 This repository holds a set of policies, standards and guides to get started with a back-end API.
 >>>>>>> 561be9f (Add project lifecycle badge to the project (#4))
 =======
+=======
+[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/nr-spar-backend)
+![Coverage](.github/badges/jacoco.svg)
+![Branches](.github/badges/branches.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-spar-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-spar-backend)
+
+# Natural Resources SPAR Back-End API
+
+>>>>>>> 4f99c64 (Cleanup (#10))
 This repository holds a set of policies, standards, guides, and pipelines to
 get started with a back-end API. Before writing your first line of code, please
 take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
@@ -271,7 +281,11 @@ your problem is someone else's problem. Let's figure it out together. So, ask
 a question using our channels. We have [our own Stackoverflow](https://stackoverflow.developer.gov.bc.ca/)
 and [our Rocket Chat](https://chat.developer.gov.bc.ca/) channel.
 
+<<<<<<< HEAD
 ## Stack
+=======
+# Stack
+>>>>>>> 4f99c64 (Cleanup (#10))
 
 Here you can find a comprehensive list of all languages and tools that are been used
 in this service. And also everything you need to get started, build locally, test
@@ -287,8 +301,13 @@ and deploy it.
   - Mockito and Mock MVC
   - Automated tests with Postman and Newman
 - Database
+<<<<<<< HEAD
   - Remote Oracle with secure connection
   - PostgreSQL
+=======
+  - PostgreSQL
+  - Versioning with [Flyway](https://flywaydb.org/)
+>>>>>>> 4f99c64 (Cleanup (#10))
 - DevOps
   - Docker
   - Docker Composer
@@ -299,24 +318,32 @@ and deploy it.
   - Postman
   - DBeaver
 
+<<<<<<< HEAD
 ## Getting started
+=======
+# Getting started
+>>>>>>> 4f99c64 (Cleanup (#10))
 
 Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
 from the project root directory. You **must** provide three environment variables for database
 access configuration:
 
+<<<<<<< HEAD
 - `DATABASE_HOST`
 - `DATABASE_PORT`
 - `SERVICE_NAME` (the database's name)
 - `DATABASE_USER`
 - `DATABASE_PASSWORD`
 
+=======
+>>>>>>> 4f99c64 (Cleanup (#10))
 Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
 the `status` property should have the value *UP*.
 
 Before writing your first line of code, and learn more about the checks, including
 tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
 
+<<<<<<< HEAD
 ### Quick look
 
 But if all you want is to take a quick look on the running service, you can do it by
@@ -369,3 +396,29 @@ on Rocket chat or ask a question on Stackoverflow.
 # nr-spar-webapp
 NR SPAR Web Application - With React
 >>>>>>> e3b54e2 (Initial commit)
+=======
+## Quick look
+
+But if all you want is to take a quick look at the running service, you can do it by using Docker Compose.
+
+Run with:
+```
+docker-compose up --build
+```
+
+You can clean and remove the containers with
+```
+docker-compose down --remove-orphans
+```
+
+But if not, You can build the Docker images:
+```
+cd backend && docker build -t bcgov/nr-spar-backend-backend:snapshot . && cd ..
+cd database && docker build -t bcgov/nr-spar-backend-database:snapshot . && cd ..
+```
+
+## Getting help
+
+As mentioned, we're here to help. Feel free to start a conversation
+on Rocket chat or ask a question on Stackoverflow.
+>>>>>>> 4f99c64 (Cleanup (#10))
