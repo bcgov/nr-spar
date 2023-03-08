@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  # pull_request:
+  pull_request:
   # push:
   #   paths:
   #     - "backend/**"
@@ -126,7 +126,7 @@ jobs:
         run: mvn --no-transfer-progress clean verify package -P all-tests sonar:sonar -Dsonar.projectKey=bcgov_nr-spar-backend -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml --file backend/pom.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_FRONTEND }}
 
   frontend-tests:
     name: Lint and Unit Tests
@@ -136,7 +136,7 @@ jobs:
       - uses: bcgov-nr/action-test-and-analyse@v0.0.1
         with:
           commands: |
-            yarn --prefer-offline --cwd frontend
+            yarn --cwd frontend --prefer-offline
             yarn --cwd frontend run lint
             yarn --cwd frontend build
             yarn --cwd frontend test -u --coverage
@@ -145,11 +145,9 @@ jobs:
             -Dsonar.organization=bcgov-sonarcloud
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
-            -Dsonar.project.monorepo.enabled=false
-            -Dsonar.projectKey=bcgov_nr-spar-webapp
+            -Dsonar.projectKey=bcgov_nr-spar_frontend
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/**/__test__/**/*
-            -Dsonar.tests=src/
             -Dsonar.test.inclusions=src/**/__test__/**/*
           sonar_project_token: ${{ secrets.SONAR_TOKEN }}
 
@@ -187,26 +185,3 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
-
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy:
-    name: Trivy Security Scan
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.9.1
-        with:
-          format: "sarif"
-          output: "trivy-results.sarif"
-          ignore-unfixed: true
-          scan-type: "fs"
-          security-checks: "vuln,secret,config"
-          severity: "CRITICAL,HIGH"
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
