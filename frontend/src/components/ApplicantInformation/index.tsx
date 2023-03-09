@@ -29,6 +29,7 @@ import './styles.scss';
 const ApplicantInformation = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+
   const getAxiosConfig = () => {
     const axiosConfig = {};
     if (token) {
@@ -43,6 +44,7 @@ const ApplicantInformation = () => {
   };
 
   const seedlotData: SeedlotRegistration = {
+    seedlotNumber: 0,
     applicant: {
       name: '',
       number: '',
@@ -166,8 +168,8 @@ const ApplicantInformation = () => {
       speciesInputRef.current?.focus();
     } else {
       axios.post(getUrl(ApiAddresses.AClassSeedlotPost), responseBody, getAxiosConfig())
-        .then(() => {
-          navigate('/seedlot/successfully-created');
+        .then((response) => {
+          navigate('/seedlot/successfully-created/' + response.data.seedlotNumber);
         })
         .catch((error) => {
           // eslint-disable-next-line

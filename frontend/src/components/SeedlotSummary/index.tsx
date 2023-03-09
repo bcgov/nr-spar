@@ -4,9 +4,15 @@ import Subtitle from '../Subtitle';
 import StatusItem from '../StatusItem';
 import Participants from '../Participants';
 
+import Seedlot from '../../types/Seedlot';
+
 import './styles.scss';
 
-const SeedlotSummary = () => (
+interface SeedlotSummaryProps {
+  seedlotData: Seedlot;
+}
+
+const SeedlotSummary = ({ seedlotData }: SeedlotSummaryProps) => (
   <div className="seedlot-summary">
     <div className="seedlot-summary-title-section">
       <p className="seedlot-summary-title">
@@ -20,7 +26,7 @@ const SeedlotSummary = () => (
           Seedlot number
         </p>
         <p className="seedlot-summary-info-value">
-          636465
+          {seedlotData.number}
         </p>
       </div>
       <div className="seedlot-summary-seedlot-class">
@@ -28,7 +34,7 @@ const SeedlotSummary = () => (
           Seedlot class
         </p>
         <p className="seedlot-summary-info-value">
-          Class A
+          {seedlotData.class}
         </p>
       </div>
       <div className="seedlot-summary-seedlot-species">
@@ -36,7 +42,7 @@ const SeedlotSummary = () => (
           Seedlot species
         </p>
         <p className="seedlot-summary-info-value">
-          SX - Spruce hybrid
+         {seedlotData.lot_species}
         </p>
       </div>
       <div className="seedlot-summary-seedlot-form">
@@ -44,7 +50,7 @@ const SeedlotSummary = () => (
           Form step
         </p>
         <p className="seedlot-summary-info-value">
-          Collection
+          {seedlotData.form_step}
         </p>
       </div>
       <div className="seedlot-summary-seedlot-status">
@@ -52,7 +58,7 @@ const SeedlotSummary = () => (
           Status
         </p>
         <div className="seedlot-summary-info-value">
-          <StatusItem status={4} />
+          <StatusItem status={seedlotData.status} />
         </div>
       </div>
       <div className="seedlot-summary-seedlot-participants">
@@ -60,7 +66,7 @@ const SeedlotSummary = () => (
           Participants
         </p>
         <div className="seedlot-summary-info-value">
-          <Participants elements={["John Doe"]} number={1} />
+          <Participants elements={seedlotData.participants} number={seedlotData.participants.length} />
         </div>
       </div>
       <div className="seedlot-summary-seedlot-created">
@@ -68,7 +74,7 @@ const SeedlotSummary = () => (
           Created at
         </p>
         <p className="seedlot-summary-info-value">
-         Sep 08, 2021
+          {seedlotData.created_at}
         </p>
       </div>
       <div className="seedlot-summary-seedlot-modified">
@@ -76,15 +82,15 @@ const SeedlotSummary = () => (
           Last modified
         </p>
         <p className="seedlot-summary-info-value">
-         Dec 24, 2022
+          {seedlotData.last_modified}
         </p>
       </div>
       <div className="seedlot-summary-seedlot-approved">
         <p className="seedlot-summary-info-label">
-          Approved  at
+          Approved at
         </p>
         <p className="seedlot-summary-info-value">
-          --
+         {seedlotData.approved_at}
         </p>
       </div>
     </div>
