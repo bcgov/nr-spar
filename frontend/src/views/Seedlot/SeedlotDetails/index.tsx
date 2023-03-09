@@ -1,5 +1,6 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 import {
   FlexGrid,
   Row,
@@ -14,13 +15,20 @@ import {
   TabPanel
 } from '@carbon/react';
 
+import Seedlot from '../../../types/Seedlot';
+import SeedlotRegistration from '../../../types/SeedlotRegistration';
+
+import { useAuth } from '../../../contexts/AuthContext';
+
+import getUrl from '../../../utils/ApiUtils';
+import ApiAddresses from '../../../utils/ApiAddresses';
+
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
 import SeedlotSummary from '../../../components/SeedlotSummary';
 import ApplicantSeedlotInformation from '../../../components/ApplicantSeedlotInformation';
 import FormProgress from '../../../components/FormProgress';
 import FormReview from '../../../components/FormReview';
-
 import SeedlotActivityHistory from '../../../components/SeedlotActivityHistory';
 
 import './styles.scss';
@@ -45,6 +53,42 @@ const manageOptions = [
 ];
 
 const SeedlotDetails = () => {
+  const { token } = useAuth();
+  const { seedlot } = useParams();
+  const [seedlotData, setSeedlotData] = useState<Seedlot>();
+  const [seedlotApplicantData, setSeedlotApplicantData] = useState<SeedlotRegistration>();
+
+  const getAxiosConfig = () => {
+    const axiosConfig = {};
+    if (token) {
+      const headers = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      Object.assign(axiosConfig, headers);
+    }
+    return axiosConfig;
+  };
+
+  const getSeedlotData = () => {
+    if (seedlot) {
+      axios.get(getUrl(ApiAddresses.SeedlotRetrieveOne).replace(':seedlotnumber', seedlot), getAxiosConfig())
+        .then((response) => {
+          if (response.data.seedlot && response.data.seedlotApplicantInfo) {
+            setSeedlotData(response.data.seedlot);
+            setSeedlotApplicantData(response.data.seedlotApplicantInfo);
+          }
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(`Error: ${error}`);
+        });
+    }
+  };
+
+  getSeedlotData();
+
   const navigate = useNavigate();
   return (
     <FlexGrid className="seedlot-details-page">
@@ -56,17 +100,23 @@ const SeedlotDetails = () => {
       </Row>
       <Stack gap={6}>
         <Row className="seedlot-summary-title">
-          <PageTitle
-            title="Seedlot 636465"
-            subtitle="Check and manage this seedlot"
-            favourite
-          />
+          {
+            seedlotData &&
+            <PageTitle
+              title={`Seedlot ${seedlotData.number}`}
+              subtitle="Check and manage this seedlot"
+              favourite
+            />
+          }
           <ComboButton title="Manage Seedlot" items={manageOptions} />
         </Row>
         <section title="Seedlot Summary">
           <Row className="seedlot-summary-content">
             <Column sm={4}>
-              <SeedlotSummary />
+              {
+                seedlotData &&
+                <SeedlotSummary seedlotData={seedlotData} />
+              }
             </Column>
           </Row>
         </section>
@@ -80,7 +130,10 @@ const SeedlotDetails = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
-                    <ApplicantSeedlotInformation />
+                    {
+                      seedlotApplicantData &&
+                      <ApplicantSeedlotInformation seedlotApplicantData={seedlotApplicantData}/>
+                    }
                     <FormProgress />
                     <FormReview />
                   </TabPanel>

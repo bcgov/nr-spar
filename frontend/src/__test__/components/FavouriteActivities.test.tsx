@@ -9,6 +9,7 @@ import {
 import FavouriteActivities from '../../components/FavouriteActivities/index';
 import '@testing-library/jest-dom';
 import makeServer from '../../mock-api/server';
+import { BrowserRouter } from 'react-router-dom';
 
 jest.setTimeout(10000);
 
@@ -20,7 +21,9 @@ describe('the Favourite Activities component', () => {
 
   it('should render correctly', () => {
     const { container } = render(
-      <FavouriteActivities />
+      <BrowserRouter>
+        <FavouriteActivities />
+      </BrowserRouter>
     );
 
     expect(screen.getByText('My favourite activities')).toBeInTheDocument();
@@ -30,7 +33,9 @@ describe('the Favourite Activities component', () => {
 
   it('should render exactly 8 cards', async () => {
     const { container } = render(
-      <FavouriteActivities />
+      <BrowserRouter>
+        <FavouriteActivities />
+      </BrowserRouter>
     );
 
     const cards = container.getElementsByClassName('fav-card-main');
@@ -41,7 +46,9 @@ describe('the Favourite Activities component', () => {
 
   it('should delete the card', async () => {
     const { container } = render(
-      <FavouriteActivities />
+      <BrowserRouter>
+        <FavouriteActivities />
+      </BrowserRouter>
     );
 
     const cards = container.getElementsByClassName('fav-card-main');
@@ -59,7 +66,9 @@ describe('the Favourite Activities component', () => {
 
   it('should highlight the card', async () => {
     const { container } = render(
-      <FavouriteActivities />
+      <BrowserRouter>
+        <FavouriteActivities />
+      </BrowserRouter>
     );
 
     const buttonElement = container.getElementsByClassName('fav-card-overflow');
