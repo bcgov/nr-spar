@@ -3,15 +3,21 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import FavouriteCard from '../../components/Card/FavouriteCard';
 import '@testing-library/jest-dom/extend-expect';
+import { BrowserRouter } from 'react-router-dom';
 
 describe('the favourite card component', () => {
   it('should render correctly with headers', async () => {
     const { container } = render(
-      <FavouriteCard
-        header="Test"
-        description="For testing"
-        icon="SoilMoistureField"
-      />
+      <BrowserRouter>
+        <FavouriteCard
+          header="Test"
+          description="For testing"
+          icon="SoilMoistureField"
+          link="#"
+          highlightFunction={() => null}
+          deleteFunction={() => null}
+        />
+      </BrowserRouter>
     );
 
     const headers = await screen.findAllByText('Test');
@@ -24,12 +30,17 @@ describe('the favourite card component', () => {
 
   it('should render card highlighted with different style', () => {
     const { container } = render(
-      <FavouriteCard
-        header="Test"
-        description="For testing"
-        icon="SoilMoistureField"
-        highlighted
-      />
+      <BrowserRouter>
+        <FavouriteCard
+          header="Test"
+          description="For testing"
+          icon="SoilMoistureField"
+          highlighted
+          link="#"
+          highlightFunction={() => null}
+          deleteFunction={() => null}
+        />
+      </BrowserRouter>
     );
 
     expect(container.firstChild).not.toHaveClass('fav-card-main');
@@ -38,11 +49,16 @@ describe('the favourite card component', () => {
 
   it('should click in the button and open the options', () => {
     const { container } = render(
-      <FavouriteCard
-        header="Test"
-        description="For testing"
-        icon="SoilMoistureField"
-      />
+      <BrowserRouter>
+        <FavouriteCard
+          header="Test"
+          description="For testing"
+          icon="SoilMoistureField"
+          link="#"
+          highlightFunction={() => null}
+          deleteFunction={() => null}
+        />
+      </BrowserRouter>
     );
 
     const buttonElement = container.getElementsByClassName('fav-card-overflow');
@@ -53,11 +69,16 @@ describe('the favourite card component', () => {
 
   it('should close the dropdown menu when click outside', () => {
     const { container } = render(
-      <FavouriteCard
-        header="Test"
-        description="For testing"
-        icon="SoilMoistureField"
-      />
+      <BrowserRouter>
+        <FavouriteCard
+          header="Test"
+          description="For testing"
+          icon="SoilMoistureField"
+          link="#"
+          highlightFunction={() => null}
+          deleteFunction={() => null}
+        />
+      </BrowserRouter>
     );
 
     const buttonElement = container.getElementsByClassName('fav-card-overflow');
