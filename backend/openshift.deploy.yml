@@ -48,6 +48,10 @@ parameters:
     description: Current SPAR backend API build version
     required: true
     value: nightly
+  - name: ALLOWED_ORIGINS
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+  - name: KEYCLOAK_REALM_URL
+    value: https://dev.loginproxy.gov.bc.ca/auth/realms/standard
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -101,15 +105,9 @@ objects:
                 - name: NR_SPAR_BACKEND_VERSION
                   value: ${BUILD}
                 - name: ALLOWED_ORIGINS
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: allowed_origins
+                  value: ${ALLOWED_ORIGINS}
                 - name: KEYCLOAK_REALM_URL
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: keycloak-realm-url
+                  value: ${KEYCLOAK_REALM_URL}
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
