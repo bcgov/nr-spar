@@ -1,25 +1,33 @@
-FROM eclipse-temurin:17-jdk-alpine
-LABEL maintainer="Ricardo Montania Prado de Campos <ricardo.campos@encora.com>"
+# Global args
+ARG workdir=app
+ARG port=4200
 
-WORKDIR /usr/share/service/
-RUN mkdir -p /usr/share/service/config
-RUN mkdir -p /usr/share/service/dump
-RUN mkdir -p /usr/share/service/public
-RUN mkdir -p /usr/share/service/artifacts
+# Build container
+FROM openjdk:17.0.2@sha256:528707081fdb9562eb819128a9f85ae7fe000e2fbaeaf9f87662e7b3f38cb7d8 as build
+ARG workdir
 
+# Build package/archive
+WORKDIR /${workdir}
+COPY . ./
+RUN ./mvnw clean package -DskipTests -Dtests.skip=true -Dskip.unit.tests=true -q
+
+# Deploy container
+FROM eclipse-temurin:17-jre-alpine AS deploy
+ARG workdir
 ENV LANG en_CA.UTF-8
 ENV LANGUAGE en_CA.UTF-8
 ENV LC_ALL en_CA.UTF-8
 
-COPY InstallCert.java .
-COPY HealthCheck.java .
+# Copy package/archive and entrypoint script
+WORKDIR /${workdir}
+COPY --from=build /${workdir}/target/*.jar ./
+COPY dockerfile-entrypoint.sh ./
 
-COPY ./target/nr-spar-oracle-api.jar /usr/share/service/artifacts/nr-spar-oracle-api.jar
-COPY dockerfile-entrypoint.sh /usr/share/service/dockerfile-entrypoint.sh
-RUN chmod -R g+w . && \
-    chmod g+x dockerfile-entrypoint.sh && \
-    chmod g+w ${JAVA_HOME}/lib/security/cacerts
-
+# Port, user and entrypoint
 EXPOSE 8090
+USER 1001
+ENTRYPOINT ["/${workdir}/dockerfile-entrypoint.sh"]
 
-ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]
+
+# COPY InstallCert.java .
+# COPY HealthCheck.java .

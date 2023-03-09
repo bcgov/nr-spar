@@ -8,8 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.LocalDate;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @NoArgsConstructor
 @RequestMapping("/api/funding-sources")
 @Tag(
-    name = "FundingSourceEndpoint",
+    name = "fundingSource",
     description = "Resource to retrieve Funding Source to Owners Agencies")
 public class FundingSourceEndpoint {
 
@@ -45,8 +43,9 @@ public class FundingSourceEndpoint {
   @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Retrieve non-expired funding sources",
-      description = "Retrieve all valid (non expired) funding source based on effectiveDate "
-          + "and expiryDate, where 'today >= effectiveDate' and 'today < expiryDate'.")
+      description =
+          "Retrieve all valid (non expired) funding source based on effectiveDate "
+              + "and expiryDate, where 'today >= effectiveDate' and 'today < expiryDate'.")
   @ApiResponses(
       value = {
         @ApiResponse(
