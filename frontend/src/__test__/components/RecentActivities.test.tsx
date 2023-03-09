@@ -12,15 +12,13 @@ describe('Recent Activities component', () => {
     makeServer('test');
   });
 
-  beforeEach(() => {
+  it('should render title and subtitle correctly', async () => {
     render(
       <BrowserRouter>
         <RecentActivities />
       </BrowserRouter>
     );
-  });
 
-  it('should render title and subtitle correctly', async () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('My recent activities');
       expect(screen.getByText('Check your recent requests and files')).toBeInTheDocument();
@@ -28,6 +26,12 @@ describe('Recent Activities component', () => {
   });
 
   it('should change tabs when clicked', async () => {
+    render(
+      <BrowserRouter>
+        <RecentActivities />
+      </BrowserRouter>
+    );
+
     await waitFor(() => {
       const tabs = screen.getAllByRole('tab');
       expect(tabs[0].textContent).toEqual('Requests');
@@ -40,7 +44,7 @@ describe('Recent Activities component', () => {
       fireEvent.click(tabs[1]);
       const tabPanelAfter = screen.getByRole('tabpanel');
       expect(tabPanelAfter).not.toHaveTextContent('Seedling request');
-      expect(tabPanelAfter).toHaveTextContent('Placeholder');
+      expect(tabPanelAfter).toHaveTextContent('There is no files & docs to show yet!');
     });
   });
 });

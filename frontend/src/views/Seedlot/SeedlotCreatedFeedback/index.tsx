@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   FlexGrid,
   Column,
@@ -11,6 +11,7 @@ import './styles.scss';
 
 const SeedlotCreatedFeedback = () => {
   const navigate = useNavigate();
+  const { seedlot } = useParams()
 
   return (
     <FlexGrid fullWidth className="seedlot-created-feedback-page">
@@ -26,7 +27,7 @@ const SeedlotCreatedFeedback = () => {
             create another one or go back to the seedlot's main screen.
           </h2>
           <Button
-            onClick={() => null}
+            onClick={() => navigate('/seedlot/details/' + seedlot)}
             size="lg"
             className="btn-scf"
           >
