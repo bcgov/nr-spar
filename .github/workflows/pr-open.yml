@@ -27,6 +27,7 @@ jobs:
 
             Any successful deployments (not always required) will be available below.
             [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/) available
+            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/) available
 
             Once merged, code will be promoted and handed off to following workflow run.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
@@ -38,12 +39,14 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database]
+        package: [backend, database, frontend]
         include:
           - package: backend
             triggers: ('backend/')
           - package: database
             triggers: ('database/')
+          - package: frontend
+            triggers: ('frontend/')
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.0
@@ -61,7 +64,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [init, database, backend]
+        name: [init, database, backend, frontend]
         include:
           - name: init
             file: common/openshift.init.yml
@@ -73,7 +76,19 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2 -p BUILD=snapshot-${{ github.event.number }}
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=snapshot-${{ github.event.number }}
+          - name: frontend
+            file: frontend/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p REACT_APP_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
+              -p REACT_APP_SERVER_URL=https://nr-spar-backend-test-backend.apps.silver.devops.gov.bc.ca
+              -p REACT_APP_NRSPARWEBAPP_VERSION=dev
+              -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
+              -p REACT_APP_KC_REALM=standard
+              -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
+              -p REACT_APP_ENABLE_MOCK_SERVER=true
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.2
         with:
@@ -91,7 +106,7 @@ jobs:
 
   pr-validation:
     name: Label Validation (Only PR)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
     permissions:
       contents: read
@@ -142,16 +157,15 @@ jobs:
         with:
           message: |
             # Current changelog
-
             ${{ steps.changelog.outputs.clean_changelog }}
           comment_tag: current-changelog
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  api-tests:
+  backend-tests:
     name: Newman API tests runner
     needs:
       - deploys
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -165,7 +179,6 @@ jobs:
         run: |
           npm install -g newman
           npm install -g newman-reporter-htmlextra
-
       - name: Make Directory for Test Results
         run: mkdir -p testArtifacts
 
@@ -178,9 +191,52 @@ jobs:
             --env-var "authClient=${{ vars.KC_SERVICE_ACCOUNT_NAME }}" \
             --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}" \
             --suppress-exit-code -r htmlextra --reporter-htmlextra-export testArtifacts/api-tests-report.html
-
       - name: Output the results
         uses: actions/upload-artifact@v3
         with:
           name: API test report
           path: testArtifacts
+
+  # frontend-tests:
+  #   name: E2E Smoke on Chrome
+  #   env:
+  #     DOMAIN: apps.silver.devops.gov.bc.ca
+  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+  #   needs:
+  #     - deploys
+  #   continue-on-error: true
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 10
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Setup Node
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: "16"
+  #         cache: "yarn"
+  #         cache-dependency-path: frontend/yarn.lock
+
+  #     - name: Install dependencies
+  #       run: yarn --prefer-offline --cwd frontend
+
+  #     - name: Cypress run
+  #       uses: cypress-io/github-action@v5.0.9
+  #       with:
+  #         install: false
+  #         working-directory: frontend
+  #         config: baseUrl=https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
+
+  #     - name: Upload screenshots on failure
+  #       uses: actions/upload-artifact@v3
+  #       if: failure()
+  #       with:
+  #         name: cypress-screenshots
+  #         path: cypress/screenshots
+
+  #     - name: Upload videos
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: cypress-videos
+  #         path: cypress/videos
