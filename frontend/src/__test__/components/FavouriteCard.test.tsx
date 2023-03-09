@@ -1,9 +1,10 @@
 /* eslint-disable no-undef */
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import FavouriteCard from '../../components/Card/FavouriteCard';
 import '@testing-library/jest-dom/extend-expect';
-import { BrowserRouter } from 'react-router-dom';
+import '@testing-library/jest-dom';
 
 describe('the favourite card component', () => {
   it('should render correctly with headers', async () => {

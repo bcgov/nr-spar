@@ -43,7 +43,7 @@ describe('Seedlot Table component', () => {
     expect(cells[2].textContent).toEqual('SX - Spruce hibrid');
     expect(cells[3].textContent).toEqual('Collection');
     expect(cells[4].textContent).toEqual('Incomplete');
-    expect(cells[5]).toBeInTheDocument;
+    expect(cells[5]).toBeInTheDocument();
     expect(cells[6].textContent).toEqual('October 10, 2021');
     expect(cells[7].textContent).toEqual('December 24, 2022');
     expect(cells[8].textContent).toEqual('--');

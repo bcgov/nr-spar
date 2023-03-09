@@ -169,7 +169,7 @@ const ApplicantInformation = () => {
     } else {
       axios.post(getUrl(ApiAddresses.AClassSeedlotPost), responseBody, getAxiosConfig())
         .then((response) => {
-          navigate('/seedlot/successfully-created/' + response.data.seedlotNumber);
+          navigate(`/seedlot/successfully-created/${response.data.seedlotNumber}`);
         })
         .catch((error) => {
           // eslint-disable-next-line

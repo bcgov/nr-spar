@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-import { env } from '../../env';
-import { Tooltip, Row, Column, Loading } from '@carbon/react';
+import {
+  Tooltip,
+  Row,
+  Column,
+  Loading
+} from '@carbon/react';
 import { Information } from '@carbon/icons-react';
 
 import Card from '../Card/FavouriteCard';
@@ -11,11 +15,16 @@ import Subtitle from '../Subtitle';
 
 import CardType from '../../types/Card';
 
-import './styles.scss';
 import getUrl from '../../utils/ApiUtils';
 import ApiAddresses from '../../utils/ApiAddresses';
+
 import { useAuth } from '../../contexts/AuthContext';
+
 import getActivityProps from '../../enums/ActivityType';
+
+import { env } from '../../env';
+
+import './styles.scss';
 
 const FavouriteActivities = () => {
   const { token } = useAuth();
@@ -40,7 +49,7 @@ const FavouriteActivities = () => {
       .then((response) => {
         const newCards = response.data.favourites || response.data;
         newCards.forEach((item: CardType, i: number) => {
-          let card = item;
+          const card = item;
           if (env.REACT_APP_ENABLE_MOCK_SERVER === 'false') {
             const activityProps = getActivityProps(item.activity);
             card.image = activityProps.icon;
@@ -80,7 +89,7 @@ const FavouriteActivities = () => {
     getCards();
     setInterval(() => {
       getCards();
-    }, 3*60*1000);
+    }, 3 * 60 * 1000);
   }, []);
 
   const highlightFunction = (index: number) => {
@@ -133,10 +142,10 @@ const FavouriteActivities = () => {
       </Column>
       <Column lg={12} className="favourite-activities-cards">
         <Row>
-          {loading ? (
-            <Loading withOverlay={false} />
-          ) : (
-            (cards.length === 0) ? (           
+          { loading && <Loading withOverlay={false} /> }
+          {
+            !loading
+            && ((cards.length === 0) ? (
               <EmptySection
                 icon="Application"
                 title="You don't have any favourites to show yet!"
@@ -154,8 +163,8 @@ const FavouriteActivities = () => {
                 deleteFunction={() => { deleteCard(card.id); }}
                 link={card.link}
               />
-            ))
-          )}
+            )))
+          }
         </Row>
       </Column>
     </Row>

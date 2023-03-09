@@ -5,7 +5,7 @@ import GeneticClasses from './GeneticClasses';
 const fixtures = {
   favourites: FavouriteActivitiesCardItems,
   recent: RecentActivityItems,
-  geneticClasses: GeneticClasses,
+  geneticClasses: GeneticClasses
 };
 
 export default fixtures;

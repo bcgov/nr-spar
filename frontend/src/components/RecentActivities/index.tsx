@@ -26,6 +26,9 @@ import FilesDocsTable from '../FilesDocsTable';
 const RecentActivities = () => {
   const { token } = useAuth();
   const [listItems, setListItems] = useState([]);
+  // Will let eslint ignoring it for now,
+  // since we will use this state with API calls
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [filesDocsItems, setFilesDocsItems] = useState([]);
 
   const getAxiosConfig = () => {

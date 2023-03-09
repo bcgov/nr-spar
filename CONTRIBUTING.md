@@ -44,6 +44,9 @@ To enforce a better solution and a stronger product we decided to use
 the Airbnb ESLint check-style. This way also helps us to have a dedicated
 pipeline to check for common errors and possible bugs.
 
+Also, run `yarn lint` before making a PR, so any style error not addressed
+can be checked and you can use `yarn lint --fix` to fix small issues.
+
 > Note that if you choose VS Code as your IDE, we highly recommend above mentioned extension **ESLint**, by Microsoft.
 > Here's the link to the Marketplace: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
 

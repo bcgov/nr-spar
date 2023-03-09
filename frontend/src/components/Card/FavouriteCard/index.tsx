@@ -22,9 +22,11 @@ const FavouriteCard = ({
   const Icon = Icons[icon];
   const navigate = useNavigate();
   return (
-    <Tile className={highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
-          tabIndex={0}
-          onClick={() => navigate(link)}>
+    <Tile
+      className={highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
+      tabIndex={0}
+      onClick={() => navigate(link)}
+    >
       <div className="fav-card-header">
         <Icon className="fav-card-icon" />
         <p className="fav-card-title-small">{header}</p>

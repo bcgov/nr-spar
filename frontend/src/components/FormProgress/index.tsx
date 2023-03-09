@@ -20,9 +20,10 @@ const FormProgress = () => (
       <Subtitle text="Where you are in the registration process" />
     </div>
     <div className="steps-box">
-      <ProgressIndicator         
+      <ProgressIndicator
         currentIndex={5}
-        spaceEqually={true}>
+        spaceEquall
+      >
         <ProgressStep
           label="Collection"
           secondaryLabel="Step 1"

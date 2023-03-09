@@ -19,43 +19,55 @@ const FormReview = () => (
       <Subtitle text="Review data filled in the form (view-only)" />
     </div>
     <div>
-      <Accordion className="steps-accordion" >
-        <AccordionItem 
-          title={
+      <Accordion className="steps-accordion">
+        <AccordionItem
+          title={(
             <TitleAccordion
               title="Collection"
-              description="Review collection information" />
-          } />
-        <AccordionItem 
-          title={
+              description="Review collection information"
+            />
+          )}
+        />
+        <AccordionItem
+          title={(
             <TitleAccordion
               title="Ownership"
-              description="Review ownership information" />
-          } />
-        <AccordionItem 
-          title={
+              description="Review ownership information"
+            />
+          )}
+        />
+        <AccordionItem
+          title={(
             <TitleAccordion
               title="Interim storage"
-              description="Review interim storage information" />
-          } />
-        <AccordionItem 
-          title={
+              description="Review interim storage information"
+            />
+          )}
+        />
+        <AccordionItem
+          title={(
             <TitleAccordion
               title="Orchard"
-              description="Review orchard information" />
-          } />
-        <AccordionItem 
-          title={
+              description="Review orchard information"
+            />
+          )}
+        />
+        <AccordionItem
+          title={(
             <TitleAccordion
               title="Parent tree and SMP"
-              description="Review parent tree and SPM information" />
-          } />
-        <AccordionItem 
-          title={
+              description="Review parent tree and SPM information"
+            />
+          )}
+        />
+        <AccordionItem
+          title={(
             <TitleAccordion
               title="Extraction and storage"
-              description="Review extraction and storage information" />
-          } />
+              description="Review extraction and storage information"
+            />
+          )}
+        />
       </Accordion>
     </div>
   </div>

@@ -25,16 +25,16 @@ const SeedlotRegistrationEndpoints = (server: Server) => {
 
     const today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
     const yyyy = today.getFullYear();
 
-    const stringDate = yyyy + '-' + mm + '-' + dd;
+    const stringDate = `${yyyy}-${mm}-${dd}`;
 
     seedlotData.insert({
       number: seedlotNumber,
-      class: "A Class",
+      class: 'A Class',
       lot_species: attrs.species,
-      form_step: "Collection",
+      form_step: 'Collection',
       status: 4,
       participants: [`${userData.firstName} ${userData.lastName}`],
       created_at: formatDate(stringDate),
@@ -43,7 +43,7 @@ const SeedlotRegistrationEndpoints = (server: Server) => {
     });
 
     return {
-      seedlotNumber: seedlotNumber,
+      seedlotNumber
     };
   });
 
