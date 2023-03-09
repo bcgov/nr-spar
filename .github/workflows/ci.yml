@@ -15,7 +15,7 @@ concurrency:
 jobs:
   validate:
     name: Code validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -50,7 +50,7 @@ jobs:
 
   tests:
     name: Run tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - validate
     steps:
@@ -152,7 +152,7 @@ jobs:
 
   backend-security:
     name: Security checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       security-events: write
     needs:

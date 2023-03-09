@@ -106,7 +106,7 @@ jobs:
 
   pr-validation:
     name: Label Validation (Only PR)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
     permissions:
       contents: read
@@ -165,7 +165,7 @@ jobs:
     name: Newman API tests runner
     needs:
       - deploys
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
