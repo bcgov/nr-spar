@@ -36,7 +36,7 @@ parameters:
     value: nrcdb03.bcgov
   - name: DATABASE_PORT
     description: The port to be used for the connection to the database
-    value: 1543
+    value: "1543"
   - name: SERVICE_NAME
     description: The database's name
     value: fortmp1.nrs.bcgov
