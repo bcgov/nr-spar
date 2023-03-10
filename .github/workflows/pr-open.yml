@@ -59,52 +59,52 @@ jobs:
   #         token: ${{ secrets.GITHUB_TOKEN }}
   #         triggers: ${{ matrix.triggers }}
 
-  deploys:
-    name: Deploys
-    # needs:
-    #   - builds
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name: [init, database, backend, frontend]
-        include:
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
-          - name: database
-            file: database/openshift.deploy.yml
-            parameters: -p DB_PVC_SIZE=128Mi
-            overwrite: false
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=snapshot-${{ github.event.number }}
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-            parameters:
-              -p REACT_APP_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
-              -p REACT_APP_SERVER_URL=https://nr-spar-backend-test-backend.apps.silver.devops.gov.bc.ca
-              -p REACT_APP_NRSPARWEBAPP_VERSION=dev
-              -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-              -p REACT_APP_KC_REALM=standard
-              -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-              -p REACT_APP_ENABLE_MOCK_SERVER=true
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.2
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
-          verification_path: "actuator/health"
-          parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
-            ${{ matrix.parameters }}
+  # deploys:
+  #   name: Deploys
+  #   # needs:
+  #   #   - builds
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       name: [init, database, backend, frontend]
+  #       include:
+  #         - name: init
+  #           file: common/openshift.init.yml
+  #           overwrite: false
+  #         - name: database
+  #           file: database/openshift.deploy.yml
+  #           parameters: -p DB_PVC_SIZE=128Mi
+  #           overwrite: false
+  #         - name: backend
+  #           file: backend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=snapshot-${{ github.event.number }}
+  #         - name: frontend
+  #           file: frontend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters:
+  #             -p REACT_APP_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
+  #             -p REACT_APP_SERVER_URL=https://nr-spar-backend-test-backend.apps.silver.devops.gov.bc.ca
+  #             -p REACT_APP_NRSPARWEBAPP_VERSION=dev
+  #             -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
+  #             -p REACT_APP_KC_REALM=standard
+  #             -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
+  #             -p REACT_APP_ENABLE_MOCK_SERVER=true
+  #             -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
+  #   steps:
+  #     - uses: bcgov-nr/action-deployer-openshift@v1.0.2
+  #       with:
+  #         file: ${{ matrix.file }}
+  #         oc_namespace: ${{ vars.OC_NAMESPACE }}
+  #         oc_server: ${{ vars.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         overwrite: ${{ matrix.overwrite }}
+  #         penetration_test: false
+  #         verification_path: "actuator/health"
+  #         parameters:
+  #           -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+  #           -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
+  #           ${{ matrix.parameters }}
 
   deploys-api:
     name: Deploys - API
@@ -125,13 +125,7 @@ jobs:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/oracle-api:${{ github.event.number }}
             -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
-            -p ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }}
-            -p KEYCLOAK_REALM_URL=${{ vars.KEYCLOAK_REALM_URL }}
-            -p DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-            -p DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-            -p SERVICE_NAME=${{ secrets.SERVICE_NAME }}
-            -p DATABASE_USER=${{ secrets.DATABASE_USER }}
-            -p DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            -p DATABASE_PASSWORD=${{ secrets.ORACLE_DB_PASSWORD }}
 
   # pr-validation:
   #   name: Label Validation (Only PR)
