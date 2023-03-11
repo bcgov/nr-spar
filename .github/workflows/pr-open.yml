@@ -8,8 +8,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pr-greeting:
-    name: PR Greeting
+  init:
+    name: Initialize
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
@@ -31,6 +31,18 @@ jobs:
 
             Once merged, code will be promoted and handed off to following workflow run.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+
+      - name: OpenShift Init
+        uses: bcgov-nr/action-deployer-openshift@v1.0.2
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          file: common/openshift.init.yml
+          overwrite: false
+          parameters:
+            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+            -p ORACLE_DB_PASSWORD=${{ secrets.ORACLE_DB_PASSWORD }}
 
   builds:
     name: Builds
@@ -58,21 +70,6 @@ jobs:
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
-
-  init:
-    name: OpenShift Init
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.2
-        with:
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          file: common/openshift.init.yml
-          overwrite: false
-          parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p ORACLE_DB_PASSWORD=${{ secrets.ORACLE_DB_PASSWORD }}
 
   deploys:
     name: Deploys
