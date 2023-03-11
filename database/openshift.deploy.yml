@@ -1,14 +1,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-metadata:
-  name: ${NAME}
-  annotations:
-    description: "NR SPAR Database"
-    tags: "nr-spar-backend,database"
-    iconClass: icon-java
 labels:
   app: ${NAME}-${ZONE}
-  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name
@@ -113,7 +106,7 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - '-c'
+                    - "-c"
                     - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
                 failureThreshold: 5
                 initialDelaySeconds: 30
@@ -124,7 +117,7 @@ objects:
                   command:
                     - /usr/bin/env
                     - bash
-                    - '-c'
+                    - "-c"
                     - psql -q $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
                 failureThreshold: 5
                 initialDelaySeconds: 30

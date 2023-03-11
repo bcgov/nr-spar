@@ -1,6 +1,6 @@
 test/
 target/
-.mvn
-mvnw*
+# .mvn
+# mvnw*
 .env
 *.yml

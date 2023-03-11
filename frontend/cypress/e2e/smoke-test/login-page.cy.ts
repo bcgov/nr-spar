@@ -37,13 +37,13 @@ describe('Login page test', () => {
   });
 
   it('try to access system using a link without user connected', () => {
-    cy.visit('https://nrsparwebapp-test-app.apps.silver.devops.gov.bc.ca/dashboard');
+    cy.visit('/dashboard');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
   it.skip('log in with BCeID and validate if after timeout the user is disconnected', () => {
     cy.login();
-    cy.wait(1800000); //wait for 30 minutes 1800000
+    cy.wait(180000); //wait for 3 minutes 180000
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
