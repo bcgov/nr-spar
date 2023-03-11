@@ -43,9 +43,6 @@ parameters:
   - name: DATABASE_USER
     description: User for the database connection
     value: proxy_fsa_spar_read_only_user
-  - name: DATABASE_PASSWORD
-    description: Password for the database connection
-    required: true
   - name: KEYCLOAK_REALM_URL
     description: Keycloak realm address
     value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
@@ -112,7 +109,10 @@ objects:
                 - name: DATABASE_USER
                   value: ${DATABASE_USER}
                 - name: DATABASE_PASSWORD
-                  value: ${DATABASE_PASSWORD}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-oracle-api
+                      key: oracle-db-password
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
               ports:
