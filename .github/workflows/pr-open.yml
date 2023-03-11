@@ -8,8 +8,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pr-greeting:
-    name: PR Greeting
+  init:
+    name: Initialize
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
@@ -32,6 +32,18 @@ jobs:
             Once merged, code will be promoted and handed off to following workflow run.
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
+      - name: OpenShift Init
+        uses: bcgov-nr/action-deployer-openshift@v1.0.2
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          file: common/openshift.init.yml
+          overwrite: false
+          parameters:
+            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+            -p ORACLE_DB_PASSWORD=${{ secrets.ORACLE_DB_PASSWORD }}
+
   builds:
     name: Builds
     runs-on: ubuntu-22.04
@@ -39,7 +51,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, frontend]
+        package: [backend, database, frontend, oracle-api]
         include:
           - package: backend
             triggers: ('backend/')
@@ -47,6 +59,8 @@ jobs:
             triggers: ('database/')
           - package: frontend
             triggers: ('frontend/')
+          - package: oracle-api
+            triggers: ('oracle-api/')
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.0
@@ -61,14 +75,12 @@ jobs:
     name: Deploys
     needs:
       - builds
+      - init
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [init, database, backend, frontend]
+        name: [database, backend, frontend]
         include:
-          - name: init
-            file: common/openshift.init.yml
-            overwrite: false
           - name: database
             file: database/openshift.deploy.yml
             parameters: -p DB_PVC_SIZE=128Mi
@@ -76,10 +88,12 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
+            verification_path: "actuator/health"
             parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=snapshot-${{ github.event.number }}
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
+            verification_path: "actuator/health"
             parameters:
               -p REACT_APP_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
               -p REACT_APP_SERVER_URL=https://nr-spar-backend-test-backend.apps.silver.devops.gov.bc.ca
@@ -89,6 +103,11 @@ jobs:
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
               -p REACT_APP_ENABLE_MOCK_SERVER=true
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
+          - name: oracle-api
+            file: oracle-api/openshift.deploy.yml
+            overwrite: true
+            verification_path: "check"
+            parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.2
         with:
@@ -98,145 +117,90 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
-          verification_path: "actuator/health"
+          verification_path: ${{ matrix.verification_path}}
           parameters:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
             ${{ matrix.parameters }}
 
-  pr-validation:
-    name: Label Validation (Only PR)
-    runs-on: ubuntu-22.04
-    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Pull request size and stability labels
-        uses: actions/labeler@v4
-        continue-on-error: true
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Conventional Label
-        uses: bcoe/conventional-release-labels@v1
-        continue-on-error: true
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ignored_types: '["chore","pr"]'
-          type_labels: '{"feat": "feature", "fix": "fix", "bug": "fix", "doc": "documentation", "ci": "ci", "chore": "chore", "breaking": "breaking", "BREAKING CHANGE": "breaking"}'
-
-      - name: Checkout branch
-        uses: actions/checkout@v3
-        with:
-          ref: refs/heads/${{ github.head_ref }}
-
-      - name: Conventional Changelog Update
-        continue-on-error: true
-        uses: TriPSs/conventional-changelog-action@v3
-        id: changelog
-        with:
-          github-token: ${{ github.token }}
-          output-file: "CHANGELOG.md"
-          skip-version-file: "true"
-          skip-commit: "true"
-          git-push: "false"
-          git-branch: refs/heads/${{ github.head_ref }}
-
-      - name: Checkout pr
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.ref }}
-
-      - name: Comment PR
-        continue-on-error: true
-        uses: thollander/actions-comment-pull-request@v2
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        with:
-          message: |
-            # Current changelog
-            ${{ steps.changelog.outputs.clean_changelog }}
-          comment_tag: current-changelog
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  backend-tests:
-    name: Newman API tests runner
-    needs:
-      - deploys
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: Install newman
-        run: |
-          npm install -g newman
-          npm install -g newman-reporter-htmlextra
-      - name: Make Directory for Test Results
-        run: mkdir -p testArtifacts
-
-      - name: Run Postman Collection
-        run: |
-          newman run test/postman/starting-api.postman_collection.json -e test/postman/starting-api.postman_environment.json \
-            --env-var "apiAddr=nr-spar-backend-${{ github.event.number }}-spar-api.apps.silver.devops.gov.bc.ca" \
-            --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-            --env-var "authServer=${{ vars.KEYCLOAK_SERVER_REALM }}" \
-            --env-var "authClient=${{ vars.KC_SERVICE_ACCOUNT_NAME }}" \
-            --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}" \
-            --suppress-exit-code -r htmlextra --reporter-htmlextra-export testArtifacts/api-tests-report.html
-      - name: Output the results
-        uses: actions/upload-artifact@v3
-        with:
-          name: API test report
-          path: testArtifacts
-
-  # frontend-tests:
-  #   name: E2E Smoke on Chrome
+  # tests-api:
+  #   name: API Tests
+  #   needs:
+  #     - deploys
   #   env:
-  #     DOMAIN: apps.silver.devops.gov.bc.ca
-  #     PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 16
+  #     - run: |
+  #         # Install newman
+  #         npm install -g newman
+  #         npm install -g newman-reporter-htmlextra
+  #         mkdir -p testArtifacts
+
+  #     - run: |
+  #         # Run Postman Collection
+  #         newman run oracle-api/test/postman/oracle-api.postman_collection.json \
+  #           -e oracle-api/test/postman/oracle-api.postman_environment.json \
+  #           --env-var "apiAddr=${{ env.TARGET }}" \
+  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
+  #           --env-var "authServer=${{ secrets.KEYCLOAK_SERVER_REALM }}" \
+  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_NAME }}" \
+  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
+
+  # tests-backend:
+  #   name: Backend Tests
+  #   needs:
+  #     - deploys
+  #   env:
+  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 16
+  #     - run: |
+  #         # Install newman
+  #         npm install -g newman
+  #         npm install -g newman-reporter-htmlextra
+  #         mkdir -p testArtifacts
+
+  #     - run: |
+  #         # Run Postman Collection
+  #         newman run backend/test/postman/starting-api.postman_collection.json \
+  #           -e backend/test/postman/starting-api.postman_environment.json \
+  #           --env-var "apiAddr=${{ env.TARGET }}" \
+  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
+  #           --env-var "authServer=${{ vars.KEYCLOAK_SERVER_REALM }}" \
+  #           --env-var "authClient=${{ vars.KC_SERVICE_ACCOUNT_NAME }}" \
+  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
+
+  # tests-frontend:
+  #   name: Frontend Tests
+  #   env:
+  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
   #   needs:
   #     - deploys
   #   continue-on-error: true
   #   runs-on: ubuntu-22.04
   #   timeout-minutes: 10
   #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-
-  #     - name: Setup Node
-  #       uses: actions/setup-node@v3
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: "16"
   #         cache: "yarn"
   #         cache-dependency-path: frontend/yarn.lock
-
   #     - name: Install dependencies
   #       run: yarn --prefer-offline --cwd frontend
 
   #     - name: Cypress run
-  #       uses: cypress-io/github-action@v5.0.9
+  #       uses: cypress-io/github-action@v5
   #       with:
+  #         config: baseUrl=https://${{ env.TARGET }}
   #         install: false
   #         working-directory: frontend
-  #         config: baseUrl=https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
-
-  #     - name: Upload screenshots on failure
-  #       uses: actions/upload-artifact@v3
-  #       if: failure()
-  #       with:
-  #         name: cypress-screenshots
-  #         path: cypress/screenshots
-
-  #     - name: Upload videos
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: cypress-videos
-  #         path: cypress/videos
