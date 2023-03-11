@@ -260,8 +260,8 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      # - name: Unit Tests
-      #   run: mvn --no-transfer-progress test --file oracle-api/pom.xml
+      - name: Unit Tests
+        run: mvn --no-transfer-progress test --file oracle-api/pom.xml
 
       - name: Integration Tests
         run: mvn --no-transfer-progress verify -P integration-test --file oracle-api/pom.xml
