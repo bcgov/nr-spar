@@ -32,32 +32,32 @@ jobs:
   #           Once merged, code will be promoted and handed off to following workflow run.
   #           [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
-  builds:
-    name: Builds
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        # package: [backend, database, frontend, oracle-api]
-        include:
-          # - package: backend
-          #   triggers: ('backend/')
-          # - package: database
-          #   triggers: ('database/')
-          # - package: frontend
-          #   triggers: ('frontend/')
-          - package: oracle-api
-            triggers: ('oracle-api/')
-    steps:
-      - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-builder-ghcr@v1.1.0
-        with:
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: test
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ${{ matrix.triggers }}
+  # builds:
+  #   name: Builds
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     packages: write
+  #   strategy:
+  #     matrix:
+  #       package: [backend, database, frontend, oracle-api]
+  #       include:
+  #         - package: backend
+  #           triggers: ('backend/')
+  #         - package: database
+  #           triggers: ('database/')
+  #         - package: frontend
+  #           triggers: ('frontend/')
+  #         - package: oracle-api
+  #           triggers: ('oracle-api/')
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: bcgov-nr/action-builder-ghcr@v1.1.0
+  #       with:
+  #         package: ${{ matrix.package }}
+  #         tag: ${{ github.event.number }}
+  #         tag_fallback: test
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         triggers: ${{ matrix.triggers }}
 
   # deploys:
   #   name: Deploys
@@ -106,26 +106,26 @@ jobs:
   #           -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
   #           ${{ matrix.parameters }}
 
-  deploys-api:
-    name: Deploys - API
-    needs:
-      - builds
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.2
-        with:
-          file: oracle-api/openshift.deploy.yml
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: true
-          penetration_test: false
-          verification_path: "check"
-          parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/oracle-api:${{ github.event.number }}
-            -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
-            -p DATABASE_PASSWORD=${{ secrets.ORACLE_DB_PASSWORD }}
+  # deploys-api:
+  #   name: Deploys - API
+  #   needs:
+  #     - builds
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: bcgov-nr/action-deployer-openshift@v1.0.2
+  #       with:
+  #         file: oracle-api/openshift.deploy.yml
+  #         oc_namespace: ${{ vars.OC_NAMESPACE }}
+  #         oc_server: ${{ vars.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         overwrite: true
+  #         penetration_test: false
+  #         verification_path: "check"
+  #         parameters:
+  #           -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+  #           -p PROMOTE=${{ github.repository }}/oracle-api:${{ github.event.number }}
+  #           -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
+  #           -p DATABASE_PASSWORD=${{ secrets.ORACLE_DB_PASSWORD }}
 
   # pr-validation:
   #   name: Label Validation (Only PR)
@@ -376,3 +376,41 @@ jobs:
   # #       with:
   # #         name: cypress-videos
   # #         path: cypress/videos
+
+  api-tests:
+    name: Newman API tests runner
+    # needs:
+    #   - deploys-api
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Run Postman Collection
+        run: |
+          # Install newman
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+
+          # Make Directory for Test Results
+          mkdir -p testArtifacts
+
+          # Run Postman Collection
+          newman run oracle-api/test/postman/oracle-api.postman_collection.json -e oracle-api/test/postman/oracle-api.postman_environment.json \
+            --env-var "apiAddr=nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca" \
+            --env-var "releaseVer=snapshot-${{ github.event.number }}" \
+            --env-var "authServer=${{ secrets.KEYCLOAK_SERVER_REALM }}" \
+            --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_NAME }}" \
+            --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}" \
+            --suppress-exit-code -r htmlextra --reporter-htmlextra-export testArtifacts/api-tests-report.html
+
+      - name: Output the results
+        uses: actions/upload-artifact@v3
+        with:
+          name: API test report
+          path: testArtifacts
