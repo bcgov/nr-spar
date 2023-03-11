@@ -1,17 +1,20 @@
 apiVersion: template.openshift.io/v1
 kind: Template
+labels:
+  app: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name
-    value: nr-spar-backend
-  - name: PG_DATABASE
-    description: Postgres database name
-    value: database
+    value: nr-spar
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: PROMOTE
-    description: Dummy param, for convenience in deployments
+  - name: ORACLE_DB_PASSWORD
+    description: Oracle database password for API
+    required: true
+  - name: PG_DATABASE
+    description: Postgres database name
+    value: database
   - name: DB_PASSWORD
     description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
@@ -27,6 +30,14 @@ objects:
       database-name: ${NAME}
       database-password: ${DB_PASSWORD}
       database-user: ${NAME}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-oracle-api
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      oracle-db-password: ${ORACLE_DB_PASSWORD}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
