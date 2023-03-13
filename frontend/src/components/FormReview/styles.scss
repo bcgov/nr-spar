@@ -28,3 +28,7 @@
   color: var(--#{vars.$bcgov-prefix}-text-secondary);
   padding-top: 0.25rem;
 }
+
+.form-review-empty-section .empty-section-container{
+  padding-bottom: 6rem;
+}

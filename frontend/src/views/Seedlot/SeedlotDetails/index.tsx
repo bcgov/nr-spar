@@ -35,7 +35,7 @@ import './styles.scss';
 
 const manageOptions = [
   {
-    text: 'Share seedlot',
+    text: 'Edit seedlot applicant',
     onClickFunction: () => null
   },
   {
@@ -95,7 +95,7 @@ const SeedlotDetails = () => {
       <Row className="seedlot-details-breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
-          <BreadcrumbItem>Existing seedlots</BreadcrumbItem>
+          <BreadcrumbItem>My seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Stack gap={6}>
@@ -110,7 +110,7 @@ const SeedlotDetails = () => {
               />
             )
           }
-          <ComboButton title="Manage Seedlot" items={manageOptions} />
+          <ComboButton title="Edit seedlot form" items={manageOptions} menuOptionsClass="edit-seedlot-form" />
         </Row>
         <section title="Seedlot Summary">
           <Row className="seedlot-summary-content">

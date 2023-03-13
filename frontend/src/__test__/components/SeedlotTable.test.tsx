@@ -2,11 +2,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SeedlotTable from '../../components/SeedlotTable';
-import ExistingSeedlotItems from '../../mock-api/fixtures/ExistingSeedlotItems';
+import MySeedlotsItems from '../../mock-api/fixtures/MySeedlotsItems';
 import '@testing-library/jest-dom';
 
 describe('Seedlot Table component', () => {
-  const listItems = ExistingSeedlotItems;
+  const listItems = MySeedlotsItems;
   const tableHeaders: string[] = [
     'Seedlot number',
     'Lot class',

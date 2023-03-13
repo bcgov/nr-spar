@@ -10,6 +10,8 @@ import ActivityHistory from '../../ActivityHistory';
 
 import ActivityHistoryItems from '../../../mock-api/fixtures/ActivityHistoryItems';
 
+import EmptySection from '../../EmptySection';
+
 import './styles.scss';
 
 interface StandardCardProps {
@@ -17,10 +19,14 @@ interface StandardCardProps {
   description: string;
   url: string;
   image: string;
+  type: string;
+  isEmpty: boolean;
+  emptyTitle: string;
+  emptyDescription: string;
 }
 
 const StandardCard = ({
-  header, description, url, image
+  header, description, url, image, type, isEmpty, emptyTitle, emptyDescription
 }: StandardCardProps) => {
   const navigate = useNavigate();
   const Image = Pictograms[image];
@@ -33,19 +39,30 @@ const StandardCard = ({
             <p>{description}</p>
           </div>
         </div>
-        <IconButton className="std-card-button" kind="ghost" label="Go" align="bottom" onClick={() => { navigate(`${url}`); }}>
-          <Icons.ArrowRight />
-        </IconButton>
+        {
+          !isEmpty
+          && (
+          <IconButton className="std-card-button" kind="ghost" label="Go" align="bottom" onClick={() => { navigate(`${url}`); }}>
+            <Icons.ArrowRight />
+          </IconButton>
+          )
+        }
       </div>
-      <div>
-        {image ? (
-          <Image className="std-card-pictogram" />
-        ) : (
-          <ActivityHistory
-            history={ActivityHistoryItems}
-          />
-        )}
-      </div>
+      {
+        isEmpty
+          ? <EmptySection pictogram={image} title={emptyTitle} description={emptyDescription} />
+          : (
+            <div>
+              {type !== '4' ? (
+                <Image className="std-card-pictogram" />
+              ) : (
+                <ActivityHistory
+                  history={ActivityHistoryItems}
+                />
+              )}
+            </div>
+          )
+      }
     </Tile>
   );
 };

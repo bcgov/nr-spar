@@ -11,7 +11,7 @@ import './styles.scss';
 
 const SeedlotCreatedFeedback = () => {
   const navigate = useNavigate();
-  const { seedlot } = useParams();
+  const seedlotNumber = useParams().seedlot;
 
   return (
     <FlexGrid fullWidth className="seedlot-created-feedback-page">
@@ -22,12 +22,16 @@ const SeedlotCreatedFeedback = () => {
         <Column className="scf-info-container">
           <h1> A class seedlot created! </h1>
           <h2>
-            Your A class seedlot has been created with success!
+            Your A class seedlot
+            {' '}
+            {seedlotNumber}
+            {' '}
+            has been created with success!
             Now you can access the seedlot&apos;s detail screen,
             create another one or go back to the seedlot&apos;s main screen.
           </h2>
           <Button
-            onClick={() => navigate(`/seedlot/details/${seedlot}`)}
+            onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
             size="lg"
             className="btn-scf"
           >

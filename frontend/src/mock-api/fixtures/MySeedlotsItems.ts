@@ -1,4 +1,4 @@
-const ExistingSeedlotItems = [
+const MySeedlotsItems = [
   {
     number: 12456,
     class: 'A',
@@ -67,4 +67,4 @@ const ExistingSeedlotItems = [
   }
 ];
 
-export default ExistingSeedlotItems;
+export default MySeedlotsItems;

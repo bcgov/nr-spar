@@ -1,15 +1,15 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ExistingSeedlot from '../../components/ExistingSeedlot';
+import MySeedlots from '../../components/MySeedlots';
 import '@testing-library/jest-dom';
 
 //TODO test Empty Section
-describe('Existing Seedlot component', () => {
+describe('MySeedlots Seedlot component', () => {
   it('should render title and subtitle correctly', () => {
-    render(<ExistingSeedlot />);
+    render(<MySeedlots />);
 
-    expect(screen.getByRole('heading', { level: 2 }).textContent).toEqual('Existing seedlot');
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toEqual('My seedlots');
     expect(screen.getByText('Check a summary of your recent seedlots')).toBeInTheDocument();
   });
 });

@@ -25,7 +25,7 @@ interface TableProps {
 }
 
 const SeedlotTable = ({ elements, headers }: TableProps) => (
-  <Table size="lg" useZebraStyles={false} className="seedlot-table">
+  <Table size="lg" useZebraStyles={false} className="seedlots-table">
     <TableHead>
       <TableRow>
         {headers.map((header, idx) => (

@@ -29,3 +29,11 @@
   background-color: var(--bcgov-layer-01);
   padding: 1.75rem 2.5rem !important;
 }
+
+.edit-seedlot-form {
+  width: 11.75rem;
+}
+
+.edit-seedlot-form .#{vars.$bcgov-prefix}--overflow-menu-options__btn {
+  max-width: 100%;
+}
