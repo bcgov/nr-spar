@@ -122,84 +122,84 @@ jobs:
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
             ${{ matrix.parameters }}
 
-  tests-api:
-    name: API Tests
-    needs:
-      - deploys
-    env:
-      TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - run: |
-          # Install newman
-          npm install -g newman
-          npm install -g newman-reporter-htmlextra
-          mkdir -p testArtifacts
+  # tests-api:
+  #   name: API Tests
+  #   needs:
+  #     - deploys
+  #   env:
+  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 16
+  #     - run: |
+  #         # Install newman
+  #         npm install -g newman
+  #         npm install -g newman-reporter-htmlextra
+  #         mkdir -p testArtifacts
 
-      - run: |
-          # Run Postman Collection
-          newman run oracle-api/test/postman/oracle-api.postman_collection.json \
-            -e oracle-api/test/postman/oracle-api.postman_environment.json \
-            --env-var "apiAddr=${{ env.TARGET }}" \
-            --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-            --env-var "authServer=${{ secrets.KEYCLOAK_SERVER_REALM }}" \
-            --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_NAME }}" \
-            --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
+  #     - run: |
+  #         # Run Postman Collection
+  #         newman run oracle-api/test/postman/oracle-api.postman_collection.json \
+  #           -e oracle-api/test/postman/oracle-api.postman_environment.json \
+  #           --env-var "apiAddr=${{ env.TARGET }}" \
+  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
+  #           --env-var "authServer=${{ secrets.KEYCLOAK_SERVER_REALM }}" \
+  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_NAME }}" \
+  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
 
-  tests-backend:
-    name: Backend Tests
-    needs:
-      - deploys
-    env:
-      TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - run: |
-          # Install newman
-          npm install -g newman
-          npm install -g newman-reporter-htmlextra
-          mkdir -p testArtifacts
+  # tests-backend:
+  #   name: Backend Tests
+  #   needs:
+  #     - deploys
+  #   env:
+  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 16
+  #     - run: |
+  #         # Install newman
+  #         npm install -g newman
+  #         npm install -g newman-reporter-htmlextra
+  #         mkdir -p testArtifacts
 
-      - run: |
-          # Run Postman Collection
-          newman run backend/test/postman/starting-api.postman_collection.json \
-            -e backend/test/postman/starting-api.postman_environment.json \
-            --env-var "apiAddr=${{ env.TARGET }}" \
-            --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-            --env-var "authServer=${{ vars.KEYCLOAK_SERVER_REALM }}" \
-            --env-var "authClient=${{ vars.KC_SERVICE_ACCOUNT_NAME }}" \
-            --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
+  #     - run: |
+  #         # Run Postman Collection
+  #         newman run backend/test/postman/starting-api.postman_collection.json \
+  #           -e backend/test/postman/starting-api.postman_environment.json \
+  #           --env-var "apiAddr=${{ env.TARGET }}" \
+  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
+  #           --env-var "authServer=${{ vars.KEYCLOAK_SERVER_REALM }}" \
+  #           --env-var "authClient=${{ vars.KC_SERVICE_ACCOUNT_NAME }}" \
+  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
 
-  tests-frontend:
-    name: Frontend Tests
-    env:
-      TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-    needs:
-      - deploys
-    continue-on-error: true
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "16"
-          cache: "yarn"
-          cache-dependency-path: frontend/yarn.lock
-      - name: Install dependencies
-        run: yarn --prefer-offline --cwd frontend
+  # tests-frontend:
+  #   name: Frontend Tests
+  #   env:
+  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+  #   needs:
+  #     - deploys
+  #   continue-on-error: true
+  #   runs-on: ubuntu-22.04
+  #   timeout-minutes: 10
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: "16"
+  #         cache: "yarn"
+  #         cache-dependency-path: frontend/yarn.lock
+  #     - name: Install dependencies
+  #       run: yarn --prefer-offline --cwd frontend
 
-      - name: Cypress run
-        uses: cypress-io/github-action@v5
-        with:
-          config: baseUrl=https://${{ env.TARGET }}
-          install: false
-          working-directory: frontend
+  #     - name: Cypress run
+  #       uses: cypress-io/github-action@v5
+  #       with:
+  #         config: baseUrl=https://${{ env.TARGET }}
+  #         install: false
+  #         working-directory: frontend

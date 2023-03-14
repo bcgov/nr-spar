@@ -20,4 +20,4 @@ COPY --from=build /app/target/nr-spar_backend.jar app.jar
 # User and startup
 EXPOSE 8090
 USER 1001
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "${JAVA_OPTS}", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
