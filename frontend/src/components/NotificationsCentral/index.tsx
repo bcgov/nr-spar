@@ -23,7 +23,7 @@ const NotificationsCentral = () => (
         />
         <Button
           renderIcon={Notification}
-          size="field"
+          size="md"
         >
           See all notifications
         </Button>
