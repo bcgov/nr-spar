@@ -23,7 +23,7 @@ jobs:
           oc login --token=${{ secrets.OC_TOKEN }} --server=${{ vars.OC_SERVER }}
           oc project ${{ vars.OC_NAMESPACE }}
           # Remove old build runs, build pods and deployment pods
-          oc delete all,pvc,secret -l app=${{ github.event.repository.name }}-${{ github.event.number }}
+          oc delete all,cm,pvc,secret -l app=${{ github.event.repository.name }}-${{ github.event.number }}
 
   # If merged into main, then handle any image promotions
   image-promotions:
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        package: [backend, database]
+        package: [database, backend, frontend, oracle-api]
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
