@@ -70,7 +70,7 @@ jobs:
   validation-labels:
     name: Label Validation
     runs-on: ubuntu-22.04
-    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     permissions:
       contents: read
       pull-requests: write
