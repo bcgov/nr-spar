@@ -198,7 +198,7 @@ jobs:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
   #         SONAR_TOKEN: ${{ secrets.SONAR_ORACLE_API }}
 
-  pr-validation:
+  validation-labels:
     name: Label Validation (Only PR)
     runs-on: ubuntu-22.04
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
@@ -221,62 +221,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           ignored_types: '["chore","pr"]'
           type_labels: '{"feat": "feature", "fix": "fix", "bug": "fix", "doc": "documentation", "ci": "ci", "chore": "chore", "breaking": "breaking", "BREAKING CHANGE": "breaking"}'
-
-      - name: Conventional Changelog Update
-        continue-on-error: true
-        uses: TriPSs/conventional-changelog-action@v3
-        id: changelog
-        with:
-          github-token: ${{ github.token }}
-          output-file: "CHANGELOG.md"
-          skip-version-file: "true"
-          skip-commit: "true"
-          git-push: "false"
-          git-branch: refs/heads/${{ github.head_ref }}
-
-      - name: Comment PR
-        continue-on-error: true
-        uses: thollander/actions-comment-pull-request@v2
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        with:
-          message: |
-            # Current changelog
-            ${{ steps.changelog.outputs.clean_changelog }}
-          comment_tag: current-changelog
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  validate:
-    name: Code validation
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.m2
-          key: ${{ runner.os }}-maven-test-${{ hashFiles('**/backend/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-test-
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: "17"
-          distribution: "temurin"
-
-      - name: Code Validation
-        run: mvn --no-transfer-progress validate --file backend/pom.xml
-
-      - name: Code Compilation
-        run: mvn --no-transfer-progress clean compile --file backend/pom.xml
-
-      - name: Checkstyle
-        run: mvn --no-transfer-progress checkstyle:checkstyle -Dcheckstyle.skip=false --file backend/pom.xml
-
-      - name: Archive Checkstyle
-        uses: actions/upload-artifact@v3
-        with:
-          name: checkstyle
-          path: backend/target/site/checkstyle.html
-          retention-days: 5
