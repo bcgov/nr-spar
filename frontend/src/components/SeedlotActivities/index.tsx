@@ -38,7 +38,7 @@ const SeedlotActivities = () => {
       header: 'My seedlots',
       description:
         'Consult and manage your own seedlots',
-      link: '#',
+      link: '/seedlot/my-seedlots',
       highlighted: false,
       isEmpty: false,
       emptyTitle: '',
