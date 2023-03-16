@@ -244,3 +244,9 @@ li.#{variables.$bcgov-prefix}--overflow-menu-options__option:first-child{
 li.#{variables.$bcgov-prefix}--overflow-menu-options__option:last-child{
   border-radius: 0 0 4px 4px;
 }
+
+table.#{variables.$bcgov-prefix}--data-table th,
+table.#{variables.$bcgov-prefix}--data-table td,
+table.#{variables.$bcgov-prefix}--data-table th button {
+  padding-left: 2rem;
+}

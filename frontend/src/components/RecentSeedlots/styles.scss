@@ -1,11 +1,11 @@
 @use '../../theme/variables.scss' as vars;
 @use '@carbon/type';
 
-p.my-seedlots-subtitle {
+p.recent-seedlots-subtitle {
   padding-bottom: 1rem;
 }
 
-.my-seedlots {
+.recent-seedlots {
   background-color: var(--bcgov-layer-02) !important;
   margin-left: 2rem;
   margin-right: 2rem;
@@ -18,40 +18,35 @@ p.my-seedlots-subtitle {
   padding: 0 !important;
 }
 
-table.#{vars.$bcgov-prefix}--data-table th,
-table.#{vars.$bcgov-prefix}--data-table td {
-  padding-left: 2rem;
-}
-
-.my-seedlots-title {
+.recent-seedlots-title {
   padding-top: 1rem;
 }
 
-.my-seedlots-title > h2 {
+.recent-seedlots-title > h2 {
   @include type.type-style('heading-03');
   margin-bottom: 0.5rem;
 }
 
-.my-seedlots-table {
+.recent-seedlots-table {
   padding: 0 !important;
 }
 
-.empty-my-seedlots {
+.empty-recent-seedlots {
   margin: 3.44rem 0;
 }
 
 @media only screen and (max-width: 1584px) {
-  .my-seedlots-title {
+  .recent-seedlots-title {
     padding-left: 3rem;
   }
 }
 
 @media only screen and (max-width: 672px) {
-  .my-seedlots-title {
+  .recent-seedlots-title {
     padding-left: 2rem;
   }
 
-  .my-seedlots {
+  .recent-seedlots {
     overflow-x: scroll;
   }
 }

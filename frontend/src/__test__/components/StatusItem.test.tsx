@@ -13,12 +13,12 @@ describe('Status item component', () => {
     expect(screen.getByText('Pending')).toBeInTheDocument();
   });
 
-  it('should return the In progress status', () => {
+  it('should return the Submited status', () => {
     render(
       <StatusItem status={1} />
     );
 
-    expect(screen.getByText('In progress')).toBeInTheDocument();
+    expect(screen.getByText('Submited')).toBeInTheDocument();
   });
 
   it('should return the Approved status', () => {
@@ -35,5 +35,21 @@ describe('Status item component', () => {
     );
 
     expect(screen.getByText('Canceled')).toBeInTheDocument();
+  });
+
+  it('should return the Expired status', () => {
+    render(
+      <StatusItem status={4} />
+    );
+
+    expect(screen.getByText('Incomplete')).toBeInTheDocument();
+  });
+
+  it('should return the Expired status', () => {
+    render(
+      <StatusItem status={5} />
+    );
+
+    expect(screen.getByText('Expired')).toBeInTheDocument();
   });
 });

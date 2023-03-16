@@ -7,7 +7,7 @@ import {
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotActivities from '../../../components/SeedlotActivities';
-import MySeedlots from '../../../components/MySeedlots';
+import RecentSeedlots from '../../../components/RecentSeedlots';
 
 import './styles.css';
 
@@ -23,7 +23,7 @@ const SeedlotDashboard = () => (
         />
       </Row>
       <SeedlotActivities />
-      <MySeedlots />
+      <RecentSeedlots />
     </Stack>
   </FlexGrid>
 );

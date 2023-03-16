@@ -8,7 +8,7 @@ const MySeedlotsItems = [
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
     created_at: '2021-10-10',
     last_modified: '2022-12-24',
-    approved_at: ''
+    approved_at: '--'
   },
   {
     number: 12457,
@@ -19,7 +19,7 @@ const MySeedlotsItems = [
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
     created_at: '2021-10-10',
     last_modified: '2022-12-24',
-    approved_at: ''
+    approved_at: '--'
   },
   {
     number: 12458,
@@ -30,7 +30,7 @@ const MySeedlotsItems = [
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
     created_at: '2021-10-10',
     last_modified: '2022-12-24',
-    approved_at: ''
+    approved_at: '--'
   },
   {
     number: 12459,
@@ -41,7 +41,7 @@ const MySeedlotsItems = [
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
     created_at: '2021-10-10',
     last_modified: '2022-12-24',
-    approved_at: ''
+    approved_at: '--'
   },
   {
     number: 12460,
@@ -52,7 +52,7 @@ const MySeedlotsItems = [
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
     created_at: '2021-10-10',
     last_modified: '2022-12-24',
-    approved_at: ''
+    approved_at: '--'
   },
   {
     number: 12461,
@@ -63,7 +63,7 @@ const MySeedlotsItems = [
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
     created_at: '2021-10-10',
     last_modified: '2022-12-24',
-    approved_at: ''
+    approved_at: '--'
   }
 ];
 

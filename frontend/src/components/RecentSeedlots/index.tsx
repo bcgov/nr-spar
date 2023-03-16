@@ -15,7 +15,7 @@ import Seedlot from '../../types/Seedlot';
 
 import './styles.scss';
 
-const MySeedlots = () => {
+const RecentSeedlots = () => {
   const { token } = useAuth();
 
   const [seedlotsData, setSeedlotsData] = useState<Seedlot[]>();
@@ -61,12 +61,12 @@ const MySeedlots = () => {
   ];
 
   return (
-    <Row className="my-seedlots">
-      <Column sm={4} className="my-seedlots-title">
-        <h2>My seedlot</h2>
-        <Subtitle text="Check a summary of your recent seedlots" className="my-seedlots-subtitle" />
+    <Row className="recent-seedlots">
+      <Column sm={4} className="recent-seedlots-title">
+        <h2>My seedlots</h2>
+        <Subtitle text="Check a summary of your recent seedlots" className="recent-seedlots-subtitle" />
       </Column>
-      <Column sm={4} className="my-seedlots-table">
+      <Column sm={4} className="recent-seedlots-table">
         {listItems
           && (
           <SeedlotTable
@@ -76,7 +76,7 @@ const MySeedlots = () => {
           )}
         {(listItems?.length === 0)
           && (
-          <div className="empty-my-seedlots">
+          <div className="empty-recent-seedlots">
             <EmptySection
               pictogram="Magnify"
               title="There is no seedlot to show yet!"
@@ -89,4 +89,4 @@ const MySeedlots = () => {
   );
 };
 
-export default MySeedlots;
+export default RecentSeedlots;

@@ -32,6 +32,7 @@ const ActivityTable = ({ elements, clickFn, headers }: TableProps) => (
             key={header}
             id={`header-${header}-${idx}`}
             data-testid={`header-${header}-${idx}`}
+            className="recent-activities-header"
           >
             {header}
           </TableHeader>
@@ -41,14 +42,20 @@ const ActivityTable = ({ elements, clickFn, headers }: TableProps) => (
     <TableBody aria-live="off">
       {elements.map((item, idx) => (
         <TableRow key={hashObject(item)} id={`row${idx}`}>
-          <TableCell>{item.type}</TableCell>
-          <TableCell>
+          <TableCell className="recent-activities-header">{item.type}</TableCell>
+          <TableCell className="recent-activities-header">
             <StatusItem status={item.status} />
           </TableCell>
-          <TableCell>{item.request_id}</TableCell>
-          <TableCell>{item.created_at}</TableCell>
-          <TableCell>{item.last_viewed}</TableCell>
-          <TableCell tabIndex={0} aria-label={`${item.type} view more`} onClick={() => clickFn(item.request_id)}>
+          <TableCell className="recent-activities-header">
+            {item.request_id}
+          </TableCell>
+          <TableCell className="recent-activities-header">
+            {item.created_at}
+          </TableCell>
+          <TableCell className="recent-activities-header">
+            {item.last_viewed}
+          </TableCell>
+          <TableCell className="recent-activities-header" tabIndex={0} aria-label={`${item.type} view more`} onClick={() => clickFn(item.request_id)}>
             <DataViewAlt />
           </TableCell>
         </TableRow>
