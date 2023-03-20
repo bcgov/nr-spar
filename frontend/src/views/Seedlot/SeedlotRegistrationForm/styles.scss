@@ -1,0 +1,28 @@
+@use '../../../theme/variables.scss' as vars;
+
+.seedlot-registration-breadcrumb {
+  padding-left: 3.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.seedlot-registration-breadcrumb .#{vars.$bcgov-prefix}--link {
+  cursor: pointer;
+}
+
+.seedlot-registration-forms,
+.seedlot-registration-progress {
+  padding: 1.5rem 3.5rem 0 3.5rem;
+}
+
+.seedlot-registration-steps {
+  width: 100%;
+  margin-bottom: 4rem;
+}
+
+.seedlot-current-form {
+  display: grid;
+}
+
+.seedlot-form-not-selected {
+  display: none;
+}

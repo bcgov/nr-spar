@@ -18,6 +18,7 @@ import SeedlotDashboard from './views/Seedlot/SeedlotDashboard';
 import CreateAClass from './views/Seedlot/CreateAClass';
 import SeedlotCreatedFeedback from './views/Seedlot/SeedlotCreatedFeedback';
 import MySeedlots from './views/Seedlot/MySeedlots';
+import SeedlotRegistrationForm from './views/Seedlot/SeedlotRegistrationForm';
 
 /**
  * Create an app structure conaining all the routes.
@@ -63,6 +64,15 @@ const App: React.FC = () => {
           />
 
           <Route
+            path="/seedlot/successfully-created/:seedlot"
+            element={(
+              <ProtectedRoute signed={signed}>
+                <SeedlotCreatedFeedback />
+              </ProtectedRoute>
+            )}
+          />
+
+          <Route
             path="/seedlot/details/:seedlot"
             element={(
               <ProtectedRoute signed={signed}>
@@ -72,10 +82,10 @@ const App: React.FC = () => {
           />
 
           <Route
-            path="/seedlot/successfully-created/:seedlot"
+            path="/seedlot/registration/:seedlot"
             element={(
               <ProtectedRoute signed={signed}>
-                <SeedlotCreatedFeedback />
+                <SeedlotRegistrationForm />
               </ProtectedRoute>
             )}
           />

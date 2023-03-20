@@ -136,7 +136,10 @@ const SeedlotDetails = () => {
                       seedlotApplicantData
                       && <ApplicantSeedlotInformation seedlotApplicantData={seedlotApplicantData} />
                     }
-                    <FormProgress />
+                    {
+                      seedlotData
+                      && <FormProgress seedlotNumber={seedlotData.number} />
+                    }
                     <FormReview />
                   </TabPanel>
                   <TabPanel>
