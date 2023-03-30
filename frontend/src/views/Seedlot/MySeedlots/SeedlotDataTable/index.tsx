@@ -64,6 +64,7 @@ const SeedlotDataTable = ({ seedlots }:SeedlotDataTableProps) => {
         }:DataTableInterface) => (
           <TableContainer>
             <Search
+              labelText="Search"
               onChange={onInputChange}
               placeholder="Search for seedlots"
               size="lg"
