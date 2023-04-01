@@ -1,5 +1,5 @@
 # Build
-FROM node:16.19.1-alpine3.17 AS build
+FROM node:16.20.0-alpine3.17@sha256:b4a72f83f52bbe3970bb74a15e44ec4cf6e873ad4787473dfc8a26f5b4e29dd2 AS build
 
 # Copy and build
 WORKDIR /app
@@ -10,7 +10,7 @@ RUN yarn install --cwd frontend --frozen-lockfile --prefer-offline && \
 
 
 # Deploy
-FROM node:16.19.1-alpine3.17
+FROM node:16.20.0-alpine3.17@sha256:b4a72f83f52bbe3970bb74a15e44ec4cf6e873ad4787473dfc8a26f5b4e29dd2
 
 # Copy and prep app
 WORKDIR /app
