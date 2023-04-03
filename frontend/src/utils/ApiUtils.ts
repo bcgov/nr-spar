@@ -34,6 +34,8 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
   // Retrieve all seedlots
   let seedlotRetrieveAllUrl = '/api/seedlot';
 
+  let seedlotOwnerRegister = '/api/seedlot/register-ownership/:seedlotnumber';
+
   // Mocks
   if (env.REACT_APP_ENABLE_MOCK_SERVER === 'true') {
     // Favourite activities
@@ -56,6 +58,9 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
 
     // Retrieve one seedlot
     seedlotRetrieveOneUrl = '/seedlot/:seedlotnumber';
+
+    // Seedlot Registration Ownership endpoint
+    seedlotOwnerRegister = '/seedlot/register-ownership/:seedlotnumber';
   }
 
   // Retrieve all seedlot
@@ -87,6 +92,8 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
       return `${server}${seedlotRetrieveOneUrl}`;
     case ApiAddresses.SeedlotRetrieveAll:
       return `${server}${seedlotRetrieveAllUrl}`;
+    case ApiAddresses.SeedlotOwnerRegister:
+      return `${server}${seedlotOwnerRegister}`;
     default:
       return '';
   }

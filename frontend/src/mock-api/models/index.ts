@@ -7,6 +7,7 @@ import GeneticClassesType from '../../types/GeneticClasses';
 import ApplicantInfo from '../../types/ApplicantInfo';
 import SeedlotRegistration from '../../types/SeedlotRegistration';
 import Seedlot from '../../types/Seedlot';
+import RegisterOwnerArray from '../../types/SeedlotTypes/OwnershipTypes';
 
 const FavouriteModel: ModelDefinition<CardType> = Model.extend({});
 const GeneticClassesModel: ModelDefinition<GeneticClassesType> = Model.extend({});
@@ -14,6 +15,7 @@ const ApplicantInfoModel: ModelDefinition<ApplicantInfo> = Model.extend({});
 const SeedlotRegistrationModel: ModelDefinition<SeedlotRegistration> = Model.extend({});
 const SeedlotInfoModel: ModelDefinition<SeedlotRegistration> = Model.extend({});
 const SeedlotModel: ModelDefinition<Seedlot> = Model.extend({});
+const RegisterOwnerModel: ModelDefinition<RegisterOwnerArray> = Model.extend({});
 
 const models = {
   favourites: FavouriteModel,
@@ -21,7 +23,8 @@ const models = {
   applicantInfo: ApplicantInfoModel,
   seedlotRegistration: SeedlotRegistrationModel,
   seedlotInfos: SeedlotInfoModel,
-  seedlotData: SeedlotModel
+  seedlotData: SeedlotModel,
+  registerOwnerData: RegisterOwnerModel
 };
 
 export default models;

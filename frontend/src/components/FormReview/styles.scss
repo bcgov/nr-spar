@@ -23,7 +23,7 @@
   padding-left: 1rem;
 }
 
-.description-section {
+.item-description-section {
   @include type.type-style('body-compact-01');
   color: var(--#{vars.$bcgov-prefix}-text-secondary);
   padding-top: 0.25rem;

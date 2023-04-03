@@ -419,7 +419,7 @@ exports[`the Header component should match the snapshot 1`] = `
           <button
             aria-describedby={null}
             aria-pressed={null}
-            className="cds--btn cds--btn--primary"
+            className="cds--btn cds--btn--md cds--btn--primary"
             disabled={false}
             tabIndex={0}
             type="button"

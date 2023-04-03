@@ -9,8 +9,8 @@ const TitleAccordion = ({
   title, description
 }: TitleAccordionProps) => (
   <div className="item-section">
-    <p>{title}</p>
-    <p className="description-section">{description}</p>
+    <p className="item-title-section">{title}</p>
+    <p className="item-description-section">{description}</p>
   </div>
 );
 

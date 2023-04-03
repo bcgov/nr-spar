@@ -1,0 +1,63 @@
+@use '../../../theme/variables.scss' as vars;
+@use '@carbon/type';
+
+.ownership-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.ownership-step-title-box {
+  display: flex;
+  flex-direction: column;
+
+  h3 {
+    color: var(--#{vars.$bcgov-prefix}-text-primary);
+    @include type.type-style('heading-03', true);
+  }
+
+  p {
+    color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    @include type.type-style('body-01', true);
+  }
+}
+
+.ownership-form-container {
+  margin-top: 1.25rem;
+
+  .single-accordion-item {
+    margin-bottom: 1rem;
+    background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+    border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
+  }
+
+  // Accordian item title styling
+  .item-section {
+    .item-title-section {
+      @include type.type-style('body-02', true);
+      color: var(--#{vars.$bcgov-prefix}-text-primary);
+    }
+
+    .description-section {
+      @include type.type-style('helper-text-02', true);
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    }
+  }
+
+  @media only screen and (min-width: 640px) {
+    .#{vars.$bcgov-prefix}--accordion__content {
+      padding-right: 1rem;
+    }
+  }
+
+}
+
+.btns-container {
+  width: 100%;
+  margin: 3rem 0;
+
+  button {
+    width: 100%;
+    margin-right: 1rem;
+  }
+}
