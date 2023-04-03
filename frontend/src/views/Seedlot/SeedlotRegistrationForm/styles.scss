@@ -9,9 +9,16 @@
   cursor: pointer;
 }
 
-.seedlot-registration-forms,
+.seedlot-registration-forms {
+  padding: 1.5rem 3.5rem 2.5rem 3.5rem;  
+}
+
 .seedlot-registration-progress {
   padding: 1.5rem 3.5rem 0 3.5rem;
+}
+
+.collection-form-buttons {
+  padding: 3rem 3.5rem 0 3.5rem;
 }
 
 .seedlot-registration-steps {

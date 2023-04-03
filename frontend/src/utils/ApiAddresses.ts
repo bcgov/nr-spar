@@ -13,6 +13,7 @@ enum ApiAddresses {
   AClassSeedlotPost,
   SeedlotRetrieveOne,
   SeedlotRetrieveAll,
+  InterimStoragePost,
   SeedlotOwnerRegister
 }
 

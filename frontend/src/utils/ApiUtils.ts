@@ -34,6 +34,8 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
   // Retrieve all seedlots
   let seedlotRetrieveAllUrl = '/api/seedlot';
 
+  // Seedlot Registration - Interim Storage Step Register
+  let interimStoragePostUrl = '/api/seedlot/registration/:seedlotnumber';
   let seedlotOwnerRegister = '/api/seedlot/register-ownership/:seedlotnumber';
 
   // Mocks
@@ -58,6 +60,9 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
 
     // Retrieve one seedlot
     seedlotRetrieveOneUrl = '/seedlot/:seedlotnumber';
+
+    // Interim Storage Post
+    interimStoragePostUrl = '/seedlot/registration/:seedlotnumber';
 
     // Seedlot Registration Ownership endpoint
     seedlotOwnerRegister = '/seedlot/register-ownership/:seedlotnumber';
@@ -92,6 +97,8 @@ const getUrl = (apiAddress: ApiAddresses, mockServer: boolean = false): string =
       return `${server}${seedlotRetrieveOneUrl}`;
     case ApiAddresses.SeedlotRetrieveAll:
       return `${server}${seedlotRetrieveAllUrl}`;
+    case ApiAddresses.InterimStoragePost:
+      return `${server}${interimStoragePostUrl}`;
     case ApiAddresses.SeedlotOwnerRegister:
       return `${server}${seedlotOwnerRegister}`;
     default:
