@@ -9,6 +9,7 @@ import {
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
+import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
 import InterimStorage from '../../../components/SeedlotRegistrationProgress/InterimStorage';
 import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
 
@@ -61,7 +62,7 @@ const SeedlotRegistrationForm = () => {
             <InterimStorage setStep={(delta: number) => setStep(delta)} />
           </div>
           <div className={formStep === 3 ? 'seedlot-current-form' : 'seedlot-form-not-selected'}>
-            <p>Orchard placeholder</p>
+            <OrchardStep setStep={(delta: number) => setStep(delta)} />
           </div>
           <div className={formStep === 4 ? 'seedlot-current-form' : 'seedlot-form-not-selected'}>
             <p>Parent tree and SMP placeholder</p>

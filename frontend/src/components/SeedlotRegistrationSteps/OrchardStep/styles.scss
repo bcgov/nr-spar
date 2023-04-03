@@ -1,0 +1,53 @@
+@use '@carbon/type';
+@use '../../../theme/variables.scss' as vars;
+
+.seedlot-orchard-step-form {
+  margin-top: 1rem;
+  padding-left: 2.5rem;
+}
+
+.seedlot-orchard-step-form h2 {
+  @include type.type-style('heading-03');
+  margin-bottom: 0.5rem;
+}
+
+.seedlot-orchard-title-row {
+  margin-bottom: 2.5rem;
+}
+
+.seedlot-orchard-field {
+  margin-bottom: 2rem;
+}
+
+.seedlot-orchard-hidden {
+  display: none;
+}
+
+.seedlot-orchard-add-orchard,
+.pollen-methodology-checkbox {
+  margin-bottom: 3rem;
+}
+
+#female-gametic-combobox::placeholder {
+  color: var(--bcgov-text-primary);
+  opacity: 1;
+}
+
+.male-gametic-invalid .#{vars.$bcgov-prefix}--radio-button + .#{vars.$bcgov-prefix}--radio-button__label .#{vars.$bcgov-prefix}--radio-button__appearance {
+  outline: 2px solid var(--bcgov-support-error);
+  outline-offset: 1.5px;
+}
+
+.seedlot-orchard-btn-row {
+  button {
+    width: 15.1875rem;
+    margin-right: 1rem;
+    margin-bottom: 3rem;
+  }
+}
+
+@media only screen and (max-width: 1584px) {
+  .applicant-information-form {
+      padding-left: 2rem;
+  }
+}

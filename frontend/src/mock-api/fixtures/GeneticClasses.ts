@@ -6,6 +6,10 @@ const GeneticClasses = [
   {
     code: 'B',
     description: 'Natural Stand Seed or Cuttings'
+  },
+  {
+    code: 'C',
+    description: 'PLI - Lodgepole pine'
   }
 ];
 

@@ -61,6 +61,19 @@ const SeedlotRegistrationEndpoints = (server: Server) => {
 
   server.get(getUrl(ApiAddresses.SeedlotRetrieveAll, true), (schema: AppSchema) => schema.all('seedlotData'));
 
+  server.post(getUrl(ApiAddresses.SeedlotOrchardPost, true), (schema: AppSchema, request) => {
+    const { seedlotnumber } = request.params;
+    const attrs = JSON.parse(request.requestBody);
+    const { seedlotOrchards } = schema.db;
+
+    seedlotOrchards.insert({
+      [seedlotnumber]: attrs
+    });
+    return {
+      status: 201
+    };
+  });
+
   server.post(getUrl(ApiAddresses.InterimStoragePost, true), (schema: AppSchema, request) => {
     const attrs = JSON.parse(request.requestBody);
 

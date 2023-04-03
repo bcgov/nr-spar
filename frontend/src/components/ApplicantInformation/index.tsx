@@ -209,7 +209,7 @@ const ApplicantInformation = () => {
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }
-              placeholder="Select an angecy..."
+              placeholder="Select an agency..."
               titleText="Applicant agency name"
               helperText="You can enter your agency number, name or acronym"
               onChange={(e: ComboBoxEvent) => comboBoxChangeHandlerApplicant(e)}
