@@ -4,6 +4,7 @@
 .interim-agency-storage-form {
   .collection-form-buttons {
     padding-left: 0;
+    margin-left: 0;
   }
 
   h2 {
@@ -68,10 +69,6 @@
 
   .storage-location-row {
     margin: 2rem -1rem;
-  }
-
-  .collection-form-buttons {
-    margin-left: 0;
   }
 
   .btn-collection-form.#{vars.$bcgov-prefix}--btn {

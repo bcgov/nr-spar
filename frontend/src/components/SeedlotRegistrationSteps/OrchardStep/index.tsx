@@ -14,7 +14,7 @@ import {
   Checkbox,
   Button
 } from '@carbon/react';
-import { Add, TrashCan, ArrowRight } from '@carbon/icons-react';
+import { Add, TrashCan } from '@carbon/icons-react';
 
 import Subtitle from '../../Subtitle';
 
@@ -31,11 +31,16 @@ import { ComboBoxEvent } from './utils';
 
 import './styles.scss';
 
+type NumStepperVal = {
+  value: number,
+  direction: string
+}
 interface OrchardStepProps {
-  setStep: Function
+  state: SeedlotOrchard
+  setStepData: Function
 }
 
-const OrchardStep = ({ setStep }: OrchardStepProps) => {
+const OrchardStep = ({ state, setStepData }: OrchardStepProps) => {
   const { token } = useAuth();
   const { seedlot } = useParams();
   const [seedlotApplicantData, setSeedlotApplicantData] = useState<SeedlotRegistration>();
@@ -74,20 +79,6 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
     getSeedlotData();
   }, []);
 
-  const orchardData: SeedlotOrchard = {
-    orchardId: '',
-    orchardName: '',
-    additionalId: '',
-    additionalName: '',
-    femaleGametic: '',
-    maleGametic: '',
-    controlledCross: true,
-    biotechProcess: true,
-    noPollenContamination: true,
-    breedingPercentage: '0',
-    pollenMethodology: true
-  };
-
   // Fixed messages
   const orchardIdNotFound = 'This id has no orchard assigned to it, please try a different one';
   const invalidOrchardValue = 'Please insert a valid orchard id between 100 and 999';
@@ -95,8 +86,6 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
   const refControl = useRef<any>({});
 
   const [additionalOrchard, setAdditionalOrchard] = useState<boolean>(false);
-
-  const [responseBody, setResponseBody] = useState<SeedlotOrchard>(orchardData);
 
   const [invalidOrchardId, setInvalidOrchardId] = useState<boolean>(false);
   const [invalidOrchardText, setInvalidOrchardText] = useState<string>(invalidOrchardValue);
@@ -119,15 +108,15 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
     const isStrArray = Array.isArray(value);
 
     if (field.length === 1) {
-      setResponseBody({
-        ...responseBody,
+      setStepData({
+        ...state,
         [field[0]]: isStrArray ? value[0] : value
       });
     } else {
       // It only get here if we are setting 2 fields,
       // so there is no need for a 'for' or a 'map'
-      setResponseBody({
-        ...responseBody,
+      setStepData({
+        ...state,
         [field[0]]: isStrArray ? value[0] : value,
         [field[1]]: isStrArray ? value[1] : value
       });
@@ -151,7 +140,7 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
 
             setResponse([name, nameField], [value, response.data.orchard.name]);
 
-          // Set error messages for id not found
+            // Set error messages for id not found
           } else if (name === 'orchardId') {
             setInvalidOrchardText(orchardIdNotFound);
             setInvalidOrchardId(true);
@@ -205,92 +194,71 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
     setResponse([name], checked);
   };
 
-  const percentageHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setResponse([name], [value]);
-  };
-
   const validateBreedingPercentage = () => {
-    const intNumber = +responseBody.breedingPercentage;
+    const intNumber = +state.breedingPercentage;
     if (intNumber < 0
-        || intNumber > 99
-        || !responseBody.breedingPercentage) {
+      || intNumber > 100
+      || !state.breedingPercentage) {
       setInvalidBreeding(true);
     } else {
       setInvalidBreeding(false);
     }
   };
 
-  const validateBeforeSubmit = () => {
-    // Check for any invalid state or empty fields
-    if (invalidOrchardId) {
-      refControl.current.orchardId.focus();
-      return false;
-    }
+  // Leaving these here for future use
+  // const validateBeforeSubmit = () => {
+  //   // Check for any invalid state or empty fields
+  //   if (invalidOrchardId) {
+  //     refControl.current.orchardId.focus();
+  //     return false;
+  //   }
 
-    // This conditional covers the case where no change was
-    // made to the field and the user tries to submit
-    if (!responseBody.orchardId) {
-      setInvalidOrchardId(true);
-      setInvalidOrchardText(invalidOrchardValue);
-      refControl.current.orchardId.focus();
-      return false;
-    }
+  //   // This conditional covers the case where no change was
+  //   // made to the field and the user tries to submit
+  //   if (!state.orchardId) {
+  //     setInvalidOrchardId(true);
+  //     setInvalidOrchardText(invalidOrchardValue);
+  //     refControl.current.orchardId.focus();
+  //     return false;
+  //   }
 
-    if (invalidAddOrchardId && additionalOrchard) {
-      refControl.current.additionalId.focus();
-      return false;
-    }
+  //   if (invalidAddOrchardId && additionalOrchard) {
+  //     refControl.current.additionalId.focus();
+  //     return false;
+  //   }
 
-    // This conditional covers the case where no change was
-    // made to the additional orchard field and the user tries to submit
-    if (!responseBody.additionalId && additionalOrchard) {
-      setInvalidAddOrchardId(true);
-      setInvalidAddOrchardText(invalidOrchardValue);
-      refControl.current.additionalId.focus();
-      return false;
-    }
+  //   // This conditional covers the case where no change was
+  //   // made to the additional orchard field and the user tries to submit
+  //   if (!state.additionalId && additionalOrchard) {
+  //     setInvalidAddOrchardId(true);
+  //     setInvalidAddOrchardText(invalidOrchardValue);
+  //     refControl.current.additionalId.focus();
+  //     return false;
+  //   }
 
-    if (!responseBody.femaleGametic) {
-      setInvalidFemGametic(true);
-      refControl.current.femaleGametic.focus();
-      return false;
-    }
+  //   if (!state.femaleGametic) {
+  //     setInvalidFemGametic(true);
+  //     refControl.current.femaleGametic.focus();
+  //     return false;
+  //   }
 
-    if (!responseBody.maleGametic) {
-      setInvalidMalGametic(true);
-      refControl.current.maleGametic.focus();
-      return false;
-    }
+  //   if (!state.maleGametic) {
+  //     setInvalidMalGametic(true);
+  //     refControl.current.maleGametic.focus();
+  //     return false;
+  //   }
 
-    if (invalidBreeding) {
-      refControl.current.breedingPercentage.focus();
-      return false;
-    }
+  //   if (invalidBreeding) {
+  //     refControl.current.breedingPercentage.focus();
+  //     return false;
+  //   }
 
-    return true;
-  };
-
-  const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (seedlot && validateBeforeSubmit()) {
-      axios.post(getUrl(ApiAddresses.SeedlotOrchardPost).replace(':seedlotnumber', seedlot), responseBody, getAxiosConfig())
-        .then((response) => {
-          if (response.status === 201) {
-            setStep(1);
-          }
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(`Error: ${error}`);
-        });
-    }
-  };
+  //   return true;
+  // };
 
   return (
     <div className="seedlot-orchard-step-form">
-      <form onSubmit={validateAndSubmit}>
+      <form>
         <Row className="seedlot-orchard-title-row">
           <Column lg={8}>
             <h2>Orchard information</h2>
@@ -303,7 +271,7 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
               id="seedlot-orchard-number-input"
               name="orchardId"
               ref={(el: HTMLInputElement) => addRefs(el, 'orchardId')}
-              value={responseBody.orchardId}
+              value={state.orchardId}
               allowEmpty
               min={100}
               max={999}
@@ -315,7 +283,7 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
               invalid={invalidOrchardId}
               invalidText={invalidOrchardText}
               onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'orchardName')}
-              onChange={() => responseBody.orchardName && clearOrchardName('orchardName')}
+              onChange={() => state.orchardName && clearOrchardName('orchardName')}
             />
           </Column>
           <Column sm={4} md={2} lg={3}>
@@ -324,7 +292,7 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
               type="text"
               labelText="Orchard name"
               placeholder="Orchard name"
-              value={responseBody.orchardName}
+              value={state.orchardName}
               readOnly
             />
           </Column>
@@ -335,7 +303,7 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
               id="seedlot-aditional-orchard-number-input"
               name="additionalId"
               ref={(el: HTMLInputElement) => addRefs(el, 'additionalId')}
-              value={responseBody.additionalId}
+              value={state.additionalId}
               allowEmpty
               min={100}
               max={999}
@@ -348,7 +316,7 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
               invalid={invalidAddOrchardId}
               invalidText={invalidAddOrchardText}
               onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'additionalName')}
-              onChange={() => responseBody.additionalName && clearOrchardName('additionalName')}
+              onChange={() => state.additionalName && clearOrchardName('additionalName')}
             />
           </Column>
           <Column sm={4} md={2} lg={3}>
@@ -357,7 +325,7 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
               type="text"
               labelText="Orchard name (optional)"
               placeholder="Orchard name"
-              value={responseBody.additionalName}
+              value={state.additionalName}
               readOnly
             />
           </Column>
@@ -506,7 +474,7 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
             />
           </Column>
         </Row>
-        <div className={!responseBody.noPollenContamination ? '' : 'seedlot-orchard-hidden'}>
+        <div className={!state.noPollenContamination ? '' : 'seedlot-orchard-hidden'}>
           <Row className="seedlot-orchard-field">
             <Column sm={4} md={4} lg={6}>
               <NumberInput
@@ -523,7 +491,23 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
                 helperText="If contaminant pollen was present and the contaminant pollen has a breeding value"
                 invalid={invalidBreeding}
                 invalidText="Please enter a valid value between 0 and 100"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => percentageHandler(e)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  if (e && e.target.name && e.target.value) {
+                    setResponse([e.target.name], [e.target.value]);
+                  }
+                }}
+                onClick={
+                  (
+                    _e: React.MouseEvent<HTMLButtonElement>,
+                    target: NumStepperVal | undefined
+                  ) => {
+                    // A guard is needed here because any click on the input will emit a
+                    //   click event, not necessarily the + - buttons
+                    if (target && target.value) {
+                      setResponse(['breedingPercentage'], [String(target.value)]);
+                    }
+                  }
+                }
                 onBlur={() => validateBreedingPercentage()}
               />
             </Column>
@@ -543,24 +527,6 @@ const OrchardStep = ({ setStep }: OrchardStepProps) => {
             </Column>
           </Row>
         </div>
-        <Row className="seedlot-orchard-btn-row">
-          <Column lg={8}>
-            <Button
-              size="lg"
-              kind="secondary"
-              onClick={() => setStep(-1)}
-            >
-              Back
-            </Button>
-            <Button
-              size="lg"
-              type="submit"
-              renderIcon={ArrowRight}
-            >
-              Next
-            </Button>
-          </Column>
-        </Row>
       </form>
     </div>
   );

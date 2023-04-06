@@ -4,16 +4,37 @@ import {
   FlexGrid,
   Row,
   Breadcrumb,
-  BreadcrumbItem
+  BreadcrumbItem,
+  Button
 } from '@carbon/react';
+import { ArrowRight, CheckmarkOutline } from '@carbon/icons-react';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
-import InterimStorage from '../../../components/SeedlotRegistrationProgress/InterimStorage';
+import InterimStorage from '../../../components/SeedlotRegistrationSteps/InterimStep';
 import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
-
+import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
+import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
+import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
+import { AllStepData } from './definitions';
+import {
+  initInterimState,
+  initOrchardState,
+  initOwnershipState
+} from './utils';
 import './styles.scss';
+
+const defaultCode = '16';
+const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
+const defaultPayment = 'ITC - Invoice to client address';
+const agencyOptions = [
+  '0032 - Strong Seeds Orchard - SSO',
+  '0035 - Weak Seeds Orchard - WSO',
+  '0038 - Okay Seeds Orchard - OSO',
+  '0041 - Great Seeds Orchard - GSO',
+  '0043 - Bad Seeds Orchard - BSO'
+];
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -21,9 +42,75 @@ const SeedlotRegistrationForm = () => {
 
   const [formStep, setFormStep] = useState<number>(0);
 
+  // Initialize all step's state here
+  const [allStepData, setAllStepData] = useState<AllStepData>({
+    interimStep: initInterimState(defaultAgency, defaultCode),
+    ownershipStep: [initOwnershipState(defaultAgency, defaultCode, defaultPayment)],
+    orchardStep: initOrchardState()
+  });
+
+  // Can't find a good way to specify the type of stepData
+  const setStepData = (stepName: keyof AllStepData, stepData: any) => {
+    const newData = { ...allStepData };
+    newData[stepName] = stepData;
+    setAllStepData(newData);
+  };
+
+  const logState = () => {
+    // eslint-disable-next-line no-console
+    console.log(allStepData);
+  };
+
   const setStep = (delta: number) => {
+    logState();
     const newStep = formStep + delta;
     setFormStep(newStep);
+  };
+
+  const renderStep = () => {
+    switch (formStep) {
+      // Collection
+      case 0:
+        return null;
+      // Ownership
+      case 1:
+        return (
+          <OwnershipStep
+            state={allStepData.ownershipStep}
+            defaultAgency={defaultAgency}
+            defaultCode={defaultCode}
+            agencyOptions={agencyOptions}
+            setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
+          />
+        );
+      // Interim Storage
+      case 2:
+        return (
+          <InterimStorage
+            state={allStepData.interimStep}
+            defaultAgency={defaultAgency}
+            defaultCode={defaultCode}
+            agencyOptions={agencyOptions}
+            setStepData={(data: InterimForm) => setStepData('interimStep', data)}
+          />
+        );
+      // Orchard
+      case 3:
+        return (
+          <OrchardStep
+            state={allStepData.orchardStep}
+            setStepData={(data: SeedlotOrchard) => setStepData('orchardStep', data)}
+          />
+        );
+      // Parent Tree and SMP
+      case 4:
+        return null;
+      // Extraction and Storage
+      case 5:
+        return null;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -51,26 +138,62 @@ const SeedlotRegistrationForm = () => {
             }}
           />
         </Row>
-        <Row className="seedlot-registration-forms">
-          <div className={formStep === 0 ? 'seedlot-current-form' : 'seedlot-form-not-selected'}>
-            <p>Collection placeholder</p>
-          </div>
-          <div className={formStep === 1 ? 'seedlot-current-form' : 'seedlot-form-not-selected'}>
-            <OwnershipStep setStep={(delta: number) => setStep(delta)} />
-          </div>
-          <div className={formStep === 2 ? 'seedlot-current-form' : 'seedlot-form-not-selected'}>
-            <InterimStorage setStep={(delta: number) => setStep(delta)} />
-          </div>
-          <div className={formStep === 3 ? 'seedlot-current-form' : 'seedlot-form-not-selected'}>
-            <OrchardStep setStep={(delta: number) => setStep(delta)} />
-          </div>
-          <div className={formStep === 4 ? 'seedlot-current-form' : 'seedlot-form-not-selected'}>
-            <p>Parent tree and SMP placeholder</p>
-          </div>
-          <div className={formStep === 5 ? 'seedlot-current-form' : 'seedlot-form-not-selected'}>
-            <p>Extraction and storage placeholder</p>
+        <Row className="seedlot-registration-row">
+          <div className="seedlot-current-form">
+            {renderStep()}
           </div>
         </Row>
+        <div className="btns-container">
+          {
+            formStep !== 0
+              ? (
+                <Button
+                  kind="secondary"
+                  size="lg"
+                  className="back-next-btn"
+                  onClick={() => setStep(-1)}
+                >
+                  Back
+                </Button>
+              )
+              : (
+                <Button
+                  kind="secondary"
+                  size="lg"
+                  className="back-next-btn"
+                  onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
+                >
+                  Cancel
+                </Button>
+              )
+
+          }
+          {
+            formStep !== 5
+              ? (
+                <Button
+                  kind="primary"
+                  size="lg"
+                  className="back-next-btn"
+                  onClick={() => setStep(1)}
+                  renderIcon={ArrowRight}
+                  disabled={formStep === 5}
+                >
+                  Next
+                </Button>
+              )
+              : (
+                <Button
+                  kind="primary"
+                  size="lg"
+                  className="back-next-btn"
+                  renderIcon={CheckmarkOutline}
+                >
+                  Submit registration
+                </Button>
+              )
+          }
+        </div>
       </div>
     </FlexGrid>
   );
