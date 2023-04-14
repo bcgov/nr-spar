@@ -14,16 +14,19 @@ import SeedlotRegistrationProgress from '../../../components/SeedlotRegistration
 import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
 import InterimStorage from '../../../components/SeedlotRegistrationSteps/InterimStep';
 import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
+import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { AllStepData } from './definitions';
 import {
+  initCollectionState,
   initInterimState,
   initOrchardState,
   initOwnershipState
 } from './utils';
 import './styles.scss';
+import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
 
 const defaultCode = '16';
 const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
@@ -44,6 +47,7 @@ const SeedlotRegistrationForm = () => {
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
+    collectionStep: initCollectionState(defaultAgency, defaultCode),
     interimStep: initInterimState(defaultAgency, defaultCode),
     ownershipStep: [initOwnershipState(defaultAgency, defaultCode, defaultPayment)],
     orchardStep: initOrchardState()
@@ -71,7 +75,15 @@ const SeedlotRegistrationForm = () => {
     switch (formStep) {
       // Collection
       case 0:
-        return null;
+        return (
+          <CollectionStep
+            state={allStepData.collectionStep}
+            defaultAgency={defaultAgency}
+            defaultCode={defaultCode}
+            agencyOptions={agencyOptions}
+            setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
+          />
+        );
       // Ownership
       case 1:
         return (

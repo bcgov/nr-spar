@@ -7,6 +7,8 @@ import GeneticClassesType from '../../types/GeneticClasses';
 import ApplicantInfo from '../../types/ApplicantInfo';
 import SeedlotRegistration from '../../types/SeedlotRegistration';
 import Seedlot from '../../types/Seedlot';
+import CollectionInformation from '../../types/CollectionInformation';
+import CollectorAgency from '../../types/CollectorAgency';
 import OrchardType from '../../types/OrchardType';
 import { MockSeedlotOrchard } from '../../types/SeedlotTypes/SeedlotOrchard';
 import InterimAgencyInfo from '../../types/InterimAgencyInfo';
@@ -20,6 +22,8 @@ const ApplicantInfoModel: ModelDefinition<ApplicantInfo> = Model.extend({});
 const SeedlotRegistrationModel: ModelDefinition<SeedlotRegistration> = Model.extend({});
 const SeedlotInfoModel: ModelDefinition<SeedlotRegistration> = Model.extend({});
 const SeedlotModel: ModelDefinition<Seedlot> = Model.extend({});
+const CollectionInformationModel: ModelDefinition<CollectionInformation> = Model.extend({});
+const CollectorAgencyModel: ModelDefinition<CollectorAgency> = Model.extend({});
 const OrchardModel: ModelDefinition<OrchardType> = Model.extend({});
 const SeedlotOrchardModel: ModelDefinition<MockSeedlotOrchard> = Model.extend({});
 const InterimAgencyInfoModel: ModelDefinition<InterimAgencyInfo> = Model.extend({});
@@ -34,6 +38,8 @@ const models = {
   seedlotRegistration: SeedlotRegistrationModel,
   seedlotInfos: SeedlotInfoModel,
   seedlotData: SeedlotModel,
+  collectionInformation: CollectionInformationModel,
+  collectorAgency: CollectorAgencyModel,
   orchards: OrchardModel,
   seedlotOrchard: SeedlotOrchardModel,
   interimAgencyInfo: InterimAgencyInfoModel,
