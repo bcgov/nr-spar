@@ -59,6 +59,12 @@ Be aware of the required environment variables:
 
 To run the unit tests all you need is `yarn test`. For end-to-end test you need to run `yarn cypress run` to run on console or `yarn cypress open` to use the Cypress IDE.
 
+> Note that to run locally you'll need those environment variables: CYPRESS_USERNAME and CYPRESS_PASSWORD
+
+> Note that to run on github you'll need those secret variables: CYPRESS_USERNAME and CYPRESS_PASSWORD
+
+For more details about end-to-end tests check out our [confluence page](https://apps.nrs.gov.bc.ca/int/confluence/display/FSADT2/Test+strategy)
+
 Before writing your first line of code, please take a moment and check out
 our [CONTRIBUTING](CONTRIBUTING.md) guide.
 

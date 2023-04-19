@@ -68,8 +68,8 @@ REACT_APP_ENABLE_MOCK_SERVER=
 
 And if you want to run Cypress, please add:
 ```
-BCEID_USERNAME=
-BCEID_PASSWORD=
+CYPRESS_USERNAME=
+CYPRESS_PASSWORD=
 ```
 
 > If don't have these values, please reach a member of the team

@@ -1,0 +1,44 @@
+{
+  "applicantAgency": {
+    "name": "0032 - Strong Seeds Orchard - SSO",
+    "number": "30",
+    "email": "test@gov.bc.ca",
+    "invalidEmail": "test.com.br"
+  },
+  "seedlotInformation": {
+    "species": "PLI - Lodgepole pine"
+  },
+  "ownership": {
+    "agency": "0032 - Strong Seeds Orchard - SSO",
+    "locationCode": "15",
+    "ownerPortion": "50",
+    "reserved": "60",
+    "surplus": "40",
+    "fundingSource": "FTL - Forests for Tomorrow - Licensee Administered",
+    "methodPayment": "ITC - Invoice to client address"
+  },
+  "secondOwnership": {
+    "agency": "0035 - Weak Seeds Orchard - WSO",
+    "locationCode": "10",
+    "ownerPortion": "50",
+    "reserved": "70",
+    "surplus": "30",
+    "fundingSource": "BCT - BC Timber Sales",
+    "methodPayment": "ITC - Invoice to client address"
+  },
+  "interimAgency": {
+    "agency": "0032 - Strong Seeds Orchard - SSO",
+    "locationCode": "16",
+    "startDate": "2023/04/10",
+    "endDate": "2023/04/14",
+    "invalidEndDate": "2023/04/09",
+    "invalidStorageLocation": "invalidStorageLocationSizeinvalidStorageLocationSizeinvalidStorageLocationSize",
+    "storagelocation": "cone shed",
+    "methodPayment": "ITC - Invoice to client address"
+  },
+  "orchard": {
+    "number": "802",
+    "name": "Mcbean",
+    "contributionMethodology": "F1 - Visual estimate"
+  }
+}
