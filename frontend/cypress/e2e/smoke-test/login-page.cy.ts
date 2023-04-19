@@ -7,6 +7,7 @@ describe('Login page test', () => {
 
   beforeEach(() => {
     cy.visit('/');
+    cy.wait(2 * 1000);
 
     // Clear cookies and local storage
     cy.clearCookies({ log: true });
@@ -41,20 +42,25 @@ describe('Login page test', () => {
 
   it.skip('log in with BCeID and validate if after timeout the user is disconnected', () => {
     cy.login();
-    // wait for 30 minutes 1800000
+    // wait for 6 minutes
     // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1800000);
+    cy.wait(6 * 60 * 1000);
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
+    cy.reload();
   });
 
   it('log in with BCeID and validate user role', () => {
     cy.login();
+    cy.wait(2 * 1000);
+    cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('IDIR: undefined');
   });
 
   it('log in with BCeID and validate user information', () => {
     cy.login();
+    cy.wait(2 * 1000);
+    cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('NRS Load Test-3');
     cy.get('.user-data').find('p').contains('nrpp_test@nrpp.compratech.com');

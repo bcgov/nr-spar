@@ -135,6 +135,8 @@ jobs:
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-test
+      CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+      CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
     needs:
       - deploy-test
     runs-on: ubuntu-20.04
@@ -157,14 +159,14 @@ jobs:
         if: failure()
         with:
           name: cypress-screenshots
-          path: cypress/screenshots
+          path: frontend/cypress/screenshots
 
       - name: Upload videos
         uses: actions/upload-artifact@v3
-        if: always()
+        if: failure()
         with:
           name: cypress-videos
-          path: cypress/videos
+          path: frontend/cypress/videos
 
   deploy-prod:
     name: PROD Deployment

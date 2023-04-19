@@ -35,6 +35,7 @@ describe('Seedlot registration flow', () => {
 
   before(() => {
     cy.visit('/');
+    cy.wait(2 * 1000);
 
     // Clear cookies and local storage
     cy.clearCookies({ log: true });
@@ -48,6 +49,7 @@ describe('Seedlot registration flow', () => {
   it('should register a Class A Seedlot', () => {
     // SPAR log in
     cy.login();
+    cy.wait(2 * 1000);
     cy.contains('Main activities');
     // Select the “Seedlots” section from the left-hand panel
     cy.get('nav')

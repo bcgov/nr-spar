@@ -5,14 +5,13 @@ on:
     # runs e2e tests every day at 4am
     - cron: '0 4 * * *'
 
-env:
-  REGISTRY: ghcr.io
-  NAME: nrsparwebapp
-
 jobs:
   e2e-chrome:
     runs-on: ubuntu-20.04
-    name: E2E on Chrome
+    name: E2E on Google Chrome
+    env:
+      CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+      CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -21,30 +20,27 @@ jobs:
         uses: cypress-io/github-action@v4
         with:
           browser: chrome
-        env:
-          CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
-          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots-chrome
-          path: cypress/screenshots
+          path: frontend/cypress/screenshots
       
       - name: Upload videos
         uses: actions/upload-artifact@v3
-        if: always()
+        if: failure()
         with:
           name: cypress-videos-chrome
-          path: cypress/videos
+          path: frontend/cypress/videos
   
   e2e-firefox:
     runs-on: ubuntu-20.04
     container:
       image: cypress/included:11.2.0
       options: --user 1001
-    name: E2E on Firefox
+    name: E2E on Mozilla Firefox
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -60,18 +56,18 @@ jobs:
         if: failure()
         with:
           name: cypress-screenshots-firefox
-          path: cypress/screenshots
+          path: frontend/cypress/screenshots
       
       - name: Upload videos
         uses: actions/upload-artifact@v3
-        if: always()
+        if: failure()
         with:
           name: cypress-videos-firefox
-          path: cypress/videos
+          path: frontend/cypress/videos
 
   e2e-edge:
     runs-on: windows-latest
-    name: E2E on Edge
+    name: E2E on Microsoft Edge
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -89,11 +85,11 @@ jobs:
         if: failure()
         with:
           name: cypress-screenshots-edge
-          path: cypress/screenshots
+          path: frontend/cypress/screenshots
       
       - name: Upload videos
         uses: actions/upload-artifact@v3
-        if: always()
+        if: failure()
         with:
           name: cypress-videos-edge
-          path: cypress/videos
+          path: frontend/cypress/videos
