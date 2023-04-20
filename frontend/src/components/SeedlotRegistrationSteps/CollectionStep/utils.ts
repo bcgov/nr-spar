@@ -26,7 +26,8 @@ export interface CollectionStepProps {
   setStepData: Function,
   defaultAgency: string,
   defaultCode: string,
-  agencyOptions: Array<string>
+  agencyOptions: Array<string>,
+  readOnly?: boolean
 }
 
 export type FormValidation = {

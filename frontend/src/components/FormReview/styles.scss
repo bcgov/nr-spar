@@ -23,6 +23,11 @@
   padding-left: 1rem;
 }
 
+.form-item{
+  padding-left: 1.5rem;
+  padding-top:  2.0rem
+}
+
 .item-description-section {
   @include type.type-style('body-compact-01');
   color: var(--#{vars.$bcgov-prefix}-text-secondary);
@@ -31,4 +36,9 @@
 
 .form-review-empty-section .empty-section-container{
   padding-bottom: 6rem;
+}
+
+.btn-edit-step {
+  width: 8.69rem;
+  margin-top: 3rem;
 }

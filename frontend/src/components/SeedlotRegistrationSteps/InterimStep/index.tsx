@@ -20,12 +20,14 @@ import InterimForm from './definitions';
 import './styles.scss';
 
 const DATE_FORMAT = 'Y/m/d';
+
 interface InterimStorageStepProps {
   state: InterimForm,
   setStepData: Function,
   defaultAgency: string,
   defaultCode: string,
-  agencyOptions: Array<string>
+  agencyOptions: Array<string>,
+  readOnly?: boolean
 }
 
 interface ComboBoxEvent {
@@ -38,7 +40,8 @@ const InterimStorage = (
     setStepData,
     defaultAgency,
     defaultCode,
-    agencyOptions
+    agencyOptions,
+    readOnly
   }: InterimStorageStepProps
 ) => {
   type FormValidation = {
@@ -190,6 +193,7 @@ const InterimStorage = (
               labelText="Use applicant agency as collector agency"
               defaultChecked
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => collectorAgencyisChecked(e)}
+              readOnly={readOnly}
             />
           </Column>
         </Row>
@@ -207,9 +211,9 @@ const InterimStorage = (
               }
               titleText="Interim agency name"
               placeholder="Select Interim agency name"
-              readOnly={isChecked}
               items={agencyOptions}
               invalid={validationObj.isNameInvalid}
+              readOnly={readOnly || isChecked}
             />
           </Column>
           <Column sm={4} md={2} lg={4}>
@@ -223,10 +227,10 @@ const InterimStorage = (
               helperText="2-digit code that identifies the address of operated office or division"
               invalid={validationObj.isCodeInvalid}
               invalidText="Please enter a valid value"
-              readOnly={isChecked}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFormInput('locationCode', e.target.value);
               }}
+              readOnly={readOnly || isChecked}
             />
           </Column>
         </Row>
@@ -246,6 +250,7 @@ const InterimStorage = (
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput('startDate', selectedDate);
               }}
+              readOnly={readOnly}
             >
               <DatePickerInput
                 id="start-date-input"
@@ -254,6 +259,7 @@ const InterimStorage = (
                 placeholder="yyyy/mm/dd"
                 invalid={validationObj.isStartDateInvalid}
                 invalidText="Please enter a valid date"
+                readOnly={readOnly}
               />
             </DatePicker>
           </Column>
@@ -267,6 +273,7 @@ const InterimStorage = (
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput('endDate', selectedDate);
               }}
+              readOnly={readOnly}
             >
               <DatePickerInput
                 id="end-date-input"
@@ -295,6 +302,7 @@ const InterimStorage = (
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFormInput('storageLocation', e.target.value);
               }}
+              readOnly={readOnly}
             />
           </Column>
         </Row>
@@ -304,8 +312,9 @@ const InterimStorage = (
               legendText="Storage facility type"
               name="storage-type-radiogroup"
               orientation="vertical"
-              defaultSelected="OCV"
+              defaultSelected={state.facilityType}
               onChange={(e: string) => inputChangeHandlerRadio(e)}
+              readOnly={readOnly}
             >
               <RadioButton
                 id="outside-radio"
@@ -345,6 +354,7 @@ const InterimStorage = (
                   invalid={validationObj.isFacilityInvalid}
                   invalidText="Storage facility type lenght should be <= 50"
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormInput('facilityType', e.target.value)}
+                  readOnly={readOnly}
                 />
               </Column>
             </Row>

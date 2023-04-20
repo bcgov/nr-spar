@@ -163,7 +163,7 @@ export const skipForInvalidLength = (name: string, value: string): boolean => {
   return false;
 };
 
-const isInputEmpty = (value: string | number | null) => {
+const isInputEmpty = (value: string | number | boolean | null) => {
   // null can be the value even with the type check
   if (value === '' || value === null) {
     return true;

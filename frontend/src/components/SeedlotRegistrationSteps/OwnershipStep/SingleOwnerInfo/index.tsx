@@ -34,12 +34,14 @@ interface SingleOwnerInfoProps {
   agencyOptions: Array<string>,
   fundingSources: Array<string>,
   methodsOfPayment: Array<string>,
-  addRefs: Function
+  addRefs: Function,
+  readOnly?: boolean,
 }
 
 const SingleOwnerInfo = ({
   addRefs, ownerInfo, agencyOptions, fundingSources, methodsOfPayment, disableInputs,
-  validationProp, handleInputChange, addAnOwner, deleteAnOwner, setDefaultAgencyNCode
+  validationProp, handleInputChange, addAnOwner, deleteAnOwner, setDefaultAgencyNCode,
+  readOnly
 }: SingleOwnerInfoProps) => (
   <div className="single-owner-info-container">
     <FlexGrid fullWidth>
@@ -50,12 +52,13 @@ const SingleOwnerInfo = ({
               <Checkbox
                 labelText={inputText.checkbox.labelText}
                 id="default-agency-code-checkbox"
-                defaultChecked
+                defaultChecked={ownerInfo.applicantAgency}
                 onChange={
                   (_event: React.ChangeEvent<HTMLInputElement>, { checked }: CheckBoxValue) => {
                     setDefaultAgencyNCode(checked);
                   }
                 }
+                readOnly={readOnly}
               />
             </Column>
           </Row>
@@ -77,11 +80,12 @@ const SingleOwnerInfo = ({
             placeholder={inputText.owner.placeholder}
             titleText={inputText.owner.titleText}
             helperText={inputText.owner.helperText}
-            onChange={(e: ComboBoxEvent) => handleInputChange('ownerAgency', e.selectedItem)}
+            onChange={!readOnly ? ((e: ComboBoxEvent) => handleInputChange('ownerAgency', e.selectedItem)) : () => {}}
             // We need to check if validationProp is here since deleting a Single Owner Form
             //    might delete the valid prop first and throwing an error
             invalid={validationProp ? validationProp.owner.isInvalid : false}
             invalidText={inputText.owner.invalidText}
+            readOnly={readOnly}
           />
         </Column>
         <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
@@ -102,6 +106,7 @@ const SingleOwnerInfo = ({
             }}
             invalid={validationProp ? validationProp.code.isInvalid : false}
             invalidText={validationProp ? validationProp.code.invalidText : ''}
+            readOnly={readOnly}
           />
         </Column>
       </Row>
@@ -137,6 +142,7 @@ const SingleOwnerInfo = ({
                 }
               }
             }
+            readOnly={readOnly}
           />
         </Column>
         <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
@@ -168,6 +174,7 @@ const SingleOwnerInfo = ({
                     }
                   }
                 }
+                readOnly={readOnly}
               />
             </div>
             <div className="reserved-surplus-input">
@@ -197,6 +204,7 @@ const SingleOwnerInfo = ({
                     }
                   }
                 }
+                readOnly={readOnly}
               />
             </div>
           </div>
@@ -220,6 +228,7 @@ const SingleOwnerInfo = ({
             onChange={(e: ComboBoxEvent) => handleInputChange('fundingSource', e.selectedItem)}
             invalid={validationProp ? validationProp.funding.isInvalid : false}
             invalidText={validationProp ? validationProp.funding.invalidText : ''}
+            readOnly={readOnly}
           />
         </Column>
         <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
@@ -240,9 +249,11 @@ const SingleOwnerInfo = ({
             onChange={(e: ComboBoxEvent) => handleInputChange('methodOfPayment', e.selectedItem)}
             invalid={validationProp ? validationProp.payment.isInvalid : false}
             invalidText={validationProp ? validationProp.payment.invalidText : ''}
+            readOnly={readOnly}
           />
         </Column>
       </Row>
+      {(!readOnly) && (
       <Row>
         {
           ownerInfo.id === DEFAULT_INDEX
@@ -270,6 +281,7 @@ const SingleOwnerInfo = ({
             )
         }
       </Row>
+      )}
     </FlexGrid>
   </div>
 );

@@ -16,7 +16,8 @@ export type SingleOwnerForm = {
     reservedPerc: string,
     surplusPerc: string,
     fundingSource: string,
-    methodOfPayment: string
+    methodOfPayment: string,
+    applicantAgency: boolean
 }
 
 export type SingleInvalidObj = {

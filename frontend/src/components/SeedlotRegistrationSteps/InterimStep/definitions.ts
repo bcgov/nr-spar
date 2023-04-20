@@ -4,7 +4,7 @@ export type InterimForm = {
   startDate: string,
   endDate: string,
   storageLocation: string,
-  facilityType: string
+  facilityType: string,
 }
 
 export default InterimForm;

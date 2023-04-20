@@ -55,7 +55,8 @@ export const ownerTemplate: SingleOwnerForm = {
   reservedPerc: '100.00',
   surplusPerc: '0.00',
   fundingSource: '',
-  methodOfPayment: ''
+  methodOfPayment: '',
+  applicantAgency: true
 };
 
 export const validTemplate: ValidationProp = {

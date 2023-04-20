@@ -33,7 +33,8 @@ const CollectionStep = (
     setStepData,
     defaultAgency,
     defaultCode,
-    agencyOptions
+    agencyOptions,
+    readOnly
   }: CollectionStepProps
 ) => {
   const initialValidationObj: FormValidation = {
@@ -184,6 +185,7 @@ const CollectionStep = (
               name={fieldsConfig.checkbox.name}
               ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.checkbox.name)}
               labelText={fieldsConfig.checkbox.labelText}
+              readOnly={readOnly}
               checked={isChecked}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 collectorAgencyIsChecked(e);
@@ -201,8 +203,8 @@ const CollectionStep = (
               titleText={fieldsConfig.collector.titleText}
               helperText={fieldsConfig.collector.helperText}
               invalidText={fieldsConfig.collector.invalidText}
-              readOnly={isChecked}
               items={agencyOptions}
+              readOnly={isChecked || readOnly}
               selectedItem={state.collectorAgency}
               onChange={(e: ComboBoxEvent) => {
                 handleFormInput(
@@ -227,7 +229,7 @@ const CollectionStep = (
               label={fieldsConfig.code.label}
               helperText={fieldsConfig.code.helperText}
               invalidText={fieldsConfig.code.invalidText}
-              readOnly={isChecked}
+              readOnly={isChecked || readOnly}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFormInput(
                   fieldsConfig.code.name as keyof CollectionForm,
@@ -250,6 +252,7 @@ const CollectionStep = (
             <DatePicker
               datePickerType="single"
               dateFormat={DATE_FORMAT}
+              readOnly={readOnly}
               value={state.startDate}
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput(
@@ -276,6 +279,7 @@ const CollectionStep = (
               datePickerType="single"
               dateFormat={DATE_FORMAT}
               minDate={state.startDate}
+              readOnly={readOnly}
               value={state.endDate}
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput(
@@ -306,6 +310,7 @@ const CollectionStep = (
               ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.numberOfContainers.name)}
               value={state.numberOfContainers}
               label={fieldsConfig.numberOfContainers.labelText}
+              readOnly={readOnly}
               invalidText={fieldsConfig.numberOfContainers.invalidText}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 collectionVolumeInformationHandler(
@@ -324,6 +329,7 @@ const CollectionStep = (
               ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.volumePerContainers.name)}
               value={state.volumePerContainers}
               label={fieldsConfig.volumePerContainers.labelText}
+              readOnly={readOnly}
               invalidText={fieldsConfig.volumePerContainers.invalidText}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 collectionVolumeInformationHandler(
@@ -347,6 +353,7 @@ const CollectionStep = (
               invalidText={fieldsConfig.volumeOfCones.invalidText}
               helperText={fieldsConfig.volumeOfCones.helperText}
               warn={isCalcWrong}
+              readOnly={readOnly}
               warnText={fieldsConfig.volumeOfCones.warnText}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 collectionVolumeInformationHandler(
@@ -368,6 +375,7 @@ const CollectionStep = (
                 name={fieldsConfig.aerialRanking.name}
                 ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.aerialRanking.name)}
                 labelText={fieldsConfig.aerialRanking.labelText}
+                readOnly={readOnly}
                 checked={state.aerialRanking}
                 onChange={
                   (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
@@ -378,6 +386,7 @@ const CollectionStep = (
                 name={fieldsConfig.aerialClippingTopping.name}
                 ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.aerialClippingTopping.name)}
                 labelText={fieldsConfig.aerialClippingTopping.labelText}
+                readOnly={readOnly}
                 checked={state.aerialClippingTopping}
                 onChange={
                   (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
@@ -388,6 +397,7 @@ const CollectionStep = (
                 name={fieldsConfig.felledTrees.name}
                 ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.felledTrees.name)}
                 labelText={fieldsConfig.felledTrees.labelText}
+                readOnly={readOnly}
                 checked={state.felledTrees}
                 onChange={
                   (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
@@ -398,6 +408,7 @@ const CollectionStep = (
                 name={fieldsConfig.climbing.name}
                 ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.climbing.name)}
                 labelText={fieldsConfig.climbing.labelText}
+                readOnly={readOnly}
                 checked={state.climbing}
                 onChange={
                   (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
@@ -408,6 +419,7 @@ const CollectionStep = (
                 name={fieldsConfig.squirrelCache.name}
                 ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.squirrelCache.name)}
                 labelText={fieldsConfig.squirrelCache.labelText}
+                readOnly={readOnly}
                 checked={state.squirrelCache}
                 onChange={
                   (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
@@ -418,6 +430,7 @@ const CollectionStep = (
                 name={fieldsConfig.ground.name}
                 ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.ground.name)}
                 labelText={fieldsConfig.ground.labelText}
+                readOnly={readOnly}
                 checked={state.ground}
                 onChange={
                   (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
@@ -428,6 +441,7 @@ const CollectionStep = (
                 name={fieldsConfig.squirrelHarvesting.name}
                 ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.squirrelHarvesting.name)}
                 labelText={fieldsConfig.squirrelHarvesting.labelText}
+                readOnly={readOnly}
                 checked={state.squirrelHarvesting}
                 onChange={
                   (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
@@ -438,6 +452,7 @@ const CollectionStep = (
                 name={fieldsConfig.other.name}
                 ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.other.name)}
                 labelText={fieldsConfig.other.labelText}
+                readOnly={readOnly}
                 checked={state.other}
                 onChange={
                   (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
@@ -455,6 +470,7 @@ const CollectionStep = (
                   labelText={fieldsConfig.collectionMethod.labelText}
                   placeholder={fieldsConfig.collectionMethod.placeholder}
                   helperText={fieldsConfig.collectionMethod.helperText}
+                  readOnly={readOnly}
                   value={state.collectionMethodName}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleFormInput(
@@ -474,6 +490,7 @@ const CollectionStep = (
               ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.comments.name)}
               value={state.comments}
               labelText={fieldsConfig.comments.labelText}
+              readOnly={readOnly}
               placeholder={fieldsConfig.comments.placeholder}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFormInput(
