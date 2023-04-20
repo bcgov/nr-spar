@@ -80,7 +80,7 @@ jobs:
 
       - name: Comment PR
         continue-on-error: true
-        uses: thollander/actions-comment-pull-request@v1
+        uses: thollander/actions-comment-pull-request@v2
         if: ${{ steps.changelog.outputs.skipped == 'false' }}
         with:
           message: |
@@ -115,7 +115,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.2
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
         with:
           file: frontend/openshift.deploy.yml
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
@@ -160,7 +160,7 @@ jobs:
         run: yarn --prefer-offline --cwd frontend
 
       - name: Cypress run
-        uses: cypress-io/github-action@v5.0.9
+        uses: cypress-io/github-action@v5.6.1
         with:
           install: false
           working-directory: frontend
