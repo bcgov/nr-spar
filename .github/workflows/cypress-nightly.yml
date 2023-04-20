@@ -20,6 +20,11 @@ jobs:
         uses: cypress-io/github-action@v4
         with:
           browser: chrome
+          working-directory: ./frontend
+          path: ./frontend/yarn.lock
+        env:
+          CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v3
@@ -37,16 +42,17 @@ jobs:
   
   e2e-firefox:
     runs-on: ubuntu-20.04
-    container:
-      image: cypress/included:11.2.0
-      options: --user 1001
-    name: E2E on Mozilla Firefox
+    name: E2E on Firefox
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       
       - name: Cypress run
-        run: cypress run --browser firefox
+        uses: cypress-io/github-action@v5
+        with:
+          browser: firefox
+          working-directory: ./frontend
+          path: ./frontend/yarn.lock
         env:
           CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
@@ -76,6 +82,8 @@ jobs:
         uses: cypress-io/github-action@v4
         with:
           browser: edge
+          working-directory: ./frontend
+          path: ./frontend/yarn.lock
         env:
           CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
