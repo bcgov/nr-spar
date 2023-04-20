@@ -4,11 +4,13 @@ import AppSchema from '../schema';
 import KeycloakService from '../../service/KeycloakService';
 
 import formatDate from '../../utils/DateUtils';
-import getUrl from '../../utils/ApiUtils';
-import ApiAddresses from '../../utils/ApiAddresses';
+
+import ApiConfig from '../../api-service/ApiConfig';
+import mockServerConfig from '../config';
 
 const SeedlotRegistrationEndpoints = (server: Server) => {
-  server.post(getUrl(ApiAddresses.AClassSeedlotPost, true), (schema: AppSchema, request) => {
+  const aClassUrl = ApiConfig.aClassSeedlot.replace(mockServerConfig.namespace, '');
+  server.post(aClassUrl, (schema: AppSchema, request) => {
     const attrs = JSON.parse(request.requestBody);
     const { seedlotRegistrations } = schema.db;
     const { applicantInfos } = schema.db;
@@ -47,7 +49,8 @@ const SeedlotRegistrationEndpoints = (server: Server) => {
     };
   });
 
-  server.get(getUrl(ApiAddresses.SeedlotRetrieveOne, true), (schema: AppSchema, request) => {
+  const seedlotNumberUrl = `${ApiConfig.seedlot}/:seedlotnumber`.replace(mockServerConfig.namespace, '');
+  server.get(seedlotNumberUrl, (schema: AppSchema, request) => {
     const { seedlotnumber } = request.params;
     const { seedlotData } = schema.db;
     const { seedlotRegistrations } = schema.db;
@@ -59,57 +62,16 @@ const SeedlotRegistrationEndpoints = (server: Server) => {
     };
   });
 
-  server.get(getUrl(ApiAddresses.SeedlotRetrieveAll, true), (schema: AppSchema) => schema.all('seedlotData'));
+  const seedlotUrl = ApiConfig.seedlot.replace(mockServerConfig.namespace, '');
+  server.get(seedlotUrl, (schema: AppSchema) => schema.all('seedlotData'));
 
-  server.post(getUrl(ApiAddresses.CollectionStepPost, true), (schema: AppSchema, request) => {
-    const attrs = JSON.parse(request.requestBody);
-
-    const { collectionInformation } = schema.db;
-    const { collectorAgency } = schema.db;
-
-    collectorAgency.insert(attrs.collectorAgency);
-    collectionInformation.insert(attrs);
-
-    return {
-      status: 'OK'
-    };
-  });
-
-  server.post(getUrl(ApiAddresses.SeedlotOrchardPost, true), (schema: AppSchema, request) => {
+  const seedlotOrchardUrl = ApiConfig.seedlotOrchardStep.replace(mockServerConfig.namespace, '');
+  server.post(seedlotOrchardUrl, (schema: AppSchema, request) => {
     const { seedlotnumber } = request.params;
     const attrs = JSON.parse(request.requestBody);
     const { seedlotOrchards } = schema.db;
 
     seedlotOrchards.insert({
-      [seedlotnumber]: attrs
-    });
-    return {
-      status: 201
-    };
-  });
-
-  server.post(getUrl(ApiAddresses.InterimStoragePost, true), (schema: AppSchema, request) => {
-    const attrs = JSON.parse(request.requestBody);
-
-    const { interimStorageRegistrations } = schema.db;
-    const { interimAgencyInfos } = schema.db;
-    const { storageInfos } = schema.db;
-
-    interimStorageRegistrations.insert(attrs);
-    interimAgencyInfos.insert(attrs.applicant);
-    storageInfos.insert(attrs.storageInformation);
-    return {
-      status: 'OK'
-    };
-  });
-
-  // Get post request for ownership registration step
-  server.post(getUrl(ApiAddresses.SeedlotOwnerRegister, true), (schema: AppSchema, request) => {
-    const attrs = JSON.parse(request.requestBody);
-    const { seedlotnumber } = request.params;
-    const { registerOwnerData } = schema.db;
-
-    registerOwnerData.insert({
       [seedlotnumber]: attrs
     });
     return {

@@ -55,7 +55,7 @@ const ApplicantSeedlotInformation = (
               Seedlot species
             </p>
             <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.species}
+              {seedlotApplicantData.species.label}
             </p>
           </div>
           <div className="applicant-seedlot-class-a-source">

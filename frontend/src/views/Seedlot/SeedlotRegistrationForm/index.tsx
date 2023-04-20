@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Checkbox,
   FlexGrid,
@@ -13,6 +14,8 @@ import {
 import { ArrowRight } from '@carbon/icons-react';
 import ReactDOM from 'react-dom';
 
+import getFundingSources from '../../../api-service/fundingSorucesAPI';
+import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
@@ -31,6 +34,7 @@ import {
   initOwnershipState,
   initExtractionStorageState
 } from './utils';
+import { getDropDownList } from '../../../utils/DropDownUtils';
 import './styles.scss';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
@@ -38,7 +42,6 @@ import inputText from './constants';
 
 const defaultCode = '16';
 const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
-const defaultPayment = 'ITC - Invoice to client address';
 const agencyOptions = [
   '0032 - Strong Seeds Orchard - SSO',
   '0035 - Weak Seeds Orchard - WSO',
@@ -78,11 +81,21 @@ const SeedlotRegistrationForm = () => {
 
   const [formStep, setFormStep] = useState<number>(0);
 
+  const fundingSourcesQuery = useQuery({
+    queryKey: ['funding-sources'],
+    queryFn: getFundingSources
+  });
+
+  const paymentMethodsQuery = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: getPaymentMethods
+  });
+
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
     collectionStep: initCollectionState(defaultAgency, defaultCode),
     interimStep: initInterimState(defaultAgency, defaultCode),
-    ownershipStep: [initOwnershipState(defaultAgency, defaultCode, defaultPayment)],
+    ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
     orchardStep: initOrchardState(),
     extractionStorageStep: initExtractionStorageState(defaultAgency, defaultCode)
   });
@@ -126,6 +139,16 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
+            fundingSources={
+              fundingSourcesQuery.isSuccess
+                ? getDropDownList(fundingSourcesQuery.data)
+                : []
+            }
+            paymentMethods={
+              paymentMethodsQuery.isSuccess
+                ? getDropDownList(paymentMethodsQuery.data)
+                : []
+            }
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
           />
         );

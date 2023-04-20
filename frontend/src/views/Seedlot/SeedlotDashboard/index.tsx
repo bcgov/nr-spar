@@ -18,8 +18,8 @@ const SeedlotDashboard = () => (
         <PageTitle
           title="Seedlots"
           subtitle="Register and manage your seedlots"
-          favourite
-          activity="SEEDLING_REQUEST"
+          enableFavourite
+          activity="SEEDLOT_DASHBOARD"
         />
       </Row>
       <SeedlotActivities />

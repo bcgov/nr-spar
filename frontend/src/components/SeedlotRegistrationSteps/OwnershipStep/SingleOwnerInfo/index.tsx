@@ -11,6 +11,7 @@ import {
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
 
+import DropDownObj from '../../../../types/DropDownObject';
 import {
   SingleOwnerForm,
   ComboBoxEvent,
@@ -32,8 +33,8 @@ interface SingleOwnerInfoProps {
   setDefaultAgencyNCode: Function,
   validationProp: ValidationProp,
   agencyOptions: Array<string>,
-  fundingSources: Array<string>,
-  methodsOfPayment: Array<string>,
+  fundingSources: Array<DropDownObj>,
+  methodsOfPayment: Array<DropDownObj>,
   addRefs: Function,
   readOnly?: boolean,
 }
@@ -52,7 +53,7 @@ const SingleOwnerInfo = ({
               <Checkbox
                 labelText={inputText.checkbox.labelText}
                 id="default-agency-code-checkbox"
-                defaultChecked={ownerInfo.applicantAgency}
+                defaultChecked
                 onChange={
                   (_event: React.ChangeEvent<HTMLInputElement>, { checked }: CheckBoxValue) => {
                     setDefaultAgencyNCode(checked);

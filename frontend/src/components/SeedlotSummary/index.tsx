@@ -42,7 +42,7 @@ const SeedlotSummary = ({ seedlotData }: SeedlotSummaryProps) => (
           Seedlot species
         </p>
         <p className="seedlot-summary-info-value">
-          {seedlotData.lot_species}
+          {seedlotData.lot_species.label}
         </p>
       </div>
       <div className="seedlot-summary-seedlot-form">

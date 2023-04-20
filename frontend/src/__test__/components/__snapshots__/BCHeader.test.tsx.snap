@@ -68,7 +68,6 @@ exports[`the Header component should match the snapshot 1`] = `
         onClick={[Function]}
         onFocus={[Function]}
         onMouseEnter={[Function]}
-        tabIndex={0}
         type="button"
       >
         <svg
@@ -119,7 +118,6 @@ exports[`the Header component should match the snapshot 1`] = `
         onClick={[Function]}
         onFocus={[Function]}
         onMouseEnter={[Function]}
-        tabIndex={0}
         type="button"
       >
         <svg
@@ -170,7 +168,6 @@ exports[`the Header component should match the snapshot 1`] = `
         onClick={[Function]}
         onFocus={[Function]}
         onMouseEnter={[Function]}
-        tabIndex={0}
         type="button"
       >
         <svg
@@ -236,7 +233,6 @@ exports[`the Header component should match the snapshot 1`] = `
             onClick={[Function]}
             onFocus={[Function]}
             onMouseEnter={[Function]}
-            tabIndex={0}
             type="button"
           >
             <svg
@@ -288,7 +284,6 @@ exports[`the Header component should match the snapshot 1`] = `
             onClick={[Function]}
             onFocus={[Function]}
             onMouseEnter={[Function]}
-            tabIndex={0}
             type="button"
           >
             <svg
@@ -335,7 +330,6 @@ exports[`the Header component should match the snapshot 1`] = `
           aria-pressed={null}
           className="btn-viewed cds--btn cds--btn--ghost"
           disabled={false}
-          tabIndex={0}
           type="button"
         >
           Mark all as viewed
@@ -345,7 +339,6 @@ exports[`the Header component should match the snapshot 1`] = `
           aria-pressed={null}
           className="btn-all-notifications cds--btn cds--btn--ghost"
           disabled={false}
-          tabIndex={0}
           type="button"
         >
           See all notifications
@@ -421,7 +414,6 @@ exports[`the Header component should match the snapshot 1`] = `
             aria-pressed={null}
             className="cds--btn cds--btn--md cds--btn--primary"
             disabled={false}
-            tabIndex={0}
             type="button"
           >
             See all notifications
@@ -473,7 +465,6 @@ exports[`the Header component should match the snapshot 1`] = `
             onClick={[Function]}
             onFocus={[Function]}
             onMouseEnter={[Function]}
-            tabIndex={0}
             type="button"
           >
             <svg
@@ -525,7 +516,6 @@ exports[`the Header component should match the snapshot 1`] = `
             onClick={[Function]}
             onFocus={[Function]}
             onMouseEnter={[Function]}
-            tabIndex={0}
             type="button"
           >
             <svg

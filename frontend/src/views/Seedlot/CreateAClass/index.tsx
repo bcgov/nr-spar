@@ -27,7 +27,8 @@ const CreateAClass = () => {
           <PageTitle
             title="Create A class seedlot"
             subtitle="Register a new A class seedlot"
-            favourite
+            enableFavourite
+            activity="CREATE_A_CLASS_SEEDLOT"
           />
         </Row>
         <ApplicantInformation />

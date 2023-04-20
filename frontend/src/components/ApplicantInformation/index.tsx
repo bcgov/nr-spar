@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   Row,
@@ -19,12 +19,11 @@ import { DocumentAdd } from '@carbon/icons-react';
 import Subtitle from '../Subtitle';
 
 import SeedlotRegistration from '../../types/SeedlotRegistration';
-import GeneticClassesType from '../../types/GeneticClasses';
 
-import getUrl from '../../utils/ApiUtils';
-import ApiAddresses from '../../utils/ApiAddresses';
-import { useAuth } from '../../contexts/AuthContext';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
+import api from '../../api-service/api';
+import ApiConfig from '../../api-service/ApiConfig';
+import getVegCodes from '../../api-service/vegetationCodeAPI';
 
 import './styles.scss';
 
@@ -39,21 +38,7 @@ const ApplicantInformation = () => {
     '0038 - Okay Seeds Orchard - OSO'
   ];
 
-  const { token } = useAuth();
   const navigate = useNavigate();
-
-  const getAxiosConfig = () => {
-    const axiosConfig = {};
-    if (token) {
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      Object.assign(axiosConfig, headers);
-    }
-    return axiosConfig;
-  };
 
   const seedlotData: SeedlotRegistration = {
     seedlotNumber: 0,
@@ -62,7 +47,11 @@ const ApplicantInformation = () => {
       number: '0',
       email: ''
     },
-    species: '',
+    species: {
+      label: '',
+      code: '',
+      description: ''
+    },
     source: 'tested',
     registered: true,
     collectedBC: true
@@ -78,26 +67,10 @@ const ApplicantInformation = () => {
   const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
   const [invalidSpecies, setInvalidSpecies] = useState<boolean>(false);
 
-  const [geneticClasses, setGeneticClasses] = useState<string[]>([]);
-
-  const getGeneticClasses = () => {
-    axios.get(getUrl(ApiAddresses.GeneticClassesRetrieveAll), getAxiosConfig())
-      .then((response) => {
-        const classes: string[] = [];
-        if (response.data.geneticClasses) {
-          response.data.geneticClasses.forEach((element: GeneticClassesType) => {
-            classes.push(element.description);
-          });
-        }
-        setGeneticClasses(classes);
-      })
-      .catch((error) => {
-        // eslint-disable-next-line
-        console.error(`Error: ${error}`);
-      });
-  };
-
-  getGeneticClasses();
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes'],
+    queryFn: getVegCodes
+  });
 
   const inputChangeHandlerApplicant = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -174,11 +147,12 @@ const ApplicantInformation = () => {
       numberInputRef.current?.focus();
     } else if (invalidEmail) {
       emailInputRef.current?.focus();
-    } else if (!responseBody.species) {
+    } else if (!responseBody.species.label) {
       setInvalidSpecies(true);
       speciesInputRef.current?.focus();
     } else {
-      axios.post(getUrl(ApiAddresses.AClassSeedlotPost), responseBody, getAxiosConfig())
+      const url = ApiConfig.aClassSeedlot;
+      api.post(url, responseBody)
         .then((response) => {
           navigate(`/seedlot/successfully-created/${response.data.seedlotNumber}`);
         })
@@ -267,7 +241,7 @@ const ApplicantInformation = () => {
               label="Enter or choose an species for the seedlot"
               invalid={invalidSpecies}
               invalidText="Please select a species"
-              items={geneticClasses}
+              items={vegCodeQuery.isSuccess ? vegCodeQuery.data : []}
               onChange={(e: any) => inputChangeHandlerSpecies(e)}
             />
           </Column>

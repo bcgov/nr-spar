@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 import { Row, Column } from '@carbon/react';
 
@@ -8,33 +6,18 @@ import SeedlotTable from '../SeedlotTable';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
 
-import ApiAddresses from '../../utils/ApiAddresses';
-import getUrl from '../../utils/ApiUtils';
-import { useAuth } from '../../contexts/AuthContext';
+import api from '../../api-service/api';
+import ApiConfig from '../../api-service/ApiConfig';
 import Seedlot from '../../types/Seedlot';
 
 import './styles.scss';
 
 const RecentSeedlots = () => {
-  const { token } = useAuth();
-
-  const [seedlotsData, setSeedlotsData] = useState<Seedlot[]>();
-
-  const getAxiosConfig = () => {
-    const axiosConfig = {};
-    if (token) {
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      Object.assign(axiosConfig, headers);
-    }
-    return axiosConfig;
-  };
+  const [seedlotsData, setSeedlotsData] = useState<Array<Seedlot>>([]);
 
   const getSeedlotsData = () => {
-    axios.get(getUrl(ApiAddresses.SeedlotRetrieveAll), getAxiosConfig())
+    const url = ApiConfig.seedlot;
+    api.get(url)
       .then((response) => {
         setSeedlotsData(response.data.seedlotData);
       })
@@ -44,9 +27,9 @@ const RecentSeedlots = () => {
       });
   };
 
-  getSeedlotsData();
-
-  const listItems = seedlotsData;
+  useEffect(() => {
+    getSeedlotsData();
+  }, []);
 
   const tableHeaders: string[] = [
     'Seedlot number',
@@ -67,23 +50,24 @@ const RecentSeedlots = () => {
         <Subtitle text="Check a summary of your recent seedlots" className="recent-seedlots-subtitle" />
       </Column>
       <Column sm={4} className="recent-seedlots-table">
-        {listItems
-          && (
-          <SeedlotTable
-            elements={listItems}
-            headers={tableHeaders}
-          />
-          )}
-        {(listItems?.length === 0)
-          && (
-          <div className="empty-recent-seedlots">
-            <EmptySection
-              pictogram="Magnify"
-              title="There is no seedlot to show yet!"
-              description="Your recent seedlots will appear here once you generate one"
-            />
-          </div>
-          )}
+        {
+          seedlotsData.length !== 0
+            ? (
+              <SeedlotTable
+                elements={seedlotsData}
+                headers={tableHeaders}
+              />
+            )
+            : (
+              <div className="empty-recent-seedlots">
+                <EmptySection
+                  pictogram="Magnify"
+                  title="There is no seedlot to show yet!"
+                  description="Your recent seedlots will appear here once you generate one"
+                />
+              </div>
+            )
+        }
       </Column>
     </Row>
   );

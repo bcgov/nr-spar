@@ -1,8 +1,14 @@
+const mockLotSpecies = {
+  code: 'SX',
+  description: 'Spruce Hybrid',
+  label: 'SX - Spruce Hybrid'
+};
+
 const MySeedlotsItems = [
   {
     number: 12456,
     class: 'A',
-    lot_species: 'SX - Spruce hibrid',
+    lot_species: mockLotSpecies,
     form_step: 'Collection',
     status: 4,
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
@@ -13,7 +19,7 @@ const MySeedlotsItems = [
   {
     number: 12457,
     class: 'A',
-    lot_species: 'SX - Spruce hibrid',
+    lot_species: mockLotSpecies,
     form_step: 'Collection',
     status: 4,
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
@@ -24,7 +30,7 @@ const MySeedlotsItems = [
   {
     number: 12458,
     class: 'A',
-    lot_species: 'SX - Spruce hibrid',
+    lot_species: mockLotSpecies,
     form_step: 'Collection',
     status: 4,
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
@@ -35,7 +41,7 @@ const MySeedlotsItems = [
   {
     number: 12459,
     class: 'A',
-    lot_species: 'SX - Spruce hibrid',
+    lot_species: mockLotSpecies,
     form_step: 'Collection',
     status: 0,
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
@@ -46,7 +52,7 @@ const MySeedlotsItems = [
   {
     number: 12460,
     class: 'A',
-    lot_species: 'SX - Spruce hibrid',
+    lot_species: mockLotSpecies,
     form_step: 'Collection',
     status: 0,
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],
@@ -57,7 +63,7 @@ const MySeedlotsItems = [
   {
     number: 12461,
     class: 'A',
-    lot_species: 'SX - Spruce hibrid',
+    lot_species: mockLotSpecies,
     form_step: 'Collection',
     status: 0,
     participants: ['Participant 1', 'Participant 2', 'Participant 3'],

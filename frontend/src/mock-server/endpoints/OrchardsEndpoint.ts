@@ -1,10 +1,11 @@
 import { Server } from 'miragejs';
 import AppSchema from '../schema';
-import getUrl from '../../utils/ApiUtils';
-import ApiAddresses from '../../utils/ApiAddresses';
+import ApiConfig from '../../api-service/ApiConfig';
+import mockServerConfig from '../config';
 
 const OrchardsEndpoints = (server: Server) => {
-  server.get(getUrl(ApiAddresses.OrchardRetriveOne, true), (schema: AppSchema, request) => {
+  const url = ApiConfig.orchard.replace(mockServerConfig.namespace, '');
+  server.get(url, (schema: AppSchema, request) => {
     const { orchardnumber } = request.params;
     const { orchards } = schema.db;
     const orchard = orchards.findBy({ id: orchardnumber });

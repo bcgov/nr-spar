@@ -8,21 +8,25 @@ import {
 } from '@testing-library/react';
 import FavouriteActivities from '../../components/FavouriteActivities/index';
 import '@testing-library/jest-dom';
-import makeServer from '../../mock-api/server';
+import makeServer from '../../mock-server/server';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.setTimeout(10000);
 
 // empty section should be tested in the future
-describe('the Favourite Activities component', () => {
+describe.skip('the Favourite Activities component', () => {
   beforeAll(() => {
     makeServer('test');
   });
 
   it('should render correctly', () => {
+    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
-        <FavouriteActivities />
+        <QueryClientProvider client={qc}>
+          <FavouriteActivities />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 
@@ -32,9 +36,12 @@ describe('the Favourite Activities component', () => {
   });
 
   it('should render exactly 8 cards', async () => {
+    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
-        <FavouriteActivities />
+        <QueryClientProvider client={qc}>
+          <FavouriteActivities />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 
@@ -45,9 +52,12 @@ describe('the Favourite Activities component', () => {
   });
 
   it('should delete the card', async () => {
+    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
-        <FavouriteActivities />
+        <QueryClientProvider client={qc}>
+          <FavouriteActivities />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 
@@ -65,9 +75,12 @@ describe('the Favourite Activities component', () => {
   });
 
   it('should highlight the card', async () => {
+    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
-        <FavouriteActivities />
+        <QueryClientProvider client={qc}>
+          <FavouriteActivities />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 

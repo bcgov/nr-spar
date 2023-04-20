@@ -6,6 +6,7 @@ import {
 
 import TitleAccordion from '../../TitleAccordion';
 import SingleOwnerInfo from './SingleOwnerInfo';
+import DropDownObj from '../../../types/DropDownObject';
 
 import {
   StateReturnObj,
@@ -27,33 +28,12 @@ import {
 } from './utils';
 import {
   DEFAULT_INDEX,
-  DEFAULT_PAYMENT_INDEX,
   MAX_OWNERS,
   inputText,
   validTemplate
 } from './constants';
 
 import './styles.scss';
-
-// Mock data
-const mockFundingSources = [
-  'BCT - BC Timber Sales',
-  'FES - Forest Enhancement Society',
-  'FIP - Forest Investment Program',
-  'FRP - FRPA - Application For Relief - Ministry Administered',
-  'FTL - Forests for Tomorrow - Licensee Administered',
-  'FTM - Forests for Tomorrow - Ministry Administered',
-  'GA - Other Agencies or Voluntary Work',
-  'GFS - Forest Stand Management Fund',
-  'LFP - Licensee Funded Program',
-  'TSC - Tree Seed Centre'
-];
-// Index 0 should be the default method of payment
-const mockMethodsOfPayment = [
-  'ITC - Invoice to client address',
-  'NC - Non-chargeable',
-  'JV - Journal voucher'
-];
 
 interface OwnershipStepProps {
   defaultAgency: string
@@ -62,6 +42,8 @@ interface OwnershipStepProps {
   state: Array<SingleOwnerForm>,
   setStepData: Function,
   readOnly?: boolean,
+  fundingSources: Array<DropDownObj>,
+  paymentMethods: Array<DropDownObj>
 }
 
 /*
@@ -74,7 +56,9 @@ const OwnershipStep = (
     defaultCode,
     defaultAgency,
     agencyOptions,
-    readOnly
+    readOnly,
+    fundingSources,
+    paymentMethods
   }: OwnershipStepProps
 ) => {
   const initialValidState = { ...validTemplate };
@@ -221,11 +205,10 @@ const OwnershipStep = (
     if (state.length >= MAX_OWNERS) {
       return;
     }
-    const defaultPayment = mockMethodsOfPayment[DEFAULT_PAYMENT_INDEX];
     const {
       newValidArr,
       newOwnerArr
-    }: StateReturnObj = insertOwnerForm(state, validationArray, defaultPayment);
+    }: StateReturnObj = insertOwnerForm(state, validationArray);
     setStepData(newOwnerArr);
     setValidationArray(newValidArr);
   };
@@ -332,8 +315,8 @@ const OwnershipStep = (
                 <SingleOwnerInfo
                   ownerInfo={singleOwnerInfo}
                   agencyOptions={agencyOptions}
-                  fundingSources={mockFundingSources}
-                  methodsOfPayment={mockMethodsOfPayment}
+                  fundingSources={fundingSources}
+                  methodsOfPayment={paymentMethods}
                   disableInputs={disableInputs}
                   addRefs={(element: HTMLInputElement, name: string) => {
                     addRefs(element, singleOwnerInfo.id, name);

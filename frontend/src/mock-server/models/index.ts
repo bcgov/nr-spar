@@ -2,7 +2,7 @@
 import { Model } from 'miragejs';
 import { ModelDefinition } from 'miragejs/-types';
 
-import CardType from '../../types/Card';
+import { FavActivityType } from '../../types/FavActivityTypes';
 import GeneticClassesType from '../../types/GeneticClasses';
 import ApplicantInfo from '../../types/ApplicantInfo';
 import SeedlotRegistration from '../../types/SeedlotRegistration';
@@ -16,7 +16,7 @@ import StorageInfo from '../../types/StorageInfo';
 import InterimStorageRegistration from '../../types/InterimStorageRegistration';
 import RegisterOwnerArray from '../../types/SeedlotTypes/OwnershipTypes';
 
-const FavouriteModel: ModelDefinition<CardType> = Model.extend({});
+const FavouriteModel: ModelDefinition<FavActivityType> = Model.extend({});
 const GeneticClassesModel: ModelDefinition<GeneticClassesType> = Model.extend({});
 const ApplicantInfoModel: ModelDefinition<ApplicantInfo> = Model.extend({});
 const SeedlotRegistrationModel: ModelDefinition<SeedlotRegistration> = Model.extend({});

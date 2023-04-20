@@ -99,9 +99,16 @@ const ownershipMock = {
   ownerPortion: '100',
   reservedPerc: '100',
   surplusPerc: '0',
-  fundingSource: 'LFP - Licensee Funded Program',
-  methodOfPayment: 'ITC - Invoice to client address',
-  applicantAgency: true
+  fundingSource: {
+    code: 'LFP',
+    description: 'Licensee Funded Program',
+    label: 'LFP - Licensee Funded Program'
+  },
+  methodOfPayment: {
+    code: 'ITC',
+    description: 'Invoice to client address',
+    label: 'ITC - Invoice to client address'
+  }
 };
 
 const collectionMock = {
@@ -199,6 +206,8 @@ const FormReview = () => {
                     defaultCode={defaultCode}
                     agencyOptions={agencyOptions}
                     setStepData={() => {}}
+                    fundingSources={[]}
+                    paymentMethods={[]}
                     readOnly
                   />
                   <Button

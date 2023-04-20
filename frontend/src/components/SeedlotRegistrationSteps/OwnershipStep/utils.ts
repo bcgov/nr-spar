@@ -1,3 +1,4 @@
+import DropDownObj from '../../../types/DropDownObject';
 import { inputText, ownerTemplate, validTemplate } from './constants';
 
 import {
@@ -21,14 +22,12 @@ const getNextId = (currentArray: Array<SingleOwnerForm>): number => {
 
 export const insertOwnerForm = (
   ownershiptArray: Array<SingleOwnerForm>,
-  validationArray: Array<ValidationProp>,
-  defaultPayment: string
+  validationArray: Array<ValidationProp>
 ) => {
   const newOwnerForm = { ...ownerTemplate };
   const newValidForm = { ...validTemplate };
   const newId = getNextId(ownershiptArray);
   newOwnerForm.id = newId;
-  newOwnerForm.methodOfPayment = defaultPayment;
   newValidForm.id = newId;
   return {
     newOwnerArr: [...ownershiptArray, newOwnerForm],
@@ -163,13 +162,7 @@ export const skipForInvalidLength = (name: string, value: string): boolean => {
   return false;
 };
 
-const isInputEmpty = (value: string | number | boolean | null) => {
-  // null can be the value even with the type check
-  if (value === '' || value === null) {
-    return true;
-  }
-  return false;
-};
+const isInputEmpty = (value: string | number | DropDownObj | null) => !value;
 
 export const isInputInvalid = (name: string, value: string): SingleInvalidObj => {
   let isInvalid = false;

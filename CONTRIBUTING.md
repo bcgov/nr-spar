@@ -100,6 +100,12 @@ Pull Request template that you can fill. The more complete the better. If you
 have images, screen capture or diagrams, that helps, but it's not required.
 Don't forget to add reviewers, assign to yourself and add labels.
 
+## React Query Conventions
+- `/posts` -> `['posts']`
+- `/posts/1` -> `['posts', post.id]`
+- `/posts?author=1` -> `['posts', { author: 1 }]`
+- `/posts/2/comments` -> `['posts', post.id, 'comments']`
+
 ## Follow our best practices
 
 - TypeScript source code must be formatted according to Airbnb ESLint,

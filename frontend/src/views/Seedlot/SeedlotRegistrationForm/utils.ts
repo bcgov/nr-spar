@@ -25,15 +25,13 @@ export const initCollectionState = (
 
 export const initOwnershipState = (
   defaultAgency: string,
-  defaultCode: string,
-  defaultPayment: string
+  defaultCode: string
 ) => {
   const initialOwnerState = { ...ownerTemplate };
   initialOwnerState.id = 0;
   initialOwnerState.ownerAgency = defaultAgency;
   initialOwnerState.ownerCode = defaultCode;
   initialOwnerState.ownerPortion = '100';
-  initialOwnerState.methodOfPayment = defaultPayment;
   return initialOwnerState;
 };
 

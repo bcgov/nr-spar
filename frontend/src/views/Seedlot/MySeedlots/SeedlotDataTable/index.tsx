@@ -1,6 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { useState } from 'react';
-import { hashObject } from 'react-hash-string';
 
 import {
   DataTable,
@@ -41,11 +40,11 @@ interface SeedlotDataTableProps {
   seedlots: Seedlot[]
 }
 
-const SeedlotDataTable = ({ seedlots }:SeedlotDataTableProps) => {
+const SeedlotDataTable = ({ seedlots }: SeedlotDataTableProps) => {
   const [firstRowIndex, setFirstRowIndex] = useState(0);
   const [currentPageSize, setCurrentPageSize] = useState(20);
 
-  const paginationOnChange = (pageSize:number, page:number) => {
+  const paginationOnChange = (pageSize: number, page: number) => {
     if (pageSize !== currentPageSize) {
       setCurrentPageSize(pageSize);
     }
@@ -61,7 +60,7 @@ const SeedlotDataTable = ({ seedlots }:SeedlotDataTableProps) => {
       >
         {({
           rows, headers, onInputChange, getHeaderProps, getTableProps
-        }:DataTableInterface) => (
+        }: DataTableInterface) => (
           <TableContainer>
             <Search
               labelText="Search"
@@ -72,7 +71,7 @@ const SeedlotDataTable = ({ seedlots }:SeedlotDataTableProps) => {
             <Table {...getTableProps()}>
               <TableHead>
                 <TableRow>
-                  {headers.map((header:HeaderType) => (
+                  {headers.map((header: HeaderType) => (
                     <TableHeader {...getHeaderProps({ header })}>
                       {header.header}
                     </TableHeader>
@@ -80,11 +79,11 @@ const SeedlotDataTable = ({ seedlots }:SeedlotDataTableProps) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((item:RowInterface) => (
-                  <TableRow key={hashObject(item.cells)}>
+                {rows.map((item: RowInterface) => (
+                  <TableRow key={item.cells[0].value}>
                     <TableCell>{item.cells[0].value}</TableCell>
                     <TableCell>{`${item.cells[1].value} class`}</TableCell>
-                    <TableCell>{item.cells[2].value}</TableCell>
+                    <TableCell>{item.cells[2].value.label}</TableCell>
                     <TableCell>{item.cells[3].value}</TableCell>
                     <TableCell>
                       <StatusItem status={item.cells[4].value} />
@@ -111,7 +110,7 @@ const SeedlotDataTable = ({ seedlots }:SeedlotDataTableProps) => {
         pageSize={currentPageSize}
         pageSizes={[10, 20, 30, 40, 50]}
         totalItems={seedlots.length}
-        onChange={({ page, pageSize }:{page: number, pageSize: number}) => {
+        onChange={({ page, pageSize }: { page: number, pageSize: number }) => {
           paginationOnChange(pageSize, page);
         }}
       />

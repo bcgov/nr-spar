@@ -42,7 +42,7 @@ const SeedlotTable = ({ elements, headers }: TableProps) => (
         <TableRow key={hashObject(item)} id={`row${idx}`}>
           <TableCell>{item.number}</TableCell>
           <TableCell>{`${item.class} class`}</TableCell>
-          <TableCell>{item.lot_species}</TableCell>
+          <TableCell>{item.lot_species.label}</TableCell>
           <TableCell>{item.form_step}</TableCell>
           <TableCell>
             <StatusItem status={item.status} />

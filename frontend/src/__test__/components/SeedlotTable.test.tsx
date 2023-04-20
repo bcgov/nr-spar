@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SeedlotTable from '../../components/SeedlotTable';
-import MySeedlotsItems from '../../mock-api/fixtures/MySeedlotsItems';
+import MySeedlotsItems from '../../mock-server/fixtures/MySeedlotsItems';
 import '@testing-library/jest-dom';
 import formatDate from '../../utils/DateUtils'
 
@@ -42,7 +42,7 @@ describe('Seedlot Table component', () => {
     const cells = screen.getAllByRole('cell');
     expect(cells[0].textContent).toEqual('12456');
     expect(cells[1].textContent).toEqual('A class');
-    expect(cells[2].textContent).toEqual('SX - Spruce hibrid');
+    expect(cells[2].textContent).toEqual('SX - Spruce Hybrid');
     expect(cells[3].textContent).toEqual('Collection');
     expect(cells[4].textContent).toEqual('Incomplete');
     expect(cells[5]).toBeInTheDocument();

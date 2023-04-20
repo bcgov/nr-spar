@@ -8,7 +8,7 @@ import * as Pictograms from '@carbon/pictograms-react';
 
 import ActivityHistory from '../../ActivityHistory';
 
-import ActivityHistoryItems from '../../../mock-api/fixtures/ActivityHistoryItems';
+import ActivityHistoryItems from '../../../mock-server/fixtures/ActivityHistoryItems';
 
 import EmptySection from '../../EmptySection';
 

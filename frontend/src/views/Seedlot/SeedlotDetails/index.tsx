@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import {
   FlexGrid,
   Row,
@@ -18,11 +17,8 @@ import {
 import Seedlot from '../../../types/Seedlot';
 import SeedlotRegistration from '../../../types/SeedlotRegistration';
 
-import { useAuth } from '../../../contexts/AuthContext';
-
-import getUrl from '../../../utils/ApiUtils';
-import ApiAddresses from '../../../utils/ApiAddresses';
-
+import api from '../../../api-service/api';
+import ApiConfig from '../../../api-service/ApiConfig';
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
 import SeedlotSummary from '../../../components/SeedlotSummary';
@@ -53,27 +49,14 @@ const manageOptions = [
 ];
 
 const SeedlotDetails = () => {
-  const { token } = useAuth();
   const { seedlot } = useParams();
   const [seedlotData, setSeedlotData] = useState<Seedlot>();
   const [seedlotApplicantData, setSeedlotApplicantData] = useState<SeedlotRegistration>();
 
-  const getAxiosConfig = () => {
-    const axiosConfig = {};
-    if (token) {
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      Object.assign(axiosConfig, headers);
-    }
-    return axiosConfig;
-  };
-
   const getSeedlotData = () => {
     if (seedlot) {
-      axios.get(getUrl(ApiAddresses.SeedlotRetrieveOne).replace(':seedlotnumber', seedlot), getAxiosConfig())
+      const url = `${ApiConfig.seedlot}/${seedlot}`;
+      api.get(url)
         .then((response) => {
           if (response.data.seedlot && response.data.seedlotApplicantInfo) {
             setSeedlotData(response.data.seedlot);
@@ -106,7 +89,7 @@ const SeedlotDetails = () => {
               <PageTitle
                 title={`Seedlot ${seedlotData.number}`}
                 subtitle="Check and manage this seedlot"
-                favourite
+                enableFavourite
               />
             )
           }

@@ -3,7 +3,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import PageTitle from '../../components/PageTitle';
 import '@testing-library/jest-dom';
-import makeServer from '../../mock-api/server';
+import makeServer from '../../mock-server/server';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 describe('the page title component', () => {
   beforeAll(() => {
@@ -11,8 +12,11 @@ describe('the page title component', () => {
   });
 
   it('should render correctly', () => {
+    const qc = new QueryClient();
     render(
-      <PageTitle title="Test title" subtitle="Test Subtitle" />
+      <QueryClientProvider client={qc}>
+        <PageTitle title="Test title" subtitle="Test Subtitle" />
+      </QueryClientProvider>
     );
 
     expect(screen.getByText('Test title')).toBeInTheDocument();
@@ -20,8 +24,16 @@ describe('the page title component', () => {
   });
 
   it('should render correctly with favourite option', () => {
+    const qc = new QueryClient();
     render(
-      <PageTitle title="Test title" subtitle="Test Subtitle" favourite />
+      <QueryClientProvider client={qc}>
+        <PageTitle
+          title="Test title"
+          subtitle="Test Subtitle"
+          enableFavourite
+          activity="SEEDLING_REQUEST"
+        />
+      </QueryClientProvider>
     );
 
     expect(screen.getAllByRole('button')[0]).toBeInTheDocument();
