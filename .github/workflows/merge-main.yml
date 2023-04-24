@@ -72,62 +72,62 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
-  # # Generate release notes and update new version
-  # release:
-  #   name: Release Notes
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     version: ${{ steps.changelog.outputs.version }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         token: ${{ secrets.PAT }}
-  #         fetch-depth: 0
+  # Generate release notes and update new version
+  release:
+    name: Release Notes
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.changelog.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
 
-  #     - name: Set Node
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: "16"
-  #         cache: "yarn"
-  #         cache-dependency-path: frontend/yarn.lock
+      - name: Set Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+          cache: "yarn"
+          cache-dependency-path: frontend/yarn.lock
 
-  #     - name: Conventional Changelog Update
-  #       uses: TriPSs/conventional-changelog-action@v3
-  #       id: changelog
-  #       with:
-  #         github-token: ${{ secrets.GITHUB_TOKEN }}
-  #         output-file: "CHANGELOG.md"
-  #         skip-version-file: "true"
-  #         skip-commit: "true"
-  #         skip-on-empty: "false"
-  #         git-push: "false"
+      - name: Conventional Changelog Update
+        uses: TriPSs/conventional-changelog-action@v3
+        id: changelog
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-file: "CHANGELOG.md"
+          skip-version-file: "true"
+          skip-commit: "true"
+          skip-on-empty: "false"
+          git-push: "false"
 
-  #     - name: Set new version output
-  #       run: |
-  #         echo "::set-output name=version::${{ steps.changelog.outputs.version }}"
-  #         cd frontend && npm version ${{ steps.changelog.outputs.version }} --git-tag-version false
-  #     - name: Commit package and changelog
-  #       uses: EndBug/add-and-commit@v9
-  #       with:
-  #         author_name: Ci Bot
-  #         author_email: cibot@users.noreply.github.com
-  #         message: "doc: updating package to ${{ steps.changelog.outputs.version }} [ci skip]"
-  #         add: '["frontend/package.json","frontend/CHANGELOG.md"]'
+      - name: Set new version output
+        run: |
+          echo "::set-output name=version::${{ steps.changelog.outputs.version }}"
+          cd frontend && npm version ${{ steps.changelog.outputs.version }} --git-tag-version false
 
-  #     - name: Create Release
-  #       uses: actions/create-release@v1
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       with:
-  #         tag_name: ${{ steps.changelog.outputs.tag }}
-  #         release_name: ${{ steps.changelog.outputs.tag }}
-  #         body: ${{ steps.changelog.outputs.clean_changelog }}
+      - name: Commit package and changelog
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Ci Bot
+          author_email: cibot@users.noreply.github.com
+          message: "doc: updating package to ${{ steps.changelog.outputs.version }} [ci skip]"
+          add: '["frontend/package.json","CHANGELOG.md"]'
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
 
   deploy-test:
     name: TEST Deployment
     needs:
       - codeql
-      # - release
+      - release
     environment: test
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -144,9 +144,8 @@ jobs:
           verification_path: "actuator/health"
           parameters: -p ZONE=test -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/frontend:test
-            -p REACT_APP_SPAR_BUILD_VERSION=snapshot-test
             -p REACT_APP_SERVER_URL=https://nr-spar-backend-test-backend.apps.silver.devops.gov.bc.ca
-            -p REACT_APP_NRSPARWEBAPP_VERSION=dev
+            -p REACT_APP_NRSPARWEBAPP_VERSION=test-${{ needs.release.outputs.version }}
             -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
             -p REACT_APP_KC_REALM=standard
             -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
@@ -211,9 +210,8 @@ jobs:
           verification_path: "actuator/health"
           parameters: -p ZONE=prod -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/frontend:test
-            -p REACT_APP_SPAR_BUILD_VERSION=snapshot-test
             -p REACT_APP_SERVER_URL=https://nr-spar-backend-prod-backend.apps.silver.devops.gov.bc.ca
-            -p REACT_APP_NRSPARWEBAPP_VERSION=dev
+            -p REACT_APP_NRSPARWEBAPP_VERSION=prod-${{ needs.release.outputs.version }}
             -p REACT_APP_KC_URL=https://loginproxy.gov.bc.ca/auth
             -p REACT_APP_KC_REALM=standard
             -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
