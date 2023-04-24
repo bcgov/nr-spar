@@ -104,7 +104,7 @@ jobs:
 
       - name: Set new version output
         run: |
-          echo "::set-output name=version::${{ steps.changelog.outputs.version }}"
+          echo "{version}=${{ steps.changelog.outputs.version }} >> $GITHUB_OUTPUT"
           cd frontend && npm version ${{ steps.changelog.outputs.version }} --git-tag-version false
 
       - name: Commit package and changelog
@@ -120,6 +120,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          tag: ${{ steps.changelog.outputs.tag }}
           name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
 
