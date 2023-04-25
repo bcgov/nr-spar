@@ -25,7 +25,7 @@ import ApiConfig from '../../../api-service/ApiConfig';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 
 import FemaleGameticOptions from './data';
-import { ComboBoxEvent } from './utils';
+import ComboBoxEvent from '../../../types/ComboBoxEvent';
 
 import './styles.scss';
 

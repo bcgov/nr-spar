@@ -53,10 +53,6 @@ export type StateReturnObj = {
     newId?: number
 }
 
-export type ComboBoxEvent = {
-    selectedItem: string
-}
-
 export type CheckBoxValue = {
     checked: boolean,
     id: string

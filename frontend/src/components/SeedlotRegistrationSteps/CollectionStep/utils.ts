@@ -1,7 +1,3 @@
-export interface ComboBoxEvent {
-  selectedItem: string;
-}
-
 export interface CollectionForm {
   collectorAgency: string,
   locationCode: string,

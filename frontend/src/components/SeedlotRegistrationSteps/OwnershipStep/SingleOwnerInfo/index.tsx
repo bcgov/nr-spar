@@ -12,9 +12,9 @@ import {
 import { Add, TrashCan } from '@carbon/icons-react';
 
 import DropDownObj from '../../../../types/DropDownObject';
+import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import {
   SingleOwnerForm,
-  ComboBoxEvent,
   CheckBoxValue,
   NumStepperVal,
   ValidationProp

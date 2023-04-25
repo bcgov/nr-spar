@@ -22,6 +22,7 @@ import {
 
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import { FilterObj, filterInput } from '../../../utils/filterUtils';
+import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import {
   FormValidation,
   initialValidationObj
@@ -36,10 +37,6 @@ interface ExtractionAndStorageProps {
   defaultCode: string,
   agencyOptions: Array<string>,
   readOnly?: boolean
-}
-
-interface ComboBoxEvent {
-  selectedItem: string;
 }
 
 const ExtractionAndStorage = (

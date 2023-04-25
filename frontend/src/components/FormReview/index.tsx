@@ -21,11 +21,6 @@ import OwnershipStep from '../SeedlotRegistrationSteps/OwnershipStep';
 import CollectionStep from '../SeedlotRegistrationSteps/CollectionStep';
 import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStorageStep';
 
-// this is for testing only
-// TODO: remove this once the PR is approved
-// eslint-disable-next-line
-const emptyMockFormData = [];
-
 const mockFormData = [
   {
     id: 0,

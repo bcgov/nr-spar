@@ -16,6 +16,7 @@ import {
 
 import Subtitle from '../../Subtitle';
 import { FilterObj, filterInput } from '../../../utils/filterUtils';
+import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import InterimForm from './definitions';
 import './styles.scss';
 
@@ -28,10 +29,6 @@ interface InterimStorageStepProps {
   defaultCode: string,
   agencyOptions: Array<string>,
   readOnly?: boolean
-}
-
-interface ComboBoxEvent {
-  selectedItem: string;
 }
 
 const InterimStorage = (

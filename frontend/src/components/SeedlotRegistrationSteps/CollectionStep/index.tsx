@@ -21,9 +21,9 @@ import { filterInput, FilterObj } from '../../../utils/filterUtils';
 import {
   CollectionStepProps,
   CollectionForm,
-  FormValidation,
-  ComboBoxEvent
+  FormValidation
 } from './utils';
+import ComboBoxEvent from '../../../types/ComboBoxEvent';
 
 import './styles.scss';
 
