@@ -126,9 +126,8 @@ jobs:
           parameters:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/frontend:${{ github.event.number }}
-            -p REACT_APP_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
             -p REACT_APP_SERVER_URL=https://nr-spar-backend-test-backend.apps.silver.devops.gov.bc.ca
-            -p REACT_APP_NRSPARWEBAPP_VERSION=dev
+            -p REACT_APP_NRSPARWEBAPP_VERSION=PR-${{ github.event.number }}
             -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
             -p REACT_APP_KC_REALM=standard
             -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
