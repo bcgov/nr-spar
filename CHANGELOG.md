@@ -1,4 +1,4 @@
-# [0.9.0](https://github.com/bcgov/nr-spar-webapp/compare/v0.8.6...v0.9.0) (2023-04-24)
+# [0.9.0](https://github.com/bcgov/nr-spar-webapp/compare/v0.8.6...v0.9.0) (2023-04-25)
 
 
 ### Bug Fixes
@@ -23,6 +23,7 @@
 * extraction and storage page ([#81](https://github.com/bcgov/nr-spar-webapp/issues/81)) ([163aa96](https://github.com/bcgov/nr-spar-webapp/commit/163aa96dbeef805b13718c37e67524b7c5e3068d))
 * favourite api integration ([#55](https://github.com/bcgov/nr-spar-webapp/issues/55)) ([fcc9bc0](https://github.com/bcgov/nr-spar-webapp/commit/fcc9bc0c4d4197780c64cd03ccb425077e7675fa))
 * Files & Docs table created ([#63](https://github.com/bcgov/nr-spar-webapp/issues/63)) ([a77761f](https://github.com/bcgov/nr-spar-webapp/commit/a77761ffa591b41630a7319395f37996546d466c))
+* fix app version ([#111](https://github.com/bcgov/nr-spar-webapp/issues/111)) ([367162a](https://github.com/bcgov/nr-spar-webapp/commit/367162a85d783a9e2ff3a3d655997aa7893b7259))
 * full workflow/pipeline overhaul ([#45](https://github.com/bcgov/nr-spar-webapp/issues/45)) ([cc86d9a](https://github.com/bcgov/nr-spar-webapp/commit/cc86d9acc0060cf73d89134ad64baeab829266d5))
 * interim storage page ([#77](https://github.com/bcgov/nr-spar-webapp/issues/77)) ([9a74830](https://github.com/bcgov/nr-spar-webapp/commit/9a74830ef76da85832f532b0df17c34c587686dd))
 * linked a class form to feedback page ([#59](https://github.com/bcgov/nr-spar-webapp/issues/59)) ([f3530d0](https://github.com/bcgov/nr-spar-webapp/commit/f3530d0d0c8edcf516aa174ac79b306e28e8b6c2))
