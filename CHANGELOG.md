@@ -1,3 +1,7 @@
+## [0.9.1](https://github.com/bcgov/nr-spar-webapp/compare/v0.9.0...v0.9.1) (2023-04-25)
+
+
+
 # [0.9.0](https://github.com/bcgov/nr-spar-webapp/compare/v0.8.6...v0.9.0) (2023-04-25)
 
 
@@ -53,15 +57,6 @@
 ### Bug Fixes
 
 * added navigate calls inside useEffect hook ([#44](https://github.com/bcgov/nr-spar-webapp/issues/44)) ([f0b5a8d](https://github.com/bcgov/nr-spar-webapp/commit/f0b5a8d7510ee90899e7f2749f979a862dcebab2))
-
-
-
-## [0.8.3](https://github.com/bcgov/nr-spar-webapp/compare/v0.8.2...v0.8.3) (2023-02-10)
-
-
-### Bug Fixes
-
-* adjusted id parameters for mock api calls ([#43](https://github.com/bcgov/nr-spar-webapp/issues/43)) ([82117e6](https://github.com/bcgov/nr-spar-webapp/commit/82117e63b66efda363b24d18aa66331ded5d17bd))
 
 
 
