@@ -1,9 +1,9 @@
 import { env } from '../env';
 import mockServerConfig from '../mock-server/config';
 
-const serverHost = env.REACT_APP_SERVER_URL;
+const serverHost = env.REACT_APP_SERVER_URL || mockServerConfig.namespace;
 
-const oracleServerHost = env.REACT_APP_ORACLE_SERVER_URL;
+const oracleServerHost = env.REACT_APP_ORACLE_SERVER_URL || mockServerConfig.namespace;
 
 const mockServerHost = mockServerConfig.namespace;
 

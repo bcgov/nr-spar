@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import {
   fireEvent,
@@ -14,14 +13,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.setTimeout(10000);
 
+const qc = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
 // empty section should be tested in the future
-describe.skip('the Favourite Activities component', () => {
+describe('the Favourite Activities component', () => {
   beforeAll(() => {
-    makeServer('test');
+    makeServer('jest-test');
   });
 
   it('should render correctly', () => {
-    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
         <QueryClientProvider client={qc}>
@@ -36,7 +42,6 @@ describe.skip('the Favourite Activities component', () => {
   });
 
   it('should render exactly 8 cards', async () => {
-    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
         <QueryClientProvider client={qc}>

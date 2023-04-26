@@ -5,7 +5,7 @@ import mockServerConfig from '../config';
 
 const FavouriteEndpoints = (server: Server) => {
   const favouriteUrl = ApiConfig.favouriteActivities.replace(mockServerConfig.namespace, '');
-  server.get(favouriteUrl, (schema: AppSchema) => schema.all('favourites'));
+  server.get(favouriteUrl, (schema: AppSchema) => schema.db.favourites);
 
   server.del(`${favouriteUrl}/:id`, (schema: AppSchema, request) => {
     const { id } = request.params;

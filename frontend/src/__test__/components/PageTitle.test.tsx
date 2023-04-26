@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 describe('the page title component', () => {
   beforeAll(() => {
-    makeServer('test');
+    makeServer('jest-test');
   });
 
   it('should render correctly', () => {

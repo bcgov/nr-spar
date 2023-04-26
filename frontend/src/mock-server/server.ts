@@ -5,7 +5,7 @@ import {
 
 import mockServerConfig from './config';
 
-import endpoints from './endpoints';
+import { endpoints, jestEndpoints } from './endpoints';
 import fixtures from './fixtures';
 import models from './models';
 import { env } from '../env';
@@ -37,9 +37,10 @@ export default function makeServer(environment = 'development') {
       };
 
       this.namespace = mockServerConfig.namespace;
-
-      this.passthrough(`${env.REACT_APP_SERVER_URL}/api/**`);
-      this.passthrough(`${env.REACT_APP_ORACLE_SERVER_URL}/api/**`);
+      if (environment !== 'jest-test') {
+        this.passthrough(`${env.REACT_APP_SERVER_URL}/api/**`);
+        this.passthrough(`${env.REACT_APP_ORACLE_SERVER_URL}/api/**`);
+      }
       this.passthrough('https://test.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token');
       this.pretender.handledRequest = (verb) => {
         if (verb.toLowerCase() !== 'get' && verb.toLowerCase() !== 'head') {
@@ -49,8 +50,15 @@ export default function makeServer(environment = 'development') {
     }
   });
 
-  Object.keys(endpoints).forEach((endpoint) => {
-    // @ts-ignore
-    endpoints[endpoint](mirageServer);
-  });
+  if (environment !== 'jest-test') {
+    Object.keys(endpoints).forEach((endpoint) => {
+      // @ts-ignore
+      endpoints[endpoint](mirageServer);
+    });
+  } else {
+    Object.keys(jestEndpoints).forEach((endpoint) => {
+      // @ts-ignore
+      jestEndpoints[endpoint](mirageServer);
+    });
+  }
 }

@@ -25,7 +25,7 @@ const ComboButton = ({ title, items, menuOptionsClass }: ComboButtonProps) => (
     <Button className="combo-button" size="md">
       {title}
     </Button>
-    <OverflowMenu className="combo-options" menuOptionsClass={`${menuOptionsClass}`} renderIcon={CaretDown} ariaLabel={`${title} button options`} flipped>
+    <OverflowMenu className="combo-options" menuOptionsClass={`${menuOptionsClass}`} renderIcon={CaretDown} aria-label={`${title} button options`} flipped>
       {items.map((item) => (
         <OverflowMenuItem key={item.text} itemText={item.text} onClick={item.onClickFunction} />
       ))}

@@ -108,7 +108,7 @@ const SeedlotActivityHistory = () => (
     <Dropdown
       id="seedlot-activity-history-filter"
       label="Filter activity history steps"
-      ariaLabel="Filter activity history steps"
+      aria-label="Filter activity history steps"
       className="seedlot-activity-history-dropdown"
       initialSelectedItem={dropdownOptions[0]}
       items={dropdownOptions}
