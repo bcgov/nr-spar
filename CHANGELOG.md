@@ -1,3 +1,7 @@
+## [0.9.2](https://github.com/bcgov/nr-spar-webapp/compare/v0.9.1...v0.9.2) (2023-04-26)
+
+
+
 ## [0.9.1](https://github.com/bcgov/nr-spar-webapp/compare/v0.9.0...v0.9.1) (2023-04-25)
 
 
@@ -48,15 +52,6 @@
 ### Bug Fixes
 
 * dark mode components token override ([#41](https://github.com/bcgov/nr-spar-webapp/issues/41)) ([4358d0b](https://github.com/bcgov/nr-spar-webapp/commit/4358d0b965d0b97539bdbd7b2d4356ecff3f52fb))
-
-
-
-## [0.8.4](https://github.com/bcgov/nr-spar-webapp/compare/v0.8.3...v0.8.4) (2023-02-13)
-
-
-### Bug Fixes
-
-* added navigate calls inside useEffect hook ([#44](https://github.com/bcgov/nr-spar-webapp/issues/44)) ([f0b5a8d](https://github.com/bcgov/nr-spar-webapp/commit/f0b5a8d7510ee90899e7f2749f979a862dcebab2))
 
 
 
