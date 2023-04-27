@@ -1,5 +1,5 @@
 # Build
-FROM maven:3.8.7-eclipse-temurin-17 AS build
+FROM maven:3.8.7-eclipse-temurin-17@sha256:76789e7bf6713b7fe617b0e72ccf1e0cc23425bc41610c878f13a9b2ffd2127d AS build
 
 # Copy and build
 WORKDIR /app
@@ -8,7 +8,7 @@ COPY ./src ./src
 RUN mvn --no-transfer-progress --update-snapshots -P prod clean package
 
 # Deploy
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-alpine@sha256:8a139831f95086a107f510f239cb311d4196b94f0f15192a22f8f7a43f343d02
 ENV LANG en_CA.UTF-8
 ENV LANGUAGE en_CA.UTF-8
 ENV LC_ALL en_CA.UTF-8
