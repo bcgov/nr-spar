@@ -1,6 +1,6 @@
 {
   "name": "nr-spar-webapp",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "private": true,
   "dependencies": {
     "@babel/core": "^7.20.12",
