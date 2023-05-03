@@ -1,6 +1,7 @@
 import React from 'react';
 
 import DropDownObj from '../../../types/DropDownObject';
+import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export type AccordionItemHeadClick = {
     isOpen: boolean,
@@ -36,20 +37,9 @@ export type ValidationPropNoId = {
     payment: SingleInvalidObj
 }
 
-export type ValidationProp = {
-    id: number,
-    owner: SingleInvalidObj,
-    code: SingleInvalidObj,
-    portion: SingleInvalidObj,
-    reserved: SingleInvalidObj,
-    surplus: SingleInvalidObj,
-    funding: SingleInvalidObj,
-    payment: SingleInvalidObj
-}
-
 export type StateReturnObj = {
     newOwnerArr: Array<SingleOwnerForm>,
-    newValidArr: Array<ValidationProp>,
+    newValidObj: OwnershipInvalidObj,
     newId?: number
 }
 

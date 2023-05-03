@@ -1,4 +1,5 @@
-import { SingleOwnerForm, ValidationProp } from './definitions';
+import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { SingleOwnerForm } from './definitions';
 
 export const DEFAULT_INDEX = 0;
 
@@ -66,8 +67,7 @@ export const ownerTemplate: SingleOwnerForm = {
   }
 };
 
-export const validTemplate: ValidationProp = {
-  id: -1,
+export const validTemplate: FormInvalidationObj = {
   owner: {
     isInvalid: false,
     invalidText: inputText.owner.invalidText

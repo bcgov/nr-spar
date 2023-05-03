@@ -122,39 +122,6 @@ const InterimStorage = (
 
   const [isChecked, setIsChecked] = useState<boolean>(true);
 
-  // Leaving these for future use
-  // const validateAndSubmit = () => {
-  //   let sendForm = true;
-
-  //   if (validationObj.isNameInvalid) {
-  //     nameInputRef.current?.focus();
-  //     sendForm = false;
-  //   } else if (validationObj.isCodeInvalid) {
-  //     numberInputRef.current?.focus();
-  //     sendForm = false;
-  //   } else if (validationObj.isStartDateInvalid) {
-  //     sendForm = false;
-  //   } else if (validationObj.isEndDateInvalid) {
-  //     sendForm = false;
-  //   } else if (validationObj.isStorageInvalid) {
-  //     storageLocationInputRef.current?.focus();
-  //     sendForm = false;
-  //   } else if (validationObj.isFacilityInvalid) {
-  //     storageFacilityTypeInputRef.current?.focus();
-  //     sendForm = false;
-  //   }
-  //   if (sendForm) {
-  //     axios.post(getUrl(ApiAddresses.InterimStoragePost), interimStorageData, getAxiosConfig())
-  //       .then(() => {
-  //         logForm();
-  //       })
-  //       .catch((error) => {
-  //         // eslint-disable-next-line
-  //         console.error(`Error: ${error}`);
-  //       });
-  //   }
-  // };
-
   const collectorAgencyisChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked } = event.target;
     setIsChecked(checked);
@@ -210,7 +177,7 @@ const InterimStorage = (
               placeholder="Select Interim agency name"
               items={agencyOptions}
               invalid={validationObj.isNameInvalid}
-              readOnly={readOnly || isChecked}
+              readOnly={readOnly ?? isChecked}
             />
           </Column>
           <Column sm={4} md={2} lg={4}>
@@ -227,7 +194,7 @@ const InterimStorage = (
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFormInput('locationCode', e.target.value);
               }}
-              readOnly={readOnly || isChecked}
+              readOnly={readOnly ?? isChecked}
             />
           </Column>
         </Row>

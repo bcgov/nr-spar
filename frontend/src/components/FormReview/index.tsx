@@ -203,6 +203,8 @@ const FormReview = () => {
                     setStepData={() => {}}
                     fundingSources={[]}
                     paymentMethods={[]}
+                    invalidState={{}}
+                    setInvalidState={() => {}}
                     readOnly
                   />
                   <Button

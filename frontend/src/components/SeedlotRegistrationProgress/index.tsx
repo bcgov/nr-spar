@@ -20,7 +20,7 @@ const SeedlotRegistrationProgress = ({
     className={className}
     currentIndex={currentIndex}
     spaceEqually
-    onChange={interactFunction || null}
+    onChange={interactFunction ?? null}
   >
     <ProgressStep
       label="Collection"

@@ -1,4 +1,8 @@
-import { ownerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
+import {
+  ownerTemplate,
+  validTemplate as ownerInvalidTemplate
+} from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
+import { FormInvalidationObj, OwnershipInvalidObj } from './definitions';
 
 export const initCollectionState = (
   defaultAgency: string,
@@ -78,3 +82,15 @@ export const initExtractionStorageState = (
     seedStorageEndDate: ''
   }
 );
+
+export const initInvalidationObj = () => {
+  const returnObj: FormInvalidationObj = {};
+  return returnObj;
+};
+
+export const initOwnerShipInvalidState = (): OwnershipInvalidObj => {
+  const initialOwnerInvalidState = { ...ownerInvalidTemplate };
+  return {
+    0: initialOwnerInvalidState
+  };
+};

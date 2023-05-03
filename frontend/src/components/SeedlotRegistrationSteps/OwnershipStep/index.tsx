@@ -10,7 +10,6 @@ import DropDownObj from '../../../types/DropDownObject';
 
 import {
   StateReturnObj,
-  ValidationProp,
   SingleOwnerForm,
   AccordionCtrlObj,
   AccordionItemHeadClick
@@ -29,11 +28,11 @@ import {
 import {
   DEFAULT_INDEX,
   MAX_OWNERS,
-  inputText,
-  validTemplate
+  inputText
 } from './constants';
 
 import './styles.scss';
+import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 interface OwnershipStepProps {
   defaultAgency: string
@@ -41,6 +40,8 @@ interface OwnershipStepProps {
   agencyOptions: Array<string>,
   state: Array<SingleOwnerForm>,
   setStepData: Function,
+  invalidState: OwnershipInvalidObj,
+  setInvalidState: Function,
   readOnly?: boolean,
   fundingSources: Array<DropDownObj>,
   paymentMethods: Array<DropDownObj>
@@ -53,6 +54,8 @@ const OwnershipStep = (
   {
     state,
     setStepData,
+    invalidState,
+    setInvalidState,
     defaultCode,
     defaultAgency,
     agencyOptions,
@@ -61,10 +64,6 @@ const OwnershipStep = (
     paymentMethods
   }: OwnershipStepProps
 ) => {
-  const initialValidState = { ...validTemplate };
-  initialValidState.id = DEFAULT_INDEX;
-  const [validationArray, setValidationArray] = useState([initialValidState]);
-
   const [disableInputs, setDisableInputs] = useState(true);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
@@ -72,30 +71,30 @@ const OwnershipStep = (
   const refControl = useRef<any>({});
 
   const setPortionsValid = (isInvalid: boolean) => {
-    const updatedArray = [...validationArray];
-    const len = updatedArray.length;
-    for (let i = 0; i < len; i += 1) {
-      updatedArray[i].portion = {
+    const updatedArray = { ...invalidState };
+    const keys = Object.keys(updatedArray);
+    for (let i = 0; i < keys.length; i += 1) {
+      updatedArray[Number(keys[i])].portion = {
         isInvalid,
         invalidText: inputText.portion.invalidText
       };
     }
-    setValidationArray(updatedArray);
+    setInvalidState(updatedArray);
   };
 
   const setValidation = (
-    index: number,
-    name: string | keyof ValidationProp,
+    id: number,
+    name: string,
     isInvalid: boolean,
     invalidText: string,
-    optName?: string | keyof ValidationProp,
+    optName?: string,
     optIsInvalid?: boolean,
     optInvalidText?: string
   ) => {
-    const updatedArray = [...validationArray];
-    if (optName) {
-      updatedArray[index] = {
-        ...updatedArray[index],
+    const updatedObj = { ...invalidState };
+    if (optName && typeof optIsInvalid === 'boolean' && typeof optInvalidText === 'string') {
+      updatedObj[id] = {
+        ...updatedObj[id],
         [name]: {
           isInvalid,
           invalidText
@@ -106,15 +105,15 @@ const OwnershipStep = (
         }
       };
     } else {
-      updatedArray[index] = {
-        ...updatedArray[index],
+      updatedObj[id] = {
+        ...updatedObj[id],
         [name]: {
           isInvalid,
           invalidText
         }
       };
     }
-    setValidationArray(updatedArray);
+    setInvalidState(updatedObj);
   };
 
   const validateInput = (
@@ -136,7 +135,7 @@ const OwnershipStep = (
 
   // Optional name and value can be passed in to set two values at once
   const handleInputChange = (
-    index: number,
+    id: number,
     name: string,
     value: string,
     optionalName?: string,
@@ -154,14 +153,14 @@ const OwnershipStep = (
      */
     if (skipForInvalidLength(name, value)) return;
     if (optionalName) {
-      updatedArray[index] = {
-        ...updatedArray[index],
+      updatedArray[id] = {
+        ...updatedArray[id],
         [name]: value,
         [optionalName]: optionalValue
       };
     } else {
-      updatedArray[index] = {
-        ...updatedArray[index],
+      updatedArray[id] = {
+        ...updatedArray[id],
         [name]: value
       };
     }
@@ -172,23 +171,23 @@ const OwnershipStep = (
         isInvalid,
         invalidText,
         validKey
-      } = calcResvOrSurp(index, name, value, updatedArray);
+      } = calcResvOrSurp(id, name, value, updatedArray);
       setStepData(newArr);
-      validateInput(index, name, value, validKey, isInvalid, invalidText);
+      validateInput(id, name, value, validKey, isInvalid, invalidText);
     } else if (name === 'ownerCode' && optionalName === 'ownerAgency') {
       // This if block is needed due to the checkbox, if unchecked, set both input to invalid
       setStepData(updatedArray);
       const agencyKey = getValidKey(optionalName);
       const isInvalid = optionalValue === '';
       const { invalidText } = inputText.owner;
-      validateInput(index, name, value, agencyKey, isInvalid, invalidText);
+      validateInput(id, name, value, agencyKey, isInvalid, invalidText);
     } else if (name === 'ownerPortion') {
       setStepData(updatedArray);
       // Prioritize single input validation
       const { isInvalid, invalidText } = isInputInvalid(name, value);
       if (isInvalid) {
         const validKey = getValidKey(name);
-        setValidation(index, validKey, isInvalid, invalidText);
+        setValidation(id, validKey, isInvalid, invalidText);
       } else {
         // If the single number is ok then we check the sum
         const portionsInvalid = !arePortionsValid(updatedArray);
@@ -196,7 +195,7 @@ const OwnershipStep = (
       }
     } else {
       setStepData(updatedArray);
-      validateInput(index, name, value);
+      validateInput(id, name, value);
     }
   };
 
@@ -206,23 +205,23 @@ const OwnershipStep = (
       return;
     }
     const {
-      newValidArr,
+      newValidObj,
       newOwnerArr
-    }: StateReturnObj = insertOwnerForm(state, validationArray);
+    }: StateReturnObj = insertOwnerForm(state, invalidState);
     setStepData(newOwnerArr);
-    setValidationArray(newValidArr);
+    setInvalidState(newValidObj);
   };
 
   const deleteAnOwner = (id: number) => {
     const {
       newOwnerArr,
-      newValidArr
-    }: StateReturnObj = deleteOwnerForm(id, state, validationArray);
+      newValidObj
+    }: StateReturnObj = deleteOwnerForm(id, state, invalidState);
     delete refControl.current[id];
     const portionsInvalid = !arePortionsValid(newOwnerArr);
     setPortionsValid(portionsInvalid);
     setStepData(newOwnerArr);
-    setValidationArray(newValidArr);
+    setInvalidState(newValidObj);
   };
 
   const setDefaultAgencyNCode = (checked: boolean) => {
@@ -250,40 +249,20 @@ const OwnershipStep = (
     setAccordionControls(newAccCtrls);
   };
 
-  // Leaving these here for future use
-  // const areAllInputsValid = (): boolean => {
-  //   const {
-  //     allValid,
-  //     invalidId,
-  //     invalidField,
-  //     invalidValue,
-  //     ownerOk
-  //   } = getInvalidIdAndKey(state, validationArray);
-  //   if (!allValid) {
-  //     if (!ownerOk) {
-  //       validateInput(invalidId, invalidField, invalidValue);
-  //     }
-  //     toggleAccordion(invalidId, true);
-  //     refControl.current[invalidId][invalidField].focus();
-  //     return false;
-  //   }
-  //   return true;
-  // };
-
   return (
     <div>
       {(!readOnly) && (
-      <div className="ownership-header">
-        <div className="ownership-step-title-box">
-          <h3>
-            Ownership
-          </h3>
-          <p>
-            Enter the seedlot&apos;s ownership information, the agencies listed as
-            owners are the ones who are charged for cone and seed processing fees
-          </p>
+        <div className="ownership-header">
+          <div className="ownership-step-title-box">
+            <h3>
+              Ownership
+            </h3>
+            <p>
+              Enter the seedlot&apos;s ownership information, the agencies listed as
+              owners are the ones who are charged for cone and seed processing fees
+            </p>
+          </div>
         </div>
-      </div>
       )}
 
       <div className="ownership-form-container">
@@ -321,7 +300,7 @@ const OwnershipStep = (
                   addRefs={(element: HTMLInputElement, name: string) => {
                     addRefs(element, singleOwnerInfo.id, name);
                   }}
-                  validationProp={validationArray[singleOwnerInfo.id]}
+                  validationProp={readOnly ? null : invalidState[singleOwnerInfo.id]}
                   handleInputChange={
                     (name: string, value: string) => {
                       handleInputChange(singleOwnerInfo.id, name, value);

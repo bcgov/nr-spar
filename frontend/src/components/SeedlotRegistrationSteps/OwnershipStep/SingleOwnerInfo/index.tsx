@@ -16,13 +16,13 @@ import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import {
   SingleOwnerForm,
   CheckBoxValue,
-  NumStepperVal,
-  ValidationProp
+  NumStepperVal
 } from '../definitions';
 import { inputText, DEFAULT_INDEX, DEFAULT_PAYMENT_INDEX } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/filterUtils';
 
 import './styles.scss';
+import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
@@ -31,7 +31,7 @@ interface SingleOwnerInfoProps {
   addAnOwner: Function,
   deleteAnOwner: Function,
   setDefaultAgencyNCode: Function,
-  validationProp: ValidationProp,
+  validationProp: FormInvalidationObj | null,
   agencyOptions: Array<string>,
   fundingSources: Array<DropDownObj>,
   methodsOfPayment: Array<DropDownObj>,
@@ -81,7 +81,7 @@ const SingleOwnerInfo = ({
             placeholder={inputText.owner.placeholder}
             titleText={inputText.owner.titleText}
             helperText={inputText.owner.helperText}
-            onChange={!readOnly ? ((e: ComboBoxEvent) => handleInputChange('ownerAgency', e.selectedItem)) : () => {}}
+            onChange={!readOnly ? ((e: ComboBoxEvent) => handleInputChange('ownerAgency', e.selectedItem)) : () => { }}
             // We need to check if validationProp is here since deleting a Single Owner Form
             //    might delete the valid prop first and throwing an error
             invalid={validationProp ? validationProp.owner.isInvalid : false}
@@ -125,7 +125,7 @@ const SingleOwnerInfo = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               // The guard is needed here because onClick also trigger the onChange method
               // but it does not pass in any value
-              if (e && e.target.name && e.target.value) {
+              if (e?.target?.name && e?.target?.value) {
                 handleInputChange(e.target.name, e.target.value);
               }
             }}
@@ -138,7 +138,7 @@ const SingleOwnerInfo = ({
               ) => {
                 // A guard is needed here because any click on the input will emit a
                 //   click event, not necessarily the + - buttons
-                if (target && target.value) {
+                if (target?.value) {
                   handleInputChange('ownerPortion', String(target.value));
                 }
               }
@@ -159,7 +159,7 @@ const SingleOwnerInfo = ({
                 max={100}
                 min={0}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  if (e && e.target.name && e.target.value) {
+                  if (e?.target?.name && e?.target?.value) {
                     handleInputChange(e.target.name, e.target.value);
                   }
                 }}
@@ -170,7 +170,7 @@ const SingleOwnerInfo = ({
                     _e: React.MouseEvent<HTMLButtonElement>,
                     target: NumStepperVal | undefined
                   ) => {
-                    if (target && target.value) {
+                    if (target?.value) {
                       handleInputChange('reservedPerc', String(target.value));
                     }
                   }
@@ -189,7 +189,7 @@ const SingleOwnerInfo = ({
                 max={100}
                 min={0}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  if (e && e.target.name && e.target.value) {
+                  if (e?.target?.name && e?.target?.value) {
                     handleInputChange(e.target.name, e.target.value);
                   }
                 }}
@@ -200,7 +200,7 @@ const SingleOwnerInfo = ({
                     _e: React.MouseEvent<HTMLButtonElement>,
                     target: NumStepperVal | undefined
                   ) => {
-                    if (target && target.value) {
+                    if (target?.value) {
                       handleInputChange('surplusPerc', String(target.value));
                     }
                   }
@@ -255,33 +255,33 @@ const SingleOwnerInfo = ({
         </Column>
       </Row>
       {(!readOnly) && (
-      <Row>
-        {
-          ownerInfo.id === DEFAULT_INDEX
-            ? (
-              <Button
-                kind="tertiary"
-                size="md"
-                className="owner-mod-btn"
-                renderIcon={Add}
-                onClick={addAnOwner}
-              >
-                Add owner
-              </Button>
-            )
-            : (
-              <Button
-                kind="danger--tertiary"
-                size="md"
-                className="owner-mod-btn"
-                renderIcon={TrashCan}
-                onClick={() => deleteAnOwner(ownerInfo.id)}
-              >
-                Delete owner
-              </Button>
-            )
-        }
-      </Row>
+        <Row>
+          {
+            ownerInfo.id === DEFAULT_INDEX
+              ? (
+                <Button
+                  kind="tertiary"
+                  size="md"
+                  className="owner-mod-btn"
+                  renderIcon={Add}
+                  onClick={addAnOwner}
+                >
+                  Add owner
+                </Button>
+              )
+              : (
+                <Button
+                  kind="danger--tertiary"
+                  size="md"
+                  className="owner-mod-btn"
+                  renderIcon={TrashCan}
+                  onClick={() => deleteAnOwner(ownerInfo.id)}
+                >
+                  Delete owner
+                </Button>
+              )
+          }
+        </Row>
       )}
     </FlexGrid>
   </div>

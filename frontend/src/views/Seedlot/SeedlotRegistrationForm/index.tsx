@@ -2,17 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Checkbox,
   FlexGrid,
   Row,
   Breadcrumb,
   BreadcrumbItem,
-  Button,
-  Modal,
-  ToastNotification
+  Button
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
-import ReactDOM from 'react-dom';
 
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
@@ -26,19 +22,21 @@ import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimSte
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import { AllStepData } from './definitions';
+import { AllStepData, AllStepInvalidationObj, FormInvalidationObj } from './definitions';
 import {
   initCollectionState,
   initInterimState,
   initOrchardState,
   initOwnershipState,
-  initExtractionStorageState
+  initExtractionStorageState,
+  initInvalidationObj,
+  initOwnerShipInvalidState
 } from './utils';
 import { getDropDownList } from '../../../utils/DropDownUtils';
-import './styles.scss';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
-import inputText from './constants';
+import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
+import './styles.scss';
 
 const defaultCode = '16';
 const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
@@ -49,31 +47,6 @@ const agencyOptions = [
   '0041 - Great Seeds Orchard - GSO',
   '0043 - Bad Seeds Orchard - BSO'
 ];
-
-interface Declaration {
-  renderLauncher: any;
-  children: any;
-}
-
-const ModalStateManager = (
-  {
-    renderLauncher: LauncherContent,
-    children: ModalContent
-  }: Declaration
-) => {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      {!ModalContent || typeof document === 'undefined'
-        ? null
-        : ReactDOM.createPortal(
-          <ModalContent open={open} setOpen={setOpen} />,
-          document.body
-        )}
-      {LauncherContent && <LauncherContent open={open} setOpen={setOpen} />}
-    </>
-  );
-};
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -100,11 +73,26 @@ const SeedlotRegistrationForm = () => {
     extractionStorageStep: initExtractionStorageState(defaultAgency, defaultCode)
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [allInvalidationObj, setAllInvalidationObj] = useState<AllStepInvalidationObj>({
+    collectionStep: initInvalidationObj(),
+    interimStep: initInvalidationObj(),
+    ownershipStep: initOwnerShipInvalidState(),
+    orchardStep: initInvalidationObj(),
+    extractionStorageStep: initInvalidationObj()
+  });
+
   // Can't find a good way to specify the type of stepData
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
     const newData = { ...allStepData };
     newData[stepName] = stepData;
     setAllStepData(newData);
+  };
+
+  const setInvalidState = (stepName: keyof AllStepInvalidationObj, stepInvalidData: any) => {
+    const newObj = { ...allInvalidationObj };
+    newObj[stepName] = stepInvalidData;
+    setAllInvalidationObj(newObj);
   };
 
   const logState = () => {
@@ -128,6 +116,7 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
+            // invalidateObj={allInvalidationObj.collectionStep}
             setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
           />
         );
@@ -136,6 +125,7 @@ const SeedlotRegistrationForm = () => {
         return (
           <OwnershipStep
             state={allStepData.ownershipStep}
+            invalidState={allInvalidationObj.ownershipStep}
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
@@ -150,6 +140,7 @@ const SeedlotRegistrationForm = () => {
                 : []
             }
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
+            setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
         );
       // Interim Storage
@@ -254,44 +245,12 @@ const SeedlotRegistrationForm = () => {
                   className="back-next-btn"
                   onClick={() => setStep(1)}
                   renderIcon={ArrowRight}
-                  disabled={formStep === 5}
                 >
                   Next
                 </Button>
               )
               : (
-                <ModalStateManager
-                  renderLauncher={({ setOpen }: any) => (
-                    <Button onClick={() => setOpen(true)}>{inputText.modal.buttonText}</Button>
-                  )}
-                >
-                  {({ open, setOpen }: any) => (
-                    <Modal
-                      size="sm"
-                      className="seedlot-registration-modal"
-                      modalLabel={inputText.modal.modalLabel}
-                      modalHeading={inputText.modal.modalHeading}
-                      primaryButtonText={inputText.modal.primaryButtonText}
-                      secondaryButtonText={inputText.modal.secondaryButtonText}
-                      open={open}
-                      onRequestClose={() => setOpen(false)}
-                    >
-                      <p>{inputText.modal.helperText}</p>
-                      <Checkbox
-                        id="declaration-modal-checkbox"
-                        name="declaration-modal"
-                        labelText={inputText.modal.checkboxLabelText}
-                      />
-                      <ToastNotification
-                        lowContrast
-                        kind="info"
-                        title={inputText.modal.notification.title}
-                        subtitle={inputText.modal.notification.subtitle}
-                        caption={inputText.modal.notification.link}
-                      />
-                    </Modal>
-                  )}
-                </ModalStateManager>
+                <SubmitModal />
               )
           }
         </div>

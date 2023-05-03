@@ -195,57 +195,6 @@ const OrchardStep = ({
     }
   };
 
-  // Leaving these here for future use
-  // const validateBeforeSubmit = () => {
-  //   // Check for any invalid state or empty fields
-  //   if (invalidOrchardId) {
-  //     refControl.current.orchardId.focus();
-  //     return false;
-  //   }
-
-  //   // This conditional covers the case where no change was
-  //   // made to the field and the user tries to submit
-  //   if (!state.orchardId) {
-  //     setInvalidOrchardId(true);
-  //     setInvalidOrchardText(invalidOrchardValue);
-  //     refControl.current.orchardId.focus();
-  //     return false;
-  //   }
-
-  //   if (invalidAddOrchardId && additionalOrchard) {
-  //     refControl.current.additionalId.focus();
-  //     return false;
-  //   }
-
-  //   // This conditional covers the case where no change was
-  //   // made to the additional orchard field and the user tries to submit
-  //   if (!state.additionalId && additionalOrchard) {
-  //     setInvalidAddOrchardId(true);
-  //     setInvalidAddOrchardText(invalidOrchardValue);
-  //     refControl.current.additionalId.focus();
-  //     return false;
-  //   }
-
-  //   if (!state.femaleGametic) {
-  //     setInvalidFemGametic(true);
-  //     refControl.current.femaleGametic.focus();
-  //     return false;
-  //   }
-
-  //   if (!state.maleGametic) {
-  //     setInvalidMalGametic(true);
-  //     refControl.current.maleGametic.focus();
-  //     return false;
-  //   }
-
-  //   if (invalidBreeding) {
-  //     refControl.current.breedingPercentage.focus();
-  //     return false;
-  //   }
-
-  //   return true;
-  // };
-
   return (
     <div className="seedlot-orchard-step-form">
       <form>
@@ -524,7 +473,7 @@ const OrchardStep = ({
                 invalid={invalidBreeding}
                 invalidText="Please enter a valid value between 0 and 100"
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  if (e && e.target.name && e.target.value) {
+                  if (e?.target?.name && e?.target?.value) {
                     setResponse([e.target.name], [e.target.value]);
                   }
                 }}
@@ -535,7 +484,7 @@ const OrchardStep = ({
                   ) => {
                     // A guard is needed here because any click on the input will emit a
                     //   click event, not necessarily the + - buttons
-                    if (target && target.value) {
+                    if (target?.value) {
                       setResponse(['breedingPercentage'], [String(target.value)]);
                     }
                   }

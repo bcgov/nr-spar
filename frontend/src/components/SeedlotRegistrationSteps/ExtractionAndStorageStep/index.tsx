@@ -162,7 +162,7 @@ const ExtractionAndStorage = (
               ref={extractorNameInputRef}
               name="extractory-agency"
               helperText={inputText.extractor.helperText}
-              readOnly={readOnly || isExtractorChecked}
+              readOnly={readOnly ?? isExtractorChecked}
               onChange={(e: ComboBoxEvent) => { handleFormInput('extractoryAgency', e.selectedItem); }}
               selectedItem={state.extractoryAgency}
               shouldFilterItem={
@@ -185,7 +185,7 @@ const ExtractionAndStorage = (
               helperText={inputText.extractorCode.helperText}
               invalid={validationObj.isExtractorCodeInvalid}
               invalidText={inputText.extractorCode.invalidText}
-              readOnly={readOnly || isExtractorChecked}
+              readOnly={readOnly ?? isExtractorChecked}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleFormInput('extractoryLocationCode', e.target.value);
               }}
@@ -202,7 +202,7 @@ const ExtractionAndStorage = (
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput('extractionStartDate', selectedDate);
               }}
-              readOnly={readOnly || isExtractorChecked}
+              readOnly={readOnly ?? isExtractorChecked}
             >
               <DatePickerInput
                 id="extraction-start-date-input"
@@ -223,7 +223,7 @@ const ExtractionAndStorage = (
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput('extractionEndDate', selectedDate);
               }}
-              readOnly={readOnly || isExtractorChecked}
+              readOnly={readOnly ?? isExtractorChecked}
             >
               <DatePickerInput
                 id="extraction-end-date-input"
@@ -273,7 +273,7 @@ const ExtractionAndStorage = (
               ref={storageNameInputRef}
               name="seed-storage-agency"
               helperText={inputText.storage.helperText}
-              onChange={(e: ComboBoxEvent) => { handleFormInput('seedStorageAgency', e.selectedItem); }}
+              onChange={(e: ComboBoxEvent) => handleFormInput('seedStorageAgency', e.selectedItem)}
               selectedItem={state.seedStorageAgency}
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
