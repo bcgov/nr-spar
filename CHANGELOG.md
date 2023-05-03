@@ -1,3 +1,7 @@
+## [0.9.4](https://github.com/bcgov/nr-spar-webapp/compare/v0.9.3...v0.9.4) (2023-05-03)
+
+
+
 ## [0.9.3](https://github.com/bcgov/nr-spar-webapp/compare/v0.9.2...v0.9.3) (2023-05-02)
 
 
@@ -43,10 +47,6 @@
 * seedlot applicant information form ([#56](https://github.com/bcgov/nr-spar-webapp/issues/56)) ([2c98ab9](https://github.com/bcgov/nr-spar-webapp/commit/2c98ab93378825f32ecb5cfac44016a2b0133054))
 * seedlot details page grid ([#47](https://github.com/bcgov/nr-spar-webapp/issues/47)) ([e7ddfb7](https://github.com/bcgov/nr-spar-webapp/commit/e7ddfb7331c2e88f9b110893d5a56b9b89c9c46f))
 * seedlot summary created ([#62](https://github.com/bcgov/nr-spar-webapp/issues/62)) ([9cfe0c3](https://github.com/bcgov/nr-spar-webapp/commit/9cfe0c3807e7ed79a5bee39f9d88bbb154a08c59))
-
-
-
-## [0.8.6](https://github.com/bcgov/nr-spar-webapp/compare/v0.8.5...v0.8.6) (2023-02-13)
 
 
 
