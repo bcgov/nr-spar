@@ -1,9 +1,10 @@
 name: Cypress Nightly
 
 on:
-  schedule:
-    # runs e2e tests every day at 4am
-    - cron: '0 4 * * *'
+  workflow_dispatch:
+  # schedule:
+  #   # runs e2e tests every day at 4am
+  #   - cron: '0 4 * * *'
 
 jobs:
   e2e-chrome:
