@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   tests-java:
-    name: Lint and Test
+    name: Java CI
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     strategy:
@@ -45,7 +45,7 @@ jobs:
           sonar_project_token: ${{ secrets[matrix.token] }}
 
   tests-javascript:
-    name: Lint and  Tests
+    name: JavaScript CI
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     steps:
@@ -67,33 +67,9 @@ jobs:
             -Dsonar.test.inclusions=src/**/__test__/**/*
           sonar_project_token: ${{ secrets.SONAR_FRONTEND }}
 
-  validation-labels:
-    name: Label Validation
-    runs-on: ubuntu-22.04
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Pull request size and stability labels
-        uses: actions/labeler@v4
-        continue-on-error: true
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Conventional Label
-        uses: bcoe/conventional-release-labels@v1
-        continue-on-error: true
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ignored_types: '["chore","pr"]'
-          type_labels: '{"feat": "feature", "fix": "fix", "bug": "fix", "doc": "documentation", "ci": "ci", "chore": "chore", "breaking": "breaking", "BREAKING CHANGE": "breaking"}'
-
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
-    name: Trivy Security Scan
+    name: Security Scan
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     steps:
