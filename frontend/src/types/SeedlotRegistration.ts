@@ -1,9 +1,10 @@
 import ApplicantInfo from './ApplicantInfo';
+import DropDownObj from './DropDownObject';
 
 type SeedlotRegistration = {
   seedlotNumber: number;
   applicant: ApplicantInfo;
-  species: string;
+  species: DropDownObj;
   source: string;
   registered: boolean;
   collectedBC: boolean;

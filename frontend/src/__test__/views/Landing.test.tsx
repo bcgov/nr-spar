@@ -5,6 +5,7 @@ import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import Landing from '../../views/Landing';
 import { AuthProvider } from '../../contexts/AuthContext';
+import '@testing-library/jest-dom';
 
 describe('Landing component test', () => {
   it('should have the correct title', () => {

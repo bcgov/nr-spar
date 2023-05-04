@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
@@ -17,7 +16,7 @@ describe('Seedlot Activities component', () => {
   it('should render correctly', () => {
     expect(screen.getByText('Register an A class seedlot')).toBeInTheDocument();
     expect(screen.getByText('Register a B class seedlot')).toBeInTheDocument();
-    expect(screen.getByText('Existing seedlot')).toBeInTheDocument();
+    expect(screen.getByText('My seedlots')).toBeInTheDocument();
     expect(screen.getByText('Activity history')).toBeInTheDocument();
   });
 });

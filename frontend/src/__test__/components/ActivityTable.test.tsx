@@ -1,8 +1,7 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import ActivityTable from '../../components/ActivityTable';
-import RecentActivityItems from '../../mock-api/fixtures/RecentActivityItems';
+import RecentActivityItems from '../../mock-server/fixtures/RecentActivityItems';
 import '@testing-library/jest-dom';
 
 describe('Activity Table component', () => {

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import axios from 'axios';
-
 import {
   Row,
   Column,
@@ -18,31 +16,20 @@ import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
 
 import './styles.scss';
-import getUrl from '../../utils/ApiUtils';
-import ApiAddresses from '../../utils/ApiAddresses';
-import { useAuth } from '../../contexts/AuthContext';
+import api from '../../api-service/api';
+import ApiConfig from '../../api-service/ApiConfig';
 import FilesDocsTable from '../FilesDocsTable';
 
 const RecentActivities = () => {
-  const { token } = useAuth();
   const [listItems, setListItems] = useState([]);
-  const [filesDocsItems, setFilesDocsItems] = useState([]);
-
-  const getAxiosConfig = () => {
-    const axiosConfig = {};
-    if (token) {
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      Object.assign(axiosConfig, headers);
-    }
-    return axiosConfig;
-  };
+  // Will let eslint ignoring it for now,
+  // since we will use this state with API calls
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [filesDocsItems] = useState([]);
 
   useEffect(() => {
-    axios.get(getUrl(ApiAddresses.RecentActivitiesRetrieveAll), getAxiosConfig())
+    const url = ApiConfig.recentActivities;
+    api.get(url)
       .then((response) => {
         setListItems(response.data);
       })
@@ -87,35 +74,45 @@ const RecentActivities = () => {
           </TabList>
           <TabPanels>
             <TabPanel>
-              <ActivityTable
-                elements={listItems}
-                clickFn={goToActivity}
-                headers={tableHeaders}
-              />
-              {(listItems.length === 0) && (
-              <div className="empty-recent-activities">
-                <EmptySection
-                  icon="Application"
-                  title="There is no activity to show yet!"
-                  description="Your recent requests will appear here once you generate one"
-                />
-              </div>
-              )}
+              {
+                listItems.length === 0
+                  ? (
+                    <div className="empty-recent-activities">
+                      <EmptySection
+                        icon="Application"
+                        title="There is no activity to show yet!"
+                        description="Your recent requests will appear here once you generate one"
+                      />
+                    </div>
+                  )
+                  : (
+                    <ActivityTable
+                      elements={listItems}
+                      clickFn={goToActivity}
+                      headers={tableHeaders}
+                    />
+                  )
+              }
             </TabPanel>
             <TabPanel>
-              <FilesDocsTable
-                elements={filesDocsItems}
-                headers={fileDocstableHeaders}
-              />
-              {(filesDocsItems.length === 0) && (
-              <div className="empty-recent-activity-files-docs">
-                <EmptySection
-                  icon="Application"
-                  title="There is no files & docs to show yet!"
-                  description="Your recent files & docs will appear here once you generate one"
-                />
-              </div>
-              )}
+              {
+                filesDocsItems.length === 0
+                  ? (
+                    <div className="empty-recent-activity-files-docs">
+                      <EmptySection
+                        icon="Application"
+                        title="There is no files & docs to show yet!"
+                        description="Your recent files & docs will appear here once you generate one"
+                      />
+                    </div>
+                  )
+                  : (
+                    <FilesDocsTable
+                      elements={filesDocsItems}
+                      headers={fileDocstableHeaders}
+                    />
+                  )
+              }
             </TabPanel>
           </TabPanels>
         </Tabs>

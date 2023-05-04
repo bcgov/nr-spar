@@ -1,12 +1,13 @@
-/* eslint-disable no-undef */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SeedlotTable from '../../components/SeedlotTable';
-import ExistingSeedlotItems from '../../mock-api/fixtures/ExistingSeedlotItems';
+import MySeedlotsItems from '../../mock-server/fixtures/MySeedlotsItems';
 import '@testing-library/jest-dom';
+import formatDate from '../../utils/DateUtils'
+
 
 describe('Seedlot Table component', () => {
-  const listItems = ExistingSeedlotItems;
+  const listItems = MySeedlotsItems;
   const tableHeaders: string[] = [
     'Seedlot number',
     'Lot class',
@@ -40,12 +41,12 @@ describe('Seedlot Table component', () => {
     const cells = screen.getAllByRole('cell');
     expect(cells[0].textContent).toEqual('12456');
     expect(cells[1].textContent).toEqual('A class');
-    expect(cells[2].textContent).toEqual('SX - Spruce hibrid');
+    expect(cells[2].textContent).toEqual('SX - Spruce Hybrid');
     expect(cells[3].textContent).toEqual('Collection');
     expect(cells[4].textContent).toEqual('Incomplete');
-    expect(cells[5]).toBeInTheDocument;
-    expect(cells[6].textContent).toEqual('October 10, 2021');
-    expect(cells[7].textContent).toEqual('December 24, 2022');
+    expect(cells[5]).toBeInTheDocument();
+    expect(formatDate(cells[6].textContent ? cells[6].textContent : "")).toEqual('October 10, 2021');
+    expect(formatDate(cells[7].textContent ? cells[7].textContent : "")).toEqual('December 24, 2022');
     expect(cells[8].textContent).toEqual('--');
   });
 });
