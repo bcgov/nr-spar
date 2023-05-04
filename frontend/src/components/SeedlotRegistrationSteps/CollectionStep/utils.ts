@@ -1,3 +1,5 @@
+import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+
 export interface CollectionForm {
   collectorAgency: string,
   locationCode: string,
@@ -23,7 +25,8 @@ export interface CollectionStepProps {
   defaultAgency: string,
   defaultCode: string,
   agencyOptions: Array<string>,
-  readOnly?: boolean
+  readOnly?: boolean,
+  invalidateObj?:FormInvalidationObj
 }
 
 export type FormValidation = {

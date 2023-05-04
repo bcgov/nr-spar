@@ -1,11 +1,10 @@
 import DropDownObj from '../../../types/DropDownObject';
+import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { inputText, ownerTemplate, validTemplate } from './constants';
 
 import {
   SingleOwnerForm,
-  ValidationProp,
-  SingleInvalidObj,
-  ValidationPropNoId
+  SingleInvalidObj
 } from './definitions';
 
 const twoDigitRegex = /^\d{2}$/;
@@ -22,36 +21,38 @@ const getNextId = (currentArray: Array<SingleOwnerForm>): number => {
 
 export const insertOwnerForm = (
   ownershiptArray: Array<SingleOwnerForm>,
-  validationArray: Array<ValidationProp>
+  validationObj: OwnershipInvalidObj
 ) => {
   const newOwnerForm = { ...ownerTemplate };
   const newValidForm = { ...validTemplate };
   const newId = getNextId(ownershiptArray);
   newOwnerForm.id = newId;
-  newValidForm.id = newId;
   return {
     newOwnerArr: [...ownershiptArray, newOwnerForm],
-    newValidArr: [...validationArray, newValidForm],
-    newId
+    newValidObj: {
+      ...validationObj,
+      [newId]: newValidForm
+    }
   };
 };
 
 export const deleteOwnerForm = (
   id: number,
   ownershiptArray: Array<SingleOwnerForm>,
-  validationArray: Array<ValidationProp>
+  validationObj: OwnershipInvalidObj
 ) => {
   if (id === 0) {
     return {
       newOwnerArr: ownershiptArray,
-      newValidArr: validationArray
+      newValidObj: validationObj
     };
   }
   const newOwnerArray = ownershiptArray.filter((obj) => obj.id !== id);
-  const newValidArray = validationArray.filter((obj) => obj.id !== id);
+  const newValidObj = { ...validationObj };
+  delete newValidObj[id];
   return {
     newOwnerArr: newOwnerArray,
-    newValidArr: newValidArray
+    newValidObj
   };
 };
 
@@ -113,17 +114,6 @@ export const getValidKey = (name: string): string => {
   if (name === 'fundingSource') return 'funding';
   if (name === 'methodOfPayment') return 'payment';
   throw new Error('Failed to get valid key');
-};
-
-const getOwnerKey = (name: string): string => {
-  if (name === 'owner') return 'ownerAgency';
-  if (name === 'code') return 'ownerCode';
-  if (name === 'portion') return 'ownerPortion';
-  if (name === 'reserved') return 'reservedPerc';
-  if (name === 'surplus') return 'surplusPerc';
-  if (name === 'funding') return 'fundingSource';
-  if (name === 'payment') return 'methodOfPayment';
-  throw new Error('Failed to get owner key');
 };
 
 // The sum of reserved and surplus should be 100, if one is changed, auto calc the other one
@@ -215,7 +205,7 @@ export const arePortionsValid = (ownershiptArray: Array<SingleOwnerForm>): boole
   ownershiptArray.forEach((obj) => {
     sum += Number(obj.ownerPortion);
   });
-  return sum === 100;
+  return Number(sum.toFixed(2)) === 100;
 };
 
 export type AllValidObj = {
@@ -225,90 +215,3 @@ export type AllValidObj = {
   invalidValue: string,
   ownerOk: boolean
 }
-
-const isOwnerObjInvalid = (ownerObj: SingleOwnerForm) => {
-  const keys = Object.keys(ownerObj);
-  const len = keys.length;
-  for (let i = 0; i < len; i += 1) {
-    const key = keys[i];
-    if (key !== 'id') {
-      const val = ownerObj[key as keyof SingleOwnerForm];
-      if (isInputEmpty(val)) {
-        return {
-          isInvalid: true,
-          invalidKey: key,
-          invalidValue: val
-        };
-      }
-    }
-  }
-  return {
-    isInvalid: false,
-    invalidKey: '',
-    invalidValue: ''
-  };
-};
-
-const isValidObjInvalid = (invalidObj: ValidationProp) => {
-  const keys = Object.keys(invalidObj);
-  const len = keys.length;
-  for (let i = 0; i < len; i += 1) {
-    const key = keys[i];
-    if (key !== 'id') {
-      if (invalidObj[key as keyof ValidationPropNoId].isInvalid) {
-        return {
-          isValidValInvalid: true,
-          invalidValidKey: key
-        };
-      }
-    }
-  }
-  return {
-    isValidValInvalid: false,
-    invalidValidKey: ''
-  };
-};
-
-export const getInvalidIdAndKey = (
-  ownershiptArray: Array<SingleOwnerForm>,
-  validationArray: Array<ValidationProp>
-): AllValidObj => {
-  const ownerLen = ownershiptArray.length;
-
-  for (let i = 0; i < ownerLen; i += 1) {
-    const ownerObj = ownershiptArray[i];
-    const validObj = validationArray[i];
-    if (ownerObj.id !== validObj.id) {
-      throw new Error('Validate all inputs error, id mismatch.');
-    }
-    const { isInvalid, invalidKey, invalidValue } = isOwnerObjInvalid(ownerObj);
-    if (isInvalid) {
-      return {
-        allValid: false,
-        invalidId: validObj.id,
-        invalidField: invalidKey,
-        invalidValue: String(invalidValue),
-        ownerOk: false
-      };
-    }
-
-    const { isValidValInvalid, invalidValidKey } = isValidObjInvalid(validObj);
-    if (isValidValInvalid) {
-      return {
-        allValid: false,
-        invalidId: validObj.id,
-        invalidField: getOwnerKey(invalidValidKey),
-        invalidValue: String(invalidValue),
-        ownerOk: true
-      };
-    }
-  }
-
-  return {
-    allValid: true,
-    invalidId: -1,
-    invalidField: '',
-    invalidValue: '',
-    ownerOk: true
-  };
-};

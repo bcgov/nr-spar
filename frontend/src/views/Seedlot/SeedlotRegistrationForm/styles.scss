@@ -1,0 +1,44 @@
+@use '@carbon/type';
+@use '../../../theme/variables.scss' as vars;
+
+.seedlot-registration-breadcrumb {
+  padding-left: 3.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.seedlot-registration-breadcrumb .#{vars.$bcgov-prefix}--link {
+  cursor: pointer;
+}
+
+.seedlot-registration-row {
+  padding: 1.5rem 3.5rem 1.5rem 3.5rem;
+}
+
+.seedlot-registration-progress {
+  padding: 1.5rem 3.5rem 0 3.5rem;
+}
+
+.collection-form-buttons {
+  padding: 3rem 3.5rem 0 3.5rem;
+}
+
+.seedlot-registration-steps {
+  width: 100%;
+  margin-bottom: 4rem;
+}
+
+.seedlot-current-form {
+  width: 100%;
+  display: grid;
+}
+
+.btns-container {
+  padding: 1rem 2.5rem 3rem 2.5rem;
+  width: 100%;
+  margin: 0;
+
+  button {
+    width: 100%;
+    margin-right: 1rem;
+  }
+}

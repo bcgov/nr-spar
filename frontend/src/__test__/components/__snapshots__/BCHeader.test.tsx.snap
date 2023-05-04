@@ -59,7 +59,7 @@ exports[`the Header component should match the snapshot 1`] = `
       <button
         aria-describedby={null}
         aria-label="Search"
-        aria-labelledby="tooltip-19"
+        aria-labelledby="tooltip-22"
         aria-pressed={null}
         className="cds--btn--icon-only cds--header__action cds--btn cds--btn--primary cds--btn--icon-only cds--btn cds--btn--primary"
         data-testid="header-button__search"
@@ -68,7 +68,6 @@ exports[`the Header component should match the snapshot 1`] = `
         onClick={[Function]}
         onFocus={[Function]}
         onMouseEnter={[Function]}
-        tabIndex={0}
         type="button"
       >
         <svg
@@ -89,7 +88,7 @@ exports[`the Header component should match the snapshot 1`] = `
       <span
         aria-hidden="true"
         className="cds--popover"
-        id="tooltip-19"
+        id="tooltip-22"
         role="tooltip"
       >
         <span
@@ -110,7 +109,7 @@ exports[`the Header component should match the snapshot 1`] = `
       <button
         aria-describedby={null}
         aria-label="Notifications"
-        aria-labelledby="tooltip-22"
+        aria-labelledby="tooltip-25"
         aria-pressed={null}
         className="cds--btn--icon-only cds--header__action cds--btn cds--btn--primary cds--btn--icon-only cds--btn cds--btn--primary"
         data-testid="header-button__notifications"
@@ -119,7 +118,6 @@ exports[`the Header component should match the snapshot 1`] = `
         onClick={[Function]}
         onFocus={[Function]}
         onMouseEnter={[Function]}
-        tabIndex={0}
         type="button"
       >
         <svg
@@ -140,7 +138,7 @@ exports[`the Header component should match the snapshot 1`] = `
       <span
         aria-hidden="true"
         className="cds--popover"
-        id="tooltip-22"
+        id="tooltip-25"
         role="tooltip"
       >
         <span
@@ -161,7 +159,7 @@ exports[`the Header component should match the snapshot 1`] = `
       <button
         aria-describedby={null}
         aria-label="User Settings"
-        aria-labelledby="tooltip-25"
+        aria-labelledby="tooltip-28"
         aria-pressed={null}
         className="cds--btn--icon-only cds--header__action cds--btn cds--btn--primary cds--btn--icon-only cds--btn cds--btn--primary"
         data-testid="header-button__user"
@@ -170,7 +168,6 @@ exports[`the Header component should match the snapshot 1`] = `
         onClick={[Function]}
         onFocus={[Function]}
         onMouseEnter={[Function]}
-        tabIndex={0}
         type="button"
       >
         <svg
@@ -194,7 +191,7 @@ exports[`the Header component should match the snapshot 1`] = `
       <span
         aria-hidden="true"
         className="cds--popover"
-        id="tooltip-25"
+        id="tooltip-28"
         role="tooltip"
       >
         <span
@@ -228,7 +225,7 @@ exports[`the Header component should match the snapshot 1`] = `
         >
           <button
             aria-describedby={null}
-            aria-labelledby="tooltip-27"
+            aria-labelledby="tooltip-30"
             aria-pressed={null}
             className="cds--btn--icon-only cds--btn cds--btn--md cds--btn--ghost"
             disabled={false}
@@ -236,7 +233,6 @@ exports[`the Header component should match the snapshot 1`] = `
             onClick={[Function]}
             onFocus={[Function]}
             onMouseEnter={[Function]}
-            tabIndex={0}
             type="button"
           >
             <svg
@@ -260,7 +256,7 @@ exports[`the Header component should match the snapshot 1`] = `
           <span
             aria-hidden="true"
             className="cds--popover"
-            id="tooltip-27"
+            id="tooltip-30"
             role="tooltip"
           >
             <span
@@ -280,7 +276,7 @@ exports[`the Header component should match the snapshot 1`] = `
         >
           <button
             aria-describedby={null}
-            aria-labelledby="tooltip-29"
+            aria-labelledby="tooltip-32"
             aria-pressed={null}
             className="cds--btn--icon-only cds--btn cds--btn--md cds--btn--ghost"
             disabled={false}
@@ -288,7 +284,6 @@ exports[`the Header component should match the snapshot 1`] = `
             onClick={[Function]}
             onFocus={[Function]}
             onMouseEnter={[Function]}
-            tabIndex={0}
             type="button"
           >
             <svg
@@ -309,7 +304,7 @@ exports[`the Header component should match the snapshot 1`] = `
           <span
             aria-hidden="true"
             className="cds--popover"
-            id="tooltip-29"
+            id="tooltip-32"
             role="tooltip"
           >
             <span
@@ -324,9 +319,123 @@ exports[`the Header component should match the snapshot 1`] = `
         </span>
       </div>
     </div>
-    <span>
-       Placeholder 
-    </span>
+    <div
+      className="notifications-space"
+    >
+      <div
+        className="notifications-button-row cds--row"
+      >
+        <button
+          aria-describedby={null}
+          aria-pressed={null}
+          className="btn-viewed cds--btn cds--btn--ghost"
+          disabled={false}
+          type="button"
+        >
+          Mark all as viewed
+        </button>
+        <button
+          aria-describedby={null}
+          aria-pressed={null}
+          className="btn-all-notifications cds--btn cds--btn--ghost"
+          disabled={false}
+          type="button"
+        >
+          See all notifications
+        </button>
+      </div>
+      <hr />
+      <div
+        className="notifications-central-container"
+      >
+        <div
+          className="notifications-central-vertical-center"
+        >
+          <div
+            className="empty-section-container"
+          >
+            <svg
+              aria-hidden={true}
+              className="empty-section-icon"
+              fill="currentColor"
+              focusable="false"
+              height={16}
+              preserveAspectRatio="xMidYMid meet"
+              viewBox="0 0 32 32"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M16,12a4,4,0,1,1-4,4,4.0045,4.0045,0,0,1,4-4m0-2a6,6,0,1,0,6,6,6,6,0,0,0-6-6Z"
+                transform="translate(0 .005)"
+              />
+              <path
+                d="M6.854 5.375H8.854V10.333H6.854z"
+                transform="rotate(-45 7.86 7.856)"
+              />
+              <path
+                d="M2 15.005H7V17.005000000000003H2z"
+              />
+              <path
+                d="M5.375 23.147H10.333V25.147H5.375z"
+                transform="rotate(-45 7.86 24.149)"
+              />
+              <path
+                d="M15 25.005H17V30.005H15z"
+              />
+              <path
+                d="M23.147 21.668H25.147V26.625999999999998H23.147z"
+                transform="rotate(-45 24.152 24.149)"
+              />
+              <path
+                d="M25 15.005H30V17.005000000000003H25z"
+              />
+              <path
+                d="M21.668 6.854H26.625999999999998V8.854H21.668z"
+                transform="rotate(-45 24.152 7.856)"
+              />
+              <path
+                d="M15 2.005H17V7.005H15z"
+              />
+            </svg>
+            <p
+              className="empty-section-title"
+            >
+              There is no new notifications!
+            </p>
+            <p
+              className="empty-section-subtitle subtitle-section"
+            >
+              You can go to all notifications to see older ones.
+            </p>
+          </div>
+          <button
+            aria-describedby={null}
+            aria-pressed={null}
+            className="cds--btn cds--btn--md cds--btn--primary"
+            disabled={false}
+            type="button"
+          >
+            See all notifications
+            <svg
+              aria-hidden={true}
+              className="cds--btn__icon"
+              fill="currentColor"
+              focusable="false"
+              height={16}
+              preserveAspectRatio="xMidYMid meet"
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M14.4,10.1L13,8.8V6.5c0-2.6-1.9-4.7-4.5-5v-1h-1v1C5,1.8,3,3.9,3,6.5v2.3l-1.4,1.3c-0.1,0.1-0.2,0.2-0.1,0.4V12 c0,0.3,0.2,0.5,0.4,0.5c0,0,0,0,0.1,0h3.5C5.5,13.9,6.6,15,8,15s2.5-1.1,2.5-2.5H14c0.3,0,0.5-0.2,0.5-0.4c0,0,0,0,0-0.1v-1.5 C14.5,10.4,14.4,10.2,14.4,10.1z M8,14c-0.8,0-1.5-0.7-1.5-1.5h3C9.5,13.3,8.8,14,8,14z M13.5,11.5h-11v-0.8l1.3-1.4 C3.9,9.3,4,9.1,4,9V6.5c0-2.2,1.8-4,4-4s4,1.8,4,4V9c0,0.1,0.1,0.3,0.1,0.4l1.4,1.3V11.5z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
   <div
     aria-label="My Profile Tab"
@@ -348,7 +457,7 @@ exports[`the Header component should match the snapshot 1`] = `
         >
           <button
             aria-describedby={null}
-            aria-labelledby="tooltip-31"
+            aria-labelledby="tooltip-37"
             aria-pressed={null}
             className="cds--btn--icon-only cds--btn cds--btn--md cds--btn--ghost"
             disabled={false}
@@ -356,7 +465,6 @@ exports[`the Header component should match the snapshot 1`] = `
             onClick={[Function]}
             onFocus={[Function]}
             onMouseEnter={[Function]}
-            tabIndex={0}
             type="button"
           >
             <svg
@@ -380,7 +488,7 @@ exports[`the Header component should match the snapshot 1`] = `
           <span
             aria-hidden="true"
             className="cds--popover"
-            id="tooltip-31"
+            id="tooltip-37"
             role="tooltip"
           >
             <span
@@ -400,7 +508,7 @@ exports[`the Header component should match the snapshot 1`] = `
         >
           <button
             aria-describedby={null}
-            aria-labelledby="tooltip-33"
+            aria-labelledby="tooltip-39"
             aria-pressed={null}
             className="cds--btn--icon-only cds--btn cds--btn--md cds--btn--ghost"
             disabled={false}
@@ -408,7 +516,6 @@ exports[`the Header component should match the snapshot 1`] = `
             onClick={[Function]}
             onFocus={[Function]}
             onMouseEnter={[Function]}
-            tabIndex={0}
             type="button"
           >
             <svg
@@ -429,7 +536,7 @@ exports[`the Header component should match the snapshot 1`] = `
           <span
             aria-hidden="true"
             className="cds--popover"
-            id="tooltip-33"
+            id="tooltip-39"
             role="tooltip"
           >
             <span

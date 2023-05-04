@@ -1,28 +1,39 @@
 import React from 'react';
 
 import * as Icons from '@carbon/icons-react';
+import * as Pictograms from '@carbon/pictograms-react';
 
 import Subtitle from '../Subtitle';
 
 import './styles.scss';
 
 interface EmptySectionProps {
-  icon: string;
+  icon?: string;
   title: string;
   description: string;
+  pictogram?: string;
 }
 
 const EmptySection = ({
-  icon, title, description
+  icon, title, description, pictogram
 }: EmptySectionProps) => {
-  const Icon = Icons[icon];
+  let Img;
+
+  if (icon) {
+    Img = Icons[icon];
+  }
+  // If both icon and pictogram are passed in then pictogram will be used
+  if (pictogram) {
+    Img = Pictograms[pictogram];
+  }
+
   return (
     <div className="empty-section-container">
-      <Icon className="empty-section-icon" />
-      <p>
+      <Img className="empty-section-icon" />
+      <p className="empty-section-title">
         {title}
       </p>
-      <Subtitle text={description} />
+      <Subtitle className="empty-section-subtitle" text={description} />
     </div>
   );
 };
