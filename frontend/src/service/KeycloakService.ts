@@ -17,12 +17,9 @@ const getToken = () => keycloak.token;
 
 const isLoggedIn = () => !!keycloak.token;
 
-const updateToken = (successCallback: any) => {
-  keycloak.updateToken(5)
-    .then(successCallback)
-    // eslint-disable-next-line no-console
-    .catch(console.error);
-};
+const updateToken = (minValidity: number) => keycloak.updateToken(minValidity);
+
+const refreshToken = () => keycloak.refreshToken;
 
 const authMethod = (): string => {
   let method = '';
@@ -71,7 +68,8 @@ const KeycloakService = {
   getToken,
   updateToken,
   authMethod,
-  getUser
+  getUser,
+  refreshToken
 };
 
 export default KeycloakService;
