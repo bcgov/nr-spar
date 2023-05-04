@@ -41,7 +41,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bcgov/nr-spar-webapp.git"
+    "url": "git+https://github.com/bcgov/nr-spar.git"
   },
   "keywords": [
     "fsa",
@@ -54,7 +54,7 @@
   "author": "Encora Team",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/bcgov/nr-spar-webapp/issues"
+    "url": "https://github.com/bcgov/nr-spar/issues"
   },
   "scripts": {
     "start": "react-scripts start",
