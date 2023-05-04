@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  database:
+    container_name: database
+    environment:
+      POSTGRES_USER: default
+      POSTGRES_PASSWORD: default
+      POSTGRES_DB: default
+    hostname: database
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - /pgdata
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    healthcheck:
+      test: [ "CMD-SHELL", "psql -q -U default -d default -c 'SELECT 1'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    container_name: backend
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      NR_SPAR_BACKEND_VERSION: snapshot
+      KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
+      POSTGRESQL_HOST: database
+      POSTGRESQL_DATABASE: default
+      POSTGRESQL_USER: default
+      POSTGRESQL_PASSWORD: default
+      FORESTCLIENTAPI_ADDRESS: ${FORESTCLIENTAPI_ADDRESS}
+      FORESTCLIENTAPI_KEY: ${FORESTCLIENTAPI_KEY}
+      JAVA_OPTS: ${JAVA_OPTS}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8090/actuator/health" ]
+      interval: 1m30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    hostname: backend
+    links:
+      - database
+    ports:
+      - "8090:8090"
+      - "5005:5005"
+    build:
+      context: ./backend
+      dockerfile: Dockerfile

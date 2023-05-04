@@ -68,56 +68,22 @@ tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) gu
 
 ## Quick look
 
-If all you want is to take a quick look at the running service, you can do it by using Docker Compose.
-
-Be aware of the required environment variables:
-
-```sh
-NR_SPAR_BACKEND_VERSION=dev
-KEYCLOAK_REALM_URL=https://test.loginproxy.gov.bc.ca/auth/realms/standard
-FORESTCLIENTAPI_ADDRESS=https://nr-forest-client-api-prod.api.gov.bc.ca/api
-FORESTCLIENTAPI_KEY=[key-here]
-POSTGRESQL_HOST=localhost
-POSTGRESQL_USER=postgres
-POSTGRESQL_PASSWORD=default
-POSTGRESQL_DATABASE=postgres
-```
-
-✅ You can export all environment variables from a .env file with this command (On Linux):
-
-```sh
-export $(cat .env | xargs)
-```
+But if all you want is to take a quick look at the running service, you can do it by using Docker Compose.
 
 Run with:
-```sh
+```
 docker-compose up --build
 ```
 
-If you want, you can clean and remove the containers with
-```sh
+You can clean and remove the containers with
+```
 docker-compose down --remove-orphans
 ```
 
-Here are how you can build with Docker, without Compose plugin:
-```sh
-cd backend
-docker build -t backend .
+But if not, You can build the Docker images:
 ```
-
-⚠️ You'll need a PostgreSQL database running. Here's how you can get it up and running:
-
-```sh
-cd database
-docker build -t database .
-```
-
-Use this environment variables
-
-```sh
-POSTGRES_USER=postgres
-POSTGRES_DB=postgres
-POSTGRES_PASSWORD=default
+cd backend && docker build -t bcgov/nr-spar-backend-backend:snapshot . && cd ..
+cd database && docker build -t bcgov/nr-spar-backend-database:snapshot . && cd ..
 ```
 
 ## Getting help
