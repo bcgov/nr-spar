@@ -71,7 +71,7 @@
   $button-tokens: utilities.merge(
     button-tokens.$button-tokens,
     light-button-overrides.$light-button-token-overrides
-);
+  );
 
   $tag-tokens: utilities.merge(
     tag-tokens.$tag-tokens,
