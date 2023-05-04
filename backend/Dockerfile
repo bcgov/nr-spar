@@ -1,5 +1,5 @@
 # Build
-FROM maven:3.8.7-eclipse-temurin-17 AS build
+FROM maven:3.9.1-eclipse-temurin-17 AS build
 
 # Copy and build
 WORKDIR /app
