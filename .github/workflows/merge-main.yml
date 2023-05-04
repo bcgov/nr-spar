@@ -1,14 +1,13 @@
 name: Merge to Main
 
 on:
-  pull_request:
-  # push:
-  #   branches:
-  #     - main
-  #   paths-ignore:
-  #     - ".github/ISSUE_TEMPLATE/*"
-  #     - "**.md"
-  # workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".github/ISSUE_TEMPLATE/*"
+      - "**.md"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}
