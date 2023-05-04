@@ -15,7 +15,7 @@ ENV LC_ALL en_CA.UTF-8
 
 # Copy app
 WORKDIR /app
-COPY --from=build /app/target/nr-spar_backend.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 # User and startup
 EXPOSE 8090
