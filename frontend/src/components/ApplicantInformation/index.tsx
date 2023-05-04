@@ -1,56 +1,53 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   Row,
   Column,
   TextInput,
   NumberInput,
-  Dropdown,
   RadioButtonGroup,
   RadioButton,
   Checkbox,
-  Button
+  Button,
+  ComboBox
 } from '@carbon/react';
 import { DocumentAdd } from '@carbon/icons-react';
 
 import Subtitle from '../Subtitle';
 
 import SeedlotRegistration from '../../types/SeedlotRegistration';
-import GeneticClassesType from '../../types/GeneticClasses';
 
-import getUrl from '../../utils/ApiUtils';
-import ApiAddresses from '../../utils/ApiAddresses';
-import { useAuth } from '../../contexts/AuthContext';
+import { FilterObj, filterInput } from '../../utils/filterUtils';
+import ComboBoxEvent from '../../types/ComboBoxEvent';
+import api from '../../api-service/api';
+import ApiConfig from '../../api-service/ApiConfig';
+import getVegCodes from '../../api-service/vegetationCodeAPI';
 
 import './styles.scss';
 
 const ApplicantInformation = () => {
-  const { token } = useAuth();
-  const navigate = useNavigate();
+  const mockAgencyOptions: Array<string> = [
+    '0032 - Strong Seeds Orchard - SSO',
+    '0035 - Weak Seeds Orchard - WSO',
+    '0038 - Okay Seeds Orchard - OSO'
+  ];
 
-  const getAxiosConfig = () => {
-    const axiosConfig = {};
-    if (token) {
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      Object.assign(axiosConfig, headers);
-    }
-    return axiosConfig;
-  };
+  const navigate = useNavigate();
 
   const seedlotData: SeedlotRegistration = {
     seedlotNumber: 0,
     applicant: {
-      name: '',
-      number: '',
+      name: mockAgencyOptions[0],
+      number: '0',
       email: ''
     },
-    species: '',
+    species: {
+      label: '',
+      code: '',
+      description: ''
+    },
     source: 'tested',
     registered: true,
     collectedBC: true
@@ -62,31 +59,14 @@ const ApplicantInformation = () => {
   const speciesInputRef = useRef<HTMLButtonElement>(null);
 
   const [responseBody, setResponseBody] = useState<SeedlotRegistration>(seedlotData);
-  const [invalidName, setInvalidName] = useState<boolean>(false);
   const [invalidNumber, setInvalidNumber] = useState<boolean>(false);
   const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
   const [invalidSpecies, setInvalidSpecies] = useState<boolean>(false);
 
-  const [geneticClasses, setGeneticClasses] = useState<string[]>([]);
-
-  const getGeneticClasses = () => {
-    axios.get(getUrl(ApiAddresses.GeneticClassesRetrieveAll), getAxiosConfig())
-      .then((response) => {
-        const classes: string[] = [];
-        if (response.data.geneticClasses) {
-          response.data.geneticClasses.forEach((element: GeneticClassesType) => {
-            classes.push(element.description);
-          });
-        }
-        setGeneticClasses(classes);
-      })
-      .catch((error) => {
-        // eslint-disable-next-line
-        console.error(`Error: ${error}`);
-      });
-  };
-
-  getGeneticClasses();
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes'],
+    queryFn: getVegCodes
+  });
 
   const inputChangeHandlerApplicant = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -95,6 +75,17 @@ const ApplicantInformation = () => {
       applicant: {
         ...responseBody.applicant,
         [name]: value
+      }
+    });
+  };
+
+  const comboBoxChangeHandlerApplicant = (event: ComboBoxEvent) => {
+    const { selectedItem } = event;
+    setResponseBody({
+      ...responseBody,
+      applicant: {
+        ...responseBody.applicant,
+        name: selectedItem
       }
     });
   };
@@ -127,18 +118,9 @@ const ApplicantInformation = () => {
     });
   };
 
-  const validateApplicantName = () => {
-    const nameRegex = /^[a-z]+(?:['-.\s][a-z]+)*$/i;
-    if (!nameRegex.test(responseBody.applicant.name)) {
-      setInvalidName(true);
-    } else {
-      setInvalidName(false);
-    }
-  };
-
   const validateApplicantNumber = () => {
     const intNumber = +responseBody.applicant.number;
-    if (intNumber <= 0 || intNumber >= 99) {
+    if (intNumber < 0 || intNumber > 99) {
       setInvalidNumber(true);
     } else {
       setInvalidNumber(false);
@@ -157,19 +139,18 @@ const ApplicantInformation = () => {
   const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (invalidName) {
-      nameInputRef.current?.focus();
-    } else if (invalidNumber) {
+    if (invalidNumber) {
       numberInputRef.current?.focus();
     } else if (invalidEmail) {
       emailInputRef.current?.focus();
-    } else if (!responseBody.species) {
+    } else if (!responseBody.species.label) {
       setInvalidSpecies(true);
       speciesInputRef.current?.focus();
     } else {
-      axios.post(getUrl(ApiAddresses.AClassSeedlotPost), responseBody, getAxiosConfig())
+      const url = ApiConfig.aClassSeedlot;
+      api.post(url, responseBody)
         .then((response) => {
-          navigate('/seedlot/successfully-created/' + response.data.seedlotNumber);
+          navigate(`/seedlot/successfully-created/${response.data.seedlotNumber}`);
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -189,18 +170,19 @@ const ApplicantInformation = () => {
         </Row>
         <Row className="agency-information">
           <Column sm={4} md={2} lg={5}>
-            <TextInput
-              id="agency-name-input"
+            <ComboBox
+              id="agency-name-combobox"
               ref={nameInputRef}
               name="name"
-              type="text"
-              labelText="Applicant agency name"
-              enableCounter
-              maxCount={8}
-              invalid={invalidName}
-              invalidText="Please enter a valid name"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerApplicant(e)}
-              onBlur={() => validateApplicantName()}
+              items={mockAgencyOptions}
+              initialSelectedItem={mockAgencyOptions[0]}
+              shouldFilterItem={
+                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+              }
+              placeholder="Select an agency..."
+              titleText="Applicant agency name"
+              helperText="You can enter your agency number, name or acronym"
+              onChange={(e: ComboBoxEvent) => comboBoxChangeHandlerApplicant(e)}
             />
           </Column>
           <Column sm={4} md={2} lg={5}>
@@ -218,6 +200,8 @@ const ApplicantInformation = () => {
               invalidText="Please enter a valid value between 0 and 99"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerApplicant(e)}
               onBlur={() => validateApplicantNumber()}
+              helperText="2-digit code that identifies the address of operated office or division"
+              defaultValue={0}
             />
           </Column>
         </Row>
@@ -243,18 +227,22 @@ const ApplicantInformation = () => {
             <Subtitle text="Enter the initial information about this seedlot" />
           </Column>
         </Row>
-        <Row className="seedlot-species-dropdown">
+        <Row className="seedlot-species-combobox">
           <Column sm={4} md={4} lg={10}>
-            <Dropdown
-              id="seedlot-species-dropdown"
+            <ComboBox
+              className="applicant-info-combobox"
+              id="applicant-info-combobox-species"
               ref={speciesInputRef}
+              items={vegCodeQuery.isSuccess ? vegCodeQuery.data : []}
+              selectedItem={responseBody.species}
+              shouldFilterItem={
+                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+              }
+              placeholder="Enter or choose an species for the seedlot"
               titleText="Seedlot species"
-              helperText="Type or search for the seedlot species using the drop-down list"
-              label="Enter or choose an species for the seedlot"
+              onChange={(e: ComboBoxEvent) => inputChangeHandlerSpecies(e)}
               invalid={invalidSpecies}
               invalidText="Please select a species"
-              items={geneticClasses}
-              onChange={(e: any) => inputChangeHandlerSpecies(e)}
             />
           </Column>
         </Row>

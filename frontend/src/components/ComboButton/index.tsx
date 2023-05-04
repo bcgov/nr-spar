@@ -16,15 +16,16 @@ interface ComboButtonOptions {
 
 interface ComboButtonProps {
   title: string,
-  items: ComboButtonOptions[]
+  items: ComboButtonOptions[],
+  menuOptionsClass?: string,
 }
 
-const ComboButton = ({ title, items }: ComboButtonProps) => (
+const ComboButton = ({ title, items, menuOptionsClass }: ComboButtonProps) => (
   <div className="combo-button-wrapper">
     <Button className="combo-button" size="md">
       {title}
     </Button>
-    <OverflowMenu className="combo-options" renderIcon={CaretDown} ariaLabel={`${title} button options`} flipped>
+    <OverflowMenu className="combo-options" menuOptionsClass={`${menuOptionsClass}`} renderIcon={CaretDown} aria-label={`${title} button options`} flipped>
       {items.map((item) => (
         <OverflowMenuItem key={item.text} itemText={item.text} onClick={item.onClickFunction} />
       ))}

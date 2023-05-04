@@ -109,7 +109,7 @@ objects:
               name: ${NAME}
               env:
                 - name: REACT_APP_SPAR_BUILD_VERSION
-                  value: ${REACT_APP_SPAR_BUILD_VERSION}
+                  value: ${BUILD}
                 - name: REACT_APP_SERVER_URL
                   value: ${REACT_APP_SERVER_URL}
                 - name: REACT_APP_NRSPARWEBAPP_VERSION

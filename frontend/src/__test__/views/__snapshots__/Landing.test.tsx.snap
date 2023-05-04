@@ -43,7 +43,6 @@ exports[`Landing component test should match the snapshot 1`] = `
       data-testid="landing-button__idir"
       disabled={false}
       onClick={[Function]}
-      tabIndex={0}
       type="button"
     >
       Login with IDIR
@@ -73,7 +72,6 @@ exports[`Landing component test should match the snapshot 1`] = `
       data-testid="landing-button__bceid"
       disabled={false}
       onClick={[Function]}
-      tabIndex={0}
       type="button"
     >
       Login with Business BCeID

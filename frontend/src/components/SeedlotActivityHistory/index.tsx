@@ -108,26 +108,26 @@ const SeedlotActivityHistory = () => (
     <Dropdown
       id="seedlot-activity-history-filter"
       label="Filter activity history steps"
-      ariaLabel="Filter activity history steps"
+      aria-label="Filter activity history steps"
       className="seedlot-activity-history-dropdown"
       initialSelectedItem={dropdownOptions[0]}
       items={dropdownOptions}
     />
     <ProgressIndicator vertical className="seedlot-activity-history-box">
       {ActivityHistoryMock.steps.map((step) => {
-          const status = statusClass(step.status);
-          return (
-            <ProgressStep
-              key={step.step.toString()}
-              complete={status.complete}
-              current={status.current}
-              invalid={status.invalid}
-              disabled={status.disabled}
-              label={step.description}
-              secondaryLabel={formatDate(step.date)}
-            />
-          );
-        })}
+        const status = statusClass(step.status);
+        return (
+          <ProgressStep
+            key={step.step.toString()}
+            complete={status.complete}
+            current={status.current}
+            invalid={status.invalid}
+            disabled={status.disabled}
+            label={step.description}
+            secondaryLabel={formatDate(step.date)}
+          />
+        );
+      })}
     </ProgressIndicator>
   </div>
 );

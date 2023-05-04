@@ -21,7 +21,15 @@
 .empty-section-container > p{
   font-family: 'BC Sans', 'IBM Plex Sans', sans-serif;
   font-style: normal;
+  padding-bottom: 0.5rem;
+}
+
+.empty-section-title {
   font-weight: 700;
   font-size: 1rem;
-  padding-bottom: 0.5rem;
+}
+
+.empty-section-subtitle {
+  font-size: 0.875rem;
+  font-weight: 400;
 }
