@@ -225,7 +225,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        component: [backend, database]
+        component: [backend, database, frontend, oracle-api]
     steps:
       - uses: shrink/actions-docker-registry-tag@v3
         with:
