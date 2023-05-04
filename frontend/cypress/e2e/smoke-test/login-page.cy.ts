@@ -1,5 +1,4 @@
 describe('Login page test', () => {
-  
   let loginPageData: {
     title: string,
     subtitle: string,
@@ -8,16 +7,16 @@ describe('Login page test', () => {
 
   beforeEach(() => {
     cy.visit('/');
+    cy.wait(2 * 1000);
 
     // Clear cookies and local storage
-    cy.clearCookies({ log: true })
-    cy.clearLocalStorage({ log: true })
+    cy.clearCookies({ log: true });
+    cy.clearLocalStorage({ log: true });
 
     // Loading test data
     cy.fixture('login-page').then((ttls) => {
       loginPageData = ttls;
     });
-
   });
 
   it('login page is displayed and loads correctly', () => {
@@ -37,27 +36,33 @@ describe('Login page test', () => {
   });
 
   it('try to access system using a link without user connected', () => {
-    cy.visit('/dashboard');
+    cy.visit('https://nr-spar-webapp-test-frontend.apps.silver.devops.gov.bc.ca/');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
   it.skip('log in with BCeID and validate if after timeout the user is disconnected', () => {
     cy.login();
-    cy.wait(180000); //wait for 3 minutes 180000
+    // wait for 6 minutes
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(6 * 60 * 1000);
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
+    cy.reload();
   });
 
   it('log in with BCeID and validate user role', () => {
     cy.login();
+    cy.wait(2 * 1000);
+    cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('IDIR: undefined');
   });
 
   it('log in with BCeID and validate user information', () => {
     cy.login();
+    cy.wait(2 * 1000);
+    cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('NRS Load Test-3');
     cy.get('.user-data').find('p').contains('nrpp_test@nrpp.compratech.com');
   });
-
 });

@@ -2,9 +2,14 @@ enum ActivitiesEnum {
   PARENT_TREE_ORCHARD = 'PARENT_TREE_ORCHARD',
   SEEDLOT_REGISTRATION = 'SEEDLOT_REGISTRATION',
   SEEDLING_REQUEST = 'SEEDLING_REQUEST'
-};
+}
 
-interface ActivityProps { icon: string, header: string; description: string; link: string };
+interface ActivityProps {
+  icon: string;
+  header: string;
+  description: string;
+  link: string;
+}
 
 const ACTIVITY_TYPE = {
   PARENT_TREE_ORCHARD: {
@@ -31,22 +36,28 @@ const ACTIVITY_TYPE = {
 
 const getActivityProps = (act: string): ActivityProps => {
   let actEnum = ActivitiesEnum.SEEDLING_REQUEST;
+  const defaultProp: ActivityProps = {
+    icon: 'Unknown',
+    header: act,
+    description: `Missing description for ${act}`,
+    link: '#'
+  };
 
-  switch (act){
-    case ActivitiesEnum.PARENT_TREE_ORCHARD:
+  switch (act) {
+    case 'PARENT_TREE_ORCHARD':
       actEnum = ActivitiesEnum.PARENT_TREE_ORCHARD;
-      break;
-    case ActivitiesEnum.SEEDLOT_REGISTRATION:
+      return ACTIVITY_TYPE[actEnum];
+    case 'SEEDLOT_REGISTRATION':
       actEnum = ActivitiesEnum.SEEDLOT_REGISTRATION;
-      break;
-    case ActivitiesEnum.SEEDLING_REQUEST:
+      return ACTIVITY_TYPE[actEnum];
+    case 'SEEDLING_REQUEST':
       actEnum = ActivitiesEnum.SEEDLING_REQUEST;
-      break;
+      return ACTIVITY_TYPE[actEnum];
     default:
+      // eslint-disable-next-line no-console
       console.warn(`Unexpected activity value, props for ${act} not found`);
-      break;
+      return defaultProp;
   }
-  return ACTIVITY_TYPE[actEnum];
 };
 
 export default getActivityProps;
