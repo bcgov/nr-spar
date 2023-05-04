@@ -1,0 +1,28 @@
+@use '@carbon/type';
+@use '../../../theme/variables.scss' as vars;
+
+.seedlot-registration-modal {
+  .#{vars.$bcgov-prefix}--modal-content {
+    p {
+      @include type.type-style('body-01');
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    }
+
+    p,
+    .#{vars.$bcgov-prefix}--checkbox-label {
+      margin-bottom: 1.5rem;
+    }
+
+    .#{vars.$bcgov-prefix}--toast-notification {
+      width: 100%;
+    }
+
+    .#{vars.$bcgov-prefix}--toast-notification__title {
+      font-weight: 700;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--btn {
+    padding-bottom: 1rem;
+  }
+}

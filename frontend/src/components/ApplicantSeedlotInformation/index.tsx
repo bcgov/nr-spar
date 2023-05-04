@@ -13,8 +13,9 @@ interface ApplicantSeedlotInformationProps {
   seedlotApplicantData: SeedlotRegistration;
 }
 
-
-const ApplicantSeedlotInformation = ({ seedlotApplicantData }: ApplicantSeedlotInformationProps) => (
+const ApplicantSeedlotInformation = (
+  { seedlotApplicantData }: ApplicantSeedlotInformationProps
+) => (
   <div className="applicant-seedlot-information">
     <div className="applicant-seedlot-information-title-section">
       <p className="applicant-seedlot-information-title">
@@ -22,7 +23,7 @@ const ApplicantSeedlotInformation = ({ seedlotApplicantData }: ApplicantSeedlotI
       </p>
       <Subtitle text="Check your seedlot initial information" />
     </div>
-    {seedlotApplicantData &&
+    {seedlotApplicantData && (
       <div>
         <div className="applicant-seedlot-info-section">
           <div className="applicant-seedlot-agency-name">
@@ -54,7 +55,7 @@ const ApplicantSeedlotInformation = ({ seedlotApplicantData }: ApplicantSeedlotI
               Seedlot species
             </p>
             <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.species}
+              {seedlotApplicantData.species.label}
             </p>
           </div>
           <div className="applicant-seedlot-class-a-source">
@@ -72,8 +73,8 @@ const ApplicantSeedlotInformation = ({ seedlotApplicantData }: ApplicantSeedlotI
               To be registered?
             </p>
             <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.registered ? ("Yes, to be registered with the Tree Seed Centre") :
-              ("No")}
+              {seedlotApplicantData.registered ? ('Yes, to be registered with the Tree Seed Centre')
+                : ('No')}
             </p>
           </div>
           <div className="applicant-seedlot-collected">
@@ -81,8 +82,8 @@ const ApplicantSeedlotInformation = ({ seedlotApplicantData }: ApplicantSeedlotI
               Collected from B.C. source?
             </p>
             <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.collectedBC ? ("Yes, collected from a location within B.C.") :
-              ("No")}
+              {seedlotApplicantData.collectedBC ? ('Yes, collected from a location within B.C.')
+                : ('No')}
             </p>
           </div>
         </div>
@@ -95,9 +96,8 @@ const ApplicantSeedlotInformation = ({ seedlotApplicantData }: ApplicantSeedlotI
           Edit applicant
         </Button>
       </div>
-    }
+    )}
   </div>
 );
-
 
 export default ApplicantSeedlotInformation;

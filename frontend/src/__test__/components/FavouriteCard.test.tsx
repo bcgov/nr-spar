@@ -1,45 +1,54 @@
-/* eslint-disable no-undef */
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import FavouriteCard from '../../components/Card/FavouriteCard';
 import '@testing-library/jest-dom/extend-expect';
-import { BrowserRouter } from 'react-router-dom';
+import '@testing-library/jest-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const testActivity = {
+  id: 0,
+  image: 'Unknown',
+  header: 'TestHeader',
+  description: 'TestDescription',
+  link: '#',
+  highlighted: false,
+  activity: 'SEEDLING_REQUEST'
+}
 
 describe('the favourite card component', () => {
   it('should render correctly with headers', async () => {
+    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
-        <FavouriteCard
-          header="Test"
-          description="For testing"
-          icon="SoilMoistureField"
-          link="#"
-          highlightFunction={() => null}
-          deleteFunction={() => null}
-        />
+        <QueryClientProvider client={qc}>
+          <FavouriteCard
+            activity={testActivity}
+            index={0}
+          />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 
-    const headers = await screen.findAllByText('Test');
+    const headers = await screen.findAllByText('TestHeader');
     expect(headers[0]).toHaveClass('fav-card-title-small');
     expect(headers[1]).toHaveClass('fav-card-title-large');
-    expect(screen.getByText('For testing')).toBeInTheDocument();
     const icon = container.getElementsByClassName('fav-card-icon');
     expect(icon[0]).toBeInTheDocument();
   });
 
   it('should render card highlighted with different style', () => {
+    const highlightedAct = { ...testActivity }
+    highlightedAct.highlighted = true;
+    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
-        <FavouriteCard
-          header="Test"
-          description="For testing"
-          icon="SoilMoistureField"
-          highlighted
-          link="#"
-          highlightFunction={() => null}
-          deleteFunction={() => null}
-        />
+        <QueryClientProvider client={qc}>
+          <FavouriteCard
+            activity={highlightedAct}
+            index={0}
+          />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 
@@ -48,16 +57,15 @@ describe('the favourite card component', () => {
   });
 
   it('should click in the button and open the options', () => {
+    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
-        <FavouriteCard
-          header="Test"
-          description="For testing"
-          icon="SoilMoistureField"
-          link="#"
-          highlightFunction={() => null}
-          deleteFunction={() => null}
-        />
+        <QueryClientProvider client={qc}>
+          <FavouriteCard
+            activity={testActivity}
+            index={0}
+          />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 
@@ -68,16 +76,15 @@ describe('the favourite card component', () => {
   });
 
   it('should close the dropdown menu when click outside', () => {
+    const qc = new QueryClient();
     const { container } = render(
       <BrowserRouter>
-        <FavouriteCard
-          header="Test"
-          description="For testing"
-          icon="SoilMoistureField"
-          link="#"
-          highlightFunction={() => null}
-          deleteFunction={() => null}
-        />
+        <QueryClientProvider client={qc}>
+          <FavouriteCard
+            activity={testActivity}
+            index={0}
+          />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 

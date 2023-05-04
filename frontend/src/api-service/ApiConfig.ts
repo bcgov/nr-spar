@@ -5,7 +5,10 @@ const serverHost = env.REACT_APP_SERVER_URL || mockServerConfig.namespace;
 
 const oracleServerHost = env.REACT_APP_ORACLE_SERVER_URL || mockServerConfig.namespace;
 
-const mockServerHost = mockServerConfig.namespace;
+const isProdEnv = env.REACT_APP_NRSPARWEBAPP_VERSION?.startsWith('prod');
+
+// The API host should never be mock server in PROD
+const mockServerHost = isProdEnv ? env.REACT_APP_SERVER_URL : mockServerConfig.namespace;
 
 const ApiConfig = {
   /**
