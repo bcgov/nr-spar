@@ -1,14 +1,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-metadata:
-  name: ${NAME}
-  annotations:
-    description: "NR SPAR Backend"
-    tags: "nr-spar-backend,backend"
-    iconClass: icon-java
 labels:
   app: ${NAME}-${ZONE}
-  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Module name
@@ -48,6 +41,10 @@ parameters:
     description: Current SPAR backend API build version
     required: true
     value: nightly
+  - name: ALLOWED_ORIGINS
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+  - name: KEYCLOAK_REALM_URL
+    value: https://dev.loginproxy.gov.bc.ca/auth/realms/standard
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -101,15 +98,9 @@ objects:
                 - name: NR_SPAR_BACKEND_VERSION
                   value: ${BUILD}
                 - name: ALLOWED_ORIGINS
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: allowed_origins
+                  value: ${ALLOWED_ORIGINS}
                 - name: KEYCLOAK_REALM_URL
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: keycloak-realm-url
+                  value: ${KEYCLOAK_REALM_URL}
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
@@ -127,16 +118,6 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
-                - name: FORESTCLIENTAPI_ADDRESS
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: forest-client-api.address
-                - name: FORESTCLIENTAPI_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: forest-client-api.key
               ports:
                 - containerPort: 8090
                   protocol: TCP
@@ -154,7 +135,7 @@ objects:
                   path: /actuator/health
                   port: 8090
                   scheme: HTTP
-                initialDelaySeconds: 150
+                initialDelaySeconds: 300
                 periodSeconds: 15
                 timeoutSeconds: 10
               livenessProbe:
@@ -164,7 +145,7 @@ objects:
                   path: /actuator/health
                   port: 8090
                   scheme: HTTP
-                initialDelaySeconds: 150
+                initialDelaySeconds: 300
                 periodSeconds: 30
                 timeoutSeconds: 10
   - apiVersion: v1
