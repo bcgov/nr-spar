@@ -1,15 +1,14 @@
-/* eslint-disable no-undef */
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import RecentActivities from '../../components/RecentActivities';
 import '@testing-library/jest-dom';
-import makeServer from '../../mock-api/server';
+import makeServer from '../../mock-server/server';
 
 // TODO test Empty Section
 describe('Recent Activities component', () => {
   beforeAll(() => {
-    makeServer('test');
+    makeServer('jest-test');
   });
 
   it('should render title and subtitle correctly', async () => {

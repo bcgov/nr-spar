@@ -6,7 +6,7 @@ import ACTIVITY_STATUS from '../../enums/ActivityStatus';
 const statusClass = (param: number) => {
   switch (param) {
     case 1:
-      // In progress
+      // Submited
       return 'cyan';
     case 2:
       // Approved
@@ -17,6 +17,9 @@ const statusClass = (param: number) => {
     case 4:
       // Incomplete
       return 'purple';
+    case 5:
+      // Expired
+      return 'magenta';
     default:
       // Pending
       return 'gray';

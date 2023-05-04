@@ -21,6 +21,8 @@ interface AuthContextData {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
+const REFRESH_TIMER = 2 * 60 * 1000;
+
 interface Props {
   children: React.ReactNode;
 }
@@ -51,6 +53,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
    */
   async function logout() {
     try {
+      localStorage.clear();
       await KeycloakService.logout();
       setUser({});
       setSigned(false);
@@ -59,6 +62,18 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       console.error('Keycloak logout error:', e);
     }
   }
+
+  /**
+   * Refresh the token
+   */
+  setInterval(() => {
+    KeycloakService.updateToken(30)
+      .catch(async (err) => {
+        // eslint-disable-next-line no-console
+        console.error('Keycloack service update error: ', err);
+        await logout();
+      });
+  }, REFRESH_TIMER);
 
   const { createLoginUrl, login } = KeycloakService;
   const provider = KeycloakService.authMethod();
@@ -78,7 +93,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
 
   return (
     <AuthContext.Provider value={contextValue}>
-      { children }
+      {children}
     </AuthContext.Provider>
   );
 };
