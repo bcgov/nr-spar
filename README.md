@@ -3,14 +3,11 @@
 ![Branches](.github/badges/branches.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-spar-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-spar-backend)
 
-# Natural Resources SPAR Back-End API
+# Natural Resources SPAR
 
-This repository holds a set of policies, standards, guides, and pipelines to
-get started with a back-end API. Before writing your first line of code, please
+This repository holds all SPAR directly related front-end client and back-end APIs codebase, and also
+a set of policies, standards, guides, and pipelines. Before pushing your first commit, please
 take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
-
-Note: This repository was generated from [greenfield-template](https://github.com/bcgov/greenfield-template)
-and in case you're interested in the original README file, we still have it [here](README_template.md).
 
 ## Our Policy
 
@@ -29,62 +26,79 @@ and [our Rocket Chat](https://chat.developer.gov.bc.ca/) channel.
 # Stack
 
 Here you can find a comprehensive list of all languages and tools that are been used
-in this service. And also everything you need to get started, build locally, test
-and deploy it. 
+for all and every service. And also everything you need to get started, building locally,
+testing and deploying. 
+
+**SPAR Client**
+
+- React PWA
+  - TypeScript
+  - Context API
+  - React Query
+  - MirageJS
+
+You can lear more about this service [looking its README](frontend/README.md)
+
+**SPAR Back-end REST API - Postgres**
 
 - Java ecosystem
   - Maven
   - Open JDK 17
   - Spring Web MVC Framework
   - JPA and Hibernate Framework
-- Testing
-  - JUnit 5
-  - Mockito and Mock MVC
-  - Automated tests with Postman and Newman
-- Database
-  - PostgreSQL
-  - Versioning with [Flyway](https://flywaydb.org/)
-- DevOps
-  - Docker
-  - Docker Composer
-  - Sonar Cloud
-  - Deploy to OpenShift with GitHub Actions
-- Tools (Recommendations)
-  - IntelliJ IDEA
-  - Postman
-  - DBeaver
+
+You can lear more about this service [looking its README](backend/README.md)
+
+**SPAR Back-end REST API - Oracle THE**
+
+- Java ecosystem
+  - Maven
+  - Open JDK 17
+  - Spring Web MVC Framework
+  - JPA and Hibernate Framework
+
+You can lear more about this service [looking its README](oracle-api/README.md)
 
 # Getting started
 
 Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
-from the project root directory. You **must** provide three environment variables for database
-access configuration:
-
-Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
-the `status` property should have the value *UP*.
-
-Before writing your first line of code, and learn more about the checks, including
-tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
+from the project root directory, if it's one of the Java services. You **must** provide some environment
+variables for database access configuration, depending on what service you're trying to run. Please
+see each service README to learn more details.
 
 ## Quick look
 
-But if all you want is to take a quick look at the running service, you can do it by using Docker Compose.
+But if all you want is to take a quick look at the running services and client, you can do it by using
+Docker Compose.
 
 Run with:
-```
+```sh
 docker-compose up --build
 ```
 
 You can clean and remove the containers with
-```
+```sh
 docker-compose down --remove-orphans
 ```
 
-But if not, You can build the Docker images:
-```
-cd backend && docker build -t bcgov/nr-spar-backend-backend:snapshot . && cd ..
-cd database && docker build -t bcgov/nr-spar-backend-database:snapshot . && cd ..
-```
+⚠️ You may want to try one or more available back-end APIs. To do so, you can rely on Swagger UI, provided
+on both back-end services. Once the service is running, head to http://localhost:8090/swagger-ui/index.html.
+Also note that you'll need to unlock swagger, otherwhise you'll only see 401 responses. Follow the steps bellow
+to get a JWT token to your user.
+
+⚠️ Be awere the port may change due to docker parameters.
+
+**Getting a JWT token for SPAR services**
+
+- Head to [BC Gov Keycloak OIDC Playground page](https://bcgov.github.io/keycloak-example-apps/)
+- Expand the first dropdown *Keycloak OIDC Config* option
+- Update *Auth server* with: **https://test.loginproxy.gov.bc.ca/auth**
+- Keep *Realm* as is, **standard**
+- Update *Client id* with: **seed-planning-test-4296**
+- Hit **Upate**
+- Click the **Login** button
+- Hit **ID Token Raw** token
+- Optional: You can check your user's JWT token properties by checking the **Token Parsed** tab
 
 ## Getting help
 
