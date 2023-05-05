@@ -41,7 +41,10 @@ parameters:
     value: "1543"
   - name: SERVICE_NAME
     description: The database's name
-    value: fortmp1.nrs.bcgov
+    value: dbq01.nrs.bcgov
+  - name: DATABASE_USER
+    description: User for the database connection
+    value: proxy_fsa_spar_read_only_user
   - name: KEYCLOAK_REALM_URL
     description: Keycloak realm address
     value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
