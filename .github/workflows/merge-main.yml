@@ -79,7 +79,7 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2 -p BUILD=test
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=test
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -196,6 +196,7 @@ jobs:
               -p REACT_APP_KC_REALM=standard
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
               -p REACT_APP_ENABLE_MOCK_SERVER=true
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
