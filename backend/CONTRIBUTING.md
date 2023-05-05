@@ -27,7 +27,7 @@ Make sure you have Git installed on your machine. You can follow
 
 We containerize our application with Docker images. 
 
-Note: things are way 
+Note: things are way
 easier if you don't need to run docker commands with sudo. Take a look
 [here](https://docs.docker.com/engine/install/#server) to learn how to
 install. Note that Docker Desktop shouldn't be used for this project,
@@ -75,7 +75,14 @@ root directory.
 In case you want to debug with remote JVM, you can do it with this command:
 `./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"`
 
-Note: TODO add here about database and running HOW-TOs.
+Note: You need a running Postgres service to have a fully working environment. You
+can do that with Docker or Docker Compose. Follow these steps
+
+With Docker Compose:
+
+```shell
+docker-compose up --build
+```
 
 ## Run tests
 
@@ -83,9 +90,12 @@ For unit tests, please use this command: `./mvnw test --file pom.xml`
 
 And for integration tests, this one: `./mvnw verify -P integration-test --file pom.xml`
 
-Tests coverage reports can be seen on your commits and pull requests. But in case you 
-want to check locally, use this command to run all tests `./mvnw --no-transfer-progress clean verify -P all-tests --file pom.xml`,
+Tests coverage reports can be seen on your commits and pull requests. But in case you want to check locally, use this command to run all tests `./mvnw --no-transfer-progress clean verify -P all-tests --file pom.xml`,
 and check out the files inside `target/coverage-reports/`
+
+Enter the running Docker container: `docker exec -ti backend sh`
+
+The backend folder is mounted to `/usr/share/service/backend`
 
 ## Submit pull requests
 
@@ -93,6 +103,15 @@ We use git flow, so all code changes happen through Pull Requests. There's a
 Pull Request template that you can fill. The more complete the better. If you
 have images, screen capture or diagrams, that helps a lot. Don't forget to add
 reviewers, assign to yourself and add a label.
+
+## Database versioning
+
+Any permanent alteration to the database schema (creation or alteration of tables,
+columns, etc.) should be done through Flyway. [Here's a brief explanation on how
+versioning with Flyway works](https://flywaydb.org/documentation/getstarted/how).
+
+Each migration should have its own file, which must follow [this naming
+pattern](https://flywaydb.org/documentation/concepts/migrations#naming).
 
 ## Follow our best practices
 
