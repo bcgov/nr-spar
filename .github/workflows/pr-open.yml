@@ -107,10 +107,7 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             verification_path: "check"
-            parameters:
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
-              -p DATABASE_USER='${{ steps.import-secrets.outputs.VAULT_DB_USER }}'
-              -p DATABASE_PASSWORD='${{ steps.import-secrets.outputs.VAULT_DB_PASS }}'
+            parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
     steps:
       - name: Broker token
         id: broker
@@ -143,6 +140,8 @@ jobs:
           parameters:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
+            -p DATABASE_USER='${{ steps.import-secrets.outputs.VAULT_DB_USER }}'
+            -p DATABASE_PASSWORD='${{ steps.import-secrets.outputs.VAULT_DB_PASS }}'
             ${{ matrix.parameters }}
 
   # tests-api:

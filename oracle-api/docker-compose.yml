@@ -5,7 +5,6 @@ services:
     build:
       context: .
     container_name: oracle-api
-    dns: "142.22.202.100"
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       DATABASE_HOST: "nrcdb03.bcgov"
