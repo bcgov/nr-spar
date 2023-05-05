@@ -42,7 +42,11 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
           overwrite: false
-          parameters: -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+          parameters:
+            -p ZONE=${{ github.event.number }}
+            -p NAME=${{ github.event.repository.name }}
+            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
+            -p ORACLE_DB_PASSWORD=${{ secrets.DB_PASSWORD }}
 
   builds:
     name: Builds
@@ -109,25 +113,6 @@ jobs:
             verification_path: "check"
             parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
     steps:
-      - name: Broker token
-        id: broker
-        uses: bcgov-nr/action-vault-broker-approle@v0.0.5
-        with:
-          broker_jwt: ${{ secrets.BROKER_JWT }}
-          provision_role_id: ${{ secrets.PROVISION_ROLE_ID }}
-          project_name: spar
-          app_name: app-spar
-          environment: development
-      - name: Import Vault Secrets
-        id: import-secrets
-        uses: hashicorp/vault-action@v2
-        with:
-          url: https://vault-iit.apps.silver.devops.gov.bc.ca
-          token: ${{ steps.broker.outputs.vault_token }}
-          exportEnv: 'false'
-          secrets: |
-            apps/data/dev/spar/app-spar/db_proxy_read_only db_username | VAULT_DB_USER;
-            apps/data/dev/spar/app-spar/db_proxy_read_only db_password | VAULT_DB_PASS;
       - uses: bcgov-nr/action-deployer-openshift@v1.0.3
         with:
           file: ${{ matrix.file }}
@@ -140,8 +125,6 @@ jobs:
           parameters:
             -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
-            -p DATABASE_USER='${{ steps.import-secrets.outputs.VAULT_DB_USER }}'
-            -p DATABASE_PASSWORD='${{ steps.import-secrets.outputs.VAULT_DB_PASS }}'
             ${{ matrix.parameters }}
 
   # tests-api:

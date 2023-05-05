@@ -16,10 +16,12 @@ parameters:
     description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
     generate: expression
+  - name: ORACLE_DB_USER
+    description: Oracle database username for API
+    required: true
   - name: ORACLE_DB_PASSWORD
     description: Oracle database password for API
-    from: "[a-zA-Z0-9]{16}"
-    generate: expression
+    required: true
 objects:
   - apiVersion: v1
     kind: Secret
@@ -31,6 +33,8 @@ objects:
       database-name: ${NAME}
       database-password: ${DB_PASSWORD}
       database-user: ${NAME}
+      oracle-user: ${ORACLE_DB_USER}
+      oracle-password: ${ORACLE_DB_PASSWORD}
   - apiVersion: v1
     kind: Secret
     metadata:
