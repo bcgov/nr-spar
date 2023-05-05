@@ -99,3 +99,6 @@ snyk.sarif
 
 # Environment variables file
 *.env
+
+# VS Code
+.vscode
