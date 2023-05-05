@@ -49,8 +49,6 @@ jobs:
 
   init-test:
     name: TEST Init
-    needs: 
-      - codeql
     environment: test
     runs-on: ubuntu-22.04
     steps:
@@ -67,6 +65,7 @@ jobs:
   deploy-test:
     name: TEST Deployment
     needs:
+      - codeql
       - init-test
     environment: test
     runs-on: ubuntu-22.04
