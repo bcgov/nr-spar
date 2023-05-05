@@ -23,6 +23,11 @@
     "jsx": "react-jsx",
     "outDir": "./build/"
   },
-  "include": ["src/**/*"],
-  "exclude": ["**/*.test.*", "**/__tests__/*"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "**/*.test.*",
+    "**/__tests__/*"
+  ]
 }

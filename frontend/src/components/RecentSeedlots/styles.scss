@@ -1,0 +1,52 @@
+@use '../../theme/variables.scss' as vars;
+@use '@carbon/type';
+
+p.recent-seedlots-subtitle {
+  padding-bottom: 1rem;
+}
+
+.recent-seedlots {
+  background-color: var(--bcgov-layer-02) !important;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--bcgov-border-subtle-02);
+  border-radius: 4px;
+}
+
+.seedlot-table {
+  padding: 0 !important;
+}
+
+.recent-seedlots-title {
+  padding-top: 1rem;
+}
+
+.recent-seedlots-title > h2 {
+  @include type.type-style('heading-03');
+  margin-bottom: 0.5rem;
+}
+
+.recent-seedlots-table {
+  padding: 0 !important;
+}
+
+.empty-recent-seedlots {
+  margin: 3.44rem 0;
+}
+
+@media only screen and (max-width: 1584px) {
+  .recent-seedlots-title {
+    padding-left: 3rem;
+  }
+}
+
+@media only screen and (max-width: 672px) {
+  .recent-seedlots-title {
+    padding-left: 2rem;
+  }
+
+  .recent-seedlots {
+    overflow-x: scroll;
+  }
+}

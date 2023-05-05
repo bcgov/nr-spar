@@ -4,9 +4,9 @@ FROM node:16.19.1-alpine3.17 AS build
 # Copy and build
 WORKDIR /app
 COPY . .
-RUN yarn install --cwd frontend --frozen-lockfile --prefer-offline && \
-    yarn --cwd frontend build:production && \
-    rm -rf node_modules
+RUN yarn install --frozen-lockfile --prefer-offline
+RUN yarn build:production
+RUN rm -rf node_modules
 
 
 # Deploy

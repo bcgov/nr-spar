@@ -36,10 +36,10 @@ Cypress.Commands.add('login', () => {
   cy.getByDataTest('landing-button__bceid').click();
   cy.get('#bceidLogo').should('be.visible');
   cy.get('input[name=user]')
-        .clear()
-        .type(USERNAME, { delay: 50 });
+    .clear()
+    .type(USERNAME, { delay: 50 });
   cy.get('input[name=password]')
-        .clear()
-        .type(PASSWORD, { delay: 50 });
+    .clear()
+    .type(PASSWORD, { delay: 50 });
   cy.get('input[name=btnSubmit]').click();
 });

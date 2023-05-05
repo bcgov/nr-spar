@@ -15,8 +15,6 @@ import StatusItem from '../StatusItem';
 
 import Seedlot from '../../types/Seedlot';
 
-import formatDate from '../../utils/DateUtils';
-
 import './styles.css';
 
 interface TableProps {
@@ -25,7 +23,7 @@ interface TableProps {
 }
 
 const SeedlotTable = ({ elements, headers }: TableProps) => (
-  <Table size="lg" useZebraStyles={false} className="seedlot-table">
+  <Table size="lg" useZebraStyles={false} className="seedlots-table">
     <TableHead>
       <TableRow>
         {headers.map((header, idx) => (
@@ -44,7 +42,7 @@ const SeedlotTable = ({ elements, headers }: TableProps) => (
         <TableRow key={hashObject(item)} id={`row${idx}`}>
           <TableCell>{item.number}</TableCell>
           <TableCell>{`${item.class} class`}</TableCell>
-          <TableCell>{item.lot_species}</TableCell>
+          <TableCell>{item.lot_species.label}</TableCell>
           <TableCell>{item.form_step}</TableCell>
           <TableCell>
             <StatusItem status={item.status} />
@@ -52,9 +50,9 @@ const SeedlotTable = ({ elements, headers }: TableProps) => (
           <TableCell>
             <Participants elements={item.participants} number={item.number} />
           </TableCell>
-          <TableCell>{formatDate(item.created_at)}</TableCell>
-          <TableCell>{formatDate(item.last_modified)}</TableCell>
-          <TableCell>{formatDate(item.approved_at)}</TableCell>
+          <TableCell>{item.created_at}</TableCell>
+          <TableCell>{item.last_modified}</TableCell>
+          <TableCell>{item.approved_at}</TableCell>
         </TableRow>
       ))}
     </TableBody>

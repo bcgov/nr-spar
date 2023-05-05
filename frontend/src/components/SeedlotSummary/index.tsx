@@ -42,7 +42,7 @@ const SeedlotSummary = ({ seedlotData }: SeedlotSummaryProps) => (
           Seedlot species
         </p>
         <p className="seedlot-summary-info-value">
-         {seedlotData.lot_species}
+          {seedlotData.lot_species.label}
         </p>
       </div>
       <div className="seedlot-summary-seedlot-form">
@@ -66,7 +66,10 @@ const SeedlotSummary = ({ seedlotData }: SeedlotSummaryProps) => (
           Participants
         </p>
         <div className="seedlot-summary-info-value">
-          <Participants elements={seedlotData.participants} number={seedlotData.participants.length} />
+          <Participants
+            elements={seedlotData.participants}
+            number={seedlotData.participants.length}
+          />
         </div>
       </div>
       <div className="seedlot-summary-seedlot-created">
@@ -90,7 +93,7 @@ const SeedlotSummary = ({ seedlotData }: SeedlotSummaryProps) => (
           Approved at
         </p>
         <p className="seedlot-summary-info-value">
-         {seedlotData.approved_at}
+          {seedlotData.approved_at}
         </p>
       </div>
     </div>

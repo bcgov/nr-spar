@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
 import {
   FlexGrid,
   Row,
@@ -18,11 +17,8 @@ import {
 import Seedlot from '../../../types/Seedlot';
 import SeedlotRegistration from '../../../types/SeedlotRegistration';
 
-import { useAuth } from '../../../contexts/AuthContext';
-
-import getUrl from '../../../utils/ApiUtils';
-import ApiAddresses from '../../../utils/ApiAddresses';
-
+import api from '../../../api-service/api';
+import ApiConfig from '../../../api-service/ApiConfig';
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
 import SeedlotSummary from '../../../components/SeedlotSummary';
@@ -35,7 +31,7 @@ import './styles.scss';
 
 const manageOptions = [
   {
-    text: 'Share seedlot',
+    text: 'Edit seedlot applicant',
     onClickFunction: () => null
   },
   {
@@ -49,31 +45,18 @@ const manageOptions = [
   {
     text: 'Delete seedlot',
     onClickFunction: () => null
-  },
+  }
 ];
 
 const SeedlotDetails = () => {
-  const { token } = useAuth();
   const { seedlot } = useParams();
   const [seedlotData, setSeedlotData] = useState<Seedlot>();
   const [seedlotApplicantData, setSeedlotApplicantData] = useState<SeedlotRegistration>();
 
-  const getAxiosConfig = () => {
-    const axiosConfig = {};
-    if (token) {
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      };
-      Object.assign(axiosConfig, headers);
-    }
-    return axiosConfig;
-  };
-
   const getSeedlotData = () => {
     if (seedlot) {
-      axios.get(getUrl(ApiAddresses.SeedlotRetrieveOne).replace(':seedlotnumber', seedlot), getAxiosConfig())
+      const url = `${ApiConfig.seedlot}/${seedlot}`;
+      api.get(url)
         .then((response) => {
           if (response.data.seedlot && response.data.seedlotApplicantInfo) {
             setSeedlotData(response.data.seedlot);
@@ -87,35 +70,37 @@ const SeedlotDetails = () => {
     }
   };
 
-  getSeedlotData();
+  useEffect(() => getSeedlotData(), []);
 
   const navigate = useNavigate();
   return (
     <FlexGrid className="seedlot-details-page">
       <Row className="seedlot-details-breadcrumb">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate('/seedlot')} >Seedlots</BreadcrumbItem>
-          <BreadcrumbItem>Existing seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
+          <BreadcrumbItem>My seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Stack gap={6}>
         <Row className="seedlot-summary-title">
           {
-            seedlotData &&
-            <PageTitle
-              title={`Seedlot ${seedlotData.number}`}
-              subtitle="Check and manage this seedlot"
-              favourite
-            />
+            seedlotData
+            && (
+              <PageTitle
+                title={`Seedlot ${seedlotData.number}`}
+                subtitle="Check and manage this seedlot"
+                enableFavourite
+              />
+            )
           }
-          <ComboButton title="Manage Seedlot" items={manageOptions} />
+          <ComboButton title="Edit seedlot form" items={manageOptions} menuOptionsClass="edit-seedlot-form" />
         </Row>
         <section title="Seedlot Summary">
           <Row className="seedlot-summary-content">
             <Column sm={4}>
               {
-                seedlotData &&
-                <SeedlotSummary seedlotData={seedlotData} />
+                seedlotData
+                && <SeedlotSummary seedlotData={seedlotData} />
               }
             </Column>
           </Row>
@@ -131,10 +116,13 @@ const SeedlotDetails = () => {
                 <TabPanels>
                   <TabPanel>
                     {
-                      seedlotApplicantData &&
-                      <ApplicantSeedlotInformation seedlotApplicantData={seedlotApplicantData}/>
+                      seedlotApplicantData
+                      && <ApplicantSeedlotInformation seedlotApplicantData={seedlotApplicantData} />
                     }
-                    <FormProgress />
+                    {
+                      seedlotData
+                      && <FormProgress seedlotNumber={seedlotData.number} />
+                    }
                     <FormReview />
                   </TabPanel>
                   <TabPanel>

@@ -1,9 +1,10 @@
 const ACTIVITY_STATUS = {
   PENDING: 'Pending',
-  IN_PROGRESS: 'In progress',
+  SUBMITED: 'Submited',
   APPROVED: 'Approved',
   CANCELED: 'Canceled',
-  INCOMPLETE: 'Incomplete'
+  INCOMPLETE: 'Incomplete',
+  EXPIRED: 'Expired'
 };
 
 export default ACTIVITY_STATUS;
