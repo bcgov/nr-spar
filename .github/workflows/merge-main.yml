@@ -60,8 +60,11 @@ jobs:
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
-          overwrite: false
-          parameters: -p ZONE=test -p NAME=${{ github.event.repository.name }}      
+          overwrite: true
+          parameters:
+            -p ZONE=test -p NAME=${{ github.event.repository.name }}      
+            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
+            -p ORACLE_DB_PASSWORD=${{ secrets.DB_PASSWORD }}
 
   deploy-test:
     name: TEST Deployment
