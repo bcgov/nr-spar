@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.4</version>
+		<version>3.0.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ca.bc.gov</groupId>
-	<artifactId>nr-spar_oracle-api</artifactId>
-	<version>0.10.5</version>
-	<name>nr-spar_oracle-api</name>
+	<artifactId>nr-spar-oracle-api</artifactId>
+	<version>0.12.2</version>
+	<name>nr-spar-oracle-api</name>
 	<description>API to fetch data from THE to SPAR</description>
 
 	<licenses>
@@ -96,8 +96,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
-
-		<!-- DevOps -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
@@ -154,7 +152,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>integration-tests</id>
@@ -177,7 +175,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.0.0</version>
 				<configuration>
 					<argLine>@{argLine} -Xmx1024m</argLine>
 					<skipTests>${skip.unit.tests}</skipTests>
@@ -376,7 +374,7 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<finalName>nr-spar_oracle-api</finalName>
+		<finalName>nr-spar-oracle-api</finalName>
 	</build>
 
 </project>

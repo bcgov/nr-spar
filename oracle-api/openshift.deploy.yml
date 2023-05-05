@@ -41,10 +41,7 @@ parameters:
     value: "1543"
   - name: SERVICE_NAME
     description: The database's name
-    value: dbq01.nrs.bcgov
-  - name: DATABASE_USER
-    description: User for the database connection
-    value: proxy_fsa_spar_read_only_user
+    value: fortmp1.nrs.bcgov
   - name: KEYCLOAK_REALM_URL
     description: Keycloak realm address
     value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
@@ -109,12 +106,15 @@ objects:
                 - name: SERVICE_NAME
                   value: ${SERVICE_NAME}
                 - name: DATABASE_USER
-                  value: ${DATABASE_USER}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-user
                 - name: DATABASE_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-oracle-api
-                      key: oracle-db-password
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-password
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
               ports:
