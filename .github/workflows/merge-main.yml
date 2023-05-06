@@ -64,7 +64,7 @@ jobs:
           parameters:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}      
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
 
   deploy-test:
     name: TEST Deployment
