@@ -101,7 +101,9 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             verification_path: "check"
-            parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
+            parameters:
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
+              -p SERVICE_NAME=dbq01.nrs.bcgov
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.3
         with:
@@ -205,8 +207,10 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             verification_path: "check"
-            parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
-    steps:
+            parameters:
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
+              -p SERVICE_NAME=dbq01.nrs.bcgov
+            steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.3
         with:
           file: ${{ matrix.file }}
