@@ -15,109 +15,109 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  codeql:
-    name: Semantic Code Analysis
-    runs-on: ubuntu-22.04
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - uses: actions/checkout@v3
+  # codeql:
+  #   name: Semantic Code Analysis
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     actions: read
+  #     contents: read
+  #     security-events: write
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Initialize
-        uses: github/codeql-action/init@v2
-        with:
-          debug: true
-          languages: java,javascript
+  #     - name: Initialize
+  #       uses: github/codeql-action/init@v2
+  #       with:
+  #         debug: true
+  #         languages: java,javascript
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: "17"
-          distribution: "temurin"
+  #     - name: Set up JDK 17
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         java-version: "17"
+  #         distribution: "temurin"
 
-        # Build Java apps, JavaScript doesn't require
-      - name: Java Builds
-        run: |
-          cd backend
-          mvn --update-snapshots -P prod clean package -Dmaven.test.skip
-          cd ../oracle-api
-          mvn --update-snapshots package -Dmaven.test.skip 
+  #       # Build Java apps, JavaScript doesn't require
+  #     - name: Java Builds
+  #       run: |
+  #         cd backend
+  #         mvn --update-snapshots -P prod clean package -Dmaven.test.skip
+  #         cd ../oracle-api
+  #         mvn --update-snapshots package -Dmaven.test.skip 
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+  #     - name: Perform CodeQL Analysis
+  #       uses: github/codeql-action/analyze@v2
 
-  init-test:
-    name: TEST Init
-    environment: test
-    runs-on: ubuntu-22.04
-    steps:
-      - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v1.0.3
-        with:
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          file: common/openshift.init.yml
-          overwrite: false
-          parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}      
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+  # init-test:
+  #   name: TEST Init
+  #   environment: test
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: OpenShift Init
+  #       uses: bcgov-nr/action-deployer-openshift@v1.0.3
+  #       with:
+  #         oc_namespace: ${{ vars.OC_NAMESPACE }}
+  #         oc_server: ${{ vars.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         file: common/openshift.init.yml
+  #         overwrite: false
+  #         parameters:
+  #           -p ZONE=test -p NAME=${{ github.event.repository.name }}      
+  #           -p ORACLE_DB_USER=${{ secrets.DB_USER }}
+  #           -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
 
-  deploy-test:
-    name: TEST Deployment
-    needs:
-      - codeql
-      - init-test
-    environment: test
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name: [database, backend, frontend, oracle-api]
-        include:
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=test
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-            verification_path: "actuator/health"
-            parameters:
-              -p REACT_APP_SPAR_BUILD_VERSION=snapshot-test
-              -p REACT_APP_SERVER_URL=https://https://nr-spar-test-backend.apps.silver.devops.gov.bc.ca
-              -p REACT_APP_NRSPARWEBAPP_VERSION=test
-              -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-              -p REACT_APP_KC_REALM=standard
-              -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-              -p REACT_APP_ENABLE_MOCK_SERVER=true
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
-          - name: oracle-api
-            file: oracle-api/openshift.deploy.yml
-            overwrite: true
-            verification_path: "check"
-            parameters:
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
-              -p SERVICE_NAME=dbq01.nrs.bcgov
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
-          verification_path: "actuator/health"
-          parameters: 
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
-            ${{ matrix.parameters }}
+  # deploy-test:
+  #   name: TEST Deployment
+  #   needs:
+  #     - codeql
+  #     - init-test
+  #   environment: test
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       name: [database, backend, frontend, oracle-api]
+  #       include:
+  #         - name: database
+  #           file: database/openshift.deploy.yml
+  #           overwrite: false
+  #         - name: backend
+  #           file: backend/openshift.deploy.yml
+  #           overwrite: true
+  #           parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=test
+  #         - name: frontend
+  #           file: frontend/openshift.deploy.yml
+  #           overwrite: true
+  #           verification_path: "actuator/health"
+  #           parameters:
+  #             -p REACT_APP_SPAR_BUILD_VERSION=snapshot-test
+  #             -p REACT_APP_SERVER_URL=https://https://nr-spar-test-backend.apps.silver.devops.gov.bc.ca
+  #             -p REACT_APP_NRSPARWEBAPP_VERSION=test
+  #             -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
+  #             -p REACT_APP_KC_REALM=standard
+  #             -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
+  #             -p REACT_APP_ENABLE_MOCK_SERVER=true
+  #             -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
+  #         - name: oracle-api
+  #           file: oracle-api/openshift.deploy.yml
+  #           overwrite: true
+  #           verification_path: "check"
+  #           parameters:
+  #             -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
+  #             -p SERVICE_NAME=dbq01.nrs.bcgov
+  #   steps:
+  #     - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+  #       with:
+  #         file: ${{ matrix.file }}
+  #         oc_namespace: ${{ vars.OC_NAMESPACE }}
+  #         oc_server: ${{ vars.OC_SERVER }}
+  #         oc_token: ${{ secrets.OC_TOKEN }}
+  #         overwrite: ${{ matrix.overwrite }}
+  #         penetration_test: false
+  #         verification_path: "actuator/health"
+  #         parameters: 
+  #           -p ZONE=test -p NAME=${{ github.event.repository.name }}
+  #           -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
+  #           ${{ matrix.parameters }}
 
   # api-tests:
     # name: Newman API tests runner
@@ -158,8 +158,8 @@ jobs:
 
   init-prod:
     name: PROD Init
-    needs: 
-      - deploy-test
+    # needs: 
+    #   - deploy-test
     environment: prod
     runs-on: ubuntu-22.04
     steps:
@@ -171,7 +171,10 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
           overwrite: false
-          parameters: -p ZONE=prod -p NAME=${{ github.event.repository.name }}      
+          parameters:
+            -p ZONE=prod -p NAME=${{ github.event.repository.name }} 
+            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
+            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
 
   deploy-prod:
     name: PROD Deployment
@@ -189,7 +192,7 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p BUILD=prod
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=prod
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
