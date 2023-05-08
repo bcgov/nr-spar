@@ -30,8 +30,6 @@ parameters:
     value: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-test.api.gov.bc.ca/api"
-  - name: FORESTCLIENT_API_KEY
-    required: true
   - name: CPU_REQUEST
     value: "75m"
   - name: MEMORY_REQUEST
@@ -114,6 +112,11 @@ objects:
                   value: ${KEYCLOAK_REALM_URL}
                 - name: FORESTCLIENTAPI_ADDRESS
                   value: ${FORESTCLIENTAPI_ADDRESS}
+                - name: FORESTCLIENTAPI_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-backend
+                      key: forest-client-api-key
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
@@ -131,8 +134,6 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
-                - name: FORESTCLIENTAPI_KEY
-                  value: ${FORESTCLIENT_API_KEY}
               ports:
                 - containerPort: 8090
                   protocol: TCP
