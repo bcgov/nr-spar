@@ -112,6 +112,8 @@ objects:
                       key: allowed_origins
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
+                - name: FORESTCLIENTAPI_ADDRESS
+                  value: https://${NAME}-${ZONE}.${DOMAIN}/api
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
@@ -129,13 +131,11 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
-                - name: FORESTCLIENTAPI_ADDRESS
-                  value: https://${NAME}-${ZONE}.${DOMAIN}/api
                 - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-backend
-                      key: forest-client-api.key
+                      name: ${NAME}-${ZONE}-oracle-api
+                      key: oracle-password
               ports:
                 - containerPort: 8090
                   protocol: TCP
