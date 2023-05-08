@@ -89,12 +89,12 @@ jobs:
             verification_path: "actuator/health"
             parameters:
               -p REACT_APP_SPAR_BUILD_VERSION=snapshot-test
-              -p REACT_APP_SERVER_URL=https://https://nr-spar-test-backend.apps.silver.devops.gov.bc.ca
+              -p REACT_APP_SERVER_URL=https://nr-spar-test-backend.apps.silver.devops.gov.bc.ca
+              -p REACT_APP_ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
               -p REACT_APP_NRSPARWEBAPP_VERSION=test
               -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
               -p REACT_APP_KC_REALM=standard
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-              -p REACT_APP_ENABLE_MOCK_SERVER=true
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
@@ -198,12 +198,12 @@ jobs:
             verification_path: "actuator/health"
             parameters:
               -p REACT_APP_SPAR_BUILD_VERSION=snapshot-prod
-              -p REACT_APP_SERVER_URL=https://https://nr-spar-prod-backend.apps.silver.devops.gov.bc.ca
+              -p REACT_APP_SERVER_URL=https://nr-spar-prod-backend.apps.silver.devops.gov.bc.ca
+              -p REACT_APP_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
               -p REACT_APP_NRSPARWEBAPP_VERSION=prod
               -p REACT_APP_KC_URL=https://loginproxy.gov.bc.ca/auth
               -p REACT_APP_KC_REALM=standard
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-              -p REACT_APP_ENABLE_MOCK_SERVER=true
               -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
