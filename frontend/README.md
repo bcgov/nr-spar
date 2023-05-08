@@ -60,7 +60,6 @@ REACT_APP_ORACLE_SERVER_URL=https://localhost:8092/
 REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
 REACT_APP_KC_REALM=standard
 REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-REACT_APP_ENABLE_MOCK_SERVER=true
 CYPRESS_USERNAME=LOAD-3-TEST
 CYPRESS_PASSWORD=[password-here]
 ```
