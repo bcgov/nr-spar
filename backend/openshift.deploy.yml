@@ -131,10 +131,7 @@ objects:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
                 - name: FORESTCLIENTAPI_ADDRESS
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-backend
-                      key: forest-client-api.address
+                  value: https://${NAME}-${ZONE}.${DOMAIN}/api
                 - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
