@@ -103,12 +103,12 @@ objects:
                 - name: ALLOWED_ORIGINS
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}
+                      name: ${NAME}-backend
                       key: allowed_origins
                 - name: KEYCLOAK_REALM_URL
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}
+                      name: ${NAME}-backend
                       key: keycloak-realm-url
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
@@ -130,12 +130,12 @@ objects:
                 - name: FORESTCLIENTAPI_ADDRESS
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}
+                      name: ${NAME}-backend
                       key: forest-client-api.address
                 - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}
+                      name: ${NAME}-backend
                       key: forest-client-api.key
               ports:
                 - containerPort: 8090
