@@ -55,8 +55,8 @@ parameters:
   - name: REACT_APP_KC_CLIENT_ID
     description: REACT_APP_KC_CLIENT_ID
     required: true
-  - name: REACT_APP_ENABLE_MOCK_SERVER
-    description: REACT_APP_ENABLE_MOCK_SERVER
+  - name: REACT_APP_ORACLE_SERVER_URL
+    description: Oracle back-end api URL
     required: true
 objects:
   - apiVersion: v1
@@ -120,8 +120,8 @@ objects:
                   value: ${REACT_APP_KC_REALM}
                 - name: REACT_APP_KC_CLIENT_ID
                   value: ${REACT_APP_KC_CLIENT_ID}
-                - name: REACT_APP_ENABLE_MOCK_SERVER
-                  value: ${REACT_APP_ENABLE_MOCK_SERVER}
+                - name: REACT_APP_ORACLE_SERVER_URL
+                  value: ${REACT_APP_ORACLE_SERVER_URL}
               ports:
                 - containerPort: 3000
                   protocol: TCP

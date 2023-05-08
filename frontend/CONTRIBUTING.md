@@ -59,11 +59,11 @@ Remember of setting up the required environment variables. You can create a `.en
 
 ```
 REACT_APP_SERVER_URL=
+REACT_APP_ORACLE_SERVER_URL=
 REACT_APP_NRSPARWEBAPP_VERSION=
 REACT_APP_KC_URL=
 REACT_APP_KC_REALM=
 REACT_APP_KC_CLIENT_ID=
-REACT_APP_ENABLE_MOCK_SERVER=
 ```
 
 And if you want to run Cypress, please add:
