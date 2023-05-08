@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v1.0.3
+        uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -104,7 +104,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -163,7 +163,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v1.0.3
+        uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -213,7 +213,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
