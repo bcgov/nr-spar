@@ -27,6 +27,8 @@ parameters:
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+  - name: KEYCLOAK_REALM_URL
+    value: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
   - name: CPU_REQUEST
     value: "75m"
   - name: MEMORY_REQUEST
@@ -109,10 +111,7 @@ objects:
                       name: ${NAME}-backend
                       key: allowed_origins
                 - name: KEYCLOAK_REALM_URL
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-backend
-                      key: keycloak-realm-url
+                  value: ${KEYCLOAK_REALM_URL}
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
