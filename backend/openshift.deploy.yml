@@ -24,6 +24,9 @@ parameters:
     value: latest
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
+  - name: ALLOWED_ORIGINS
+    description: Sets all the allowed request origins
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
   - name: CPU_REQUEST
     value: "75m"
   - name: MEMORY_REQUEST
