@@ -28,6 +28,8 @@ parameters:
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
   - name: KEYCLOAK_REALM_URL
     value: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
+  - name: FORESTCLIENTAPI_ADDRESS
+    value: "https://nr-forest-client-api-test.api.gov.bc.ca/api"
   - name: CPU_REQUEST
     value: "75m"
   - name: MEMORY_REQUEST
@@ -112,7 +114,7 @@ objects:
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
                 - name: FORESTCLIENTAPI_ADDRESS
-                  value: https://${NAME}-${ZONE}.${DOMAIN}/api
+                  value: ${FORESTCLIENTAPI_ADDRESS}
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
