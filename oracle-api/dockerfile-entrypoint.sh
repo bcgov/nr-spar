@@ -10,4 +10,4 @@ java \
     -Djava.security.egd=file:/dev/./urandom \
     ${JAVA_OPTS} \
     -jar \
-    /usr/share/service/artifacts/nr-spar_oracle-api.jar
+    /usr/share/service/artifacts/nr-spar-oracle-api.jar

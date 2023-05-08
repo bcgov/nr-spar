@@ -49,24 +49,26 @@ jobs:
 
   init-test:
     name: TEST Init
-    needs: 
-      - codeql
     environment: test
     runs-on: ubuntu-22.04
     steps:
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v1.0.3
+        uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
           overwrite: false
-          parameters: -p ZONE=test -p NAME=${{ github.event.repository.name }}      
+          parameters:
+            -p ZONE=test -p NAME=${{ github.event.repository.name }}      
+            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
+            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
 
   deploy-test:
     name: TEST Deployment
     needs:
+      - codeql
       - init-test
     environment: test
     runs-on: ubuntu-22.04
@@ -80,7 +82,7 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=2 -p BUILD=test
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=test
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -98,9 +100,11 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             verification_path: "check"
-            parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
+            parameters:
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
+              -p SERVICE_NAME=dbq01.nrs.bcgov
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -159,14 +163,17 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v1.0.3
+        uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
           overwrite: false
-          parameters: -p ZONE=prod -p NAME=${{ github.event.repository.name }}      
+          parameters:
+            -p ZONE=prod -p NAME=${{ github.event.repository.name }} 
+            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
+            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
 
   deploy-prod:
     name: PROD Deployment
@@ -184,7 +191,7 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p BUILD=prod
+            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=prod
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -197,13 +204,16 @@ jobs:
               -p REACT_APP_KC_REALM=standard
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
               -p REACT_APP_ENABLE_MOCK_SERVER=true
+              -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             verification_path: "check"
-            parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
+            parameters:
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
+              -p SERVICE_NAME=dbq01.nrs.bcgov
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}

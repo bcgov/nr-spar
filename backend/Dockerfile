@@ -1,23 +1,25 @@
-# Build
-FROM maven:3.9.1-eclipse-temurin-17 AS build
+FROM maven:3.8.7-eclipse-temurin-17 AS build
 
-# Copy and build
-WORKDIR /app
-COPY pom.xml .
-COPY ./src ./src
+RUN addgroup --system spring && adduser --system spring --ingroup spring
+USER spring:spring
+
+COPY src /home/spring/src
+COPY pom.xml /home/spring
+
+WORKDIR /home/spring
 RUN mvn --no-transfer-progress --update-snapshots -P prod clean package
 
-# Deploy
 FROM eclipse-temurin:17-jre-alpine
+LABEL maintainer="Ricardo Montania Prado de Campos <ricardo.campos@encora.com>"
+
 ENV LANG en_CA.UTF-8
 ENV LANGUAGE en_CA.UTF-8
 ENV LC_ALL en_CA.UTF-8
 
-# Copy app
-WORKDIR /app
-COPY --from=build /app/target/nr-spar_backend.jar app.jar
+WORKDIR /usr/share/service/
+COPY --from=build /home/spring/target/nr-spar-backend.jar /usr/share/service/service.jar
+COPY dockerfile-entrypoint.sh /usr/share/service/dockerfile-entrypoint.sh
 
-# User and startup
 EXPOSE 8090
 USER 1001
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]

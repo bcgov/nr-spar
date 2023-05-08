@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.3</version>
+		<version>3.0.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ca.bc.gov</groupId>
-	<artifactId>nr-spar_backend</artifactId>
-	<version>0.11.3</version>
-	<name>nr-spar_backend</name>
+	<artifactId>nr-spar-backend</artifactId>
+	<version>0.19.1</version>
+	<name>nr-spar-backend</name>
 	<description>Starting backend API project</description>
 
 	<licenses>
@@ -83,7 +83,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+      <version>1.18.26</version>
+      <optional>true</optional>
 		</dependency>
 
 		<!-- Authentication and Security -->
@@ -110,18 +111,28 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
+      <version>2.1.214</version>
+      <scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
+      <version>42.6.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
+      <version>9.17.0</version>
 			<scope>runtime</scope>
 		</dependency>
+
+    <!-- Functionalities -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.2.3</version>
+    </dependency>
 
 		<!-- Testing -->
 		<dependency>
@@ -166,7 +177,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.0.0</version>
 				<executions>
 					<execution>
 						<id>integration-tests</id>
@@ -189,7 +200,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
+				<version>3.0.0</version>
 				<configuration>
 					<argLine>@{argLine} -Xmx1024m</argLine>
 					<skipTests>${skip.unit.tests}</skipTests>
@@ -211,7 +222,6 @@
 						<exclude>**/entity/**</exclude>
 						<exclude>**/exception/**</exclude>
 						<exclude>**/response/**</exclude>
-						<exclude>**/vo/**</exclude>
 						<exclude>**/*$*Builder*</exclude>
 						<exclude>**/RestExceptionEndpoint.*</exclude>
 						<exclude>**/BackendStartApiApplication.*</exclude>
@@ -394,7 +404,7 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<finalName>nr-spar_backend</finalName>
+		<finalName>nr-spar-backend</finalName>
 	</build>
 
 </project>

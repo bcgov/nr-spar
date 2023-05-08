@@ -35,14 +35,18 @@ jobs:
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v1.0.3
+        uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
           overwrite: false
-          parameters: -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+          parameters:
+            -p ZONE=${{ github.event.number }}
+            -p NAME=${{ github.event.repository.name }}
+            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
+            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
 
   builds:
     name: Builds
@@ -109,7 +113,7 @@ jobs:
             verification_path: "check"
             parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.3
+      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
