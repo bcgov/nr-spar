@@ -24,5 +24,5 @@ RUN mkdir config dump public && \
 # Port, user and entrypoint
 EXPOSE 8090
 USER 1001
-HEALTHCHECK --interval=35s --timeout=4s CMD wget --spider -S http://127.0.0.1:8090/check
+HEALTHCHECK --interval=35s --timeout=4s CMD java HealthCheck
 ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]
