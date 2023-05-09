@@ -2,11 +2,10 @@ version: '3.9'
 
 services:
   oracle-api:
-    build:
-      context: .
     container_name: oracle-api
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
+      SERVER_PORT: "8091"
       DATABASE_HOST: "nrcdb03.bcgov"
       DATABASE_PORT: "1543"
       SERVICE_NAME: "fortmp1.nrs.bcgov"
@@ -15,12 +14,20 @@ services:
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
       JAVA_OPTS: ${JAVA_OPTS}
     healthcheck:
-      test: ["CMD", "java", "HealthCheck"]
+      test: [ "CMD", "java", "HealthCheck" ]
       interval: 1m30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    image: bcgov/nr-spar-oracle-api:latest
-    network_mode: "host"
-    volumes:
-      - ./target:/usr/share/service/artifacts
+    hostname: oracle-api
+    ports:
+      - "8091:8091"
+    networks:
+      - local
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+networks:
+  local:
+    name: spar
