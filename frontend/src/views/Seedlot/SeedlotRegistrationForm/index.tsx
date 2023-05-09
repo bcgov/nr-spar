@@ -47,6 +47,8 @@ const agencyOptions = [
   '0041 - Great Seeds Orchard - GSO',
   '0043 - Bad Seeds Orchard - BSO'
 ];
+const defaultExtStorCode = '00';
+const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -70,7 +72,7 @@ const SeedlotRegistrationForm = () => {
     interimStep: initInterimState(defaultAgency, defaultCode),
     ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
     orchardStep: initOrchardState(),
-    extractionStorageStep: initExtractionStorageState(defaultAgency, defaultCode)
+    extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -170,8 +172,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <ExtractionAndStorage
             state={allStepData.extractionStorageStep}
-            defaultAgency={defaultAgency}
-            defaultCode={defaultCode}
+            defaultAgency={defaultExtStorAgency}
+            defaultCode={defaultExtStorCode}
             agencyOptions={agencyOptions}
             setStepData={(data: ExtractionStorage) => setStepData('extractionStorageStep', data)}
           />
