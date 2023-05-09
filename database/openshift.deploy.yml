@@ -18,6 +18,14 @@ parameters:
   - name: PVC_MOUNT_PATH
     description: Where to mount the PVC, subpath (e.g. data/)
     value: /var/lib/postgresql
+  - name: CPU_REQUEST
+    value: 50m
+  - name: CPU_LIMIT
+    value: 115m
+  - name: MEMORY_REQUEST
+    value: 25Mi
+  - name: MEMORY_LIMIT
+    value: 50Mi
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
@@ -101,6 +109,13 @@ objects:
               ports:
                 - containerPort: 5432
                   protocol: TCP
+              resources:
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
               readinessProbe:
                 exec:
                   command:
