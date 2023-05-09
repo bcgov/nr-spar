@@ -9,7 +9,7 @@ COPY pom.xml /home/spring
 WORKDIR /home/spring
 RUN mvn --no-transfer-progress --update-snapshots -P prod clean package
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17.0.7_7-jre-jammy
 LABEL maintainer="Ricardo Montania Prado de Campos <ricardo.campos@encora.com>"
 
 ENV LANG en_CA.UTF-8
