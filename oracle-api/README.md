@@ -101,7 +101,9 @@ docker build -t oracle-api .
 Then run with:
 ```
 docker run -p 8090:8090 \
-  -e KEYCLOAK_REALM_URL=https://test.loginproxy.gov.bc.ca/auth/realms/standard \
+  --env-file .env \
+  --tty \
+  --interactive \
   -t oracle-api
 ```
 
