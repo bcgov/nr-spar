@@ -67,13 +67,8 @@ using Docker and the Composer plugin.
 
 Note that you'll need these environment variables:
 ```sh
-NR_SPAR_ORACLE_API_VERSION=dev
-DATABASE_HOST=nrcdb03.bcgov
-DATABASE_PORT=1543
-SERVICE_NAME=fortmp1.nrs.bcgov
 DATABASE_USER=[user-here]
 DATABASE_PASSWORD=[password-here]
-KEYCLOAK_REALM_URL=KEYCLOAK_REALM_URL=https://test.loginproxy.gov.bc.ca/auth/realms/standard
 ```
 
 ✅ You can export all environment variables from a .env file with this command (On Linux):
@@ -82,29 +77,9 @@ KEYCLOAK_REALM_URL=KEYCLOAK_REALM_URL=https://test.loginproxy.gov.bc.ca/auth/rea
 export $(cat .env | xargs)
 ```
 
-Run with:
+Run with (from the project root):
 ```sh
-docker-compose up --build
-```
-
-If you want, you can clean and remove the containers with
-```sh
-docker-compose down --remove-orphans
-```
-
-Here are how you can build with Docker, without Compose plugin:
-```sh
-cd oracle-api
-docker build -t oracle-api .
-```
-
-Then run with:
-```
-docker run -p 8090:8090 \
-  --env-file .env \
-  --tty \
-  --interactive \
-  -t oracle-api
+docker-compose up --build oracle-api -d
 ```
 
 If you're in Brazil, you'll need to provide the address of the DNS server to be used by the container in the environment

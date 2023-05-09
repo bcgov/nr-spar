@@ -65,14 +65,8 @@ If all you want is to take a quick look at the running service, you can do it by
 Be aware of the required environment variables:
 
 ```sh
-NR_SPAR_BACKEND_VERSION=dev
-KEYCLOAK_REALM_URL=https://test.loginproxy.gov.bc.ca/auth/realms/standard
-FORESTCLIENTAPI_ADDRESS=https://nr-forest-client-api-prod.api.gov.bc.ca/api
 FORESTCLIENTAPI_KEY=[key-here]
-POSTGRESQL_HOST=localhost
-POSTGRESQL_USER=postgres
-POSTGRESQL_PASSWORD=default
-POSTGRESQL_DATABASE=postgres
+
 ```
 
 ✅ You can export all environment variables from a .env file with this command (On Linux):
@@ -81,27 +75,16 @@ POSTGRESQL_DATABASE=postgres
 export $(cat .env | xargs)
 ```
 
-Run with:
+Run with (from the project root):
 ```sh
-docker-compose up --build
-```
-
-If you want, you can clean and remove the containers with
-```sh
-docker-compose down --remove-orphans
-```
-
-Here are how you can build with Docker, without Compose plugin:
-```sh
-cd backend
-docker build -t backend .
+docker-compose up --build backend -d
 ```
 
 ⚠️ You'll need a PostgreSQL database running. Here's how you can get it up and running:
 
+Run with (from the project root):
 ```sh
-cd database
-docker build -t database .
+docker-compose up --build database -d
 ```
 
 Use this environment variables
