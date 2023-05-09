@@ -50,7 +50,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-  
+
   oracle-api:
     container_name: oracle-api
     environment:
