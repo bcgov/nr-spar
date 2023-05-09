@@ -31,13 +31,13 @@ parameters:
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
-    value: "75m"
-  - name: MEMORY_REQUEST
-    value: "256Mi"
+    value: 50m
   - name: CPU_LIMIT
-    value: "200m"
+    value: 75m
+  - name: MEMORY_REQUEST
+    value: 50Mi
   - name: MEMORY_LIMIT
-    value: "512Mi"
+    value: 250Mi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"

@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  database:
+    container_name: database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: default
+      POSTGRES_DB: postgres
+    hostname: database
+    ports:
+      - "5432:5432"
+    networks:
+      - local
+    restart: always
+    volumes:
+      - /pgdata
+    build:
+      context: .
+      dockerfile: Dockerfile
+    healthcheck:
+      test: [ "CMD-SHELL", "psql -q -U postgres -d postgres -c 'SELECT 1'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  local:
+    name: spar
