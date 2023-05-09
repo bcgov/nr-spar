@@ -4,8 +4,7 @@ import KeycloakService from '../service/KeycloakService';
 const getHeader = () => {
   const token = KeycloakService.getToken();
   return {
-    Authorization: `Bearer ${token}`,
-    'Access-Control-Allow-Origin': '*'
+    Authorization: `Bearer ${token}`
   };
 };
 
