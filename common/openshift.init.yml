@@ -16,6 +16,8 @@ parameters:
     description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
     generate: expression
+  - name: FORESTCLIENTAPI_KEY
+    required: true
   - name: ORACLE_DB_USER
     description: Oracle database username for API
     required: true
@@ -42,6 +44,14 @@ objects:
     stringData:
       oracle-user: ${ORACLE_DB_USER}
       oracle-password: ${ORACLE_DB_PASSWORD}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-backend
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      forest-client-api-key: ${FORESTCLIENTAPI_KEY}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
