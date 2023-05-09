@@ -1,0 +1,106 @@
+version: '3.9'
+
+services:
+  database:
+    container_name: database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: default
+      POSTGRES_DB: postgres
+    hostname: database
+    ports:
+      - "5432:5432"
+    networks:
+      - local
+    restart: always
+    volumes:
+      - /pgdata
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    healthcheck:
+      test: [ "CMD-SHELL", "psql -q -U postgres -d postgres -c 'SELECT 1'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    container_name: backend
+    environment:
+      NR_SPAR_BACKEND_VERSION: dev
+      KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
+      POSTGRESQL_HOST: database
+      POSTGRESQL_DATABASE: postgres
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: default
+      FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
+      FORESTCLIENTAPI_KEY: ${FORESTCLIENTAPI_KEY}
+      JAVA_OPTS: ${JAVA_OPTS}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8090/actuator/health" ]
+      interval: 1m30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    hostname: backend
+    ports:
+      - "8090:8090"
+    networks:
+      - local
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+  
+  oracle-api:
+    container_name: oracle-api
+    environment:
+      NR_SPAR_ORACLE_API_VERSION: "dev"
+      SERVER_PORT: "8091"
+      DATABASE_HOST: "nrcdb03.bcgov"
+      DATABASE_PORT: "1543"
+      SERVICE_NAME: "fortmp1.nrs.bcgov"
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
+      JAVA_OPTS: ${JAVA_OPTS}
+    healthcheck:
+      test: [ "CMD", "java", "HealthCheck" ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    hostname: oracle-api
+    ports:
+      - "8091:8091"
+    networks:
+      - local
+    build:
+      context: ./oracle-api
+      dockerfile: Dockerfile
+
+  frontend:
+    container_name: frontend
+    environment:
+      REACT_APP_NRSPARWEBAPP_VERSION: dev
+      REACT_APP_SERVER_URL: "http://localhost:8090"
+      REACT_APP_ORACLE_SERVER_URL: "http://localhost:8091"
+      REACT_APP_KC_URL: https://test.loginproxy.gov.bc.ca/auth
+      REACT_APP_KC_REALM: standard
+      REACT_APP_KC_CLIENT_ID: seed-planning-test-4296
+    ports:
+      - "3000:3000"
+    networks:
+      - local
+    restart: always
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    healthcheck:
+      test: [ "CMD", "curl -f http://localhost:3000/" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+networks:
+  local:
+    name: spar

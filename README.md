@@ -73,8 +73,10 @@ Docker Compose.
 
 Run with:
 ```sh
-docker-compose up --build
+docker-compose up --build -d
 ```
+
+There should be four running services:
 
 You can clean and remove the containers with
 ```sh
