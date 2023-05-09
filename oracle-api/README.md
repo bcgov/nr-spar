@@ -1,9 +1,4 @@
-[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/nr-spar-oracle-api)
-![Coverage](.github/badges/jacoco.svg)
-![Branches](.github/badges/branches.svg)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-backend-starting-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-backend-starting-api)
-
-# Natural Resources SPAR Oracle API
+# SPAR Oracle API
 
 This repository holds a set of policies, standards, guides, and pipelines to
 get started with a back-end API. Before writing your first line of code, please
@@ -57,14 +52,7 @@ and deploy it.
 ## Getting started
 
 Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
-from the project root directory. You **must** provide three environment variables for database
-access configuration:
-
-- `DATABASE_HOST`
-- `DATABASE_PORT`
-- `SERVICE_NAME` (the database's name)
-- `DATABASE_USER`
-- `DATABASE_PASSWORD`
+from the project root directory. You **must** provide bellow environment variables:
 
 Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
 the `status` property should have the value *UP*.
@@ -75,7 +63,7 @@ tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) gu
 ### Quick look
 
 But if all you want is to take a quick look on the running service, you can do it by
-using Docker.
+using Docker and the Composer plugin.
 
 Note that you'll need these environment variables:
 ```sh
@@ -94,7 +82,17 @@ KEYCLOAK_REALM_URL=KEYCLOAK_REALM_URL=https://test.loginproxy.gov.bc.ca/auth/rea
 export $(cat .env | xargs)
 ```
 
-Build the service:
+Run with:
+```sh
+docker-compose up --build
+```
+
+If you want, you can clean and remove the containers with
+```sh
+docker-compose down --remove-orphans
+```
+
+Here are how you can build with Docker, without Compose plugin:
 ```sh
 cd oracle-api
 docker build -t oracle-api .
@@ -107,12 +105,7 @@ docker run -p 8090:8090 \
   -t oracle-api
 ```
 
-However, if you have docker-compose you can do:
-```
-docker-compose up --build --force-recreate --no-deps
-```
-
-You'll need to provide the address of the DNS server to be used by the container in the environment
+If you're in Brazil, you'll need to provide the address of the DNS server to be used by the container in the environment
 variable `DNS_ADDRESS`: you can find the address of the DNS server you're using right now using
 [nslookup](https://en.wikipedia.org/wiki/Nslookup), for instance.
 

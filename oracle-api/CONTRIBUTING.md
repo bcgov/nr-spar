@@ -69,23 +69,43 @@ You can check your code before submitting with `./mvnw --no-transfer-progress ch
 ## Run this application
 
 After setting up your environment you might want to see this service running. 
-You can get it up and running by typing `./mvnw spring-boot:run` in the project
-root directory.
+You can get it up and running by typing (in the project root directory):
+
+```sh
+./mvnw spring-boot:run
+```
 
 In case you want to debug with remote JVM, you can do it with this command:
-`./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"`
 
-Note: TODO add here about database and running HOW-TOs.
+```sh
+./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
+```
 
 ## Run tests
 
-For unit tests, please use this command: `./mvnw test --file pom.xml`
+For unit tests, please use this command:
+```sh
+./mvnw test --file pom.xml
+```
 
-And for integration tests, this one: `./mvnw verify -P integration-test --file pom.xml`
+And for integration tests:
+```sh
+./mvnw verify -P integration-test --file pom.xml
+```
 
-Tests coverage reports can be seen on your commits and pull requests. But in case you 
-want to check locally, use this command to run all tests `./mvnw --no-transfer-progress clean verify -P all-tests --file pom.xml`,
-and check out the files inside `target/coverage-reports/`
+Tests coverage and reports can be seen on your commits and pull requests.
+But in case you want to check it locally, use this command to run all tests:
+
+```sh
+./mvnw --no-transfer-progress clean verify -P all-tests --file pom.xml
+```
+
+And check out the html file generated:
+
+```sh
+x-www-browser target/coverage-reports/merged-test-report/index.html # For Linux
+open target/coverage-reports/merged-test-report/index.html # For MacOS
+```
 
 ## Submit pull requests
 
