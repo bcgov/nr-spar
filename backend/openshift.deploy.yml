@@ -8,7 +8,6 @@ metadata:
     iconClass: icon-java
 labels:
   app: ${NAME}-${ZONE}
-  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Module name
@@ -24,6 +23,13 @@ parameters:
     value: latest
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
+  - name: ALLOWED_ORIGINS
+    description: Sets all the allowed request origins
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+  - name: KEYCLOAK_REALM_URL
+    value: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
+  - name: FORESTCLIENTAPI_ADDRESS
+    value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
     value: "75m"
   - name: MEMORY_REQUEST
@@ -101,15 +107,16 @@ objects:
                 - name: NR_SPAR_BACKEND_VERSION
                   value: ${BUILD}
                 - name: ALLOWED_ORIGINS
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-backend
-                      key: allowed_origins
+                  value: ${ALLOWED_ORIGINS}
                 - name: KEYCLOAK_REALM_URL
+                  value: ${KEYCLOAK_REALM_URL}
+                - name: FORESTCLIENTAPI_ADDRESS
+                  value: ${FORESTCLIENTAPI_ADDRESS}
+                - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-backend
-                      key: keycloak-realm-url
+                      name: ${NAME}-${ZONE}-backend
+                      key: forest-client-api-key
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
@@ -127,16 +134,6 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
-                - name: FORESTCLIENTAPI_ADDRESS
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-backend
-                      key: forest-client-api.address
-                - name: FORESTCLIENTAPI_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-backend
-                      key: forest-client-api.key
               ports:
                 - containerPort: 8090
                   protocol: TCP
