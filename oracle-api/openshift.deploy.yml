@@ -19,8 +19,12 @@ parameters:
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
     value: 100m
+  - name: CPU_LIMIT
+    value: 175m
   - name: MEMORY_REQUEST
-    value: 0.5Gi
+    value: 150Mi
+  - name: MEMORY_LIMIT
+    value: 300Mi
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
@@ -124,6 +128,9 @@ objects:
                 requests:
                   cpu: ${CPU_REQUEST}
                   memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
               readinessProbe:
                 httpGet:
                   path: /check
