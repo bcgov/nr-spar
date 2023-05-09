@@ -23,4 +23,4 @@ EXPOSE 3000
 USER 1001
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000/
 CMD react-inject-env set -d . && \
-    serve -s .
+    serve --no-clipboard --single .
