@@ -52,6 +52,8 @@ const ExtractionAndStorage = (
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [isExtractorChecked, setIsExtractorChecked] = useState<boolean>(true);
   const [isStorageChecked, setIsStorageChecked] = useState<boolean>(true);
+  const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
+  const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
 
   const validateInput = (name: string, value: string) => {
     const newValidObj = { ...validationObj };
@@ -202,7 +204,7 @@ const ExtractionAndStorage = (
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput('extractionStartDate', selectedDate);
               }}
-              readOnly={readOnly ?? isExtractorChecked}
+              readOnly={readOnly}
             >
               <DatePickerInput
                 id="extraction-start-date-input"
@@ -211,6 +213,7 @@ const ExtractionAndStorage = (
                 placeholder={inputText.date.placeholder}
                 invalid={validationObj.isExtractorStartDateInvalid}
                 invalidText={inputText.date.invalidText}
+                disabled={isExtractorChecked}
               />
             </DatePicker>
           </Column>
@@ -223,7 +226,7 @@ const ExtractionAndStorage = (
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput('extractionEndDate', selectedDate);
               }}
-              readOnly={readOnly ?? isExtractorChecked}
+              readOnly={readOnly}
             >
               <DatePickerInput
                 id="extraction-end-date-input"
@@ -232,18 +235,20 @@ const ExtractionAndStorage = (
                 placeholder={inputText.date.placeholder}
                 invalid={validationObj.isExtractorEndDateInvalid}
                 invalidText={inputText.date.invalidText}
+                disabled={isExtractorChecked}
               />
             </DatePicker>
           </Column>
         </Row>
         <Row>
           <Column sm={4} md={8} lg={8}>
-            {isExtractorChecked && !readOnly && (
+            {isExtractorChecked && !readOnly && isExtractorHintOpen && (
               <InlineNotification
                 lowContrast
                 kind="info"
                 title={inputText.date.extraction.notification.title}
                 subtitle={inputText.date.extraction.notification.subtitle}
+                onCloseButtonClick={() => { setIsExtractorHintOpen(false); }}
               />
             )}
           </Column>
@@ -313,7 +318,7 @@ const ExtractionAndStorage = (
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput('seedStorageStartDate', selectedDate);
               }}
-              readOnly={isStorageChecked || readOnly}
+              readOnly={readOnly}
             >
               <DatePickerInput
                 id="storage-start-date-input"
@@ -322,6 +327,7 @@ const ExtractionAndStorage = (
                 placeholder={inputText.date.placeholder}
                 invalid={validationObj.isStorageStartDateInvalid}
                 invalidText={inputText.date.invalidText}
+                disabled={isStorageChecked}
               />
             </DatePicker>
           </Column>
@@ -334,7 +340,7 @@ const ExtractionAndStorage = (
               onChange={(_e: Array<Date>, selectedDate: string) => {
                 handleFormInput('seedStorageEndDate', selectedDate);
               }}
-              readOnly={isStorageChecked || readOnly}
+              readOnly={readOnly}
             >
               <DatePickerInput
                 id="storage-end-date-input"
@@ -343,18 +349,20 @@ const ExtractionAndStorage = (
                 placeholder={inputText.date.placeholder}
                 invalid={validationObj.isStorageEndDateInvalid}
                 invalidText={inputText.date.invalidText}
+                disabled={isStorageChecked}
               />
             </DatePicker>
           </Column>
         </Row>
         <Row>
           <Column sm={4} md={8} lg={8}>
-            {isStorageChecked && !readOnly && (
+            {isStorageChecked && !readOnly && isStorageHintOpen && (
               <InlineNotification
                 lowContrast
                 kind="info"
                 title={inputText.date.storage.notification.title}
                 subtitle={inputText.date.storage.notification.subtitle}
+                onCloseButtonClick={() => { setIsStorageHintOpen(false); }}
               />
             )}
           </Column>
