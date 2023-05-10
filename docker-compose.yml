@@ -35,7 +35,6 @@ services:
       POSTGRESQL_PASSWORD: default
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: ${FORESTCLIENTAPI_KEY}
-      JAVA_OPTS: ${JAVA_OPTS}
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/actuator/health" ]
       interval: 1m30s
@@ -59,10 +58,9 @@ services:
       DATABASE_HOST: "nrcdb03.bcgov"
       DATABASE_PORT: "1543"
       SERVICE_NAME: "fortmp1.nrs.bcgov"
-      DATABASE_USER: ${DATABASE_USER}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_USER: proxy_fsa_spar_read_only_user
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
-      JAVA_OPTS: ${JAVA_OPTS}
     healthcheck:
       test: [ "CMD", "java", "HealthCheck" ]
       interval: 1m30s
