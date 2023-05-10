@@ -40,7 +40,7 @@ services:
     environment:
       NR_SPAR_BACKEND_VERSION: dev
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
-      POSTGRESQL_HOST: database
+      POSTGRESQL_HOST: localhost
       POSTGRESQL_DATABASE: *POSTGRES_DB
       POSTGRESQL_USER: *POSTGRES_USER
       POSTGRESQL_PASSWORD: *POSTGRES_PASSWORD
