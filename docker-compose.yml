@@ -11,6 +11,7 @@ x-var:
 services:
   database:
     container_name: database
+    network_mode: "host"
     environment:
       POSTGRES_USER: *POSTGRES_USER
       POSTGRES_PASSWORD: *POSTGRES_PASSWORD
@@ -18,8 +19,6 @@ services:
     hostname: database
     ports:
       - "5432:5432"
-    networks:
-      - local
     restart: always
     volumes:
       - /pgdata
@@ -34,6 +33,7 @@ services:
 
   backend:
     container_name: backend
+    network_mode: "host"
     depends_on:
       database:
         condition: service_healthy
@@ -55,14 +55,13 @@ services:
     hostname: backend
     ports:
       - "8090:8090"
-    networks:
-      - local
     build:
       context: ./backend
       dockerfile: Dockerfile
 
   oracle-api:
     container_name: oracle-api
+    network_mode: "host"
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       SERVER_PORT: "8091"
@@ -82,14 +81,13 @@ services:
     hostname: oracle-api
     ports:
       - "8091:8091"
-    networks:
-      - local
     build:
       context: ./oracle-api
       dockerfile: Dockerfile
 
   frontend:
     container_name: frontend
+    network_mode: "host"
     depends_on:
       backend:
         condition: service_healthy
@@ -102,8 +100,6 @@ services:
       REACT_APP_KC_CLIENT_ID: seed-planning-test-4296
     ports:
       - "3000:3000"
-    networks:
-      - local
     restart: always
     build:
       context: ./frontend
@@ -113,7 +109,3 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-
-networks:
-  local:
-    name: spar
