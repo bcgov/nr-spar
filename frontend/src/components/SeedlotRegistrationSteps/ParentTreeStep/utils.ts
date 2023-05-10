@@ -78,8 +78,8 @@ export const disableWheelEvent = (e: React.WheelEvent) => {
 };
 
 // This function will be removed after the connection with the API
-const getRandomFloatString = () => parseFloat((Math.random() * (10 - 1) + 1).toFixed(4)).toString();
-const getRandomFloat = () => parseFloat((Math.random() * (10 - 1) + 1).toFixed(4));
+const getRandomFloatString = (): string => (Math.random() * (10 - 1) + 1).toFixed(4);
+const getRandomFloat = ():number => parseFloat(getRandomFloatString());
 
 // The initial state for all data should be zero, the only changes are
 // on the specific traits of the species the seedlot belongs to, which
