@@ -3,15 +3,20 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Objects;
 
 public class HealthCheck {
 
   public static void main(String[] args) throws IOException, InterruptedException {
     var client = HttpClient.newHttpClient();
 
-    var request =
-        HttpRequest.newBuilder()
-            .uri(URI.create("http://localhost:8090/actuator/health"))
+    String port = System.getenv("SERVER_PORT");
+    if (Objects.isNull(port)) {
+      port = "8090";
+    }
+
+    var request = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:"+port+"/actuator/health"))
             .header("accept", "application/json")
             .build();
 

@@ -1,11 +1,8 @@
-# SPAR Oracle API
+# SPAR Back-end REST API
 
 This repository holds a set of policies, standards, guides, and pipelines to
 get started with a back-end API. Before writing your first line of code, please
 take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
-
-Note: This repository was generated from [greenfield-template](https://github.com/bcgov/greenfield-template)
-and in case you're interested in the original README file, we still have it [here](README_template.md).
 
 ## Our Policy
 
@@ -21,7 +18,7 @@ your problem is someone else's problem. Let's figure it out together. So, ask
 a question using our channels. We have [our own Stackoverflow](https://stackoverflow.developer.gov.bc.ca/)
 and [our Rocket Chat](https://chat.developer.gov.bc.ca/) channel.
 
-## Stack
+# Stack
 
 Here you can find a comprehensive list of all languages and tools that are been used
 in this service. And also everything you need to get started, build locally, test
@@ -37,8 +34,8 @@ and deploy it.
   - Mockito and Mock MVC
   - Automated tests with Postman and Newman
 - Database
-  - Remote Oracle with secure connection
   - PostgreSQL
+  - Versioning with [Flyway](https://flywaydb.org/)
 - DevOps
   - Docker
   - Docker Composer
@@ -49,10 +46,11 @@ and deploy it.
   - Postman
   - DBeaver
 
-## Getting started
+# Getting started
 
 Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
-from the project root directory. You **must** provide bellow environment variables:
+from the project root directory. You **must** provide three environment variables for database
+access configuration:
 
 Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
 the `status` property should have the value *UP*.
@@ -60,15 +58,15 @@ the `status` property should have the value *UP*.
 Before writing your first line of code, and learn more about the checks, including
 tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
 
-### Quick look
+## Quick look
 
-But if all you want is to take a quick look on the running service, you can do it by
-using Docker and the Composer plugin.
+If all you want is to take a quick look at the running service, you can do it by using Docker Compose.
 
-Note that you'll need these environment variables:
+Be aware of the required environment variables:
+
 ```sh
-DATABASE_USER=[user-here]
-DATABASE_PASSWORD=[password-here]
+FORESTCLIENTAPI_KEY=[key-here]
+
 ```
 
 ✅ You can export all environment variables from a .env file with this command (On Linux):
@@ -79,14 +77,23 @@ export $(cat .env | xargs)
 
 Run with (from the project root):
 ```sh
-docker-compose up --build oracle-api -d
+docker-compose up --build backend -d
 ```
 
-If you're in Brazil, you'll need to provide the address of the DNS server to be used by the container in the environment
-variable `DNS_ADDRESS`: you can find the address of the DNS server you're using right now using
-[nslookup](https://en.wikipedia.org/wiki/Nslookup), for instance.
+⚠️ You'll need a PostgreSQL database running. Here's how you can get it up and running:
 
-You can then check the API documentation accessing `localhost:8090/swagger-ui.html`.
+Run with (from the project root):
+```sh
+docker-compose up --build database -d
+```
+
+Use this environment variables
+
+```sh
+POSTGRES_USER=postgres
+POSTGRES_DB=postgres
+POSTGRES_PASSWORD=default
+```
 
 ## Getting help
 
