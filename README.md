@@ -37,7 +37,7 @@ testing and deploying.
   - React Query
   - MirageJS
 
-You can lear more about this service [looking its README](frontend/README.md)
+You can learn more about this service [looking its README](frontend/README.md)
 
 **SPAR Back-end REST API - Postgres**
 
@@ -47,7 +47,7 @@ You can lear more about this service [looking its README](frontend/README.md)
   - Spring Web MVC Framework
   - JPA and Hibernate Framework
 
-You can lear more about this service [looking its README](backend/README.md)
+You can learn more about this service [looking its README](backend/README.md)
 
 **SPAR Back-end REST API - Oracle THE**
 
@@ -57,7 +57,7 @@ You can lear more about this service [looking its README](backend/README.md)
   - Spring Web MVC Framework
   - JPA and Hibernate Framework
 
-You can lear more about this service [looking its README](oracle-api/README.md)
+You can learn more about this service [looking its README](oracle-api/README.md)
 
 # Getting started
 
@@ -73,8 +73,10 @@ Docker Compose.
 
 Run with:
 ```sh
-docker-compose up --build
+docker-compose up --build -d
 ```
+
+There should be four running services:
 
 You can clean and remove the containers with
 ```sh
