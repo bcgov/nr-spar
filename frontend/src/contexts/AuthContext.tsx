@@ -66,13 +66,17 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   /**
    * Refresh the token
    */
-  setInterval(() => {
-    KeycloakService.updateToken(30)
-      .catch(async (err) => {
-        // eslint-disable-next-line no-console
-        console.error('Keycloack service update error: ', err);
-        await logout();
-      });
+  setInterval(async () => {
+    if (signed) {
+      KeycloakService.updateToken(30)
+        .catch(async (err) => {
+          // eslint-disable-next-line no-console
+          console.error('Keycloack service update error: ', err);
+          await logout();
+        });
+    } else {
+      await logout();
+    }
   }, REFRESH_TIMER);
 
   const { createLoginUrl, login } = KeycloakService;
