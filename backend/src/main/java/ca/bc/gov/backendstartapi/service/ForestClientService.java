@@ -16,16 +16,16 @@ public class ForestClientService {
   private final ForestClientApiProvider provider;
 
   /**
-   * Fetch a forest client by its client number.
+   * Fetch a forest client by its number or its acronym.
    *
-   * @param number the client number to search for
-   * @return the forest client with client number {@code number}, if one exists
+   * @param identifier the client number or acronym to search for
+   * @return the forest client with client number or acronym {@code identifier}, if one exists
    */
-  public Optional<ForestClientDto> fetchClient(String number) {
+  public Optional<ForestClientDto> fetchClient(String identifier) {
     try {
-      return provider.fetchByClientNumber(number);
+      return provider.fetchClientByIdentifier(identifier);
     } catch (HttpClientErrorException.NotFound e) {
-      log.info(String.format("Client %s not found", number), e);
+      log.info(String.format("Client %s not found", identifier), e);
       return Optional.empty();
     }
   }

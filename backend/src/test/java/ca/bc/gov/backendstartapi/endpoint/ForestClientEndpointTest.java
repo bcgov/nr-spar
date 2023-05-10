@@ -45,7 +45,7 @@ class ForestClientEndpointTest {
   }
 
   @Test
-  void fetchExistentClient() throws Exception {
+  void fetchExistentClientByNumber() throws Exception {
     var client =
         new ForestClientDto(
             "00000000",
@@ -73,11 +73,48 @@ class ForestClientEndpointTest {
   }
 
   @Test
-  void fetchNonExistentClient() throws Exception {
+  void fetchNonExistentClientByNumber() throws Exception {
     given(forestClientService.fetchClient("00000000")).willReturn(Optional.empty());
 
     mockMvc
         .perform(get("/api/forest-clients/00000000").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void fetchExistentClientByAcronym() throws Exception {
+    var client =
+        new ForestClientDto(
+            "00000000",
+            "SMITH",
+            "JOHN",
+            "JOSEPH",
+            ForestClientStatusEnum.ACT,
+            ForestClientTypeEnum.I,
+            "JSMITH");
+
+    given(forestClientService.fetchClient("JSMITH")).willReturn(Optional.of(client));
+
+    mockMvc
+        .perform(get("/api/forest-clients/JSMITH").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpectAll(
+            jsonPath("$.clientNumber").value(client.clientNumber()),
+            jsonPath("$.clientName").value(client.clientName()),
+            jsonPath("$.legalFirstName").value(client.legalFirstName()),
+            jsonPath("$.legalMiddleName").value(client.legalMiddleName()),
+            jsonPath("$.clientStatusCode").value(client.clientStatusCode().name()),
+            jsonPath("$.clientTypeCode").value(client.clientTypeCode().name()),
+            jsonPath("$.acronym").value(client.acronym()));
+  }
+
+  @Test
+  void fetchNonExistentClientByAcronym() throws Exception {
+    given(forestClientService.fetchClient("JSMITH")).willReturn(Optional.empty());
+
+    mockMvc
+        .perform(get("/api/forest-clients/JSMITH").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 }
