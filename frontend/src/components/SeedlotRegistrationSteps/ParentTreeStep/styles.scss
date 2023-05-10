@@ -1,0 +1,13 @@
+@use '../../../theme/variables.scss' as vars;
+
+.seedlot-parent-tree-step {
+  // TODO: find a way to remove negative margins
+  .#{vars.$bcgov-prefix}--tabs {
+    margin-left: -1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .#{vars.$bcgov-prefix}--tabs .#{vars.$bcgov-prefix}--tabs__nav-link {
+    max-width: 12rem;
+  }
+}

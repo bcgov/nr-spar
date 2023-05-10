@@ -34,6 +34,7 @@ import {
 } from './utils';
 import { getDropDownList } from '../../../utils/DropDownUtils';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
+import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
 import './styles.scss';
@@ -166,7 +167,9 @@ const SeedlotRegistrationForm = () => {
         );
       // Parent Tree and SMP
       case 4:
-        return null;
+        return (
+          <ParentTreeStep orchardID={['102']} />
+        );
       // Extraction and Storage
       case 5:
         return (
