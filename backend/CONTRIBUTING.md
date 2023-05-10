@@ -27,17 +27,17 @@ Make sure you have Git installed on your machine. You can follow
 
 We containerize our application with Docker images. 
 
-Note: things are way 
-easier if you don't need to run docker commands with sudo. Take a look
+Note: things are way
+easier if you don't need to run docker commands with root (sudo). Take a look
 [here](https://docs.docker.com/engine/install/#server) to learn how to
 install. Note that Docker Desktop shouldn't be used for this project,
-due to license matter.
+due to license matters.
 
 ### Java and Maven
 
 An easy way of getting both Java and Maven on your machine is using 
 SDK Man. Take a look [here](https://sdkman.io/) to learn how to install.
-For this project we're using Java 17.
+For this project we're using Java 17 (OpenSDK).
 
 ### IDE
 
@@ -81,14 +81,24 @@ In case you want to debug with remote JVM, you can do it with this command:
 ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"
 ```
 
+Note: You need a running Postgres service to have a fully working environment. You
+can do that with Docker or Docker and the Compose plugin. Follow these steps:
+
+```sh
+cd database
+docker-compose up --build
+```
+
 ## Run tests
 
 For unit tests, please use this command:
+
 ```sh
 ./mvnw test --file pom.xml
 ```
 
 And for integration tests:
+
 ```sh
 ./mvnw verify -P integration-test --file pom.xml
 ```
@@ -113,6 +123,15 @@ We use git flow, so all code changes happen through Pull Requests. There's a
 Pull Request template that you can fill. The more complete the better. If you
 have images, screen capture or diagrams, that helps a lot. Don't forget to add
 reviewers, assign to yourself and add a label.
+
+## Database versioning
+
+Any permanent alteration to the database schema (creation or alteration of tables,
+columns, etc.) should be done through Flyway. [Here's a brief explanation on how
+versioning with Flyway works](https://flywaydb.org/documentation/getstarted/how).
+
+Each migration should have its own file, which must follow [this naming
+pattern](https://flywaydb.org/documentation/concepts/migrations#naming).
 
 ## Follow our best practices
 

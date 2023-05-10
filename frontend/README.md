@@ -82,22 +82,11 @@ our [CONTRIBUTING](CONTRIBUTING.md) guide.
 ## Quick look
 
 But if all you want is to take a quick look on the running service, you can do it by
-using Docker.
+using Docker Compose.
 
-⚠️ Note that you'll need those environment variables mentioned above!
-
-Build Docker image:
+Run with (from the project root):
 ```sh
-cd frontend
-docker build -t frontend .
-```
-
-Then run with:
-```
-docker run -p 3000:3000 \
-  --env-file .env \
-  --tty --interactive \
-  frontend
+docker-compose up --build frontend -d
 ```
 
 ## Getting help
