@@ -26,6 +26,9 @@ services:
 
   backend:
     container_name: backend
+    depends_on:
+      database:
+        condition: service_healthy
     environment:
       NR_SPAR_BACKEND_VERSION: dev
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
@@ -34,7 +37,7 @@ services:
       POSTGRESQL_USER: postgres
       POSTGRESQL_PASSWORD: default
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
-      FORESTCLIENTAPI_KEY: ${FORESTCLIENTAPI_KEY}
+      FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/actuator/health" ]
       interval: 1m30s
@@ -78,6 +81,9 @@ services:
 
   frontend:
     container_name: frontend
+    depends_on:
+      backend:
+        condition: service_healthy
     environment:
       REACT_APP_NRSPARWEBAPP_VERSION: dev
       REACT_APP_SERVER_URL: "http://localhost:8090"
