@@ -19,13 +19,16 @@ services:
       context: ./database
       dockerfile: Dockerfile
     healthcheck:
-      test: [ "CMD-SHELL", "psql -q -U postgres -d postgres -c 'SELECT 1'" ]
-      interval: 10s
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 5s
       timeout: 5s
       retries: 5
 
   backend:
     container_name: backend
+    depends_on:
+      database:
+        condition: service_healthy
     environment:
       NR_SPAR_BACKEND_VERSION: dev
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
@@ -37,7 +40,15 @@ services:
       FORESTCLIENTAPI_KEY: ${FORESTCLIENTAPI_KEY}
       JAVA_OPTS: ${JAVA_OPTS}
     healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/actuator/health" ]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8090/actuator/health"
+        ]
       interval: 1m30s
       timeout: 3s
       retries: 3
@@ -58,7 +69,7 @@ services:
       SERVER_PORT: "8091"
       DATABASE_HOST: "nrcdb03.bcgov"
       DATABASE_PORT: "1543"
-      SERVICE_NAME: "fortmp1.nrs.bcgov"
+      SERVICE_NAME: "dbq01.nrs.bcgov"
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
@@ -96,7 +107,15 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/" ]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/"
+        ]
       interval: 15s
       timeout: 5s
       retries: 5
