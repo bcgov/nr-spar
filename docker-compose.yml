@@ -66,12 +66,12 @@ services:
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       SERVER_PORT: "8091"
-      DATABASE_HOST: "nrcdb03.bcgov"
+      DATABASE_HOST: nrcdb03.bcgov
       DATABASE_PORT: "1543"
+      SERVICE_NAME: dbq01.nrs.bcgov
       DATABASE_USER: proxy_fsa_spar_read_only_user
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
-      SERVICE_NAME: "dbq01.nrs.bcgov"
       JAVA_OPTS: ${JAVA_OPTS}
     healthcheck:
       test: [ "CMD", "java", "HealthCheck" ]
