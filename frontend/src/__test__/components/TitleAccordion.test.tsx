@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import React from 'react'
 import { render, screen } from '@testing-library/react';
 import TitleAccordion from '../../components/TitleAccordion/index';
