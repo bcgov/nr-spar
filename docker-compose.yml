@@ -66,7 +66,7 @@ services:
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       SERVER_PORT: "8091"
-      DATABASE_HOST: 142.34.84.58
+      DATABASE_HOST: nrcdb03.bcgov
       DATABASE_PORT: "1543"
       SERVICE_NAME: dbq01.nrs.bcgov
       DATABASE_USER: proxy_fsa_spar_read_only_user
@@ -92,8 +92,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-      # oracle-api:
-      #   condition: service_healthy
+      oracle-api:
+        condition: service_healthy
     environment:
       REACT_APP_NRSPARWEBAPP_VERSION: dev
       REACT_APP_SERVER_URL: "http://backend:8090"
@@ -113,8 +113,12 @@ services:
       timeout: 5s
       retries: 5
     hostname: oracle-api
+    dns:
+      - "142.22.202.100"
     networks:
       - spar
 
 networks:
   spar:
+    name: spar-network
+    external: true
