@@ -27,7 +27,7 @@ services:
       context: ./database
       dockerfile: Dockerfile
     healthcheck:
-      test: [ "CMD-SHELL", "psql -q -U postgres -d postgres -c 'SELECT 1'" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -60,7 +60,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-  
+
   oracle-api:
     container_name: oracle-api
     environment:
@@ -68,10 +68,11 @@ services:
       SERVER_PORT: "8091"
       DATABASE_HOST: "nrcdb03.bcgov"
       DATABASE_PORT: "1543"
-      SERVICE_NAME: "fortmp1.nrs.bcgov"
       DATABASE_USER: proxy_fsa_spar_read_only_user
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
+      SERVICE_NAME: "dbq01.nrs.bcgov"
+      JAVA_OPTS: ${JAVA_OPTS}
     healthcheck:
       test: [ "CMD", "java", "HealthCheck" ]
       interval: 1m30s

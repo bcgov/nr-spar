@@ -4,10 +4,10 @@ FROM node:16.19.1-alpine3.17 AS build
 # Copy and build
 WORKDIR /app
 COPY . .
-RUN yarn install --frozen-lockfile --prefer-offline
+RUN apk add --no-cache python3 g++ make &&\
+    yarn install --frozen-lockfile --prefer-offline
 RUN yarn build:production
 RUN rm -rf node_modules
-
 
 # Deploy
 FROM node:16.19.1-alpine3.17
