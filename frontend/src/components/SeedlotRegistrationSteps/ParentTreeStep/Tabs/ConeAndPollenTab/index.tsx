@@ -57,7 +57,7 @@ const ConeAndPollenTab = ({
   geneticTraits,
   isLoading
 }: TabProps) => {
-  const emptyConeAndPollen:ConeAndPollenType = createEmptyConeAndPollen(parentTrees);
+  const emptyConeAndPollen: ConeAndPollenType = createEmptyConeAndPollen(parentTrees);
 
   const [updateTable, setUpdateTable] = useState<boolean>(false);
   const [firstRowIndex, setFirstRowIndex] = useState<number>(0);
@@ -145,6 +145,7 @@ const ConeAndPollenTab = ({
     setUpdateTable(true);
   };
 
+  // TODO: STOP using index to identify object
   const handleTableChange = (field: string, value: string, index: number) => {
     const updatedConeAndPollen = coneAndPollenData.coneAndPollenEntries.map((entry, i) => {
       if (i === index) {
@@ -298,63 +299,66 @@ const ConeAndPollenTab = ({
                   </TableHead>
                   <TableBody>
                     {
-                      // eslint-disable-next-line max-len
-                      parentTrees.slice(firstRowIndex, firstRowIndex + currentPageSize).map((row, i) => (
-                        <TableRow key={(row.id)}>
-                          <TableCell>
-                            {row.value}
-                          </TableCell>
-                          <TableCell>
-                            <input
-                              ref={(el: HTMLInputElement) => addRefs(el, `inputCone-${(row.id)}`)}
-                              type="number"
-                              className="table-input"
-                              placeholder={pageTexts.sharedTabTexts.tableInputPlaceholder}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                handleTableChange('inputCone', e.target.value, i);
-                              }}
-                              onWheel={(e: React.WheelEvent) => disableWheelEvent(e)}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <input
-                              ref={(el: HTMLInputElement) => addRefs(el, `inputPollen-${(row.id)}`)}
-                              type="number"
-                              className="table-input"
-                              placeholder={pageTexts.sharedTabTexts.tableInputPlaceholder}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                handleTableChange('inputPollen', e.target.value, i);
-                              }}
-                              onWheel={(e: React.WheelEvent) => disableWheelEvent(e)}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <input
-                              ref={(el: HTMLInputElement) => addRefs(el, `inputSMP-${(row.id)}`)}
-                              type="number"
-                              className="table-input"
-                              placeholder={pageTexts.sharedTabTexts.tableInputPlaceholder}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                handleTableChange('inputSMP', e.target.value, i);
-                              }}
-                              onWheel={(e: React.WheelEvent) => disableWheelEvent(e)}
-                            />
-                          </TableCell>
-                          {
-                            geneticTraits.map((trait) => (
-                              filterControl[trait.code]
-                              && (
-                                <TableCell
-                                  key={`cell-trait-${trait.code}-${(row.id + i).toString()}`}
-                                >
-                                  {coneAndPollenData.coneAndPollenEntries[i][trait.code]}
-                                </TableCell>
-                              )
-                            ))
-                          }
-                        </TableRow>
-                      ))
-                      }
+                      parentTrees.slice(firstRowIndex, firstRowIndex + currentPageSize)
+                        .map((row, i) => (
+                          <TableRow key={(row.id)}>
+                            <TableCell>
+                              {row.value}
+                            </TableCell>
+                            <TableCell>
+                              <input
+                                ref={(el: HTMLInputElement) => addRefs(el, `inputCone-${(row.id)}`)}
+                                type="number"
+                                className="table-input"
+                                placeholder={pageTexts.sharedTabTexts.tableInputPlaceholder}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                  // TODO: STOP using index to identify object
+                                  handleTableChange('inputCone', e.target.value, i);
+                                }}
+                                onWheel={(e: React.WheelEvent) => disableWheelEvent(e)}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <input
+                                ref={(el: HTMLInputElement) => addRefs(el, `inputPollen-${(row.id)}`)}
+                                type="number"
+                                className="table-input"
+                                placeholder={pageTexts.sharedTabTexts.tableInputPlaceholder}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                  // TODO: STOP using index to identify object
+                                  handleTableChange('inputPollen', e.target.value, i);
+                                }}
+                                onWheel={(e: React.WheelEvent) => disableWheelEvent(e)}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <input
+                                ref={(el: HTMLInputElement) => addRefs(el, `inputSMP-${(row.id)}`)}
+                                type="number"
+                                className="table-input"
+                                placeholder={pageTexts.sharedTabTexts.tableInputPlaceholder}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                  // TODO: STOP using index to identify object
+                                  handleTableChange('inputSMP', e.target.value, i);
+                                }}
+                                onWheel={(e: React.WheelEvent) => disableWheelEvent(e)}
+                              />
+                            </TableCell>
+                            {
+                              geneticTraits.map((trait) => (
+                                filterControl[trait.code]
+                                && (
+                                  <TableCell
+                                    key={`cell-trait-${trait.code}-${(row.id + i).toString()}`}
+                                  >
+                                    {coneAndPollenData.coneAndPollenEntries[i][trait.code]}
+                                  </TableCell>
+                                )
+                              ))
+                            }
+                          </TableRow>
+                        ))
+                    }
                   </TableBody>
                 </Table>
               </TableContainer>

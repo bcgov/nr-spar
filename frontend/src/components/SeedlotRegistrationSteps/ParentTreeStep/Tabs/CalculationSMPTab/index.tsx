@@ -138,7 +138,6 @@ const CalculationSMPTab = ({ geneticTraits }: CalculationSMPTabProps) => {
       });
 
       // Other inputs are manual...
-      // eslint-disable-next-line max-len
       refControl.current.smpParentTrees.value = smpMix.totalParentTreesFromOutside;
       refControl.current.totalVolume.value = smpMix.totalVolume;
     }
@@ -156,8 +155,7 @@ const CalculationSMPTab = ({ geneticTraits }: CalculationSMPTabProps) => {
     index: number,
     genTrait: string = ''
   ) => {
-    // // eslint-disable-next-line no-debugger
-    // debugger;
+    // TODO: STOP using index to identify object
     const updatedSMPMixData = smpMixData.smpMixEntries.map((entry, i) => {
       if (i === index) {
         switch (field) {

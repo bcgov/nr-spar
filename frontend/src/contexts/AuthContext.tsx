@@ -66,7 +66,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   /**
    * Refresh the token
    */
-  setInterval(async () => {
+  setInterval(() => {
     if (signed) {
       KeycloakService.updateToken(30)
         .catch(async (err) => {
@@ -74,8 +74,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
           console.error('Keycloack service update error: ', err);
           await logout();
         });
-    } else {
-      await logout();
     }
   }, REFRESH_TIMER);
 
