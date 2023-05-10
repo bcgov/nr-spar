@@ -11,12 +11,13 @@ x-var:
 services:
   database:
     container_name: database
-    network_mode: "host"
     environment:
       POSTGRES_USER: *POSTGRES_USER
       POSTGRES_PASSWORD: *POSTGRES_PASSWORD
       POSTGRES_DB: *POSTGRES_DB
     hostname: database
+    networks:
+      - spar
     ports:
       - "5432:5432"
     restart: always
@@ -33,14 +34,13 @@ services:
 
   backend:
     container_name: backend
-    network_mode: "host"
     depends_on:
       database:
         condition: service_healthy
     environment:
       NR_SPAR_BACKEND_VERSION: dev
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
-      POSTGRESQL_HOST: localhost
+      POSTGRESQL_HOST: database
       POSTGRESQL_DATABASE: *POSTGRES_DB
       POSTGRESQL_USER: *POSTGRES_USER
       POSTGRESQL_PASSWORD: *POSTGRES_PASSWORD
@@ -53,6 +53,8 @@ services:
       retries: 3
       start_period: 40s
     hostname: backend
+    networks:
+      - spar
     ports:
       - "8090:8090"
     build:
@@ -61,17 +63,15 @@ services:
 
   oracle-api:
     container_name: oracle-api
-    network_mode: "host"
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       SERVER_PORT: "8091"
-      DATABASE_HOST: nrcdb03.bcgov
+      DATABASE_HOST: 142.34.84.58
       DATABASE_PORT: "1543"
       SERVICE_NAME: dbq01.nrs.bcgov
       DATABASE_USER: proxy_fsa_spar_read_only_user
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
-      JAVA_OPTS: ${JAVA_OPTS}
     healthcheck:
       test: [ "CMD", "java", "HealthCheck" ]
       interval: 1m30s
@@ -79,6 +79,8 @@ services:
       retries: 3
       start_period: 40s
     hostname: oracle-api
+    networks:
+      - spar
     ports:
       - "8091:8091"
     build:
@@ -87,16 +89,15 @@ services:
 
   frontend:
     container_name: frontend
-    network_mode: "host"
     depends_on:
       backend:
         condition: service_healthy
-      oracle-api:
-        condition: service_healthy
+      # oracle-api:
+      #   condition: service_healthy
     environment:
       REACT_APP_NRSPARWEBAPP_VERSION: dev
-      REACT_APP_SERVER_URL: "http://localhost:8090"
-      REACT_APP_ORACLE_SERVER_URL: "http://localhost:8091"
+      REACT_APP_SERVER_URL: "http://backend:8090"
+      REACT_APP_ORACLE_SERVER_URL: "http://oracle-api:8091"
       REACT_APP_KC_URL: https://test.loginproxy.gov.bc.ca/auth
       REACT_APP_KC_REALM: standard
       REACT_APP_KC_CLIENT_ID: seed-planning-test-4296
@@ -111,3 +112,9 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+    hostname: oracle-api
+    networks:
+      - spar
+
+networks:
+  spar:
