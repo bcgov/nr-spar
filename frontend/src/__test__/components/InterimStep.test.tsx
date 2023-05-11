@@ -21,6 +21,9 @@ describe('Interim Storage Step test', () => {
     );
     dismount = unmount;
     component = container;
+
+    // screen click next button
+    clickNext(2);
   });
 
   afterEach(() => dismount());
@@ -33,9 +36,6 @@ describe('Interim Storage Step test', () => {
   }
 
   it('should have the correct labels', () => {
-    // screen click next button
-    clickNext(2);
-
     const content = {
       title: 'Interim agency',
       subtitle: 'Enter the interim agency information',
@@ -50,9 +50,6 @@ describe('Interim Storage Step test', () => {
   });
 
   it('should call the checkbox click function twice', async () => {
-    // screen click next button
-    clickNext(2);
-
     let checkbox = screen.getByRole('checkbox');
     
     for(var i = 0; i < 2; i++){

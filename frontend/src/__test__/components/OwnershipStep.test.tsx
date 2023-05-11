@@ -21,6 +21,9 @@ describe('Ownership Step test', () => {
     );
     dismount = unmount;
     component = container;
+
+    // screen click next button
+    clickNext();
   });
 
   afterEach(() => dismount());
@@ -31,9 +34,6 @@ describe('Ownership Step test', () => {
   }
 
   it('should have the correct labels', () => {
-    // screen click next button
-    clickNext();
-
     const content = {
       title: 'Ownership',
       titleOrchard: 'Strong Seeds Orchard',
@@ -45,15 +45,82 @@ describe('Ownership Step test', () => {
     expect(screen.getByText(content.subtitleOrchard)).toBeInTheDocument();
   });
 
-  it('should call the checkbox click function', async () => {
-    // screen click next button
-    clickNext();
+  it('should call the checkbox click function twice', async () => {
+    let checkbox = screen.getByRole('checkbox');
+    
+    for(var i = 0; i < 2; i++){
+      fireEvent.click(checkbox);
+    }
 
+    await waitFor(() => {
+      expect(checkbox).toBeChecked();
+    });
+  });
+
+  it('should render Owner agency name clicking twice', async () => {
+    //Click button for additional Orchard ID
+    const addButton = screen.getByText('Add owner');
+    for(var i = 0; i < 2; i++){
+      fireEvent.click(addButton);
+    }
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Owner agency name')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Owner agency name')[1]).toBeInTheDocument();
+    });
+  });
+
+  it('should show invalid message for inputs for agency and location code', async () => {
     let checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);
 
+    //agency
+    const agencyNumber = component.querySelector('#owner-agency-0') as HTMLInputElement;
+
+    fireEvent.change(agencyNumber, {
+      target: { value: '2' }
+    });
+    agencyNumber.blur();
+
     await waitFor(() => {
-      expect(checkbox).not.toBeChecked();
+      expect(agencyNumber.value).toBe('2');
+      expect(
+        screen.getByText('Please choose a valid owner agency, filter with agency number, name or acronym')
+      ).toBeInTheDocument();
+    });
+
+    //code
+    const ownerCode = component.querySelector('#single-owner-code-0') as HTMLInputElement;
+
+    fireEvent.change(ownerCode, {
+      target: { value: '3' }
+    });
+    ownerCode.blur();
+
+    await waitFor(() => {
+      expect(ownerCode.value).toBe('3');
+      expect(
+        screen.getByText('Please enter a valid 2-digit code that identifies the address of operated office or division')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('should show invalid message for inputs for Reserved and Surplus', async () => {
+    const ownerReserved = component.querySelector('#single-owner-reserved-0') as HTMLInputElement;
+
+    fireEvent.change(ownerReserved, {
+      target: { value: '-2' }
+    });
+    ownerReserved.blur();
+
+    await waitFor(() => {
+      expect(ownerReserved.value).toBe('-2');
+      expect(
+        screen.getByText('Value must be higher or equal to 0')
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Value must be lower or equal to 100')
+      ).toBeInTheDocument();
     });
   });
 });

@@ -21,6 +21,9 @@ describe('Extraction and Storage Step test', () => {
     );
     dismount = unmount;
     component = container;
+
+    // screen click next button
+    clickNext(5);
   });
 
   afterEach(() => dismount());
@@ -33,9 +36,6 @@ describe('Extraction and Storage Step test', () => {
   }
 
   it('should have the correct labels', () => {
-    // screen click next button
-    clickNext(5);
-
     const content = {
       title: 'Extraction information',
       subtitle: 'Enter the extractory agency information and extraction’s star and end dates for this seedlot',
@@ -50,9 +50,6 @@ describe('Extraction and Storage Step test', () => {
   });
 
   it('should call the checkbox click function twice', async () => {
-    // screen click next button
-    clickNext(5);
-
     const checkBoxes = screen.getAllByRole('checkbox');
 
     for(var i = 0; i < 2; i++){
@@ -66,5 +63,31 @@ describe('Extraction and Storage Step test', () => {
       expect(checkBoxes[1]).toBeChecked();
       expect(checkBoxes[2]).not.toBeChecked();
     });
+  });
+
+  it('should input date in the form', () => {
+    const content = {
+      extStartDate: '2023/04/26',
+      extEndDate: '2023/04/25',
+      extErrorMsg: 'Please enter a valid date'
+    };
+    
+    //Click the checkbox
+    const chkExtraction = screen.getAllByRole('checkbox')[0];
+    fireEvent.click(chkExtraction);
+
+    //Input Extraction Start Date
+    const dateExtStart = component.querySelector('#extraction-start-date-input') as HTMLInputElement;
+
+    fireEvent.mouseDown(dateExtStart);
+    fireEvent.change(dateExtStart, { target: { value: content.extStartDate } });
+    expect(dateExtStart.value).toEqual(content.extStartDate);
+
+    //Input Extraction End Date
+    const dateExtEnd = component.querySelector('#extraction-end-date-input') as HTMLInputElement;
+
+    fireEvent.mouseDown(dateExtEnd);
+    fireEvent.change(dateExtEnd, { target: { value: content.extEndDate } });
+    expect(dateExtEnd.value).toEqual(content.extEndDate);
   });
 });
