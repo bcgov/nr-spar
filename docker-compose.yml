@@ -34,6 +34,7 @@ services:
       database:
         condition: service_healthy
     environment:
+      ALLOWED_ORIGINS: "http://localhost:*,http://frontend:*"
       NR_SPAR_BACKEND_VERSION: dev
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
       POSTGRESQL_HOST: database
