@@ -4,11 +4,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@testing-library/jest-dom';
 import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm';
+import makeServer from '../../mock-server/server';
 
 describe('Ownership Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
   beforeEach(() => {
+    makeServer('jest-test');
     const qc = new QueryClient();
     const { container, unmount } = render(
       <QueryClientProvider client={qc}>

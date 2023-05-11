@@ -4,11 +4,13 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@testing-library/jest-dom';
 import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm';
+import makeServer from '../../mock-server/server';
 
 describe('Interim Storage Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
   beforeEach(() => {
+    makeServer('jest-test');
     const qc = new QueryClient();
     const { container, unmount } = render(
       <QueryClientProvider client={qc}>
@@ -47,15 +49,18 @@ describe('Interim Storage Step test', () => {
     expect(screen.getByText(content.subtitleStorage)).toBeInTheDocument();
   });
 
-  it('should call the checkbox click function', async () => {
+  it('should call the checkbox click function twice', async () => {
     // screen click next button
     clickNext(2);
 
     let checkbox = screen.getByRole('checkbox');
-    fireEvent.click(checkbox);
+    
+    for(var i = 0; i < 2; i++){
+      fireEvent.click(checkbox);
+    }
 
     await waitFor(() => {
-      expect(checkbox).not.toBeChecked();
+      expect(checkbox).toBeChecked();
     });
   });
 });
