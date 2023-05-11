@@ -28,9 +28,10 @@ services:
       dockerfile: Dockerfile
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   backend:
     container_name: backend
@@ -48,10 +49,10 @@ services:
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/actuator/health" ]
-      interval: 1m30s
-      timeout: 3s
-      retries: 3
-      start_period: 40s
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     hostname: backend
     # networks:
     #   - spar
@@ -109,9 +110,10 @@ services:
       dockerfile: Dockerfile
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/" ]
-      interval: 15s
+      interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 30s
     hostname: frontend
     # dns:
     #   - "142.22.202.100"
