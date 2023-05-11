@@ -7,7 +7,7 @@ COPY . ./
 RUN ./mvnw --no-transfer-progress --update-snapshots clean package -Dtests.skip=true -Dskip.unit.tests=true
 
 # Deploy container
-FROM eclipse-temurin:17-jdk-alpine AS deploy
+FROM eclipse-temurin:17.0.7_7-jdk-jammy AS deploy
 ENV LANG en_CA.UTF-8
 ENV LANGUAGE en_CA.UTF-8
 ENV LC_ALL en_CA.UTF-8
@@ -24,5 +24,5 @@ RUN mkdir config dump public && \
 # Port, user and entrypoint
 EXPOSE 8090
 USER 1001
-HEALTHCHECK --interval=35s --timeout=4s CMD wget --spider -S http://127.0.0.1:8090/check
+HEALTHCHECK --interval=35s --timeout=4s CMD java HealthCheck
 ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]

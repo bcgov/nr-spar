@@ -102,3 +102,6 @@ snyk.sarif
 
 # VS Code
 .vscode
+
+# Artifacts
+*.jar
