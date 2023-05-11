@@ -16,8 +16,8 @@ services:
       POSTGRES_PASSWORD: *POSTGRES_PASSWORD
       POSTGRES_DB: *POSTGRES_DB
     hostname: database
-    networks:
-      - spar
+    # networks:
+    #   - spar
     ports:
       - "5432:5432"
     restart: always
@@ -53,8 +53,8 @@ services:
       retries: 3
       start_period: 40s
     hostname: backend
-    networks:
-      - spar
+    # networks:
+    #   - spar
     ports:
       - "8090:8090"
     build:
@@ -113,12 +113,12 @@ services:
       timeout: 5s
       retries: 5
     hostname: frontend
-    dns:
-      - "142.22.202.100"
-    networks:
-      - spar
+    # dns:
+    #   - "142.22.202.100"
+    # networks:
+    #   - spar
 
-networks:
-  spar:
-    name: spar-network
-    external: true
+# networks:
+#   spar:
+#     name: spar-network
+#     external: true
