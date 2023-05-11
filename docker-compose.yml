@@ -73,6 +73,7 @@ services:
     build:
       context: ./oracle-api
     profiles: ["oracle-api"]
+    network_mode: "host"
 
   frontend:
     container_name: frontend
