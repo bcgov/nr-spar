@@ -25,6 +25,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - local
 
   backend:
     container_name: backend
@@ -50,6 +52,8 @@ services:
       - "8090:8090"
     build:
       context: ./backend
+    networks:
+      - local
 
   frontend:
     container_name: frontend
@@ -58,7 +62,7 @@ services:
         condition: service_healthy
     environment:
       REACT_APP_NRSPARWEBAPP_VERSION: dev
-      REACT_APP_SERVER_URL: http://backend:8090
+      REACT_APP_SERVER_URL: http://localhost:8090
       REACT_APP_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       REACT_APP_KC_URL: https://test.loginproxy.gov.bc.ca/auth
       REACT_APP_KC_REALM: standard
@@ -73,3 +77,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - local
+
+networks:
+  local:
+   name: spar
