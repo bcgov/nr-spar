@@ -4,10 +4,12 @@ import CreateAClass from '../../views/Seedlot/CreateAClass/index';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import makeServer from '../../mock-server/server';
 
 
 describe('Test the Create A Class component', () => {
   it('should render correctly', () => {
+    makeServer('jest-test');
     const qc = new QueryClient();
     render(
       <BrowserRouter>
