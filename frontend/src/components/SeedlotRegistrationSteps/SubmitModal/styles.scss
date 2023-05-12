@@ -25,4 +25,8 @@
   .#{vars.$bcgov-prefix}--btn {
     padding-bottom: 1rem;
   }
+  
+  .#{vars.$bcgov-prefix}--modal-footer .#{vars.$bcgov-prefix}--btn {
+    height: 0;
+  }
 }
