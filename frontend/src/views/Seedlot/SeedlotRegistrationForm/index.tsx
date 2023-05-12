@@ -175,7 +175,7 @@ const SeedlotRegistrationForm = () => {
             setStepData={(data: any) => setStepData('parentTreeStep', data)}
           />
         );
-      // // Extraction and Storage
+      // Extraction and Storage
       case 5:
         return (
           <ExtractionAndStorage

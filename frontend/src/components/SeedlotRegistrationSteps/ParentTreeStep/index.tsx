@@ -14,9 +14,10 @@ import ConeAndPollen from './Tabs/ConeAndPollen';
 import { pageTexts } from './constants';
 
 import './styles.scss';
+import DropDownObj from '../../../types/DropDownObject';
 
 interface ParentTreeStepProps {
-  seedlotSpecies: object
+  seedlotSpecies: DropDownObj
   state: object;
   setStepData: Function;
 }
@@ -37,7 +38,7 @@ const ParentTreeStep = (
       </TabList>
       <TabPanels>
         <TabPanel>
-          <ConeAndPollen />
+          <ConeAndPollen seedlotSpecies={seedlotSpecies} />
         </TabPanel>
         <TabPanel>
           SMP
