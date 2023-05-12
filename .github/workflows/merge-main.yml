@@ -1,13 +1,14 @@
 name: Merge to Main
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - ".github/ISSUE_TEMPLATE/*"
-      - "**.md"
-  workflow_dispatch:
+  pull_request:
+  # push:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - ".github/ISSUE_TEMPLATE/*"
+  #     - "**.md"
+  # workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}
@@ -64,6 +65,7 @@ jobs:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}      
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
   deploy-test:
     name: TEST Deployment
@@ -174,6 +176,7 @@ jobs:
             -p ZONE=prod -p NAME=${{ github.event.repository.name }} 
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
   deploy-prod:
     name: PROD Deployment
