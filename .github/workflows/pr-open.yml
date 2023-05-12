@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api]
+        name: [database, backend, frontend, oracle-api, fluentbit]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -113,6 +113,11 @@ jobs:
             overwrite: true
             verification_path: "check"
             parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
+          - name: fluentbit
+            file: backend/fluent-bit.cm.yml
+            overwrite: true
+            parameters: -p NAMESPACE=${{ secrets.OC_NAMESPACE }}
+              #-p AWS_DEFAULT_REGION=? -p AWS_KINESIS_STREAM=? -p AWS_ROLE_ARN=?
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
