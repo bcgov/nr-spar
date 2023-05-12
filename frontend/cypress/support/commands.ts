@@ -1,6 +1,8 @@
 // @ts-check
 /// <reference path="../global.d.ts" />
 
+import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
+
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
 
 Cypress.Commands.add('deleteUser', (firstname, lastname) => {
@@ -42,4 +44,20 @@ Cypress.Commands.add('login', () => {
     .clear()
     .type(PASSWORD, { delay: 50 });
   cy.get('input[name=btnSubmit]').click();
+});
+
+Cypress.Commands.add('navigateTo', (menuItem) => {
+  cy.get(NavigationSelectors.NavigationSideMenu)
+    .contains(menuItem)
+    .click();
+});
+
+Cypress.Commands.add('isPageTitle', (pageTitle) => {
+  cy.get(GenericSelectors.PageTitle)
+    .should('contain.text', pageTitle);
+});
+
+Cypress.Commands.add('toogleFavourite', () => {
+  cy.get(GenericSelectors.FavouriteButton)
+    .click();
 });

@@ -36,7 +36,7 @@ describe('Login page test', () => {
   });
 
   it('try to access system using a link without user connected', () => {
-    cy.visit('https://nr-spar-webapp-test-frontend.apps.silver.devops.gov.bc.ca/');
+    cy.visit('http://localhost:3000/');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
