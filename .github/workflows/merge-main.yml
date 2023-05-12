@@ -64,6 +64,7 @@ jobs:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}      
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
   deploy-test:
     name: TEST Deployment
@@ -82,7 +83,7 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=2 -p MAX_REPLICAS=3 -p BUILD=test
+            parameters: -p BUILD=test
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -95,7 +96,6 @@ jobs:
               -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
               -p REACT_APP_KC_REALM=standard
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-              -p MIN_REPLICAS=2 -p MAX_REPLICAS=3
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -174,6 +174,7 @@ jobs:
             -p ZONE=prod -p NAME=${{ github.event.repository.name }} 
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
   deploy-prod:
     name: PROD Deployment
@@ -191,7 +192,7 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=2 -p MAX_REPLICAS=3 -p BUILD=prod
+            parameters: -p BUILD=prod
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -204,7 +205,6 @@ jobs:
               -p REACT_APP_KC_URL=https://loginproxy.gov.bc.ca/auth
               -p REACT_APP_KC_REALM=standard
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-              -p MIN_REPLICAS=2 -p MAX_REPLICAS=3
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
