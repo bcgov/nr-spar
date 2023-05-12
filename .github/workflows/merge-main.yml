@@ -99,7 +99,7 @@ jobs:
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
-            verification_path: "check"
+            verification_path: "actuator/health"
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
@@ -208,7 +208,7 @@ jobs:
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
-            verification_path: "check"
+            verification_path: "actuator/health"
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
