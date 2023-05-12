@@ -4,7 +4,6 @@ on:
   pull_request:
 
 concurrency:
-  workflow_dispatch:
   # PR open and close use the same group, allowing only one at a time
   # group: pr-${{ github.event.number }}
   # cancel-in-progress: true
