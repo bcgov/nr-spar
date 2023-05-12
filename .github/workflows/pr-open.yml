@@ -98,7 +98,6 @@ jobs:
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
-            verification_path: "actuator/health"
             parameters:
               -p REACT_APP_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
               -p REACT_APP_SERVER_URL=https://nr-spar-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
@@ -111,7 +110,7 @@ jobs:
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
-            verification_path: "check"
+            verification_path: "actuator/health"
             parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
