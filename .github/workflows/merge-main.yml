@@ -42,7 +42,7 @@ jobs:
           cd backend
           mvn --update-snapshots -P prod clean package -Dmaven.test.skip
           cd ../oracle-api
-          mvn --update-snapshots package -Dmaven.test.skip 
+          mvn --update-snapshots package -Dmaven.test.skip
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
@@ -61,7 +61,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}      
+            -p ZONE=test -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
@@ -88,7 +88,6 @@ jobs:
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
-            verification_path: "/"
             parameters:
               -p REACT_APP_SPAR_BUILD_VERSION=snapshot-test
               -p REACT_APP_SERVER_URL=https://nr-spar-test-backend.apps.silver.devops.gov.bc.ca
@@ -114,7 +113,7 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           verification_path: "actuator/health"
-          parameters: 
+          parameters:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             ${{ matrix.parameters }}
@@ -158,7 +157,7 @@ jobs:
 
   init-prod:
     name: PROD Init
-    needs: 
+    needs:
       - deploy-test
     environment: prod
     runs-on: ubuntu-22.04
@@ -172,7 +171,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=prod -p NAME=${{ github.event.repository.name }} 
+            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
@@ -198,7 +197,6 @@ jobs:
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
-            verification_path: "/"
             parameters:
               -p REACT_APP_SPAR_BUILD_VERSION=snapshot-prod
               -p REACT_APP_SERVER_URL=https://nr-spar-prod-backend.apps.silver.devops.gov.bc.ca
