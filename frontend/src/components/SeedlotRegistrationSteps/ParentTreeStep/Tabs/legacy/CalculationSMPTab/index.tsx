@@ -30,11 +30,11 @@ import {
   Add
 } from '@carbon/icons-react';
 
-import Subtitle from '../../../../Subtitle';
-import UploadFileModal from '../../UploadFileModal';
+import Subtitle from '../../../../../Subtitle';
+import UploadFileModal from '../../../UploadFileModal';
 
-import { SMPMixType } from '../../../../../types/SeedlotTypes/ParentTree';
-import paginationOnChange from '../../../../../utils/PaginationUtils';
+import { SMPMixType } from '../../../../../../types/SeedlotTypes/ParentTree';
+import paginationOnChange from '../../../../../../utils/PaginationUtils';
 
 import {
   smpMixFixedHeaders,
@@ -42,21 +42,21 @@ import {
   newSMPMixEntry,
   DEFAULT_INITIAL_ROWS,
   PAGINATION_OPTIONS
-} from '../../constants';
+} from '../../../constants';
 
 import {
   ControlFiltersType,
   GeneticTraitsType
-} from '../../definitions';
+} from '../../../definitions';
 
 import {
   clearTable,
   createEmptySMPMix,
   createRandomSMPMix,
   disableWheelEvent
-} from '../../utils';
+} from '../../../utils';
 
-import '../styles.scss';
+import '../../styles.scss';
 
 interface CalculationSMPTabProps {
   geneticTraits: Array<GeneticTraitsType>;

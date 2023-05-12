@@ -38,6 +38,7 @@ const SeedlotRegistrationEndpoints = (server: Server) => {
       lot_species: attrs.species,
       form_step: 'Collection',
       status: 4,
+      // TODO: why format data upon insertion???
       participants: [`${userData.firstName} ${userData.lastName}`],
       created_at: formatDate(stringDate),
       last_modified: formatDate(stringDate),

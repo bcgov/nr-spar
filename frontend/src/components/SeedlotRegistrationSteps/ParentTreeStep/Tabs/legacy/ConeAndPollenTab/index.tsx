@@ -24,32 +24,32 @@ import {
 } from '@carbon/react';
 import { Upload, View, Settings } from '@carbon/icons-react';
 
-import Subtitle from '../../../../Subtitle';
-import UploadFileModal from '../../UploadFileModal';
+import Subtitle from '../../../../../Subtitle';
+import UploadFileModal from '../../../UploadFileModal';
 
-import { ConeAndPollenType } from '../../../../../types/SeedlotTypes/ParentTree';
-import paginationOnChange from '../../../../../utils/PaginationUtils';
+import { ConeAndPollenType } from '../../../../../../types/SeedlotTypes/ParentTree';
+import paginationOnChange from '../../../../../../utils/PaginationUtils';
 
 import {
   coneAndPollenFixedHeaders,
   DEFAULT_INITIAL_ROWS,
   pageTexts,
   PAGINATION_OPTIONS
-} from '../../constants';
+} from '../../../constants';
 
 import {
   ControlFiltersType,
   TabProps
-} from '../../definitions';
+} from '../../../definitions';
 
 import {
   clearTable,
   createEmptyConeAndPollen,
   createRandomConeAndPollen,
   disableWheelEvent
-} from '../../utils';
+} from '../../../utils';
 
-import '../styles.scss';
+import '../../styles.scss';
 
 const ConeAndPollenTab = ({
   parentTrees,

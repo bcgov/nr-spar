@@ -143,7 +143,8 @@ const FormReview = () => {
     ownershipStep: [ownershipMock],
     orchardStep: orchardMock,
     collectionStep: collectionMock,
-    extractionStorageStep: extractionMock
+    extractionStorageStep: extractionMock,
+    parentTreeStep: {}
   });
 
   return (
@@ -156,161 +157,166 @@ const FormReview = () => {
       </div>
       <div>
         {
-        mockFormData.length
-          ? (
-            <Accordion className="steps-accordion">
-              <AccordionItem
-                title={(
-                  <TitleAccordion
-                    title={formReviewText.collection.title}
-                    description={formReviewText.collection.description}
-                  />
-                    )}
-              >
-                <div className="form-item">
-                  <CollectionStep
-                    state={allStepData.collectionStep}
-                    defaultAgency={defaultAgency}
-                    defaultCode={defaultCode}
-                    agencyOptions={agencyOptions}
-                    setStepData={() => {}}
-                    readOnly
-                  />
-                  <Button
-                    kind="tertiary"
-                    size="md"
-                    className="btn-edit-step"
-                    renderIcon={Edit}
-                  >
-                    {formReviewText.editButton.labelText}
-                  </Button>
-                </div>
-              </AccordionItem>
-              <AccordionItem
-                title={(
-                  <TitleAccordion
-                    title={formReviewText.ownership.title}
-                    description={formReviewText.ownership.description}
-                  />
-                    )}
-              >
-                <div className="form-item">
-                  <OwnershipStep
-                    state={allStepData.ownershipStep}
-                    defaultAgency={defaultAgency}
-                    defaultCode={defaultCode}
-                    agencyOptions={agencyOptions}
-                    setStepData={() => {}}
-                    fundingSources={[]}
-                    paymentMethods={[]}
-                    invalidState={{}}
-                    setInvalidState={() => {}}
-                    readOnly
-                  />
-                  <Button
-                    kind="tertiary"
-                    size="md"
-                    className="btn-edit-step"
-                    renderIcon={Edit}
-                  >
-                    {formReviewText.editButton.labelText}
-                  </Button>
-                </div>
-              </AccordionItem>
-              <AccordionItem
-                title={(
-                  <TitleAccordion
-                    title={formReviewText.interim.title}
-                    description={formReviewText.interim.description}
-                  />
-                    )}
-              >
-                <div className="form-item">
-                  <InterimStorage
-                    state={allStepData.interimStep}
-                    defaultAgency={defaultAgency}
-                    defaultCode={defaultCode}
-                    agencyOptions={agencyOptions}
-                    setStepData={() => {}}
-                    readOnly
-                  />
-                  <Button
-                    kind="tertiary"
-                    size="md"
-                    className="btn-edit-step"
-                    renderIcon={Edit}
-                  >
-                    {formReviewText.editButton.labelText}
-                  </Button>
-                </div>
-              </AccordionItem>
-              <AccordionItem
-                title={(
-                  <TitleAccordion
-                    title={formReviewText.orchard.title}
-                    description={formReviewText.orchard.description}
-                  />
-                    )}
-              >
-                <div className="form-item">
-                  <OrchardStep
-                    state={allStepData.orchardStep}
-                    setStepData={() => {}}
-                    readOnly
-                  />
-                  <Button
-                    kind="tertiary"
-                    size="md"
-                    className="btn-edit-step"
-                    renderIcon={Edit}
-                  >
-                    {formReviewText.editButton.labelText}
-                  </Button>
-                </div>
-              </AccordionItem>
-              <AccordionItem
-                title={(
-                  <TitleAccordion
-                    title={formReviewText.parentTree.title}
-                    description={formReviewText.parentTree.description}
-                  />
-                    )}
-              />
-              <AccordionItem
-                title={(
-                  <TitleAccordion
-                    title={formReviewText.extraction.title}
-                    description={formReviewText.extraction.description}
-                  />
-                    )}
-              >
-                <div className="form-item">
-                  <ExtractionAndStorage
-                    state={allStepData.extractionStorageStep}
-                    defaultAgency={defaultAgency}
-                    defaultCode={defaultCode}
-                    agencyOptions={agencyOptions}
-                    setStepData={() => {}}
-                    readOnly
-                  />
-                  <Button
-                    kind="tertiary"
-                    size="md"
-                    className="btn-edit-step"
-                    renderIcon={Edit}
-                  >
-                    {formReviewText.editButton.labelText}
-                  </Button>
-                </div>
-              </AccordionItem>
-            </Accordion>
-          )
-          : (
-            <div className="form-review-empty-section">
-              <EmptySection pictogram="Magnify" title="You haven't completed the form yet!" description="The form data will appear here once you complete one step" />
-            </div>
-          )
-      }
+          mockFormData.length
+            ? (
+              <Accordion className="steps-accordion">
+                <AccordionItem
+                  title={(
+                    <TitleAccordion
+                      title={formReviewText.collection.title}
+                      description={formReviewText.collection.description}
+                    />
+                  )}
+                >
+                  <div className="form-item">
+                    <CollectionStep
+                      state={allStepData.collectionStep}
+                      defaultAgency={defaultAgency}
+                      defaultCode={defaultCode}
+                      agencyOptions={agencyOptions}
+                      setStepData={() => { }}
+                      readOnly
+                    />
+                    <Button
+                      kind="tertiary"
+                      size="md"
+                      className="btn-edit-step"
+                      renderIcon={Edit}
+                    >
+                      {formReviewText.editButton.labelText}
+                    </Button>
+                  </div>
+                </AccordionItem>
+                <AccordionItem
+                  title={(
+                    <TitleAccordion
+                      title={formReviewText.ownership.title}
+                      description={formReviewText.ownership.description}
+                    />
+                  )}
+                >
+                  <div className="form-item">
+                    <OwnershipStep
+                      state={allStepData.ownershipStep}
+                      defaultAgency={defaultAgency}
+                      defaultCode={defaultCode}
+                      agencyOptions={agencyOptions}
+                      setStepData={() => { }}
+                      fundingSources={[]}
+                      paymentMethods={[]}
+                      invalidState={{}}
+                      setInvalidState={() => { }}
+                      readOnly
+                    />
+                    <Button
+                      kind="tertiary"
+                      size="md"
+                      className="btn-edit-step"
+                      renderIcon={Edit}
+                    >
+                      {formReviewText.editButton.labelText}
+                    </Button>
+                  </div>
+                </AccordionItem>
+                <AccordionItem
+                  title={(
+                    <TitleAccordion
+                      title={formReviewText.interim.title}
+                      description={formReviewText.interim.description}
+                    />
+                  )}
+                >
+                  <div className="form-item">
+                    <InterimStorage
+                      state={allStepData.interimStep}
+                      defaultAgency={defaultAgency}
+                      defaultCode={defaultCode}
+                      agencyOptions={agencyOptions}
+                      setStepData={() => { }}
+                      readOnly
+                    />
+                    <Button
+                      kind="tertiary"
+                      size="md"
+                      className="btn-edit-step"
+                      renderIcon={Edit}
+                    >
+                      {formReviewText.editButton.labelText}
+                    </Button>
+                  </div>
+                </AccordionItem>
+                <AccordionItem
+                  title={(
+                    <TitleAccordion
+                      title={formReviewText.orchard.title}
+                      description={formReviewText.orchard.description}
+                    />
+                  )}
+                >
+                  <div className="form-item">
+                    <OrchardStep
+                      seedlotSpecies={{
+                        code: 'POG',
+                        description: 'Protect old growth',
+                        label: 'POG - Protect old growth'
+                      }}
+                      state={allStepData.orchardStep}
+                      setStepData={() => { }}
+                      readOnly
+                    />
+                    <Button
+                      kind="tertiary"
+                      size="md"
+                      className="btn-edit-step"
+                      renderIcon={Edit}
+                    >
+                      {formReviewText.editButton.labelText}
+                    </Button>
+                  </div>
+                </AccordionItem>
+                <AccordionItem
+                  title={(
+                    <TitleAccordion
+                      title={formReviewText.parentTree.title}
+                      description={formReviewText.parentTree.description}
+                    />
+                  )}
+                />
+                <AccordionItem
+                  title={(
+                    <TitleAccordion
+                      title={formReviewText.extraction.title}
+                      description={formReviewText.extraction.description}
+                    />
+                  )}
+                >
+                  <div className="form-item">
+                    <ExtractionAndStorage
+                      state={allStepData.extractionStorageStep}
+                      defaultAgency={defaultAgency}
+                      defaultCode={defaultCode}
+                      agencyOptions={agencyOptions}
+                      setStepData={() => { }}
+                      readOnly
+                    />
+                    <Button
+                      kind="tertiary"
+                      size="md"
+                      className="btn-edit-step"
+                      renderIcon={Edit}
+                    >
+                      {formReviewText.editButton.labelText}
+                    </Button>
+                  </div>
+                </AccordionItem>
+              </Accordion>
+            )
+            : (
+              <div className="form-review-empty-section">
+                <EmptySection pictogram="Magnify" title="You haven't completed the form yet!" description="The form data will appear here once you complete one step" />
+              </div>
+            )
+        }
       </div>
     </div>
   );

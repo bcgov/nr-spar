@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useRef, useState } from 'react';
 
 import {
   Row,
@@ -16,8 +15,6 @@ import {
 import { Add, TrashCan } from '@carbon/icons-react';
 
 import Subtitle from '../../Subtitle';
-
-import SeedlotRegistration from '../../../types/SeedlotRegistration';
 import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
 
 import api from '../../../api-service/api';
@@ -28,6 +25,7 @@ import FemaleGameticOptions from './data';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 
 import './styles.scss';
+import DropDownObj from '../../../types/DropDownObject';
 
 type NumStepperVal = {
   value: number,
@@ -35,38 +33,16 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
+  seedlotSpecies: DropDownObj
   state: SeedlotOrchard
   setStepData: Function
   readOnly?: boolean
 }
 
 const OrchardStep = ({
-  state, setStepData, readOnly
+  seedlotSpecies, state, setStepData, readOnly
 }: OrchardStepProps) => {
-  const { seedlot } = useParams();
-  const [seedlotApplicantData, setSeedlotApplicantData] = useState<SeedlotRegistration>();
-  const [isPLISpecies, setIsPLISpecies] = useState<boolean>();
-
-  const getSeedlotData = () => {
-    if (seedlot) {
-      const url = `${ApiConfig.seedlot}/${seedlot}`;
-      api.get(url)
-        .then((response) => {
-          if (response.data.seedlotApplicantInfo) {
-            setSeedlotApplicantData(response.data.seedlotApplicantInfo);
-            setIsPLISpecies(response.data.seedlotApplicantInfo.species.code === 'PLI');
-          }
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(`Error: ${error}`);
-        });
-    }
-  };
-
-  useEffect(() => {
-    getSeedlotData();
-  }, []);
+  const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
 
   // Fixed messages
   const orchardIdNotFound = 'This id has no orchard assigned to it, please try a different one';
@@ -307,9 +283,9 @@ const OrchardStep = ({
               id="seedlot-species-dropdown"
               titleText="Seedlot species"
               label="Seedlot species"
-              selectedItem={seedlotApplicantData?.species}
+              selectedItem={seedlotSpecies}
               readOnly
-              items={[seedlotApplicantData?.species]}
+              items={[seedlotSpecies]}
             />
           </Column>
         </Row>

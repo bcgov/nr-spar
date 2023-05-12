@@ -9,6 +9,7 @@ export type AllStepData = {
   interimStep: InterimForm,
   ownershipStep: Array<SingleOwnerForm>,
   orchardStep: SeedlotOrchard,
+  parentTreeStep: any,
   extractionStorageStep: ExtractionStorage
 }
 

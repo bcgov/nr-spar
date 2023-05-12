@@ -24,11 +24,11 @@ import {
 } from '@carbon/react';
 import { Upload, View, Settings } from '@carbon/icons-react';
 
-import Subtitle from '../../../../Subtitle';
-import UploadFileModal from '../../UploadFileModal';
+import Subtitle from '../../../../../Subtitle';
+import UploadFileModal from '../../../UploadFileModal';
 
-import { SMPSuccessType } from '../../../../../types/SeedlotTypes/ParentTree';
-import paginationOnChange from '../../../../../utils/PaginationUtils';
+import { SMPSuccessType } from '../../../../../../types/SeedlotTypes/ParentTree';
+import paginationOnChange from '../../../../../../utils/PaginationUtils';
 
 import {
   DEFAULT_INITIAL_ROWS,
@@ -36,21 +36,21 @@ import {
   PAGINATION_OPTIONS,
   smpSuccessFixedFilters,
   smpSuccessFixedHeaders
-} from '../../constants';
+} from '../../../constants';
 
 import {
   ControlFiltersType,
   TabProps
-} from '../../definitions';
+} from '../../../definitions';
 
 import {
   clearTable,
   createEmptySMPSuccess,
   createRandomSMPSuccess,
   disableWheelEvent
-} from '../../utils';
+} from '../../../utils';
 
-import '../styles.scss';
+import '../../styles.scss';
 
 const SMPSuccessTab = ({
   parentTrees,

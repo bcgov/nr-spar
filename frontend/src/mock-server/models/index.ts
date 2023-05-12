@@ -5,7 +5,7 @@ import { ModelDefinition } from 'miragejs/-types';
 import { FavActivityType } from '../../types/FavActivityTypes';
 import GeneticClassesType from '../../types/GeneticClasses';
 import ApplicantInfo from '../../types/ApplicantInfo';
-import SeedlotRegistration from '../../types/SeedlotRegistration';
+import SeedlotRegistration from '../../types/SeedlotRegistrationObj';
 import Seedlot from '../../types/Seedlot';
 import CollectionInformation from '../../types/CollectionInformation';
 import CollectorAgency from '../../types/CollectorAgency';
