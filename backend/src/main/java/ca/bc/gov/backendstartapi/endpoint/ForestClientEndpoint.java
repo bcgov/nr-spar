@@ -35,16 +35,19 @@ public class ForestClientEndpoint {
   private final ForestClientService forestClientService;
 
   /**
-   * Fetch a forest client by its client number.
+   * Fetch a forest client by its identifier (either its number or its acronym).
    *
-   * @param number the number that identifies the desired client
-   * @return the forest client with client number {@code number}, if it exists
+   * @param identifier the number that identifies the desired client
+   * @return the forest with client number or acronym {@code identifier}, if one exists
    */
-  @GetMapping(path = "/{number}")
+  @GetMapping(path = "/{identifier}")
   @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch a forest client",
-      description = "Returns the forest client identified by `number`, if there is one.",
+      description =
+          """
+              Returns the forest client identified by `identifier` (a number or an acronym),
+              if there is one.""",
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -52,18 +55,18 @@ public class ForestClientEndpoint {
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   public ResponseEntity<Serializable> fetchClient(
-      @PathVariable("number")
-          @Pattern(regexp = "\\d{8}")
+      @PathVariable("identifier")
+          @Pattern(regexp = "^\\d{8}$|^\\w{1,8}$")
           @Parameter(
-              name = "number",
+              name = "identifier",
               in = ParameterIn.PATH,
-              description = "Number that identifies the client number to be fetched.")
-          String number) {
+              description = "Number or acronym that identifies the client to be fetched.")
+          String identifier) {
     try {
-      var response = forestClientService.fetchClient(number).map(Serializable.class::cast);
+      var response = forestClientService.fetchClient(identifier).map(Serializable.class::cast);
       return ResponseEntity.of(response);
     } catch (HttpStatusCodeException e) {
-      log.warn("External error while retrieving forest client " + number, e);
+      log.warn("External error while retrieving forest client " + identifier, e);
       return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
     }
   }
