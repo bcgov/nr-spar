@@ -136,7 +136,7 @@ objects:
                 successThreshold: 1
                 failureThreshold: 5
                 httpGet:
-                  path: /actuator/health
+                  path: /
                   port: 3000
                   scheme: HTTP
                 initialDelaySeconds: 15
@@ -146,7 +146,7 @@ objects:
                 successThreshold: 1
                 failureThreshold: 5
                 httpGet:
-                  path: /actuator/health
+                  path: /
                   port: 3000
                   scheme: HTTP
                 initialDelaySeconds: 15
