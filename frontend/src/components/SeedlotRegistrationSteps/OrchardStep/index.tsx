@@ -17,8 +17,8 @@ import { Add, TrashCan } from '@carbon/icons-react';
 import Subtitle from '../../Subtitle';
 import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
 
-import api from '../../../api-service/api';
-import ApiConfig from '../../../api-service/ApiConfig';
+// import api from '../../../api-service/api';
+// import ApiConfig from '../../../api-service/ApiConfig';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 
 import FemaleGameticOptions from './data';
@@ -44,18 +44,14 @@ const OrchardStep = ({
 }: OrchardStepProps) => {
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
 
-  // Fixed messages
-  const orchardIdNotFound = 'This id has no orchard assigned to it, please try a different one';
-  const invalidOrchardValue = 'Please insert a valid orchard id between 100 and 999';
-
   const refControl = useRef<any>({});
 
   const [hasAddtionalOrchard, setAdditionalOrchard] = useState<boolean>(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [invalidOrchardId, setInvalidOrchardId] = useState<boolean>(false);
-  const [invalidOrchardText, setInvalidOrchardText] = useState<string>(invalidOrchardValue);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [invalidAddOrchardId, setInvalidAddOrchardId] = useState<boolean>(false);
-  const [invalidAddOrchardText, setInvalidAddOrchardText] = useState<string>(invalidOrchardValue);
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
@@ -89,43 +85,7 @@ const OrchardStep = ({
   };
 
   const validateOrchardId = (event: React.ChangeEvent<HTMLInputElement>, nameField: string) => {
-    const { value, name } = event.target;
-    if (value) {
-      const url = `${ApiConfig.orchard}/${value}`;
-      api.get(url)
-        .then((response) => {
-          if (response.data.orchard) {
-            // Clear any errors, if any
-            if (name === 'orchardId' && invalidOrchardId) {
-              setInvalidOrchardId(false);
-              setInvalidOrchardText(invalidOrchardValue);
-            } else if (invalidAddOrchardId) {
-              setInvalidAddOrchardId(false);
-              setInvalidAddOrchardText(invalidOrchardValue);
-            }
-
-            setResponse([name, nameField], [value, response.data.orchard.name]);
-
-            // Set error messages for id not found
-          } else if (name === 'orchardId') {
-            setInvalidOrchardText(orchardIdNotFound);
-            setInvalidOrchardId(true);
-          } else {
-            setInvalidAddOrchardText(orchardIdNotFound);
-            setInvalidAddOrchardId(true);
-          }
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(`Error: ${error}`);
-        });
-    } else if (name === 'orchardId') {
-      setInvalidOrchardId(true);
-      setInvalidOrchardText(invalidOrchardValue);
-    } else {
-      setInvalidAddOrchardId(true);
-      setInvalidAddOrchardText(invalidOrchardValue);
-    }
+    console.log(event, nameField);
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -184,8 +144,6 @@ const OrchardStep = ({
               type="number"
               label="Orchard ID or number"
               placeholder="Example: 123"
-              invalid={invalidOrchardId}
-              invalidText={invalidOrchardText}
               onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'orchardName')}
               readOnly={readOnly}
             />
@@ -197,7 +155,7 @@ const OrchardStep = ({
               labelText="Orchard name"
               placeholder="Orchard name"
               value={state.orchardName}
-              readOnly={readOnly}
+              readOnly
             />
           </Column>
         </Row>
@@ -221,7 +179,6 @@ const OrchardStep = ({
                     helperText="Additional contributing orchard id"
                     placeholder="Example: 123"
                     invalid={invalidAddOrchardId}
-                    invalidText={invalidAddOrchardText}
                     onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'additionalName')}
                     readOnly={readOnly}
                   />
@@ -233,7 +190,7 @@ const OrchardStep = ({
                     labelText="Orchard name (optional)"
                     placeholder="Orchard name"
                     value={state.additionalName}
-                    readOnly={readOnly}
+                    readOnly
                   />
                 </Column>
               </Row>
