@@ -83,12 +83,13 @@ const OrchardStep = ({
     }
   };
 
-  // TODO FOR TESTING
-  // const [orchardName, setOrchardName] = useState<any>();
-
-  const setOrchardName = (data: OrchardDataType, id: number) => {
+  const setOrchardName = (data: OrchardDataType, inputId: number) => {
     const newOrchards = [...state.orchards];
-    const replaceIndex = newOrchards.findIndex((orchard) => orchard.id === id);
+    /*
+      * It is safe to replace item in array by index here
+      * since the array is not mutable at this stage
+    */
+    const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
     if (data.id && data.name && data.vegetationCode) {
       newOrchards[replaceIndex].orchardLabel = `${data.id} - ${data.name} - ${data.vegetationCode}`;
     } else {
@@ -103,30 +104,25 @@ const OrchardStep = ({
   useQueries({
     queries:
       state.orchards.map((orchard) => ({
-        queryKey: ['orchard', orchard.id],
+        queryKey: ['orchard', orchard.orchardId],
         queryFn: () => getOrchardByID(orchard.orchardId),
-        onSuccess: (data: OrchardDataType) => setOrchardName(data, orchard.id),
+        onSuccess: (data: OrchardDataType) => setOrchardName(data, orchard.inputId),
         enabled: orchard.orchardId.length > 0,
         retry: 0
       }))
   });
 
-  const fetchOrchardInfo = (orchardIdInput: string, id: number) => {
+  const fetchOrchardInfo = (orchardId: string, inputId: number) => {
     // Copy orchards from state
     const newOrchards = [...state.orchards];
     // Replace input value with id
-    const replaceIndex = newOrchards.findIndex((orchard) => orchard.id === id);
-    /*
-      It is safe to replace item in array by index here
-      since the array is not mutable at this stage
-    */
-    newOrchards[replaceIndex].orchardId = orchardIdInput;
+    const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
+    newOrchards[replaceIndex].orchardId = orchardId;
     setStepData({
       ...state,
       orchards: newOrchards
     });
-    console.log(newOrchards);
-    queryClient.refetchQueries({ queryKey: ['orchard', id] });
+    queryClient.refetchQueries({ queryKey: ['orchard', orchardId] });
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -165,7 +161,7 @@ const OrchardStep = ({
     const orchards = [...state.orchards];
     const numOfOrchard = orchards.length;
     const newOrchard: OrchardObj = {
-      id: numOfOrchard,
+      inputId: numOfOrchard,
       orchardId: '',
       orchardLabel: ''
     };
@@ -179,7 +175,7 @@ const OrchardStep = ({
   const deleteOrchardObj = () => {
     const orchards = [...state.orchards];
     const numOfOrchard = orchards.length;
-    const newOrchards = orchards.filter((orchard) => orchard.id !== (numOfOrchard - 1));
+    const newOrchards = orchards.filter((orchard) => orchard.inputId !== (numOfOrchard - 1));
     setStepData({
       ...state,
       orchards: newOrchards
@@ -197,12 +193,12 @@ const OrchardStep = ({
         </Row>
         {
           state.orchards.map((orchard) => (
-            <Row className="seedlot-orchard-field" key={orchard.id}>
+            <Row className="seedlot-orchard-field" key={orchard.inputId}>
               <Column sm={4} md={2} lg={3}>
                 <NumberInput
-                  id={`orchardId-${orchard.id}`}
+                  id={`orchardId-${orchard.inputId}`}
                   name="orchardId"
-                  ref={(el: HTMLInputElement) => addRefs(el, `orchardId-${orchard.id}`)}
+                  ref={(el: HTMLInputElement) => addRefs(el, `orchardId-${orchard.inputId}`)}
                   value={orchard.orchardId}
                   allowEmpty
                   min={100}
@@ -210,11 +206,11 @@ const OrchardStep = ({
                   disableWheel
                   hideSteppers
                   type="number"
-                  label={orchard.id === 0 ? 'Orchard ID or number' : 'Additional orchard ID (optional)'}
+                  label={orchard.inputId === 0 ? 'Orchard ID or number' : 'Additional orchard ID (optional)'}
                   placeholder="Example: 123"
                   onBlur={
                     (event: React.ChangeEvent<HTMLInputElement>) => {
-                      fetchOrchardInfo(event.target.value, orchard.id);
+                      fetchOrchardInfo(event.target.value, orchard.inputId);
                     }
                   }
                   readOnly={readOnly}
@@ -222,9 +218,9 @@ const OrchardStep = ({
               </Column>
               <Column sm={4} md={2} lg={3}>
                 <TextInput
-                  id={`orchardName-${orchard.id}`}
+                  id={`orchardName-${orchard.inputId}`}
                   type="text"
-                  labelText={orchard.id === 0 ? 'Orchard name' : 'Orchard name (optional)'}
+                  labelText={orchard.inputId === 0 ? 'Orchard name' : 'Orchard name (optional)'}
                   placeholder="Orchard name"
                   value={orchard.orchardLabel}
                   readOnly

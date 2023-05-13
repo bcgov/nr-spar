@@ -56,7 +56,7 @@ export const initOrchardState = (): OrchardForm => (
   {
     orchards: [
       {
-        id: 0,
+        inputId: 0,
         orchardId: '',
         orchardLabel: ''
       }

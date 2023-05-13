@@ -68,7 +68,7 @@ const agencyOptions = [
 const orchardMock: OrchardForm = {
   orchards: [
     {
-      id: 0,
+      inputId: 0,
       orchardId: '123',
       orchardLabel: 'Strong seeds orchard'
     }

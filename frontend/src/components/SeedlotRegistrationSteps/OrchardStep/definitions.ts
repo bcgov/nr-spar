@@ -1,5 +1,5 @@
 export type OrchardObj = {
-  id: number,
+  inputId: number,
   orchardId: string,
   orchardLabel: string
 }
