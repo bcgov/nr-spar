@@ -20,6 +20,7 @@ import InterimStorage from '../SeedlotRegistrationSteps/InterimStep';
 import OwnershipStep from '../SeedlotRegistrationSteps/OwnershipStep';
 import CollectionStep from '../SeedlotRegistrationSteps/CollectionStep';
 import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStorageStep';
+import { OrchardForm } from '../SeedlotRegistrationSteps/OrchardStep/definitions';
 
 const mockFormData = [
   {
@@ -64,16 +65,19 @@ const agencyOptions = [
   '0043 - Bad Seeds Orchard - BSO'
 ];
 
-const orchardMock = {
-  orchardId: '123',
-  orchardName: 'Strong seeds orchard',
+const orchardMock: OrchardForm = {
+  orchards: [
+    {
+      id: 0,
+      orchardId: '123',
+      orchardLabel: 'Strong seeds orchard'
+    }
+  ],
   femaleGametic: 'F1 - Visual estimate',
   maleGametic: 'M2',
   controlledCross: true,
   biotechProcess: true,
   noPollenContamination: true,
-  additionalId: '4',
-  additionalName: 'teste',
   breedingPercentage: '100',
   pollenMethodology: false
 };

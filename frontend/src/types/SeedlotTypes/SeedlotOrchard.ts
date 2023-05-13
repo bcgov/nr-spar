@@ -1,17 +1,5 @@
-export type SeedlotOrchard = {
-  orchardId: string;
-  orchardName: string;
-  additionalId: string;
-  additionalName: string;
-  femaleGametic: string;
-  maleGametic: string;
-  controlledCross: boolean;
-  biotechProcess: boolean;
-  noPollenContamination: boolean;
-  breedingPercentage: string;
-  pollenMethodology: boolean;
-}
+import { OrchardForm } from '../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 
 export type MockSeedlotOrchard = {
-  [seedlotnumber: string]: SeedlotOrchard
+  [seedlotnumber: string]: OrchardForm
 }

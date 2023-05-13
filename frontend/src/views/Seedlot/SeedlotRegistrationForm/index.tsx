@@ -22,7 +22,7 @@ import OwnershipStep from '../../../components/SeedlotRegistrationSteps/Ownershi
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
-import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
+import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { AllStepData, AllStepInvalidationObj, FormInvalidationObj } from './definitions';
 import {
@@ -163,7 +163,7 @@ const SeedlotRegistrationForm = () => {
           <OrchardStep
             seedlotSpecies={seedlotInfoQuery.data.seedlot.lot_species}
             state={allStepData.orchardStep}
-            setStepData={(data: SeedlotOrchard) => setStepData('orchardStep', data)}
+            setStepData={(data: OrchardForm) => setStepData('orchardStep', data)}
           />
         );
       // Parent Tree and SMP

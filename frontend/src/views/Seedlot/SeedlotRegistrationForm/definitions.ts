@@ -2,13 +2,13 @@ import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/Col
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
-import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
+import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 
 export type AllStepData = {
   collectionStep: CollectionForm,
   interimStep: InterimForm,
   ownershipStep: Array<SingleOwnerForm>,
-  orchardStep: SeedlotOrchard,
+  orchardStep: OrchardForm,
   parentTreeStep: any,
   extractionStorageStep: ExtractionStorage
 }

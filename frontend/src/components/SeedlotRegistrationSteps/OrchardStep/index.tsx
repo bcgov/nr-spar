@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
 
 import {
   Row,
@@ -16,7 +17,8 @@ import {
 import { Add, TrashCan } from '@carbon/icons-react';
 
 import Subtitle from '../../Subtitle';
-import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
+import { OrchardForm, OrchardObj } from './definitions';
+import { MAX_ORCHARDS } from './constants';
 
 import getOrchardByID from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
@@ -34,7 +36,7 @@ type NumStepperVal = {
 
 interface OrchardStepProps {
   seedlotSpecies: DropDownObj
-  state: SeedlotOrchard
+  state: OrchardForm
   setStepData: Function
   readOnly?: boolean
 }
@@ -45,12 +47,7 @@ const OrchardStep = ({
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
 
   const refControl = useRef<any>({});
-
-  const [hasAddtionalOrchard, setAdditionalOrchard] = useState<boolean>(false);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [invalidOrchardId, setInvalidOrchardId] = useState<boolean>(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [invalidAddOrchardId, setInvalidAddOrchardId] = useState<boolean>(false);
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
@@ -87,19 +84,25 @@ const OrchardStep = ({
   // TODO FOR TESTING
   // const [orchardName, setOrchardName] = useState<any>();
 
-  const orchardQuery = useQuery(
-    {
-      queryKey: ['orchard', state.orchardId],
-      queryFn: () => getOrchardByID(state.orchardId),
-      enabled: false,
-      onSuccess: (data) => setResponse(['orchardName'], [data.name])
-    }
-  );
+  // const orchardQuery = useQuery(
+  //   {
+  //     queryKey: ['orchard', state.orchardId],
+  //     queryFn: () => getOrchardByID(state.orchardId),
+  //     enabled: false
+  //   }
+  // );
+
+  // const orchardQueries = useQueries(
+  //   [state.orchardId, state.additionalId].map((id) => {
+
+  //   })
+  // );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fetchOrchardInfo = (event: React.ChangeEvent<HTMLInputElement>, nameField: string) => {
-    setResponse(['orchardId'], [event.target.value]);
-    orchardQuery.refetch();
+    console.log(event.target.value, nameField);
+    // setResponse(['orchardId'], [event.target.value]);
+    // orchardQuery.refetch();
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -134,6 +137,31 @@ const OrchardStep = ({
     }
   };
 
+  const addOrchardObj = () => {
+    const orchards = [...state.orchards];
+    const numOfOrchard = orchards.length;
+    const newOrchard: OrchardObj = {
+      id: numOfOrchard,
+      orchardId: '',
+      orchardLabel: ''
+    };
+    orchards.push(newOrchard);
+    setStepData({
+      ...state,
+      orchards
+    });
+  };
+
+  const deleteOrchardObj = () => {
+    const orchards = [...state.orchards];
+    const numOfOrchard = orchards.length;
+    const newOrchards = orchards.filter((orchard) => orchard.id !== (numOfOrchard - 1));
+    setStepData({
+      ...state,
+      orchards: newOrchards
+    });
+  };
+
   return (
     <div className="seedlot-orchard-step-form">
       <form>
@@ -143,91 +171,70 @@ const OrchardStep = ({
             <Subtitle text="Enter the contributing orchard information" />
           </Column>
         </Row>
-        <Row className="seedlot-orchard-field">
-          <Column sm={4} md={2} lg={3}>
-            <NumberInput
-              id="seedlot-orchard-number-input"
-              name="orchardId"
-              ref={(el: HTMLInputElement) => addRefs(el, 'orchardId')}
-              value={state.orchardId}
-              allowEmpty
-              min={100}
-              max={999}
-              disableWheel
-              hideSteppers
-              type="number"
-              label="Orchard ID or number"
-              placeholder="Example: 123"
-              onBlur={(event: React.ChangeEvent<HTMLInputElement>) => fetchOrchardInfo(event, 'orchardName')}
-              readOnly={readOnly}
-            />
-          </Column>
-          <Column sm={4} md={2} lg={3}>
-            <TextInput
-              id="seedlot-orchard-name-input"
-              type="text"
-              labelText="Orchard name"
-              placeholder="Orchard name"
-              value={state.orchardName}
-              readOnly
-            />
-          </Column>
-        </Row>
         {
-          hasAddtionalOrchard
-            ? (
-              <Row className="seedlot-orchard-field">
-                <Column sm={4} md={2} lg={3}>
-                  <NumberInput
-                    id="seedlot-aditional-orchard-number-input"
-                    name="additionalId"
-                    ref={(el: HTMLInputElement) => addRefs(el, 'additionalId')}
-                    value={state.additionalId}
-                    allowEmpty
-                    min={100}
-                    max={999}
-                    disableWheel
-                    hideSteppers
-                    type="number"
-                    label="Additional orchard ID (optional)"
-                    helperText="Additional contributing orchard id"
-                    placeholder="Example: 123"
-                    invalid={invalidAddOrchardId}
-                    onBlur={(event: React.ChangeEvent<HTMLInputElement>) => fetchOrchardInfo(event, 'additionalName')}
-                    readOnly={readOnly}
-                  />
-                </Column>
-                <Column sm={4} md={2} lg={3}>
-                  <TextInput
-                    id="seedlot-aditional-orchard-name-input"
-                    type="text"
-                    labelText="Orchard name (optional)"
-                    placeholder="Orchard name"
-                    value={state.additionalName}
-                    readOnly
-                  />
-                </Column>
-              </Row>
-            )
-            : null
+          state.orchards.map((orchard) => (
+            <Row className="seedlot-orchard-field" key={orchard.id}>
+              <Column sm={4} md={2} lg={3}>
+                <NumberInput
+                  id={`orchardId-${orchard.id}`}
+                  name="orchardId"
+                  ref={(el: HTMLInputElement) => addRefs(el, `orchardId-${orchard.id}`)}
+                  value={orchard.orchardId}
+                  allowEmpty
+                  min={100}
+                  max={999}
+                  disableWheel
+                  hideSteppers
+                  type="number"
+                  label={orchard.id === 0 ? 'Orchard ID or number' : 'Additional orchard ID (optional)'}
+                  placeholder="Example: 123"
+                  onBlur={(event: React.ChangeEvent<HTMLInputElement>) => fetchOrchardInfo(event, 'orchardName')}
+                  readOnly={readOnly}
+                />
+              </Column>
+              <Column sm={4} md={2} lg={3}>
+                <TextInput
+                  id={`orchardName-${orchard.id}`}
+                  type="text"
+                  labelText={orchard.id === 0 ? 'Orchard name' : 'Orchard name (optional)'}
+                  placeholder="Orchard name"
+                  value={orchard.orchardLabel}
+                  readOnly
+                />
+              </Column>
+            </Row>
+          ))
         }
         {
-          !readOnly
+          (!readOnly && state.orchards.length !== 1)
             ? (
               <Row className="seedlot-orchard-add-orchard">
                 <Column sm={4} md={4} lg={10}>
                   <Button
                     size="md"
-                    kind={hasAddtionalOrchard ? 'danger--tertiary' : 'tertiary'}
-                    renderIcon={hasAddtionalOrchard ? TrashCan : Add}
-                    onClick={() => setAdditionalOrchard(!hasAddtionalOrchard)}
+                    kind="danger--tertiary"
+                    renderIcon={TrashCan}
+                    onClick={() => deleteOrchardObj()}
                   >
-                    {hasAddtionalOrchard ? 'Delete additional orchard' : 'Add orchard'}
+                    Delete additional orchard
                   </Button>
                 </Column>
               </Row>
             )
-            : null
+            : (
+              <Row className="seedlot-orchard-add-orchard">
+                <Column sm={4} md={4} lg={10}>
+                  <Button
+                    size="md"
+                    kind="tertiary"
+                    renderIcon={Add}
+                    onClick={() => addOrchardObj()}
+                  >
+                    Add orchard
+                  </Button>
+                </Column>
+              </Row>
+            )
         }
         <Row className="seedlot-orchard-title-row">
           <Column lg={8}>
