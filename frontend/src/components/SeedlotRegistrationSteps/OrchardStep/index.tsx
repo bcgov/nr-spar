@@ -56,18 +56,6 @@ const OrchardStep = ({
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
 
-  // TODO FOR TESTING
-  // const [orchardName, setOrchardName] = useState<any>();
-
-  const orchardQuery = useQuery(
-    {
-      queryKey: ['orchard', state.orchardId],
-      queryFn: () => getOrchardByID(state.orchardId),
-      enabled: false,
-      onSuccess: (data) => console.log(data)
-    }
-  );
-
   const addRefs = (element: HTMLInputElement, name: string) => {
     if (element !== null) {
       refControl.current = {
@@ -95,6 +83,18 @@ const OrchardStep = ({
       });
     }
   };
+
+  // TODO FOR TESTING
+  // const [orchardName, setOrchardName] = useState<any>();
+
+  const orchardQuery = useQuery(
+    {
+      queryKey: ['orchard', state.orchardId],
+      queryFn: () => getOrchardByID(state.orchardId),
+      enabled: false,
+      onSuccess: (data) => setResponse(['orchardName'], [data.name])
+    }
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fetchOrchardInfo = (event: React.ChangeEvent<HTMLInputElement>, nameField: string) => {
