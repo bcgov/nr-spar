@@ -221,8 +221,8 @@ const SeedlotRegistrationForm = () => {
             {
               (
                 seedlotInfoQuery.isSuccess
-                && fundingSourcesQuery.isSuccess
-                && paymentMethodsQuery.isSuccess
+                // && fundingSourcesQuery.isSuccess
+                // && paymentMethodsQuery.isSuccess
               )
                 ? renderStep()
                 : <Loading />

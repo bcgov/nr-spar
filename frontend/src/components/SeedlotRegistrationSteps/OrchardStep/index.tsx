@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   Row,
@@ -17,8 +18,7 @@ import { Add, TrashCan } from '@carbon/icons-react';
 import Subtitle from '../../Subtitle';
 import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
 
-// import api from '../../../api-service/api';
-// import ApiConfig from '../../../api-service/ApiConfig';
+import getOrchardByID from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 
 import FemaleGameticOptions from './data';
@@ -56,6 +56,18 @@ const OrchardStep = ({
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
 
+  // TODO FOR TESTING
+  // const [orchardName, setOrchardName] = useState<any>();
+
+  const orchardQuery = useQuery(
+    {
+      queryKey: ['orchard', state.orchardId],
+      queryFn: () => getOrchardByID(state.orchardId),
+      enabled: false,
+      onSuccess: (data) => console.log(data)
+    }
+  );
+
   const addRefs = (element: HTMLInputElement, name: string) => {
     if (element !== null) {
       refControl.current = {
@@ -84,8 +96,10 @@ const OrchardStep = ({
     }
   };
 
-  const validateOrchardId = (event: React.ChangeEvent<HTMLInputElement>, nameField: string) => {
-    console.log(event, nameField);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const fetchOrchardInfo = (event: React.ChangeEvent<HTMLInputElement>, nameField: string) => {
+    setResponse(['orchardId'], [event.target.value]);
+    orchardQuery.refetch();
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -144,7 +158,7 @@ const OrchardStep = ({
               type="number"
               label="Orchard ID or number"
               placeholder="Example: 123"
-              onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'orchardName')}
+              onBlur={(event: React.ChangeEvent<HTMLInputElement>) => fetchOrchardInfo(event, 'orchardName')}
               readOnly={readOnly}
             />
           </Column>
@@ -179,7 +193,7 @@ const OrchardStep = ({
                     helperText="Additional contributing orchard id"
                     placeholder="Example: 123"
                     invalid={invalidAddOrchardId}
-                    onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'additionalName')}
+                    onBlur={(event: React.ChangeEvent<HTMLInputElement>) => fetchOrchardInfo(event, 'additionalName')}
                     readOnly={readOnly}
                   />
                 </Column>
