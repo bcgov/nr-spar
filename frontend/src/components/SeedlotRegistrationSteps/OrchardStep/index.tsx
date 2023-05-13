@@ -50,7 +50,7 @@ const OrchardStep = ({
 
   const refControl = useRef<any>({});
 
-  const [additionalOrchard, setAdditionalOrchard] = useState<boolean>(false);
+  const [hasAddtionalOrchard, setAdditionalOrchard] = useState<boolean>(false);
 
   const [invalidOrchardId, setInvalidOrchardId] = useState<boolean>(false);
   const [invalidOrchardText, setInvalidOrchardText] = useState<string>(invalidOrchardValue);
@@ -128,17 +128,6 @@ const OrchardStep = ({
     }
   };
 
-  const clearOrchardName = (nameField: string) => {
-    setResponse([nameField], ['']);
-  };
-
-  const deleteAdditionalOrchard = () => {
-    setResponse(['additionalId', 'additionalName'], ['', '']);
-    setInvalidAddOrchardId(false);
-    setInvalidAddOrchardText(invalidOrchardValue);
-    setAdditionalOrchard(false);
-  };
-
   const femaleGameticHandler = (event: ComboBoxEvent) => {
     if (invalidFemGametic) {
       setInvalidFemGametic(false);
@@ -198,7 +187,6 @@ const OrchardStep = ({
               invalid={invalidOrchardId}
               invalidText={invalidOrchardText}
               onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'orchardName')}
-              // onChange={() => state.orchardName && clearOrchardName('orchardName')}
               readOnly={readOnly}
             />
           </Column>
@@ -214,7 +202,7 @@ const OrchardStep = ({
           </Column>
         </Row>
         {
-          additionalOrchard
+          hasAddtionalOrchard
             ? (
               <Row className="seedlot-orchard-field">
                 <Column sm={4} md={2} lg={3}>
@@ -235,7 +223,6 @@ const OrchardStep = ({
                     invalid={invalidAddOrchardId}
                     invalidText={invalidAddOrchardText}
                     onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'additionalName')}
-                    onChange={() => state.additionalName && clearOrchardName('additionalName')}
                     readOnly={readOnly}
                   />
                 </Column>
@@ -253,31 +240,24 @@ const OrchardStep = ({
             )
             : null
         }
-
-        {(!readOnly) && (
-          <Row className="seedlot-orchard-add-orchard">
-            <Column sm={4} md={4} lg={10}>
-              <Button
-                size="md"
-                className={additionalOrchard ? 'seedlot-orchard-hidden' : ''}
-                kind="tertiary"
-                renderIcon={Add}
-                onClick={() => setAdditionalOrchard(true)}
-              >
-                Add orchard
-              </Button>
-              <Button
-                size="md"
-                className={additionalOrchard ? '' : 'seedlot-orchard-hidden'}
-                kind="danger--tertiary"
-                renderIcon={TrashCan}
-                onClick={() => deleteAdditionalOrchard()}
-              >
-                Delete additional orchard
-              </Button>
-            </Column>
-          </Row>
-        )}
+        {
+          !readOnly
+            ? (
+              <Row className="seedlot-orchard-add-orchard">
+                <Column sm={4} md={4} lg={10}>
+                  <Button
+                    size="md"
+                    kind={hasAddtionalOrchard ? 'danger--tertiary' : 'tertiary'}
+                    renderIcon={hasAddtionalOrchard ? TrashCan : Add}
+                    onClick={() => setAdditionalOrchard(!hasAddtionalOrchard)}
+                  >
+                    {hasAddtionalOrchard ? 'Delete additional orchard' : 'Add orchard'}
+                  </Button>
+                </Column>
+              </Row>
+            )
+            : null
+        }
         <Row className="seedlot-orchard-title-row">
           <Column lg={8}>
             <h2>Gamete information</h2>
