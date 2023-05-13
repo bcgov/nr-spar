@@ -198,7 +198,7 @@ const OrchardStep = ({
               invalid={invalidOrchardId}
               invalidText={invalidOrchardText}
               onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'orchardName')}
-              onChange={() => state.orchardName && clearOrchardName('orchardName')}
+              // onChange={() => state.orchardName && clearOrchardName('orchardName')}
               readOnly={readOnly}
             />
           </Column>
@@ -213,40 +213,47 @@ const OrchardStep = ({
             />
           </Column>
         </Row>
-        <Row className={additionalOrchard ? 'seedlot-orchard-field' : 'seedlot-orchard-hidden'}>
-          <Column sm={4} md={2} lg={3}>
-            <NumberInput
-              id="seedlot-aditional-orchard-number-input"
-              name="additionalId"
-              ref={(el: HTMLInputElement) => addRefs(el, 'additionalId')}
-              value={state.additionalId}
-              allowEmpty
-              min={100}
-              max={999}
-              disableWheel
-              hideSteppers
-              type="number"
-              label="Additional orchard ID (optional)"
-              helperText="Additional contributing orchard id"
-              placeholder="Example: 123"
-              invalid={invalidAddOrchardId}
-              invalidText={invalidAddOrchardText}
-              onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'additionalName')}
-              onChange={() => state.additionalName && clearOrchardName('additionalName')}
-              readOnly={readOnly}
-            />
-          </Column>
-          <Column sm={4} md={2} lg={3}>
-            <TextInput
-              id="seedlot-aditional-orchard-name-input"
-              type="text"
-              labelText="Orchard name (optional)"
-              placeholder="Orchard name"
-              value={state.additionalName}
-              readOnly={readOnly}
-            />
-          </Column>
-        </Row>
+        {
+          additionalOrchard
+            ? (
+              <Row className="seedlot-orchard-field">
+                <Column sm={4} md={2} lg={3}>
+                  <NumberInput
+                    id="seedlot-aditional-orchard-number-input"
+                    name="additionalId"
+                    ref={(el: HTMLInputElement) => addRefs(el, 'additionalId')}
+                    value={state.additionalId}
+                    allowEmpty
+                    min={100}
+                    max={999}
+                    disableWheel
+                    hideSteppers
+                    type="number"
+                    label="Additional orchard ID (optional)"
+                    helperText="Additional contributing orchard id"
+                    placeholder="Example: 123"
+                    invalid={invalidAddOrchardId}
+                    invalidText={invalidAddOrchardText}
+                    onBlur={(event: React.ChangeEvent<HTMLInputElement>) => validateOrchardId(event, 'additionalName')}
+                    onChange={() => state.additionalName && clearOrchardName('additionalName')}
+                    readOnly={readOnly}
+                  />
+                </Column>
+                <Column sm={4} md={2} lg={3}>
+                  <TextInput
+                    id="seedlot-aditional-orchard-name-input"
+                    type="text"
+                    labelText="Orchard name (optional)"
+                    placeholder="Orchard name"
+                    value={state.additionalName}
+                    readOnly={readOnly}
+                  />
+                </Column>
+              </Row>
+            )
+            : null
+        }
+
         {(!readOnly) && (
           <Row className="seedlot-orchard-add-orchard">
             <Column sm={4} md={4} lg={10}>
