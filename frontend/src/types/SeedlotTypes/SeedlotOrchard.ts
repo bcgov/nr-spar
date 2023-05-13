@@ -3,3 +3,8 @@ import { OrchardForm } from '../../components/SeedlotRegistrationSteps/OrchardSt
 export type MockSeedlotOrchard = {
   [seedlotnumber: string]: OrchardForm
 }
+
+export type OrchardType = {
+  id: string;
+  name: string;
+}

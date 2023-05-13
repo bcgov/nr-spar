@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useRef, useState } from 'react';
-import { useQueries } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import {
   Row,
@@ -25,9 +25,10 @@ import { filterInput, FilterObj } from '../../../utils/filterUtils';
 
 import FemaleGameticOptions from './data';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
+import DropDownObj from '../../../types/DropDownObject';
+import OrchardDataType from '../../../types/OrchardDataType';
 
 import './styles.scss';
-import DropDownObj from '../../../types/DropDownObject';
 
 type NumStepperVal = {
   value: number,
@@ -44,6 +45,7 @@ interface OrchardStepProps {
 const OrchardStep = ({
   seedlotSpecies, state, setStepData, readOnly
 }: OrchardStepProps) => {
+  const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
 
   const refControl = useRef<any>({});
@@ -84,25 +86,40 @@ const OrchardStep = ({
   // TODO FOR TESTING
   // const [orchardName, setOrchardName] = useState<any>();
 
-  // const orchardQuery = useQuery(
-  //   {
-  //     queryKey: ['orchard', state.orchardId],
-  //     queryFn: () => getOrchardByID(state.orchardId),
-  //     enabled: false
-  //   }
-  // );
+  const setOrchardName = (data: OrchardDataType, id: number) => {
+    const newOrchards = [...state.orchards];
+    const replaceIndex = newOrchards.findIndex((orchard) => orchard.id === id);
+    newOrchards[replaceIndex].orchardLabel = `${data.id} - ${data.name} - ${data.vegetationCode}`;
+    setStepData({
+      ...state,
+      orchards: newOrchards
+    });
+  };
 
-  // const orchardQueries = useQueries(
-  //   [state.orchardId, state.additionalId].map((id) => {
+  const orchardQueries = useQueries({
+    queries:
+      state.orchards.map((orchard) => ({
+        queryKey: ['orchard', orchard.id],
+        queryFn: () => getOrchardByID(orchard.orchardId),
+        onSuccess: (data: OrchardDataType) => setOrchardName(data, orchard.id)
+      }))
+  });
 
-  //   })
-  // );
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const fetchOrchardInfo = (event: React.ChangeEvent<HTMLInputElement>, nameField: string) => {
-    console.log(event.target.value, nameField);
-    // setResponse(['orchardId'], [event.target.value]);
-    // orchardQuery.refetch();
+  const fetchOrchardInfo = (orchardIdInput: string, id: number) => {
+    // Copy orchards from state
+    const newOrchards = [...state.orchards];
+    // Replace input value with id
+    const replaceIndex = newOrchards.findIndex((orchard) => orchard.id === id);
+    /*
+      It is safe to replace item in array by index here
+      since the array is not mutable at this stage
+    */
+    newOrchards[replaceIndex].orchardId = orchardIdInput;
+    setStepData({
+      ...state,
+      orchards: newOrchards
+    });
+    queryClient.invalidateQueries({ queryKey: ['orchard', id] });
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -188,7 +205,11 @@ const OrchardStep = ({
                   type="number"
                   label={orchard.id === 0 ? 'Orchard ID or number' : 'Additional orchard ID (optional)'}
                   placeholder="Example: 123"
-                  onBlur={(event: React.ChangeEvent<HTMLInputElement>) => fetchOrchardInfo(event, 'orchardName')}
+                  onBlur={
+                    (event: React.ChangeEvent<HTMLInputElement>) => {
+                      fetchOrchardInfo(event.target.value, orchard.id);
+                    }
+                  }
                   readOnly={readOnly}
                 />
               </Column>
