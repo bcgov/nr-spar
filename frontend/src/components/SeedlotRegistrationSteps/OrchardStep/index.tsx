@@ -89,19 +89,25 @@ const OrchardStep = ({
   const setOrchardName = (data: OrchardDataType, id: number) => {
     const newOrchards = [...state.orchards];
     const replaceIndex = newOrchards.findIndex((orchard) => orchard.id === id);
-    newOrchards[replaceIndex].orchardLabel = `${data.id} - ${data.name} - ${data.vegetationCode}`;
+    if (data.id && data.name && data.vegetationCode) {
+      newOrchards[replaceIndex].orchardLabel = `${data.id} - ${data.name} - ${data.vegetationCode}`;
+    } else {
+      newOrchards[replaceIndex].orchardLabel = '';
+    }
     setStepData({
       ...state,
       orchards: newOrchards
     });
   };
 
-  const orchardQueries = useQueries({
+  useQueries({
     queries:
       state.orchards.map((orchard) => ({
         queryKey: ['orchard', orchard.id],
         queryFn: () => getOrchardByID(orchard.orchardId),
-        onSuccess: (data: OrchardDataType) => setOrchardName(data, orchard.id)
+        onSuccess: (data: OrchardDataType) => setOrchardName(data, orchard.id),
+        enabled: orchard.orchardId.length > 0,
+        retry: 0
       }))
   });
 
@@ -119,7 +125,8 @@ const OrchardStep = ({
       ...state,
       orchards: newOrchards
     });
-    queryClient.invalidateQueries({ queryKey: ['orchard', id] });
+    console.log(newOrchards);
+    queryClient.refetchQueries({ queryKey: ['orchard', id] });
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
