@@ -3,6 +3,12 @@
 
 .seedlot-orchard-step-form {
   margin-top: 1rem;
+
+  .#{vars.$bcgov-prefix}--text-input-wrapper--readonly .#{vars.$bcgov-prefix}--text-input{
+    border: none;
+    cursor: default;
+    padding-left: 0;
+  }
 }
 
 .seedlot-orchard-step-form h2 {
@@ -28,7 +34,7 @@
   opacity: 1;
 }
 
-.male-gametic-invalid .#{vars.$bcgov-prefix}--radio-button + .#{vars.$bcgov-prefix}--radio-button__label .#{vars.$bcgov-prefix}--radio-button__appearance {
+.male-gametic-invalid .#{vars.$bcgov-prefix}--radio-button+.#{vars.$bcgov-prefix}--radio-button__label .#{vars.$bcgov-prefix}--radio-button__appearance {
   outline: 2px solid var(--#{vars.$bcgov-prefix}-support-error);
   outline-offset: 1.5px;
 }
@@ -43,6 +49,6 @@
 
 @media only screen and (max-width: 1584px) {
   .applicant-information-form {
-      padding-left: 2rem;
+    padding-left: 2rem;
   }
 }

@@ -221,6 +221,7 @@ const SeedlotRegistrationForm = () => {
             {
               (
                 seedlotInfoQuery.isSuccess
+                // TODO: UNCOMMENT
                 // && fundingSourcesQuery.isSuccess
                 // && paymentMethodsQuery.isSuccess
               )

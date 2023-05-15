@@ -12,9 +12,11 @@ import {
   RadioButtonGroup,
   RadioButton,
   Checkbox,
-  Button
+  Button,
+  InlineLoading
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
+import InputErrorText from '../../InputErrorText';
 
 import Subtitle from '../../Subtitle';
 import { OrchardForm, OrchardObj } from './definitions';
@@ -49,8 +51,6 @@ const OrchardStep = ({
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
 
   const refControl = useRef<any>({});
-  const [invalidOrchardId, setInvalidOrchardId] = useState<boolean>(false);
-  const [invalidAddOrchardId, setInvalidAddOrchardId] = useState<boolean>(false);
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
@@ -83,15 +83,16 @@ const OrchardStep = ({
     }
   };
 
-  const setOrchardName = (data: OrchardDataType, inputId: number) => {
+  // Set orchard name by input id, if data is not present then clear orcahrd name
+  const setOrchardName = (inputId: number, data?: OrchardDataType) => {
     const newOrchards = [...state.orchards];
     /*
       * It is safe to replace item in array by index here
       * since the array is not mutable at this stage
     */
     const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
-    if (data.id && data.name && data.vegetationCode) {
-      newOrchards[replaceIndex].orchardLabel = `${data.id} - ${data.name} - ${data.vegetationCode}`;
+    if (data?.name && data.vegetationCode && data.stageCode) {
+      newOrchards[replaceIndex].orchardLabel = `${data.name} - ${data.vegetationCode} - ${data.stageCode}`;
     } else {
       newOrchards[replaceIndex].orchardLabel = '';
     }
@@ -106,9 +107,12 @@ const OrchardStep = ({
       state.orchards.map((orchard) => ({
         queryKey: ['orchard', orchard.orchardId],
         queryFn: () => getOrchardByID(orchard.orchardId),
-        onSuccess: (data: OrchardDataType) => setOrchardName(data, orchard.inputId),
-        enabled: orchard.orchardId.length > 0,
-        retry: 0
+        onSuccess: (data: OrchardDataType) => setOrchardName(orchard.inputId, data),
+        onError: () => setOrchardName(orchard.inputId),
+        enabled: orchard.orchardId.length > 0 && !readOnly,
+        retry: 0,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false
       }))
   });
 
@@ -160,16 +164,18 @@ const OrchardStep = ({
   const addOrchardObj = () => {
     const orchards = [...state.orchards];
     const numOfOrchard = orchards.length;
-    const newOrchard: OrchardObj = {
-      inputId: numOfOrchard,
-      orchardId: '',
-      orchardLabel: ''
-    };
-    orchards.push(newOrchard);
-    setStepData({
-      ...state,
-      orchards
-    });
+    if (numOfOrchard < MAX_ORCHARDS) {
+      const newOrchard: OrchardObj = {
+        inputId: numOfOrchard,
+        orchardId: '',
+        orchardLabel: ''
+      };
+      orchards.push(newOrchard);
+      setStepData({
+        ...state,
+        orchards
+      });
+    }
   };
 
   const deleteOrchardObj = () => {
@@ -180,6 +186,21 @@ const OrchardStep = ({
       ...state,
       orchards: newOrchards
     });
+  };
+
+  const displayOrchNameStatus = (orchard: OrchardObj) => {
+    const status = queryClient.getQueryState(['orchard', orchard.orchardId])?.status;
+    if (status === 'loading' && orchard.orchardId.length > 0) {
+      return (
+        <InlineLoading description="Loading..." />
+      );
+    }
+    if (status === 'error' && orchard.orchardId.length > 0) {
+      return (
+        <InputErrorText description="Orchard name not found" />
+      );
+    }
+    return null;
   };
 
   return (
@@ -225,6 +246,9 @@ const OrchardStep = ({
                   value={orchard.orchardLabel}
                   readOnly
                 />
+                {
+                  displayOrchNameStatus(orchard)
+                }
               </Column>
             </Row>
           ))
