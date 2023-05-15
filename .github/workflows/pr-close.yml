@@ -4,8 +4,6 @@ on:
   pull_request:
     types:
       - closed
-    paths-ignore:
-      - "**.md"
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
