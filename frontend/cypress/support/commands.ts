@@ -5,45 +5,27 @@ import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
 
-Cypress.Commands.add('deleteUser', (firstname, lastname) => {
-  cy.request({
-    method: 'DELETE',
-    url: `${Cypress.env('apiUrl')}/api/users/${firstname}/${lastname}`,
-    failOnStatusCode: false
-  }).then((response) => {
-    cy.log(`${response.status}`);
-    cy.log(response.body);
-  });
-});
-
-Cypress.Commands.add('createUser', (firstname, lastname) => {
-  cy.request({
-    method: 'POST',
-    url: `${Cypress.env('apiUrl')}/api/users`,
-    failOnStatusCode: false,
-    body: {
-      firstName: firstname,
-      lastName: lastname
-    }
-  }).then((response) => {
-    cy.log(`${response.status}`);
-    cy.log(response.body);
-  });
-});
-
 Cypress.Commands.add('login', () => {
-  const USERNAME = Cypress.env('USERNAME');
-  const PASSWORD = Cypress.env('PASSWORD');
+  const credentials = {
+    username: Cypress.env('USERNAME'),
+    password: Cypress.env('PASSWORD')
+  };
 
   cy.getByDataTest('landing-button__bceid').click();
-  cy.get('#bceidLogo').should('be.visible');
-  cy.get('input[name=user]')
-    .clear()
-    .type(USERNAME, { delay: 50 });
-  cy.get('input[name=password]')
-    .clear()
-    .type(PASSWORD, { delay: 50 });
-  cy.get('input[name=btnSubmit]').click();
+  cy.origin(
+    Cypress.env('keycloakLoginUrl'),
+    { args: credentials },
+    ({ username, password }) => {
+      cy.get('#bceidLogo', { timeout: 6000 }).should('be.visible');
+      cy.get('input[name=user]')
+        .clear()
+        .type(username, { delay: 50 });
+      cy.get('input[name=password]')
+        .clear()
+        .type(password, { delay: 50 });
+      cy.get('input[name=btnSubmit]').click();
+    }
+  );
 });
 
 Cypress.Commands.add('navigateTo', (menuItem) => {

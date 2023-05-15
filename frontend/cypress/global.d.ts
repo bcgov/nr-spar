@@ -14,26 +14,6 @@ declare namespace Cypress {
     getByDataTest(selector: string): Chainable<JQuery<HTMLElement>>
 
     /**
-     * Custom command to delete a user using the API.
-     *
-     * @param firstname {string} - The user first name
-     * @param lastname {string} - The user last name
-     * @example
-     * cy.deleteUser('Jhon', 'Doe')
-     */
-    deleteUser(firstname: string, lastname: string): void
-
-    /**
-     * Custom command to create a user using the API.
-     *
-     * @param firstname {string} - The user first name
-     * @param lastname {string} - The user last name
-     * @example
-     * cy.createUser('Jhon', 'Doe')
-     */
-    createUser(firstname: string, lastname: string): void
-
-    /**
      * Custom command to log in on app.
      *
      * @example

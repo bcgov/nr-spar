@@ -7,7 +7,7 @@ export default defineConfig({
     viewportHeight: 720,
     experimentalWebKitSupport: true,
     env: {
-      apiUrl: 'https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca'
+      keycloakLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
