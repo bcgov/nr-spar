@@ -42,7 +42,7 @@ jobs:
           cd backend
           mvn --update-snapshots -P prod clean package -Dmaven.test.skip
           cd ../oracle-api
-          mvn --update-snapshots package -Dmaven.test.skip 
+          mvn --update-snapshots package -Dmaven.test.skip
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
@@ -61,9 +61,10 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}      
+            -p ZONE=test -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
   deploy-test:
     name: TEST Deployment
@@ -82,11 +83,11 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
+            verification_path: "actuator/health"
             parameters: -p BUILD=test
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
-            verification_path: "actuator/health"
             parameters:
               -p REACT_APP_SPAR_BUILD_VERSION=snapshot-test
               -p REACT_APP_SERVER_URL=https://nr-spar-test-backend.apps.silver.devops.gov.bc.ca
@@ -98,7 +99,7 @@ jobs:
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
-            verification_path: "check"
+            verification_path: "actuator/health"
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
@@ -112,7 +113,7 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           verification_path: "actuator/health"
-          parameters: 
+          parameters:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             ${{ matrix.parameters }}
@@ -156,7 +157,7 @@ jobs:
 
   init-prod:
     name: PROD Init
-    needs: 
+    needs:
       - deploy-test
     environment: prod
     runs-on: ubuntu-22.04
@@ -170,9 +171,10 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=prod -p NAME=${{ github.event.repository.name }} 
+            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
   deploy-prod:
     name: PROD Deployment
@@ -190,11 +192,11 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
+            verification_path: "actuator/health"
             parameters: -p BUILD=prod
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
-            verification_path: "actuator/health"
             parameters:
               -p REACT_APP_SPAR_BUILD_VERSION=snapshot-prod
               -p REACT_APP_SERVER_URL=https://nr-spar-prod-backend.apps.silver.devops.gov.bc.ca
@@ -206,7 +208,7 @@ jobs:
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
-            verification_path: "check"
+            verification_path: "actuator/health"
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
