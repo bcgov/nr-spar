@@ -127,14 +127,13 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-      <version>42.6.0</version>
+      <!--<version>42.6.0</version>-->
 		</dependency>
 
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-      <version>9.17.0</version>
-			<scope>runtime</scope>
+      <!--<version>9.18.0</version>-->
 		</dependency>
 
     <!-- Functionalities -->

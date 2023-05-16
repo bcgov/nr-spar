@@ -1,6 +1,8 @@
 package ca.bc.gov.backendstartapi.config;
 
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
+import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import ca.bc.gov.backendstartapi.dto.DescribedEnumDto;
@@ -19,4 +21,10 @@ import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
   ConeAndPollenCount.class,
   SmpMixVolume.class,
 })
-public class NativeImageConfig {}
+public class NativeImageConfig {
+
+  @Bean
+  FlywayConfigurationCustomizer flywayLoggersCustomizer() {
+    return (configuration) -> configuration.loggers("slf4j");
+  }
+}
