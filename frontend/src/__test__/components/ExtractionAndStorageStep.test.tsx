@@ -11,12 +11,12 @@ describe('Extraction and Storage Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
   jest
-  .spyOn(ReactQuery, 'useQuery')
-  .mockImplementation(
-    jest
-      .fn()
-      .mockReturnValue({ data: [], isLoading: false, isSuccess: true })
-  );
+    .spyOn(ReactQuery, 'useQuery')
+    .mockImplementation(
+      jest
+        .fn()
+        .mockReturnValue({ data: [], isLoading: false, isSuccess: true })
+    );
   beforeEach(() => {
     makeServer('jest-test');
     const qc = new QueryClient();
@@ -38,7 +38,7 @@ describe('Extraction and Storage Step test', () => {
 
   function clickNext(times: number) {
     const buttonNext = component.getElementsByClassName('back-next-btn')[1];
-    for(let i = 0; i < times; i++) {
+    for (let i = 0; i < times; i++) {
       fireEvent.click(buttonNext);
     }
   }
@@ -60,8 +60,8 @@ describe('Extraction and Storage Step test', () => {
   it('should call the checkbox click function twice', async () => {
     const checkBoxes = screen.getAllByRole('checkbox');
 
-    for(let i = 0; i < 2; i++){
-      for(let j = 0; j < checkBoxes.length; j++){
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < checkBoxes.length; j++) {
         fireEvent.click(checkBoxes[j]);
       }
     }
