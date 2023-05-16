@@ -221,6 +221,7 @@ const OrchardStep = ({
                   name="orchardId"
                   ref={(el: HTMLInputElement) => addRefs(el, `orchardId-${orchard.inputId}`)}
                   value={orchard.orchardId}
+                  invalidText="Please insert a valid orchard id between 100 and 999"
                   allowEmpty
                   min={100}
                   max={999}

@@ -5,10 +5,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@testing-library/jest-dom';
 import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm';
 import makeServer from '../../mock-server/server';
+import * as ReactQuery from '@tanstack/react-query';
 
 describe('Orchard Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
+
+  jest
+    .spyOn(ReactQuery, 'useQuery')
+    .mockImplementation(
+      jest
+        .fn()
+        .mockReturnValue({ data: [], isLoading: false, isSuccess: true })
+    );
+
   beforeEach(() => {
     makeServer('jest-test');
     const qc = new QueryClient();
@@ -30,7 +40,7 @@ describe('Orchard Step test', () => {
 
   function clickNext(times: number) {
     const buttonNext = component.getElementsByClassName('back-next-btn')[1];
-    for(var i = 0; i < times; i++) {
+    for (let i = 0; i < times; i++) {
       fireEvent.click(buttonNext);
     }
   }
@@ -64,14 +74,14 @@ describe('Orchard Step test', () => {
   });
 
   it('should show invalid Orchard ID message in both fields', async () => {
-    const orchardID = component.querySelector('#seedlot-orchard-number-input') as HTMLInputElement;
-    fireEvent.change(orchardID, {
+    const orchardIdInput = await screen.findByLabelText('Orchard ID or number') as HTMLInputElement;
+    fireEvent.change(orchardIdInput, {
       target: { value: '2' }
     });
-    orchardID.blur();
+    orchardIdInput.blur(); //
 
     await waitFor(() => {
-      expect(orchardID.value).toBe('2');
+      expect(orchardIdInput.value).toBe('2');
       expect(screen.getByText('Please insert a valid orchard id between 100 and 999')).toBeInTheDocument();
     });
 
@@ -79,14 +89,14 @@ describe('Orchard Step test', () => {
     const addButton = screen.getByText('Add orchard');
     fireEvent.click(addButton);
 
-    const addOrchardID = component.querySelector('#seedlot-aditional-orchard-number-input') as HTMLInputElement;
-    fireEvent.change(addOrchardID, {
+    const addOrchardIdInput = await screen.findByLabelText('Additional orchard ID (optional)') as HTMLInputElement;
+    fireEvent.change(addOrchardIdInput, {
       target: { value: '3' }
     });
-    addOrchardID.blur();
+    addOrchardIdInput.blur();
 
     await waitFor(() => {
-      expect(addOrchardID.value).toBe('3');
+      expect(addOrchardIdInput.value).toBe('3');
       expect(screen.getAllByText('Please insert a valid orchard id between 100 and 999')[1]).toBeInTheDocument();
     });
   });

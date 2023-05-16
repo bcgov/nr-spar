@@ -118,6 +118,11 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
+    const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
+      code: '',
+      label: '',
+      Description: ''
+    };
     switch (formStep) {
       // Collection
       case 0:
@@ -161,7 +166,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
-            seedlotSpecies={seedlotInfoQuery.data.seedlot.lot_species}
+            seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             setStepData={(data: OrchardForm) => setStepData('orchardStep', data)}
           />
@@ -170,7 +175,7 @@ const SeedlotRegistrationForm = () => {
       case 4:
         return (
           <ParentTreeStep
-            seedlotSpecies={seedlotInfoQuery.data.seedlot.lot_species}
+            seedlotSpecies={seedlotSpecies}
             state={allStepData.parentTreeStep}
             setStepData={(data: any) => setStepData('parentTreeStep', data)}
           />
@@ -221,7 +226,6 @@ const SeedlotRegistrationForm = () => {
             {
               (
                 seedlotInfoQuery.isSuccess
-                // TODO: UNCOMMENT
                 // && fundingSourcesQuery.isSuccess
                 // && paymentMethodsQuery.isSuccess
               )
