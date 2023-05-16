@@ -22,7 +22,8 @@ module.exports = {
     '<rootDir>/src/contexts/',
     '<rootDir>/src/routes/',
     '<rootDir>/src/service/',
-    '<rootDir>/src/api-service/'
+    '<rootDir>/src/api-service/',
+    '<rootDir>/src/components/SeedlotRegistrationSteps/ParentTreeStep/Tabs/legacy'
   ]
 };
 
