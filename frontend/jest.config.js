@@ -23,7 +23,9 @@ module.exports = {
     '<rootDir>/src/routes/',
     '<rootDir>/src/service/',
     '<rootDir>/src/api-service/',
-    '<rootDir>/src/components/SeedlotRegistrationSteps/ParentTreeStep/Tabs/legacy'
+    '<rootDir>/src/mock-server/',
+    // TODO: remove once parent tree is complete
+    '<rootDir>/src/components/SeedlotRegistrationSteps/ParentTreeStep'
   ]
 };
 
