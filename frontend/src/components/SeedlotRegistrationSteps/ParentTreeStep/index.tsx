@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React from 'react';
 import {
   Tabs,
   TabList,
@@ -25,7 +23,9 @@ interface ParentTreeStepProps {
 const ParentTreeStep = (
   {
     seedlotSpecies,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     state,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setStepData
   }: ParentTreeStepProps
 ) => (

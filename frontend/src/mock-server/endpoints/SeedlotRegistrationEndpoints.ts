@@ -8,6 +8,7 @@ import formatDate from '../../utils/DateUtils';
 import ApiConfig from '../../api-service/ApiConfig';
 import mockServerConfig from '../config';
 
+// TODO: refactor or remove: the way we keep data here is really messy and unnecessarily complicated
 const SeedlotRegistrationEndpoints = (server: Server) => {
   const aClassUrl = ApiConfig.aClassSeedlot.replace(mockServerConfig.namespace, '');
   server.post(aClassUrl, (schema: AppSchema, request) => {
@@ -38,7 +39,6 @@ const SeedlotRegistrationEndpoints = (server: Server) => {
       lot_species: attrs.species,
       form_step: 'Collection',
       status: 4,
-      // TODO: why format data upon insertion???
       participants: [`${userData.firstName} ${userData.lastName}`],
       created_at: formatDate(stringDate),
       last_modified: formatDate(stringDate),

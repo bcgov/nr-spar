@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React from 'react';
 import {
   FlexGrid,
   Row,
@@ -18,13 +17,13 @@ type ConeAndPollenProps = {
 const ConeAndPollen = ({
   seedlotSpecies
 }: ConeAndPollenProps) => {
-  const a = 'b';
+  const a = '';
   return (
     <FlexGrid className="parent-tree-tabs">
       <Row className="title-row">
         <Column sm={4} md={5} lg={9}>
           <h2>{pageTexts.tabTitles.coneTab}</h2>
-          <h2>{seedlotSpecies.label}</h2>
+          <h2>{seedlotSpecies.label + a}</h2>
           <Subtitle text={pageTexts.coneAndPollen.subtitle} />
         </Column>
       </Row>
