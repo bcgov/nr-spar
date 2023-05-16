@@ -1,33 +1,19 @@
-# Build container
-FROM openjdk:17.0.2 AS build
-
-# Build package/archive
+FROM eclipse-temurin:17.0.6_10-jdk-alpine@sha256:a765a97826df90554f3d3a98be5586012bbc53593876f669ff4b2e68717be71d
 WORKDIR /app
-COPY . ./
-RUN ./mvnw --no-transfer-progress --update-snapshots clean package -Dtests.skip=true -Dskip.unit.tests=true
-RUN javac HealthCheck.java InstallCert.java
-
-# Deploy container
-FROM eclipse-temurin:17.0.7_7-jdk-jammy AS deploy
 ENV LANG en_CA.UTF-8
 ENV LANGUAGE en_CA.UTF-8
 ENV LC_ALL en_CA.UTF-8
 
-# Setup package/archive and supporting files
-WORKDIR /usr/share/service/
-COPY --from=build /app/target/*.jar \
-                  /app/HealthCheck.class \
-                  /app/InstallCert.class \
-                  /app/InstallCert\$SavingTrustManager.class \
-                  ./artifacts/
-COPY dockerfile-entrypoint.sh ./
-RUN mkdir config dump public && \
-    chmod -R g+w . && \
-    chmod g+x dockerfile-entrypoint.sh && \
+RUN apk --no-cache add openssl
+
+COPY startup.sh .
+
+RUN chmod g+w /app && \
+    chmod g+x startup.sh && \
     chmod g+w ${JAVA_HOME}/lib/security/cacerts
 
 # Port, user and entrypoint
 EXPOSE 8090
 USER 1001
-HEALTHCHECK --interval=35s --timeout=4s CMD java -cp /usr/share/service/artifacts/ HealthCheck
-ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]
+HEALTHCHECK --interval=35s --timeout=4s CMD wget --spider -S http://localhost:8090/actuator/health || exit 1
+ENTRYPOINT ["sh", "startup.sh"]
