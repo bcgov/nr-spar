@@ -78,7 +78,7 @@ const SeedlotDetails = () => {
       <Row className="seedlot-details-breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
-          <BreadcrumbItem>My seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate('/seedlot/my-seedlots')}>My seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Stack gap={6}>
