@@ -22,7 +22,10 @@ module.exports = {
     '<rootDir>/src/contexts/',
     '<rootDir>/src/routes/',
     '<rootDir>/src/service/',
-    '<rootDir>/src/api-service/'
+    '<rootDir>/src/api-service/',
+    '<rootDir>/src/mock-server/',
+    // TODO: remove once parent tree is complete
+    '<rootDir>/src/components/SeedlotRegistrationSteps/ParentTreeStep'
   ]
 };
 

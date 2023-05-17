@@ -15,7 +15,7 @@ import {
 } from '@carbon/react';
 
 import Seedlot from '../../../types/Seedlot';
-import SeedlotRegistration from '../../../types/SeedlotRegistration';
+import SeedlotRegistration from '../../../types/SeedlotRegistrationObj';
 
 import api from '../../../api-service/api';
 import ApiConfig from '../../../api-service/ApiConfig';

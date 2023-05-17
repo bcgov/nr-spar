@@ -1,3 +1,4 @@
+import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import {
   ownerTemplate,
   validTemplate as ownerInvalidTemplate
@@ -51,12 +52,15 @@ export const initInterimState = (
   facilityType: 'OCV'
 });
 
-export const initOrchardState = () => (
+export const initOrchardState = (): OrchardForm => (
   {
-    orchardId: '',
-    orchardName: '',
-    additionalId: '',
-    additionalName: '',
+    orchards: [
+      {
+        inputId: 0,
+        orchardId: '',
+        orchardLabel: ''
+      }
+    ],
     femaleGametic: '',
     maleGametic: '',
     controlledCross: true,
