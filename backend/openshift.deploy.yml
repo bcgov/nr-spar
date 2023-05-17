@@ -25,7 +25,7 @@ parameters:
     value: apps.silver.devops.gov.bc.ca
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
-    value: apps.silver.devops.gov.bc.ca
+    value: https://apps.silver.devops.gov.bc.ca
   - name: KEYCLOAK_REALM_URL
     value: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
   - name: FORESTCLIENTAPI_ADDRESS
