@@ -20,7 +20,7 @@ describe('Landing component test', () => {
     const content = {
       title: 'Welcome to SPAR',
       subtitle: 'Seed Planning and Registry Application',
-      description: 'Register and storage your seed and meet '
+      description: 'Register and store your seed and meet '
         + 'your annual reforestation needs using SPAR',
       idir_btn: 'Login with IDIR',
       bceid_btn: 'Login with Business BCeID'

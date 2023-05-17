@@ -8,5 +8,5 @@ RUN apk add --no-cache python3 g++ make &&\
     yarn install --frozen-lockfile --prefer-offline
 USER 1001
 EXPOSE 3000
-CMD yarn start
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000/
+CMD yarn start
