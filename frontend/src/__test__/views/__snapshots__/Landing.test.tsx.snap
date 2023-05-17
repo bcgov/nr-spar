@@ -29,7 +29,7 @@ exports[`Landing component test should match the snapshot 1`] = `
       className="landing-desc"
       data-testid="landing-desc"
     >
-      Register and storage your seed and meet your annual reforestation needs using
+      Register and store your seed and meet your annual reforestation needs using
       <span
         className="spar-span"
       >
