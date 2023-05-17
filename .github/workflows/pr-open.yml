@@ -76,7 +76,7 @@ jobs:
           cd ${{ matrix.package }}
           chmod +x ./mvnw
           ./mvnw -Pnative clean spring-boot:build-image \
-            -Dspring-boot.build-image.imageName="nr-spar-${{ env.COMPONENT }}" \
+            -Dspring-boot.build-image.imageName="nr-spar-${{ env.NAME }}" \
             -Doci.revision=${{ github.event.number }} --quiet
       - name: Log in to the Container registry
         uses: docker/login-action@v2.1.0
@@ -94,16 +94,12 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, frontend, oracle-api]
+        package: [database, frontend]
         include:
-          - package: backend
-            triggers: ('backend/')
           - package: database
             triggers: ('database/')
           - package: frontend
             triggers: ('frontend/')
-          - package: oracle-api
-            triggers: ('oracle-api/')
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.0

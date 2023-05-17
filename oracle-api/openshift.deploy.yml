@@ -168,6 +168,11 @@ objects:
                       key: oracle-password
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
+                - name: DATABASE_CERT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-cert-password
               ports:
                 - containerPort: 8090
                   protocol: TCP
