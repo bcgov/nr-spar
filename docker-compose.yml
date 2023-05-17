@@ -19,12 +19,6 @@ services:
       - /pgdata
     build:
       context: ./database
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
   backend:
     container_name: backend
@@ -40,12 +34,6 @@ services:
       POSTGRESQL_PASSWORD: *POSTGRES_PASSWORD
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
-    healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/actuator/health" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     ports:
       - "8090:8090"
     build:
@@ -62,12 +50,6 @@ services:
       DATABASE_USER: proxy_fsa_spar_read_only_user
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
-    healthcheck:
-      test: [ "CMD", "java", "HealthCheck" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 45s
     ports:
       - "8091:8091"
     build:
@@ -94,9 +76,3 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./frontend:/app:z
-    healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
