@@ -87,18 +87,16 @@ services:
       REACT_APP_KC_REALM: standard
       REACT_APP_KC_CLIENT_ID: seed-planning-test-4296
       CHOKIDAR_USEPOLLING: true
-    entrypoint: [ "sh", "-c", "yarn install --prefer-offline && yarn start"]
     ports:
       - "3000:3000"
     build:
       context: ./frontend
+      dockerfile: Dockerfile.dev
     volumes:
       - ./frontend:/app:z
-      - /app/node_modules
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/" ]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 30s
-    user: root

@@ -1,0 +1,9 @@
+# Build
+FROM node:16.19.1-alpine3.17 AS dev-build
+
+# Copy and build
+WORKDIR /app
+COPY . .
+RUN apk add --no-cache python3 g++ make &&\
+    yarn install --frozen-lockfile --prefer-offline
+CMD yarn start
