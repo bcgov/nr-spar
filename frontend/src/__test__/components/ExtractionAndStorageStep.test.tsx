@@ -5,10 +5,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@testing-library/jest-dom';
 import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm';
 import makeServer from '../../mock-server/server';
+import * as ReactQuery from '@tanstack/react-query';
 
 describe('Extraction and Storage Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
+  jest
+    .spyOn(ReactQuery, 'useQuery')
+    .mockImplementation(
+      jest
+        .fn()
+        .mockReturnValue({ data: [], isLoading: false, isSuccess: true })
+    );
   beforeEach(() => {
     makeServer('jest-test');
     const qc = new QueryClient();
@@ -30,7 +38,7 @@ describe('Extraction and Storage Step test', () => {
 
   function clickNext(times: number) {
     const buttonNext = component.getElementsByClassName('back-next-btn')[1];
-    for(var i = 0; i < times; i++) {
+    for (let i = 0; i < times; i++) {
       fireEvent.click(buttonNext);
     }
   }
@@ -52,8 +60,8 @@ describe('Extraction and Storage Step test', () => {
   it('should call the checkbox click function twice', async () => {
     const checkBoxes = screen.getAllByRole('checkbox');
 
-    for(var i = 0; i < 2; i++){
-      for(var j = 0; j < checkBoxes.length; j++){
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < checkBoxes.length; j++) {
         fireEvent.click(checkBoxes[j]);
       }
     }
@@ -71,7 +79,7 @@ describe('Extraction and Storage Step test', () => {
       extEndDate: '2023/04/25',
       extErrorMsg: 'Please enter a valid date'
     };
-    
+
     //Click the checkbox
     const chkExtraction = screen.getAllByRole('checkbox')[0];
     fireEvent.click(chkExtraction);

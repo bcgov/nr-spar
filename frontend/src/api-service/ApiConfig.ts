@@ -14,7 +14,7 @@ const ApiConfig = {
   /**
    * MOCK API
    */
-  applicantInfo: `${mockServerHost}/api/application-info`,
+  applicantInfo: `${mockServerHost}/api/applicant-info`,
 
   aClassSeedlot: `${mockServerHost}/api/register-a-class`,
 
@@ -22,12 +22,10 @@ const ApiConfig = {
 
   seedlotOrchardStep: `${mockServerHost}/api/seedlot/orchard`,
 
-  orchard: `${mockServerHost}/api/orchard`,
-
   recentActivities: `${mockServerHost}/api/recent-activities`,
 
   /**
-   * POSTGRES API
+   * Backend API
    */
   favouriteActivities: `${serverHost}/api/favourite-activities`,
 
@@ -40,7 +38,9 @@ const ApiConfig = {
    */
   vegetationCode: `${oracleServerHost}/api/vegetation-codes?page=0&perPage=500`,
 
-  fundingSource: `${oracleServerHost}/api/funding-sources`
+  fundingSource: `${oracleServerHost}/api/funding-sources`,
+
+  orchard: `${oracleServerHost}/api/orchards`
 };
 
 export default ApiConfig;
