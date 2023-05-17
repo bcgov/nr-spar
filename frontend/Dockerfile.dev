@@ -1,12 +1,13 @@
-# Build
-FROM node:16.19.1-alpine3.17 AS dev-build
+FROM node:16.19.1-alpine3.17
+ENV PORT=3000
 
-# Copy and build
+# Packages
+RUN apk add --no-cache python3 g++ make
+
+# Port and Healthcheck
+EXPOSE ${PORT}
+HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:${PORT}
+
+# Start
 WORKDIR /app
-COPY . .
-RUN apk add --no-cache python3 g++ make &&\
-    yarn install --frozen-lockfile --prefer-offline
-USER 1001
-EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000/
-CMD yarn start
+CMD ["sh", "-c", "yarn install --frozen-lockfile --prefer-offline && yarn start"]
