@@ -41,6 +41,9 @@ services:
 
   oracle-api:
     container_name: oracle-api
+    depends_on:
+      backend:
+        condition: service_healthy
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       SERVER_PORT: "8091"
