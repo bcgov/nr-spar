@@ -15,7 +15,7 @@ import StatusItem from '../StatusItem';
 
 import Seedlot from '../../types/Seedlot';
 
-import './styles.css';
+import './styles.scss';
 
 interface TableProps {
   elements: Seedlot[];
