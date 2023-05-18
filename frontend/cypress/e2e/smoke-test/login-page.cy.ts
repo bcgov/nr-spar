@@ -27,16 +27,20 @@ describe('Login page test', () => {
 
   it('navigate to the user form page IDIR', () => {
     cy.getByDataTest('landing-button__idir').click();
-    cy.get('#idirLogo').should('be.visible');
+    cy.origin(Cypress.env('keycloakLoginUrl'), () => {
+      cy.get('#idirLogo', { timeout: 6000 }).should('be.visible');
+    });
   });
 
   it('navigate to the user form page BCeID', () => {
     cy.getByDataTest('landing-button__bceid').click();
-    cy.get('#bceidLogo').should('be.visible');
+    cy.origin(Cypress.env('keycloakLoginUrl'), () => {
+      cy.get('#bceidLogo', { timeout: 6000 }).should('be.visible');
+    });
   });
 
   it('try to access system using a link without user connected', () => {
-    cy.visit('https://nr-spar-webapp-test-frontend.apps.silver.devops.gov.bc.ca/');
+    cy.visit('/dashboard');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 

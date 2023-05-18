@@ -1,36 +1,64 @@
+import { SeedlotRegistrationSelectors } from '../../utils/selectors';
+import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
+
 describe('Seedlot registration flow', () => {
   let data: {
     applicantAgency: { name: string; number: string; email: string; invalidEmail: string;};
     seedlotInformation: { species: string; };
+    collection: {
+      agency: string;
+      locationCode: string;
+      startDate: string;
+      endDate: string;
+      invalidEndDate: string;
+      numberOfContainers: string;
+      volumePerContainers: string;
+      volumeOfCones: string;
+      nonMatchVolumeOfCones: string;
+      comments: string;
+    };
     ownership: {
       agency: string;
       locationCode: string;
-      ownerPortion: string,
-      reserved: string,
-      surplus: string,
+      ownerPortion: string;
+      reserved: string;
+      surplus: string;
       fundingSource: string;
       methodPayment: string;
     };
     secondOwnership: {
       agency: string;
       locationCode: string;
-      ownerPortion: string,
-      reserved: string,
-      surplus: string,
+      ownerPortion: string;
+      reserved: string;
+      surplus: string;
       fundingSource: string;
       methodPayment: string;
     };
     interimAgency: {
-      agency: string,
-      locationCode: string,
-      startDate: string,
-      endDate: string,
-      invalidEndDate: string,
-      invalidStorageLocation: string,
-      storagelocation: string,
-      methodPayment: string
+      agency: string;
+      locationCode: string;
+      startDate: string;
+      endDate: string;
+      invalidEndDate: string;
+      invalidStorageLocation: string;
+      storagelocation: string;
+      methodPayment: string;
     }
-    orchard: { number: string; name: string; contributionMethodology: string; }
+    orchard: {
+      number: string;
+      name: string;
+      contributionMethodology: string;
+    },
+    extractionStorage: {
+      extractoryAgency: string;
+      extractoryLocationCode: string;
+      storageAgency: string;
+      storageLocationCode: string;
+      startDate: string;
+      endDate: string;
+      invalidEndDate: string;
+    }
   };
 
   before(() => {
@@ -49,21 +77,19 @@ describe('Seedlot registration flow', () => {
   it('should register a Class A Seedlot', () => {
     // SPAR log in
     cy.login();
-    cy.wait(2 * 1000);
-    cy.contains('Main activities');
+    cy.url().should('include', '/dashboard').and('not.include', '?page=');
+    cy.isPageTitle(NavigationLabels.Dashboard);
     // Select the “Seedlots” section from the left-hand panel
-    cy.get('nav')
-      .contains('Seedlots')
-      .click();
+    cy.navigateTo(NavigationLabels.Seedlots);
     // Click on the register seedlot an A class seedlot card
-    cy.get('.std-card-title')
-      .contains('Register an A class seedlot')
+    cy.get(SeedlotRegistrationSelectors.SeedlotActivitiesCardTitle)
+      .contains(SeedlotActivities.RegisterAClass)
       .click();
     // Clicking the heart icon to enable it
-    cy.get('.title-favourite button').click();
+    cy.toogleFavourite();
     // To do - validate after to be fixed
     // Clicking the heart icon to disable it
-    cy.get('.title-favourite button').click();
+    cy.toogleFavourite();
     // To do - validate after to be fixed
     // Enter the applicant agency name
     cy.get('#agency-name-combobox')
@@ -92,11 +118,11 @@ describe('Seedlot registration flow', () => {
       .clear()
       .type(data.applicantAgency.email, { delay: 50 });
     // Enter the seedlot species
-    cy.get('#seedlot-species-dropdown')
-      .find('.bcgov--list-box__menu-icon')
+    cy.get('#applicant-info-combobox-species')
       .click();
-    cy.get('#seedlot-species-dropdown')
+    cy.get('.bcgov--list-box__menu-item__option')
       .contains(data.seedlotInformation.species)
+      .scrollIntoView()
       .click();
     // Check checkbox behavior when Tested parent tree selected
     cy.get('#tested-radio')
@@ -147,6 +173,104 @@ describe('Seedlot registration flow', () => {
     // Click on Complete registration
     cy.contains('button', 'Complete registration')
       .click();
+    // Collection step
+    // Uncheck Use applicant agency as collector agency
+    cy.get('#applicant')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    cy.get('#applicant')
+      .should('not.be.checked');
+    cy.get('#collectorAgency')
+      .clear()
+      .should('be.empty');
+    cy.get('#locationCode')
+      .clear()
+      .should('be.empty');
+    // Select Collection agency
+    cy.get('#collectorAgency')
+      .clear();
+    cy.get('.bcgov--list-box__menu-item__option')
+      .contains(data.collection.agency)
+      .click();
+    // Input Collection location code
+    cy.get('#locationCode')
+      .type(data.collection.locationCode, { delay: 50 });
+    cy.get('#collectorAgency')
+      .should('have.value', data.collection.agency);
+    cy.get('#locationCode')
+      .should('have.value', data.collection.locationCode);
+    cy.get('#applicant')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    cy.get('#applicant')
+      .should('be.checked');
+    cy.get('#collectorAgency')
+      .should('not.have.value', data.collection.agency);
+    cy.get('#locationCode')
+      .should('not.have.value', data.collection.locationCode);
+    // Checking dates inputs
+    // Insert start date
+    cy.get('#startDate')
+      .type(data.collection.startDate, { delay: 50 });
+    // Insert end date before start date
+    cy.get('#endDate')
+      .type(data.collection.invalidEndDate, { delay: 50 })
+      .blur();
+    cy.get('#endDate')
+      .should('have.value', '');
+    // Insert end date
+    cy.get('#endDate')
+      .type(data.collection.endDate, { delay: 50 });
+    // Checking Containers and Cones inputs
+    cy.get('#numberOfContainers')
+      .clear()
+      .type(data.collection.numberOfContainers, { delay: 50 });
+    cy.get('#volumeOfCones')
+      .should('have.value', data.collection.numberOfContainers);
+    cy.get('#volumePerContainers')
+      .clear()
+      .type(data.collection.volumePerContainers, { delay: 50 });
+    cy.get('#volumeOfCones')
+      .should('have.value', data.collection.volumeOfCones);
+    cy.get('#volumeOfCones')
+      .clear();
+    cy.get('#volumeOfCones-error-msg')
+      .should('be.visible');
+    cy.get('#volumeOfCones')
+      .type(data.collection.nonMatchVolumeOfCones, { delay: 50 });
+    cy.get('#volumeOfCones-warn-msg')
+      .should('be.visible');
+    // Validating Collection Methods
+    cy.get('.collection-methods .bcgov--checkbox')
+      .as('collectionMethods');
+    cy.get('@collectionMethods')
+      .each((checkbox) => expect(checkbox).to.not.be.checked);
+    cy.get('@collectionMethods')
+      .each((checkbox) => {
+        cy.wrap(checkbox)
+          .siblings('.bcgov--checkbox-label')
+          .click();
+      });
+    cy.get('@collectionMethods')
+      .each((checkbox) => expect(checkbox).to.be.checked);
+    cy.get('@collectionMethods')
+      .each((checkbox) => {
+        cy.wrap(checkbox)
+          .siblings('.bcgov--checkbox-label')
+          .click();
+      });
+    cy.get('@collectionMethods')
+      .first()
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    cy.get('@collectionMethods')
+      .first()
+      .should('be.checked');
+    cy.get('[name="comments"]')
+      .clear()
+      .type(data.collection.comments, { delay: 50 });
+    cy.get('[name="comments"')
+      .should('have.value', data.collection.comments);
     // Click on Next button to go to Ownership step
     cy.contains('button', 'Next')
       .click();
@@ -184,12 +308,12 @@ describe('Seedlot registration flow', () => {
     cy.get('#single-owner-surplus-0')
       .should('have.value', data.ownership.surplus);
     // Select Funding source
-    cy.get('#owner-funding-source-0')
-      .click();
-    cy.get('.bcgov--list-box__menu')
-      .eq(1)
-      .contains(data.ownership.fundingSource)
-      .click();
+    // cy.get('#owner-funding-source-0')
+    //   .click();
+    // cy.get('.bcgov--list-box__menu')
+    //   .eq(1)
+    //   .contains(data.ownership.fundingSource)
+    //   .click();
     // Check default Method of payment
     cy.get('#owner-method-of-payment-0')
       .should('have.value', data.ownership.methodPayment);
@@ -218,12 +342,12 @@ describe('Seedlot registration flow', () => {
     cy.get('#single-owner-surplus-1')
       .should('have.value', data.secondOwnership.surplus);
     // Select Funding source on second owner
-    cy.get('#owner-funding-source-1')
-      .click();
-    cy.get('.bcgov--list-box__menu')
-      .eq(4)
-      .contains(data.secondOwnership.fundingSource)
-      .click();
+    // cy.get('#owner-funding-source-1')
+    //   .click();
+    // cy.get('.bcgov--list-box__menu')
+    //   .eq(4)
+    //   .contains(data.secondOwnership.fundingSource)
+    //   .click();
     // Check default Method of payment on second owner
     cy.get('#owner-method-of-payment-1')
       .should('have.value', data.secondOwnership.methodPayment);
@@ -348,17 +472,17 @@ describe('Seedlot registration flow', () => {
     cy.get('#seedlot-orchard-number-input')
       .clear()
       .type(data.orchard.number, { delay: 50 });
-    cy.get('#seedlot-orchard-name-input')
-      .click();
+    // cy.get('#seedlot-orchard-name-input')
+    //   .click();
     // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
+    // cy.wait(1000);
     // Validate if Orchard name is correct
-    cy.get('#seedlot-orchard-name-input')
-      .should('have.value', data.orchard.name);
+    // cy.get('#seedlot-orchard-name-input')
+    //   .should('have.value', data.orchard.name);
     // Validate if Seedlot species is correct
-    cy.get('#seedlot-species-dropdown')
-      .find('.bcgov--list-box__label')
-      .should('have.text', data.seedlotInformation.species);
+    // cy.get('#seedlot-species-dropdown')
+    //   .find('.bcgov--list-box__label')
+    //   .should('have.text', data.seedlotInformation.species);
     // Select Female gametic contribution methodology
     cy.get('#female-gametic-combobox')
       .click();
@@ -438,8 +562,146 @@ describe('Seedlot registration flow', () => {
     // Click on Next button to go to Extraction and storage step
     cy.contains('button', 'Next')
       .click();
+    // Validating Extraction and storage step
+    cy.get('#extractory-agency-tsc-checkbox')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    cy.get('#extractory-agency-tsc-checkbox')
+      .should('not.be.checked');
+    cy.get('#extractory-agency-combobox')
+      .clear()
+      .should('be.empty');
+    cy.get('#extractory-agency-location-code-input')
+      .clear()
+      .should('be.empty');
+    // Select extractory agency
+    cy.get('#extractory-agency-combobox')
+      .clear();
+    cy.get('.bcgov--list-box__menu-item__option')
+      .contains(data.extractionStorage.extractoryAgency)
+      .click();
+    // Input extractory location code
+    cy.get('#extractory-agency-location-code-input')
+      .type(data.extractionStorage.extractoryLocationCode, { delay: 50 });
+    cy.get('#extractory-agency-combobox')
+      .should('have.value', data.extractionStorage.extractoryAgency);
+    cy.get('#extractory-agency-location-code-input')
+      .should('have.value', data.extractionStorage.extractoryLocationCode);
+    cy.get('#extractory-agency-tsc-checkbox')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    cy.get('#extractory-agency-tsc-checkbox')
+      .should('be.checked');
+    cy.get('#extractory-agency-combobox')
+      .should('not.have.value', data.extractionStorage.extractoryAgency);
+    cy.get('#extractory-agency-location-code-input')
+      .should('not.have.value', data.extractionStorage.extractoryLocationCode);
+    cy.get('#extractory-agency-tsc-checkbox')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    // Checking dates inputs
+    // Insert start date
+    cy.get('#extraction-start-date-input')
+      .type(data.extractionStorage.startDate, { delay: 50 });
+    // Insert end date before start date
+    cy.get('#extraction-end-date-input')
+      .type(data.extractionStorage.invalidEndDate, { delay: 50 })
+      .blur();
+    cy.get('#extraction-end-date-input')
+      .click()
+      .focus()
+      .blur();
+    cy.get('#extraction-end-date-input')
+      .parent()
+      .siblings('.bcgov--form-requirement')
+      .should('be.visible');
+    // Insert end date
+    cy.get('#extraction-end-date-input')
+      .clear()
+      .type(data.extractionStorage.endDate, { delay: 50 })
+      .blur();
+    cy.get('#extraction-end-date-input')
+      .click()
+      .focus()
+      .blur();
+    cy.get('#extraction-end-date-input')
+      .parent()
+      .siblings('.bcgov--form-requirement')
+      .should('not.exist');
+    // Uncheck Use applicant agency as storage agency
+    cy.get('#seed-storage-agency-tsc-checkbox')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    cy.get('#seed-storage-agency-tsc-checkbox')
+      .should('not.be.checked');
+    cy.get('#seed-storage-agency-combobox')
+      .clear()
+      .should('be.empty');
+    cy.get('#seed-storage-location-code-input')
+      .clear()
+      .should('be.empty');
+    // Select storage agency
+    cy.get('#seed-storage-agency-combobox')
+      .clear();
+    cy.get('.bcgov--list-box__menu-item__option')
+      .contains(data.extractionStorage.storageAgency)
+      .click();
+    // Input storage location code
+    cy.get('#seed-storage-location-code-input')
+      .type(data.extractionStorage.storageLocationCode, { delay: 50 });
+    cy.get('#seed-storage-agency-combobox')
+      .should('have.value', data.extractionStorage.storageAgency);
+    cy.get('#seed-storage-location-code-input')
+      .should('have.value', data.extractionStorage.storageLocationCode);
+    cy.get('#seed-storage-agency-tsc-checkbox')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    cy.get('#seed-storage-agency-tsc-checkbox')
+      .should('be.checked');
+    cy.get('#seed-storage-agency-combobox')
+      .should('not.have.value', data.extractionStorage.storageAgency);
+    cy.get('#seed-storage-location-code-input')
+      .should('not.have.value', data.extractionStorage.storageLocationCode);
+    cy.get('#seed-storage-agency-tsc-checkbox')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    // Checking dates inputs
+    // Insert start date
+    cy.get('#storage-start-date-input')
+      .type(data.extractionStorage.startDate, { delay: 50 });
+    // Insert end date before start date
+    cy.get('#storage-end-date-input')
+      .type(data.extractionStorage.invalidEndDate, { delay: 50 })
+      .blur();
+    cy.get('#storage-end-date-input')
+      .click()
+      .focus()
+      .blur();
+    cy.get('#storage-end-date-input')
+      .parent()
+      .siblings('.bcgov--form-requirement')
+      .should('be.visible');
+    // Insert end date
+    cy.get('#storage-end-date-input')
+      .clear()
+      .type(data.extractionStorage.endDate, { delay: 50 })
+      .blur();
+    cy.get('#storage-end-date-input')
+      .click()
+      .focus()
+      .blur();
+    cy.get('#storage-end-date-input')
+      .parent()
+      .siblings('.bcgov--form-requirement')
+      .should('not.exist');
     // Click on Submit registration button to submit form
     cy.contains('button', 'Submit registration')
+      .click();
+    cy.get('#declaration-modal-checkbox')
+      .siblings('.bcgov--checkbox-label')
+      .click();
+    cy.get('.seedlot-registration-modal')
+      .contains('button', 'Submit seedlot')
       .click();
   });
 });

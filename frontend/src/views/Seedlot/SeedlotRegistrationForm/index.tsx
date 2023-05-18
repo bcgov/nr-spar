@@ -6,12 +6,14 @@ import {
   Row,
   Breadcrumb,
   BreadcrumbItem,
-  Button
+  Button,
+  Loading
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
+import getSeedlotInfo from '../../../api-service/seedlotAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
@@ -20,7 +22,7 @@ import OwnershipStep from '../../../components/SeedlotRegistrationSteps/Ownershi
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
-import { SeedlotOrchard } from '../../../types/SeedlotTypes/SeedlotOrchard';
+import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { AllStepData, AllStepInvalidationObj, FormInvalidationObj } from './definitions';
 import {
@@ -34,6 +36,7 @@ import {
 } from './utils';
 import { getDropDownList } from '../../../utils/DropDownUtils';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
+import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
 import './styles.scss';
@@ -52,7 +55,7 @@ const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
-  const seedlotNumber = useParams().seedlot;
+  const seedlotNumber = useParams().seedlot ?? '';
 
   const [formStep, setFormStep] = useState<number>(0);
 
@@ -66,12 +69,18 @@ const SeedlotRegistrationForm = () => {
     queryFn: getPaymentMethods
   });
 
+  const seedlotInfoQuery = useQuery({
+    queryKey: ['seedlot', seedlotNumber],
+    queryFn: () => getSeedlotInfo(seedlotNumber)
+  });
+
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
     collectionStep: initCollectionState(defaultAgency, defaultCode),
     interimStep: initInterimState(defaultAgency, defaultCode),
     ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
     orchardStep: initOrchardState(),
+    parentTreeStep: {},
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
   });
 
@@ -109,6 +118,11 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
+    const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
+      code: '',
+      label: '',
+      Description: ''
+    };
     switch (formStep) {
       // Collection
       case 0:
@@ -131,16 +145,8 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
-            fundingSources={
-              fundingSourcesQuery.isSuccess
-                ? getDropDownList(fundingSourcesQuery.data)
-                : []
-            }
-            paymentMethods={
-              paymentMethodsQuery.isSuccess
-                ? getDropDownList(paymentMethodsQuery.data)
-                : []
-            }
+            fundingSources={getDropDownList(fundingSourcesQuery.data)}
+            paymentMethods={getDropDownList(paymentMethodsQuery.data)}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
             setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
@@ -160,13 +166,20 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
+            seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
-            setStepData={(data: SeedlotOrchard) => setStepData('orchardStep', data)}
+            setStepData={(data: OrchardForm) => setStepData('orchardStep', data)}
           />
         );
       // Parent Tree and SMP
       case 4:
-        return null;
+        return (
+          <ParentTreeStep
+            seedlotSpecies={seedlotSpecies}
+            state={allStepData.parentTreeStep}
+            setStepData={(data: any) => setStepData('parentTreeStep', data)}
+          />
+        );
       // Extraction and Storage
       case 5:
         return (
@@ -210,7 +223,15 @@ const SeedlotRegistrationForm = () => {
         </Row>
         <Row className="seedlot-registration-row">
           <div className="seedlot-current-form">
-            {renderStep()}
+            {
+              (
+                seedlotInfoQuery.isSuccess
+                // && fundingSourcesQuery.isSuccess
+                // && paymentMethodsQuery.isSuccess
+              )
+                ? renderStep()
+                : <Loading />
+            }
           </div>
         </Row>
         <div className="btns-container">

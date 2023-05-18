@@ -5,7 +5,7 @@ import mockServerConfig from '../config';
 
 const ApplicantInfoEndpoint = (server: Server) => {
   const url = ApiConfig.applicantInfo.replace(mockServerConfig.namespace, '');
-  server.get(url, (schema: AppSchema) => schema.all('applicantInfo'));
+  server.get(url, (schema: AppSchema) => schema.db.applicantInfo);
 };
 
 export default ApplicantInfoEndpoint;

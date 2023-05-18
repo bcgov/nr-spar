@@ -15,7 +15,7 @@ import {
 } from '@carbon/react';
 
 import Seedlot from '../../../types/Seedlot';
-import SeedlotRegistration from '../../../types/SeedlotRegistration';
+import SeedlotRegistration from '../../../types/SeedlotRegistrationObj';
 
 import api from '../../../api-service/api';
 import ApiConfig from '../../../api-service/ApiConfig';
@@ -78,7 +78,7 @@ const SeedlotDetails = () => {
       <Row className="seedlot-details-breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
-          <BreadcrumbItem>My seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate('/seedlot/my-seedlots')}>My seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Stack gap={6}>
