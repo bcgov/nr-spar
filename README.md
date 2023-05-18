@@ -106,3 +106,5 @@ to get a JWT token to your user.
 
 As mentioned, we're here to help. Feel free to start a conversation
 on Rocket chat or ask a question on Stackoverflow.
+
+Dummy change to open PR xD
