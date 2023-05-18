@@ -1,7 +1,7 @@
 import React from 'react';
 
 import logo from '../../assets/img/bc-gov-logo.png';
-import './styles.css';
+import './styles.scss';
 
 const BCGovLogo = () => (
   <img src={logo} alt="BCGov Logo" width={160} className="logo" />

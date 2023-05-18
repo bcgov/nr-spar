@@ -15,7 +15,7 @@ import StatusItem from '../StatusItem';
 
 import Activity from '../../types/Activity';
 
-import './styles.css';
+import './styles.scss';
 
 interface TableProps {
   elements: Activity[];
