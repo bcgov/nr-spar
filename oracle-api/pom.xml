@@ -38,7 +38,6 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 		<sonar.organization>bcgov-sonarcloud</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
-		<oci.revision>${project.version}</oci.revision>
 	</properties>
 
 	<profiles>
@@ -60,15 +59,6 @@
 				<build.profile.id>integration-test</build.profile.id>
 				<skip.integration.tests>false</skip.integration.tests>
 				<skip.unit.tests>true</skip.unit.tests>
-			</properties>
-		</profile>
-		<profile>
-			<id>native</id>
-			<properties>
-			  <build.profile.id>native</build.profile.id>
-				<skip.integration.tests>true</skip.integration.tests>
-				<skip.unit.tests>true</skip.unit.tests>
-				<jacoco.skip>true</jacoco.skip>
 			</properties>
 		</profile>
 	</profiles>
@@ -93,6 +83,12 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>2.2.9</version>
 		</dependency>
 
 		<!-- Authentication and Security -->
@@ -140,21 +136,6 @@
 
 	<build>
 		<plugins>
-		  <plugin>
-				<groupId>org.graalvm.buildtools</groupId>
-				<artifactId>native-maven-plugin</artifactId>
-				<configuration>
-					<metadataRepository>
-						<dependencies>
-							<dependency>
-								<groupId>org.hibernate.orm</groupId>
-								<artifactId>hibernate-core</artifactId>
-								<metadataVersion>6.1.1.Final</metadataVersion>
-							</dependency>
-						</dependencies>
-					</metadataRepository>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -165,26 +146,6 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
-					<image>
-						<buildpacks>
-							<buildpack>gcr.io/paketo-buildpacks/graalvm</buildpack>
-							<buildpack>gcr.io/paketo-buildpacks/java-native-image</buildpack>
-							<buildpack>gcr.io/paketo-buildpacks/image-labels</buildpack>
-						</buildpacks>
-						<env>
-							<BP_JVM_VERSION>19.0.2</BP_JVM_VERSION>
-							<BP_OCI_SOURCE>https://github.com/bcgov/nr-spar</BP_OCI_SOURCE>
-							<BP_OCI_DESCRIPTION>${project.description}</BP_OCI_DESCRIPTION>
-							<BP_OCI_LICENSES>Apache License, Version 2.0</BP_OCI_LICENSES>
-							<BP_OCI_REVISION>${oci.revision}</BP_OCI_REVISION>
-							<BP_OCI_TITLE>${project.name}</BP_OCI_TITLE>
-							<BP_OCI_CREATED>${timestamp}</BP_OCI_CREATED>
-							<BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-						</env>
-					</image>
-					<layers>
-						<includeLayerTools>false</includeLayerTools>
-					</layers>
 				</configuration>
 			</plugin>
 
