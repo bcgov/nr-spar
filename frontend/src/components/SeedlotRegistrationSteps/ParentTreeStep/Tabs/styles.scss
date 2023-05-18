@@ -79,12 +79,12 @@
     }
 
     .table-input:focus-visible {
-      outline-color: var(--bcgov-border-interactive);
+      outline-color: var(--#{vars.$bcgov-prefix}-border-interactive);
     }
 
     ::placeholder {
       @include type.type-style('code-02');
-      color: var(--bcgov-text-placeholder);
+      color: var(--#{vars.$bcgov-prefix}-text-placeholder);
     }
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import {
   FlexGrid,
@@ -8,6 +9,7 @@ import {
 import Subtitle from '../../../../Subtitle';
 import DropDownObj from '../../../../../types/DropDownObject';
 import { pageTexts } from '../../constants';
+import textConfig from './constants';
 import '../styles.scss';
 
 type ConeAndPollenProps = {
@@ -22,9 +24,8 @@ const ConeAndPollen = ({
     <FlexGrid className="parent-tree-tabs">
       <Row className="title-row">
         <Column sm={4} md={5} lg={9}>
-          <h2>{pageTexts.tabTitles.coneTab}</h2>
-          <h2>{seedlotSpecies.label + a}</h2>
-          <Subtitle text={pageTexts.coneAndPollen.subtitle} />
+          <h2>{textConfig.tabTitle}</h2>
+          <div>{textConfig.tabDescription}</div>
         </Column>
       </Row>
       <Row className="notification-row">
