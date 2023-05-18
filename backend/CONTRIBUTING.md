@@ -89,6 +89,22 @@ cd database
 docker-compose up --build
 ```
 
+## Building Cloud Native Image
+
+You can build the image with:
+
+```sh
+./mvnw -Pnative clean spring-boot:build-image -Dspring-boot.build-image.imageName="nr-spar-backend"
+```
+
+And then, run it with:
+```sh
+docker run -d \
+  --name backend-native \
+  --env-file ./backend/.env \
+  nr-spar-backend
+```
+
 ## Run tests
 
 For unit tests, please use this command:
