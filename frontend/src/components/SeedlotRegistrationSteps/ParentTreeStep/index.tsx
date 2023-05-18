@@ -28,27 +28,31 @@ const ParentTreeStep = (
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setStepData
   }: ParentTreeStepProps
-) => (
-  <div className="seedlot-parent-tree-step">
-    <Tabs>
-      <TabList aria-label="List of tabs">
-        <Tab>{pageTexts.tabTitles.coneTab}</Tab>
-        <Tab>{pageTexts.tabTitles.smpTab}</Tab>
-        <Tab>{pageTexts.tabTitles.mixTab}</Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel>
-          <ConeAndPollen seedlotSpecies={seedlotSpecies} />
-        </TabPanel>
-        <TabPanel>
-          SMP
-        </TabPanel>
-        <TabPanel>
-          MIX
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
-  </div>
-);
+) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const a = 'b';
+  return (
+    <div className="seedlot-parent-tree-step">
+      <Tabs>
+        <TabList aria-label="List of tabs">
+          <Tab>{pageTexts.tabTitles.coneTab}</Tab>
+          <Tab>{pageTexts.tabTitles.smpTab}</Tab>
+          <Tab>{pageTexts.tabTitles.mixTab}</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <ConeAndPollen seedlotSpecies={seedlotSpecies} />
+          </TabPanel>
+          <TabPanel>
+            SMP
+          </TabPanel>
+          <TabPanel>
+            MIX
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </div>
+  );
+};
 
 export default ParentTreeStep;
