@@ -10,7 +10,7 @@ import {
 
 import PageTitle from '../../../components/PageTitle';
 import ApplicantInformationForm from '../../../components/ApplicantInformationForm';
-import './styles.css';
+import './styles.scss';
 
 const CreateAClass = () => {
   const navigate = useNavigate();

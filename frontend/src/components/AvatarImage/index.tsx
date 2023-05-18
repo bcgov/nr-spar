@@ -1,7 +1,7 @@
 import React from 'react';
 
 import emptyUser from '../../assets/img/emptyUser.jpg';
-import './style.css';
+import './style.scss';
 
 type Size = 'small' | 'large';
 
