@@ -77,5 +77,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
+    user: root
     volumes:
       - ./frontend:/app:z
