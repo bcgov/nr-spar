@@ -2,7 +2,7 @@ import React from 'react';
 
 import AvatarImage from '../AvatarImage';
 
-import './styles.css';
+import './styles.scss';
 
 interface ParticipantsProps {
   elements: string[];

@@ -21,6 +21,6 @@ RUN yarn global add serve@14.2.0 react-inject-env@2.1.0 && \
 # User and startup
 EXPOSE 3000
 USER 1001
-HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000/
+HEALTHCHECK --interval=30s --timeout=3s CMD wget --no-verbose --tries=1 --spider http://localhost:3000/
 CMD react-inject-env set -d . && \
     serve --no-clipboard --single .

@@ -9,9 +9,8 @@ import {
 } from '@carbon/react';
 
 import PageTitle from '../../../components/PageTitle';
-import ApplicantInformation from '../../../components/ApplicantInformation';
-
-import './styles.css';
+import ApplicantInformationForm from '../../../components/ApplicantInformationForm';
+import './styles.scss';
 
 const CreateAClass = () => {
   const navigate = useNavigate();
@@ -31,7 +30,7 @@ const CreateAClass = () => {
             activity="CREATE_A_CLASS_SEEDLOT"
           />
         </Row>
-        <ApplicantInformation />
+        <ApplicantInformationForm />
       </Stack>
     </FlexGrid>
   );
