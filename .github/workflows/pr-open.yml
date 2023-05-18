@@ -71,12 +71,12 @@ jobs:
           java-version: "17"
           components: "native-image"
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Oracle-API
+      - name: Build Native Image
         run: |
           cd ${{ matrix.package }}
           chmod +x ./mvnw
           ./mvnw -Pnative clean spring-boot:build-image \
-            -Dspring-boot.build-image.imageName="nr-spar-${{ env.NAME }}" \
+            -Dspring-boot.build-image.imageName="${{ env.NAME }}" \
             -Doci.revision=${{ github.event.number }} --quiet
       - name: Log in to the Container registry
         uses: docker/login-action@v2.1.0
