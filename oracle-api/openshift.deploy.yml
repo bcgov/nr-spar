@@ -170,6 +170,8 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-cert-password
+                - name: DATABASE_CERT_KEYSTORE
+                  value: /cert/jssecacerts
               ports:
                 - containerPort: 8090
                   protocol: TCP
