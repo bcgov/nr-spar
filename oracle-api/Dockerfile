@@ -15,11 +15,7 @@ ENV LC_ALL en_CA.UTF-8
 
 # Setup package/archive and supporting files
 WORKDIR /usr/share/service/
-COPY --from=build /app/target/*.jar \
-                /app/HealthCheck.class \
-                /app/InstallCert.class \
-                /app/InstallCert\$SavingTrustManager.class \
-                ./artifacts/
+COPY --from=build /app/target/*.jar /app/*.class ./artifacts/
 COPY dockerfile-entrypoint.sh ./
 RUN mkdir config dump public && \
     chmod -R g+w . && \
