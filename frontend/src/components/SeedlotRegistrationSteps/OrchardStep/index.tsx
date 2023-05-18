@@ -117,16 +117,25 @@ const OrchardStep = ({
   });
 
   const fetchOrchardInfo = (orchardId: string, inputId: number) => {
-    // Copy orchards from state
-    const newOrchards = [...state.orchards];
-    // Replace input value with id
-    const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
-    newOrchards[replaceIndex].orchardId = orchardId;
-    setStepData({
-      ...state,
-      orchards: newOrchards
-    });
-    queryClient.refetchQueries({ queryKey: ['orchard', orchardId] });
+    /*
+    ** If orchardID already exist then do nothing
+    ** True if is duplicated, False otherwise
+    */
+    const isDuplicateOrchard = state.orchards
+      .findIndex((orchard) => orchard.orchardId === orchardId) !== -1;
+    if (!isDuplicateOrchard) {
+      console.log(orchardId);
+      // Copy orchards from state
+      const newOrchards = [...state.orchards];
+      // Replace input value with id
+      const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
+      newOrchards[replaceIndex].orchardId = orchardId;
+      setStepData({
+        ...state,
+        orchards: newOrchards
+      });
+      queryClient.refetchQueries({ queryKey: ['orchard', orchardId] });
+    }
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
