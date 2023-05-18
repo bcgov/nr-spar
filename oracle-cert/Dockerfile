@@ -13,7 +13,6 @@ RUN chmod g+w /app && \
     chmod g+w ${JAVA_HOME}/lib/security/cacerts
 
 # Port, user and entrypoint
-EXPOSE 8090
 USER 1001
-HEALTHCHECK --interval=35s --timeout=4s CMD wget --spider -S http://localhost:8090/actuator/health || exit 1
+
 ENTRYPOINT ["sh", "startup.sh"]
