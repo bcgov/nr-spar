@@ -12,7 +12,7 @@ import {
 
 import File from '../../types/File';
 
-import './styles.css';
+import './styles.scss';
 
 interface TableProps {
   elements: File[];
