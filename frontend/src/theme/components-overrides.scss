@@ -163,7 +163,8 @@ nav.#{variables.$bcgov-prefix}--side-nav {
   background-color: var(--#{variables.$bcgov-prefix}-layer-02);
 }
 
-.#{variables.$bcgov-prefix}--table-header-label {
+.#{variables.$bcgov-prefix}--table-header-label,
+.#{variables.$bcgov-prefix}--data-table.#{variables.$bcgov-prefix}--skeleton th {
   font-weight: bold;
 }
 

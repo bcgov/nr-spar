@@ -5,7 +5,6 @@ import MySeedlotsItems from '../../mock-server/fixtures/MySeedlotsItems';
 import '@testing-library/jest-dom';
 import formatDate from '../../utils/DateUtils'
 
-
 describe('Seedlot Table component', () => {
   const listItems = MySeedlotsItems;
   const tableHeaders: string[] = [

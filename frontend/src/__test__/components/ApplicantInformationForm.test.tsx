@@ -1,6 +1,6 @@
 import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react';
-import ApplicantInformation from '../../components/ApplicantInformation/index';
+import ApplicantInformationForm from '../../components/ApplicantInformationForm/index';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -11,14 +11,14 @@ describe('Test the Form Progress component', () => {
     render(
       <BrowserRouter>
         <QueryClientProvider client={qc}>
-          <ApplicantInformation />
+          <ApplicantInformationForm />
         </QueryClientProvider>
       </BrowserRouter>
     );
 
     expect(screen.getByText('Applicant agency')).toBeInTheDocument();
     expect(screen.getByText('Enter the applicant agency information')).toBeInTheDocument();
-    
+
     const checkBoxes = screen.getAllByRole('checkbox');
 
     expect(checkBoxes[0]).toBeChecked();

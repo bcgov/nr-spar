@@ -8,6 +8,7 @@ import formatDate from '../../utils/DateUtils';
 import ApiConfig from '../../api-service/ApiConfig';
 import mockServerConfig from '../config';
 
+// TODO: refactor or remove: the way we keep data here is really messy and unnecessarily complicated
 const SeedlotRegistrationEndpoints = (server: Server) => {
   const aClassUrl = ApiConfig.aClassSeedlot.replace(mockServerConfig.namespace, '');
   server.post(aClassUrl, (schema: AppSchema, request) => {
