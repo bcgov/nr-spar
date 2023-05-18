@@ -19,8 +19,7 @@ RUN yarn global add serve@14.2.0 react-inject-env@2.1.0 && \
 # User, port and healthcheck
 USER 1001
 EXPOSE 3000
-HEALTHCHECK --interval=5s --timeout=5s --retries=5 --start-period=30s \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
 
 # Startup
 CMD react-inject-env set -d . && \

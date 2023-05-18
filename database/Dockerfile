@@ -7,5 +7,4 @@ RUN sed -i '/EXISTS postgis_tiger_geocoder;*/a CREATE EXTENSION IF NOT EXISTS pg
 # User, port and Healthcheck
 USER postgres
 EXPOSE 5432
-HEALTHCHECK --interval=5s --timeout=5s --retries=5 --start-period=30s \
-  CMD [ "pg_isready", "-U", "postgres"]
+HEALTHCHECK CMD [ "pg_isready", "-U", "postgres"]

@@ -29,8 +29,7 @@ RUN mkdir config dump public && \
 # User, port and healthcheck
 USER 1001
 EXPOSE 8090
-HEALTHCHECK --interval=5s --timeout=5s --retries=5 --start-period=45s \
-  CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+HEALTHCHECK CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
 
 # Start
 ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]

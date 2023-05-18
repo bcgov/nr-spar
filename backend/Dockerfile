@@ -24,6 +24,5 @@ COPY dockerfile-entrypoint.sh /usr/share/service/dockerfile-entrypoint.sh
 # User, port and healthcheck
 USER 1001
 EXPOSE 8090
-HEALTHCHECK --interval=30s --timeout=5s --retries=5 --start-period=30s \
-  CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+HEALTHCHECK CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
 ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]
