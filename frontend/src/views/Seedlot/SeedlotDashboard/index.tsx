@@ -9,7 +9,7 @@ import PageTitle from '../../../components/PageTitle';
 import SeedlotActivities from '../../../components/SeedlotActivities';
 import RecentSeedlots from '../../../components/RecentSeedlots';
 
-import './styles.css';
+import './styles.scss';
 
 const SeedlotDashboard = () => (
   <FlexGrid className="seedlot-page">

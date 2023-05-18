@@ -22,5 +22,5 @@ COPY dockerfile-entrypoint.sh /usr/share/service/dockerfile-entrypoint.sh
 
 EXPOSE 8090
 USER 1001
-HEALTHCHECK --interval=35s --timeout=4s CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+HEALTHCHECK --interval=35s --timeout=4s CMD wget --no-verbose --tries=1 --spider http://localhost:8090/actuator/health
 ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]
