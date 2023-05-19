@@ -17,7 +17,7 @@ import { DocumentAdd } from '@carbon/icons-react';
 
 import Subtitle from '../Subtitle';
 
-import SeedlotRegistration from '../../types/SeedlotRegistration';
+import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
 
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
@@ -27,7 +27,7 @@ import getVegCodes from '../../api-service/vegetationCodeAPI';
 
 import './styles.scss';
 
-const ApplicantInformation = () => {
+const ApplicantInformationForm = () => {
   const mockAgencyOptions: Array<string> = [
     '0032 - Strong Seeds Orchard - SSO',
     '0035 - Weak Seeds Orchard - WSO',
@@ -36,7 +36,7 @@ const ApplicantInformation = () => {
 
   const navigate = useNavigate();
 
-  const seedlotData: SeedlotRegistration = {
+  const seedlotData: SeedlotRegistrationObj = {
     seedlotNumber: 0,
     applicant: {
       name: mockAgencyOptions[0],
@@ -58,7 +58,7 @@ const ApplicantInformation = () => {
   const emailInputRef = useRef<HTMLInputElement>(null);
   const speciesInputRef = useRef<HTMLButtonElement>(null);
 
-  const [responseBody, setResponseBody] = useState<SeedlotRegistration>(seedlotData);
+  const [responseBody, setResponseBody] = useState<SeedlotRegistrationObj>(seedlotData);
   const [invalidNumber, setInvalidNumber] = useState<boolean>(false);
   const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
   const [invalidSpecies, setInvalidSpecies] = useState<boolean>(false);
@@ -313,4 +313,4 @@ const ApplicantInformation = () => {
   );
 };
 
-export default ApplicantInformation;
+export default ApplicantInformationForm;

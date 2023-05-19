@@ -5,9 +5,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@testing-library/jest-dom';
 import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm';
 import makeServer from '../../mock-server/server';
+import * as ReactQuery from '@tanstack/react-query';
 
 describe('Collection Step test', () => {
   let dismount: Function;
+  jest
+    .spyOn(ReactQuery, 'useQuery')
+    .mockImplementation(
+      jest
+        .fn()
+        .mockReturnValue({ data: [], isLoading: false, isSuccess: true })
+    );
   beforeEach(() => {
     makeServer('jest-test');
     const qc = new QueryClient();

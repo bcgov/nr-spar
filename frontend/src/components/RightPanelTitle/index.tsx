@@ -3,7 +3,7 @@ import React from 'react';
 import { IconButton } from '@carbon/react';
 import { Settings, Close } from '@carbon/icons-react';
 
-import './styles.css';
+import './styles.scss';
 
 interface RightPanelTitleProps {
   title: string;

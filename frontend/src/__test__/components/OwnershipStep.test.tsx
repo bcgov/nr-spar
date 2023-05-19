@@ -5,11 +5,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@testing-library/jest-dom';
 import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm';
 import makeServer from '../../mock-server/server';
+import * as ReactQuery from '@tanstack/react-query';
 
 describe('Ownership Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
-  beforeEach(() => {
+
+  jest.spyOn(ReactQuery, 'useQuery').mockImplementation(
+    jest
+      .fn()
+      .mockReturnValue({ data: [], isLoading: false, isSuccess: true })
+  );
+
+  beforeEach(async () => {
+
     makeServer('jest-test');
     const qc = new QueryClient();
     const { container, unmount } = render(
@@ -33,7 +42,7 @@ describe('Ownership Step test', () => {
     fireEvent.click(buttonNext);
   }
 
-  it('should have the correct labels', () => {
+  it('should have the correct labels', async () => {
     const content = {
       title: 'Ownership',
       titleOrchard: 'Strong Seeds Orchard',
@@ -46,9 +55,9 @@ describe('Ownership Step test', () => {
   });
 
   it('should call the checkbox click function twice', async () => {
-    let checkbox = screen.getByRole('checkbox');
-    
-    for(var i = 0; i < 2; i++){
+    let checkbox = await screen.findByRole('checkbox');
+
+    for (let i = 0; i < 2; i++) {
       fireEvent.click(checkbox);
     }
 
@@ -59,8 +68,8 @@ describe('Ownership Step test', () => {
 
   it('should render Owner agency name clicking twice', async () => {
     //Click button for additional Orchard ID
-    const addButton = screen.getByText('Add owner');
-    for(var i = 0; i < 2; i++){
+    const addButton = await screen.findByText('Add owner');
+    for (let i = 0; i < 2; i++) {
       fireEvent.click(addButton);
     }
 
@@ -71,10 +80,9 @@ describe('Ownership Step test', () => {
   });
 
   it('should show invalid message for inputs for agency and location code', async () => {
-    let checkbox = screen.getByRole('checkbox');
+    let checkbox = await screen.findByRole('checkbox');
     fireEvent.click(checkbox);
 
-    //agency
     const agencyNumber = component.querySelector('#owner-agency-0') as HTMLInputElement;
 
     fireEvent.change(agencyNumber, {
@@ -89,7 +97,6 @@ describe('Ownership Step test', () => {
       ).toBeInTheDocument();
     });
 
-    //code
     const ownerCode = component.querySelector('#single-owner-code-0') as HTMLInputElement;
 
     fireEvent.change(ownerCode, {

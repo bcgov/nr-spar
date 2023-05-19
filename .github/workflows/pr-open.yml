@@ -49,6 +49,44 @@ jobs:
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
+  cloud-native-builds:
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        package: [backend]
+    name: Cloud Native Builds (${{ matrix.package }})
+    runs-on: ubuntu-22.04
+    env:
+      COMPONENT: ${{ matrix.package }}
+      ZONE: ${{ github.event.number }}
+      NAME: ghcr.io/${{ github.repository }}/${{ matrix.package }}:${{ github.event.number }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          version: "22.3.0"
+          java-version: "17"
+          components: "native-image"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Native Image
+        run: |
+          cd ${{ matrix.package }}
+          chmod +x ./mvnw
+          ./mvnw -Pnative clean spring-boot:build-image \
+            -Dspring-boot.build-image.imageName="${{ env.NAME }}" \
+            -Doci.revision=${{ github.event.number }} --quiet
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pushing
+        run: docker push ${{ env.NAME }}
+  
   builds:
     name: Builds
     runs-on: ubuntu-22.04
@@ -56,10 +94,8 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend, database, frontend, oracle-api]
+        package: [database, frontend, oracle-api]
         include:
-          - package: backend
-            triggers: ('backend/')
           - package: database
             triggers: ('database/')
           - package: frontend
@@ -79,6 +115,7 @@ jobs:
   deploys:
     name: Deploys
     needs:
+      - cloud-native-builds
       - builds
       - init
     runs-on: ubuntu-22.04
