@@ -1,16 +1,14 @@
-# Build
 FROM node:16.19.1-alpine3.17 AS build
 
-# Copy and build
+# Build
 WORKDIR /app
 COPY . .
-RUN apk add --no-cache python3 g++ make &&\
-    yarn install --frozen-lockfile --prefer-offline
-RUN yarn build:production
-RUN rm -rf node_modules
+RUN apk add --no-cache python3 g++ make && \
+    yarn install --frozen-lockfile --prefer-offline && \
+    yarn build:production && \
+    rm -rf node_modules
 
-# Deploy
-FROM node:16.19.1-alpine3.17
+FROM node:16.19.1-alpine3.17 AS deploy
 
 # Copy and prep app
 WORKDIR /app
@@ -18,9 +16,11 @@ COPY --from=build /app/build/ .
 RUN yarn global add serve@14.2.0 react-inject-env@2.1.0 && \
     chmod -R g+w .
 
-# User and startup
-EXPOSE 3000
+# User, port and healthcheck
 USER 1001
-HEALTHCHECK --interval=30s --timeout=3s CMD wget --no-verbose --tries=1 --spider http://localhost:3000/
+EXPOSE 3000
+HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+
+# Startup
 CMD react-inject-env set -d . && \
     serve --no-clipboard --single .
