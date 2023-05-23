@@ -1,0 +1,51 @@
+FROM eclipse-temurin:17.0.6_10-jdk-alpine
+ENV LANG=en_CA.UTF-8 LANGUAGE=en_CA.UTF-8 LC_ALL=en_CA.UTF-8
+
+# Packages
+RUN apk --no-cache add openssl
+
+# Entrypoint
+RUN SCRIPT=/entrypoint.sh; \
+    ( \
+        echo '#!/bin/sh'; \
+        echo ''; \
+        echo 'cert_folder="/cert"'; \
+        echo 'cert_file="jssecacerts"'; \
+        echo ''; \
+        echo 'mkdir -p $cert_folder'; \
+        echo ''; \
+        echo 'generate_cert() {'; \
+        echo ''; \
+        echo '  echo "I will try to get the ${DATABASE_HOST}-1 cert"'; \
+        echo '  echo "Connecting to ${DATABASE_HOST}:${DATABASE_PORT}"'; \
+        echo ''; \
+        echo '  openssl s_client -connect ${DATABASE_HOST}:${DATABASE_PORT} -showcerts </dev/null | openssl x509 -outform pem > $cert_folder/${DATABASE_HOST}.pem'; \
+        echo '  openssl x509 -outform der -in $cert_folder/${DATABASE_HOST}.pem -out $cert_folder/${DATABASE_HOST}.der'; \
+        echo '  keytool -import -alias ${DATABASE_HOST} -keystore $cert_folder/$cert_file -file $cert_folder/${DATABASE_HOST}.der -storepass ${DATABASE_CERT_SECRET} -noprompt'; \
+        echo ''; \
+        echo '  echo "Generated $cert_file and copied it to $cert_folder."'; \
+        echo '}'; \
+        echo ''; \
+        echo 'if [ "$(ls -A $cert_folder)" ]; then'; \
+        echo '  echo "The $cert_folder folder is not empty."'; \
+        echo '  if [ -e "$cert_folder/$cert_file" ]; then'; \
+        echo '    echo "The "$cert_folder/$cert_file" certificate file is present."'; \
+        echo '  else'; \
+        echo '    generate_cert'; \
+        echo '  fi'; \
+        echo 'else'; \
+        echo '  generate_cert'; \
+        echo 'fi'; \
+    )  \
+      >> ${SCRIPT}; \
+    chmod +x ${SCRIPT}
+
+# Cert folder permissions
+RUN chmod g+w ${JAVA_HOME}/lib/security/cacerts
+
+# User and health check
+USER 1001
+HEALTHCHECK CMD [ -d /cert/ ]
+
+# Start
+ENTRYPOINT ["sh", "startup.sh"]
