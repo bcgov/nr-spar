@@ -55,7 +55,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [backend]
+        package: [backend, oracle-api]
     name: Cloud Native Builds (${{ matrix.package }})
     runs-on: ubuntu-22.04
     env:
@@ -94,14 +94,14 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [database, frontend, oracle-api]
+        package: [database, frontend, oracle-cert]
         include:
           - package: database
             triggers: ('database/')
           - package: frontend
             triggers: ('frontend/')
-          - package: oracle-api
-            triggers: ('oracle-api/')
+          - package: oracle-cert
+            triggers: ('oracle-cert/')
     steps:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.0
