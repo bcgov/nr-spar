@@ -107,6 +107,24 @@ x-www-browser target/coverage-reports/merged-test-report/index.html # For Linux
 open target/coverage-reports/merged-test-report/index.html # For MacOS
 ```
 
+## Building Cloud Native Image
+
+You can build the image with:
+
+```sh
+./mvnw -Pnative clean spring-boot:build-image -Dspring-boot.build-image.imageName="nr-spar-oracle-api"
+```
+
+And then, run it with:
+```sh
+docker run -d \
+  --name oracle-api-native \
+  --network=host \
+  --env-file ./oracle-api/.env \
+  -v $HOME/cert:/cert \
+  nr-spar-oracle-api
+```
+
 ## Submit pull requests
 
 We use git flow, so all code changes happen through Pull Requests. There's a
