@@ -1,4 +1,5 @@
 @use '../../theme/variables.scss' as vars;
+@use '../../theme/colors.scss' as colors;
 
 .panel-section,
 .panel-section-light {
@@ -8,6 +9,7 @@
   align-items: center;
   padding: 0.9375rem 1rem;
   background: var(--bcgov-background-left-panel);
+  box-shadow: inset -1px 0 0 colors.$gray-20;
 }
 
 .panel-section-light {
