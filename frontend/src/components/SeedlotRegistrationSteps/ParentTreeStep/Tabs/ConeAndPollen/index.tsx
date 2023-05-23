@@ -10,6 +10,8 @@ import Subtitle from '../../../../Subtitle';
 import DropDownObj from '../../../../../types/DropDownObject';
 import { pageTexts } from '../../constants';
 import textConfig from './constants';
+import DescriptionBox from '../../../../DescriptionBox';
+
 import '../styles.scss';
 
 type ConeAndPollenProps = {
@@ -24,8 +26,7 @@ const ConeAndPollen = ({
     <FlexGrid className="parent-tree-tabs">
       <Row className="title-row">
         <Column sm={4} md={5} lg={9}>
-          <h2>{textConfig.tabTitle}</h2>
-          <div>{textConfig.tabDescription}</div>
+          <DescriptionBox header={textConfig.tabTitle} description={textConfig.tabDescription} />
         </Column>
       </Row>
       <Row className="notification-row">
