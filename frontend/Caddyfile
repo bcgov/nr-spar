@@ -3,8 +3,6 @@
 #        Then access local frontend app: http://localhost:4300/public/projects
 
 :3000 {
-	redir /public /public/
-
 	log {
 		level ERROR
 		format json
@@ -23,8 +21,6 @@
 
 		# Multi-lines for header's Content-Security-Policy won't work, it has to be enclosed in double quote as one line.
 		Content-Security-Policy "connect-src 'self' https://*.gov.bc.ca http://*.gov.bc.ca;form-action 'self';img-src 'self' 'self';base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';object-src 'none';script-src 'self';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
-
-		# For connect-src (Content-Security-Policy): add "*" if testing locally, will also need to bypass CORS in the API.
 	}
 
 	file_server
