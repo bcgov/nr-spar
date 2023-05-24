@@ -1,44 +1,31 @@
-{
-  auto_https off
-  admin off
-}
+# Caddy's configuration file to serve up frontend. (Require Caddy installed/downloaded in system)
+# Local: Assume local build is ready at './dist/public'; at root working directory run command "caddy run --watch" at console.
+#        Then access local frontend app: http://localhost:4300/public/projects
 
-:3000
-root * /srv
-respond /config 200 {
-  body `{"APP_TITLE":{$VITE_APP_TITLE}}`
-  close
-}
+:3000 {
+	redir /public /public/
 
-file_server
+	log {
+		level ERROR
+		format json
+		output stdout
+	}
 
-@www_host {
-  host www.{$HOST_ROUTE}
-}
-redir @www_host http://{$HOST_ROUTE}{path}
+	# Good practice to compress responses.
+	encode zstd gzip
 
-header {
-  X-Frame-Options "SAMEORIGIN"
-  X-XSS-Protection "1;mode=block"
-  Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
-  X-Content-Type-Options "nosniff"
-  Strict-Transport-Security "max-age=31536000"
-  Referrer-Policy "same-origin"
-  Feature-Policy "fullscreen 'self'; camera 'none'; microphone 'none'"
-}
+	# If 'root' directive is used, it has to be before other directives such as 'try_files'.
+	root * /srv
 
-@unspecified_path {
-  not path_regexp ^\/0.0.0.0
-  not path /api/*
-}
-handle @unspecified_path {
-  try_files {path} {path}/ /?_url={uri}
-}
+	header {
+		# allow caching for 5 minutes, for refreshing after deployments.
+		Cache-Control "public, max-age=300"
 
-encode {
-  gzip 7
-}
+		# Multi-lines for header's Content-Security-Policy won't work, it has to be enclosed in double quote as one line.
+		Content-Security-Policy "connect-src 'self' https://*.gov.bc.ca http://*.gov.bc.ca;form-action 'self';img-src 'self' 'self';base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';object-src 'none';script-src 'self';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
 
-log {
-  output stdout
+		# For connect-src (Content-Security-Policy): add "*" if testing locally, will also need to bypass CORS in the API.
+	}
+
+	file_server
 }
