@@ -1,6 +1,11 @@
+### Global args
+ARG PORT 3000
+
+
+### Build
 FROM node:16.19.1-alpine3.17 AS build
 
-# Build
+# Build static files
 WORKDIR /app
 COPY . .
 RUN apk add --no-cache python3 g++ make && \
@@ -8,19 +13,18 @@ RUN apk add --no-cache python3 g++ make && \
     yarn build:production && \
     rm -rf node_modules
 
-FROM node:16.19.1-alpine3.17 AS deploy
+
+### Deploy w/ arg
+FROM caddy:2.4.6-alpine AS deploy
+ARG PORT
 
 # Copy and prep app
 WORKDIR /app
-COPY --from=build /app/build/ .
-RUN yarn global add serve@14.2.0 react-inject-env@2.1.0 && \
-    chmod -R g+w .
+COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/build /srv
 
-# User, port and healthcheck
-USER 1001
-EXPOSE 3000
-HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
-
-# Startup
-CMD react-inject-env set -d . && \
-    serve --no-clipboard --single .
+# Port, Healthcheck and user
+EXPOSE ${PORT}
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD curl -f http://localhost/:${PORT} || exit 1
+USER app
