@@ -144,6 +144,15 @@ objects:
                 initialDelaySeconds: 15
                 periodSeconds: 30
                 timeoutSeconds: 10
+          volumes:
+            - name: env-config
+              configMap:
+                name: ${NAME}-${ZONE}-${COMPONENT}
+            - name: caddy-data
+              persistentVolumeClaim:
+                claimName: ${NAME}-${ZONE}-${COMPONENT}-caddy-data
+            - name: caddy-config
+              emptyDir: {}
   - apiVersion: v1
     kind: Service
     metadata:
