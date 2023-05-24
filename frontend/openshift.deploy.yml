@@ -63,6 +63,16 @@ objects:
             name: ${REGISTRY}/${PROMOTE}
           referencePolicy:
             type: Local
+  - kind: ConfigMap
+    apiVersion: v1
+    data:
+      env.js: |-
+        window.localStorage.setItem('REACT_APP_SERVER_URL', '${REACT_APP_SERVER_URL}');
+        window.localStorage.setItem('REACT_APP_ORACLE_SERVER_URL', '${REACT_APP_ORACLE_SERVER_URL}');
+        window.localStorage.setItem('REACT_APP_NRSPARWEBAPP_VERSION', '${REACT_APP_NRSPARWEBAPP_VERSION}');
+        window.localStorage.setItem('REACT_APP_KC_URL', '${REACT_APP_KC_URL}');
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: v1
     kind: DeploymentConfig
     metadata:
