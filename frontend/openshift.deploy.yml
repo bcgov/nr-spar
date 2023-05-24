@@ -38,13 +38,10 @@ parameters:
     description: Image (namespace/name:tag) to promote/import
     value: bcgov/nr-spar-webapp/frontend:test
   - name: REACT_APP_SERVER_URL
-    description: REACT_APP_SERVER_URL
     required: true
   - name: REACT_APP_NRSPARWEBAPP_VERSION
-    description: REACT_APP_NRSPARWEBAPP_VERSION
-    required: true
+    value: dev
   - name: REACT_APP_KC_URL
-    description: REACT_APP_KC_URL
     required: true
   - name: REACT_APP_ORACLE_SERVER_URL
     description: Oracle back-end api URL

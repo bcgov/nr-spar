@@ -105,7 +105,6 @@ jobs:
             parameters:
               -p REACT_APP_SERVER_URL=https://nr-spar-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
               -p REACT_APP_ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
-              -p REACT_APP_NRSPARWEBAPP_VERSION=dev
               -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1

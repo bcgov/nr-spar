@@ -54,7 +54,6 @@ head to http://localhost:3000.
 Be aware of the required environment variables:
 
 ```sh
-REACT_APP_NRSPARWEBAPP_VERSION=dev
 REACT_APP_SERVER_URL=http://localhost:8091/
 REACT_APP_ORACLE_SERVER_URL=https://localhost:8092/
 REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
