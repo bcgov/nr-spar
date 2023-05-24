@@ -1,4 +1,4 @@
-FROM maven:3.8.7-eclipse-temurin-17 AS build
+FROM maven:3.9.2-eclipse-temurin-17 AS build
 
 # User
 RUN addgroup --system spring && adduser --system spring --ingroup spring
