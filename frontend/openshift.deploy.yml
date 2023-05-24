@@ -72,6 +72,8 @@ objects:
         window.localStorage.setItem('REACT_APP_NRSPARWEBAPP_VERSION', '${REACT_APP_NRSPARWEBAPP_VERSION}');
         window.localStorage.setItem('REACT_APP_KC_URL', '${REACT_APP_KC_URL}');
     metadata:
+      labels:
+        app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: v1
     kind: DeploymentConfig
@@ -144,15 +146,13 @@ objects:
                 initialDelaySeconds: 15
                 periodSeconds: 30
                 timeoutSeconds: 10
+              volumeMounts:
+                - mountPath: /srv
+                  name: env-js
           volumes:
-            - name: env-config
+            - name: env-js
               configMap:
                 name: ${NAME}-${ZONE}-${COMPONENT}
-            - name: caddy-data
-              persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}-caddy-data
-            - name: caddy-config
-              emptyDir: {}
   - apiVersion: v1
     kind: Service
     metadata:
