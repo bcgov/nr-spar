@@ -1,28 +1,46 @@
-FROM maven:3.9.2-eclipse-temurin-17 AS build
+FROM ghcr.io/graalvm/native-image:ol8-java17-22 AS builder
 
-# User
-RUN addgroup --system spring && adduser --system spring --ingroup spring
-USER spring:spring
+# Install tar and gzip to extract the Maven binaries
+RUN microdnf update \
+ && microdnf install --nodocs \
+    tar \
+    gzip \
+ && microdnf clean all \
+ && rm -rf /var/cache/yum
 
-# App
-WORKDIR /home/spring
-COPY src /home/spring/src
-COPY pom.xml /home/spring
-RUN mvn --no-transfer-progress --update-snapshots -P prod clean package
+# Install Maven
+# Source:
+# 1) https://github.com/carlossg/docker-maven/blob/925e49a1d0986070208e3c06a11c41f8f2cada82/openjdk-17/Dockerfile
+# 2) https://maven.apache.org/download.cgi
+ARG USER_HOME_DIR="/root"
+ARG MAVEN_DOWNLOAD_URL=https://dlcdn.apache.org/maven/maven-3/3.9.2/binaries/apache-maven-3.9.2-bin.tar.gz
 
-FROM eclipse-temurin:17.0.7_7-jre-jammy AS deploy
+RUN mkdir -p /usr/share/maven /usr/share/maven/ref
+RUN curl -fsSL -o /tmp/apache-maven.tar.gz ${MAVEN_DOWNLOAD_URL}
+RUN tar -xzf /tmp/apache-maven.tar.gz -C /usr/share/maven --strip-components=1 \
+  && rm -f /tmp/apache-maven.tar.gz \
+  && ln -s /usr/share/maven/bin/mvn /usr/bin/mvn
 
-ENV LANG en_CA.UTF-8
-ENV LANGUAGE en_CA.UTF-8
-ENV LC_ALL en_CA.UTF-8
+ENV MAVEN_HOME /usr/share/maven
+ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
+# 
+# Set the working directory to /home/app
+WORKDIR /build
 
-# App
-WORKDIR /usr/share/service/
-COPY --from=build /home/spring/target/nr-spar-backend.jar /usr/share/service/service.jar
-COPY dockerfile-entrypoint.sh /usr/share/service/dockerfile-entrypoint.sh
+# Copy the source code into the image for building
+COPY . /build
 
-# User, port and healthcheck
-USER 1001
-EXPOSE 8090
-HEALTHCHECK CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
-ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]
+# Build
+RUN mvn -Pnative native:compile -Dtests.skip=true
+
+# The deployment Image
+FROM docker.io/oraclelinux:8-slim
+
+EXPOSE 3000
+
+# Copy the native executable into the containers
+# COPY --from=builder /build/target/nr-spar-backend.jar .
+WORKDIR /app
+COPY --from=builder /build/target/nr-spar-backend.jar .
+
+ENTRYPOINT ["/nr-spar-backend"]
