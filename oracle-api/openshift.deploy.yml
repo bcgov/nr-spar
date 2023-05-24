@@ -18,13 +18,13 @@ parameters:
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
-    value: 75m
+    value: 100m
   - name: CPU_LIMIT
     value: 175m
   - name: MEMORY_REQUEST
-    value: 75Mi
-  - name: MEMORY_LIMIT
     value: 150Mi
+  - name: MEMORY_LIMIT
+    value: 300Mi
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
@@ -49,9 +49,6 @@ parameters:
   - name: KEYCLOAK_REALM_URL
     description: Keycloak realm address
     value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
-  - name: CERT_PVC_SIZE
-    description: The amount of storage the cert PVC should have
-    value: 25Mi
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -69,19 +66,6 @@ objects:
             name: ${REGISTRY}/${PROMOTE}
           referencePolicy:
             type: Local
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: ${CERT_PVC_SIZE}
-      storageClassName: netapp-file-standard
   - apiVersion: v1
     kind: DeploymentConfig
     metadata:
@@ -110,34 +94,6 @@ objects:
             app: ${NAME}-${ZONE}
             deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
-          volumes:
-            - name: ${NAME}-${ZONE}-certs
-              persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}
-          initContainers:
-            - name: ${NAME}-init
-              image: ${REGISTRY}/bcgov/${NAME}/oracle-cert:${ZONE}
-              imagePullPolicy: Always
-              env:
-                - name: DATABASE_HOST
-                  value: ${DATABASE_HOST}
-                - name: DATABASE_CERT_SECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: oracle-cert-password
-                - name: DATABASE_PORT
-                  value: "1543"
-              volumeMounts:
-                - name: ${NAME}-${ZONE}-certs
-                  mountPath: /cert
-              resources:
-                limits:
-                  cpu: ${CPU_LIMIT}
-                  memory: ${MEMORY_LIMIT}
-                requests:
-                  cpu: ${CPU_REQUEST}
-                  memory: ${MEMORY_REQUEST}
           containers:
             - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
@@ -165,13 +121,6 @@ objects:
                       key: oracle-password
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
-                - name: DATABASE_CERT_SECRET
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: oracle-cert-password
-                - name: DATABASE_CERT_KEYSTORE
-                  value: /cert/jssecacerts
               ports:
                 - containerPort: 8090
                   protocol: TCP
@@ -187,7 +136,7 @@ objects:
                   path: /actuator/health
                   port: 8090
                   scheme: HTTP
-                initialDelaySeconds: 10
+                initialDelaySeconds: 120
                 periodSeconds: 15
                 timeoutSeconds: 10
               livenessProbe:
@@ -197,12 +146,9 @@ objects:
                   path: /actuator/health
                   port: 8090
                   scheme: HTTP
-                initialDelaySeconds: 10
+                initialDelaySeconds: 120
                 periodSeconds: 30
                 timeoutSeconds: 10
-              volumeMounts:
-                - mountPath: /cert
-                  name: ${NAME}-${ZONE}-certs
   - apiVersion: v1
     kind: Service
     metadata:

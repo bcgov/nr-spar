@@ -24,10 +24,6 @@ parameters:
   - name: ORACLE_DB_PASSWORD
     description: Oracle database password for API
     required: true
-  - name: DATABASE_CERT_SECRET
-    description: Oracle database certificate password
-    from: "[a-zA-Z0-9]{16}"
-    generate: expression
 objects:
   - apiVersion: v1
     kind: Secret
@@ -48,7 +44,6 @@ objects:
     stringData:
       oracle-user: ${ORACLE_DB_USER}
       oracle-password: ${ORACLE_DB_PASSWORD}
-      oracle-cert-password: ${DATABASE_CERT_SECRET}
   - apiVersion: v1
     kind: Secret
     metadata:
