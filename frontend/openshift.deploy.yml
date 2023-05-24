@@ -46,9 +46,6 @@ parameters:
   - name: REACT_APP_KC_URL
     description: REACT_APP_KC_URL
     required: true
-  - name: REACT_APP_KC_CLIENT_ID
-    description: REACT_APP_KC_CLIENT_ID
-    required: true
   - name: REACT_APP_ORACLE_SERVER_URL
     description: Oracle back-end api URL
     required: true
@@ -108,8 +105,6 @@ objects:
                   value: ${REACT_APP_NRSPARWEBAPP_VERSION}
                 - name: REACT_APP_KC_URL
                   value: ${REACT_APP_KC_URL}
-                - name: REACT_APP_KC_CLIENT_ID
-                  value: ${REACT_APP_KC_CLIENT_ID}
                 - name: REACT_APP_ORACLE_SERVER_URL
                   value: ${REACT_APP_ORACLE_SERVER_URL}
               ports:

@@ -58,7 +58,6 @@ REACT_APP_NRSPARWEBAPP_VERSION=dev
 REACT_APP_SERVER_URL=http://localhost:8091/
 REACT_APP_ORACLE_SERVER_URL=https://localhost:8092/
 REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
 CYPRESS_USERNAME=LOAD-3-TEST
 CYPRESS_PASSWORD=[password-here]
 ```
