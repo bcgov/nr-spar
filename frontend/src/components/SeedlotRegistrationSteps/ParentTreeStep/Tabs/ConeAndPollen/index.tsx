@@ -3,9 +3,9 @@ import React from 'react';
 import {
   FlexGrid,
   Row,
-  Column,
   InlineNotification
 } from '@carbon/react';
+import { Link } from 'react-router-dom';
 import Subtitle from '../../../../Subtitle';
 import DropDownObj from '../../../../../types/DropDownObject';
 import { pageTexts } from '../../constants';
@@ -32,9 +32,14 @@ const ConeAndPollen = ({
           lowContrast
           kind="info"
           aria-label={pageTexts.sharedTabTexts.notification.actionButtonLabel}
-          subtitle={pageTexts.coneAndPollen.notification.subtitle}
+          // subtitle={pageTexts.coneAndPollen.notification.subtitle}
           title={pageTexts.sharedTabTexts.notification.title}
-        />
+        >
+          <span>
+            Subtitle text goes here.
+            <Link to="#f">sss</Link>
+          </span>
+        </InlineNotification>
       </Row>
     </FlexGrid>
   );
