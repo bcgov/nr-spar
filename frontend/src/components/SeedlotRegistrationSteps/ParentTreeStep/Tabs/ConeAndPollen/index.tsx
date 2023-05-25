@@ -25,9 +25,7 @@ const ConeAndPollen = ({
   return (
     <FlexGrid className="parent-tree-tabs">
       <Row className="title-row">
-        <Column sm={4} md={5} lg={9}>
-          <DescriptionBox header={textConfig.tabTitle} description={textConfig.tabDescription} />
-        </Column>
+        <DescriptionBox header={textConfig.tabTitle} description={textConfig.tabDescription} />
       </Row>
       <Row className="notification-row">
         <InlineNotification

@@ -64,7 +64,7 @@
     }
 
     .#{vars.$bcgov-prefix}--data-table tr th {
-      background-color: var(--bcgov-layer-accent-01);
+      background-color: var(--#{vars.$bcgov-prefix}-layer-accent-01);
     }
 
     .#{vars.$bcgov-prefix}--data-table-container {
