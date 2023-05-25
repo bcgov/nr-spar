@@ -131,7 +131,10 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             verification_path: "actuator/health"
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=snapshot-${{ github.event.number }}
+            parameters:
+              -p MIN_REPLICAS=1
+              -p MAX_REPLICAS=1
+              -p BUILD=snapshot-${{ github.event.number }}
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -143,7 +146,8 @@ jobs:
               -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
               -p REACT_APP_KC_REALM=standard
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
+              -p MIN_REPLICAS=1
+              -p MAX_REPLICAS=1
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -163,9 +167,9 @@ jobs:
           penetration_test: false
           verification_path: ${{ matrix.verification_path}}
           parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
-            ${{ matrix.parameters }}
+            -p ZONE=${{ github.event.number }}
+            -p NAME=${{ github.event.repository.name }}
+            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}${{ matrix.parameters }}
 
   # tests-api:
   #   name: API Tests

@@ -203,4 +203,4 @@ objects:
             name: cpu
             target:
               type: Utilization
-              averageUtilization: 100
+              averageUtilization: 80
