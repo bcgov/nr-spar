@@ -177,7 +177,16 @@
                 <metadataVersion>6.1.1.Final</metadataVersion>
               </dependency>
             </dependencies>
+            <enabled>true</enabled>
           </metadataRepository>
+          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+          <requiredVersion>22.3.0</requiredVersion>
+          <verbose>true</verbose>
+          <buildArgs>
+            <arg>--verbose</arg>
+            <arg>--initialize-at-build-time=org.slf4j.LoggerFactory</arg>
+            <arg>--trace-class-initialization=org.slf4j.LoggerFactory</arg>
+          </buildArgs>
         </configuration>
       </plugin>
       <plugin>
