@@ -86,7 +86,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pushing
         run: docker push ${{ env.NAME }}
-  
+
   builds:
     name: Builds
     runs-on: ubuntu-22.04
@@ -148,7 +148,10 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             verification_path: "actuator/health"
-            parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
+            parameters:
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
+              -p MIN_REPLICAS=1
+              -p MAX_REPLICAS=1
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
