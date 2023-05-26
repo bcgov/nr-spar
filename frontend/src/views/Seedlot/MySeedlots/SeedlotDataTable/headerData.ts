@@ -5,11 +5,11 @@ const headerData = [
   },
   {
     key: 'class',
-    header: 'Lot class'
+    header: 'Seedlot class'
   },
   {
     key: 'lot_species',
-    header: 'Lot species'
+    header: 'Seedlot species'
   },
   {
     key: 'form_step',
@@ -29,7 +29,7 @@ const headerData = [
   },
   {
     key: 'last_modified',
-    header: 'Last modified'
+    header: 'Last updated'
   },
   {
     key: 'approved_at',
