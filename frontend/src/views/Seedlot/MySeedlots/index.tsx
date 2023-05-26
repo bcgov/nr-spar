@@ -50,7 +50,7 @@ const MySeedlots = () => {
       <Row className="my-seedlot-title">
         <PageTitle
           title="My Seedlots"
-          subtitle="Check and manage my seedlots"
+          subtitle="Check and manage your own seedlots"
           enableFavourite
         />
         <Button
