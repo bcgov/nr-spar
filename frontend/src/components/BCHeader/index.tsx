@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import {
@@ -15,154 +15,54 @@ import {
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
-import { env } from '../../env';
-
 import RightPanelTitle from '../RightPanelTitle';
 import MyProfile from '../MyProfile';
 import NotificationsCentral from '../NotificationsCentral';
 import PanelSectionName from '../PanelSectionName';
 
+import {
+  HOME_LINK,
+  VERSION,
+  clearPanelState,
+  componentTexts,
+  listItems
+} from './constants';
+import { ListItems, ListItem, RightPanelType } from './definitions';
+
 import './styles.scss';
 
-interface ListItem {
-  name: string;
-  icon: string;
-  link: string;
-  disabled: boolean;
-}
-interface ListItems {
-  name: string;
-  items: ListItem[]
-}
-
-const listItems = [
-  {
-    name: 'Main activities',
-    items: [
-      {
-        name: 'Dashboard',
-        icon: 'Dashboard',
-        link: '/dashboard',
-        disabled: false
-      },
-      {
-        name: 'Seedlots',
-        icon: 'SoilMoistureField',
-        link: '/seedlot',
-        disabled: true
-      },
-      {
-        name: 'Seedlings',
-        icon: 'CropGrowth',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Nurseries',
-        icon: 'CropHealth',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Orchards',
-        icon: 'MapBoundaryVegetation',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Reports',
-        icon: 'Report',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Tests',
-        icon: 'Chemistry',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Parent tree',
-        icon: 'Tree',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Tree seed center',
-        icon: 'Enterprise',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Financial',
-        icon: 'Money',
-        link: '#',
-        disabled: true
-      }
-    ]
-  },
-  {
-    name: 'Management',
-    items: [
-      {
-        name: 'Settings',
-        icon: 'Settings',
-        link: '#',
-        disabled: true
-      },
-      {
-        name: 'Notifications',
-        icon: 'Notification',
-        link: '#',
-        disabled: true
-      }
-    ]
-  }
-];
-
 const BCHeader = () => {
-  const version: string = `Version: ${env.REACT_APP_NRSPARWEBAPP_VERSION}`;
-
-  const [myProfile, setMyProfile] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<boolean>(false);
+  const [rightPanel, setRightPanel] = useState<RightPanelType>(clearPanelState);
   const [overlay, setOverlay] = useState<boolean>(false);
   const [goToURL, setGoToURL] = useState<string>('');
   const [goTo, setGoTo] = useState<boolean>(false);
 
-  const handleNotificationsPanel = useCallback((): void => {
-    if (notifications) {
+  const handleRightPanel = (panel: string) => {
+    // Using clearPanelState here so that it cleans all other
+    // panel options before setting the one we actually want,
+    // this solves the case where the user wants to open a new
+    // panel, when other one is already open.
+    if (rightPanel[panel]) {
       setOverlay(false);
-      setNotifications(false);
+      setRightPanel(clearPanelState);
     } else {
       setOverlay(true);
-      setNotifications(true);
+      setRightPanel({
+        ...clearPanelState,
+        [panel]: true
+      });
     }
-    setMyProfile(false);
-  }, [notifications]);
+  };
 
-  const handleMyProfilePanel = useCallback((): void => {
-    if (myProfile) {
-      setOverlay(false);
-      setMyProfile(false);
-    } else {
-      setOverlay(true);
-      setMyProfile(true);
-    }
-    setNotifications(false);
-  }, [myProfile]);
-
-  const closeNotificationsPanel = useCallback((): void => {
+  const closeRightPanel = (panel: string) => {
     setOverlay(false);
-    setNotifications(false);
-  }, []);
-
-  const closeMyProfilePanel = useCallback((): void => {
-    setOverlay(false);
-    setMyProfile(false);
-  }, []);
+    setRightPanel({
+      ...rightPanel,
+      [panel]: false
+    });
+  };
 
   const navigate = useNavigate();
-
   useEffect(() => {
     if (goTo) {
       setGoTo(false);
@@ -174,61 +74,76 @@ const BCHeader = () => {
     <HeaderContainer
       render={({ isSideNavExpanded, onClickSideNavExpand }: any) => (
         <Header
-          aria-label="Seed Planning and Registry System"
+          aria-label={componentTexts.completeTitle}
           className="spar-header"
           data-testid="header"
         >
           <SkipToContent />
           <HeaderMenuButton
-            aria-label="Open menu"
+            aria-label={componentTexts.openMenu}
             onClick={onClickSideNavExpand}
             isActive={isSideNavExpanded}
           />
-          <Link to="/dashboard" className="header-link" data-testid="header-name">
-            SPAR
-            <span className="header-full-name"> Seed Planning and Registry System</span>
+          <Link to={HOME_LINK} className="header-link" data-testid="header-name">
+            {componentTexts.headerTitle}
+            <span className="header-full-name">{componentTexts.completeTitle}</span>
           </Link>
           <HeaderGlobalBar>
             <HeaderGlobalAction
-              aria-label="Search"
+              aria-label={componentTexts.searchAriaLabel}
               data-testid="header-button__search"
             >
               <Icons.Search size={20} />
             </HeaderGlobalAction>
             <HeaderGlobalAction
-              aria-label="Notifications"
+              aria-label={componentTexts.notifications.title}
               data-testid="header-button__notifications"
-              onClick={handleNotificationsPanel}
-              isActive={notifications}
+              onClick={() => handleRightPanel('notifications')}
+              isActive={rightPanel.notifications}
             >
               <Icons.Notification size={20} />
             </HeaderGlobalAction>
             <HeaderGlobalAction
-              aria-label="User Settings"
+              aria-label={componentTexts.profile.controllerAriaLabel}
               tooltipAlignment="end"
               data-testid="header-button__user"
-              onClick={handleMyProfilePanel}
-              isActive={myProfile}
+              onClick={() => handleRightPanel('myProfile')}
+              isActive={rightPanel.myProfile}
             >
               <Icons.UserAvatar size={20} />
             </HeaderGlobalAction>
           </HeaderGlobalBar>
-          <HeaderPanel aria-label="Notifications Tab" expanded={notifications} className="notifications-panel">
+          <HeaderPanel
+            aria-label={componentTexts.notifications.headerAriaLabel}
+            expanded={rightPanel.notifications}
+            className="notifications-panel"
+          >
             <RightPanelTitle
-              title="Notifications"
-              closeFn={closeNotificationsPanel}
+              title={componentTexts.notifications.title}
+              closeFn={() => closeRightPanel('notifications')}
             />
             <NotificationsCentral />
           </HeaderPanel>
-          <HeaderPanel aria-label="My Profile Tab" expanded={myProfile} className="profile-panel">
+          <HeaderPanel
+            aria-label={componentTexts.profile.headerAriaLabel}
+            expanded={rightPanel.myProfile}
+            className="profile-panel"
+          >
             <RightPanelTitle
-              title="My Profile"
-              closeFn={closeMyProfilePanel}
+              title={componentTexts.profile.title}
+              closeFn={() => closeRightPanel('myProfile')}
             />
             <MyProfile />
           </HeaderPanel>
-          <div className={overlay ? 'overlay-element active' : 'overlay-element'} />
-          <SideNav isChildOfHeader expanded={isSideNavExpanded} aria-label="Side menu">
+          {
+            overlay
+            && <div className="overlay-element" />
+          }
+          <SideNav
+            isChildOfHeader
+            expanded={isSideNavExpanded}
+            aria-label={componentTexts.sideMenuAriaLabel}
+          >
             <SideNavItems>
               {listItems.map((item: ListItems) => (
                 <div key={item.name}>
@@ -252,9 +167,9 @@ const BCHeader = () => {
                 </div>
               ))}
               <div className="support-section">
-                <PanelSectionName title="Support" />
-                <SideNavLink renderIcon={Icons.Help}>Need help?</SideNavLink>
-                <PanelSectionName title={version} />
+                <PanelSectionName title={componentTexts.support.title} />
+                <SideNavLink renderIcon={Icons.Help}>{componentTexts.support.menuName}</SideNavLink>
+                <PanelSectionName title={VERSION} />
               </div>
             </SideNavItems>
           </SideNav>
