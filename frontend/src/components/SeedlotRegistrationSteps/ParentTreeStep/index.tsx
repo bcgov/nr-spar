@@ -32,7 +32,7 @@ const ParentTreeStep = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const a = 'b';
   return (
-    <div className="seedlot-parent-tree-step">
+    <div className="parent-tree-step-container">
       <Tabs>
         <TabList aria-label="List of tabs">
           <Tab>{pageTexts.tabTitles.coneTab}</Tab>

@@ -23,7 +23,7 @@ const ConeAndPollen = ({
 }: ConeAndPollenProps) => {
   const a = '';
   return (
-    <FlexGrid className="parent-tree-tabs">
+    <FlexGrid className="parent-tree-tab-container">
       <Row className="title-row">
         <DescriptionBox header={textConfig.tabTitle} description={textConfig.tabDescription} />
       </Row>
@@ -36,6 +36,7 @@ const ConeAndPollen = ({
         >
           <span>
             Subtitle text goes here.
+            <span>hihiihi</span>
           </span>
         </InlineNotification>
       </Row>

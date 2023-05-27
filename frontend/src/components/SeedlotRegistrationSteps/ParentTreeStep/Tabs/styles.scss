@@ -1,118 +1,21 @@
 @use '@carbon/type';
 @use '../../../../theme/variables.scss' as vars;
 
-.parent-tree-tabs {
-  h2 {
-    @include type.type-style('heading-03');
-    margin-bottom: 0.5rem;
-  }
+.parent-tree-tab-container{
 
-  .title-row {
-    margin-bottom: 2.5rem;
-  }
-
-  .summary-row,
-  .traits-row {
-    margin-bottom: 3rem;
-  }
-
-  .genetic-row,
-  .bulk-update-row {
-    margin-bottom: 2rem;
-  }
-
-  .bulk-control-row-active {
-    padding-left: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .notification-row,
-  .bulk-control-row {
-    padding-left: 1rem;
-    margin-bottom: 1.5rem;
-  }
+  padding: 1rem;
 
   .#{vars.$bcgov-prefix}--inline-notification {
     max-width: 100%;
   }
 
   .#{vars.$bcgov-prefix}--inline-notification__text-wrapper {
-    display: block;
-    width: 44rem;
+    display: flex;
+    flex-direction: column;
   }
 
   .#{vars.$bcgov-prefix}--inline-notification__title {
     font-weight: 700;
   }
 
-  input::-webkit-outer-spin-button,
-  input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-  }
-
-  /* Firefox specific rule*/
-  input[type=number] {
-    -moz-appearance: textfield;
-  }
-
-  .parent-tree-table-row {
-    margin-left: 0;
-    margin-bottom: 3rem;
-
-    .parent-tree-hide {
-      display: none;
-    }
-
-    .#{vars.$bcgov-prefix}--data-table tr th {
-      background-color: var(--#{vars.$bcgov-prefix}-layer-accent-01);
-    }
-
-    .#{vars.$bcgov-prefix}--data-table-container {
-      width: 100%;
-    }
-
-    .table-input {
-      border: 0;
-      background: transparent;
-      width: 100%;
-      height: 2.9375rem;
-    }
-
-    .table-input:focus-visible {
-      outline-color: var(--#{vars.$bcgov-prefix}-border-interactive);
-    }
-
-    ::placeholder {
-      @include type.type-style('code-02');
-      color: var(--#{vars.$bcgov-prefix}-text-placeholder);
-    }
-  }
-}
-
-// This needs to be out because the overflow menu
-// is appended to a parent element of parent-tree-tabs
-.parent-tree-table-options {
-  width: 12.9375rem;
-
-  button {
-    max-width: 13.25rem;
-  }
-}
-
-.parent-tree-view-options {
-  width: 18rem;
-
-  button {
-    max-width: 19.25rem;
-  }
-
-  .view-options-separator {
-    @include type.type-style('label-01');
-    padding: 1rem 1rem 0.625rem;
-  }
-
-  .breeding-value-checkbox,
-  .mean-filters-checkbox {
-    padding: 0.5rem 0.9375rem;
-  }
 }
