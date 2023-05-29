@@ -12,7 +12,7 @@ RUN ./mvnw -Pnative native:compile -Dtests.skip=true
 
 
 ### Deployer
-FROM gcr.io/distroless/java-base AS deploy
+FROM gcr.io/distroless/java-base:nonroot AS deploy
 ARG PORT=8090
 
 # Copy
