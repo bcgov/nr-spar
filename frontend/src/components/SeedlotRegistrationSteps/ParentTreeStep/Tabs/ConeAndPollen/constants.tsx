@@ -12,9 +12,22 @@ const tabDescription = (
   </>
 );
 
+const notificationSubtitle = (
+  <>
+    {
+      'You can import one spreadsheet file for the cone'
+      + 'and pollen count table with the data you want to use. '
+      + 'For further guidance on how to organize the data, '
+      + "do use the SPAR's spreadsheet template. "
+    }
+    <Link className="notification-link" to="#TODO">Download cone and pollen count template</Link>
+  </>
+);
+
 const textConfig = {
   tabTitle: 'Cone and pollen count',
-  tabDescription
+  tabDescription,
+  notificationSubtitle
 };
 
 export default textConfig;

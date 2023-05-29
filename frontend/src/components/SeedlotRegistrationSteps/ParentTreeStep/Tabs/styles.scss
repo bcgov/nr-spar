@@ -1,23 +1,41 @@
 @use '@carbon/type';
 @use '../../../../theme/variables.scss' as vars;
 
-.parent-tree-tab-container{
+.parent-tree-tab-container {
   padding: 2.5rem 0;
 
-  .#{vars.$bcgov-prefix}--inline-notification {
-    max-width: 100%;
-  }
 
-  .#{vars.$bcgov-prefix}--inline-notification__text-wrapper {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .#{vars.$bcgov-prefix}--inline-notification__title {
-    font-weight: 700;
-  }
-
-  .description-box-container{
+  .description-box-container {
     padding-left: 0;
+  }
+
+  .notification-row {
+    margin-top: 2.5em;
+
+    .#{vars.$bcgov-prefix}--actionable-notification__content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__title {
+      @include type.type-style('heading-compact-01');
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification{
+      width: 100%;
+      max-width: none;
+    }
+    .#{vars.$bcgov-prefix}--actionable-notification__action-button{
+      display: none;
+    }
+
+    .notification-subtitle {
+      @include type.type-style('body-compact-01');
+    }
+
+    .notification-link {
+      color: var(--#{vars.$bcgov-prefix}-link-primary);
+      text-decoration: underline;
+    }
   }
 }

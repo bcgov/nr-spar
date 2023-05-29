@@ -4,7 +4,7 @@ import {
   FlexGrid,
   Row,
   Column,
-  InlineNotification
+  ActionableNotification
 } from '@carbon/react';
 import { Link } from 'react-router-dom';
 import Subtitle from '../../../../Subtitle';
@@ -32,17 +32,17 @@ const ConeAndPollen = ({
       </Row>
       <Row className="notification-row">
         <Column>
-          <InlineNotification
-            lowContrast
+          <ActionableNotification
             kind="info"
-            aria-label={pageTexts.sharedTabTexts.notification.actionButtonLabel}
+            lowContrast
             title={pageTexts.sharedTabTexts.notification.title}
+            inline
+            actionButtonLabel=""
           >
-            <span>
-              Subtitle text goes here.
-              <span>hihiihi</span>
+            <span className="notification-subtitle">
+              {textConfig.notificationSubtitle}
             </span>
-          </InlineNotification>
+          </ActionableNotification>
         </Column>
       </Row>
     </FlexGrid>
