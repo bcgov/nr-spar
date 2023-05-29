@@ -2,8 +2,7 @@
 @use '../../../../theme/variables.scss' as vars;
 
 .parent-tree-tab-container{
-
-  padding: 1rem;
+  padding: 2.5rem 0;
 
   .#{vars.$bcgov-prefix}--inline-notification {
     max-width: 100%;
@@ -16,5 +15,9 @@
 
   .#{vars.$bcgov-prefix}--inline-notification__title {
     font-weight: 700;
+  }
+
+  .description-box-container{
+    padding-left: 0;
   }
 }

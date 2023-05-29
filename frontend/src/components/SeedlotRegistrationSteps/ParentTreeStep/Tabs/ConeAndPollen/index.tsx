@@ -3,6 +3,7 @@ import React from 'react';
 import {
   FlexGrid,
   Row,
+  Column,
   InlineNotification
 } from '@carbon/react';
 import { Link } from 'react-router-dom';
@@ -25,20 +26,24 @@ const ConeAndPollen = ({
   return (
     <FlexGrid className="parent-tree-tab-container">
       <Row className="title-row">
-        <DescriptionBox header={textConfig.tabTitle} description={textConfig.tabDescription} />
+        <Column>
+          <DescriptionBox header={textConfig.tabTitle} description={textConfig.tabDescription} />
+        </Column>
       </Row>
       <Row className="notification-row">
-        <InlineNotification
-          lowContrast
-          kind="info"
-          aria-label={pageTexts.sharedTabTexts.notification.actionButtonLabel}
-          title={pageTexts.sharedTabTexts.notification.title}
-        >
-          <span>
-            Subtitle text goes here.
-            <span>hihiihi</span>
-          </span>
-        </InlineNotification>
+        <Column>
+          <InlineNotification
+            lowContrast
+            kind="info"
+            aria-label={pageTexts.sharedTabTexts.notification.actionButtonLabel}
+            title={pageTexts.sharedTabTexts.notification.title}
+          >
+            <span>
+              Subtitle text goes here.
+              <span>hihiihi</span>
+            </span>
+          </InlineNotification>
+        </Column>
       </Row>
     </FlexGrid>
   );

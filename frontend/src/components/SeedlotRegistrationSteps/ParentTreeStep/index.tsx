@@ -4,15 +4,18 @@ import {
   TabList,
   Tab,
   TabPanels,
-  TabPanel
+  TabPanel,
+  FlexGrid,
+  Row,
+  Column
 } from '@carbon/react';
 
 import ConeAndPollen from './Tabs/ConeAndPollen';
+import DropDownObj from '../../../types/DropDownObject';
 
 import { pageTexts } from './constants';
 
 import './styles.scss';
-import DropDownObj from '../../../types/DropDownObject';
 
 interface ParentTreeStepProps {
   seedlotSpecies: DropDownObj
@@ -32,26 +35,30 @@ const ParentTreeStep = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const a = 'b';
   return (
-    <div className="parent-tree-step-container">
-      <Tabs>
-        <TabList aria-label="List of tabs">
-          <Tab>{pageTexts.tabTitles.coneTab}</Tab>
-          <Tab>{pageTexts.tabTitles.smpTab}</Tab>
-          <Tab>{pageTexts.tabTitles.mixTab}</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <ConeAndPollen seedlotSpecies={seedlotSpecies} />
-          </TabPanel>
-          <TabPanel>
-            SMP
-          </TabPanel>
-          <TabPanel>
-            MIX
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
-    </div>
+    <FlexGrid className="parent-tree-step-container">
+      <Row>
+        <Column sm={4} md={8} lg={16} xlg={16}>
+          <Tabs>
+            <TabList className="parent-tree-step-tab-list" aria-label="List of tabs">
+              <Tab>{pageTexts.tabTitles.coneTab}</Tab>
+              <Tab>{pageTexts.tabTitles.smpTab}</Tab>
+              <Tab>{pageTexts.tabTitles.mixTab}</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <ConeAndPollen seedlotSpecies={seedlotSpecies} />
+              </TabPanel>
+              <TabPanel>
+                SMP
+              </TabPanel>
+              <TabPanel>
+                MIX
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Column>
+      </Row>
+    </FlexGrid>
   );
 };
 

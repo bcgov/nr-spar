@@ -1,5 +1,17 @@
 @use '../../../theme/variables.scss' as vars;
 
-.parent-tree-tab-container {
+.parent-tree-step-container {
+  padding-left: 0rem;
+  padding-right: 0rem;
 
+  .parent-tree-step-tab-list{
+    margin-left: -1rem;
+    border-bottom: 2px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+    width: calc(100% + 1rem);
+
+    .bcgov--tab--list{
+      // Without this the tab list will be pushed up by 2px due to the border bottom above
+      margin-bottom: -2px;
+    }
+  }
 }
