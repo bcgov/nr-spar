@@ -6,19 +6,11 @@ import {
   Column,
   ActionableNotification
 } from '@carbon/react';
-import DropDownObj from '../../../../../types/DropDownObject';
 import textConfig from './constants';
 import DescriptionBox from '../../../../DescriptionBox';
-
 import '../styles.scss';
 
-type ConeAndPollenProps = {
-  seedlotSpecies: DropDownObj
-}
-
-const ConeAndPollen = ({
-  seedlotSpecies
-}: ConeAndPollenProps) => {
+const SuccessOnParent = () => {
   const a = '';
   return (
     <FlexGrid className="parent-tree-tab-container">
@@ -46,4 +38,4 @@ const ConeAndPollen = ({
   );
 };
 
-export default ConeAndPollen;
+export default SuccessOnParent;

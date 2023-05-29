@@ -10,8 +10,10 @@ import {
   Column
 } from '@carbon/react';
 
-import ConeAndPollen from './Tabs/ConeAndPollen';
 import DropDownObj from '../../../types/DropDownObject';
+import ConeAndPollen from './Tabs/ConeAndPollen';
+import SuccessOnParent from './Tabs/SuccessOnParent';
+import CalcOfMix from './Tabs/CalcOfMix';
 
 import { pageTexts } from './constants';
 
@@ -49,10 +51,10 @@ const ParentTreeStep = (
                 <ConeAndPollen seedlotSpecies={seedlotSpecies} />
               </TabPanel>
               <TabPanel>
-                SMP
+                <SuccessOnParent />
               </TabPanel>
               <TabPanel>
-                MIX
+                <CalcOfMix />
               </TabPanel>
             </TabPanels>
           </Tabs>
