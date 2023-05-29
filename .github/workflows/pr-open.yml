@@ -170,7 +170,8 @@ jobs:
           parameters:
             -p ZONE=${{ github.event.number }}
             -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}${{ matrix.parameters }}
+            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
+            ${{ matrix.parameters }}
 
   # tests-api:
   #   name: API Tests
