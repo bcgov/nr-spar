@@ -247,7 +247,7 @@ const CollectionStep = (
         </Column>
       </Row>
       <Row className="collection-step-row">
-        <Column sm={4} md={8} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={4} xlg={4}>
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
