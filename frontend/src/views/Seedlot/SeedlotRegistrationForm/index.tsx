@@ -8,7 +8,8 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Button,
-  Loading
+  Loading,
+  Grid
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 
@@ -241,50 +242,54 @@ const SeedlotRegistrationForm = () => {
             }
           </Column>
         </Row>
-        <Row>
-          <Column sm={4} md={8} lg={16} xlg={16}>
-            {
-              formStep !== 0
-                ? (
-                  <Button
-                    kind="secondary"
-                    size="lg"
-                    className="back-next-btn"
-                    onClick={() => setStep(-1)}
-                  >
-                    Back
-                  </Button>
-                )
-                : (
-                  <Button
-                    kind="secondary"
-                    size="lg"
-                    className="back-next-btn"
-                    onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
-                  >
-                    Cancel
-                  </Button>
-                )
+        <Row className="seedlot-registration-button-row">
+          <Grid narrow>
+            <Column sm={4} md={3} lg={3} xlg={3}>
+              {
+                formStep !== 0
+                  ? (
+                    <Button
+                      kind="secondary"
+                      size="lg"
+                      className="back-next-btn"
+                      onClick={() => setStep(-1)}
+                    >
+                      Back
+                    </Button>
+                  )
+                  : (
+                    <Button
+                      kind="secondary"
+                      size="lg"
+                      className="back-next-btn"
+                      onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
+                    >
+                      Cancel
+                    </Button>
+                  )
 
-            }
-            {
-              formStep !== 5
-                ? (
-                  <Button
-                    kind="primary"
-                    size="lg"
-                    className="back-next-btn"
-                    onClick={() => setStep(1)}
-                    renderIcon={ArrowRight}
-                  >
-                    Next
-                  </Button>
-                )
-                : (
-                  <SubmitModal />
-                )
-            }
-          </Column>
+              }
+            </Column>
+            <Column sm={4} md={3} lg={3} xlg={3}>
+              {
+                formStep !== 5
+                  ? (
+                    <Button
+                      kind="primary"
+                      size="lg"
+                      className="back-next-btn"
+                      onClick={() => setStep(1)}
+                      renderIcon={ArrowRight}
+                    >
+                      Next
+                    </Button>
+                  )
+                  : (
+                    <SubmitModal btnText="Submit Registration" renderIconName="CheckmarkOutline" />
+                  )
+              }
+            </Column>
+          </Grid>
         </Row>
       </FlexGrid>
     </div>
