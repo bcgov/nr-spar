@@ -24,8 +24,11 @@ COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/build /srv
 
 # Non-root user
-RUN addgroup -g 101 -S nonroot && \
-    adduser -u 101 -D -S -G nonroot nonroot
+ENV XDG_CONFIG_HOME=/config XDG_DATA_HOME=/data
+RUN mkdir -p /config/caddy /data/caddy && \
+    addgroup -g 101 -S nonroot && \
+    adduser -u 101 -D -S -G nonroot nonroot && \
+    chown -R nonroot:nonroot /config /data
 
 # Port, healthcheck and user
 EXPOSE ${PORT}
