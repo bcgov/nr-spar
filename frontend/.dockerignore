@@ -32,7 +32,7 @@ openshift*.yml
 .ps1
 
 # Node
-**/node_modules/
+**/node_modules/**/*
 nodemon*.json
 npm-debug.log
 npm-debug.log.*
