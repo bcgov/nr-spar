@@ -36,6 +36,14 @@
     svg {
       fill: var(--#{vars.$bcgov-prefix}-text-disabled);
     }
+
+    &:hover,
+    &:hover > span {
+      background-color: unset !important;
+      // Unset doesn't work on 'color' because the inherited value is not the
+      // disabled text color, so setting it directly to the wanted value
+      color: var(--#{vars.$bcgov-prefix}-text-disabled) !important;
+    }
   }
 
   button.#{vars.$bcgov-prefix}--header__action {
