@@ -93,7 +93,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.26</version>
+      <version>1.18.28</version>
       <optional>true</optional>
     </dependency>
 
@@ -177,7 +177,16 @@
                 <metadataVersion>6.1.1.Final</metadataVersion>
               </dependency>
             </dependencies>
+            <enabled>true</enabled>
           </metadataRepository>
+          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+          <requiredVersion>22.3.0</requiredVersion>
+          <verbose>true</verbose>
+          <buildArgs>
+            <arg>--verbose</arg>
+            <arg>--initialize-at-build-time=org.slf4j.LoggerFactory</arg>
+            <arg>--trace-class-initialization=org.slf4j.LoggerFactory</arg>
+          </buildArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -414,7 +423,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.2.2</version>
+        <version>3.3.0</version>
         <dependencies>
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
