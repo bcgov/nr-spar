@@ -26,9 +26,8 @@ COPY --from=build /app/build /srv
 # Non-root user
 ENV XDG_CONFIG_HOME=/config XDG_DATA_HOME=/data
 RUN mkdir -p /config/caddy /data/caddy && \
-    addgroup -g 101 -S nonroot && \
-    adduser -u 101 -D -S -G nonroot nonroot && \
-    chown -R nonroot:nonroot /config /data
+    adduser -D -S nonroot && \
+    chown -R nonroot /config /data
 
 # Port, healthcheck and user
 EXPOSE ${PORT}
