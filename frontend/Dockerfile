@@ -26,10 +26,10 @@ COPY --from=build /app/build /srv
 # Non-root user
 ENV XDG_CONFIG_HOME=/config XDG_DATA_HOME=/data
 RUN mkdir -p /config/caddy /data/caddy && \
-    adduser -D -S nonroot && \
-    chown -R nonroot /config /data
+    adduser -D -S www-data && \
+    chown -R www-data /config /data
 
 # Port, healthcheck and user
 EXPOSE ${PORT}
 HEALTHCHECK CMD curl -f http://localhost/:${PORT}
-USER nonroot
+USER www-data
