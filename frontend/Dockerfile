@@ -20,6 +20,7 @@ ARG PORT
 
 # Copy and prep app
 COPY Caddyfile /etc/caddy/Caddyfile
+RUN chmod 770 /etc/caddy/Caddyfile
 COPY --from=build /app/build /srv
 
 # Port, healthcheck and user
