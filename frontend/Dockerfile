@@ -19,10 +19,10 @@ FROM caddy:2.4.6-alpine AS deploy
 ARG PORT
 
 # Copy and prep app
-WORKDIR /app
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/build /srv
 
 # Port, healthcheck and user
 EXPOSE ${PORT}
 HEALTHCHECK CMD curl -f http://localhost/:${PORT}
+USER 1001
