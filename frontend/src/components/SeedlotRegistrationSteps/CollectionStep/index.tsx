@@ -241,7 +241,7 @@ const CollectionStep = (
         </Column>
       </Row>
       <Row className="collection-step-row">
-        <Column lg={16}>
+        <Column sm={4} md={8} lg={16} xlg={16}>
           <h2>Collection information</h2>
           <Subtitle text="Enter the collection information about this seedlot" />
         </Column>
