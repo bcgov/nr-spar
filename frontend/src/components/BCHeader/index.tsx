@@ -146,17 +146,20 @@ const BCHeader = () => {
           >
             <SideNavItems>
               {listItems.map((item: ListItems) => (
-                <div key={item.name}>
-                  <PanelSectionName title={item.name} />
+                <div key={item.name} className={`${item.name.toLocaleLowerCase()}-section`}>
+                  <PanelSectionName title={item.name} key={item.name} />
                   {item.items.map((subItem: ListItem) => {
                     const IconComponent = Icons[subItem.icon];
                     return (
                       <SideNavLink
                         key={subItem.name}
+                        className={subItem.disabled ? 'disabled-menu-option' : ''}
                         renderIcon={IconComponent || ''}
                         onClick={() => {
-                          setGoToURL(subItem.link);
-                          setGoTo(true);
+                          if (!subItem.disabled) {
+                            setGoToURL(subItem.link);
+                            setGoTo(true);
+                          }
                         }}
                         isActive={window.location.pathname === subItem.link}
                       >
@@ -166,11 +169,7 @@ const BCHeader = () => {
                   })}
                 </div>
               ))}
-              <div className="support-section">
-                <PanelSectionName title={componentTexts.support.title} />
-                <SideNavLink renderIcon={Icons.Help}>{componentTexts.support.menuName}</SideNavLink>
-                <PanelSectionName title={VERSION} />
-              </div>
+              <PanelSectionName title={VERSION} />
             </SideNavItems>
           </SideNav>
         </Header>

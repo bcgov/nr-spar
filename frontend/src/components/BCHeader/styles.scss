@@ -28,27 +28,37 @@
     margin-top: auto;
   }
 
+  .disabled-menu-option {
+    span {
+      color: var(--#{vars.$bcgov-prefix}-text-disabled);
+    }
+
+    svg {
+      fill: var(--#{vars.$bcgov-prefix}-text-disabled);
+    }
+  }
+
   button.#{vars.$bcgov-prefix}--header__action {
     border-radius: 0;
   }
 
   button.#{vars.$bcgov-prefix}--header__action--active {
-    background: var(--bcgov-layer-02);
+    background: var(--#{vars.$bcgov-prefix}-layer-02);
     border: 0;
   }
 
   .#{vars.$bcgov-prefix}--header__global .#{vars.$bcgov-prefix}--btn--icon-only.#{vars.$bcgov-prefix}--header__action svg,
   button.#{vars.$bcgov-prefix}--header__action svg {
-    fill: var(--bcgov-icon-on-color) ;
+    fill: var(--#{vars.$bcgov-prefix}-icon-on-color) ;
   }
 
   button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg,
   .#{vars.$bcgov-prefix}--popover-container button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg {
-    fill: var(--bcgov-icon-primary) ;
+    fill: var(--#{vars.$bcgov-prefix}-icon-primary) ;
   }
 
   button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__menu-trigger:focus {
-    border-color: var(--bcgov-icon-on-color);
+    border-color: var(--#{vars.$bcgov-prefix}-icon-on-color);
   }
 
   .#{vars.$bcgov-prefix}--header-panel--expanded.notifications-panel,
@@ -56,8 +66,8 @@
     z-index: 10000;
     width: 25rem;
     height: 100vh;
-    background-color: var(--bcgov-layer-02);
-    color: var(--bcgov-text-primary);
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+    color: var(--#{vars.$bcgov-prefix}-text-primary);
     transition: width 0.11s cubic-bezier(0.2, 0, 1, 0.9);
     will-change: width;
   }

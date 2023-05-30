@@ -91,6 +91,17 @@ export const listItems = [
         disabled: true
       }
     ]
+  },
+  {
+    name: 'Support',
+    items: [
+      {
+        name: 'Need help?',
+        icon: 'Help',
+        link: '#',
+        disabled: true
+      }
+    ]
   }
 ];
 
@@ -108,9 +119,5 @@ export const componentTexts = {
     title: 'My Profile',
     headerAriaLabel: 'My Profile Tab',
     controllerAriaLabel: 'User Settings'
-  },
-  support: {
-    title: 'Support',
-    menuName: 'Need help?'
   }
 };
