@@ -147,12 +147,20 @@ objects:
                 periodSeconds: 30
                 timeoutSeconds: 10
               volumeMounts:
-                - mountPath: /srv
-                  name: env-js
+                - name: env-js
+                  mountPath: /srv
+                - name: config-caddy
+                  mountPath: /config/caddy
+                - name: data-caddy
+                  mountPath: /data/caddy
           volumes:
             - name: env-js
               configMap:
                 name: ${NAME}-${ZONE}-${COMPONENT}
+            - name: config-caddy
+              emptyDir: {}
+            - name: data-caddy
+              emptyDir: {}
   - apiVersion: v1
     kind: Service
     metadata:
