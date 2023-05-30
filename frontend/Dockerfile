@@ -23,8 +23,11 @@ WORKDIR /app
 COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/build /srv
 
-# Port, Healthcheck and user
+# Non-root user
+RUN addgroup -g 101 -S nonroot && \
+    adduser -u 101 -D -S -G nonroot nonroot
+
+# Port, healthcheck and user
 EXPOSE ${PORT}
-HEALTHCHECK --interval=30s --timeout=3s \
-    CMD curl -f http://localhost/:${PORT} || exit 1
-USER app
+HEALTHCHECK CMD curl -f http://localhost/:${PORT}
+USER nonroot
