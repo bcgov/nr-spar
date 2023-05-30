@@ -7,15 +7,22 @@ import {
   FlexGrid,
   Row,
   Column,
-  ActionableNotification
+  Button,
+  ActionableNotification,
+  TableContainer,
+  TableToolbar,
+  TableToolbarAction,
+  TableToolbarContent,
+  TableToolbarMenu,
+  TableToolbarSearch
 } from '@carbon/react';
 
 import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
 import { OrchardObj } from '../OrchardStep/definitions';
-import getPageText from './constants';
+import { getPageText, notificationCtrlObj } from './constants';
 import { tabTypes } from './definitions';
-import { getTabString, processOrchardIDs } from './utils';
+import { getTabString, processOrchards } from './utils';
 
 import './styles.scss';
 
@@ -35,13 +42,29 @@ const ParentTreeStep = (
   }: ParentTreeStepProps
 ) => {
   const pageText = getPageText();
-  const [hasOrchardID, setHasOrchardID] = useState<boolean>(false);
-  const [orchardIDs, setOrchardIDs] = useState<Array<string>>([]);
-  const [currentTab, setCurrentTab] = useState(tabTypes.coneTab);
+  const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
+  const [currentTab, setCurrentTab] = useState<keyof tabTypes>('coneTab');
+  // eslint-disable-next-line prefer-object-spread
+  const notifCtrlObj = Object.assign({}, notificationCtrlObj);
+  const [notifCtrl, setNotifCtrl] = useState({ ...notifCtrlObj });
+
+  const toggleNotification = (notifType: string) => {
+    const newNotifCtrl = { ...notifCtrl };
+    if (notifType === 'info') {
+      newNotifCtrl[currentTab].showInfo = false;
+    }
+    if (notifType === 'error') {
+      newNotifCtrl[currentTab].showError = false;
+    }
+    setNotifCtrl(newNotifCtrl);
+  };
+
+  // console.log(notifCtrl, currentTab);
 
   useEffect(
     () => {
-      const processedOrchardIDs = processOrchardIDs(orchards);
+      const processedOrchard = processOrchards(orchards);
+      setOrchardsData(processedOrchard);
     },
     [orchards]
   );
@@ -55,7 +78,10 @@ const ParentTreeStep = (
           }
           >
             <TabList className="parent-tree-step-tab-list" aria-label="List of tabs">
-              <Tab>{pageText.coneTab.tabTitle}</Tab>
+              <Tab>
+                {pageText.coneTab.tabTitle}
+                &nbsp;(required)
+              </Tab>
               <Tab>{pageText.successTab.tabTitle}</Tab>
               <Tab>{pageText.mixTab.tabTitle}</Tab>
             </TabList>
@@ -70,17 +96,72 @@ const ParentTreeStep = (
               </Row>
               <Row className="notification-row">
                 <Column>
-                  <ActionableNotification
-                    kind="info"
-                    lowContrast
-                    title={pageText.notificationTitle}
-                    inline
-                    actionButtonLabel=""
+                  {
+                    notifCtrl[currentTab].showInfo && orchardsData.length > 0
+                      ? (
+                        <ActionableNotification
+                          kind="info"
+                          lowContrast
+                          title={pageText.notificationTitle}
+                          inline
+                          actionButtonLabel=""
+                          onClose={(_event: any) => {
+                            toggleNotification('info');
+                            return false;
+                          }}
+                        >
+                          <span className="notification-subtitle">
+                            {pageText[currentTab].notificationSubtitle}
+                          </span>
+                        </ActionableNotification>
+                      )
+                      : null
+                  }
+                  {
+                    notifCtrl[currentTab].showError && orchardsData.length === 0
+                      ? (
+                        <ActionableNotification
+                          kind="error"
+                          lowContrast
+                          title={pageText.errorNotifTitle}
+                          onClose={(_event: any) => {
+                            toggleNotification('error');
+                            return false;
+                          }}
+                        >
+                          <span className="notification-subtitle">
+                            {pageText.errorDescription}
+                          </span>
+                        </ActionableNotification>
+                      )
+                      : null
+                  }
+                </Column>
+              </Row>
+              <Row>
+                <Column>
+                  <TableContainer
+                    title={pageText[currentTab].tabTitle}
+                    description={pageText[currentTab].tableDescription}
                   >
-                    <span className="notification-subtitle">
-                      {pageText[currentTab].notificationSubtitle}
-                    </span>
-                  </ActionableNotification>
+                    <TableToolbar aria-label="data table toolbar">
+                      <TableToolbarContent>
+                        <TableToolbarSearch onChange={() => console.log('toolbar search')} />
+                        <TableToolbarMenu light>
+                          <TableToolbarAction>
+                            Download table template
+                          </TableToolbarAction>
+                          <TableToolbarAction>
+                            Export table as PDF file
+                          </TableToolbarAction>
+                          <TableToolbarAction>
+                            Clean table data
+                          </TableToolbarAction>
+                        </TableToolbarMenu>
+                        <Button>Primary Button</Button>
+                      </TableToolbarContent>
+                    </TableToolbar>
+                  </TableContainer>
                 </Column>
               </Row>
             </FlexGrid>

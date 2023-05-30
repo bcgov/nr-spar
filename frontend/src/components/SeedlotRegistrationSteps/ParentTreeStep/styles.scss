@@ -20,13 +20,12 @@
 .parent-tree-tab-container {
   padding: 2.5rem 0;
 
-
   .description-box-container {
     padding-left: 0;
   }
 
   .notification-row {
-    margin-top: 2.5em;
+    margin-top: 2.5rem;
 
     .#{vars.$bcgov-prefix}--actionable-notification__content {
       display: flex;

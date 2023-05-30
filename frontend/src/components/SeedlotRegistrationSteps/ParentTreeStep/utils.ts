@@ -1,20 +1,20 @@
 import { OrchardObj } from '../OrchardStep/definitions';
-import { tabTypes } from './definitions';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
     case 0:
-      return tabTypes.coneTab;
+      return 'coneTab';
     case 1:
-      return tabTypes.successTab;
+      return 'successTab';
     case 2:
-      return tabTypes.mixTab;
+      return 'mixTab';
     default:
-      return tabTypes.coneTab;
+      return 'coneTab';
   }
 };
 
-const getMergedOrchards = (orchards: Array<OrchardObj>) => {
+// Returns a merged array of orchards, duplicated orchards are merged as one
+export const processOrchards = (orchards: Array<OrchardObj>): Array<OrchardObj> => {
   const obj = {};
 
   orchards.forEach((orchard) => {
@@ -30,9 +30,4 @@ const getMergedOrchards = (orchards: Array<OrchardObj>) => {
   });
 
   return Object.values(obj);
-};
-
-export const processOrchardIDs = (orchards: Array<OrchardObj>) => {
-  const mergedOrchards = getMergedOrchards(orchards);
-  console.log(mergedOrchards);
 };

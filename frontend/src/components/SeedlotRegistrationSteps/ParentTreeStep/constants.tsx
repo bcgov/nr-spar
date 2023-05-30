@@ -20,30 +20,59 @@ const getNotificationSubtitle = (tabType: string) => (
   <>
     {
       `You can import one spreadsheet file for the ${tabType} table with the data you want to use. `
-      + 'For further guidance on how to organize the data, '
+    }
+    <br />
+    {
+      'For further guidance on how to organize the data, '
       + "do use the SPAR's spreadsheet template. "
     }
     <Link className="notification-link" to={getDownloadUrl(tabType)}>{`Download ${tabType} template`}</Link>
   </>
 );
 
+const errorDescription = (
+  <>
+    To see your orchard&apos;s composition, you must first fill the orchard id field in the previous step, “Orchard”.
+    <br />
+    Please, fill the orchard ID to complete the cone and pollen table.
+  </>
+);
+
 export const getPageText = () => ({
   notificationTitle: 'Upload spreadsheet to table',
+  errorNotifTitle: 'No orchard ID linked yet!',
+  errorDescription,
   coneTab: {
     tabTitle: 'Cone and pollen count',
     tabDescription: getTabDescription('cone and pollen count'),
-    notificationSubtitle: getNotificationSubtitle('cone and pollen count')
+    notificationSubtitle: getNotificationSubtitle('cone and pollen count'),
+    tableDescription: 'Enter the cone and pollen count manually or upload a spreadsheet file with the template for the cone and pollen count table (required)'
   },
   successTab: {
     tabTitle: 'SMP success on parent',
     tabDescription: getTabDescription('SMP success on parent'),
-    notificationSubtitle: getNotificationSubtitle('SMP success on parent')
+    notificationSubtitle: getNotificationSubtitle('SMP success on parent'),
+    tableDescription: "Enter the estimative of SMP success for the orchard's seedlot"
   },
   mixTab: {
     tabTitle: 'Calculation of SMP mix',
     tabDescription: getTabDescription('calculation of SMP mix'),
-    notificationSubtitle: getNotificationSubtitle('calculation of SMP mix')
+    notificationSubtitle: getNotificationSubtitle('calculation of SMP mix'),
+    tableDescription: 'Enter the estimative volume of SMP mix used for each clone'
   }
 });
 
-export default getPageText;
+export const notificationCtrlObj = {
+  coneTab: {
+    showInfo: true,
+    showError: true
+  },
+  successTab: {
+    showInfo: true,
+    showError: true
+  },
+  mixTab: {
+    showInfo: true,
+    showError: true
+  }
+};
