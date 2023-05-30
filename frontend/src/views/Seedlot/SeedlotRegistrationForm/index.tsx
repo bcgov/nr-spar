@@ -4,10 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
   Row,
+  Column,
   Breadcrumb,
   BreadcrumbItem,
   Button,
-  Loading
+  Loading,
+  Grid
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 
@@ -197,32 +199,38 @@ const SeedlotRegistrationForm = () => {
   };
 
   return (
-    <FlexGrid className="seedlot-registration-page">
-      <div className="seedlot-registration-title-section">
-        <Row className="seedlot-registration-breadcrumb">
-          <Breadcrumb>
-            <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
-            <BreadcrumbItem onClick={() => navigate('/seedlot/my-seedlots')}>My seedlots</BreadcrumbItem>
-            <BreadcrumbItem onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
-          </Breadcrumb>
+    <div className="seedlot-registration-page">
+      <FlexGrid fullWidth>
+        <Row>
+          <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
+            <Breadcrumb>
+              <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate('/seedlot/my-seedlots')}>My seedlots</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
+            </Breadcrumb>
+          </Column>
         </Row>
         <Row>
-          <PageTitle
-            title="Seedlot Registration"
-            subtitle={`Seedlot ${seedlotNumber}`}
-          />
+          <Column className="seedlot-registration-title" sm={4} md={8} lg={16} xlg={16}>
+            <PageTitle
+              title="Seedlot Registration"
+              subtitle={`Seedlot ${seedlotNumber}`}
+            />
+          </Column>
         </Row>
-        <Row className="seedlot-registration-progress">
-          <SeedlotRegistrationProgress
-            currentIndex={formStep}
-            className="seedlot-registration-steps"
-            interactFunction={(e: number) => {
-              setFormStep(e);
-            }}
-          />
+        <Row>
+          <Column className="seedlot-registration-progress" sm={4} md={8} lg={16} xlg={16}>
+            <SeedlotRegistrationProgress
+              currentIndex={formStep}
+              className="seedlot-registration-steps"
+              interactFunction={(e: number) => {
+                setFormStep(e);
+              }}
+            />
+          </Column>
         </Row>
-        <Row className="seedlot-registration-row">
-          <div className="seedlot-current-form">
+        <Row>
+          <Column className="seedlot-registration-row" sm={4} md={8} lg={16} xlg={16}>
             {
               (
                 seedlotInfoQuery.isSuccess
@@ -232,53 +240,59 @@ const SeedlotRegistrationForm = () => {
                 ? renderStep()
                 : <Loading />
             }
-          </div>
+          </Column>
         </Row>
-        <div className="btns-container">
-          {
-            formStep !== 0
-              ? (
-                <Button
-                  kind="secondary"
-                  size="lg"
-                  className="back-next-btn"
-                  onClick={() => setStep(-1)}
-                >
-                  Back
-                </Button>
-              )
-              : (
-                <Button
-                  kind="secondary"
-                  size="lg"
-                  className="back-next-btn"
-                  onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
-                >
-                  Cancel
-                </Button>
-              )
+        <Row className="seedlot-registration-button-row">
+          <Grid narrow>
+            <Column sm={4} md={3} lg={3} xlg={3}>
+              {
+                formStep !== 0
+                  ? (
+                    <Button
+                      kind="secondary"
+                      size="lg"
+                      className="back-next-btn"
+                      onClick={() => setStep(-1)}
+                    >
+                      Back
+                    </Button>
+                  )
+                  : (
+                    <Button
+                      kind="secondary"
+                      size="lg"
+                      className="back-next-btn"
+                      onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
+                    >
+                      Cancel
+                    </Button>
+                  )
 
-          }
-          {
-            formStep !== 5
-              ? (
-                <Button
-                  kind="primary"
-                  size="lg"
-                  className="back-next-btn"
-                  onClick={() => setStep(1)}
-                  renderIcon={ArrowRight}
-                >
-                  Next
-                </Button>
-              )
-              : (
-                <SubmitModal />
-              )
-          }
-        </div>
-      </div>
-    </FlexGrid>
+              }
+            </Column>
+            <Column sm={4} md={3} lg={3} xlg={3}>
+              {
+                formStep !== 5
+                  ? (
+                    <Button
+                      kind="primary"
+                      size="lg"
+                      className="back-next-btn"
+                      onClick={() => setStep(1)}
+                      renderIcon={ArrowRight}
+                    >
+                      Next
+                    </Button>
+                  )
+                  : (
+                    <SubmitModal btnText="Submit Registration" renderIconName="CheckmarkOutline" />
+                  )
+              }
+            </Column>
+          </Grid>
+        </Row>
+      </FlexGrid>
+    </div>
   );
 };
 

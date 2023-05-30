@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import {
   FlexGrid,
   Row,
-  Column,
   InlineNotification
 } from '@carbon/react';
+import { Link } from 'react-router-dom';
 import Subtitle from '../../../../Subtitle';
 import DropDownObj from '../../../../../types/DropDownObject';
 import { pageTexts } from '../../constants';
+import textConfig from './constants';
+import DescriptionBox from '../../../../DescriptionBox';
+
 import '../styles.scss';
 
 type ConeAndPollenProps = {
@@ -19,22 +23,22 @@ const ConeAndPollen = ({
 }: ConeAndPollenProps) => {
   const a = '';
   return (
-    <FlexGrid className="parent-tree-tabs">
+    <FlexGrid className="parent-tree-tab-container">
       <Row className="title-row">
-        <Column sm={4} md={5} lg={9}>
-          <h2>{pageTexts.tabTitles.coneTab}</h2>
-          <h2>{seedlotSpecies.label + a}</h2>
-          <Subtitle text={pageTexts.coneAndPollen.subtitle} />
-        </Column>
+        <DescriptionBox header={textConfig.tabTitle} description={textConfig.tabDescription} />
       </Row>
       <Row className="notification-row">
         <InlineNotification
           lowContrast
           kind="info"
           aria-label={pageTexts.sharedTabTexts.notification.actionButtonLabel}
-          subtitle={pageTexts.coneAndPollen.notification.subtitle}
           title={pageTexts.sharedTabTexts.notification.title}
-        />
+        >
+          <span>
+            Subtitle text goes here.
+            <span>hihiihi</span>
+          </span>
+        </InlineNotification>
       </Row>
     </FlexGrid>
   );
