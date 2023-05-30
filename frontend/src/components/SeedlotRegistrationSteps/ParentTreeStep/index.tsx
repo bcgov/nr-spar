@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Tabs,
   TabList,
@@ -12,8 +12,10 @@ import {
 
 import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
+import { OrchardObj } from '../OrchardStep/definitions';
 import getPageText from './constants';
 import { tabTypes } from './definitions';
+import { getTabString, processOrchardIDs } from './utils';
 
 import './styles.scss';
 
@@ -21,44 +23,35 @@ interface ParentTreeStepProps {
   seedlotSpecies: DropDownObj
   state: object;
   setStepData: Function;
+  orchards: Array<OrchardObj>;
 }
 
 const ParentTreeStep = (
   {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     seedlotSpecies,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     state,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setStepData
+    setStepData,
+    orchards
   }: ParentTreeStepProps
 ) => {
   const pageText = getPageText();
   const [hasOrchardID, setHasOrchardID] = useState<boolean>(false);
+  const [orchardIDs, setOrchardIDs] = useState<Array<string>>([]);
   const [currentTab, setCurrentTab] = useState(tabTypes.coneTab);
 
-  const setTabString = (selectedIndex: number) => {
-    switch (selectedIndex) {
-      case 0:
-        setCurrentTab(tabTypes.coneTab);
-        break;
-      case 1:
-        setCurrentTab(tabTypes.successTab);
-        break;
-      case 2:
-        setCurrentTab(tabTypes.mixTab);
-        break;
-      default:
-        break;
-    }
-  };
+  useEffect(
+    () => {
+      const processedOrchardIDs = processOrchardIDs(orchards);
+    },
+    [orchards]
+  );
 
   return (
     <FlexGrid className="parent-tree-step-container">
       <Row>
         <Column sm={4} md={8} lg={16} xlg={16}>
           <Tabs onChange={
-            (value: { selectedIndex: number }) => setTabString(value.selectedIndex)
+            (value: { selectedIndex: number }) => setCurrentTab(getTabString(value.selectedIndex))
           }
           >
             <TabList className="parent-tree-step-tab-list" aria-label="List of tabs">
