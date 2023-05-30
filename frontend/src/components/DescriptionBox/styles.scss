@@ -1,9 +1,10 @@
 @use '../../theme/variables.scss' as vars;
 
 .description-box-container{
+
   .description-box-header{
     color: var(--#{vars.$bcgov-prefix}-text-primary);
-    font-size: 1.25em;
+    font-size: 1.25rem;
   }
 
   .description-box-description{
