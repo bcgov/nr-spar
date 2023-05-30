@@ -46,7 +46,7 @@ export const getPageText = () => ({
     tabTitle: 'Cone and pollen count',
     tabDescription: getTabDescription('cone and pollen count'),
     notificationSubtitle: getNotificationSubtitle('cone and pollen count'),
-    tableDescription: 'Enter the cone and pollen count manually or upload a spreadsheet file with the template for the cone and pollen count table (required)'
+    tableDescription: "Enter the estimative of cone and pollen count for the orchard's seedlot (*required)"
   },
   successTab: {
     tabTitle: 'SMP success on parent',

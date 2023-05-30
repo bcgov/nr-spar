@@ -22,7 +22,7 @@ import Subtitle from '../../Subtitle';
 import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS } from './constants';
 
-import getOrchardByID from '../../../api-service/orchardAPI';
+import { getOrchardByID } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 
 import FemaleGameticOptions from './data';
@@ -86,10 +86,10 @@ const OrchardStep = ({
   // Set orchard name by input id, if data is not present then clear orcahrd name
   const setOrchardName = (inputId: number, data?: OrchardDataType) => {
     const newOrchards = [...state.orchards];
-    /*
-      * It is safe to replace item in array by index here
-      * since the array is not mutable at this stage
-    */
+    /**
+     * It is safe to replace item in array by index here
+     * since the array is not mutable at this stage
+     */
     const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
     if (data?.name && data.vegetationCode && data.stageCode) {
       newOrchards[replaceIndex].orchardLabel = `${data.name} - ${data.vegetationCode} - ${data.stageCode}`;

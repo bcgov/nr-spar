@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
@@ -7,15 +8,18 @@ import {
   FlexGrid,
   Row,
   Column,
-  Button,
   ActionableNotification,
   TableContainer,
   TableToolbar,
-  TableToolbarAction,
   TableToolbarContent,
-  TableToolbarMenu,
-  TableToolbarSearch
+  OverflowMenuItem,
+  OverflowMenu,
+  Button,
+  Checkbox
 } from '@carbon/react';
+import { View, Settings, Upload } from '@carbon/icons-react';
+import { useQueries, useQueryClient, useQuery } from '@tanstack/react-query';
+import { getSeedPlanUnits, getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
 
 import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
@@ -42,6 +46,7 @@ const ParentTreeStep = (
   }: ParentTreeStepProps
 ) => {
   const pageText = getPageText();
+  const queryClient = useQueryClient();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof tabTypes>('coneTab');
   // eslint-disable-next-line prefer-object-spread
@@ -68,6 +73,44 @@ const ParentTreeStep = (
     },
     [orchards]
   );
+
+  // Seed plan units queries
+  useQueries({
+    queries:
+      orchardsData.map((orchard) => ({
+        queryKey: ['orchard', orchard.orchardId, 'seed-plan-units'],
+        queryFn: () => getSeedPlanUnits(orchard.orchardId),
+        refetchOnMount: false,
+        refetchOnWindowFocus: false
+      }))
+  });
+
+  const getSPUfromQuery = (orchardId: string): string => {
+    const data: Array<any> = queryClient.getQueryData(['orchard', orchardId, 'seed-plan-units']) ?? [];
+    if (data[0]?.seedPlanningUnitId) {
+      return data[0].seedPlanningUnitId;
+    }
+    return '';
+  };
+
+  const enableParentTreeQuery = (orchardId: string): boolean => {
+    if (queryClient.getQueryState(['orchard', orchardId, 'seed-plan-units'])?.status === 'success') {
+      return getSPUfromQuery(orchardId) !== '';
+    }
+    return false;
+  };
+
+  // Parent tree genetic quality queries
+  useQueries({
+    queries:
+      orchardsData.map((orchard) => ({
+        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.orchardId, getSPUfromQuery(orchard.orchardId)],
+        queryFn: () => getParentTreeGeneQuali(orchard.orchardId, getSPUfromQuery(orchard.orchardId)),
+        enabled: enableParentTreeQuery(orchard.orchardId),
+        refetchOnMount: false,
+        refetchOnWindowFocus: false
+      }))
+  });
 
   return (
     <FlexGrid className="parent-tree-step-container">
@@ -124,6 +167,7 @@ const ParentTreeStep = (
                           kind="error"
                           lowContrast
                           title={pageText.errorNotifTitle}
+                          actionButtonLabel=""
                           onClose={(_event: any) => {
                             toggleNotification('error');
                             return false;
@@ -146,19 +190,36 @@ const ParentTreeStep = (
                   >
                     <TableToolbar aria-label="data table toolbar">
                       <TableToolbarContent>
-                        <TableToolbarSearch onChange={() => console.log('toolbar search')} />
-                        <TableToolbarMenu light>
-                          <TableToolbarAction>
-                            Download table template
-                          </TableToolbarAction>
-                          <TableToolbarAction>
-                            Export table as PDF file
-                          </TableToolbarAction>
-                          <TableToolbarAction>
-                            Clean table data
-                          </TableToolbarAction>
-                        </TableToolbarMenu>
-                        <Button>Primary Button</Button>
+                        <OverflowMenu
+                          renderIcon={View}
+                          menuOptionsClass="parent-tree-view-options"
+                          iconDescription="haha"
+                          flipped
+                        >
+                          <div>
+                            haha
+                          </div>
+                          <div>
+                            hahaha
+                          </div>
+                        </OverflowMenu>
+                        <OverflowMenu
+                          renderIcon={Settings}
+                          menuOptionsClass="parent-tree-table-options"
+                          iconDescription="sss"
+                        >
+                          <OverflowMenuItem
+                            itemText="gggg"
+                          />
+                        </OverflowMenu>
+                        <Button
+                          size="sm"
+                          kind="primary"
+                          renderIcon={Upload}
+                        // onClick={() => console.log(queryClient.getQueryData(['orchard', '405', 'seed-plan-units']))}
+                        >
+                          Primary Button
+                        </Button>
                       </TableToolbarContent>
                     </TableToolbar>
                   </TableContainer>
