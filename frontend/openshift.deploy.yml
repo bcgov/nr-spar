@@ -148,7 +148,8 @@ objects:
                 timeoutSeconds: 10
               volumeMounts:
                 - name: env-js
-                  mountPath: /srv
+                  mountPath: /srv/env.js
+                  subPath: env.js
                 - name: config-caddy
                   mountPath: /config/caddy
                 - name: data-caddy

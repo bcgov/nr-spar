@@ -20,7 +20,7 @@ ARG PORT
 
 # Copy and prep app
 WORKDIR /app
-COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
+COPY Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/build /srv
 
 # Port, healthcheck and user
