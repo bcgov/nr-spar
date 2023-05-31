@@ -76,3 +76,18 @@ export const notificationCtrlObj = {
     showError: true
   }
 };
+
+export const geneticWorthDict = {
+  CW: ['AD', 'DFU', 'GVO', 'WDU'],
+  PLI: ['DFS', 'DSC', 'DSG', 'GVO'],
+  FDC: ['DFW', 'GVO', 'WWD'],
+  PW: ['DSB'],
+  DR: ['GVO'],
+  EP: ['GVO'],
+  FDI: ['GVO'],
+  HW: ['GVO'],
+  LW: ['GVO'],
+  PY: ['GVO'],
+  SS: ['GVO', 'IWS'],
+  SX: ['GVO', 'IWS']
+};

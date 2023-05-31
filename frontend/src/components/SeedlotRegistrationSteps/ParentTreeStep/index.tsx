@@ -45,6 +45,7 @@ const ParentTreeStep = (
     orchards
   }: ParentTreeStepProps
 ) => {
+  console.log(seedlotSpecies.code);
   const pageText = getPageText();
   const queryClient = useQueryClient();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
@@ -218,7 +219,7 @@ const ParentTreeStep = (
                           renderIcon={Upload}
                         // onClick={() => console.log(queryClient.getQueryData(['orchard', '405', 'seed-plan-units']))}
                         >
-                          Primary Button
+                          Upload from file
                         </Button>
                       </TableToolbarContent>
                     </TableToolbar>
