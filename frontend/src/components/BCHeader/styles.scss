@@ -4,96 +4,107 @@
 .spar-header {
   overflow: hidden;
   border: 0;
-}
 
-.header-link {
-  margin-left: 0.9375rem;
-  color: colors.$white;
-}
-
-a.header-link:link {
-  text-decoration: none;
-  color: colors.$white;
-}
-
-.header-full-name {
-  font-weight: bold;
-}
-
-.#{vars.$bcgov-prefix}--__items {
-  display: flex;
-  flex-direction: column;
-}
-
-.support-section {
-  margin-top: auto;
-}
-
-button.#{vars.$bcgov-prefix}--header__action {
-  border-radius: 0;
-}
-
-button.#{vars.$bcgov-prefix}--header__action--active {
-  background: var(--bcgov-layer-02);
-  border: 0;
-}
-
-.#{vars.$bcgov-prefix}--header__global .#{vars.$bcgov-prefix}--btn--icon-only.#{vars.$bcgov-prefix}--header__action svg,
-button.#{vars.$bcgov-prefix}--header__action svg {
-  fill: var(--bcgov-icon-on-color) ;
-}
-
-button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg,
-.#{vars.$bcgov-prefix}--popover-container button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg {
-  fill: var(--bcgov-icon-primary) ;
-}
-
-button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__menu-trigger:focus {
-  border-color: var(--bcgov-icon-on-color);
-}
-
-.#{vars.$bcgov-prefix}--header-panel--expanded.notifications-panel,
-.#{vars.$bcgov-prefix}--header-panel--expanded.profile-panel {
-  z-index: 10000;
-  width: 25rem;
-  height: 100vh;
-  background-color: var(--bcgov-layer-02);
-  color: var(--bcgov-text-primary);
-  transition: width 0.11s cubic-bezier(0.2, 0, 1, 0.9);
-  will-change: width;
-}
-
-.overlay-element {
-  position: fixed;
-  top: 3rem;
-  left: 0;
-  width: 0;
-  height: 0;
-  background-color: transparent;
-  opacity: 0;
-  transition: opacity 300ms cubic-bezier(0.5, 0, 0.1, 1), background-color 300ms cubic-bezier(0.5, 0, 0.1, 1);
-}
-
-.overlay-element.active {
-  z-index: 9000;
-  width: 100vw;
-  height: 100vh;
-  background-color: var(--#{vars.$bcgov-prefix}-overlay);
-  opacity: 1;
-  transition: opacity 300ms cubic-bezier(0.5, 0, 0.1, 1), background-color 300ms cubic-bezier(0.5, 0, 0.1, 1);
-}
-
-/* Medium - Up to 672px */
-@media only screen and (max-width: 672px) {
-  .header-full-name {
-    display: none;
+  .header-link {
+    margin-left: 0.9375rem;
+    color: colors.$white;
   }
-}
-/* This rule is specific for the right panel only, it should fill the whole viewport
-   when the screen hits the panel size or smaller */
-@media only screen and (max-width: 400px) {
+
+  a.header-link:link {
+    text-decoration: none;
+    color: colors.$white;
+  }
+
+  .header-full-name {
+    font-weight: bold;
+  }
+
+  .#{vars.$bcgov-prefix}--side-nav__items {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .support-section {
+    margin-top: auto;
+  }
+
+  .disabled-menu-option {
+    span {
+      color: var(--#{vars.$bcgov-prefix}-text-disabled);
+    }
+
+    svg {
+      fill: var(--#{vars.$bcgov-prefix}-text-disabled);
+    }
+
+    &:hover,
+    &:hover > span {
+      background-color: unset !important;
+      // Unset doesn't work on 'color' because the inherited value is not the
+      // disabled text color, so setting it directly to the wanted value
+      color: var(--#{vars.$bcgov-prefix}-text-disabled) !important;
+    }
+  }
+
+  button.#{vars.$bcgov-prefix}--header__action {
+    border-radius: 0;
+  }
+
+  button.#{vars.$bcgov-prefix}--header__action--active {
+    background: var(--#{vars.$bcgov-prefix}-layer-02);
+    border: 0;
+  }
+
+  .#{vars.$bcgov-prefix}--header__global .#{vars.$bcgov-prefix}--btn--icon-only.#{vars.$bcgov-prefix}--header__action svg,
+  button.#{vars.$bcgov-prefix}--header__action svg {
+    fill: var(--#{vars.$bcgov-prefix}-icon-on-color) ;
+  }
+
+  button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg,
+  .#{vars.$bcgov-prefix}--popover-container button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg {
+    fill: var(--#{vars.$bcgov-prefix}-icon-primary) ;
+  }
+
+  button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__menu-trigger:focus {
+    border-color: var(--#{vars.$bcgov-prefix}-icon-on-color);
+  }
+
   .#{vars.$bcgov-prefix}--header-panel--expanded.notifications-panel,
   .#{vars.$bcgov-prefix}--header-panel--expanded.profile-panel {
+    z-index: 10000;
+    width: 25rem;
+    height: 100vh;
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+    color: var(--#{vars.$bcgov-prefix}-text-primary);
+    transition: width 0.11s cubic-bezier(0.2, 0, 1, 0.9);
+    will-change: width;
+  }
+
+  .overlay-element {
+    position: fixed;
+    top: 3rem;
+    left: 0;
+    z-index: 9000;
     width: 100vw;
+    height: 100vh;
+    background-color: var(--#{vars.$bcgov-prefix}-overlay);
+    opacity: 1;
+    transition: opacity 300ms cubic-bezier(0.5, 0, 0.1, 1), background-color 300ms cubic-bezier(0.5, 0, 0.1, 1);
+  }
+
+  /* Medium - Up to 672px */
+  @media only screen and (max-width: 672px) {
+    .header-full-name {
+      display: none;
+    }
+  }
+
+  /* This rule is specific for the right panel only, it should fill the whole viewport
+    when the screen hits the panel size or smaller */
+  @media only screen and (max-width: 400px) {
+    .#{vars.$bcgov-prefix}--header-panel--expanded.notifications-panel,
+    .#{vars.$bcgov-prefix}--header-panel--expanded.profile-panel {
+      width: 100vw;
+    }
   }
 }
