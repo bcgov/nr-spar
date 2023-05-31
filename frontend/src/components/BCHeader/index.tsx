@@ -137,7 +137,8 @@ const BCHeader = () => {
           </HeaderPanel>
           {
             overlay
-            && <div className="overlay-element" />
+              ? <div className="overlay-element" />
+              : null
           }
           <SideNav
             isChildOfHeader
