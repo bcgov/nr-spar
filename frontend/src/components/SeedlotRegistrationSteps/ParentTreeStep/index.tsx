@@ -15,17 +15,23 @@ import {
   OverflowMenuItem,
   OverflowMenu,
   Button,
-  Checkbox
+  Checkbox,
+  Table,
+  TableHead,
+  TableRow,
+  TableHeader,
+  TableBody,
+  TableCell
 } from '@carbon/react';
 import { View, Settings, Upload } from '@carbon/icons-react';
-import { useQueries, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { getSeedPlanUnits, getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
 
 import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
 import { OrchardObj } from '../OrchardStep/definitions';
-import { getPageText, notificationCtrlObj } from './constants';
-import { tabTypes } from './definitions';
+import { getPageText, notificationCtrlObj, headerTemplate } from './constants';
+import { TabTypes, HeaderConfigObj, RowItem } from './definitions';
 import { getTabString, processOrchards } from './utils';
 
 import './styles.scss';
@@ -45,14 +51,13 @@ const ParentTreeStep = (
     orchards
   }: ParentTreeStepProps
 ) => {
-  console.log(seedlotSpecies.code);
   const pageText = getPageText();
   const queryClient = useQueryClient();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
-  const [currentTab, setCurrentTab] = useState<keyof tabTypes>('coneTab');
-  // eslint-disable-next-line prefer-object-spread
-  const notifCtrlObj = Object.assign({}, notificationCtrlObj);
-  const [notifCtrl, setNotifCtrl] = useState({ ...notifCtrlObj });
+  const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
+  const [notifCtrl, setNotifCtrl] = useState(structuredClone(notificationCtrlObj));
+  const [headerConfig, setHeaderConfig] = useState<HeaderConfigObj>(structuredClone(headerTemplate));
+  const [tableRowData, setTableRowData] = useState<Array<RowItem>>([]);
 
   const toggleNotification = (notifType: string) => {
     const newNotifCtrl = { ...notifCtrl };
@@ -64,8 +69,6 @@ const ParentTreeStep = (
     }
     setNotifCtrl(newNotifCtrl);
   };
-
-  // console.log(notifCtrl, currentTab);
 
   useEffect(
     () => {
@@ -141,7 +144,7 @@ const ParentTreeStep = (
               <Row className="notification-row">
                 <Column>
                   {
-                    notifCtrl[currentTab].showInfo && orchardsData.length > 0
+                    (notifCtrl[currentTab].showInfo && orchardsData.length > 0)
                       ? (
                         <ActionableNotification
                           kind="info"
@@ -162,7 +165,7 @@ const ParentTreeStep = (
                       : null
                   }
                   {
-                    notifCtrl[currentTab].showError && orchardsData.length === 0
+                    (notifCtrl[currentTab].showError && orchardsData.length === 0)
                       ? (
                         <ActionableNotification
                           kind="error"
@@ -223,6 +226,30 @@ const ParentTreeStep = (
                         </Button>
                       </TableToolbarContent>
                     </TableToolbar>
+                    <Table useZebraStyles>
+                      <TableHead>
+                        <TableRow>
+                          {
+                            Object.values(headerConfig).map((header) => (
+                              header.availableInTabs.includes(currentTab) && header.enabled
+                                ? (
+                                  <TableHeader id={header.id} key={header.id}>
+                                    {header.name}
+                                  </TableHeader>
+                                )
+                                : null
+                            ))
+                          }
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>
+                            sif
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
                   </TableContainer>
                 </Column>
               </Row>
