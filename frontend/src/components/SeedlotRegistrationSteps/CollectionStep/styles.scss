@@ -1,27 +1,23 @@
 @use '@carbon/type';
 @use '../../../theme/variables.scss' as vars;
 
-.seedlot-collection-form {
-  h2 {
-    @include type.type-style('heading-03');
-    margin-bottom: 0.5rem;
-  }
-
-  .#{vars.$bcgov-prefix}--row {
-    margin-bottom: 2rem;
-  }
+.collection-step-container{
+  padding: 0;
 }
 
-.collector-information-dates {
-  margin-top: 2.5rem;
-
+.collection-step-row {
+  margin-bottom: 1.5rem;
+  h2 {
+    @include type.type-style('heading-03');
+  }
   .#{vars.$bcgov-prefix}--date-picker--single {
     width: 100%;
-    
-    .#{vars.$bcgov-prefix}--date-picker-container,  .#{vars.$bcgov-prefix}--date-picker__input {
+
+    .#{vars.$bcgov-prefix}--date-picker-container,
+    .#{vars.$bcgov-prefix}--date-picker__input {
       width: 100%;
     }
-	}
+  }
 }
 
 .collection-methods {

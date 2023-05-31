@@ -10,7 +10,7 @@ import './styles.scss';
 const Layout = () => (
   <>
     <BCHeader />
-    <div className="mainContainer">
+    <div className="main-container">
       <Content className="page-content">
         <Outlet />
       </Content>
