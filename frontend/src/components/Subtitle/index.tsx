@@ -3,7 +3,7 @@ import React from 'react';
 import './styles.scss';
 
 interface SubtitleProps {
-  text: string;
+  text: string | React.ReactNode;
   className?: string;
 }
 
