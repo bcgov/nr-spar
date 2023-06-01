@@ -148,7 +148,10 @@ const FormReview = () => {
     orchardStep: orchardMock,
     collectionStep: collectionMock,
     extractionStorageStep: extractionMock,
-    parentTreeStep: {}
+    parentTreeStep: {
+      tableRowData: {},
+      notifCtrl: {}
+    }
   });
 
   return (

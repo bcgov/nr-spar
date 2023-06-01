@@ -51,3 +51,10 @@ export type HeaderObj = {
 export type RowDataDictType = {
   [key: string]: RowItem
 }
+
+export type NotifCtrlType = {
+  [key: string]: {
+    showInfo: boolean,
+    showError: boolean
+  }
+}

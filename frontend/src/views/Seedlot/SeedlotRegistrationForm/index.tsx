@@ -34,7 +34,8 @@ import {
   initOwnershipState,
   initExtractionStorageState,
   initInvalidationObj,
-  initOwnerShipInvalidState
+  initOwnerShipInvalidState,
+  initParentTreeState
 } from './utils';
 import { getDropDownList } from '../../../utils/DropDownUtils';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
@@ -82,7 +83,7 @@ const SeedlotRegistrationForm = () => {
     interimStep: initInterimState(defaultAgency, defaultCode),
     ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
     orchardStep: initOrchardState(),
-    parentTreeStep: {},
+    parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
   });
 

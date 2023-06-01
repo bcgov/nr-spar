@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { HeaderObj, RowItem } from './definitions';
+import { HeaderObj, RowItem, NotifCtrlType } from './definitions';
 
 // Placeholder function to generate download URL for future
 const getDownloadUrl = (tabType: string) => `#TODO-${tabType.split(' ')[0]}`;
@@ -63,7 +63,7 @@ export const getPageText = () => ({
   }
 });
 
-export const notificationCtrlObj = {
+export const notificationCtrlObj: NotifCtrlType = {
   coneTab: {
     showInfo: true,
     showError: true

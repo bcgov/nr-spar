@@ -39,12 +39,12 @@ import {
 } from './definitions';
 import { getTabString, processOrchards, sortRowItem } from './utils';
 import { ParentTreeGeneticQualityType, GenWorthCodeEnum } from '../../../types/ParentTreeGeneticQualityType';
-
+import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import './styles.scss';
 
 interface ParentTreeStepProps {
   seedlotSpecies: DropDownObj
-  state: object;
+  state: ParentTreeStepDataObj;
   setStepData: Function;
   orchards: Array<OrchardObj>;
 }
@@ -61,19 +61,19 @@ const ParentTreeStep = (
   const queryClient = useQueryClient();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
-  const [notifCtrl, setNotifCtrl] = useState(structuredClone(notificationCtrlObj));
+  // const [notifCtrl, setNotifCtrl] = useState(structuredClone(notificationCtrlObj));
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(structuredClone(headerTemplate));
-  const [tableRowData, setTableRowData] = useState<RowDataDictType>({});
+  // const [tableRowData, setTableRowData] = useState<RowDataDictType>({});
 
   const toggleNotification = (notifType: string) => {
-    const newNotifCtrl = { ...notifCtrl };
+    const modifiedState = { ...state };
     if (notifType === 'info') {
-      newNotifCtrl[currentTab].showInfo = false;
+      modifiedState.notifCtrl[currentTab].showInfo = false;
     }
     if (notifType === 'error') {
-      newNotifCtrl[currentTab].showError = false;
+      modifiedState.notifCtrl[currentTab].showError = false;
     }
-    setNotifCtrl(newNotifCtrl);
+    setStepData(modifiedState);
   };
 
   useEffect(
@@ -111,7 +111,8 @@ const ParentTreeStep = (
   };
 
   const processParentTreeData = (data: ParentTreeGeneticQualityType) => {
-    let clonedTableRowData: RowDataDictType = structuredClone(tableRowData);
+    const modifiedState = { ...state };
+    let clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
 
     data.parentTrees.forEach((parentTree) => {
       if (!Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)) {
@@ -130,7 +131,8 @@ const ParentTreeStep = (
       }
     });
 
-    setTableRowData(clonedTableRowData);
+    modifiedState.tableRowData = clonedTableRowData;
+    setStepData(modifiedState);
   };
 
   // Parent tree genetic quality queries
@@ -174,7 +176,7 @@ const ParentTreeStep = (
               <Row className="notification-row">
                 <Column>
                   {
-                    (notifCtrl[currentTab].showInfo && orchardsData.length > 0)
+                    (state.notifCtrl[currentTab].showInfo && orchardsData.length > 0)
                       ? (
                         <ActionableNotification
                           kind="info"
@@ -195,7 +197,7 @@ const ParentTreeStep = (
                       : null
                   }
                   {
-                    (notifCtrl[currentTab].showError && orchardsData.length === 0)
+                    (state.notifCtrl[currentTab].showError && orchardsData.length === 0)
                       ? (
                         <ActionableNotification
                           kind="error"
@@ -256,44 +258,59 @@ const ParentTreeStep = (
                         </Button>
                       </TableToolbarContent>
                     </TableToolbar>
-                    <Table useZebraStyles>
-                      <TableHead>
-                        <TableRow>
-                          {
-                            headerConfig.map((header) => (
-                              (header.availableInTabs.includes(currentTab) && header.enabled)
-                                ? (
-                                  <TableHeader id={header.id} key={header.id}>
-                                    {header.name}
-                                  </TableHeader>
-                                )
-                                : null
-                            ))
-                          }
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {
-                          // Since we cannot sort an Object, we will have to sort the array here
-                          sortRowItem(Object.values(tableRowData)).map((rowData) => (
-                            <TableRow key={rowData.clone_number}>
+                    {
+                      queryClient.isFetching()
+                        ? (
+                          <DataTableSkeleton
+                            showToolbar={false}
+                            zebra
+                            headers={
+                              headerConfig.filter((header) => header.availableInTabs.includes(currentTab) && header.enabled)
+                            }
+                          />
+                        )
+                        : (
+                          <Table useZebraStyles>
+                            <TableHead>
+                              <TableRow>
+                                {
+                                  headerConfig.map((header) => (
+                                    (header.availableInTabs.includes(currentTab) && header.enabled)
+                                      ? (
+                                        <TableHeader id={header.id} key={header.id}>
+                                          {header.name}
+                                        </TableHeader>
+                                      )
+                                      : null
+                                  ))
+                                }
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
                               {
-                                headerConfig.map((header) => (
-                                  // This is to enforce that the cell data is actually related to the column
-                                  (header.availableInTabs.includes(currentTab) && header.enabled)
-                                    ? (
-                                      <TableCell key={header.id}>
-                                        {rowData[header.id]}
-                                      </TableCell>
-                                    )
-                                    : null
+                                // Since we cannot sort an Object, we will have to sort the array here
+                                sortRowItem(Object.values(state.tableRowData)).map((rowData) => (
+                                  <TableRow key={rowData.clone_number}>
+                                    {
+                                      headerConfig.map((header) => (
+                                        // This is to enforce that the cell data is actually related to the column
+                                        (header.availableInTabs.includes(currentTab) && header.enabled)
+                                          ? (
+                                            <TableCell key={header.id}>
+                                              {rowData[header.id]}
+                                            </TableCell>
+                                          )
+                                          : null
+                                      ))
+                                    }
+                                  </TableRow>
                                 ))
                               }
-                            </TableRow>
-                          ))
-                        }
-                      </TableBody>
-                    </Table>
+                            </TableBody>
+                          </Table>
+                        )
+                    }
+
                   </TableContainer>
                 </Column>
               </Row>
