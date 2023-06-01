@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { HeaderConfigObj, RowItem } from './definitions';
+import { HeaderObj, RowItem } from './definitions';
 
 // Placeholder function to generate download URL for future
 const getDownloadUrl = (tabType: string) => `#TODO-${tabType.split(' ')[0]}`;
@@ -94,7 +94,7 @@ export const geneticWorthDict = {
 };
 
 export const rowTemplate: RowItem = {
-  clone_number: 0,
+  clone_number: '',
   cone_count: 0,
   pollen_count: 0,
   smp_success_perc: 0,
@@ -119,8 +119,8 @@ export const rowTemplate: RowItem = {
   proportion: 0
 };
 
-export const headerTemplate: HeaderConfigObj = {
-  clone_number: {
+export const headerTemplate: Array<HeaderObj> = [
+  {
     id: 'clone_number',
     name: 'Clone number',
     description: 'Clone number',
@@ -128,7 +128,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  cone_count: {
+  {
     id: 'cone_count',
     name: 'Cone count',
     description: 'Cone count',
@@ -136,7 +136,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab']
   },
-  pollen_count: {
+  {
     id: 'pollen_count',
     name: 'Pollen count',
     description: 'Pollen count',
@@ -144,7 +144,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab']
   },
-  smp_success_perc: {
+  {
     id: 'smp_success_perc',
     name: 'SMP success on parent (%)',
     description: 'SMP success on parent (%)',
@@ -152,7 +152,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab']
   },
-  ad: {
+  {
     id: 'ad',
     name: 'AD',
     description: 'Animal browse resistance (deer)',
@@ -160,7 +160,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  dfs: {
+  {
     id: 'dfs',
     name: 'DFS',
     description: 'Disease resistance for Dothistroma needle blight',
@@ -168,7 +168,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  dfu: {
+  {
     id: 'dfu',
     name: 'DFU',
     description: 'Disease resistance for Redcedar leaf blight',
@@ -176,7 +176,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  dfw: {
+  {
     id: 'dfw',
     name: 'DFW',
     description: 'Disease resistance Swiss needle cast',
@@ -184,7 +184,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  dsb: {
+  {
     id: 'dsb',
     name: 'DSB',
     description: 'Disease resistance for white pine blister rust',
@@ -192,7 +192,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  dsc: {
+  {
     id: 'dsc',
     name: 'DSC',
     description: 'Disease resistance for Commandra blister rust',
@@ -200,7 +200,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  dsg: {
+  {
     id: 'dsg',
     name: 'DSG',
     description: 'Disease resistance Western gall rust',
@@ -208,7 +208,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  gvo: {
+  {
     id: 'gvo',
     name: 'GVO',
     description: 'Volume growth',
@@ -216,7 +216,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  iws: {
+  {
     id: 'iws',
     name: 'IWS',
     description: 'Spruce terminal weevil',
@@ -224,7 +224,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  wdu: {
+  {
     id: 'wdu',
     name: 'WDU',
     description: 'Wood durability',
@@ -232,7 +232,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  wwd: {
+  {
     id: 'wwd',
     name: 'WWD',
     description: 'Wood quality',
@@ -240,7 +240,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
-  non_orchard_pollen_contam: {
+  {
     id: 'non_orchard_pollen_contam',
     name: 'Non-orchard pollen contam. (%)',
     description: 'Non-orchard pollen contam. (%)',
@@ -248,7 +248,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: [undefined, 'successTab']
   },
-  mean_deg_lat: {
+  {
     id: 'mean_deg_lat',
     name: 'Mean degrees latitude',
     description: 'Mean degrees latitude',
@@ -256,7 +256,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
-  mean_min_lat: {
+  {
     id: 'mean_min_lat',
     name: 'Mean minutes latitude',
     description: 'Mean minutes latitude',
@@ -264,7 +264,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
-  mean_deg_long: {
+  {
     id: 'mean_deg_long',
     name: 'Mean degrees longitude',
     description: 'Mean degrees longitude',
@@ -272,7 +272,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
-  mean_min_long: {
+  {
     id: 'mean_min_long',
     name: 'Mean minutes longitude',
     description: 'Mean minutes longitude',
@@ -280,7 +280,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
-  mean_elevation: {
+  {
     id: 'mean_elevation',
     name: 'Mean elevation',
     description: 'Mean elevation',
@@ -288,7 +288,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
-  volume: {
+  {
     id: 'volume',
     name: 'Volume (ml)',
     description: 'Volume (ml)',
@@ -296,7 +296,7 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: [undefined, undefined, 'mixTab']
   },
-  proportion: {
+  {
     id: 'proportion',
     name: 'Proportion',
     description: 'Proportion',
@@ -304,4 +304,4 @@ export const headerTemplate: HeaderConfigObj = {
     isAnOption: false,
     availableInTabs: [undefined, undefined, 'mixTab']
   }
-};
+];

@@ -5,7 +5,8 @@ export type TabTypes = {
 };
 
 export type RowItem = {
-  clone_number: number,
+  [key: string]: any,
+  clone_number: string,
   cone_count: number,
   pollen_count: number,
   smp_success_perc: number,
@@ -31,14 +32,14 @@ export type RowItem = {
 };
 
 /**
- * id: self-referencing the property's name
+ * id: referencing the property's name
  * name: displayed header name
  * description: used for tooltip
  * isAnoption: true if the option belongs to this species
  * enabled: whether to display in header row, can be toggled by user
  * availableInTabs: this header item can be seen in one or more of these tabs
  */
-type HeaderObj = {
+export type HeaderObj = {
   id: keyof RowItem,
   name: string,
   description: string,
@@ -47,6 +48,6 @@ type HeaderObj = {
   availableInTabs: ['coneTab'?, 'successTab'?, 'mixTab'?]
 };
 
-export type HeaderConfigObj = {
-  [Property in keyof RowItem]: HeaderObj
-};
+export type RowDataDictType = {
+  [key: string]: RowItem
+}

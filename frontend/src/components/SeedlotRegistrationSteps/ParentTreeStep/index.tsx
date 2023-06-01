@@ -30,9 +30,14 @@ import { getSeedPlanUnits, getParentTreeGeneQuali } from '../../../api-service/o
 import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
 import { OrchardObj } from '../OrchardStep/definitions';
-import { getPageText, notificationCtrlObj, headerTemplate } from './constants';
-import { TabTypes, HeaderConfigObj, RowItem } from './definitions';
+import {
+  getPageText, notificationCtrlObj, headerTemplate, rowTemplate
+} from './constants';
+import {
+  TabTypes, HeaderObj, RowItem, RowDataDictType
+} from './definitions';
 import { getTabString, processOrchards } from './utils';
+import { ParentTreeGeneticQualityType, GenWorthCodeEnum } from '../../../types/ParentTreeGeneticQualityType';
 
 import './styles.scss';
 
@@ -56,7 +61,7 @@ const ParentTreeStep = (
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
   const [notifCtrl, setNotifCtrl] = useState(structuredClone(notificationCtrlObj));
-  const [headerConfig, setHeaderConfig] = useState<HeaderConfigObj>(structuredClone(headerTemplate));
+  const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(structuredClone(headerTemplate));
   const [tableRowData, setTableRowData] = useState<Array<RowItem>>([]);
 
   const toggleNotification = (notifType: string) => {
@@ -104,6 +109,38 @@ const ParentTreeStep = (
     return false;
   };
 
+  const processParentTreeData = (data: ParentTreeGeneticQualityType) => {
+    let rowDataDict: RowDataDictType = {};
+    tableRowData.forEach((rowItem: RowItem) => {
+      rowDataDict = Object.assign(rowDataDict, {
+        [rowItem.clone_number]: rowItem
+      });
+    });
+
+    data.parentTrees.forEach((parentTree) => {
+      if (!Object.prototype.hasOwnProperty.call(rowDataDict, parentTree.parentTreeNumber)) {
+        const newRowData: RowItem = structuredClone(rowTemplate);
+        newRowData.clone_number = parentTree.parentTreeNumber;
+        // Assign genetic worth values
+        parentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
+          const genWorthName = singleGenWorthObj.geneticWorthCode.toLowerCase();
+          if (Object.prototype.hasOwnProperty.call(newRowData, genWorthName)) {
+            newRowData[genWorthName] = singleGenWorthObj.geneticQualityValue;
+          }
+        });
+        rowDataDict = Object.assign(rowDataDict, {
+          [parentTree.parentTreeNumber]: newRowData
+        });
+      }
+    });
+
+    const rowDataDictValues = Object.values(rowDataDict);
+
+    rowDataDictValues.sort((a: RowItem, b: RowItem) => Number(a.clone_number) - Number(b.clone_number));
+
+    setTableRowData(rowDataDictValues);
+  };
+
   // Parent tree genetic quality queries
   useQueries({
     queries:
@@ -111,6 +148,7 @@ const ParentTreeStep = (
         queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.orchardId, getSPUfromQuery(orchard.orchardId)],
         queryFn: () => getParentTreeGeneQuali(orchard.orchardId, getSPUfromQuery(orchard.orchardId)),
         enabled: enableParentTreeQuery(orchard.orchardId),
+        onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(data),
         refetchOnMount: false,
         refetchOnWindowFocus: false
       }))
@@ -186,7 +224,7 @@ const ParentTreeStep = (
                   }
                 </Column>
               </Row>
-              <Row>
+              <Row className="parent-tree-step-table-container">
                 <Column>
                   <TableContainer
                     title={pageText[currentTab].tabTitle}
@@ -230,8 +268,8 @@ const ParentTreeStep = (
                       <TableHead>
                         <TableRow>
                           {
-                            Object.values(headerConfig).map((header) => (
-                              header.availableInTabs.includes(currentTab) && header.enabled
+                            headerConfig.map((header) => (
+                              (header.availableInTabs.includes(currentTab) && header.enabled)
                                 ? (
                                   <TableHeader id={header.id} key={header.id}>
                                     {header.name}
@@ -243,11 +281,23 @@ const ParentTreeStep = (
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        <TableRow>
-                          <TableCell>
-                            sif
-                          </TableCell>
-                        </TableRow>
+                        {
+                          tableRowData.map((rowData) => (
+                            <TableRow key={rowData.clone_number}>
+                              {
+                                headerConfig.map((header) => (
+                                  (header.availableInTabs.includes(currentTab) && header.enabled)
+                                    ? (
+                                      <TableCell key={header.id}>
+                                        {rowData[header.id]}
+                                      </TableCell>
+                                    )
+                                    : null
+                                ))
+                              }
+                            </TableRow>
+                          ))
+                        }
                       </TableBody>
                     </Table>
                   </TableContainer>
