@@ -22,7 +22,9 @@ import {
   TableHeader,
   TableBody,
   TableCell,
-  DataTableSkeleton
+  DataTableSkeleton,
+  Popover,
+  PopoverContent
 } from '@carbon/react';
 import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
