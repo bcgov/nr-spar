@@ -1,4 +1,5 @@
 import { OrchardObj } from '../OrchardStep/definitions';
+import { RowItem } from './definitions';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -31,3 +32,7 @@ export const processOrchards = (orchards: Array<OrchardObj>): Array<OrchardObj> 
 
   return Object.values(obj);
 };
+
+export const sortRowItem = (rows: Array<RowItem>) => (
+  rows.sort((a: RowItem, b: RowItem) => Number(a.clone_number) - Number(b.clone_number))
+);

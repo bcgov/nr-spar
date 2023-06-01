@@ -21,7 +21,8 @@ import {
   TableRow,
   TableHeader,
   TableBody,
-  TableCell
+  TableCell,
+  DataTableSkeleton
 } from '@carbon/react';
 import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
@@ -36,7 +37,7 @@ import {
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
 } from './definitions';
-import { getTabString, processOrchards } from './utils';
+import { getTabString, processOrchards, sortRowItem } from './utils';
 import { ParentTreeGeneticQualityType, GenWorthCodeEnum } from '../../../types/ParentTreeGeneticQualityType';
 
 import './styles.scss';
@@ -62,7 +63,7 @@ const ParentTreeStep = (
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
   const [notifCtrl, setNotifCtrl] = useState(structuredClone(notificationCtrlObj));
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(structuredClone(headerTemplate));
-  const [tableRowData, setTableRowData] = useState<Array<RowItem>>([]);
+  const [tableRowData, setTableRowData] = useState<RowDataDictType>({});
 
   const toggleNotification = (notifType: string) => {
     const newNotifCtrl = { ...notifCtrl };
@@ -110,15 +111,10 @@ const ParentTreeStep = (
   };
 
   const processParentTreeData = (data: ParentTreeGeneticQualityType) => {
-    let rowDataDict: RowDataDictType = {};
-    tableRowData.forEach((rowItem: RowItem) => {
-      rowDataDict = Object.assign(rowDataDict, {
-        [rowItem.clone_number]: rowItem
-      });
-    });
+    let clonedTableRowData: RowDataDictType = structuredClone(tableRowData);
 
     data.parentTrees.forEach((parentTree) => {
-      if (!Object.prototype.hasOwnProperty.call(rowDataDict, parentTree.parentTreeNumber)) {
+      if (!Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)) {
         const newRowData: RowItem = structuredClone(rowTemplate);
         newRowData.clone_number = parentTree.parentTreeNumber;
         // Assign genetic worth values
@@ -128,17 +124,13 @@ const ParentTreeStep = (
             newRowData[genWorthName] = singleGenWorthObj.geneticQualityValue;
           }
         });
-        rowDataDict = Object.assign(rowDataDict, {
+        clonedTableRowData = Object.assign(clonedTableRowData, {
           [parentTree.parentTreeNumber]: newRowData
         });
       }
     });
 
-    const rowDataDictValues = Object.values(rowDataDict);
-
-    rowDataDictValues.sort((a: RowItem, b: RowItem) => Number(a.clone_number) - Number(b.clone_number));
-
-    setTableRowData(rowDataDictValues);
+    setTableRowData(clonedTableRowData);
   };
 
   // Parent tree genetic quality queries
@@ -282,10 +274,12 @@ const ParentTreeStep = (
                       </TableHead>
                       <TableBody>
                         {
-                          tableRowData.map((rowData) => (
+                          // Since we cannot sort an Object, we will have to sort the array here
+                          sortRowItem(Object.values(tableRowData)).map((rowData) => (
                             <TableRow key={rowData.clone_number}>
                               {
                                 headerConfig.map((header) => (
+                                  // This is to enforce that the cell data is actually related to the column
                                   (header.availableInTabs.includes(currentTab) && header.enabled)
                                     ? (
                                       <TableCell key={header.id}>
