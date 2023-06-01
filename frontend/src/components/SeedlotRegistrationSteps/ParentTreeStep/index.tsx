@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
@@ -24,7 +23,9 @@ import {
   TableCell,
   DataTableSkeleton,
   Popover,
-  PopoverContent
+  PopoverContent,
+  DefinitionTooltip,
+  TextInput
 } from '@carbon/react';
 import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
@@ -63,9 +64,7 @@ const ParentTreeStep = (
   const queryClient = useQueryClient();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
-  // const [notifCtrl, setNotifCtrl] = useState(structuredClone(notificationCtrlObj));
-  const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(structuredClone(headerTemplate));
-  // const [tableRowData, setTableRowData] = useState<RowDataDictType>({});
+  const [headerConfig] = useState<Array<HeaderObj>>(structuredClone(headerTemplate));
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -119,7 +118,7 @@ const ParentTreeStep = (
     data.parentTrees.forEach((parentTree) => {
       if (!Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)) {
         const newRowData: RowItem = structuredClone(rowTemplate);
-        newRowData.clone_number = parentTree.parentTreeNumber;
+        newRowData.cloneNumber = parentTree.parentTreeNumber;
         // Assign genetic worth values
         parentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
           const genWorthName = singleGenWorthObj.geneticWorthCode.toLowerCase();
@@ -142,13 +141,50 @@ const ParentTreeStep = (
     queries:
       orchardsData.map((orchard) => ({
         queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.orchardId, getSPUfromQuery(orchard.orchardId)],
-        queryFn: () => getParentTreeGeneQuali(orchard.orchardId, getSPUfromQuery(orchard.orchardId)),
+        queryFn: () => (
+          getParentTreeGeneQuali(orchard.orchardId, getSPUfromQuery(orchard.orchardId))
+        ),
         enabled: enableParentTreeQuery(orchard.orchardId),
         onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(data),
-        refetchOnMount: false,
+        refetchOnMount: true,
         refetchOnWindowFocus: false
       }))
   });
+
+  const setInputChange = (cloneNumber: string, colName: keyof RowItem, value: string) => {
+    const clonedState = { ...state };
+    clonedState.tableRowData[cloneNumber][colName] = value;
+    setStepData(clonedState);
+  };
+
+  const renderTabelCell = (rowData: RowItem, header: HeaderObj) => {
+    if (header.availableInTabs.includes(currentTab) && header.enabled) {
+      return (
+        <TableCell key={header.id}>
+          {
+            header.editable
+              ? (
+                <TextInput
+                  labelText=""
+                  hideLabel
+                  type="number"
+                  placeholder="Add value"
+                  defaultValue={rowData[header.id]}
+                  id={`${rowData.cloneNumber}-${rowData[header.id]}`}
+                  onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setInputChange(rowData.cloneNumber, header.id, event.target.value);
+                  }}
+                />
+              )
+              : (
+                rowData[header.id]
+              )
+          }
+        </TableCell>
+      );
+    }
+    return null;
+  };
 
   return (
     <FlexGrid className="parent-tree-step-container">
@@ -254,21 +290,21 @@ const ParentTreeStep = (
                           size="sm"
                           kind="primary"
                           renderIcon={Upload}
-                        // onClick={() => console.log(queryClient.getQueryData(['orchard', '405', 'seed-plan-units']))}
                         >
                           Upload from file
                         </Button>
                       </TableToolbarContent>
                     </TableToolbar>
                     {
-                      queryClient.isFetching()
+                      /**
+                       * Check if it's fetching parent tree data
+                       */
+                      orchardsData.length > 0 && Object.values(state.tableRowData).length === 0
                         ? (
                           <DataTableSkeleton
                             showToolbar={false}
+                            showHeader={false}
                             zebra
-                            headers={
-                              headerConfig.filter((header) => header.availableInTabs.includes(currentTab) && header.enabled)
-                            }
                           />
                         )
                         : (
@@ -280,7 +316,13 @@ const ParentTreeStep = (
                                     (header.availableInTabs.includes(currentTab) && header.enabled)
                                       ? (
                                         <TableHeader id={header.id} key={header.id}>
-                                          {header.name}
+                                          <DefinitionTooltip
+                                            align="top"
+                                            openOnHover
+                                            definition={header.description}
+                                          >
+                                            {header.name}
+                                          </DefinitionTooltip>
                                         </TableHeader>
                                       )
                                       : null
@@ -290,19 +332,13 @@ const ParentTreeStep = (
                             </TableHead>
                             <TableBody>
                               {
-                                // Since we cannot sort an Object, we will have to sort the array here
+                                // Since we cannot sort an Object
+                                // we will have to sort the array here
                                 sortRowItem(Object.values(state.tableRowData)).map((rowData) => (
-                                  <TableRow key={rowData.clone_number}>
+                                  <TableRow key={rowData.cloneNumber}>
                                     {
                                       headerConfig.map((header) => (
-                                        // This is to enforce that the cell data is actually related to the column
-                                        (header.availableInTabs.includes(currentTab) && header.enabled)
-                                          ? (
-                                            <TableCell key={header.id}>
-                                              {rowData[header.id]}
-                                            </TableCell>
-                                          )
-                                          : null
+                                        renderTabelCell(rowData, header)
                                       ))
                                     }
                                   </TableRow>

@@ -6,29 +6,29 @@ export type TabTypes = {
 
 export type RowItem = {
   [key: string]: any,
-  clone_number: string,
-  cone_count: number,
-  pollen_count: number,
-  smp_success_perc: number,
-  ad: number,
-  dfs: number,
-  dfu: number,
-  dfw: number,
-  dsb: number,
-  dsc: number,
-  gvo: number,
-  wdu: number,
-  wwd: number,
-  dsg: number,
-  iws: number,
-  non_orchard_pollen_contam: number,
-  mean_deg_lat: number,
-  mean_min_lat: number,
-  mean_deg_long: number,
-  mean_min_long: number,
-  mean_elevation: number,
-  volume: number,
-  proportion: number
+  cloneNumber: string,
+  cloneCount: number | null,
+  pollenCount: number | null,
+  smpSuccessPerc: number | null,
+  ad: number | null,
+  dfs: number | null,
+  dfu: number | null,
+  dfw: number | null,
+  dsb: number | null,
+  dsc: number | null,
+  gvo: number | null,
+  wdu: number | null,
+  wwd: number | null,
+  dsg: number | null,
+  iws: number | null,
+  nonOrchardPollenContam: number | null,
+  meanDegLat: number | null,
+  meanMinLat: number | null,
+  meanDegLong: number | null,
+  meanMinLong: number | null,
+  meanElevation: number | null,
+  volume: number | null,
+  proportion: number | null
 };
 
 /**
@@ -45,6 +45,7 @@ export type HeaderObj = {
   description: string,
   enabled: boolean,
   isAnOption: boolean,
+  editable: boolean,
   availableInTabs: ['coneTab'?, 'successTab'?, 'mixTab'?]
 };
 

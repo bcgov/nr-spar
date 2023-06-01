@@ -56,6 +56,37 @@
   }
 }
 
-.parent-tree-step-table-container{
+.parent-tree-step-table-container {
   margin-top: 2rem;
+
+  .#{vars.$bcgov-prefix}--data-table {
+    .#{vars.$bcgov-prefix}--text-input {
+      background: transparent;
+      border-bottom: none;
+      border-radius: 0;
+    }
+
+    .#{vars.$bcgov-prefix}--text-input:focus {
+      background: white;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--data-table-content{
+    overflow: visible;
+  }
+
+  .#{vars.$bcgov-prefix}--definition-term{
+    border-bottom: none;
+    @include type.type-style('heading-compact-01');
+  }
 }

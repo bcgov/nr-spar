@@ -94,61 +94,65 @@ export const geneticWorthDict = {
 };
 
 export const rowTemplate: RowItem = {
-  clone_number: '',
-  cone_count: 0,
-  pollen_count: 0,
-  smp_success_perc: 0,
-  ad: 0,
-  dfs: 0,
-  dfu: 0,
-  dfw: 0,
-  dsb: 0,
-  dsc: 0,
-  dsg: 0,
-  gvo: 0,
-  iws: 0,
-  wdu: 0,
-  wwd: 0,
-  non_orchard_pollen_contam: 0,
-  mean_deg_lat: 0,
-  mean_min_lat: 0,
-  mean_deg_long: 0,
-  mean_min_long: 0,
-  mean_elevation: 0,
-  volume: 0,
-  proportion: 0
+  cloneNumber: '',
+  cloneCount: null,
+  pollenCount: null,
+  smpSuccessPerc: null,
+  ad: null,
+  dfs: null,
+  dfu: null,
+  dfw: null,
+  dsb: null,
+  dsc: null,
+  dsg: null,
+  gvo: null,
+  iws: null,
+  wdu: null,
+  wwd: null,
+  nonOrchardPollenContam: null,
+  meanDegLat: null,
+  meanMinLat: null,
+  meanDegLong: null,
+  meanMinLong: null,
+  meanElevation: null,
+  volume: null,
+  proportion: null
 };
 
 export const headerTemplate: Array<HeaderObj> = [
   {
-    id: 'clone_number',
+    id: 'cloneNumber',
     name: 'Clone number',
     description: 'Clone number',
     enabled: true,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
   {
-    id: 'cone_count',
+    id: 'cloneCount',
     name: 'Cone count',
     description: 'Cone count',
     enabled: true,
+    editable: true,
     isAnOption: false,
     availableInTabs: ['coneTab']
   },
   {
-    id: 'pollen_count',
+    id: 'pollenCount',
     name: 'Pollen count',
     description: 'Pollen count',
     enabled: true,
+    editable: true,
     isAnOption: false,
     availableInTabs: ['coneTab']
   },
   {
-    id: 'smp_success_perc',
+    id: 'smpSuccessPerc',
     name: 'SMP success on parent (%)',
     description: 'SMP success on parent (%)',
     enabled: true,
+    editable: true,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab']
   },
@@ -157,6 +161,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'AD',
     description: 'Animal browse resistance (deer)',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -165,6 +170,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'DFS',
     description: 'Disease resistance for Dothistroma needle blight',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -173,6 +179,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'DFU',
     description: 'Disease resistance for Redcedar leaf blight',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -181,6 +188,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'DFW',
     description: 'Disease resistance Swiss needle cast',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -189,6 +197,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'DSB',
     description: 'Disease resistance for white pine blister rust',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -197,6 +206,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'DSC',
     description: 'Disease resistance for Commandra blister rust',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -205,6 +215,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'DSG',
     description: 'Disease resistance Western gall rust',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -213,6 +224,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'GVO',
     description: 'Volume growth',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -221,6 +233,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'IWS',
     description: 'Spruce terminal weevil',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -229,6 +242,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'WDU',
     description: 'Wood durability',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
@@ -237,54 +251,61 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'WWD',
     description: 'Wood quality',
     enabled: false,
+    editable: false,
     isAnOption: false,
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
   {
-    id: 'non_orchard_pollen_contam',
+    id: 'nonOrchardPollenContam',
     name: 'Non-orchard pollen contam. (%)',
     description: 'Non-orchard pollen contam. (%)',
     enabled: true,
+    editable: true,
     isAnOption: false,
     availableInTabs: [undefined, 'successTab']
   },
   {
-    id: 'mean_deg_lat',
+    id: 'meanDegLat',
     name: 'Mean degrees latitude',
     description: 'Mean degrees latitude',
     enabled: false,
+    editable: false,
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
   {
-    id: 'mean_min_lat',
+    id: 'meanMinLat',
     name: 'Mean minutes latitude',
     description: 'Mean minutes latitude',
     enabled: false,
+    editable: false,
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
   {
-    id: 'mean_deg_long',
+    id: 'meanDegLong',
     name: 'Mean degrees longitude',
     description: 'Mean degrees longitude',
     enabled: false,
+    editable: false,
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
   {
-    id: 'mean_min_long',
+    id: 'meanMinLong',
     name: 'Mean minutes longitude',
     description: 'Mean minutes longitude',
     enabled: false,
+    editable: false,
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
   {
-    id: 'mean_elevation',
+    id: 'meanElevation',
     name: 'Mean elevation',
     description: 'Mean elevation',
     enabled: false,
+    editable: false,
     isAnOption: true,
     availableInTabs: [undefined, 'successTab']
   },
@@ -293,6 +314,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'Volume (ml)',
     description: 'Volume (ml)',
     enabled: true,
+    editable: true,
     isAnOption: false,
     availableInTabs: [undefined, undefined, 'mixTab']
   },
@@ -301,6 +323,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'Proportion',
     description: 'Proportion',
     enabled: true,
+    editable: true,
     isAnOption: false,
     availableInTabs: [undefined, undefined, 'mixTab']
   }
