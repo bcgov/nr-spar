@@ -4,14 +4,10 @@
 
 .favourite-activities {
   background-color: var(--bcgov-layer-01);
-  padding: 2rem 0;
+  padding: 2rem;
 }
 
-.favourite-activities-title {
-  padding-left: 3.5rem;
-}
-
-.favourite-activities-title > h2 {
+.favourite-activities-title>h2 {
   @include type.type-style('heading-03');
   margin-bottom: 0.5rem;
 }
@@ -26,37 +22,11 @@
   background: transparent;
 }
 
-button.tooltip-button > svg {
+button.tooltip-button>svg {
   color: var(--#{vars.$bcgov-prefix}-text-secondary);
 }
 
 .favourite-activity-tooltip {
   top: 0.1875rem;
   padding-left: 0.3125rem;
-}
-
-@media only screen and (max-width: 1584px) {
-  .favourite-activities-title {
-    padding-left: 3rem;
-  }
-}
-
-@media only screen and (max-width: 1056px) {
-  .favourite-activities-cards {
-    padding-left: 3.5rem;
-  }
-}
-
-@media only screen and (max-width: 672px) {
-  .favourite-activities-title {
-    padding-left: 2rem;
-  }
-
-  .favourite-activities-cards {
-    padding-left: 2.5rem;
-  }
-
-  .cards-row {
-    flex-direction: column;
-  }
 }
