@@ -40,12 +40,13 @@ type NumStepperVal = {
 interface OrchardStepProps {
   seedlotSpecies: DropDownObj
   state: OrchardForm
-  setStepData: Function
+  setStepData: Function,
+  cleanParentTables: Function,
   readOnly?: boolean
 }
 
 const OrchardStep = ({
-  seedlotSpecies, state, setStepData, readOnly
+  seedlotSpecies, state, setStepData, cleanParentTables, readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
@@ -117,6 +118,7 @@ const OrchardStep = ({
   });
 
   const fetchOrchardInfo = (orchardId: string, inputId: number) => {
+    cleanParentTables();
     // Copy orchards from state
     const newOrchards = [...state.orchards];
     // Replace input value with id

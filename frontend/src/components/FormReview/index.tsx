@@ -270,6 +270,7 @@ const FormReview = () => {
                       state={allStepData.orchardStep}
                       setStepData={() => { }}
                       readOnly
+                      cleanParentTables={() => { }}
                     />
                     <Button
                       kind="tertiary"

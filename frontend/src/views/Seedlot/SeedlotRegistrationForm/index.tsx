@@ -120,6 +120,12 @@ const SeedlotRegistrationForm = () => {
     setFormStep(newStep);
   };
 
+  const cleanParentTables = () => {
+    const clonedState = { ...allStepData };
+    clonedState.parentTreeStep.tableRowData = {};
+    setAllStepData(clonedState);
+  };
+
   const renderStep = () => {
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
@@ -171,6 +177,7 @@ const SeedlotRegistrationForm = () => {
           <OrchardStep
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
+            cleanParentTables={() => cleanParentTables()}
             setStepData={(data: OrchardForm) => setStepData('orchardStep', data)}
           />
         );
