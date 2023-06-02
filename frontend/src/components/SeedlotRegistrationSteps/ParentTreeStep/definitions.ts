@@ -59,3 +59,7 @@ export type NotifCtrlType = {
     showError: boolean
   }
 }
+
+export type GeneticWorthDictType = {
+  [key: string]: Array<string>
+}

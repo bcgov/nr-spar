@@ -35,7 +35,7 @@ import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
-  getPageText, notificationCtrlObj, headerTemplate, rowTemplate
+  getPageText, headerTemplate, rowTemplate, geneticWorthDict
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
@@ -64,7 +64,9 @@ const ParentTreeStep = (
   const queryClient = useQueryClient();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
-  const [headerConfig] = useState<Array<HeaderObj>>(structuredClone(headerTemplate));
+  const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
+    structuredClone(headerTemplate)
+  );
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -174,6 +176,7 @@ const ParentTreeStep = (
                   onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
                     setInputChange(rowData.cloneNumber, header.id, event.target.value);
                   }}
+                  onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                 />
               )
               : (
@@ -184,6 +187,55 @@ const ParentTreeStep = (
       );
     }
     return null;
+  };
+
+  const configHeaderOpt = () => {
+    const speciesHasGenWorth = Object.keys(geneticWorthDict);
+    if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
+      const availOptions = geneticWorthDict[seedlotSpecies.code];
+      const clonedHeaders = structuredClone(headerConfig);
+      availOptions.forEach((opt: string) => {
+        const optionIndex = headerConfig.findIndex((header) => header.id === opt);
+        clonedHeaders[optionIndex].isAnOption = true;
+      });
+      setHeaderConfig(clonedHeaders);
+    }
+  };
+
+  useEffect(() => configHeaderOpt(), [seedlotSpecies]);
+
+  const toggleColumn = (colName: keyof RowItem, nodeName: string) => {
+    // Without this check the checkbox will be clicked twice
+    if (nodeName !== 'INPUT') {
+      const clonedHeaders = structuredClone(headerConfig);
+      const optionIndex = headerConfig.findIndex((header) => header.id === colName);
+      clonedHeaders[optionIndex].enabled = !headerConfig[optionIndex].enabled;
+      setHeaderConfig(clonedHeaders);
+    }
+  };
+
+  const renderColOptions = () => {
+    const toggleableCols = headerConfig
+      .filter((header) => header.isAnOption && header.availableInTabs.includes(currentTab));
+
+    return (
+      toggleableCols.map((header) => (
+        <OverflowMenuItem
+          key={header.id}
+          closeMenu={() => false}
+          onClick={(e: React.ChangeEvent<any>) => toggleColumn(header.id, e.target.nodeName)}
+          itemText={
+            (
+              <Checkbox
+                checked={header.enabled}
+                id={header.id}
+                labelText={header.name}
+              />
+            )
+          }
+        />
+      ))
+    );
   };
 
   return (
@@ -264,22 +316,38 @@ const ParentTreeStep = (
                   >
                     <TableToolbar aria-label="data table toolbar">
                       <TableToolbarContent>
+                        {/* <Popover
+                          align="bottom-right"
+                          open={isColMenuOpen}
+                          isTabTip
+                        >
+                          <Button
+                            kind="ghost"
+                            hasIconOnly
+                            renderIcon={View}
+                            type="button"
+                            onClick={() => setIsColMenuOpen(!isColMenuOpen)}
+                          />
+                          <PopoverContent>
+                            <fieldset>
+                              <legend>Show breeding value</legend>
+                              <Checkbox id="a" labelText="ikkk" />
+                              <Checkbox id="b" labelText="saasd" />
+                              <Checkbox id="c" labelText="hkok" />
+                            </fieldset>
+                          </PopoverContent>
+                        </Popover> */}
                         <OverflowMenu
                           renderIcon={View}
-                          menuOptionsClass="parent-tree-view-options"
-                          iconDescription="haha"
+                          iconDescription="ooo"
                           flipped
                         >
-                          <div>
-                            haha
-                          </div>
-                          <div>
-                            hahaha
-                          </div>
+                          {
+                            renderColOptions()
+                          }
                         </OverflowMenu>
                         <OverflowMenu
                           renderIcon={Settings}
-                          menuOptionsClass="parent-tree-table-options"
                           iconDescription="sss"
                         >
                           <OverflowMenuItem

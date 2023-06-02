@@ -1,7 +1,9 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { HeaderObj, RowItem, NotifCtrlType } from './definitions';
+import {
+  HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType
+} from './definitions';
 
 // Placeholder function to generate download URL for future
 const getDownloadUrl = (tabType: string) => `#TODO-${tabType.split(' ')[0]}`;
@@ -78,7 +80,7 @@ export const notificationCtrlObj: NotifCtrlType = {
   }
 };
 
-export const geneticWorthDict = {
+export const geneticWorthDict: GeneticWorthDictType = {
   CW: ['ad', 'dfu', 'gvo', 'wdu'],
   PLI: ['dfs', 'dsc', 'dsg', 'gvo'],
   FDC: ['dfw', 'gvo', 'wwd'],
