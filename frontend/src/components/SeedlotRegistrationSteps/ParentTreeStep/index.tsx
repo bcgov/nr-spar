@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
   Tabs,
@@ -22,8 +21,6 @@ import {
   TableBody,
   TableCell,
   DataTableSkeleton,
-  Popover,
-  PopoverContent,
   DefinitionTooltip,
   TextInput
 } from '@carbon/react';
@@ -41,7 +38,7 @@ import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
 } from './definitions';
 import { getTabString, processOrchards, sortRowItem } from './utils';
-import { ParentTreeGeneticQualityType, GenWorthCodeEnum } from '../../../types/ParentTreeGeneticQualityType';
+import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import './styles.scss';
 
@@ -274,7 +271,7 @@ const ParentTreeStep = (
                           title={pageText.notificationTitle}
                           inline
                           actionButtonLabel=""
-                          onClose={(_event: any) => {
+                          onClose={() => {
                             toggleNotification('info');
                             return false;
                           }}
@@ -294,7 +291,7 @@ const ParentTreeStep = (
                           lowContrast
                           title={pageText.errorNotifTitle}
                           actionButtonLabel=""
-                          onClose={(_event: any) => {
+                          onClose={() => {
                             toggleNotification('error');
                             return false;
                           }}
