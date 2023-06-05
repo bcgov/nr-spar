@@ -3,13 +3,17 @@
 @use '@carbon/type';
 
 .favourite-activities {
-  background-color: var(--bcgov-layer-01);
+  background-color: var(--#{vars.$bcgov-prefix}-layer-01);
   padding: 2rem;
 }
 
-.favourite-activities-title>h2 {
+.favourite-activities-title > h2 {
   @include type.type-style('heading-03');
   margin-bottom: 0.5rem;
+}
+
+.#{vars.$bcgov-prefix}--row > .favourite-activities-title {
+  padding-left: 0.5rem;
 }
 
 .favourite-activities-subtitle {
@@ -22,7 +26,7 @@
   background: transparent;
 }
 
-button.tooltip-button>svg {
+button.tooltip-button > svg {
   color: var(--#{vars.$bcgov-prefix}-text-secondary);
 }
 

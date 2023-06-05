@@ -64,7 +64,7 @@ const RecentActivities = () => {
     <>
       <Row className="recent-activity-title-row">
         <Column>
-          <h3>My recent activities</h3>
+          <h2>My recent activities</h2>
           <Subtitle text="Check your recent requests and files" className="recent-activity-subtitle" />
         </Column>
       </Row>
