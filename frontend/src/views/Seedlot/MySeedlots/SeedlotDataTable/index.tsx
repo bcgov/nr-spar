@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import {
   DataTable,
@@ -51,7 +52,10 @@ const SeedlotDataTable = ({ seedlots }: SeedlotDataTableProps) => {
     setFirstRowIndex(pageSize * (page - 1));
   };
 
+  const navigate = useNavigate();
+
   return (
+
     <>
       <DataTable
         rows={seedlots.slice(firstRowIndex, firstRowIndex + currentPageSize)}
@@ -80,7 +84,7 @@ const SeedlotDataTable = ({ seedlots }: SeedlotDataTableProps) => {
               </TableHead>
               <TableBody>
                 {rows.map((item: RowInterface) => (
-                  <TableRow key={item.cells[0].value}>
+                  <TableRow key={item.cells[0].value} onClick={() => navigate(`/seedlot/details/${item.cells[0].value}`)}>
                     <TableCell>{item.cells[0].value}</TableCell>
                     <TableCell>{`${item.cells[1].value} class`}</TableCell>
                     <TableCell>{item.cells[2].value.label}</TableCell>

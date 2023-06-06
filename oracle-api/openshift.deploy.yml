@@ -49,6 +49,12 @@ parameters:
   - name: KEYCLOAK_REALM_URL
     description: Keycloak realm address
     value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
+  - name: MIN_REPLICAS
+    description: The minimum amount of replicas for the horizontal pod autoscaler.
+    value: "3"
+  - name: MAX_REPLICAS
+    description: The maximum amount of replicas for the horizontal pod autoscaler.
+    value: "5"
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -133,7 +139,7 @@ objects:
                   memory: ${MEMORY_LIMIT}
               readinessProbe:
                 httpGet:
-                  path: /check
+                  path: /actuator/health
                   port: 8090
                   scheme: HTTP
                 initialDelaySeconds: 120
@@ -143,7 +149,7 @@ objects:
                 successThreshold: 1
                 failureThreshold: 3
                 httpGet:
-                  path: /check
+                  path: /actuator/health
                   port: 8090
                   scheme: HTTP
                 initialDelaySeconds: 120
@@ -180,3 +186,21 @@ objects:
       tls:
         termination: edge
         insecureEdgeTerminationPolicy: Redirect
+  - apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      scaleTargetRef:
+        apiVersion: apps.openshift.io/v1
+        kind: DeploymentConfig
+        name: ${NAME}-${ZONE}-${COMPONENT}
+      minReplicas: ${{MIN_REPLICAS}}
+      maxReplicas: ${{MAX_REPLICAS}}
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80

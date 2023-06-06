@@ -1,9 +1,10 @@
 @use '../../theme/variables.scss' as vars;
 
-.mainContainer {
+.main-container {
   overflow-x: hidden;
   padding-top: 5.625rem;
   padding-left: 16rem;
+  padding-bottom: 2.5rem;
 }
 
 .page-content div.#{vars.$bcgov-prefix}--grid {
@@ -11,14 +12,14 @@
 }
 
 @media only screen and (max-width: 1056px) {
-  .mainContainer {
+  .main-container {
     padding-top: 5rem;
     padding-left: 0;
   }
 }
 
 @media only screen and (max-width: 672px) {
-  .mainContainer {
+  .main-container {
     padding-top: 4.5rem;
   }
 }

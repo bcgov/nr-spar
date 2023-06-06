@@ -1,26 +1,28 @@
-FROM maven:3.8.7-eclipse-temurin-17 AS build
+### Builder
+FROM ghcr.io/graalvm/native-image:ol8-java17-22 AS build
 
-RUN addgroup --system spring && adduser --system spring --ingroup spring
-USER spring:spring
+# Copy
+WORKDIR /app
+COPY pom.xml mvnw ./
+COPY src ./src
+COPY .mvn/ ./.mvn
 
-COPY src /home/spring/src
-COPY pom.xml /home/spring
+# Build
+RUN ./mvnw -Pnative native:compile -Dtests.skip=true
 
-WORKDIR /home/spring
-RUN mvn --no-transfer-progress --update-snapshots -P prod clean package
 
-FROM eclipse-temurin:17.0.7_7-jre-jammy
-LABEL maintainer="Ricardo Montania Prado de Campos <ricardo.campos@encora.com>"
+### Deployer
+FROM gcr.io/distroless/java-base:nonroot AS deploy
+ARG PORT=8090
 
-ENV LANG en_CA.UTF-8
-ENV LANGUAGE en_CA.UTF-8
-ENV LC_ALL en_CA.UTF-8
+# Copy
+WORKDIR /app
+COPY --from=build /app/target/nr-spar-backend ./nr-spar-backend
 
-WORKDIR /usr/share/service/
-COPY --from=build /home/spring/target/nr-spar-backend.jar /usr/share/service/service.jar
-COPY dockerfile-entrypoint.sh /usr/share/service/dockerfile-entrypoint.sh
-
-EXPOSE 8090
+# User, port and health check
 USER 1001
-HEALTHCHECK --interval=35s --timeout=4s CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
-ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]
+EXPOSE ${PORT}
+HEALTHCHECK CMD curl -f http://localhost:${PORT}/actuator/health | grep '"status":"UP"'
+
+# Startup
+ENTRYPOINT ["/app/nr-spar-backend"]

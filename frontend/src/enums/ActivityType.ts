@@ -55,7 +55,7 @@ const getActivityProps = (act: string): ActivityProps => {
       return ACTIVITY_TYPE[actEnum];
     default:
       // eslint-disable-next-line no-console
-      console.warn(`Unexpected activity value, props for ${act} not found`);
+      // console.warn(`Unexpected activity value, props for ${act} not found`);
       return defaultProp;
   }
 };

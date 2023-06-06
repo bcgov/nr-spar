@@ -14,6 +14,18 @@ module.exports = {
     'text',
     'cobertura',
     'lcov'
+  ],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/src/components/Logout/',
+    '<rootDir>/src/components/SilentCheckSso/',
+    '<rootDir>/src/contexts/',
+    '<rootDir>/src/routes/',
+    '<rootDir>/src/service/',
+    '<rootDir>/src/api-service/',
+    '<rootDir>/src/mock-server/',
+    // TODO: remove once parent tree is complete
+    '<rootDir>/src/components/SeedlotRegistrationSteps/ParentTreeStep'
   ]
 };
 

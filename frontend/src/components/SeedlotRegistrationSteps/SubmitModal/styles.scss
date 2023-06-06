@@ -1,6 +1,11 @@
 @use '@carbon/type';
 @use '../../../theme/variables.scss' as vars;
 
+.submit-modal-btn {
+  width: 100%;
+  max-width: none;
+}
+
 .seedlot-registration-modal {
   .#{vars.$bcgov-prefix}--modal-content {
     p {
@@ -24,5 +29,9 @@
 
   .#{vars.$bcgov-prefix}--btn {
     padding-bottom: 1rem;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-footer .#{vars.$bcgov-prefix}--btn {
+    height: 0;
   }
 }
