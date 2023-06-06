@@ -52,6 +52,7 @@ const MySeedlots = () => {
           title="My Seedlots"
           subtitle="Check and manage my seedlots"
           enableFavourite
+          activity="MY-SEEDLOTS"
         />
         <Button
           kind="primary"
