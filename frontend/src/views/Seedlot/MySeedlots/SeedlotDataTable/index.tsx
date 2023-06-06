@@ -15,10 +15,10 @@ import {
   Search
 } from '@carbon/react';
 
-import headerData from './headerData';
 import StatusItem from '../../../../components/StatusItem';
 import Participants from '../../../../components/Participants';
 import Seedlot from '../../../../types/Seedlot';
+import tableText from '../constants';
 
 interface HeaderType {
   key: string,
@@ -59,7 +59,7 @@ const SeedlotDataTable = ({ seedlots }: SeedlotDataTableProps) => {
     <>
       <DataTable
         rows={seedlots.slice(firstRowIndex, firstRowIndex + currentPageSize)}
-        headers={headerData}
+        headers={tableText.headerData}
         isSortable
       >
         {({
