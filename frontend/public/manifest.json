@@ -1,6 +1,6 @@
 {
-  "short_name": "NR Sample App",
-  "name": "Sample application for natural resources in BCGov",
+  "short_name": "SPAR",
+  "name": "Seed Planning and Registry System for natural resources in BCGov",
   "icons": [
     {
       "src": "favicon.ico",
