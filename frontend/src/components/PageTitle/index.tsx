@@ -54,7 +54,7 @@ const PageTitle = ({
   const isFavourited = thisFavAct !== undefined;
 
   return (
-    <Column sm={4} md={8} lg={16} xlg={16} className="title-section">
+    <Column className="title-section">
       <div className="title-favourite">
         <h1>{title}</h1>
         {enableFavourite && activity && (
