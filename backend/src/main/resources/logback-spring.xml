@@ -20,7 +20,7 @@
   <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${LOGS}/postgres-api.log</file>
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <Pattern>{"labels.project":"${applicationName}","labels.target_project":"spar","service.environment":"${serviceEnv}","@time_stamp":"%date{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","thread":"%t","class":"%logger{36}","message":"%m"}%n</Pattern>
+      <Pattern>{"labels.project":"${applicationName}","service.environment":"${serviceEnv}","@timestamp":"%date{yyyy-MM-dd HH:mm:ss.SSS}","log.level":"%p","log.logger":"%logger{36}","message":"%m","ecs.version":"8","event.category":"web","event.dataset":"application.log"}%n</Pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <!-- rollover daily and when the file reaches 10 MegaBytes -->
