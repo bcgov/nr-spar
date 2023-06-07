@@ -1,0 +1,9 @@
+# Base and envars
+FROM maven:3.9.2-eclipse-temurin-17
+ENV LANG=en_CA.UTF-8 LANGUAGE=en_CA.UTF-8 LC_ALL=en_CA.UTF-8
+
+# Workdir, port, healthcheck and entrypoint
+WORKDIR /app
+EXPOSE 8090
+HEALTHCHECK CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+ENTRYPOINT ["mvn", "spring-boot:run"]
