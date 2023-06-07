@@ -8,4 +8,4 @@ ENV LC_ALL en_CA.UTF-8
 WORKDIR /app
 EXPOSE 8090
 # HEALTHCHECK CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
-ENTRYPOINT ["./mvnw", "spring-boot:run"]
+ENTRYPOINT ["mvn", "spring-boot:run"]
