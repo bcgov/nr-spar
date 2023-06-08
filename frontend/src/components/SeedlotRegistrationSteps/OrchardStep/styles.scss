@@ -2,8 +2,6 @@
 @use '../../../theme/variables.scss' as vars;
 
 .seedlot-orchard-step-form {
-  margin-top: 1rem;
-
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly .#{vars.$bcgov-prefix}--text-input{
     border: none;
     cursor: default;
