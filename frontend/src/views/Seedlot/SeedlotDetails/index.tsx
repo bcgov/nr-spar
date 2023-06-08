@@ -83,7 +83,7 @@ const SeedlotDetails = () => {
       </Row>
       <Stack gap={6}>
         <Row className="seedlot-summary-title">
-          <Column sm={4} md={6} lg={14} xlg={14}>
+          <Column sm={4} md={6} lg={14} xlg={12}>
             {
               seedlotData
               && (
@@ -95,7 +95,7 @@ const SeedlotDetails = () => {
               )
             }
           </Column>
-          <Column sm={4} md={2} lg={2} xlg={2}>
+          <Column sm={4} md={2} lg={2} xlg={4}>
             <ComboButton title="Edit seedlot form" items={manageOptions} menuOptionsClass="edit-seedlot-form" />
           </Column>
         </Row>
