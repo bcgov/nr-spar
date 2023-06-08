@@ -12,8 +12,7 @@
     padding-right: 0;
   }
 
-  .interim-agency-title,
-  .storage-information-title,
+  .interim-title-row,
   .agency-information.#{vars.$bcgov-prefix}--row {
     margin-bottom: 2.5rem;
   }
@@ -27,12 +26,7 @@
     padding-left: 1.75rem;
   }
 
-  .storage-date-row .#{vars.$bcgov-prefix}--row {
-    margin-left: 0;
-  }
-
-  .storage-date-row .#{vars.$bcgov-prefix}--row,
-  .storage-location-row .#{vars.$bcgov-prefix}--row {
+  .interim-storage-row {
     margin-bottom: 2rem;
   }
 

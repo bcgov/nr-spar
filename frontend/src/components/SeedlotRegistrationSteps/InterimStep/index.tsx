@@ -142,8 +142,8 @@ const InterimStorage = (
 
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
-      <Row className="interim-agency-title">
-        <Column lg={8}>
+      <Row className="interim-title-row">
+        <Column sm={4} md={8} lg={16}>
           <h2>Interim agency</h2>
           <Subtitle text="Enter the interim agency information" />
         </Column>
@@ -161,7 +161,7 @@ const InterimStorage = (
         </Column>
       </Row>
       <Row className="agency-information">
-        <Column sm={4} md={2} lg={4}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
             id="agency-name-combobox"
             ref={nameInputRef}
@@ -179,7 +179,7 @@ const InterimStorage = (
             readOnly={readOnly ?? isChecked}
           />
         </Column>
-        <Column sm={4} md={2} lg={4}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           <TextInput
             id="agency-number-input"
             name="locationCode"
@@ -197,14 +197,14 @@ const InterimStorage = (
           />
         </Column>
       </Row>
-      <Row className="storage-information-title">
-        <Column lg={8}>
+      <Row className="interim-title-row">
+        <Column sm={4} md={8} lg={16}>
           <h2>Storage information</h2>
           <Subtitle text="Enter the interim storage information for this seedlot" />
         </Column>
       </Row>
-      <Row className="storage-date-row">
-        <Column className="start-date-col" sm={4} md={2} lg={4}>
+      <Row className="interim-storage-row">
+        <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
             datePickerType="single"
             name="startDate"
@@ -226,7 +226,7 @@ const InterimStorage = (
             />
           </DatePicker>
         </Column>
-        <Column className="end-date-col" sm={4} md={2} lg={4}>
+        <Column className="end-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
             datePickerType="single"
             name="endDate"
@@ -249,8 +249,8 @@ const InterimStorage = (
           </DatePicker>
         </Column>
       </Row>
-      <Row className="storage-location-row">
-        <Column sm={4} md={4} lg={8}>
+      <Row className="interim-storage-row">
+        <Column sm={4} md={4} lg={16} xlg={12}>
           <TextInput
             id="storage-location-input"
             name="location"
@@ -303,7 +303,7 @@ const InterimStorage = (
         </Column>
         {
           otherRadioChecked && (
-            <Column className="storage-facility-type" sm={4} md={4} lg={8}>
+            <Column className="storage-facility-type" sm={4} md={4} lg={16} xlg={12}>
               <TextInput
                 id="storage-facility-type-input"
                 name="storage-facility"
