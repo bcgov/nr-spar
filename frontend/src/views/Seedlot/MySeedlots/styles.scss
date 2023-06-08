@@ -1,23 +1,25 @@
+.my-seedlot-content {
+  .my-seedlot-breadcrumb{
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+  }
 
-.my-seedlot-breadcrumb{
-  padding-left: 3.5rem;
-  margin-bottom: 0.5rem;
+  .title-section {
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .my-seedlot-title{
+    justify-content: space-between;
+    margin-bottom: 3.25rem;
+  }
+
+  .btn-my-seedlot{
+    text-align: right;
+  }
+
+  .my-seedlot-data-table-row{
+    width: 100%;
+    margin-left: -2rem;
+  }
 }
-
-.my-seedlot-title{
-  justify-content: space-between;
-  margin-bottom: 3.25rem;
-}
-
-.btn-my-seedlot{
-  margin-right: 3.5rem;
-  height: 48px;
-  width: 233px;
-}
-
-.my-seedlot-data-table-row{
-  width: 100%;
-  display: block;
-  margin: 0;
-}
-
