@@ -123,7 +123,7 @@ jobs:
           - name: fluentbit
             file: backend/fluent-bit.cm.yml
             overwrite: true
-            parameters: -p NAMESPACE=${{ secrets.OC_NAMESPACE }}
+            parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
               #-p AWS_DEFAULT_REGION=? -p AWS_KINESIS_STREAM=? -p AWS_ROLE_ARN=?
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
