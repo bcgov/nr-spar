@@ -19,7 +19,7 @@ const RecentSeedlots = () => {
     const url = ApiConfig.seedlot;
     api.get(url)
       .then((response) => {
-        setSeedlotsData(response.data.seedlotData);
+        setSeedlotsData(response.data.seedlotData.reverse());
       })
       .catch((error) => {
         // eslint-disable-next-line
