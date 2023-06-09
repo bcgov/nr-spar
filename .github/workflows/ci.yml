@@ -33,7 +33,7 @@ jobs:
       - name: Run Docker commands
         run: |
           docker build -t ${{ matrix.dir }} --file ./${{ matrix.dir }}/Dockerfile.tests ./${{ matrix.dir }}
-          docker run -it --rm --name ${{ matrix.dir }} ${{ matrix.dir }}
+          docker run --rm --name ${{ matrix.dir }} ${{ matrix.dir }}
 
   tests-java:
     name: Java CI
