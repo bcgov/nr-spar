@@ -38,6 +38,9 @@ services:
       - "8090:8090"
     build:
       context: ./backend
+      dockerfile: Dockerfile.local
+    volumes:
+      - ./backend:/app:z
 
   oracle-api:
     container_name: oracle-api

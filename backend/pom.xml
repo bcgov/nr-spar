@@ -96,6 +96,12 @@
       <version>1.18.28</version>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
 
     <!-- Authentication and Security -->
     <dependency>
@@ -428,7 +434,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.11.0</version>
+            <version>10.12.0</version>
           </dependency>
         </dependencies>
         <configuration>
