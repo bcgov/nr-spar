@@ -28,8 +28,10 @@ jobs:
           - dir: backend
             token: SONAR_BACKEND
     steps:
-      - uses: actions/checkout@v3
-        run:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Run Docker commands
+        run: |
           docker build -t ${{ matrix.dir }} --file ./${{ matrix.dir }}/Dockerfile.tests ./${{ matrix.dir }}
           docker run -it --rm --name ${{ matrix.dir }} ${{ matrix.dir }}
 
