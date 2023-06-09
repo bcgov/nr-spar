@@ -18,7 +18,7 @@ import {
 import StatusItem from '../../../../components/StatusItem';
 import Participants from '../../../../components/Participants';
 import Seedlot from '../../../../types/Seedlot';
-import tableText from '../constants';
+import { headerData } from '../constants';
 
 interface HeaderType {
   key: string,
@@ -59,7 +59,7 @@ const SeedlotDataTable = ({ seedlots }: SeedlotDataTableProps) => {
     <>
       <DataTable
         rows={seedlots.slice(firstRowIndex, firstRowIndex + currentPageSize)}
-        headers={tableText.headerData}
+        headers={headerData}
         isSortable
       >
         {({

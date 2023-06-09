@@ -18,7 +18,7 @@ import ApiConfig from '../../../api-service/ApiConfig';
 import Seedlot from '../../../types/Seedlot';
 
 import './styles.scss';
-import tableText from './constants';
+import { tableText } from './constants';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
