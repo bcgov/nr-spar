@@ -1,0 +1,13 @@
+# Base and envars
+FROM maven:3.9.2-eclipse-temurin-17 as build
+ENV LANG=en_CA.UTF-8 LANGUAGE=en_CA.UTF-8 LC_ALL=en_CA.UTF-8
+
+# Workdir
+WORKDIR /app
+
+# Tests
+COPY pom.xml mvnw ./
+COPY src ./src
+COPY .mvn/ ./.mvn
+RUN mkdir /logs && chown 777 /logs
+CMD ["mvn","--no-transfer-progress","clean","compile","verify","package","checkstyle:checkstyle","-P","all-tests"]
