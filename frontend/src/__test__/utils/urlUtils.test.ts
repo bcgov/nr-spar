@@ -4,7 +4,7 @@ import getUrlQueryParam from '../../utils/UrlUtils';
 describe('Url Utils test', () => {
   it('should have page param', () => {
     const url = 'http://spar-webapp.com/?page=/home';
-    global.window = Object.create(window);
+    global.window ??= Object.create(window);
     Object.defineProperty(window, 'location', {
       value: { search: url }
     });
@@ -16,7 +16,7 @@ describe('Url Utils test', () => {
 
   it('should have no param', () => {
     const url = 'http://spar-webapp.com/?page=/home';
-    global.window = Object.create(window);
+    global.window ??= Object.create(window);
     Object.defineProperty(window, 'location', {
       value: { search: url }
     });
@@ -28,7 +28,7 @@ describe('Url Utils test', () => {
 
   it('location without query search', () => {
     const url = 'http://spar-webapp.com';
-    global.window = Object.create(window);
+    global.window ??= Object.create(window);
     Object.defineProperty(window, 'location', {
       value: { search: url }
     });
