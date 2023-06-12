@@ -5,7 +5,7 @@ module.exports = {
     '^.+\\.(ts|tsx)?$': 'ts-jest',
     '^.+\\.(js|jsx)$': 'babel-jest'
   },
-  testEnvironment: 'jsdom',
+  testEnvironment: '<rootDir>/src/__test__/JSdomPatch.ts',
   moduleNameMapper: {
     '^.+\\.(css|less|scss)$': 'babel-jest',
     '^.+\\.(jpg|ico|jpeg|png|gif|webp|svg)$': '<rootDir>/src/__test__/__mocks__/fileMock.ts'

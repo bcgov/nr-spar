@@ -798,7 +798,9 @@ exports[`the Header component should match the snapshot 1`] = `
     <ul
       className="cds--side-nav__items"
     >
-      <div>
+      <div
+        className="main activities-section"
+      >
         <div
           className="panel-section"
         >
@@ -877,7 +879,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -909,7 +911,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -941,7 +943,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -976,7 +978,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -1011,7 +1013,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -1043,7 +1045,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -1078,7 +1080,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -1113,7 +1115,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -1145,7 +1147,9 @@ exports[`the Header component should match the snapshot 1`] = `
           </a>
         </li>
       </div>
-      <div>
+      <div
+        className="management-section"
+      >
         <div
           className="panel-section"
         >
@@ -1157,7 +1161,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -1189,7 +1193,7 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
           >
             <div
@@ -1235,7 +1239,8 @@ exports[`the Header component should match the snapshot 1`] = `
           className="cds--side-nav__item"
         >
           <a
-            className="cds--side-nav__link"
+            className="cds--side-nav__link disabled-menu-option"
+            onClick={[Function]}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -1270,13 +1275,13 @@ exports[`the Header component should match the snapshot 1`] = `
             </span>
           </a>
         </li>
-        <div
-          className="panel-section"
-        >
-          <span>
-            Version: undefined
-          </span>
-        </div>
+      </div>
+      <div
+        className="panel-section"
+      >
+        <span>
+          Version: undefined
+        </span>
       </div>
     </ul>
   </nav>
