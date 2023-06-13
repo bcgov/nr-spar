@@ -229,16 +229,14 @@ objects:
 parameters:
   - name: NAME
     description: Module name
-    value: nr-spar-backend
+    value: nr-spar-fluentbit-backend
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
+    required: true
   - name: REPO_NAME
     description: Application repository name
     displayName: Repository Name
     value: nr-spar-backend
-  # JOB_NAME was replaced by ZONE
-  #- name: JOB_NAME
-  #  description: Job identifier (i.e. 'pr-5' OR 'master')
-  #  displayName: Job Branch Name
-  #  required: true
   - name: NAMESPACE
     description: Target namespace reference (i.e. '9f0fbe-dev')
     displayName: Target Namespace
