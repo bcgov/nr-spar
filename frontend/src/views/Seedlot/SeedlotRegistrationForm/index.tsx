@@ -253,7 +253,7 @@ const SeedlotRegistrationForm = () => {
         </Row>
         <Row className="seedlot-registration-button-row">
           <Grid narrow>
-            <Column sm={4} md={3} lg={3} xlg={3}>
+            <Column sm={4} md={3} lg={3} xlg={4}>
               {
                 formStep !== 0
                   ? (
@@ -279,7 +279,7 @@ const SeedlotRegistrationForm = () => {
 
               }
             </Column>
-            <Column sm={4} md={3} lg={3} xlg={3}>
+            <Column sm={4} md={3} lg={3} xlg={4}>
               {
                 formStep !== 5
                   ? (

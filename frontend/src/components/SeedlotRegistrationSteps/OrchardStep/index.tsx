@@ -209,7 +209,7 @@ const OrchardStep = ({
     <div className="seedlot-orchard-step-form">
       <form>
         <Row className="seedlot-orchard-title-row">
-          <Column lg={8}>
+          <Column sm={4} md={8} lg={16}>
             <h2>Orchard information</h2>
             <Subtitle text="Enter the contributing orchard information" />
           </Column>
@@ -217,7 +217,7 @@ const OrchardStep = ({
         {
           state.orchards.map((orchard) => (
             <Row className="seedlot-orchard-field" key={orchard.inputId}>
-              <Column sm={4} md={2} lg={3}>
+              <Column sm={4} md={4} lg={8} xlg={6}>
                 <NumberInput
                   id={`orchardId-${orchard.inputId}`}
                   name="orchardId"
@@ -240,7 +240,7 @@ const OrchardStep = ({
                   readOnly={readOnly}
                 />
               </Column>
-              <Column sm={4} md={2} lg={3}>
+              <Column sm={4} md={4} lg={8} xlg={6}>
                 <TextInput
                   id={`orchardName-${orchard.inputId}`}
                   type="text"
@@ -288,13 +288,13 @@ const OrchardStep = ({
             )
         }
         <Row className="seedlot-orchard-title-row">
-          <Column lg={8}>
+          <Column sm={4} md={8} lg={16}>
             <h2>Gamete information</h2>
             <Subtitle text="Enter the seedlot gamete information" />
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">
-          <Column sm={4} md={4} lg={6}>
+          <Column sm={4} md={8} lg={16} xlg={12}>
             <Dropdown
               id="seedlot-species-dropdown"
               titleText="Seedlot species"
@@ -306,7 +306,7 @@ const OrchardStep = ({
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">
-          <Column sm={4} md={4} lg={6}>
+          <Column sm={4} md={8} lg={16} xlg={12}>
             <ComboBox
               id="female-gametic-combobox"
               name="femaleGametic"
@@ -427,7 +427,7 @@ const OrchardStep = ({
           </Column>
         </Row>
         <Row className="seedlot-orchard-title-row">
-          <Column lg={8}>
+          <Column sm={4} md={8} lg={16}>
             <h2>Pollen information</h2>
             <Subtitle text="Enter the pollen contaminant information" />
           </Column>
@@ -449,7 +449,7 @@ const OrchardStep = ({
         </Row>
         <div className={!state.noPollenContamination ? '' : 'seedlot-orchard-hidden'}>
           <Row className="seedlot-orchard-field">
-            <Column sm={4} md={4} lg={6}>
+            <Column sm={4} md={8} lg={16} xlg={12}>
               <NumberInput
                 id="pollen-percentage-number-input"
                 name="breedingPercentage"

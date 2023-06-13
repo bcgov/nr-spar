@@ -6,55 +6,22 @@ p.recent-activity-subtitle {
   padding-bottom: 1rem;
 }
 
-.recent-activity {
-  background-color: var(--bcgov-background) !important;
+.recent-activity-title-row {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+
+  h2 {
+    @include type.type-style('heading-03');
+    margin-bottom: 0.5rem;
+  }
 }
 
-.activity-table {
-  padding: 0 !important;
-}
-
-.recent-activity-title {
-  padding-left: 3.5rem;
-}
-
-.recent-activity-title > h2 {
-  @include type.type-style('heading-03');
-  margin-bottom: 0.5rem;
-}
-.recent-activity {
+.recent-activity-table {
   .#{vars.$bcgov-prefix}--tabs {
     padding-left: 1.5rem;
   }
 }
+
 .empty-recent-activities {
   margin: 3.44rem 0;
-}
-
-@media only screen and (max-width: 1584px) {
-  .recent-activity-title {
-    padding-left: 3rem;
-  }
-
-  .recent-activity {
-    .#{vars.$bcgov-prefix}--tabs {
-      padding-left: 1rem;
-    }
-  }
-}
-
-@media only screen and (max-width: 672px) {
-  .recent-activity-title {
-    padding-left: 2rem;
-  }
-
-  .recent-activity {
-    .#{vars.$bcgov-prefix}--tabs {
-      padding-left: 0;
-    }
-  }
-
-  .recent-activity {
-    overflow-x: scroll;
-  }
 }
