@@ -3,17 +3,17 @@
 @use '@carbon/type';
 
 .favourite-activities {
-  background-color: var(--bcgov-layer-01);
-  padding: 2rem 0;
-}
-
-.favourite-activities-title {
-  padding-left: 3.5rem;
+  background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+  padding: 2rem;
 }
 
 .favourite-activities-title > h2 {
   @include type.type-style('heading-03');
   margin-bottom: 0.5rem;
+}
+
+.#{vars.$bcgov-prefix}--row > .favourite-activities-title {
+  padding-left: 0.5rem;
 }
 
 .favourite-activities-subtitle {
@@ -33,30 +33,4 @@ button.tooltip-button > svg {
 .favourite-activity-tooltip {
   top: 0.1875rem;
   padding-left: 0.3125rem;
-}
-
-@media only screen and (max-width: 1584px) {
-  .favourite-activities-title {
-    padding-left: 3rem;
-  }
-}
-
-@media only screen and (max-width: 1056px) {
-  .favourite-activities-cards {
-    padding-left: 3.5rem;
-  }
-}
-
-@media only screen and (max-width: 672px) {
-  .favourite-activities-title {
-    padding-left: 2rem;
-  }
-
-  .favourite-activities-cards {
-    padding-left: 2.5rem;
-  }
-
-  .cards-row {
-    flex-direction: column;
-  }
 }

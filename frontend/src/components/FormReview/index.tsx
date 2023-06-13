@@ -148,7 +148,10 @@ const FormReview = () => {
     orchardStep: orchardMock,
     collectionStep: collectionMock,
     extractionStorageStep: extractionMock,
-    parentTreeStep: {}
+    parentTreeStep: {
+      tableRowData: {},
+      notifCtrl: {}
+    }
   });
 
   return (
@@ -267,6 +270,7 @@ const FormReview = () => {
                       state={allStepData.orchardStep}
                       setStepData={() => { }}
                       readOnly
+                      cleanParentTables={() => { }}
                     />
                     <Button
                       kind="tertiary"
