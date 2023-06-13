@@ -8,7 +8,6 @@ metadata:
     iconClass: icon-java
 labels:
   app: ${NAME}-${ZONE}
-  app.kubernetes.io/part-of: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Module name
