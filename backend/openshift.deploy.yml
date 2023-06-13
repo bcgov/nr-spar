@@ -35,7 +35,7 @@ parameters:
   - name: CPU_LIMIT
     value: 75m
   - name: MEMORY_REQUEST
-    value: 50Mi
+    value: 100Mi
   - name: MEMORY_LIMIT
     value: 250Mi
   - name: MIN_REPLICAS
