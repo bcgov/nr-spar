@@ -1,15 +1,17 @@
+@use '@carbon/type';
 @use '../../theme/variables.scss' as vars;
 
 .description-box-container{
+  width: 100%;
 
   .description-box-header{
+    @include type.type-style('heading-03');
     color: var(--#{vars.$bcgov-prefix}-text-primary);
-    font-size: 1.25rem;
   }
 
   .description-box-description{
+    @include type.type-style('body-01');
     color: var(--#{vars.$bcgov-prefix}-text-secondary);
-    font-size: 0.875rem;
     margin-top: 0.5rem;
 
     a{
