@@ -35,7 +35,7 @@ parameters:
   - name: CPU_LIMIT
     value: 75m
   - name: MEMORY_REQUEST
-    value: 50Mi
+    value: 100Mi
   - name: MEMORY_LIMIT
     value: 250Mi
   - name: MIN_REPLICAS
@@ -151,7 +151,7 @@ objects:
                   path: /actuator/health
                   port: 8090
                   scheme: HTTP
-                initialDelaySeconds: 150
+                initialDelaySeconds: 20
                 periodSeconds: 15
                 timeoutSeconds: 10
               livenessProbe:
@@ -161,7 +161,7 @@ objects:
                   path: /actuator/health
                   port: 8090
                   scheme: HTTP
-                initialDelaySeconds: 150
+                initialDelaySeconds: 20
                 periodSeconds: 30
                 timeoutSeconds: 10
   - apiVersion: v1
