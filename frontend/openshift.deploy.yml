@@ -18,13 +18,13 @@ parameters:
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
-    value: 5m
+    value: 15m
   - name: CPU_LIMIT
-    value: 10m
+    value: 30m
   - name: MEMORY_REQUEST
     value: 30Mi
   - name: MEMORY_LIMIT
-    value: 40Mi
+    value: 50Mi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"

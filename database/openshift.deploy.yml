@@ -23,9 +23,9 @@ parameters:
   - name: CPU_LIMIT
     value: 115m
   - name: MEMORY_REQUEST
-    value: 25Mi
-  - name: MEMORY_LIMIT
     value: 50Mi
+  - name: MEMORY_LIMIT
+    value: 100Mi
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
@@ -123,8 +123,9 @@ objects:
                     - bash
                     - "-c"
                     - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                successThreshold: 1
                 failureThreshold: 5
-                initialDelaySeconds: 30
+                initialDelaySeconds: 10
                 periodSeconds: 15
                 timeoutSeconds: 1
               livenessProbe:
@@ -134,8 +135,9 @@ objects:
                     - bash
                     - "-c"
                     - psql -q $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                successThreshold: 1
                 failureThreshold: 5
-                initialDelaySeconds: 30
+                initialDelaySeconds: 10
                 periodSeconds: 15
                 timeoutSeconds: 1
               env:
