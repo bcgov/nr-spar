@@ -33,7 +33,7 @@ jobs:
       - name: Run Docker commands
         run: |
           docker build -t ${{ matrix.dir }} --file ./${{ matrix.dir }}/Dockerfile.tests ./${{ matrix.dir }}
-          docker run --rm --name ${{ matrix.dir }} -e SONAR_TOKEN=${{ secrets.SONAR_BACKEND }} ${{ matrix.dir }}
+          docker run --rm --name ${{ matrix.dir }} -e SONAR_TOKEN=${{ secrets[matrix.token] }} ${{ matrix.dir }}
 
   tests-java:
     name: Java CI

@@ -257,3 +257,6 @@ parameters:
     description: AWS OpenSearch/Kinesis Resource Name
     displayName: AWS Role ARN
     required: false
+  - name: PROMOTE
+    description: Image (namespace/name:tag) to promote/import
+    value: bcgov/nr-spar-backend:prod-backend
