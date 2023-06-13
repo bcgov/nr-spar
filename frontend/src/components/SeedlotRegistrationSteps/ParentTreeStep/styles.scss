@@ -1,5 +1,93 @@
+@use '@carbon/type';
 @use '../../../theme/variables.scss' as vars;
 
-.parent-tree-tab-container {
+.parent-tree-step-container {
+  padding-left: 0rem;
+  padding-right: 0rem;
 
+  .parent-tree-step-tab-list {
+    margin-left: -1rem;
+    border-bottom: 2px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+    width: calc(100% + 1rem);
+
+    .bcgov--tab--list {
+      // Without this the tab list will be pushed up by 2px due to the border bottom above
+      margin-bottom: -2px;
+    }
+  }
+}
+
+.parent-tree-tab-container {
+  padding: 2.5rem 0;
+
+  .description-box-container {
+    padding-left: 0;
+  }
+
+  .notification-row {
+    margin-top: 2.5rem;
+
+    .#{vars.$bcgov-prefix}--actionable-notification__content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__title {
+      @include type.type-style('heading-compact-01');
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification {
+      width: 100%;
+      max-width: none;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__action-button {
+      display: none;
+    }
+
+    .notification-subtitle {
+      @include type.type-style('body-compact-01');
+    }
+
+    .notification-link {
+      color: var(--#{vars.$bcgov-prefix}-link-primary);
+      text-decoration: underline;
+    }
+  }
+}
+
+.parent-tree-step-table-container {
+  margin-top: 2rem;
+
+  .#{vars.$bcgov-prefix}--data-table {
+    .#{vars.$bcgov-prefix}--text-input {
+      background: transparent;
+      border-bottom: none;
+      border-radius: 0;
+      padding: 0;
+    }
+
+    .#{vars.$bcgov-prefix}--text-input:focus {
+      background: white;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--data-table-content{
+    overflow: visible;
+  }
+
+  .#{vars.$bcgov-prefix}--definition-term{
+    border-bottom: none;
+    @include type.type-style('heading-compact-01');
+  }
 }

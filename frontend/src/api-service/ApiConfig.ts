@@ -33,6 +33,8 @@ const ApiConfig = {
 
   paymentMethod: `${serverHost}/api/payment-methods`,
 
+  orchardSeedPlan: `${serverHost}/api/orchards`,
+
   /**
    * ORACLE API
    */
@@ -40,7 +42,9 @@ const ApiConfig = {
 
   fundingSource: `${oracleServerHost}/api/funding-sources`,
 
-  orchard: `${oracleServerHost}/api/orchards`
+  orchard: `${oracleServerHost}/api/orchards`,
+
+  parentTreeGeneticQuality: `${oracleServerHost}/api/orchards/parent-tree-genetic-quality`
 };
 
 export default ApiConfig;

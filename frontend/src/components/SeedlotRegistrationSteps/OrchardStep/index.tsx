@@ -22,7 +22,7 @@ import Subtitle from '../../Subtitle';
 import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS } from './constants';
 
-import getOrchardByID from '../../../api-service/orchardAPI';
+import { getOrchardByID } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 
 import FemaleGameticOptions from './data';
@@ -40,12 +40,13 @@ type NumStepperVal = {
 interface OrchardStepProps {
   seedlotSpecies: DropDownObj
   state: OrchardForm
-  setStepData: Function
+  setStepData: Function,
+  cleanParentTables: Function,
   readOnly?: boolean
 }
 
 const OrchardStep = ({
-  seedlotSpecies, state, setStepData, readOnly
+  seedlotSpecies, state, setStepData, cleanParentTables, readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
@@ -86,10 +87,10 @@ const OrchardStep = ({
   // Set orchard name by input id, if data is not present then clear orcahrd name
   const setOrchardName = (inputId: number, data?: OrchardDataType) => {
     const newOrchards = [...state.orchards];
-    /*
-      * It is safe to replace item in array by index here
-      * since the array is not mutable at this stage
-    */
+    /**
+     * It is safe to replace item in array by index here
+     * since the array is not mutable at this stage
+     */
     const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
     if (data?.name && data.vegetationCode && data.stageCode) {
       newOrchards[replaceIndex].orchardLabel = `${data.name} - ${data.vegetationCode} - ${data.stageCode}`;
@@ -117,6 +118,7 @@ const OrchardStep = ({
   });
 
   const fetchOrchardInfo = (orchardId: string, inputId: number) => {
+    cleanParentTables();
     // Copy orchards from state
     const newOrchards = [...state.orchards];
     // Replace input value with id
