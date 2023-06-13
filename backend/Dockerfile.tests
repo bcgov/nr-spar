@@ -2,6 +2,10 @@
 FROM maven:3.9.2-eclipse-temurin-17 as build
 ENV LANG=en_CA.UTF-8 LANGUAGE=en_CA.UTF-8 LC_ALL=en_CA.UTF-8
 
+USER root
+RUN mkdir /logs && chown 777 /logs
+USER 1001
+
 # Workdir
 WORKDIR /app
 
@@ -9,8 +13,6 @@ WORKDIR /app
 COPY pom.xml mvnw ./
 COPY src ./src
 COPY .mvn/ ./.mvn
-RUN mkdir /logs && chown 777 /logs
-USER 1001
 CMD ["mvn", \
   "--no-transfer-progress", \
   "clean", \
