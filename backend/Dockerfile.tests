@@ -1,19 +1,21 @@
 # Base and envars
-FROM maven:3.9.2-eclipse-temurin-17 as build
+FROM amazoncorretto:17-alpine
+RUN mkdir /logs && chown 777 /logs
 ENV LANG=en_CA.UTF-8 LANGUAGE=en_CA.UTF-8 LC_ALL=en_CA.UTF-8
 
-USER root
-RUN mkdir /logs && chown 777 /logs
-USER 1001
+RUN adduser --system spring
+USER spring
 
 # Workdir
 WORKDIR /app
 
 # Tests
-COPY pom.xml mvnw ./
-COPY src ./src
-COPY .mvn/ ./.mvn
-CMD ["mvn", \
+COPY pom.xml .
+COPY src .
+COPY mvnw .
+COPY .mvn ./.mvn
+
+CMD ["./mvnw", \
   "--no-transfer-progress", \
   "clean", \
   "verify", \
