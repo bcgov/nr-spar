@@ -10,4 +10,18 @@ COPY pom.xml mvnw ./
 COPY src ./src
 COPY .mvn/ ./.mvn
 RUN mkdir /logs && chown 777 /logs
-CMD ["mvn","--no-transfer-progress","clean","compile","verify","package","checkstyle:checkstyle","-P","all-tests"]
+ENV SONAR_TOKEN=$SONAR_TOKEN
+CMD ["mvn", \
+  "--no-transfer-progress", \
+  "clean", \
+  "compile", \
+  "verify", \
+  "package", \
+  "checkstyle:checkstyle", \
+  "-P", \
+  "all-tests", \
+  "-Dsonar.organization=bcgov-sonarcloud", \
+  "-Dsonar.projectKey=nr-spar_backend", \
+  "-Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml", \
+  "-Dsonar.exclusions=**/coverage/**" \
+]
