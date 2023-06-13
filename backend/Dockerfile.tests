@@ -10,6 +10,7 @@ COPY pom.xml mvnw ./
 COPY src ./src
 COPY .mvn/ ./.mvn
 RUN mkdir /logs && chown 777 /logs
+USER 1001
 CMD ["mvn", \
   "--no-transfer-progress", \
   "clean", \
