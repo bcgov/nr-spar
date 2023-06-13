@@ -1,3 +1,5 @@
+@use '../../../theme/variables.scss' as vars;
+
 .my-seedlot-content {
   .my-seedlot-breadcrumb{
     padding-left: 1rem;
@@ -21,5 +23,22 @@
   .my-seedlot-data-table-row{
     width: 100%;
     margin-left: -2rem;
+  }
+  
+  .#{vars.$bcgov-prefix}--table-sort {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+  }
+
+  .#{vars.$bcgov-prefix}--search-input { 
+    border-bottom: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01)
+  }
+
+  .#{vars.$bcgov-prefix}--data-table tr {
+    cursor: pointer;
+  }
+
+  .#{vars.$bcgov-prefix}--pagination__button, 
+  .#{vars.$bcgov-prefix}--btn--ghost.#{vars.$bcgov-prefix}--pagination__button {
+    height: 3rem;
   }
 }
