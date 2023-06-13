@@ -24,6 +24,14 @@ parameters:
   - name: ORACLE_DB_PASSWORD
     description: Oracle database password for API
     required: true
+  - name: AWS_KINESIS_USER
+    description: AWS Kinesis Secret Key ID
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
+  - name: AWS_KINESIS_PASS
+    description: AWS Kinesis Secret Key password
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
 objects:
   - apiVersion: v1
     kind: Secret
@@ -52,6 +60,8 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       forest-client-api-key: ${FORESTCLIENTAPI_KEY}
+      aws-kinesis-secret-username: ${AWS_KINESIS_USER}
+      aws-kinesis-secret-password: ${AWS_KINESIS_PASS}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:

@@ -199,7 +199,7 @@ objects:
                 periodSeconds: 30
                 timeoutSeconds: 10
             - name: fluent-bit
-              image: docker.io/fluent/fluent-bit:1.8
+              image: docker.io/fluent/fluent-bit:2.1
               imagePullPolicy: Always
               livenessProbe:
                 httpGet:
@@ -235,13 +235,13 @@ objects:
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
-                      key: username
-                      name: "${APP_NAME}-aws-kinesis-secret"
+                      name: "${NAME}"
+                      key: aws-kinesis-secret-username
                 - name: AWS_SECRET_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
-                      key: password
-                      name: "${APP_NAME}-aws-kinesis-secret"
+                      name: "${NAME}"
+                      key: aws-kinesis-secret-password
               volumeMounts:
                 # mount log file location
                 - name: log-storage
