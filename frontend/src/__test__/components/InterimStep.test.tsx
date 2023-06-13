@@ -50,7 +50,7 @@ describe('Interim Storage Step test', () => {
       titleStorage: 'Storage information',
       subtitleStorage: 'Enter the interim storage information for this seedlot'
     }
-    const titleBox = component.getElementsByClassName('interim-agency-title')[0];
+    const titleBox = component.getElementsByClassName('interim-title-row')[0];
     expect(titleBox).toHaveTextContent(content.title);
     expect(titleBox).toHaveTextContent(content.subtitle);
     expect(screen.getByText(content.titleStorage)).toBeInTheDocument();

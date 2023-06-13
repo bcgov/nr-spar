@@ -141,191 +141,187 @@ const InterimStorage = (
   };
 
   return (
-    <div className="interim-agency-storage-form">
-      <FlexGrid fullWidth>
-        <Row className="interim-agency-title">
-          <Column lg={8}>
-            <h2>Interim agency</h2>
-            <Subtitle text="Enter the interim agency information" />
-          </Column>
-        </Row>
-        <Row className="interim-agency-checkbox-row">
-          <Column sm={4} md={8} lg={16}>
-            <Checkbox
-              id="interim-agency-checkbox"
-              name="interim-agency"
-              labelText="Use applicant agency as interim storage agency"
-              defaultChecked
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => interimAgencyIsChecked(e)}
+    <FlexGrid className="interim-agency-storage-form" fullWidth>
+      <Row className="interim-title-row">
+        <Column sm={4} md={8} lg={16}>
+          <h2>Interim agency</h2>
+          <Subtitle text="Enter the interim agency information" />
+        </Column>
+      </Row>
+      <Row className="interim-agency-checkbox-row">
+        <Column sm={4} md={8} lg={16}>
+          <Checkbox
+            id="interim-agency-checkbox"
+            name="interim-agency"
+            labelText="Use applicant agency as interim storage agency"
+            defaultChecked
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => interimAgencyIsChecked(e)}
+            readOnly={readOnly}
+          />
+        </Column>
+      </Row>
+      <Row className="agency-information">
+        <Column sm={4} md={4} lg={8} xlg={6}>
+          <ComboBox
+            id="agency-name-combobox"
+            ref={nameInputRef}
+            name="name"
+            helperText="You can enter the agency number, name or acronym"
+            onChange={(e: ComboBoxEvent) => { handleFormInput('agencyName', e.selectedItem); }}
+            selectedItem={state.agencyName}
+            shouldFilterItem={
+              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+            }
+            titleText="Interim agency"
+            placeholder="Select Interim agency name"
+            items={agencyOptions}
+            invalid={validationObj.isNameInvalid}
+            readOnly={readOnly ?? isChecked}
+          />
+        </Column>
+        <Column sm={4} md={4} lg={8} xlg={6}>
+          <TextInput
+            id="agency-number-input"
+            name="locationCode"
+            ref={numberInputRef}
+            value={state.locationCode}
+            type="number"
+            labelText="Interim agency location code"
+            helperText="2-digit code that identifies the address of operated office or division"
+            invalid={validationObj.isCodeInvalid}
+            invalidText="Please enter a valid value"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              handleFormInput('locationCode', e.target.value);
+            }}
+            readOnly={readOnly ?? isChecked}
+          />
+        </Column>
+      </Row>
+      <Row className="interim-title-row">
+        <Column sm={4} md={8} lg={16}>
+          <h2>Storage information</h2>
+          <Subtitle text="Enter the interim storage information for this seedlot" />
+        </Column>
+      </Row>
+      <Row className="interim-storage-row">
+        <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>
+          <DatePicker
+            datePickerType="single"
+            name="startDate"
+            dateFormat={DATE_FORMAT}
+            value={state.startDate}
+            onChange={(_e: Array<Date>, selectedDate: string) => {
+              handleFormInput('startDate', selectedDate);
+            }}
+            readOnly={readOnly}
+          >
+            <DatePickerInput
+              id="start-date-input"
+              labelText="Storage start date"
+              helperText="year/month/day"
+              placeholder="yyyy/mm/dd"
+              invalid={validationObj.isStartDateInvalid}
+              invalidText="Please enter a valid date"
               readOnly={readOnly}
             />
-          </Column>
-        </Row>
-        <Row className="agency-information">
-          <Column sm={4} md={2} lg={4}>
-            <ComboBox
-              id="agency-name-combobox"
-              ref={nameInputRef}
-              name="name"
-              helperText="You can enter the agency number, name or acronym"
-              onChange={(e: ComboBoxEvent) => { handleFormInput('agencyName', e.selectedItem); }}
-              selectedItem={state.agencyName}
-              shouldFilterItem={
-                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-              }
-              titleText="Interim agency"
-              placeholder="Select Interim agency name"
-              items={agencyOptions}
-              invalid={validationObj.isNameInvalid}
-              readOnly={readOnly ?? isChecked}
+          </DatePicker>
+        </Column>
+        <Column className="end-date-col" sm={4} md={4} lg={8} xlg={6}>
+          <DatePicker
+            datePickerType="single"
+            name="endDate"
+            dateFormat={DATE_FORMAT}
+            minDate={state.startDate}
+            value={state.endDate}
+            onChange={(_e: Array<Date>, selectedDate: string) => {
+              handleFormInput('endDate', selectedDate);
+            }}
+            readOnly={readOnly}
+          >
+            <DatePickerInput
+              id="end-date-input"
+              labelText="Storage end date"
+              helperText="year/month/day"
+              placeholder="yyyy/mm/dd"
+              invalid={validationObj.isEndDateInvalid}
+              invalidText="Please enter a valid date"
             />
-          </Column>
-          <Column sm={4} md={2} lg={4}>
-            <TextInput
-              id="agency-number-input"
-              name="locationCode"
-              ref={numberInputRef}
-              value={state.locationCode}
-              type="number"
-              labelText="Interim agency location code"
-              helperText="2-digit code that identifies the address of operated office or division"
-              invalid={validationObj.isCodeInvalid}
-              invalidText="Please enter a valid value"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFormInput('locationCode', e.target.value);
-              }}
-              readOnly={readOnly ?? isChecked}
+          </DatePicker>
+        </Column>
+      </Row>
+      <Row className="interim-storage-row">
+        <Column sm={4} md={4} lg={16} xlg={12}>
+          <TextInput
+            id="storage-location-input"
+            name="location"
+            ref={storageLocationInputRef}
+            type="text"
+            value={state.storageLocation}
+            labelText="Storage location"
+            placeholder="Enter the location were the cones were stored"
+            helperText="Enter a short name or description of the location where the cones are being temporarily stored"
+            invalid={validationObj.isStorageInvalid}
+            invalidText="Storage location lenght should be <= 55"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              handleFormInput('storageLocation', e.target.value);
+            }}
+            readOnly={readOnly}
+          />
+        </Column>
+      </Row>
+      <Row className="storage-type-radio">
+        <Column sm={4} md={8} lg={16}>
+          <RadioButtonGroup
+            legendText="Storage facility type"
+            name="storage-type-radiogroup"
+            orientation="vertical"
+            defaultSelected={state.facilityType}
+            onChange={(e: string) => inputChangeHandlerRadio(e)}
+            readOnly={readOnly}
+          >
+            <RadioButton
+              id="outside-radio"
+              labelText="Outside covered - OCV"
+              value="OCV"
             />
-          </Column>
-        </Row>
-        <Row className="storage-information-title">
-          <Column lg={8}>
-            <h2>Storage information</h2>
-            <Subtitle text="Enter the interim storage information for this seedlot" />
-          </Column>
-        </Row>
-        <Row className="storage-date-row">
-          <Column className="start-date-col" sm={4} md={2} lg={4}>
-            <DatePicker
-              datePickerType="single"
-              name="startDate"
-              dateFormat={DATE_FORMAT}
-              value={state.startDate}
-              onChange={(_e: Array<Date>, selectedDate: string) => {
-                handleFormInput('startDate', selectedDate);
-              }}
-              readOnly={readOnly}
-            >
-              <DatePickerInput
-                id="start-date-input"
-                labelText="Storage start date"
-                helperText="year/month/day"
-                placeholder="yyyy/mm/dd"
-                invalid={validationObj.isStartDateInvalid}
-                invalidText="Please enter a valid date"
-                readOnly={readOnly}
-              />
-            </DatePicker>
-          </Column>
-          <Column className="end-date-col" sm={4} md={2} lg={4}>
-            <DatePicker
-              datePickerType="single"
-              name="endDate"
-              dateFormat={DATE_FORMAT}
-              minDate={state.startDate}
-              value={state.endDate}
-              onChange={(_e: Array<Date>, selectedDate: string) => {
-                handleFormInput('endDate', selectedDate);
-              }}
-              readOnly={readOnly}
-            >
-              <DatePickerInput
-                id="end-date-input"
-                labelText="Storage end date"
-                helperText="year/month/day"
-                placeholder="yyyy/mm/dd"
-                invalid={validationObj.isEndDateInvalid}
-                invalidText="Please enter a valid date"
-              />
-            </DatePicker>
-          </Column>
-        </Row>
-        <Row className="storage-location-row">
-          <Column sm={4} md={4} lg={8}>
-            <TextInput
-              id="storage-location-input"
-              name="location"
-              ref={storageLocationInputRef}
-              type="text"
-              value={state.storageLocation}
-              labelText="Storage location"
-              placeholder="Enter the location were the cones were stored"
-              helperText="Enter a short name or description of the location where the cones are being temporarily stored"
-              invalid={validationObj.isStorageInvalid}
-              invalidText="Storage location lenght should be <= 55"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFormInput('storageLocation', e.target.value);
-              }}
-              readOnly={readOnly}
+            <RadioButton
+              id="ventilated-radio"
+              labelText="Ventilated room - VRM"
+              value="VRM"
             />
-          </Column>
-        </Row>
-        <Row className="storage-type-radio">
-          <Column sm={4} md={8} lg={16}>
-            <RadioButtonGroup
-              legendText="Storage facility type"
-              name="storage-type-radiogroup"
-              orientation="vertical"
-              defaultSelected={state.facilityType}
-              onChange={(e: string) => inputChangeHandlerRadio(e)}
-              readOnly={readOnly}
-            >
-              <RadioButton
-                id="outside-radio"
-                labelText="Outside covered - OCV"
-                value="OCV"
-              />
-              <RadioButton
-                id="ventilated-radio"
-                labelText="Ventilated room - VRM"
-                value="VRM"
-              />
-              <RadioButton
-                id="reefer-radio"
-                labelText="Reefer - RFR"
-                value="RFR"
-              />
-              <RadioButton
-                id="other-radio"
-                labelText="Other - OTH"
-                value="OTH"
-              />
-            </RadioButtonGroup>
-          </Column>
-        </Row>
+            <RadioButton
+              id="reefer-radio"
+              labelText="Reefer - RFR"
+              value="RFR"
+            />
+            <RadioButton
+              id="other-radio"
+              labelText="Other - OTH"
+              value="OTH"
+            />
+          </RadioButtonGroup>
+        </Column>
         {
           otherRadioChecked && (
-            <Row className="storage-facility-type">
-              <Column sm={4} md={4} lg={8}>
-                <TextInput
-                  id="storage-facility-type-input"
-                  name="storage-facility"
-                  type="text"
-                  ref={storageFacilityTypeInputRef}
-                  labelText="Storage facility type"
-                  placeholder="Enter the storage facility type"
-                  helperText="Describe the new storage facility used"
-                  invalid={validationObj.isFacilityInvalid}
-                  invalidText="Storage facility type lenght should be <= 50"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormInput('facilityType', e.target.value)}
-                  readOnly={readOnly}
-                />
-              </Column>
-            </Row>
+            <Column className="storage-facility-type" sm={4} md={4} lg={16} xlg={12}>
+              <TextInput
+                id="storage-facility-type-input"
+                name="storage-facility"
+                type="text"
+                ref={storageFacilityTypeInputRef}
+                labelText="Storage facility type"
+                placeholder="Enter the storage facility type"
+                helperText="Describe the new storage facility used"
+                invalid={validationObj.isFacilityInvalid}
+                invalidText="Storage facility type lenght should be <= 50"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormInput('facilityType', e.target.value)}
+                readOnly={readOnly}
+              />
+            </Column>
           )
         }
-      </FlexGrid>
-    </div>
+      </Row>
+    </FlexGrid>
   );
 };
 

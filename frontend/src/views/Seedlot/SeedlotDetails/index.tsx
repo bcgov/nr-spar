@@ -83,17 +83,21 @@ const SeedlotDetails = () => {
       </Row>
       <Stack gap={6}>
         <Row className="seedlot-summary-title">
-          {
-            seedlotData
-            && (
-              <PageTitle
-                title={`Seedlot ${seedlotData.number}`}
-                subtitle="Check and manage this seedlot"
-                enableFavourite
-              />
-            )
-          }
-          <ComboButton title="Edit seedlot form" items={manageOptions} menuOptionsClass="edit-seedlot-form" />
+          <Column sm={4} md={6} lg={14} xlg={12}>
+            {
+              seedlotData
+              && (
+                <PageTitle
+                  title={`Seedlot ${seedlotData.number}`}
+                  subtitle="Check and manage this seedlot"
+                  enableFavourite
+                />
+              )
+            }
+          </Column>
+          <Column sm={4} md={2} lg={2} xlg={4}>
+            <ComboButton title="Edit seedlot form" items={manageOptions} menuOptionsClass="edit-seedlot-form" />
+          </Column>
         </Row>
         <section title="Seedlot Summary">
           <Row className="seedlot-summary-content">

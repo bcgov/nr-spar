@@ -59,23 +59,21 @@ const SeedlotActivities = () => {
   ];
 
   return (
-    <div className="seedlot-activities">
-      <Row className="seedlot-activities-cards">
-        {cards.map((card) => (
-          <StandardCard
-            key={card.id}
-            type={card.id}
-            image={card.image}
-            header={card.header}
-            description={card.description}
-            url={card.link}
-            isEmpty={card.isEmpty}
-            emptyTitle={card.emptyTitle}
-            emptyDescription={card.emptyDescription}
-          />
-        ))}
-      </Row>
-    </div>
+    <Row className="seedlot-activities-cards">
+      {cards.map((card) => (
+        <StandardCard
+          key={card.id}
+          type={card.id}
+          image={card.image}
+          header={card.header}
+          description={card.description}
+          url={card.link}
+          isEmpty={card.isEmpty}
+          emptyTitle={card.emptyTitle}
+          emptyDescription={card.emptyDescription}
+        />
+      ))}
+    </Row>
   );
 };
 

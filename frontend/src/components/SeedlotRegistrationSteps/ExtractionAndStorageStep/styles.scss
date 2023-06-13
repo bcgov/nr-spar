@@ -8,6 +8,9 @@
 }
 
 .extractory-and-storage-form {
+  &.#{vars.$bcgov-prefix}--grid {
+    padding-left: 0;
+  }
 
   h2 {
     @include type.type-style('heading-03');
@@ -18,7 +21,7 @@
   .temporary-seed-storage-title {
     margin-bottom: 2.5rem;
   }
-  
+
   .temporary-seed-storage-title {
     margin-top: 3rem;
   }
@@ -26,6 +29,10 @@
   .extractory-agency-tsc-checkbox-row,
   .seed-storage-agency-tsc-checkbox-row {
     margin-bottom: 1.5rem;
+  }
+
+  .storage-date-row {
+    margin-bottom: 3.5rem;
   }
 
   .extractor-agency-row,
@@ -52,5 +59,4 @@
       }
     }
   }
-  
 }

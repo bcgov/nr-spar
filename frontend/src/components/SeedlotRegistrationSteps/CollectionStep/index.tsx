@@ -193,7 +193,7 @@ const CollectionStep = (
         </Column>
       </Row>
       <Row className="collection-step-row">
-        <Column sm={4} md={4} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
             id={fieldsConfig.collector.name}
             name={fieldsConfig.collector.name}
@@ -218,7 +218,7 @@ const CollectionStep = (
             size="md"
           />
         </Column>
-        <Column sm={4} md={4} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           <NumberInput
             id={fieldsConfig.code.name}
             name={fieldsConfig.code.name}
@@ -247,7 +247,7 @@ const CollectionStep = (
         </Column>
       </Row>
       <Row className="collection-step-row">
-        <Column sm={4} md={4} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
@@ -273,7 +273,7 @@ const CollectionStep = (
             />
           </DatePicker>
         </Column>
-        <Column sm={4} md={4} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
@@ -302,7 +302,7 @@ const CollectionStep = (
         </Column>
       </Row>
       <Row className="collection-step-row">
-        <Column sm={4} md={4} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           <NumberInput
             id={fieldsConfig.numberOfContainers.name}
             name={fieldsConfig.numberOfContainers.name}
@@ -321,7 +321,7 @@ const CollectionStep = (
             disableWheel
           />
         </Column>
-        <Column sm={4} md={4} lg={4} xlg={4}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
           <NumberInput
             id={fieldsConfig.volumePerContainers.name}
             name={fieldsConfig.volumePerContainers.name}
@@ -342,7 +342,7 @@ const CollectionStep = (
         </Column>
       </Row>
       <Row className="collection-step-row">
-        <Column sm={4} md={8} lg={8} xlg={8}>
+        <Column sm={4} md={4} lg={16} xlg={12}>
           <NumberInput
             id={fieldsConfig.volumeOfCones.name}
             name={fieldsConfig.volumeOfCones.name}
@@ -458,6 +458,8 @@ const CollectionStep = (
               }
             />
           </fieldset>
+        </Column>
+        <Column className="" sm={4} md={4} lg={16} xlg={12}>
           {
             isOtherChecked && (
               <TextInput
@@ -483,7 +485,7 @@ const CollectionStep = (
         </Column>
       </Row>
       <Row className="collection-step-row">
-        <Column sm={4} md={8} lg={8} xlg={8}>
+        <Column sm={4} md={4} lg={16} xlg={12}>
           <TextArea
             name={fieldsConfig.comments.name}
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.comments.name)}

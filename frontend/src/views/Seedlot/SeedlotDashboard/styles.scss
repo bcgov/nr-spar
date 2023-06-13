@@ -1,15 +1,15 @@
-.seedlot-dashboard-content {
-  padding-left: 2.5rem;
-}
+@use '../../../theme/variables.scss' as vars;
 
-@media only screen and (max-width: 1584px) {
-  .seedlot-dashboard-content {
-    padding-left: 2rem;
+.seedlot-page {
+  padding-left: 0;
+  padding-right: 0;
+
+  .title-section{
+    padding-left: 0;
   }
-}
 
-@media only screen and (max-width: 672px) {
-  .seedlot-dashboard-content {
-    padding-left: 1rem;
+  .#{vars.$bcgov-prefix}--row {
+    margin-left: 2.5rem;
+    margin-right: 2.5rem;
   }
 }

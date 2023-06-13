@@ -137,238 +137,232 @@ const ExtractionAndStorage = (
   };
 
   return (
-    <div className="extractory-and-storage-form">
-      <FlexGrid fullWidth>
-        <Row className="extraction-information-title">
-          <Column lg={16}>
-            <h2>{inputText.extractionTitle.titleText}</h2>
-            <Subtitle text={inputText.extractionTitle.subtitleText} />
-          </Column>
-        </Row>
-        <Row className="extractory-agency-tsc-checkbox-row">
-          <Column sm={4} md={8} lg={16}>
-            <Checkbox
-              id="extractory-agency-tsc-checkbox"
-              name="extractory-agency-tsc"
-              labelText={inputText.extractorCheckbox.labelText}
-              defaultChecked
-              readOnly={readOnly}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => extractorIsChecked(e)}
+    <FlexGrid className="extractory-and-storage-form" fullWidth>
+      <Row className="extraction-information-title">
+        <Column sm={4} md={8} lg={16}>
+          <h2>{inputText.extractionTitle.titleText}</h2>
+          <Subtitle text={inputText.extractionTitle.subtitleText} />
+        </Column>
+      </Row>
+      <Row className="extractory-agency-tsc-checkbox-row">
+        <Column sm={4} md={8} lg={16}>
+          <Checkbox
+            id="extractory-agency-tsc-checkbox"
+            name="extractory-agency-tsc"
+            labelText={inputText.extractorCheckbox.labelText}
+            defaultChecked
+            readOnly={readOnly}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => extractorIsChecked(e)}
+          />
+        </Column>
+      </Row>
+      <Row className="extractor-agency-row">
+        <Column className="extractor-agency-col" sm={4} md={4} lg={8} xlg={6}>
+          <ComboBox
+            id="extractory-agency-combobox"
+            ref={extractorNameInputRef}
+            name="extractory-agency"
+            helperText={inputText.extractor.helperText}
+            readOnly={readOnly ?? isExtractorChecked}
+            onChange={(e: ComboBoxEvent) => { handleFormInput('extractoryAgency', e.selectedItem); }}
+            selectedItem={state.extractoryAgency}
+            shouldFilterItem={
+              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+            }
+            titleText={inputText.extractor.titleText}
+            placeholder={inputText.extractor.placeholder}
+            items={agencyOptions}
+            invalid={validationObj.isExtractorNameInvalid}
+          />
+        </Column>
+        <Column className="extractor-agency-col" sm={4} md={4} lg={8} xlg={6}>
+          <TextInput
+            id="extractory-agency-location-code-input"
+            name="extractory-agency-location-code"
+            ref={extractorNumberInputRef}
+            value={state.extractoryLocationCode}
+            type="number"
+            labelText={inputText.extractorCode.labelText}
+            helperText={inputText.extractorCode.helperText}
+            invalid={validationObj.isExtractorCodeInvalid}
+            invalidText={inputText.extractorCode.invalidText}
+            readOnly={readOnly ?? isExtractorChecked}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              handleFormInput('extractoryLocationCode', e.target.value);
+            }}
+          />
+        </Column>
+      </Row>
+      <Row className="extraction-date-row">
+        <Column className="extraction-start-date-col" sm={4} md={4} lg={8} xlg={6}>
+          <DatePicker
+            datePickerType="single"
+            name="extractionStartDate"
+            dateFormat={DATE_FORMAT}
+            value={state.extractionStartDate}
+            onChange={(_e: Array<Date>, selectedDate: string) => {
+              handleFormInput('extractionStartDate', selectedDate);
+            }}
+            readOnly={readOnly}
+          >
+            <DatePickerInput
+              id="extraction-start-date-input"
+              labelText={inputText.date.extraction.labelText.start}
+              helperText={inputText.date.helperText}
+              placeholder={inputText.date.placeholder}
+              invalid={validationObj.isExtractorStartDateInvalid}
+              invalidText={inputText.date.invalidText}
+              disabled={isExtractorChecked}
             />
-          </Column>
-        </Row>
-        <Row className="extractor-agency-row">
-          <Column className="extractor-agency-col" sm={4} md={2} lg={4}>
-            <ComboBox
-              id="extractory-agency-combobox"
-              ref={extractorNameInputRef}
-              name="extractory-agency"
-              helperText={inputText.extractor.helperText}
-              readOnly={readOnly ?? isExtractorChecked}
-              onChange={(e: ComboBoxEvent) => { handleFormInput('extractoryAgency', e.selectedItem); }}
-              selectedItem={state.extractoryAgency}
-              shouldFilterItem={
-                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-              }
-              titleText={inputText.extractor.titleText}
-              placeholder={inputText.extractor.placeholder}
-              items={agencyOptions}
-              invalid={validationObj.isExtractorNameInvalid}
+          </DatePicker>
+        </Column>
+        <Column className="extraction-end-date-col" sm={4} md={4} lg={8} xlg={6}>
+          <DatePicker
+            datePickerType="single"
+            name="extractionEndDate"
+            dateFormat={DATE_FORMAT}
+            value={state.extractionEndDate}
+            onChange={(_e: Array<Date>, selectedDate: string) => {
+              handleFormInput('extractionEndDate', selectedDate);
+            }}
+            readOnly={readOnly}
+          >
+            <DatePickerInput
+              id="extraction-end-date-input"
+              labelText={inputText.date.extraction.labelText.end}
+              helperText={inputText.date.helperText}
+              placeholder={inputText.date.placeholder}
+              invalid={validationObj.isExtractorEndDateInvalid}
+              invalidText={inputText.date.invalidText}
+              disabled={isExtractorChecked}
             />
-          </Column>
-          <Column className="extractor-agency-col" sm={4} md={2} lg={4}>
-            <TextInput
-              id="extractory-agency-location-code-input"
-              name="extractory-agency-location-code"
-              ref={extractorNumberInputRef}
-              value={state.extractoryLocationCode}
-              type="number"
-              labelText={inputText.extractorCode.labelText}
-              helperText={inputText.extractorCode.helperText}
-              invalid={validationObj.isExtractorCodeInvalid}
-              invalidText={inputText.extractorCode.invalidText}
-              readOnly={readOnly ?? isExtractorChecked}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFormInput('extractoryLocationCode', e.target.value);
-              }}
+          </DatePicker>
+        </Column>
+        <Column sm={4} md={8} lg={16} xlg={12}>
+          {isExtractorChecked && !readOnly && isExtractorHintOpen && (
+            <InlineNotification
+              lowContrast
+              kind="info"
+              title={inputText.date.extraction.notification.title}
+              subtitle={inputText.date.extraction.notification.subtitle}
+              onCloseButtonClick={() => { setIsExtractorHintOpen(false); }}
             />
-          </Column>
-        </Row>
-        <Row className="extraction-date-row">
-          <Column className="extraction-start-date-col" sm={4} md={2} lg={4}>
-            <DatePicker
-              datePickerType="single"
-              name="extractionStartDate"
-              dateFormat={DATE_FORMAT}
-              value={state.extractionStartDate}
-              onChange={(_e: Array<Date>, selectedDate: string) => {
-                handleFormInput('extractionStartDate', selectedDate);
-              }}
-              readOnly={readOnly}
-            >
-              <DatePickerInput
-                id="extraction-start-date-input"
-                labelText={inputText.date.extraction.labelText.start}
-                helperText={inputText.date.helperText}
-                placeholder={inputText.date.placeholder}
-                invalid={validationObj.isExtractorStartDateInvalid}
-                invalidText={inputText.date.invalidText}
-                disabled={isExtractorChecked}
-              />
-            </DatePicker>
-          </Column>
-          <Column className="extraction-end-date-col" sm={4} md={2} lg={4}>
-            <DatePicker
-              datePickerType="single"
-              name="extractionEndDate"
-              dateFormat={DATE_FORMAT}
-              value={state.extractionEndDate}
-              onChange={(_e: Array<Date>, selectedDate: string) => {
-                handleFormInput('extractionEndDate', selectedDate);
-              }}
-              readOnly={readOnly}
-            >
-              <DatePickerInput
-                id="extraction-end-date-input"
-                labelText={inputText.date.extraction.labelText.end}
-                helperText={inputText.date.helperText}
-                placeholder={inputText.date.placeholder}
-                invalid={validationObj.isExtractorEndDateInvalid}
-                invalidText={inputText.date.invalidText}
-                disabled={isExtractorChecked}
-              />
-            </DatePicker>
-          </Column>
-        </Row>
-        <Row>
-          <Column sm={4} md={8} lg={8}>
-            {isExtractorChecked && !readOnly && isExtractorHintOpen && (
-              <InlineNotification
-                lowContrast
-                kind="info"
-                title={inputText.date.extraction.notification.title}
-                subtitle={inputText.date.extraction.notification.subtitle}
-                onCloseButtonClick={() => { setIsExtractorHintOpen(false); }}
-              />
-            )}
-          </Column>
-        </Row>
-        <Row className="temporary-seed-storage-title">
-          <Column lg={16}>
-            <h2>{inputText.storageTitle.titleText}</h2>
-            <Subtitle text={inputText.storageTitle.subtitleText} />
-          </Column>
-        </Row>
-        <Row className="seed-storage-agency-tsc-checkbox-row">
-          <Column sm={4} md={8} lg={16}>
-            <Checkbox
-              id="seed-storage-agency-tsc-checkbox"
-              name="seed-storage-agency-tsc"
-              labelText={inputText.storageCheckbox.labelText}
-              defaultChecked
-              readOnly={readOnly}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => storageIsChecked(e)}
+          )}
+        </Column>
+      </Row>
+      <Row className="temporary-seed-storage-title">
+        <Column lg={16}>
+          <h2>{inputText.storageTitle.titleText}</h2>
+          <Subtitle text={inputText.storageTitle.subtitleText} />
+        </Column>
+      </Row>
+      <Row className="seed-storage-agency-tsc-checkbox-row">
+        <Column sm={4} md={8} lg={16}>
+          <Checkbox
+            id="seed-storage-agency-tsc-checkbox"
+            name="seed-storage-agency-tsc"
+            labelText={inputText.storageCheckbox.labelText}
+            defaultChecked
+            readOnly={readOnly}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => storageIsChecked(e)}
+          />
+        </Column>
+      </Row>
+      <Row className="seed-storage-agency-row">
+        <Column className="seed-storage-agency-col" sm={4} md={4} lg={8} xlg={6}>
+          <ComboBox
+            id="seed-storage-agency-combobox"
+            ref={storageNameInputRef}
+            name="seed-storage-agency"
+            helperText={inputText.storage.helperText}
+            onChange={(e: ComboBoxEvent) => handleFormInput('seedStorageAgency', e.selectedItem)}
+            selectedItem={state.seedStorageAgency}
+            shouldFilterItem={
+              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+            }
+            titleText={inputText.storage.titleText}
+            placeholder={inputText.storage.placeholder}
+            readOnly={isStorageChecked || readOnly}
+            items={agencyOptions}
+            invalid={validationObj.isStorageNameInvalid}
+          />
+        </Column>
+        <Column className="seed-storage-location-code-col" sm={4} md={4} lg={8} xlg={6}>
+          <TextInput
+            id="seed-storage-location-code-input"
+            name="seed-storage-location-code"
+            ref={storageNumberInputRef}
+            value={state.seedStorageLocationCode}
+            type="number"
+            labelText={inputText.storageCode.labelText}
+            helperText={inputText.storageCode.helperText}
+            invalid={validationObj.isStorageCodeInvalid}
+            invalidText={inputText.storageCode.invalidText}
+            readOnly={isStorageChecked || readOnly}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              handleFormInput('seedStorageLocationCode', e.target.value);
+            }}
+          />
+        </Column>
+      </Row>
+      <Row className="storage-date-row">
+        <Column className="storage-start-date-col" sm={4} md={4} lg={8} xlg={6}>
+          <DatePicker
+            datePickerType="single"
+            name="storageStartDate"
+            dateFormat={DATE_FORMAT}
+            value={state.seedStorageStartDate}
+            onChange={(_e: Array<Date>, selectedDate: string) => {
+              handleFormInput('seedStorageStartDate', selectedDate);
+            }}
+            readOnly={readOnly}
+          >
+            <DatePickerInput
+              id="storage-start-date-input"
+              labelText={inputText.date.storage.labelText.start}
+              helperText={inputText.date.helperText}
+              placeholder={inputText.date.placeholder}
+              invalid={validationObj.isStorageStartDateInvalid}
+              invalidText={inputText.date.invalidText}
+              disabled={isStorageChecked}
             />
-          </Column>
-        </Row>
-        <Row className="seed-storage-agency-row">
-          <Column className="seed-storage-agency-col" sm={4} md={2} lg={4}>
-            <ComboBox
-              id="seed-storage-agency-combobox"
-              ref={storageNameInputRef}
-              name="seed-storage-agency"
-              helperText={inputText.storage.helperText}
-              onChange={(e: ComboBoxEvent) => handleFormInput('seedStorageAgency', e.selectedItem)}
-              selectedItem={state.seedStorageAgency}
-              shouldFilterItem={
-                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-              }
-              titleText={inputText.storage.titleText}
-              placeholder={inputText.storage.placeholder}
-              readOnly={isStorageChecked || readOnly}
-              items={agencyOptions}
-              invalid={validationObj.isStorageNameInvalid}
+          </DatePicker>
+        </Column>
+        <Column className="storage-end-date-col" sm={4} md={4} lg={8} xlg={6}>
+          <DatePicker
+            datePickerType="single"
+            name="storageEndDate"
+            dateFormat={DATE_FORMAT}
+            value={state.seedStorageEndDate}
+            onChange={(_e: Array<Date>, selectedDate: string) => {
+              handleFormInput('seedStorageEndDate', selectedDate);
+            }}
+            readOnly={readOnly}
+          >
+            <DatePickerInput
+              id="storage-end-date-input"
+              labelText={inputText.date.storage.labelText.end}
+              helperText={inputText.date.helperText}
+              placeholder={inputText.date.placeholder}
+              invalid={validationObj.isStorageEndDateInvalid}
+              invalidText={inputText.date.invalidText}
+              disabled={isStorageChecked}
             />
-          </Column>
-          <Column className="seed-storage-location-code-col" sm={4} md={2} lg={4}>
-            <TextInput
-              id="seed-storage-location-code-input"
-              name="seed-storage-location-code"
-              ref={storageNumberInputRef}
-              value={state.seedStorageLocationCode}
-              type="number"
-              labelText={inputText.storageCode.labelText}
-              helperText={inputText.storageCode.helperText}
-              invalid={validationObj.isStorageCodeInvalid}
-              invalidText={inputText.storageCode.invalidText}
-              readOnly={isStorageChecked || readOnly}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleFormInput('seedStorageLocationCode', e.target.value);
-              }}
+          </DatePicker>
+        </Column>
+        <Column sm={4} md={8} lg={16} xlg={12}>
+          {isStorageChecked && !readOnly && isStorageHintOpen && (
+            <InlineNotification
+              lowContrast
+              kind="info"
+              title={inputText.date.storage.notification.title}
+              subtitle={inputText.date.storage.notification.subtitle}
+              onCloseButtonClick={() => { setIsStorageHintOpen(false); }}
             />
-          </Column>
-        </Row>
-        <Row className="storage-date-row">
-          <Column className="storage-start-date-col" sm={4} md={2} lg={4}>
-            <DatePicker
-              datePickerType="single"
-              name="storageStartDate"
-              dateFormat={DATE_FORMAT}
-              value={state.seedStorageStartDate}
-              onChange={(_e: Array<Date>, selectedDate: string) => {
-                handleFormInput('seedStorageStartDate', selectedDate);
-              }}
-              readOnly={readOnly}
-            >
-              <DatePickerInput
-                id="storage-start-date-input"
-                labelText={inputText.date.storage.labelText.start}
-                helperText={inputText.date.helperText}
-                placeholder={inputText.date.placeholder}
-                invalid={validationObj.isStorageStartDateInvalid}
-                invalidText={inputText.date.invalidText}
-                disabled={isStorageChecked}
-              />
-            </DatePicker>
-          </Column>
-          <Column className="storage-end-date-col" sm={4} md={2} lg={4}>
-            <DatePicker
-              datePickerType="single"
-              name="storageEndDate"
-              dateFormat={DATE_FORMAT}
-              value={state.seedStorageEndDate}
-              onChange={(_e: Array<Date>, selectedDate: string) => {
-                handleFormInput('seedStorageEndDate', selectedDate);
-              }}
-              readOnly={readOnly}
-            >
-              <DatePickerInput
-                id="storage-end-date-input"
-                labelText={inputText.date.storage.labelText.end}
-                helperText={inputText.date.helperText}
-                placeholder={inputText.date.placeholder}
-                invalid={validationObj.isStorageEndDateInvalid}
-                invalidText={inputText.date.invalidText}
-                disabled={isStorageChecked}
-              />
-            </DatePicker>
-          </Column>
-        </Row>
-        <Row>
-          <Column sm={4} md={8} lg={8}>
-            {isStorageChecked && !readOnly && isStorageHintOpen && (
-              <InlineNotification
-                lowContrast
-                kind="info"
-                title={inputText.date.storage.notification.title}
-                subtitle={inputText.date.storage.notification.subtitle}
-                onCloseButtonClick={() => { setIsStorageHintOpen(false); }}
-              />
-            )}
-          </Column>
-        </Row>
-      </FlexGrid>
-    </div>
+          )}
+        </Column>
+      </Row>
+    </FlexGrid>
   );
 };
 

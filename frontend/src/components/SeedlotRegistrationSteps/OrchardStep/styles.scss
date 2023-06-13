@@ -2,8 +2,6 @@
 @use '../../../theme/variables.scss' as vars;
 
 .seedlot-orchard-step-form {
-  margin-top: 1rem;
-
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly .#{vars.$bcgov-prefix}--text-input{
     border: none;
     cursor: default;
@@ -37,18 +35,4 @@
 .male-gametic-invalid .#{vars.$bcgov-prefix}--radio-button+.#{vars.$bcgov-prefix}--radio-button__label .#{vars.$bcgov-prefix}--radio-button__appearance {
   outline: 2px solid var(--#{vars.$bcgov-prefix}-support-error);
   outline-offset: 1.5px;
-}
-
-.seedlot-orchard-btn-row {
-  button {
-    width: 15.1875rem;
-    margin-right: 1rem;
-    margin-bottom: 3rem;
-  }
-}
-
-@media only screen and (max-width: 1584px) {
-  .applicant-information-form {
-    padding-left: 2rem;
-  }
 }

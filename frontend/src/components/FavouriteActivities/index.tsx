@@ -26,7 +26,7 @@ const FavouriteActivities = () => {
 
   return (
     <Row className="favourite-activities">
-      <Column lg={4} className="favourite-activities-title">
+      <Column sm={4} md={8} lg={16} xlg={4} className="favourite-activities-title">
         <h2>My favourite activities</h2>
         <Subtitle text="Quick access to your favourite activities." className="favourite-activities-subtitle" />
         <Tooltip
@@ -39,7 +39,7 @@ const FavouriteActivities = () => {
           </button>
         </Tooltip>
       </Column>
-      <Column lg={12} className="favourite-activities-cards">
+      <Column sm={4} md={8} lg={16} xlg={12} className="favourite-activities-cards">
         <Row>
           {favActQuery.isLoading && <Loading withOverlay={false} />}
           {favActQuery.isSuccess && (
