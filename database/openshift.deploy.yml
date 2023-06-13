@@ -123,8 +123,9 @@ objects:
                     - bash
                     - "-c"
                     - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                successThreshold: 1
                 failureThreshold: 5
-                initialDelaySeconds: 30
+                initialDelaySeconds: 10
                 periodSeconds: 15
                 timeoutSeconds: 1
               livenessProbe:
@@ -134,8 +135,9 @@ objects:
                     - bash
                     - "-c"
                     - psql -q $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                successThreshold: 1
                 failureThreshold: 5
-                initialDelaySeconds: 30
+                initialDelaySeconds: 10
                 periodSeconds: 15
                 timeoutSeconds: 1
               env:
