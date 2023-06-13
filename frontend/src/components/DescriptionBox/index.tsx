@@ -13,7 +13,7 @@ const DescriptionBox = (
   }: DescriptionBoxProps
 ) => (
   <div className="description-box-container">
-    <h2 className="description-box-header">{header}</h2>
+    <h3 className="description-box-header">{header}</h3>
     <div className="description-box-description">{description}</div>
   </div>
 );
