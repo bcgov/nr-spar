@@ -336,7 +336,7 @@ const ParentTreeStep = (
                         </Popover> */}
                         <OverflowMenu
                           renderIcon={View}
-                          iconDescription="ooo"
+                          iconDescription="Show/hide columns"
                           flipped
                         >
                           {
@@ -345,10 +345,10 @@ const ParentTreeStep = (
                         </OverflowMenu>
                         <OverflowMenu
                           renderIcon={Settings}
-                          iconDescription="sss"
+                          iconDescription="more options"
                         >
                           <OverflowMenuItem
-                            itemText="gggg"
+                            itemText="Download table template"
                           />
                         </OverflowMenu>
                         <Button
