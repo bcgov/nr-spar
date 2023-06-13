@@ -3,7 +3,8 @@ import {
   ownerTemplate,
   validTemplate as ownerInvalidTemplate
 } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
-import { FormInvalidationObj, OwnershipInvalidObj } from './definitions';
+import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { FormInvalidationObj, OwnershipInvalidObj, ParentTreeStepDataObj } from './definitions';
 
 export const initCollectionState = (
   defaultAgency: string,
@@ -68,6 +69,17 @@ export const initOrchardState = (): OrchardForm => (
     noPollenContamination: true,
     breedingPercentage: '0',
     pollenMethodology: true
+  }
+);
+
+// {
+//   tableRowData: RowDataDictType,
+//   notifCtrl
+// }
+export const initParentTreeState = (): ParentTreeStepDataObj => (
+  {
+    tableRowData: {},
+    notifCtrl: structuredClone(notificationCtrlObj)
   }
 );
 
