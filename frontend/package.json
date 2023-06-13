@@ -100,8 +100,10 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.31.8",
     "eslint-plugin-react-hooks": "4.6.0",
+    "fork-ts-checker-webpack-plugin": "6.5.3",
     "jest-environment-jsdom": "^29.0.1",
     "miragejs": "^0.1.47",
-    "playwright-webkit": "^1.27.1"
+    "playwright-webkit": "^1.27.1",
+    "webpack": "5.86.0"
   }
 }
