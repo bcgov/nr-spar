@@ -15,10 +15,10 @@ import {
   Search
 } from '@carbon/react';
 
-import headerData from './headerData';
 import StatusItem from '../../../../components/StatusItem';
 import Participants from '../../../../components/Participants';
 import Seedlot from '../../../../types/Seedlot';
+import { headerData } from '../constants';
 
 interface HeaderType {
   key: string,
