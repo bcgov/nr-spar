@@ -156,7 +156,7 @@ const ParentTreeStep = (
     setStepData(clonedState);
   };
 
-  const renderTabelCell = (rowData: RowItem, header: HeaderObj) => {
+  const renderTableCell = (rowData: RowItem, header: HeaderObj) => {
     if (header.availableInTabs.includes(currentTab) && header.enabled) {
       return (
         <TableCell key={header.id}>
@@ -403,7 +403,7 @@ const ParentTreeStep = (
                                   <TableRow key={rowData.cloneNumber}>
                                     {
                                       headerConfig.map((header) => (
-                                        renderTabelCell(rowData, header)
+                                        renderTableCell(rowData, header)
                                       ))
                                     }
                                   </TableRow>
