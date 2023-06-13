@@ -1,3 +1,9 @@
+const tableText = {
+  pageTitle: 'My Seedlots',
+  pageSubtitle: 'Check and manage your own seedlots',
+  buttonText: 'Register a new seedlot'
+};
+
 const headerData = [
   {
     key: 'number',
@@ -5,11 +11,11 @@ const headerData = [
   },
   {
     key: 'class',
-    header: 'Lot class'
+    header: 'Seedlot class'
   },
   {
     key: 'lot_species',
-    header: 'Lot species'
+    header: 'Seedlot species'
   },
   {
     key: 'form_step',
@@ -29,7 +35,7 @@ const headerData = [
   },
   {
     key: 'last_modified',
-    header: 'Last modified'
+    header: 'Last updated'
   },
   {
     key: 'approved_at',
@@ -37,4 +43,4 @@ const headerData = [
   }
 ];
 
-export default headerData;
+export { tableText, headerData };

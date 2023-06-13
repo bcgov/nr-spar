@@ -18,6 +18,7 @@ import ApiConfig from '../../../api-service/ApiConfig';
 import Seedlot from '../../../types/Seedlot';
 
 import './styles.scss';
+import { tableText } from './constants';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
@@ -49,8 +50,8 @@ const MySeedlots = () => {
       </Row>
       <Row className="my-seedlot-title">
         <PageTitle
-          title="My Seedlots"
-          subtitle="Check and manage my seedlots"
+          title={tableText.pageTitle}
+          subtitle={tableText.pageSubtitle}
           enableFavourite
         />
         <Button
@@ -60,7 +61,7 @@ const MySeedlots = () => {
           className="btn-my-seedlot"
           renderIcon={Add}
         >
-          Register a new seedlot
+          {tableText.buttonText}
         </Button>
       </Row>
       <Row className="my-seedlot-data-table-row">
