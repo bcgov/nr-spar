@@ -212,8 +212,11 @@ const ParentTreeStep = (
   };
 
   const renderColOptions = () => {
-    const toggleableCols = headerConfig
-      .filter((header) => header.isAnOption && header.availableInTabs.includes(currentTab));
+    let toggleableCols: Array<HeaderObj> = [];
+    if (Array.isArray(headerConfig)) {
+      toggleableCols = headerConfig
+        .filter((header) => header.isAnOption && header.availableInTabs.includes(currentTab));
+    }
 
     return (
       toggleableCols.map((header) => (
@@ -263,7 +266,7 @@ const ParentTreeStep = (
               <Row className="notification-row">
                 <Column>
                   {
-                    (state.notifCtrl[currentTab].showInfo && orchardsData.length > 0)
+                    (state.notifCtrl[currentTab]?.showInfo && orchardsData.length > 0)
                       ? (
                         <ActionableNotification
                           kind="info"
@@ -284,7 +287,7 @@ const ParentTreeStep = (
                       : null
                   }
                   {
-                    (state.notifCtrl[currentTab].showError && orchardsData.length === 0)
+                    (state.notifCtrl[currentTab]?.showError && orchardsData.length === 0)
                       ? (
                         <ActionableNotification
                           kind="error"
@@ -377,7 +380,7 @@ const ParentTreeStep = (
                             <TableHead>
                               <TableRow>
                                 {
-                                  headerConfig.map((header) => (
+                                  (Array.isArray(headerConfig) && headerConfig.map((header) => (
                                     (header.availableInTabs.includes(currentTab) && header.enabled)
                                       ? (
                                         <TableHeader id={header.id} key={header.id}>
@@ -391,7 +394,7 @@ const ParentTreeStep = (
                                         </TableHeader>
                                       )
                                       : null
-                                  ))
+                                  )))
                                 }
                               </TableRow>
                             </TableHead>
