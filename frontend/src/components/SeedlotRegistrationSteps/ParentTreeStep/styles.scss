@@ -82,17 +82,26 @@
     }
   }
 
-  .#{vars.$bcgov-prefix}--data-table-content{
+  .#{vars.$bcgov-prefix}--data-table-content {
     overflow: visible;
   }
 
-  .#{vars.$bcgov-prefix}--definition-term{
+  .#{vars.$bcgov-prefix}--definition-term {
     border-bottom: none;
     @include type.type-style('heading-compact-01');
   }
 
-  .#{vars.$bcgov-prefix}--pagination__control-buttons{
+  .#{vars.$bcgov-prefix}--popover-container {
     display: flex;
     align-items: center;
+  }
+
+  .td-no-padding {
+    padding-left: 0;
+    padding-right: 0;
+
+    .#{vars.$bcgov-prefix}--text-input {
+      padding: 0 1rem;
+    }
   }
 }

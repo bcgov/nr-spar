@@ -33,6 +33,24 @@ export const processOrchards = (orchards: Array<OrchardObj>): Array<OrchardObj> 
   return Object.values(obj);
 };
 
-export const sortRowItem = (rows: Array<RowItem>) => (
+const sortRowItems = (rows: Array<RowItem>) => (
   rows.sort((a: RowItem, b: RowItem) => Number(a.clone_number) - Number(b.clone_number))
 );
+
+const sliceRowItems = (rows: Array<RowItem>, pageNumber: number, pageSize: number) => (
+  rows.slice((pageNumber - 1) * pageSize).slice(0, pageSize)
+);
+
+export const sortAndSliceRows = (
+  rows: Array<RowItem>,
+  pageNumber: number,
+  pageSize: number,
+  sliceOnly: boolean
+) => {
+  let sorted = rows;
+  if (!sliceOnly) {
+    sorted = sortRowItems(rows);
+  }
+  const sliced = sliceRowItems(sorted, pageNumber, pageSize);
+  return sliced;
+};

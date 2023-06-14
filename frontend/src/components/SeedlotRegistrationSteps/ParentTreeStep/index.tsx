@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
   Tabs,
@@ -33,12 +34,15 @@ import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
-  getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig, DEFAULT_PAGE_SIZE
+  getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig,
+  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
 } from './definitions';
-import { getTabString, processOrchards, sortRowItem } from './utils';
+import {
+  getTabString, processOrchards, sortAndSliceRows
+} from './utils';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import PaginationChangeType from '../../../types/PaginationChangeType';
@@ -67,6 +71,11 @@ const ParentTreeStep = (
     structuredClone(headerTemplate)
   );
   const [currPageSize, setCurrPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+  const [currentPage, setCurrentPage] = useState<number>(DEFAULT_PAGE_NUMBER);
+
+  const [slicedRows, setSlicedRows] = useState<Array<RowItem>>(
+    sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true)
+  );
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -113,6 +122,16 @@ const ParentTreeStep = (
     return false;
   };
 
+  const sliceTableRowData = (
+    rows: Array<RowItem>,
+    pageNumber: number,
+    pageSize: number,
+    sliceOnly: boolean
+  ) => {
+    const sliced = sortAndSliceRows(rows, pageNumber, pageSize, sliceOnly);
+    setSlicedRows(sliced);
+  };
+
   const processParentTreeData = (data: ParentTreeGeneticQualityType) => {
     const modifiedState = { ...state };
     let clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
@@ -135,6 +154,7 @@ const ParentTreeStep = (
     });
 
     modifiedState.tableRowData = clonedTableRowData;
+    sliceTableRowData(Object.values(clonedTableRowData), currentPage, currPageSize, false);
     setStepData(modifiedState);
   };
 
@@ -156,13 +176,17 @@ const ParentTreeStep = (
   const setInputChange = (cloneNumber: string, colName: keyof RowItem, value: string) => {
     const clonedState = { ...state };
     clonedState.tableRowData[cloneNumber][colName] = value;
+    // Slicing rows again to make sure the value is updated in the slicedRows state,
+    // It works without doing this as slicedRows is a shallow copy, but let's not rely on it
+    sliceTableRowData(Object.values(clonedState.tableRowData), currentPage, currPageSize, true);
     setStepData(clonedState);
   };
 
   const renderTableCell = (rowData: RowItem, header: HeaderObj) => {
     if (header.availableInTabs.includes(currentTab) && header.enabled) {
+      const className = header.editable ? 'td-no-padding' : null;
       return (
-        <TableCell key={header.id}>
+        <TableCell key={header.id} className={className}>
           {
             header.editable
               ? (
@@ -287,8 +311,10 @@ const ParentTreeStep = (
   };
 
   const handlePagination = (paginationObj: PaginationChangeType) => {
-    console.log(paginationObj);
-    setCurrPageSize(paginationObj.pageSize);
+    const { page, pageSize } = paginationObj;
+    setCurrentPage(page);
+    setCurrPageSize(pageSize);
+    sliceTableRowData(Object.values(state.tableRowData), page, pageSize, true);
   };
 
   const renderTableBody = () => {
@@ -296,34 +322,40 @@ const ParentTreeStep = (
       return null;
     }
     return (
-      <>
-        <TableBody>
-          {
-            // Since we cannot sort an Object
-            // we will have to sort the array here
-            sortRowItem(Object.values(state.tableRowData)).map((rowData) => (
-              rowData.isCalcTab
-                ? null
-                : (
-                  <TableRow key={rowData.cloneNumber}>
-                    {
-                      headerConfig.map((header) => (
-                        renderTableCell(rowData, header)
-                      ))
-                    }
-                  </TableRow>
-                )
-            ))
-          }
-        </TableBody>
-        <Pagination
-          pageSize={currPageSize}
-          pageSizes={pageSizesConfig}
-          itemsPerPageText=""
-          totalItems={Object.values(state.tableRowData).length}
-          onChange={(paginationObj: PaginationChangeType) => handlePagination(paginationObj)}
-        />
-      </>
+      <TableBody>
+        {
+          slicedRows.map((rowData) => (
+            rowData.isCalcTab
+              ? null
+              : (
+                <TableRow key={rowData.cloneNumber}>
+                  {
+                    headerConfig.map((header) => (
+                      renderTableCell(rowData, header)
+                    ))
+                  }
+                </TableRow>
+              )
+          ))
+        }
+      </TableBody>
+    );
+  };
+
+  const renderPagination = () => {
+    if (currentTab === 'mixTab') {
+      return null;
+    }
+    return (
+      <Pagination
+        pageSize={currPageSize}
+        pageSizes={pageSizesConfig}
+        itemsPerPageText=""
+        totalItems={Object.values(state.tableRowData).length}
+        onChange={
+          (paginationObj: PaginationChangeType) => handlePagination(paginationObj)
+        }
+      />
     );
   };
 
@@ -431,6 +463,9 @@ const ParentTreeStep = (
                             }
                           </Table>
                         )
+                    }
+                    {
+                      renderPagination()
                     }
                   </TableContainer>
                 </Column>
