@@ -1,305 +1,332 @@
-import { SMPMixEntriesType } from '../../../types/SeedlotTypes/ParentTree';
-import { TableHeaders, ParentTreesType, SMPSuccessFixedFiltersType } from './definitions';
+/* eslint-disable max-len */
+import React from 'react';
+import { Link } from 'react-router-dom';
+import {
+  HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType
+} from './definitions';
 
-export const DEFAULT_INITIAL_ROWS = 20;
-export const PAGINATION_OPTIONS = [20, 40, 60, 80, 100];
+// Placeholder function to generate download URL for future
+const getDownloadUrl = (tabType: string) => `#TODO-${tabType.split(' ')[0]}`;
 
-export const pageTexts = {
-  tabTitles: {
-    coneTab: 'Cone and pollen count',
-    smpTab: 'SMP success on parent',
-    mixTab: 'Calculation of SMP mix'
-  },
-  sharedTabTexts: {
-    notification: {
-      title: 'Upload spreadsheet to table',
-      actionButtonLabel: 'Close notification'
-    },
-    geneticWorth: {
-      title: 'Genetic worth and diversity',
-      subtitle: 'Check the genetic worth and diversity of your seedlot',
-      defaultFieldsLabels: {
-        populationSize: 'Effective population size (Ne)',
-        testedParentTree: 'Tested parent tree contribution (%)',
-        coancestry: 'Coancestry (Sum PiPj * Cij)',
-        smpParents: 'Number of SMP parents from outside'
-      }
-    },
-    modal: {
-      title: 'Upload from file',
-      label: 'Seedlot registration',
-      description: 'Select the spreadsheet file for the cone and pollen count table with the data you want to import. The supported file format is .csv.',
-      uploadFile: 'Click to upload or drag and drop the file here',
-      uploadedFileErrorSize: 'File size exceeds limit',
-      uploadedFileErrorType: 'Incorrect file format',
-      uploadedFileErrorMessageSize: '500kb max file size. Select a new file and try again.',
-      uploadedFileErrorMessageType: 'Only CSV files are supported. Select a new file and try again.',
-      uploadedFileIconDesc: 'Delete file',
-      notification: {
-        title: 'Note:',
-        description: 'When uploading a file all previously filled data within the table will be replaced'
-      },
-      buttons: {
-        cancel: 'Cancel',
-        confirm: 'Import file and continue'
-      }
-    },
-    overflowMenus: {
-      columnsOverflow: 'Show/Hide columns',
-      breedingValues: 'Show breeding values',
-      smpMixUsed: 'Show SMP mix used on parent',
-      clonalValue: 'Show clonal value',
-      weightedValue: 'Show weighted value',
-      optionsOverflow: 'More options',
-      downloadTable: 'Download table template',
-      exportPdf: 'Export table as PDF file',
-      cleanTable: 'Clean table data'
-    },
-    uploadButtonLabel: 'Upload from file',
-    uploadButtonIconDesc: 'Upload file',
-    tableInputPlaceholder: 'Add value',
-    pagination: {
-      previous: 'Previous page',
-      next: 'Next page',
-      pageNumber: 'Page Number'
+const getTabDescription = (tabType: string) => (
+  <>
+    {
+      `Enter the ${tabType} manually or upload a spreadsheet file with the template for the ${tabType} table. `
+      + 'Remember to keep your orchard updated, you can '
     }
-  },
-  coneAndPollen: {
-    subtitle: 'Enter the cone and pollen count manually or upload a spreadsheet file with the template for the cone and pollen count table. Remember to keep your orchard updated, you can go to orchard\'s management page to edit the listed parent trees in your orchard.',
-    tableSubtitle: 'Enter the estimative of cone and pollen count for the orchard\'s seedlot (*required)',
-    notification: {
-      subtitle: 'You can import one spreadsheet file for the cone and pollen count table with the data you want to use. For further guidance on how to organize the data, do use the SPAR\'s spreadsheet template.',
-      templateLink: 'Download cone and pollen count template'
-    },
-    summary: {
-      title: 'Summary',
-      subtitle: 'Check the parent tree contribution summary',
-      fieldLabels: {
-        totalParentTrees: 'Total number of parent trees',
-        totalConeCount: 'Total number of cone count',
-        totalPollenCount: 'Total number of pollen count',
-        averageSMP: 'Average number of SMP success %'
-      }
+    <Link to="#TODO-orchard-management-link">go to orchard&apos;s management page</Link>
+    &nbsp;to edit the listed parent trees in your orchard.
+  </>
+);
+
+const getNotificationSubtitle = (tabType: string) => (
+  <>
+    {
+      `You can import one spreadsheet file for the ${tabType} table with the data you want to use. `
     }
-  },
-  smpSuccess: {
-    subtitle: 'Enter the SMP success on parent manually or upload a spreadsheet file with the template for the cone and pollen count table. Remember to keep your orchard updated, you can go to orchard\'s management page to edit the listed parent trees in your orchard.',
-    tableSubtitle: 'Enter the estimative of SMP success for the orchard\'s seedlot',
-    notification: {
-      subtitle: 'You can import one spreadsheet file for the SMP success on parent table with the data you want to use. For further guidance on how to organize the data, do use the SPAR\'s spreadsheet template.',
-      templateLink: 'Download SMP success on parent template'
-    },
-    bulkCheckboxLabel: 'Enter the same SMP success on parent or Non-orchard pollen contaminant to all parent trees',
-    bulkSuccessInputLabel: 'SMP Success on parent (%)',
-    bulkNonOrchardInputLabel: 'Non-orchard pollen contaminant (%)',
-    summary: {
-      title: 'Summary',
-      subtitle: 'Check the SMP success on parent summary',
-      fieldLabels: {
-        totalParentTrees: 'Total number of parent trees',
-        averageSMPSuccess: 'Average number of SMP success %',
-        averageNonOrchard: 'Average number of non-orchard pollen contam. (%)'
-      }
+    <br />
+    {
+      'For further guidance on how to organize the data, '
+      + "do use the SPAR's spreadsheet template. "
     }
+    <Link className="notification-link" to={getDownloadUrl(tabType)}>{`Download ${tabType} template`}</Link>
+  </>
+);
+
+const errorDescription = (
+  <>
+    To see your orchard&apos;s composition, you must first fill the orchard id field in the previous step, “Orchard”.
+    <br />
+    Please, fill the orchard ID to complete the cone and pollen table.
+  </>
+);
+
+export const getPageText = () => ({
+  notificationTitle: 'Upload spreadsheet to table',
+  errorNotifTitle: 'No orchard ID linked yet!',
+  errorDescription,
+  coneTab: {
+    tabTitle: 'Cone and pollen count',
+    tabDescription: getTabDescription('cone and pollen count'),
+    notificationSubtitle: getNotificationSubtitle('cone and pollen count'),
+    tableDescription: "Enter the estimative of cone and pollen count for the orchard's seedlot (*required)"
   },
-  smpMix: {
-    subtitle: 'Enter the calculation of SMP mix manually or upload a spreadsheet file with the template for the cone and pollen count table. Remember to keep your orchard updated, you can go to orchard\'s management page to edit the listed parent trees in your orchard.',
-    tableSubtitle: 'Enter the estimative volume of SMP mix used for each clone',
-    tableActions: 'Actions',
-    addButtonDesc: 'Add row',
-    deleteRow: 'Delete row',
-    clonalHeader: '- Clonal value',
-    weightedHeader: '- Weighted value',
-    notification: {
-      subtitle: 'You can import one spreadsheet file for calculation of SMP mix table with the data you want to use. For further guidance on how to organize the data, do use the SPAR\'s spreadsheet template.',
-      templateLink: 'Download calculation of SMP mix template'
-    },
-    summary: {
-      title: 'Breeding value SMP mix used',
-      subtitle: 'Check the breeding value of SMP mix used on parent',
-      fieldLabels: {
-        smpParentTrees: 'Number of SMP parents from outside',
-        totalVolume: 'Total volume (ml)'
-      }
-    }
+  successTab: {
+    tabTitle: 'SMP success on parent',
+    tabDescription: getTabDescription('SMP success on parent'),
+    notificationSubtitle: getNotificationSubtitle('SMP success on parent'),
+    tableDescription: "Enter the estimative of SMP success for the orchard's seedlot"
+  },
+  mixTab: {
+    tabTitle: 'Calculation of SMP mix',
+    tabDescription: getTabDescription('calculation of SMP mix'),
+    notificationSubtitle: getNotificationSubtitle('calculation of SMP mix'),
+    tableDescription: 'Enter the estimative volume of SMP mix used for each clone'
+  }
+});
+
+export const notificationCtrlObj: NotifCtrlType = {
+  coneTab: {
+    showInfo: true,
+    showError: true
+  },
+  successTab: {
+    showInfo: true,
+    showError: true
+  },
+  mixTab: {
+    showInfo: true,
+    showError: true
   }
 };
 
-export const geneticTraits = {
-  ad: {
-    code: 'ad',
-    description: 'Genetic worth AD',
-    filterLabel: 'Deer browse (AD)'
-  },
-  dfs: {
-    code: 'dfs',
-    description: 'Genetic worth DFS',
-    filterLabel: 'Dothistroma needle blight (DFS)'
-  },
-  dfu: {
-    code: 'dfu',
-    description: 'Genetic worth DFU',
-    filterLabel: 'Cedar leaf blight (DFU)'
-  },
-  dfw: {
-    code: 'dfw',
-    description: 'Genetic worth DFW',
-    filterLabel: 'Swiss needle cast (DFW)'
-  },
-  dsb: {
-    code: 'dsb',
-    description: 'Genetic worth DSB',
-    filterLabel: 'White pine blister rust (DSB)'
-  },
-  dsc: {
-    code: 'dsc',
-    description: 'Genetic worth DSC',
-    filterLabel: 'Comandra blister rust (DSC)'
-  },
-  dsg: {
-    code: 'dsg',
-    description: 'Genetic worth DSG',
-    filterLabel: 'Western gall rust (DSG)'
-  },
-  gvo: {
-    code: 'gvo',
-    description: 'Genetic worth GVO',
-    filterLabel: 'Volume growth (GVO)'
-  },
-  iws: {
-    code: 'iws',
-    description: 'Genetic worth IWS',
-    filterLabel: 'White pine terminal weevil (IWS)'
-  },
-  wdu: {
-    code: 'wdu',
-    description: 'Genetic worth WDU',
-    filterLabel: 'Durability (WDU)'
-  },
-  wwd: {
-    code: 'wwd',
-    description: 'Genetic worth WWD',
-    filterLabel: 'Wood density (WWD)'
-  },
-  wve: {
-    code: 'wve',
-    description: 'Genetic worth WVE',
-    filterLabel: 'Wood velocity measures (WVE)'
-  }
+export const geneticWorthDict: GeneticWorthDictType = {
+  CW: ['ad', 'dfu', 'gvo', 'wdu'],
+  PLI: ['dfs', 'dsc', 'dsg', 'gvo'],
+  FDC: ['dfw', 'gvo', 'wwd'],
+  PW: ['dsb'],
+  DR: ['gvo'],
+  EP: ['gvo'],
+  FDI: ['gvo'],
+  HW: ['gvo'],
+  LW: ['gvo'],
+  PY: ['gvo'],
+  SS: ['gvo', 'iws'],
+  SX: ['gvo', 'iws']
 };
 
-export const coneAndPollenFixedHeaders:Array<TableHeaders> = [
-  {
-    key: '1',
-    header: 'Clone number'
-  },
-  {
-    key: '2',
-    header: 'Cone count'
-  },
-  {
-    key: '3',
-    header: 'Pollen count'
-  },
-  {
-    key: '4',
-    header: 'SMP success (%)'
-  }
-];
-
-export const smpSuccessFixedHeaders:Array<TableHeaders> = [
-  {
-    key: '1',
-    header: 'Clone number'
-  },
-  {
-    key: '2',
-    header: 'SMP success on parent (%)'
-  },
-  {
-    key: '3',
-    header: 'Non-orchard pollen contam. (%)'
-  }
-];
-
-export const smpSuccessFixedFilters: Array<SMPSuccessFixedFiltersType> = [
-  {
-    code: 'meanDegreesLat',
-    description: 'Mean degrees latitude'
-  },
-  {
-    code: 'meanMinutesLat',
-    description: 'Mean minutes latitude'
-  },
-  {
-    code: 'meanDegreesLong',
-    description: 'Mean degrees longitude'
-  },
-  {
-    code: 'meanMinutesLong',
-    description: 'Mean minutes longitude'
-  },
-  {
-    code: 'meanElevation',
-    description: 'Mean elevation'
-  }
-];
-
-export const smpMixFixedHeaders:Array<TableHeaders> = [
-  {
-    key: '1',
-    header: 'Clone number'
-  },
-  {
-    key: '2',
-    header: 'Volume (ml)'
-  },
-  {
-    key: '3',
-    header: 'Proportion'
-  }
-];
-
-export const newSMPMixEntry:SMPMixEntriesType = {
+export const rowTemplate: RowItem = {
   cloneNumber: '',
-  volume: '',
-  proportion: '',
-  adClonal: '',
-  dfsClonal: '',
-  dfuClonal: '',
-  dfwClonal: '',
-  dsbClonal: '',
-  dscClonal: '',
-  dsgClonal: '',
-  gvoClonal: '',
-  iwsClonal: '',
-  wduClonal: '',
-  wwdClonal: '',
-  wveClonal: '',
-  adWeighted: '',
-  dfsWeighted: '',
-  dfuWeighted: '',
-  dfwWeighted: '',
-  dsbWeighted: '',
-  dscWeighted: '',
-  dsgWeighted: '',
-  gvoWeighted: '',
-  iwsWeighted: '',
-  wduWeighted: '',
-  wwdWeighted: '',
-  wveWeighted: ''
+  cloneCount: null,
+  pollenCount: null,
+  smpSuccessPerc: null,
+  ad: null,
+  dfs: null,
+  dfu: null,
+  dfw: null,
+  dsb: null,
+  dsc: null,
+  dsg: null,
+  gvo: null,
+  iws: null,
+  wdu: null,
+  wwd: null,
+  nonOrchardPollenContam: null,
+  meanDegLat: null,
+  meanMinLat: null,
+  meanDegLong: null,
+  meanMinLong: null,
+  meanElevation: null,
+  volume: null,
+  proportion: null
 };
 
-// This function will be removed once we start using the real API
-export const getTestParentTrees = (orchardID: string[]): Array<ParentTreesType> => {
-  const returnObj:Array<ParentTreesType> = [];
-  orchardID.forEach((id) => {
-    for (let index = 1; index < 26; index += 1) {
-      returnObj.push({
-        id: `${index.toString()}-${id}`,
-        value: index.toString()
-      });
-    }
-  });
-  return returnObj;
-};
+export const headerTemplate: Array<HeaderObj> = [
+  {
+    id: 'cloneNumber',
+    name: 'Clone number',
+    description: 'Clone number',
+    enabled: true,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'cloneCount',
+    name: 'Cone count',
+    description: 'Cone count',
+    enabled: true,
+    editable: true,
+    isAnOption: false,
+    availableInTabs: ['coneTab']
+  },
+  {
+    id: 'pollenCount',
+    name: 'Pollen count',
+    description: 'Pollen count',
+    enabled: true,
+    editable: true,
+    isAnOption: false,
+    availableInTabs: ['coneTab']
+  },
+  {
+    id: 'smpSuccessPerc',
+    name: 'SMP success on parent (%)',
+    description: 'SMP success on parent (%)',
+    enabled: true,
+    editable: true,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab']
+  },
+  {
+    id: 'ad',
+    name: 'AD',
+    description: 'Animal browse resistance (deer)',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'dfs',
+    name: 'DFS',
+    description: 'Disease resistance for Dothistroma needle blight',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'dfu',
+    name: 'DFU',
+    description: 'Disease resistance for Redcedar leaf blight',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'dfw',
+    name: 'DFW',
+    description: 'Disease resistance Swiss needle cast',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'dsb',
+    name: 'DSB',
+    description: 'Disease resistance for white pine blister rust',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'dsc',
+    name: 'DSC',
+    description: 'Disease resistance for Commandra blister rust',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'dsg',
+    name: 'DSG',
+    description: 'Disease resistance Western gall rust',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'gvo',
+    name: 'GVO',
+    description: 'Volume growth',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'iws',
+    name: 'IWS',
+    description: 'Spruce terminal weevil',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'wdu',
+    name: 'WDU',
+    description: 'Wood durability',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'wwd',
+    name: 'WWD',
+    description: 'Wood quality',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: ['coneTab', 'successTab', 'mixTab']
+  },
+  {
+    id: 'nonOrchardPollenContam',
+    name: 'Non-orchard pollen contam. (%)',
+    description: 'Non-orchard pollen contam. (%)',
+    enabled: true,
+    editable: true,
+    isAnOption: false,
+    availableInTabs: [undefined, 'successTab']
+  },
+  {
+    id: 'meanDegLat',
+    name: 'Mean degrees latitude',
+    description: 'Mean degrees latitude',
+    enabled: false,
+    editable: false,
+    isAnOption: true,
+    availableInTabs: [undefined, 'successTab']
+  },
+  {
+    id: 'meanMinLat',
+    name: 'Mean minutes latitude',
+    description: 'Mean minutes latitude',
+    enabled: false,
+    editable: false,
+    isAnOption: true,
+    availableInTabs: [undefined, 'successTab']
+  },
+  {
+    id: 'meanDegLong',
+    name: 'Mean degrees longitude',
+    description: 'Mean degrees longitude',
+    enabled: false,
+    editable: false,
+    isAnOption: true,
+    availableInTabs: [undefined, 'successTab']
+  },
+  {
+    id: 'meanMinLong',
+    name: 'Mean minutes longitude',
+    description: 'Mean minutes longitude',
+    enabled: false,
+    editable: false,
+    isAnOption: true,
+    availableInTabs: [undefined, 'successTab']
+  },
+  {
+    id: 'meanElevation',
+    name: 'Mean elevation',
+    description: 'Mean elevation',
+    enabled: false,
+    editable: false,
+    isAnOption: true,
+    availableInTabs: [undefined, 'successTab']
+  },
+  {
+    id: 'volume',
+    name: 'Volume (ml)',
+    description: 'Volume (ml)',
+    enabled: true,
+    editable: true,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'proportion',
+    name: 'Proportion',
+    description: 'Proportion',
+    enabled: true,
+    editable: true,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  }
+];

@@ -22,9 +22,9 @@ parameters:
   - name: CPU_LIMIT
     value: 175m
   - name: MEMORY_REQUEST
-    value: 150Mi
-  - name: MEMORY_LIMIT
     value: 300Mi
+  - name: MEMORY_LIMIT
+    value: 400Mi
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io

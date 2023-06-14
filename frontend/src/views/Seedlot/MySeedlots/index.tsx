@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import {
   Row,
+  Column,
   Breadcrumb,
   BreadcrumbItem,
   FlexGrid,
@@ -18,6 +19,7 @@ import ApiConfig from '../../../api-service/ApiConfig';
 import Seedlot from '../../../types/Seedlot';
 
 import './styles.scss';
+import { tableText } from './constants';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
@@ -41,28 +43,32 @@ const MySeedlots = () => {
   }, []);
 
   return (
-    <FlexGrid>
+    <FlexGrid fullWidth className="my-seedlot-content">
       <Row className="my-seedlot-breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Row className="my-seedlot-title">
-        <PageTitle
-          title="My Seedlots"
-          subtitle="Check and manage my seedlots"
-          enableFavourite
-          activity="My Seedlots"
-        />
-        <Button
-          kind="primary"
-          onClick={() => { navigate('/seedlot/register-a-class'); }}
-          size="md"
-          className="btn-my-seedlot"
-          renderIcon={Add}
-        >
-          Register a new seedlot
-        </Button>
+        <Column sm={4} md={6} lg={14} xlg={12}>
+          <PageTitle
+            title={tableText.pageTitle}
+            subtitle={tableText.pageSubtitle}
+            enableFavourite
+            activity="My Seedlots"
+          />
+        </Column>
+        <Column sm={4} md={2} lg={2} xlg={4}>
+          <Button
+            kind="primary"
+            onClick={() => { navigate('/seedlot/register-a-class'); }}
+            size="lg"
+            className="btn-my-seedlot"
+            renderIcon={Add}
+          >
+            {tableText.buttonText}
+          </Button>
+        </Column>
       </Row>
       <Row className="my-seedlot-data-table-row">
         {seedlotsData.length > 0 && <SeedlotDataTable seedlots={seedlotsData} /> }

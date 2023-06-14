@@ -34,7 +34,8 @@ import {
   initOwnershipState,
   initExtractionStorageState,
   initInvalidationObj,
-  initOwnerShipInvalidState
+  initOwnerShipInvalidState,
+  initParentTreeState
 } from './utils';
 import { getDropDownList } from '../../../utils/DropDownUtils';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
@@ -82,7 +83,7 @@ const SeedlotRegistrationForm = () => {
     interimStep: initInterimState(defaultAgency, defaultCode),
     ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
     orchardStep: initOrchardState(),
-    parentTreeStep: {},
+    parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
   });
 
@@ -117,6 +118,12 @@ const SeedlotRegistrationForm = () => {
     logState();
     const newStep = formStep + delta;
     setFormStep(newStep);
+  };
+
+  const cleanParentTables = () => {
+    const clonedState = { ...allStepData };
+    clonedState.parentTreeStep.tableRowData = {};
+    setAllStepData(clonedState);
   };
 
   const renderStep = () => {
@@ -170,6 +177,7 @@ const SeedlotRegistrationForm = () => {
           <OrchardStep
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
+            cleanParentTables={() => cleanParentTables()}
             setStepData={(data: OrchardForm) => setStepData('orchardStep', data)}
           />
         );
@@ -179,6 +187,7 @@ const SeedlotRegistrationForm = () => {
           <ParentTreeStep
             seedlotSpecies={seedlotSpecies}
             state={allStepData.parentTreeStep}
+            orchards={allStepData.orchardStep.orchards}
             setStepData={(data: any) => setStepData('parentTreeStep', data)}
           />
         );
@@ -244,7 +253,7 @@ const SeedlotRegistrationForm = () => {
         </Row>
         <Row className="seedlot-registration-button-row">
           <Grid narrow>
-            <Column sm={4} md={3} lg={3} xlg={3}>
+            <Column sm={4} md={3} lg={3} xlg={4}>
               {
                 formStep !== 0
                   ? (
@@ -270,7 +279,7 @@ const SeedlotRegistrationForm = () => {
 
               }
             </Column>
-            <Column sm={4} md={3} lg={3} xlg={3}>
+            <Column sm={4} md={3} lg={3} xlg={4}>
               {
                 formStep !== 5
                   ? (
