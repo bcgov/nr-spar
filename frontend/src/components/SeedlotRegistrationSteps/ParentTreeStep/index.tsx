@@ -341,9 +341,7 @@ const ParentTreeStep = (
                       </TableToolbarContent>
                     </TableToolbar>
                     {
-                      /**
-                       * Check if it's fetching parent tree data
-                       */
+                      // Check if it's fetching parent tree data
                       orchardsData.length > 0 && Object.values(state.tableRowData).length === 0
                         ? (
                           <DataTableSkeleton
