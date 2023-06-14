@@ -111,7 +111,7 @@ const SeedlotRegistrationForm = () => {
 
   const logState = () => {
     // eslint-disable-next-line no-console
-    // console.log(allStepData);
+    console.log(allStepData);
   };
 
   const setStep = (delta: number) => {
