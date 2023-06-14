@@ -212,6 +212,49 @@ const ParentTreeStep = (
     }
   };
 
+  const renderNotification = () => {
+    if (state.notifCtrl[currentTab].showInfo && orchardsData.length > 0) {
+      return (
+        <ActionableNotification
+          kind="info"
+          lowContrast
+          title={pageText.notificationTitle}
+          inline
+          actionButtonLabel=""
+          onClose={() => {
+            toggleNotification('info');
+            return false;
+          }}
+        >
+          <span className="notification-subtitle">
+            {pageText[currentTab].notificationSubtitle}
+          </span>
+        </ActionableNotification>
+      );
+    }
+
+    if (state.notifCtrl[currentTab].showError && orchardsData.length === 0) {
+      return (
+        <ActionableNotification
+          kind="error"
+          lowContrast
+          title={pageText.errorNotifTitle}
+          actionButtonLabel=""
+          onClose={() => {
+            toggleNotification('error');
+            return false;
+          }}
+        >
+          <span className="notification-subtitle">
+            {pageText.errorDescription}
+          </span>
+        </ActionableNotification>
+      );
+    }
+
+    return null;
+  };
+
   const renderColOptions = () => {
     const toggleableCols = headerConfig
       .filter((header) => header.isAnOption && header.availableInTabs.includes(currentTab));
@@ -233,6 +276,41 @@ const ParentTreeStep = (
           }
         />
       ))
+    );
+  };
+
+  const renderTableBody = () => {
+    if (currentTab === 'mixTab') {
+      return null;
+    }
+    return (
+      <>
+        <TableBody>
+          {
+            // Since we cannot sort an Object
+            // we will have to sort the array here
+            sortRowItem(Object.values(state.tableRowData)).map((rowData) => (
+              rowData.isCalcTab
+                ? null
+                : (
+                  <TableRow key={rowData.cloneNumber}>
+                    {
+                      headerConfig.map((header) => (
+                        renderTableCell(rowData, header)
+                      ))
+                    }
+                  </TableRow>
+                )
+            ))
+          }
+        </TableBody>
+        <Pagination
+          pageSizes={pageSizesConfig}
+          itemsPerPageText=""
+          totalItems={Object.values(state.tableRowData).length}
+          onChange={(a: any, b: any, c: any) => console.log(a, b, c)}
+        />
+      </>
     );
   };
 
@@ -264,45 +342,7 @@ const ParentTreeStep = (
               <Row className="notification-row">
                 <Column>
                   {
-                    (state.notifCtrl[currentTab].showInfo && orchardsData.length > 0)
-                      ? (
-                        <ActionableNotification
-                          kind="info"
-                          lowContrast
-                          title={pageText.notificationTitle}
-                          inline
-                          actionButtonLabel=""
-                          onClose={() => {
-                            toggleNotification('info');
-                            return false;
-                          }}
-                        >
-                          <span className="notification-subtitle">
-                            {pageText[currentTab].notificationSubtitle}
-                          </span>
-                        </ActionableNotification>
-                      )
-                      : null
-                  }
-                  {
-                    (state.notifCtrl[currentTab].showError && orchardsData.length === 0)
-                      ? (
-                        <ActionableNotification
-                          kind="error"
-                          lowContrast
-                          title={pageText.errorNotifTitle}
-                          actionButtonLabel=""
-                          onClose={() => {
-                            toggleNotification('error');
-                            return false;
-                          }}
-                        >
-                          <span className="notification-subtitle">
-                            {pageText.errorDescription}
-                          </span>
-                        </ActionableNotification>
-                      )
-                      : null
+                    renderNotification()
                   }
                 </Column>
               </Row>
@@ -373,27 +413,9 @@ const ParentTreeStep = (
                                 }
                               </TableRow>
                             </TableHead>
-                            <TableBody>
-                              {
-                                // Since we cannot sort an Object
-                                // we will have to sort the array here
-                                sortRowItem(Object.values(state.tableRowData)).map((rowData) => (
-                                  <TableRow key={rowData.cloneNumber}>
-                                    {
-                                      headerConfig.map((header) => (
-                                        renderTableCell(rowData, header)
-                                      ))
-                                    }
-                                  </TableRow>
-                                ))
-                              }
-                            </TableBody>
-                            <Pagination
-                              pageSizes={pageSizesConfig}
-                              itemsPerPageText=""
-                              totalItems={Object.values(state.tableRowData).length}
-                              onChange={(a: any, b: any, c: any) => console.log(a, b, c)}
-                            />
+                            {
+                              renderTableBody()
+                            }
                           </Table>
                         )
                     }

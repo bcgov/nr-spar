@@ -118,7 +118,8 @@ export const rowTemplate: RowItem = {
   meanMinLong: null,
   meanElevation: null,
   volume: null,
-  proportion: null
+  proportion: null,
+  isCalcTab: false
 };
 
 export const headerTemplate: Array<HeaderObj> = [

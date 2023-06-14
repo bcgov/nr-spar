@@ -29,6 +29,7 @@ export type RowItem = {
   meanElevation: number | null,
   volume: number | null,
   proportion: number | null
+  isCalcTab: boolean
 };
 
 /**
