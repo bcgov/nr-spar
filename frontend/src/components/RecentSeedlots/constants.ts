@@ -1,5 +1,5 @@
 const recentSeedlotsText = {
-  tableTitle: 'My Seedlots',
+  tableTitle: 'My seedlots',
   tableSubtitle: 'Check a summary of your recent seedlots',
   emptyPictogram: 'Magnify',
   emptyTitle: 'There is no seedlot to show yet!',
