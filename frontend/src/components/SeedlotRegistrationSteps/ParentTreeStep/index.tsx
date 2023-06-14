@@ -437,7 +437,7 @@ const ParentTreeStep = (
                         )
                         : (
                           <Table useZebraStyles>
-                            <TableHead>
+                            <TableHead className="table-header">
                               <TableRow>
                                 {
                                   headerConfig.map((header) => (

@@ -82,6 +82,14 @@
     }
   }
 
+  .table-header {
+    height: 4rem;
+    th {
+      vertical-align: baseline;
+      padding-top: 1rem;
+    }
+  }
+
   .#{vars.$bcgov-prefix}--data-table-content {
     overflow: visible;
   }
