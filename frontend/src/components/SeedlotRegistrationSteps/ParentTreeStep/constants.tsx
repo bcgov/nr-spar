@@ -330,3 +330,7 @@ export const headerTemplate: Array<HeaderObj> = [
     availableInTabs: [undefined, undefined, 'mixTab']
   }
 ];
+
+export const pageSizesConfig = [
+  20, 40, 60, 80, 100
+];

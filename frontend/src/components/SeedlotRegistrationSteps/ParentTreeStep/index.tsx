@@ -22,7 +22,8 @@ import {
   TableCell,
   DataTableSkeleton,
   DefinitionTooltip,
-  TextInput
+  TextInput,
+  Pagination
 } from '@carbon/react';
 import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
@@ -32,7 +33,7 @@ import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
-  getPageText, headerTemplate, rowTemplate, geneticWorthDict
+  getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
@@ -313,27 +314,6 @@ const ParentTreeStep = (
                   >
                     <TableToolbar aria-label="data table toolbar">
                       <TableToolbarContent>
-                        {/* <Popover
-                          align="bottom-right"
-                          open={isColMenuOpen}
-                          isTabTip
-                        >
-                          <Button
-                            kind="ghost"
-                            hasIconOnly
-                            renderIcon={View}
-                            type="button"
-                            onClick={() => setIsColMenuOpen(!isColMenuOpen)}
-                          />
-                          <PopoverContent>
-                            <fieldset>
-                              <legend>Show breeding value</legend>
-                              <Checkbox id="a" labelText="ikkk" />
-                              <Checkbox id="b" labelText="saasd" />
-                              <Checkbox id="c" labelText="hkok" />
-                            </fieldset>
-                          </PopoverContent>
-                        </Popover> */}
                         <OverflowMenu
                           renderIcon={View}
                           iconDescription="Show/hide columns"
@@ -410,6 +390,12 @@ const ParentTreeStep = (
                                 ))
                               }
                             </TableBody>
+                            <Pagination
+                              pageSizes={pageSizesConfig}
+                              itemsPerPageText=""
+                              totalItems={Object.values(state.tableRowData).length}
+                              onChange={(a: any, b: any, c: any) => console.log(a, b, c)}
+                            />
                           </Table>
                         )
                     }
