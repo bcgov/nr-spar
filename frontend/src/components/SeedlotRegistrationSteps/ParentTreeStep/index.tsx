@@ -175,6 +175,11 @@ const ParentTreeStep = (
                     setInputChange(rowData.cloneNumber, header.id, event.target.value);
                   }}
                   onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+                  onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
+                    if (event.key === 'Enter') {
+                      (event.target as HTMLInputElement).blur();
+                    }
+                  }}
                 />
               )
               : (
