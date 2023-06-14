@@ -33,7 +33,7 @@ import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
-  getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig
+  getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig, DEFAULT_PAGE_SIZE
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
@@ -41,6 +41,7 @@ import {
 import { getTabString, processOrchards, sortRowItem } from './utils';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import PaginationChangeType from '../../../types/PaginationChangeType';
 import './styles.scss';
 
 interface ParentTreeStepProps {
@@ -65,6 +66,7 @@ const ParentTreeStep = (
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
     structuredClone(headerTemplate)
   );
+  const [currPageSize, setCurrPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -284,6 +286,11 @@ const ParentTreeStep = (
     );
   };
 
+  const handlePagination = (paginationObj: PaginationChangeType) => {
+    console.log(paginationObj);
+    setCurrPageSize(paginationObj.pageSize);
+  };
+
   const renderTableBody = () => {
     if (currentTab === 'mixTab') {
       return null;
@@ -310,10 +317,11 @@ const ParentTreeStep = (
           }
         </TableBody>
         <Pagination
+          pageSize={currPageSize}
           pageSizes={pageSizesConfig}
           itemsPerPageText=""
           totalItems={Object.values(state.tableRowData).length}
-          onChange={(a: any, b: any, c: any) => console.log(a, b, c)}
+          onChange={(paginationObj: PaginationChangeType) => handlePagination(paginationObj)}
         />
       </>
     );
@@ -424,7 +432,6 @@ const ParentTreeStep = (
                           </Table>
                         )
                     }
-
                   </TableContainer>
                 </Column>
               </Row>

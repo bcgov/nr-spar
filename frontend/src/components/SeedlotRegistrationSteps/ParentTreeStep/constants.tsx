@@ -5,6 +5,8 @@ import {
   HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType
 } from './definitions';
 
+export const DEFAULT_PAGE_SIZE = 40;
+
 // Placeholder function to generate download URL for future
 const getDownloadUrl = (tabType: string) => `#TODO-${tabType.split(' ')[0]}`;
 

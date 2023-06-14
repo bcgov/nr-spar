@@ -10,7 +10,7 @@
     border-bottom: 2px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
     width: calc(100% + 1rem);
 
-    .bcgov--tab--list {
+    .#{vars.$bcgov-prefix}--tab--list {
       // Without this the tab list will be pushed up by 2px due to the border bottom above
       margin-bottom: -2px;
     }
@@ -89,5 +89,10 @@
   .#{vars.$bcgov-prefix}--definition-term{
     border-bottom: none;
     @include type.type-style('heading-compact-01');
+  }
+
+  .#{vars.$bcgov-prefix}--pagination__control-buttons{
+    display: flex;
+    align-items: center;
   }
 }
