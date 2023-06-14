@@ -211,7 +211,7 @@ const ApplicantInformationForm = () => {
               id="appliccant-email-input"
               name="email"
               ref={emailInputRef}
-              type="text"
+              type="email"
               labelText="Applicant email address"
               helperText="The Tree Seed Centre will uses it to communicate with the applicant"
               invalid={invalidEmail}
