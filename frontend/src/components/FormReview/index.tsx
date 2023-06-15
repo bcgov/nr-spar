@@ -181,6 +181,7 @@ const FormReview = () => {
                       defaultAgency={defaultAgency}
                       defaultCode={defaultCode}
                       agencyOptions={agencyOptions}
+                      collectionMethods={[]}
                       setStepData={() => { }}
                       readOnly
                     />

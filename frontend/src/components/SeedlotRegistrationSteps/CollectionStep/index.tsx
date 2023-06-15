@@ -22,7 +22,7 @@ import {
   CollectionStepProps,
   CollectionForm,
   FormValidation
-} from './utils';
+} from './definitions';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 
 import './styles.scss';
@@ -34,6 +34,7 @@ const CollectionStep = (
     defaultAgency,
     defaultCode,
     agencyOptions,
+    collectionMethods,
     readOnly
   }: CollectionStepProps
 ) => {
@@ -51,7 +52,7 @@ const CollectionStep = (
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [isChecked, setIsChecked] = useState<boolean>(true);
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
-  const [isOtherChecked, setIsOtherChecked] = useState<boolean>(state.other);
+  const [isOtherChecked, setIsOtherChecked] = useState<boolean | string>(state.other);
 
   const refControl = useRef<any>({});
 
@@ -105,9 +106,9 @@ const CollectionStep = (
   };
 
   const handleFormInput = <K extends keyof CollectionForm>(
-    name: K,
+    name: string,
     value: CollectionForm[K],
-    optName?: K,
+    optName?: string,
     optValue?: CollectionForm[K]
   ) => {
     const newForm: CollectionForm = { ...state };
@@ -126,15 +127,15 @@ const CollectionStep = (
     const { checked } = event.target;
     setIsChecked(checked);
     handleFormInput(
-      fieldsConfig.collector.name as keyof CollectionForm,
+      fieldsConfig.collector.name,
       defaultAgency,
-      fieldsConfig.code.name as keyof CollectionForm,
+      fieldsConfig.code.name,
       defaultCode
     );
   };
 
   const collectionVolumeInformationHandler = <K extends keyof CollectionForm>(
-    name: K,
+    name: string,
     value: CollectionForm[K]
   ) => {
     const numberOfContainers = +refControl.current[fieldsConfig.numberOfContainers.name].value;
@@ -144,7 +145,7 @@ const CollectionStep = (
 
     if (name === fieldsConfig.volumeOfCones.name) {
       handleFormInput(
-        fieldsConfig.volumeOfCones.name as keyof CollectionForm,
+        fieldsConfig.volumeOfCones.name,
         value
       );
       setIsCalcWrong(
@@ -154,7 +155,7 @@ const CollectionStep = (
       handleFormInput(
         name,
         value,
-        fieldsConfig.volumeOfCones.name as keyof CollectionForm,
+        fieldsConfig.volumeOfCones.name,
         conesCalc.toString()
       );
       setIsCalcWrong(false);
@@ -163,7 +164,7 @@ const CollectionStep = (
 
   const collectionMethodsCheckboxes = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
-    handleFormInput(name as keyof CollectionForm, checked);
+    handleFormInput(name, checked);
     if (name === fieldsConfig.other.name) {
       setIsOtherChecked(checked);
     }
@@ -207,7 +208,7 @@ const CollectionStep = (
             selectedItem={state.collectorAgency}
             onChange={(e: ComboBoxEvent) => {
               handleFormInput(
-                fieldsConfig.collector.name as keyof CollectionForm,
+                fieldsConfig.collector.name,
                 e.selectedItem
               );
             }}
@@ -231,7 +232,7 @@ const CollectionStep = (
             readOnly={isChecked || readOnly}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput(
-                fieldsConfig.code.name as keyof CollectionForm,
+                fieldsConfig.code.name,
                 e.target.value
               );
             }}
@@ -255,7 +256,7 @@ const CollectionStep = (
             value={state.startDate}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleFormInput(
-                fieldsConfig.startDate.name as keyof CollectionForm,
+                fieldsConfig.startDate.name,
                 selectedDate
               );
             }}
@@ -282,7 +283,7 @@ const CollectionStep = (
             value={state.endDate}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleFormInput(
-                fieldsConfig.endDate.name as keyof CollectionForm,
+                fieldsConfig.endDate.name,
                 selectedDate
               );
             }}
@@ -313,7 +314,7 @@ const CollectionStep = (
             invalidText={fieldsConfig.numberOfContainers.invalidText}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               collectionVolumeInformationHandler(
-                fieldsConfig.numberOfContainers.name as keyof CollectionForm,
+                fieldsConfig.numberOfContainers.name,
                 e.target.value
               );
             }}
@@ -332,7 +333,7 @@ const CollectionStep = (
             invalidText={fieldsConfig.volumePerContainers.invalidText}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               collectionVolumeInformationHandler(
-                fieldsConfig.volumePerContainers.name as keyof CollectionForm,
+                fieldsConfig.volumePerContainers.name,
                 e.target.value
               );
             }}
@@ -356,7 +357,7 @@ const CollectionStep = (
             warnText={fieldsConfig.volumeOfCones.warnText}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               collectionVolumeInformationHandler(
-                fieldsConfig.volumeOfCones.name as keyof CollectionForm,
+                fieldsConfig.volumeOfCones.name,
                 e.target.value
               );
             }}
@@ -369,94 +370,24 @@ const CollectionStep = (
         <Column sm={4} md={8} lg={16} xlg={16}>
           <fieldset>
             <Subtitle text="Collection methods (Select at least one method used to collect the cones)" />
-            <Checkbox
-              id={fieldsConfig.aerialRanking.name}
-              name={fieldsConfig.aerialRanking.name}
-              ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.aerialRanking.name)}
-              labelText={fieldsConfig.aerialRanking.labelText}
-              readOnly={readOnly}
-              checked={state.aerialRanking}
-              onChange={
-                (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
-              }
-            />
-            <Checkbox
-              id={fieldsConfig.aerialClippingTopping.name}
-              name={fieldsConfig.aerialClippingTopping.name}
-              ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.aerialClippingTopping.name)}
-              labelText={fieldsConfig.aerialClippingTopping.labelText}
-              readOnly={readOnly}
-              checked={state.aerialClippingTopping}
-              onChange={
-                (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
-              }
-            />
-            <Checkbox
-              id={fieldsConfig.felledTrees.name}
-              name={fieldsConfig.felledTrees.name}
-              ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.felledTrees.name)}
-              labelText={fieldsConfig.felledTrees.labelText}
-              readOnly={readOnly}
-              checked={state.felledTrees}
-              onChange={
-                (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
-              }
-            />
-            <Checkbox
-              id={fieldsConfig.climbing.name}
-              name={fieldsConfig.climbing.name}
-              ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.climbing.name)}
-              labelText={fieldsConfig.climbing.labelText}
-              readOnly={readOnly}
-              checked={state.climbing}
-              onChange={
-                (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
-              }
-            />
-            <Checkbox
-              id={fieldsConfig.squirrelCache.name}
-              name={fieldsConfig.squirrelCache.name}
-              ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.squirrelCache.name)}
-              labelText={fieldsConfig.squirrelCache.labelText}
-              readOnly={readOnly}
-              checked={state.squirrelCache}
-              onChange={
-                (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
-              }
-            />
-            <Checkbox
-              id={fieldsConfig.ground.name}
-              name={fieldsConfig.ground.name}
-              ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.ground.name)}
-              labelText={fieldsConfig.ground.labelText}
-              readOnly={readOnly}
-              checked={state.ground}
-              onChange={
-                (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
-              }
-            />
-            <Checkbox
-              id={fieldsConfig.squirrelHarvesting.name}
-              name={fieldsConfig.squirrelHarvesting.name}
-              ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.squirrelHarvesting.name)}
-              labelText={fieldsConfig.squirrelHarvesting.labelText}
-              readOnly={readOnly}
-              checked={state.squirrelHarvesting}
-              onChange={
-                (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
-              }
-            />
-            <Checkbox
-              id={fieldsConfig.other.name}
-              name={fieldsConfig.other.name}
-              ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.other.name)}
-              labelText={fieldsConfig.other.labelText}
-              readOnly={readOnly}
-              checked={state.other}
-              onChange={
-                (event: React.ChangeEvent<HTMLInputElement>) => collectionMethodsCheckboxes(event)
-              }
-            />
+            {
+              collectionMethods.map((method) => (
+                <Checkbox
+                  id={fieldsConfig.aerialRanking.name}
+                  name={fieldsConfig.aerialRanking.name}
+                  ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.aerialRanking.name)}
+                  labelText={method.description}
+                  readOnly={readOnly}
+                  checked={state.aerialRanking}
+                  onChange={
+                    (event: React.ChangeEvent<HTMLInputElement>) => {
+                      collectionMethodsCheckboxes(event);
+                    }
+                  }
+                />
+              ))
+
+            }
           </fieldset>
         </Column>
         <Column className="" sm={4} md={4} lg={16} xlg={12}>
@@ -475,7 +406,7 @@ const CollectionStep = (
                 value={state.collectionMethodName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   handleFormInput(
-                    fieldsConfig.collectionMethod.name as keyof CollectionForm,
+                    fieldsConfig.collectionMethod.name,
                     e.target.value
                   );
                 }}
@@ -495,7 +426,7 @@ const CollectionStep = (
             placeholder={fieldsConfig.comments.placeholder}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput(
-                fieldsConfig.comments.name as keyof CollectionForm,
+                fieldsConfig.comments.name,
                 e.target.value
               );
             }}

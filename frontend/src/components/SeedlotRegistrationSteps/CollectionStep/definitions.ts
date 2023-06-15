@@ -1,6 +1,8 @@
+import DropDownObj from '../../../types/DropDownObject';
 import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export interface CollectionForm {
+  [method: string]: boolean | string,
   collectorAgency: string,
   locationCode: string,
   startDate: string,
@@ -8,23 +10,19 @@ export interface CollectionForm {
   numberOfContainers: string,
   volumePerContainers: string,
   volumeOfCones: string,
-  aerialRanking: boolean,
-  aerialClippingTopping: boolean,
-  felledTrees: boolean,
-  climbing: boolean,
-  squirrelCache: boolean,
-  ground: boolean,
-  squirrelHarvesting: boolean,
-  other: boolean,
   collectionMethodName: string,
   comments: string,
 }
+
 export interface CollectionStepProps {
   state: CollectionForm,
   setStepData: Function,
   defaultAgency: string,
   defaultCode: string,
   agencyOptions: Array<string>,
+  // DropDownObj already fill every need for this field,
+  // even if not being used in a dropdown component
+  collectionMethods: Array<DropDownObj>,
   readOnly?: boolean,
   invalidateObj?:FormInvalidationObj
 }
