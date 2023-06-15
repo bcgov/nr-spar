@@ -1,6 +1,10 @@
 const DATE_FORMAT = 'Y/m/d';
 
 const fieldsConfig = {
+  titleSection: {
+    title: 'Collector agency',
+    subtitle: 'Enter the collector agency information'
+  },
   checkbox: {
     name: 'applicant',
     labelText: 'Use applicant agency as collector agency'
@@ -18,6 +22,10 @@ const fieldsConfig = {
     label: 'Cone Collector location code',
     helperText: '2-digit code that identifies the address of operated office or division',
     invalidText: 'Please enter a valid 2-digit code that identifies the address of operated office or division'
+  },
+  collectionTitle: {
+    title: 'Collection information',
+    subtitle: 'Enter the collection information about this seedlot'
   },
   startDate: {
     name: 'startDate',
@@ -50,6 +58,7 @@ const fieldsConfig = {
     helperText: 'This value should be the "Volume per container" X "Number of containers".',
     warnText: 'The total volume of cones does not equal, please note that this value should be the "Volume per container" x "Number of containers"'
   },
+  collectionMethodOptionsLabel: 'Collection methods (Select at least one method used to collect the cones)',
   aerialRanking: {
     name: 'aerialRanking',
     labelText: 'Aerial raking'

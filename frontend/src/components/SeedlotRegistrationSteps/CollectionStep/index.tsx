@@ -174,8 +174,8 @@ const CollectionStep = (
     <FlexGrid className="collection-step-container">
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>
-          <h2>Collector agency</h2>
-          <Subtitle text="Enter the collector agency information" />
+          <h2>{fieldsConfig.titleSection.title}</h2>
+          <Subtitle text={fieldsConfig.titleSection.subtitle} />
         </Column>
       </Row>
       <Row className="collection-step-row">
@@ -243,8 +243,8 @@ const CollectionStep = (
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>
-          <h2>Collection information</h2>
-          <Subtitle text="Enter the collection information about this seedlot" />
+          <h2>{fieldsConfig.collectionTitle.title}</h2>
+          <Subtitle text={fieldsConfig.collectionTitle.subtitle} />
         </Column>
       </Row>
       <Row className="collection-step-row">
@@ -369,7 +369,7 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>
           <fieldset>
-            <Subtitle text="Collection methods (Select at least one method used to collect the cones)" />
+            <Subtitle text={fieldsConfig.collectionMethodOptionsLabel} />
             {
               collectionMethods.map((method) => (
                 <Checkbox
