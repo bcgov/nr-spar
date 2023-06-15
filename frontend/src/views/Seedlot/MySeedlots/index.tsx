@@ -30,7 +30,7 @@ const MySeedlots = () => {
     const url = ApiConfig.seedlot;
     api.get(url)
       .then((response) => {
-        setSeedlotsData(response.data.seedlotData);
+        setSeedlotsData(response.data.seedlotData.reverse());
       })
       .catch((error) => {
         // eslint-disable-next-line
@@ -55,6 +55,7 @@ const MySeedlots = () => {
             title={tableText.pageTitle}
             subtitle={tableText.pageSubtitle}
             enableFavourite
+            activity="My Seedlots"
           />
         </Column>
         <Column sm={4} md={2} lg={2} xlg={4}>
