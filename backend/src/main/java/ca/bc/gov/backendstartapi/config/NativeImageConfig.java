@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomiz
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** This class holds configurations for Cloud Native image building. */
+/** This class holds configurations for building Cloud Native images. */
 @Configuration
 @RegisterReflectionForBinding({
   DescribedEnumDto.class,

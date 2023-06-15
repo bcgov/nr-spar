@@ -61,63 +61,67 @@ const RecentActivities = () => {
   ];
 
   return (
-    <Row className="main-content recent-activity">
-      <Column sm={4} className="recent-activity-title">
-        <h2>My recent activities</h2>
-        <Subtitle text="Check your recent requests and files" className="recent-activity-subtitle" />
-      </Column>
-      <Column sm={4}>
-        <Tabs>
-          <TabList aria-label="List of tabs">
-            <Tab>Requests</Tab>
-            <Tab>Files & Docs.</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              {
-                listItems.length === 0
-                  ? (
-                    <div className="empty-recent-activities">
-                      <EmptySection
-                        icon="Application"
-                        title="There is no activity to show yet!"
-                        description="Your recent requests will appear here once you generate one"
+    <>
+      <Row className="recent-activity-title-row">
+        <Column>
+          <h2>My recent activities</h2>
+          <Subtitle text="Check your recent requests and files" className="recent-activity-subtitle" />
+        </Column>
+      </Row>
+      <Row>
+        <Column className="recent-activity-table">
+          <Tabs>
+            <TabList aria-label="List of tabs">
+              <Tab>Requests</Tab>
+              <Tab>Files & Docs.</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                {
+                  listItems.length === 0
+                    ? (
+                      <div className="empty-recent-activities">
+                        <EmptySection
+                          icon="Application"
+                          title="There is no activity to show yet!"
+                          description="Your recent requests will appear here once you generate one"
+                        />
+                      </div>
+                    )
+                    : (
+                      <ActivityTable
+                        elements={listItems}
+                        clickFn={goToActivity}
+                        headers={tableHeaders}
                       />
-                    </div>
-                  )
-                  : (
-                    <ActivityTable
-                      elements={listItems}
-                      clickFn={goToActivity}
-                      headers={tableHeaders}
-                    />
-                  )
-              }
-            </TabPanel>
-            <TabPanel>
-              {
-                filesDocsItems.length === 0
-                  ? (
-                    <div className="empty-recent-activity-files-docs">
-                      <EmptySection
-                        icon="Application"
-                        title="There is no files & docs to show yet!"
-                        description="Your recent files & docs will appear here once you generate one"
+                    )
+                }
+              </TabPanel>
+              <TabPanel>
+                {
+                  filesDocsItems.length === 0
+                    ? (
+                      <div className="empty-recent-activity-files-docs">
+                        <EmptySection
+                          icon="Application"
+                          title="There is no files & docs to show yet!"
+                          description="Your recent files & docs will appear here once you generate one"
+                        />
+                      </div>
+                    )
+                    : (
+                      <FilesDocsTable
+                        elements={filesDocsItems}
+                        headers={fileDocstableHeaders}
                       />
-                    </div>
-                  )
-                  : (
-                    <FilesDocsTable
-                      elements={filesDocsItems}
-                      headers={fileDocstableHeaders}
-                    />
-                  )
-              }
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Column>
-    </Row>
+                    )
+                }
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Column>
+      </Row>
+    </>
   );
 };
 
