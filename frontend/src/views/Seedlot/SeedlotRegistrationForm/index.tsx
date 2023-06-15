@@ -45,7 +45,7 @@ import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModa
 import './styles.scss';
 
 const defaultCode = '16';
-const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
+const defaultAgency = '0033 - Strong Seeds Orchard - SSO';
 const agencyOptions = [
   '0032 - Strong Seeds Orchard - SSO',
   '0035 - Weak Seeds Orchard - WSO',
@@ -79,9 +79,18 @@ const SeedlotRegistrationForm = () => {
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
-    collectionStep: initCollectionState(defaultAgency, defaultCode),
-    interimStep: initInterimState(defaultAgency, defaultCode),
-    ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
+    collectionStep: initCollectionState(
+      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name,
+      defaultCode
+    ),
+    interimStep: initInterimState(
+      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name,
+      defaultCode
+    ),
+    ownershipStep: [initOwnershipState(
+      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name,
+      defaultCode
+    )],
     orchardStep: initOrchardState(),
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
