@@ -15,5 +15,5 @@ public class ActiveOrchardSeedPlanningUnitId {
 
   @NonNull private String orchardId;
 
-  @NonNull private int seedPlanningUnitId;
+  private int seedPlanningUnitId;
 }

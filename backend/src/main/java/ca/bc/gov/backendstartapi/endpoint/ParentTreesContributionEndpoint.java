@@ -76,7 +76,7 @@ public class ParentTreesContributionEndpoint {
           MultipartFile file)
       throws IOException {
     try {
-      // TODO: validate the information against the seedlot's orchard
+      // NEXT: validate the information against the seedlot's orchard
       //   All trees on the table must belong to the seedlot's orchard.
       return ResponseEntity.ok(contributionTableCsvParser.parse(getFileResource(file)));
     } catch (CsvTableParsingException e) {
@@ -121,7 +121,7 @@ public class ParentTreesContributionEndpoint {
       throws IOException {
     try {
       /*
-       * TODO:
+       * NEXT:
        *   We must have the breeding values of all the trees (even those that don't belong to the
        *   seedlot's orchard).
        */

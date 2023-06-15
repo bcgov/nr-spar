@@ -68,7 +68,7 @@ public class SwaggerConfig {
     openApi.addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     openApi.setComponents(components);
 
-    // TODO: find a way to keep this closer to the controllers themselves.
+    // NEXT: find a way to keep this closer to the controllers themselves.
     Paths paths = new Paths();
     createSeedlotStatusPathItem(paths);
     createGeneticClassPathItem(paths);

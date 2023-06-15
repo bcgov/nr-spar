@@ -14,10 +14,10 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -28,7 +28,7 @@ import lombok.Setter;
 @Table(name = "smp_mix")
 @IdClass(SmpMixId.class)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class SmpMix {
@@ -42,12 +42,10 @@ public class SmpMix {
 
   @Id
   @Column(name = "parent_tree_id", nullable = false)
-  @NonNull
   private int parentTreeId;
   // endregion
 
   @Column(name = "amount_of_material", nullable = false)
-  @NonNull
   private int amountOfMaterial;
 
   @Column(name = "proportion", precision = 20, scale = 10)

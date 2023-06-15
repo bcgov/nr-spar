@@ -80,7 +80,13 @@ public class SecurityConfig {
                   new SimpleGrantedAuthority("ROLE_user_write"))
               : List.of();
         }
-        final List<String> realmAccess = (ArrayList<String>) jwt.getClaims().get("client_roles");
+        Object clientRolesObj = jwt.getClaims().get("client_roles");
+        final List<String> realmAccess = new ArrayList<>();
+        if (clientRolesObj instanceof List<?> list) {
+          for (Object item : list) {
+            realmAccess.add(String.valueOf(item));
+          }
+        }
         return realmAccess.stream()
             .map(roleName -> "ROLE_" + roleName)
             .map(roleName -> (GrantedAuthority) new SimpleGrantedAuthority(roleName))

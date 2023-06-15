@@ -16,10 +16,10 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /** The calculated Genetic Worth value(s) for the Supplemental Mass Pollination mix. */
@@ -27,7 +27,7 @@ import lombok.Setter;
 @Table(name = "smp_mix_gen_qlty")
 @IdClass(SmpMixGeneticQualityId.class)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class SmpMixGeneticQuality {
@@ -57,7 +57,6 @@ public class SmpMixGeneticQuality {
   private BigDecimal geneticQualityValue;
 
   @Column(name = "estimated_ind", nullable = false)
-  @NonNull
   public boolean qualityValueEstimated;
 
   @Embedded @NonNull private AuditInformation auditInformation;

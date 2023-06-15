@@ -29,7 +29,7 @@ class SmpMixJpaTest extends SeedlotEntityJpaTest {
   @Test
   void create() {
     var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
-    var smpMix = new SmpMix(seedlot, 1, 1, new AuditInformation("user1"));
+    var smpMix = new SmpMix(seedlot, 1, 1, null, new AuditInformation("user1"), 0);
     smpMix.setProportion(new BigDecimal(10));
 
     repository.saveAndFlush(smpMix);
