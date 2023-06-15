@@ -1,6 +1,6 @@
-import DropDownObj from '../types/DropDownObject';
+import MultiOptionsObj from '../types/MultiOptionsObject';
 
-const dropDownItem: DropDownObj = {
+const dropDownItem: MultiOptionsObj = {
   label: '',
   code: '',
   description: ''
@@ -10,7 +10,7 @@ const capFirstChar = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
 const trimExtraSpaces = (str: string) => str.replace(/\s\s+/g, ' ');
 
-export const sortAlphabetically = (a: DropDownObj, b: DropDownObj) => (
+export const sortAlphabetically = (a: MultiOptionsObj, b: MultiOptionsObj) => (
   a.label.toLocaleLowerCase() < b.label.toLocaleLowerCase()
     ? -1
     : 1
@@ -21,7 +21,7 @@ export const getDropDownList = (
   toCapFirstChar: boolean = true,
   toTrimExtraSpaces: boolean = false
 ) => {
-  const resultList: Array<DropDownObj> = [];
+  const resultList: Array<MultiOptionsObj> = [];
 
   dataList.forEach((data: any) => {
     const newItem = { ...dropDownItem };

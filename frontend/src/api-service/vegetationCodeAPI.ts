@@ -1,7 +1,7 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
 import { getDropDownList } from '../utils/DropDownUtils';
-import DropDownObj from '../types/DropDownObject';
+import MultiOptionsObj from '../types/MultiOptionsObject';
 import VegCode from '../types/VegetationCodeType';
 
 // Remove VegCodes with these codes
@@ -29,7 +29,7 @@ const codesToFilter: Array<string> = [
 const getVegCodes = () => {
   const url = ApiConfig.vegetationCode;
   return api.get(url).then((res) => {
-    let vegCodeOptions: Array<DropDownObj> = [];
+    let vegCodeOptions: Array<MultiOptionsObj> = [];
     if (res.data) {
       const filteredData = res.data
         .filter((vegCode: VegCode) => codesToFilter.indexOf(vegCode.code) === -1);

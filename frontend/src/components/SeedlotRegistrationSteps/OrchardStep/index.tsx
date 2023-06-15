@@ -27,7 +27,7 @@ import { filterInput, FilterObj } from '../../../utils/filterUtils';
 
 import FemaleGameticOptions from './data';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import OrchardDataType from '../../../types/OrchardDataType';
 
 import './styles.scss';
@@ -38,7 +38,7 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  seedlotSpecies: DropDownObj
+  seedlotSpecies: MultiOptionsObj
   state: OrchardForm
   setStepData: Function,
   cleanParentTables: Function,

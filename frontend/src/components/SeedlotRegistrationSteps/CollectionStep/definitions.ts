@@ -1,4 +1,4 @@
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export interface CollectionForm {
@@ -20,9 +20,7 @@ export interface CollectionStepProps {
   defaultAgency: string,
   defaultCode: string,
   agencyOptions: Array<string>,
-  // DropDownObj already fill every need for this field,
-  // even if not being used in a dropdown component
-  collectionMethods: Array<DropDownObj>,
+  collectionMethods: Array<MultiOptionsObj>,
   readOnly?: boolean,
   invalidateObj?:FormInvalidationObj
 }
