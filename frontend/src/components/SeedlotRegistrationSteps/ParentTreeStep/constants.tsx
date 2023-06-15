@@ -165,7 +165,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'ad',
-    name: 'AD',
+    name: 'Deer browse (AD)',
     description: 'Animal browse resistance (deer)',
     enabled: false,
     editable: false,
@@ -174,7 +174,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'dfs',
-    name: 'DFS',
+    name: 'Dothistroma needle blight (DFS)',
     description: 'Disease resistance for Dothistroma needle blight',
     enabled: false,
     editable: false,
@@ -183,7 +183,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'dfu',
-    name: 'DFU',
+    name: 'Cedar leaf blight (DFU)',
     description: 'Disease resistance for Redcedar leaf blight',
     enabled: false,
     editable: false,
@@ -192,8 +192,8 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'dfw',
-    name: 'DFW',
-    description: 'Disease resistance Swiss needle cast',
+    name: 'Swiss needle cast (DFW)',
+    description: 'Disease resistance for Swiss needle cast',
     enabled: false,
     editable: false,
     isAnOption: false,
@@ -201,7 +201,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'dsb',
-    name: 'DSB',
+    name: 'White pine blister rust (DSB)',
     description: 'Disease resistance for white pine blister rust',
     enabled: false,
     editable: false,
@@ -210,7 +210,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'dsc',
-    name: 'DSC',
+    name: 'Comandra blister rust (DSC)',
     description: 'Disease resistance for Commandra blister rust',
     enabled: false,
     editable: false,
@@ -219,7 +219,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'dsg',
-    name: 'DSG',
+    name: 'Western gall rust (DSG)',
     description: 'Disease resistance Western gall rust',
     enabled: false,
     editable: false,
@@ -228,7 +228,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'gvo',
-    name: 'GVO',
+    name: 'Volume growth (GVO)',
     description: 'Volume growth',
     enabled: false,
     editable: false,
@@ -237,7 +237,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'iws',
-    name: 'IWS',
+    name: 'White pine terminal weevil (IWS)',
     description: 'Spruce terminal weevil',
     enabled: false,
     editable: false,
@@ -246,7 +246,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'wdu',
-    name: 'WDU',
+    name: 'Durability (WDU)',
     description: 'Wood durability',
     enabled: false,
     editable: false,
@@ -255,7 +255,7 @@ export const headerTemplate: Array<HeaderObj> = [
   },
   {
     id: 'wwd',
-    name: 'WWD',
+    name: 'Wood density (WWD)',
     description: 'Wood quality',
     enabled: false,
     editable: false,
