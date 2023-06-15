@@ -11,6 +11,7 @@ import ApiConfig from '../../api-service/ApiConfig';
 import Seedlot from '../../types/Seedlot';
 
 import './styles.scss';
+import recentSeedlotsText from './constants';
 
 const RecentSeedlots = () => {
   const [seedlotsData, setSeedlotsData] = useState<Array<Seedlot>>([]);
@@ -19,7 +20,7 @@ const RecentSeedlots = () => {
     const url = ApiConfig.seedlot;
     api.get(url)
       .then((response) => {
-        setSeedlotsData(response.data.seedlotData);
+        setSeedlotsData(response.data.seedlotData.reverse().slice(0, 9));
       })
       .catch((error) => {
         // eslint-disable-next-line
@@ -46,8 +47,8 @@ const RecentSeedlots = () => {
   return (
     <Row className="recent-seedlots">
       <Column sm={4} className="recent-seedlots-title">
-        <h2>My seedlots</h2>
-        <Subtitle text="Check a summary of your recent seedlots" className="recent-seedlots-subtitle" />
+        <h2>{recentSeedlotsText.tableTitle}</h2>
+        <Subtitle text={recentSeedlotsText.tableSubtitle} className="recent-seedlots-subtitle" />
       </Column>
       <Column sm={4} className="recent-seedlots-table">
         {
@@ -61,9 +62,9 @@ const RecentSeedlots = () => {
             : (
               <div className="empty-recent-seedlots">
                 <EmptySection
-                  pictogram="Magnify"
-                  title="There is no seedlot to show yet!"
-                  description="Your recent seedlots will appear here once you generate one"
+                  pictogram={recentSeedlotsText.emptyPictogram}
+                  title={recentSeedlotsText.emptyTitle}
+                  description={recentSeedlotsText.emptyDescription}
                 />
               </div>
             )
