@@ -80,4 +80,15 @@ class UserServiceTest {
     LoggedUserService loggedUserService1 = new LoggedUserService();
     loggedUserService1.setUserAuthenticationHelper(userAuthenticationHelper);
   }
+
+  @Test
+  @DisplayName("getLoggedUserTokenTest")
+  void getLoggedUserTokenTest() {
+    when(userAuthenticationHelper.getUserInfo()).thenReturn(Optional.of(userInfo));
+
+    Optional<UserInfo> userInfoOp = loggedUserService.getLoggedUserInfo();
+
+    Assertions.assertTrue(userInfoOp.isPresent());
+    Assertions.assertEquals("abcdef123456789", userInfoOp.get().jwtToken());
+  }
 }

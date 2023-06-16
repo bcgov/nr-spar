@@ -97,4 +97,18 @@ class OrchardServiceTest {
 
     Assertions.assertTrue(orchardDto.isPresent());
   }
+
+  @Test
+  @DisplayName("findParentTreeGeneticQualityDataEmptyTest")
+  void findParentTreeGeneticQualityDataEmptyTest() {
+    String orchardId = "405";
+
+    when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
+        .thenReturn(List.of());
+
+    Optional<OrchardParentTreeDto> orchardDto =
+        orchardService.findParentTreeGeneticQualityData(orchardId);
+
+    Assertions.assertFalse(orchardDto.isPresent());
+  }
 }
