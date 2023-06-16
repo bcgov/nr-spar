@@ -76,7 +76,6 @@ class OrchardServiceTest {
   @DisplayName("findParentTreeGeneticQualityDataSuccessTest")
   void findParentTreeGeneticQualityDataSuccessTest() {
     String orchardId = "405";
-    int spuId = 1;
 
     ActiveOrchardSeedPlanningUnit activeOrchardSpu = createOrchardSpu(orchardId, true);
 
@@ -87,6 +86,8 @@ class OrchardServiceTest {
     parentTreeDto.setOrchardId(orchardId);
     parentTreeDto.setSeedPlanningUnitId(1L);
     parentTreeDto.setVegetationCode("ACT");
+
+    int spuId = 1;
 
     when(oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId))
         .thenReturn(Optional.of(parentTreeDto));

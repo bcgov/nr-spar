@@ -39,9 +39,6 @@ class OracleApiProviderTest {
   @Test
   @DisplayName("findOrchardParentTreeGeneticQualityDataTest")
   void findOrchardParentTreeGeneticQualityDataTest() {
-    String orchardId = "405";
-    int spuId = 7;
-
     String jwtToken = "1f7a4k5e8t9o5k6e9n8h5e2r6e";
 
     when(loggedUserService.getLoggedUserToken()).thenReturn(jwtToken);
@@ -59,6 +56,9 @@ class OracleApiProviderTest {
 
     ResponseEntity<OrchardParentTreeDto> orchardResponse =
         ResponseEntity.status(HttpStatusCode.valueOf(200)).body(orchard);
+
+    String orchardId = "405";
+    int spuId = 7;
 
     Map<String, String> uriVars = new HashMap<>();
     uriVars.put("orchardId", orchardId);
