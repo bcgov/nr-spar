@@ -44,8 +44,6 @@ import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
 import './styles.scss';
 
-const defaultCode = '16';
-const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
 const agencyOptions = [
   '0032 - Strong Seeds Orchard - SSO',
   '0035 - Weak Seeds Orchard - WSO',
@@ -77,20 +75,14 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getSeedlotInfo(seedlotNumber)
   });
 
+  const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
+  const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
+
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
-    collectionStep: initCollectionState(
-      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name,
-      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number
-    ),
-    interimStep: initInterimState(
-      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name,
-      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number
-    ),
-    ownershipStep: [initOwnershipState(
-      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name,
-      seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number
-    )],
+    collectionStep: initCollectionState(defaultAgency, defaultCode),
+    interimStep: initInterimState(defaultAgency, defaultCode),
+    ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
     orchardStep: initOrchardState(),
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
