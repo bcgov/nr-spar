@@ -1,6 +1,6 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
-import { getDropDownList } from '../utils/DropDownUtils';
+import { getMultiOptList } from '../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 import VegCode from '../types/VegetationCodeType';
 
@@ -33,7 +33,7 @@ const getVegCodes = () => {
     if (res.data) {
       const filteredData = res.data
         .filter((vegCode: VegCode) => codesToFilter.indexOf(vegCode.code) === -1);
-      vegCodeOptions = getDropDownList(filteredData, true, true);
+      vegCodeOptions = getMultiOptList(filteredData, true, true);
     }
     return vegCodeOptions;
   });

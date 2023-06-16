@@ -43,7 +43,7 @@ import {
   initOwnerShipInvalidState,
   initParentTreeState
 } from './utils';
-import { getDropDownList } from '../../../utils/DropDownUtils';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 
 import './styles.scss';
@@ -164,8 +164,8 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
-            fundingSources={getDropDownList(fundingSourcesQuery.data)}
-            paymentMethods={getDropDownList(paymentMethodsQuery.data)}
+            fundingSources={getMultiOptList(fundingSourcesQuery.data)}
+            paymentMethods={getMultiOptList(paymentMethodsQuery.data)}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
             setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
