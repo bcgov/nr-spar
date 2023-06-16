@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -82,10 +83,8 @@ class OrchardServiceTest {
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of(activeOrchardSpu));
 
-    OrchardParentTreeDto parentTreeDto = new OrchardParentTreeDto();
-    parentTreeDto.setOrchardId(orchardId);
-    parentTreeDto.setSeedPlanningUnitId(1L);
-    parentTreeDto.setVegetationCode("ACT");
+    OrchardParentTreeDto parentTreeDto =
+        new OrchardParentTreeDto(orchardId, "FDC", 1L, new ArrayList<>());
 
     int spuId = 1;
 
@@ -96,6 +95,9 @@ class OrchardServiceTest {
         orchardService.findParentTreeGeneticQualityData(orchardId);
 
     Assertions.assertTrue(orchardDto.isPresent());
+    Assertions.assertEquals("405", orchardDto.get().orchardId());
+    Assertions.assertEquals("FDC", orchardDto.get().vegetationCode());
+    Assertions.assertEquals(1L, orchardDto.get().seedPlanningUnitId());
   }
 
   @Test

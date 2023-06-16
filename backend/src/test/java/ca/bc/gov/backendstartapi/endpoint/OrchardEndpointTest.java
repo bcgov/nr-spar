@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
+import java.util.ArrayList;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,10 +35,8 @@ class OrchardEndpointTest {
   void getParentTreeGeneticQualityDataSuccessTest() throws Exception {
     String orchardId = "123";
 
-    OrchardParentTreeDto parentTreeDto = new OrchardParentTreeDto();
-    parentTreeDto.setOrchardId(orchardId);
-    parentTreeDto.setVegetationCode("ACT");
-    parentTreeDto.setSeedPlanningUnitId(1L);
+    OrchardParentTreeDto parentTreeDto =
+        new OrchardParentTreeDto(orchardId, "ACT", 1L, new ArrayList<>());
 
     when(orchardService.findParentTreeGeneticQualityData(orchardId))
         .thenReturn(Optional.of(parentTreeDto));

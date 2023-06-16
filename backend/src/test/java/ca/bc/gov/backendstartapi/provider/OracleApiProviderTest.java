@@ -4,6 +4,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -52,7 +53,7 @@ class OracleApiProviderTest {
     HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
     Class<OrchardParentTreeDto> className = OrchardParentTreeDto.class;
 
-    OrchardParentTreeDto orchard = new OrchardParentTreeDto();
+    OrchardParentTreeDto orchard = new OrchardParentTreeDto("123", "AT", 11L, new ArrayList<>());
 
     ResponseEntity<OrchardParentTreeDto> orchardResponse =
         ResponseEntity.status(HttpStatusCode.valueOf(200)).body(orchard);
