@@ -25,9 +25,16 @@ public class OracleApiProvider {
 
   private LoggedUserService loggedUserService;
 
+  private RestTemplate restTemplate;
+
   @Autowired
   OracleApiProvider(LoggedUserService loggedUserService) {
+    this(loggedUserService, new RestTemplate());
+  }
+
+  OracleApiProvider(LoggedUserService loggedUserService, RestTemplate restTemplate) {
     this.loggedUserService = loggedUserService;
+    this.restTemplate = restTemplate;
   }
 
   @Value("${oracle-api.base-url}")
@@ -49,7 +56,6 @@ public class OracleApiProvider {
     String fullApiUrl = oracleApiBaseUrl + apiUrl;
     log.info("Oracle API - Sending GET request to: {}", fullApiUrl);
 
-    RestTemplate restTemplate = new RestTemplate();
     HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
 
     ResponseEntity<T> response =
