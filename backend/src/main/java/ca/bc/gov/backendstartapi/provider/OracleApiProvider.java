@@ -56,7 +56,7 @@ public class OracleApiProvider {
     String fullApiUrl = oracleApiBaseUrl + apiUrl;
     log.info("Oracle API - Sending GET request to: {}", fullApiUrl);
 
-    HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
+    HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
     ResponseEntity<T> response =
         restTemplate.exchange(fullApiUrl, HttpMethod.GET, requestEntity, className, uriVars);
