@@ -20,7 +20,8 @@ class UserInfoTest {
             "BAGGINGS",
             null,
             IdentityProvider.IDIR,
-            new HashSet<>());
+            new HashSet<>(),
+            "abcdef123456789");
 
     Assertions.assertNotNull(userInfo);
     Assertions.assertEquals("Bilbo", userInfo.firstName());

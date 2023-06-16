@@ -41,7 +41,8 @@ public class UserAuthenticationHelper {
               jwtPrincipal.getClaimAsString("idir_username"),
               jwtPrincipal.getClaimAsString("bceid_business_name"),
               IdentityProvider.fromClaim(jwtPrincipal).orElseThrow(),
-              roles);
+              roles,
+              jwtPrincipal.getTokenValue());
 
       return Optional.of(userInfo);
     }

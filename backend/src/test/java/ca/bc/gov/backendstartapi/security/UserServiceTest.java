@@ -38,7 +38,8 @@ class UserServiceTest {
             "USERT",
             null,
             IdentityProvider.IDIR,
-            new HashSet<>());
+            new HashSet<>(),
+            "abcdef123456789");
   }
 
   @Test
