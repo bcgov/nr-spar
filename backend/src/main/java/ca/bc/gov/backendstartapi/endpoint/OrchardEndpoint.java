@@ -36,6 +36,13 @@ public class OrchardEndpoint {
     this.orchardService = orchardService;
   }
 
+  /**
+   * Gets all ParentTree data to an Orchard.
+   *
+   * @param orchardId {@link Orchard}'s identification
+   * @return an {@link OrchardParentTreeDto}
+   * @throws ResponseStatusException if no data is found
+   */
   @GetMapping(path = "/{orchardId}/parent-tree-genetic-quality")
   @PreAuthorize("hasRole('user_read')")
   @Operation(

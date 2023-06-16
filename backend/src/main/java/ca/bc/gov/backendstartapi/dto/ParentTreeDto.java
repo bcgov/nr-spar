@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/** This class holds the fields that will be returned from a ParentTree. */
 @Getter
 @Setter
 @ToString

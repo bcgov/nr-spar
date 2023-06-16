@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/** This class contains methods to handle Orchards requests. */
 @Service
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

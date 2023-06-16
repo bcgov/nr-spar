@@ -1,22 +1,20 @@
 package ca.bc.gov.backendstartapi.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * This class holds the fields that will be returned when requesting a ParentTree
- * from an Orchard.
+ * This class holds the fields that will be returned when requesting a ParentTree from an Orchard.
  */
 @Getter
 @Setter
 @ToString
 public class OrchardParentTreeDto {
-  
+
   @Schema(
       description =
           """

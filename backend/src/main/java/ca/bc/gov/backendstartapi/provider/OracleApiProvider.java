@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+/** This class contains methods for fetching data from Oracle REST API. */
 @Service
 @Slf4j
 public class OracleApiProvider {
@@ -33,8 +34,6 @@ public class OracleApiProvider {
   private String oracleApiBaseUrl;
 
   private <T> T doGetRequest(Class<T> className, String apiUrl, Map<String, String> uriVars) {
-    String fullApiUrl = oracleApiBaseUrl + apiUrl;
-
     if (!Objects.isNull(uriVars)) {
       for (Map.Entry<String, String> entry : uriVars.entrySet()) {
         log.info("Oracle API - URI variable {}={}", entry.getKey(), entry.getValue());
@@ -47,11 +46,11 @@ public class OracleApiProvider {
     headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
     headers.set("Authorization", "Bearer " + jwtToken);
 
-    HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
-
+    String fullApiUrl = oracleApiBaseUrl + apiUrl;
     log.info("Oracle API - Sending GET request to: {}", fullApiUrl);
 
     RestTemplate restTemplate = new RestTemplate();
+    HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
 
     ResponseEntity<T> response =
         restTemplate.exchange(fullApiUrl, HttpMethod.GET, requestEntity, className, uriVars);
@@ -80,8 +79,9 @@ public class OracleApiProvider {
     uriVars.put("orchardId", orchardId);
     uriVars.put("spuId", String.valueOf(spuId));
 
-    OrchardParentTreeDto oTreeDto = doGetRequest(OrchardParentTreeDto.class, oracleApiUrl, uriVars);
+    OrchardParentTreeDto orchardTreeDto =
+        doGetRequest(OrchardParentTreeDto.class, oracleApiUrl, uriVars);
 
-    return Optional.ofNullable(oTreeDto);
+    return Optional.ofNullable(orchardTreeDto);
   }
 }
