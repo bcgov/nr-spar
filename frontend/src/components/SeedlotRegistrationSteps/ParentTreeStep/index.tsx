@@ -116,6 +116,17 @@ const ParentTreeStep = (
     setSlicedRows(sliced);
   };
 
+  const setTotalParentTreeNum = (value: string) => {
+    const modifiedSummaryConfig = { ...summaryConfig };
+    modifiedSummaryConfig.sharedItems.totalParentTree.value = value;
+    setSummaryConfig(modifiedSummaryConfig);
+  };
+
+  useEffect(
+    () => setTotalParentTreeNum(Object.values(state.tableRowData).length.toString()),
+    [state.tableRowData]
+  );
+
   const processParentTreeData = (data: ParentTreeGeneticQualityType) => {
     const modifiedState = { ...state };
     let clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
@@ -466,8 +477,8 @@ const ParentTreeStep = (
               description={summaryConfig[currentTab].description}
               infoItems={
                 combineObjectValues([
-                  summaryConfig[currentTab].infoItems,
-                  summaryConfig.sharedItems
+                  summaryConfig.sharedItems,
+                  summaryConfig[currentTab].infoItems
                 ])
               }
             />
