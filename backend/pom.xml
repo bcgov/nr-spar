@@ -450,7 +450,7 @@
         <executions>
           <execution>
             <id>validate</id>
-            <phase>validate</phase>
+            <phase>checkstyle</phase>
             <goals>
               <goal>check</goal>
             </goals>
