@@ -1,30 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
-  Tabs,
-  TabList,
-  Tab,
-  FlexGrid,
-  Row,
-  Column,
-  ActionableNotification,
-  TableContainer,
-  TableToolbar,
-  TableToolbarContent,
-  OverflowMenuItem,
-  OverflowMenu,
-  Button,
-  Checkbox,
-  Table,
-  TableHead,
-  TableRow,
-  TableHeader,
-  TableBody,
-  TableCell,
-  DataTableSkeleton,
-  DefinitionTooltip,
-  TextInput,
-  Pagination
+  Tabs, TabList, Tab, FlexGrid, Row, Column,
+  ActionableNotification, TableContainer, TableToolbar,
+  TableToolbarContent, OverflowMenuItem, OverflowMenu,
+  Button, Checkbox, Table, TableHead, TableRow, TableHeader,
+  TableBody, TableCell, DataTableSkeleton, DefinitionTooltip,
+  TextInput, Pagination
 } from '@carbon/react';
 import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
@@ -32,6 +14,7 @@ import { getSeedPlanUnits, getParentTreeGeneQuali } from '../../../api-service/o
 
 import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
+import InfoSection from '../../InfoSection';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
   getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig,
@@ -474,6 +457,11 @@ const ParentTreeStep = (
           </Tabs>
         </Column>
       </Row>
+      <InfoSection
+        title="Summary"
+        description="Check the parent tree contribution summary"
+        infoItems={[]}
+      />
     </FlexGrid>
   );
 };
