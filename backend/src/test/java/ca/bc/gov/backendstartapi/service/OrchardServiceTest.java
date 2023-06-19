@@ -4,6 +4,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
+import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.util.ArrayList;
@@ -91,13 +92,12 @@ class OrchardServiceTest {
     when(oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId))
         .thenReturn(Optional.of(parentTreeDto));
 
-    Optional<OrchardParentTreeDto> orchardDto =
-        orchardService.findParentTreeGeneticQualityData(orchardId);
+    OrchardParentTreeDto orchardDto = orchardService.findParentTreeGeneticQualityData(orchardId);
 
-    Assertions.assertTrue(orchardDto.isPresent());
-    Assertions.assertEquals("405", orchardDto.get().orchardId());
-    Assertions.assertEquals("FDC", orchardDto.get().vegetationCode());
-    Assertions.assertEquals(1L, orchardDto.get().seedPlanningUnitId());
+    Assertions.assertNotNull(orchardDto);
+    Assertions.assertEquals("405", orchardDto.orchardId());
+    Assertions.assertEquals("FDC", orchardDto.vegetationCode());
+    Assertions.assertEquals(1L, orchardDto.seedPlanningUnitId());
   }
 
   @Test
@@ -108,9 +108,14 @@ class OrchardServiceTest {
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of());
 
-    Optional<OrchardParentTreeDto> orchardDto =
-        orchardService.findParentTreeGeneticQualityData(orchardId);
+    Exception exc =
+        Assertions.assertThrows(
+            NoSpuForOrchardException.class,
+            () -> {
+              orchardService.findParentTreeGeneticQualityData(orchardId);
+            });
 
-    Assertions.assertFalse(orchardDto.isPresent());
+    Assertions.assertEquals(
+        "404 NOT_FOUND \"No active SPU for the given Orchard ID!\"", exc.getMessage());
   }
 }

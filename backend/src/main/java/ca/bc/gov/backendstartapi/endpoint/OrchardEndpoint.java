@@ -9,11 +9,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,13 +61,6 @@ public class OrchardEndpoint {
               in = ParameterIn.PATH,
               description = "Identifier of the Orchard.")
           String orchardId) {
-    Optional<OrchardParentTreeDto> parentTreeDto =
-        orchardService.findParentTreeGeneticQualityData(orchardId);
-
-    return parentTreeDto.orElseThrow(
-        () ->
-            new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                String.format("Orchard Parent Tree data not found for Orchard ID: %s", orchardId)));
+    return orchardService.findParentTreeGeneticQualityData(orchardId);
   }
 }

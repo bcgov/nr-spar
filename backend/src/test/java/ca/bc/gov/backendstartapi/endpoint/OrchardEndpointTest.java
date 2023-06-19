@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.util.ArrayList;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,8 +38,7 @@ class OrchardEndpointTest {
     OrchardParentTreeDto parentTreeDto =
         new OrchardParentTreeDto(orchardId, "ACT", 1L, new ArrayList<>());
 
-    when(orchardService.findParentTreeGeneticQualityData(orchardId))
-        .thenReturn(Optional.of(parentTreeDto));
+    when(orchardService.findParentTreeGeneticQualityData(orchardId)).thenReturn(parentTreeDto);
 
     mockMvc
         .perform(
@@ -60,7 +59,8 @@ class OrchardEndpointTest {
   void getParentTreeGeneticQualityDataNotFoundTest() throws Exception {
     String orchardId = "222";
 
-    when(orchardService.findParentTreeGeneticQualityData(orchardId)).thenReturn(Optional.empty());
+    when(orchardService.findParentTreeGeneticQualityData(orchardId))
+        .thenThrow(new NoParentTreeDataException());
 
     mockMvc
         .perform(
