@@ -6,8 +6,9 @@ export default defineConfig({
     viewportWidth: 1280,
     viewportHeight: 720,
     experimentalWebKitSupport: true,
+    experimentalSessionAndOrigin: true,
     env: {
-      keycloakLoginUrl: 'https://logontest7.gov.bc.ca'
+      apiUrl: 'https://localhost:8090'
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {

@@ -1,6 +1,7 @@
 export enum GenericSelectors {
   PageTitle = '.title-section h1',
-  FavouriteButton = '.title-favourite button'
+  FavouriteButton = '.title-favourite button',
+
 }
 
 export enum SeedlotRegistrationSelectors {

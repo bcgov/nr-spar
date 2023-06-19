@@ -244,7 +244,9 @@ describe('Seedlot registration flow', () => {
     cy.get('.collection-methods .bcgov--checkbox')
       .as('collectionMethods');
     cy.get('@collectionMethods')
-      .each((checkbox) => expect(checkbox).to.not.be.checked);
+      .each((checkbox) => {
+        expect(checkbox).to.not.be.checked;
+      });
     cy.get('@collectionMethods')
       .each((checkbox) => {
         cy.wrap(checkbox)
@@ -252,7 +254,9 @@ describe('Seedlot registration flow', () => {
           .click();
       });
     cy.get('@collectionMethods')
-      .each((checkbox) => expect(checkbox).to.be.checked);
+      .each((checkbox) => {
+        expect(checkbox).to.be.checked;
+      });
     cy.get('@collectionMethods')
       .each((checkbox) => {
         cy.wrap(checkbox)
