@@ -60,6 +60,16 @@ const SeedlotRegistrationForm = () => {
 
   const [formStep, setFormStep] = useState<number>(0);
 
+  // Initialize all step's state here
+  const [allStepData, setAllStepData] = useState<AllStepData>({
+    collectionStep: initCollectionState('', ''),
+    interimStep: initInterimState('', ''),
+    ownershipStep: [initOwnershipState('', '')],
+    orchardStep: initOrchardState(),
+    parentTreeStep: initParentTreeState(),
+    extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
+  });
+
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
     queryFn: getFundingSources
@@ -72,20 +82,8 @@ const SeedlotRegistrationForm = () => {
 
   const seedlotInfoQuery = useQuery({
     queryKey: ['seedlot', seedlotNumber],
-    queryFn: () => getSeedlotInfo(seedlotNumber)
-  });
-
-  const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
-  const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
-
-  // Initialize all step's state here
-  const [allStepData, setAllStepData] = useState<AllStepData>({
-    collectionStep: initCollectionState(defaultAgency, defaultCode),
-    interimStep: initInterimState(defaultAgency, defaultCode),
-    ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
-    orchardStep: initOrchardState(),
-    parentTreeStep: initParentTreeState(),
-    extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
+    queryFn: () => getSeedlotInfo(seedlotNumber),
+    refetchOnWindowFocus: false
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -128,6 +126,9 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
+    const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
+    const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
+
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
       label: '',
@@ -166,8 +167,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            defaultAgency={defaultAgency}
-            defaultCode={defaultCode}
+            collectorAgency={allStepData.collectionStep.collectorAgency}
+            collectorCode={allStepData.collectionStep.locationCode}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />
