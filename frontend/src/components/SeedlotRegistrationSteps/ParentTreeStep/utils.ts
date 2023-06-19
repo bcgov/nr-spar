@@ -1,5 +1,6 @@
 import { OrchardObj } from '../OrchardStep/definitions';
-import { RowItem } from './definitions';
+import { RowItem, InfoSectionConfigType } from './definitions';
+import InfoDisplayObj from '../../../types/InfoDisplayObj';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -53,4 +54,18 @@ export const sortAndSliceRows = (
   }
   const sliced = sliceRowItems(sorted, pageNumber, pageSize);
   return sliced;
+};
+
+export const combineObjectValues = (objs: Array<InfoSectionConfigType>): Array<InfoDisplayObj> => {
+  let combined: Array<InfoDisplayObj> = [];
+
+  objs.forEach((obj) => {
+    const vals = Object.values(obj);
+    combined = [
+      ...combined,
+      ...vals
+    ];
+  });
+
+  return combined;
 };

@@ -339,3 +339,40 @@ export const headerTemplate: Array<HeaderObj> = [
 export const pageSizesConfig = [
   20, 40, 60, 80, 100
 ];
+
+export const summarySectionConfig = {
+  coneTab: {
+    title: 'Summary',
+    description: 'Check the parent tree contribution summary',
+    infoItems: {
+      totalCone: {
+        name: 'Total number of cone count',
+        value: '--'
+      },
+      totalPollen: {
+        name: 'Total number of pollen count',
+        value: '--'
+      }
+    }
+  },
+  successTab: {
+    title: 'Summary',
+    description: 'Check the SMP success on parent summary',
+    infoItems: {
+      avgNonOrchardContam: {
+        name: 'Average number of non-orchard pollen contam. (%)',
+        value: '--'
+      }
+    }
+  },
+  sharedItems: {
+    totalParentTree: {
+      name: 'Total number of parent trees',
+      value: '--'
+    },
+    avgSMPSuccess: {
+      name: 'Average number of SMP success %',
+      value: '--'
+    }
+  }
+};

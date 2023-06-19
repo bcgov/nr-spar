@@ -1,3 +1,5 @@
+import InfoDisplayObj from '../../../types/InfoDisplayObj';
+
 export type TabTypes = {
   coneTab: 'coneTab',
   successTab: 'successTab',
@@ -64,3 +66,7 @@ export type NotifCtrlType = {
 export type GeneticWorthDictType = {
   [key: string]: Array<string>
 }
+
+export type InfoSectionConfigType = {
+  [key: string]: InfoDisplayObj;
+};

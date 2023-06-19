@@ -18,17 +18,18 @@ import InfoSection from '../../InfoSection';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
   getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig,
-  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER
+  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
 } from './definitions';
 import {
-  getTabString, processOrchards, sortAndSliceRows
+  getTabString, processOrchards, sortAndSliceRows, combineObjectValues
 } from './utils';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import PaginationChangeType from '../../../types/PaginationChangeType';
+
 import './styles.scss';
 
 interface ParentTreeStepProps {
@@ -55,10 +56,10 @@ const ParentTreeStep = (
   );
   const [currPageSize, setCurrPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState<number>(DEFAULT_PAGE_NUMBER);
-
   const [slicedRows, setSlicedRows] = useState<Array<RowItem>>(
     sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true)
   );
+  const [summaryConfig, setSummaryConfig] = useState(structuredClone(summarySectionConfig));
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -457,11 +458,23 @@ const ParentTreeStep = (
           </Tabs>
         </Column>
       </Row>
-      <InfoSection
-        title="Summary"
-        description="Check the parent tree contribution summary"
-        infoItems={[]}
-      />
+      {
+        currentTab === 'coneTab' || currentTab === 'successTab'
+          ? (
+            <InfoSection
+              title={summaryConfig[currentTab].title}
+              description={summaryConfig[currentTab].description}
+              infoItems={
+                combineObjectValues([
+                  summaryConfig[currentTab].infoItems,
+                  summaryConfig.sharedItems
+                ])
+              }
+            />
+          )
+          : null
+      }
+
     </FlexGrid>
   );
 };
