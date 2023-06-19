@@ -4,8 +4,8 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.exception.UserNotFoundException;
 import ca.bc.gov.backendstartapi.repository.UserProfileRepository;
-import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +38,7 @@ class UserServiceTest {
             "USERT",
             null,
             IdentityProvider.IDIR,
-            new HashSet<>(),
+            Set.of(),
             "abcdef123456789");
   }
 
