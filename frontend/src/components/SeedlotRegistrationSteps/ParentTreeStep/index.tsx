@@ -504,16 +504,23 @@ const ParentTreeStep = (
       {
         currentTab === 'coneTab' || currentTab === 'successTab'
           ? (
-            <InfoSection
-              title={summaryConfig[currentTab].title}
-              description={summaryConfig[currentTab].description}
-              infoItems={
-                combineObjectValues([
-                  summaryConfig.sharedItems,
-                  summaryConfig[currentTab].infoItems
-                ])
-              }
-            />
+            <>
+              <InfoSection
+                title={summaryConfig[currentTab].title}
+                description={summaryConfig[currentTab].description}
+                infoItems={
+                  combineObjectValues([
+                    summaryConfig.sharedItems,
+                    summaryConfig[currentTab].infoItems
+                  ])
+                }
+              />
+              <InfoSection
+                title="Genetic worth and diversity"
+                description="Check the genetic worth and diversity of your seedlot"
+                infoItems={[{ name: 'aaa', value: '10' }]}
+              />
+            </>
           )
           : null
       }

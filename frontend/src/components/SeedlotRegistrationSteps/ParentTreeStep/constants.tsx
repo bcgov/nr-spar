@@ -378,3 +378,10 @@ export const summarySectionConfig = {
     }
   }
 };
+
+export const gwSectionConfig = {
+  ne: {
+    name: '',
+    value: ''
+  }
+};
