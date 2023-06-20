@@ -77,8 +77,6 @@ class OracleApiProviderTest {
   @Test
   @DisplayName("findOrchardParentTreeGeneticQualityDataErrorTest")
   void findOrchardParentTreeGeneticQualityDataErrorTest() {
-    // String jwtToken = "1f7a4k5e8t9o5k6e9n8h5e2r6e";
-
     when(loggedUserService.getLoggedUserToken()).thenReturn("");
 
     HttpHeaders headers = new HttpHeaders();

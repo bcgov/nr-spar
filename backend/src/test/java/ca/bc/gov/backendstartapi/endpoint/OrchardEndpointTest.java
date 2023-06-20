@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
+import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.util.ArrayList;
 import org.junit.jupiter.api.DisplayName;
@@ -69,6 +70,31 @@ class OrchardEndpointTest {
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
-        .andReturn();
+        .andExpect(status().reason("No Parent Tree data for the given Orchard!"))
+        .andReturn()
+        .getResolvedException()
+        .getMessage();
+  }
+
+  @Test
+  @DisplayName("getParentTreeGeneticQualityDataNoSpuTest")
+  @WithMockUser(roles = "user_read")
+  void getParentTreeGeneticQualityDataNoSpuTest() throws Exception {
+    String orchardId = "222";
+
+    when(orchardService.findParentTreeGeneticQualityData(orchardId))
+        .thenThrow(new NoSpuForOrchardException());
+
+    mockMvc
+        .perform(
+            get("/api/orchards/{orchardId}/parent-tree-genetic-quality", orchardId)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(status().reason("No active SPU for the given Orchard ID!"))
+        .andReturn()
+        .getResolvedException()
+        .getMessage();
   }
 }
