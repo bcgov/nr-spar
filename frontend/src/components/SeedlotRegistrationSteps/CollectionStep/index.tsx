@@ -376,6 +376,7 @@ const CollectionStep = (
             {
               collectionMethods.map((method) => (
                 <Checkbox
+                  key={method.code}
                   id={method.label}
                   name={method.label}
                   ref={(el: HTMLInputElement) => addRefs(el, method.label)}
