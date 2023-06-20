@@ -95,11 +95,14 @@ class UserServiceTest {
   @Test
   @DisplayName("getLoggedUserTokenEmptyTest")
   void getLoggedUserTokenEmptyTest() {
-    when(userAuthenticationHelper.getUserInfo()).thenReturn(Optional.empty());
+    Exception e =
+        Assertions.assertThrows(
+            UserNotFoundException.class,
+            () -> {
+              loggedUserService.getLoggedUserToken();
+            });
 
-    Optional<UserInfo> userInfoOp = loggedUserService.getLoggedUserInfo();
-
-    Assertions.assertTrue(userInfoOp.isEmpty());
+    Assertions.assertEquals("404 NOT_FOUND \"User not registered!\"", e.getMessage());
   }
 
   @Test
@@ -115,5 +118,16 @@ class UserServiceTest {
             });
 
     Assertions.assertEquals("404 NOT_FOUND \"User not registered!\"", e.getMessage());
+  }
+
+  @Test
+  @DisplayName("getLoggedUserIdSuccessTest")
+  void getLoggedUserIdSuccessTest() {
+    when(userAuthenticationHelper.getUserInfo()).thenReturn(Optional.of(userInfo));
+
+    Optional<UserInfo> userInfoOp = loggedUserService.getLoggedUserInfo();
+
+    Assertions.assertTrue(userInfoOp.isPresent());
+    Assertions.assertEquals("123456789@idir", userInfoOp.get().id());
   }
 }

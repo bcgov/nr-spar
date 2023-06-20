@@ -46,7 +46,26 @@ public record ParentTreeDto(
     List<ParentTreeGeneticQualityDto> parentTreeGeneticQualities) {
 
   /** Ensure immutability for the user's roles. */
-  public ParentTreeDto {
-    parentTreeGeneticQualities = Collections.unmodifiableList(parentTreeGeneticQualities);
+  public ParentTreeDto(
+      Long parentTreeId,
+      String parentTreeNumber,
+      String parentTreeRegStatusCode,
+      String localNumber,
+      boolean active,
+      boolean tested,
+      boolean breedingProgram,
+      Long femaleParentTreeId,
+      Long maleParentTreeId,
+      List<ParentTreeGeneticQualityDto> parentTreeGeneticQualities) {
+    this.parentTreeId = parentTreeId;
+    this.parentTreeNumber = parentTreeNumber;
+    this.parentTreeRegStatusCode = parentTreeRegStatusCode;
+    this.localNumber = localNumber;
+    this.active = active;
+    this.tested = tested;
+    this.breedingProgram = breedingProgram;
+    this.femaleParentTreeId = femaleParentTreeId;
+    this.maleParentTreeId = maleParentTreeId;
+    this.parentTreeGeneticQualities = Collections.unmodifiableList(parentTreeGeneticQualities);
   }
 }

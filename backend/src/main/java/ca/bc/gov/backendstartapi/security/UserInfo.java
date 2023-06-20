@@ -44,15 +44,13 @@ public record UserInfo(
 
   /** Ensure immutability for the user's roles. */
   public UserInfo {
-    switch (identityProvider) {
-      case IDIR -> {
-        Objects.requireNonNull(firstName);
-        Objects.requireNonNull(lastName);
-        Objects.requireNonNull(idirUsername);
-      }
-      case BUSINESS_BCEID -> Objects.requireNonNull(businessName);
-      default -> throw new IllegalArgumentException(
-          "Not implemented for identity provider " + identityProvider);
+    if (identityProvider.equals(IdentityProvider.IDIR)) {
+      Objects.requireNonNull(firstName);
+      Objects.requireNonNull(lastName);
+      Objects.requireNonNull(idirUsername);
+    }
+    if (identityProvider.equals(IdentityProvider.BUSINESS_BCEID)) {
+      Objects.requireNonNull(businessName);
     }
     roles = Collections.unmodifiableSet(roles);
   }
