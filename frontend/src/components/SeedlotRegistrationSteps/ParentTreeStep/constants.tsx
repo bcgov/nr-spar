@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType
+  HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType, InfoSectionConfigType
 } from './definitions';
 
 export const DEFAULT_PAGE_SIZE = 40;
@@ -68,6 +68,10 @@ export const getPageText = () => ({
     tabDescription: getTabDescription('calculation of SMP mix'),
     notificationSubtitle: getNotificationSubtitle('calculation of SMP mix'),
     tableDescription: 'Enter the estimative volume of SMP mix used for each clone'
+  },
+  gwAndDiverse: {
+    title: 'Genetic worth and diversity',
+    description: 'Check the genetic worth and diversity of your seedlot'
   }
 });
 
@@ -379,9 +383,21 @@ export const summarySectionConfig = {
   }
 };
 
-export const gwSectionConfig = {
+export const gwSectionConfig: InfoSectionConfigType = {
   ne: {
-    name: '',
-    value: ''
+    name: 'Effective population size (Ne)',
+    value: EMPTY_NUMBER_STRING
+  },
+  testedParentTreeContri: {
+    name: 'Tested parent tree contribution (%)',
+    value: EMPTY_NUMBER_STRING
+  },
+  coancestry: {
+    name: 'Coancestry (Sum PiPj * Cij)',
+    value: EMPTY_NUMBER_STRING
+  },
+  outsideSMPParent: {
+    name: 'Number of SMP parents from outside',
+    value: EMPTY_NUMBER_STRING
   }
 };

@@ -18,7 +18,7 @@ import InfoSection from '../../InfoSection';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
   getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig,
-  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig
+  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig, gwSectionConfig
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
@@ -61,6 +61,7 @@ const ParentTreeStep = (
     sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true)
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(summarySectionConfig));
+  const [gwInfoConfig, setGWInfoConfig] = useState(structuredClone(gwSectionConfig));
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -250,11 +251,21 @@ const ParentTreeStep = (
     if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
       const availOptions = geneticWorthDict[seedlotSpecies.code];
       const clonedHeaders = structuredClone(headerConfig);
+      let clonedGWItems = structuredClone(gwInfoConfig);
       availOptions.forEach((opt: string) => {
         const optionIndex = headerConfig.findIndex((header) => header.id === opt);
+        // Enable option in the column customization
         clonedHeaders[optionIndex].isAnOption = true;
+        // Add GW input to the info section at the bottom
+        clonedGWItems = Object.assign(clonedGWItems, {
+          [clonedHeaders[optionIndex].id]: {
+            name: clonedHeaders[optionIndex].name,
+            value: '--'
+          }
+        });
       });
       setHeaderConfig(clonedHeaders);
+      setGWInfoConfig(clonedGWItems);
     }
   };
 
@@ -516,9 +527,9 @@ const ParentTreeStep = (
                 }
               />
               <InfoSection
-                title="Genetic worth and diversity"
-                description="Check the genetic worth and diversity of your seedlot"
-                infoItems={[{ name: 'aaa', value: '10' }]}
+                title={pageText.gwAndDiverse.title}
+                description={pageText.gwAndDiverse.description}
+                infoItems={Object.values(gwInfoConfig)}
               />
             </>
           )
