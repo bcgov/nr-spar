@@ -16,19 +16,19 @@ import {
   InlineLoading
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
-import InputErrorText from '../../InputErrorText';
 
+import InputErrorText from '../../InputErrorText';
 import Subtitle from '../../Subtitle';
-import { OrchardForm, OrchardObj } from './definitions';
-import { MAX_ORCHARDS } from './constants';
 
 import { getOrchardByID } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
-
-import FemaleGameticOptions from './data';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import DropDownObj from '../../../types/DropDownObject';
 import OrchardDataType from '../../../types/OrchardDataType';
+
+import { OrchardForm, OrchardObj } from './definitions';
+import { MAX_ORCHARDS } from './constants';
+import FemaleGameticOptions from './data';
 
 import './styles.scss';
 
@@ -46,7 +46,11 @@ interface OrchardStepProps {
 }
 
 const OrchardStep = ({
-  seedlotSpecies, state, setStepData, cleanParentTables, readOnly
+  seedlotSpecies,
+  state,
+  setStepData,
+  cleanParentTables,
+  readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
@@ -447,60 +451,66 @@ const OrchardStep = ({
             />
           </Column>
         </Row>
-        <div className={!state.noPollenContamination ? '' : 'seedlot-orchard-hidden'}>
-          <Row className="seedlot-orchard-field">
-            <Column sm={4} md={8} lg={16} xlg={12}>
-              <NumberInput
-                id="pollen-percentage-number-input"
-                name="breedingPercentage"
-                ref={(el: HTMLInputElement) => addRefs(el, 'breedingPercentage')}
-                min={0}
-                max={100}
-                value={0}
-                step={10}
-                disableWheel
-                type="number"
-                label="Contaminant pollen breeding percentage (optional) (%)"
-                helperText="If contaminant pollen was present and the contaminant pollen has a breeding value"
-                invalid={invalidBreeding}
-                invalidText="Please enter a valid value between 0 and 100"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  if (e?.target?.name && e?.target?.value) {
-                    setResponse([e.target.name], [e.target.value]);
-                  }
-                }}
-                onClick={
-                  (
-                    _e: React.MouseEvent<HTMLButtonElement>,
-                    target: NumStepperVal | undefined
-                  ) => {
-                    // A guard is needed here because any click on the input will emit a
-                    //   click event, not necessarily the + - buttons
-                    if (target?.value) {
-                      setResponse(['breedingPercentage'], [String(target.value)]);
-                    }
-                  }
-                }
-                onBlur={() => validateBreedingPercentage()}
-                readOnly={readOnly}
-              />
-            </Column>
-          </Row>
-          <Row className="pollen-methodology-checkbox">
-            <Column sm={4} md={8} lg={16}>
-              <label htmlFor="pollen-methodology" className="bcgov--label">
-                Contaminant pollen methodology
-              </label>
-              <Checkbox
-                id="pollen-methodology"
-                name="pollenMethodology"
-                labelText="Regional pollen monitoring"
-                defaultChecked={state.pollenMethodology}
-                readOnly={readOnly}
-              />
-            </Column>
-          </Row>
-        </div>
+        {
+          !state.noPollenContamination
+            ? (
+              <>
+                <Row className="seedlot-orchard-field">
+                  <Column sm={4} md={8} lg={16} xlg={12}>
+                    <NumberInput
+                      id="pollen-percentage-number-input"
+                      name="breedingPercentage"
+                      ref={(el: HTMLInputElement) => addRefs(el, 'breedingPercentage')}
+                      min={0}
+                      max={100}
+                      value={0}
+                      step={10}
+                      disableWheel
+                      type="number"
+                      label="Contaminant pollen breeding percentage (optional) (%)"
+                      helperText="If contaminant pollen was present and the contaminant pollen has a breeding value"
+                      invalid={invalidBreeding}
+                      invalidText="Please enter a valid value between 0 and 100"
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        if (e?.target?.name && e?.target?.value) {
+                          setResponse([e.target.name], [e.target.value]);
+                        }
+                      }}
+                      onClick={
+                        (
+                          _e: React.MouseEvent<HTMLButtonElement>,
+                          target: NumStepperVal | undefined
+                        ) => {
+                          // A guard is needed here because any click on the input will emit a
+                          //   click event, not necessarily the + - buttons
+                          if (target?.value) {
+                            setResponse(['breedingPercentage'], [String(target.value)]);
+                          }
+                        }
+                      }
+                      onBlur={() => validateBreedingPercentage()}
+                      readOnly={readOnly}
+                    />
+                  </Column>
+                </Row>
+                <Row className="pollen-methodology-checkbox">
+                  <Column sm={4} md={8} lg={16}>
+                    <label htmlFor="pollen-methodology" className="bcgov--label">
+                      Contaminant pollen methodology
+                    </label>
+                    <Checkbox
+                      id="pollen-methodology"
+                      name="pollenMethodology"
+                      labelText="Regional pollen monitoring"
+                      defaultChecked={state.pollenMethodology}
+                      readOnly
+                    />
+                  </Column>
+                </Row>
+              </>
+            )
+            : null
+        }
       </form>
     </div>
   );
