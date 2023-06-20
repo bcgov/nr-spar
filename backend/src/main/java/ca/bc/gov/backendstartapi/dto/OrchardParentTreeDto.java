@@ -25,14 +25,7 @@ public record OrchardParentTreeDto(
     List<ParentTreeDto> parentTrees) {
 
   /** Ensure immutability for the user's roles. */
-  public OrchardParentTreeDto(
-      String orchardId,
-      String vegetationCode,
-      Long seedPlanningUnitId,
-      List<ParentTreeDto> parentTrees) {
-    this.orchardId = orchardId;
-    this.vegetationCode = vegetationCode;
-    this.seedPlanningUnitId = seedPlanningUnitId;
-    this.parentTrees = Collections.unmodifiableList(parentTrees);
+  public OrchardParentTreeDto {
+    parentTrees = Collections.unmodifiableList(parentTrees);
   }
 }
