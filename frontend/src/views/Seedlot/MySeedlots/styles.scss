@@ -17,11 +17,11 @@
   }
 
   .btn-my-seedlot {
-    text-align: right;
+    float: right;
   }
 
   .#{vars.$bcgov-prefix}--data-table-container {
-    width: 100vw;
+    width: 100%;
   }
 
   .my-seedlot-data-table-row {
