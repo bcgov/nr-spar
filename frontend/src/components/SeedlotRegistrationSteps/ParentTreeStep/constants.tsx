@@ -9,6 +9,8 @@ export const DEFAULT_PAGE_SIZE = 40;
 
 export const DEFAULT_PAGE_NUMBER = 1;
 
+export const EMPTY_NUMBER_STRING = '--';
+
 // Placeholder function to generate download URL for future
 const getDownloadUrl = (tabType: string) => `#TODO-${tabType.split(' ')[0]}`;
 
@@ -101,7 +103,7 @@ export const geneticWorthDict: GeneticWorthDictType = {
 
 export const rowTemplate: RowItem = {
   cloneNumber: '',
-  cloneCount: null,
+  coneCount: null,
   pollenCount: null,
   smpSuccessPerc: null,
   ad: null,
@@ -137,7 +139,7 @@ export const headerTemplate: Array<HeaderObj> = [
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
   {
-    id: 'cloneCount',
+    id: 'coneCount',
     name: 'Cone count',
     description: 'Cone count',
     enabled: true,
@@ -347,11 +349,11 @@ export const summarySectionConfig = {
     infoItems: {
       totalCone: {
         name: 'Total number of cone count',
-        value: '--'
+        value: EMPTY_NUMBER_STRING
       },
       totalPollen: {
         name: 'Total number of pollen count',
-        value: '--'
+        value: EMPTY_NUMBER_STRING
       }
     }
   },
@@ -361,18 +363,18 @@ export const summarySectionConfig = {
     infoItems: {
       avgNonOrchardContam: {
         name: 'Average number of non-orchard pollen contam. (%)',
-        value: '--'
+        value: EMPTY_NUMBER_STRING
       }
     }
   },
   sharedItems: {
     totalParentTree: {
       name: 'Total number of parent trees',
-      value: '--'
+      value: EMPTY_NUMBER_STRING
     },
     avgSMPSuccess: {
       name: 'Average number of SMP success %',
-      value: '--'
+      value: EMPTY_NUMBER_STRING
     }
   }
 };

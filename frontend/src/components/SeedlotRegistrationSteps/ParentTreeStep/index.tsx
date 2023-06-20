@@ -24,7 +24,8 @@ import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
 } from './definitions';
 import {
-  getTabString, processOrchards, sortAndSliceRows, combineObjectValues
+  getTabString, processOrchards, sortAndSliceRows, combineObjectValues,
+  calcAverage, calcSum
 } from './utils';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
@@ -116,14 +117,37 @@ const ParentTreeStep = (
     setSlicedRows(sliced);
   };
 
-  const setTotalParentTreeNum = (value: string) => {
-    const modifiedSummaryConfig = { ...summaryConfig };
-    modifiedSummaryConfig.sharedItems.totalParentTree.value = value;
-    setSummaryConfig(modifiedSummaryConfig);
+  const calcSummaryItems = () => {
+    if (orchardsData.length > 0) {
+      const modifiedSummaryConfig = { ...summaryConfig };
+      const tableRows = Object.values(state.tableRowData);
+
+      // Calc Total Number of Parent Trees
+      modifiedSummaryConfig.sharedItems
+        .totalParentTree.value = tableRows.length.toString();
+
+      // Calc Total number of cone count
+      modifiedSummaryConfig.coneTab
+        .infoItems.totalCone.value = calcSum(tableRows, 'coneCount');
+
+      // Calc Total number of pollen count
+      modifiedSummaryConfig.coneTab
+        .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
+
+      // Calc AVG of SMP Success
+      modifiedSummaryConfig.sharedItems
+        .avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
+
+      // Calc AVG of of non-orchard pollen contam.
+      modifiedSummaryConfig.successTab
+        .infoItems.avgNonOrchardContam.value = calcAverage(tableRows, 'nonOrchardPollenContam');
+
+      setSummaryConfig(modifiedSummaryConfig);
+    }
   };
 
   useEffect(
-    () => setTotalParentTreeNum(Object.values(state.tableRowData).length.toString()),
+    () => calcSummaryItems(),
     [state.tableRowData]
   );
 
@@ -169,11 +193,13 @@ const ParentTreeStep = (
   });
 
   const setInputChange = (cloneNumber: string, colName: keyof RowItem, value: string) => {
-    const clonedState = { ...state };
+    // Using structuredClone so useEffect on state.tableRowData can be triggered
+    const clonedState = structuredClone(state);
     clonedState.tableRowData[cloneNumber][colName] = value;
     // Slicing rows again to make sure the value is updated in the slicedRows state,
     // It works without doing this as slicedRows is a shallow copy, but let's not rely on it
     sliceTableRowData(Object.values(clonedState.tableRowData), currentPage, currPageSize, true);
+
     setStepData(clonedState);
   };
 
@@ -213,6 +239,12 @@ const ParentTreeStep = (
     return null;
   };
 
+  /**
+   * Each seedlot speicies has its own associated Genetic Worth values that users can toggle,
+   * only those values associated are displayed to user.
+   * This function toggles the isAnOption field of a header column so it can be
+   * displayed as an option
+   */
   const configHeaderOpt = () => {
     const speciesHasGenWorth = Object.keys(geneticWorthDict);
     if (speciesHasGenWorth.includes(seedlotSpecies.code)) {

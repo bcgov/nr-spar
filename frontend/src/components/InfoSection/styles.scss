@@ -1,6 +1,9 @@
-.info-section-items-row{
+@use '../../theme/variables.scss' as vars;
+
+.info-section-items-row {
   margin-top: 2.5rem;
-  input{
+
+  input {
     cursor: default;
   }
 }

@@ -9,7 +9,7 @@ export type TabTypes = {
 export type RowItem = {
   [key: string]: any,
   cloneNumber: string,
-  cloneCount: number | null,
+  coneCount: number | null,
   pollenCount: number | null,
   smpSuccessPerc: number | null,
   ad: number | null,
