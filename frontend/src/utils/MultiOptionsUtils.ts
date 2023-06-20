@@ -7,14 +7,47 @@ const multiOptionsItem: MultiOptionsObj = {
 };
 
 const capFirstChar = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+const uncapFirstChar = (str: string) => str.charAt(0).toLowerCase() + str.slice(1);
+
+const createCheckboxLabel = (str1: string, str2: string) => {
+  const strArray = str1.split(' ');
+  return uncapFirstChar(strArray[0]) + str2;
+};
 
 const trimExtraSpaces = (str: string) => str.replace(/\s\s+/g, ' ');
 
-export const sortAlphabetically = (a: MultiOptionsObj, b: MultiOptionsObj) => (
-  a.label.toLocaleLowerCase() < b.label.toLocaleLowerCase()
+export const sortAlphabetically = (
+  a: MultiOptionsObj,
+  b: MultiOptionsObj,
+  orderByDescription: boolean = false
+) => {
+  if (orderByDescription) {
+    return a.description.toLocaleLowerCase() < b.description.toLocaleLowerCase()
+      ? -1
+      : 1;
+  }
+  return a.label.toLocaleLowerCase() < b.label.toLocaleLowerCase()
     ? -1
-    : 1
-);
+    : 1;
+};
+
+export const getCheckboxOptions = (
+  dataList: any
+) => {
+  const resultList: Array<MultiOptionsObj> = [];
+
+  dataList.forEach((data: any) => {
+    const newItem = { ...multiOptionsItem };
+    newItem.code = data.code;
+    newItem.description = data.description;
+    newItem.label = createCheckboxLabel(data.description, data.code);
+    resultList.push(newItem);
+  });
+
+  resultList.sort((a, b) => sortAlphabetically(a, b, true));
+
+  return resultList;
+};
 
 export const getMultiOptList = (
   dataList: any,

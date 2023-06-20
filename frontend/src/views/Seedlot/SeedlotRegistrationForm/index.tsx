@@ -43,7 +43,7 @@ import {
   initOwnerShipInvalidState,
   initParentTreeState
 } from './utils';
-import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
+import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 
 import './styles.scss';
@@ -150,7 +150,7 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
-            collectionMethods={coneCollectionMethodsQuery.data}
+            collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
             // invalidateObj={allInvalidationObj.collectionStep}
             setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
           />

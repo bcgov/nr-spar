@@ -1,4 +1,5 @@
 const DATE_FORMAT = 'Y/m/d';
+const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
 
 const fieldsConfig = {
   titleSection: {
@@ -59,38 +60,6 @@ const fieldsConfig = {
     warnText: 'The total volume of cones does not equal, please note that this value should be the "Volume per container" x "Number of containers"'
   },
   collectionMethodOptionsLabel: 'Collection methods (Select at least one method used to collect the cones)',
-  aerialRanking: {
-    name: 'aerialRanking',
-    labelText: 'Aerial raking'
-  },
-  aerialClippingTopping: {
-    name: 'aerialClippingTopping',
-    labelText: 'Aerial clipping or topping'
-  },
-  felledTrees: {
-    name: 'felledTrees',
-    labelText: 'Felled trees'
-  },
-  climbing: {
-    name: 'climbing',
-    labelText: 'Climbing'
-  },
-  squirrelCache: {
-    name: 'squirrelCache',
-    labelText: 'Squirrel cache'
-  },
-  ground: {
-    name: 'ground',
-    labelText: 'Ground, Ladder and or Hydraulic lift'
-  },
-  squirrelHarvesting: {
-    name: 'squirrelHarvesting',
-    labelText: 'Squirrel harvesting or dropping'
-  },
-  other: {
-    name: 'other',
-    labelText: 'Other'
-  },
   collectionMethod: {
     name: 'collectionMethodName',
     labelText: 'Collection method name',
@@ -104,4 +73,4 @@ const fieldsConfig = {
   }
 };
 
-export { DATE_FORMAT, fieldsConfig };
+export { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig };

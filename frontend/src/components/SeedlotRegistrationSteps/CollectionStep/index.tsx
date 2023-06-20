@@ -10,13 +10,12 @@ import {
   Checkbox,
   DatePickerInput,
   DatePicker,
-  TextArea,
-  TextInput
+  TextArea
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
 
-import { DATE_FORMAT, fieldsConfig } from './constants';
+import { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig } from './constants';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 import {
   CollectionStepProps,
@@ -52,7 +51,9 @@ const CollectionStep = (
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [isChecked, setIsChecked] = useState<boolean>(true);
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
-  const [isOtherChecked, setIsOtherChecked] = useState<boolean | string>(state.other);
+  // Commenting this for now until we decide how to deal
+  // with the 'other' option
+  // const [isOtherChecked, setIsOtherChecked] = useState<boolean | string>(state.other);
 
   const refControl = useRef<any>({});
 
@@ -77,8 +78,8 @@ const CollectionStep = (
     if (name === fieldsConfig.startDate.name || name === fieldsConfig.endDate.name) {
       // Have both start and end dates
       if (state.startDate !== '' && state.endDate !== '') {
-        isInvalid = moment(state.endDate, 'YYYY/MM/DD')
-          .isBefore(moment(state.startDate, 'YYYY/MM/DD'));
+        isInvalid = moment(state.endDate, MOMENT_DATE_FORMAT)
+          .isBefore(moment(state.startDate, MOMENT_DATE_FORMAT));
       }
       newValidObj.isStartDateInvalid = isInvalid;
       newValidObj.isEndDateInvalid = isInvalid;
@@ -165,9 +166,11 @@ const CollectionStep = (
   const collectionMethodsCheckboxes = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
     handleFormInput(name, checked);
-    if (name === fieldsConfig.other.name) {
-      setIsOtherChecked(checked);
-    }
+    // Commenting this for now until we decide how to deal
+    // with the 'other' option
+    // if (name === 'other') {
+    //   setIsOtherChecked(checked);
+    // }
   };
 
   return (
@@ -373,12 +376,12 @@ const CollectionStep = (
             {
               collectionMethods.map((method) => (
                 <Checkbox
-                  id={fieldsConfig.aerialRanking.name}
-                  name={fieldsConfig.aerialRanking.name}
-                  ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.aerialRanking.name)}
+                  id={method.label}
+                  name={method.label}
+                  ref={(el: HTMLInputElement) => addRefs(el, method.label)}
                   labelText={method.description}
                   readOnly={readOnly}
-                  checked={state.aerialRanking}
+                  checked={state[method.label]}
                   onChange={
                     (event: React.ChangeEvent<HTMLInputElement>) => {
                       collectionMethodsCheckboxes(event);
@@ -390,7 +393,10 @@ const CollectionStep = (
             }
           </fieldset>
         </Column>
-        <Column className="" sm={4} md={4} lg={16} xlg={12}>
+        {
+        // Commenting this for now until we decide how to deal
+        // with the 'other' option
+        /* <Column className="" sm={4} md={4} lg={16} xlg={12}>
           {
             isOtherChecked && (
               <TextInput
@@ -413,7 +419,7 @@ const CollectionStep = (
               />
             )
           }
-        </Column>
+        </Column> */}
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={16} xlg={12}>
