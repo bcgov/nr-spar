@@ -467,7 +467,7 @@ const OrchardStep = ({
                       step={10}
                       disableWheel
                       type="number"
-                      label="Contaminant pollen breeding percentage (optional) (%)"
+                      label="Contaminant pollen breeding value (optional)"
                       helperText="If contaminant pollen was present and the contaminant pollen has a breeding value"
                       invalid={invalidBreeding}
                       invalidText="Please enter a valid value between 0 and 100"
