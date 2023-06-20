@@ -76,6 +76,6 @@ public class OrchardService {
 
     log.info("Finished fetching Parent Tree and Genetic Quality from Oracle API Provider!");
 
-    return parentTreeDto.orElseThrow(() -> new NoParentTreeDataException());
+    return parentTreeDto.orElseThrow(NoParentTreeDataException::new);
   }
 }
