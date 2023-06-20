@@ -25,7 +25,6 @@ import { MAX_ORCHARDS } from './constants';
 import { getOrchardByID } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 
-import FemaleGameticOptions from './data';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import DropDownObj from '../../../types/DropDownObject';
 import OrchardDataType from '../../../types/OrchardDataType';
@@ -38,19 +37,22 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  seedlotSpecies: DropDownObj
-  state: OrchardForm
+  seedlotSpecies: DropDownObj,
+  gameticOptions: DropDownObj[],
+  state: OrchardForm,
   setStepData: Function,
   cleanParentTables: Function,
-  readOnly?: boolean
+  readOnly?: boolean,
 }
 
 const OrchardStep = ({
-  seedlotSpecies, state, setStepData, cleanParentTables, readOnly
+  seedlotSpecies, gameticOptions, state, setStepData, cleanParentTables, readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
 
+  const FemaleGameticOptions = gameticOptions.slice(0, 9);
+  const MaleGameticOptions = gameticOptions.slice(9, 14);
   const refControl = useRef<any>({});
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
@@ -340,31 +342,13 @@ const OrchardStep = ({
                     onChange={(e: string) => maleGameticHandler(e)}
                     valueSelected={state.maleGametic}
                   >
-                    <RadioButton
-                      id="m1-radio"
-                      labelText="M1 - Portion of ramets in orchard"
-                      value="M1"
-                    />
-                    <RadioButton
-                      id="m2-radio"
-                      labelText="M2 - Pollen volume estimate by partial survey"
-                      value="M2"
-                    />
-                    <RadioButton
-                      id="m3-radio"
-                      labelText="M3 - Pollen volume estimate by 100% survey"
-                      value="M3"
-                    />
-                    <RadioButton
-                      id="m4-radio"
-                      labelText="M4 - Ramet proportion by clone"
-                      value="M4"
-                    />
-                    <RadioButton
-                      id="m5-radio"
-                      labelText="M5 - Ramet proportion by age and expected production"
-                      value="M5"
-                    />
+                    {MaleGameticOptions.map((item) => (
+                      <RadioButton
+                        id={`${item.code.toLowerCase()}-radio`}
+                        labelText={item.label}
+                        value={item.code}
+                      />
+                    ))}
                   </RadioButtonGroup>
                 )
                 : (
@@ -376,21 +360,13 @@ const OrchardStep = ({
                     onChange={(e: string) => maleGameticHandler(e)}
                     valueSelected={state.maleGametic}
                   >
-                    <RadioButton
-                      id="m1-radio"
-                      labelText="M1 - Portion of ramets in orchard"
-                      value="M1"
-                    />
-                    <RadioButton
-                      id="m2-radio"
-                      labelText="M2 - Pollen volume estimate by partial survey"
-                      value="M2"
-                    />
-                    <RadioButton
-                      id="m3-radio"
-                      labelText="M3 - Pollen volume estimate by 100% survey"
-                      value="M3"
-                    />
+                    {MaleGameticOptions.slice(0, -2).map((item) => (
+                      <RadioButton
+                        id={`${item.code.toLowerCase()}-radio`}
+                        labelText={item.label}
+                        value={item.code}
+                      />
+                    ))}
                   </RadioButtonGroup>
                 )
             }

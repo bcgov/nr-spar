@@ -16,6 +16,7 @@ import { ArrowRight } from '@carbon/icons-react';
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
 import getSeedlotInfo from '../../../api-service/seedlotAPI';
+import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
@@ -77,6 +78,11 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getSeedlotInfo(seedlotNumber)
   });
 
+  const maleFemaleMethodologyQuery = useQuery({
+    queryKey: ['male-female-methodology'],
+    queryFn: getMaleFemaleMethodology
+  });
+
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
     collectionStep: initCollectionState(defaultAgency, defaultCode),
@@ -127,6 +133,7 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
+    const methodologyList = getDropDownList(maleFemaleMethodologyQuery.data);
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
       label: '',
@@ -175,6 +182,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
+            gameticOptions={methodologyList}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -261,7 +269,7 @@ const SeedlotRegistrationForm = () => {
                       kind="secondary"
                       size="lg"
                       className="back-next-btn"
-                      onClick={() => setStep(-1)}
+                      onClick={() => console.log('teste: ', maleFemaleMethodologyQuery.data)}
                     >
                       Back
                     </Button>
