@@ -1,7 +1,7 @@
 @use '../../../theme/variables.scss' as vars;
 
 .my-seedlot-content {
-  .my-seedlot-breadcrumb{
+  .my-seedlot-breadcrumb {
     padding-left: 1rem;
     margin-bottom: 0.5rem;
   }
@@ -11,25 +11,28 @@
     margin-left: 0;
   }
 
-  .my-seedlot-title{
+  .my-seedlot-title {
     justify-content: space-between;
     margin-bottom: 3.25rem;
   }
 
-  .btn-my-seedlot{
-    text-align: right;
+  .btn-my-seedlot {
+    float: right;
   }
 
-  .my-seedlot-data-table-row{
+  .#{vars.$bcgov-prefix}--data-table-container {
     width: 100%;
-    margin-left: -2rem;
   }
-  
+
+  .my-seedlot-data-table-row {
+    margin: 0 -2rem;
+  }
+
   .#{vars.$bcgov-prefix}--table-sort {
     background-color: var(--#{vars.$bcgov-prefix}-layer-01);
   }
 
-  .#{vars.$bcgov-prefix}--search-input { 
+  .#{vars.$bcgov-prefix}--search-input {
     border-bottom: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01)
   }
 
@@ -37,7 +40,7 @@
     cursor: pointer;
   }
 
-  .#{vars.$bcgov-prefix}--pagination__button, 
+  .#{vars.$bcgov-prefix}--pagination__button,
   .#{vars.$bcgov-prefix}--btn--ghost.#{vars.$bcgov-prefix}--pagination__button {
     height: 3rem;
   }
