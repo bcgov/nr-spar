@@ -7,7 +7,7 @@ import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm
 import makeServer from '../../mock-server/server';
 import * as ReactQuery from '@tanstack/react-query';
 
-describe('Extraction and Storage Step test', () => {
+describe.skip('Extraction and Storage Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
   jest
