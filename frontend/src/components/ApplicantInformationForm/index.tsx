@@ -11,11 +11,13 @@ import {
   RadioButton,
   Checkbox,
   Button,
-  ComboBox
+  ComboBox,
+  InlineLoading
 } from '@carbon/react';
 import { DocumentAdd } from '@carbon/icons-react';
 
 import Subtitle from '../Subtitle';
+import InputErrorText from '../InputErrorText';
 
 import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
 
@@ -159,6 +161,21 @@ const ApplicantInformationForm = () => {
     }
   };
 
+  const displaySpeciesStatus = () => {
+    const { status } = vegCodeQuery;
+    if (status === 'loading') {
+      return (
+        <InlineLoading description="Loading..." />
+      );
+    }
+    if (status === 'error') {
+      return (
+        <InputErrorText description="An error occurred" />
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="applicant-information-form">
       <form onSubmit={validateAndSubmit}>
@@ -244,6 +261,9 @@ const ApplicantInformationForm = () => {
               invalid={invalidSpecies}
               invalidText="Please select a species"
             />
+            {
+              displaySpeciesStatus()
+            }
           </Column>
         </Row>
         <Row className="class-source-radio">
