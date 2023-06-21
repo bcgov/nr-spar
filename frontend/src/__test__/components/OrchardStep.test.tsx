@@ -133,7 +133,7 @@ describe.skip('Orchard Step test', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText('Contaminant pollen breeding percentage (optional) (%)')
+        screen.getByText('Contaminant pollen breeding value (optional)')
       ).toBeInTheDocument();
       expect(
         screen.getByText('If contaminant pollen was present and the contaminant pollen has a breeding value')
