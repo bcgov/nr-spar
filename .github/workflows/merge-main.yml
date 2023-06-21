@@ -81,7 +81,9 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             verification_path: "actuator/health"
-            parameters: -p BUILD=test
+            parameters:
+              -p BUILD=test
+              -p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -190,7 +192,9 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             verification_path: "actuator/health"
-            parameters: -p BUILD=prod
+            parameters:
+              -p BUILD=prod
+              -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true

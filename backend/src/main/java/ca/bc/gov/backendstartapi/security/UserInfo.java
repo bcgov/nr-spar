@@ -28,6 +28,7 @@ import lombok.NonNull;
  * @param identityProvider the identity provider used to authenticate this user. This prop comes
  *     from the JWT {@code identity_provider} claim
  * @param roles The user's roles. This prop comes from the JWT {@code client_roles} claim
+ * @param jwtToken The user's JWT token
  */
 public record UserInfo(
     @NonNull String id,
@@ -38,19 +39,18 @@ public record UserInfo(
     String idirUsername,
     String businessName,
     @NonNull IdentityProvider identityProvider,
-    @NonNull Set<String> roles) {
+    @NonNull Set<String> roles,
+    @NonNull String jwtToken) {
 
   /** Ensure immutability for the user's roles. */
   public UserInfo {
-    switch (identityProvider) {
-      case IDIR -> {
-        Objects.requireNonNull(firstName);
-        Objects.requireNonNull(lastName);
-        Objects.requireNonNull(idirUsername);
-      }
-      case BUSINESS_BCEID -> Objects.requireNonNull(businessName);
-      default -> throw new IllegalArgumentException(
-          "Not implemented for identity provider " + identityProvider);
+    if (identityProvider.equals(IdentityProvider.IDIR)) {
+      Objects.requireNonNull(firstName);
+      Objects.requireNonNull(lastName);
+      Objects.requireNonNull(idirUsername);
+    }
+    if (identityProvider.equals(IdentityProvider.BUSINESS_BCEID)) {
+      Objects.requireNonNull(businessName);
     }
     roles = Collections.unmodifiableSet(roles);
   }

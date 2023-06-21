@@ -63,4 +63,19 @@ public class LoggedUserService {
 
     return userInfo.get().id();
   }
+
+  /**
+   * Get the JWT Token from the logged user.
+   *
+   * @return a String containing the token if logged in. Or an empty string otherwise
+   * @throws UserNotFoundException when not logged in
+   */
+  public String getLoggedUserToken() {
+    Optional<UserInfo> userInfo = userAuthenticationHelper.getUserInfo();
+    if (userInfo.isEmpty()) {
+      throw new UserNotFoundException();
+    }
+
+    return userInfo.get().jwtToken();
+  }
 }

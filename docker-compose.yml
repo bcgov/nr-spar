@@ -34,6 +34,7 @@ services:
       POSTGRESQL_PASSWORD: *POSTGRES_PASSWORD
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
+      ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
     ports:
       - "8090:8090"
     build:
