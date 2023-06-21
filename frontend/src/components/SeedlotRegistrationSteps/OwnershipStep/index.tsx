@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Accordion,
   AccordionItem
@@ -233,6 +233,10 @@ const OwnershipStep = (
       setDisableInputs(false);
     }
   };
+
+  useEffect(() => {
+    setDefaultAgencyNCode(true);
+  }, [defaultAgency, defaultCode]);
 
   const addRefs = (element: HTMLInputElement, id: number, name: string) => {
     if (element !== null) {
