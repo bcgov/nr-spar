@@ -329,22 +329,34 @@ const ParentTreeStep = (
       .filter((header) => header.isAnOption && header.availableInTabs.includes(currentTab));
 
     return (
-      toggleableCols.map((header) => (
+      <>
         <OverflowMenuItem
-          key={header.id}
+          className="menu-item-label-text"
           closeMenu={() => false}
-          onClick={(e: React.ChangeEvent<any>) => toggleColumn(header.id, e.target.nodeName)}
-          itemText={
-            (
-              <Checkbox
-                checked={header.enabled}
-                id={header.id}
-                labelText={header.name}
-              />
-            )
-          }
+          itemText={pageText[currentTab].toggleName}
         />
-      ))
+        {/* <span className="menu-item-text">
+          {pageText[currentTab].toggleName}
+        </span> */}
+        {
+          toggleableCols.map((header) => (
+            <OverflowMenuItem
+              key={header.id}
+              closeMenu={() => false}
+              onClick={(e: React.ChangeEvent<any>) => toggleColumn(header.id, e.target.nodeName)}
+              itemText={
+                (
+                  <Checkbox
+                    checked={header.enabled}
+                    id={header.id}
+                    labelText={header.name}
+                  />
+                )
+              }
+            />
+          ))
+        }
+      </>
     );
   };
 
@@ -438,6 +450,7 @@ const ParentTreeStep = (
                     <TableToolbar aria-label="data table toolbar">
                       <TableToolbarContent>
                         <OverflowMenu
+                          menuOptionsClass="parent-tree-table-menu"
                           renderIcon={View}
                           iconDescription="Show/hide columns"
                           flipped
