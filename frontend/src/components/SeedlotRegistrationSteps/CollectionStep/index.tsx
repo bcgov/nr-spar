@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import moment from 'moment';
 
 import {
@@ -56,6 +56,14 @@ const CollectionStep = (
   // const [isOtherChecked, setIsOtherChecked] = useState<boolean | string>(state.other);
 
   const refControl = useRef<any>({});
+
+  useEffect(() => {
+    setStepData({
+      ...state,
+      collectorAgency: defaultAgency,
+      locationCode: defaultCode
+    });
+  }, [defaultAgency, defaultCode]);
 
   const addRefs = (element: HTMLInputElement, name: string) => {
     if (element !== null) {

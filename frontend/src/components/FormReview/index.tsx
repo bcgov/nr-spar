@@ -237,8 +237,8 @@ const FormReview = () => {
                   <div className="form-item">
                     <InterimStorage
                       state={allStepData.interimStep}
-                      defaultAgency={defaultAgency}
-                      defaultCode={defaultCode}
+                      collectorAgency={defaultAgency}
+                      collectorCode={defaultCode}
                       agencyOptions={agencyOptions}
                       setStepData={() => { }}
                       readOnly
