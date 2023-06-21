@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.security;
 
-import java.util.HashSet;
+import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,8 @@ class UserInfoTest {
             "BAGGINGS",
             null,
             IdentityProvider.IDIR,
-            new HashSet<>());
+            Set.of(),
+            "abcdef123456789");
 
     Assertions.assertNotNull(userInfo);
     Assertions.assertEquals("Bilbo", userInfo.firstName());

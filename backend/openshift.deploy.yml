@@ -54,6 +54,9 @@ parameters:
     description: Current SPAR backend API build version
     required: true
     value: nightly
+  - name: ORACLE_SERVER_URL
+    description: Oracle back-end api URL
+    required: true
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -112,6 +115,8 @@ objects:
                   value: ${KEYCLOAK_REALM_URL}
                 - name: FORESTCLIENTAPI_ADDRESS
                   value: ${FORESTCLIENTAPI_ADDRESS}
+                - name: ORACLE_SERVER_URL
+                  value: ${ORACLE_SERVER_URL}
                 - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
