@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import moment from 'moment';
 
 import {
@@ -18,6 +18,7 @@ import Subtitle from '../../Subtitle';
 import { FilterObj, filterInput } from '../../../utils/filterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import InterimForm from './definitions';
+
 import './styles.scss';
 
 const DATE_FORMAT = 'Y/m/d';
@@ -25,8 +26,8 @@ const DATE_FORMAT = 'Y/m/d';
 interface InterimStorageStepProps {
   state: InterimForm,
   setStepData: Function,
-  defaultAgency: string,
-  defaultCode: string,
+  collectorAgency: string,
+  collectorCode: string,
   agencyOptions: Array<string>,
   readOnly?: boolean
 }
@@ -35,8 +36,8 @@ const InterimStorage = (
   {
     state,
     setStepData,
-    defaultAgency,
-    defaultCode,
+    collectorAgency,
+    collectorCode,
     agencyOptions,
     readOnly
   }: InterimStorageStepProps
@@ -62,6 +63,14 @@ const InterimStorage = (
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
 
   const [otherRadioChecked, setOtherChecked] = useState(false);
+
+  useEffect(() => {
+    setStepData({
+      ...state,
+      agencyName: collectorAgency,
+      locationCode: collectorCode
+    });
+  }, [collectorAgency, collectorCode]);
 
   const validateInput = (name: string, value: string) => {
     const newValidObj = { ...validationObj };
@@ -126,7 +135,7 @@ const InterimStorage = (
     const { checked } = event.target;
     setIsChecked(checked);
     if (checked) {
-      handleFormInput('agencyName', defaultAgency, 'locationCode', defaultCode);
+      handleFormInput('agencyName', collectorAgency, 'locationCode', collectorCode);
     }
   };
 
@@ -153,7 +162,7 @@ const InterimStorage = (
           <Checkbox
             id="interim-agency-checkbox"
             name="interim-agency"
-            labelText="Use applicant agency as interim storage agency"
+            labelText="Use collector agency as interim storage agency"
             defaultChecked
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => interimAgencyIsChecked(e)}
             readOnly={readOnly}

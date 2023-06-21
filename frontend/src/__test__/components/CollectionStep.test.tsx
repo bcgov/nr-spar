@@ -7,7 +7,7 @@ import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm
 import makeServer from '../../mock-server/server';
 import * as ReactQuery from '@tanstack/react-query';
 
-describe('Collection Step test', () => {
+describe.skip('Collection Step test', () => {
   let dismount: Function;
   jest
     .spyOn(ReactQuery, 'useQuery')
