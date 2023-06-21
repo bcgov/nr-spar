@@ -3,7 +3,6 @@
 
 .applicant-information-form {
   margin-top: 1rem;
-  padding-left: 2.5rem;
 }
 
 .applicant-information-form h2 {
@@ -33,11 +32,4 @@
 .collected-checkbox,
 .save-button {
   margin-bottom: 3rem;
-}
-
-
-@media only screen and (max-width: 1584px) {
-  .applicant-information-form {
-    padding-left: 2rem;
-  }
 }

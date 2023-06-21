@@ -88,7 +88,7 @@
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-annotations</artifactId>
-			<version>2.2.10</version>
+			<version>2.2.12</version>
 		</dependency>
 
 		<!-- Authentication and Security -->
@@ -152,7 +152,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.2</version>
 				<executions>
 					<execution>
 						<id>integration-tests</id>
@@ -175,7 +175,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.2</version>
 				<configuration>
 					<argLine>@{argLine} -Xmx1024m</argLine>
 					<skipTests>${skip.unit.tests}</skipTests>
@@ -345,12 +345,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.2.2</version>
+				<version>3.3.0</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>10.11.0</version>
+						<version>10.12.0</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -366,7 +366,7 @@
 				<executions>
 					<execution>
 						<id>validate</id>
-						<phase>validate</phase>
+						<phase>checkstyle</phase>
 						<goals>
 							<goal>check</goal>
 						</goals>

@@ -6,7 +6,7 @@ import {
   FileUploaderItem
 } from '@carbon/react';
 
-import { pageTexts } from '../constants';
+import textConfig from './constants';
 
 import './styles.scss';
 
@@ -36,10 +36,10 @@ const UploadFileModal = ({ open, setOpen, onSubmit }: UploadFileModalProps) => {
   return (
     <Modal
       className="upload-file-modal"
-      modalLabel={pageTexts.sharedTabTexts.modal.label}
-      modalHeading={pageTexts.sharedTabTexts.modal.title}
-      primaryButtonText={pageTexts.sharedTabTexts.modal.buttons.confirm}
-      secondaryButtonText={pageTexts.sharedTabTexts.modal.buttons.cancel}
+      modalLabel={textConfig.label}
+      modalHeading={textConfig.title}
+      primaryButtonText={textConfig.buttons.confirm}
+      secondaryButtonText={textConfig.buttons.cancel}
       open={open}
       onRequestClose={() => {
         setOpen(false);
@@ -54,11 +54,11 @@ const UploadFileModal = ({ open, setOpen, onSubmit }: UploadFileModalProps) => {
       size="sm"
     >
       <p className="upload-modal-description">
-        {pageTexts.sharedTabTexts.modal.description}
+        {textConfig.description}
       </p>
       <FileUploaderDropContainer
         className="upload-file-component"
-        labelText={pageTexts.sharedTabTexts.modal.uploadFile}
+        labelText={textConfig.uploadFile}
         accept={['.csv']}
         onAddFiles={
           (e: React.ChangeEvent<HTMLInputElement>, { addedFiles }: any) => {
@@ -67,11 +67,11 @@ const UploadFileModal = ({ open, setOpen, onSubmit }: UploadFileModalProps) => {
             setFileAdded(true);
             setFileName(fileToUpload.name);
             if (fileToUpload.type !== 'text/csv') {
-              setErrorSub(pageTexts.sharedTabTexts.modal.uploadedFileErrorType);
-              setErrorMessage(pageTexts.sharedTabTexts.modal.uploadedFileErrorMessageType);
+              setErrorSub(textConfig.uploadedFileErrorType);
+              setErrorMessage(textConfig.uploadedFileErrorMessageType);
             } else if (fileToUpload.filesize > 512000) {
-              setErrorSub(pageTexts.sharedTabTexts.modal.uploadedFileErrorSize);
-              setErrorMessage(pageTexts.sharedTabTexts.modal.uploadedFileErrorMessageSize);
+              setErrorSub(textConfig.uploadedFileErrorSize);
+              setErrorMessage(textConfig.uploadedFileErrorMessageSize);
             } else {
               setInvalidFile(false);
               setFile(fileToUpload);
@@ -86,7 +86,7 @@ const UploadFileModal = ({ open, setOpen, onSubmit }: UploadFileModalProps) => {
           errorSubject={errorSub}
           errorBody={errorMessage}
           invalid={invalidFile}
-          iconDescription={pageTexts.sharedTabTexts.modal.uploadedFileIconDesc}
+          iconDescription={textConfig.uploadedFileIconDesc}
           status={uploaderStatus}
           onDelete={() => resetUploadStatus()}
         />
@@ -96,8 +96,8 @@ const UploadFileModal = ({ open, setOpen, onSubmit }: UploadFileModalProps) => {
         hideCloseButton
         lowContrast
         kind="info"
-        title={pageTexts.sharedTabTexts.modal.notification.title}
-        subtitle={pageTexts.sharedTabTexts.modal.notification.description}
+        title={textConfig.notification.title}
+        subtitle={textConfig.notification.description}
       />
     </Modal>
   );

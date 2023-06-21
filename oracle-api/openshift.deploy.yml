@@ -22,9 +22,9 @@ parameters:
   - name: CPU_LIMIT
     value: 175m
   - name: MEMORY_REQUEST
-    value: 150Mi
-  - name: MEMORY_LIMIT
     value: 300Mi
+  - name: MEMORY_LIMIT
+    value: 400Mi
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
@@ -49,6 +49,12 @@ parameters:
   - name: KEYCLOAK_REALM_URL
     description: Keycloak realm address
     value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
+  - name: MIN_REPLICAS
+    description: The minimum amount of replicas for the horizontal pod autoscaler.
+    value: "1"
+  - name: MAX_REPLICAS
+    description: The maximum amount of replicas for the horizontal pod autoscaler.
+    value: "2"
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -180,3 +186,21 @@ objects:
       tls:
         termination: edge
         insecureEdgeTerminationPolicy: Redirect
+  - apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      scaleTargetRef:
+        apiVersion: apps.openshift.io/v1
+        kind: DeploymentConfig
+        name: ${NAME}-${ZONE}-${COMPONENT}
+      minReplicas: ${{MIN_REPLICAS}}
+      maxReplicas: ${{MAX_REPLICAS}}
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 80

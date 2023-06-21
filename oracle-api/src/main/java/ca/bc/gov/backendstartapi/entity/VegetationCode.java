@@ -9,8 +9,10 @@ import jakarta.persistence.Table;
 import java.beans.Transient;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.NamedQuery;
 
@@ -24,6 +26,7 @@ import org.hibernate.annotations.NamedQuery;
 @Entity
 @Table(name = "vegetation_code")
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
 @NamedQuery(
@@ -65,9 +68,6 @@ public class VegetationCode {
   @Column(name = "update_timestamp", nullable = false)
   @Schema(description = "The date and time when the code was last updated.")
   private LocalDateTime updateTimestamp;
-
-  /** Because we need an empty constructor for Hibernate. */
-  private VegetationCode() {}
 
   @Transient
   public boolean isValid() {

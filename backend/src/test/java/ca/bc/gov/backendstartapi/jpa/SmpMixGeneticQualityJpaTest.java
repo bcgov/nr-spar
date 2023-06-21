@@ -39,7 +39,7 @@ class SmpMixGeneticQualityJpaTest extends SeedlotEntityJpaTest {
   @Test
   void create() {
     var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
-    var smpMix = new SmpMix(seedlot, 1, 1, new AuditInformation("user1"));
+    var smpMix = new SmpMix(seedlot, 1, 1, null, new AuditInformation("user1"), 0);
     smpMix.setProportion(new BigDecimal(10));
 
     var savedSmpMix = smpMixRepository.save(smpMix);
@@ -51,7 +51,8 @@ class SmpMixGeneticQualityJpaTest extends SeedlotEntityJpaTest {
             GeneticWorthEnum.AD,
             new BigDecimal(10),
             true,
-            new AuditInformation("user1"));
+            new AuditInformation("user1"),
+            0);
 
     repository.saveAndFlush(smpMixGeneticQuality);
 

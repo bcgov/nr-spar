@@ -93,7 +93,13 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.26</version>
+      <version>1.18.28</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
       <optional>true</optional>
     </dependency>
 
@@ -177,7 +183,16 @@
                 <metadataVersion>6.1.1.Final</metadataVersion>
               </dependency>
             </dependencies>
+            <enabled>true</enabled>
           </metadataRepository>
+          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+          <requiredVersion>22.3.0</requiredVersion>
+          <verbose>true</verbose>
+          <buildArgs>
+            <arg>--verbose</arg>
+            <arg>--initialize-at-build-time=org.slf4j.LoggerFactory</arg>
+            <arg>--trace-class-initialization=org.slf4j.LoggerFactory</arg>
+          </buildArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -216,7 +231,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.2</version>
         <executions>
           <execution>
             <id>integration-tests</id>
@@ -239,7 +254,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.2</version>
         <configuration>
           <argLine>@{argLine} -Xmx1024m</argLine>
           <skipTests>${skip.unit.tests}</skipTests>
@@ -414,12 +429,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.2.2</version>
+        <version>3.3.0</version>
         <dependencies>
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.11.0</version>
+            <version>10.12.0</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -435,7 +450,7 @@
         <executions>
           <execution>
             <id>validate</id>
-            <phase>validate</phase>
+            <phase>checkstyle</phase>
             <goals>
               <goal>check</goal>
             </goals>

@@ -5,14 +5,31 @@ import {
   Modal,
   ToastNotification
 } from '@carbon/react';
+import * as Icons from '@carbon/icons-react';
 import ModalStateManager from '../../ModalStateManager';
 import inputText from './constants';
 import './styles.scss';
 
-const SubmitModal = () => (
+type SubmitModalProps = {
+  btnText: string;
+  renderIconName?: string;
+}
+
+const SubmitModal = (
+  {
+    btnText,
+    renderIconName
+  }: SubmitModalProps
+) => (
   <ModalStateManager
     renderLauncher={({ setOpen }: any) => (
-      <Button onClick={() => setOpen(true)}>{inputText.modal.buttonText}</Button>
+      <Button
+        className="submit-modal-btn"
+        onClick={() => setOpen(true)}
+        renderIcon={renderIconName ? Icons[renderIconName] : null}
+      >
+        {btnText}
+      </Button>
     )}
   >
     {({ open, setOpen }: any) => (

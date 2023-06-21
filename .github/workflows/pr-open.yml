@@ -19,6 +19,7 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
+        if: github.event.action == 'opened' || github.event.action == 'reopened'
         uses: bcgov-nr/action-pr-description-add@v0.0.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,7 +36,7 @@ jobs:
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v1.0.4
+        uses: bcgov-nr/action-deployer-openshift@v1.1.1
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -48,45 +49,8 @@ jobs:
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+          triggers: ('common/', 'backend/', 'frontend/', 'oracle-api/')
 
-  cloud-native-builds:
-    permissions:
-      contents: read
-      packages: write
-    strategy:
-      matrix:
-        package: [backend]
-    name: Cloud Native Builds (${{ matrix.package }})
-    runs-on: ubuntu-22.04
-    env:
-      COMPONENT: ${{ matrix.package }}
-      ZONE: ${{ github.event.number }}
-      NAME: ghcr.io/${{ github.repository }}/${{ matrix.package }}:${{ github.event.number }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - uses: graalvm/setup-graalvm@v1
-        with:
-          version: "22.3.0"
-          java-version: "17"
-          components: "native-image"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build Native Image
-        run: |
-          cd ${{ matrix.package }}
-          chmod +x ./mvnw
-          ./mvnw -Pnative clean spring-boot:build-image \
-            -Dspring-boot.build-image.imageName="${{ env.NAME }}" \
-            -Doci.revision=${{ github.event.number }} --quiet
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Pushing
-        run: docker push ${{ env.NAME }}
-  
   builds:
     name: Builds
     runs-on: ubuntu-22.04
@@ -94,17 +58,19 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [database, frontend, oracle-api]
+        package: [database, backend, frontend, oracle-api]
         include:
           - package: database
             triggers: ('database/')
+          - package: backend
+            triggers: ('backend/')
           - package: frontend
             triggers: ('frontend/')
           - package: oracle-api
             triggers: ('oracle-api/')
     steps:
       - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-builder-ghcr@v1.1.0
+      - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
@@ -115,7 +81,6 @@ jobs:
   deploys:
     name: Deploys
     needs:
-      - cloud-native-builds
       - builds
       - init
     runs-on: ubuntu-22.04
@@ -127,11 +92,16 @@ jobs:
             file: database/openshift.deploy.yml
             parameters: -p DB_PVC_SIZE=128Mi
             overwrite: false
+            triggers: ('common/', 'database/')
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
+            parameters:
+              -p MIN_REPLICAS=1
+              -p MAX_REPLICAS=1
+              -p BUILD=snapshot-${{ github.event.number }}
+            triggers: ('common/', 'database/', 'backend/')
             verification_path: "actuator/health"
-            parameters: -p MIN_REPLICAS=1 -p MAX_REPLICAS=1 -p BUILD=snapshot-${{ github.event.number }}
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -143,14 +113,20 @@ jobs:
               -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
               -p REACT_APP_KC_REALM=standard
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
-              -p MIN_REPLICAS=1 -p MAX_REPLICAS=1
+              -p MIN_REPLICAS=1
+              -p MAX_REPLICAS=1
+            triggers: ('common/', 'database/', 'backend/', 'frontend/')
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
+            parameters:
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
+              -p MIN_REPLICAS=1
+              -p MAX_REPLICAS=1
+            triggers: ('common/', 'oracle-api')
             verification_path: "actuator/health"
-            parameters: -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v1.0.4
+      - uses: bcgov-nr/action-deployer-openshift@v1.1.1
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -158,11 +134,13 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
-          verification_path: ${{ matrix.verification_path}}
           parameters:
-            -p ZONE=${{ github.event.number }} -p NAME=${{ github.event.repository.name }}
+            -p ZONE=${{ github.event.number }}
+            -p NAME=${{ github.event.repository.name }}
             -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
             ${{ matrix.parameters }}
+          triggers: ${{ matrix.triggers }}
+          verification_path: ${{ matrix.verification_path}}
 
   # tests-api:
   #   name: API Tests

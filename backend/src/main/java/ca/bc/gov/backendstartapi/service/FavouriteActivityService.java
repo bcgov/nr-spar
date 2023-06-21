@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.exception.FavoriteActivityExistsToUser;
 import ca.bc.gov.backendstartapi.exception.InvalidActivityException;
 import ca.bc.gov.backendstartapi.repository.FavouriteActivityRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -86,6 +87,7 @@ public class FavouriteActivityService {
    * @return a {@link FavouriteActivityEntity} updated
    * @throws InvalidActivityException if the activity doesn't exist
    */
+  @Transactional
   public FavouriteActivityEntity updateUserActivity(Long id, FavouriteActivityUpdateDto updateDto) {
     String userId = loggedUserService.getLoggedUserId();
 
@@ -93,6 +95,13 @@ public class FavouriteActivityService {
     Optional<FavouriteActivityEntity> activityEntity = favouriteActivityRepository.findById(id);
     if (activityEntity.isEmpty()) {
       throw new InvalidActivityException();
+    }
+
+    // If the received activity is hilighted, update all other activities
+    // for this user with not highlighted, keeping only one activity
+    // hightlighted
+    if (updateDto.highlighted()) {
+      favouriteActivityRepository.removeAllHighlightedByUser(userId);
     }
 
     FavouriteActivityEntity entity =
