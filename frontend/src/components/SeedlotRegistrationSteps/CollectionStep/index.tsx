@@ -74,7 +74,7 @@ const CollectionStep = (
     }
   };
 
-  const validateInput = (name: string, value: string | boolean) => {
+  const validateInput = (name: string, value: string | string[]) => {
     const newValidObj = { ...validationObj };
     let isInvalid = false;
     if (name === fieldsConfig.code.name) {
@@ -114,18 +114,24 @@ const CollectionStep = (
     setValidationObj(newValidObj);
   };
 
-  const handleFormInput = <K extends keyof CollectionForm>(
+  const handleFormInput = (
     name: string,
-    value: CollectionForm[K],
+    value: string | string[],
     optName?: string,
-    optValue?: CollectionForm[K]
+    optValue?: string | string[]
   ) => {
-    const newForm: CollectionForm = { ...state };
-    newForm[name] = value;
     if (optName && optValue && optName !== name) {
-      newForm[optName] = optValue;
+      setStepData({
+        ...state,
+        [name]: value,
+        [optName]: optValue
+      });
+    } else {
+      setStepData({
+        ...state,
+        [name]: value
+      });
     }
-    setStepData(newForm);
     validateInput(name, value);
     if (optName && optValue) {
       validateInput(optName, optValue);
@@ -143,9 +149,9 @@ const CollectionStep = (
     );
   };
 
-  const collectionVolumeInformationHandler = <K extends keyof CollectionForm>(
+  const collectionVolumeInformationHandler = (
     name: string,
-    value: CollectionForm[K]
+    value: string | string[]
   ) => {
     const numberOfContainers = +refControl.current[fieldsConfig.numberOfContainers.name].value;
     const volumePerContainers = +refControl.current[fieldsConfig.volumePerContainers.name].value;
@@ -171,14 +177,15 @@ const CollectionStep = (
     }
   };
 
-  const collectionMethodsCheckboxes = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = event.target;
-    handleFormInput(name, checked);
-    // Commenting this for now until we decide how to deal
-    // with the 'other' option
-    // if (name === 'other') {
-    //   setIsOtherChecked(checked);
-    // }
+  const collectionMethodsCheckboxes = (selectedMethod: string) => {
+    const { selectedCollectionCodes } = state;
+    const index = selectedCollectionCodes.indexOf(selectedMethod);
+    if (index > -1) {
+      selectedCollectionCodes.splice(index, 1);
+    } else {
+      selectedCollectionCodes.push(selectedMethod);
+    }
+    handleFormInput('selectedCollectionCodes', selectedCollectionCodes);
   };
 
   return (
@@ -325,7 +332,7 @@ const CollectionStep = (
             invalidText={fieldsConfig.numberOfContainers.invalidText}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               collectionVolumeInformationHandler(
-                fieldsConfig.numberOfContainers.name,
+                fieldsConfig.numberOfContainers.name as keyof CollectionForm,
                 e.target.value
               );
             }}
@@ -344,7 +351,7 @@ const CollectionStep = (
             invalidText={fieldsConfig.volumePerContainers.invalidText}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               collectionVolumeInformationHandler(
-                fieldsConfig.volumePerContainers.name,
+                fieldsConfig.volumePerContainers.name as keyof CollectionForm,
                 e.target.value
               );
             }}
@@ -368,7 +375,7 @@ const CollectionStep = (
             warnText={fieldsConfig.volumeOfCones.warnText}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               collectionVolumeInformationHandler(
-                fieldsConfig.volumeOfCones.name,
+                fieldsConfig.volumeOfCones.name as keyof CollectionForm,
                 e.target.value
               );
             }}
@@ -390,12 +397,8 @@ const CollectionStep = (
                   ref={(el: HTMLInputElement) => addRefs(el, method.label)}
                   labelText={method.description}
                   readOnly={readOnly}
-                  checked={state[method.label]}
-                  onChange={
-                    (event: React.ChangeEvent<HTMLInputElement>) => {
-                      collectionMethodsCheckboxes(event);
-                    }
-                  }
+                  checked={state.selectedCollectionCodes.includes(method.code)}
+                  onChange={() => collectionMethodsCheckboxes(method.code)}
                 />
               ))
 

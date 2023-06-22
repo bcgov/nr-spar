@@ -118,14 +118,7 @@ const collectionMock = {
   numberOfContainers: '2',
   volumePerContainers: '2',
   volumeOfCones: '4',
-  aerialRanking: true,
-  aerialClippingTopping: false,
-  felledTrees: false,
-  climbing: true,
-  squirrelCache: false,
-  ground: true,
-  squirrelHarvesting: false,
-  other: false,
+  selectedCollectionCodes: [],
   collectionMethodName: 'Other',
   comments: 'Example of additional comments about the seedlot'
 };

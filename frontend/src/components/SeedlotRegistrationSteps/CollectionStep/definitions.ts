@@ -2,7 +2,6 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export interface CollectionForm {
-  [method: string]: boolean | string,
   collectorAgency: string,
   locationCode: string,
   startDate: string,
@@ -10,8 +9,9 @@ export interface CollectionForm {
   numberOfContainers: string,
   volumePerContainers: string,
   volumeOfCones: string,
+  selectedCollectionCodes: string[],
   collectionMethodName: string,
-  comments: string,
+  comments: string
 }
 
 export interface CollectionStepProps {
