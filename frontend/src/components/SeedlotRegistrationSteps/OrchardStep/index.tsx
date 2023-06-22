@@ -245,6 +245,13 @@ const OrchardStep = ({
                       fetchOrchardInfo(event.target.value, orchard.inputId);
                     }
                   }
+                  onKeyUp={
+                    (event: React.KeyboardEvent<HTMLDivElement>) => {
+                      if (event.key === 'Enter') {
+                        (event.target as HTMLInputElement).blur();
+                      }
+                    }
+                  }
                   readOnly={readOnly}
                 />
               </Column>
