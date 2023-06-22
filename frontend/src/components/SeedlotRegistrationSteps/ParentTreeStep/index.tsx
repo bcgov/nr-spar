@@ -9,8 +9,8 @@ import {
   TextInput, Pagination
 } from '@carbon/react';
 import { View, Settings, Upload } from '@carbon/icons-react';
-import { useQueries, useQueryClient } from '@tanstack/react-query';
-import { getSeedPlanUnits, getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
+import { useQueries } from '@tanstack/react-query';
+import { getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
 
 import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
@@ -49,7 +49,6 @@ const ParentTreeStep = (
   }: ParentTreeStepProps
 ) => {
   const pageText = getPageText();
-  const queryClient = useQueryClient();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
@@ -81,32 +80,6 @@ const ParentTreeStep = (
     },
     [orchards]
   );
-
-  // Seed plan units queries
-  useQueries({
-    queries:
-      orchardsData.map((orchard) => ({
-        queryKey: ['orchard', orchard.orchardId, 'seed-plan-units'],
-        queryFn: () => getSeedPlanUnits(orchard.orchardId),
-        refetchOnMount: false,
-        refetchOnWindowFocus: false
-      }))
-  });
-
-  const getSPUfromQuery = (orchardId: string): string => {
-    const data: Array<any> = queryClient.getQueryData(['orchard', orchardId, 'seed-plan-units']) ?? [];
-    if (data[0]?.seedPlanningUnitId) {
-      return data[0].seedPlanningUnitId;
-    }
-    return '';
-  };
-
-  const enableParentTreeQuery = (orchardId: string): boolean => {
-    if (queryClient.getQueryState(['orchard', orchardId, 'seed-plan-units'])?.status === 'success') {
-      return getSPUfromQuery(orchardId) !== '';
-    }
-    return false;
-  };
 
   const sliceTableRowData = (
     rows: Array<RowItem>,
@@ -162,9 +135,12 @@ const ParentTreeStep = (
         newRowData.cloneNumber = parentTree.parentTreeNumber;
         // Assign genetic worth values
         parentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
-          const genWorthName = singleGenWorthObj.geneticWorthCode.toLowerCase();
-          if (Object.prototype.hasOwnProperty.call(newRowData, genWorthName)) {
-            newRowData[genWorthName] = singleGenWorthObj.geneticQualityValue;
+          // We only care about breeding values of genetic worth
+          if (singleGenWorthObj.geneticTypeCode === 'BV') {
+            const genWorthName = singleGenWorthObj.geneticWorthCode.toLowerCase();
+            if (Object.prototype.hasOwnProperty.call(newRowData, genWorthName)) {
+              newRowData[genWorthName] = singleGenWorthObj.geneticQualityValue;
+            }
           }
         });
         clonedTableRowData = Object.assign(clonedTableRowData, {
@@ -182,11 +158,10 @@ const ParentTreeStep = (
   useQueries({
     queries:
       orchardsData.map((orchard) => ({
-        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.orchardId, getSPUfromQuery(orchard.orchardId)],
+        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.orchardId],
         queryFn: () => (
-          getParentTreeGeneQuali(orchard.orchardId, getSPUfromQuery(orchard.orchardId))
+          getParentTreeGeneQuali(orchard.orchardId)
         ),
-        enabled: enableParentTreeQuery(orchard.orchardId),
         onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(data),
         refetchOnMount: true,
         refetchOnWindowFocus: false
