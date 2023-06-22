@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import SeedlotTable from '../../components/SeedlotTable';
 import MySeedlotsItems from '../../mock-server/fixtures/MySeedlotsItems';
@@ -21,10 +22,12 @@ describe('Seedlot Table component', () => {
 
   beforeEach(() => {
     render(
-      <SeedlotTable
-        elements={listItems}
-        headers={tableHeaders}
-      />
+      <BrowserRouter>
+        <SeedlotTable
+          elements={listItems}
+          headers={tableHeaders}
+        />
+      </BrowserRouter>
     );
   });
 

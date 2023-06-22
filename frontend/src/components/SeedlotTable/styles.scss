@@ -1,6 +1,12 @@
-a {
-  color: inherit;
-  text-decoration: inherit
+.seedlots-table {
+  a {
+    color: inherit;
+    text-decoration: inherit
+  }
+
+  tbody tr {
+    cursor: pointer;
+  }
 }
 
 @media only screen and (max-width: 672px) {
