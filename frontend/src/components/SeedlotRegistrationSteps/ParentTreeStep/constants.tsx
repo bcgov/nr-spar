@@ -12,7 +12,8 @@ export const DEFAULT_PAGE_NUMBER = 1;
 export const EMPTY_NUMBER_STRING = '--';
 
 // Placeholder function to generate download URL for future
-const getDownloadUrl = (tabType: string) => `#TODO-${tabType.split(' ')[0]}`;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getDownloadUrl = (tabType: string) => '/downloads/Cone_and_Pollen_Count_template.csv';
 
 const getTabDescription = (tabType: string) => (
   <>
@@ -35,7 +36,13 @@ const getNotificationSubtitle = (tabType: string) => (
       'For further guidance on how to organize the data, '
       + "do use the SPAR's spreadsheet template. "
     }
-    <Link className="notification-link" to={getDownloadUrl(tabType)}>{`Download ${tabType} template`}</Link>
+    <Link
+      className="notification-link"
+      to={getDownloadUrl(tabType)}
+      target="_blank"
+    >
+      {`Download ${tabType} template`}
+    </Link>
   </>
 );
 
