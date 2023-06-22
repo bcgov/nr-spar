@@ -16,19 +16,19 @@ import {
   InlineLoading
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
-import InputErrorText from '../../InputErrorText';
 
+import InputErrorText from '../../InputErrorText';
 import Subtitle from '../../Subtitle';
-import { OrchardForm, OrchardObj } from './definitions';
-import { MAX_ORCHARDS } from './constants';
 
 import { getOrchardByID } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
-
-import FemaleGameticOptions from './data';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import DropDownObj from '../../../types/DropDownObject';
 import OrchardDataType from '../../../types/OrchardDataType';
+
+import { OrchardForm, OrchardObj } from './definitions';
+import { MAX_ORCHARDS, orcharStepText } from './constants';
+import FemaleGameticOptions from './data';
 
 import './styles.scss';
 
@@ -46,7 +46,11 @@ interface OrchardStepProps {
 }
 
 const OrchardStep = ({
-  seedlotSpecies, state, setStepData, cleanParentTables, readOnly
+  seedlotSpecies,
+  state,
+  setStepData,
+  cleanParentTables,
+  readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
@@ -210,8 +214,8 @@ const OrchardStep = ({
       <form>
         <Row className="seedlot-orchard-title-row">
           <Column sm={4} md={8} lg={16}>
-            <h2>Orchard information</h2>
-            <Subtitle text="Enter the contributing orchard information" />
+            <h2>{orcharStepText.orchardSection.title}</h2>
+            <Subtitle text={orcharStepText.orchardSection.subtitle} />
           </Column>
         </Row>
         {
@@ -223,15 +227,19 @@ const OrchardStep = ({
                   name="orchardId"
                   ref={(el: HTMLInputElement) => addRefs(el, `orchardId-${orchard.inputId}`)}
                   value={orchard.orchardId}
-                  invalidText="Please insert a valid orchard id between 100 and 999"
+                  invalidText={orcharStepText.orchardSection.orchardInput.invalid}
                   allowEmpty
                   min={100}
                   max={999}
                   disableWheel
                   hideSteppers
                   type="number"
-                  label={orchard.inputId === 0 ? 'Orchard ID or number' : 'Additional orchard ID (optional)'}
-                  placeholder="Example: 123"
+                  label={
+                    orchard.inputId === 0
+                      ? orcharStepText.orchardSection.orchardInput.label
+                      : orcharStepText.orchardSection.orchardInput.optLabel
+                  }
+                  placeholder={orcharStepText.orchardSection.orchardInput.placeholder}
                   onBlur={
                     (event: React.ChangeEvent<HTMLInputElement>) => {
                       fetchOrchardInfo(event.target.value, orchard.inputId);
@@ -244,8 +252,12 @@ const OrchardStep = ({
                 <TextInput
                   id={`orchardName-${orchard.inputId}`}
                   type="text"
-                  labelText={orchard.inputId === 0 ? 'Orchard name' : 'Orchard name (optional)'}
-                  placeholder="Orchard name"
+                  labelText={
+                    orchard.inputId === 0
+                      ? orcharStepText.orchardSection.orchardName.label
+                      : orcharStepText.orchardSection.orchardName.optLabel
+                  }
+                  placeholder={orcharStepText.orchardSection.orchardName.label}
                   value={orchard.orchardLabel}
                   readOnly
                 />
@@ -267,7 +279,7 @@ const OrchardStep = ({
                     renderIcon={TrashCan}
                     onClick={() => deleteOrchardObj()}
                   >
-                    Delete additional orchard
+                    {orcharStepText.orchardSection.buttons.delete}
                   </Button>
                 </Column>
               </Row>
@@ -281,7 +293,7 @@ const OrchardStep = ({
                     renderIcon={Add}
                     onClick={() => addOrchardObj()}
                   >
-                    Add orchard
+                    {orcharStepText.orchardSection.buttons.add}
                   </Button>
                 </Column>
               </Row>
@@ -289,16 +301,16 @@ const OrchardStep = ({
         }
         <Row className="seedlot-orchard-title-row">
           <Column sm={4} md={8} lg={16}>
-            <h2>Gamete information</h2>
-            <Subtitle text="Enter the seedlot gamete information" />
+            <h2>{orcharStepText.gameteSection.title}</h2>
+            <Subtitle text={orcharStepText.gameteSection.subtitle} />
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16} xlg={12}>
             <Dropdown
               id="seedlot-species-dropdown"
-              titleText="Seedlot species"
-              label="Seedlot species"
+              titleText={orcharStepText.gameteSection.seedlotSpecies}
+              label={orcharStepText.gameteSection.seedlotSpecies}
               selectedItem={seedlotSpecies}
               readOnly
               items={[seedlotSpecies]}
@@ -315,10 +327,10 @@ const OrchardStep = ({
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }
-              placeholder="Choose a female contribution method"
-              titleText="Female gametic contribution methodology"
+              placeholder={orcharStepText.gameteSection.femaleGametic.placeholder}
+              titleText={orcharStepText.gameteSection.femaleGametic.label}
               invalid={invalidFemGametic}
-              invalidText="Please select an option"
+              invalidText={orcharStepText.gameteSection.femaleGametic.invalid}
               onChange={(e: ComboBoxEvent) => femaleGameticHandler(e)}
               readOnly={readOnly}
               selectedItem={state.femaleGametic}
@@ -333,7 +345,7 @@ const OrchardStep = ({
               isPLISpecies
                 ? (
                   <RadioButtonGroup
-                    legendText="Male gametic contribution methodology"
+                    legendText={orcharStepText.gameteSection.maleGametic.label}
                     name="male-gametic-radiogroup"
                     orientation="vertical"
                     className={invalidMalGametic ? 'male-gametic-invalid' : ''}
@@ -342,34 +354,34 @@ const OrchardStep = ({
                   >
                     <RadioButton
                       id="m1-radio"
-                      labelText="M1 - Portion of ramets in orchard"
+                      labelText={orcharStepText.gameteSection.maleGametic.options.m1}
                       value="M1"
                     />
                     <RadioButton
                       id="m2-radio"
-                      labelText="M2 - Pollen volume estimate by partial survey"
+                      labelText={orcharStepText.gameteSection.maleGametic.options.m2}
                       value="M2"
                     />
                     <RadioButton
                       id="m3-radio"
-                      labelText="M3 - Pollen volume estimate by 100% survey"
+                      labelText={orcharStepText.gameteSection.maleGametic.options.m3}
                       value="M3"
                     />
                     <RadioButton
                       id="m4-radio"
-                      labelText="M4 - Ramet proportion by clone"
+                      labelText={orcharStepText.gameteSection.maleGametic.options.m4}
                       value="M4"
                     />
                     <RadioButton
                       id="m5-radio"
-                      labelText="M5 - Ramet proportion by age and expected production"
+                      labelText={orcharStepText.gameteSection.maleGametic.options.m5}
                       value="M5"
                     />
                   </RadioButtonGroup>
                 )
                 : (
                   <RadioButtonGroup
-                    legendText="Male gametic contribution methodology"
+                    legendText={orcharStepText.gameteSection.maleGametic.label}
                     name="male-gametic-radiogroup"
                     orientation="vertical"
                     className={invalidMalGametic ? 'male-gametic-invalid' : ''}
@@ -378,17 +390,17 @@ const OrchardStep = ({
                   >
                     <RadioButton
                       id="m1-radio"
-                      labelText="M1 - Portion of ramets in orchard"
+                      labelText={orcharStepText.gameteSection.maleGametic.options.m1}
                       value="M1"
                     />
                     <RadioButton
                       id="m2-radio"
-                      labelText="M2 - Pollen volume estimate by partial survey"
+                      labelText={orcharStepText.gameteSection.maleGametic.options.m2}
                       value="M2"
                     />
                     <RadioButton
                       id="m3-radio"
-                      labelText="M3 - Pollen volume estimate by 100% survey"
+                      labelText={orcharStepText.gameteSection.maleGametic.options.m3}
                       value="M3"
                     />
                   </RadioButtonGroup>
@@ -399,12 +411,12 @@ const OrchardStep = ({
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
             <label htmlFor="seedlot-produced" className="bcgov--label">
-              Was the seedlot produced through controlled crosses?
+              {orcharStepText.gameteSection.controlledCross.label}
             </label>
             <Checkbox
               id="seedlot-produced"
               name="controlledCross"
-              labelText="No, the seedlot was not produced through controlled crosses"
+              labelText={orcharStepText.gameteSection.controlledCross.checkbox}
               defaultChecked={state.controlledCross}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
               readOnly={readOnly}
@@ -414,12 +426,12 @@ const OrchardStep = ({
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
             <label htmlFor="bio-processes" className="bcgov--label">
-              Have biotechnological processes been used to produce this seedlot?
+              {orcharStepText.gameteSection.biotechProcess.label}
             </label>
             <Checkbox
               id="bio-processes"
               name="biotechProcess"
-              labelText="No, biotechnological processes have not been used to produce this seedlot"
+              labelText={orcharStepText.gameteSection.biotechProcess.checkbox}
               defaultChecked={state.biotechProcess}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
               readOnly={readOnly}
@@ -428,79 +440,85 @@ const OrchardStep = ({
         </Row>
         <Row className="seedlot-orchard-title-row">
           <Column sm={4} md={8} lg={16}>
-            <h2>Pollen information</h2>
-            <Subtitle text="Enter the pollen contaminant information" />
+            <h2>{orcharStepText.pollenSection.title}</h2>
+            <Subtitle text={orcharStepText.pollenSection.subtitle} />
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
             <label htmlFor="pollen-contamination" className="bcgov--label">
-              Was pollen contamination present?
+              {orcharStepText.pollenSection.noPollenContamination.label}
             </label>
             <Checkbox
               id="pollen-contamination"
               name="noPollenContamination"
-              labelText="No, there was no pollen contamination present in the seed orchard"
+              labelText={orcharStepText.pollenSection.noPollenContamination.checkbox}
               defaultChecked={state.noPollenContamination}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
               readOnly={readOnly}
             />
           </Column>
         </Row>
-        <div className={!state.noPollenContamination ? '' : 'seedlot-orchard-hidden'}>
-          <Row className="seedlot-orchard-field">
-            <Column sm={4} md={8} lg={16} xlg={12}>
-              <NumberInput
-                id="pollen-percentage-number-input"
-                name="breedingPercentage"
-                ref={(el: HTMLInputElement) => addRefs(el, 'breedingPercentage')}
-                min={0}
-                max={100}
-                value={0}
-                step={10}
-                disableWheel
-                type="number"
-                label="Contaminant pollen breeding percentage (optional) (%)"
-                helperText="If contaminant pollen was present and the contaminant pollen has a breeding value"
-                invalid={invalidBreeding}
-                invalidText="Please enter a valid value between 0 and 100"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  if (e?.target?.name && e?.target?.value) {
-                    setResponse([e.target.name], [e.target.value]);
-                  }
-                }}
-                onClick={
-                  (
-                    _e: React.MouseEvent<HTMLButtonElement>,
-                    target: NumStepperVal | undefined
-                  ) => {
-                    // A guard is needed here because any click on the input will emit a
-                    //   click event, not necessarily the + - buttons
-                    if (target?.value) {
-                      setResponse(['breedingPercentage'], [String(target.value)]);
-                    }
-                  }
-                }
-                onBlur={() => validateBreedingPercentage()}
-                readOnly={readOnly}
-              />
-            </Column>
-          </Row>
-          <Row className="pollen-methodology-checkbox">
-            <Column sm={4} md={8} lg={16}>
-              <label htmlFor="pollen-methodology" className="bcgov--label">
-                Contaminant pollen methodology
-              </label>
-              <Checkbox
-                id="pollen-methodology"
-                name="pollenMethodology"
-                labelText="Regional pollen monitoring"
-                defaultChecked={state.pollenMethodology}
-                readOnly={readOnly}
-              />
-            </Column>
-          </Row>
-        </div>
+        {
+          !state.noPollenContamination
+            ? (
+              <>
+                <Row className="seedlot-orchard-field">
+                  <Column sm={4} md={8} lg={16} xlg={12}>
+                    <NumberInput
+                      id="pollen-percentage-number-input"
+                      name="breedingPercentage"
+                      ref={(el: HTMLInputElement) => addRefs(el, 'breedingPercentage')}
+                      min={0}
+                      max={100}
+                      value={0}
+                      step={10}
+                      disableWheel
+                      type="number"
+                      label={orcharStepText.pollenSection.breedingPercentage.label}
+                      helperText={orcharStepText.pollenSection.breedingPercentage.helper}
+                      invalid={invalidBreeding}
+                      invalidText={orcharStepText.pollenSection.breedingPercentage.invalid}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        if (e?.target?.name && e?.target?.value) {
+                          setResponse([e.target.name], [e.target.value]);
+                        }
+                      }}
+                      onClick={
+                        (
+                          _e: React.MouseEvent<HTMLButtonElement>,
+                          target: NumStepperVal | undefined
+                        ) => {
+                          // A guard is needed here because any click on the input will emit a
+                          //   click event, not necessarily the + - buttons
+                          if (target?.value) {
+                            setResponse(['breedingPercentage'], [String(target.value)]);
+                          }
+                        }
+                      }
+                      onBlur={() => validateBreedingPercentage()}
+                      readOnly={readOnly}
+                    />
+                  </Column>
+                </Row>
+                <Row className="pollen-methodology-checkbox">
+                  <Column sm={4} md={8} lg={16}>
+                    <label htmlFor="pollen-methodology" className="bcgov--label">
+                      {orcharStepText.pollenSection.pollenMethodology.label}
+                    </label>
+                    <Checkbox
+                      id="pollen-methodology"
+                      name="pollenMethodology"
+                      labelText={orcharStepText.pollenSection.pollenMethodology.checkbox}
+                      defaultChecked={state.pollenMethodology}
+                      readOnly
+                    />
+                  </Column>
+                </Row>
+              </>
+            )
+            : null
+        }
       </form>
     </div>
   );
