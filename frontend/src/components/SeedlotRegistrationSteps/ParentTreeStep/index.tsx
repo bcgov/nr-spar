@@ -29,7 +29,7 @@ import {
 } from './utils';
 import {
   renderColOptions, renderTableBody, renderNotification, renderPagination
-} from './tableComponents';
+} from './TableComponents/';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import PaginationChangeType from '../../../types/PaginationChangeType';

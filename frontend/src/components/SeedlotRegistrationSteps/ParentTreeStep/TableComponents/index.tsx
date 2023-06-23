@@ -3,13 +3,13 @@ import {
   OverflowMenuItem, Checkbox, TableBody, TableRow,
   TableCell, TextInput, ActionableNotification, Pagination
 } from '@carbon/react';
-import { pageText, pageSizesConfig } from './constants';
-import { HeaderObj, RowItem, TabTypes } from './definitions';
-import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { OrchardObj } from '../OrchardStep/definitions';
+import { pageText, pageSizesConfig } from '../constants';
+import { HeaderObj, RowItem, TabTypes } from '../definitions';
+import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { OrchardObj } from '../../OrchardStep/definitions';
 
-import './styles.scss';
-import PaginationChangeType from '../../../types/PaginationChangeType';
+import '../styles.scss';
+import PaginationChangeType from '../../../../types/PaginationChangeType';
 
 export const renderColOptions = (
   headerConfig: Array<HeaderObj>,
