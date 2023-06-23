@@ -252,6 +252,7 @@ const SeedlotRegistrationForm = () => {
                 seedlotInfoQuery.isSuccess
                 && fundingSourcesQuery.isSuccess
                 && paymentMethodsQuery.isSuccess
+                && maleFemaleMethodologyQuery.isSuccess
               )
                 ? renderStep()
                 : <Loading />

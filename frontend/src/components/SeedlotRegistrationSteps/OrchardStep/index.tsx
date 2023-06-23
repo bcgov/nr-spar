@@ -56,8 +56,8 @@ const OrchardStep = ({
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
 
-  const MaleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('m'));
-  const FemaleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('f'));
+  const maleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('m'));
+  const femaleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('f'));
 
   const refControl = useRef<any>({});
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
@@ -319,7 +319,7 @@ const OrchardStep = ({
               id="female-gametic-combobox"
               name="femaleGametic"
               ref={(el: HTMLInputElement) => addRefs(el, 'femaleGametic')}
-              items={isPLISpecies ? FemaleGameticOptions : FemaleGameticOptions.slice(0, -2)}
+              items={isPLISpecies ? femaleGameticOptions : femaleGameticOptions.slice(0, -2)}
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }
@@ -348,7 +348,7 @@ const OrchardStep = ({
                     onChange={(e: string) => maleGameticHandler(e)}
                     valueSelected={state.maleGametic}
                   >
-                    {MaleGameticOptions.map((item) => (
+                    {maleGameticOptions.map((item) => (
                       <RadioButton
                         id={`${item.code.toLowerCase()}-radio`}
                         labelText={item.label}
@@ -361,12 +361,12 @@ const OrchardStep = ({
                   <RadioButtonGroup
                     legendText="Male gametic contribution methodology"
                     name="male-gametic-radiogroup"
-                    orientation="veasdsadrtical"
+                    orientation="vertical"
                     className={invalidMalGametic ? 'male-gametic-invalid' : ''}
                     onChange={(e: string) => maleGameticHandler(e)}
                     valueSelected={state.maleGametic}
                   >
-                    {MaleGameticOptions.slice(0, -2).map((item) => (
+                    {maleGameticOptions.slice(0, -2).map((item) => (
                       <RadioButton
                         id={`${item.code.toLowerCase()}-radio`}
                         labelText={item.label}
