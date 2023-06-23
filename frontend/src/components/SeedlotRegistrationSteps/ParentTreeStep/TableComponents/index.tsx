@@ -66,9 +66,9 @@ const renderTableCell = (
                 hideLabel
                 type="number"
                 placeholder="Add value"
-                defaultValue={rowData[header.id]}
+                value={rowData[header.id]}
                 id={`${rowData.cloneNumber}-${rowData[header.id]}`}
-                onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   setInputChange(rowData.cloneNumber, header.id, event.target.value);
                 }}
                 onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}

@@ -126,7 +126,10 @@ const ParentTreeStep = (
   };
 
   useEffect(
-    () => calcSummaryItems(),
+    () => {
+      sliceTableRowData(Object.values(state.tableRowData), currentPage, currPageSize, true);
+      calcSummaryItems();
+    },
     [state.tableRowData]
   );
 
@@ -177,10 +180,6 @@ const ParentTreeStep = (
     // Using structuredClone so useEffect on state.tableRowData can be triggered
     const clonedState = structuredClone(state);
     clonedState.tableRowData[cloneNumber][colName] = value;
-    // Slicing rows again to make sure the value is updated in the slicedRows state,
-    // It works without doing this as slicedRows is a shallow copy, but let's not rely on it
-    sliceTableRowData(Object.values(clonedState.tableRowData), currentPage, currPageSize, true);
-
     setStepData(clonedState);
   };
 
@@ -233,11 +232,20 @@ const ParentTreeStep = (
   };
 
   const cleanTable = () => {
+    const modifiedState = { ...state };
     const clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
     const fieldsToClean = headerConfig
       .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
+      .map((header) => header.id);
+    const cloneNumbers = Object.keys(clonedTableRowData);
+    cloneNumbers.forEach((cloneNumber) => {
+      fieldsToClean.forEach((field) => {
+        clonedTableRowData[cloneNumber][field] = '';
+      });
+    });
 
-
+    modifiedState.tableRowData = clonedTableRowData;
+    setStepData(modifiedState);
   };
 
   return (
@@ -405,10 +413,13 @@ const ParentTreeStep = (
         className="clean-data-modal"
         open={isCleanWarnOpen}
         onRequestClose={() => setIsCleanWarnOpen(false)}
-        onRequestSubmit={() => setIsCleanWarnOpen(false)}
+        onRequestSubmit={() => {
+          cleanTable();
+          setIsCleanWarnOpen(false);
+        }}
         danger
-        size="sm  "
-        modalHeading={pageText.cleanModal.heading}
+        size="sm"
+        modalHeading={pageText[currentTab].cleanModalHeading}
         modalLabel={pageText.cleanModal.label}
         primaryButtonText={pageText.cleanModal.primaryButtonText}
         secondaryButtonText={pageText.cleanModal.secondaryButtonText}

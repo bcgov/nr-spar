@@ -69,14 +69,18 @@ const getPageText = () => ({
     tabDescription: getTabDescription('cone and pollen count'),
     notificationSubtitle: getNotificationSubtitle('cone and pollen count'),
     tableDescription: "Enter the estimative of cone and pollen count for the orchard's seedlot (*required)",
-    toggleName: 'Show breeding value'
+    toggleName: 'Show breeding value',
+    cleanModalHeading: 'Are you sure you want to clean all the data from the cone and pollen count table?'
+    + ' This action will remove SMP success on parent (%) values on SMP success on parent table as well.'
   },
   successTab: {
     tabTitle: 'SMP success on parent',
     tabDescription: getTabDescription('SMP success on parent'),
     notificationSubtitle: getNotificationSubtitle('SMP success on parent'),
     tableDescription: "Enter the estimative of SMP success for the orchard's seedlot",
-    toggleName: 'Show SMP mix used on parent'
+    toggleName: 'Show SMP mix used on parent',
+    cleanModalHeading: 'Are you sure you want to clean all the data from the SMP success on parent table? '
+      + ' This action will remove SMP success on parent (%) values on Cone and Pollen Count table as well.'
   },
   mixTab: {
     tabTitle: 'Calculation of SMP mix',
@@ -84,14 +88,14 @@ const getPageText = () => ({
     notificationSubtitle: getNotificationSubtitle('calculation of SMP mix'),
     tableDescription: 'Enter the estimative volume of SMP mix used for each clone',
     toggleName: 'Show clonal value',
-    toggleNameBottom: 'Show weighted value'
+    toggleNameBottom: 'Show weighted value',
+    cleanModalHeading: 'Are you sure you want to clean all the data from the calculation of SMP mix table?'
   },
   gwAndDiverse: {
     title: 'Genetic worth and diversity',
     description: 'Check the genetic worth and diversity of your seedlot'
   },
   cleanModal: {
-    heading: 'Are you sure you want to clean all the data from the cone and pollen count table?',
     label: 'Clean table data',
     primaryButtonText: 'Clean table data',
     secondaryButtonText: 'Cancel'
@@ -132,28 +136,28 @@ export const geneticWorthDict: GeneticWorthDictType = {
 
 export const rowTemplate: RowItem = {
   cloneNumber: '',
-  coneCount: null,
-  pollenCount: null,
-  smpSuccessPerc: null,
-  ad: null,
-  dfs: null,
-  dfu: null,
-  dfw: null,
-  dsb: null,
-  dsc: null,
-  dsg: null,
-  gvo: null,
-  iws: null,
-  wdu: null,
-  wwd: null,
-  nonOrchardPollenContam: null,
-  meanDegLat: null,
-  meanMinLat: null,
-  meanDegLong: null,
-  meanMinLong: null,
-  meanElevation: null,
-  volume: null,
-  proportion: null,
+  coneCount: '',
+  pollenCount: '',
+  smpSuccessPerc: '',
+  ad: '',
+  dfs: '',
+  dfu: '',
+  dfw: '',
+  dsb: '',
+  dsc: '',
+  dsg: '',
+  gvo: '',
+  iws: '',
+  wdu: '',
+  wwd: '',
+  nonOrchardPollenContam: '',
+  meanDegLat: '',
+  meanMinLat: '',
+  meanDegLong: '',
+  meanMinLong: '',
+  meanElevation: '',
+  volume: '',
+  proportion: '',
   isCalcTab: false
 };
 
