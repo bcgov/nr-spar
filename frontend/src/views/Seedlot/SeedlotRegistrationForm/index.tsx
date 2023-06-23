@@ -268,7 +268,7 @@ const SeedlotRegistrationForm = () => {
                       kind="secondary"
                       size="lg"
                       className="back-next-btn"
-                      onClick={() => console.log('teste: ', maleFemaleMethodologyQuery.data)}
+                      onClick={() => setStep(-1)}
                     >
                       Back
                     </Button>
