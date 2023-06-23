@@ -18,7 +18,6 @@ export const initCollectionState = (
   volumePerContainers: '1',
   volumeOfCones: '1',
   selectedCollectionCodes: [],
-  collectionMethodName: '',
   comments: ''
 });
 

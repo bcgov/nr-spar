@@ -119,7 +119,6 @@ const collectionMock = {
   volumePerContainers: '2',
   volumeOfCones: '4',
   selectedCollectionCodes: [],
-  collectionMethodName: 'Other',
   comments: 'Example of additional comments about the seedlot'
 };
 

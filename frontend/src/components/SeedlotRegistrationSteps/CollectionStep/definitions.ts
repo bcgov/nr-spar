@@ -10,7 +10,6 @@ export interface CollectionForm {
   volumePerContainers: string,
   volumeOfCones: string,
   selectedCollectionCodes: string[],
-  collectionMethodName: string,
   comments: string
 }
 
