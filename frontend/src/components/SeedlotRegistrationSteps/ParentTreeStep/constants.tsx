@@ -89,6 +89,12 @@ const getPageText = () => ({
   gwAndDiverse: {
     title: 'Genetic worth and diversity',
     description: 'Check the genetic worth and diversity of your seedlot'
+  },
+  cleanModal: {
+    heading: 'Are you sure you want to clean all the data from the cone and pollen count table?',
+    label: 'Clean table data',
+    primaryButtonText: 'Clean table data',
+    secondaryButtonText: 'Cancel'
   }
 });
 

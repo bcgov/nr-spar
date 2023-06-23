@@ -5,7 +5,7 @@ import {
   TableContainer, TableToolbar,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
-  DataTableSkeleton, DefinitionTooltip
+  DataTableSkeleton, DefinitionTooltip, Modal
 } from '@carbon/react';
 import { Link } from 'react-router-dom';
 import { View, Settings, Upload } from '@carbon/icons-react';
@@ -29,7 +29,8 @@ import {
 } from './utils';
 import {
   renderColOptions, renderTableBody, renderNotification, renderPagination
-} from './TableComponents/';
+} from './TableComponents';
+import UploadFileModal from './UploadFileModal';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import PaginationChangeType from '../../../types/PaginationChangeType';
@@ -63,6 +64,8 @@ const ParentTreeStep = (
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(summarySectionConfig));
   const [gwInfoConfig, setGWInfoConfig] = useState(structuredClone(gwSectionConfig));
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -229,6 +232,14 @@ const ParentTreeStep = (
     sliceTableRowData(Object.values(state.tableRowData), page, pageSize, true);
   };
 
+  const cleanTable = () => {
+    const clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
+    const fieldsToClean = headerConfig
+      .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
+
+
+  };
+
   return (
     <FlexGrid className="parent-tree-step-container">
       <Row>
@@ -302,12 +313,16 @@ const ParentTreeStep = (
                             }
                           />
                           <OverflowMenuItem itemText="Export table as PDF file" />
-                          <OverflowMenuItem itemText="Clean table data" />
+                          <OverflowMenuItem
+                            itemText="Clean table data"
+                            onClick={() => setIsCleanWarnOpen(true)}
+                          />
                         </OverflowMenu>
                         <Button
                           size="sm"
                           kind="primary"
                           renderIcon={Upload}
+                          onClick={() => setIsUploadOpen(true)}
                         >
                           Upload from file
                         </Button>
@@ -385,7 +400,19 @@ const ParentTreeStep = (
           )
           : null
       }
-
+      <UploadFileModal open={isUploadOpen} setOpen={setIsUploadOpen} onSubmit={() => { }} />
+      <Modal
+        className="clean-data-modal"
+        open={isCleanWarnOpen}
+        onRequestClose={() => setIsCleanWarnOpen(false)}
+        onRequestSubmit={() => setIsCleanWarnOpen(false)}
+        danger
+        size="sm  "
+        modalHeading={pageText.cleanModal.heading}
+        modalLabel={pageText.cleanModal.label}
+        primaryButtonText={pageText.cleanModal.primaryButtonText}
+        secondaryButtonText={pageText.cleanModal.secondaryButtonText}
+      />
     </FlexGrid>
   );
 };
