@@ -42,17 +42,22 @@ interface OrchardStepProps {
   state: OrchardForm,
   setStepData: Function,
   cleanParentTables: Function,
-  readOnly?: boolean,
+  readOnly?: boolean
 }
 
 const OrchardStep = ({
-  seedlotSpecies, gameticOptions, state, setStepData, cleanParentTables, readOnly
+  seedlotSpecies,
+  gameticOptions,
+  state,
+  setStepData,
+  cleanParentTables,
+  readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
 
-  const MaleGameticOptions = gameticOptions.filter((f) => f.code.toLowerCase().startsWith('m'));
-  const FemaleGameticOptions = gameticOptions.filter((f) => f.code.toLowerCase().startsWith('f'));
+  const MaleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('m'));
+  const FemaleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('f'));
 
   const refControl = useRef<any>({});
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
@@ -356,7 +361,7 @@ const OrchardStep = ({
                   <RadioButtonGroup
                     legendText="Male gametic contribution methodology"
                     name="male-gametic-radiogroup"
-                    orientation="vertical"
+                    orientation="veasdsadrtical"
                     className={invalidMalGametic ? 'male-gametic-invalid' : ''}
                     onChange={(e: string) => maleGameticHandler(e)}
                     valueSelected={state.maleGametic}

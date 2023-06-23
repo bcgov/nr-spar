@@ -133,7 +133,6 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
-    const methodologyList = getDropDownList(maleFemaleMethodologyQuery.data);
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
       label: '',
@@ -182,7 +181,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
-            gameticOptions={methodologyList}
+            gameticOptions={getDropDownList(maleFemaleMethodologyQuery.data)}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
