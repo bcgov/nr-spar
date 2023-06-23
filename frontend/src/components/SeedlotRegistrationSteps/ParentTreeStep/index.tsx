@@ -2,23 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,
-  ActionableNotification, TableContainer, TableToolbar,
+  TableContainer, TableToolbar,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
-  Button, Checkbox, Table, TableHead, TableRow, TableHeader,
-  TableBody, TableCell, DataTableSkeleton, DefinitionTooltip,
-  TextInput, Pagination
+  Button, Table, TableHead, TableRow, TableHeader,
+  DataTableSkeleton, DefinitionTooltip
 } from '@carbon/react';
+import { Link } from 'react-router-dom';
 import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries } from '@tanstack/react-query';
 import { getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
-
 import DropDownObj from '../../../types/DropDownObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
-  getPageText, headerTemplate, rowTemplate, geneticWorthDict, pageSizesConfig,
-  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig, gwSectionConfig
+  pageText, headerTemplate, rowTemplate, geneticWorthDict,
+  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig,
+  gwSectionConfig, getDownloadUrl
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType
@@ -27,6 +27,9 @@ import {
   getTabString, processOrchards, sortAndSliceRows, combineObjectValues,
   calcAverage, calcSum
 } from './utils';
+import {
+  renderColOptions, renderTableBody, renderNotification, renderPagination
+} from './tableComponents';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import PaginationChangeType from '../../../types/PaginationChangeType';
@@ -48,7 +51,6 @@ const ParentTreeStep = (
     orchards
   }: ParentTreeStepProps
 ) => {
-  const pageText = getPageText();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
@@ -179,42 +181,6 @@ const ParentTreeStep = (
     setStepData(clonedState);
   };
 
-  const renderTableCell = (rowData: RowItem, header: HeaderObj) => {
-    if (header.availableInTabs.includes(currentTab) && header.enabled) {
-      const className = header.editable ? 'td-no-padding' : null;
-      return (
-        <TableCell key={header.id} className={className}>
-          {
-            header.editable
-              ? (
-                <TextInput
-                  labelText=""
-                  hideLabel
-                  type="number"
-                  placeholder="Add value"
-                  defaultValue={rowData[header.id]}
-                  id={`${rowData.cloneNumber}-${rowData[header.id]}`}
-                  onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
-                    setInputChange(rowData.cloneNumber, header.id, event.target.value);
-                  }}
-                  onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-                  onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
-                    if (event.key === 'Enter') {
-                      (event.target as HTMLInputElement).blur();
-                    }
-                  }}
-                />
-              )
-              : (
-                rowData[header.id]
-              )
-          }
-        </TableCell>
-      );
-    }
-    return null;
-  };
-
   /**
    * Each seedlot speicies has its own associated Genetic Worth values that users can toggle,
    * only those values associated are displayed to user.
@@ -256,132 +222,11 @@ const ParentTreeStep = (
     }
   };
 
-  const renderNotification = () => {
-    if (state.notifCtrl[currentTab].showInfo && orchardsData.length > 0) {
-      return (
-        <ActionableNotification
-          kind="info"
-          lowContrast
-          title={pageText.notificationTitle}
-          inline
-          actionButtonLabel=""
-          onClose={() => {
-            toggleNotification('info');
-            return false;
-          }}
-        >
-          <span className="notification-subtitle">
-            {pageText[currentTab].notificationSubtitle}
-          </span>
-        </ActionableNotification>
-      );
-    }
-
-    if (state.notifCtrl[currentTab].showError && orchardsData.length === 0) {
-      return (
-        <ActionableNotification
-          kind="error"
-          lowContrast
-          title={pageText.errorNotifTitle}
-          actionButtonLabel=""
-          onClose={() => {
-            toggleNotification('error');
-            return false;
-          }}
-        >
-          <span className="notification-subtitle">
-            {pageText.errorDescription}
-          </span>
-        </ActionableNotification>
-      );
-    }
-
-    return null;
-  };
-
-  const renderColOptions = () => {
-    const toggleableCols = headerConfig
-      .filter((header) => header.isAnOption && header.availableInTabs.includes(currentTab));
-
-    return (
-      <>
-        <OverflowMenuItem
-          className="menu-item-label-text"
-          closeMenu={() => false}
-          itemText={pageText[currentTab].toggleName}
-        />
-        {/* <span className="menu-item-text">
-          {pageText[currentTab].toggleName}
-        </span> */}
-        {
-          toggleableCols.map((header) => (
-            <OverflowMenuItem
-              key={header.id}
-              closeMenu={() => false}
-              onClick={(e: React.ChangeEvent<any>) => toggleColumn(header.id, e.target.nodeName)}
-              itemText={
-                (
-                  <Checkbox
-                    checked={header.enabled}
-                    id={header.id}
-                    labelText={header.name}
-                  />
-                )
-              }
-            />
-          ))
-        }
-      </>
-    );
-  };
-
   const handlePagination = (paginationObj: PaginationChangeType) => {
     const { page, pageSize } = paginationObj;
     setCurrentPage(page);
     setCurrPageSize(pageSize);
     sliceTableRowData(Object.values(state.tableRowData), page, pageSize, true);
-  };
-
-  const renderTableBody = () => {
-    if (currentTab === 'mixTab') {
-      return null;
-    }
-    return (
-      <TableBody>
-        {
-          slicedRows.map((rowData) => (
-            rowData.isCalcTab
-              ? null
-              : (
-                <TableRow key={rowData.cloneNumber}>
-                  {
-                    headerConfig.map((header) => (
-                      renderTableCell(rowData, header)
-                    ))
-                  }
-                </TableRow>
-              )
-          ))
-        }
-      </TableBody>
-    );
-  };
-
-  const renderPagination = () => {
-    if (currentTab === 'mixTab') {
-      return null;
-    }
-    return (
-      <Pagination
-        pageSize={currPageSize}
-        pageSizes={pageSizesConfig}
-        itemsPerPageText=""
-        totalItems={Object.values(state.tableRowData).length}
-        onChange={
-          (paginationObj: PaginationChangeType) => handlePagination(paginationObj)
-        }
-      />
-    );
   };
 
   return (
@@ -412,7 +257,12 @@ const ParentTreeStep = (
               <Row className="notification-row">
                 <Column>
                   {
-                    renderNotification()
+                    renderNotification(
+                      state,
+                      currentTab,
+                      orchardsData,
+                      toggleNotification
+                    )
                   }
                 </Column>
               </Row>
@@ -425,22 +275,34 @@ const ParentTreeStep = (
                     <TableToolbar aria-label="data table toolbar">
                       <TableToolbarContent>
                         <OverflowMenu
-                          menuOptionsClass="parent-tree-table-menu"
+                          menuOptionsClass="parent-tree-table-toggle-menu"
                           renderIcon={View}
                           iconDescription="Show/hide columns"
                           flipped
                         >
                           {
-                            renderColOptions()
+                            renderColOptions(headerConfig, currentTab, toggleColumn)
                           }
                         </OverflowMenu>
                         <OverflowMenu
                           renderIcon={Settings}
                           iconDescription="more options"
+                          menuOptionsClass="parent-tree-table-option-menu"
                         >
                           <OverflowMenuItem
-                            itemText="Download table template"
+                            itemText={
+                              (
+                                <Link
+                                  to={getDownloadUrl(currentTab)}
+                                  target="_blank"
+                                >
+                                  Download table template
+                                </Link>
+                              )
+                            }
                           />
+                          <OverflowMenuItem itemText="Export table as PDF file" />
+                          <OverflowMenuItem itemText="Clean table data" />
                         </OverflowMenu>
                         <Button
                           size="sm"
@@ -485,13 +347,13 @@ const ParentTreeStep = (
                               </TableRow>
                             </TableHead>
                             {
-                              renderTableBody()
+                              renderTableBody(currentTab, slicedRows, headerConfig, setInputChange)
                             }
                           </Table>
                         )
                     }
                     {
-                      renderPagination()
+                      renderPagination(state, currentTab, currPageSize, handlePagination)
                     }
                   </TableContainer>
                 </Column>

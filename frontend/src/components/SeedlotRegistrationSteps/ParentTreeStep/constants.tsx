@@ -11,9 +11,15 @@ export const DEFAULT_PAGE_NUMBER = 1;
 
 export const EMPTY_NUMBER_STRING = '--';
 
-// Placeholder function to generate download URL for future
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getDownloadUrl = (tabType: string) => '/downloads/Cone_and_Pollen_Count_template.csv';
+export const getDownloadUrl = (tabType: string) => {
+  if (tabType === 'cone and pollen count' || tabType === 'coneTab') {
+    return '/downloads/Cone_and_Pollen_Count_template.csv';
+  }
+  if (tabType === 'SMP success on parent' || tabType === 'successTab') {
+    return '/downloads/SMP_Mix_Volume_template.csv';
+  }
+  return '#TODO';
+};
 
 const getTabDescription = (tabType: string) => (
   <>
@@ -54,7 +60,7 @@ const errorDescription = (
   </>
 );
 
-export const getPageText = () => ({
+const getPageText = () => ({
   notificationTitle: 'Upload spreadsheet to table',
   errorNotifTitle: 'No orchard ID linked yet!',
   errorDescription,
@@ -85,6 +91,8 @@ export const getPageText = () => ({
     description: 'Check the genetic worth and diversity of your seedlot'
   }
 });
+
+export const pageText = getPageText();
 
 export const notificationCtrlObj: NotifCtrlType = {
   coneTab: {

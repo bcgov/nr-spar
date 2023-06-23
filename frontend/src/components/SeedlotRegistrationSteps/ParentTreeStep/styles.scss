@@ -89,6 +89,7 @@
 
   .table-header {
     height: 4rem;
+
     th {
       vertical-align: baseline;
       padding-top: 1rem;
@@ -97,6 +98,10 @@
 
   .#{vars.$bcgov-prefix}--data-table-content {
     overflow: visible;
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu--open {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
   }
 
   .#{vars.$bcgov-prefix}--definition-term {
@@ -119,9 +124,58 @@
   }
 }
 
-.parent-tree-table-menu{
-  .menu-item-label-text{
-    cursor: default;
-    color: red;
+.parent-tree-table-toggle-menu {
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+  width: 18rem;
+  // This is to adjust the horizontal offset so the white color are more blended
+  box-shadow: 0 5px 6px var(--#{vars.$bcgov-prefix}--shadow, rgba(0, 0, 0, 0.3));
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn {
+    max-width: none;
   }
+
+  .#{vars.$bcgov-prefix}--checkbox-label-text {
+    @include type.type-style('body-compact-01');
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options::after {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+  }
+
+  .menu-item-label-text {
+    @include type.type-style('label-01');
+    cursor: default;
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn:focus {
+    z-index: 1;
+  }
+}
+
+.parent-tree-table-toggle-menu::after {
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+}
+
+.parent-tree-table-option-menu {
+  width: 12.625rem;
+  // This is to adjust the horizontal offset so the white color are more blended
+  box-shadow: 0 5px 6px var(--#{vars.$bcgov-prefix}--shadow, rgba(0, 0, 0, 0.3));
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn:focus {
+    z-index: 1;
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn {
+    max-width: none;
+    @include type.type-style('body-compact-01');
+  }
+
+  .#{vars.$bcgov-prefix}--checkbox-label-text {
+    @include type.type-style('body-compact-01');
+  }
+}
+
+.parent-tree-table-option-menu::after {
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
 }

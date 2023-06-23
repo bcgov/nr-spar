@@ -30,5 +30,6 @@
     "**/*.test.*",
     "**/__tests__/*"
   ],
+  "typeRoots": [ "./typeScriptTypes", "./node_modules/@types" ],
   "extends": "@tsconfig/node18/tsconfig.json"
 }

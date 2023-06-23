@@ -1,3 +1,8 @@
+/**
+ * The author for this component is mgaseta
+ * the history was lost during repo migrations
+ */
+
 import React, { useState } from 'react';
 import {
   ToastNotification,
