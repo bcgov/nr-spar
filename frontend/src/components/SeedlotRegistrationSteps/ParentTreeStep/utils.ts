@@ -106,6 +106,5 @@ export const calcSum = (tableRows: Array<RowItem>, field: string): string => {
       sum += Number(row[field]);
     }
   });
-
   return sum.toString();
 };
