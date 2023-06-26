@@ -257,6 +257,28 @@ objects:
             - name: fluent-bit-config
               configMap:
                 name: fluent-bit-config
+                items:
+                  - key: filters.conf
+                    path: filters.conf
+                  - key: fluent-bit.conf
+                    path: fluent-bit.conf
+                  - key: generic_json_parsers.conf
+                    path: generic_json_parsers.conf
+                  - key: host_metadata.lua
+                    path: host_metadata.lua
+                  - key: outputs.conf
+                    path: outputs.conf
+                  - key: parsers.conf
+                    path: parsers.conf
+                  - key: spar_filter_filters.conf
+                    path: spar/filter/filters.conf
+                  - key: spar_input_inputs.conf
+                    path: spar/input/inputs.conf
+                  - key: spar_parser_parsers.conf
+                    path: spar/parser/parsers.conf
+                  - key: timestamp.lua
+                    path: timestamp.lua
+                defaultMode: 420
             # fluent-bit TLS (enable for TLS)
             # - name: fluent-bit-tls
             #   secret:
