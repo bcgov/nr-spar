@@ -75,6 +75,9 @@ parameters:
     displayName: Persistent Volume Class name
     required: false
     value: netapp-file-standard
+  - name: ORACLE_SERVER_URL
+    description: Oracle back-end api URL
+    required: true
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -131,15 +134,18 @@ objects:
                 - name: NR_SPAR_BACKEND_VERSION
                   value: ${BUILD}
                 - name: ALLOWED_ORIGINS
+                  value: ${ALLOWED_ORIGINS}
+                - name: KEYCLOAK_REALM_URL
+                  value: ${KEYCLOAK_REALM_URL}
+                - name: FORESTCLIENTAPI_ADDRESS
+                  value: ${FORESTCLIENTAPI_ADDRESS}
+                - name: ORACLE_SERVER_URL
+                  value: ${ORACLE_SERVER_URL}
+                - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}
                       key: allowed_origins
-                - name: KEYCLOAK_REALM_URL
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: keycloak-realm-url
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
@@ -157,16 +163,6 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
-                - name: FORESTCLIENTAPI_ADDRESS
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: forest-client-api.address
-                - name: FORESTCLIENTAPI_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}
-                      key: forest-client-api.key
               ports:
                 - containerPort: 8090
                   protocol: TCP

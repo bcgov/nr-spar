@@ -7,6 +7,14 @@
   justify-content: space-between;
 }
 
+button.#{vars.$bcgov-prefix}--accordion__heading {
+  align-items: center;
+}
+
+svg.#{vars.$bcgov-prefix}--accordion__arrow {
+  margin-right: 2rem;
+}
+
 .ownership-step-title-box {
   display: flex;
   flex-direction: column;
