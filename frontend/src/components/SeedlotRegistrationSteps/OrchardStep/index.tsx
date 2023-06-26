@@ -124,7 +124,7 @@ const OrchardStep = ({
   const fetchOrchardInfo = (orchardId: string, inputId: number) => {
     cleanParentTables();
     // Copy orchards from state
-    const newOrchards = [...state.orchards];
+    const newOrchards = structuredClone(state.orchards);
     // Replace input value with id
     const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
     newOrchards[replaceIndex].orchardId = orchardId;
@@ -132,7 +132,7 @@ const OrchardStep = ({
       ...state,
       orchards: newOrchards
     });
-    queryClient.refetchQueries({ queryKey: ['orchard', orchardId] });
+    queryClient.refetchQueries({ queryKey: ['orchard', orchardId], exact: true });
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -242,7 +242,9 @@ const OrchardStep = ({
                   placeholder={orcharStepText.orchardSection.orchardInput.placeholder}
                   onBlur={
                     (event: React.ChangeEvent<HTMLInputElement>) => {
-                      fetchOrchardInfo(event.target.value, orchard.inputId);
+                      if (event.target.value !== orchard.orchardId) {
+                        fetchOrchardInfo(event.target.value, orchard.inputId);
+                      }
                     }
                   }
                   onKeyUp={
