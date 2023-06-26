@@ -128,7 +128,7 @@ objects:
               image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
               volumeMounts:
-                - name: log-storage
+                - name: log-storage-${ZONE}
                   mountPath: /logs
               env:
                 - name: NR_SPAR_BACKEND_VERSION
@@ -239,22 +239,22 @@ objects:
                       key: aws-kinesis-secret-password
               volumeMounts:
                 # mount log file location
-                - name: log-storage
+                - name: log-storage-${ZONE}
                   mountPath: /logs
-                # mount fluent-bit config file
-                - name: fluent-bit-config
+                # mount fluentbit config file
+                - name: fluentbit-config-${ZONE}
                   mountPath: /fluent-bit/etc/
                 # TLS cert for connecting to fluentd (enable for TLS)
                 # - mountPath: /fluent-bit/ssl
                 #   name: fluent-bit-tls
           volumes:
-            - name: file-cache-data
+            - name: file-cache-data-${ZONE}
               persistentVolumeClaim:
                 claimName: file-cache-data-${ZONE}
-            - name: log-storage
-              emptyDir: {}
+            - name: log-storage-${ZONE}
+                claimName: log-storage-${ZONE}
             # fluent-bit config file
-            - name: fluent-bit-config
+            - name: fluentbit-config-${ZONE}
               configMap:
                 name: fluent-bit-config
                 items:
@@ -294,6 +294,28 @@ objects:
       resources:
         requests:
           storage: "${FILE_CACHE_VOLUME_CAPACITY}"
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: log-storage-${ZONE}
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: netapp-file-standard
+        resources:
+          requests:
+            storage: "20Mi"
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: fluentbit-config-${ZONE}
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: netapp-file-standard
+        resources:
+          requests:
+            storage: "20Mi"
   - apiVersion: v1
     kind: Service
     metadata:
