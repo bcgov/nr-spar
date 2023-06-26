@@ -28,7 +28,7 @@ import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { getSeedPlanUnits, getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
 
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
@@ -43,7 +43,7 @@ import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistratio
 import './styles.scss';
 
 interface ParentTreeStepProps {
-  seedlotSpecies: DropDownObj
+  seedlotSpecies: MultiOptionsObj
   state: ParentTreeStepDataObj;
   setStepData: Function;
   orchards: Array<OrchardObj>;

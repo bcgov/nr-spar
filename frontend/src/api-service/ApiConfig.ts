@@ -33,6 +33,8 @@ const ApiConfig = {
 
   paymentMethod: `${serverHost}/api/payment-methods`,
 
+  coneCollectionMethod: `${serverHost}/api/cone-collection-methods`,
+
   orchardSeedPlan: `${serverHost}/api/orchards`,
 
   /**

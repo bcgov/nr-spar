@@ -1,9 +1,9 @@
-import DropDownObj from './DropDownObject';
+import MultiOptionsObj from './MultiOptionsObject';
 
 type Seedlot = {
   number: number;
   class: string;
-  lot_species: DropDownObj;
+  lot_species: MultiOptionsObj;
   form_step: string;
   status: number;
   participants: string[];

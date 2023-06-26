@@ -6,7 +6,7 @@ import {
 
 import TitleAccordion from '../../TitleAccordion';
 import SingleOwnerInfo from './SingleOwnerInfo';
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {
   StateReturnObj,
@@ -43,8 +43,8 @@ interface OwnershipStepProps {
   invalidState: OwnershipInvalidObj,
   setInvalidState: Function,
   readOnly?: boolean,
-  fundingSources: Array<DropDownObj>,
-  paymentMethods: Array<DropDownObj>
+  fundingSources: Array<MultiOptionsObj>,
+  paymentMethods: Array<MultiOptionsObj>
 }
 
 /*

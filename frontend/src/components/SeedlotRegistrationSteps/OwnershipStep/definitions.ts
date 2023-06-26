@@ -1,6 +1,6 @@
 import React from 'react';
 
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export type AccordionItemHeadClick = {
@@ -18,8 +18,8 @@ export type SingleOwnerForm = {
   ownerPortion: string,
   reservedPerc: string,
   surplusPerc: string,
-  fundingSource: DropDownObj,
-  methodOfPayment: DropDownObj,
+  fundingSource: MultiOptionsObj,
+  methodOfPayment: MultiOptionsObj,
 }
 
 export type SingleInvalidObj = {

@@ -17,15 +17,7 @@ export const initCollectionState = (
   numberOfContainers: '1',
   volumePerContainers: '1',
   volumeOfCones: '1',
-  aerialRanking: false,
-  aerialClippingTopping: false,
-  felledTrees: false,
-  climbing: false,
-  squirrelCache: false,
-  ground: false,
-  squirrelHarvesting: false,
-  other: false,
-  collectionMethodName: '',
+  selectedCollectionCodes: [],
   comments: ''
 });
 

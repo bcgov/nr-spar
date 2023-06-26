@@ -1,4 +1,4 @@
-import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
+import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';

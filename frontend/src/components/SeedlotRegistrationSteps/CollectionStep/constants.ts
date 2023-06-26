@@ -1,6 +1,11 @@
 const DATE_FORMAT = 'Y/m/d';
+const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
 
 const fieldsConfig = {
+  titleSection: {
+    title: 'Collector agency',
+    subtitle: 'Enter the collector agency information'
+  },
   checkbox: {
     name: 'applicant',
     labelText: 'Use applicant agency as collector agency'
@@ -18,6 +23,10 @@ const fieldsConfig = {
     label: 'Cone Collector location code',
     helperText: '2-digit code that identifies the address of operated office or division',
     invalidText: 'Please enter a valid 2-digit code that identifies the address of operated office or division'
+  },
+  collectionTitle: {
+    title: 'Collection information',
+    subtitle: 'Enter the collection information about this seedlot'
   },
   startDate: {
     name: 'startDate',
@@ -50,38 +59,7 @@ const fieldsConfig = {
     helperText: 'This value should be the "Volume per container" X "Number of containers".',
     warnText: 'The total volume of cones does not equal, please note that this value should be the "Volume per container" x "Number of containers"'
   },
-  aerialRanking: {
-    name: 'aerialRanking',
-    labelText: 'Aerial raking'
-  },
-  aerialClippingTopping: {
-    name: 'aerialClippingTopping',
-    labelText: 'Aerial clipping or topping'
-  },
-  felledTrees: {
-    name: 'felledTrees',
-    labelText: 'Felled trees'
-  },
-  climbing: {
-    name: 'climbing',
-    labelText: 'Climbing'
-  },
-  squirrelCache: {
-    name: 'squirrelCache',
-    labelText: 'Squirrel cache'
-  },
-  ground: {
-    name: 'ground',
-    labelText: 'Ground, Ladder and or Hydraulic lift'
-  },
-  squirrelHarvesting: {
-    name: 'squirrelHarvesting',
-    labelText: 'Squirrel harvesting or dropping'
-  },
-  other: {
-    name: 'other',
-    labelText: 'Other'
-  },
+  collectionMethodOptionsLabel: 'Collection methods (Select at least one method used to collect the cones)',
   collectionMethod: {
     name: 'collectionMethodName',
     labelText: 'Collection method name',
@@ -95,4 +73,4 @@ const fieldsConfig = {
   }
 };
 
-export { DATE_FORMAT, fieldsConfig };
+export { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig };

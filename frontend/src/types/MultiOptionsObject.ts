@@ -1,7 +1,7 @@
-type DropDownObj = {
+type MultiOptionsObj = {
   label: string;
   code: string;
   description: string;
 };
 
-export default DropDownObj;
+export default MultiOptionsObj;
