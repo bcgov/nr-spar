@@ -1,4 +1,4 @@
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { inputText, ownerTemplate, validTemplate } from './constants';
 
@@ -152,7 +152,7 @@ export const skipForInvalidLength = (name: string, value: string): boolean => {
   return false;
 };
 
-const isInputEmpty = (value: string | number | DropDownObj | null) => !value;
+const isInputEmpty = (value: string | number | MultiOptionsObj | null) => !value;
 
 export const isInputInvalid = (name: string, value: string): SingleInvalidObj => {
   let isInvalid = false;

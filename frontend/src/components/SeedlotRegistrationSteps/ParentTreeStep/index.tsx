@@ -11,7 +11,8 @@ import { Link } from 'react-router-dom';
 import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries } from '@tanstack/react-query';
 import { getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
-import DropDownObj from '../../../types/DropDownObject';
+
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
 import { OrchardObj } from '../OrchardStep/definitions';
@@ -38,7 +39,7 @@ import PaginationChangeType from '../../../types/PaginationChangeType';
 import './styles.scss';
 
 interface ParentTreeStepProps {
-  seedlotSpecies: DropDownObj
+  seedlotSpecies: MultiOptionsObj
   state: ParentTreeStepDataObj;
   setStepData: Function;
   orchards: Array<OrchardObj>;

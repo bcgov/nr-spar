@@ -35,6 +35,8 @@ const ApiConfig = {
 
   orchards: `${serverHost}/api/orchards`,
 
+  coneCollectionMethod: `${serverHost}/api/cone-collection-methods`,
+
   /**
    * ORACLE API
    */
