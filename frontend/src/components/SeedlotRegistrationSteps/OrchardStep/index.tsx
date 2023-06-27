@@ -358,6 +358,7 @@ const OrchardStep = ({
                   >
                     {maleGameticOptions.map((item) => (
                       <RadioButton
+                        key={item.code}
                         id={`${item.code.toLowerCase()}-radio`}
                         labelText={item.label}
                         value={item.code}
@@ -376,6 +377,7 @@ const OrchardStep = ({
                   >
                     {maleGameticOptions.slice(0, -2).map((item) => (
                       <RadioButton
+                        key={item.code}
                         id={`${item.code.toLowerCase()}-radio`}
                         labelText={item.label}
                         value={item.code}
