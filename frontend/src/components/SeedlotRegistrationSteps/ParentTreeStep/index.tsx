@@ -255,7 +255,7 @@ const ParentTreeStep = (
 
   const fillCompostitionTables = (res: AxiosResponse) => {
     // Clone numbers that does not exist in the orchards
-    const invalidCloneNumbers = [];
+    const invalidCloneNumbers: Array<string> = [];
     const clonedState = structuredClone(state);
 
     res.data.forEach((row: CompUploadResponse) => {
@@ -273,6 +273,12 @@ const ParentTreeStep = (
     });
 
     setStepData(clonedState);
+
+    if (invalidCloneNumbers.length > 0) {
+      // A temporary solution to let users know they have invalid clone numbers
+      // eslint-disable-next-line no-alert
+      alert(`The following clone numbers cannot be found: ${invalidCloneNumbers}`);
+    }
   };
 
   const uploadCompostion = useMutation({
