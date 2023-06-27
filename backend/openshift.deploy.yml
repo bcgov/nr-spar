@@ -284,39 +284,45 @@ objects:
             # - name: fluent-bit-tls
             #   secret:
             #     secretName: fluent-bit-tls
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
     metadata:
+      labels:
+        app: ${NAME}-${ZONE}
       name: file-cache-data-${ZONE}
     spec:
       accessModes:
         - ReadWriteMany
-      storageClassName: ${FILE_CACHE_PERSISTENT_VOLUME_CLASS}
       resources:
         requests:
           storage: "${FILE_CACHE_VOLUME_CAPACITY}"
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
+      storageClassName: ${FILE_CACHE_PERSISTENT_VOLUME_CLASS}
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
     metadata:
+      labels:
+        app: ${NAME}-${ZONE}
       name: log-storage-${ZONE}
     spec:
       accessModes:
         - ReadWriteMany
+      resources:
+        requests:
+          storage: "20Mi"
       storageClassName: netapp-file-standard
-        resources:
-          requests:
-            storage: "20Mi"
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
     metadata:
+      labels:
+        app: ${NAME}-${ZONE}
       name: fluentbit-config-${ZONE}
     spec:
       accessModes:
         - ReadWriteMany
+      resources:
+        requests:
+          storage: "20Mi"
       storageClassName: netapp-file-standard
-        resources:
-          requests:
-            storage: "20Mi"
   - apiVersion: v1
     kind: Service
     metadata:
