@@ -16,7 +16,7 @@ import { ArrowRight } from '@carbon/icons-react';
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
-import getSeedlotInfo from '../../../api-service/seedlotAPI';
+import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -197,6 +197,7 @@ const SeedlotRegistrationForm = () => {
       case 4:
         return (
           <ParentTreeStep
+            seedlotNumber={seedlotNumber}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.parentTreeStep}
             orchards={allStepData.orchardStep.orchards}

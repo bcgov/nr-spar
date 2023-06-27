@@ -15,7 +15,7 @@ export const getDownloadUrl = (tabType: string) => {
   if (tabType === 'cone and pollen count' || tabType === 'coneTab') {
     return '/downloads/Cone_and_Pollen_Count_template.csv';
   }
-  if (tabType === 'SMP success on parent' || tabType === 'successTab') {
+  if (tabType === 'calculation of SMP mix' || tabType === 'mixTab') {
     return '/downloads/SMP_Mix_Volume_template.csv';
   }
   return '#TODO';
