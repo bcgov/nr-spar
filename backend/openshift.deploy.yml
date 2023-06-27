@@ -257,7 +257,7 @@ objects:
             # fluent-bit config file
             - name: fluentbit-config-${ZONE}
               configMap:
-                name: fluent-bit-config
+                name: ${NAME}-${ZONE}-fluent-bit-config
                 items:
                   - key: filters.conf
                     path: filters.conf
