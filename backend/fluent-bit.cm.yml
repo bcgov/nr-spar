@@ -175,7 +175,7 @@ objects:
             Tag spar.log
             Buffer_Max_Size 1024k
             Parser spar.json
-            Path /logs/db/fluent-bit-logs.db/vault_err.log
+            Path /logs/postgres-api.log
             Path_Key log_file_path
             Offset_Key event_sequence
             DB /apps_data/agents/fluent-bit/fluent-bit-logs.db

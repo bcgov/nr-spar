@@ -71,6 +71,12 @@ parameters:
     description: Requested Memory per pod (in gigabytes Gi or megabytes Mi ex. 500Mi)
     displayName: Memory Request
     value: 16Mi
+  - name: FLUENT_CONF_HOME
+    description: FluentBit configuration home
+    value: "/fluent-bit/etc"
+  - name: FLUENT_VERSION
+    description: FluentBit version
+    value: "2.1"
   # Parameters for file caching
   - name: FILE_CACHE_VOLUME_CAPACITY
     description: Volume space available for File Cache
@@ -244,13 +250,29 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-backend
                       key: aws-kinesis-secret-password
+                - name: AWS_KINESIS_STREAM
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-backend
+                      key: aws-kinesis-stream
+                - name: AWS_KINESIS_ROLE_ARN
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-backend
+                      key: aws-kinesis-role-arn
+                - name: FLUENT_CONF_HOME
+                  value: ${FLUENT_CONF_HOME}
+                - name: FLUENT_VERSION
+                  value: ${FLUENT_VERSION}
+                - name: AGENT_NAME
+                  value: ${NAME}-${ZONE}
               volumeMounts:
                 # mount log file location
                 - name: log-storage-${ZONE}
                   mountPath: /logs
                 # mount fluentbit config file
                 - name: fluentbit-config-${ZONE}
-                  mountPath: /fluent-bit/etc/
+                  mountPath: ${FLUENT_CONF_HOME}
                 # TLS cert for connecting to fluentd (enable for TLS)
                 # - mountPath: /fluent-bit/ssl
                 #   name: fluent-bit-tls
