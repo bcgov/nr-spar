@@ -199,7 +199,7 @@ export const headerTemplate: Array<HeaderObj> = [
     enabled: true,
     editable: true,
     isAnOption: false,
-    availableInTabs: ['coneTab', 'successTab']
+    availableInTabs: [undefined, 'successTab']
   },
   {
     id: 'ad',
@@ -368,7 +368,7 @@ export const headerTemplate: Array<HeaderObj> = [
     name: 'Proportion',
     description: 'Proportion',
     enabled: true,
-    editable: true,
+    editable: false,
     isAnOption: false,
     availableInTabs: [undefined, undefined, 'mixTab']
   }
