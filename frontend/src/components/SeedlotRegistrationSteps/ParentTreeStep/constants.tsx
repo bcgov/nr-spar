@@ -63,18 +63,21 @@ const errorDescription = (
   </>
 );
 
+const getCleanTableDesc = (tableName: string) => (
+  `Are you sure you want to clean all the data from the ${tableName} table?`
+);
+
 const getPageText = () => ({
   notificationTitle: 'Upload spreadsheet to table',
   errorNotifTitle: 'No orchard ID linked yet!',
   errorDescription,
   coneTab: {
     tabTitle: 'Cone and pollen count',
-    tabDescription: getTabDescription('cone and pollen count'),
-    notificationSubtitle: getNotificationSubtitle('cone and pollen count'),
-    tableDescription: "Enter the estimative of cone and pollen count for the orchard's seedlot (*required)",
+    tabDescription: getTabDescription('Cone and pollen count'),
+    notificationSubtitle: getNotificationSubtitle('Cone and pollen count'),
+    tableDescription: "Enter the estimative of Cone and pollen count for the orchard's seedlot (*required)",
     toggleName: 'Show breeding value',
-    cleanModalHeading: 'Are you sure you want to clean all the data from the cone and pollen count table?'
-      + ' This action will remove SMP success on parent (%) values on SMP success on parent table as well.'
+    cleanModalHeading: getCleanTableDesc('Cone and pollen count')
   },
   successTab: {
     tabTitle: 'SMP success on parent',
@@ -82,8 +85,7 @@ const getPageText = () => ({
     notificationSubtitle: getNotificationSubtitle('SMP success on parent'),
     tableDescription: "Enter the estimative of SMP success for the orchard's seedlot",
     toggleName: 'Show SMP mix used on parent',
-    cleanModalHeading: 'Are you sure you want to clean all the data from the SMP success on parent table? '
-      + ' This action will remove SMP success on parent (%) values on Cone and Pollen Count table as well.'
+    cleanModalHeading: getCleanTableDesc('SMP success on parent')
   },
   mixTab: {
     tabTitle: 'Calculation of SMP mix',
@@ -92,7 +94,7 @@ const getPageText = () => ({
     tableDescription: 'Enter the estimative volume of SMP mix used for each clone',
     toggleName: 'Show clonal value',
     toggleNameBottom: 'Show weighted value',
-    cleanModalHeading: 'Are you sure you want to clean all the data from the Calculation of SMP mix table?'
+    cleanModalHeading: getCleanTableDesc('Calculation of SMP mix')
   },
   gwAndDiverse: {
     title: 'Genetic worth and diversity',
