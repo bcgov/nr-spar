@@ -28,7 +28,6 @@ import OrchardDataType from '../../../types/OrchardDataType';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS, orcharStepText } from './constants';
-import FemaleGameticOptions from './data';
 
 import './styles.scss';
 
