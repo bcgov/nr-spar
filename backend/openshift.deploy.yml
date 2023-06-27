@@ -23,6 +23,13 @@ parameters:
     value: latest
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
+  - name: ALLOWED_ORIGINS
+    description: Sets all the allowed request origins
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+  - name: KEYCLOAK_REALM_URL
+    value: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
+  - name: FORESTCLIENTAPI_ADDRESS
+    value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
     value: "50m"
   - name: CPU_LIMIT
@@ -79,8 +86,8 @@ parameters:
     description: Oracle back-end api URL
     required: true
 objects:
-  - apiVersion: v1
-    kind: ImageStream
+  - kind: ImageStream
+    apiVersion: v1
     metadata:
       labels:
         app: ${NAME}-${ZONE}
@@ -95,8 +102,8 @@ objects:
             name: ${REGISTRY}/${PROMOTE}
           referencePolicy:
             type: Local
-  - apiVersion: v1
-    kind: DeploymentConfig
+  - kind: DeploymentConfig
+    apiVersion: v1
     metadata:
       labels:
         app: ${NAME}-${ZONE}
@@ -144,8 +151,8 @@ objects:
                 - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}
-                      key: allowed_origins
+                      name: ${NAME}-${ZONE}-backend
+                      key: forest-client-api-key
                 - name: POSTGRESQL_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRESQL_DATABASE
@@ -323,8 +330,8 @@ objects:
         requests:
           storage: "20Mi"
       storageClassName: netapp-file-standard
-  - apiVersion: v1
-    kind: Service
+  - kind: Service
+    apiVersion: v1
     metadata:
       labels:
         app: ${NAME}-${ZONE}
@@ -337,8 +344,8 @@ objects:
           targetPort: 8090
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
-  - apiVersion: route.openshift.io/v1
-    kind: Route
+  - kind: Route
+    apiVersion: route.openshift.io/v1
     metadata:
       labels:
         app: ${NAME}-${ZONE}
@@ -354,8 +361,8 @@ objects:
       tls:
         termination: edge
         insecureEdgeTerminationPolicy: Redirect
-  - apiVersion: autoscaling/v2
-    kind: HorizontalPodAutoscaler
+  - kind: HorizontalPodAutoscaler
+    apiVersion: autoscaling/v2
     metadata:
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
