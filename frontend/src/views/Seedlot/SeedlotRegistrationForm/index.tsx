@@ -15,18 +15,24 @@ import { ArrowRight } from '@carbon/icons-react';
 
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
+import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import getSeedlotInfo from '../../../api-service/seedlotAPI';
 import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
+
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
-import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
-import InterimStorage from '../../../components/SeedlotRegistrationSteps/InterimStep';
-import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
-import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
+import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
+import InterimStorage from '../../../components/SeedlotRegistrationSteps/InterimStep';
+import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
+import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
-import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
+import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
+
+import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
+import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
+import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { AllStepData, AllStepInvalidationObj, FormInvalidationObj } from './definitions';
 import {
   initCollectionState,
@@ -38,11 +44,9 @@ import {
   initOwnerShipInvalidState,
   initParentTreeState
 } from './utils';
-import { getDropDownList } from '../../../utils/DropDownUtils';
-import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
-import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
+import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
-import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
+
 import './styles.scss';
 
 const agencyOptions = [
@@ -79,6 +83,11 @@ const SeedlotRegistrationForm = () => {
   const paymentMethodsQuery = useQuery({
     queryKey: ['payment-methods'],
     queryFn: getPaymentMethods
+  });
+
+  const coneCollectionMethodsQuery = useQuery({
+    queryKey: ['cone-collection-methods'],
+    queryFn: getConeCollectionMethod
   });
 
   const seedlotInfoQuery = useQuery({
@@ -149,6 +158,7 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
+            collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
             // invalidateObj={allInvalidationObj.collectionStep}
             setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
           />
@@ -162,8 +172,8 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
-            fundingSources={getDropDownList(fundingSourcesQuery.data)}
-            paymentMethods={getDropDownList(paymentMethodsQuery.data)}
+            fundingSources={getMultiOptList(fundingSourcesQuery.data)}
+            paymentMethods={getMultiOptList(paymentMethodsQuery.data)}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
             setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
@@ -183,7 +193,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
-            gameticOptions={getDropDownList(maleFemaleMethodologyQuery.data)}
+            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data)}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -255,6 +265,7 @@ const SeedlotRegistrationForm = () => {
                 && fundingSourcesQuery.isSuccess
                 && paymentMethodsQuery.isSuccess
                 && maleFemaleMethodologyQuery.isSuccess
+                && coneCollectionMethodsQuery.isSuccess
               )
                 ? renderStep()
                 : <Loading />

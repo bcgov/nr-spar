@@ -1,7 +1,7 @@
-import DropDownObj from '../types/DropDownObject';
+import MultiOptionsObj from '../types/MultiOptionsObject';
 
 export type FilterObj = {
-  item: string | DropDownObj,
+  item: string | MultiOptionsObj,
   inputValue: string,
 }
 

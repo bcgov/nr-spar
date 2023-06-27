@@ -23,7 +23,7 @@ import Subtitle from '../../Subtitle';
 import { getOrchardByID } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import OrchardDataType from '../../../types/OrchardDataType';
 
 import { OrchardForm, OrchardObj } from './definitions';
@@ -38,9 +38,9 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  seedlotSpecies: DropDownObj,
-  gameticOptions: DropDownObj[],
-  state: OrchardForm,
+  seedlotSpecies: MultiOptionsObj
+  gameticOptions: MultiOptionsObj[],
+  state: OrchardForm
   setStepData: Function,
   cleanParentTables: Function,
   readOnly?: boolean
