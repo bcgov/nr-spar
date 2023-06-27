@@ -145,7 +145,7 @@ const ParentTreeStep = (
     data.parentTrees.forEach((parentTree) => {
       if (!Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)) {
         const newRowData: RowItem = structuredClone(rowTemplate);
-        newRowData.cloneNumber = parentTree.parentTreeNumber;
+        newRowData.parentTreeNumber = parentTree.parentTreeNumber;
         // Assign genetic worth values
         parentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
           // We only care about breeding values of genetic worth
@@ -181,10 +181,10 @@ const ParentTreeStep = (
       }))
   });
 
-  const setInputChange = (cloneNumber: string, colName: keyof RowItem, value: string) => {
+  const setInputChange = (parentTreeNumber: string, colName: keyof RowItem, value: string) => {
     // Using structuredClone so useEffect on state.tableRowData can be triggered
     const clonedState = structuredClone(state);
-    clonedState.tableRowData[cloneNumber][colName] = value;
+    clonedState.tableRowData[parentTreeNumber][colName] = value;
     setStepData(clonedState);
   };
 
@@ -242,10 +242,10 @@ const ParentTreeStep = (
     const fieldsToClean = headerConfig
       .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
       .map((header) => header.id);
-    const cloneNumbers = Object.keys(clonedTableRowData);
-    cloneNumbers.forEach((cloneNumber) => {
+    const parentTreeNumbers = Object.keys(clonedTableRowData);
+    parentTreeNumbers.forEach((parentTreeNumber) => {
       fieldsToClean.forEach((field) => {
-        clonedTableRowData[cloneNumber][field] = '';
+        clonedTableRowData[parentTreeNumber][field] = '';
       });
     });
 
@@ -255,29 +255,29 @@ const ParentTreeStep = (
 
   const fillCompostitionTables = (res: AxiosResponse) => {
     // Clone numbers that does not exist in the orchards
-    const invalidCloneNumbers: Array<string> = [];
+    const invalidParentTreeNumbers: Array<string> = [];
     const clonedState = structuredClone(state);
 
     res.data.forEach((row: CompUploadResponse) => {
-      const cloneNumber = row.parentTreeNumber.toString();
-      if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, cloneNumber)) {
+      const parentTreeNumber = row.parentTreeNumber.toString();
+      if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
         // If the clone nubmer exist from user file then fill in the values
-        clonedState.tableRowData[cloneNumber].coneCount = row.coneCount.toString();
-        clonedState.tableRowData[cloneNumber].pollenCount = row.pollenCount.toString();
-        clonedState.tableRowData[cloneNumber].smpSuccessPerc = row.smpSuccess.toString();
-        clonedState.tableRowData[cloneNumber].nonOrchardPollenContam = row.pollenContamination
+        clonedState.tableRowData[parentTreeNumber].coneCount = row.coneCount.toString();
+        clonedState.tableRowData[parentTreeNumber].pollenCount = row.pollenCount.toString();
+        clonedState.tableRowData[parentTreeNumber].smpSuccessPerc = row.smpSuccess.toString();
+        clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam = row.pollenContamination
           .toString();
       } else {
-        invalidCloneNumbers.push(cloneNumber);
+        invalidParentTreeNumbers.push(parentTreeNumber);
       }
     });
 
     setStepData(clonedState);
 
-    if (invalidCloneNumbers.length > 0) {
+    if (invalidParentTreeNumbers.length > 0) {
       // A temporary solution to let users know they have invalid clone numbers
       // eslint-disable-next-line no-alert
-      alert(`The following clone numbers cannot be found: ${invalidCloneNumbers}`);
+      alert(`The following clone numbers cannot be found: ${invalidParentTreeNumbers}`);
     }
   };
 

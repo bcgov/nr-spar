@@ -141,7 +141,7 @@ export const geneticWorthDict: GeneticWorthDictType = {
 };
 
 export const rowTemplate: RowItem = {
-  cloneNumber: '',
+  parentTreeNumber: '',
   coneCount: '',
   pollenCount: '',
   smpSuccessPerc: '',
@@ -169,9 +169,9 @@ export const rowTemplate: RowItem = {
 
 export const headerTemplate: Array<HeaderObj> = [
   {
-    id: 'cloneNumber',
-    name: 'Clone number',
-    description: 'Clone number',
+    id: 'parentTreeNumber',
+    name: 'Parent Tree Number',
+    description: 'Parent Tree Number',
     enabled: true,
     editable: false,
     isAnOption: false,

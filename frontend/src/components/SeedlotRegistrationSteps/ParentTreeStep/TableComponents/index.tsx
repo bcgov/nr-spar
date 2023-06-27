@@ -67,9 +67,9 @@ const renderTableCell = (
                 type="number"
                 placeholder="Add value"
                 value={rowData[header.id]}
-                id={`${rowData.cloneNumber}-${rowData[header.id]}`}
+                id={`${rowData.parentTreeNumber}-${rowData[header.id]}`}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setInputChange(rowData.cloneNumber, header.id, event.target.value);
+                  setInputChange(rowData.parentTreeNumber, header.id, event.target.value);
                 }}
                 onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                 onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
@@ -105,7 +105,7 @@ export const renderTableBody = (
           rowData.isCalcTab
             ? null
             : (
-              <TableRow key={rowData.cloneNumber}>
+              <TableRow key={rowData.parentTreeNumber}>
                 {
                   headerConfig.map((header) => (
                     renderTableCell(rowData, header, currentTab, setInputChange)

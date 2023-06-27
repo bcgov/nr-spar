@@ -1,5 +1,5 @@
 export type ConeAndPollenEntriesType = {
-  cloneNumber: string;
+  parentTreeNumber: string;
   coneCount: string;
   pollenCount: string;
   smpSuccess: string;
@@ -7,14 +7,14 @@ export type ConeAndPollenEntriesType = {
 };
 
 export type SMPSuccessEntriesType = {
-  cloneNumber: string;
+  parentTreeNumber: string;
   successOnParent: string;
   nonOrchardPollenContam: string;
   [genTrait: string]: string;
 };
 
 export type SMPMixEntriesType = {
-  cloneNumber: string;
+  parentTreeNumber: string;
   volume: string;
   proportion: string;
   [genTrait: string]: string;
