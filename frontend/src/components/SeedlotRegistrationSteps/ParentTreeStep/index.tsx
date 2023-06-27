@@ -334,7 +334,7 @@ const ParentTreeStep = (
                               )
                             }
                           />
-                          <OverflowMenuItem itemText="Export table as PDF file" />
+                          <OverflowMenuItem itemText="Export table as PDF file" disabled />
                           <OverflowMenuItem
                             itemText="Clean table data"
                             onClick={() => setIsCleanWarnOpen(true)}
