@@ -12,13 +12,10 @@ export const DEFAULT_PAGE_NUMBER = 1;
 export const EMPTY_NUMBER_STRING = '--';
 
 export const getDownloadUrl = (tabType: string) => {
-  if (tabType === 'cone and pollen count' || tabType === 'coneTab') {
-    return '/downloads/Cone_and_Pollen_Count_template.csv';
-  }
-  if (tabType === 'calculation of SMP mix' || tabType === 'mixTab') {
+  if (tabType === 'Calculation of SMP mix' || tabType === 'mixTab') {
     return '/downloads/SMP_Mix_Volume_template.csv';
   }
-  return '#TODO';
+  return '/downloads/Seedlot_composition_template.csv';
 };
 
 const getTabDescription = (tabType: string) => (
@@ -32,25 +29,31 @@ const getTabDescription = (tabType: string) => (
   </>
 );
 
-const getNotificationSubtitle = (tabType: string) => (
-  <>
-    {
-      `You can import one spreadsheet file for the ${tabType} table with the data you want to use. `
-    }
-    <br />
-    {
-      'For further guidance on how to organize the data, '
-      + "do use the SPAR's spreadsheet template. "
-    }
-    <Link
-      className="notification-link"
-      to={getDownloadUrl(tabType)}
-      target="_blank"
-    >
-      {`Download ${tabType} template`}
-    </Link>
-  </>
-);
+const getNotificationSubtitle = (tabType: string) => {
+  let downloadName = 'Seedlot composition';
+  if (tabType === 'Calculation of SMP mix') {
+    downloadName = tabType;
+  }
+  return (
+    <>
+      {
+        `You can import one spreadsheet file for the ${tabType} table with the data you want to use. `
+      }
+      <br />
+      {
+        'For further guidance on how to organize the data, '
+        + "do use the SPAR's spreadsheet template. "
+      }
+      <Link
+        className="notification-link"
+        to={getDownloadUrl(tabType)}
+        target="_blank"
+      >
+        {`Download ${downloadName} template`}
+      </Link>
+    </>
+  );
+};
 
 const errorDescription = (
   <>
@@ -71,7 +74,7 @@ const getPageText = () => ({
     tableDescription: "Enter the estimative of cone and pollen count for the orchard's seedlot (*required)",
     toggleName: 'Show breeding value',
     cleanModalHeading: 'Are you sure you want to clean all the data from the cone and pollen count table?'
-    + ' This action will remove SMP success on parent (%) values on SMP success on parent table as well.'
+      + ' This action will remove SMP success on parent (%) values on SMP success on parent table as well.'
   },
   successTab: {
     tabTitle: 'SMP success on parent',
@@ -84,12 +87,12 @@ const getPageText = () => ({
   },
   mixTab: {
     tabTitle: 'Calculation of SMP mix',
-    tabDescription: getTabDescription('calculation of SMP mix'),
-    notificationSubtitle: getNotificationSubtitle('calculation of SMP mix'),
+    tabDescription: getTabDescription('Calculation of SMP mix'),
+    notificationSubtitle: getNotificationSubtitle('Calculation of SMP mix'),
     tableDescription: 'Enter the estimative volume of SMP mix used for each clone',
     toggleName: 'Show clonal value',
     toggleNameBottom: 'Show weighted value',
-    cleanModalHeading: 'Are you sure you want to clean all the data from the calculation of SMP mix table?'
+    cleanModalHeading: 'Are you sure you want to clean all the data from the Calculation of SMP mix table?'
   },
   gwAndDiverse: {
     title: 'Genetic worth and diversity',
