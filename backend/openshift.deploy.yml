@@ -237,12 +237,12 @@ objects:
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
-                      name: "${NAME}"
+                      name: ${NAME}-${ZONE}-backend
                       key: aws-kinesis-secret-username
                 - name: AWS_SECRET_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
-                      name: "${NAME}"
+                      name: ${NAME}-${ZONE}-backend
                       key: aws-kinesis-secret-password
               volumeMounts:
                 # mount log file location
