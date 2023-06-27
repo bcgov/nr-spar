@@ -16,15 +16,24 @@ interface UploadArgs {
   file: File
 }
 
+const formatFile = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return formData;
+};
+
 const useFileUploadMutation = () => {
   const [progress, setProgress] = useState(0);
 
   const mutation = useMutation<void, AxiosError, UploadArgs>(
     (args) => axios.post(
       args.uploadUrl,
-      args.file,
+      formatFile(args.file),
       {
-        onUploadProgress: (ev) => setProgress(Math.round((ev.loaded * 100) / (ev.total ?? 1))),
+        onUploadProgress: (progressEvent) => {
+          // setProgress(Math.round((progressEvent.loaded * 100) / (progressEvent.total ?? 1)));
+          setProgress(progressEvent.loaded);
+        },
         headers: getHeader()
       }
     )

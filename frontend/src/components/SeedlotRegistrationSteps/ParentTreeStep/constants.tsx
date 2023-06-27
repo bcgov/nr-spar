@@ -2,7 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
-  HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType, InfoSectionConfigType
+  HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType,
+  InfoSectionConfigType, FileConfigType
 } from './definitions';
 
 export const DEFAULT_PAGE_SIZE = 40;
@@ -434,4 +435,14 @@ export const gwSectionConfig: InfoSectionConfigType = {
     name: 'Number of SMP parents from outside',
     value: EMPTY_NUMBER_STRING
   }
+};
+
+export const fileConfigTemplate: FileConfigType = {
+  file: null,
+  fileName: '',
+  fileAdded: false,
+  uploaderStatus: 'edit',
+  errorSub: '',
+  errorMessage: '',
+  invalidFile: true
 };

@@ -70,3 +70,21 @@ export type GeneticWorthDictType = {
 export type InfoSectionConfigType = {
   [key: string]: InfoDisplayObj;
 };
+
+export type FileConfigType = {
+  file: File | null,
+  fileName: string,
+  fileAdded: boolean,
+  uploaderStatus: string,
+  errorSub: string,
+  errorMessage: string,
+  invalidFile: boolean
+};
+
+export type CompUploadResponse = {
+  parentTreeNumber: number,
+  coneCount: number,
+  pollenCount: number,
+  smpSuccess: number,
+  pollenContamination: number
+}

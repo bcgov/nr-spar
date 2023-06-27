@@ -39,7 +39,7 @@ const ApiConfig = {
 
   uploadConeAndPollen: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/cone-pollen-count-table/upload`,
 
-  uploadSMPSuccess: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/smp-calculation-table/upload`,
+  uploadSMPMix: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/smp-calculation-table/upload`,
   /**
    * ORACLE API
    */

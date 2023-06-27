@@ -9,7 +9,6 @@ const getHeader = (useMultipart = false) => {
   if (useMultipart) {
     headers = Object.assign(headers, { 'content-type': 'multipart/form-data' });
   }
-
   return headers;
 };
 

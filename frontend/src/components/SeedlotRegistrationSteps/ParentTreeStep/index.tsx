@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,
@@ -7,11 +6,11 @@ import {
   Button, Table, TableHead, TableRow, TableHeader,
   DataTableSkeleton, DefinitionTooltip, Modal
 } from '@carbon/react';
+import { AxiosError, AxiosResponse } from 'axios';
 import { Link } from 'react-router-dom';
 import { View, Settings, Upload } from '@carbon/icons-react';
 import { useQueries, useMutation } from '@tanstack/react-query';
 import { getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
-
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
@@ -19,10 +18,10 @@ import { OrchardObj } from '../OrchardStep/definitions';
 import {
   pageText, headerTemplate, rowTemplate, geneticWorthDict,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig,
-  gwSectionConfig, getDownloadUrl
+  gwSectionConfig, getDownloadUrl, fileConfigTemplate
 } from './constants';
 import {
-  TabTypes, HeaderObj, RowItem, RowDataDictType
+  TabTypes, HeaderObj, RowItem, RowDataDictType, CompUploadResponse
 } from './definitions';
 import {
   getTabString, processOrchards, sortAndSliceRows, combineObjectValues,
@@ -35,9 +34,7 @@ import UploadFileModal from './UploadFileModal';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import PaginationChangeType from '../../../types/PaginationChangeType';
-import { postConeAndPollenFile } from '../../../api-service/seedlotAPI';
-import ApiConfig from '../../../api-service/ApiConfig';
-import useFileUploadMutation from '../../../api-service/fileUploadMutation';
+import { postCompositionFile } from '../../../api-service/seedlotAPI';
 
 import './styles.scss';
 
@@ -72,6 +69,8 @@ const ParentTreeStep = (
   const [gwInfoConfig, setGWInfoConfig] = useState(structuredClone(gwSectionConfig));
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
+  const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));
+  const resetFileUploadConfig = () => setFileUploadConfig(structuredClone(fileConfigTemplate));
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -254,13 +253,41 @@ const ParentTreeStep = (
     setStepData(modifiedState);
   };
 
-  const uploadConePollen = useMutation({
-    mutationFn: (coneCSV: File) => postConeAndPollenFile(seedlotNumber, coneCSV),
-    onSuccess: (data) => { console.log(data); },
-    onError: (err) => console.log('hahaha', err)
-  });
+  const fillCompostitionTables = (res: AxiosResponse) => {
+    // Clone numbers that does not exist in the orchards
+    const invalidCloneNumbers = [];
+    const clonedState = structuredClone(state);
 
-  const uploadFile = useFileUploadMutation();
+    res.data.forEach((row: CompUploadResponse) => {
+      const cloneNumber = row.parentTreeNumber.toString();
+      if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, cloneNumber)) {
+        // If the clone nubmer exist from user file then fill in the values
+        clonedState.tableRowData[cloneNumber].coneCount = row.coneCount.toString();
+        clonedState.tableRowData[cloneNumber].pollenCount = row.pollenCount.toString();
+        clonedState.tableRowData[cloneNumber].smpSuccessPerc = row.smpSuccess.toString();
+        clonedState.tableRowData[cloneNumber].nonOrchardPollenContam = row.pollenContamination
+          .toString();
+      } else {
+        invalidCloneNumbers.push(cloneNumber);
+      }
+    });
+
+    setStepData(clonedState);
+  };
+
+  const uploadCompostion = useMutation({
+    mutationFn: (coneCSV: File) => postCompositionFile(seedlotNumber, coneCSV),
+    onSuccess: (res) => {
+      cleanTable();
+      resetFileUploadConfig();
+      setIsUploadOpen(false);
+      fillCompostitionTables(res);
+    },
+    onError: (err: AxiosError) => {
+      const msg = (err.response as AxiosResponse).data.message;
+      setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
+    }
+  });
 
   return (
     <FlexGrid className="parent-tree-step-container">
@@ -425,11 +452,11 @@ const ParentTreeStep = (
       <UploadFileModal
         open={isUploadOpen}
         setOpen={setIsUploadOpen}
-        onSubmit={(file: File) => uploadConePollen.mutate(file)}
-        // onSubmit={(file: File) => useFileUploadMutation.mutate({
-        //   uploadUrl: ApiConfig.uploadConeAndPollen.replace('{seedlotNumber}', seedlotNumber),
-        //   file
-        // })}
+        // onSubmit={(file: File) => uploadFile(file)}
+        onSubmit={(file: File) => uploadCompostion.mutate(file)}
+        fileUploadConfig={fileUploadConfig}
+        setFileUploadConfig={setFileUploadConfig}
+        resetFileUploadConfig={resetFileUploadConfig}
       />
       <Modal
         className="clean-data-modal"
