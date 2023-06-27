@@ -252,6 +252,7 @@ objects:
               persistentVolumeClaim:
                 claimName: file-cache-data-${ZONE}
             - name: log-storage-${ZONE}
+              persistentVolumeClaim:
                 claimName: log-storage-${ZONE}
             # fluent-bit config file
             - name: fluentbit-config-${ZONE}
