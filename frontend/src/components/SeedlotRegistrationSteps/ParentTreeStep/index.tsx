@@ -247,7 +247,6 @@ const ParentTreeStep = (
 
   const cleanTable = () => {
     const clonedState = structuredClone(state);
-    // const clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
     const fieldsToClean = headerConfig
       .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
       .map((header) => header.id);

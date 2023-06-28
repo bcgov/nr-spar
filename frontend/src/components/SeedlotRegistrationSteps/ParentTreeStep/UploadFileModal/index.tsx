@@ -54,24 +54,16 @@ const UploadFileModal = (
           e.stopPropagation();
           const fileToUpload = addedFiles[0];
           const newFileUploadConfig = { ...fileUploadConfig };
-          // setFileAdded(true);
           newFileUploadConfig.fileAdded = true;
-          // setFileName(fileToUpload.name);
           newFileUploadConfig.fileName = fileToUpload.name;
           if (fileToUpload.type !== 'text/csv') {
-            // setErrorSub(textConfig.uploadedFileErrorType);
             newFileUploadConfig.errorSub = textConfig.uploadedFileErrorType;
-            // setErrorMessage(textConfig.uploadedFileErrorMessageType);
             newFileUploadConfig.errorMessage = textConfig.uploadedFileErrorMessageType;
           } else if (fileToUpload.size > 512000) {
-            // setErrorSub(textConfig.uploadedFileErrorSize);
             newFileUploadConfig.errorSub = textConfig.uploadedFileErrorSize;
-            // setErrorMessage(textConfig.uploadedFileErrorMessageSize);
             newFileUploadConfig.errorMessage = textConfig.uploadedFileErrorMessageSize;
           } else {
-            // setInvalidFile(false);
             newFileUploadConfig.invalidFile = false;
-            // setFile(fileToUpload);
             newFileUploadConfig.file = fileToUpload;
           }
           setFileUploadConfig(newFileUploadConfig);
