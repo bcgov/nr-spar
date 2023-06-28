@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api]
+        name: [database, backend, frontend, oracle-api, fluentbit]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -194,7 +194,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api]
+        name: [database, backend, frontend, oracle-api, fluentbit]
         include:
           - name: database
             file: database/openshift.deploy.yml
