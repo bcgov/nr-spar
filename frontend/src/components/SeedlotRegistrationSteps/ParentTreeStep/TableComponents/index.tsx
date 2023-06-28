@@ -54,7 +54,6 @@ export const renderColOptions = (
 const renderTableCell = (
   rowData: RowItem,
   header: HeaderObj,
-  currentTab: keyof TabTypes,
   setInputChange: Function
 ) => {
   const className = header.editable ? 'td-no-padding' : null;
@@ -110,7 +109,7 @@ export const renderTableBody = (
                       header.availableInTabs.includes(currentTab) && header.enabled
                     ))
                     .map((header) => (
-                      renderTableCell(rowData, header, currentTab, setInputChange)
+                      renderTableCell(rowData, header, setInputChange)
                     ))
                 }
               </TableRow>
