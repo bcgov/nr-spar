@@ -198,7 +198,7 @@ const ParentTreeStep = (
   };
 
   /**
-   * Each seedlot speicies has its own associated Genetic Worth values that users can toggle,
+   * Each seedlot species has its own associated Genetic Worth values that users can toggle,
    * only those values associated are displayed to user.
    * This function toggles the isAnOption field of a header column so it can be
    * displayed as an option
