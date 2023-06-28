@@ -32,7 +32,9 @@ export const renderColOptions = (
           <OverflowMenuItem
             key={header.id}
             closeMenu={() => false}
-            onClick={(e: React.ChangeEvent<any>) => toggleColumn(header.id, e.target.nodeName)}
+            onClick={(e: React.ChangeEvent<HTMLInputElement>) => {
+              toggleColumn(header.id, e.target.nodeName);
+            }}
             itemText={
               (
                 <Checkbox
@@ -73,7 +75,7 @@ const renderTableCell = (
                   setInputChange(rowData.parentTreeNumber, header.id, event.target.value);
                 }}
                 onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-                onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
+                onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
                   blurOnEnter(event);
                 }}
               />
@@ -203,7 +205,7 @@ export const renderDefaultInputs = (
             onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
               applyValueToAll('smpSuccessPerc', event.target.value);
             }}
-            onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
+            onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
               blurOnEnter(event);
             }}
           />
@@ -216,7 +218,7 @@ export const renderDefaultInputs = (
             onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
               applyValueToAll('nonOrchardPollenContam', event.target.value);
             }}
-            onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
+            onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
               blurOnEnter(event);
             }}
           />
