@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,
@@ -247,26 +246,28 @@ const ParentTreeStep = (
   };
 
   const cleanTable = () => {
-    const modifiedState = { ...state };
-    const clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
+    const clonedState = structuredClone(state);
+    // const clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
     const fieldsToClean = headerConfig
       .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
       .map((header) => header.id);
-    const parentTreeNumbers = Object.keys(clonedTableRowData);
+    const parentTreeNumbers = Object.keys(clonedState.tableRowData);
     parentTreeNumbers.forEach((parentTreeNumber) => {
       fieldsToClean.forEach((field) => {
-        clonedTableRowData[parentTreeNumber][field] = '';
+        clonedState.tableRowData[parentTreeNumber][field] = '';
       });
     });
 
-    modifiedState.tableRowData = clonedTableRowData;
-    setStepData(modifiedState);
+    setStepData(clonedState);
+    return clonedState;
   };
 
   const fillCompostitionTables = (res: AxiosResponse) => {
-    // Clone numbers that does not exist in the orchards
+    // Ctore parent tree numbers that does not exist in the orchards
     const invalidParentTreeNumbers: Array<string> = [];
-    const clonedState = structuredClone(state);
+
+    // Clean the table first
+    const clonedState = cleanTable();
 
     res.data.forEach((row: CompUploadResponse) => {
       const parentTreeNumber = row.parentTreeNumber.toString();
@@ -294,7 +295,6 @@ const ParentTreeStep = (
   const uploadCompostion = useMutation({
     mutationFn: (coneCSV: File) => postCompositionFile(seedlotNumber, coneCSV),
     onSuccess: (res) => {
-      cleanTable();
       resetFileUploadConfig();
       setIsUploadOpen(false);
       fillCompostitionTables(res);

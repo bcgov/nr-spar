@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@carbon/react';
@@ -59,7 +58,8 @@ const getNotificationSubtitle = (tabType: string) => {
 
 const errorDescription = (
   <>
-    To see your orchard&apos;s composition, you must first fill the orchard id field in the previous step, “Orchard”.
+    To see your orchard&apos;s composition, you must first fill the
+    orchard id field in the previous step, “Orchard”.
     <br />
     Please, fill the orchard ID to complete the cone and pollen table.
   </>

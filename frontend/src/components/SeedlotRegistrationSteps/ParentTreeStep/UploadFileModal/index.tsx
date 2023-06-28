@@ -6,9 +6,9 @@ import {
   FileUploaderItem
 } from '@carbon/react';
 import textConfig from './constants';
+import { FileConfigType } from '../definitions';
 
 import './styles.scss';
-import { FileConfigType } from '../definitions';
 
 interface UploadFileModalProps {
   open: boolean;
