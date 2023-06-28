@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { AxiosError, AxiosResponse } from 'axios';
+import { Link } from 'react-router-dom';
+import { useQueries, useMutation } from '@tanstack/react-query';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,
   TableContainer, TableToolbar, Checkbox,
@@ -6,15 +9,23 @@ import {
   Button, Table, TableHead, TableRow, TableHeader,
   DataTableSkeleton, DefinitionTooltip, Modal
 } from '@carbon/react';
-import { AxiosError, AxiosResponse } from 'axios';
-import { Link } from 'react-router-dom';
 import { View, Settings, Upload } from '@carbon/icons-react';
-import { useQueries, useMutation } from '@tanstack/react-query';
 import { getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
+import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
+import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import PaginationChangeType from '../../../types/PaginationChangeType';
+import { postCompositionFile } from '../../../api-service/seedlotAPI';
+import CheckboxType from '../../../types/CheckboxType';
+import EmptySection from '../../EmptySection';
+import {
+  renderColOptions, renderTableBody, renderNotification,
+  renderDefaultInputs, renderPagination
+} from './TableComponents';
 import { OrchardObj } from '../OrchardStep/definitions';
+import UploadFileModal from './UploadFileModal';
 import {
   pageText, headerTemplate, rowTemplate, geneticWorthDict,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig,
@@ -27,17 +38,6 @@ import {
   getTabString, processOrchards, sortAndSliceRows, combineObjectValues,
   calcAverage, calcSum
 } from './utils';
-import {
-  renderColOptions, renderTableBody, renderNotification, renderPagination,
-  renderDefaultInputs
-} from './TableComponents';
-import UploadFileModal from './UploadFileModal';
-import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
-import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import PaginationChangeType from '../../../types/PaginationChangeType';
-import { postCompositionFile } from '../../../api-service/seedlotAPI';
-import CheckboxType from '../../../types/CheckboxType';
-import EmptySection from '../../EmptySection';
 
 import './styles.scss';
 
