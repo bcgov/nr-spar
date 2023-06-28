@@ -7,6 +7,26 @@ metadata:
     tags: "nr-spar-backend,fluent-bit"
 labels:
   app: "${NAME}-${ZONE}"
+parameters:
+  - name: NAME
+    description: Module name
+    value: nr-spar-fluentbit-backend
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
+    required: true
+  - name: NAMESPACE
+    description: Target namespace reference (i.e. '9f0fbe-dev')
+    displayName: Target Namespace
+    required: true
+  - name: AWS_KINESIS_STREAM
+    description: AWS Kinesis Stream identifier
+    required: true
+  - name: AWS_KINESIS_ROLE_ARN
+    description: AWS OpenSearch/Kinesis Resource Name
+    required: true
+  - name: PROMOTE
+    description: Image (namespace/name:tag) to promote/import
+    value: bcgov/nr-spar-backend:prod-backend
 objects:
   - apiVersion: v1
     kind: ConfigMap
@@ -200,33 +220,4 @@ objects:
           new_record["@timestamp"] = (os.date("!%Y-%m-%dT%H:%M:%S", timestamp["sec"]) .. '.' .. math.floor(timestamp["nsec"] / 1000000) .. 'Z')
           return 2, timestamp, new_record
         end
-parameters:
-  - name: NAME
-    description: Module name
-    value: nr-spar-fluentbit-backend
-  - name: ZONE
-    description: Deployment zone, e.g. pr-### or prod
-    required: true
-  - name: REPO_NAME
-    description: Application repository name
-    displayName: Repository Name
-    value: nr-spar-backend
-  - name: NAMESPACE
-    description: Target namespace reference (i.e. '9f0fbe-dev')
-    displayName: Target Namespace
-    required: true
-  - name: LOGGING_HOST_NAME
-    description: The hostname of our Fluentd service running further down the monitoring pipeline
-    displayName: Fluentd host name
-    required: false
-  - name: AWS_KINESIS_STREAM
-    description: AWS Kinesis Stream identifier
-    displayName: AWS Kinesis Stream
-    required: true
-  - name: AWS_KINESIS_ROLE_ARN
-    description: AWS OpenSearch/Kinesis Resource Name
-    displayName: AWS Role ARN
-    required: true
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    value: bcgov/nr-spar-backend:prod-backend
+
