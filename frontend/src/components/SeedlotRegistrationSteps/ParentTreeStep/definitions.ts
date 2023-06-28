@@ -31,7 +31,7 @@ export type RowItem = {
   meanElevation: string | null,
   volume: string | null,
   proportion: string | null
-  isCalcTab: boolean
+  isMixTab: boolean
 };
 
 /**

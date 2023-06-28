@@ -57,37 +57,34 @@ const renderTableCell = (
   currentTab: keyof TabTypes,
   setInputChange: Function
 ) => {
-  if (header.availableInTabs.includes(currentTab) && header.enabled) {
-    const className = header.editable ? 'td-no-padding' : null;
-    return (
-      <TableCell key={header.id} className={className}>
-        {
-          header.editable
-            ? (
-              <TextInput
-                labelText=""
-                hideLabel
-                type="number"
-                placeholder="Add value"
-                value={rowData[header.id]}
-                id={`${rowData.parentTreeNumber}-${rowData[header.id]}`}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                  setInputChange(rowData.parentTreeNumber, header.id, event.target.value);
-                }}
-                onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-                onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
-                  blurOnEnter(event);
-                }}
-              />
-            )
-            : (
-              rowData[header.id]
-            )
-        }
-      </TableCell>
-    );
-  }
-  return null;
+  const className = header.editable ? 'td-no-padding' : null;
+  return (
+    <TableCell key={header.id} className={className}>
+      {
+        header.editable
+          ? (
+            <TextInput
+              labelText=""
+              hideLabel
+              type="number"
+              placeholder="Add value"
+              value={rowData[header.id]}
+              id={`${rowData.parentTreeNumber}-${rowData[header.id]}`}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setInputChange(rowData.parentTreeNumber, header.id, event.target.value);
+              }}
+              onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+              onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
+                blurOnEnter(event);
+              }}
+            />
+          )
+          : (
+            rowData[header.id]
+          )
+      }
+    </TableCell>
+  );
 };
 
 export const renderTableBody = (
@@ -103,14 +100,18 @@ export const renderTableBody = (
     <TableBody>
       {
         slicedRows.map((rowData) => (
-          rowData.isCalcTab
+          rowData.isMixTab
             ? null
             : (
               <TableRow key={rowData.parentTreeNumber}>
                 {
-                  headerConfig.map((header) => (
-                    renderTableCell(rowData, header, currentTab, setInputChange)
-                  ))
+                  headerConfig
+                    .filter((header) => (
+                      header.availableInTabs.includes(currentTab) && header.enabled
+                    ))
+                    .map((header) => (
+                      renderTableCell(rowData, header, currentTab, setInputChange)
+                    ))
                 }
               </TableRow>
             )

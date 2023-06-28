@@ -171,7 +171,7 @@ export const rowTemplate: RowItem = {
   meanElevation: '',
   volume: '',
   proportion: '',
-  isCalcTab: false
+  isMixTab: false
 };
 
 export const headerTemplate: Array<HeaderObj> = [
