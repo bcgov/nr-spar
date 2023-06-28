@@ -23,6 +23,7 @@ export const renderColOptions = (
   return (
     <>
       <OverflowMenuItem
+        wrapperClassName="toggle-category-name"
         className="menu-item-label-text"
         closeMenu={() => false}
         itemText={pageText[currentTab].toggleName}
