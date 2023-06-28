@@ -201,6 +201,7 @@ const SeedlotRegistrationForm = () => {
             seedlotSpecies={seedlotSpecies}
             state={allStepData.parentTreeStep}
             orchards={allStepData.orchardStep.orchards}
+            setStep={setStep}
             setStepData={(data: any) => setStepData('parentTreeStep', data)}
           />
         );

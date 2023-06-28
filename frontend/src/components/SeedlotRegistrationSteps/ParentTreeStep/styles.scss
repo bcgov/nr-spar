@@ -49,6 +49,19 @@
   .smp-default-input-row {
     margin-top: 1rem;
   }
+
+  .empty-section-container{
+    padding: 5rem;
+    background: var(--#{vars.$bcgov-prefix}-layer-01);
+
+    .empty-section-button{
+      padding: 0;
+      min-height: auto;
+    }
+  }
+  .empty-section-icon{
+    color: var(--#{vars.$bcgov-prefix}-border-interactive);
+  }
 }
 
 .parent-tree-tab-container {
@@ -139,6 +152,13 @@
 
     .#{vars.$bcgov-prefix}--text-input {
       padding: 0 1rem;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu__wrapper .#{vars.$bcgov-prefix}--btn--disabled {
+    background: var(--#{vars.$bcgov-prefix}-layer-01);
+    .#{vars.$bcgov-prefix}--overflow-menu__icon{
+      fill: var(--#{vars.$bcgov-prefix}-text-placeholder);
     }
   }
 }

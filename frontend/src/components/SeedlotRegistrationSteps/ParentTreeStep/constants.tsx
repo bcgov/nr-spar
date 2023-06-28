@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Button } from '@carbon/react';
 import {
   HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType,
   InfoSectionConfigType, FileConfigType
@@ -10,7 +11,7 @@ export const DEFAULT_PAGE_SIZE = 40;
 
 export const DEFAULT_PAGE_NUMBER = 1;
 
-export const EMPTY_NUMBER_STRING = '--';
+export const EMPTY_NUMBER_STRING = '';
 
 export const getDownloadUrl = (tabType: string) => {
   if (tabType === 'Calculation of SMP mix' || tabType === 'mixTab') {
@@ -108,6 +109,9 @@ const getPageText = () => ({
     label: 'Clean table data',
     primaryButtonText: 'Clean table data',
     secondaryButtonText: 'Cancel'
+  },
+  emptySection: {
+    title: 'Nothing to show yet!'
   }
 });
 
@@ -449,3 +453,15 @@ export const fileConfigTemplate: FileConfigType = {
   errorMessage: '',
   invalidFile: true
 };
+
+export const getEmptySectionDescription = (setStep: Function) => (
+  <span>
+    To see your orchard&apos;s composition, you must first fill
+    <br />
+    the orchard id field in the previous step,&quot;
+    <Button className="empty-section-button" kind="ghost" onClick={() => setStep(-1)}>Orchard</Button>
+    &quot;.
+    <br />
+    Please, fill the orchard ID to complete the cone and pollen table.
+  </span>
+);

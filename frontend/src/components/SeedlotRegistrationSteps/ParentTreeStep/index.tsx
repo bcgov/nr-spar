@@ -19,7 +19,7 @@ import { OrchardObj } from '../OrchardStep/definitions';
 import {
   pageText, headerTemplate, rowTemplate, geneticWorthDict,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig,
-  gwSectionConfig, getDownloadUrl, fileConfigTemplate
+  gwSectionConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem, RowDataDictType, CompUploadResponse
@@ -37,14 +37,16 @@ import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQu
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import PaginationChangeType from '../../../types/PaginationChangeType';
 import { postCompositionFile } from '../../../api-service/seedlotAPI';
+import CheckboxType from '../../../types/CheckboxType';
+import EmptySection from '../../EmptySection';
 
 import './styles.scss';
-import CheckboxType from '../../../types/CheckboxType';
 
 interface ParentTreeStepProps {
   seedlotNumber: string,
   seedlotSpecies: MultiOptionsObj
   state: ParentTreeStepDataObj;
+  setStep: Function
   setStepData: Function;
   orchards: Array<OrchardObj>;
 }
@@ -54,6 +56,7 @@ const ParentTreeStep = (
     seedlotNumber,
     seedlotSpecies,
     state,
+    setStep,
     setStepData,
     orchards
   }: ParentTreeStepProps
@@ -75,8 +78,8 @@ const ParentTreeStep = (
   const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));
   const resetFileUploadConfig = () => setFileUploadConfig(structuredClone(fileConfigTemplate));
   const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
-  const [defaultSMPValue, setDefaultSMPValue] = useState('0');
-  const [defaultContamValue, setDefaultContamValue] = useState('0');
+  // Options are disabled if users have not typed in one or more valid orchards
+  const [disableOptions, setDisableOptions] = useState(true);
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -92,6 +95,7 @@ const ParentTreeStep = (
   useEffect(
     () => {
       const processedOrchard = processOrchards(orchards);
+      setDisableOptions(processedOrchard.length === 0);
       setOrchardsData(processedOrchard);
     },
     [orchards]
@@ -108,7 +112,7 @@ const ParentTreeStep = (
   };
 
   const calcSummaryItems = () => {
-    if (orchardsData.length > 0) {
+    if (!disableOptions) {
       const modifiedSummaryConfig = { ...summaryConfig };
       const tableRows = Object.values(state.tableRowData);
 
@@ -214,7 +218,7 @@ const ParentTreeStep = (
         clonedGWItems = Object.assign(clonedGWItems, {
           [clonedHeaders[optionIndex].id]: {
             name: clonedHeaders[optionIndex].name,
-            value: '--'
+            value: ''
           }
         });
       });
@@ -388,6 +392,7 @@ const ParentTreeStep = (
                           renderIcon={View}
                           iconDescription="Show/hide columns"
                           flipped
+                          disabled={disableOptions}
                         >
                           {
                             renderColOptions(headerConfig, currentTab, toggleColumn)
@@ -397,6 +402,7 @@ const ParentTreeStep = (
                           renderIcon={Settings}
                           iconDescription="more options"
                           menuOptionsClass="parent-tree-table-option-menu"
+                          disabled={disableOptions}
                         >
                           <OverflowMenuItem
                             itemText={
@@ -417,10 +423,12 @@ const ParentTreeStep = (
                           />
                         </OverflowMenu>
                         <Button
+                          className="upload-button"
                           size="sm"
                           kind="primary"
                           renderIcon={Upload}
                           onClick={() => setIsUploadOpen(true)}
+                          disabled={disableOptions}
                         >
                           Upload from file
                         </Button>
@@ -428,7 +436,7 @@ const ParentTreeStep = (
                     </TableToolbar>
                     {
                       // Check if it's fetching parent tree data
-                      orchardsData.length > 0 && Object.values(state.tableRowData).length === 0
+                      (!disableOptions && Object.values(state.tableRowData).length === 0)
                         ? (
                           <DataTableSkeleton
                             showToolbar={false}
@@ -466,7 +474,9 @@ const ParentTreeStep = (
                         )
                     }
                     {
-                      renderPagination(state, currentTab, currPageSize, handlePagination)
+                      disableOptions
+                        ? <EmptySection title={pageText.emptySection.title} description={getEmptySectionDescription(setStep)} pictogram="CloudyWindy" />
+                        : renderPagination(state, currentTab, currPageSize, handlePagination)
                     }
                   </TableContainer>
                 </Column>
@@ -475,6 +485,17 @@ const ParentTreeStep = (
           </Tabs>
         </Column>
       </Row>
+      {
+        currentTab === 'mixTab'
+          ? (
+            <EmptySection
+              title="Coming soon"
+              description=""
+              icon="Construction"
+            />
+          )
+          : null
+      }
       {
         currentTab === 'coneTab' || currentTab === 'successTab'
           ? (

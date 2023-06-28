@@ -48,6 +48,7 @@ const InfoSection = (
                 id={`${formatStrForKey(item.name)}-id`}
                 labelText={item.name}
                 value={item.value}
+                placeholder="--"
                 readOnly
               />
             </Column>
