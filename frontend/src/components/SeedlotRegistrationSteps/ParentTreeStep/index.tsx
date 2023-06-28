@@ -369,6 +369,7 @@ const ParentTreeStep = (
                                 setIsSMPDefaultValChecked(checked);
                               }
                             }
+                            disabled={disableOptions}
                           />
                         </Column>
                       </Row>

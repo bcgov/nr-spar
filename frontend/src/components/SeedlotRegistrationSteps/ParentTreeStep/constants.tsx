@@ -458,7 +458,7 @@ export const getEmptySectionDescription = (setStep: Function) => (
   <span>
     To see your orchard&apos;s composition, you must first fill
     <br />
-    the orchard id field in the previous step,&quot;
+    the orchard id field in the previous step,&nbsp;&quot;
     <Button className="empty-section-button" kind="ghost" onClick={() => setStep(-1)}>Orchard</Button>
     &quot;.
     <br />
