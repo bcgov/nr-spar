@@ -262,7 +262,7 @@ const ParentTreeStep = (
   };
 
   const fillCompostitionTables = (res: AxiosResponse) => {
-    // Ctore parent tree numbers that does not exist in the orchards
+    // Store parent tree numbers that does not exist in the orchards
     const invalidParentTreeNumbers: Array<string> = [];
 
     // Clean the table first
@@ -400,7 +400,7 @@ const ParentTreeStep = (
                         </OverflowMenu>
                         <OverflowMenu
                           renderIcon={Settings}
-                          iconDescription="more options"
+                          iconDescription="More options"
                           menuOptionsClass="parent-tree-table-option-menu"
                           disabled={disableOptions}
                         >
@@ -522,7 +522,6 @@ const ParentTreeStep = (
       <UploadFileModal
         open={isUploadOpen}
         setOpen={setIsUploadOpen}
-        // onSubmit={(file: File) => uploadFile(file)}
         onSubmit={(file: File) => uploadCompostion.mutate(file)}
         fileUploadConfig={fileUploadConfig}
         setFileUploadConfig={setFileUploadConfig}
