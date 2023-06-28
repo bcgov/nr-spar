@@ -219,18 +219,14 @@ parameters:
     description: The hostname of our Fluentd service running further down the monitoring pipeline
     displayName: Fluentd host name
     required: false
-  - name: AWS_DEFAULT_REGION
-    description: Default AWS region for Opensearch logging stack
-    displayName: AWS Default Region
-    required: false
   - name: AWS_KINESIS_STREAM
     description: AWS Kinesis Stream identifier
     displayName: AWS Kinesis Stream
-    required: false
-  - name: AWS_ROLE_ARN
+    required: true
+  - name: AWS_KINESIS_ROLE_ARN
     description: AWS OpenSearch/Kinesis Resource Name
     displayName: AWS Role ARN
-    required: false
+    required: true
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     value: bcgov/nr-spar-backend:prod-backend

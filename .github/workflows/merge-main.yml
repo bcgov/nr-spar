@@ -104,6 +104,13 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
+          - name: fluentbit
+            file: backend/fluent-bit.cm.yml
+            overwrite: true
+            parameters:
+              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
+              -p AWS_KINESIS_STREAM=${{ secrets.AWS_KINESIS_STREAM }}
+              -p AWS_KINESIS_ROLE_ARN=${{ secrets.AWS_KINESIS_ROLE_ARN }}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
@@ -217,6 +224,13 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
+          - name: fluentbit
+            file: backend/fluent-bit.cm.yml
+            overwrite: true
+            parameters:
+              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
+              -p AWS_KINESIS_STREAM=${{ secrets.AWS_KINESIS_STREAM }}
+              -p AWS_KINESIS_ROLE_ARN=${{ secrets.AWS_KINESIS_ROLE_ARN }}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
