@@ -49,7 +49,6 @@ const CollectionStep = (
   };
 
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
-  const [isChecked, setIsChecked] = useState<boolean>(true);
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
   // Commenting this for now until we decide how to deal
   // with the 'other' option
@@ -118,14 +117,21 @@ const CollectionStep = (
     name: string,
     value: string | string[],
     optName?: string,
-    optValue?: string | string[]
+    optValue?: string | string[],
+    setDefaultAgency?: boolean
   ) => {
     if (optName && optValue && optName !== name) {
-      setStepData({
+      const newState = {
         ...state,
         [name]: value,
         [optName]: optValue
-      });
+      };
+
+      if (setDefaultAgency) {
+        newState.useDefaultAgencyInfo = !state.useDefaultAgencyInfo;
+      }
+
+      setStepData(newState);
     } else {
       setStepData({
         ...state,
@@ -136,17 +142,6 @@ const CollectionStep = (
     if (optName && optValue) {
       validateInput(optName, optValue);
     }
-  };
-
-  const collectorAgencyIsChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked } = event.target;
-    setIsChecked(checked);
-    handleFormInput(
-      fieldsConfig.collector.name,
-      defaultAgency,
-      fieldsConfig.code.name,
-      defaultCode
-    );
   };
 
   const collectionVolumeInformationHandler = (
@@ -204,9 +199,15 @@ const CollectionStep = (
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.checkbox.name)}
             labelText={fieldsConfig.checkbox.labelText}
             readOnly={readOnly}
-            checked={isChecked}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              collectorAgencyIsChecked(e);
+            checked={state.useDefaultAgencyInfo}
+            onChange={() => {
+              handleFormInput(
+                fieldsConfig.collector.name,
+                defaultAgency,
+                fieldsConfig.code.name,
+                defaultCode,
+                true
+              );
             }}
           />
         </Column>
@@ -222,7 +223,7 @@ const CollectionStep = (
             helperText={fieldsConfig.collector.helperText}
             invalidText={fieldsConfig.collector.invalidText}
             items={agencyOptions}
-            readOnly={isChecked || readOnly}
+            readOnly={state.useDefaultAgencyInfo || readOnly}
             selectedItem={state.collectorAgency}
             onChange={(e: ComboBoxEvent) => {
               handleFormInput(
@@ -247,7 +248,7 @@ const CollectionStep = (
             label={fieldsConfig.code.label}
             helperText={fieldsConfig.code.helperText}
             invalidText={fieldsConfig.code.invalidText}
-            readOnly={isChecked || readOnly}
+            readOnly={state.useDefaultAgencyInfo || readOnly}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput(
                 fieldsConfig.code.name,

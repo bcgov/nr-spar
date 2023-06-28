@@ -111,6 +111,7 @@ const ownershipMock = {
 };
 
 const collectionMock = {
+  useDefaultAgencyInfo: true,
   collectorAgency: 'Strong Seeds Orchard - SSO',
   locationCode: '32',
   startDate: '2023/01/04',

@@ -10,6 +10,7 @@ export const initCollectionState = (
   defaultAgency: string,
   defaultCode: string
 ) => ({
+  useDefaultAgencyInfo: true,
   collectorAgency: defaultAgency,
   locationCode: defaultCode,
   startDate: '',
