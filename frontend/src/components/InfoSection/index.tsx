@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import { Row, Column, TextInput } from '@carbon/react';
 import InfoDisplayObj from '../../types/InfoDisplayObj';
