@@ -1,15 +1,16 @@
 import React from 'react';
 import {
-  OverflowMenuItem, Checkbox, TableBody, TableRow,
+  OverflowMenuItem, Checkbox, TableBody, TableRow, Row, Column,
   TableCell, TextInput, ActionableNotification, Pagination
 } from '@carbon/react';
 import { pageText, pageSizesConfig } from '../constants';
 import { HeaderObj, RowItem, TabTypes } from '../definitions';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { OrchardObj } from '../../OrchardStep/definitions';
+import PaginationChangeType from '../../../../types/PaginationChangeType';
+import blurOnEnter from '../../../../utils/KeyboardUtil';
 
 import '../styles.scss';
-import PaginationChangeType from '../../../../types/PaginationChangeType';
 
 export const renderColOptions = (
   headerConfig: Array<HeaderObj>,
@@ -73,9 +74,7 @@ const renderTableCell = (
                 }}
                 onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                 onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
-                  if (event.key === 'Enter') {
-                    (event.target as HTMLInputElement).blur();
-                  }
+                  blurOnEnter(event);
                 }}
               />
             )
@@ -187,4 +186,43 @@ export const renderPagination = (
       }
     />
   );
+};
+
+export const renderDefaultInputs = (
+  isSMPDefaultValChecked: boolean,
+  applyValueToAll: Function
+) => {
+  if (isSMPDefaultValChecked) {
+    return (
+      <Row className="smp-default-input-row">
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          <TextInput
+            id="default-smp-success-input"
+            type="number"
+            labelText={pageText.successTab.smpInputLabel}
+            onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
+              applyValueToAll('smpSuccessPerc', event.target.value);
+            }}
+            onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
+              blurOnEnter(event);
+            }}
+          />
+        </Column>
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          <TextInput
+            id="default-pollen-contam-input"
+            type="number"
+            labelText={pageText.successTab.pollenCotamInputLabel}
+            onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
+              applyValueToAll('nonOrchardPollenContam', event.target.value);
+            }}
+            onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
+              blurOnEnter(event);
+            }}
+          />
+        </Column>
+      </Row>
+    );
+  }
+  return null;
 };

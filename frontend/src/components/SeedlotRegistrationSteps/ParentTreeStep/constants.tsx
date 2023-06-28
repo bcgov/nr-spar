@@ -86,7 +86,10 @@ const getPageText = () => ({
     notificationSubtitle: getNotificationSubtitle('SMP success on parent'),
     tableDescription: "Enter the estimative of SMP success for the orchard's seedlot",
     toggleName: 'Show SMP mix used on parent',
-    cleanModalHeading: getCleanTableDesc('SMP success on parent')
+    cleanModalHeading: getCleanTableDesc('SMP success on parent'),
+    defaultCheckBoxDesc: 'Enter the same SMP success on parent or Non-orchard pollen contaminant to all parent trees',
+    smpInputLabel: 'SMP Success on parent (%)',
+    pollenCotamInputLabel: 'Non-orchard pollen contaminant (%)'
   },
   mixTab: {
     tabTitle: 'Calculation of SMP mix',

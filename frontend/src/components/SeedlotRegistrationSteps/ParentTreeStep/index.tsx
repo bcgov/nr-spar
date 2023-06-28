@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,
-  TableContainer, TableToolbar,
+  TableContainer, TableToolbar, Checkbox,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
   DataTableSkeleton, DefinitionTooltip, Modal
@@ -28,7 +29,8 @@ import {
   calcAverage, calcSum
 } from './utils';
 import {
-  renderColOptions, renderTableBody, renderNotification, renderPagination
+  renderColOptions, renderTableBody, renderNotification, renderPagination,
+  renderDefaultInputs
 } from './TableComponents';
 import UploadFileModal from './UploadFileModal';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
@@ -37,6 +39,7 @@ import PaginationChangeType from '../../../types/PaginationChangeType';
 import { postCompositionFile } from '../../../api-service/seedlotAPI';
 
 import './styles.scss';
+import CheckboxType from '../../../types/CheckboxType';
 
 interface ParentTreeStepProps {
   seedlotNumber: string,
@@ -71,6 +74,9 @@ const ParentTreeStep = (
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
   const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));
   const resetFileUploadConfig = () => setFileUploadConfig(structuredClone(fileConfigTemplate));
+  const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
+  const [defaultSMPValue, setDefaultSMPValue] = useState('0');
+  const [defaultContamValue, setDefaultContamValue] = useState('0');
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -265,8 +271,8 @@ const ParentTreeStep = (
         clonedState.tableRowData[parentTreeNumber].coneCount = row.coneCount.toString();
         clonedState.tableRowData[parentTreeNumber].pollenCount = row.pollenCount.toString();
         clonedState.tableRowData[parentTreeNumber].smpSuccessPerc = row.smpSuccess.toString();
-        clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam = row.pollenContamination
-          .toString();
+        clonedState.tableRowData[parentTreeNumber]
+          .nonOrchardPollenContam = row.pollenContamination.toString();
       } else {
         invalidParentTreeNumbers.push(parentTreeNumber);
       }
@@ -294,6 +300,15 @@ const ParentTreeStep = (
       setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
     }
   });
+
+  const applyValueToAll = (field: keyof RowItem, value: string) => {
+    const clonedState = structuredClone(state);
+    const parentTreeNumbers = Object.keys(clonedState.tableRowData);
+    parentTreeNumbers.forEach((number) => {
+      clonedState.tableRowData[number][field] = value;
+    });
+    setStepData(clonedState);
+  };
 
   return (
     <FlexGrid className="parent-tree-step-container">
@@ -332,6 +347,34 @@ const ParentTreeStep = (
                   }
                 </Column>
               </Row>
+              {
+                currentTab === 'successTab'
+                  ? (
+                    <>
+                      <Row className="smp-default-checkbox-row">
+                        <Column>
+                          <Checkbox
+                            id="smp-default-vals-checkbox"
+                            checked={isSMPDefaultValChecked}
+                            labelText={pageText.successTab.defaultCheckBoxDesc}
+                            onChange={
+                              (
+                                _event: React.ChangeEvent<HTMLInputElement>,
+                                { checked }: CheckboxType
+                              ) => {
+                                setIsSMPDefaultValChecked(checked);
+                              }
+                            }
+                          />
+                        </Column>
+                      </Row>
+                      {
+                        renderDefaultInputs(isSMPDefaultValChecked, applyValueToAll)
+                      }
+                    </>
+                  )
+                  : null
+              }
               <Row className="parent-tree-step-table-container">
                 <Column>
                   <TableContainer
