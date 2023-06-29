@@ -17,6 +17,7 @@ import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import getSeedlotInfo from '../../../api-service/seedlotAPI';
+import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -93,6 +94,11 @@ const SeedlotRegistrationForm = () => {
     queryKey: ['seedlot', seedlotNumber],
     queryFn: () => getSeedlotInfo(seedlotNumber),
     refetchOnWindowFocus: false
+  });
+
+  const maleFemaleMethodologyQuery = useQuery({
+    queryKey: ['male-female-methodology'],
+    queryFn: getMaleFemaleMethodology
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -187,6 +193,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
+            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data)}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -257,6 +264,7 @@ const SeedlotRegistrationForm = () => {
                 seedlotInfoQuery.isSuccess
                 && fundingSourcesQuery.isSuccess
                 && paymentMethodsQuery.isSuccess
+                && maleFemaleMethodologyQuery.isSuccess
                 && coneCollectionMethodsQuery.isSuccess
               )
                 ? renderStep()
