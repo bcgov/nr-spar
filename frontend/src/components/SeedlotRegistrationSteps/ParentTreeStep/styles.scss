@@ -163,6 +163,10 @@
       fill: var(--#{vars.$bcgov-prefix}-text-placeholder);
     }
   }
+
+  .#{vars.$bcgov-prefix}--text-input {
+    height: 3rem;
+  }
 }
 
 .parent-tree-table-toggle-menu {
