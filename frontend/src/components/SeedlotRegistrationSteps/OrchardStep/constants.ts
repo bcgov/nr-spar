@@ -30,14 +30,7 @@ export const orcharStepText = {
       invalid: 'Please select an option'
     },
     maleGametic: {
-      label: 'Male gametic contribution methodology',
-      options: {
-        m1: 'M1 - Portion of ramets in orchard',
-        m2: 'M2 - Pollen volume estimate by partial survey',
-        m3: 'M3 - Pollen volume estimate by 100% survey',
-        m4: 'M4 - Ramet proportion by clone',
-        m5: 'M5 - Ramet proportion by age and expected production'
-      }
+      label: 'Male gametic contribution methodology'
     },
     controlledCross: {
       label: 'Was the seedlot produced through controlled crosses?',

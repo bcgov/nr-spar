@@ -37,6 +37,8 @@ const ApiConfig = {
 
   orchardSeedPlan: `${serverHost}/api/orchards`,
 
+  maleFemaleMethodology: `${serverHost}/api/male-female-methodologies`,
+
   /**
    * ORACLE API
    */
