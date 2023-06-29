@@ -35,30 +35,6 @@ export const processOrchards = (orchards: Array<OrchardObj>): Array<OrchardObj> 
   return Object.values(obj);
 };
 
-// Sort parent tree table by clone_number in ASCENDING order
-const sortRowItems = (rows: Array<RowItem>) => (
-  rows.sort((a: RowItem, b: RowItem) => Number(a.clone_number) - Number(b.clone_number))
-);
-
-// Slice row data for pagination
-const sliceRowItems = (rows: Array<RowItem>, pageNumber: number, pageSize: number) => (
-  rows.slice((pageNumber - 1) * pageSize).slice(0, pageSize)
-);
-
-export const sortAndSliceRows = (
-  rows: Array<RowItem>,
-  pageNumber: number,
-  pageSize: number,
-  sliceOnly: boolean
-) => {
-  let sorted = rows;
-  if (!sliceOnly) {
-    sorted = sortRowItems(rows);
-  }
-  const sliced = sliceRowItems(sorted, pageNumber, pageSize);
-  return sliced;
-};
-
 export const combineObjectValues = (objs: Array<InfoSectionConfigType>): Array<InfoDisplayObj> => {
   let combined: Array<InfoDisplayObj> = [];
 

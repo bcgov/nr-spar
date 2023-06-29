@@ -16,10 +16,10 @@ import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import PaginationChangeType from '../../../types/PaginationChangeType';
 import { postCompositionFile } from '../../../api-service/seedlotAPI';
 import CheckboxType from '../../../types/CheckboxType';
 import EmptySection from '../../EmptySection';
+import { sortAndSliceRows, sliceTableRowData, handlePagination } from '../../../utils/PaginationUtils';
 import {
   renderColOptions, renderTableBody, renderNotification,
   renderDefaultInputs, renderPagination
@@ -35,7 +35,7 @@ import {
   TabTypes, HeaderObj, RowItem, RowDataDictType, CompUploadResponse
 } from './definitions';
 import {
-  getTabString, processOrchards, sortAndSliceRows, combineObjectValues,
+  getTabString, processOrchards, combineObjectValues,
   calcAverage, calcSum
 } from './utils';
 
@@ -68,7 +68,7 @@ const ParentTreeStep = (
   const [currPageSize, setCurrPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState<number>(DEFAULT_PAGE_NUMBER);
   const [slicedRows, setSlicedRows] = useState<Array<RowItem>>(
-    sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true)
+    sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true, 'parentTreeNumber')
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(summarySectionConfig));
   const [gwInfoConfig, setGWInfoConfig] = useState(structuredClone(gwSectionConfig));
@@ -99,16 +99,6 @@ const ParentTreeStep = (
     },
     [orchards]
   );
-
-  const sliceTableRowData = (
-    rows: Array<RowItem>,
-    pageNumber: number,
-    pageSize: number,
-    sliceOnly: boolean
-  ) => {
-    const sliced = sortAndSliceRows(rows, pageNumber, pageSize, sliceOnly);
-    setSlicedRows(sliced);
-  };
 
   const calcSummaryItems = () => {
     if (!disableOptions) {
@@ -141,7 +131,14 @@ const ParentTreeStep = (
 
   useEffect(
     () => {
-      sliceTableRowData(Object.values(state.tableRowData), currentPage, currPageSize, true);
+      sliceTableRowData(
+        Object.values(state.tableRowData),
+        currentPage,
+        currPageSize,
+        true,
+        'parentTreeNumber',
+        setSlicedRows
+      );
       calcSummaryItems();
     },
     [state.tableRowData]
@@ -172,7 +169,14 @@ const ParentTreeStep = (
     });
 
     modifiedState.tableRowData = clonedTableRowData;
-    sliceTableRowData(Object.values(clonedTableRowData), currentPage, currPageSize, false);
+    sliceTableRowData(
+      Object.values(clonedTableRowData),
+      currentPage,
+      currPageSize,
+      false,
+      'parentTreeNumber',
+      setSlicedRows
+    );
     setStepData(modifiedState);
   };
 
@@ -236,13 +240,6 @@ const ParentTreeStep = (
       clonedHeaders[optionIndex].enabled = !headerConfig[optionIndex].enabled;
       setHeaderConfig(clonedHeaders);
     }
-  };
-
-  const handlePagination = (paginationObj: PaginationChangeType) => {
-    const { page, pageSize } = paginationObj;
-    setCurrentPage(page);
-    setCurrPageSize(pageSize);
-    sliceTableRowData(Object.values(state.tableRowData), page, pageSize, true);
   };
 
   const cleanTable = () => {
@@ -476,7 +473,15 @@ const ParentTreeStep = (
                     {
                       disableOptions
                         ? <EmptySection title={pageText.emptySection.title} description={getEmptySectionDescription(setStep)} pictogram="CloudyWindy" />
-                        : renderPagination(state, currentTab, currPageSize, handlePagination)
+                        : renderPagination(
+                          state,
+                          currentTab,
+                          currPageSize,
+                          setCurrentPage,
+                          setCurrPageSize,
+                          handlePagination,
+                          setSlicedRows
+                        )
                     }
                   </TableContainer>
                 </Column>

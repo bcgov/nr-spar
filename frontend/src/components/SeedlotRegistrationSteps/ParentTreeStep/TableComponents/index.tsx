@@ -173,19 +173,33 @@ export const renderPagination = (
   state: ParentTreeStepDataObj,
   currentTab: keyof TabTypes,
   currPageSize: number,
-  handlePagination: Function
+  setCurrentPage: Function,
+  setCurrPageSize: Function,
+  handlePagination: Function,
+  setRows: Function
 ) => {
   if (currentTab === 'mixTab') {
     return null;
   }
+  const tableData = Object.values(state.tableRowData);
   return (
     <Pagination
       pageSize={currPageSize}
       pageSizes={pageSizesConfig}
       itemsPerPageText=""
-      totalItems={Object.values(state.tableRowData).length}
+      totalItems={tableData.length}
       onChange={
-        (paginationObj: PaginationChangeType) => handlePagination(paginationObj)
+        (paginationObj: PaginationChangeType) => {
+          handlePagination(
+            paginationObj,
+            setCurrentPage,
+            setCurrPageSize,
+            tableData,
+            true,
+            'parentTreeNumber',
+            setRows
+          );
+        }
       }
     />
   );
