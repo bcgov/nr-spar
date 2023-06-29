@@ -172,6 +172,10 @@ objects:
                 initialDelaySeconds: 20
                 periodSeconds: 30
                 timeoutSeconds: 10
+          volumes:
+            - name: log-storage-${ZONE}
+              persistentVolumeClaim:
+                claimName: log-storage-${ZONE}
   - kind: Service
     apiVersion: v1
     metadata:
