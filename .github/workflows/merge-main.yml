@@ -107,10 +107,7 @@ jobs:
           - name: fluentbit
             file: backend/fluent-bit.cm.yml
             overwrite: true
-            parameters:
-              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
-              -p AWS_KINESIS_STREAM=${{ secrets.AWS_KINESIS_STREAM }}
-              -p AWS_KINESIS_ROLE_ARN=${{ secrets.AWS_KINESIS_ROLE_ARN }}
+            parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
@@ -227,10 +224,7 @@ jobs:
           - name: fluentbit
             file: backend/fluent-bit.cm.yml
             overwrite: true
-            parameters:
-              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
-              -p AWS_KINESIS_STREAM=${{ secrets.AWS_KINESIS_STREAM }}
-              -p AWS_KINESIS_ROLE_ARN=${{ secrets.AWS_KINESIS_ROLE_ARN }}
+            parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
