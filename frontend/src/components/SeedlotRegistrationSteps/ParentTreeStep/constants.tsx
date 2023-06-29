@@ -31,9 +31,10 @@ const getTabDescription = (tabType: string) => (
 );
 
 const getNotificationSubtitle = (tabType: string) => {
-  let downloadName = 'Seedlot composition';
+  let downloadName = 'seedlot composition';
   if (tabType === 'Calculation of SMP mix') {
-    downloadName = tabType;
+    // make the first char lowercase
+    downloadName = tabType.charAt(0).toLowerCase() + tabType.slice(1);
   }
   return (
     <>
