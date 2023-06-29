@@ -20,10 +20,10 @@ parameters:
     required: true
   - name: AWS_KINESIS_STREAM
     description: AWS Kinesis Stream identifier
-    required: true
+    required: false
   - name: AWS_KINESIS_ROLE_ARN
     description: AWS OpenSearch/Kinesis Resource Name
-    required: true
+    required: false
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     value: bcgov/nr-spar-backend:prod-backend
