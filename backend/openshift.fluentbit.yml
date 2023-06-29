@@ -10,7 +10,10 @@ labels:
 parameters:
   - name: NAME
     description: Module name
-    value: nr-spar-fluentbit-backend
+    value: nr-spar-fluentbit
+  - name: COMPONENT
+    description: Component name
+    value: backend
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
@@ -70,16 +73,6 @@ objects:
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       replicas: 1
-      triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - ${NAME}
-            from:
-              kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
