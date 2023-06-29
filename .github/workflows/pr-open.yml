@@ -129,7 +129,7 @@ jobs:
             # triggers: ('common/', 'oracle-api')
             verification_path: "actuator/health"
           - name: fluentbit
-            file: backend/fluent-bit.cm.yml
+            file: backend/openshift.fluentbit.yml
             overwrite: true
             parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
             # triggers: ('backend/')

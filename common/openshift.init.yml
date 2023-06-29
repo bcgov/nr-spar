@@ -66,6 +66,13 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       forest-client-api-key: ${FORESTCLIENTAPI_KEY}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-fluentbit
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
       aws-kinesis-secret-username: ${AWS_KINESIS_USER}
       aws-kinesis-secret-password: ${AWS_KINESIS_PASS}
       aws-kinesis-stream: ${AWS_KINESIS_STREAM}

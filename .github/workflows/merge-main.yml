@@ -105,7 +105,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
           - name: fluentbit
-            file: backend/fluent-bit.cm.yml
+            file: backend/openshift.fluentbit.yml
             overwrite: true
             parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
     steps:
@@ -222,7 +222,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
           - name: fluentbit
-            file: backend/fluent-bit.cm.yml
+            file: backend/openshift.fluentbit.yml
             overwrite: true
             parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
     steps:
