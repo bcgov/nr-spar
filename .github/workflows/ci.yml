@@ -17,32 +17,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests-java-docker:
-    name: Java Docker tests
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        dir: [backend]
-        include:
-          - dir: backend
-            token: SONAR_BACKEND
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Run Docker commands
-        run: |
-          docker build -t ${{ matrix.dir }} --file ./${{ matrix.dir }}/Dockerfile.tests ./${{ matrix.dir }}
-          docker run --rm --name ${{ matrix.dir }} -e SONAR_TOKEN=${{ secrets[matrix.token] }} ${{ matrix.dir }}
-
   tests-java:
     name: Java CI
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        dir: [oracle-api]
+        dir: [backend, oracle-api]
         include:
+          - dir: backend
+            token: SONAR_BACKEND
           - dir: oracle-api
             token: SONAR_ORACLE_API
     steps:

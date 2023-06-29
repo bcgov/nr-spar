@@ -53,6 +53,7 @@
     </profile>
     <profile>
       <id>dev</id>
+
     </profile>
     <profile>
       <id>integration-test</id>
@@ -170,6 +171,12 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
@@ -225,6 +232,9 @@
           <layers>
             <includeLayerTools>false</includeLayerTools>
           </layers>
+          <profiles>
+            <profile>prod</profile>
+          </profiles>
         </configuration>
       </plugin>
 

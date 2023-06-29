@@ -48,7 +48,7 @@ and deploy it.
 
 # Getting started
 
-Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
+Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run -Dspring-boot.run.profiles=dev`
 from the project root directory. You **must** provide three environment variables for database
 access configuration:
 
