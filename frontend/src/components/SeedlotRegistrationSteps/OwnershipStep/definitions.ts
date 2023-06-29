@@ -1,5 +1,4 @@
 import React from 'react';
-
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
@@ -41,11 +40,6 @@ export type StateReturnObj = {
   newOwnerArr: Array<SingleOwnerForm>,
   newValidObj: OwnershipInvalidObj,
   newId?: number
-}
-
-export type CheckBoxValue = {
-  checked: boolean,
-  id: string
 }
 
 export type NumStepperVal = {
