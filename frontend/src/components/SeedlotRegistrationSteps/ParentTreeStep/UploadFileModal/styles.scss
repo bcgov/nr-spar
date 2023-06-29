@@ -23,4 +23,12 @@
   .upload-notification {
     width: 100%;
   }
+
+  .#{vars.$bcgov-prefix}--btn {
+    height: 1rem;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-footer {
+    height: auto;
+  }
 }

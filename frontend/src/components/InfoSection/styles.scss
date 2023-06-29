@@ -1,0 +1,13 @@
+@use '../../theme/variables.scss' as vars;
+
+.info-section-items-row {
+  margin-top: 0.5rem;
+
+  input {
+    cursor: default;
+  }
+
+  .#{vars.$bcgov-prefix}--form-item {
+    margin-top: 2rem;
+  }
+}

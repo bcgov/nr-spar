@@ -15,14 +15,14 @@ import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import {
   SingleOwnerForm,
-  CheckBoxValue,
   NumStepperVal
 } from '../definitions';
 import { inputText, DEFAULT_INDEX, DEFAULT_PAYMENT_INDEX } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/filterUtils';
+import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import CheckboxType from '../../../../types/CheckboxType';
 
 import './styles.scss';
-import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
@@ -55,7 +55,7 @@ const SingleOwnerInfo = ({
                 id="default-agency-code-checkbox"
                 defaultChecked
                 onChange={
-                  (_event: React.ChangeEvent<HTMLInputElement>, { checked }: CheckBoxValue) => {
+                  (_event: React.ChangeEvent<HTMLInputElement>, { checked }: CheckboxType) => {
                     setDefaultAgencyNCode(checked);
                   }
                 }

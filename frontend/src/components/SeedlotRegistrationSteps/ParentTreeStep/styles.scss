@@ -4,21 +4,69 @@
 .parent-tree-step-container {
   padding-left: 0rem;
   padding-right: 0rem;
+  padding-bottom: 3rem;
 
   .parent-tree-step-tab-list {
     margin-left: -1rem;
     border-bottom: 2px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
     width: calc(100% + 1rem);
 
-    .bcgov--tab--list {
+    .#{vars.$bcgov-prefix}--tab--list {
       // Without this the tab list will be pushed up by 2px due to the border bottom above
       margin-bottom: -2px;
     }
   }
+
+  .info-section-desc-row {
+    padding-top: 3rem;
+  }
+
+  .clean-data-modal {
+    .#{vars.$bcgov-prefix}--btn {
+      height: 1rem;
+    }
+
+    .#{vars.$bcgov-prefix}--modal-footer {
+      height: auto;
+    }
+  }
+
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  .smp-default-checkbox-row {
+    margin-top: 2rem;
+  }
+
+  .smp-default-input-row {
+    margin-top: 1rem;
+  }
+
+  .empty-section-container {
+    padding: 5rem;
+    background: var(--#{vars.$bcgov-prefix}-layer-01);
+
+    .empty-section-button {
+      padding: 0;
+      min-height: auto;
+    }
+  }
+
+  .empty-section-icon {
+    color: var(--#{vars.$bcgov-prefix}-border-interactive);
+  }
 }
 
 .parent-tree-tab-container {
-  padding: 2.5rem 0;
+  padding: 2.5rem 0 0.25rem 0;
 
   .description-box-container {
     padding-left: 0;
@@ -70,24 +118,117 @@
     .#{vars.$bcgov-prefix}--text-input:focus {
       background: white;
     }
+  }
 
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
+  .table-header {
+    height: 4rem;
 
-    input[type=number] {
-      -moz-appearance: textfield;
+    th {
+      vertical-align: baseline;
+      padding-top: 1rem;
     }
   }
 
-  .#{vars.$bcgov-prefix}--data-table-content{
+  .#{vars.$bcgov-prefix}--data-table-content {
     overflow: visible;
   }
 
-  .#{vars.$bcgov-prefix}--definition-term{
+  .#{vars.$bcgov-prefix}--overflow-menu--open {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+  }
+
+  .#{vars.$bcgov-prefix}--definition-term {
     border-bottom: none;
     @include type.type-style('heading-compact-01');
   }
+
+  .#{vars.$bcgov-prefix}--popover-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .td-no-padding {
+    padding-left: 0;
+    padding-right: 0;
+
+    .#{vars.$bcgov-prefix}--text-input {
+      padding: 0 1rem;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu__wrapper .#{vars.$bcgov-prefix}--btn--disabled {
+    background: var(--#{vars.$bcgov-prefix}-layer-01);
+
+    .#{vars.$bcgov-prefix}--overflow-menu__icon {
+      fill: var(--#{vars.$bcgov-prefix}-text-placeholder);
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--text-input {
+    height: 3rem;
+  }
+}
+
+.parent-tree-table-toggle-menu {
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+  width: 18rem;
+  // This is to adjust the horizontal offset so the white color are more blended
+  box-shadow: 0 5px 6px var(--#{vars.$bcgov-prefix}--shadow, rgba(0, 0, 0, 0.3));
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn {
+    max-width: none;
+  }
+
+  .#{vars.$bcgov-prefix}--checkbox-label-text {
+    @include type.type-style('body-compact-01');
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options::after {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+  }
+
+  .menu-item-label-text {
+    @include type.type-style('label-01');
+    cursor: default;
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn:focus {
+    z-index: 1;
+  }
+
+  .toggle-category-name:hover {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+
+    .#{vars.$bcgov-prefix}--overflow-menu-options__btn:hover {
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    }
+  }
+}
+
+.parent-tree-table-toggle-menu::after {
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+}
+
+.parent-tree-table-option-menu {
+  width: 12.625rem;
+  // This is to adjust the horizontal offset so the white color are more blended
+  box-shadow: 0 5px 6px var(--#{vars.$bcgov-prefix}--shadow, rgba(0, 0, 0, 0.3));
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn:focus {
+    z-index: 1;
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn {
+    max-width: none;
+    @include type.type-style('body-compact-01');
+  }
+
+  .#{vars.$bcgov-prefix}--checkbox-label-text {
+    @include type.type-style('body-compact-01');
+  }
+}
+
+.parent-tree-table-option-menu::after {
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
 }

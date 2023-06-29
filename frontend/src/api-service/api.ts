@@ -1,11 +1,15 @@
 import axios from 'axios';
 import KeycloakService from '../service/KeycloakService';
 
-const getHeader = () => {
+const getHeader = (useMultipart = false) => {
   const token = KeycloakService.getToken();
-  return {
+  let headers = {
     Authorization: `Bearer ${token}`
   };
+  if (useMultipart) {
+    headers = Object.assign(headers, { 'content-type': 'multipart/form-data' });
+  }
+  return headers;
 };
 
 const api = {
@@ -14,8 +18,8 @@ const api = {
     ...params
   }),
 
-  post: (url: string, data: any) => axios.post(url, data, {
-    headers: getHeader()
+  post: (url: string, data: any, useMultipart = false) => axios.post(url, data, {
+    headers: getHeader(useMultipart)
   }),
 
   put: (url: string, data: any) => axios.put(url, data, {
