@@ -86,6 +86,7 @@ jobs:
             parameters:
               -p BUILD=test
               -p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
+              -p BACKEND_ENV=test
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -203,6 +204,7 @@ jobs:
             parameters:
               -p BUILD=prod
               -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
+              -p BACKEND_ENV=prod
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
