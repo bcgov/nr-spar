@@ -255,6 +255,7 @@ const FormReview = () => {
                 >
                   <div className="form-item">
                     <OrchardStep
+                      gameticOptions={[]}
                       seedlotSpecies={{
                         code: 'POG',
                         description: 'Protect old growth',
