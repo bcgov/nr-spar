@@ -28,7 +28,6 @@ import OrchardDataType from '../../../types/OrchardDataType';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS, orcharStepText } from './constants';
-import FemaleGameticOptions from './data';
 
 import './styles.scss';
 
@@ -39,6 +38,7 @@ type NumStepperVal = {
 
 interface OrchardStepProps {
   seedlotSpecies: MultiOptionsObj
+  gameticOptions: MultiOptionsObj[],
   state: OrchardForm
   setStepData: Function,
   cleanParentTables: Function,
@@ -47,6 +47,7 @@ interface OrchardStepProps {
 
 const OrchardStep = ({
   seedlotSpecies,
+  gameticOptions,
   state,
   setStepData,
   cleanParentTables,
@@ -54,6 +55,9 @@ const OrchardStep = ({
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
+
+  const maleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('m'));
+  const femaleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('f'));
 
   const refControl = useRef<any>({});
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
@@ -323,7 +327,7 @@ const OrchardStep = ({
               id="female-gametic-combobox"
               name="femaleGametic"
               ref={(el: HTMLInputElement) => addRefs(el, 'femaleGametic')}
-              items={isPLISpecies ? FemaleGameticOptions : FemaleGameticOptions.slice(0, -2)}
+              items={isPLISpecies ? femaleGameticOptions : femaleGameticOptions.slice(0, -2)}
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }
@@ -352,31 +356,14 @@ const OrchardStep = ({
                     onChange={(e: string) => maleGameticHandler(e)}
                     valueSelected={state.maleGametic}
                   >
-                    <RadioButton
-                      id="m1-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m1}
-                      value="M1"
-                    />
-                    <RadioButton
-                      id="m2-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m2}
-                      value="M2"
-                    />
-                    <RadioButton
-                      id="m3-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m3}
-                      value="M3"
-                    />
-                    <RadioButton
-                      id="m4-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m4}
-                      value="M4"
-                    />
-                    <RadioButton
-                      id="m5-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m5}
-                      value="M5"
-                    />
+                    {maleGameticOptions.map((item) => (
+                      <RadioButton
+                        key={item.code}
+                        id={`${item.code.toLowerCase()}-radio`}
+                        labelText={item.label}
+                        value={item.code}
+                      />
+                    ))}
                   </RadioButtonGroup>
                 )
                 : (
@@ -388,21 +375,14 @@ const OrchardStep = ({
                     onChange={(e: string) => maleGameticHandler(e)}
                     valueSelected={state.maleGametic}
                   >
-                    <RadioButton
-                      id="m1-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m1}
-                      value="M1"
-                    />
-                    <RadioButton
-                      id="m2-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m2}
-                      value="M2"
-                    />
-                    <RadioButton
-                      id="m3-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m3}
-                      value="M3"
-                    />
+                    {maleGameticOptions.slice(0, -2).map((item) => (
+                      <RadioButton
+                        key={item.code}
+                        id={`${item.code.toLowerCase()}-radio`}
+                        labelText={item.label}
+                        value={item.code}
+                      />
+                    ))}
                   </RadioButtonGroup>
                 )
             }

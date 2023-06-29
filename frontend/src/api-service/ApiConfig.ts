@@ -41,6 +41,8 @@ const ApiConfig = {
 
   uploadSMPMix: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/smp-calculation-table/upload`,
 
+  maleFemaleMethodology: `${serverHost}/api/male-female-methodologies`,
+
   /**
    * ORACLE API
    */
