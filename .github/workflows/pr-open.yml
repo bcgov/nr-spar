@@ -60,7 +60,9 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           file: backend/openshift.fluentbit.yml
           overwrite: true
-          parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
+          parameters:
+            -p NAMESPACE=${{ vars.OC_NAMESPACE }}
+            -p ZONE=${{ github.event.number }}
 
   builds:
     name: Builds
