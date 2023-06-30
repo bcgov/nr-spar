@@ -109,12 +109,12 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-fluentbit
                       key: aws-kinesis-secret-password
-                - name: AWS_KINESIS_STREAM
+                - name: STREAM_NAME
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-fluentbit
                       key: aws-kinesis-stream
-                - name: AWS_KINESIS_ROLE_ARN
+                - name: ROLE_ARN
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-fluentbit
