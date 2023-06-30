@@ -344,7 +344,7 @@ objects:
             Path /logs/postgres-api.log
             Path_Key log_file_path
             Offset_Key event_sequence
-            DB /apps_data/agents/fluent-bit/fluent-bit-logs.db
+            DB /logs/fluent-bit-logs.db
             Read_from_Head True
             Refresh_Interval 15
       spar_parser_parsers.conf: |
