@@ -1,4 +1,5 @@
-FROM node:18.17.0-alpine3.17 AS build
+# Build static files
+FROM node:18.16.1-alpine3.17 AS build
 
 # Build
 WORKDIR /app
@@ -8,19 +9,18 @@ RUN apk add --no-cache python3 g++ make && \
     yarn build:production && \
     rm -rf node_modules
 
-FROM node:18.17.0-alpine3.17 AS deploy
+# Caddy
+FROM caddy:2.6.4-alpine
 
-# Copy and prep app
-WORKDIR /app
-COPY --from=build /app/build/ .
-RUN yarn global add serve@14.2.0 react-inject-env@2.1.0 && \
-    chmod -R g+w .
+# Copy static files and config
+COPY --from=build /app/build/ /app/dist
+COPY Caddyfile /etc/caddy/Caddyfile
 
-# User, port and healthcheck
-USER 1001
+# Packages and caddy format
+RUN apk add --no-cache ca-certificates && \
+    caddy fmt --overwrite /etc/caddy/Caddyfile
+
+# Port, health check and non-root user
 EXPOSE 3000
-HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
-
-# Startup
-CMD react-inject-env set -d . && \
-    serve --no-clipboard --single .
+HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000
+USER 1001
