@@ -138,8 +138,6 @@ objects:
               persistentVolumeClaim:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}-logs
             - name: ${NAME}-${ZONE}-${COMPONENT}-config
-              persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}-configs
               configMap:
                 name: ${NAME}-${ZONE}-${COMPONENT}-configs
                 items:
@@ -170,19 +168,6 @@ objects:
       labels:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}-logs
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: "20Mi"
-      storageClassName: netapp-file-standard
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}-configs
     spec:
       accessModes:
         - ReadWriteMany
