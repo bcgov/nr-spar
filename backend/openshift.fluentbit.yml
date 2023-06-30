@@ -175,19 +175,6 @@ objects:
         requests:
           storage: "20Mi"
       storageClassName: netapp-file-standard
-  #- kind: PersistentVolumeClaim
-  #  apiVersion: v1
-  #  metadata:
-  #    labels:
-  #      app: ${NAME}-${ZONE}
-  #    name: ${NAME}-${ZONE}-${COMPONENT}-configs
-  #  spec:
-  #    accessModes:
-  #      - ReadWriteMany
-  #    resources:
-  #      requests:
-  #        storage: "20Mi"
-  #    storageClassName: netapp-file-standard
   - kind: ConfigMap
     apiVersion: v1
     metadata:
@@ -322,13 +309,13 @@ objects:
 
             return 2, timestamp, new_record
         end
-      outputs.conf: |
+      outputs.conf: >
         [OUTPUT]
             Name  kinesis_streams
             Match *
             region ca-central-1
-            stream $${AWS_KINESIS_STREAM}
-            role_arn $${AWS_KINESIS_ROLE_ARN}
+            stream ${AWS_KINESIS_STREAM}
+            role_arn ${AWS_KINESIS_ROLE_ARN}
             Retry_Limit 3
       parsers.conf: |+
         @INCLUDE generic_json_parsers.conf
