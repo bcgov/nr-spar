@@ -93,6 +93,7 @@ const interimStorageMock = {
 
 const ownershipMock = {
   id: 0,
+  useDefaultAgencyInfo: true,
   ownerAgency: '0032 - Strong Seeds Orchard - SSO',
   ownerCode: '32',
   ownerPortion: '100',
