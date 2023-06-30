@@ -103,6 +103,7 @@ jobs:
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
               -p ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
+              -P BACKEND_ENV=development
             # triggers: ('common/', 'database/', 'backend/')
             verification_path: "actuator/health"
           - name: frontend
