@@ -38,6 +38,7 @@ export const initInterimState = (
   defaultAgency: string,
   defaultCode: string
 ) => ({
+  useCollectorAgencyInfo: true,
   agencyName: defaultAgency,
   locationCode: defaultCode,
   startDate: '',

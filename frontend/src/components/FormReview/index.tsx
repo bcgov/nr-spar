@@ -83,6 +83,7 @@ const orchardMock: OrchardForm = {
 };
 
 const interimStorageMock = {
+  useCollectorAgencyInfo: true,
   agencyName: 'Strong Seeds Orchard - SSO',
   locationCode: '32',
   startDate: '2023/01/04',
