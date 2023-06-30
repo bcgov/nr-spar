@@ -126,21 +126,22 @@ objects:
                 - name: AGENT_NAME
                   value: ${NAME}-${ZONE}
               volumeMounts:
-                - name: log-storage-${ZONE}
+                - name: ${NAME}-${ZONE}-${COMPONENT}-logs
                   mountPath: /logs
-                - name: fluentbit-config-${ZONE}
+                - name: ${NAME}-${ZONE}-${COMPONENT}-configs
                   mountPath: ${FLUENT_CONF_HOME}
                 # TLS cert for connecting to fluentd (enable for TLS)
                 # - mountPath: /fluent-bit/ssl
                 #   name: fluent-bit-tls
           volumes:
-            - name: log-storage-${ZONE}
+            - name: ${NAME}-${ZONE}-${COMPONENT}-logs
               persistentVolumeClaim:
-                claimName: log-storage-${ZONE}
-            # fluent-bit config file
-            - name: fluentbit-config-${ZONE}
+                claimName: ${NAME}-${ZONE}-${COMPONENT}-logs
+            - name: ${NAME}-${ZONE}-${COMPONENT}-config
+              persistentVolumeClaim:
+                claimName: ${NAME}-${ZONE}-${COMPONENT}-configs
               configMap:
-                name: ${NAME}-${ZONE}-fluent-bit-config
+                name: ${NAME}-${ZONE}-${COMPONENT}-configs
                 items:
                   - key: filters.conf
                     path: filters.conf
@@ -163,16 +164,12 @@ objects:
                   - key: timestamp.lua
                     path: timestamp.lua
                 defaultMode: 420
-            # fluent-bit TLS (enable for TLS)
-            # - name: fluent-bit-tls
-            #   secret:
-            #     secretName: fluent-bit-tls
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
       labels:
         app: ${NAME}-${ZONE}
-      name: log-storage-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}-logs
     spec:
       accessModes:
         - ReadWriteMany
@@ -185,7 +182,7 @@ objects:
     metadata:
       labels:
         app: ${NAME}-${ZONE}
-      name: config-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}-configs
     spec:
       accessModes:
         - ReadWriteMany
@@ -196,7 +193,7 @@ objects:
   - kind: ConfigMap
     apiVersion: v1
     metadata:
-      name: ${NAME}-${ZONE}-cm
+      name: ${NAME}-${ZONE}-${COMPONENT}-configs
       namespace: ${NAMESPACE}
     data:
       filters.conf: >
