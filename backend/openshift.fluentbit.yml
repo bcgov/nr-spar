@@ -1,19 +1,14 @@
-apiVersion: v1
+apiVersion: template.openshift.io/v1
 kind: Template
-metadata:
-  name: "${NAME}"
-  annotations:
-    description: "NR SPAR Fluent-bit Config Map"
-    tags: "nr-spar-backend,fluent-bit"
 labels:
-  app: "${NAME}-${ZONE}"
+  app: ${NAME}-${ZONE}
 parameters:
   - name: NAME
-    description: Module name
-    value: nr-spar-fluentbit
+    description: Product name
+    value: nr-spar
   - name: COMPONENT
     description: Component name
-    value: backend
+    value: fluentbit
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
@@ -27,9 +22,6 @@ parameters:
   - name: AWS_KINESIS_ROLE_ARN
     description: AWS OpenSearch/Kinesis Resource Name
     required: false
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    value: bcgov/nr-spar-backend:prod-backend
   - name: FLUENT_CONF_HOME
     description: FluentBit configuration home
     value: "/fluent-bit/etc"
@@ -53,17 +45,6 @@ parameters:
     description: Requested Memory per pod (in gigabytes Gi or megabytes Mi ex. 500Mi)
     displayName: Memory Request
     value: 16Mi
-  # Parameters for file caching
-  - name: FILE_CACHE_VOLUME_CAPACITY
-    description: Volume space available for File Cache
-    displayName: File Cache Volume Capacity (use M or G, not Mi or Gi)
-    required: false
-    value: 100Mi
-  - name: FILE_CACHE_PERSISTENT_VOLUME_CLASS
-    description: The storage class of the volume
-    displayName: Persistent Volume Class name
-    required: false
-    value: netapp-file-standard
 objects:
   - kind: DeploymentConfig
     apiVersion: v1
@@ -153,9 +134,6 @@ objects:
                 # - mountPath: /fluent-bit/ssl
                 #   name: fluent-bit-tls
           volumes:
-            - name: file-cache-data-${ZONE}
-              persistentVolumeClaim:
-                claimName: file-cache-data-${ZONE}
             - name: log-storage-${ZONE}
               persistentVolumeClaim:
                 claimName: log-storage-${ZONE}
@@ -189,19 +167,6 @@ objects:
             # - name: fluent-bit-tls
             #   secret:
             #     secretName: fluent-bit-tls
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: file-cache-data-${ZONE}
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: "${FILE_CACHE_VOLUME_CAPACITY}"
-      storageClassName: ${FILE_CACHE_PERSISTENT_VOLUME_CLASS}
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
@@ -367,13 +332,12 @@ objects:
             Name  kinesis_streams
             Match *
             region ca-central-1
-            stream ${AWS_KINESIS_STREAM}
-            role_arn ${AWS_KINESIS_ROLE_ARN}
+            stream $${AWS_KINESIS_STREAM}
+            role_arn $${AWS_KINESIS_ROLE_ARN}
             Retry_Limit 3
       parsers.conf: |+
         @INCLUDE generic_json_parsers.conf
         @INCLUDE spar/parser/parsers.conf
-
       spar_filter_filters.conf: |
 
         [FILTER]
