@@ -314,8 +314,8 @@ objects:
             Name  kinesis_streams
             Match *
             region ca-central-1
-            stream ${AWS_KINESIS_STREAM}
-            role_arn ${AWS_KINESIS_ROLE_ARN}
+            stream ${STREAM_NAME}
+            role_arn ${ROLE_ARN}
             Retry_Limit 3
       parsers.conf: |+
         @INCLUDE generic_json_parsers.conf
