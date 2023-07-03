@@ -27,3 +27,10 @@
   color: var(--#{vars.$bcgov-prefix}-text-secondary);
   user-select: none;
 }
+
+@media only screen and (max-height: 877px) {
+  .panel-section,
+  .panel-section-light {
+  box-shadow: none
+}
+}
