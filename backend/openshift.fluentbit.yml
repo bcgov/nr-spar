@@ -182,16 +182,15 @@ objects:
       namespace: ${NAMESPACE}
     data:
       filters.conf: >
-
         [FILTER]
-          Name modify
-          Match *
-          Add agent.type fluentbit
-          Add agent.version ${FLUENT_VERSION}
-          Add agent.name ${AGENT_NAME}
-          Add ecs.version 8.4
-          Rename event_sequence event.sequence
-          Rename log_file_path log.file.path
+            Name modify
+            Match *
+            Add agent.type fluentbit
+            Add agent.version ${FLUENT_VERSION}
+            Add agent.name ${AGENT_NAME}
+            Add ecs.version 8.4
+            Rename event_sequence event.sequence
+            Rename log_file_path log.file.path
 
         [FILTER]
             Name lua
@@ -202,9 +201,7 @@ objects:
 
 
         # There is a bug when resolving environment variables with spaces in the value :(
-
         # So, we have to use Lua script for now
-
         # Reference: https://github.com/fluent/fluent-bit/issues/1225
 
         [FILTER]
@@ -213,22 +210,22 @@ objects:
             script ${FLUENT_CONF_HOME}/host_metadata.lua
             time_as_table True
             call add_host_metadata
+
       fluent-bit.conf: |
         [SERVICE]
             Log_Level       info
             Parsers_File    parsers.conf
 
         @INCLUDE spar/input/inputs.conf
-
         @INCLUDE spar/filter/filters.conf
-
-
         @INCLUDE filters.conf
         @INCLUDE outputs.conf
+
       generic_json_parsers.conf: |
         [PARSER]
             Name        generic_json
             Format      json
+
       host_metadata.lua: |
         -- Space delimited values to array
         function sdv2array(s)
@@ -271,7 +268,6 @@ objects:
             host["os"]["kernel"] = os.getenv("HOST_OS_KERNEL")
             host["os"]["full"] = os.getenv("HOST_OS_FULL")
             host["os"]["version"] = os.getenv("HOST_OS_VERSION")
-
             host["ip"] = os.getenv("HOST_IP")
             host["mac"] = os.getenv("HOST_MAC")
             if os.getenv("HOST_NAME") ~= nil then
@@ -309,6 +305,7 @@ objects:
 
             return 2, timestamp, new_record
         end
+
       outputs.conf: >
         [OUTPUT]
             Name  kinesis_streams
@@ -317,11 +314,12 @@ objects:
             stream ${STREAM_NAME}
             role_arn ${ROLE_ARN}
             Retry_Limit 3
+
       parsers.conf: |+
         @INCLUDE generic_json_parsers.conf
         @INCLUDE spar/parser/parsers.conf
-      spar_filter_filters.conf: |
 
+      spar_filter_filters.conf: |
         [FILTER]
             Name lua
             Match spar.*
@@ -335,6 +333,7 @@ objects:
             Add event.kind event
             Add event.category web
             Add @metadata.keyAsPath true
+
       spar_input_inputs.conf: |
         [INPUT]
             Name tail
@@ -347,6 +346,7 @@ objects:
             DB /logs/fluent-bit-logs.db
             Read_from_Head True
             Refresh_Interval 15
+
       spar_parser_parsers.conf: |
         [PARSER]
             Name spar.json
@@ -354,6 +354,7 @@ objects:
             Format json
             Time_Key @timestamp
             Time_Format %Y-%m-%dT%H:%M:%S.%LZ
+
       timestamp.lua: >
         function append_event_created(tag, timestamp, record)
             new_record = record
