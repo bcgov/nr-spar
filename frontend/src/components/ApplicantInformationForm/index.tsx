@@ -67,7 +67,7 @@ const ApplicantInformationForm = () => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: getVegCodes
+    queryFn: () => getVegCodes(true)
   });
 
   const inputChangeHandlerApplicant = (event: React.ChangeEvent<HTMLInputElement>) => {
