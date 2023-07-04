@@ -16,8 +16,8 @@ import { ArrowRight } from '@carbon/icons-react';
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
-import getSeedlotInfo from '../../../api-service/seedlotAPI';
-
+import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
+import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
@@ -93,6 +93,11 @@ const SeedlotRegistrationForm = () => {
     queryKey: ['seedlot', seedlotNumber],
     queryFn: () => getSeedlotInfo(seedlotNumber),
     refetchOnWindowFocus: false
+  });
+
+  const maleFemaleMethodologyQuery = useQuery({
+    queryKey: ['male-female-methodology'],
+    queryFn: getMaleFemaleMethodology
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -187,6 +192,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
+            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data)}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -197,9 +203,11 @@ const SeedlotRegistrationForm = () => {
       case 4:
         return (
           <ParentTreeStep
+            seedlotNumber={seedlotNumber}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.parentTreeStep}
             orchards={allStepData.orchardStep.orchards}
+            setStep={setStep}
             setStepData={(data: any) => setStepData('parentTreeStep', data)}
           />
         );
@@ -257,6 +265,7 @@ const SeedlotRegistrationForm = () => {
                 seedlotInfoQuery.isSuccess
                 && fundingSourcesQuery.isSuccess
                 && paymentMethodsQuery.isSuccess
+                && maleFemaleMethodologyQuery.isSuccess
                 && coneCollectionMethodsQuery.isSuccess
               )
                 ? renderStep()
