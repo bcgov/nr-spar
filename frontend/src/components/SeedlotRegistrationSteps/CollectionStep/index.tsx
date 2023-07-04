@@ -49,21 +49,12 @@ const CollectionStep = (
   };
 
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
-  const [isChecked, setIsChecked] = useState<boolean>(true);
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
   // Commenting this for now until we decide how to deal
   // with the 'other' option
   // const [isOtherChecked, setIsOtherChecked] = useState<boolean | string>(state.other);
 
   const refControl = useRef<any>({});
-
-  useEffect(() => {
-    setStepData({
-      ...state,
-      collectorAgency: defaultAgency,
-      locationCode: defaultCode
-    });
-  }, [defaultAgency, defaultCode]);
 
   const addRefs = (element: HTMLInputElement, name: string) => {
     if (element !== null) {
@@ -118,14 +109,22 @@ const CollectionStep = (
     name: string,
     value: string | string[],
     optName?: string,
-    optValue?: string | string[]
+    optValue?: string | string[],
+    setDefaultAgency?: boolean,
+    checked?: boolean
   ) => {
-    if (optName && optValue && optName !== name) {
-      setStepData({
+    if (optName && optName !== name) {
+      const newState = {
         ...state,
         [name]: value,
         [optName]: optValue
-      });
+      };
+
+      if (setDefaultAgency) {
+        newState.useDefaultAgencyInfo = checked || false;
+      }
+
+      setStepData(newState);
     } else {
       setStepData({
         ...state,
@@ -138,16 +137,20 @@ const CollectionStep = (
     }
   };
 
-  const collectorAgencyIsChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked } = event.target;
-    setIsChecked(checked);
+  useEffect(() => {
+    const useDefault = state.useDefaultAgencyInfo;
+    const agency = useDefault ? defaultAgency : state.collectorAgency;
+    const code = useDefault ? defaultCode : state.locationCode;
+
     handleFormInput(
       fieldsConfig.collector.name,
-      defaultAgency,
+      agency,
       fieldsConfig.code.name,
-      defaultCode
+      code,
+      true,
+      useDefault
     );
-  };
+  }, [defaultAgency, defaultCode]);
 
   const collectionVolumeInformationHandler = (
     name: string,
@@ -204,9 +207,17 @@ const CollectionStep = (
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.checkbox.name)}
             labelText={fieldsConfig.checkbox.labelText}
             readOnly={readOnly}
-            checked={isChecked}
+            checked={state.useDefaultAgencyInfo}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              collectorAgencyIsChecked(e);
+              const { checked } = e.target;
+              handleFormInput(
+                fieldsConfig.collector.name,
+                checked ? defaultAgency : '',
+                fieldsConfig.code.name,
+                checked ? defaultCode : '',
+                true,
+                checked
+              );
             }}
           />
         </Column>
@@ -222,7 +233,7 @@ const CollectionStep = (
             helperText={fieldsConfig.collector.helperText}
             invalidText={fieldsConfig.collector.invalidText}
             items={agencyOptions}
-            readOnly={isChecked || readOnly}
+            readOnly={state.useDefaultAgencyInfo || readOnly}
             selectedItem={state.collectorAgency}
             onChange={(e: ComboBoxEvent) => {
               handleFormInput(
@@ -247,7 +258,7 @@ const CollectionStep = (
             label={fieldsConfig.code.label}
             helperText={fieldsConfig.code.helperText}
             invalidText={fieldsConfig.code.invalidText}
-            readOnly={isChecked || readOnly}
+            readOnly={state.useDefaultAgencyInfo || readOnly}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput(
                 fieldsConfig.code.name,

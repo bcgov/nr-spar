@@ -1,4 +1,5 @@
 export type InterimForm = {
+  useCollectorAgencyInfo: boolean,
   agencyName: string,
   locationCode: string,
   startDate: string,

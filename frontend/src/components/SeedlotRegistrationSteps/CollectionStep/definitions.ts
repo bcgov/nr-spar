@@ -2,6 +2,7 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export interface CollectionForm {
+  useDefaultAgencyInfo: boolean,
   collectorAgency: string,
   locationCode: string,
   startDate: string,
