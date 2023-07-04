@@ -136,34 +136,6 @@ const InterimStorage = (
   const storageLocationInputRef = useRef<HTMLInputElement>(null);
   const storageFacilityTypeInputRef = useRef<HTMLInputElement>(null);
 
-  // const setCollectorAgency = (
-  //   checked: boolean,
-  //   clearInputs?: boolean
-  // ) => {
-  //   if (checked) {
-  //     handleFormInput(
-  //       'agencyName',
-  //       collectorAgency,
-  //       'locationCode',
-  //       collectorCode,
-  //       true,
-  //       checked
-  //     );
-  //   } else {
-  //     const code = clearInputs ? '' : state.locationCode;
-  //     const agency = clearInputs ? '' : state.agencyName;
-
-  //     handleFormInput(
-  //       'agencyName',
-  //       agency,
-  //       'locationCode',
-  //       code,
-  //       true,
-  //       checked
-  //     );
-  //   }
-  // };
-
   useEffect(() => {
     const useDefault = state.useCollectorAgencyInfo;
     const agency = useDefault ? collectorAgency : state.agencyName;
