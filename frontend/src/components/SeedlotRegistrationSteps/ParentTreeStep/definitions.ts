@@ -1,3 +1,5 @@
+import InfoDisplayObj from '../../../types/InfoDisplayObj';
+
 export type TabTypes = {
   coneTab: 'coneTab',
   successTab: 'successTab',
@@ -6,29 +8,30 @@ export type TabTypes = {
 
 export type RowItem = {
   [key: string]: any,
-  cloneNumber: string,
-  cloneCount: number | null,
-  pollenCount: number | null,
-  smpSuccessPerc: number | null,
-  ad: number | null,
-  dfs: number | null,
-  dfu: number | null,
-  dfw: number | null,
-  dsb: number | null,
-  dsc: number | null,
-  gvo: number | null,
-  wdu: number | null,
-  wwd: number | null,
-  dsg: number | null,
-  iws: number | null,
-  nonOrchardPollenContam: number | null,
-  meanDegLat: number | null,
-  meanMinLat: number | null,
-  meanDegLong: number | null,
-  meanMinLong: number | null,
-  meanElevation: number | null,
-  volume: number | null,
-  proportion: number | null
+  parentTreeNumber: string,
+  coneCount: string | null,
+  pollenCount: string | null,
+  smpSuccessPerc: string | null,
+  ad: string | null,
+  dfs: string | null,
+  dfu: string | null,
+  dfw: string | null,
+  dsb: string | null,
+  dsc: string | null,
+  gvo: string | null,
+  wdu: string | null,
+  wwd: string | null,
+  dsg: string | null,
+  iws: string | null,
+  nonOrchardPollenContam: string | null,
+  meanDegLat: string | null,
+  meanMinLat: string | null,
+  meanDegLong: string | null,
+  meanMinLong: string | null,
+  meanElevation: string | null,
+  volume: string | null,
+  proportion: string | null
+  isMixTab: boolean
 };
 
 /**
@@ -62,4 +65,26 @@ export type NotifCtrlType = {
 
 export type GeneticWorthDictType = {
   [key: string]: Array<string>
+}
+
+export type InfoSectionConfigType = {
+  [key: string]: InfoDisplayObj;
+};
+
+export type FileConfigType = {
+  file: File | null,
+  fileName: string,
+  fileAdded: boolean,
+  uploaderStatus: string,
+  errorSub: string,
+  errorMessage: string,
+  invalidFile: boolean
+};
+
+export type CompUploadResponse = {
+  parentTreeNumber: number,
+  coneCount: number,
+  pollenCount: number,
+  smpSuccess: number,
+  pollenContamination: number
 }

@@ -10,7 +10,7 @@ import './styles.scss';
 interface EmptySectionProps {
   icon?: string;
   title: string;
-  description: string;
+  description: string | React.ReactNode;
   pictogram?: string;
 }
 

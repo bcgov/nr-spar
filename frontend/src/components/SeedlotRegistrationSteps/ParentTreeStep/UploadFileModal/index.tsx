@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   ToastNotification,
   Modal,
   FileUploaderDropContainer,
   FileUploaderItem
 } from '@carbon/react';
-
 import textConfig from './constants';
+import { FileConfigType } from '../definitions';
 
 import './styles.scss';
 
@@ -14,23 +14,34 @@ interface UploadFileModalProps {
   open: boolean;
   setOpen: Function;
   onSubmit: Function;
+  fileUploadConfig: FileConfigType;
+  setFileUploadConfig: Function;
+  resetFileUploadConfig: Function;
 }
 
-const UploadFileModal = ({ open, setOpen, onSubmit }: UploadFileModalProps) => {
-  const [file, setFile] = useState<File>();
-  const [fileName, setFileName] = useState<string>('');
-  const [fileAdded, setFileAdded] = useState<boolean>(false);
-  const [uploaderStatus, setUploaderStatus] = useState<string>('uploading');
-  const [errorSub, setErrorSub] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [invalidFile, setInvalidFile] = useState<boolean>(true);
-
-  const resetUploadStatus = () => {
-    setFile(undefined);
-    setFileName('');
-    setFileAdded(false);
-    setUploaderStatus('uploading');
-    setInvalidFile(true);
+const UploadFileModal = (
+  {
+    open, setOpen, onSubmit,
+    fileUploadConfig, setFileUploadConfig, resetFileUploadConfig
+  }: UploadFileModalProps
+) => {
+  const handleAddFile = (e: React.ChangeEvent<HTMLInputElement>, addedFile: File) => {
+    e.stopPropagation();
+    const fileToUpload = addedFile;
+    const newFileUploadConfig = { ...fileUploadConfig };
+    newFileUploadConfig.fileAdded = true;
+    newFileUploadConfig.fileName = fileToUpload.name;
+    if (fileToUpload.type !== 'text/csv') {
+      newFileUploadConfig.errorSub = textConfig.uploadedFileErrorType;
+      newFileUploadConfig.errorMessage = textConfig.uploadedFileErrorMessageType;
+    } else if (fileToUpload.size > 512000) {
+      newFileUploadConfig.errorSub = textConfig.uploadedFileErrorSize;
+      newFileUploadConfig.errorMessage = textConfig.uploadedFileErrorMessageSize;
+    } else {
+      newFileUploadConfig.invalidFile = false;
+      newFileUploadConfig.file = fileToUpload;
+    }
+    setFileUploadConfig(newFileUploadConfig);
   };
 
   return (
@@ -43,14 +54,12 @@ const UploadFileModal = ({ open, setOpen, onSubmit }: UploadFileModalProps) => {
       open={open}
       onRequestClose={() => {
         setOpen(false);
-        resetUploadStatus();
+        resetFileUploadConfig();
       }}
       onRequestSubmit={() => {
-        onSubmit(file);
-        setOpen(false);
-        resetUploadStatus();
+        onSubmit(fileUploadConfig.file);
       }}
-      primaryButtonDisabled={invalidFile}
+      primaryButtonDisabled={fileUploadConfig.invalidFile}
       size="sm"
     >
       <p className="upload-modal-description">
@@ -62,35 +71,25 @@ const UploadFileModal = ({ open, setOpen, onSubmit }: UploadFileModalProps) => {
         accept={['.csv']}
         onAddFiles={
           (e: React.ChangeEvent<HTMLInputElement>, { addedFiles }: any) => {
-            e.stopPropagation();
-            const fileToUpload = addedFiles[0];
-            setFileAdded(true);
-            setFileName(fileToUpload.name);
-            if (fileToUpload.type !== 'text/csv') {
-              setErrorSub(textConfig.uploadedFileErrorType);
-              setErrorMessage(textConfig.uploadedFileErrorMessageType);
-            } else if (fileToUpload.filesize > 512000) {
-              setErrorSub(textConfig.uploadedFileErrorSize);
-              setErrorMessage(textConfig.uploadedFileErrorMessageSize);
-            } else {
-              setInvalidFile(false);
-              setFile(fileToUpload);
-            }
-            setUploaderStatus('edit');
+            handleAddFile(e, addedFiles[0]);
           }
         }
       />
-      { fileAdded && (
-        <FileUploaderItem
-          name={fileName}
-          errorSubject={errorSub}
-          errorBody={errorMessage}
-          invalid={invalidFile}
-          iconDescription={textConfig.uploadedFileIconDesc}
-          status={uploaderStatus}
-          onDelete={() => resetUploadStatus()}
-        />
-      )}
+      {
+        fileUploadConfig.fileAdded
+          ? (
+            <FileUploaderItem
+              name={fileUploadConfig.fileName}
+              errorSubject={fileUploadConfig.errorSub}
+              errorBody={fileUploadConfig.errorMessage}
+              invalid={fileUploadConfig.invalidFile}
+              iconDescription={textConfig.uploadedFileIconDesc}
+              status={fileUploadConfig.uploaderStatus}
+              onDelete={() => resetFileUploadConfig()}
+            />
+          )
+          : null
+      }
       <ToastNotification
         className="upload-notification"
         hideCloseButton
