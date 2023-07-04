@@ -136,36 +136,47 @@ const InterimStorage = (
   const storageLocationInputRef = useRef<HTMLInputElement>(null);
   const storageFacilityTypeInputRef = useRef<HTMLInputElement>(null);
 
-  const setCollectorAgency = (
-    checked: boolean,
-    clearInputs?: boolean
-  ) => {
-    if (checked) {
-      handleFormInput(
-        'agencyName',
-        collectorAgency,
-        'locationCode',
-        collectorCode,
-        true,
-        checked
-      );
-    } else {
-      const code = clearInputs ? '' : state.locationCode;
-      const agency = clearInputs ? '' : state.agencyName;
+  // const setCollectorAgency = (
+  //   checked: boolean,
+  //   clearInputs?: boolean
+  // ) => {
+  //   if (checked) {
+  //     handleFormInput(
+  //       'agencyName',
+  //       collectorAgency,
+  //       'locationCode',
+  //       collectorCode,
+  //       true,
+  //       checked
+  //     );
+  //   } else {
+  //     const code = clearInputs ? '' : state.locationCode;
+  //     const agency = clearInputs ? '' : state.agencyName;
 
-      handleFormInput(
-        'agencyName',
-        agency,
-        'locationCode',
-        code,
-        true,
-        checked
-      );
-    }
-  };
+  //     handleFormInput(
+  //       'agencyName',
+  //       agency,
+  //       'locationCode',
+  //       code,
+  //       true,
+  //       checked
+  //     );
+  //   }
+  // };
 
   useEffect(() => {
-    setCollectorAgency(state.useCollectorAgencyInfo);
+    const useDefault = state.useCollectorAgencyInfo;
+    const agency = useDefault ? collectorAgency : state.agencyName;
+    const code = useDefault ? collectorCode : state.locationCode;
+
+    handleFormInput(
+      'agencyName',
+      agency,
+      'locationCode',
+      code,
+      true,
+      useDefault
+    );
   }, [collectorAgency, collectorCode]);
 
   const inputChangeHandlerRadio = (selected: string) => {
@@ -195,7 +206,14 @@ const InterimStorage = (
             checked={state.useCollectorAgencyInfo}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
-              setCollectorAgency(checked, true);
+              handleFormInput(
+                'agencyName',
+                checked ? collectorAgency : '',
+                'locationCode',
+                checked ? collectorCode : '',
+                true,
+                checked
+              );
             }}
             readOnly={readOnly}
           />
