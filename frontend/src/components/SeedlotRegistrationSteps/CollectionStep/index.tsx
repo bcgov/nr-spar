@@ -137,36 +137,19 @@ const CollectionStep = (
     }
   };
 
-  const setDefaultAgency = (
-    checked: boolean,
-    clearInputs?: boolean
-  ) => {
-    if (checked) {
-      handleFormInput(
-        fieldsConfig.collector.name,
-        defaultAgency,
-        fieldsConfig.code.name,
-        defaultCode,
-        true,
-        checked
-      );
-    } else {
-      const code = clearInputs ? '' : state.locationCode;
-      const agency = clearInputs ? '' : state.collectorAgency;
-
-      handleFormInput(
-        fieldsConfig.collector.name,
-        agency,
-        fieldsConfig.code.name,
-        code,
-        true,
-        checked
-      );
-    }
-  };
-
   useEffect(() => {
-    setDefaultAgency(state.useDefaultAgencyInfo);
+    const useDefault = state.useDefaultAgencyInfo;
+    const agency = useDefault ? defaultAgency : state.collectorAgency;
+    const code = useDefault ? defaultCode : state.locationCode;
+
+    handleFormInput(
+      fieldsConfig.collector.name,
+      agency,
+      fieldsConfig.code.name,
+      code,
+      true,
+      useDefault
+    );
   }, [defaultAgency, defaultCode]);
 
   const collectionVolumeInformationHandler = (
@@ -227,7 +210,14 @@ const CollectionStep = (
             checked={state.useDefaultAgencyInfo}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
-              setDefaultAgency(checked, true);
+              handleFormInput(
+                fieldsConfig.collector.name,
+                checked ? defaultAgency : '',
+                fieldsConfig.code.name,
+                checked ? defaultCode : '',
+                true,
+                checked
+              );
             }}
           />
         </Column>
