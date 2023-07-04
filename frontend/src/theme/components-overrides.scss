@@ -125,7 +125,7 @@
 }
 
 nav.#{variables.$bcgov-prefix}--side-nav {
-  box-shadow: inset -1px 0 0 colors.$gray-20;
+  border-right: 1px solid colors.$gray-20;
   background-color: var(--bcgov-background-left-panel);
 }
 
