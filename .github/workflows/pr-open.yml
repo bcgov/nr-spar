@@ -92,7 +92,7 @@ jobs:
             file: database/openshift.deploy.yml
             parameters: -p DB_PVC_SIZE=128Mi
             overwrite: false
-            triggers: ('common/', 'database/')
+            triggers: ('common/', 'database/', 'backend', 'frontend')
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
