@@ -92,7 +92,7 @@ jobs:
             file: database/openshift.deploy.yml
             parameters: -p DB_PVC_SIZE=128Mi
             overwrite: false
-            triggers: ('common/', 'database/')
+            triggers: ('common/' 'database/' 'backend' 'frontend')
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
@@ -101,7 +101,7 @@ jobs:
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
               -p ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
-            triggers: ('common/', 'database/', 'backend/')
+            triggers: ('common/' 'database/' 'backend/')
             verification_path: "actuator/health"
           - name: frontend
             file: frontend/openshift.deploy.yml
@@ -116,7 +116,7 @@ jobs:
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-            triggers: ('common/', 'database/', 'backend/', 'frontend/')
+            triggers: ('common/' 'database/' 'backend/' 'frontend/')
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -124,7 +124,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-            triggers: ('common/', 'oracle-api')
+            triggers: ('common/' 'oracle-api')
             verification_path: "actuator/health"
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.1.1
