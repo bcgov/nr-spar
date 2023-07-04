@@ -10,6 +10,7 @@ export const initCollectionState = (
   defaultAgency: string,
   defaultCode: string
 ) => ({
+  useDefaultAgencyInfo: true,
   collectorAgency: defaultAgency,
   locationCode: defaultCode,
   startDate: '',
@@ -37,6 +38,7 @@ export const initInterimState = (
   defaultAgency: string,
   defaultCode: string
 ) => ({
+  useCollectorAgencyInfo: true,
   agencyName: defaultAgency,
   locationCode: defaultCode,
   startDate: '',
@@ -80,10 +82,12 @@ export const initExtractionStorageState = (
   defaultCode: string
 ) => (
   {
+    extractoryUseTSC: true,
     extractoryAgency: defaultAgency,
     extractoryLocationCode: defaultCode,
     extractionStartDate: '',
     extractionEndDate: '',
+    seedStorageUseTSC: true,
     seedStorageAgency: defaultAgency,
     seedStorageLocationCode: defaultCode,
     seedStorageStartDate: '',

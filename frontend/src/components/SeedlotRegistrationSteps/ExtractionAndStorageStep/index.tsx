@@ -50,23 +50,21 @@ const ExtractionAndStorage = (
   }: ExtractionAndStorageProps
 ) => {
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
-  const [isExtractorChecked, setIsExtractorChecked] = useState<boolean>(true);
-  const [isStorageChecked, setIsStorageChecked] = useState<boolean>(true);
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
 
-  const validateInput = (name: string, value: string) => {
+  const validateInput = (name: string, value: string | boolean) => {
     const newValidObj = { ...validationObj };
     let isInvalid = false;
     switch (name) {
       case 'extractoryLocationCode':
-        if (value.length !== 2) {
+        if (typeof value === 'string' && value.length !== 2) {
           isInvalid = true;
         }
         newValidObj.isExtractorCodeInvalid = isInvalid;
         break;
       case 'seedStorageLocationCode':
-        if (value.length !== 2) {
+        if (typeof value === 'string' && value.length !== 2) {
           isInvalid = true;
         }
         newValidObj.isStorageCodeInvalid = isInvalid;
@@ -104,35 +102,37 @@ const ExtractionAndStorage = (
 
   const handleFormInput = (
     name: keyof ExtractionStorage,
-    value: string,
+    value: string | boolean,
     optName?: keyof ExtractionStorage,
-    optValue?: string
+    optValue?: string | boolean,
+    tscAgency?: string,
+    checked?: boolean
   ) => {
-    const newForm = { ...state };
-    newForm[name] = value;
-    if (optName && optValue && optName !== name) {
-      newForm[optName] = optValue;
+    if (optName && optName !== name) {
+      let newState = {
+        ...state,
+        [name]: value,
+        [optName]: optValue
+      };
+
+      if (tscAgency) {
+        newState = {
+          ...newState,
+          [tscAgency]: checked
+        };
+      }
+
+      setStepData(newState);
+    } else {
+      setStepData({
+        ...state,
+        [name]: value
+      });
     }
-    setStepData(newForm);
+
     validateInput(name, value);
     if (optName && optValue) {
       validateInput(optName, optValue);
-    }
-  };
-
-  const extractorIsChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked } = event.target;
-    setIsExtractorChecked(checked);
-    if (checked) {
-      handleFormInput('extractoryAgency', defaultAgency, 'extractoryLocationCode', defaultCode);
-    }
-  };
-
-  const storageIsChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked } = event.target;
-    setIsStorageChecked(checked);
-    if (checked) {
-      handleFormInput('seedStorageAgency', defaultAgency, 'seedStorageLocationCode', defaultCode);
     }
   };
 
@@ -150,9 +150,19 @@ const ExtractionAndStorage = (
             id="extractory-agency-tsc-checkbox"
             name="extractory-agency-tsc"
             labelText={inputText.extractorCheckbox.labelText}
-            defaultChecked
+            checked={state.extractoryUseTSC}
             readOnly={readOnly}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => extractorIsChecked(e)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const { checked } = e.target;
+              handleFormInput(
+                'extractoryAgency',
+                checked ? defaultAgency : '',
+                'extractoryLocationCode',
+                checked ? defaultCode : '',
+                'extractoryUseTSC',
+                checked
+              );
+            }}
           />
         </Column>
       </Row>
@@ -163,7 +173,7 @@ const ExtractionAndStorage = (
             ref={extractorNameInputRef}
             name="extractory-agency"
             helperText={inputText.extractor.helperText}
-            readOnly={readOnly ?? isExtractorChecked}
+            readOnly={readOnly ?? state.extractoryUseTSC}
             onChange={(e: ComboBoxEvent) => { handleFormInput('extractoryAgency', e.selectedItem); }}
             selectedItem={state.extractoryAgency}
             shouldFilterItem={
@@ -186,7 +196,7 @@ const ExtractionAndStorage = (
             helperText={inputText.extractorCode.helperText}
             invalid={validationObj.isExtractorCodeInvalid}
             invalidText={inputText.extractorCode.invalidText}
-            readOnly={readOnly ?? isExtractorChecked}
+            readOnly={readOnly ?? state.extractoryUseTSC}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput('extractoryLocationCode', e.target.value);
             }}
@@ -212,7 +222,7 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={validationObj.isExtractorStartDateInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={isExtractorChecked}
+              disabled={state.extractoryUseTSC}
             />
           </DatePicker>
         </Column>
@@ -234,12 +244,12 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={validationObj.isExtractorEndDateInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={isExtractorChecked}
+              disabled={state.extractoryUseTSC}
             />
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {isExtractorChecked && !readOnly && isExtractorHintOpen && (
+          {state.extractoryUseTSC && !readOnly && isExtractorHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"
@@ -262,9 +272,19 @@ const ExtractionAndStorage = (
             id="seed-storage-agency-tsc-checkbox"
             name="seed-storage-agency-tsc"
             labelText={inputText.storageCheckbox.labelText}
-            defaultChecked
+            checked={state.seedStorageUseTSC}
             readOnly={readOnly}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => storageIsChecked(e)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const { checked } = e.target;
+              handleFormInput(
+                'seedStorageAgency',
+                checked ? defaultAgency : '',
+                'seedStorageLocationCode',
+                checked ? defaultCode : '',
+                'seedStorageUseTSC',
+                checked
+              );
+            }}
           />
         </Column>
       </Row>
@@ -282,7 +302,7 @@ const ExtractionAndStorage = (
             }
             titleText={inputText.storage.titleText}
             placeholder={inputText.storage.placeholder}
-            readOnly={isStorageChecked || readOnly}
+            readOnly={state.seedStorageUseTSC}
             items={agencyOptions}
             invalid={validationObj.isStorageNameInvalid}
           />
@@ -298,7 +318,7 @@ const ExtractionAndStorage = (
             helperText={inputText.storageCode.helperText}
             invalid={validationObj.isStorageCodeInvalid}
             invalidText={inputText.storageCode.invalidText}
-            readOnly={isStorageChecked || readOnly}
+            readOnly={readOnly || state.seedStorageUseTSC}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput('seedStorageLocationCode', e.target.value);
             }}
@@ -324,7 +344,7 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={validationObj.isStorageStartDateInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={isStorageChecked}
+              disabled={state.seedStorageUseTSC}
             />
           </DatePicker>
         </Column>
@@ -346,12 +366,12 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={validationObj.isStorageEndDateInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={isStorageChecked}
+              disabled={state.seedStorageUseTSC}
             />
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {isStorageChecked && !readOnly && isStorageHintOpen && (
+          {state.seedStorageUseTSC && !readOnly && isStorageHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"

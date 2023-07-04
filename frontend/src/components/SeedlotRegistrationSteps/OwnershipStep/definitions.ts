@@ -12,6 +12,7 @@ export type AccordionCtrlObj = {
 
 export type SingleOwnerForm = {
   id: number,
+  useDefaultAgencyInfo: boolean,
   ownerAgency: string,
   ownerCode: string,
   ownerPortion: string,

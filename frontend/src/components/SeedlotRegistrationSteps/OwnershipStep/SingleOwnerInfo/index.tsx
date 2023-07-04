@@ -31,6 +31,7 @@ interface SingleOwnerInfoProps {
   addAnOwner: Function,
   deleteAnOwner: Function,
   setDefaultAgencyNCode: Function,
+  useDefaultAgency: boolean,
   validationProp: FormInvalidationObj | null,
   agencyOptions: Array<string>,
   fundingSources: Array<MultiOptionsObj>,
@@ -42,7 +43,7 @@ interface SingleOwnerInfoProps {
 const SingleOwnerInfo = ({
   addRefs, ownerInfo, agencyOptions, fundingSources, methodsOfPayment, disableInputs,
   validationProp, handleInputChange, addAnOwner, deleteAnOwner, setDefaultAgencyNCode,
-  readOnly
+  useDefaultAgency, readOnly
 }: SingleOwnerInfoProps) => (
   <div className="single-owner-info-container">
     <FlexGrid fullWidth>
@@ -53,7 +54,7 @@ const SingleOwnerInfo = ({
               <Checkbox
                 labelText={inputText.checkbox.labelText}
                 id="default-agency-code-checkbox"
-                defaultChecked
+                checked={useDefaultAgency}
                 onChange={
                   (_event: React.ChangeEvent<HTMLInputElement>, { checked }: CheckboxType) => {
                     setDefaultAgencyNCode(checked);
