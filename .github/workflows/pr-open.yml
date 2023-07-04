@@ -49,7 +49,7 @@ jobs:
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
-          triggers: ('common/', 'backend/', 'frontend/', 'oracle-api/')
+          triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
 
   builds:
     name: Builds
