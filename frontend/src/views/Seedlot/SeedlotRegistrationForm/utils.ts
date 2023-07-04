@@ -82,10 +82,12 @@ export const initExtractionStorageState = (
   defaultCode: string
 ) => (
   {
+    extractoryUseTSC: true,
     extractoryAgency: defaultAgency,
     extractoryLocationCode: defaultCode,
     extractionStartDate: '',
     extractionEndDate: '',
+    seedStorageUseTSC: true,
     seedStorageAgency: defaultAgency,
     seedStorageLocationCode: defaultCode,
     seedStorageStartDate: '',

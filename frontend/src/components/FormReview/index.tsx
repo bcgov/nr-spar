@@ -126,10 +126,12 @@ const collectionMock = {
 };
 
 const extractionMock = {
+  extractoryUseTSC: true,
   extractoryAgency: 'Yellow point lodge LTD.',
   extractoryLocationCode: '00',
   extractionStartDate: '2023/01/20',
   extractionEndDate: '2023/03/18',
+  seedStorageUseTSC: true,
   seedStorageAgency: 'Yellow point lodge LTD.',
   seedStorageLocationCode: '00',
   seedStorageStartDate: '2023/01/20',
