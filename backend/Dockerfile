@@ -8,7 +8,7 @@ COPY src ./src
 COPY .mvn/ ./.mvn
 
 # Build
-RUN ./mvnw package -Pnative -Dtests.skip=true
+RUN ./mvnw package -Pnative -DskipTests
 
 
 ### Deployer
