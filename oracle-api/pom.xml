@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.6</version>
+		<version>3.1.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ca.bc.gov</groupId>
@@ -377,4 +377,28 @@
 		<finalName>nr-spar-oracle-api</finalName>
 	</build>
 
+  <!-- 
+    Issue:
+    - spring-boot-starter-oauth2-client (v3.1.1-latest) depends on
+      - spring-security-oauth2-client (v6.1.1-latest) depends on
+        - oauth2-oidc-sdk (v10.10.1-latest) depends on
+          - nimbus-jose-jwt (v9.30.2 NOT THE LATESTE)
+
+    conficts with:
+    - spring-boot-starter-oauth2-client (v3.1.1-latest) depends on
+      - spring-security-oauth2-jose (v6.1.1-latest) depends on
+        - nimbus-jose-jwt (v9.31 LATEST)
+
+    Forcing oauth2-oidc-sdk to update its dependency nimbus-jose-jwt to version 9.31
+    solves the issue, for now.
+  -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>9.31</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>
