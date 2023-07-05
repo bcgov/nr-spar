@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 /** This repository class contains methods to retrieve Orchards from the database. */
 public interface OrchardRepository extends JpaRepository<Orchard, String> {
 
-  @Query("from Orchard o where o.stageCode != 'RET' and o.id = ?1")
+  @Query("from Orchard o where o.stageCode <> 'RET' and o.id = ?1")
   Optional<Orchard> findNotRetiredById(String id);
 }
