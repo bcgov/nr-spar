@@ -37,6 +37,7 @@ services:
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
     ports:
       - "8090:8090"
+      - "5005:5005"
     build:
       context: ./backend
       dockerfile: Dockerfile.local
