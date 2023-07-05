@@ -1,6 +1,8 @@
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export interface CollectionForm {
+  useDefaultAgencyInfo: boolean,
   collectorAgency: string,
   locationCode: string,
   startDate: string,
@@ -8,23 +10,17 @@ export interface CollectionForm {
   numberOfContainers: string,
   volumePerContainers: string,
   volumeOfCones: string,
-  aerialRanking: boolean,
-  aerialClippingTopping: boolean,
-  felledTrees: boolean,
-  climbing: boolean,
-  squirrelCache: boolean,
-  ground: boolean,
-  squirrelHarvesting: boolean,
-  other: boolean,
-  collectionMethodName: string,
-  comments: string,
+  selectedCollectionCodes: string[],
+  comments: string
 }
+
 export interface CollectionStepProps {
   state: CollectionForm,
   setStepData: Function,
   defaultAgency: string,
   defaultCode: string,
   agencyOptions: Array<string>,
+  collectionMethods: Array<MultiOptionsObj>,
   readOnly?: boolean,
   invalidateObj?:FormInvalidationObj
 }

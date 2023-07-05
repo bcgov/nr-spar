@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import moment from 'moment';
 
 import {
@@ -18,6 +18,7 @@ import Subtitle from '../../Subtitle';
 import { FilterObj, filterInput } from '../../../utils/filterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import InterimForm from './definitions';
+
 import './styles.scss';
 
 const DATE_FORMAT = 'Y/m/d';
@@ -25,8 +26,8 @@ const DATE_FORMAT = 'Y/m/d';
 interface InterimStorageStepProps {
   state: InterimForm,
   setStepData: Function,
-  defaultAgency: string,
-  defaultCode: string,
+  collectorAgency: string,
+  collectorCode: string,
   agencyOptions: Array<string>,
   readOnly?: boolean
 }
@@ -35,8 +36,8 @@ const InterimStorage = (
   {
     state,
     setStepData,
-    defaultAgency,
-    defaultCode,
+    collectorAgency,
+    collectorCode,
     agencyOptions,
     readOnly
   }: InterimStorageStepProps
@@ -101,14 +102,29 @@ const InterimStorage = (
     name: keyof InterimForm,
     value: string,
     optName?: keyof InterimForm,
-    optValue?: string
+    optValue?: string,
+    setCollectorAgency?: boolean,
+    checked?: boolean
   ) => {
-    const newForm = { ...state };
-    newForm[name] = value;
-    if (optName && optValue && optName !== name) {
-      newForm[optName] = optValue;
+    if (optName && optName !== name) {
+      const newState = {
+        ...state,
+        [name]: value,
+        [optName]: optValue
+      };
+
+      if (setCollectorAgency) {
+        newState.useCollectorAgencyInfo = checked || false;
+      }
+
+      setStepData(newState);
+    } else {
+      setStepData({
+        ...state,
+        [name]: value
+      });
     }
-    setStepData(newForm);
+
     validateInput(name, value);
     if (optName && optValue) {
       validateInput(optName, optValue);
@@ -120,15 +136,20 @@ const InterimStorage = (
   const storageLocationInputRef = useRef<HTMLInputElement>(null);
   const storageFacilityTypeInputRef = useRef<HTMLInputElement>(null);
 
-  const [isChecked, setIsChecked] = useState<boolean>(true);
+  useEffect(() => {
+    const useDefault = state.useCollectorAgencyInfo;
+    const agency = useDefault ? collectorAgency : state.agencyName;
+    const code = useDefault ? collectorCode : state.locationCode;
 
-  const interimAgencyIsChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked } = event.target;
-    setIsChecked(checked);
-    if (checked) {
-      handleFormInput('agencyName', defaultAgency, 'locationCode', defaultCode);
-    }
-  };
+    handleFormInput(
+      'agencyName',
+      agency,
+      'locationCode',
+      code,
+      true,
+      useDefault
+    );
+  }, [collectorAgency, collectorCode]);
 
   const inputChangeHandlerRadio = (selected: string) => {
     if (selected === 'OTH') {
@@ -153,9 +174,19 @@ const InterimStorage = (
           <Checkbox
             id="interim-agency-checkbox"
             name="interim-agency"
-            labelText="Use applicant agency as interim storage agency"
-            defaultChecked
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => interimAgencyIsChecked(e)}
+            labelText="Use collector agency as interim storage agency"
+            checked={state.useCollectorAgencyInfo}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const { checked } = e.target;
+              handleFormInput(
+                'agencyName',
+                checked ? collectorAgency : '',
+                'locationCode',
+                checked ? collectorCode : '',
+                true,
+                checked
+              );
+            }}
             readOnly={readOnly}
           />
         </Column>
@@ -176,7 +207,7 @@ const InterimStorage = (
             placeholder="Select Interim agency name"
             items={agencyOptions}
             invalid={validationObj.isNameInvalid}
-            readOnly={readOnly ?? isChecked}
+            readOnly={readOnly ?? state.useCollectorAgencyInfo}
           />
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
@@ -193,7 +224,7 @@ const InterimStorage = (
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput('locationCode', e.target.value);
             }}
-            readOnly={readOnly ?? isChecked}
+            readOnly={readOnly ?? state.useCollectorAgencyInfo}
           />
         </Column>
       </Row>

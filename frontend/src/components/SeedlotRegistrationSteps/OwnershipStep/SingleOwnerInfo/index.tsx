@@ -11,18 +11,18 @@ import {
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
 
-import DropDownObj from '../../../../types/DropDownObject';
+import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import {
   SingleOwnerForm,
-  CheckBoxValue,
   NumStepperVal
 } from '../definitions';
 import { inputText, DEFAULT_INDEX, DEFAULT_PAYMENT_INDEX } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/filterUtils';
+import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import CheckboxType from '../../../../types/CheckboxType';
 
 import './styles.scss';
-import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
@@ -31,10 +31,11 @@ interface SingleOwnerInfoProps {
   addAnOwner: Function,
   deleteAnOwner: Function,
   setDefaultAgencyNCode: Function,
+  useDefaultAgency: boolean,
   validationProp: FormInvalidationObj | null,
   agencyOptions: Array<string>,
-  fundingSources: Array<DropDownObj>,
-  methodsOfPayment: Array<DropDownObj>,
+  fundingSources: Array<MultiOptionsObj>,
+  methodsOfPayment: Array<MultiOptionsObj>,
   addRefs: Function,
   readOnly?: boolean,
 }
@@ -42,7 +43,7 @@ interface SingleOwnerInfoProps {
 const SingleOwnerInfo = ({
   addRefs, ownerInfo, agencyOptions, fundingSources, methodsOfPayment, disableInputs,
   validationProp, handleInputChange, addAnOwner, deleteAnOwner, setDefaultAgencyNCode,
-  readOnly
+  useDefaultAgency, readOnly
 }: SingleOwnerInfoProps) => (
   <div className="single-owner-info-container">
     <FlexGrid fullWidth>
@@ -53,9 +54,9 @@ const SingleOwnerInfo = ({
               <Checkbox
                 labelText={inputText.checkbox.labelText}
                 id="default-agency-code-checkbox"
-                defaultChecked
+                checked={useDefaultAgency}
                 onChange={
-                  (_event: React.ChangeEvent<HTMLInputElement>, { checked }: CheckBoxValue) => {
+                  (_event: React.ChangeEvent<HTMLInputElement>, { checked }: CheckboxType) => {
                     setDefaultAgencyNCode(checked);
                   }
                 }

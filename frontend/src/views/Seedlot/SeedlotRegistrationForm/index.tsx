@@ -15,17 +15,23 @@ import { ArrowRight } from '@carbon/icons-react';
 
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
-import getSeedlotInfo from '../../../api-service/seedlotAPI';
+import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
+import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
+import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
-import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
-import InterimStorage from '../../../components/SeedlotRegistrationSteps/InterimStep';
-import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
-import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
+import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
+import InterimStorage from '../../../components/SeedlotRegistrationSteps/InterimStep';
+import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
+import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
-import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
+import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
+
+import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
+import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
+import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { AllStepData, AllStepInvalidationObj, FormInvalidationObj } from './definitions';
 import {
   initCollectionState,
@@ -37,15 +43,11 @@ import {
   initOwnerShipInvalidState,
   initParentTreeState
 } from './utils';
-import { getDropDownList } from '../../../utils/DropDownUtils';
-import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/utils';
-import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
+import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
-import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
+
 import './styles.scss';
 
-const defaultCode = '16';
-const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
 const agencyOptions = [
   '0032 - Strong Seeds Orchard - SSO',
   '0035 - Weak Seeds Orchard - WSO',
@@ -62,6 +64,16 @@ const SeedlotRegistrationForm = () => {
 
   const [formStep, setFormStep] = useState<number>(0);
 
+  // Initialize all step's state here
+  const [allStepData, setAllStepData] = useState<AllStepData>({
+    collectionStep: initCollectionState('', ''),
+    interimStep: initInterimState('', ''),
+    ownershipStep: [initOwnershipState('', '')],
+    orchardStep: initOrchardState(),
+    parentTreeStep: initParentTreeState(),
+    extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
+  });
+
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
     queryFn: getFundingSources
@@ -72,19 +84,20 @@ const SeedlotRegistrationForm = () => {
     queryFn: getPaymentMethods
   });
 
-  const seedlotInfoQuery = useQuery({
-    queryKey: ['seedlot', seedlotNumber],
-    queryFn: () => getSeedlotInfo(seedlotNumber)
+  const coneCollectionMethodsQuery = useQuery({
+    queryKey: ['cone-collection-methods'],
+    queryFn: getConeCollectionMethod
   });
 
-  // Initialize all step's state here
-  const [allStepData, setAllStepData] = useState<AllStepData>({
-    collectionStep: initCollectionState(defaultAgency, defaultCode),
-    interimStep: initInterimState(defaultAgency, defaultCode),
-    ownershipStep: [initOwnershipState(defaultAgency, defaultCode)],
-    orchardStep: initOrchardState(),
-    parentTreeStep: initParentTreeState(),
-    extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
+  const seedlotInfoQuery = useQuery({
+    queryKey: ['seedlot', seedlotNumber],
+    queryFn: () => getSeedlotInfo(seedlotNumber),
+    refetchOnWindowFocus: false
+  });
+
+  const maleFemaleMethodologyQuery = useQuery({
+    queryKey: ['male-female-methodology'],
+    queryFn: getMaleFemaleMethodology
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -127,6 +140,9 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
+    const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
+    const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
+
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
       label: '',
@@ -141,6 +157,7 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
+            collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
             // invalidateObj={allInvalidationObj.collectionStep}
             setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
           />
@@ -154,8 +171,8 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
-            fundingSources={getDropDownList(fundingSourcesQuery.data)}
-            paymentMethods={getDropDownList(paymentMethodsQuery.data)}
+            fundingSources={getMultiOptList(fundingSourcesQuery.data)}
+            paymentMethods={getMultiOptList(paymentMethodsQuery.data)}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
             setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
@@ -165,8 +182,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            defaultAgency={defaultAgency}
-            defaultCode={defaultCode}
+            collectorAgency={allStepData.collectionStep.collectorAgency}
+            collectorCode={allStepData.collectionStep.locationCode}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />
@@ -175,6 +192,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
+            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data)}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -185,9 +203,11 @@ const SeedlotRegistrationForm = () => {
       case 4:
         return (
           <ParentTreeStep
+            seedlotNumber={seedlotNumber}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.parentTreeStep}
             orchards={allStepData.orchardStep.orchards}
+            setStep={setStep}
             setStepData={(data: any) => setStepData('parentTreeStep', data)}
           />
         );
@@ -245,6 +265,8 @@ const SeedlotRegistrationForm = () => {
                 seedlotInfoQuery.isSuccess
                 && fundingSourcesQuery.isSuccess
                 && paymentMethodsQuery.isSuccess
+                && maleFemaleMethodologyQuery.isSuccess
+                && coneCollectionMethodsQuery.isSuccess
               )
                 ? renderStep()
                 : <Loading />

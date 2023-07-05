@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Accordion,
   AccordionItem
@@ -6,7 +6,7 @@ import {
 
 import TitleAccordion from '../../TitleAccordion';
 import SingleOwnerInfo from './SingleOwnerInfo';
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {
   StateReturnObj,
@@ -43,8 +43,8 @@ interface OwnershipStepProps {
   invalidState: OwnershipInvalidObj,
   setInvalidState: Function,
   readOnly?: boolean,
-  fundingSources: Array<DropDownObj>,
-  paymentMethods: Array<DropDownObj>
+  fundingSources: Array<MultiOptionsObj>,
+  paymentMethods: Array<MultiOptionsObj>
 }
 
 /*
@@ -139,7 +139,9 @@ const OwnershipStep = (
     name: string,
     value: string,
     optionalName?: string,
-    optionalValue?: string
+    optionalValue?: string,
+    setDefaultAgency?: boolean,
+    checked?: boolean
   ) => {
     const updatedArray = [...state];
     /*
@@ -158,6 +160,14 @@ const OwnershipStep = (
         [name]: value,
         [optionalName]: optionalValue
       };
+
+      // The default agency will only be set when setting an optional name
+      // so the check is only necessary here
+      if (setDefaultAgency) {
+        // To set the correct value to the useDefaultAgencyInfo field, just
+        // need to check the value that is being assigned
+        updatedArray[id].useDefaultAgencyInfo = checked || false;
+      }
     } else {
       updatedArray[id] = {
         ...updatedArray[id],
@@ -224,15 +234,37 @@ const OwnershipStep = (
     setInvalidState(newValidObj);
   };
 
-  const setDefaultAgencyNCode = (checked: boolean) => {
+  const setDefaultAgencyNCode = (checked: boolean, clearInputs?: boolean) => {
     if (checked) {
-      handleInputChange(DEFAULT_INDEX, 'ownerCode', defaultCode, 'ownerAgency', defaultAgency);
+      handleInputChange(
+        DEFAULT_INDEX,
+        'ownerCode',
+        defaultCode,
+        'ownerAgency',
+        defaultAgency,
+        true,
+        checked
+      );
       setDisableInputs(true);
     } else {
-      handleInputChange(DEFAULT_INDEX, 'ownerCode', '', 'ownerAgency', '');
+      const code = clearInputs ? '' : state[DEFAULT_INDEX].ownerCode;
+      const agency = clearInputs ? '' : state[DEFAULT_INDEX].ownerAgency;
+      handleInputChange(
+        DEFAULT_INDEX,
+        'ownerCode',
+        code,
+        'ownerAgency',
+        agency,
+        true,
+        checked
+      );
       setDisableInputs(false);
     }
   };
+
+  useEffect(() => {
+    setDefaultAgencyNCode(state[DEFAULT_INDEX].useDefaultAgencyInfo);
+  }, [defaultAgency, defaultCode]);
 
   const addRefs = (element: HTMLInputElement, id: number, name: string) => {
     if (element !== null) {
@@ -307,8 +339,9 @@ const OwnershipStep = (
                     }
                   }
                   setDefaultAgencyNCode={
-                    (checked: boolean) => setDefaultAgencyNCode(checked)
+                    (checked: boolean) => setDefaultAgencyNCode(checked, true)
                   }
+                  useDefaultAgency={state[DEFAULT_INDEX].useDefaultAgencyInfo}
                   addAnOwner={addAnOwner}
                   deleteAnOwner={(id: number) => deleteAnOwner(id)}
                   readOnly={readOnly}

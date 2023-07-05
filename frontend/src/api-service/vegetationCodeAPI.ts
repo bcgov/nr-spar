@@ -1,8 +1,9 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
-import { getDropDownList } from '../utils/DropDownUtils';
-import DropDownObj from '../types/DropDownObject';
+import { getMultiOptList } from '../utils/MultiOptionsUtils';
+import MultiOptionsObj from '../types/MultiOptionsObject';
 import VegCode from '../types/VegetationCodeType';
+import { geneticWorthDict } from '../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
 // Remove VegCodes with these codes
 const codesToFilter: Array<string> = [
@@ -26,14 +27,19 @@ const codesToFilter: Array<string> = [
   'SPIRBET'
 ];
 
-const getVegCodes = () => {
+const getVegCodes = (isAClass = false) => {
   const url = ApiConfig.vegetationCode;
   return api.get(url).then((res) => {
-    let vegCodeOptions: Array<DropDownObj> = [];
+    let vegCodeOptions: Array<MultiOptionsObj> = [];
     if (res.data) {
-      const filteredData = res.data
+      let filteredData = res.data
         .filter((vegCode: VegCode) => codesToFilter.indexOf(vegCode.code) === -1);
-      vegCodeOptions = getDropDownList(filteredData, true, true);
+      if (isAClass) {
+        const aClassCodes = Object.keys(geneticWorthDict);
+        filteredData = filteredData
+          .filter((vegCode: VegCode) => aClassCodes.includes(vegCode.code));
+      }
+      vegCodeOptions = getMultiOptList(filteredData, true, true);
     }
     return vegCodeOptions;
   });
