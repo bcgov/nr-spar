@@ -125,8 +125,8 @@
 }
 
 nav.#{variables.$bcgov-prefix}--side-nav {
-  box-shadow: inset -1px 0 0 colors.$gray-20;
-  background-color: var(--bcgov-background-left-panel);
+  border-right: 1px solid colors.$gray-20;
+  background-color: var(--#{variables.$bcgov-prefix}-background-left-panel);
 }
 
 .#{variables.$bcgov-prefix}--side-nav__items {
@@ -156,7 +156,7 @@ nav.#{variables.$bcgov-prefix}--side-nav {
 }
 
 .#{variables.$bcgov-prefix}--header {
-  background-color: var(--bcgov-background-brand) !important;
+  background-color: var(--#{variables.$bcgov-prefix}-background-brand) !important;
 }
 
 ul.#{variables.$bcgov-prefix}--accordion {
@@ -196,21 +196,21 @@ $types: 'error', 'info', 'success', 'warning';
 
 @each $notificationType in $types {
   div.#{variables.$bcgov-prefix}--inline-notification--#{$notificationType}{
-    border-left: 4px solid var(--bcgov-support-#{$notificationType}-inverse);}
+    border-left: 4px solid var(--#{variables.$bcgov-prefix}-support-#{$notificationType}-inverse);}
   div.#{variables.$bcgov-prefix}--inline-notification--low-contrast.#{variables.$bcgov-prefix}--inline-notification--#{$notificationType}{
-    border-left: 4px solid var(--bcgov-support-#{$notificationType});}
+    border-left: 4px solid var(--#{variables.$bcgov-prefix}-support-#{$notificationType});}
   div.#{variables.$bcgov-prefix}--inline-notification--low-contrast.#{variables.$bcgov-prefix}--inline-notification--#{$notificationType}::before{
-    border-color: var(--bcgov-notification-border-#{$notificationType});}
+    border-color: var(--#{variables.$bcgov-prefix}-notification-border-#{$notificationType});}
 }
 
 @each $notificationType in $types {
   div.#{variables.$bcgov-prefix}--toast-notification--#{$notificationType}{
-    border-left: 4px solid var(--bcgov-support-#{$notificationType}-inverse);}
+    border-left: 4px solid var(--#{variables.$bcgov-prefix}-support-#{$notificationType}-inverse);}
   div.#{variables.$bcgov-prefix}--toast-notification--low-contrast.#{variables.$bcgov-prefix}--toast-notification--#{$notificationType}{
-    border-left: 4px solid var(--bcgov-support-#{$notificationType});
-    border-top-color: var(--bcgov-notification-border-#{$notificationType});
-    border-bottom-color: var(--bcgov-notification-border-#{$notificationType});
-    border-right-color: var(--bcgov-notification-border-#{$notificationType})}
+    border-left: 4px solid var(--#{variables.$bcgov-prefix}-support-#{$notificationType});
+    border-top-color: var(--#{variables.$bcgov-prefix}-notification-border-#{$notificationType});
+    border-bottom-color: var(--#{variables.$bcgov-prefix}-notification-border-#{$notificationType});
+    border-right-color: var(--#{variables.$bcgov-prefix}-notification-border-#{$notificationType})}
 }
 
 .#{variables.$bcgov-prefix}--overflow-menu.bcgov--overflow-menu--open{
