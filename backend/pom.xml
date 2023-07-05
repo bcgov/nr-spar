@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.6</version>
+    <version>3.1.1</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>ca.bc.gov</groupId>
@@ -77,6 +77,23 @@
         <skip.unit.tests>true</skip.unit.tests>
         <jacoco.skip>true</jacoco.skip>
       </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>build-native</id>
+                <goals>
+                  <goal>compile-no-fork</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 
@@ -171,30 +188,7 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.graalvm.buildtools</groupId>
-        <artifactId>native-maven-plugin</artifactId>
-        <configuration>
-          <metadataRepository>
-            <dependencies>
-              <dependency>
-                <groupId>org.hibernate.orm</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <metadataVersion>6.1.1.Final</metadataVersion>
-              </dependency>
-            </dependencies>
-            <enabled>true</enabled>
-          </metadataRepository>
-          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
-          <requiredVersion>22.3.0</requiredVersion>
-          <verbose>true</verbose>
-          <buildArgs>
-            <arg>--verbose</arg>
-            <arg>--initialize-at-build-time=org.slf4j.LoggerFactory</arg>
-            <arg>--trace-class-initialization=org.slf4j.LoggerFactory</arg>
-          </buildArgs>
-        </configuration>
-      </plugin>
+      
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -205,26 +199,6 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
-          <image>
-            <buildpacks>
-              <buildpack>gcr.io/paketo-buildpacks/graalvm</buildpack>
-              <buildpack>gcr.io/paketo-buildpacks/java-native-image</buildpack>
-              <buildpack>gcr.io/paketo-buildpacks/image-labels</buildpack>
-            </buildpacks>
-            <env>
-              <BP_JVM_VERSION>19.0.2</BP_JVM_VERSION>
-              <BP_OCI_SOURCE>https://github.com/bcgov/nr-spar</BP_OCI_SOURCE>
-              <BP_OCI_DESCRIPTION>${project.description}</BP_OCI_DESCRIPTION>
-              <BP_OCI_LICENSES>Apache License, Version 2.0</BP_OCI_LICENSES>
-              <BP_OCI_REVISION>${oci.revision}</BP_OCI_REVISION>
-              <BP_OCI_TITLE>${project.name}</BP_OCI_TITLE>
-              <BP_OCI_CREATED>${timestamp}</BP_OCI_CREATED>
-              <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
-            </env>
-          </image>
-          <layers>
-            <includeLayerTools>false</includeLayerTools>
-          </layers>
         </configuration>
       </plugin>
 
@@ -461,4 +435,28 @@
     <finalName>nr-spar-backend</finalName>
   </build>
 
+  <!-- 
+    Issue:
+    - spring-boot-starter-oauth2-client (v3.1.1-latest) depends on
+      - spring-security-oauth2-client (v6.1.1-latest) depends on
+        - oauth2-oidc-sdk (v10.10.1-latest) depends on
+          - nimbus-jose-jwt (v9.30.2 NOT THE LATESTE)
+
+    conficts with:
+    - spring-boot-starter-oauth2-client (v3.1.1-latest) depends on
+      - spring-security-oauth2-jose (v6.1.1-latest) depends on
+        - nimbus-jose-jwt (v9.31 LATEST)
+
+    Forcing oauth2-oidc-sdk to update its dependency nimbus-jose-jwt to version 9.31
+    solves the issue, for now.
+  -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>9.31</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>
