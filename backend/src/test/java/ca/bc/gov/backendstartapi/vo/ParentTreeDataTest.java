@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.vo;
 
-import ca.bc.gov.backendstartapi.dto.orchard.ParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.orchard.ParentTreeGeneticQuality;
+import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -61,49 +61,49 @@ class ParentTreeDataTest {
     var parentTreeDtos =
         List.of(
             new ParentTreeDto(
-                1,
+                1L,
                 null,
                 null,
                 null,
                 true,
                 true,
                 false,
-                0,
-                0,
-                List.of(new ParentTreeGeneticQuality("A", "A", 25))),
+                null,
+                null,
+                List.of(new ParentTreeGeneticQualityDto("A", "A", new BigDecimal("25")))),
             new ParentTreeDto(
-                2,
+                2L,
                 null,
                 null,
                 null,
                 true,
                 true,
                 false,
-                0,
-                0,
-                List.of(new ParentTreeGeneticQuality("A", "A", -1))),
+                null,
+                null,
+                List.of(new ParentTreeGeneticQualityDto("A", "A", new BigDecimal("-1")))),
             new ParentTreeDto(
-                3,
+                3L,
                 null,
                 null,
                 null,
                 true,
                 true,
                 false,
-                0,
-                0,
-                List.of(new ParentTreeGeneticQuality("A", "A", 7))),
+                null,
+                null,
+                List.of(new ParentTreeGeneticQualityDto("A", "A", new BigDecimal("7")))),
             new ParentTreeDto(
-                4,
+                4L,
                 null,
                 null,
                 null,
                 true,
                 true,
                 false,
-                0,
-                0,
-                List.of(new ParentTreeGeneticQuality("A", "A", 4))));
+                null,
+                null,
+                List.of(new ParentTreeGeneticQualityDto("A", "A", new BigDecimal("4")))));
 
     parentTreeData =
         IntStream.range(0, parentTrees.size())
@@ -151,7 +151,7 @@ class ParentTreeDataTest {
   void testIndividualContribution() {
     var expectedIndividualContributions = calculateExpectedIndividualContribution();
 
-    var individualContributions =
+    List<Double> individualContributions =
         parentTreeData.stream().map(ParentTreeData::individualContribution).toList();
 
     assertValues(expectedIndividualContributions, individualContributions);
@@ -159,7 +159,7 @@ class ParentTreeDataTest {
 
   @Test
   void testGeneticWorth() {
-    var expectedIndividualContributions = calculateExpectedIndividualContribution();
+    List<Double> expectedIndividualContributions = calculateExpectedIndividualContribution();
 
     var expectedGeneticWorth =
         IntStream.range(0, parentTreeData.size())
@@ -172,7 +172,8 @@ class ParentTreeDataTest {
                             .parentTreeDto()
                             .parentTreeGeneticQualities()
                             .get(0)
-                            .geneticQualityValue())
+                            .geneticQualityValue()
+                            .doubleValue())
             .toList();
 
     var geneticWorth = parentTreeData.stream().map(ParentTreeData::geneticWorth).toList();

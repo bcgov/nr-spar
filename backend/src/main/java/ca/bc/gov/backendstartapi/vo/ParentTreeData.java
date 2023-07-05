@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.vo;
 
-import ca.bc.gov.backendstartapi.dto.orchard.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import java.util.List;
 
@@ -30,8 +31,9 @@ public record ParentTreeData(
   }
 
   public double geneticWorth() {
-    assert parentTreeDto.parentTreeGeneticQualities().size()==1;
-    return individualContribution()
-        * parentTreeDto.parentTreeGeneticQualities().get(0).geneticQualityValue();
+    assert parentTreeDto.parentTreeGeneticQualities().size() == 1;
+    ParentTreeGeneticQualityDto geneticQualityDto =
+        parentTreeDto.parentTreeGeneticQualities().get(0);
+    return individualContribution() * geneticQualityDto.geneticQualityValue().doubleValue();
   }
 }

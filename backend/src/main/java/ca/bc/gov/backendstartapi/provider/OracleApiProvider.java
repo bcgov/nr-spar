@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.provider;
 
-import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,9 +75,9 @@ public class OracleApiProvider {
    *
    * @param orchardId Orchard's identification.
    * @param spuId SPU's identification.
-   * @return An {@link Optional} of {@link OrchardParentTreeDto}
+   * @return An {@link Optional} of {@link OrchardSpuDto}
    */
-  public Optional<OrchardParentTreeDto> findOrchardParentTreeGeneticQualityData(
+  public Optional<OrchardSpuDto> findOrchardParentTreeGeneticQualityData(
       String orchardId, int spuId) {
     String oracleApiUrl = "/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}";
 
@@ -85,8 +85,7 @@ public class OracleApiProvider {
     uriVars.put("orchardId", orchardId);
     uriVars.put("spuId", String.valueOf(spuId));
 
-    OrchardParentTreeDto orchardTreeDto =
-        doGetRequest(OrchardParentTreeDto.class, oracleApiUrl, uriVars);
+    OrchardSpuDto orchardTreeDto = doGetRequest(OrchardSpuDto.class, oracleApiUrl, uriVars);
 
     return Optional.ofNullable(orchardTreeDto);
   }

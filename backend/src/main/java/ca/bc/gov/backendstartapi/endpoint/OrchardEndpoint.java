@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,7 +38,7 @@ public class OrchardEndpoint {
    * Gets all ParentTree data to an Orchard.
    *
    * @param orchardId {@link Orchard}'s identification
-   * @return an {@link OrchardParentTreeDto}
+   * @return an {@link OrchardSpuDto}
    * @throws ResponseStatusException if no data is found
    */
   @GetMapping(path = "/{orchardId}/parent-tree-genetic-quality")
@@ -54,7 +54,7 @@ public class OrchardEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  public OrchardParentTreeDto getParentTreeGeneticQualityData(
+  public OrchardSpuDto getParentTreeGeneticQualityData(
       @PathVariable
           @Parameter(
               name = "orchardId",

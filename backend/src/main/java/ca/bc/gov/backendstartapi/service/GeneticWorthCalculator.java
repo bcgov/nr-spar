@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dto.orchard.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.dto.orchard.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
@@ -51,7 +51,7 @@ public class GeneticWorthCalculator {
     var parentTreeIds =
         parentTreeDtos.stream()
             .map(ParentTreeDto::parentTreeId)
-            .map(id -> new SeedlotParentTreeId(seedlotId, id))
+            .map(id -> new SeedlotParentTreeId(seedlotId, id.intValue()))
             .toList();
     assert parentTreeIds.size() == new HashSet<>(parentTreeIds).size();
 

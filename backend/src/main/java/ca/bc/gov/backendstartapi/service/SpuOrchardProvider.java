@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dto.orchard.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

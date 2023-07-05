@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.provider;
 
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,11 +51,11 @@ class OracleApiProviderTest {
     String url = "null/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}";
     HttpMethod method = HttpMethod.GET;
     HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
-    Class<OrchardParentTreeDto> className = OrchardParentTreeDto.class;
+    Class<OrchardSpuDto> className = OrchardSpuDto.class;
 
-    OrchardParentTreeDto orchard = new OrchardParentTreeDto("123", "AT", 11L, new ArrayList<>());
+    OrchardSpuDto orchard = new OrchardSpuDto("123", "AT", 11L, new ArrayList<>());
 
-    ResponseEntity<OrchardParentTreeDto> orchardResponse =
+    ResponseEntity<OrchardSpuDto> orchardResponse =
         ResponseEntity.status(HttpStatusCode.valueOf(200)).body(orchard);
 
     String orchardId = "405";
@@ -68,7 +68,7 @@ class OracleApiProviderTest {
     when(restTemplate.exchange(url, method, requestEntity, className, uriVars))
         .thenReturn(orchardResponse);
 
-    Optional<OrchardParentTreeDto> orchardDto =
+    Optional<OrchardSpuDto> orchardDto =
         oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId);
 
     Assertions.assertTrue(orchardDto.isPresent());
@@ -86,9 +86,9 @@ class OracleApiProviderTest {
     String url = "null/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}";
     HttpMethod method = HttpMethod.GET;
     HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
-    Class<OrchardParentTreeDto> className = OrchardParentTreeDto.class;
+    Class<OrchardSpuDto> className = OrchardSpuDto.class;
 
-    ResponseEntity<OrchardParentTreeDto> orchardResponse =
+    ResponseEntity<OrchardSpuDto> orchardResponse =
         ResponseEntity.status(HttpStatusCode.valueOf(401)).build();
 
     String orchardId = "405";
@@ -101,7 +101,7 @@ class OracleApiProviderTest {
     when(restTemplate.exchange(url, method, requestEntity, className, uriVars))
         .thenReturn(orchardResponse);
 
-    Optional<OrchardParentTreeDto> orchardDto =
+    Optional<OrchardSpuDto> orchardDto =
         oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId);
 
     Assertions.assertFalse(orchardDto.isPresent());

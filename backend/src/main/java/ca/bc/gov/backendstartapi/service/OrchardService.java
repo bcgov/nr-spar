@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
@@ -57,9 +57,9 @@ public class OrchardService {
    * Finds all Parent Tree and Genetic Quality to an Orchard.
    *
    * @param orchardId Orchard's identification.
-   * @return An {@link Optional} of {@link OrchardParentTreeDto}
+   * @return An {@link Optional} of {@link OrchardSpuDto}
    */
-  public OrchardParentTreeDto findParentTreeGeneticQualityData(String orchardId) {
+  public OrchardSpuDto findParentTreeGeneticQualityData(String orchardId) {
     log.info("Fetching Parent Tree data for Orchard ID: {}", orchardId);
 
     List<ActiveOrchardSeedPlanningUnit> spuList = findSpuIdByOrchard(orchardId);
@@ -71,7 +71,7 @@ public class OrchardService {
     log.info("Found SPU Id {} for Orchard Id {}", spuId, orchardId);
 
     log.info("Fetching Parent Tree and Genetic Quality from Oracle API Provider...");
-    Optional<OrchardParentTreeDto> parentTreeDto =
+    Optional<OrchardSpuDto> parentTreeDto =
         oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId);
 
     log.info("Finished fetching Parent Tree and Genetic Quality from Oracle API Provider!");
