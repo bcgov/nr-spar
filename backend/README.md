@@ -95,6 +95,41 @@ POSTGRES_DB=postgres
 POSTGRES_PASSWORD=default
 ```
 
+## Developing locally with Docker
+
+Just run:
+```sh
+docker compose up backend -d
+```
+
+If you need to change the code, no problem. Once you hit Ctrl+S keys
+the service will be restarted! Enjoy
+
+## Debugging inside Docker
+
+This instruction is for VSCode. If you have another IDE, be aware that some
+steps may change.
+
+All you need to do is to click the "Run and Debug" button on VSCode, then
+click the small cog button, to open a new file called `launch.json`.
+Make sure you have these settings:
+
+```json
+"configurations": [
+  {
+    "type": "java",
+    "name": "Debug (Attach)",
+    "projectName": "BackendAPI",
+    "request": "attach",
+    "hostName": "127.0.0.1",
+    "port": 5005
+  },
+]
+```
+
+Now you can select `Debug (Attach)` in the dropdown input and hit run, 
+click the play button. 
+
 ## Getting help
 
 As mentioned, we're here to help. Feel free to start a conversation

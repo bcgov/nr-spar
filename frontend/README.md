@@ -55,8 +55,8 @@ Be aware of the required environment variables:
 
 ```sh
 REACT_APP_NRSPARWEBAPP_VERSION=dev
-REACT_APP_SERVER_URL=http://localhost:8091/
-REACT_APP_ORACLE_SERVER_URL=https://localhost:8092/
+REACT_APP_SERVER_URL=http://localhost:8090
+REACT_APP_ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
 REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
 REACT_APP_KC_REALM=standard
 REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
@@ -86,8 +86,18 @@ using Docker Compose.
 
 Run with (from the project root):
 ```sh
-docker-compose up --build frontend -d
+docker compose up --build frontend -d
 ```
+
+## Developing locally with Docker
+
+Just run:
+```sh
+docker compose up frontend -d
+```
+
+Then every change you made in the code base will be update in the running instance.
+Happy coding!
 
 ## Getting help
 

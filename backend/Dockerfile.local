@@ -6,4 +6,4 @@ ENV LANG=en_CA.UTF-8 LANGUAGE=en_CA.UTF-8 LC_ALL=en_CA.UTF-8
 WORKDIR /app
 EXPOSE 8090
 HEALTHCHECK CMD curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
-ENTRYPOINT ["mvn", "spring-boot:run"]
+CMD mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005"
