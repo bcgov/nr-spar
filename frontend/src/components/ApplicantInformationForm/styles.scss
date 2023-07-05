@@ -33,3 +33,7 @@
 .save-button {
   margin-bottom: 3rem;
 }
+
+#agency-number-input{
+  @include type.type-style('code-02');
+}

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@types/validator": "^13.7.17"
+  }
+}
