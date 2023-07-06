@@ -116,12 +116,10 @@ const ApplicantInformationForm = () => {
   };
 
   const validateApplicantNumber = () => {
-    const intNumber = +responseBody.applicant.number;
-    if (intNumber < 0 || intNumber > 99) {
-      setIsAgencyNumberInvalid(true);
-    } else {
-      setIsAgencyNumberInvalid(false);
-    }
+    const applicantNumber = responseBody.applicant.number;
+    const isDoubleAndInRange = applicantNumber.length === 2
+      && validator.isInt(applicantNumber, { min: 0, max: 99 });
+    setIsAgencyNumberInvalid(!isDoubleAndInRange);
   };
 
   const validateApplicantEmail = () => {
@@ -198,18 +196,18 @@ const ApplicantInformationForm = () => {
           </Column>
           <Column sm={4} md={2} lg={5}>
             <TextInput
+              className="agency-number-wrapper-class"
               id="agency-number-input"
               name="number"
               ref={numberInputRef}
-              disableWheel
-              hideSteppers
               type="number"
               labelText="Applicant agency number"
               invalid={isAgencyNumberInvalid}
               placeholder="00"
               invalidText="Please enter a valid value between 0 and 99"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerApplicant(e)}
-              onBlur={() => validateApplicantNumber()}
+              onBlur={validateApplicantNumber}
+              onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
               helperText="2-digit code that identifies the address of operated office or division"
             />
           </Column>
