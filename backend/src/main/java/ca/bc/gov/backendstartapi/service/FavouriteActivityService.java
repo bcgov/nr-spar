@@ -12,10 +12,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /** This class contains all routines and database access to a users' favorite activity. */
 @Slf4j
-
+@Service
 public class FavouriteActivityService {
 
   private FavouriteActivityRepository favouriteActivityRepository;

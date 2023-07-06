@@ -9,7 +9,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -20,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 
 /** Makes HTTP requests to the Forest Client API server. */
 @Service
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
 class ForestClientApiProvider {
 
@@ -31,7 +35,8 @@ class ForestClientApiProvider {
 
   private final RestTemplate restTemplate;
 
-  ForestClientApiProvider(
+  @Autowired
+  private ForestClientApiProvider(
       @Value("${forest-client-api.address}") String forestClientApiAddress,
       @Value("${forest-client-api.key}") String forestClientApiKey,
       RestTemplateBuilder restTemplateBuilder) {
@@ -51,7 +56,7 @@ class ForestClientApiProvider {
    * @param identifier the client number or acronym to search for
    * @return the forest client with client number or acronym {@code identifier}, if one exists
    */
-  public Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
+  Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
     if (numberPredicate.test(identifier)) {
       return fetchClientByNumber(identifier);
     } else if (acronymPredicate.test(identifier)) {
