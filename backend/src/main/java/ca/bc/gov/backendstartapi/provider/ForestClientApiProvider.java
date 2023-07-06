@@ -1,53 +1,46 @@
-package ca.bc.gov.backendstartapi.service;
-
-import static org.springframework.http.HttpHeaders.ACCEPT;
+package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
-import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 /** Makes HTTP requests to the Forest Client API server. */
 @Service
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
-class ForestClientApiProvider {
+public class ForestClientApiProvider extends Provider {
 
   private static final Predicate<String> numberPredicate =
       Pattern.compile("^\\d{8}$").asMatchPredicate();
 
-  private static final Predicate<String> acronymPredicate =
-      Pattern.compile("^\\w{1,8}$").asMatchPredicate();
+  private RestTemplate restTemplate;
 
-  private final RestTemplate restTemplate;
+  @Value("${forest-client-api.address}")
+  private static String baseUri;
+
+  @Value("${forest-client-api.key}")
+  private String forestClientApiKey;
 
   @Autowired
-  private ForestClientApiProvider(
-      @Value("${forest-client-api.address}") String forestClientApiAddress,
-      @Value("${forest-client-api.key}") String forestClientApiKey,
-      RestTemplateBuilder restTemplateBuilder) {
-    this.restTemplate =
-        restTemplateBuilder
-            .setConnectTimeout(Duration.ofSeconds(5))
-            .setReadTimeout(Duration.ofSeconds(5))
-            .rootUri(forestClientApiAddress)
-            .defaultHeader("X-API-KEY", forestClientApiKey)
-            .defaultHeader(ACCEPT, MediaType.APPLICATION_JSON.toString())
-            .build();
+  ForestClientApiProvider() {
+    this(new RestTemplate());
+  }
+  
+  ForestClientApiProvider(RestTemplate restTemplate) {
+    super(log, "ForestClient API");
+    setBaseUri(baseUri);
+    this.restTemplate = restTemplate;
   }
 
   /**
@@ -59,22 +52,24 @@ class ForestClientApiProvider {
   Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
     if (numberPredicate.test(identifier)) {
       return fetchClientByNumber(identifier);
-    } else if (acronymPredicate.test(identifier)) {
-      return fetchClientByAcronym(identifier);
     }
-    throw new IllegalArgumentException(
-        """
-            The identifier must be either an 8-digit string or an 8-character word string
-            (consisting of alphanumeric characters and underscores [_]).""");
+    
+    return fetchClientByAcronym(identifier);
   }
 
+  // OK
   private Optional<ForestClientDto> fetchClientByNumber(String number) {
-    log.debug(String.format("Fetching client %s", number));
-    var response =
-        restTemplate.getForEntity("/clients/findByClientNumber/" + number, ForestClientDto.class);
-    return Optional.of(Objects.requireNonNull(response.getBody()));
+    String api = "/clients/findByClientNumber/{number}";
+
+    Map<String, String> uriVars = new HashMap<>();
+    uriVars.put("number", number);
+    
+    ForestClientDto clientDto = doGetRequest(ForestClientDto.class, api, uriVars);
+    
+    return Optional.ofNullable(clientDto);
   }
 
+  // NEXT: keep going from here!
   private Optional<ForestClientDto> fetchClientByAcronym(String acronym) {
     log.debug(String.format("Fetching client %s", acronym));
     var response =
