@@ -6,7 +6,6 @@ import {
   Row,
   Column,
   TextInput,
-  NumberInput,
   RadioButtonGroup,
   RadioButton,
   Checkbox,
@@ -15,7 +14,7 @@ import {
   InlineLoading
 } from '@carbon/react';
 import { DocumentAdd } from '@carbon/icons-react';
-
+import validator from 'validator';
 import Subtitle from '../Subtitle';
 import InputErrorText from '../InputErrorText';
 
@@ -61,9 +60,9 @@ const ApplicantInformationForm = () => {
   const speciesInputRef = useRef<HTMLButtonElement>(null);
 
   const [responseBody, setResponseBody] = useState<SeedlotRegistrationObj>(seedlotData);
-  const [invalidNumber, setInvalidNumber] = useState<boolean>(false);
-  const [invalidEmail, setInvalidEmail] = useState<boolean>(false);
-  const [invalidSpecies, setInvalidSpecies] = useState<boolean>(false);
+  const [isAgencyNumberInvalid, setIsAgencyNumberInvalid] = useState<boolean>(false);
+  const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
+  const [isSpeciesInvalid, setIsSpeciesInvalid] = useState<boolean>(false);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -93,10 +92,6 @@ const ApplicantInformationForm = () => {
   };
 
   const inputChangeHandlerSpecies = (event: any) => {
-    if (invalidSpecies) {
-      setInvalidSpecies(false);
-    }
-
     const { selectedItem } = event;
     setResponseBody({
       ...responseBody,
@@ -121,32 +116,29 @@ const ApplicantInformationForm = () => {
   };
 
   const validateApplicantNumber = () => {
-    const intNumber = +responseBody.applicant.number;
-    if (intNumber < 0 || intNumber > 99) {
-      setInvalidNumber(true);
-    } else {
-      setInvalidNumber(false);
-    }
+    const applicantNumber = responseBody.applicant.number;
+    const isDoubleAndInRange = applicantNumber.length === 2
+      && validator.isInt(applicantNumber, { min: 0, max: 99 });
+    setIsAgencyNumberInvalid(!isDoubleAndInRange);
   };
 
   const validateApplicantEmail = () => {
-    const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    if (!emailRegex.test(responseBody.applicant.email)) {
-      setInvalidEmail(true);
+    if (validator.isEmail(responseBody.applicant.email)) {
+      setIsEmailInvalid(false);
     } else {
-      setInvalidEmail(false);
+      setIsEmailInvalid(true);
     }
   };
 
   const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (invalidNumber) {
+    if (isAgencyNumberInvalid) {
       numberInputRef.current?.focus();
-    } else if (invalidEmail) {
+    } else if (isEmailInvalid) {
       emailInputRef.current?.focus();
     } else if (!responseBody.species.label) {
-      setInvalidSpecies(true);
+      setIsSpeciesInvalid(true);
       speciesInputRef.current?.focus();
     } else {
       const url = ApiConfig.aClassSeedlot;
@@ -203,22 +195,20 @@ const ApplicantInformationForm = () => {
             />
           </Column>
           <Column sm={4} md={2} lg={5}>
-            <NumberInput
+            <TextInput
+              className="agency-number-wrapper-class"
               id="agency-number-input"
               name="number"
               ref={numberInputRef}
-              min={0}
-              max={99}
-              disableWheel
-              hideSteppers
-              type="text"
-              label="Applicant agency number"
-              invalid={invalidNumber}
+              type="number"
+              labelText="Applicant agency number"
+              invalid={isAgencyNumberInvalid}
+              placeholder="00"
               invalidText="Please enter a valid value between 0 and 99"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerApplicant(e)}
-              onBlur={() => validateApplicantNumber()}
+              onBlur={validateApplicantNumber}
+              onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
               helperText="2-digit code that identifies the address of operated office or division"
-              defaultValue={0}
             />
           </Column>
         </Row>
@@ -231,7 +221,7 @@ const ApplicantInformationForm = () => {
               type="email"
               labelText="Applicant email address"
               helperText="The Tree Seed Centre will uses it to communicate with the applicant"
-              invalid={invalidEmail}
+              invalid={isEmailInvalid}
               invalidText="Please enter a valid email"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerApplicant(e)}
               onBlur={() => validateApplicantEmail()}
@@ -258,7 +248,7 @@ const ApplicantInformationForm = () => {
               placeholder="Enter or choose an species for the seedlot"
               titleText="Seedlot species"
               onChange={(e: ComboBoxEvent) => inputChangeHandlerSpecies(e)}
-              invalid={invalidSpecies}
+              invalid={isSpeciesInvalid}
               invalidText="Please select a species"
             />
             {

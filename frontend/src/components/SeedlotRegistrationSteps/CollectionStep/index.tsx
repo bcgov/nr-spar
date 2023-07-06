@@ -225,7 +225,7 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
-            id={fieldsConfig.collector.name}
+            id="collector-agency-combobox"
             name={fieldsConfig.collector.name}
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.collector.name)}
             placeholder={fieldsConfig.collector.placeholder}
@@ -250,7 +250,7 @@ const CollectionStep = (
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
           <NumberInput
-            id={fieldsConfig.code.name}
+            id="collector-location-code-input"
             name={fieldsConfig.code.name}
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.code.name)}
             value={state.locationCode}
@@ -291,7 +291,7 @@ const CollectionStep = (
             }}
           >
             <DatePickerInput
-              id={fieldsConfig.startDate.name}
+              id="collection-start-date-picker"
               name={fieldsConfig.startDate.name}
               ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.startDate.name)}
               placeholder={fieldsConfig.startDate.placeholder}
@@ -318,7 +318,7 @@ const CollectionStep = (
             }}
           >
             <DatePickerInput
-              id={fieldsConfig.endDate.name}
+              id="collection-end-date-picker"
               name={fieldsConfig.endDate.name}
               ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.endDate.name)}
               placeholder={fieldsConfig.endDate.placeholder}
@@ -334,7 +334,7 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
           <NumberInput
-            id={fieldsConfig.numberOfContainers.name}
+            id="collection-num-of-container-input"
             name={fieldsConfig.numberOfContainers.name}
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.numberOfContainers.name)}
             value={state.numberOfContainers}
@@ -353,7 +353,7 @@ const CollectionStep = (
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
           <NumberInput
-            id={fieldsConfig.volumePerContainers.name}
+            id="collection-colume-perc-input"
             name={fieldsConfig.volumePerContainers.name}
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.volumePerContainers.name)}
             value={state.volumePerContainers}
@@ -374,7 +374,7 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={16} xlg={12}>
           <NumberInput
-            id={fieldsConfig.volumeOfCones.name}
+            id="collection-value-of-cones-input"
             name={fieldsConfig.volumeOfCones.name}
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.volumeOfCones.name)}
             value={state.volumeOfCones}
