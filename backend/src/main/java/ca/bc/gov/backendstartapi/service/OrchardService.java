@@ -8,23 +8,18 @@ import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.util.List;
 import java.util.Optional;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods to handle Orchards requests. */
 @Service
 @Slf4j
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class OrchardService {
 
   private ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;
 
   private OracleApiProvider oracleApiProvider;
 
-  @Autowired
   OrchardService(
       ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository,
       OracleApiProvider oracleApiProvider) {

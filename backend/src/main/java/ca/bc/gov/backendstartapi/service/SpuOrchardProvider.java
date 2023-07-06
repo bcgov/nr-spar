@@ -2,11 +2,10 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/** This class is responsible for fetching Orchard SPUs. */
 @Service
-@RequiredArgsConstructor
 public class SpuOrchardProvider {
 
   public List<OrchardSpuDto> fetchOrchardSpus() {

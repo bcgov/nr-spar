@@ -17,6 +17,7 @@ import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/** This class is responsible for doing all Genetic Worth related calculations. */
 @Service
 @RequiredArgsConstructor
 public class GeneticWorthCalculator {
@@ -27,6 +28,12 @@ public class GeneticWorthCalculator {
   private final SeedlotParentTreeRepository seedlotParentTreeRepository;
   private final SpuOrchardProvider spuOrchardProvider;
 
+  /**
+   * Calculate the Genetic Worth value.
+   *
+   * @param seedlotId Seedlot's identification.
+   * @return A BigDecimal representing the number
+   */
   public BigDecimal calculate(String seedlotId) {
     var seedlot = seedlotRepository.findById(seedlotId);
 
