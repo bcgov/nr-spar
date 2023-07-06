@@ -2,63 +2,38 @@
 @use '@carbon/type';
 
 .seedlot-created-feedback-page {
-  display: flex;
-  align-items: center;
-  height: 100vh;
-  margin-right: 8.06rem;
-}
+  height:max-content;
 
-.scf-pic-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.scf-pictogram {
-  width: 23.125rem;
-  height: 22.375rem;
-  color: var(--#{vars.$bcgov-prefix}-button-primary);
-}
-
-.scf-info-container {
-  display: flex;
-  flex-direction: column;
-  padding-left: 7.563rem;
-}
-
-.scf-info-container > h2 {
-  padding-top: 1.5rem;
-  padding-bottom: 3rem;
-}
-
-.btn-scf {
-  width: 20.625rem;
-  margin-bottom: 1rem;
-}
-
-.seedlot-created-feedback-page h1 {
-  @include type.type-style('fluid-heading-05', true);
-  color: var(--#{vars.$bcgov-prefix}-text-primary)
-}
-.seedlot-created-feedback-page h2 {
-  @include type.type-style('fluid-paragraph-01', true);
-  color: var(--#{vars.$bcgov-prefix}-text-secondary)
-}
-
-@media only screen and (max-width: 1584px) {
-  .scf-pic-container {
-    justify-content: center;
-  }
-}
-
-@media only screen and (max-width: 672px) {
-  .seedlot-created-feedback-page {
-    margin: 0px;
-    height: auto;
+  .scf-pictogram {
+    width: 100%;
+    height: 100%;
+    color: var(--#{vars.$bcgov-prefix}-button-primary);
   }
 
   .scf-info-container {
-    align-items: center;
-    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    h1 {
+      @include type.type-style('fluid-heading-05', true);
+      color: var(--#{vars.$bcgov-prefix}-text-primary)
+    }
+
+    h2 {
+      padding-top: 1.5rem;
+      @include type.type-style('fluid-paragraph-01', true);
+      color: var(--#{vars.$bcgov-prefix}-text-secondary)
+    }
+
+    .navigate-btn{
+      padding-top: 2rem;
+    }
+  }
+
+  .btn-scf {
+    width: 100%;
+    margin-bottom: 1rem;
+    max-width: none;
   }
 }
