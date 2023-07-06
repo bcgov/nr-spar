@@ -33,3 +33,20 @@
 .save-button {
   margin-bottom: 3rem;
 }
+
+.agency-number-wrapper-class {
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  #agency-number-input {
+    @include type.type-style('code-02');
+  }
+}
