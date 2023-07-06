@@ -55,14 +55,24 @@ const OrchardStep = ({
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
-
-  const maleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('m'));
-  const femaleGameticOptions = gameticOptions.filter((options) => options.code.toLowerCase().startsWith('f'));
-
   const refControl = useRef<any>({});
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
+
+  const filterGameticOptions = (gender: string) => {
+    const result = gameticOptions
+      .filter((option) => {
+        if (!isPLISpecies && option.isPLI) {
+          return false;
+        }
+        return option.code.toLowerCase().startsWith(gender);
+      });
+    return result;
+  };
+
+  const [maleGameticOptions] = useState(filterGameticOptions('m'));
+  const [femaleGameticOptions] = useState(filterGameticOptions('f'));
 
   const addRefs = (element: HTMLInputElement, name: string) => {
     if (element !== null) {
@@ -336,7 +346,7 @@ const OrchardStep = ({
               id="female-gametic-combobox"
               name="femaleGametic"
               ref={(el: HTMLInputElement) => addRefs(el, 'femaleGametic')}
-              items={isPLISpecies ? femaleGameticOptions : femaleGameticOptions.slice(0, -2)}
+              items={femaleGameticOptions}
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }
@@ -384,7 +394,7 @@ const OrchardStep = ({
                     onChange={(e: string) => maleGameticHandler(e)}
                     valueSelected={state.maleGametic}
                   >
-                    {maleGameticOptions.slice(0, -2).map((item) => (
+                    {maleGameticOptions.map((item) => (
                       <RadioButton
                         key={item.code}
                         id={`${item.code.toLowerCase()}-radio`}
