@@ -50,6 +50,7 @@ export const inputText = {
 
 export const ownerTemplate: SingleOwnerForm = {
   id: -1,
+  useDefaultAgencyInfo: true,
   ownerAgency: '',
   ownerCode: '',
   ownerPortion: '0.00',
