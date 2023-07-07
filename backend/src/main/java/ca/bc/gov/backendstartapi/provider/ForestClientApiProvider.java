@@ -1,10 +1,8 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -13,18 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 /** Makes HTTP requests to the Forest Client API server. */
-@Service
+@Component
 @Slf4j
 public class ForestClientApiProvider extends Provider {
 
   private static final Predicate<String> numberPredicate =
       Pattern.compile("^\\d{8}$").asMatchPredicate();
-
-  private RestTemplate restTemplate;
 
   @Value("${forest-client-api.address}")
   private static String baseUri;
@@ -33,14 +30,14 @@ public class ForestClientApiProvider extends Provider {
   private String forestClientApiKey;
 
   @Autowired
-  ForestClientApiProvider() {
+  public ForestClientApiProvider() {
     this(new RestTemplate());
   }
-  
-  ForestClientApiProvider(RestTemplate restTemplate) {
+
+  public ForestClientApiProvider(RestTemplate restTemplate) {
     super(log, "ForestClient API");
     setBaseUri(baseUri);
-    this.restTemplate = restTemplate;
+    setRestTemplate(restTemplate);
   }
 
   /**
@@ -49,42 +46,44 @@ public class ForestClientApiProvider extends Provider {
    * @param identifier the client number or acronym to search for
    * @return the forest client with client number or acronym {@code identifier}, if one exists
    */
-  Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
+  public Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
     if (numberPredicate.test(identifier)) {
       return fetchClientByNumber(identifier);
     }
-    
+
     return fetchClientByAcronym(identifier);
   }
 
-  // OK
   private Optional<ForestClientDto> fetchClientByNumber(String number) {
     String api = "/clients/findByClientNumber/{number}";
 
-    Map<String, String> uriVars = new HashMap<>();
-    uriVars.put("number", number);
-    
-    ForestClientDto clientDto = doGetRequest(ForestClientDto.class, api, uriVars);
-    
+    ForestClientDto clientDto =
+        doGetRequestSingleObject(ForestClientDto.class, api, createParamsMap("number", number));
+
     return Optional.ofNullable(clientDto);
   }
 
-  // NEXT: keep going from here!
   private Optional<ForestClientDto> fetchClientByAcronym(String acronym) {
-    log.debug(String.format("Fetching client %s", acronym));
-    var response =
-        restTemplate.exchange(
-            "/clients/findByAcronym?acronym=" + acronym,
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<List<ForestClientDto>>() {});
-    var results = Objects.requireNonNull(response.getBody());
-    if (results.isEmpty()) {
-      return Optional.empty();
+    String apiUrl = "/clients/findByAcronym?acronym={acronym}";
+    Map<String, String> uriVars = createParamsMap("acronym", acronym);
+
+    logParams(uriVars);
+
+    ResponseEntity<List<ForestClientDto>> response =
+        getRestTemplate()
+            .exchange(
+                getFullApiAddress(apiUrl),
+                HttpMethod.GET,
+                getRequestEntity(),
+                new ParameterizedTypeReference<List<ForestClientDto>>() {},
+                uriVars);
+
+    logResponseError(response);
+
+    if (response.getBody().size() > 1) {
+      log.warn("More than one client found for acronym {}", acronym);
     }
-    if (results.size() > 1) {
-      log.warn("More than one client found for acronym " + acronym);
-    }
-    return Optional.of(results.get(0));
+
+    return response.getBody().stream().findAny();
   }
 }
