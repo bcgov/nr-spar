@@ -34,6 +34,11 @@ public class ForestClientApiProvider extends Provider {
     this(new RestTemplate());
   }
 
+  /**
+   * Creates a ForestClientApiProvider instance with a RestTemplate.
+   *
+   * @param restTemplate The RestTemplate instance to be set.
+   */
   public ForestClientApiProvider(RestTemplate restTemplate) {
     super(log, "ForestClient API");
     setBaseUri(baseUri);

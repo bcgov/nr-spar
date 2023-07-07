@@ -9,7 +9,6 @@ import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
 import ca.bc.gov.backendstartapi.provider.ForestClientApiProvider;
-
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
