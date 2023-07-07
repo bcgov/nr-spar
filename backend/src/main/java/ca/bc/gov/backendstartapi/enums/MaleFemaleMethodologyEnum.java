@@ -38,19 +38,4 @@ public enum MaleFemaleMethodologyEnum {
     this.description = description;
     this.isPLI = isPLI;
   }
-
-  /**
-   * Get a {@link MaleFemaleMethodologyEnum} by its code.
-   *
-   * @param code The code of the male/female methodology. E.g.: F1, F2, F3...
-   * @return An {@link Optional} of {@link MaleFemaleMethodologyEnum}
-   */
-  public static Optional<MaleFemaleMethodologyEnum> getByCode(String code) {
-    for (MaleFemaleMethodologyEnum methodology : values()) {
-      if (methodology.code.equals(code)) {
-        return Optional.of(methodology);
-      }
-    }
-    return Optional.empty();
-  }
 }
