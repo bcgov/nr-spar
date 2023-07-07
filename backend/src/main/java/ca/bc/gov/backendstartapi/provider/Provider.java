@@ -42,7 +42,8 @@ class Provider {
     logParams(uriVars);
 
     ResponseEntity<T> response =
-        restTemplate.exchange(getFullApiAddress(apiUrl), HttpMethod.GET, getRequestEntity(), className, uriVars);
+        restTemplate.exchange(
+            getFullApiAddress(apiUrl), HttpMethod.GET, getRequestEntity(), className, uriVars);
 
     logResponseError(response);
 
