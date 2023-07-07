@@ -1,20 +1,18 @@
 package ca.bc.gov.backendstartapi.enums;
 
-import java.util.Optional;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.ToString;
 
-/**
- * This enumeration represents a method code to determine male/female gametic
- * contribution.
- */
+/** This enumeration represents a method code to determine male/female gametic contribution. */
 @Getter
 @ToString
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-@Schema(description = "This object represents a method code to determine male/female gametic contribution.")
+@Schema(
+    description =
+        "This object represents a method code to determine male/female gametic contribution.")
 public enum MaleFemaleMethodologyEnum {
   F1("F1", "Visual Estimate", false),
   F2("F2", "Measured Cone Volume", false),
