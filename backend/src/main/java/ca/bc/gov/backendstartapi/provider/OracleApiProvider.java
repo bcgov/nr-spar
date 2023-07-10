@@ -1,35 +1,38 @@
 package ca.bc.gov.backendstartapi.provider;
 
+import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+
+import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 /** This class contains methods for fetching data from Oracle REST API. */
-@Component
+@Service
 @Slf4j
 public class OracleApiProvider extends Provider {
 
-  private LoggedUserService loggedUserService;
+  private final LoggedUserService loggedUserService;
 
-  @Autowired
-  OracleApiProvider(LoggedUserService loggedUserService) {
-    this(loggedUserService, new RestTemplate());
-  }
+  private final RestTemplate restTemplate;
 
-  OracleApiProvider(LoggedUserService loggedUserService, RestTemplate restTemplate) {
+  private final ProvidersConfig providersConfig;
+
+  OracleApiProvider(
+      LoggedUserService loggedUserService,
+      RestTemplateBuilder templateBuilder,
+      ProvidersConfig providersConfig) {
     super(log, "Oracle API");
     this.loggedUserService = loggedUserService;
+    this.restTemplate = templateBuilder.build();
+    this.providersConfig = providersConfig;
+    setBaseUri(this.providersConfig.getOracleApiBaseUri());
     setRestTemplate(restTemplate);
-    setUserJwtToken(this.loggedUserService.getLoggedUserToken());
   }
-
-  @Value("${oracle-api.base-url}")
-  private String oracleApiBaseUrl;
 
   /**
    * Find all Parent Tree and Genetic Quality to an Orchard.
@@ -40,6 +43,7 @@ public class OracleApiProvider extends Provider {
    */
   public Optional<OrchardSpuDto> findOrchardParentTreeGeneticQualityData(
       String orchardId, int spuId) {
+    setAuthentication();
     String oracleApiUrl = "/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}";
 
     OrchardSpuDto orchardTreeDto =
@@ -49,5 +53,10 @@ public class OracleApiProvider extends Provider {
             createParamsMap("orchardId", orchardId, "spuId", String.valueOf(spuId)));
 
     return Optional.ofNullable(orchardTreeDto);
+  }
+
+  private void setAuthentication() {
+    String token = this.loggedUserService.getLoggedUserToken();
+    setAditionalHeaders(Map.of("Authorization", "Bearer " + token));
   }
 }

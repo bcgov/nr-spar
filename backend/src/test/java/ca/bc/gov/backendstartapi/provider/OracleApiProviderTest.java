@@ -1,72 +1,54 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.web.client.MockRestServiceServer;
 
-@ExtendWith(SpringExtension.class)
+@RestClientTest({OracleApiProvider.class, LoggedUserService.class})
 class OracleApiProviderTest {
 
-  @Mock LoggedUserService loggedUserService;
+  @Autowired private OracleApiProvider oracleApiProvider;
 
-  @Mock RestTemplate restTemplate;
+  @MockBean private LoggedUserService loggedUserService;
 
-  private OracleApiProvider oracleApiProvider;
-
-  @BeforeEach
-  void setup() {
-    oracleApiProvider = new OracleApiProvider(loggedUserService, restTemplate);
-  }
+  @Autowired private MockRestServiceServer mockRestServiceServer;
 
   @Test
   @DisplayName("findOrchardParentTreeGeneticQualityDataTest")
   void findOrchardParentTreeGeneticQualityDataTest() {
-    String jwtToken = "1f7a4k5e8t9o5k6e9n8h5e2r6e";
-
-    when(loggedUserService.getLoggedUserToken()).thenReturn(jwtToken);
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-    headers.set("Authorization", "Bearer " + jwtToken);
-
-    String url = "null/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}";
-    HttpMethod method = HttpMethod.GET;
-    HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
-    Class<OrchardSpuDto> className = OrchardSpuDto.class;
-
-    OrchardSpuDto orchard = new OrchardSpuDto("123", "AT", 11L, new ArrayList<>());
-
-    ResponseEntity<OrchardSpuDto> orchardResponse =
-        ResponseEntity.status(HttpStatusCode.valueOf(200)).body(orchard);
+    when(loggedUserService.getLoggedUserToken()).thenReturn("1f7a4k5e8t9o5k6e9n8h5e2r6e");
 
     String orchardId = "405";
     int spuId = 7;
+    String url = "/null/api/orchards/parent-tree-genetic-quality/" + orchardId + "/" + spuId;
 
-    Map<String, String> uriVars = new HashMap<>();
-    uriVars.put("orchardId", orchardId);
-    uriVars.put("spuId", String.valueOf(spuId));
+    String json =
+        """
+        {
+          "orchardId": "123",
+          "vegetationCode": "AT",
+          "seedPlanningUnitId": 11,
+          "parentTrees": []
+        }
+        """;
 
-    when(restTemplate.exchange(url, method, requestEntity, className, uriVars))
-        .thenReturn(orchardResponse);
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
     Optional<OrchardSpuDto> orchardDto =
         oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId);
@@ -79,27 +61,11 @@ class OracleApiProviderTest {
   void findOrchardParentTreeGeneticQualityDataErrorTest() {
     when(loggedUserService.getLoggedUserToken()).thenReturn("");
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-    headers.set("Authorization", "Bearer ");
-
-    String url = "null/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}";
-    HttpMethod method = HttpMethod.GET;
-    HttpEntity<Void> requestEntity = new HttpEntity<Void>(headers);
-    Class<OrchardSpuDto> className = OrchardSpuDto.class;
-
-    ResponseEntity<OrchardSpuDto> orchardResponse =
-        ResponseEntity.status(HttpStatusCode.valueOf(401)).build();
-
     String orchardId = "405";
     int spuId = 7;
+    String url = "/null/api/orchards/parent-tree-genetic-quality/" + orchardId + "/" + spuId;
 
-    Map<String, String> uriVars = new HashMap<>();
-    uriVars.put("orchardId", orchardId);
-    uriVars.put("spuId", String.valueOf(spuId));
-
-    when(restTemplate.exchange(url, method, requestEntity, className, uriVars))
-        .thenReturn(orchardResponse);
+    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
 
     Optional<OrchardSpuDto> orchardDto =
         oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId);

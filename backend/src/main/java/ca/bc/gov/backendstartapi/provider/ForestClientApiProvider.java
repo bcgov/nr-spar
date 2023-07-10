@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.provider;
 
+import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import java.util.List;
 import java.util.Map;
@@ -8,11 +9,12 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /** Makes HTTP requests to the Forest Client API server. */
@@ -23,15 +25,12 @@ public class ForestClientApiProvider extends Provider {
   private static final Predicate<String> numberPredicate =
       Pattern.compile("^\\d{8}$").asMatchPredicate();
 
-  @Value("${forest-client-api.address}")
-  private static String baseUri;
-
-  @Value("${forest-client-api.key}")
-  private String forestClientApiKey;
+  private final ProvidersConfig providersConfig;
+  private final static String providerName = "ForestClient API";
 
   @Autowired
-  public ForestClientApiProvider() {
-    this(new RestTemplate());
+  public ForestClientApiProvider(ProvidersConfig providersConfig) {
+    this(new RestTemplate(), providersConfig);
   }
 
   /**
@@ -39,9 +38,10 @@ public class ForestClientApiProvider extends Provider {
    *
    * @param restTemplate The RestTemplate instance to be set.
    */
-  public ForestClientApiProvider(RestTemplate restTemplate) {
-    super(log, "ForestClient API");
-    setBaseUri(baseUri);
+  public ForestClientApiProvider(RestTemplate restTemplate, ProvidersConfig providersConfig) {
+    super(log, providerName);
+    this.providersConfig = providersConfig;
+    setBaseUri(this.providersConfig.getForestClientBaseUri());
     setRestTemplate(restTemplate);
   }
 
@@ -60,6 +60,7 @@ public class ForestClientApiProvider extends Provider {
   }
 
   private Optional<ForestClientDto> fetchClientByNumber(String number) {
+    setAuthentication();
     String api = "/clients/findByClientNumber/{number}";
 
     ForestClientDto clientDto =
@@ -69,26 +70,39 @@ public class ForestClientApiProvider extends Provider {
   }
 
   private Optional<ForestClientDto> fetchClientByAcronym(String acronym) {
+    setAuthentication();
     String apiUrl = "/clients/findByAcronym?acronym={acronym}";
-    Map<String, String> uriVars = createParamsMap("acronym", acronym);
 
+    HttpEntity<Void> requesEntity = getRequestEntity();
+    
+    Map<String, String> uriVars = createParamsMap("acronym", acronym);
     logParams(uriVars);
 
-    ResponseEntity<List<ForestClientDto>> response =
+    try {
+      ResponseEntity<List<ForestClientDto>> response =
         getRestTemplate()
             .exchange(
                 getFullApiAddress(apiUrl),
                 HttpMethod.GET,
-                getRequestEntity(),
+                requesEntity,
                 new ParameterizedTypeReference<List<ForestClientDto>>() {},
                 uriVars);
 
-    logResponseError(response);
+      if (response.getBody().size() > 1) {
+        log.warn("More than one client found for acronym {}", acronym);
+      }
+      log.info(providerName + " - Success response!");
+      return response.getBody().stream().findAny();
 
-    if (response.getBody().size() > 1) {
-      log.warn("More than one client found for acronym {}", acronym);
+    } catch (HttpClientErrorException httpExc) {
+      log.info(providerName + " - Response code error: {}", httpExc.getStatusCode());
     }
 
-    return response.getBody().stream().findAny();
+    return Optional.empty();
+  }
+
+  private void setAuthentication() {
+    String apiKey = this.providersConfig.getForestClientApiKey();
+    setAditionalHeaders(Map.of("X-API-KEY", apiKey));
   }
 }

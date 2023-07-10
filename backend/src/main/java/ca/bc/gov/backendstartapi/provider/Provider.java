@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Setter
@@ -19,9 +19,9 @@ class Provider {
 
   private final Logger log;
   private final String providerName;
-  private String userJwtToken;
   private String baseUri;
   private RestTemplate restTemplate;
+  private Map<String, String> aditionalHeaders;
 
   public Provider(Logger log, String providerName) {
     this.log = log;
@@ -39,15 +39,21 @@ class Provider {
    */
   protected <T> T doGetRequestSingleObject(
       Class<T> className, String apiUrl, Map<String, String> uriVars) {
+    HttpEntity<Void> requesEntity = getRequestEntity();
+
     logParams(uriVars);
 
-    ResponseEntity<T> response =
-        restTemplate.exchange(
-            getFullApiAddress(apiUrl), HttpMethod.GET, getRequestEntity(), className, uriVars);
+    try {
+      ResponseEntity<T> response =
+          restTemplate.exchange(getFullApiAddress(apiUrl), HttpMethod.GET, requesEntity, className, uriVars);
 
-    logResponseError(response);
+      log.info(providerName + " - Success response!");
+      return response.getBody();
+    } catch (HttpClientErrorException httpExc) {
+      log.info(providerName + " - Response code error: {}", httpExc.getStatusCode());
+    }
 
-    return response.getBody();
+    return null;
   }
 
   /**
@@ -71,9 +77,21 @@ class Provider {
   protected HttpEntity<Void> getRequestEntity() {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-    if (!Objects.isNull(userJwtToken)) {
-      headers.set("Authorization", "Bearer " + userJwtToken);
+    if (!Objects.isNull(aditionalHeaders)) {
+      for (Map.Entry<String, String> entry : aditionalHeaders.entrySet()) {
+        headers.set(entry.getKey(), entry.getValue());
+      }
     }
+
+    headers.forEach((key, values) -> {
+      String value = values.get(0);
+      boolean shouldMask = key.toLowerCase().contains("key")
+          || key.toLowerCase().contains("auth");
+      if (shouldMask) {
+        value = "****";
+      }
+      log.info(providerName + " - Adding Header -> [{}={}]", key, value);
+    });
 
     return new HttpEntity<>(headers);
   }
@@ -81,7 +99,7 @@ class Provider {
   protected void logParams(Map<String, String> uriVars) {
     if (!Objects.isNull(uriVars)) {
       for (Map.Entry<String, String> entry : uriVars.entrySet()) {
-        log.info(providerName + " - URI variable {}={}", entry.getKey(), entry.getValue());
+        log.info(providerName + " - Adding Param -> [{}={}]", entry.getKey(), entry.getValue());
       }
     }
   }
@@ -90,15 +108,6 @@ class Provider {
     String fullApiUrl = baseUri + apiUrl;
     log.info(providerName + " - Sending GET request to: {}", fullApiUrl);
     return fullApiUrl;
-  }
-
-  protected void logResponseError(ResponseEntity<?> response) {
-    if (!response.getStatusCode().equals(HttpStatusCode.valueOf(200))) {
-      log.info(providerName + " - Response code error : {}", response.getStatusCode());
-      return;
-    }
-
-    log.info(providerName + " - Success response!");
   }
 
   protected RestTemplate getRestTemplate() {
