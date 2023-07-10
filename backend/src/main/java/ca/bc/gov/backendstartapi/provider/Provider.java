@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import lombok.Setter;
-import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,14 +36,14 @@ class Provider {
    *     createParamsMap to create those.
    * @return A single object of the given className.
    */
-  protected <T> T doGetRequestSingleObject(
-      Class<T> className, String apiUrl, Map<String, String> uriVars) {
+  protected <T2> T2 doGetRequestSingleObject(
+      Class<T2> className, String apiUrl, Map<String, String> uriVars) {
     HttpEntity<Void> requesEntity = getRequestEntity();
 
     logParams(uriVars);
 
     try {
-      ResponseEntity<T> response =
+      ResponseEntity<T2> response =
           restTemplate.exchange(
               getFullApiAddress(apiUrl), HttpMethod.GET, requesEntity, className, uriVars);
 
