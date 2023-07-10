@@ -8,16 +8,12 @@
 
   tr > th:last-child,
   tr > td:last-child {
-    width: 5rem;
     padding-right: 2.5rem;
   }
 
+  tr > th:last-child div,
   tr > td:last-child {
     text-align: center;
-  }
-
-  .activities-table-action svg {
-    cursor: pointer;
   }
 }
 

@@ -10,7 +10,7 @@ import {
   TableCell,
   Button
 } from '@carbon/react';
-import { DataViewAlt } from '@carbon/icons-react';
+import { DataViewAlt, Download } from '@carbon/icons-react';
 
 import StatusItem from '../../StatusItem';
 
@@ -22,9 +22,15 @@ interface TableProps {
   elements: any[];
   clickFn: Function;
   headers: string[];
+  docTable?: boolean;
 }
 
-const RecentActivitiesTable = ({ elements, clickFn, headers }: TableProps) => {
+const RecentActivitiesTable = ({
+  elements,
+  clickFn,
+  headers,
+  docTable
+}: TableProps) => {
   const createTableCell = (value: any, key: string, index: number) => {
     const mapKey = `${key}-${index}`;
     switch (key) {
@@ -86,12 +92,28 @@ const RecentActivitiesTable = ({ elements, clickFn, headers }: TableProps) => {
               >
                 <Button
                   hasIconOnly
-                  iconDescription="Icon Description"
+                  iconDescription={`View ${docTable ? 'file' : 'request'}`}
+                  tooltipPosition="bottom"
                   kind="ghost"
                   onClick={() => clickFn(item.id)}
                   renderIcon={DataViewAlt}
                   size="md"
                 />
+                {
+                  docTable
+                    ? (
+                      <Button
+                        hasIconOnly
+                        iconDescription="Download file"
+                        tooltipPosition="bottom"
+                        kind="ghost"
+                        onClick={() => null}
+                        renderIcon={Download}
+                        size="md"
+                      />
+                    )
+                    : null
+                }
               </TableCell>
             </TableRow>
           ))

@@ -105,6 +105,7 @@ const RecentActivities = () => {
                               headers={filesAndDocsHeaders}
                               elements={filesAndDocsQuery.data}
                               clickFn={goToActivity}
+                              docTable
                             />
                           )
                       }
