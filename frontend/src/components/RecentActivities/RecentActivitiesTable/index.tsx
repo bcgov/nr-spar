@@ -67,26 +67,28 @@ const RecentActivitiesTable = ({ elements, clickFn, headers }: TableProps) => {
         </TableRow>
       </TableHead>
       <TableBody aria-live="off">
-        {elements.map((item, idx) => (
-          <TableRow key={hashObject(item)} id={`row${idx}`}>
-            {
-              Object.keys(item).map((key) => {
-                if (key.toLowerCase() !== 'id') {
-                  return createTableCell(item[key], key, idx);
-                }
-                return null;
-              })
-            }
-            <TableCell
-              className="activities-table-cell"
-              tabIndex={0}
-              aria-label="View more"
-              onClick={() => clickFn(item.id)}
-            >
-              <DataViewAlt />
-            </TableCell>
-          </TableRow>
-        ))}
+        {
+          elements.map((item, idx) => (
+            <TableRow key={hashObject(item)} id={`row${idx}`}>
+              {
+                Object.keys(item).map((key) => {
+                  if (key.toLowerCase() !== 'id') {
+                    return createTableCell(item[key], key, idx);
+                  }
+                  return null;
+                })
+              }
+              <TableCell
+                className="activities-table-cell"
+                tabIndex={0}
+                aria-label="View more"
+                onClick={() => clickFn(item.id)}
+              >
+                <DataViewAlt />
+              </TableCell>
+            </TableRow>
+          ))
+        }
       </TableBody>
     </Table>
   );

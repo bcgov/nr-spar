@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
@@ -18,6 +18,8 @@ import Subtitle from '../Subtitle';
 import RecentActivitiesTable from './RecentActivitiesTable';
 
 import getRecentActivities from '../../api-service/recentActivitiesAPI';
+import getFilesAndDocs from '../../api-service/filesAndDocsAPI';
+
 import {
   componentTexts,
   fileDocstableHeaders,
@@ -29,14 +31,14 @@ import {
 import './styles.scss';
 
 const RecentActivities = () => {
-  // Will let eslint ignoring it for now,
-  // since we will use this state with API calls
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [filesDocsItems] = useState([]);
-
   const recentActivitiesQuery = useQuery({
     queryKey: ['recent-activities'],
     queryFn: getRecentActivities
+  });
+
+  const filesAndDocsQuery = useQuery({
+    queryKey: ['files-docs'],
+    queryFn: getFilesAndDocs
   });
 
   const navigate = useNavigate();
@@ -60,10 +62,11 @@ const RecentActivities = () => {
               <Tab>{componentTexts.tabs.requests}</Tab>
               <Tab>{componentTexts.tabs.files}</Tab>
             </TabList>
-            <TabPanels>
-              {
-                recentActivitiesQuery.isSuccess
-                  ? (
+            {
+              recentActivitiesQuery.isSuccess
+              && filesAndDocsQuery.isSuccess
+                ? (
+                  <TabPanels>
                     <TabPanel>
                       {
                         recentActivitiesQuery.data.length === 0
@@ -85,36 +88,36 @@ const RecentActivities = () => {
                           )
                       }
                     </TabPanel>
-                  )
-                  : (
-                    <DataTableSkeleton
-                      showToolbar={false}
-                      showHeader={false}
-                    />
-                  )
-              }
-              <TabPanel>
-                {
-                  filesDocsItems.length === 0
-                    ? (
-                      <div className="empty-recent-activity-files-docs">
-                        <EmptySection
-                          pictogram="Farm_02"
-                          title={getEmptySectionTitle('files & docs')}
-                          description={getEmptySectionDesc('files & docs')}
-                        />
-                      </div>
-                    )
-                    : (
-                      <RecentActivitiesTable
-                        headers={fileDocstableHeaders}
-                        elements={filesDocsItems}
-                        clickFn={goToActivity}
-                      />
-                    )
-                }
-              </TabPanel>
-            </TabPanels>
+                    <TabPanel>
+                      {
+                        filesAndDocsQuery.data.length === 0
+                          ? (
+                            <div className="empty-recent-activity-files-docs">
+                              <EmptySection
+                                pictogram="Farm_02"
+                                title={getEmptySectionTitle('files & docs')}
+                                description={getEmptySectionDesc('files & docs')}
+                              />
+                            </div>
+                          )
+                          : (
+                            <RecentActivitiesTable
+                              headers={fileDocstableHeaders}
+                              elements={filesAndDocsQuery.data}
+                              clickFn={goToActivity}
+                            />
+                          )
+                      }
+                    </TabPanel>
+                  </TabPanels>
+                )
+                : (
+                  <DataTableSkeleton
+                    showToolbar={false}
+                    showHeader={false}
+                  />
+                )
+            }
           </Tabs>
         </Column>
       </Row>
