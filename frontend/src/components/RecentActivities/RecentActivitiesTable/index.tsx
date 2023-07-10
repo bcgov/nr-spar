@@ -24,11 +24,12 @@ interface TableProps {
 }
 
 const RecentActivitiesTable = ({ elements, clickFn, headers }: TableProps) => {
-  const createTableCell = (value: any, key: string) => {
+  const createTableCell = (value: any, key: string, index: number) => {
+    const mapKey = `${key}-${index}`;
     switch (key) {
       case 'status':
         return (
-          <TableCell className="activities-table-cell">
+          <TableCell key={mapKey} className="activities-table-cell">
             <StatusItem status={value} />
           </TableCell>
         );
@@ -36,25 +37,13 @@ const RecentActivitiesTable = ({ elements, clickFn, headers }: TableProps) => {
       case 'last_update':
       case 'last_viewed':
         return (
-          <TableCell className="activities-table-cell">
+          <TableCell key={mapKey} className="activities-table-cell">
             {formatDate(value)}
-          </TableCell>
-        );
-      // Use the id to call the correct click function
-      case 'id':
-        return (
-          <TableCell
-            className="activities-table-cell"
-            tabIndex={0}
-            aria-label="View more"
-            onClick={() => clickFn(value)}
-          >
-            <DataViewAlt />
           </TableCell>
         );
       default:
         return (
-          <TableCell className="activities-table-cell">
+          <TableCell key={mapKey} className="activities-table-cell">
             {value}
           </TableCell>
         );
@@ -81,8 +70,21 @@ const RecentActivitiesTable = ({ elements, clickFn, headers }: TableProps) => {
         {elements.map((item, idx) => (
           <TableRow key={hashObject(item)} id={`row${idx}`}>
             {
-              Object.keys(item).map((key) => createTableCell(item[key], key))
+              Object.keys(item).map((key) => {
+                if (key.toLowerCase() !== 'id') {
+                  return createTableCell(item[key], key, idx);
+                }
+                return null;
+              })
             }
+            <TableCell
+              className="activities-table-cell"
+              tabIndex={0}
+              aria-label="View more"
+              onClick={() => clickFn(item.id)}
+            >
+              <DataViewAlt />
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

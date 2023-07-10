@@ -1,4 +1,5 @@
 type Activity = {
+  id: string;
   type: string;
   status: number;
   request_id: string;

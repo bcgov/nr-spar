@@ -16,7 +16,7 @@ import {
 // import ActivityTable from '../ActivityTable';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
-import FilesDocsTable from '../FilesDocsTable';
+// import FilesDocsTable from '../FilesDocsTable';
 import RecentActivitiesTable from './RecentActivitiesTable';
 
 import getRecentActivities from '../../api-service/recentActivitiesAPI';
@@ -80,9 +80,9 @@ const RecentActivities = () => {
                           )
                           : (
                             <RecentActivitiesTable
+                              headers={tableHeaders}
                               elements={recentActivitiesQuery.data}
                               clickFn={goToActivity}
-                              headers={tableHeaders}
                             />
                           )
                       }
@@ -108,9 +108,10 @@ const RecentActivities = () => {
                       </div>
                     )
                     : (
-                      <FilesDocsTable
-                        elements={filesDocsItems}
+                      <RecentActivitiesTable
                         headers={fileDocstableHeaders}
+                        elements={filesDocsItems}
+                        clickFn={goToActivity}
                       />
                     )
                 }
