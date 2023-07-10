@@ -1,4 +1,4 @@
-export const tableHeaders: string[] = [
+export const activitiesHeaders: string[] = [
   'Activity type',
   'Status',
   'Request ID',
@@ -7,7 +7,7 @@ export const tableHeaders: string[] = [
   'View'
 ];
 
-export const fileDocstableHeaders: string[] = [
+export const filesAndDocsHeaders: string[] = [
   'File name',
   'File format',
   'Created at',

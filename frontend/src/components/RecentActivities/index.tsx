@@ -22,10 +22,10 @@ import getFilesAndDocs from '../../api-service/filesAndDocsAPI';
 
 import {
   componentTexts,
-  fileDocstableHeaders,
   getEmptySectionDesc,
   getEmptySectionTitle,
-  tableHeaders
+  activitiesHeaders,
+  filesAndDocsHeaders
 } from './constants';
 
 import './styles.scss';
@@ -81,7 +81,7 @@ const RecentActivities = () => {
                           )
                           : (
                             <RecentActivitiesTable
-                              headers={tableHeaders}
+                              headers={activitiesHeaders}
                               elements={recentActivitiesQuery.data}
                               clickFn={goToActivity}
                             />
@@ -102,7 +102,7 @@ const RecentActivities = () => {
                           )
                           : (
                             <RecentActivitiesTable
-                              headers={fileDocstableHeaders}
+                              headers={filesAndDocsHeaders}
                               elements={filesAndDocsQuery.data}
                               clickFn={goToActivity}
                             />
