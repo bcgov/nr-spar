@@ -1,5 +1,5 @@
 type ComboBoxEvent = {
-  selectedItem: string;
+  selectedItem: any
 };
 
 export default ComboBoxEvent;
