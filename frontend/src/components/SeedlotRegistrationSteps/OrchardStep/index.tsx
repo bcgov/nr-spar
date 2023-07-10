@@ -361,49 +361,23 @@ const OrchardStep = ({
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
-            {
-              // Dynamic rendering of radio buttons does not work with carbon radio button groups
-              // So we are left with these gross duplicated code
-              isPLISpecies
-                ? (
-                  <RadioButtonGroup
-                    legendText={orcharStepText.gameteSection.maleGametic.label}
-                    name="male-gametic-radiogroup"
-                    orientation="vertical"
-                    className={invalidMalGametic ? 'male-gametic-invalid' : ''}
-                    onChange={(e: string) => maleGameticHandler(e)}
-                    valueSelected={state.maleGametic}
-                  >
-                    {maleGameticOptions.map((item) => (
-                      <RadioButton
-                        key={item.code}
-                        id={`${item.code.toLowerCase()}-radio`}
-                        labelText={item.label}
-                        value={item.code}
-                      />
-                    ))}
-                  </RadioButtonGroup>
-                )
-                : (
-                  <RadioButtonGroup
-                    legendText={orcharStepText.gameteSection.maleGametic.label}
-                    name="male-gametic-radiogroup"
-                    orientation="vertical"
-                    className={invalidMalGametic ? 'male-gametic-invalid' : ''}
-                    onChange={(e: string) => maleGameticHandler(e)}
-                    valueSelected={state.maleGametic}
-                  >
-                    {maleGameticOptions.map((item) => (
-                      <RadioButton
-                        key={item.code}
-                        id={`${item.code.toLowerCase()}-radio`}
-                        labelText={item.label}
-                        value={item.code}
-                      />
-                    ))}
-                  </RadioButtonGroup>
-                )
-            }
+            <RadioButtonGroup
+              legendText={orcharStepText.gameteSection.maleGametic.label}
+              name="male-gametic-radiogroup"
+              orientation="vertical"
+              className={invalidMalGametic ? 'male-gametic-invalid' : ''}
+              onChange={(e: string) => maleGameticHandler(e)}
+              valueSelected={state.maleGametic}
+            >
+              {maleGameticOptions.map((item) => (
+                <RadioButton
+                  key={item.code}
+                  id={`${item.code.toLowerCase()}-radio`}
+                  labelText={item.label}
+                  value={item.code}
+                />
+              ))}
+            </RadioButtonGroup>
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">
