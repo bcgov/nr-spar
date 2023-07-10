@@ -5,6 +5,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
+import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.Optional;
@@ -18,12 +19,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 
-@RestClientTest({OracleApiProvider.class, LoggedUserService.class})
+@RestClientTest(OracleApiProvider.class)
 class OracleApiProviderTest {
 
   @Autowired private OracleApiProvider oracleApiProvider;
 
   @MockBean private LoggedUserService loggedUserService;
+
+  @MockBean private ProvidersConfig providersConfig;
 
   @Autowired private MockRestServiceServer mockRestServiceServer;
 
