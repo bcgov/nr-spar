@@ -3,7 +3,6 @@ package ca.bc.gov.backendstartapi.provider;
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;

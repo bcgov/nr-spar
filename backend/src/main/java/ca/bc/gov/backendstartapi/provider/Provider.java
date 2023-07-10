@@ -45,7 +45,8 @@ class Provider {
 
     try {
       ResponseEntity<T> response =
-          restTemplate.exchange(getFullApiAddress(apiUrl), HttpMethod.GET, requesEntity, className, uriVars);
+          restTemplate.exchange(
+              getFullApiAddress(apiUrl), HttpMethod.GET, requesEntity, className, uriVars);
 
       log.info(providerName + " - Success response!");
       return response.getBody();
@@ -83,15 +84,16 @@ class Provider {
       }
     }
 
-    headers.forEach((key, values) -> {
-      String value = values.get(0);
-      boolean shouldMask = key.toLowerCase().contains("key")
-          || key.toLowerCase().contains("auth");
-      if (shouldMask) {
-        value = "****";
-      }
-      log.info(providerName + " - Adding Header -> [{}={}]", key, value);
-    });
+    headers.forEach(
+        (key, values) -> {
+          String value = values.get(0);
+          boolean shouldMask =
+              key.toLowerCase().contains("key") || key.toLowerCase().contains("auth");
+          if (shouldMask) {
+            value = "****";
+          }
+          log.info(providerName + " - Adding Header -> [{}={}]", key, value);
+        });
 
     return new HttpEntity<>(headers);
   }

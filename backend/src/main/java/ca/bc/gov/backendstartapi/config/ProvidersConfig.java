@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+/** This class contains configurations for all external APIs like address and keys. */
 @Getter
 @Configuration
 public class ProvidersConfig {

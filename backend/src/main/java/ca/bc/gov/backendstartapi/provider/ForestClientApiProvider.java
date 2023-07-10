@@ -26,7 +26,7 @@ public class ForestClientApiProvider extends Provider {
       Pattern.compile("^\\d{8}$").asMatchPredicate();
 
   private final ProvidersConfig providersConfig;
-  private final static String providerName = "ForestClient API";
+  private static final String PROVIDER = "ForestClient API";
 
   @Autowired
   public ForestClientApiProvider(ProvidersConfig providersConfig) {
@@ -39,7 +39,7 @@ public class ForestClientApiProvider extends Provider {
    * @param restTemplate The RestTemplate instance to be set.
    */
   public ForestClientApiProvider(RestTemplate restTemplate, ProvidersConfig providersConfig) {
-    super(log, providerName);
+    super(log, PROVIDER);
     this.providersConfig = providersConfig;
     setBaseUri(this.providersConfig.getForestClientBaseUri());
     setRestTemplate(restTemplate);
@@ -74,28 +74,28 @@ public class ForestClientApiProvider extends Provider {
     String apiUrl = "/clients/findByAcronym?acronym={acronym}";
 
     HttpEntity<Void> requesEntity = getRequestEntity();
-    
+
     Map<String, String> uriVars = createParamsMap("acronym", acronym);
     logParams(uriVars);
 
     try {
       ResponseEntity<List<ForestClientDto>> response =
-        getRestTemplate()
-            .exchange(
-                getFullApiAddress(apiUrl),
-                HttpMethod.GET,
-                requesEntity,
-                new ParameterizedTypeReference<List<ForestClientDto>>() {},
-                uriVars);
+          getRestTemplate()
+              .exchange(
+                  getFullApiAddress(apiUrl),
+                  HttpMethod.GET,
+                  requesEntity,
+                  new ParameterizedTypeReference<List<ForestClientDto>>() {},
+                  uriVars);
 
       if (response.getBody().size() > 1) {
         log.warn("More than one client found for acronym {}", acronym);
       }
-      log.info(providerName + " - Success response!");
+      log.info(PROVIDER + " - Success response!");
       return response.getBody().stream().findAny();
 
     } catch (HttpClientErrorException httpExc) {
-      log.info(providerName + " - Response code error: {}", httpExc.getStatusCode());
+      log.info(PROVIDER + " - Response code error: {}", httpExc.getStatusCode());
     }
 
     return Optional.empty();
