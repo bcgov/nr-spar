@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.enums;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Optional;
 import lombok.Getter;
 import lombok.ToString;
 

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -71,8 +70,8 @@ const OrchardStep = ({
     return result;
   };
 
-  const [maleGameticOptions] = useState(filterGameticOptions('m'));
-  const [femaleGameticOptions] = useState(filterGameticOptions('f'));
+  const maleGameticOptions = useMemo(() => filterGameticOptions('m'), []);
+  const femaleGameticOptions = useMemo(() => filterGameticOptions('f'), []);
 
   const addRefs = (element: HTMLInputElement, name: string) => {
     if (element !== null) {
