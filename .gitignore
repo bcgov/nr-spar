@@ -110,6 +110,3 @@ snyk.sarif
 frontend/cypress/videos
 frontend/cypress/screenshots
 frontend/cypress/downloads
-
-# Backup copies
-*.~
