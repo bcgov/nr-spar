@@ -43,6 +43,16 @@ public class OrchardService {
   }
 
   /**
+   * Find all SPU IDs. It can be active or not.
+   *
+   * @param active determine if the SPU should be active or not.
+   * @return A {@link List} of {@link ActiveOrchardSeedPlanningUnit} or an empty list.
+   */
+  public List<ActiveOrchardSeedPlanningUnit> findAllSpuIds(String orchardId, boolean active) {
+    return activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, active);
+  }
+
+  /**
    * Find a SPU ID given an Orchard ID. It can be active or not.
    *
    * @param orchardId Orchard's identification.

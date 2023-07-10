@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,5 +65,25 @@ public class OrchardEndpoint {
               description = "Identifier of the Orchard.")
           String orchardId) {
     return orchardService.findParentTreeGeneticQualityData(orchardId);
+  }
+
+  /**
+   * Gets all orchards with vegCode
+   *
+   * @param vegCode {@link Orchard}'s identification
+   * @return an {@link String}
+   * @throws ResponseStatusException if no data is found
+   */
+  @GetMapping(path = "/vegetation-code/{vegCode}")
+  @PreAuthorize("hasRole('user_read')")
+  public List<OrchardDto> getOrchardsByVegCode(
+      @PathVariable
+          @Parameter(
+              name = "vegCode",
+              in = ParameterIn.PATH,
+              description = "Identifier of the Orchard.")
+          String vegCode) {
+    List<OrchardDto> tempList = new ArrayList<OrchardDto>();
+    return tempList;
   }
 }
