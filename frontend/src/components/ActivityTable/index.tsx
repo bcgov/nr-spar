@@ -55,7 +55,12 @@ const ActivityTable = ({ elements, clickFn, headers }: TableProps) => (
           <TableCell className="recent-activities-header">
             {item.last_viewed}
           </TableCell>
-          <TableCell className="recent-activities-header" tabIndex={0} aria-label={`${item.type} view more`} onClick={() => clickFn(item.request_id)}>
+          <TableCell
+            className="recent-activities-header"
+            tabIndex={0}
+            aria-label={`${item.type} view more`}
+            onClick={() => clickFn(item.request_id)}
+          >
             <DataViewAlt />
           </TableCell>
         </TableRow>

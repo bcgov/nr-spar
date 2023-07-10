@@ -13,11 +13,13 @@ import {
   DataTableSkeleton
 } from '@carbon/react';
 
-import ActivityTable from '../ActivityTable';
+// import ActivityTable from '../ActivityTable';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
 import FilesDocsTable from '../FilesDocsTable';
+import RecentActivitiesTable from './RecentActivitiesTable';
 
+import getRecentActivities from '../../api-service/recentActivitiesAPI';
 import {
   componentTexts,
   fileDocstableHeaders,
@@ -27,7 +29,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import getRecentActivities from '../../api-service/recentActivitiesAPI';
 
 const RecentActivities = () => {
   // Will let eslint ignoring it for now,
@@ -78,7 +79,7 @@ const RecentActivities = () => {
                             </div>
                           )
                           : (
-                            <ActivityTable
+                            <RecentActivitiesTable
                               elements={recentActivitiesQuery.data}
                               clickFn={goToActivity}
                               headers={tableHeaders}
