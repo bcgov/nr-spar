@@ -79,7 +79,7 @@ const RecentActivitiesTable = ({ elements, clickFn, headers }: TableProps) => {
                 })
               }
               <TableCell
-                className="activities-table-cell"
+                className="activities-table-action"
                 tabIndex={0}
                 aria-label="View more"
                 onClick={() => clickFn(item.id)}

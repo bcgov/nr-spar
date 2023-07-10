@@ -2,8 +2,13 @@
   margin-bottom: 2.5rem;
 
   .activities-table-header,
-  .activities-table-cell {
+  .activities-table-cell,
+  .activities-table-action {
     padding-left: 2.5rem;
+  }
+
+  .activities-table-action svg {
+    cursor: pointer;
   }
 }
 
