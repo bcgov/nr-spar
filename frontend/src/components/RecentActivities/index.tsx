@@ -13,10 +13,8 @@ import {
   DataTableSkeleton
 } from '@carbon/react';
 
-// import ActivityTable from '../ActivityTable';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
-// import FilesDocsTable from '../FilesDocsTable';
 import RecentActivitiesTable from './RecentActivitiesTable';
 
 import getRecentActivities from '../../api-service/recentActivitiesAPI';
