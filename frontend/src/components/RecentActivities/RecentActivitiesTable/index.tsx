@@ -7,7 +7,8 @@ import {
   TableHeader,
   TableRow,
   TableBody,
-  TableCell
+  TableCell,
+  Button
 } from '@carbon/react';
 import { DataViewAlt } from '@carbon/icons-react';
 
@@ -82,9 +83,15 @@ const RecentActivitiesTable = ({ elements, clickFn, headers }: TableProps) => {
                 className="activities-table-action"
                 tabIndex={0}
                 aria-label="View more"
-                onClick={() => clickFn(item.id)}
               >
-                <DataViewAlt />
+                <Button
+                  hasIconOnly
+                  iconDescription="Icon Description"
+                  kind="ghost"
+                  onClick={() => clickFn(item.id)}
+                  renderIcon={DataViewAlt}
+                  size="md"
+                />
               </TableCell>
             </TableRow>
           ))

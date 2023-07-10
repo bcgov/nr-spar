@@ -1,10 +1,19 @@
 .activity-table {
   margin-bottom: 2.5rem;
 
-  .activities-table-header,
-  .activities-table-cell,
-  .activities-table-action {
+  tr > th:first-child,
+  tr > td:first-child {
     padding-left: 2.5rem;
+  }
+
+  tr > th:last-child,
+  tr > td:last-child {
+    width: 5rem;
+    padding-right: 2.5rem;
+  }
+
+  tr > td:last-child {
+    text-align: center;
   }
 
   .activities-table-action svg {
