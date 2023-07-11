@@ -10,7 +10,7 @@ import {
   TableCell,
   Button
 } from '@carbon/react';
-import { DataViewAlt, Download } from '@carbon/icons-react';
+import * as Icons from '@carbon/icons-react';
 
 import StatusItem from '../../StatusItem';
 
@@ -31,13 +31,31 @@ const RecentActivitiesTable = ({
   headers,
   docTable
 }: TableProps) => {
-  const createTableCell = (value: any, key: string, index: number) => {
+  const getFilesAndDocsIcons = (format: string) => {
+    const iconSize = '18';
+    switch (format) {
+      case 'PDF file':
+        return (
+          <Icons.DocumentPdf size={iconSize} />
+        );
+      case 'Word file':
+        return (
+          <Icons.DocumentWordProcessor size={iconSize} />
+        );
+      default:
+        return (
+          <Icons.Document size={iconSize} />
+        );
+    }
+  };
+
+  const createTableCell = (obj: any, key: string, index: number) => {
     const mapKey = `${key}-${index}`;
     switch (key) {
       case 'status':
         return (
           <TableCell key={mapKey} className="activities-table-cell">
-            <StatusItem status={value} />
+            <StatusItem status={obj[key]} />
           </TableCell>
         );
       case 'created_at':
@@ -45,13 +63,20 @@ const RecentActivitiesTable = ({
       case 'last_viewed':
         return (
           <TableCell key={mapKey} className="activities-table-cell">
-            {formatDate(value)}
+            {formatDate(obj[key])}
+          </TableCell>
+        );
+      case 'name':
+        return (
+          <TableCell key={mapKey} className="activities-table-cell">
+            {getFilesAndDocsIcons(obj.format)}
+            {obj[key]}
           </TableCell>
         );
       default:
         return (
           <TableCell key={mapKey} className="activities-table-cell">
-            {value}
+            {obj[key]}
           </TableCell>
         );
     }
@@ -80,7 +105,7 @@ const RecentActivitiesTable = ({
               {
                 Object.keys(item).map((key) => {
                   if (key.toLowerCase() !== 'id') {
-                    return createTableCell(item[key], key, idx);
+                    return createTableCell(item, key, idx);
                   }
                   return null;
                 })
@@ -96,7 +121,7 @@ const RecentActivitiesTable = ({
                   tooltipPosition="bottom"
                   kind="ghost"
                   onClick={() => clickFn(item.id)}
-                  renderIcon={DataViewAlt}
+                  renderIcon={Icons.DataViewAlt}
                   size="md"
                 />
                 {
@@ -108,7 +133,7 @@ const RecentActivitiesTable = ({
                         tooltipPosition="bottom"
                         kind="ghost"
                         onClick={() => null}
-                        renderIcon={Download}
+                        renderIcon={Icons.Download}
                         size="md"
                       />
                     )

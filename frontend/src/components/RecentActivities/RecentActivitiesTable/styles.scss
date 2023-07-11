@@ -15,6 +15,12 @@
   tr > td:last-child {
     text-align: center;
   }
+
+  .activities-table-cell svg {
+    position: relative;
+    margin-right: 0.5rem;
+    top: 0.1875rem;
+  }
 }
 
 @media only screen and (max-width: 672px) {
