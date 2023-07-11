@@ -60,7 +60,7 @@ const RecentActivitiesTable = ({
         );
       case 'createdAt':
       case 'lastUpdate':
-      case 'last_viewed':
+      case 'lastViewed':
         return (
           <TableCell key={mapKey} className="activities-table-cell">
             {formatDate(obj[key])}
