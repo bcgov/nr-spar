@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.Setter;
@@ -74,7 +75,7 @@ class Provider {
     return uriVars;
   }
 
-  protected HttpEntity<Void> getRequestEntity() {
+  protected HttpHeaders getHttpHeaders() {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
     if (!Objects.isNull(aditionalHeaders)) {
@@ -93,8 +94,11 @@ class Provider {
           }
           log.info(providerName + " - Adding Header -> [{}={}]", key, value);
         });
+    return headers;
+  }
 
-    return new HttpEntity<>(headers);
+  protected HttpEntity<Void> getRequestEntity() {
+    return new HttpEntity<>(getHttpHeaders());
   }
 
   protected void logParams(Map<String, String> uriVars) {

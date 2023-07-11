@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -71,14 +72,14 @@ public class OrchardEndpoint {
    */
   @GetMapping(path = "/vegetation-code/{vegCode}")
   @PreAuthorize("hasRole('user_read')")
-  public List<OrchardDto> getOrchardsByVegCode(
+  public List<ActiveOrchardSeedPlanningUnit> getOrchardsByVegCode(
       @PathVariable
           @Parameter(
               name = "vegCode",
               in = ParameterIn.PATH,
               description = "Identifier of the Orchard.")
           String vegCode) {
-    List<OrchardDto> tempList = new ArrayList<OrchardDto>();
-    return tempList;
+    // List<OrchardDto> tempList = new ArrayList<OrchardDto>();
+    return orchardService.findAllSpu(true);
   }
 }
