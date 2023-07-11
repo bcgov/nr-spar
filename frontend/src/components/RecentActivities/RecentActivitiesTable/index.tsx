@@ -58,8 +58,8 @@ const RecentActivitiesTable = ({
             <StatusItem status={obj[key]} />
           </TableCell>
         );
-      case 'created_at':
-      case 'last_update':
+      case 'createdAt':
+      case 'lastUpdate':
       case 'last_viewed':
         return (
           <TableCell key={mapKey} className="activities-table-cell">
