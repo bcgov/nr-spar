@@ -47,10 +47,10 @@ class Provider {
           restTemplate.exchange(
               getFullApiAddress(apiUrl), HttpMethod.GET, requesEntity, className, uriVars);
 
-      log.info(providerName + " - Success response!");
+      log.info("{} - Success response!", providerName);
       return response.getBody();
     } catch (HttpClientErrorException httpExc) {
-      log.info(providerName + " - Response code error: {}", httpExc.getStatusCode());
+      log.info("{} - Response code error: {}", providerName, httpExc.getStatusCode());
     }
 
     return null;
@@ -91,7 +91,7 @@ class Provider {
           if (shouldMask) {
             value = "****";
           }
-          log.info(providerName + " - Adding Header -> [{}={}]", key, value);
+          log.info("{} - Adding Header -> [{}={}]", providerName, key, value);
         });
 
     return new HttpEntity<>(headers);
@@ -100,14 +100,14 @@ class Provider {
   protected void logParams(Map<String, String> uriVars) {
     if (!Objects.isNull(uriVars)) {
       for (Map.Entry<String, String> entry : uriVars.entrySet()) {
-        log.info(providerName + " - Adding Param -> [{}={}]", entry.getKey(), entry.getValue());
+        log.info("{} - Adding Param -> [{}={}]", providerName, entry.getKey(), entry.getValue());
       }
     }
   }
 
   protected String getFullApiAddress(String apiUrl) {
     String fullApiUrl = baseUri + apiUrl;
-    log.info(providerName + " - Sending GET request to: {}", fullApiUrl);
+    log.info("{} - Sending GET request to: {}", providerName, fullApiUrl);
     return fullApiUrl;
   }
 
