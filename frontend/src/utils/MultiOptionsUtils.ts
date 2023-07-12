@@ -37,7 +37,7 @@ export const getCheckboxOptions = (
   const resultList: Array<MultiOptionsObj> = [];
 
   dataList.forEach((data: any) => {
-    const newItem = { ...multiOptionsItem };
+    const newItem = structuredClone(multiOptionsItem);
     newItem.code = data.code;
     newItem.description = data.description;
     newItem.label = createCheckboxLabel(data.description, data.code);
@@ -52,12 +52,14 @@ export const getCheckboxOptions = (
 export const getMultiOptList = (
   dataList: any,
   toCapFirstChar: boolean = true,
-  toTrimExtraSpaces: boolean = false
+  toTrimExtraSpaces: boolean = false,
+  insertProperty: boolean = false,
+  additionalProperties: string[] = []
 ) => {
   const resultList: Array<MultiOptionsObj> = [];
 
   dataList.forEach((data: any) => {
-    const newItem = { ...multiOptionsItem };
+    const newItem = structuredClone(multiOptionsItem);
     newItem.code = data.code;
     newItem.description = data.description;
     if (toCapFirstChar) {
@@ -65,6 +67,13 @@ export const getMultiOptList = (
     }
     if (toTrimExtraSpaces) {
       newItem.description = trimExtraSpaces(newItem.description);
+    }
+    if (insertProperty) {
+      additionalProperties.forEach((property) => {
+        Object.assign(newItem, {
+          [property]: data[property]
+        });
+      });
     }
     newItem.label = `${newItem.code} - ${newItem.description}`;
     resultList.push(newItem);
