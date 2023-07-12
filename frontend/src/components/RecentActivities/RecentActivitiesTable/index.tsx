@@ -16,6 +16,9 @@ import StatusItem from '../../StatusItem';
 
 import formatDate from '../../../utils/DateUtils';
 
+import ActivityIcons from '../../../enums/ActivityIcons';
+import FilesAndDocsIcons from '../../../enums/FilesAndDocsIcons';
+
 import './styles.scss';
 
 interface TableProps {
@@ -31,26 +34,13 @@ const RecentActivitiesTable = ({
   headers,
   docTable
 }: TableProps) => {
-  const getFilesAndDocsIcons = (format: string) => {
-    const iconSize = '18';
-    switch (format) {
-      case 'PDF file':
-        return (
-          <Icons.DocumentPdf size={iconSize} />
-        );
-      case 'Word file':
-        return (
-          <Icons.DocumentWordProcessor size={iconSize} />
-        );
-      default:
-        return (
-          <Icons.Document size={iconSize} />
-        );
-    }
-  };
+  const iconSize = '18';
+
+  const writeFileFormat = (format: string) => `${format.charAt(0) + format.slice(1).toLowerCase()} file`;
 
   const createTableCell = (obj: any, key: string, index: number) => {
     const mapKey = `${key}-${index}`;
+    let Img;
     switch (key) {
       case 'status':
         return (
@@ -67,9 +57,28 @@ const RecentActivitiesTable = ({
           </TableCell>
         );
       case 'name':
+        Img = Icons[
+          FilesAndDocsIcons[obj.format]
+            ? FilesAndDocsIcons[obj.format]
+            : FilesAndDocsIcons.GENERIC
+        ];
         return (
           <TableCell key={mapKey} className="activities-table-cell">
-            {getFilesAndDocsIcons(obj.format)}
+            <Img size={iconSize} />
+            {obj[key]}
+          </TableCell>
+        );
+      case 'format':
+        return (
+          <TableCell key={mapKey} className="activities-table-cell">
+            {writeFileFormat(obj[key])}
+          </TableCell>
+        );
+      case 'activity':
+        Img = Icons[ActivityIcons[obj.type]];
+        return (
+          <TableCell key={mapKey} className="activities-table-cell">
+            <Img size={iconSize} />
             {obj[key]}
           </TableCell>
         );
@@ -104,7 +113,7 @@ const RecentActivitiesTable = ({
             <TableRow key={hashObject(item)} id={`row${idx}`}>
               {
                 Object.keys(item).map((key) => {
-                  if (key.toLowerCase() !== 'id') {
+                  if (key.toLowerCase() !== 'id' && key.toLowerCase() !== 'type') {
                     return createTableCell(item, key, idx);
                   }
                   return null;

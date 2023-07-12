@@ -1,7 +1,8 @@
 const RecentActivityItems = [
   {
     id: '0',
-    type: 'Seedling request',
+    activity: 'Seedling request',
+    type: 'SEEDLING',
     status: 0,
     requestId: '201589',
     createdAt: '2022-10-27',
@@ -9,7 +10,8 @@ const RecentActivityItems = [
   },
   {
     id: '1',
-    type: 'Seedlot registration',
+    activity: 'Seedlot registration',
+    type: 'SEEDLOT',
     status: 0,
     requestId: '235685',
     createdAt: '2022-09-04',
@@ -17,7 +19,8 @@ const RecentActivityItems = [
   },
   {
     id: '2',
-    type: 'Seedlot testing',
+    activity: 'Seedlot testing',
+    type: 'TESTS',
     status: 1,
     requestId: '214538',
     createdAt: '2022-09-04',
@@ -25,7 +28,8 @@ const RecentActivityItems = [
   },
   {
     id: '3',
-    type: 'Seedlot details',
+    activity: 'Seedlot details',
+    type: 'SEEDLOT',
     status: 2,
     requestId: '854362',
     createdAt: '2022-01-16',
@@ -33,7 +37,8 @@ const RecentActivityItems = [
   },
   {
     id: '4',
-    type: 'Seedling request',
+    activity: 'Seedling request',
+    type: 'SEEDLING',
     status: 3,
     requestId: '943576',
     createdAt: '2021-12-08',
