@@ -8,14 +8,13 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 /** Makes HTTP requests to the Forest Client API server. */
 @Component
@@ -28,21 +27,10 @@ public class ForestClientApiProvider extends Provider {
   private final ProvidersConfig providersConfig;
   private static final String PROVIDER = "ForestClient API";
 
-  @Autowired
-  public ForestClientApiProvider(ProvidersConfig providersConfig) {
-    this(new RestTemplate(), providersConfig);
-  }
-
-  /**
-   * Creates a ForestClientApiProvider instance with a RestTemplate.
-   *
-   * @param restTemplate The RestTemplate instance to be set.
-   */
-  public ForestClientApiProvider(RestTemplate restTemplate, ProvidersConfig providersConfig) {
-    super(log, PROVIDER);
+  ForestClientApiProvider(RestTemplateBuilder templateBuilder, ProvidersConfig providersConfig) {
+    super(log, PROVIDER, templateBuilder.build());
     this.providersConfig = providersConfig;
     setBaseUri(this.providersConfig.getForestClientBaseUri());
-    setRestTemplate(restTemplate);
   }
 
   /**

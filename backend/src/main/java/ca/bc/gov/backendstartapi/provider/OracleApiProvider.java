@@ -8,7 +8,6 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 /** This class contains methods for fetching data from Oracle REST API. */
 @Service
@@ -17,20 +16,16 @@ public class OracleApiProvider extends Provider {
 
   private final LoggedUserService loggedUserService;
 
-  private final RestTemplate restTemplate;
-
   private final ProvidersConfig providersConfig;
 
   OracleApiProvider(
       LoggedUserService loggedUserService,
       RestTemplateBuilder templateBuilder,
       ProvidersConfig providersConfig) {
-    super(log, "Oracle API");
+    super(log, "Oracle API", templateBuilder.build());
     this.loggedUserService = loggedUserService;
-    this.restTemplate = templateBuilder.build();
     this.providersConfig = providersConfig;
     setBaseUri(this.providersConfig.getOracleApiBaseUri());
-    setRestTemplate(restTemplate);
   }
 
   /**

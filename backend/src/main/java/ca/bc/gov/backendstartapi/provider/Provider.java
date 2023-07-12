@@ -19,12 +19,13 @@ class Provider {
   private final Logger log;
   private final String providerName;
   private String baseUri;
-  private RestTemplate restTemplate;
+  private final RestTemplate restTemplate;
   private Map<String, String> aditionalHeaders;
 
-  public Provider(Logger log, String providerName) {
+  public Provider(Logger log, String providerName, RestTemplate restTemplate) {
     this.log = log;
     this.providerName = providerName;
+    this.restTemplate = restTemplate;
   }
 
   /**
