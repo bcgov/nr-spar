@@ -1,7 +1,9 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
+import ca.bc.gov.backendstartapi.exception.NoOrchardException;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
@@ -82,5 +84,11 @@ public class OrchardService {
     log.info("Finished fetching Parent Tree and Genetic Quality from Oracle API Provider!");
 
     return parentTreeDto.orElseThrow(NoParentTreeDataException::new);
+  }
+
+  public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
+    Optional<List<OrchardDto>> orchardList = oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
+    if (orchardList.get().isEmpty()) throw new NoOrchardException();
+    return orchardList.orElseThrow(NoOrchardException::new);
   }
 }

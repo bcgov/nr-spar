@@ -3,15 +3,18 @@ package ca.bc.gov.backendstartapi.provider;
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /** This class contains methods for fetching data from Oracle REST API. */
@@ -65,19 +68,28 @@ public class OracleApiProvider extends Provider {
    * @param spuList A list of spu object to be used for filtering
    * @return An {@link Optional} of {@link OrchardDto}
    */
-  public Optional<OrchardDto[]> findOrchardsByVegCode(
-      String vegCode, List<ActiveOrchardSeedPlanningUnit> spuList) {
+  public Optional<List<OrchardDto>> findOrchardsByVegCode(String vegCode) {
     setAuthentication();
-    String oracleApiUrl = "/api/orchards/vegetation-code/" + vegCode;
+    String oracleApiUrl = "/api/orchards/vegetation-code/{vegCode}";
 
-    HttpEntity<List<ActiveOrchardSeedPlanningUnit>> requesEntity =
-        new HttpEntity<>(spuList, getHttpHeaders());
+    HttpEntity<Void> requestEntity = getRequestEntity();
 
-    OrchardDto[] orchardsResult =
-        restTemplate.postForObject(
-            getFullApiAddress(oracleApiUrl), requesEntity, OrchardDto[].class);
+    try {
+      ResponseEntity<List<OrchardDto>> orchardsResult =
+          getRestTemplate()
+              .exchange(
+                  getFullApiAddress(oracleApiUrl),
+                  HttpMethod.GET,
+                  requestEntity,
+                  new ParameterizedTypeReference<List<OrchardDto>>() {},
+                  createParamsMap("vegCode", vegCode));
+      log.info("GET orchards by vegCode - Success response!");
+      return Optional.ofNullable(orchardsResult.getBody());
+    } catch (HttpClientErrorException httpExc) {
+      log.info("GET orchards by vegCode - Response code error: {}", httpExc.getStatusCode());
+    }
 
-    return Optional.ofNullable(orchardsResult);
+    return Optional.empty();
   }
 
   private void setAuthentication() {

@@ -67,12 +67,12 @@ public class OrchardEndpoint {
    * Gets all orchards with vegCode
    *
    * @param vegCode {@link Orchard}'s identification
-   * @return an {@link String}
+   * @return a list of {@link OrchardDto}
    * @throws ResponseStatusException if no data is found
    */
   @GetMapping(path = "/vegetation-code/{vegCode}")
   @PreAuthorize("hasRole('user_read')")
-  public List<ActiveOrchardSeedPlanningUnit> getOrchardsByVegCode(
+  public List<OrchardDto> getOrchardsByVegCode(
       @PathVariable
           @Parameter(
               name = "vegCode",
@@ -80,6 +80,6 @@ public class OrchardEndpoint {
               description = "Identifier of the Orchard.")
           String vegCode) {
     // List<OrchardDto> tempList = new ArrayList<OrchardDto>();
-    return orchardService.findAllSpu(true);
+    return orchardService.findOrchardsByVegCode(vegCode);
   }
 }
