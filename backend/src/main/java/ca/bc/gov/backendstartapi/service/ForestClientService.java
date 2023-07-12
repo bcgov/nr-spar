@@ -2,8 +2,10 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.provider.ForestClientApiProvider;
+import ca.bc.gov.backendstartapi.provider.Provider;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -12,7 +14,8 @@ import org.springframework.web.client.HttpClientErrorException;
 @Slf4j
 public class ForestClientService {
 
-  private ForestClientApiProvider provider;
+  @Qualifier("forestClientApi")
+  private Provider provider;
 
   ForestClientService(ForestClientApiProvider provider) {
     this.provider = provider;

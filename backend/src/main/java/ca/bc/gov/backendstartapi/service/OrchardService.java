@@ -4,11 +4,12 @@ import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
-import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
+import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods to handle Orchards requests. */
@@ -18,11 +19,12 @@ public class OrchardService {
 
   private ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;
 
-  private OracleApiProvider oracleApiProvider;
+  @Qualifier("oracleApi")
+  private Provider oracleApiProvider;
 
   OrchardService(
       ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository,
-      OracleApiProvider oracleApiProvider) {
+      Provider oracleApiProvider) {
     this.activeOrchardSeedPlanningUnitRepository = activeOrchardSeedPlanningUnitRepository;
     this.oracleApiProvider = oracleApiProvider;
   }
@@ -65,11 +67,10 @@ public class OrchardService {
     int spuId = spuList.get(0).getSeedPlanningUnitId();
     log.info("Found SPU Id {} for Orchard Id {}", spuId, orchardId);
 
-    log.info("Fetching Parent Tree and Genetic Quality from Oracle API Provider...");
     Optional<OrchardSpuDto> parentTreeDto =
         oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId);
 
-    log.info("Finished fetching Parent Tree and Genetic Quality from Oracle API Provider!");
+    log.info("Finished fetching Parent Tree data for Orchard ID: {}", orchardId);
 
     return parentTreeDto.orElseThrow(NoParentTreeDataException::new);
   }
