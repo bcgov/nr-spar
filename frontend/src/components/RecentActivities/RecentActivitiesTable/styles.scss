@@ -1,3 +1,5 @@
+@use '../../../theme/variables.scss' as vars;
+
 .activity-table {
   margin-bottom: 2.5rem;
 
@@ -24,6 +26,11 @@
 }
 
 @media only screen and (max-width: 672px) {
+  .#{vars.$bcgov-prefix}--data-table-content {
+    width: 100%;
+    overflow-x: scroll;
+  }
+
   .activity-table {
     width: 56.25rem;
   }
