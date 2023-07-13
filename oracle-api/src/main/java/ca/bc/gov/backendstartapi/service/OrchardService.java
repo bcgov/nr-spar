@@ -143,7 +143,9 @@ public class OrchardService {
           }
         });
 
-    if (resultList.isEmpty()) return Optional.empty();
+    if (resultList.isEmpty()) {
+      return Optional.empty();
+    }
     return Optional.of(resultList);
   }
 

@@ -119,6 +119,13 @@ public class OrchardEndpoint {
                     orchardId, spuId)));
   }
 
+  /**
+   * Consumed by backend (postgres) service to retrieve a list of orchards witha vegCode.
+   *
+   * @param vegCode an {@link Orchard}'s vegCode
+   * @return an {@link List} of {@link OrchardLotTypeDescriptionDto}
+   * @throws ResponseStatusException if no data is found
+   */
   @GetMapping(path = "/vegetation-code/{vegCode}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('user_read')")
   @Operation(
@@ -135,9 +142,7 @@ public class OrchardEndpoint {
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   public List<OrchardLotTypeDescriptionDto> getOrchardsByVegCode(
-      @PathVariable("vegCode")
-          @Parameter(
-              description = "The vegetation code of an orchard.")
+      @PathVariable("vegCode") @Parameter(description = "The vegetation code of an orchard.")
           String vegCode) {
     log.info("Received GET request for orchards with vegCode: " + vegCode);
     return orchardService

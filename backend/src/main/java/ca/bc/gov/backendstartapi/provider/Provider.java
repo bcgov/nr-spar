@@ -27,6 +27,8 @@ public interface Provider {
     return Optional.empty();
   }
 
+
+
   // Common methods
   String[] addAuthorizationHeader();
 

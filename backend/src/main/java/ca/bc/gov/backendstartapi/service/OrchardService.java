@@ -38,7 +38,7 @@ public class OrchardService {
    * @return A {@link List} of {@link ActiveOrchardSeedPlanningUnit} or an empty list.
    */
   public List<ActiveOrchardSeedPlanningUnit> findSpuIdByOrchard(String orchardId) {
-    return findSpuIdByOrchard(orchardId, true);
+    return findSpuIdByOrchardWithActive(orchardId, true);
   }
 
   /**
@@ -58,7 +58,8 @@ public class OrchardService {
    * @param active determine if the SPU should be active or not.
    * @return A {@link List} of {@link ActiveOrchardSeedPlanningUnit} or an empty list.
    */
-  public List<ActiveOrchardSeedPlanningUnit> findSpuIdByOrchard(String orchardId, boolean active) {
+  public List<ActiveOrchardSeedPlanningUnit> findSpuIdByOrchardWithActive(
+      String orchardId, boolean active) {
     return activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, active);
   }
 
@@ -88,7 +89,7 @@ public class OrchardService {
   }
 
   /**
-   * Finds all orchards with the provided vegCode
+   * Finds all orchards with the provided vegCode.
    *
    * @param vegCode Orchard's identification.
    * @return An {@link List} of {@link OrchardDto} from oracle-api
@@ -96,7 +97,9 @@ public class OrchardService {
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
     Optional<List<OrchardDto>> orchardList =
         oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
-    if (orchardList.get().isEmpty()) throw new NoOrchardException();
+    if (orchardList.get().isEmpty()) {
+      throw new NoOrchardException();
+    }
     return orchardList.orElseThrow(NoOrchardException::new);
   }
 }

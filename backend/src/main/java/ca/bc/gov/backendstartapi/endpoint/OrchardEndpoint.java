@@ -62,7 +62,7 @@ public class OrchardEndpoint {
   }
 
   /**
-   * Gets all orchards with vegCode
+   * Gets all orchards with vegCode.
    *
    * @param vegCode {@link Orchard}'s identification
    * @return a {@link List} of {@link OrchardDto}
