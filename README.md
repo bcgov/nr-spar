@@ -10,13 +10,24 @@
 
 #### Frontend
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nr-spar_frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=nr-spar_frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_frontend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_frontend)
 
 #### Backend
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nr-spar_backend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_backend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=nr-spar_backend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_backend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_backend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_backend)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_backend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_backend)
 
 #### Oracle-API
-
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_oracle-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nr-spar_oracle-api)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_oracle-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=nr-spar_oracle-api)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_oracle-api&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_oracle-api)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_oracle-api&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_oracle-api)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_oracle-api&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=nr-spar_oracle-api)
 
 # Natural Resources SPAR
 
