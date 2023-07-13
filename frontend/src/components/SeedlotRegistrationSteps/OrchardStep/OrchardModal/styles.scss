@@ -1,0 +1,9 @@
+@use '@carbon/type';
+@use '../../../../theme/variables.scss' as vars;
+
+
+.orchard-modal {
+  h2 {
+    @include type.type-style('label-01')
+  }
+}
