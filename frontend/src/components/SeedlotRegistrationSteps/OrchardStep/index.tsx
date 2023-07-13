@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useRef, useState, useMemo } from 'react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 
@@ -235,7 +236,19 @@ const OrchardStep = ({
           state.orchards.map((orchard) => (
             <Row className="seedlot-orchard-field" key={orchard.inputId}>
               <Column sm={4} md={4} lg={8} xlg={6}>
-                <NumberInput
+                <ComboBox
+                  id={`orchard-combobox-${orchard.inputId}`}
+                  items={[]}
+                  titleText={
+                    orchard.inputId === 0
+                      ? orcharStepText.orchardSection.orchardInput.label
+                      : orcharStepText.orchardSection.orchardInput.optLabel
+                  }
+                  shouldFilterItem={
+                    ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                  }
+                />
+                {/* <NumberInput
                   id={`orchardId-${orchard.inputId}`}
                   name="orchardId"
                   ref={(el: HTMLInputElement) => addRefs(el, `orchardId-${orchard.inputId}`)}
@@ -285,7 +298,7 @@ const OrchardStep = ({
                 />
                 {
                   displayOrchNameStatus(orchard)
-                }
+                } */}
               </Column>
             </Row>
           ))
