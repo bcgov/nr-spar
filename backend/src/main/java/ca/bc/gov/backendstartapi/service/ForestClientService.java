@@ -1,19 +1,24 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.provider.Provider;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 /** Service to deal with {@link ForestClientDto ForestClients}. */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class ForestClientService {
 
-  private final ForestClientApiProvider provider;
+  @Qualifier("forestClientApi")
+  private Provider forestClientApiProvider;
+
+  ForestClientService(Provider forestClientApiProvider) {
+    this.forestClientApiProvider = forestClientApiProvider;
+  }
 
   /**
    * Fetch a forest client by its number or its acronym.
@@ -23,7 +28,7 @@ public class ForestClientService {
    */
   public Optional<ForestClientDto> fetchClient(String identifier) {
     try {
-      return provider.fetchClientByIdentifier(identifier);
+      return forestClientApiProvider.fetchClientByIdentifier(identifier);
     } catch (HttpClientErrorException.NotFound e) {
       log.info(String.format("Client %s not found", identifier), e);
       return Optional.empty();

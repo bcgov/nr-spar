@@ -12,9 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Optional;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /** This class contains resources to handle Orchards. */
-@Setter
 @RestController
 @RequestMapping("/api/orchards")
-@NoArgsConstructor
 @Tag(
     name = "orchard",
     description = "A location where class A seed or class A cuttings are produced.")
@@ -35,8 +30,7 @@ public class OrchardEndpoint {
 
   private OrchardService orchardService;
 
-  @Autowired
-  public OrchardEndpoint(OrchardService orchardService) {
+  OrchardEndpoint(OrchardService orchardService) {
     this.orchardService = orchardService;
   }
 

@@ -11,17 +11,12 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** This class contains all routines and database access to a users' favorite activity. */
 @Slf4j
-@Setter
 @Service
-@NoArgsConstructor
 public class FavouriteActivityService {
 
   private FavouriteActivityRepository favouriteActivityRepository;
@@ -34,7 +29,6 @@ public class FavouriteActivityService {
    * @param loggedUserService a {@link LoggedUserService} instance
    * @param favouriteActivityRepository a {@link FavouriteActivityRepository} instance
    */
-  @Autowired
   public FavouriteActivityService(
       LoggedUserService loggedUserService,
       FavouriteActivityRepository favouriteActivityRepository) {

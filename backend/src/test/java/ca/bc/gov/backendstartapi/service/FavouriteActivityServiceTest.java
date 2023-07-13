@@ -193,12 +193,4 @@ class FavouriteActivityServiceTest {
 
     Assertions.assertEquals("404 NOT_FOUND \"Invalid activity or page name!\"", e.getMessage());
   }
-
-  @Test
-  @DisplayName("createFavoriteActivityService")
-  void createFavoriteActivityService() {
-    FavouriteActivityService activityService = new FavouriteActivityService();
-    activityService.setLoggedUserService(loggedUserService);
-    activityService.setFavouriteActivityRepository(favouriteActivityRepository);
-  }
 }
