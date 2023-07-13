@@ -29,6 +29,7 @@ import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS, orcharStepText } from './constants';
 
 import './styles.scss';
+import OrchardModal from './OrchardModal';
 
 type NumStepperVal = {
   value: number,
@@ -58,6 +59,8 @@ const OrchardStep = ({
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalType, setModalType] = useState<string>('');
 
   const filterGameticOptions = (gender: string) => {
     const result = gameticOptions
@@ -299,7 +302,10 @@ const OrchardStep = ({
                     size="md"
                     kind="danger--tertiary"
                     renderIcon={TrashCan}
-                    onClick={() => deleteOrchardObj()}
+                    onClick={() => {
+                      setModalType('delete');
+                      setModalOpen(true);
+                    }}
                   >
                     {orcharStepText.orchardSection.buttons.delete}
                   </Button>
@@ -313,7 +319,10 @@ const OrchardStep = ({
                     size="md"
                     kind="tertiary"
                     renderIcon={Add}
-                    onClick={() => addOrchardObj()}
+                    onClick={() => {
+                      setModalType('add');
+                      setModalOpen(true);
+                    }}
                   >
                     {orcharStepText.orchardSection.buttons.add}
                   </Button>
@@ -491,6 +500,14 @@ const OrchardStep = ({
             )
             : null
         }
+        <OrchardModal
+          open={modalOpen}
+          setOpen={setModalOpen}
+          modalType={modalType}
+          addFunction={addOrchardObj}
+          deleteFunction={deleteOrchardObj}
+          // submitFunction
+        />
       </form>
     </div>
   );
