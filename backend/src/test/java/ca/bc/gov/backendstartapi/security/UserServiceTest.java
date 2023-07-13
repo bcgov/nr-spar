@@ -77,8 +77,8 @@ class UserServiceTest {
 
   @Test
   void createUserService() {
-    LoggedUserService loggedUserService1 = new LoggedUserService();
-    loggedUserService1.setUserAuthenticationHelper(userAuthenticationHelper);
+    LoggedUserService loggedUserService1 = new LoggedUserService(userAuthenticationHelper);
+    Assertions.assertNotNull(loggedUserService1);
   }
 
   @Test

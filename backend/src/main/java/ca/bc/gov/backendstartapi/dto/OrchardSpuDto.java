@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * This class holds the fields that will be returned when requesting a ParentTree from an Orchard.
  */
-public record OrchardParentTreeDto(
+public record OrchardSpuDto(
     @Schema(
             description =
                 """
@@ -25,7 +25,7 @@ public record OrchardParentTreeDto(
     List<ParentTreeDto> parentTrees) {
 
   /** Ensure immutability for the user's roles. */
-  public OrchardParentTreeDto {
+  public OrchardSpuDto {
     parentTrees = Collections.unmodifiableList(parentTrees);
   }
 }

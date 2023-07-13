@@ -1,73 +1,45 @@
 package ca.bc.gov.backendstartapi.provider;
 
-import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.config.ProvidersConfig;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /** This class contains methods for fetching data from Oracle REST API. */
-@Service
 @Slf4j
-public class OracleApiProvider {
+@Component
+@Qualifier("oracleApi")
+public class OracleApiProvider implements Provider {
 
-  private LoggedUserService loggedUserService;
+  private final LoggedUserService loggedUserService;
 
-  private RestTemplate restTemplate;
+  private final ProvidersConfig providersConfig;
 
-  @Autowired
-  OracleApiProvider(LoggedUserService loggedUserService) {
-    this(loggedUserService, new RestTemplate());
-  }
+  private final RestTemplate restTemplate;
 
-  OracleApiProvider(LoggedUserService loggedUserService, RestTemplate restTemplate) {
+  private final String rootUri;
+
+  private static final String PROVIDER = "Oracle API";
+
+  OracleApiProvider(
+      LoggedUserService loggedUserService,
+      ProvidersConfig providersConfig,
+      RestTemplateBuilder templateBuilder) {
     this.loggedUserService = loggedUserService;
-    this.restTemplate = restTemplate;
-  }
-
-  @Value("${oracle-api.base-url}")
-  private String oracleApiBaseUrl;
-
-  private <T> T doGetRequest(Class<T> className, String apiUrl, Map<String, String> uriVars) {
-    if (!Objects.isNull(uriVars)) {
-      for (Map.Entry<String, String> entry : uriVars.entrySet()) {
-        log.info("Oracle API - URI variable {}={}", entry.getKey(), entry.getValue());
-      }
-    }
-
-    String jwtToken = loggedUserService.getLoggedUserToken();
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-    headers.set("Authorization", "Bearer " + jwtToken);
-
-    String fullApiUrl = oracleApiBaseUrl + apiUrl;
-    log.info("Oracle API - Sending GET request to: {}", fullApiUrl);
-
-    HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
-    ResponseEntity<T> response =
-        restTemplate.exchange(fullApiUrl, HttpMethod.GET, requestEntity, className, uriVars);
-
-    if (!response.getStatusCode().equals(HttpStatusCode.valueOf(200))) {
-      log.info("Oracle API - Response code error : {}", response.getStatusCode());
-      return null;
-    }
-
-    log.info("Oracle API - Success response!");
-    return response.getBody();
+    this.providersConfig = providersConfig;
+    this.restTemplate = templateBuilder.build();
+    this.rootUri = this.providersConfig.getOracleApiBaseUri();
   }
 
   /**
@@ -75,19 +47,48 @@ public class OracleApiProvider {
    *
    * @param orchardId Orchard's identification.
    * @param spuId SPU's identification.
-   * @return An {@link Optional} of {@link OrchardParentTreeDto}
+   * @return An {@link Optional} of {@link OrchardSpuDto}
    */
-  public Optional<OrchardParentTreeDto> findOrchardParentTreeGeneticQualityData(
+  @Override
+  public Optional<OrchardSpuDto> findOrchardParentTreeGeneticQualityData(
       String orchardId, int spuId) {
-    String oracleApiUrl = "/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}";
+    String apiUrl =
+        String.format("%s/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}", rootUri);
+    
+    log.info("Starting {} request to {}", PROVIDER, apiUrl);
 
-    Map<String, String> uriVars = new HashMap<>();
-    uriVars.put("orchardId", orchardId);
-    uriVars.put("spuId", String.valueOf(spuId));
+    try {
+      ResponseEntity<OrchardSpuDto> response =
+          restTemplate.exchange(
+              apiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              OrchardSpuDto.class,
+              createParamsMap("orchardId", orchardId, "spuId", String.valueOf(spuId)));
 
-    OrchardParentTreeDto orchardTreeDto =
-        doGetRequest(OrchardParentTreeDto.class, oracleApiUrl, uriVars);
+      log.info("Finished {} request - 200 OK!", PROVIDER);
+      return Optional.of(response.getBody());
+    } catch (HttpClientErrorException httpExc) {
+      log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+    }
 
-    return Optional.ofNullable(orchardTreeDto);
+    return Optional.empty();
+  }
+
+  @Override
+  public String[] addAuthorizationHeader() {
+    String token = this.loggedUserService.getLoggedUserToken();
+    return new String[] {"Authorization", "Bearer " + token};
+  }
+
+  @Override
+  public HttpHeaders addHttpHeaders() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+
+    String[] authorization = addAuthorizationHeader();
+    headers.set(authorization[0], authorization[1]);
+
+    return headers;
   }
 }

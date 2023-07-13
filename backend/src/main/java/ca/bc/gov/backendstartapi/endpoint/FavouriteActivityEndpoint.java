@@ -16,9 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,8 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /** This class contains all {@link FavouriteActivityEntity} resources that a user needs. */
-@Setter
-@NoArgsConstructor
 @RestController
 @RequestMapping("/api/favourite-activities")
 @Tag(name = "FavouriteActivity", description = "Resources to handle users' favourite activities")
@@ -41,7 +36,6 @@ public class FavouriteActivityEndpoint {
 
   private FavouriteActivityService favouriteActivityService;
 
-  @Autowired
   FavouriteActivityEndpoint(FavouriteActivityService favouriteActivityService) {
     this.favouriteActivityService = favouriteActivityService;
   }

@@ -6,23 +6,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.util.ArrayList;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-@ExtendWith(SpringExtension.class)
 @WebMvcTest(OrchardEndpoint.class)
 class OrchardEndpointTest {
 
@@ -36,8 +33,8 @@ class OrchardEndpointTest {
   void getParentTreeGeneticQualityDataSuccessTest() throws Exception {
     String orchardId = "123";
 
-    OrchardParentTreeDto parentTreeDto =
-        new OrchardParentTreeDto(orchardId, "ACT", 1L, new ArrayList<>());
+    OrchardSpuDto parentTreeDto =
+        new OrchardSpuDto(orchardId, "ACT", 1L, new ArrayList<>());
 
     when(orchardService.findParentTreeGeneticQualityData(orchardId)).thenReturn(parentTreeDto);
 

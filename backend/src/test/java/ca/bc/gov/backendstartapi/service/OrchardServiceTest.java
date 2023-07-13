@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
@@ -93,15 +93,15 @@ class OrchardServiceTest {
         new ParentTreeDto(
             123L, "37", "App", "123456", true, true, false, null, null, List.of(geneticQualityDto));
 
-    OrchardParentTreeDto parentTreeDto =
-        new OrchardParentTreeDto(orchardId, "FDC", 1L, List.of(parentDto));
+    OrchardSpuDto parentTreeDto =
+        new OrchardSpuDto(orchardId, "FDC", 1L, List.of(parentDto));
 
     int spuId = 1;
 
     when(oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId))
         .thenReturn(Optional.of(parentTreeDto));
 
-    OrchardParentTreeDto orchardDto = orchardService.findParentTreeGeneticQualityData(orchardId);
+    OrchardSpuDto orchardDto = orchardService.findParentTreeGeneticQualityData(orchardId);
 
     Assertions.assertNotNull(orchardDto);
     Assertions.assertEquals("405", orchardDto.orchardId());

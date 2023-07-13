@@ -2,26 +2,15 @@ package ca.bc.gov.backendstartapi.security;
 
 import ca.bc.gov.backendstartapi.exception.UserNotFoundException;
 import java.util.Optional;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /** This class contains all user related methods and artifacts. */
-@Setter
 @Service
-@NoArgsConstructor
 public class LoggedUserService {
 
   private UserAuthenticationHelper userAuthenticationHelper;
 
-  /**
-   * Create a {@link LoggedUserService} instance.
-   *
-   * @param userAuthenticationHelper a {@link UserAuthenticationHelper} instance
-   */
-  @Autowired
-  public LoggedUserService(UserAuthenticationHelper userAuthenticationHelper) {
+  LoggedUserService(UserAuthenticationHelper userAuthenticationHelper) {
     this.userAuthenticationHelper = userAuthenticationHelper;
   }
 

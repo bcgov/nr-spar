@@ -11,11 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import java.io.Serializable;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,14 +24,17 @@ import org.springframework.web.client.HttpStatusCodeException;
 
 /** Controller for forest client-related endpoints. */
 @RestController
-@RequestMapping(path = "/api/forest-clients", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-@RequiredArgsConstructor
+@RequestMapping(path = "/api/forest-clients", produces = MediaType.APPLICATION_JSON_VALUE)
 @Validated
 @Slf4j
 @Tag(name = "ForestClient", description = "The many agencies that work with the ministry.")
 public class ForestClientEndpoint {
 
   private final ForestClientService forestClientService;
+
+  ForestClientEndpoint(ForestClientService forestClientService) {
+    this.forestClientService = forestClientService;
+  }
 
   /**
    * Fetch a forest client by its identifier (either its number or its acronym).

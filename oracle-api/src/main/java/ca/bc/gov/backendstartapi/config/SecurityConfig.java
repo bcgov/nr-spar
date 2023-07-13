@@ -9,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -37,25 +39,25 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.cors()
-        .and()
-        .csrf()
-        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-        .and()
-        .authorizeHttpRequests()
-        .requestMatchers("/api/**")
-        .authenticated()
-        .requestMatchers(HttpMethod.OPTIONS, "/**")
-        .permitAll()
-        .anyRequest()
-        .permitAll()
-        .and()
-        .httpBasic()
-        .disable()
-        .formLogin()
-        .disable()
-        .oauth2ResourceServer()
-        .jwt(jwt -> jwt.jwtAuthenticationConverter(converter()).jwkSetUri(jwkSetUri));
+    http.cors(Customizer.withDefaults())
+        .csrf(
+            customize ->
+                customize.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+        .authorizeHttpRequests(
+            customize ->
+                customize
+                    .requestMatchers("/api/**")
+                    .authenticated()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**")
+                    .permitAll()
+                    .anyRequest()
+                    .permitAll())
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable)
+        .oauth2ResourceServer(
+            customize ->
+                customize.jwt(
+                    jwt -> jwt.jwtAuthenticationConverter(converter()).jwkSetUri(jwkSetUri)));
 
     return http.build();
   }
