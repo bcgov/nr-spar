@@ -1,8 +1,10 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +20,10 @@ public interface Provider {
   // Oracle API
   default Optional<OrchardSpuDto> findOrchardParentTreeGeneticQualityData(
       String orchardId, int spuId) {
+    return Optional.empty();
+  }
+
+  default Optional<List<OrchardDto>> findOrchardsByVegCode(String vegCode) {
     return Optional.empty();
   }
 
