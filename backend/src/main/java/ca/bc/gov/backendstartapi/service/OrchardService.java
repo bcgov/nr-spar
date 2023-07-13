@@ -97,7 +97,7 @@ public class OrchardService {
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
     Optional<List<OrchardDto>> orchardList =
         oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
-    if (orchardList.get().isEmpty()) {
+    if (orchardList.isPresent() && orchardList.get().isEmpty()) {
       throw new NoOrchardException();
     }
     return orchardList.orElseThrow(NoOrchardException::new);

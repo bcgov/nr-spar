@@ -67,11 +67,11 @@ class OrchardRepositoryTest {
         orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, stageCode).get();
 
     Assertions.assertFalse(orchardRet.isEmpty());
-    Assertions.assertEquals(orchardRet.size(), 2);
-    Assertions.assertEquals(orchardRet.get(0).getVegetationCode(), vegCode);
-    Assertions.assertEquals(orchardRet.get(1).getVegetationCode(), vegCode);
-    Assertions.assertNotEquals(orchardRet.get(0).getStageCode(), stageCode);
-    Assertions.assertNotEquals(orchardRet.get(1).getStageCode(), stageCode);
+    Assertions.assertEquals(2, orchardRet.size());
+    Assertions.assertEquals(vegCode, orchardRet.get(0).getVegetationCode());
+    Assertions.assertEquals(vegCode, orchardRet.get(1).getVegetationCode());
+    Assertions.assertNotEquals(stageCode, orchardRet.get(0).getStageCode());
+    Assertions.assertNotEquals(stageCode, orchardRet.get(1).getStageCode());
   }
 
   @Test

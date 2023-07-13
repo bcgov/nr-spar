@@ -84,6 +84,7 @@ public class OracleApiProvider implements Provider {
    * @param vegCode The vegetation code of a seedlot.
    * @return An {@link List} of {@link OrchardDto}
    */
+  @Override
   public Optional<List<OrchardDto>> findOrchardsByVegCode(String vegCode) {
     String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/{vegCode}", rootUri);
 
