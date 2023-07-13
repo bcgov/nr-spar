@@ -49,6 +49,7 @@
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
         <jacoco.skip>false</jacoco.skip>
+        <checkstyle.skip>false</checkstyle.skip>
       </properties>
     </profile>
     <profile>
