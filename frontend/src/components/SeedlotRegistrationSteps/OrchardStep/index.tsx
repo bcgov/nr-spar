@@ -60,7 +60,7 @@ const OrchardStep = ({
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [modalType, setModalType] = useState<string>('');
+  const [modalType, setModalType] = useState<string>('add');
 
   const filterGameticOptions = (gender: string) => {
     const result = gameticOptions
@@ -223,6 +223,15 @@ const OrchardStep = ({
       );
     }
     return null;
+  };
+
+  const submitModal = () => {
+    if (modalType === 'add') {
+      addOrchardObj();
+    }
+    if (modalType === 'delete') {
+      deleteOrchardObj();
+    }
   };
 
   return (
@@ -504,9 +513,7 @@ const OrchardStep = ({
           open={modalOpen}
           setOpen={setModalOpen}
           modalType={modalType}
-          addFunction={addOrchardObj}
-          deleteFunction={deleteOrchardObj}
-          // submitFunction
+          submitFunction={submitModal}
         />
       </form>
     </div>

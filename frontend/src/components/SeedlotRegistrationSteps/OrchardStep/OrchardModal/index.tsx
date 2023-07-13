@@ -7,14 +7,13 @@ import './styles.scss';
 interface OrchardModalProps {
   open: boolean;
   setOpen: Function;
-  deleteFunction: Function;
-  addFunction: Function;
+  submitFunction: Function;
   modalType: string;
 }
 
 const OrchardModal = (
   {
-    open, setOpen, deleteFunction, addFunction, modalType
+    open, setOpen, submitFunction, modalType
   }: OrchardModalProps
 ) => (
   <Modal
@@ -28,12 +27,7 @@ const OrchardModal = (
       setOpen(false);
     }}
     onRequestSubmit={() => {
-      if (modalType === 'delete') {
-        deleteFunction();
-      }
-      if (modalType === 'add') {
-        addFunction();
-      }
+      submitFunction();
       setOpen(false);
     }}
     size="sm"
