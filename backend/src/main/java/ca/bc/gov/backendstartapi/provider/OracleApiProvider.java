@@ -62,11 +62,10 @@ public class OracleApiProvider extends Provider {
   }
 
   /**
-   * Find all Parent Tree and Genetic Quality to an Orchard.
+   * Finds all orchards with the provided vegCode from oracle-api
    *
    * @param vegCode The vegetation code of a seedlot.
-   * @param spuList A list of spu object to be used for filtering
-   * @return An {@link Optional} of {@link OrchardDto}
+   * @return An {@link List} of {@link OrchardDto}
    */
   public Optional<List<OrchardDto>> findOrchardsByVegCode(String vegCode) {
     setAuthentication();
@@ -83,10 +82,11 @@ public class OracleApiProvider extends Provider {
                   requestEntity,
                   new ParameterizedTypeReference<List<OrchardDto>>() {},
                   createParamsMap("vegCode", vegCode));
-      log.info("GET orchards by vegCode - Success response!");
+      log.info("GET orchards by vegCode from oracle - Success response!");
       return Optional.ofNullable(orchardsResult.getBody());
     } catch (HttpClientErrorException httpExc) {
-      log.info("GET orchards by vegCode - Response code error: {}", httpExc.getStatusCode());
+      log.info(
+          "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
     }
 
     return Optional.empty();

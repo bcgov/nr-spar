@@ -121,10 +121,23 @@ public class OrchardEndpoint {
 
   @GetMapping(path = "/vegetation-code/{vegCode}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Fetch the orchards with the provided vegCode.",
+      description =
+          "Returns a list of non retired orchards, it should be called from the new SPAR back-end"
+              + " only, AVOID using it on the front-end",
+      responses = {
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
+      })
   public List<OrchardLotTypeDescriptionDto> getOrchardsByVegCode(
       @PathVariable("vegCode")
           @Parameter(
-              description = "The number of the seedlot to which the data in the file refers to")
+              description = "The vegetation code of an orchard.")
           String vegCode) {
     log.info("Received GET request for orchards with vegCode: " + vegCode);
     return orchardService

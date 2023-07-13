@@ -112,6 +112,12 @@ public class OrchardService {
     return Optional.of(orchardParentTreeDto);
   }
 
+  /**
+   * Finds an Orchard parent tree contribution data given an orchard id and an SPU ID.
+   *
+   * @param vegCode {@link VegetationCode} identification
+   * @return {@link Optional} of a {@link List} of {@link OrchardParentTreeDto}
+   */
   public Optional<List<OrchardLotTypeDescriptionDto>> findNotRetOrchardsByVegCode(String vegCode) {
 
     List<OrchardLotTypeDescriptionDto> resultList = new ArrayList<>();

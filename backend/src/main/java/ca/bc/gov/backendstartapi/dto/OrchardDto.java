@@ -2,7 +2,9 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/** This class represents the OrchardLotTypeDescriptionDto object found in the oracle-api service */
+/**
+ * This record represents the OrchardLotTypeDescriptionDto object found in the oracle-api service
+ */
 @Schema(description = "Represents an Orchard object received from oracle-api,")
 public record OrchardDto(
     @Schema(

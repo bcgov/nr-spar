@@ -86,8 +86,15 @@ public class OrchardService {
     return parentTreeDto.orElseThrow(NoParentTreeDataException::new);
   }
 
+  /**
+   * Finds all orchards with the provided vegCode
+   *
+   * @param vegCode Orchard's identification.
+   * @return An {@link List} of {@link OrchardDto} from oracle-api
+   */
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    Optional<List<OrchardDto>> orchardList = oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
+    Optional<List<OrchardDto>> orchardList =
+        oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
     if (orchardList.get().isEmpty()) throw new NoOrchardException();
     return orchardList.orElseThrow(NoOrchardException::new);
   }
