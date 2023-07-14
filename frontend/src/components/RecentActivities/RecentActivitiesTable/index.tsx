@@ -95,11 +95,11 @@ const RecentActivitiesTable = ({
     <Table size="lg" className="activity-table">
       <TableHead>
         <TableRow>
-          {headers.map((header, idx) => (
+          {headers.map((header) => (
             <TableHeader
               key={header}
-              id={`header-${header}-${idx}`}
-              data-testid={`header-${header}-${idx}`}
+              id={`header-${header.toLowerCase().replace(' ', '-')}`}
+              data-testid={`header-${header.toLowerCase().replace(' ', '-')}`}
               className="activities-table-header"
             >
               {header}
