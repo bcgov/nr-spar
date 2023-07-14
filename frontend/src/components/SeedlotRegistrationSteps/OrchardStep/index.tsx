@@ -62,7 +62,7 @@ const OrchardStep = ({
   const filterGameticOptions = (gender: string) => {
     const result = gameticOptions
       .filter((option) => {
-        if (!isPliSpecies && option.isPli) {
+        if (!isPliSpecies && option.isPliSpecies) {
           return false;
         }
         return option.code.toLowerCase().startsWith(gender);
