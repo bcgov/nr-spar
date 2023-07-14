@@ -25,14 +25,14 @@ interface TableProps {
   elements: any[];
   clickFn: Function;
   headers: string[];
-  docTable?: boolean;
+  isDocTable?: boolean;
 }
 
 const RecentActivitiesTable = ({
   elements,
   clickFn,
   headers,
-  docTable
+  isDocTable
 }: TableProps) => {
   const iconSize = '18';
 
@@ -126,7 +126,7 @@ const RecentActivitiesTable = ({
               >
                 <Button
                   hasIconOnly
-                  iconDescription={`View ${docTable ? 'file' : 'request'}`}
+                  iconDescription={`View ${isDocTable ? 'file' : 'request'}`}
                   tooltipPosition="bottom"
                   kind="ghost"
                   onClick={() => clickFn(item.id)}
@@ -134,7 +134,7 @@ const RecentActivitiesTable = ({
                   size="md"
                 />
                 {
-                  docTable
+                  isDocTable
                     ? (
                       <Button
                         hasIconOnly
