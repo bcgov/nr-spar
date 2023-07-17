@@ -19,8 +19,7 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        if: github.event.action == 'opened' || github.event.action == 'reopened'
-        uses: bcgov-nr/action-pr-description-add@v0.0.2
+        uses: bcgov-nr/action-pr-description-add@v1.0.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
