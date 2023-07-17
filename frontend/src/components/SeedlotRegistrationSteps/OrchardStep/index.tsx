@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -23,12 +22,11 @@ import Subtitle from '../../Subtitle';
 import { getOrchardByID } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import OrchardDataType from '../../../types/OrchardDataType';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS, orcharStepText } from './constants';
-import FemaleGameticOptions from './data';
 
 import './styles.scss';
 
@@ -38,7 +36,8 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  seedlotSpecies: DropDownObj
+  seedlotSpecies: MultiOptionsObj
+  gameticOptions: MultiOptionsObj[],
   state: OrchardForm
   setStepData: Function,
   cleanParentTables: Function,
@@ -47,18 +46,32 @@ interface OrchardStepProps {
 
 const OrchardStep = ({
   seedlotSpecies,
+  gameticOptions,
   state,
   setStepData,
   cleanParentTables,
   readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
-  const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
-
+  const [isPliSpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
   const refControl = useRef<any>({});
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
+
+  const filterGameticOptions = (gender: string) => {
+    const result = gameticOptions
+      .filter((option) => {
+        if (!isPliSpecies && option.isPliSpecies) {
+          return false;
+        }
+        return option.code.toLowerCase().startsWith(gender);
+      });
+    return result;
+  };
+
+  const maleGameticOptions = useMemo(() => filterGameticOptions('m'), []);
+  const femaleGameticOptions = useMemo(() => filterGameticOptions('f'), []);
 
   const addRefs = (element: HTMLInputElement, name: string) => {
     if (element !== null) {
@@ -124,7 +137,7 @@ const OrchardStep = ({
   const fetchOrchardInfo = (orchardId: string, inputId: number) => {
     cleanParentTables();
     // Copy orchards from state
-    const newOrchards = [...state.orchards];
+    const newOrchards = structuredClone(state.orchards);
     // Replace input value with id
     const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
     newOrchards[replaceIndex].orchardId = orchardId;
@@ -132,7 +145,7 @@ const OrchardStep = ({
       ...state,
       orchards: newOrchards
     });
-    queryClient.refetchQueries({ queryKey: ['orchard', orchardId] });
+    queryClient.refetchQueries({ queryKey: ['orchard', orchardId], exact: true });
   };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -242,7 +255,16 @@ const OrchardStep = ({
                   placeholder={orcharStepText.orchardSection.orchardInput.placeholder}
                   onBlur={
                     (event: React.ChangeEvent<HTMLInputElement>) => {
-                      fetchOrchardInfo(event.target.value, orchard.inputId);
+                      if (event.target.value !== orchard.orchardId) {
+                        fetchOrchardInfo(event.target.value, orchard.inputId);
+                      }
+                    }
+                  }
+                  onKeyUp={
+                    (event: React.KeyboardEvent<HTMLDivElement>) => {
+                      if (event.key === 'Enter') {
+                        (event.target as HTMLInputElement).blur();
+                      }
                     }
                   }
                   readOnly={readOnly}
@@ -323,7 +345,7 @@ const OrchardStep = ({
               id="female-gametic-combobox"
               name="femaleGametic"
               ref={(el: HTMLInputElement) => addRefs(el, 'femaleGametic')}
-              items={isPLISpecies ? FemaleGameticOptions : FemaleGameticOptions.slice(0, -2)}
+              items={femaleGameticOptions}
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }
@@ -339,73 +361,23 @@ const OrchardStep = ({
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
-            {
-              // Dynamic rendering of radio buttons does not work with carbon radio button groups
-              // So we are left with these gross duplicated code
-              isPLISpecies
-                ? (
-                  <RadioButtonGroup
-                    legendText={orcharStepText.gameteSection.maleGametic.label}
-                    name="male-gametic-radiogroup"
-                    orientation="vertical"
-                    className={invalidMalGametic ? 'male-gametic-invalid' : ''}
-                    onChange={(e: string) => maleGameticHandler(e)}
-                    valueSelected={state.maleGametic}
-                  >
-                    <RadioButton
-                      id="m1-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m1}
-                      value="M1"
-                    />
-                    <RadioButton
-                      id="m2-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m2}
-                      value="M2"
-                    />
-                    <RadioButton
-                      id="m3-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m3}
-                      value="M3"
-                    />
-                    <RadioButton
-                      id="m4-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m4}
-                      value="M4"
-                    />
-                    <RadioButton
-                      id="m5-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m5}
-                      value="M5"
-                    />
-                  </RadioButtonGroup>
-                )
-                : (
-                  <RadioButtonGroup
-                    legendText={orcharStepText.gameteSection.maleGametic.label}
-                    name="male-gametic-radiogroup"
-                    orientation="vertical"
-                    className={invalidMalGametic ? 'male-gametic-invalid' : ''}
-                    onChange={(e: string) => maleGameticHandler(e)}
-                    valueSelected={state.maleGametic}
-                  >
-                    <RadioButton
-                      id="m1-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m1}
-                      value="M1"
-                    />
-                    <RadioButton
-                      id="m2-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m2}
-                      value="M2"
-                    />
-                    <RadioButton
-                      id="m3-radio"
-                      labelText={orcharStepText.gameteSection.maleGametic.options.m3}
-                      value="M3"
-                    />
-                  </RadioButtonGroup>
-                )
-            }
+            <RadioButtonGroup
+              legendText={orcharStepText.gameteSection.maleGametic.label}
+              name="male-gametic-radiogroup"
+              orientation="vertical"
+              className={invalidMalGametic ? 'male-gametic-invalid' : ''}
+              onChange={(e: string) => maleGameticHandler(e)}
+              valueSelected={state.maleGametic}
+            >
+              {maleGameticOptions.map((item) => (
+                <RadioButton
+                  key={item.code}
+                  id={`${item.code.toLowerCase()}-radio`}
+                  labelText={item.label}
+                  value={item.code}
+                />
+              ))}
+            </RadioButtonGroup>
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">

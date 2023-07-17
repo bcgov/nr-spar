@@ -83,6 +83,7 @@ const orchardMock: OrchardForm = {
 };
 
 const interimStorageMock = {
+  useCollectorAgencyInfo: true,
   agencyName: 'Strong Seeds Orchard - SSO',
   locationCode: '32',
   startDate: '2023/01/04',
@@ -93,6 +94,7 @@ const interimStorageMock = {
 
 const ownershipMock = {
   id: 0,
+  useDefaultAgencyInfo: true,
   ownerAgency: '0032 - Strong Seeds Orchard - SSO',
   ownerCode: '32',
   ownerPortion: '100',
@@ -111,6 +113,7 @@ const ownershipMock = {
 };
 
 const collectionMock = {
+  useDefaultAgencyInfo: true,
   collectorAgency: 'Strong Seeds Orchard - SSO',
   locationCode: '32',
   startDate: '2023/01/04',
@@ -118,23 +121,17 @@ const collectionMock = {
   numberOfContainers: '2',
   volumePerContainers: '2',
   volumeOfCones: '4',
-  aerialRanking: true,
-  aerialClippingTopping: false,
-  felledTrees: false,
-  climbing: true,
-  squirrelCache: false,
-  ground: true,
-  squirrelHarvesting: false,
-  other: false,
-  collectionMethodName: 'Other',
+  selectedCollectionCodes: [],
   comments: 'Example of additional comments about the seedlot'
 };
 
 const extractionMock = {
+  extractoryUseTSC: true,
   extractoryAgency: 'Yellow point lodge LTD.',
   extractoryLocationCode: '00',
   extractionStartDate: '2023/01/20',
   extractionEndDate: '2023/03/18',
+  seedStorageUseTSC: true,
   seedStorageAgency: 'Yellow point lodge LTD.',
   seedStorageLocationCode: '00',
   seedStorageStartDate: '2023/01/20',
@@ -181,6 +178,7 @@ const FormReview = () => {
                       defaultAgency={defaultAgency}
                       defaultCode={defaultCode}
                       agencyOptions={agencyOptions}
+                      collectionMethods={[]}
                       setStepData={() => { }}
                       readOnly
                     />
@@ -262,6 +260,7 @@ const FormReview = () => {
                 >
                   <div className="form-item">
                     <OrchardStep
+                      gameticOptions={[]}
                       seedlotSpecies={{
                         code: 'POG',
                         description: 'Protect old growth',

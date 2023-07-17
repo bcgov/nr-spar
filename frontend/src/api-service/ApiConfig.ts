@@ -33,7 +33,15 @@ const ApiConfig = {
 
   paymentMethod: `${serverHost}/api/payment-methods`,
 
-  orchardSeedPlan: `${serverHost}/api/orchards`,
+  orchards: `${serverHost}/api/orchards`,
+
+  coneCollectionMethod: `${serverHost}/api/cone-collection-methods`,
+
+  uploadConeAndPollen: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/cone-pollen-count-table/upload`,
+
+  uploadSMPMix: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/smp-calculation-table/upload`,
+
+  maleFemaleMethodology: `${serverHost}/api/male-female-methodologies`,
 
   /**
    * ORACLE API
@@ -42,9 +50,7 @@ const ApiConfig = {
 
   fundingSource: `${oracleServerHost}/api/funding-sources`,
 
-  orchard: `${oracleServerHost}/api/orchards`,
-
-  parentTreeGeneticQuality: `${oracleServerHost}/api/orchards/parent-tree-genetic-quality`
+  oracleOrchards: `${oracleServerHost}/api/orchards`
 };
 
 export default ApiConfig;

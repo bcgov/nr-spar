@@ -1,6 +1,5 @@
 import React from 'react';
-
-import DropDownObj from '../../../types/DropDownObject';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export type AccordionItemHeadClick = {
@@ -13,13 +12,14 @@ export type AccordionCtrlObj = {
 
 export type SingleOwnerForm = {
   id: number,
+  useDefaultAgencyInfo: boolean,
   ownerAgency: string,
   ownerCode: string,
   ownerPortion: string,
   reservedPerc: string,
   surplusPerc: string,
-  fundingSource: DropDownObj,
-  methodOfPayment: DropDownObj,
+  fundingSource: MultiOptionsObj,
+  methodOfPayment: MultiOptionsObj,
 }
 
 export type SingleInvalidObj = {
@@ -41,11 +41,6 @@ export type StateReturnObj = {
   newOwnerArr: Array<SingleOwnerForm>,
   newValidObj: OwnershipInvalidObj,
   newId?: number
-}
-
-export type CheckBoxValue = {
-  checked: boolean,
-  id: string
 }
 
 export type NumStepperVal = {

@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -11,42 +12,27 @@ import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@WebMvcTest(ForestClientEndpoint.class)
 @WithMockUser(roles = "user_read")
 class ForestClientEndpointTest {
 
-  private MockMvc mockMvc;
-
-  private final WebApplicationContext webApplicationContext;
+  @Autowired private MockMvc mockMvc;
 
   @MockBean private ForestClientService forestClientService;
 
-  ForestClientEndpointTest(WebApplicationContext webApplicationContext) {
-    this.webApplicationContext = webApplicationContext;
-  }
-
-  @BeforeEach
-  void setup() {
-    this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-  }
-
   @Test
+  @DisplayName("fetchExistentClientByNumber")
   void fetchExistentClientByNumber() throws Exception {
-    var client =
+    ForestClientDto client =
         new ForestClientDto(
             "00000000",
             "SMITH",
@@ -56,10 +42,14 @@ class ForestClientEndpointTest {
             ForestClientTypeEnum.I,
             "JSMITH");
 
-    given(forestClientService.fetchClient("00000000")).willReturn(Optional.of(client));
+    when(forestClientService.fetchClient("00000000")).thenReturn(Optional.of(client));
 
     mockMvc
-        .perform(get("/api/forest-clients/00000000").accept(MediaType.APPLICATION_JSON))
+        .perform(
+            get("/api/forest-clients/00000000")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpectAll(
@@ -73,17 +63,23 @@ class ForestClientEndpointTest {
   }
 
   @Test
+  @DisplayName("fetchNonExistentClientByNumber")
   void fetchNonExistentClientByNumber() throws Exception {
-    given(forestClientService.fetchClient("00000000")).willReturn(Optional.empty());
+    when(forestClientService.fetchClient("00000000")).thenReturn(Optional.empty());
 
     mockMvc
-        .perform(get("/api/forest-clients/00000000").accept(MediaType.APPLICATION_JSON))
+        .perform(
+            get("/api/forest-clients/00000000")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
   @Test
+  @DisplayName("fetchExistentClientByAcronym")
   void fetchExistentClientByAcronym() throws Exception {
-    var client =
+    ForestClientDto client =
         new ForestClientDto(
             "00000000",
             "SMITH",
@@ -93,10 +89,14 @@ class ForestClientEndpointTest {
             ForestClientTypeEnum.I,
             "JSMITH");
 
-    given(forestClientService.fetchClient("JSMITH")).willReturn(Optional.of(client));
+    when(forestClientService.fetchClient("JSMITH")).thenReturn(Optional.of(client));
 
     mockMvc
-        .perform(get("/api/forest-clients/JSMITH").accept(MediaType.APPLICATION_JSON))
+        .perform(
+            get("/api/forest-clients/JSMITH")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpectAll(
@@ -110,11 +110,16 @@ class ForestClientEndpointTest {
   }
 
   @Test
+  @DisplayName("fetchNonExistentClientByAcronym")
   void fetchNonExistentClientByAcronym() throws Exception {
-    given(forestClientService.fetchClient("JSMITH")).willReturn(Optional.empty());
+    when(forestClientService.fetchClient("JSMITH")).thenReturn(Optional.empty());
 
     mockMvc
-        .perform(get("/api/forest-clients/JSMITH").accept(MediaType.APPLICATION_JSON))
+        .perform(
+            get("/api/forest-clients/JSMITH")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 }
