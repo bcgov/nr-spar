@@ -68,7 +68,7 @@ services:
     container_name: frontend
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
     environment:
       REACT_APP_SERVER_URL: http://localhost:8090
       REACT_APP_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
@@ -78,9 +78,14 @@ services:
       CHOKIDAR_USEPOLLING: true
     ports:
       - "3000:3000"
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+    healthcheck:
+      test: wget --spider http://localhost:3000
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    image: node:18.16.1-alpine3.17
+    entrypoint: sh -c "cd /app && yarn install --frozen-lockfile --prefer-offline && yarn start"
     user: root
     volumes:
       - ./frontend:/app:z
