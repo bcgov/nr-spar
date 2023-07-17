@@ -33,18 +33,18 @@ class MaleFemaleMethodologyEndpointTest {
         .andExpect(content().contentType("application/json"))
         .andExpect(jsonPath("$[0].code").value("F1"))
         .andExpect(jsonPath("$[0].description").value("Visual Estimate"))
-        .andExpect(jsonPath("$[0].isPli").value(false))
+        .andExpect(jsonPath("$[0].isPliSpecies").value(false))
         .andExpect(jsonPath("$[8].code").value("F9"))
         .andExpect(
             jsonPath("$[8].description").value("Ramet Proportion by Age and Expected Production"))
-        .andExpect(jsonPath("$[8].isPli").value(true))
+        .andExpect(jsonPath("$[8].isPliSpecies").value(true))
         .andExpect(jsonPath("$[9].code").value("M1"))
         .andExpect(jsonPath("$[9].description").value("Portion of Ramets in Orchard"))
-        .andExpect(jsonPath("$[9].isPli").value(false))
+        .andExpect(jsonPath("$[9].isPliSpecies").value(false))
         .andExpect(jsonPath("$[13].code").value("M5"))
         .andExpect(
             jsonPath("$[13].description").value("Ramet Proportion by Age and Expected Production"))
-        .andExpect(jsonPath("$[13].isPli").value(true))
+        .andExpect(jsonPath("$[13].isPliSpecies").value(true))
         .andReturn();
   }
 }
