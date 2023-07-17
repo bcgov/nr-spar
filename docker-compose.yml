@@ -44,6 +44,7 @@ services:
       - "5005:5005"
     image: maven:3.9.3-eclipse-temurin-17
     entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005"
+    working_dir: /app
     volumes:
       - ./backend:/app:z
 
@@ -51,7 +52,7 @@ services:
     container_name: oracle-api
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       SERVER_PORT: "8091"
@@ -63,10 +64,13 @@ services:
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
     ports:
       - "8091:8091"
-    build:
-      context: ./oracle-api
+    image: maven:3.9.3-eclipse-temurin-17
+    entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
     profiles: ["oracle-api"]
     network_mode: "host"
+    working_dir: /app
+    volumes:
+      - ./oracle-api:/app:z
 
   frontend:
     container_name: frontend
