@@ -54,7 +54,7 @@ const OrchardStep = ({
   readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
-  const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
+  const [isPliSpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
   const refControl = useRef<any>({});
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
@@ -63,7 +63,7 @@ const OrchardStep = ({
   const filterGameticOptions = (gender: string) => {
     const result = gameticOptions
       .filter((option) => {
-        if (!isPLISpecies && option.isPLI) {
+        if (!isPliSpecies && option.isPliSpecies) {
           return false;
         }
         return option.code.toLowerCase().startsWith(gender);
