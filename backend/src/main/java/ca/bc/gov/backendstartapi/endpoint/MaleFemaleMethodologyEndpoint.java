@@ -34,7 +34,7 @@ public class MaleFemaleMethodologyEndpoint {
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "An array of objects containing code, description and isPLI.",
+            description = "An array of objects containing code, description and isPliSpecies.",
             content =
                 @Content(
                     array = @ArraySchema(schema = @Schema(type = "object")),
@@ -55,7 +55,7 @@ public class MaleFemaleMethodologyEndpoint {
                                   description = "Describe the name of the methodology",
                                   example = "Portion of Ramets in Orchard")),
                       @SchemaProperty(
-                          name = "isPLI",
+                          name = "isPliSpecies",
                           schema =
                               @Schema(
                                   type = "boolean",
