@@ -293,7 +293,7 @@ class OrchardServiceTest {
         };
 
     when(orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, "RET"))
-        .thenReturn(Optional.of(repoResult));
+        .thenReturn(repoResult);
 
     List<OrchardLotTypeDescriptionDto> listToTest =
         orchardService.findNotRetOrchardsByVegCode(vegCode).get();

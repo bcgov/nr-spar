@@ -122,11 +122,8 @@ public class OrchardService {
 
     List<OrchardLotTypeDescriptionDto> resultList = new ArrayList<>();
 
-    Optional<List<Orchard>> orchardOptionalList =
-        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode.toUpperCase(), "RET");
-
     List<Orchard> orchardList =
-        orchardOptionalList.isPresent() ? orchardOptionalList.get() : new ArrayList<>();
+        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode.toUpperCase(), "RET");
 
     orchardList.forEach(
         orchard -> {

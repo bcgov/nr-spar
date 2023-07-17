@@ -104,9 +104,9 @@ class OracleApiProviderTest {
         .expect(requestTo(url))
         .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-    Optional<List<OrchardDto>> orchardDto = oracleApiProvider.findOrchardsByVegCode(vegCode);
+    List<OrchardDto> orchardDtoList = oracleApiProvider.findOrchardsByVegCode(vegCode);
 
-    Assertions.assertTrue(orchardDto.isPresent());
+    Assertions.assertFalse(orchardDtoList.isEmpty());
   }
 
   @Test
@@ -119,8 +119,8 @@ class OracleApiProviderTest {
 
     mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
 
-    Optional<List<OrchardDto>> orchardDto = oracleApiProvider.findOrchardsByVegCode(vegCode);
+    List<OrchardDto> orchardDtoList = oracleApiProvider.findOrchardsByVegCode(vegCode);
 
-    Assertions.assertFalse(orchardDto.isPresent());
+    Assertions.assertTrue(orchardDtoList.isEmpty());
   }
 }
