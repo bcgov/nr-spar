@@ -24,7 +24,7 @@ services:
     container_name: backend
     depends_on:
       database:
-        condition: service_healthy
+        condition: service_started
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
@@ -38,9 +38,8 @@ services:
     ports:
       - "8090:8090"
       - "5005:5005"
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.local
+    image: maven:3.9.3-eclipse-temurin-17
+    entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005"
     volumes:
       - ./backend:/app:z
 
