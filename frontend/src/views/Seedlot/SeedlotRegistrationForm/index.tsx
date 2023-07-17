@@ -192,7 +192,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
-            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data, true, false, true, ['isPLI'])}
+            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data, true, false, true, ['isPliSpecies'])}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
