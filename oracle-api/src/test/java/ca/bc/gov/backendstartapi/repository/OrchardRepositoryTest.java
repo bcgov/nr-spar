@@ -64,7 +64,7 @@ class OrchardRepositoryTest {
     String vegCode = "PLI";
     String stageCode = "RET";
     List<Orchard> orchardRet =
-        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, stageCode).get();
+        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, stageCode);
 
     Assertions.assertFalse(orchardRet.isEmpty());
     Assertions.assertEquals(2, orchardRet.size());
@@ -78,7 +78,7 @@ class OrchardRepositoryTest {
   @DisplayName("findOrchardByVegCodeRepoErrorTest")
   void findOrchardByVegCodeRepoErrorTest() {
     List<Orchard> orchardRet =
-        orchardRepository.findAllByVegetationCodeAndStageCodeNot("SX", "RET").get();
+        orchardRepository.findAllByVegetationCodeAndStageCodeNot("SX", "RET");
 
     Assertions.assertTrue(orchardRet.isEmpty());
   }

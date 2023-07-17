@@ -167,7 +167,7 @@ class OrchardServiceTest {
           }
         };
 
-    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(Optional.of(testList));
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(testList);
 
     List<OrchardDto> responseFromService = orchardService.findOrchardsByVegCode(vegCode);
 
@@ -181,7 +181,7 @@ class OrchardServiceTest {
   void findOrchardByVegCodeEmptyServiceTest() {
     String vegCode = "FDI";
 
-    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(Optional.of(List.of()));
+    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
 
     Exception exc =
         Assertions.assertThrows(

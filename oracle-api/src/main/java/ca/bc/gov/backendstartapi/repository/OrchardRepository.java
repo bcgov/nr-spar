@@ -13,5 +13,5 @@ public interface OrchardRepository extends JpaRepository<Orchard, String> {
   Optional<Orchard> findNotRetiredById(String id);
 
   // Find all orchards that are not retired with a given vegCode
-  Optional<List<Orchard>> findAllByVegetationCodeAndStageCodeNot(String vegCode, String stageCode);
+  List<Orchard> findAllByVegetationCodeAndStageCodeNot(String vegCode, String stageCode);
 }

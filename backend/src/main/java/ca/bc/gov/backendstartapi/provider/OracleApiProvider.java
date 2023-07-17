@@ -85,7 +85,7 @@ public class OracleApiProvider implements Provider {
    * @return An {@link List} of {@link OrchardDto}
    */
   @Override
-  public Optional<List<OrchardDto>> findOrchardsByVegCode(String vegCode) {
+  public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
     String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/{vegCode}", rootUri);
 
     log.info("Starting {} request to {}", PROVIDER, oracleApiUrl);
@@ -99,13 +99,13 @@ public class OracleApiProvider implements Provider {
               new ParameterizedTypeReference<List<OrchardDto>>() {},
               createParamsMap("vegCode", vegCode));
       log.info("GET orchards by vegCode from oracle - Success response!");
-      return Optional.ofNullable(orchardsResult.getBody());
+      return orchardsResult.getBody();
     } catch (HttpClientErrorException httpExc) {
       log.info(
           "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
     }
 
-    return Optional.empty();
+    return List.of();
   }
 
   @Override

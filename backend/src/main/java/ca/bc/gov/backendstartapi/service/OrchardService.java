@@ -95,11 +95,11 @@ public class OrchardService {
    * @return An {@link List} of {@link OrchardDto} from oracle-api
    */
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    Optional<List<OrchardDto>> orchardList =
+    List<OrchardDto> orchardList =
         oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
-    if (orchardList.isPresent() && orchardList.get().isEmpty()) {
+    if (orchardList.isEmpty()) {
       throw new NoOrchardException();
     }
-    return orchardList.orElseThrow(NoOrchardException::new);
+    return orchardList;
   }
 }

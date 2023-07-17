@@ -23,8 +23,8 @@ public interface Provider {
     return Optional.empty();
   }
 
-  default Optional<List<OrchardDto>> findOrchardsByVegCode(String vegCode) {
-    return Optional.empty();
+  default List<OrchardDto> findOrchardsByVegCode(String vegCode) {
+    return List.of();
   }
 
 
