@@ -3,7 +3,6 @@ import React from 'react';
 import {
   FlexGrid,
   Row,
-  Stack,
   Column
 } from '@carbon/react';
 
@@ -15,30 +14,28 @@ import './styles.scss';
 
 const Dashboard = () => (
   <FlexGrid className="dashboard-page">
-    <Stack gap={7}>
-      <Row>
-        <Column>
-          <PageTitle
-            title="Dashboard"
-            subtitle="See your favourite and recent activities inside SPAR system"
-          />
-        </Column>
-      </Row>
-      <Row>
-        <Column>
-          <section title="Favourite activities">
-            <FavouriteActivities />
-          </section>
-        </Column>
-      </Row>
-      <Row>
-        <Column>
-          <section title="Recent activities">
-            <RecentActivities />
-          </section>
-        </Column>
-      </Row>
-    </Stack>
+    <Row className="dashboard-row">
+      <Column>
+        <PageTitle
+          title="Dashboard"
+          subtitle="See your favourite and recent activities inside SPAR system"
+        />
+      </Column>
+    </Row>
+    <Row className="dashboard-row">
+      <Column>
+        <section title="Favourite activities">
+          <FavouriteActivities />
+        </section>
+      </Column>
+    </Row>
+    <Row className="dashboard-row">
+      <Column>
+        <section title="Recent activities">
+          <RecentActivities />
+        </section>
+      </Column>
+    </Row>
   </FlexGrid>
 );
 

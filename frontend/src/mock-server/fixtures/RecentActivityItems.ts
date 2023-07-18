@@ -1,38 +1,48 @@
 const RecentActivityItems = [
   {
-    type: 'Seedling request',
+    id: '0',
+    activity: 'Seedling request',
+    type: 'SEEDLING',
     status: 0,
-    request_id: '201589',
-    created_at: '2022-10-27',
-    last_viewed: '2022-10-27'
+    requestId: '201589',
+    createdAt: '2022-10-27',
+    lastViewed: '2022-10-27'
   },
   {
-    type: 'Seedlot registration',
+    id: '1',
+    activity: 'Seedlot registration',
+    type: 'SEEDLOT',
     status: 0,
-    request_id: '235685',
-    created_at: '2022-09-04',
-    last_viewed: '2022-10-27'
+    requestId: '235685',
+    createdAt: '2022-09-04',
+    lastViewed: '2022-10-27'
   },
   {
-    type: 'Seedlot testing',
+    id: '2',
+    activity: 'Seedlot testing',
+    type: 'TESTS',
     status: 1,
-    request_id: '214538',
-    created_at: '2022-09-04',
-    last_viewed: '2022-10-27'
+    requestId: '214538',
+    createdAt: '2022-09-04',
+    lastViewed: '2022-10-27'
   },
   {
-    type: 'Seedlot details',
+    id: '3',
+    activity: 'Seedlot details',
+    type: 'SEEDLOT',
     status: 2,
-    request_id: '854362',
-    created_at: '2022-01-16',
-    last_viewed: '2022-10-26'
+    requestId: '854362',
+    createdAt: '2022-01-16',
+    lastViewed: '2022-10-26'
   },
   {
-    type: 'Seedling request',
+    id: '4',
+    activity: 'Seedling request',
+    type: 'SEEDLING',
     status: 3,
-    request_id: '943576',
-    created_at: '2021-12-08',
-    last_viewed: '2022-10-26'
+    requestId: '943576',
+    createdAt: '2021-12-08',
+    lastViewed: '2022-10-26'
   }
 ];
 
