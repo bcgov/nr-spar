@@ -97,23 +97,12 @@ const OrchardStep = ({
     }
   };
 
-  // useQueries({
-  //   queries:
-  //     state.orchards.map((orchard) => ({
-  //       queryKey: ['orchard', orchard.orchardId],
-  //       queryFn: () => getOrchardByID(orchard.orchardId),
-  //       onSuccess: (data: OrchardDataType) => setOrchardName(orchard.inputId, data),
-  //       onError: () => setOrchardName(orchard.inputId),
-  //       enabled: orchard.orchardId.length > 0 && !readOnly,
-  //       retry: 0,
-  //       refetchOnMount: false,
-  //       refetchOnWindowFocus: false
-  //     }))
-  // });
-
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
-    queryFn: () => getOrchardByVegCode(seedlotSpecies.code)
+    queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
+    retry: 3,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false
   });
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -189,7 +178,8 @@ const OrchardStep = ({
               <Column sm={4} md={4} lg={8} xlg={6}>
                 <ComboBox
                   id={`orchard-combobox-${orchard.inputId}`}
-                  items={[]}
+                  // TODO: use skeleton and filter
+                  items={orchardQuery.isSuccess ? orchardQuery.data : []}
                   selectedItem={orchard.selectedItem}
                   titleText={
                     orchard.inputId === 0
