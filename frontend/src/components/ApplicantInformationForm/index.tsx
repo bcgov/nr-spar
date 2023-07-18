@@ -155,9 +155,9 @@ const ApplicantInformationForm = () => {
   };
 
   const displaySpeciesInput = () => {
-    const { status } = vegCodeQuery;
+    const { status, fetchStatus } = vegCodeQuery;
     const fetchError = status === 'error';
-    if (status === 'loading') {
+    if (fetchStatus === 'fetching') {
       return (
         <TextInputSkeleton />
       );
