@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useRef, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,7 +10,8 @@ import {
   RadioButtonGroup,
   RadioButton,
   Checkbox,
-  Button
+  Button,
+  TextInputSkeleton
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
 
@@ -23,9 +23,10 @@ import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import { OrchardForm, OrchardObj } from './definitions';
-import { MAX_ORCHARDS, orcharStepText } from './constants';
+import { MAX_ORCHARDS, orchardStepText } from './constants';
 
 import './styles.scss';
+import InputErrorText from '../../InputErrorText';
 
 type NumStepperVal = {
   value: number,
@@ -99,10 +100,7 @@ const OrchardStep = ({
 
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
-    queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
-    retry: 3,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false
+    queryFn: () => getOrchardByVegCode(seedlotSpecies.code)
   });
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -163,33 +161,84 @@ const OrchardStep = ({
     });
   };
 
+  const setOrchard = (inputId: number, selectedItem: MultiOptionsObj) => {
+    cleanParentTables();
+    const orchards = structuredClone(state.orchards);
+    const selectedOrchardIndex = orchards.findIndex((orchard) => orchard.inputId === inputId);
+    orchards[selectedOrchardIndex].selectedItem = selectedItem;
+    setStepData({
+      ...state,
+      orchards
+    });
+  };
+
+  // Remove options that are already selected by a user
+  const removeSelectedOption = (data: MultiOptionsObj[]) => {
+    const filteredOptions: MultiOptionsObj[] = structuredClone(data);
+    state.orchards.forEach((orchard) => {
+      const orchardId = orchard.selectedItem?.code;
+      // The index of a matching orchard in filteredOptions
+      const orchardOptIndex = filteredOptions.findIndex((option) => option.code === orchardId);
+      if (orchardOptIndex > -1) {
+        // Remove found option
+        filteredOptions.splice(orchardOptIndex, 1);
+      }
+    });
+    return filteredOptions;
+  };
+
   return (
     <div className="seedlot-orchard-step-form">
       <form>
         <Row className="seedlot-orchard-title-row">
           <Column sm={4} md={8} lg={16}>
-            <h2>{orcharStepText.orchardSection.title}</h2>
-            <Subtitle text={orcharStepText.orchardSection.subtitle} />
+            <h2>{orchardStepText.orchardSection.title}</h2>
+            <Subtitle text={orchardStepText.orchardSection.subtitle} />
           </Column>
         </Row>
         {
           state.orchards.map((orchard) => (
             <Row className="seedlot-orchard-field" key={orchard.inputId}>
               <Column sm={4} md={4} lg={8} xlg={6}>
-                <ComboBox
-                  id={`orchard-combobox-${orchard.inputId}`}
-                  // TODO: use skeleton and filter
-                  items={orchardQuery.isSuccess ? orchardQuery.data : []}
-                  selectedItem={orchard.selectedItem}
-                  titleText={
-                    orchard.inputId === 0
-                      ? orcharStepText.orchardSection.orchardInput.label
-                      : orcharStepText.orchardSection.orchardInput.optLabel
-                  }
-                  shouldFilterItem={
-                    ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-                  }
-                />
+                {
+                  orchardQuery.isFetching ? (
+                    <TextInputSkeleton />
+                  )
+                    : (
+                      <>
+                        <ComboBox
+                          id={`orchard-combobox-${orchard.inputId}`}
+                          placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
+                          items={
+                            orchardQuery.isSuccess
+                              ? removeSelectedOption(orchardQuery.data)
+                              : []
+                          }
+                          selectedItem={orchard.selectedItem}
+                          titleText={
+                            orchard.inputId === 0
+                              ? orchardStepText.orchardSection.orchardInput.label
+                              : orchardStepText.orchardSection.orchardInput.optLabel
+                          }
+                          shouldFilterItem={
+                            ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                          }
+                          onChange={
+                            (e: ComboBoxEvent) => setOrchard(orchard.inputId, e.selectedItem)
+                          }
+                        />
+                        {
+                          orchardQuery.isError
+                            ? (
+                              <InputErrorText
+                                description={orchardStepText.orchardSection.orchardInput.fetchError}
+                              />
+                            )
+                            : null
+                        }
+                      </>
+                    )
+                }
               </Column>
             </Row>
           ))
@@ -205,7 +254,7 @@ const OrchardStep = ({
                     renderIcon={TrashCan}
                     onClick={() => deleteOrchardObj()}
                   >
-                    {orcharStepText.orchardSection.buttons.delete}
+                    {orchardStepText.orchardSection.buttons.delete}
                   </Button>
                 </Column>
               </Row>
@@ -219,7 +268,7 @@ const OrchardStep = ({
                     renderIcon={Add}
                     onClick={() => addOrchardObj()}
                   >
-                    {orcharStepText.orchardSection.buttons.add}
+                    {orchardStepText.orchardSection.buttons.add}
                   </Button>
                 </Column>
               </Row>
@@ -227,16 +276,16 @@ const OrchardStep = ({
         }
         <Row className="seedlot-orchard-title-row">
           <Column sm={4} md={8} lg={16}>
-            <h2>{orcharStepText.gameteSection.title}</h2>
-            <Subtitle text={orcharStepText.gameteSection.subtitle} />
+            <h2>{orchardStepText.gameteSection.title}</h2>
+            <Subtitle text={orchardStepText.gameteSection.subtitle} />
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16} xlg={12}>
             <Dropdown
               id="seedlot-species-dropdown"
-              titleText={orcharStepText.gameteSection.seedlotSpecies}
-              label={orcharStepText.gameteSection.seedlotSpecies}
+              titleText={orchardStepText.gameteSection.seedlotSpecies}
+              label={orchardStepText.gameteSection.seedlotSpecies}
               selectedItem={seedlotSpecies}
               readOnly
               items={[seedlotSpecies]}
@@ -253,10 +302,10 @@ const OrchardStep = ({
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }
-              placeholder={orcharStepText.gameteSection.femaleGametic.placeholder}
-              titleText={orcharStepText.gameteSection.femaleGametic.label}
+              placeholder={orchardStepText.gameteSection.femaleGametic.placeholder}
+              titleText={orchardStepText.gameteSection.femaleGametic.label}
               invalid={invalidFemGametic}
-              invalidText={orcharStepText.gameteSection.femaleGametic.invalid}
+              invalidText={orchardStepText.gameteSection.femaleGametic.invalid}
               onChange={(e: ComboBoxEvent) => femaleGameticHandler(e)}
               readOnly={readOnly}
               selectedItem={state.femaleGametic}
@@ -266,7 +315,7 @@ const OrchardStep = ({
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
             <RadioButtonGroup
-              legendText={orcharStepText.gameteSection.maleGametic.label}
+              legendText={orchardStepText.gameteSection.maleGametic.label}
               name="male-gametic-radiogroup"
               orientation="vertical"
               className={invalidMalGametic ? 'male-gametic-invalid' : ''}
@@ -287,12 +336,12 @@ const OrchardStep = ({
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
             <label htmlFor="seedlot-produced" className="bcgov--label">
-              {orcharStepText.gameteSection.controlledCross.label}
+              {orchardStepText.gameteSection.controlledCross.label}
             </label>
             <Checkbox
               id="seedlot-produced"
               name="controlledCross"
-              labelText={orcharStepText.gameteSection.controlledCross.checkbox}
+              labelText={orchardStepText.gameteSection.controlledCross.checkbox}
               defaultChecked={state.controlledCross}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
               readOnly={readOnly}
@@ -302,12 +351,12 @@ const OrchardStep = ({
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
             <label htmlFor="bio-processes" className="bcgov--label">
-              {orcharStepText.gameteSection.biotechProcess.label}
+              {orchardStepText.gameteSection.biotechProcess.label}
             </label>
             <Checkbox
               id="bio-processes"
               name="biotechProcess"
-              labelText={orcharStepText.gameteSection.biotechProcess.checkbox}
+              labelText={orchardStepText.gameteSection.biotechProcess.checkbox}
               defaultChecked={state.biotechProcess}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
               readOnly={readOnly}
@@ -316,19 +365,19 @@ const OrchardStep = ({
         </Row>
         <Row className="seedlot-orchard-title-row">
           <Column sm={4} md={8} lg={16}>
-            <h2>{orcharStepText.pollenSection.title}</h2>
-            <Subtitle text={orcharStepText.pollenSection.subtitle} />
+            <h2>{orchardStepText.pollenSection.title}</h2>
+            <Subtitle text={orchardStepText.pollenSection.subtitle} />
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
             <label htmlFor="pollen-contamination" className="bcgov--label">
-              {orcharStepText.pollenSection.noPollenContamination.label}
+              {orchardStepText.pollenSection.noPollenContamination.label}
             </label>
             <Checkbox
               id="pollen-contamination"
               name="noPollenContamination"
-              labelText={orcharStepText.pollenSection.noPollenContamination.checkbox}
+              labelText={orchardStepText.pollenSection.noPollenContamination.checkbox}
               defaultChecked={state.noPollenContamination}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
               readOnly={readOnly}
@@ -351,10 +400,10 @@ const OrchardStep = ({
                       step={10}
                       disableWheel
                       type="number"
-                      label={orcharStepText.pollenSection.breedingPercentage.label}
-                      helperText={orcharStepText.pollenSection.breedingPercentage.helper}
+                      label={orchardStepText.pollenSection.breedingPercentage.label}
+                      helperText={orchardStepText.pollenSection.breedingPercentage.helper}
                       invalid={invalidBreeding}
-                      invalidText={orcharStepText.pollenSection.breedingPercentage.invalid}
+                      invalidText={orchardStepText.pollenSection.breedingPercentage.invalid}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         if (e?.target?.name && e?.target?.value) {
                           setResponse([e.target.name], [e.target.value]);
@@ -380,12 +429,12 @@ const OrchardStep = ({
                 <Row className="pollen-methodology-checkbox">
                   <Column sm={4} md={8} lg={16}>
                     <label htmlFor="pollen-methodology" className="bcgov--label">
-                      {orcharStepText.pollenSection.pollenMethodology.label}
+                      {orchardStepText.pollenSection.pollenMethodology.label}
                     </label>
                     <Checkbox
                       id="pollen-methodology"
                       name="pollenMethodology"
-                      labelText={orcharStepText.pollenSection.pollenMethodology.checkbox}
+                      labelText={orchardStepText.pollenSection.pollenMethodology.checkbox}
                       defaultChecked={state.pollenMethodology}
                       readOnly
                     />

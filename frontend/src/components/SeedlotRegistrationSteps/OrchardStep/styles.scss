@@ -27,6 +27,10 @@
   margin-bottom: 3rem;
 }
 
+#female-gametic-combobox{
+  border-bottom: none;
+}
+
 #female-gametic-combobox::placeholder {
   color: var(--#{vars.$bcgov-prefix}-text-primary);
   opacity: 1;
