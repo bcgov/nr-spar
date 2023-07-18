@@ -8,13 +8,11 @@ import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 
 abstract class SeedlotEntityJpaTest {
 
   protected final SeedlotRepository repository;
 
-  @Autowired
   protected SeedlotEntityJpaTest(SeedlotRepository seedlotRepository) {
     repository = seedlotRepository;
   }

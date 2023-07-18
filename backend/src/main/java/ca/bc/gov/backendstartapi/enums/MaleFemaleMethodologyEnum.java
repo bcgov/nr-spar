@@ -30,11 +30,11 @@ public enum MaleFemaleMethodologyEnum {
 
   private final String code;
   private final String description;
-  private final Boolean isPLI;
+  private final Boolean isPliSpecies;
 
-  MaleFemaleMethodologyEnum(String code, String description, Boolean isPLI) {
+  MaleFemaleMethodologyEnum(String code, String description, Boolean isPliSpecies) {
     this.code = code;
     this.description = description;
-    this.isPLI = isPLI;
+    this.isPliSpecies = isPliSpecies;
   }
 }
