@@ -64,7 +64,7 @@ before submitting it.
 - [5.3 Camel case: defined](https://google.github.io/styleguide/javaguide.html#s5.3-camel-case)
 - [6.1 @Override: always used](https://google.github.io/styleguide/javaguide.html#s6.1-override-annotation)
 
-You can check your code before submitting with `./mvnw --no-transfer-progress checkstyle:checkstyle -D checkstyle.skip=false --file pom.xml`
+You can check your code before submitting with `./mvnw --no-transfer-progress checkstyle:checkstyle -Dcheckstyle.skip=false --file pom.xml`
 
 ## Run this application
 
