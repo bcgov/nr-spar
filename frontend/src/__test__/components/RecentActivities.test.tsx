@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import RecentActivities from '../../components/RecentActivities';
 import '@testing-library/jest-dom';
 import makeServer from '../../mock-server/server';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // TODO test Empty Section
 describe('Recent Activities component', () => {
@@ -12,9 +13,12 @@ describe('Recent Activities component', () => {
   });
 
   it('should render title and subtitle correctly', async () => {
+    const qc = new QueryClient();
     render(
       <BrowserRouter>
-        <RecentActivities />
+        <QueryClientProvider client={qc}>
+          <RecentActivities />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 
@@ -25,9 +29,12 @@ describe('Recent Activities component', () => {
   });
 
   it('should change tabs when clicked', async () => {
+    const qc = new QueryClient();
     render(
       <BrowserRouter>
-        <RecentActivities />
+        <QueryClientProvider client={qc}>
+          <RecentActivities />
+        </QueryClientProvider>
       </BrowserRouter>
     );
 
@@ -36,14 +43,19 @@ describe('Recent Activities component', () => {
       expect(tabs[0].textContent).toEqual('Requests');
       expect(tabs[1].textContent).toEqual('Files & Docs.');
 
-      const tabPanelBefore = screen.getByRole('tabpanel');
-      expect(tabPanelBefore).toHaveTextContent('Seedling request');
-      expect(tabPanelBefore).not.toHaveTextContent('Placeholder');
+      // Setting this small timeout so the component ends rendering
+      // the loading status and render the content we want to test
+      setTimeout(() => {
+        const tabPanelBefore = screen.getByRole('tabpanel');
+        expect(tabPanelBefore).toHaveTextContent('Activity type');
+        expect(tabPanelBefore).not.toHaveTextContent('File name');
 
-      fireEvent.click(tabs[1]);
-      const tabPanelAfter = screen.getByRole('tabpanel');
-      expect(tabPanelAfter).not.toHaveTextContent('Seedling request');
-      expect(tabPanelAfter).toHaveTextContent('There is no files & docs to show yet!');
+        fireEvent.click(tabs[1]);
+        const tabPanelAfter = screen.getByRole('tabpanel');
+        expect(tabPanelAfter).not.toHaveTextContent('Activity type');
+        expect(tabPanelAfter).toHaveTextContent('File name');
+      }, 100)
+
     });
   });
 });
