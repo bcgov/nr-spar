@@ -1,7 +1,8 @@
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
+
 export type OrchardObj = {
   inputId: number,
-  orchardId: string,
-  orchardLabel: string
+  selectedItem: MultiOptionsObj | null
 }
 
 export type OrchardForm = {

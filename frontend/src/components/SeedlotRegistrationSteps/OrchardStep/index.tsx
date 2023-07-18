@@ -1,30 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useRef, useState, useMemo } from 'react';
-import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   Row,
   Column,
   NumberInput,
-  TextInput,
   Dropdown,
   ComboBox,
   RadioButtonGroup,
   RadioButton,
   Checkbox,
-  Button,
-  InlineLoading
+  Button
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
 
-import InputErrorText from '../../InputErrorText';
 import Subtitle from '../../Subtitle';
 
-import { getOrchardByID } from '../../../api-service/orchardAPI';
+import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import OrchardDataType from '../../../types/OrchardDataType';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS, orcharStepText } from './constants';
@@ -53,7 +49,6 @@ const OrchardStep = ({
   cleanParentTables,
   readOnly
 }: OrchardStepProps) => {
-  const queryClient = useQueryClient();
   const [isPliSpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
   const refControl = useRef<any>({});
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
@@ -102,52 +97,24 @@ const OrchardStep = ({
     }
   };
 
-  // Set orchard name by input id, if data is not present then clear orcahrd name
-  const setOrchardName = (inputId: number, data?: OrchardDataType) => {
-    const newOrchards = [...state.orchards];
-    /**
-     * It is safe to replace item in array by index here
-     * since the array is not mutable at this stage
-     */
-    const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
-    if (data?.name && data.vegetationCode && data.stageCode) {
-      newOrchards[replaceIndex].orchardLabel = `${data.name} - ${data.vegetationCode} - ${data.stageCode}`;
-    } else {
-      newOrchards[replaceIndex].orchardLabel = '';
-    }
-    setStepData({
-      ...state,
-      orchards: newOrchards
-    });
-  };
+  // useQueries({
+  //   queries:
+  //     state.orchards.map((orchard) => ({
+  //       queryKey: ['orchard', orchard.orchardId],
+  //       queryFn: () => getOrchardByID(orchard.orchardId),
+  //       onSuccess: (data: OrchardDataType) => setOrchardName(orchard.inputId, data),
+  //       onError: () => setOrchardName(orchard.inputId),
+  //       enabled: orchard.orchardId.length > 0 && !readOnly,
+  //       retry: 0,
+  //       refetchOnMount: false,
+  //       refetchOnWindowFocus: false
+  //     }))
+  // });
 
-  useQueries({
-    queries:
-      state.orchards.map((orchard) => ({
-        queryKey: ['orchard', orchard.orchardId],
-        queryFn: () => getOrchardByID(orchard.orchardId),
-        onSuccess: (data: OrchardDataType) => setOrchardName(orchard.inputId, data),
-        onError: () => setOrchardName(orchard.inputId),
-        enabled: orchard.orchardId.length > 0 && !readOnly,
-        retry: 0,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false
-      }))
+  const orchardQuery = useQuery({
+    queryKey: ['orchards', seedlotSpecies.code],
+    queryFn: () => getOrchardByVegCode(seedlotSpecies.code)
   });
-
-  const fetchOrchardInfo = (orchardId: string, inputId: number) => {
-    cleanParentTables();
-    // Copy orchards from state
-    const newOrchards = structuredClone(state.orchards);
-    // Replace input value with id
-    const replaceIndex = newOrchards.findIndex((orchard) => orchard.inputId === inputId);
-    newOrchards[replaceIndex].orchardId = orchardId;
-    setStepData({
-      ...state,
-      orchards: newOrchards
-    });
-    queryClient.refetchQueries({ queryKey: ['orchard', orchardId], exact: true });
-  };
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
     if (invalidFemGametic) {
@@ -182,13 +149,12 @@ const OrchardStep = ({
   };
 
   const addOrchardObj = () => {
-    const orchards = [...state.orchards];
+    const orchards = structuredClone(state.orchards);
     const numOfOrchard = orchards.length;
     if (numOfOrchard < MAX_ORCHARDS) {
       const newOrchard: OrchardObj = {
         inputId: numOfOrchard,
-        orchardId: '',
-        orchardLabel: ''
+        selectedItem: null
       };
       orchards.push(newOrchard);
       setStepData({
@@ -199,28 +165,13 @@ const OrchardStep = ({
   };
 
   const deleteOrchardObj = () => {
-    const orchards = [...state.orchards];
+    const orchards = structuredClone(state.orchards);
     const numOfOrchard = orchards.length;
     const newOrchards = orchards.filter((orchard) => orchard.inputId !== (numOfOrchard - 1));
     setStepData({
       ...state,
       orchards: newOrchards
     });
-  };
-
-  const displayOrchNameStatus = (orchard: OrchardObj) => {
-    const status = queryClient.getQueryState(['orchard', orchard.orchardId])?.status;
-    if (status === 'loading' && orchard.orchardId.length > 0) {
-      return (
-        <InlineLoading description="Loading..." />
-      );
-    }
-    if (status === 'error' && orchard.orchardId.length > 0) {
-      return (
-        <InputErrorText description="Orchard name not found" />
-      );
-    }
-    return null;
   };
 
   return (
@@ -239,6 +190,7 @@ const OrchardStep = ({
                 <ComboBox
                   id={`orchard-combobox-${orchard.inputId}`}
                   items={[]}
+                  selectedItem={orchard.selectedItem}
                   titleText={
                     orchard.inputId === 0
                       ? orcharStepText.orchardSection.orchardInput.label
@@ -248,57 +200,6 @@ const OrchardStep = ({
                     ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
                   }
                 />
-                {/* <NumberInput
-                  id={`orchardId-${orchard.inputId}`}
-                  name="orchardId"
-                  ref={(el: HTMLInputElement) => addRefs(el, `orchardId-${orchard.inputId}`)}
-                  value={orchard.orchardId}
-                  invalidText={orcharStepText.orchardSection.orchardInput.invalid}
-                  allowEmpty
-                  min={100}
-                  max={999}
-                  disableWheel
-                  hideSteppers
-                  type="number"
-                  label={
-                    orchard.inputId === 0
-                      ? orcharStepText.orchardSection.orchardInput.label
-                      : orcharStepText.orchardSection.orchardInput.optLabel
-                  }
-                  placeholder={orcharStepText.orchardSection.orchardInput.placeholder}
-                  onBlur={
-                    (event: React.ChangeEvent<HTMLInputElement>) => {
-                      if (event.target.value !== orchard.orchardId) {
-                        fetchOrchardInfo(event.target.value, orchard.inputId);
-                      }
-                    }
-                  }
-                  onKeyUp={
-                    (event: React.KeyboardEvent<HTMLDivElement>) => {
-                      if (event.key === 'Enter') {
-                        (event.target as HTMLInputElement).blur();
-                      }
-                    }
-                  }
-                  readOnly={readOnly}
-                />
-              </Column>
-              <Column sm={4} md={4} lg={8} xlg={6}>
-                <TextInput
-                  id={`orchardName-${orchard.inputId}`}
-                  type="text"
-                  labelText={
-                    orchard.inputId === 0
-                      ? orcharStepText.orchardSection.orchardName.label
-                      : orcharStepText.orchardSection.orchardName.optLabel
-                  }
-                  placeholder={orcharStepText.orchardSection.orchardName.label}
-                  value={orchard.orchardLabel}
-                  readOnly
-                />
-                {
-                  displayOrchNameStatus(orchard)
-                } */}
               </Column>
             </Row>
           ))

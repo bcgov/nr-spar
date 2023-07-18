@@ -184,9 +184,9 @@ const ParentTreeStep = (
   useQueries({
     queries:
       orchardsData.map((orchard) => ({
-        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.orchardId],
+        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.selectedItem?.orchardId],
         queryFn: () => (
-          getParentTreeGeneQuali(orchard.orchardId)
+          getParentTreeGeneQuali(orchard.selectedItem?.orchardId)
         ),
         onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(data),
         refetchOnMount: true,

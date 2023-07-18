@@ -52,8 +52,7 @@ export const initOrchardState = (): OrchardForm => (
     orchards: [
       {
         inputId: 0,
-        orchardId: '',
-        orchardLabel: ''
+        selectedItem: null
       }
     ],
     femaleGametic: '',
