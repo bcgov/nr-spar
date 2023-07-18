@@ -30,6 +30,7 @@ import { MAX_ORCHARDS, orcharStepText } from './constants';
 
 import './styles.scss';
 import OrchardModal from './OrchardModal';
+import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 type NumStepperVal = {
   value: number,
@@ -42,7 +43,8 @@ interface OrchardStepProps {
   state: OrchardForm
   setStepData: Function,
   cleanParentTables: Function,
-  readOnly?: boolean
+  readOnly?: boolean,
+  parentTreeState?: ParentTreeStepDataObj
 }
 
 const OrchardStep = ({
@@ -51,7 +53,8 @@ const OrchardStep = ({
   state,
   setStepData,
   cleanParentTables,
-  readOnly
+  readOnly,
+  parentTreeState
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPLISpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
@@ -234,6 +237,8 @@ const OrchardStep = ({
     }
   };
 
+  const isEmpty = (obj:any) => JSON.stringify(obj) === '{}';
+
   return (
     <div className="seedlot-orchard-step-form">
       <form>
@@ -312,8 +317,10 @@ const OrchardStep = ({
                     kind="danger--tertiary"
                     renderIcon={TrashCan}
                     onClick={() => {
-                      setModalType('delete');
-                      setModalOpen(true);
+                      if (!isEmpty(parentTreeState?.tableRowData)) {
+                        setModalType('delete');
+                        setModalOpen(true);
+                      } else deleteOrchardObj();
                     }}
                   >
                     {orcharStepText.orchardSection.buttons.delete}
@@ -329,8 +336,10 @@ const OrchardStep = ({
                     kind="tertiary"
                     renderIcon={Add}
                     onClick={() => {
-                      setModalType('add');
-                      setModalOpen(true);
+                      if (!isEmpty(parentTreeState?.tableRowData)) {
+                        setModalType('add');
+                        setModalOpen(true);
+                      } else addOrchardObj();
                     }}
                   >
                     {orcharStepText.orchardSection.buttons.add}

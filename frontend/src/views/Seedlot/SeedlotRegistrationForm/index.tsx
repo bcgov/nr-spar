@@ -197,6 +197,7 @@ const SeedlotRegistrationForm = () => {
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
             setStepData={(data: OrchardForm) => setStepData('orchardStep', data)}
+            parentTreeState={allStepData.parentTreeStep}
           />
         );
       // Parent Tree and SMP
