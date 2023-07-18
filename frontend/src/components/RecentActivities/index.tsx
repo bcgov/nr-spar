@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   Row,
@@ -8,34 +9,37 @@ import {
   TabList,
   Tab,
   TabPanels,
-  TabPanel
+  TabPanel,
+  DataTableSkeleton
 } from '@carbon/react';
 
-import ActivityTable from '../ActivityTable';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
+import RecentActivitiesTable from './RecentActivitiesTable';
+
+import getRecentActivities from '../../api-service/recentActivitiesAPI';
+import getFilesAndDocs from '../../api-service/filesAndDocsAPI';
+
+import {
+  componentTexts,
+  getEmptySectionDesc,
+  getEmptySectionTitle,
+  activitiesHeaders,
+  filesAndDocsHeaders
+} from './constants';
 
 import './styles.scss';
-import api from '../../api-service/api';
-import ApiConfig from '../../api-service/ApiConfig';
-import FilesDocsTable from '../FilesDocsTable';
 
 const RecentActivities = () => {
-  const [listItems, setListItems] = useState([]);
-  // Will let eslint ignoring it for now,
-  // since we will use this state with API calls
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [filesDocsItems] = useState([]);
+  const recentActivitiesQuery = useQuery({
+    queryKey: ['recent-activities'],
+    queryFn: getRecentActivities
+  });
 
-  useEffect(() => {
-    const url = ApiConfig.recentActivities;
-    api.get(url)
-      .then((response) => {
-        setListItems(response.data);
-      })
-      // eslint-disable-next-line
-      .catch((error) => console.error(`Error: ${error}`));
-  }, []);
+  const filesAndDocsQuery = useQuery({
+    queryKey: ['files-docs'],
+    queryFn: getFilesAndDocs
+  });
 
   const navigate = useNavigate();
 
@@ -43,81 +47,78 @@ const RecentActivities = () => {
     navigate(`/activity/${requestId}`);
   };
 
-  const tableHeaders: string[] = [
-    'Activity type',
-    'Status',
-    'Request ID',
-    'Created at',
-    'Last viewed',
-    'View'
-  ];
-
-  const fileDocstableHeaders: string[] = [
-    'File name',
-    'File format',
-    'Created at',
-    'Last update',
-    'Actions'
-  ];
-
   return (
     <>
       <Row className="recent-activity-title-row">
         <Column>
-          <h2>My recent activities</h2>
-          <Subtitle text="Check your recent requests and files" className="recent-activity-subtitle" />
+          <h2>{componentTexts.title}</h2>
+          <Subtitle text={componentTexts.subtitle} className="recent-activity-subtitle" />
         </Column>
       </Row>
       <Row>
         <Column className="recent-activity-table">
           <Tabs>
-            <TabList aria-label="List of tabs">
-              <Tab>Requests</Tab>
-              <Tab>Files & Docs.</Tab>
+            <TabList aria-label={componentTexts.tabs.ariaLabel}>
+              <Tab>{componentTexts.tabs.requests}</Tab>
+              <Tab>{componentTexts.tabs.files}</Tab>
             </TabList>
-            <TabPanels>
-              <TabPanel>
-                {
-                  listItems.length === 0
-                    ? (
-                      <div className="empty-recent-activities">
-                        <EmptySection
-                          icon="Application"
-                          title="There is no activity to show yet!"
-                          description="Your recent requests will appear here once you generate one"
-                        />
-                      </div>
-                    )
-                    : (
-                      <ActivityTable
-                        elements={listItems}
-                        clickFn={goToActivity}
-                        headers={tableHeaders}
-                      />
-                    )
-                }
-              </TabPanel>
-              <TabPanel>
-                {
-                  filesDocsItems.length === 0
-                    ? (
-                      <div className="empty-recent-activity-files-docs">
-                        <EmptySection
-                          icon="Application"
-                          title="There is no files & docs to show yet!"
-                          description="Your recent files & docs will appear here once you generate one"
-                        />
-                      </div>
-                    )
-                    : (
-                      <FilesDocsTable
-                        elements={filesDocsItems}
-                        headers={fileDocstableHeaders}
-                      />
-                    )
-                }
-              </TabPanel>
-            </TabPanels>
+            {
+              recentActivitiesQuery.isSuccess
+              && filesAndDocsQuery.isSuccess
+                ? (
+                  <TabPanels>
+                    <TabPanel>
+                      {
+                        recentActivitiesQuery.data.length === 0
+                          ? (
+                            <div className="empty-recent-activities">
+                              <EmptySection
+                                pictogram="Farm_02"
+                                title={getEmptySectionTitle('activity')}
+                                description={getEmptySectionDesc('requests')}
+                              />
+                            </div>
+                          )
+                          : (
+                            <RecentActivitiesTable
+                              headers={activitiesHeaders}
+                              elements={recentActivitiesQuery.data}
+                              clickFn={goToActivity}
+                            />
+                          )
+                      }
+                    </TabPanel>
+                    <TabPanel>
+                      {
+                        filesAndDocsQuery.data.length === 0
+                          ? (
+                            <div className="empty-recent-activity-files-docs">
+                              <EmptySection
+                                pictogram="Farm_02"
+                                title={getEmptySectionTitle('files & docs')}
+                                description={getEmptySectionDesc('files & docs')}
+                              />
+                            </div>
+                          )
+                          : (
+                            <RecentActivitiesTable
+                              headers={filesAndDocsHeaders}
+                              elements={filesAndDocsQuery.data}
+                              clickFn={goToActivity}
+                              isDocTable
+                            />
+                          )
+                      }
+                    </TabPanel>
+                  </TabPanels>
+                )
+                : (
+                  <DataTableSkeleton
+                    showToolbar={false}
+                    showHeader={false}
+                  />
+                )
+            }
           </Tabs>
         </Column>
       </Row>

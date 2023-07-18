@@ -1,8 +1,9 @@
 type File = {
-    name: string;
-    format: number;
-    created_at: string;
-    last_update: string;
+  id: string;
+  name: string;
+  format: string;
+  createdAt: string;
+  lastUpdate: string;
 }
 
 export default File;
