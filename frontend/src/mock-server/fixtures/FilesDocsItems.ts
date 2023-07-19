@@ -9,21 +9,21 @@ const FilesDocsItems = [
   {
     id: '1',
     name: 'Seedlots details report',
-    format: 'EXCEL',
+    format: 'Excel',
     createdAt: '2022-09-04',
     lastUpdate: '2022-10-27'
   },
   {
     id: '2',
     name: 'Orchard report',
-    format: 'EXCEL',
+    format: 'Excel',
     createdAt: '2022-09-04',
     lastUpdate: '2022-10-27'
   },
   {
     id: '3',
     name: 'Seedlot use report',
-    format: 'WORD',
+    format: 'Word',
     createdAt: '2022-01-16',
     lastUpdate: '2022-10-26'
   },

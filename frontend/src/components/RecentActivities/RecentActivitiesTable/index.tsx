@@ -36,7 +36,7 @@ const RecentActivitiesTable = ({
 }: TableProps) => {
   const iconSize = '18';
 
-  const writeFileFormat = (format: string) => `${format.charAt(0) + format.slice(1).toLowerCase()} file`;
+  const writeFileFormat = (format: string) => `${format} file`;
 
   const createTableCell = (obj: any, key: string, index: number) => {
     const mapKey = `${key}-${index}`;

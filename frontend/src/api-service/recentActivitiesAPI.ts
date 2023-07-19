@@ -1,9 +1,5 @@
-import ApiConfig from './ApiConfig';
-import api from './api';
+import RecentActivityItems from '../mock-server/fixtures/RecentActivityItems';
 
-const getRecentActivities = () => {
-  const url = ApiConfig.recentActivities;
-  return api.get(url).then((res) => res.data);
-};
+const getRecentActivities = () => RecentActivityItems;
 
 export default getRecentActivities;
