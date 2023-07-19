@@ -1,9 +1,5 @@
-import ApiConfig from './ApiConfig';
-import api from './api';
+import FilesDocsItems from '../mock-server/fixtures/FilesDocsItems';
 
-const getFilesAndDocs = () => {
-  const url = ApiConfig.filesAndDocs;
-  return api.get(url).then((res) => res.data);
-};
+const getFilesAndDocs = () => FilesDocsItems;
 
 export default getFilesAndDocs;
