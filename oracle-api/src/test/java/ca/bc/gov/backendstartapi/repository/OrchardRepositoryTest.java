@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.repository;
 
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +54,31 @@ class OrchardRepositoryTest {
   @DisplayName("findByIdNotFoundTest")
   void findByIdNotFoundTest() {
     Optional<Orchard> orchardRet = orchardRepository.findNotRetiredById("612");
+
+    Assertions.assertTrue(orchardRet.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findOrchardByVegCodeRepoSuccessTest")
+  void findOrchardByVegCodeRepoSuccessTest() {
+    String vegCode = "PLI";
+    String stageCode = "RET";
+    List<Orchard> orchardRet =
+        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, stageCode);
+
+    Assertions.assertFalse(orchardRet.isEmpty());
+    Assertions.assertEquals(2, orchardRet.size());
+    Assertions.assertEquals(vegCode, orchardRet.get(0).getVegetationCode());
+    Assertions.assertEquals(vegCode, orchardRet.get(1).getVegetationCode());
+    Assertions.assertNotEquals(stageCode, orchardRet.get(0).getStageCode());
+    Assertions.assertNotEquals(stageCode, orchardRet.get(1).getStageCode());
+  }
+
+  @Test
+  @DisplayName("findOrchardByVegCodeRepoErrorTest")
+  void findOrchardByVegCodeRepoErrorTest() {
+    List<Orchard> orchardRet =
+        orchardRepository.findAllByVegetationCodeAndStageCodeNot("SX", "RET");
 
     Assertions.assertTrue(orchardRet.isEmpty());
   }

@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,5 +59,37 @@ public class OrchardEndpoint {
               description = "Identifier of the Orchard.")
           String orchardId) {
     return orchardService.findParentTreeGeneticQualityData(orchardId);
+  }
+
+  /**
+   * Gets all orchards with vegCode.
+   *
+   * @param vegCode {@link Orchard}'s identification
+   * @return a {@link List} of {@link OrchardDto}
+   * @throws ResponseStatusException if no data is found
+   */
+  @GetMapping(path = "/vegetation-code/{vegCode}")
+  @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Fetch a list of orchard based on the provided vegCode",
+      description =
+          "Returns all non-retired orchards under the provided vegCode, this is a proxy that calls"
+              + " oracle-api.",
+      responses = {
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
+      })
+  public List<OrchardDto> getOrchardsByVegCode(
+      @PathVariable
+          @Parameter(
+              name = "vegCode",
+              in = ParameterIn.PATH,
+              description = "Identifier of the Orchard.")
+          String vegCode) {
+    return orchardService.findOrchardsByVegCode(vegCode);
   }
 }
