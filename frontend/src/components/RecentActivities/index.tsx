@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -63,13 +64,14 @@ const RecentActivities = () => {
               <Tab>{componentTexts.tabs.files}</Tab>
             </TabList>
             {
-              recentActivitiesQuery.isSuccess
-              && filesAndDocsQuery.isSuccess
+              (recentActivitiesQuery.isSuccess
+                && filesAndDocsQuery.isSuccess)
                 ? (
                   <TabPanels>
                     <TabPanel>
                       {
-                        recentActivitiesQuery.data.length === 0
+                        (Array.isArray(recentActivitiesQuery.data)
+                          && recentActivitiesQuery.data.length === 0)
                           ? (
                             <div className="empty-recent-activities">
                               <EmptySection
@@ -90,7 +92,8 @@ const RecentActivities = () => {
                     </TabPanel>
                     <TabPanel>
                       {
-                        filesAndDocsQuery.data.length === 0
+                        (Array.isArray(filesAndDocsQuery.data)
+                          && filesAndDocsQuery.data.length === 0)
                           ? (
                             <div className="empty-recent-activity-files-docs">
                               <EmptySection
