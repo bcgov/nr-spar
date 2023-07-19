@@ -112,6 +112,41 @@ public class OrchardService {
     return Optional.of(orchardParentTreeDto);
   }
 
+  /**
+   * Finds an Orchard parent tree contribution data given an orchard id and an SPU ID.
+   *
+   * @param vegCode {@link VegetationCode} identification
+   * @return {@link Optional} of a {@link List} of {@link OrchardParentTreeDto}
+   */
+  public Optional<List<OrchardLotTypeDescriptionDto>> findNotRetOrchardsByVegCode(String vegCode) {
+
+    List<OrchardLotTypeDescriptionDto> resultList = new ArrayList<>();
+
+    List<Orchard> orchardList =
+        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode.toUpperCase(), "RET");
+
+    orchardList.forEach(
+        orchard -> {
+          OrchardLotTypeCode orchardLotTypeCode = orchard.getOrchardLotTypeCode();
+          if (orchardLotTypeCode.isValid()) {
+            OrchardLotTypeDescriptionDto objToAdd =
+                new OrchardLotTypeDescriptionDto(
+                    orchard.getId(),
+                    orchard.getName(),
+                    orchard.getVegetationCode(),
+                    orchardLotTypeCode.getCode(),
+                    orchardLotTypeCode.getDescription(),
+                    orchard.getStageCode());
+            resultList.add(objToAdd);
+          }
+        });
+
+    if (resultList.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(resultList);
+  }
+
   private List<ParentTreeDto> findAllParentTree(String orchardId, Long spuId, long milli) {
     List<ParentTreeDto> parentTreeDtoList = new ArrayList<>();
     List<ParentTreeOrchard> parentTreeOrchards =

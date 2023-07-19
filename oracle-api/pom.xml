@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.1.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ca.bc.gov</groupId>
 	<artifactId>nr-spar-oracle-api</artifactId>
@@ -31,7 +32,7 @@
 		<skip.unit.tests>false</skip.unit.tests>
 		<jacoco.skip>true</jacoco.skip>
 		<checkstyle.skip>true</checkstyle.skip>
-    	<checkstyle.failsOnError>true</checkstyle.failsOnError>
+		<checkstyle.failsOnError>true</checkstyle.failsOnError>
 		<checkstyle.includeTestSourceDirectory>true</checkstyle.includeTestSourceDirectory>
 		<jacoco.output.data>${project.build.directory}/coverage-reports</jacoco.output.data>
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -125,6 +126,14 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
+		</dependency>
+
+		<!-- Auto restart dev tooll -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
@@ -329,7 +338,7 @@
 									<message>No Snapshots Allowed in releases!</message>
 									<onlyWhenRelease>true</onlyWhenRelease>
 								</requireReleaseDeps>
-								<banDuplicatePomDependencyVersions/>
+								<banDuplicatePomDependencyVersions />
 							</rules>
 						</configuration>
 					</execution>
@@ -371,7 +380,7 @@
 		<finalName>nr-spar-oracle-api</finalName>
 	</build>
 
-  <!-- 
+	<!--
     Issue:
     - spring-boot-starter-oauth2-client (v3.1.1-latest) depends on
       - spring-security-oauth2-client (v6.1.1-latest) depends on
@@ -386,13 +395,13 @@
     Forcing oauth2-oidc-sdk to update its dependency nimbus-jose-jwt to version 9.31
     solves the issue, for now.
   -->
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.nimbusds</groupId>
-        <artifactId>nimbus-jose-jwt</artifactId>
-        <version>9.31</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>nimbus-jose-jwt</artifactId>
+				<version>9.31</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
