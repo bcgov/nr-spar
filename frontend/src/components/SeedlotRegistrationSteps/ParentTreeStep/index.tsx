@@ -42,7 +42,6 @@ import {
 import './styles.scss';
 
 interface ParentTreeStepProps {
-  seedlotNumber: string,
   seedlotSpecies: MultiOptionsObj
   state: ParentTreeStepDataObj;
   setStep: Function
@@ -52,7 +51,6 @@ interface ParentTreeStepProps {
 
 const ParentTreeStep = (
   {
-    seedlotNumber,
     seedlotSpecies,
     state,
     setStep,
@@ -289,7 +287,7 @@ const ParentTreeStep = (
   };
 
   const uploadCompostion = useMutation({
-    mutationFn: (coneCSV: File) => postCompositionFile(seedlotNumber, coneCSV),
+    mutationFn: (coneCSV: File) => postCompositionFile(coneCSV),
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
