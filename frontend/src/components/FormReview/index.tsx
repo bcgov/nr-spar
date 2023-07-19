@@ -273,6 +273,7 @@ const FormReview = () => {
                       setStepData={() => { }}
                       readOnly
                       cleanParentTables={() => { }}
+                      tableRowData={{}}
                     />
                     <Button
                       kind="tertiary"
