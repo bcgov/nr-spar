@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from '@carbon/react';
 import modalConfig from './constants';
+import orchardModalOptions from './definitions';
 
 import './styles.scss';
 
@@ -8,7 +9,7 @@ interface OrchardModalProps {
   open: boolean;
   setOpen: Function;
   submitFunction: Function;
-  modalType: string;
+  modalType: keyof orchardModalOptions;
 }
 
 const OrchardModal = (

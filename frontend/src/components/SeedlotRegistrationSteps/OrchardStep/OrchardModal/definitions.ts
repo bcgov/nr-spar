@@ -8,7 +8,9 @@ type orchardModalTextType = {
 }
 
 type orchardModalOptions = {
-  [key: string]: orchardModalTextType
+  add: orchardModalTextType,
+  delete: orchardModalTextType,
+  change: orchardModalTextType
 }
 
 export default orchardModalOptions;

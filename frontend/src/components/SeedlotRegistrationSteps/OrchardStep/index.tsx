@@ -27,10 +27,11 @@ import OrchardDataType from '../../../types/OrchardDataType';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS, orcharStepText } from './constants';
+import OrchardModal from './OrchardModal';
+import orchardModalOptions from './OrchardModal/definitions';
+import { RowDataDictType } from '../ParentTreeStep/definitions';
 
 import './styles.scss';
-import OrchardModal from './OrchardModal';
-import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 type NumStepperVal = {
   value: number,
@@ -43,8 +44,8 @@ interface OrchardStepProps {
   state: OrchardForm
   setStepData: Function,
   cleanParentTables: Function,
-  readOnly?: boolean,
-  parentTreeState?: ParentTreeStepDataObj
+  tableRowData: RowDataDictType
+  readOnly?: boolean
 }
 
 const OrchardStep = ({
@@ -53,8 +54,8 @@ const OrchardStep = ({
   state,
   setStepData,
   cleanParentTables,
-  readOnly,
-  parentTreeState
+  tableRowData,
+  readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
   const [isPliSpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
@@ -63,7 +64,7 @@ const OrchardStep = ({
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [modalType, setModalType] = useState<string>('add');
+  const [modalType, setModalType] = useState<keyof orchardModalOptions>('add');
 
   const filterGameticOptions = (gender: string) => {
     const result = gameticOptions
@@ -237,7 +238,7 @@ const OrchardStep = ({
     }
   };
 
-  const isEmpty = (obj:any) => JSON.stringify(obj) === '{}';
+  const isTableEmpty = Object.keys(tableRowData).length === 0;
 
   return (
     <div className="seedlot-orchard-step-form">
@@ -317,7 +318,7 @@ const OrchardStep = ({
                     kind="danger--tertiary"
                     renderIcon={TrashCan}
                     onClick={() => {
-                      if (!isEmpty(parentTreeState?.tableRowData)) {
+                      if (isTableEmpty) {
                         setModalType('delete');
                         setModalOpen(true);
                       } else deleteOrchardObj();
@@ -336,7 +337,7 @@ const OrchardStep = ({
                     kind="tertiary"
                     renderIcon={Add}
                     onClick={() => {
-                      if (!isEmpty(parentTreeState?.tableRowData)) {
+                      if (isTableEmpty) {
                         setModalType('add');
                         setModalOpen(true);
                       } else addOrchardObj();

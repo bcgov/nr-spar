@@ -1,6 +1,6 @@
 import orchardModalOptions from './definitions';
 
-const modalConfig:orchardModalOptions = {
+const modalConfig: orchardModalOptions = {
   add: {
     label: 'Add orchard',
     title: 'Are you sure you want to add another orchard? If yes, then you might lose the parent tree and SMP information',
@@ -25,7 +25,6 @@ const modalConfig:orchardModalOptions = {
       secondary: 'Cancel'
     }
   }
-
 };
 
 export default modalConfig;
