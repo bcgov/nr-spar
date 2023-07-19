@@ -330,9 +330,8 @@ objects:
         [FILTER]
             Name modify
             Match spar.*
-            Add event.kind event
-            Add event.category web
-            Add @metadata.keyAsPath true
+            Add service.name spar_postgres_api
+            Add service.type postgres_api
 
       spar_input_inputs.conf: |
         [INPUT]
