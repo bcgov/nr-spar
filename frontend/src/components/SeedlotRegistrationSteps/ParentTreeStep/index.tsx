@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link } from 'react-router-dom';
 import { useQueries, useMutation } from '@tanstack/react-query';
@@ -77,6 +77,9 @@ const ParentTreeStep = (
   const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
+
+  // Link reference to trigger click event
+  const linkRef = useRef<HTMLAnchorElement>(null);
 
   const toggleNotification = (notifType: string) => {
     const modifiedState = { ...state };
@@ -403,6 +406,7 @@ const ParentTreeStep = (
                             itemText={
                               (
                                 <Link
+                                  ref={linkRef}
                                   to={getDownloadUrl(currentTab)}
                                   target="_blank"
                                 >
@@ -410,6 +414,7 @@ const ParentTreeStep = (
                                 </Link>
                               )
                             }
+                            onClick={() => linkRef.current?.click()}
                           />
                           <OverflowMenuItem itemText="Export table as PDF file" disabled />
                           <OverflowMenuItem
