@@ -110,3 +110,7 @@ snyk.sarif
 frontend/cypress/videos
 frontend/cypress/screenshots
 frontend/cypress/downloads
+*.cer
+jssecacerts
+InstallCert.class
+InstallCert$SavingTrustManager.class

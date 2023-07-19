@@ -1,12 +1,15 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -54,7 +57,7 @@ public class OracleApiProvider implements Provider {
       String orchardId, int spuId) {
     String apiUrl =
         String.format("%s/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}", rootUri);
-    
+
     log.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
@@ -73,6 +76,36 @@ public class OracleApiProvider implements Provider {
     }
 
     return Optional.empty();
+  }
+
+  /**
+   * Finds all orchards with the provided vegCode from oracle-api.
+   *
+   * @param vegCode The vegetation code of a seedlot.
+   * @return An {@link List} of {@link OrchardDto}
+   */
+  @Override
+  public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
+    String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/{vegCode}", rootUri);
+
+    log.info("Starting {} request to {}", PROVIDER, oracleApiUrl);
+
+    try {
+      ResponseEntity<List<OrchardDto>> orchardsResult =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<List<OrchardDto>>() {},
+              createParamsMap("vegCode", vegCode));
+      log.info("GET orchards by vegCode from oracle - Success response!");
+      return orchardsResult.getBody();
+    } catch (HttpClientErrorException httpExc) {
+      log.info(
+          "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
+    }
+
+    return List.of();
   }
 
   @Override

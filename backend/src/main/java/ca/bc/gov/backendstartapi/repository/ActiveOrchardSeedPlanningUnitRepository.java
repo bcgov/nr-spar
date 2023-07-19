@@ -9,5 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ActiveOrchardSeedPlanningUnitRepository
     extends JpaRepository<ActiveOrchardSeedPlanningUnit, ActiveOrchardSeedPlanningUnitId> {
 
+  List<ActiveOrchardSeedPlanningUnit> findAllByActive(boolean active);
+
   List<ActiveOrchardSeedPlanningUnit> findByOrchardIdAndActive(String orchardId, boolean active);
 }

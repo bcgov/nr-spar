@@ -13,6 +13,8 @@ import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -147,6 +149,61 @@ class OrchardEndpointTest {
     mockMvc
         .perform(
             get(path, "123", "8")
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("findOrchardsWithVegCodeSuccessEndpointTest")
+  @WithMockUser(roles = "user_read")
+  void findOrchardsWithVegCodeSuccessEndpointTest() throws Exception {
+    String vegCode = "PLI";
+
+    OrchardLotTypeDescriptionDto firstOrchard =
+        new OrchardLotTypeDescriptionDto("123", "smOrchard", vegCode, 'S', "Seed lot", "PRD");
+    OrchardLotTypeDescriptionDto secondOrchard =
+        new OrchardLotTypeDescriptionDto("456", "xlOrchard", vegCode, 'S', "Seed lot", "TEST");
+
+    List<OrchardLotTypeDescriptionDto> testList =
+        new ArrayList<>() {
+          {
+            add(firstOrchard);
+            add(secondOrchard);
+          }
+        };
+
+    when(orchardService.findNotRetOrchardsByVegCode(vegCode)).thenReturn(Optional.of(testList));
+
+    mockMvc
+        .perform(
+            get("/api/orchards/vegetation-code/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id").value("123"))
+        .andExpect(jsonPath("$[0].vegetationCode").value(vegCode))
+        .andExpect(jsonPath("$[0].name").value("smOrchard"))
+        .andExpect(jsonPath("$[1].id").value("456"))
+        .andExpect(jsonPath("$[1].vegetationCode").value(vegCode))
+        .andExpect(jsonPath("$[1].name").value("xlOrchard"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("findOrchardsWithVegCodeNotFoundEndpointTest")
+  @WithMockUser(roles = "user_read")
+  void findOrchardsWithVegCodeNotFoundEndpointTest() throws Exception {
+    String vegCode = "BEEF";
+
+    when(orchardService.findNotRetOrchardsByVegCode(vegCode)).thenReturn(Optional.empty());
+
+    mockMvc
+        .perform(
+            get("/api/orchards/vegetation-code/{vegCode}", vegCode)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))

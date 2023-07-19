@@ -1,6 +1,6 @@
 # Contributing guide
 
-Thanks for taking a moment and reading this guide. Is very important to have 
+Thanks for taking a moment and reading this guide. Is very important to have
 everyone on the same page. This guide describes how to:
 - Set up your environment
 - Run this application
@@ -11,9 +11,9 @@ everyone on the same page. This guide describes how to:
 (If you are new to GitHub, you might start with a [basic tutorial](https://help.github.com/articles/set-up-git) and check out a more detailed guide to [pull requests](https://help.github.com/articles/using-pull-requests/).)
 
 All contributors retain the original copyright to their stuff, but by
-contributing to this project, you grant a world-wide, royalty-free, 
-perpetual, irrevocable, non-exclusive, transferable license to all 
-users **under the terms of the [license](./LICENSE.md) under which 
+contributing to this project, you grant a world-wide, royalty-free,
+perpetual, irrevocable, non-exclusive, transferable license to all
+users **under the terms of the [license](./LICENSE.md) under which
 this project is distributed**.
 
 ## Set up your environment
@@ -25,7 +25,7 @@ Make sure you have Git installed on your machine. You can follow
 
 ### Docker
 
-We containerize our application with Docker images. 
+We containerize our application with Docker images.
 
 Note: things are way
 easier if you don't need to run docker commands with root (sudo). Take a look
@@ -35,7 +35,7 @@ due to license matters.
 
 ### Java and Maven
 
-An easy way of getting both Java and Maven on your machine is using 
+An easy way of getting both Java and Maven on your machine is using
 SDK Man. Take a look [here](https://sdkman.io/) to learn how to install.
 For this project we're using Java 17 (OpenSDK).
 
@@ -68,7 +68,7 @@ You can check your code before submitting with `./mvnw --no-transfer-progress ch
 
 ## Run this application
 
-After setting up your environment you might want to see this service running. 
+After setting up your environment you might want to see this service running.
 You can get it up and running by typing (in the project root directory):
 
 ```sh

@@ -51,3 +51,18 @@ insert into ORCHARD (
   'S',
   'PRD'
 );
+
+-- PRD - Another Producing
+insert into ORCHARD (
+  ORCHARD_ID,
+  ORCHARD_NAME,
+  VEGETATION_CODE,
+  ORCHARD_LOT_TYPE_CODE,
+  ORCHARD_STAGE_CODE
+) VALUES (
+  '456',
+  'COQUITLAM',
+  'PLI',
+  'S',
+  'PRD'
+);
