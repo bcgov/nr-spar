@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -63,8 +64,8 @@ const RecentActivities = () => {
               <Tab>{componentTexts.tabs.files}</Tab>
             </TabList>
             {
-              recentActivitiesQuery.isSuccess
-              && filesAndDocsQuery.isSuccess
+              (recentActivitiesQuery.isSuccess
+                && filesAndDocsQuery.isSuccess)
                 ? (
                   <TabPanels>
                     <TabPanel>
