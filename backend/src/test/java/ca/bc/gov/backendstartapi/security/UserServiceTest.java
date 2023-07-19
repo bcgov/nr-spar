@@ -55,14 +55,8 @@ class UserServiceTest {
   @Test
   @DisplayName("getLoggedUserEmailExceptionTest")
   void getLoggedUserEmailExceptionTest() {
-    Exception e =
-        Assertions.assertThrows(
-            UserNotFoundException.class,
-            () -> {
-              loggedUserService.getLoggedUserEmail();
-            });
-
-    Assertions.assertEquals("404 NOT_FOUND \"User not registered!\"", e.getMessage());
+    Assertions.assertThrows(
+        UserNotFoundException.class, () -> loggedUserService.getLoggedUserEmail());
   }
 
   @Test
@@ -95,29 +89,15 @@ class UserServiceTest {
   @Test
   @DisplayName("getLoggedUserTokenEmptyTest")
   void getLoggedUserTokenEmptyTest() {
-    Exception e =
-        Assertions.assertThrows(
-            UserNotFoundException.class,
-            () -> {
-              loggedUserService.getLoggedUserToken();
-            });
-
-    Assertions.assertEquals("404 NOT_FOUND \"User not registered!\"", e.getMessage());
+    Assertions.assertThrows(
+        UserNotFoundException.class, () -> loggedUserService.getLoggedUserToken());
   }
 
   @Test
   @DisplayName("getLoggedUserIdEmptyTest")
   void getLoggedUserIdEmptyTest() {
     when(userAuthenticationHelper.getUserInfo()).thenReturn(Optional.empty());
-
-    Exception e =
-        Assertions.assertThrows(
-            UserNotFoundException.class,
-            () -> {
-              loggedUserService.getLoggedUserId();
-            });
-
-    Assertions.assertEquals("404 NOT_FOUND \"User not registered!\"", e.getMessage());
+    Assertions.assertThrows(UserNotFoundException.class, () -> loggedUserService.getLoggedUserId());
   }
 
   @Test

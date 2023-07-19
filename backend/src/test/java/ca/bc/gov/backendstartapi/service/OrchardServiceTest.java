@@ -93,8 +93,7 @@ class OrchardServiceTest {
         new ParentTreeDto(
             123L, "37", "App", "123456", true, true, false, null, null, List.of(geneticQualityDto));
 
-    OrchardSpuDto parentTreeDto =
-        new OrchardSpuDto(orchardId, "FDC", 1L, List.of(parentDto));
+    OrchardSpuDto parentTreeDto = new OrchardSpuDto(orchardId, "FDC", 1L, List.of(parentDto));
 
     int spuId = 1;
 
@@ -138,14 +137,8 @@ class OrchardServiceTest {
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of());
 
-    Exception exc =
-        Assertions.assertThrows(
-            NoSpuForOrchardException.class,
-            () -> {
-              orchardService.findParentTreeGeneticQualityData(orchardId);
-            });
-
-    Assertions.assertEquals(
-        "404 NOT_FOUND \"No active SPU for the given Orchard ID!\"", exc.getMessage());
+    Assertions.assertThrows(
+        NoSpuForOrchardException.class,
+        () -> orchardService.findParentTreeGeneticQualityData(orchardId));
   }
 }

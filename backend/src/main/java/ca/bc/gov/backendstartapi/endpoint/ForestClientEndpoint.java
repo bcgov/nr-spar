@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.exception.NotFoundException;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,10 +11,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
-import java.io.Serializable;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.server.ResponseStatusException;
 
 /** Controller for forest client-related endpoints. */
 @RestController
@@ -56,7 +57,7 @@ public class ForestClientEndpoint {
             content = @Content(schema = @Schema(implementation = ForestClientDto.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  public ResponseEntity<Serializable> fetchClient(
+  public ForestClientDto fetchClient(
       @PathVariable("identifier")
           @Pattern(regexp = "^\\d{8}$|^\\w{1,8}$")
           @Parameter(
@@ -65,11 +66,13 @@ public class ForestClientEndpoint {
               description = "Number or acronym that identifies the client to be fetched.")
           String identifier) {
     try {
-      var response = forestClientService.fetchClient(identifier).map(Serializable.class::cast);
-      return ResponseEntity.of(response);
+      return forestClientService.fetchClient(identifier).orElseThrow(NotFoundException::new);
     } catch (HttpStatusCodeException e) {
-      log.warn("External error while retrieving forest client " + identifier, e);
-      return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+      log.error(
+          "Error while fetching from ForestClient! Message: {}, Status code:",
+          e.getResponseBodyAsString(),
+          e.getStatusCode());
+      throw new ResponseStatusException(HttpStatusCode.valueOf(400));
     }
   }
 }
