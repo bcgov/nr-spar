@@ -70,8 +70,7 @@ const RecentActivities = () => {
                   <TabPanels>
                     <TabPanel>
                       {
-                        (Array.isArray(recentActivitiesQuery.data)
-                          && recentActivitiesQuery.data.length === 0)
+                        recentActivitiesQuery.data.length === 0
                           ? (
                             <div className="empty-recent-activities">
                               <EmptySection
@@ -92,8 +91,7 @@ const RecentActivities = () => {
                     </TabPanel>
                     <TabPanel>
                       {
-                        (Array.isArray(filesAndDocsQuery.data)
-                          && filesAndDocsQuery.data.length === 0)
+                        filesAndDocsQuery.data.length === 0
                           ? (
                             <div className="empty-recent-activity-files-docs">
                               <EmptySection
