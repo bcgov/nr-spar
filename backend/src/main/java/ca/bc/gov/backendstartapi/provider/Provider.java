@@ -1,8 +1,10 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,12 @@ public interface Provider {
       String orchardId, int spuId) {
     return Optional.empty();
   }
+
+  default List<OrchardDto> findOrchardsByVegCode(String vegCode) {
+    return List.of();
+  }
+
+
 
   // Common methods
   String[] addAuthorizationHeader();

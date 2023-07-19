@@ -6,11 +6,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.exception.NoOrchardException;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +93,62 @@ class OrchardEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andExpect(status().reason("No active SPU for the given Orchard ID!"))
+        .andReturn()
+        .getResolvedException()
+        .getMessage();
+  }
+
+  @Test
+  @DisplayName("findOrchardsWithVegCodeSuccessTest")
+  @WithMockUser(roles = "user_read")
+  void findOrchardsWithVegCodeTest() throws Exception {
+    String vegCode = "PLI";
+
+    OrchardDto firstOrchard = new OrchardDto("123", "smOrchard", vegCode, 'S', "Seed lot", "PRD");
+    OrchardDto secondOrchard = new OrchardDto("456", "xlOrchard", vegCode, 'S', "Seed lot", "TEST");
+
+    List<OrchardDto> testList =
+        new ArrayList<>() {
+          {
+            add(firstOrchard);
+            add(secondOrchard);
+          }
+        };
+
+    when(orchardService.findOrchardsByVegCode(vegCode)).thenReturn(testList);
+
+    mockMvc
+        .perform(
+            get("/api/orchards/vegetation-code/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id").value("123"))
+        .andExpect(jsonPath("$[0].vegetationCode").value(vegCode))
+        .andExpect(jsonPath("$[0].name").value("smOrchard"))
+        .andExpect(jsonPath("$[1].id").value("456"))
+        .andExpect(jsonPath("$[1].vegetationCode").value(vegCode))
+        .andExpect(jsonPath("$[1].name").value("xlOrchard"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("findOrchardsWithVegCodeNotFoundTest")
+  @WithMockUser(roles = "user_read")
+  void findOrchardsWithVegCodeNotFoundTest() throws Exception {
+    String vegCode = "BEEF";
+
+    when(orchardService.findOrchardsByVegCode(vegCode)).thenThrow(new NoOrchardException());
+
+    mockMvc
+        .perform(
+            get("/api/orchards/vegetation-code/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(status().reason("No orchard was found with the given VegCode!"))
         .andReturn()
         .getResolvedException()
         .getMessage();
