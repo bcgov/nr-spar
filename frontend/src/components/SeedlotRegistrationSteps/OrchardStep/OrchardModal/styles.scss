@@ -1,0 +1,16 @@
+@use '@carbon/type';
+@use '../../../../theme/variables.scss' as vars;
+
+.orchard-modal {
+  .#{vars.$bcgov-prefix}--btn {
+    height: 1rem;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-footer{
+    height: auto;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-header__label{
+    @include type.type-style('label-01');
+  }
+}

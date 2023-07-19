@@ -27,6 +27,9 @@ import OrchardDataType from '../../../types/OrchardDataType';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { MAX_ORCHARDS, orcharStepText } from './constants';
+import OrchardModal from './OrchardModal';
+import orchardModalOptions from './OrchardModal/definitions';
+import { RowDataDictType } from '../ParentTreeStep/definitions';
 
 import './styles.scss';
 
@@ -41,6 +44,7 @@ interface OrchardStepProps {
   state: OrchardForm
   setStepData: Function,
   cleanParentTables: Function,
+  tableRowData: RowDataDictType
   readOnly?: boolean
 }
 
@@ -50,6 +54,7 @@ const OrchardStep = ({
   state,
   setStepData,
   cleanParentTables,
+  tableRowData,
   readOnly
 }: OrchardStepProps) => {
   const queryClient = useQueryClient();
@@ -58,6 +63,8 @@ const OrchardStep = ({
   const [invalidFemGametic, setInvalidFemGametic] = useState<boolean>(false);
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalType, setModalType] = useState<keyof orchardModalOptions>('add');
 
   const filterGameticOptions = (gender: string) => {
     const result = gameticOptions
@@ -222,6 +229,17 @@ const OrchardStep = ({
     return null;
   };
 
+  const submitModal = () => {
+    if (modalType === 'add') {
+      addOrchardObj();
+    }
+    if (modalType === 'delete') {
+      deleteOrchardObj();
+    }
+  };
+
+  const isTableEmpty = Object.keys(tableRowData).length === 0;
+
   return (
     <div className="seedlot-orchard-step-form">
       <form>
@@ -299,7 +317,12 @@ const OrchardStep = ({
                     size="md"
                     kind="danger--tertiary"
                     renderIcon={TrashCan}
-                    onClick={() => deleteOrchardObj()}
+                    onClick={() => {
+                      if (!isTableEmpty) {
+                        setModalType('delete');
+                        setModalOpen(true);
+                      } else deleteOrchardObj();
+                    }}
                   >
                     {orcharStepText.orchardSection.buttons.delete}
                   </Button>
@@ -313,7 +336,12 @@ const OrchardStep = ({
                     size="md"
                     kind="tertiary"
                     renderIcon={Add}
-                    onClick={() => addOrchardObj()}
+                    onClick={() => {
+                      if (!isTableEmpty) {
+                        setModalType('add');
+                        setModalOpen(true);
+                      } else addOrchardObj();
+                    }}
                   >
                     {orcharStepText.orchardSection.buttons.add}
                   </Button>
@@ -491,6 +519,12 @@ const OrchardStep = ({
             )
             : null
         }
+        <OrchardModal
+          open={modalOpen}
+          setOpen={setModalOpen}
+          modalType={modalType}
+          submitFunction={submitModal}
+        />
       </form>
     </div>
   );
