@@ -47,7 +47,7 @@ class ParentTreesContributionEndpointTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.multipart(
-                    "/api/seedlots/00000/parent-trees-contribution/smp-calculation-table/upload")
+                    "/api/seedlots/parent-trees-contribution/smp-calculation-table/upload")
                 .file(
                     new MockMultipartFile(
                         "file",
@@ -66,7 +66,7 @@ class ParentTreesContributionEndpointTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.multipart(
-                    "/api/seedlots/00000/parent-trees-contribution/cone-pollen-count-table/upload")
+                    "/api/seedlots/parent-trees-contribution/cone-pollen-count-table/upload")
                 .file(
                     new MockMultipartFile(
                         "file",
@@ -86,7 +86,7 @@ class ParentTreesContributionEndpointTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.multipart(
-                    "/api/seedlots/00000/parent-trees-contribution/smp-calculation-table/upload")
+                    "/api/seedlots/parent-trees-contribution/smp-calculation-table/upload")
                 .file(
                     new MockMultipartFile(
                         "file",
@@ -105,7 +105,7 @@ class ParentTreesContributionEndpointTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.multipart(
-                    "/api/seedlots/00000/parent-trees-contribution/cone-pollen-count-table/upload")
+                    "/api/seedlots/parent-trees-contribution/cone-pollen-count-table/upload")
                 .file(
                     new MockMultipartFile(
                         "file",
@@ -130,7 +130,7 @@ class ParentTreesContributionEndpointTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.multipart(
-                    "/api/seedlots/00000/parent-trees-contribution/smp-calculation-table/upload")
+                    "/api/seedlots/parent-trees-contribution/smp-calculation-table/upload")
                 .file(file)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
