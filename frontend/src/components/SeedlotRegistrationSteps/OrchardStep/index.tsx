@@ -318,7 +318,7 @@ const OrchardStep = ({
                     kind="danger--tertiary"
                     renderIcon={TrashCan}
                     onClick={() => {
-                      if (isTableEmpty) {
+                      if (!isTableEmpty) {
                         setModalType('delete');
                         setModalOpen(true);
                       } else deleteOrchardObj();
@@ -337,7 +337,7 @@ const OrchardStep = ({
                     kind="tertiary"
                     renderIcon={Add}
                     onClick={() => {
-                      if (isTableEmpty) {
+                      if (!isTableEmpty) {
                         setModalType('add');
                         setModalOpen(true);
                       } else addOrchardObj();
