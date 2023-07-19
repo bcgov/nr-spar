@@ -1,35 +1,40 @@
 {
 	auto_https off
 	admin off
-	debug
 }
 
 :3000 {
-	log {
-		output stdout
-		format console {
-			time_format iso8601
-			level_format color
-		}
-		level {$LOG_LEVEL}
-	}
+	root * /app/dist
 
 	encode gzip
 
-	handle {
-		root * /app/dist
-		try_files {path} {path}/ /index.html
-		file_server
+	log {
+		output stdout
+		level {$LOG_LEVEL}
 	}
-	
+
 	header {
 		X-Frame-Options "SAMEORIGIN"
 		X-XSS-Protection "1;mode=block"
 		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		X-Content-Type-Options "nosniff"
 		Strict-Transport-Security "max-age=31536000"
-		Content-Security-Policy https://raw.githubusercontent.com/bcgov/* "default-src 'self'  *.devops.gov.bc.ca data:; script-src 'self' 'unsafe-eval' https://www2.gov.bc.ca ;style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://use.fontawesome.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://fonts.googleapis.com http://www.w3.org"
+		Content-Security-Policy "default-src 'self' *.gov.bc.ca data:; script-src 'self' 'unsafe-eval' *.gov.bc.ca; style-src 'self' 'unsafe-inline' *.gov.bc.ca; font-src 'self' *.gov.bc.ca; img-src 'self' data: *.gov.bc.ca"
 		Referrer-Policy "same-origin"
-		Feature-Policy "fullscreen 'self'; camera 'none'; microphone 'none'"
 	}
+
+	handle /env.js {
+		header {
+			Content-Type "text/javascript"
+		}
+		respond `
+			window.REACT_APP_SERVER_URL="{$REACT_APP_SERVER_URL}";
+			window.REACT_APP_KC_URL="{$REACT_APP_KC_URL}";
+			window.REACT_APP_KC_REALM="standard";
+			window.REACT_APP_KC_CLIENT_ID="seed-planning-test-4296";
+			window.REACT_APP_ORACLE_SERVER_URL="{$REACT_APP_ORACLE_SERVER_URL}";
+		`
+	}
+
+	file_server
 }
