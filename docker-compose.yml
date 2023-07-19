@@ -17,14 +17,18 @@ services:
       POSTGRES_DB: *POSTGRES_DB
     volumes:
       - /pgdata
-    build:
-      context: ./database
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    image: postgis/postgis:13-master
 
   backend:
     container_name: backend
     depends_on:
       database:
-        condition: service_healthy
+        condition: service_started
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
@@ -38,9 +42,9 @@ services:
     ports:
       - "8090:8090"
       - "5005:5005"
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.local
+    image: maven:3.9.3-eclipse-temurin-17
+    entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005"
+    working_dir: /app
     volumes:
       - ./backend:/app:z
 
@@ -48,7 +52,7 @@ services:
     container_name: oracle-api
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       SERVER_PORT: "8091"
@@ -60,16 +64,19 @@ services:
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
     ports:
       - "8091:8091"
-    build:
-      context: ./oracle-api
+    image: maven:3.9.3-eclipse-temurin-17
+    entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
     profiles: ["oracle-api"]
     network_mode: "host"
+    working_dir: /app
+    volumes:
+      - ./oracle-api:/app:z
 
   frontend:
     container_name: frontend
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
     environment:
       REACT_APP_SERVER_URL: http://localhost:8090
       REACT_APP_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
@@ -79,9 +86,14 @@ services:
       CHOKIDAR_USEPOLLING: true
     ports:
       - "3000:3000"
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+    healthcheck:
+      test: wget --spider http://localhost:3000
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    image: node:18.16.1-alpine3.17
+    entrypoint: sh -c "cd /app && yarn install --frozen-lockfile --prefer-offline && yarn start"
     user: root
     volumes:
       - ./frontend:/app:z

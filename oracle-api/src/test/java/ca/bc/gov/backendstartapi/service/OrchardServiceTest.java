@@ -19,6 +19,7 @@ import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -233,5 +234,77 @@ class OrchardServiceTest {
     Assertions.assertEquals("BV", geneticDto.getGeneticTypeCode());
     Assertions.assertEquals("GVO", geneticDto.getGeneticWorthCode());
     Assertions.assertEquals(new BigDecimal("18.0"), geneticDto.getGeneticQualityValue());
+  }
+
+  @Test
+  @DisplayName("findNotRetOrchardsByVegCodeSuccessServiceTest")
+  void findNotRetOrchardsByVegCodeSuccessServiceTest() {
+    LocalDate now = LocalDate.now();
+    // Add two active orchard
+    OrchardLotTypeCode firstLotTypeCode = new OrchardLotTypeCode();
+    firstLotTypeCode.setCode('S');
+    firstLotTypeCode.setDescription("Seed Lot");
+    firstLotTypeCode.setEffectiveDate(now.minusDays(3L));
+    firstLotTypeCode.setExpiryDate(now.plusDays(3L));
+    firstLotTypeCode.setUpdateTimestamp(now);
+    String vegCode = "SX";
+    Orchard firstOrchard = new Orchard();
+    firstOrchard.setId("612");
+    firstOrchard.setName("E.KOOTENAY BREED A");
+    firstOrchard.setVegetationCode(vegCode);
+    firstOrchard.setStageCode("PRD");
+    firstOrchard.setOrchardLotTypeCode(firstLotTypeCode);
+
+    // Add second active Orchard
+    OrchardLotTypeCode secondLotTypeCode = new OrchardLotTypeCode();
+    secondLotTypeCode.setCode('S');
+    secondLotTypeCode.setDescription("Seed Lot");
+    secondLotTypeCode.setEffectiveDate(now.minusDays(1L));
+    secondLotTypeCode.setExpiryDate(now.plusDays(1L));
+    secondLotTypeCode.setUpdateTimestamp(now);
+    Orchard secondOrchard = new Orchard();
+    secondOrchard.setId("613");
+    secondOrchard.setName("BURNABY TOWERS");
+    secondOrchard.setVegetationCode(vegCode);
+    secondOrchard.setStageCode("ESB");
+    secondOrchard.setOrchardLotTypeCode(secondLotTypeCode);
+
+    // Add Expired Orchard
+    OrchardLotTypeCode expiredlotTypeCode = new OrchardLotTypeCode();
+    expiredlotTypeCode.setCode('S');
+    expiredlotTypeCode.setDescription("Seed Lot");
+    expiredlotTypeCode.setEffectiveDate(now.minusDays(3L));
+    expiredlotTypeCode.setExpiryDate(now.minusDays(1L));
+    expiredlotTypeCode.setUpdateTimestamp(now);
+    Orchard expiredOrchard = new Orchard();
+    expiredOrchard.setId("666");
+    expiredOrchard.setName("EXPIRED AND STINKS");
+    expiredOrchard.setVegetationCode(vegCode);
+    expiredOrchard.setStageCode("ESB");
+    expiredOrchard.setOrchardLotTypeCode(expiredlotTypeCode);
+
+    List<Orchard> repoResult =
+        new ArrayList<>() {
+          {
+            add(firstOrchard);
+            add(secondOrchard);
+            add(expiredOrchard);
+          }
+        };
+
+    when(orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, "RET"))
+        .thenReturn(repoResult);
+
+    List<OrchardLotTypeDescriptionDto> listToTest =
+        orchardService.findNotRetOrchardsByVegCode(vegCode).get();
+
+    Assertions.assertEquals(2, listToTest.size());
+    listToTest.forEach(
+        testObj -> {
+          Assertions.assertNotEquals("RET", testObj.stageCode());
+          Assertions.assertEquals(vegCode, testObj.vegetationCode());
+          Assertions.assertEquals("Seed Lot", testObj.lotTypeDescription());
+          Assertions.assertFalse(testObj.id().isEmpty());
+        });
   }
 }

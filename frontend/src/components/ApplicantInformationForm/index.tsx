@@ -11,10 +11,11 @@ import {
   Checkbox,
   Button,
   ComboBox,
-  InlineLoading
+  TextInputSkeleton
 } from '@carbon/react';
 import { DocumentAdd } from '@carbon/icons-react';
 import validator from 'validator';
+
 import Subtitle from '../Subtitle';
 import InputErrorText from '../InputErrorText';
 
@@ -153,19 +154,39 @@ const ApplicantInformationForm = () => {
     }
   };
 
-  const displaySpeciesStatus = () => {
-    const { status } = vegCodeQuery;
-    if (status === 'loading') {
+  const displaySpeciesInput = () => {
+    const { status, fetchStatus } = vegCodeQuery;
+    const fetchError = status === 'error';
+    if (fetchStatus === 'fetching') {
       return (
-        <InlineLoading description="Loading..." />
+        <TextInputSkeleton />
       );
     }
-    if (status === 'error') {
-      return (
-        <InputErrorText description="An error occurred" />
-      );
-    }
-    return null;
+    return (
+      <>
+        <ComboBox
+          className="applicant-info-combobox"
+          id="applicant-info-combobox-species"
+          ref={speciesInputRef}
+          items={vegCodeQuery.isSuccess ? vegCodeQuery.data : []}
+          selectedItem={responseBody.species}
+          shouldFilterItem={
+            ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+          }
+          placeholder="Enter or choose an species for the seedlot"
+          titleText="Seedlot species"
+          onChange={(e: ComboBoxEvent) => inputChangeHandlerSpecies(e)}
+          invalid={isSpeciesInvalid}
+          invalidText="Please select a species"
+          disabled={fetchError}
+        />
+        {
+          fetchError
+            ? <InputErrorText description="An error occurred" />
+            : null
+        }
+      </>
+    );
   };
 
   return (
@@ -236,23 +257,8 @@ const ApplicantInformationForm = () => {
         </Row>
         <Row className="seedlot-species-combobox">
           <Column sm={4} md={4} lg={10}>
-            <ComboBox
-              className="applicant-info-combobox"
-              id="applicant-info-combobox-species"
-              ref={speciesInputRef}
-              items={vegCodeQuery.isSuccess ? vegCodeQuery.data : []}
-              selectedItem={responseBody.species}
-              shouldFilterItem={
-                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-              }
-              placeholder="Enter or choose an species for the seedlot"
-              titleText="Seedlot species"
-              onChange={(e: ComboBoxEvent) => inputChangeHandlerSpecies(e)}
-              invalid={isSpeciesInvalid}
-              invalidText="Please select a species"
-            />
             {
-              displaySpeciesStatus()
+              displaySpeciesInput()
             }
           </Column>
         </Row>
