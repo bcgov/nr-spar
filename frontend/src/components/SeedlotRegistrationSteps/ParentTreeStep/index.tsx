@@ -99,6 +99,7 @@ const ParentTreeStep = (
       const processedOrchard = processOrchards(orchards);
       setDisableOptions(processedOrchard.length === 0);
       setOrchardsData(processedOrchard);
+      queryClient.resetQueries({ queryKey: ['orchard', 'parent-tree-genetic-quality'] });
     },
     [orchards]
   );

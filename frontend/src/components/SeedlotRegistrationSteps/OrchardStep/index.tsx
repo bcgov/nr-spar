@@ -21,15 +21,15 @@ import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import InputErrorText from '../../InputErrorText';
 
-import { OrchardForm, OrchardObj } from './definitions';
-import { MAX_ORCHARDS, orchardStepText } from './constants';
-import OrchardModal from './OrchardModal';
-import orchardModalOptions from './OrchardModal/definitions';
+import { OrchardForm, OrchardObj, StagedOrchardOpt } from './definitions';
+import { initialStagedOrchard, MAX_ORCHARDS, orchardStepText } from './constants';
+import OrchardWarnModal from './OrchardWarnModal';
+import orchardModalOptions from './OrchardWarnModal/definitions';
 import { RowDataDictType } from '../ParentTreeStep/definitions';
 
 import './styles.scss';
-import InputErrorText from '../../InputErrorText';
 
 type NumStepperVal = {
   value: number,
@@ -61,7 +61,9 @@ const OrchardStep = ({
   const [invalidMalGametic, setInvalidMalGametic] = useState<boolean>(false);
   const [invalidBreeding, setInvalidBreeding] = useState<boolean>(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [modalType, setModalType] = useState<keyof orchardModalOptions>('add');
+  const [modalType, setModalType] = useState<keyof orchardModalOptions>('change');
+  // Store the orchard selection until the user has confirmed the warning modal
+  const [stagedOrchard, setStagedOrchard] = useState<StagedOrchardOpt>(initialStagedOrchard);
 
   const filterGameticOptions = (gender: string) => {
     const result = gameticOptions
@@ -107,7 +109,8 @@ const OrchardStep = ({
 
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
-    queryFn: () => getOrchardByVegCode(seedlotSpecies.code)
+    queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
+    enabled: !readOnly
   });
 
   const femaleGameticHandler = (event: ComboBoxEvent) => {
@@ -168,15 +171,16 @@ const OrchardStep = ({
     });
   };
 
-  const setOrchard = (inputId: number, selectedItem: MultiOptionsObj) => {
-    cleanParentTables();
+  const setOrchard = (inputId: number, selectedItem: MultiOptionsObj | null) => {
     const orchards = structuredClone(state.orchards);
     const selectedOrchardIndex = orchards.findIndex((orchard) => orchard.inputId === inputId);
-    orchards[selectedOrchardIndex].selectedItem = selectedItem;
-    setStepData({
-      ...state,
-      orchards
-    });
+    if (selectedOrchardIndex > -1) {
+      orchards[selectedOrchardIndex].selectedItem = selectedItem;
+      setStepData({
+        ...state,
+        orchards
+      });
+    }
   };
 
   // Remove options that are already selected by a user
@@ -196,13 +200,55 @@ const OrchardStep = ({
 
   const isTableEmpty = Object.keys(tableRowData).length === 0;
 
-  const submitModal = () => {
-    if (modalType === 'add') {
-      addOrchardObj();
-    }
+  const proceedEdit = () => {
+    cleanParentTables();
     if (modalType === 'delete') {
       deleteOrchardObj();
     }
+    if (modalType === 'change') {
+      setOrchard(stagedOrchard.inputId, stagedOrchard.selectedItem);
+    }
+  };
+
+  const renderOrchardButtons = () => {
+    if (!readOnly) {
+      return state.orchards.length !== 1
+        ? (
+          <Row className="seedlot-orchard-add-orchard">
+            <Column sm={4} md={4} lg={10}>
+              <Button
+                size="md"
+                kind="danger--tertiary"
+                renderIcon={TrashCan}
+                onClick={() => {
+                  // Show warning only if the table is not empty and an item has been selected
+                  if (!isTableEmpty && state.orchards[1].selectedItem) {
+                    setModalType('delete');
+                    setModalOpen(true);
+                  } else deleteOrchardObj();
+                }}
+              >
+                {orchardStepText.orchardSection.buttons.delete}
+              </Button>
+            </Column>
+          </Row>
+        )
+        : (
+          <Row className="seedlot-orchard-add-orchard">
+            <Column sm={4} md={4} lg={10}>
+              <Button
+                size="md"
+                kind="tertiary"
+                renderIcon={Add}
+                onClick={() => addOrchardObj()}
+              >
+                {orchardStepText.orchardSection.buttons.add}
+              </Button>
+            </Column>
+          </Row>
+        );
+    }
+    return null;
   };
 
   return (
@@ -242,11 +288,20 @@ const OrchardStep = ({
                             ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
                           }
                           onChange={
-                            (e: ComboBoxEvent) => setOrchard(orchard.inputId, e.selectedItem)
+                            (e: ComboBoxEvent) => {
+                              if (!isTableEmpty) {
+                                setModalType('change');
+                                setStagedOrchard({
+                                  inputId: orchard.inputId,
+                                  selectedItem: e.selectedItem
+                                });
+                                setModalOpen(true);
+                              } else setOrchard(orchard.inputId, e.selectedItem);
+                            }
                           }
                         />
                         {
-                          orchardQuery.isError
+                          orchardQuery.isError && !readOnly
                             ? (
                               <InputErrorText
                                 description={orchardStepText.orchardSection.orchardInput.fetchError}
@@ -262,45 +317,7 @@ const OrchardStep = ({
           ))
         }
         {
-          (!readOnly && state.orchards.length !== 1)
-            ? (
-              <Row className="seedlot-orchard-add-orchard">
-                <Column sm={4} md={4} lg={10}>
-                  <Button
-                    size="md"
-                    kind="danger--tertiary"
-                    renderIcon={TrashCan}
-                    onClick={() => {
-                      if (!isTableEmpty) {
-                        setModalType('delete');
-                        setModalOpen(true);
-                      } else deleteOrchardObj();
-                    }}
-                  >
-                    {orchardStepText.orchardSection.buttons.delete}
-                  </Button>
-                </Column>
-              </Row>
-            )
-            : (
-              <Row className="seedlot-orchard-add-orchard">
-                <Column sm={4} md={4} lg={10}>
-                  <Button
-                    size="md"
-                    kind="tertiary"
-                    renderIcon={Add}
-                    onClick={() => {
-                      if (!isTableEmpty) {
-                        setModalType('add');
-                        setModalOpen(true);
-                      } else addOrchardObj();
-                    }}
-                  >
-                    {orchardStepText.orchardSection.buttons.add}
-                  </Button>
-                </Column>
-              </Row>
-            )
+          renderOrchardButtons()
         }
         <Row className="seedlot-orchard-title-row">
           <Column sm={4} md={8} lg={16}>
@@ -472,11 +489,11 @@ const OrchardStep = ({
             )
             : null
         }
-        <OrchardModal
+        <OrchardWarnModal
           open={modalOpen}
           setOpen={setModalOpen}
           modalType={modalType}
-          submitFunction={submitModal}
+          confirmEdit={proceedEdit}
         />
       </form>
     </div>

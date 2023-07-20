@@ -6,12 +6,17 @@ export type OrchardObj = {
 }
 
 export type OrchardForm = {
-  orchards: Array<OrchardObj>;
-  femaleGametic: string;
-  maleGametic: string;
-  controlledCross: boolean;
-  biotechProcess: boolean;
-  noPollenContamination: boolean;
-  breedingPercentage: string;
-  pollenMethodology: boolean;
+  orchards: Array<OrchardObj>,
+  femaleGametic: string,
+  maleGametic: string,
+  controlledCross: boolean,
+  biotechProcess: boolean,
+  noPollenContamination: boolean,
+  breedingPercentage: string,
+  pollenMethodology: boolean
+}
+
+export type StagedOrchardOpt = {
+  inputId: number,
+  selectedItem: MultiOptionsObj | null
 }

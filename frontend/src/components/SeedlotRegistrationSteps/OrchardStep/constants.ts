@@ -1,6 +1,11 @@
 // eslint-disable-next-line import/prefer-default-export
 export const MAX_ORCHARDS = 2;
 
+export const initialStagedOrchard = {
+  inputId: -1,
+  selectedItem: null
+};
+
 export const orchardStepText = {
   orchardSection: {
     title: 'Orchard information',
