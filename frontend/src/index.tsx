@@ -29,7 +29,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <AuthProvider>
     <React.StrictMode>
-      <ClassPrefix prefix="bcgov">
+      <ClassPrefix prefix="bx">
         <ThemePreference>
           <QueryClientProvider client={queryClient}>
             <App />
