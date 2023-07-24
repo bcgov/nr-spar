@@ -11,6 +11,10 @@
   max-width: none;
 }
 
+.#{vars.$bcgov-prefix}--content {
+  margin: auto;
+}
+
 @media only screen and (max-width: 1055px) {
   .main-container {
     padding-top: 5rem;

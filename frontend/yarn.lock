@@ -1242,10 +1242,10 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
-"@bcgov-nr/nr-fsa-theme@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@bcgov-nr/nr-fsa-theme/-/nr-fsa-theme-1.1.0.tgz#25b34a98ce0ef3becfab736149aee285286cbef9"
-  integrity sha512-lGWHg2Ab6SgtAoU1QS8rkg+N6Km4N25nyYVr4Q+59lHowRL/xi1VUgRwtd7FVAFuUpczHdw0VN2h9ZjrtxyJFQ==
+"@bcgov-nr/nr-fsa-theme@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@bcgov-nr/nr-fsa-theme/-/nr-fsa-theme-1.1.1.tgz#a131b71e4a10d116695d0fd0c1d9279a7126879e"
+  integrity sha512-kUEa7d0NgMYozM8rrhU6kj+uc3cil9ThzoMP8yIrQm6irAua9VbQOB1nBNAaCGjy+C0FHqUxbIYAdkfVuEduSA==
 
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
