@@ -23,7 +23,7 @@ import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import InputErrorText from '../../InputErrorText';
 
-import { OrchardForm, OrchardObj, StagedOrchardOpt } from './definitions';
+import { OrchardForm, OrchardObj } from './definitions';
 import { initialStagedOrchard, MAX_ORCHARDS, orchardStepText } from './constants';
 import OrchardWarnModal from './OrchardWarnModal';
 import orchardModalOptions from './OrchardWarnModal/definitions';
@@ -63,7 +63,7 @@ const OrchardStep = ({
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalType, setModalType] = useState<keyof orchardModalOptions>('change');
   // Store the orchard selection until the user has confirmed the warning modal
-  const [stagedOrchard, setStagedOrchard] = useState<StagedOrchardOpt>(initialStagedOrchard);
+  const [stagedOrchard, setStagedOrchard] = useState<OrchardObj>(initialStagedOrchard);
 
   const filterGameticOptions = (gender: string) => {
     const result = gameticOptions

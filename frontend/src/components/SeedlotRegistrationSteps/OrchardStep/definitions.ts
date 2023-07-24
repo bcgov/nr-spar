@@ -15,8 +15,3 @@ export type OrchardForm = {
   breedingPercentage: string,
   pollenMethodology: boolean
 }
-
-export type StagedOrchardOpt = {
-  inputId: number,
-  selectedItem: MultiOptionsObj | null
-}
