@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
 import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,8 +30,8 @@ public class GeneticWorthEndpoint implements DescribedEnumEndpoint<GeneticWorthE
     return GeneticWorthEnum.class;
   }
 
-  @PostMapping(path = "/calculate-file", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public GeneticWorthSummaryDto geneticTraitsCalculations(@RequestBody List<GeneticWorthTraitsDto> traitsDto) {
+  @PostMapping(path = "/calculate-all", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public GeneticWorthSummaryDto geneticTraitsCalculations(@RequestBody List<GeneticWorthTraitsRequestDto> traitsDto) {
     return geneticWorthService.calculateGeneticWorth(traitsDto);
   }
 }
