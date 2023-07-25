@@ -36,7 +36,7 @@ create table spar.genetic_class (
 	description 		varchar(120) not null,
 	effective_date 		timestamp not null,
 	expiry_date 		timestamp not null,
-	update_timestamp 	timestamp not null,
+	update_timestamp timestamp default current_timestamp,
 	constraint genetic_class_pk
 		primary key(code)
 );
@@ -61,7 +61,7 @@ create table spar.genetic_worth (
 	description 		varchar(120) not null,
 	effective_date 		timestamp not null,
 	expiry_date 		timestamp not null,
-	update_timestamp 	timestamp not null,
+	update_timestamp timestamp default current_timestamp,
 	constraint genetic_worth_pk
 		primary key(code)
 );
@@ -179,7 +179,7 @@ create table spar.seedlot_source (
 	description 		varchar(120) not null,
 	effective_date 		timestamp not null,
 	expiry_date 		timestamp not null,
-	update_timestamp 	timestamp not null,
+	update_timestamp timestamp default current_timestamp,
 	constraint seedlot_source_pk
 		primary key(code)
 );
@@ -205,7 +205,7 @@ create table spar.seedlot_status (
 	description 		varchar(120) not null,
 	effective_date 		timestamp not null,
 	expiry_date 		timestamp not null,
-	update_timestamp 	timestamp not null,
+	update_timestamp timestamp default current_timestamp,
 	constraint seedlot_status_pk
 		primary key(code)
 );
