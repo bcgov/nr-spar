@@ -7,10 +7,9 @@ export const getSeedlotInfo = (seedlotNumber: string) => {
 };
 
 export const postCompositionFile = (
-  seedlotNumber: string,
   compositionFile: File
 ) => {
-  const url = ApiConfig.uploadConeAndPollen.replace('{seedlotNumber}', seedlotNumber);
+  const url = ApiConfig.uploadConeAndPollen;
   const formData = new FormData();
   formData.append('file', compositionFile);
   return api.post(url, formData, true);
