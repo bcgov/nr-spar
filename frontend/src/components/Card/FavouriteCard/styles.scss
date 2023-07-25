@@ -1,5 +1,5 @@
-@use '../../../theme/variables.scss' as vars;
-@use '../../../theme/colors.scss' as colors;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/colors.scss' as colors;
 @use '@carbon/type';
 
 .fav-card-header {
@@ -14,7 +14,7 @@
   height: 1.5rem !important;
   padding: 0 !important;
   margin: 0 !important;
-  color: var(--bcgov-focus);
+  color: var(--#{vars.$bcgov-prefix}-focus);
 }
 
 .fav-card-overflow {
@@ -37,8 +37,8 @@
   margin: 0.5rem;
   width: 14.625rem;
   height: 9.875rem;
-  background: var(--bcgov-layer-02);
-  border: 1px solid var(--bcgov-border-subtle-02);
+  background: var(--#{vars.$bcgov-prefix}-layer-02);
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-02);
   border-radius: 4px;
   flex: none;
   order: 0;
@@ -46,7 +46,7 @@
 }
 
 .fav-card-main:hover {
-  outline: 2px solid var(--bcgov-focus);
+  outline: 2px solid var(--#{vars.$bcgov-prefix}-focus);
   cursor: pointer;
 }
 
@@ -69,7 +69,7 @@ p.fav-card-title-small {
 .fav-card-content > p.fav-card-content-description {
   @include type.type-style('body-compact-01');
   margin-bottom: auto;
-  color: var(--bcgov-text-secondary);
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
   display: -webkit-box;
   max-width: 12.5rem;
   -webkit-line-clamp: 3;
@@ -79,27 +79,27 @@ p.fav-card-title-small {
 }
 
 .fav-card-main-highlighted {
-  background: var(--bcgov-button-primary);
+  background: var(--#{vars.$bcgov-prefix}-button-primary);
 }
 
 .fav-card-main-highlighted .fav-card-icon,
 .fav-card-main-highlighted .fav-card-content > p,
 .fav-card-main-highlighted .fav-card-header > p {
-  color: var(--bcgov-text-on-color)
+  color: var(--#{vars.$bcgov-prefix}-text-on-color)
 }
 
 .fav-card-main-highlighted .fav-card-overflow > svg{
-  fill: var(--bcgov-icon-on-color);
+  fill: var(--#{vars.$bcgov-prefix}-icon-on-color);
 }
 
 .#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open >svg{
-  fill: var(--bcgov-icon-primary);
+  fill: var(--#{vars.$bcgov-prefix}-icon-primary);
 }
 
 .fav-card-main-highlighted:hover,
 .fav-card-main-highlighted:focus {
-  border-color: var(--bcgov-icon-on-color);
-  box-shadow: inset 0 0 0 1px var(--bcgov-icon-on-color), 0 0 0 3px var(--bcgov-button-primary);
+  border-color: var(--#{vars.$bcgov-prefix}-icon-on-color);
+  box-shadow: inset 0 0 0 1px var(--#{vars.$bcgov-prefix}-icon-on-color), 0 0 0 3px var(--#{vars.$bcgov-prefix}-button-primary);
   cursor: pointer;
   outline: 0;
   outline-offset: 0;
@@ -124,7 +124,7 @@ p.fav-card-title-small {
     padding: 1rem;
     width: 18rem;
     height: 4rem;
-    border: 1px solid var(--bcgov-border-subtle-02);
+    border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-02);
     flex: none;
     order: 0;
     align-self: stretch;

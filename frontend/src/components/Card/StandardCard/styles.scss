@@ -1,4 +1,4 @@
-@use '../../../theme/variables.scss' as vars;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
 @use '@carbon/type';
 
 .std-card-header {
@@ -23,8 +23,8 @@ p.std-card-title {
   margin: 0.5rem 2rem 0.5rem 0;
   width: 20.25rem;
   height: 22.5625rem;
-  background: var(--bcgov-layer-02);
-  border: 1px solid var(--bcgov-border-subtle-02);
+  background: var(--#{vars.$bcgov-prefix}-layer-02);
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-02);
   border-radius: 4px;
   flex: none;
   order: 0;
@@ -32,7 +32,7 @@ p.std-card-title {
 }
 
 .std-card-main:hover {
-  outline: 2px solid var(--bcgov-focus);
+  outline: 2px solid var(--#{vars.$bcgov-prefix}-focus);
   cursor: pointer;
 }
 
@@ -48,7 +48,7 @@ p.std-card-title {
 .std-card-description > p {
   font-size: 0.875rem;
   margin-bottom: auto;
-  color: var(--bcgov-text-secondary);
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
   display: -webkit-box;
   max-width: 14.5rem;
   -webkit-line-clamp: 3;
@@ -62,13 +62,13 @@ p.std-card-title {
   height: 9.75rem !important;
   padding: 0rem !important;
   margin-bottom: 1.25rem !important;
-  color: var(--bcgov-focus);
+  color: var(--#{vars.$bcgov-prefix}-focus);
   position: absolute;
   bottom: 0;
 }
 
 .#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open >svg {
-  fill: var(--bcgov-icon-primary);
+  fill: var(--#{vars.$bcgov-prefix}-icon-primary);
 }
 
 .std-card-header .#{vars.$bcgov-prefix}--popover-container {
