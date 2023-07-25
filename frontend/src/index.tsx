@@ -20,7 +20,17 @@ if (isDevEnv) {
   makeServer('development');
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient(
+  {
+    defaultOptions: {
+      queries: {
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        retry: 3
+      }
+    }
+  }
+);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
