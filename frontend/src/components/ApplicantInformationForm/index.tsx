@@ -23,6 +23,7 @@ import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
 
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
+
 import api from '../../api-service/api';
 import ApiConfig from '../../api-service/ApiConfig';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
