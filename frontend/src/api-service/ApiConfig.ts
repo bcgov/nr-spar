@@ -37,6 +37,8 @@ const ApiConfig = {
 
   orchards: `${serverHost}/api/orchards`,
 
+  orchardsVegCode: `${serverHost}/api/orchards/vegetation-code`,
+
   coneCollectionMethod: `${serverHost}/api/cone-collection-methods`,
 
   uploadConeAndPollen: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/cone-pollen-count-table/upload`,

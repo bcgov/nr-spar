@@ -5,17 +5,17 @@ import orchardModalOptions from './definitions';
 
 import './styles.scss';
 
-interface OrchardModalProps {
+interface OrchardWarnModalProps {
   open: boolean;
   setOpen: Function;
-  submitFunction: Function;
+  confirmEdit: Function;
   modalType: keyof orchardModalOptions;
 }
 
-const OrchardModal = (
+const OrchardWarnModal = (
   {
-    open, setOpen, submitFunction, modalType
-  }: OrchardModalProps
+    open, setOpen, confirmEdit, modalType
+  }: OrchardWarnModalProps
 ) => (
   <Modal
     className="orchard-modal"
@@ -28,7 +28,7 @@ const OrchardModal = (
       setOpen(false);
     }}
     onRequestSubmit={() => {
-      submitFunction();
+      confirmEdit();
       setOpen(false);
     }}
     size="sm"
@@ -36,4 +36,4 @@ const OrchardModal = (
   />
 );
 
-export default OrchardModal;
+export default OrchardWarnModal;

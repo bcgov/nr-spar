@@ -21,13 +21,9 @@ export const processOrchards = (orchards: Array<OrchardObj>): Array<OrchardObj> 
   const obj = {};
 
   orchards.forEach((orchard) => {
-    if (
-      !Object.prototype.hasOwnProperty.call(obj, orchard.orchardId)
-      && orchard.orchardId !== ''
-      && orchard.orchardLabel !== ''
-    ) {
+    if (orchard.selectedItem) {
       Object.assign(obj, {
-        [orchard.orchardId]: orchard
+        [orchard.selectedItem.code]: orchard
       });
     }
   });
