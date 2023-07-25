@@ -78,18 +78,18 @@ insert into spar.genetic_worth (genetic_worth_code, description, effective_date,
 	('G', 'Growth and Volume', '1905-01-01 00:00:00', '2018-05-29 00:00:00', current_timestamp),
 	('GVO', 'Volume Growth', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
 	('WVE', 'Wood Velocity Measures', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('WWD', 'Wood Density', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('WWD', 'Wood quality', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
 	('R', 'Pest Resistance', '1905-01-01 00:00:00', '2018-05-29 00:00:00', current_timestamp),
 	('M', 'Major Gene Resistance', '2006-09-06 00:00:00', '2018-05-29 00:00:00', current_timestamp),
-	('WDU', 'Durability', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('AD', 'Deer', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('DFS', 'Dothistroma Needle Blight (Dothistroma septosporum)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('DFU', 'Cedar Leaf Blight (Didymascella thujina)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('DFW', 'Swiss Needle Cast (Phaeocryptopus gaumanni)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('DSB', 'White pine Blister Rust (Cronartium ribicola)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('DSC', 'Comandra Blister Rust (Cronartium comandrae)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('DSG', 'Western Gall Rust (Endocronartium harknessii)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('IWS', 'White pine Weevil (on Spruce) (Pissodes strobi)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp);
+	('WDU', 'Wood durability', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('AD', 'Animal browse resistance (deer)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('DFS', 'Disease resistance for Dothistroma needle blight (Dothistroma septosporum)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('DFU', 'Disease resistance for Redcedar leaf blight (Didymascella thujina)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('DFW', 'Disease resistance for Swiss needle cast (Phaeocryptopus gaumanni)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('DSB', 'Disease resistance for white pine blister rust (Cronartium ribicola)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('DSC', 'Disease resistance for Commandra blister rust (Cronartium comandrae)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('DSG', 'Disease resistance for Western gall rust (Endocronartium harknessii)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp),
+	('IWS', 'Spruce terminal weevil (Pissodes strobi)', '2018-05-29 00:00:00', '9999-12-31 00:00:00', current_timestamp);
 
 alter table spar.seedlot_parent_tree_gen_qlty add constraint seedlot_pt_genqlt_genwor_cd_fk
 		foreign key(genetic_worth_code) references spar.genetic_worth(genetic_worth_code);
