@@ -8,7 +8,6 @@ type orchardModalTextType = {
 }
 
 type orchardModalOptions = {
-  add: orchardModalTextType,
   delete: orchardModalTextType,
   change: orchardModalTextType
 }

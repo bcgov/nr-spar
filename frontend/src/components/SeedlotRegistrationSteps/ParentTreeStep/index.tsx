@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link } from 'react-router-dom';
-import { useQueries, useMutation } from '@tanstack/react-query';
+import { useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,
   TableContainer, TableToolbar, Checkbox,
@@ -58,6 +58,8 @@ const ParentTreeStep = (
     orchards
   }: ParentTreeStepProps
 ) => {
+  const queryClient = useQueryClient();
+  const isQueryClientFetching = queryClient.isFetching() > 0;
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
@@ -77,6 +79,7 @@ const ParentTreeStep = (
   const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
+  const [isFetchingParentTrees, setIsFetchingParentTrees] = useState(true);
 
   // Link reference to trigger click event
   const linkRef = useRef<HTMLAnchorElement>(null);
@@ -97,6 +100,7 @@ const ParentTreeStep = (
       const processedOrchard = processOrchards(orchards);
       setDisableOptions(processedOrchard.length === 0);
       setOrchardsData(processedOrchard);
+      queryClient.resetQueries({ queryKey: ['orchard', 'parent-tree-genetic-quality'] });
     },
     [orchards]
   );
@@ -185,15 +189,31 @@ const ParentTreeStep = (
   useQueries({
     queries:
       orchardsData.map((orchard) => ({
-        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.orchardId],
+        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.selectedItem?.code],
         queryFn: () => (
-          getParentTreeGeneQuali(orchard.orchardId)
+          getParentTreeGeneQuali(orchard.selectedItem?.code)
         ),
-        onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(data),
-        refetchOnMount: true,
-        refetchOnWindowFocus: false
+        onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(data)
       }))
   });
+
+  const getParentTreesFetchStatus = (): boolean => {
+    let isFetching = false;
+    orchardsData.forEach((orchard) => {
+      const orchardId = orchard.selectedItem?.code ? orchard.selectedItem.code : '';
+      const queryKey = ['orchard', 'parent-tree-genetic-quality', orchardId];
+      const queryStatus = queryClient.getQueryState(queryKey);
+      if (!isFetching && queryStatus?.fetchStatus === 'fetching') {
+        isFetching = true;
+      }
+    });
+    return isFetching;
+  };
+
+  useEffect(
+    () => setIsFetchingParentTrees(getParentTreesFetchStatus()),
+    [isQueryClientFetching]
+  );
 
   const setInputChange = (parentTreeNumber: string, colName: keyof RowItem, value: string) => {
     // Using structuredClone so useEffect on state.tableRowData can be triggered
@@ -254,7 +274,6 @@ const ParentTreeStep = (
         clonedState.tableRowData[parentTreeNumber][field] = '';
       });
     });
-
     setStepData(clonedState);
     return clonedState;
   };
@@ -436,7 +455,7 @@ const ParentTreeStep = (
                     </TableToolbar>
                     {
                       // Check if it's fetching parent tree data
-                      (!disableOptions && Object.values(state.tableRowData).length === 0)
+                      (!disableOptions && isFetchingParentTrees)
                         ? (
                           <DataTableSkeleton
                             showToolbar={false}
