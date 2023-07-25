@@ -1,5 +1,5 @@
-@use '../../theme/variables.scss' as vars;
-@use '../../theme/colors.scss' as colors;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/colors.scss' as colors;
 
 .spar-header {
   overflow: hidden;

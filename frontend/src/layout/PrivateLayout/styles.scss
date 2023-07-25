@@ -1,4 +1,4 @@
-@use '../../theme/variables.scss' as vars;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
 
 .main-container {
   overflow-x: hidden;
@@ -9,6 +9,10 @@
 
 .page-content .#{vars.$bcgov-prefix}--grid {
   max-width: none;
+}
+
+.#{vars.$bcgov-prefix}--content {
+  margin: auto;
 }
 
 @media only screen and (max-width: 1055px) {
