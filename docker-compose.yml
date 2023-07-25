@@ -92,8 +92,8 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
-    image: node:18.16.1-alpine3.17
-    entrypoint: sh -c "cd /app && yarn install --frozen-lockfile --prefer-offline && yarn start"
+    image: node:18.17.0-alpine3.17
+    entrypoint: sh -c "apk add --no-cache python3 g++ make && cd /app && yarn install --frozen-lockfile --prefer-offline && yarn start"
     user: root
     volumes:
       - ./frontend:/app:z
