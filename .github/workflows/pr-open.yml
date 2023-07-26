@@ -50,9 +50,9 @@ jobs:
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
-            -p AWS_KINESIS_USER=${{ secrets.AWS_KINESIS_USER }}
-            -p AWS_KINESIS_PASS='${{ secrets.AWS_KINESIS_PASS }}'
-          #triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
+            -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
+          triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
       - name: FluentBit Init
         uses: bcgov-nr/action-deployer-openshift@v1.1.1
         with:
@@ -108,7 +108,7 @@ jobs:
             file: database/openshift.deploy.yml
             parameters: -p DB_PVC_SIZE=128Mi
             overwrite: false
-            # triggers: ('common/' 'database/' 'backend' 'frontend')
+            triggers: ('common/' 'database/' 'backend/' 'frontend/')
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
@@ -117,7 +117,7 @@ jobs:
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
               -p ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
-            # triggers: ('common/' 'database/' 'backend/' 'frontend/')
+            triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
           - name: frontend
             file: frontend/openshift.deploy.yml
@@ -132,7 +132,7 @@ jobs:
               -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-            # triggers: ('common/' 'database/' 'backend/' 'frontend/')
+            triggers: ('common/' 'database/' 'backend/' 'frontend/')
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -140,7 +140,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-            # triggers: ('common/' 'oracle-api/')
+            triggers: ('common/' 'oracle-api/')
             verification_path: "actuator/health"
 
     steps:

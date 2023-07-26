@@ -103,12 +103,12 @@ objects:
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-fluentbit
-                      key: aws-kinesis-secret-username
+                      key: aws-access-key-id
                 - name: AWS_SECRET_ACCESS_KEY
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-fluentbit
-                      key: aws-kinesis-secret-password
+                      key: aws-access-key-secret
                 - name: STREAM_NAME
                   valueFrom:
                     secretKeyRef:
