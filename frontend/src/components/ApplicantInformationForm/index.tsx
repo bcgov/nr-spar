@@ -23,26 +23,22 @@ import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
 
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
+import ApplicantAgencyType from '../../types/ApplicantAgencyType';
 
 import api from '../../api-service/api';
 import ApiConfig from '../../api-service/ApiConfig';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
+import getApplicantAgencies from '../../api-service/applicantAgenciesAPI';
 
 import './styles.scss';
 
 const ApplicantInformationForm = () => {
-  const mockAgencyOptions: Array<string> = [
-    '0032 - Strong Seeds Orchard - SSO',
-    '0035 - Weak Seeds Orchard - WSO',
-    '0038 - Okay Seeds Orchard - OSO'
-  ];
-
   const navigate = useNavigate();
 
   const seedlotData: SeedlotRegistrationObj = {
     seedlotNumber: 0,
     applicant: {
-      name: mockAgencyOptions[0],
+      name: '',
       number: '0',
       email: ''
     },
@@ -65,6 +61,11 @@ const ApplicantInformationForm = () => {
   const [isAgencyNumberInvalid, setIsAgencyNumberInvalid] = useState<boolean>(false);
   const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
   const [isSpeciesInvalid, setIsSpeciesInvalid] = useState<boolean>(false);
+
+  const applicantAgencyQuery = useQuery({
+    queryKey: ['applicant-agencies'],
+    queryFn: () => getApplicantAgencies()
+  });
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -155,6 +156,19 @@ const ApplicantInformationForm = () => {
     }
   };
 
+  const createApplicantAgencyDropdownItems = (data: ApplicantAgencyType[]) => {
+    const options: string[] = [];
+    data.forEach((agency: ApplicantAgencyType) => {
+      const correctName = agency.clientName
+        .toLowerCase()
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      options.push(`${agency.clientNumber} - ${correctName} - ${agency.acronym}`);
+    });
+    return options;
+  };
+
   const displaySpeciesInput = () => {
     const { status, fetchStatus } = vegCodeQuery;
     const fetchError = status === 'error';
@@ -190,6 +204,44 @@ const ApplicantInformationForm = () => {
     );
   };
 
+  const displayApplicantInput = () => {
+    const { status, fetchStatus } = applicantAgencyQuery;
+    const fetchError = status === 'error';
+    const listItems = applicantAgencyQuery.isSuccess
+      ? createApplicantAgencyDropdownItems(applicantAgencyQuery.data)
+      : [];
+
+    if (fetchStatus === 'fetching') {
+      return (
+        <TextInputSkeleton />
+      );
+    }
+    return (
+      <>
+        <ComboBox
+          id="agency-name-combobox"
+          ref={nameInputRef}
+          name="name"
+          items={listItems}
+          initialSelectedItem={listItems[0]}
+          shouldFilterItem={
+            ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+          }
+          placeholder="Select an agency..."
+          titleText="Applicant agency name"
+          helperText={fetchError ? '' : 'You can enter your agency number, name or acronym'}
+          onChange={(e: ComboBoxEvent) => comboBoxChangeHandlerApplicant(e)}
+          disabled={fetchError}
+        />
+        {
+          fetchError
+            ? <InputErrorText description="An error occurred" />
+            : null
+        }
+      </>
+    );
+  };
+
   return (
     <div className="applicant-information-form">
       <form onSubmit={validateAndSubmit}>
@@ -201,20 +253,9 @@ const ApplicantInformationForm = () => {
         </Row>
         <Row className="agency-information">
           <Column sm={4} md={2} lg={5}>
-            <ComboBox
-              id="agency-name-combobox"
-              ref={nameInputRef}
-              name="name"
-              items={mockAgencyOptions}
-              initialSelectedItem={mockAgencyOptions[0]}
-              shouldFilterItem={
-                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-              }
-              placeholder="Select an agency..."
-              titleText="Applicant agency name"
-              helperText="You can enter your agency number, name or acronym"
-              onChange={(e: ComboBoxEvent) => comboBoxChangeHandlerApplicant(e)}
-            />
+            {
+              displayApplicantInput()
+            }
           </Column>
           <Column sm={4} md={2} lg={5}>
             <TextInput
