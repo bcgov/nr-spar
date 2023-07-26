@@ -15,10 +15,10 @@ import lombok.Setter;
 public class GeneticWorth {
   
   @Id
-  @Column(name = "genetic_worth_code")
+  @Column(name = "genetic_worth_code", length = 3)
   private String id;
 
-  @Column(name = "genetic_worth_name")
+  @Column(name = "genetic_worth_name", length = 30)
   private String description;
 
 }
