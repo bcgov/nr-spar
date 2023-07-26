@@ -1,6 +1,6 @@
 -- ConeCollectionMethodEnum
 create table spar.cone_collection_method (
-	code 															serial,
+	code 											serial not null,
 	description 				varchar(120) not null,
 	effective_date 				timestamp not null,
 	expiry_date 				timestamp not null,
@@ -21,15 +21,15 @@ comment on column spar.cone_collection_method.effective_date is 'The effective d
 comment on column spar.cone_collection_method.expiry_date is 'The date the code expires on.';
 comment on column spar.cone_collection_method.update_timestamp is 'The date and time of the last update.';
 
-insert into spar.cone_collection_method (code, description, effective_date, expiry_date) values
-	(1, 'Aerial raking', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
-	(2, 'Aerial clipping/topping', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
-	(3, 'Felled trees', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
-	(4, 'Climbing', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
-	(5, 'Squirrel cache', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
-	(6, 'Ground, Ladder and/or Hydraulic Lift', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
-	(7, 'Unknown', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
-	(8, 'Squirrel harvesting/dropping', '2013-12-03 00:00:00', '9999-12-31 00:00:00');
+insert into spar.cone_collection_method (description, effective_date, expiry_date) values
+	('Aerial raking', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	('Aerial clipping/topping', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	('Felled trees', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	('Climbing', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	('Squirrel cache', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	('Ground, Ladder and/or Hydraulic Lift', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	('Unknown', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	('Squirrel harvesting/dropping', '2013-12-03 00:00:00', '9999-12-31 00:00:00');
 
 alter table spar.seedlot_collection_method alter column cone_collection_method_code type integer using cone_collection_method_code::integer;
 alter table spar.seedlot_collection_method add constraint seedlot_cone_col_met_code_fk
