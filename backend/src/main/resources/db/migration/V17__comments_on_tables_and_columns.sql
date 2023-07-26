@@ -58,6 +58,7 @@ comment on column spar.seedlot.revision_count is 'A counter used to ensure data 
 comment on table spar.seedlot_collection_method is 'The collection methods in which the cones of a Seedlot were collected.';
 comment on column spar.seedlot_collection_method.seedlot_number is 'The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time.';
 comment on column spar.seedlot_collection_method.cone_collection_method_code is 'A code representing the method in which the cones were collected.';
+comment on column spar.seedlot_collection_method.cone_collection_method_desc is 'A description of the method in which the cones were collected - used only when the user selects the option "Other".';
 comment on column spar.seedlot_collection_method.entry_userid is 'The userid of the individual that entered the Seedlot collection method.';
 comment on column spar.seedlot_collection_method.entry_timestamp is 'The time and date a Seedlot collection method was entered onto the system.';
 comment on column spar.seedlot_collection_method.update_userid is 'The userid of the individual that changed the Seedlot collection method.';
