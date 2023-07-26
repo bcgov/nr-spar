@@ -45,6 +45,7 @@ public class SeedlotGeneticWorth {
   @Enumerated(EnumType.STRING)
   @NonNull
   private GeneticWorthEnum geneticWorthCode;
+
   // endregion
 
   @Column(name = "genetic_quality_value", precision = 4, scale = 1, nullable = false)

@@ -1,12 +1,17 @@
 -- ConeCollectionMethodEnum
 create table spar.cone_collection_method (
-	code varchar(3) not null,
+	code 															serial,
 	description 				varchar(120) not null,
 	effective_date 				timestamp not null,
 	expiry_date 				timestamp not null,
-	update_timestamp 			timestamp not null,
+	update_timestamp 			timestamp default current_timestamp,
+	user_id							varchar(70)	default null,
+	archived						boolean default false,
+
 	constraint cone_collection_method_pk
-		primary key(code)
+		primary key(code),
+	constraint cone_collection_method_fk_user
+		foreign key(user_id) references spar.user_profile
 );
 
 comment on table spar.cone_collection_method is 'A list of valid Cone based Collection Method Codes.';
@@ -16,17 +21,17 @@ comment on column spar.cone_collection_method.effective_date is 'The effective d
 comment on column spar.cone_collection_method.expiry_date is 'The date the code expires on.';
 comment on column spar.cone_collection_method.update_timestamp is 'The date and time of the last update.';
 
-insert into spar.cone_collection_method (code, description, effective_date, expiry_date, update_timestamp) values
-	('01', 'Aerial raking', '1905-01-01 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('02', 'Aerial clipping/topping', '1905-01-01 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('03', 'Felled trees', '1905-01-01 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('04', 'Climbing', '1905-01-01 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('05', 'Squirrel cache', '1905-01-01 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('06', 'Ground, Ladder and/or Hydraulic Lift', '1905-01-01 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('07', 'Unknown', '1905-01-01 00:00:00', '9999-12-31 00:00:00', current_timestamp),
-	('08', 'Squirrel harvesting/dropping', '2013-12-03 00:00:00', '9999-12-31 00:00:00', current_timestamp);
+insert into spar.cone_collection_method (code, description, effective_date, expiry_date) values
+	(1, 'Aerial raking', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	(2, 'Aerial clipping/topping', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	(3, 'Felled trees', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	(4, 'Climbing', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	(5, 'Squirrel cache', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	(6, 'Ground, Ladder and/or Hydraulic Lift', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	(7, 'Unknown', '1905-01-01 00:00:00', '9999-12-31 00:00:00'),
+	(8, 'Squirrel harvesting/dropping', '2013-12-03 00:00:00', '9999-12-31 00:00:00');
 
-alter table spar.seedlot_collection_method alter column cone_collection_method_code type varchar(3);
+alter table spar.seedlot_collection_method alter column cone_collection_method_code type integer using cone_collection_method_code::integer;
 alter table spar.seedlot_collection_method add constraint seedlot_cone_col_met_code_fk
 		foreign key(cone_collection_method_code) references spar.cone_collection_method(code);
 
@@ -230,3 +235,5 @@ alter table spar.seedlot add constraint seedlot_seedlot_status_code_fk
 		foreign key(seedlot_status_code) references spar.seedlot_status(code);
 
 alter table spar.seedlot_orchard drop column primary_ind;
+
+alter table spar.seedlot_collection_method drop column cone_collection_method_desc;
