@@ -1,22 +1,14 @@
 package ca.bc.gov.backendstartapi.dto;
 
-import java.math.BigDecimal;
-
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.List;
 
+/** This class represents the JSON request body when doing genetic worth calculations. */
+@Schema(description = "An object representing the request body for the genetic worth calculations.")
 public record GeneticWorthTraitsRequestDto(
-  @NotNull String parentTreeNumber,
-  BigDecimal coneCount,
-  BigDecimal pollenCount,
-  BigDecimal ad,
-  BigDecimal dfs,
-  BigDecimal dfu,
-  BigDecimal dfw,
-  BigDecimal dsb,
-  BigDecimal dsc,
-  BigDecimal dsg,
-  BigDecimal gvo,
-  BigDecimal iws,
-  BigDecimal wdu,
-  BigDecimal wve,
-  BigDecimal wwd) {}
+    @NotNull String parentTreeNumber,
+    BigDecimal coneCount,
+    BigDecimal pollenCount,
+    List<GeneticWorthTraitsDto> geneticTraits) {}

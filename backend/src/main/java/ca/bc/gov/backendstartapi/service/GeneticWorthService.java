@@ -1,27 +1,28 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsResponseDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorth;
 import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/** This class contains all methods for handling Genetic Worth routines and calculations. */
 @Service
 @Slf4j
 public class GeneticWorthService {
 
   private final GeneticWorthRepository geneticWorthRepository;
 
-  public GeneticWorthService(GeneticWorthRepository geneticWorthRepository) {
+  GeneticWorthService(GeneticWorthRepository geneticWorthRepository) {
     this.geneticWorthRepository = geneticWorthRepository;
   }
 
@@ -39,24 +40,24 @@ public class GeneticWorthService {
     BigDecimal coancestry = BigDecimal.ZERO;
     int numberOfSmpParentFromOutside = 0;
 
-    List<GeneticWorthTraitsResponseDto> traits = calculateTraits(traitsDto);
+    List<GeneticWorthTraitsDto> traits = calculateTraits(traitsDto);
 
     return new GeneticWorthSummaryDto(
         effectivePopulationSizeNe, coancestry, numberOfSmpParentFromOutside, traits);
   }
 
   /**
-   * Does the calculation for each genetic trait. PS: if the treshold of 70% of contribution
-   *     from the parent tree is not met, the trait will respond with zero as value growth.
+   * Does the calculation for each genetic trait. PS: if the treshold of 70% of contribution from
+   * the parent tree is not met, the trait will respond with zero as value growth.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
-   * @return A {@link List} of {@link GeneticWorthTraitsResponseDto} containing the trait code
-   *     , its value growth and the percentage of contribution
+   * @return A {@link List} of {@link GeneticWorthTraitsDto} containing the trait code , its value
+   *     growth and the percentage of contribution
    */
-  private List<GeneticWorthTraitsResponseDto> calculateTraits(
+  private List<GeneticWorthTraitsDto> calculateTraits(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
-    List<GeneticWorthTraitsResponseDto> traits = new ArrayList<>();
+    List<GeneticWorthTraitsDto> traits = new ArrayList<>();
     BigDecimal minimumTreshold = new BigDecimal("0.7");
 
     // Iterate over all traits
@@ -67,12 +68,13 @@ public class GeneticWorthService {
       BigDecimal percentage = checkGeneticTraitTreshold(traitsDto, trait);
 
       if (percentage.compareTo(minimumTreshold) >= 0) {
-        volumeGrowth = calculateGeneticWorth(traitsDto, trait);
+        log.info("Calculating Genetic Worth for {} trait", trait.getId());
+        volumeGrowth = calculateTraitGeneticWorth(traitsDto, trait);
       }
 
-      GeneticWorthTraitsResponseDto traitResponse =
-          new GeneticWorthTraitsResponseDto(
-              GeneticWorthEnum.GVO.name().toLowerCase(), volumeGrowth, percentage);
+      GeneticWorthTraitsDto traitResponse =
+          new GeneticWorthTraitsDto(
+              GeneticWorthEnum.GVO.name().toLowerCase(), null, volumeGrowth, percentage);
       traits.add(traitResponse);
     }
 
@@ -98,10 +100,10 @@ public class GeneticWorthService {
    * attend the 70% treshold weight, the value for this trait will be zero;
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
-   *     values
+   *     values.
    * @return A {@link BigDecimal} representing the value.
    */
-  private BigDecimal calculateGeneticWorth(
+  private BigDecimal calculateTraitGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto, GeneticWorth trait) {
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
     BigDecimal femaleConeSum = reduceConeCount(traitsDto);
@@ -120,6 +122,14 @@ public class GeneticWorthService {
     return sumGw;
   }
 
+  /**
+   * Check if a given trait mets the minimum of 70% of parent tree contribution.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values to be calculated.
+   * @param trait A {@link GeneticWorth} with the trait that should be considered.
+   * @return A BigDecimal representing the trait treshold.
+   */
   private BigDecimal checkGeneticTraitTreshold(
       List<GeneticWorthTraitsRequestDto> traitsDto, GeneticWorth trait) {
     log.debug("Checking genetic trait treshold for {} trait", trait);
@@ -140,40 +150,35 @@ public class GeneticWorthService {
       }
     }
 
+    log.debug("Finished checking Genetic Trait treshold for {} trait with: {}%", trait, sumPi);
+
     return sumPi;
   }
 
-  private BigDecimal getTraitValue(GeneticWorthTraitsRequestDto dto, GeneticWorth trait) {
-    switch (trait.getId()) {
-      case "AD":
-        return dto.ad();
-      case "DFS":
-        return dto.dfs();
-      case "DFU":
-        return dto.dfu();
-      case "DFW":
-        return dto.dfw();
-      case "DSB":
-        return dto.dsb();
-      case "DSC":
-        return dto.dsc();
-      case "DSG":
-        return dto.dsg();
-      case "GVO":
-        return dto.gvo();
-      case "IWS":
-        return dto.iws();
-      case "WDU":
-        return dto.wdu();
-      case "WVE":
-        return dto.wve();
-      case "WWD":
-        return dto.wwd();
-      default:
-        return BigDecimal.ZERO;
-    }
+  /**
+   * Finds the genetic trait value given the request dto and the trait that should be found.
+   *
+   * @param dto A {@link GeneticWorthTraitsRequestDto} instance with the traits value.
+   * @param trait A {@link GeneticWorth} with the trait that should be considered.
+   * @return a BigDecimal representing the trait value or BigDecimal.ZERO otherwise.
+   */
+  private BigDecimal getTraitValue(GeneticWorthTraitsRequestDto traitDto, GeneticWorth trait) {
+    List<GeneticWorthTraitsDto> geneticTraits = traitDto.geneticTraits();
+    Optional<GeneticWorthTraitsDto> traitOptional =
+        geneticTraits.stream().filter(x -> x.traitCode().equals(trait.getId())).findFirst();
+    return traitOptional.isEmpty() ? BigDecimal.ZERO : traitOptional.get().traitValue();
   }
 
+  /**
+   * Calculate the pi. The P represents the percentage of contribution for a parent tree, the sum of
+   * male and female contribution divided by two.
+   *
+   * @param pollenCount The amount of pollen for this parent tree (clone).
+   * @param coneCount The amount of cone for this parent tree (clone).
+   * @param pollenSum The sum of all pollen count for this calculation.
+   * @param coneSum The sum of all cone count for this calculation.
+   * @return A BigDecimal representing the value.
+   */
   private BigDecimal calculatePi(
       BigDecimal pollenCount, BigDecimal coneCount, BigDecimal pollenSum, BigDecimal coneSum) {
     BigDecimal mi = pollenCount.divide(pollenSum, 10, RoundingMode.HALF_UP);
@@ -181,10 +186,24 @@ public class GeneticWorthService {
     return mi.add(fi).divide(new BigDecimal("2"), 10, RoundingMode.HALF_UP);
   }
 
+  /**
+   * Sums all the pollen count.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values
+   * @return A BigDecimal representing the value
+   */
   private BigDecimal reducePollenCount(List<GeneticWorthTraitsRequestDto> traitsDto) {
     return traitsDto.stream().map(x -> x.pollenCount()).reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
+  /**
+   * Sums all the cone count.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values
+   * @return A BigDecimal representing the value
+   */
   private BigDecimal reduceConeCount(List<GeneticWorthTraitsRequestDto> traitsDto) {
     return traitsDto.stream().map(x -> x.coneCount()).reduce(BigDecimal.ZERO, BigDecimal::add);
   }

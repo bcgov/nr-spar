@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+/** This class represents a Genetic Worth object in the database. */
 @Getter
 @Setter
 @Entity
