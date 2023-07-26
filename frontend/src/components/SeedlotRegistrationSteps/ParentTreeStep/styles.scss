@@ -1,5 +1,5 @@
 @use '@carbon/type';
-@use '../../../theme/variables.scss' as vars;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
 
 .parent-tree-step-container {
   padding-left: 0rem;
@@ -226,6 +226,12 @@
 
   .#{vars.$bcgov-prefix}--checkbox-label-text {
     @include type.type-style('body-compact-01');
+  }
+
+  a {
+    @include type.type-style('body-compact-01');
+    text-decoration: none;
+    color: var(--#{vars.$bcgov-prefix}-text-secondary);
   }
 }
 

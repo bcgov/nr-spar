@@ -1,4 +1,4 @@
-@use '../../theme/variables.scss' as vars;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
 
 .combo-button {
   border-top-right-radius: 0;
@@ -9,7 +9,7 @@
 .combo-options {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  background: var(--bcgov-background-brand);
+  background: var(--#{vars.$bcgov-prefix}-background-brand);
   border-left: solid white 1px;
 }
 
@@ -19,7 +19,7 @@
 }
 
 .combo-options:hover {
-  background-color: var(--bcgov-button-primary-hover);
+  background-color: var(--#{vars.$bcgov-prefix}-button-primary-hover);
 }
 
 .combo-options.#{vars.$bcgov-prefix}--overflow-menu:focus {
@@ -34,8 +34,8 @@ button.combo-options + .#{vars.$bcgov-prefix}--popover {
 .combo-options.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  box-shadow: 0 2px 6px var(--bcgov-shadow, rgba(0, 0, 0, 0.3));
-  background-color: var(--bcgov-button-primary-active);
+  box-shadow: 0 2px 6px var(--#{vars.$bcgov-prefix}-shadow, rgba(0, 0, 0, 0.3));
+  background-color: var(--#{vars.$bcgov-prefix}-button-primary-active);
   transition: none;
 }
 

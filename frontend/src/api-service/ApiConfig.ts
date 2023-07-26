@@ -37,11 +37,13 @@ const ApiConfig = {
 
   orchards: `${serverHost}/api/orchards`,
 
+  orchardsVegCode: `${serverHost}/api/orchards/vegetation-code`,
+
   coneCollectionMethod: `${serverHost}/api/cone-collection-methods`,
 
-  uploadConeAndPollen: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/cone-pollen-count-table/upload`,
+  uploadConeAndPollen: `${serverHost}/api/seedlots/parent-trees-contribution/cone-pollen-count-table/upload`,
 
-  uploadSMPMix: `${serverHost}/api/seedlots/{seedlotNumber}/parent-trees-contribution/smp-calculation-table/upload`,
+  uploadSMPMix: `${serverHost}/api/seedlots/parent-trees-contribution/smp-calculation-table/upload`,
 
   maleFemaleMethodology: `${serverHost}/api/male-female-methodologies`,
 
