@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import {
   Row,
@@ -23,12 +23,14 @@ import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
 
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
-import ApplicantAgencyType from '../../types/ApplicantAgencyType';
 
 import api from '../../api-service/api';
 import ApiConfig from '../../api-service/ApiConfig';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgencies from '../../api-service/applicantAgenciesAPI';
+
+import ComboBoxPropsType from './definitions';
+import { applicantAgencyFieldProps, speciesFieldProps } from './constants';
 
 import './styles.scss';
 
@@ -52,7 +54,7 @@ const ApplicantInformationForm = () => {
     collectedBC: true
   };
 
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const agencyInputRef = useRef<HTMLInputElement>(null);
   const numberInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const speciesInputRef = useRef<HTMLButtonElement>(null);
@@ -64,7 +66,7 @@ const ApplicantInformationForm = () => {
 
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
-    queryFn: () => getApplicantAgencies()
+    queryFn: () => getApplicantAgencies(true)
   });
 
   const vegCodeQuery = useQuery({
@@ -83,23 +85,22 @@ const ApplicantInformationForm = () => {
     });
   };
 
-  const comboBoxChangeHandlerApplicant = (event: ComboBoxEvent) => {
+  const comboBoxChangeHandler = (event: ComboBoxEvent, isApplicantAgency: boolean) => {
     const { selectedItem } = event;
-    setResponseBody({
-      ...responseBody,
-      applicant: {
-        ...responseBody.applicant,
-        name: selectedItem
-      }
-    });
-  };
-
-  const inputChangeHandlerSpecies = (event: any) => {
-    const { selectedItem } = event;
-    setResponseBody({
-      ...responseBody,
-      species: selectedItem
-    });
+    if (isApplicantAgency) {
+      setResponseBody({
+        ...responseBody,
+        applicant: {
+          ...responseBody.applicant,
+          name: selectedItem
+        }
+      });
+    } else {
+      setResponseBody({
+        ...responseBody,
+        species: selectedItem
+      });
+    }
   };
 
   const inputChangeHandlerRadio = (event: string) => {
@@ -156,60 +157,13 @@ const ApplicantInformationForm = () => {
     }
   };
 
-  const createApplicantAgencyDropdownItems = (data: ApplicantAgencyType[]) => {
-    const options: string[] = [];
-    data.forEach((agency: ApplicantAgencyType) => {
-      const correctName = agency.clientName
-        .toLowerCase()
-        .split(' ')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-      options.push(`${agency.clientNumber} - ${correctName} - ${agency.acronym}`);
-    });
-    return options;
-  };
-
-  const displaySpeciesInput = () => {
-    const { status, fetchStatus } = vegCodeQuery;
+  const displayCombobox = (
+    query: UseQueryResult,
+    propsValues: ComboBoxPropsType,
+    isApplicantComboBox = false
+  ) => {
+    const { status, fetchStatus, isSuccess } = query;
     const fetchError = status === 'error';
-    if (fetchStatus === 'fetching') {
-      return (
-        <TextInputSkeleton />
-      );
-    }
-    return (
-      <>
-        <ComboBox
-          className="applicant-info-combobox"
-          id="applicant-info-combobox-species"
-          ref={speciesInputRef}
-          items={vegCodeQuery.isSuccess ? vegCodeQuery.data : []}
-          selectedItem={responseBody.species}
-          shouldFilterItem={
-            ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-          }
-          placeholder="Enter or choose an species for the seedlot"
-          titleText="Seedlot species"
-          onChange={(e: ComboBoxEvent) => inputChangeHandlerSpecies(e)}
-          invalid={isSpeciesInvalid}
-          invalidText="Please select a species"
-          disabled={fetchError}
-        />
-        {
-          fetchError
-            ? <InputErrorText description="An error occurred" />
-            : null
-        }
-      </>
-    );
-  };
-
-  const displayApplicantInput = () => {
-    const { status, fetchStatus } = applicantAgencyQuery;
-    const fetchError = status === 'error';
-    const listItems = applicantAgencyQuery.isSuccess
-      ? createApplicantAgencyDropdownItems(applicantAgencyQuery.data)
-      : [];
 
     if (fetchStatus === 'fetching') {
       return (
@@ -218,19 +172,23 @@ const ApplicantInformationForm = () => {
     }
     return (
       <>
+        {/* For now the default selected item will not be set,
+            we need the information from each user to set the
+            correct one */}
         <ComboBox
-          id="agency-name-combobox"
-          ref={nameInputRef}
-          name="name"
-          items={listItems}
-          initialSelectedItem={listItems[0]}
+          className={propsValues.className}
+          id={propsValues.id}
+          ref={isApplicantComboBox ? agencyInputRef : speciesInputRef}
+          items={isSuccess ? query.data : []}
           shouldFilterItem={
             ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
           }
-          placeholder="Select an agency..."
-          titleText="Applicant agency name"
-          helperText={fetchError ? '' : 'You can enter your agency number, name or acronym'}
-          onChange={(e: ComboBoxEvent) => comboBoxChangeHandlerApplicant(e)}
+          placeholder={propsValues.placeholder}
+          titleText={propsValues.titleText}
+          onChange={(e: ComboBoxEvent) => comboBoxChangeHandler(e, isApplicantComboBox)}
+          invalid={!isApplicantComboBox && isSpeciesInvalid}
+          invalidText={propsValues.invalidText}
+          helperText={fetchError ? '' : propsValues.helperText}
           disabled={fetchError}
         />
         {
@@ -254,7 +212,7 @@ const ApplicantInformationForm = () => {
         <Row className="agency-information">
           <Column sm={4} md={2} lg={5}>
             {
-              displayApplicantInput()
+              displayCombobox(applicantAgencyQuery, applicantAgencyFieldProps, true)
             }
           </Column>
           <Column sm={4} md={2} lg={5}>
@@ -300,7 +258,7 @@ const ApplicantInformationForm = () => {
         <Row className="seedlot-species-combobox">
           <Column sm={4} md={4} lg={10}>
             {
-              displaySpeciesInput()
+              displayCombobox(vegCodeQuery, speciesFieldProps)
             }
           </Column>
         </Row>
