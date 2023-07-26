@@ -69,8 +69,11 @@ const orchardMock: OrchardForm = {
   orchards: [
     {
       inputId: 0,
-      orchardId: '123',
-      orchardLabel: 'Strong seeds orchard'
+      selectedItem: {
+        code: '123',
+        description: 'Strong seeds orchard',
+        label: '123 - Strong seeds orchard'
+      }
     }
   ],
   femaleGametic: 'F1 - Visual estimate',
@@ -270,6 +273,7 @@ const FormReview = () => {
                       setStepData={() => { }}
                       readOnly
                       cleanParentTables={() => { }}
+                      tableRowData={{}}
                     />
                     <Button
                       kind="tertiary"

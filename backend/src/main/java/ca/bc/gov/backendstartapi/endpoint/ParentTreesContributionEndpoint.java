@@ -21,7 +21,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,8 +42,6 @@ public class ParentTreesContributionEndpoint {
   /**
    * Parse the CSV table in {@code file} and return the data stored in it.
    *
-   * @param seedlotNumber the seedlot to associate the results with (<b>note:</b> has no effect
-   *     right now)
    * @param file a CSV file containing the table to be parsed
    * @return a list with the data that has been parsed
    * @throws IOException in case of problems while accessing {@code file}'s content
@@ -63,14 +60,10 @@ public class ParentTreesContributionEndpoint {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PostMapping(
-      path = "/{seedlotNumber}/parent-trees-contribution/cone-pollen-count-table/upload",
+      path = "/parent-trees-contribution/cone-pollen-count-table/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("hasRole('user_read')")
   public ResponseEntity<List<ConeAndPollenCount>> handleConeAndPollenCountTableUpload(
-      @PathVariable("seedlotNumber")
-          @Parameter(
-              description = "The number of the seedlot to which the data in the file refers to")
-          String seedlotNumber,
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
           MultipartFile file)
@@ -87,8 +80,6 @@ public class ParentTreesContributionEndpoint {
   /**
    * Parse CSV table in {@code file} and return the data stored in it.
    *
-   * @param seedlotNumber the seedlot to associate the results with (<b>note:</b> has no effect
-   *     right now)
    * @param file a CSV file containing the table to be parsed
    * @return a list with the data that has been parsed
    * @throws IOException in case of problems while accessing {@code file}'s content
@@ -107,14 +98,10 @@ public class ParentTreesContributionEndpoint {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PostMapping(
-      path = "/{seedlotNumber}/parent-trees-contribution/smp-calculation-table/upload",
+      path = "/parent-trees-contribution/smp-calculation-table/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("hasRole('user_read')")
   public ResponseEntity<List<SmpMixVolume>> handleSmpCalculationTableUpload(
-      @PathVariable("seedlotNumber")
-          @Parameter(
-              description = "The number of the seedlot to which the data in the file refers to")
-          String seedlotNumber,
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
           MultipartFile file)

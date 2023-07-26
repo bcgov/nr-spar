@@ -197,13 +197,13 @@ const SeedlotRegistrationForm = () => {
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
             setStepData={(data: OrchardForm) => setStepData('orchardStep', data)}
+            tableRowData={allStepData.parentTreeStep.tableRowData}
           />
         );
       // Parent Tree and SMP
       case 4:
         return (
           <ParentTreeStep
-            seedlotNumber={seedlotNumber}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.parentTreeStep}
             orchards={allStepData.orchardStep.orchards}
