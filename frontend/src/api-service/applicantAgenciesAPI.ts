@@ -8,11 +8,17 @@ const getApplicantAgencies = (getEditedAgencies: boolean) => {
     if (getEditedAgencies) {
       const options: string[] = [];
       res.data.forEach((agency: ApplicantAgencyType) => {
-        const correctName = agency.clientName
+        let correctName = agency.clientName
           .toLowerCase()
           .split(' ')
           .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
+        if (correctName.indexOf('-') > -1) {
+          correctName = correctName
+            .split('-')
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join('-');
+        }
         options.push(`${agency.clientNumber} - ${correctName} - ${agency.acronym}`);
       });
       return options;
