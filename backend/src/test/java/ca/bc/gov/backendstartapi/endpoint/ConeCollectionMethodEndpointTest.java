@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.UniversalDataDto;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.service.ConeCollectionMethodService;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +38,11 @@ class ConeCollectionMethodEndpointTest {
   @WithMockUser(roles = "user_read")
   void getAllConeCollectionMethodsTest() throws Exception {
 
-    UniversalDataDto firstMethod = new UniversalDataDto("1", "Aerial raking");
-    UniversalDataDto secondMethod = new UniversalDataDto("2", "Aerial clipping/topping");
-    UniversalDataDto thirdMethod = new UniversalDataDto("3", "Felled trees");
+    CodeDescriptionDto firstMethod = new CodeDescriptionDto("1", "Aerial raking");
+    CodeDescriptionDto secondMethod = new CodeDescriptionDto("2", "Aerial clipping/topping");
+    CodeDescriptionDto thirdMethod = new CodeDescriptionDto("3", "Felled trees");
 
-    List<UniversalDataDto> testList =
+    List<CodeDescriptionDto> testList =
         new ArrayList<>() {
           {
             add(firstMethod);

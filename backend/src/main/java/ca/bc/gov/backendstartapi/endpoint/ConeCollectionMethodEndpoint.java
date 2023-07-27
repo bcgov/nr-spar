@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.UniversalDataDto;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.service.ConeCollectionMethodService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
     name = "ConeCollectionMethodEndpoint",
     description = "Resources to handle all cone collection method codes")
 public class ConeCollectionMethodEndpoint {
+
   private ConeCollectionMethodService coneCollectionMethodService;
 
   ConeCollectionMethodEndpoint(ConeCollectionMethodService coneCollectionMethodService) {
@@ -71,7 +72,7 @@ public class ConeCollectionMethodEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<UniversalDataDto> getAllConeCollectionMethods() {
+  public List<CodeDescriptionDto> getAllConeCollectionMethods() {
     return coneCollectionMethodService.getAllConeCollectionMethods();
   }
 }

@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dto.UniversalDataDto;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,15 +18,15 @@ public class ConeCollectionMethodService {
     this.coneCollectionMethodRepository = coneCollectionMethodRepository;
   }
 
-  public List<UniversalDataDto> getAllConeCollectionMethods() {
+  public List<CodeDescriptionDto> getAllConeCollectionMethods() {
     log.info("Fetching Cone Collection Methods");
-    List<UniversalDataDto> resultList = new ArrayList<>();
+    List<CodeDescriptionDto> resultList = new ArrayList<>();
     coneCollectionMethodRepository.findAll().stream()
         .filter(method -> method.isValid())
         .forEach(
             method -> {
-              UniversalDataDto methodToAdd =
-                  new UniversalDataDto(
+              CodeDescriptionDto methodToAdd =
+                  new CodeDescriptionDto(
                       String.valueOf(method.getConeCollectionMethodCode()),
                       method.getDescription());
               resultList.add(methodToAdd);
