@@ -2,8 +2,8 @@
 create table spar.cone_collection_method_list (
 	cone_collection_method_code serial not null,
 	description varchar(120) not null,
-	effective_date timestamp not null,
-	expiry_date timestamp not null,
+	effective_date date not null,
+	expiry_date date not null,
 	update_timestamp timestamp default current_timestamp,
 	constraint cone_collection_method_list_pk primary key(cone_collection_method_code)
 );
@@ -25,43 +25,43 @@ insert into
 values
 	(
 		'Aerial raking',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00'
+		'1905-01-01',
+		'9999-12-31'
 	),
 	(
 		'Aerial clipping/topping',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00'
+		'1905-01-01',
+		'9999-12-31'
 	),
 	(
 		'Felled trees',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00'
+		'1905-01-01',
+		'9999-12-31'
 	),
 	(
 		'Climbing',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00'
+		'1905-01-01',
+		'9999-12-31'
 	),
 	(
 		'Squirrel cache',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00'
+		'1905-01-01',
+		'9999-12-31'
 	),
 	(
 		'Ground, Ladder and/or Hydraulic Lift',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00'
+		'1905-01-01',
+		'9999-12-31'
 	),
 	(
 		'Unknown',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00'
+		'1905-01-01',
+		'9999-12-31'
 	),
 	(
 		'Squirrel harvesting/dropping',
-		'2013-12-03 00:00:00',
-		'9999-12-31 00:00:00'
+		'2013-12-03',
+		'9999-12-31'
 	);
 
 alter table
@@ -78,8 +78,8 @@ add
 create table spar.genetic_class_list (
 	genetic_class_code varchar(1) not null,
 	description varchar(120) not null,
-	effective_date timestamp not null,
-	expiry_date timestamp not null,
+	effective_date date not null,
+	expiry_date date not null,
 	update_timestamp timestamp default current_timestamp,
 	constraint genetic_class_list_pk primary key(genetic_class_code)
 );
@@ -108,15 +108,15 @@ values
 	(
 		'A',
 		'Orchard Seed or Cuttings',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'B',
 		'Natural Stand Seed or Cuttings',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	);
 
@@ -129,8 +129,8 @@ add
 create table spar.genetic_worth_list (
 	genetic_worth_code varchar(3) not null,
 	description varchar(120) not null,
-	effective_date timestamp not null,
-	expiry_date timestamp not null,
+	effective_date date not null,
+	expiry_date date not null,
 	update_timestamp timestamp default current_timestamp,
 	constraint genetic_worth_list_pk primary key(genetic_worth_code)
 );
@@ -159,113 +159,113 @@ values
 	(
 		'D',
 		'Relative Wood Density',
-		'1998-07-15 00:00:00',
-		'2018-05-29 00:00:00',
+		'1998-07-15',
+		'2018-05-29',
 		current_timestamp
 	),
 	(
 		'G',
 		'Growth and Volume',
-		'1905-01-01 00:00:00',
-		'2018-05-29 00:00:00',
+		'1905-01-01',
+		'2018-05-29',
 		current_timestamp
 	),
 	(
 		'GVO',
 		'Volume Growth',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'WVE',
 		'Wood Velocity Measures',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'WWD',
 		'Wood quality',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'R',
 		'Pest Resistance',
-		'1905-01-01 00:00:00',
-		'2018-05-29 00:00:00',
+		'1905-01-01',
+		'2018-05-29',
 		current_timestamp
 	),
 	(
 		'M',
 		'Major Gene Resistance',
-		'2006-09-06 00:00:00',
-		'2018-05-29 00:00:00',
+		'2006-09-06',
+		'2018-05-29',
 		current_timestamp
 	),
 	(
 		'WDU',
 		'Wood durability',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'AD',
 		'Animal browse resistance (deer)',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'DFS',
 		'Disease resistance for Dothistroma needle blight (Dothistroma septosporum)',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'DFU',
 		'Disease resistance for Redcedar leaf blight (Didymascella thujina)',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'DFW',
 		'Disease resistance for Swiss needle cast (Phaeocryptopus gaumanni)',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'DSB',
 		'Disease resistance for white pine blister rust (Cronartium ribicola)',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'DSC',
 		'Disease resistance for Commandra blister rust (Cronartium comandrae)',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'DSG',
 		'Disease resistance for Western gall rust (Endocronartium harknessii)',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'IWS',
 		'Spruce terminal weevil (Pissodes strobi)',
-		'2018-05-29 00:00:00',
-		'9999-12-31 00:00:00',
+		'2018-05-29',
+		'9999-12-31',
 		current_timestamp
 	);
 
@@ -295,8 +295,8 @@ create table spar.gametic_methodology_list (
 	description varchar(120) not null,
 	female_methodology_ind boolean not null,
 	pli_species_ind boolean not null,
-	effective_date timestamp not null,
-	expiry_date timestamp not null,
+	effective_date date not null,
+	expiry_date date not null,
 	update_timestamp timestamp not null,
 	constraint gametic_methodology_list_pk primary key(gametic_methodology_code)
 );
@@ -331,8 +331,8 @@ values
 		'Visual Estimate',
 		true,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -340,8 +340,8 @@ values
 		'Measured Cone Volume',
 		true,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -349,8 +349,8 @@ values
 		'Cone Weight',
 		true,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -358,8 +358,8 @@ values
 		'Cone Number from Weight',
 		true,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -367,8 +367,8 @@ values
 		'Cone Number from Standard Volume',
 		true,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -376,8 +376,8 @@ values
 		'Sample of Seeds',
 		true,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -385,8 +385,8 @@ values
 		'Filled Seeds',
 		true,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -394,8 +394,8 @@ values
 		'Ramet Proportion by Clone',
 		true,
 		true,
-		'2015-06-03 00:00:00',
-		'9999-12-31 00:00:00',
+		'2015-06-03',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -403,8 +403,8 @@ values
 		'Ramet Proportion by Age and Expected Production',
 		true,
 		true,
-		'2015-06-03 00:00:00',
-		'9999-12-31 00:00:00',
+		'2015-06-03',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -412,8 +412,8 @@ values
 		'Portion of Ramets in Orchard',
 		false,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -421,8 +421,8 @@ values
 		'Pollen Volume Estimate by Partial Survey',
 		false,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -430,8 +430,8 @@ values
 		'Pollen Volume Estimate by 100% Survey',
 		false,
 		false,
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -439,8 +439,8 @@ values
 		'Ramet Proportion by Clone',
 		false,
 		true,
-		'2015-06-03 00:00:00',
-		'9999-12-31 00:00:00',
+		'2015-06-03',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
@@ -448,8 +448,8 @@ values
 		'Ramet Proportion by Age and Expected Production',
 		false,
 		true,
-		'2015-06-03 00:00:00',
-		'9999-12-31 00:00:00',
+		'2015-06-03',
+		'9999-12-31',
 		current_timestamp
 	);
 
@@ -467,8 +467,8 @@ add
 create table spar.method_of_payment_list (
 	method_of_payment_code varchar(3) not null,
 	description varchar(120) not null,
-	effective_date timestamp not null,
-	expiry_date timestamp not null,
+	effective_date date not null,
+	expiry_date date not null,
 	update_timestamp timestamp not null,
 	constraint method_of_payment_list_pk primary key(method_of_payment_code)
 );
@@ -497,43 +497,43 @@ values
 	(
 		'CLA',
 		'Invoice to MOF Client Account',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'CSH',
 		'Cash Sale',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'ITC',
 		'Invoice to Client Address',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'ITO',
 		'Invoice to Other Address',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'JV',
 		'Journal Voucher',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'NC',
 		'Non-chargeable',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	);
 
@@ -546,8 +546,8 @@ add
 create table spar.seedlot_source_list (
 	seedlot_source_code varchar(3) not null,
 	description varchar(120) not null,
-	effective_date timestamp not null,
-	expiry_date timestamp not null,
+	effective_date date not null,
+	expiry_date date not null,
 	update_timestamp timestamp default current_timestamp,
 	constraint seedlot_source_list_pk primary key(seedlot_source_code)
 );
@@ -576,22 +576,22 @@ values
 	(
 		'CUS',
 		'Custom Lot',
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'TPT',
 		'Tested Parent Trees',
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'UPT',
 		'Untested Parent Trees',
-		'2005-07-25 00:00:00',
-		'9999-12-31 00:00:00',
+		'2005-07-25',
+		'9999-12-31',
 		current_timestamp
 	);
 
@@ -604,8 +604,8 @@ add
 create table spar.seedlot_status_list (
 	seedlot_status_code varchar(3) not null,
 	description varchar(120) not null,
-	effective_date timestamp not null,
-	expiry_date timestamp not null,
+	effective_date date not null,
+	expiry_date date not null,
 	update_timestamp timestamp default current_timestamp,
 	constraint seedlot_status_list_pk primary key(seedlot_status_code)
 );
@@ -634,50 +634,50 @@ values
 	(
 		'APP',
 		'Approved',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'CAN',
 		'Cancelled',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'COM',
 		'Complete',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'INC',
 		'Incomplete',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'PND',
 		'Pending',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'EXP',
 		'Expired',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	),
 	(
 		'SUB',
 		'Submitted',
-		'1905-01-01 00:00:00',
-		'9999-12-31 00:00:00',
+		'1905-01-01',
+		'9999-12-31',
 		current_timestamp
 	);
 
@@ -693,3 +693,8 @@ alter table
 	spar.seedlot_collection_method
 alter column
 	cone_collection_method_desc type varchar(50);
+
+alter table
+	spar.seedlot_collection_method
+rename column
+	cone_collection_method_desc to cone_collection_method_other_desc;
