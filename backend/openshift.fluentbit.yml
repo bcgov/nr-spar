@@ -68,14 +68,6 @@ objects:
             - name: ${NAME}
               image: docker.io/fluent/fluent-bit:${FLUENT_VERSION}
               imagePullPolicy: Always
-              livenessProbe:
-                httpGet:
-                  path: /
-                  port: 2020
-                  scheme: HTTP
-                initialDelaySeconds: 10
-                timeoutSeconds: 1
-                failureThreshold: 3
               ports:
                 - containerPort: 2020
                   name: metrics
@@ -83,14 +75,6 @@ objects:
                 - containerPort: 80
                   name: http-plugin
                   protocol: TCP
-              readinessProbe:
-                httpGet:
-                  path: /
-                  port: 2020
-                  scheme: HTTP
-                initialDelaySeconds: 10
-                timeoutSeconds: 1
-                failureThreshold: 3
               resources:
                 requests:
                   cpu: "${LOGGING_CPU_REQUEST}"
