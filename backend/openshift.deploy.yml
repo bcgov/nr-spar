@@ -105,7 +105,7 @@ objects:
               imagePullPolicy: Always
               name: ${NAME}
               volumeMounts:
-                - name: log-storage-${ZONE}
+                - name: ${NAME}-${ZONE}-fluentbit-logs
                   mountPath: /logs
               env:
                 - name: NR_SPAR_BACKEND_VERSION
