@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /** Used to track the changes made in a registry. */
 @Embeddable
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 public class EffectiveDateRange {
   /** The date from which the code is in effect. */

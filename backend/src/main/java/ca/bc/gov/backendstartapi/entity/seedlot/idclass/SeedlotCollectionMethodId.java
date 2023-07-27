@@ -19,5 +19,5 @@ public class SeedlotCollectionMethodId implements Serializable {
 
   @NonNull private String seedlot;
 
-  @NonNull private String coneCollectionMethodCode;
+  @NonNull private int coneCollectionMethod;
 }
