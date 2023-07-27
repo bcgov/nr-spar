@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <property name="LOGS" value="/logs" />
-  <springProperty scope="context" name="serviceEnv" source="nr-spar-env" />
+  <springProperty scope="context" name="serviceEnv" source="nr-spar-backend-env-opensearch" />
   <springProperty scope="context" name="applicationName" source="spring.application.name" />
   <springProperty scope="context" name="sparTeamEmail" source="nr-spar-team-email-address" />
   <springProperty scope="context" name="ecsVersion" source="nr-spar-ecs-version" />
