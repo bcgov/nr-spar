@@ -26,8 +26,8 @@ parameters:
     description: FluentBit configuration home
     value: "/fluent-bit/etc"
   - name: FLUENT_VERSION
-    description: FluentBit version
-    value: "2.1"
+    description: FluentBit version (docker tag). You may include a debug version.
+    value: "2.1-debug"
   # Parameters for logging sidecar
   - name: LOGGING_CPU_LIMIT
     description: Limit Peak CPU per pod (in millicores ex. 1000m)
