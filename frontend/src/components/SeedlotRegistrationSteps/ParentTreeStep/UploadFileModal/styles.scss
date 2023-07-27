@@ -1,11 +1,11 @@
 @use '@carbon/type';
-@use '../../../../theme/variables.scss' as vars;
+@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
 
 
 .upload-file-modal {
   p.upload-modal-description {
     @include type.type-style('body-compact-01');
-    color: var(--bcgov-text-secondary);
+    color: var(--#{vars.$bcgov-prefix}-text-secondary);
     margin-bottom: 1rem;
   }
 
@@ -16,7 +16,7 @@
 
   .#{vars.$bcgov-prefix}--file__selected-file {
     max-width: 100%;
-    background-color: var(--bcgov-background);
+    background-color: var(--#{vars.$bcgov-prefix}-background);
     margin-bottom: 1.5rem;
   }
 

@@ -1,15 +1,20 @@
 // eslint-disable-next-line import/prefer-default-export
 export const MAX_ORCHARDS = 2;
 
-export const orcharStepText = {
+export const initialStagedOrchard = {
+  inputId: -1,
+  selectedItem: null
+};
+
+export const orchardStepText = {
   orchardSection: {
     title: 'Orchard information',
     subtitle: 'Enter the contributing orchard information',
     orchardInput: {
-      label: 'Orchard ID or number',
-      optLabel: 'Additional orchard ID (optional)',
-      placeholder: 'Example: 123',
-      invalid: 'Please insert a valid orchard id between 100 and 999'
+      label: 'Select an orchard',
+      optLabel: 'Select an additional orchard',
+      placeholder: 'ID - Name - Lot type - Stage code',
+      fetchError: 'Failed to fetch orchard data'
     },
     orchardName: {
       label: 'Orchard name',

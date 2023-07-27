@@ -20,7 +20,17 @@ if (isDevEnv) {
   makeServer('development');
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient(
+  {
+    defaultOptions: {
+      queries: {
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        retry: 3
+      }
+    }
+  }
+);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -29,7 +39,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <AuthProvider>
     <React.StrictMode>
-      <ClassPrefix prefix="bcgov">
+      <ClassPrefix prefix="bx">
         <ThemePreference>
           <QueryClientProvider client={queryClient}>
             <App />

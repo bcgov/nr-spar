@@ -203,7 +203,6 @@ const SeedlotRegistrationForm = () => {
       case 4:
         return (
           <ParentTreeStep
-            seedlotNumber={seedlotNumber}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.parentTreeStep}
             orchards={allStepData.orchardStep.orchards}
