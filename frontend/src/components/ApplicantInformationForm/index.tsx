@@ -167,11 +167,13 @@ const ApplicantInformationForm = () => {
 
     if (fetchStatus === 'fetching') {
       return (
-        <TextInputSkeleton />
+        <Column sm={4} md={2} lg={isApplicantComboBox ? 5 : 10}>
+          <TextInputSkeleton />
+        </Column>
       );
     }
     return (
-      <>
+      <Column sm={4} md={2} lg={isApplicantComboBox ? 5 : 10}>
         {/* For now the default selected item will not be set,
             we need the information from each user to set the
             correct one */}
@@ -196,7 +198,7 @@ const ApplicantInformationForm = () => {
             ? <InputErrorText description="An error occurred" />
             : null
         }
-      </>
+      </Column>
     );
   };
 
@@ -210,11 +212,9 @@ const ApplicantInformationForm = () => {
           </Column>
         </Row>
         <Row className="agency-information">
-          <Column sm={4} md={2} lg={5}>
-            {
-              displayCombobox(applicantAgencyQuery, applicantAgencyFieldProps, true)
-            }
-          </Column>
+          {
+            displayCombobox(applicantAgencyQuery, applicantAgencyFieldProps, true)
+          }
           <Column sm={4} md={2} lg={5}>
             <TextInput
               className="agency-number-wrapper-class"
@@ -256,11 +256,9 @@ const ApplicantInformationForm = () => {
           </Column>
         </Row>
         <Row className="seedlot-species-combobox">
-          <Column sm={4} md={4} lg={10}>
-            {
-              displayCombobox(vegCodeQuery, speciesFieldProps)
-            }
-          </Column>
+          {
+            displayCombobox(vegCodeQuery, speciesFieldProps)
+          }
         </Row>
         <Row className="class-source-radio">
           <Column sm={4} md={8} lg={16}>
