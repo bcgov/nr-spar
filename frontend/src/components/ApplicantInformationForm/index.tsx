@@ -27,7 +27,7 @@ import ComboBoxEvent from '../../types/ComboBoxEvent';
 import api from '../../api-service/api';
 import ApiConfig from '../../api-service/ApiConfig';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
-import getApplicantAgencies from '../../api-service/applicantAgenciesAPI';
+import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 
 import ComboBoxPropsType from './definitions';
 import { applicantAgencyFieldProps, speciesFieldProps } from './constants';
@@ -66,7 +66,7 @@ const ApplicantInformationForm = () => {
 
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
-    queryFn: () => getApplicantAgencies(true)
+    queryFn: () => getApplicantAgenciesOptions()
   });
 
   const vegCodeQuery = useQuery({

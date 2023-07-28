@@ -18,7 +18,7 @@ import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
 import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
-import getApplicantAgencies from '../../../api-service/applicantAgenciesAPI';
+import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
@@ -96,7 +96,7 @@ const SeedlotRegistrationForm = () => {
 
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
-    queryFn: () => getApplicantAgencies(true)
+    queryFn: () => getApplicantAgenciesOptions()
   });
 
   const [allInvalidationObj, setAllInvalidationObj] = useState<AllStepInvalidationObj>({
@@ -140,7 +140,7 @@ const SeedlotRegistrationForm = () => {
   const renderStep = () => {
     const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
     const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
-    const agencyOptions = applicantAgencyQuery.data;
+    const agencyOptions = applicantAgencyQuery.data ? applicantAgencyQuery.data : [];
 
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
