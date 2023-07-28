@@ -2,11 +2,23 @@ import ApplicantAgencyType from '../types/ApplicantAgencyType';
 import ApiConfig from './ApiConfig';
 import api from './api';
 
-const getApplicantAgencies = (getEditedAgencies: boolean) => {
+/**
+ * Fetch the applicant agencies available for the user
+ *
+ * @param {boolean} getEditedAgencies this parameter will define to return either an array
+ *                                    with full agencies data or an array of a string
+ *                                    combination of the code, name and acronym of each agency.
+ *                                    Defaults to false.
+ * @returns {Array} applicant agencies information
+ */
+const getApplicantAgencies = (getEditedAgencies = false) => {
   const url = ApiConfig.applicantAgencies;
   return api.get(url).then((res) => {
     if (getEditedAgencies) {
       const options: string[] = [];
+      res.data.sort(
+        (a: ApplicantAgencyType, b: ApplicantAgencyType) => (a.clientName < b.clientName ? -1 : 1)
+      );
       res.data.forEach((agency: ApplicantAgencyType) => {
         let correctName = agency.clientName
           .toLowerCase()
