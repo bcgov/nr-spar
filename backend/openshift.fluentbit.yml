@@ -165,7 +165,7 @@ objects:
       name: ${NAME}-${ZONE}-${COMPONENT}-configs
       namespace: ${NAMESPACE}
     data:
-      filters.conf: >
+      filters.conf: |
         [FILTER]
             Name modify
             Match *
@@ -197,7 +197,7 @@ objects:
 
       fluent-bit.conf: |
         [SERVICE]
-            Log_Level       info
+            Log_Level       debug
             Parsers_File    parsers.conf
 
         @INCLUDE spar/input/inputs.conf
@@ -290,7 +290,7 @@ objects:
             return 2, timestamp, new_record
         end
 
-      outputs.conf: >
+      outputs.conf: |
         [OUTPUT]
             Name  kinesis_streams
             Match *
@@ -299,7 +299,7 @@ objects:
             role_arn ${ROLE_ARN}
             Retry_Limit 3
 
-      parsers.conf: |+
+      parsers.conf: |
         @INCLUDE generic_json_parsers.conf
         @INCLUDE spar/parser/parsers.conf
 
@@ -338,7 +338,7 @@ objects:
             Time_Key @timestamp
             Time_Format %Y-%m-%d %H:%M:%S.%L
 
-      timestamp.lua: >
+      timestamp.lua: |
         function append_event_created(tag, timestamp, record)
             new_record = record
             new_record["event.created"] = (os.date("!%Y-%m-%dT%H:%M:%S", timestamp["sec"]) .. '.' .. math.floor(timestamp["nsec"] / 1000000) .. 'Z')
