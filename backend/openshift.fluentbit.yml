@@ -336,7 +336,7 @@ objects:
             Match *
             Format json
             Time_Key @timestamp
-            Time_Format %Y-%m-%dT%H:%M:%S.%LZ
+            Time_Format %Y-%m-%d %H:%M:%S.%L
 
       timestamp.lua: >
         function append_event_created(tag, timestamp, record)
