@@ -10,7 +10,7 @@ export const applicantAgencyFieldProps: ComboBoxPropsType = {
 };
 
 export const speciesFieldProps: ComboBoxPropsType = {
-  id: 'applicant-info-combobox',
+  id: 'seedlot-species-combobox',
   className: 'applicant-info-combobox-species',
   placeholder: 'Enter or choose an species for the seedlot',
   titleText: 'Seedlot species',
