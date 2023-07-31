@@ -145,7 +145,7 @@ objects:
                     path: spar/parser/parsers.conf
                   - key: timestamp.lua
                     path: timestamp.lua
-                defaultMode: 420
+                defaultMode: 644
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
