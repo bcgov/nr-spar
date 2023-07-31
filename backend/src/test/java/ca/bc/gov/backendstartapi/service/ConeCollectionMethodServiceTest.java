@@ -46,8 +46,10 @@ class ConeCollectionMethodServiceTest {
 
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
-    var expiryDate = now.plusDays(2);
-    var effectiveDateRange = new EffectiveDateRange(effectiveDate, expiryDate);
+    var nonExpiryDate = now.plusDays(2);
+    var expiredDate = now.minusDays(1);
+    var effectiveDateRange = new EffectiveDateRange(effectiveDate, nonExpiryDate);
+    var expiredDateRange = new EffectiveDateRange(effectiveDate, expiredDate);
 
     ConeCollectionMethodEntity firstEntity =
         new ConeCollectionMethodEntity(1, "Aerial raking", effectiveDateRange, null);
@@ -58,6 +60,10 @@ class ConeCollectionMethodServiceTest {
     ConeCollectionMethodEntity thirdEntity =
         new ConeCollectionMethodEntity(3, "Felled trees", effectiveDateRange, null);
     coneCollectionMethodRepository.saveAndFlush(thirdEntity);
+    // This entity should not appear in the result list
+    ConeCollectionMethodEntity expiredEntity =
+        new ConeCollectionMethodEntity(4, "Metal detector", expiredDateRange, null);
+    coneCollectionMethodRepository.saveAndFlush(thirdEntity);
 
     List<ConeCollectionMethodEntity> testEntityList =
         new ArrayList<>() {
@@ -65,6 +71,7 @@ class ConeCollectionMethodServiceTest {
             add(firstEntity);
             add(secondEntity);
             add(thirdEntity);
+            add(expiredEntity);
           }
         };
 
@@ -72,6 +79,8 @@ class ConeCollectionMethodServiceTest {
 
     List<CodeDescriptionDto> resultList = coneCollectionMethodService.getAllConeCollectionMethods();
 
+    Assertions.assertNotEquals(testEntityList.size(), resultList.size());
+    Assertions.assertEquals(testDtoList.size(), resultList.size());
     Assertions.assertEquals(testDtoList.get(0).code(), resultList.get(0).code());
     Assertions.assertEquals(testDtoList.get(0).description(), resultList.get(0).description());
     Assertions.assertEquals(testDtoList.get(1).code(), resultList.get(1).code());
