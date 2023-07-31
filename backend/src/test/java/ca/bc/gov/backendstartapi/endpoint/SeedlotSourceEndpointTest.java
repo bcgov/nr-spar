@@ -1,11 +1,10 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.enums.SeedlotSourceEnum;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.web.context.WebApplicationContext;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@WebMvcTest(SeedlotSourceEndpoint.class)
 class SeedlotSourceEndpointTest extends DescribedEnumEndpointTest<SeedlotSourceEnum> {
 
   SeedlotSourceEndpointTest(WebApplicationContext webApplicationContext) {
