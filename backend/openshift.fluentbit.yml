@@ -157,7 +157,7 @@ objects:
         - ReadWriteMany
       resources:
         requests:
-          storage: "20Mi"
+          storage: "50Mi"
       storageClassName: netapp-file-standard
   - kind: ConfigMap
     apiVersion: v1
@@ -197,7 +197,7 @@ objects:
 
       fluent-bit.conf: |
         [SERVICE]
-            Log_Level       debug
+            Log_Level       info
             Parsers_File    parsers.conf
 
         @INCLUDE spar/input/inputs.conf
