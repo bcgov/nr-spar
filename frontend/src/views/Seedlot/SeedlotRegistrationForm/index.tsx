@@ -17,7 +17,7 @@ import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
-import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
+import getGameticMethodology from '../../../api-service/maleFemaleMethodologyAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
@@ -95,9 +95,9 @@ const SeedlotRegistrationForm = () => {
     refetchOnWindowFocus: false
   });
 
-  const maleFemaleMethodologyQuery = useQuery({
-    queryKey: ['male-female-methodology'],
-    queryFn: getMaleFemaleMethodology
+  const gameticMethodologyQuery = useQuery({
+    queryKey: ['gametic-methodologies'],
+    queryFn: getGameticMethodology
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -192,7 +192,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
-            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data, true, false, true, ['isPliSpecies'])}
+            gameticOptions={getMultiOptList(gameticMethodologyQuery.data, true, false, true, ['isFemaleMethodology', 'isPliSpecies'])}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -265,7 +265,7 @@ const SeedlotRegistrationForm = () => {
                 seedlotInfoQuery.isSuccess
                 && fundingSourcesQuery.isSuccess
                 && paymentMethodsQuery.isSuccess
-                && maleFemaleMethodologyQuery.isSuccess
+                && gameticMethodologyQuery.isSuccess
                 && coneCollectionMethodsQuery.isSuccess
               )
                 ? renderStep()

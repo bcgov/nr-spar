@@ -45,7 +45,7 @@ const ApiConfig = {
 
   uploadSMPMix: `${serverHost}/api/seedlots/parent-trees-contribution/smp-calculation-table/upload`,
 
-  maleFemaleMethodology: `${serverHost}/api/male-female-methodologies`,
+  gameticMethodology: `${serverHost}/api/gametic-methodologies`,
 
   /**
    * ORACLE API
