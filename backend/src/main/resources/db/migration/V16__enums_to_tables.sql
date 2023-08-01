@@ -307,6 +307,8 @@ comment on column spar.gametic_methodology_list.gametic_methodology_code is 'Cod
 
 comment on column spar.gametic_methodology_list.description is 'A description for the affiliated code.';
 
+comment on column spar.gametic_methodology_list.female_methodology_ind is 'A flag that indicates if the methodology is female or not.';
+
 comment on column spar.gametic_methodology_list.pli_species_ind is 'A flag that indicates if the methodology can be used by a PLI species or not';
 
 comment on column spar.gametic_methodology_list.effective_date is 'The effective date the code is in effect';
