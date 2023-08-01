@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -69,6 +70,43 @@ public class ForestClientEndpoint {
       return ResponseEntity.of(response);
     } catch (HttpStatusCodeException e) {
       log.warn("External error while retrieving forest client " + identifier, e);
+      return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+    }
+  }
+
+  /**
+   * Fetch the forest client locations by the client number.
+   *
+   * @param number the number that identifies the client to fetch the locations
+   * @return the forest client locations
+   */
+  @GetMapping(path = "/{number}/locations")
+  @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Fetch the locations of the forest client.",
+      description =
+          """
+              Returns a list of locations associated with the forest client, identified
+              by it's number.""",
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            content = @Content(schema = @Schema(implementation = ForestClientLocationDto.class))),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
+      })
+  public ResponseEntity<Serializable> fetchClientLocations(
+      @PathVariable("number")
+          @Pattern(regexp = "^\\d{8}$|^\\w{1,8}$")
+          @Parameter(
+              name = "number",
+              in = ParameterIn.PATH,
+              description = "Number that identifies the client to get the locations.")
+          String number) {
+    try {
+      var response = forestClientService.fetchClientLocations(number).map(Serializable.class::cast);
+      return ResponseEntity.of(response);
+    } catch (HttpStatusCodeException e) {
+      log.warn("External error while retrieving the locations for forest client " + number, e);
       return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
     }
   }

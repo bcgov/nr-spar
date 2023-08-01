@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,21 @@ public class ForestClientService {
       return forestClientApiProvider.fetchClientByIdentifier(identifier);
     } catch (HttpClientErrorException.NotFound e) {
       log.info(String.format("Client %s not found", identifier), e);
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Fetch a forest client location by its number.
+   *
+   * @param number the client number to search the location
+   * @return an list of the locations of the forest client
+   */
+  public Optional<ForestClientLocationDto> fetchClientLocations(String number) {
+    try {
+      return forestClientApiProvider.fetchLocationsByClientNumber(number);
+    } catch (HttpClientErrorException.NotFound e) {
+      log.info(String.format("Locations for client %s not found", number), e);
       return Optional.empty();
     }
   }
