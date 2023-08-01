@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 abstract class SeedlotEntityJpaTest {
 
-  protected final SeedlotRepository repository;
+  protected SeedlotRepository repository;
 
   protected SeedlotEntityJpaTest(SeedlotRepository seedlotRepository) {
     repository = seedlotRepository;
@@ -75,6 +75,6 @@ abstract class SeedlotEntityJpaTest {
     seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
     seedlot.setAuditInformation(new AuditInformation("user1"));
 
-    return repository.save(seedlot);
+    return repository.saveAndFlush(seedlot);
   }
 }

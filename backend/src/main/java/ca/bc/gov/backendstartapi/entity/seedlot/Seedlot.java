@@ -19,14 +19,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /** A registered seedlot. */
 @Entity
 @Table(name = "seedlot")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-@RequiredArgsConstructor
 @Getter
 @Setter
 public class Seedlot implements Serializable {
@@ -41,6 +39,11 @@ public class Seedlot implements Serializable {
   @NonNull
   private SeedlotStatusEnum status;
 
+  public Seedlot(String id, SeedlotStatusEnum status) {
+    this.id = id;
+    this.status = status;
+  }
+
   @Column(name = "seedlot_comment", length = 2000)
   private String comment;
 
@@ -53,6 +56,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "applicant_email_address", length = 100)
   private String applicantEmailAddress;
+
   // endregion
 
   // region Lot information
@@ -72,6 +76,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "bc_source_ind")
   private Boolean sourceInBc;
+
   // endregion
 
   // region Collection
@@ -99,6 +104,7 @@ public class Seedlot implements Serializable {
    */
   @Column(name = "clctn_volume", precision = 6, scale = 2)
   private BigDecimal totalConeVolume;
+
   // endregion
 
   // region Interim storage
@@ -116,6 +122,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "interm_facility_code", length = 3)
   private String interimStorageFacilityCode;
+
   // endregion
 
   // region Orchard
@@ -142,6 +149,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "pollen_contamination_mthd_code", length = 4)
   private String pollenContaminationMethodCode;
+
   // endregion
 
   // region Parent tree & SMP
@@ -166,6 +174,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "non_orchard_pollen_contam_pct")
   private Integer nonOrchardPollenContaminationPercentage;
+
   // endregion
 
   // region Extraction & Storage
@@ -192,6 +201,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "temporary_storage_end_date")
   private LocalDateTime temporaryStorageEndDate;
+
   // endregion
 
   // region Legal & Audit

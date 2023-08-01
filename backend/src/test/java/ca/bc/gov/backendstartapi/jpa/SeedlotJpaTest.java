@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Transactional
 class SeedlotJpaTest extends SeedlotEntityJpaTest {
-
   @Autowired
   SeedlotJpaTest(SeedlotRepository seedlotRepository) {
     super(seedlotRepository);

@@ -1,10 +1,8 @@
 package ca.bc.gov.backendstartapi.entity.seedlot.idclass;
 
 import java.io.Serializable;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
@@ -12,11 +10,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode
-@AllArgsConstructor
-@NoArgsConstructor
 public class SeedlotCollectionMethodId implements Serializable {
 
   @NonNull private String seedlot;
 
   private int coneCollectionMethod;
+
+  public SeedlotCollectionMethodId(String seedlot, int coneCollectionMethod) {
+    this.seedlot = seedlot;
+    this.coneCollectionMethod = coneCollectionMethod;
+  }
 }

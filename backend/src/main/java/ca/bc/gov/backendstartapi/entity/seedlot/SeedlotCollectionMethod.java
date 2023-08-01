@@ -14,7 +14,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
@@ -22,11 +21,9 @@ import lombok.Setter;
 @Entity
 @Table(name = "seedlot_collection_method")
 @IdClass(SeedlotCollectionMethodId.class)
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
 @Setter
 public class SeedlotCollectionMethod {
-
   // region Identifier
   @Id
   @JoinColumn(name = "seedlot_number")

@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
+import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,8 @@ class ParentTreesContributionEndpointTest {
   @MockBean private SmpCalculationCsvTableParser smpCalculationCsvTableParser;
 
   @Autowired private MockMvc mockMvc;
+
+  @MockBean ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
 
   private final WebApplicationContext webApplicationContext;
 

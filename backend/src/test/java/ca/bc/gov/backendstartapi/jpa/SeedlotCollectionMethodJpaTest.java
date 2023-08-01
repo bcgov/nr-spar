@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.jpa;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
@@ -15,23 +16,21 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@Transactional
+@SpringBootTest(classes = SeedlotCollectionMethodJpaTest.class)
 class SeedlotCollectionMethodJpaTest extends SeedlotEntityJpaTest {
 
-  private final SeedlotCollectionMethodRepository seedlotCollectionMethodRepo;
+  private SeedlotCollectionMethodRepository seedlotCollectionMethodRepo;
   private ConeCollectionMethodRepository coneCollectionMethodRepo;
 
   @Autowired
-  SeedlotCollectionMethodJpaTest(
+  protected SeedlotCollectionMethodJpaTest(
       SeedlotRepository seedlotRepository,
-      ConeCollectionMethodRepository coneCollectionMethodRepository,
-      SeedlotCollectionMethodRepository seedlotCollectionMethodRepository) {
+      SeedlotCollectionMethodRepository seedlotCollectionMethodRepo,
+      ConeCollectionMethodRepository coneCollectionMethodRepo) {
     super(seedlotRepository);
-    seedlotCollectionMethodRepo = seedlotCollectionMethodRepository;
-    coneCollectionMethodRepo = coneCollectionMethodRepository;
+    this.seedlotCollectionMethodRepo = seedlotCollectionMethodRepo;
+    this.coneCollectionMethodRepo = coneCollectionMethodRepo;
   }
 
   @Test
@@ -51,7 +50,11 @@ class SeedlotCollectionMethodJpaTest extends SeedlotEntityJpaTest {
         coneCollectionMethod.getDescription());
     seedlotCollectionMethod.setAuditInformation(new AuditInformation("user1"));
 
-    seedlotCollectionMethodRepo.saveAndFlush(seedlotCollectionMethod);
+    // Using saved here for debugging
+    SeedlotCollectionMethod saved =
+        seedlotCollectionMethodRepo.saveAndFlush(seedlotCollectionMethod);
+
+    assertEquals(1, seedlotCollectionMethodRepo.count());
 
     var savedSeedlotCollectionMethod =
         seedlotCollectionMethodRepo.findById(
