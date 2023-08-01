@@ -1,4 +1,4 @@
-package ca.bc.gov.backendstartapi.jpa;
+package ca.bc.gov.backendstartapi.repository.seedlot;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

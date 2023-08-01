@@ -1,4 +1,4 @@
-package ca.bc.gov.backendstartapi.jpa;
+package ca.bc.gov.backendstartapi.repository.seedlot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,7 +43,7 @@ class SeedlotCollectionMethodJpaTest extends SeedlotEntityJpaTest {
     var effectiveDateRange = new EffectiveDateRange(effectiveDate, expiryDate);
     var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
     var coneCollectionMethod =
-        new ConeCollectionMethodEntity(999, "digging", effectiveDateRange, null);
+        new ConeCollectionMethodEntity(999, "digging", effectiveDateRange);
 
     coneCollectionMethodTestRepo.saveAndFlush(coneCollectionMethod);
 

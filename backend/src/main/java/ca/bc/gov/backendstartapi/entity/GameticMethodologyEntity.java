@@ -17,20 +17,26 @@ import lombok.Setter;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
-/** Entity for the list of cone collection method */
+/** Entity for the list of gametic methodology */
 @Entity
-@Table(name = "cone_collection_method_list")
+@Table(name = "gametic_methodology_list")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
-public class ConeCollectionMethodEntity {
+public class GameticMethodologyEntity {
   @Id
-  @Column(name = "cone_collection_method_code")
-  private int coneCollectionMethodCode;
+  @Column(name = "gametic_methodology_code", length = 3)
+  private String gameticMethodologyCode;
 
   @Column(name = "description", length = 120)
   @NonNull
   private String description;
+
+  @Column(name = "female_methodology_ind")
+  private boolean isFemaleMethodology;
+
+  @Column(name = "pli_species_ind")
+  private boolean isPliSpecies;
 
   @Embedded @NonNull private EffectiveDateRange effectiveDateRange;
 
@@ -45,10 +51,16 @@ public class ConeCollectionMethodEntity {
         && effectiveDateRange.getExpiryDate().isAfter(today);
   }
 
-  public ConeCollectionMethodEntity(
-      int coneCollectionMethodCode, String description, EffectiveDateRange effectiveDateRange) {
-    this.coneCollectionMethodCode = coneCollectionMethodCode;
+  public GameticMethodologyEntity(
+      String gameticMethodologyCode,
+      String description,
+      boolean isFemaleMethodology,
+      boolean isPliSpecies,
+      EffectiveDateRange effectiveDateRange) {
+    this.gameticMethodologyCode = gameticMethodologyCode;
     this.description = description;
+    this.isFemaleMethodology = isFemaleMethodology;
+    this.isPliSpecies = isPliSpecies;
     this.effectiveDateRange = effectiveDateRange;
   }
 }

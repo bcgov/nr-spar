@@ -1,4 +1,4 @@
-package ca.bc.gov.backendstartapi.jpa;
+package ca.bc.gov.backendstartapi.repository.seedlot;
 
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;

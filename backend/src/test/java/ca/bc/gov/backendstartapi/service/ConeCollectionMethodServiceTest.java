@@ -52,17 +52,17 @@ class ConeCollectionMethodServiceTest {
     var expiredDateRange = new EffectiveDateRange(effectiveDate, expiredDate);
 
     ConeCollectionMethodEntity firstEntity =
-        new ConeCollectionMethodEntity(1, "Aerial raking", effectiveDateRange, null);
+        new ConeCollectionMethodEntity(1, "Aerial raking", effectiveDateRange);
     coneCollectionMethodRepository.saveAndFlush(firstEntity);
     ConeCollectionMethodEntity secondEntity =
-        new ConeCollectionMethodEntity(2, "Aerial clipping/topping", effectiveDateRange, null);
+        new ConeCollectionMethodEntity(2, "Aerial clipping/topping", effectiveDateRange);
     coneCollectionMethodRepository.saveAndFlush(secondEntity);
     ConeCollectionMethodEntity thirdEntity =
-        new ConeCollectionMethodEntity(3, "Felled trees", effectiveDateRange, null);
+        new ConeCollectionMethodEntity(3, "Felled trees", effectiveDateRange);
     coneCollectionMethodRepository.saveAndFlush(thirdEntity);
     // This entity should not appear in the result list
     ConeCollectionMethodEntity expiredEntity =
-        new ConeCollectionMethodEntity(4, "Metal detector", expiredDateRange, null);
+        new ConeCollectionMethodEntity(4, "Metal detector", expiredDateRange);
     coneCollectionMethodRepository.saveAndFlush(thirdEntity);
 
     List<ConeCollectionMethodEntity> testEntityList =
