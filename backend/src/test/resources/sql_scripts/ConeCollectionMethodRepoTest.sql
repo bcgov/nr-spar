@@ -1,5 +1,5 @@
 insert into
-  spar.cone_collection_method_list (
+  cone_collection_method_list (
     cone_collection_method_code,
     description,
     effective_date,
