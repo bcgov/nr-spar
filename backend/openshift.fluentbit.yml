@@ -103,8 +103,6 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-fluentbit
                       key: aws-kinesis-role-arn
-                - name: HOST_HOSTNAME
-                  value: ${HOSTNAME}
                 - name: FLUENT_CONF_HOME
                   value: ${FLUENT_CONF_HOME}
                 - name: FLUENT_VERSION
@@ -256,8 +254,8 @@ objects:
             host["os"]["version"] = os.getenv("HOST_OS_VERSION")
             host["ip"] = os.getenv("HOST_IP")
             host["mac"] = os.getenv("HOST_MAC")
-            if os.getenv("HOST_NAME") ~= nil then
-                host["name"] = string.lower(os.getenv("HOST_NAME"))
+            if os.getenv("HOSTNAME") ~= nil then
+                host["name"] = string.lower(os.getenv("HOSTNAME"))
             end
             if os.getenv("HOST_HOSTNAME") ~= nil then
                 host["hostname"] = string.lower(os.getenv("HOST_HOSTNAME"))
