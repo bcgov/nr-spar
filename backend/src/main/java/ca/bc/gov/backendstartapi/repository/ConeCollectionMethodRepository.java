@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Repository for {@link ConeCollectionMethodEntity}. */
 public interface ConeCollectionMethodRepository
-    extends JpaRepository<ConeCollectionMethodEntity, String> {
+    extends JpaRepository<ConeCollectionMethodEntity, Integer> {
   List<ConeCollectionMethodEntity> findAll();
 }

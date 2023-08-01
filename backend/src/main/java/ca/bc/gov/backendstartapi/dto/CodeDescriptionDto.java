@@ -3,8 +3,8 @@ package ca.bc.gov.backendstartapi.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * This class holds the fields that will be returned from a ParentTreeGeneticQuality of a
- * ParentTree.
+ * This general record is used for simple data object with only a code and description
+ * to be consumed by endpoints
  */
 @Schema(
     description =

@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.enums.MaleFemaleMethodologyEnum;
+import ca.bc.gov.backendstartapi.dto.GameticMethodologyDto;
+import ca.bc.gov.backendstartapi.service.GameticMethodologyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,9 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Endpoints to fetch {@link MaleFemaleMethodologyEnum}. */
 @RestController
-@RequestMapping("/api/male-female-methodologies")
-@Tag(name = "MaleFemaleMethodologies")
-public class MaleFemaleMethodologyEndpoint {
+@RequestMapping("/api/gametic-methodologies")
+@Tag(name = "GameticMethodologies")
+public class GameticMethodologiesEndpoint {
+
+  private GameticMethodologyService gameticMethodologyService;
+
+  GameticMethodologiesEndpoint(GameticMethodologyService gameticMethodologyService) {
+    this.gameticMethodologyService = gameticMethodologyService;
+  }
+
   /**
    * Get all male/female methodologies.
    *
@@ -54,6 +62,14 @@ public class MaleFemaleMethodologyEndpoint {
                                   type = "string",
                                   description = "Describe the name of the methodology",
                                   example = "Portion of Ramets in Orchard")),
+                    @SchemaProperty(
+                          name = "isFemaleMethodology",
+                          schema =
+                              @Schema(
+                                  type = "boolean",
+                                  description =
+                                      "Indicate whether this methodology is applicable to female",
+                                  example = "false")),
                       @SchemaProperty(
                           name = "isPliSpecies",
                           schema =
@@ -69,7 +85,7 @@ public class MaleFemaleMethodologyEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<MaleFemaleMethodologyEnum> getAllMaleFemaleMethodologies() {
-    return List.of(MaleFemaleMethodologyEnum.values());
+  public List<GameticMethodologyDto> getAllMaleFemaleMethodologies() {
+    return gameticMethodologyService.getAllGameticMethodologies();
   }
 }

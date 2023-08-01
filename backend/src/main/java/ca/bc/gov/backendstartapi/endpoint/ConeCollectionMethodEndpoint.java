@@ -58,7 +58,7 @@ public class ConeCollectionMethodEndpoint {
                                   type = "string",
                                   description =
                                       "This object represents a cone collection method code",
-                                  example = "01")),
+                                  example = "1")),
                       @SchemaProperty(
                           name = "description",
                           schema =
