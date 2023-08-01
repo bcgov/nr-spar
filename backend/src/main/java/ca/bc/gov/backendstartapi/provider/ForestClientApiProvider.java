@@ -2,6 +2,8 @@ package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -98,6 +100,35 @@ public class ForestClientApiProvider implements Provider {
 
       log.info("Finished {} request - 200 OK!", PROVIDER);
       return response.getBody().stream().findFirst();
+    } catch (HttpClientErrorException httpExc) {
+      log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+    }
+
+    return Optional.empty();
+  }
+
+  /**
+   * Fetch a forest client location by its number.
+   *
+   * @param number the client number to search the location
+   * @return an list of the locations of the forest client
+   */
+  @Override
+  public Optional<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
+    String apiUrl = String.format("%s/clients/{number}/locations?size=20", rootUri);
+    log.info("Starting {} request to {}", PROVIDER, apiUrl);
+
+    try {
+      ResponseEntity<ForestClientLocationDto> response =
+          restTemplate.exchange(
+              apiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              ForestClientLocationDto.class,
+              createParamsMap("number", number));
+
+      log.info("Finished {} request - 200 OK!", PROVIDER);
+      return Optional.of(response.getBody());
     } catch (HttpClientErrorException httpExc) {
       log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
