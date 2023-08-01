@@ -15,13 +15,15 @@ import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(classes = SeedlotCollectionMethodJpaTest.class)
+@DataJpaTest
+@Transactional
 class SeedlotCollectionMethodJpaTest extends SeedlotEntityJpaTest {
 
-  private SeedlotCollectionMethodRepository seedlotCollectionMethodRepo;
-  private ConeCollectionMethodRepository coneCollectionMethodRepo;
+  private final SeedlotCollectionMethodRepository seedlotCollectionMethodTestRepo;
+  private final ConeCollectionMethodRepository coneCollectionMethodTestRepo;
 
   @Autowired
   protected SeedlotCollectionMethodJpaTest(
@@ -29,8 +31,8 @@ class SeedlotCollectionMethodJpaTest extends SeedlotEntityJpaTest {
       SeedlotCollectionMethodRepository seedlotCollectionMethodRepo,
       ConeCollectionMethodRepository coneCollectionMethodRepo) {
     super(seedlotRepository);
-    this.seedlotCollectionMethodRepo = seedlotCollectionMethodRepo;
-    this.coneCollectionMethodRepo = coneCollectionMethodRepo;
+    seedlotCollectionMethodTestRepo = seedlotCollectionMethodRepo;
+    coneCollectionMethodTestRepo = coneCollectionMethodRepo;
   }
 
   @Test
@@ -43,21 +45,21 @@ class SeedlotCollectionMethodJpaTest extends SeedlotEntityJpaTest {
     var coneCollectionMethod =
         new ConeCollectionMethodEntity(999, "digging", effectiveDateRange, null);
 
-    coneCollectionMethodRepo.saveAndFlush(coneCollectionMethod);
+    coneCollectionMethodTestRepo.saveAndFlush(coneCollectionMethod);
 
     var seedlotCollectionMethod = new SeedlotCollectionMethod(seedlot, coneCollectionMethod);
+    // seedlotCollectionMethod.setSeedlot(seedlot);
+    // seedlotCollectionMethod.setConeCollectionMethod(coneCollectionMethod);
     seedlotCollectionMethod.setConeCollectionMethodDescription(
         coneCollectionMethod.getDescription());
     seedlotCollectionMethod.setAuditInformation(new AuditInformation("user1"));
 
-    // Using saved here for debugging
-    SeedlotCollectionMethod saved =
-        seedlotCollectionMethodRepo.saveAndFlush(seedlotCollectionMethod);
+    seedlotCollectionMethodTestRepo.saveAndFlush(seedlotCollectionMethod);
 
-    assertEquals(1, seedlotCollectionMethodRepo.count());
+    assertEquals(1, seedlotCollectionMethodTestRepo.count());
 
     var savedSeedlotCollectionMethod =
-        seedlotCollectionMethodRepo.findById(
+        seedlotCollectionMethodTestRepo.findById(
             new SeedlotCollectionMethodId(
                 seedlot.getId(), coneCollectionMethod.getConeCollectionMethodCode()));
     assertTrue(savedSeedlotCollectionMethod.isPresent());

@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
@@ -23,6 +24,7 @@ import lombok.Setter;
 @IdClass(SeedlotCollectionMethodId.class)
 @Getter
 @Setter
+@NoArgsConstructor
 public class SeedlotCollectionMethod {
   // region Identifier
   @Id
@@ -49,8 +51,7 @@ public class SeedlotCollectionMethod {
   @Setter(AccessLevel.NONE)
   private int revisionCount;
 
-  public SeedlotCollectionMethod(
-      @NonNull Seedlot seedlot, @NonNull ConeCollectionMethodEntity collectionMethod) {
+  public SeedlotCollectionMethod(Seedlot seedlot, ConeCollectionMethodEntity collectionMethod) {
     this.seedlot = seedlot;
     this.coneCollectionMethod = collectionMethod;
   }
