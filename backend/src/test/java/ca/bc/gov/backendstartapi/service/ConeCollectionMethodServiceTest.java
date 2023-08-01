@@ -63,7 +63,7 @@ class ConeCollectionMethodServiceTest {
     // This entity should not appear in the result list
     ConeCollectionMethodEntity expiredEntity =
         new ConeCollectionMethodEntity(4, "Metal detector", expiredDateRange);
-    coneCollectionMethodRepository.saveAndFlush(thirdEntity);
+    coneCollectionMethodRepository.saveAndFlush(expiredEntity);
 
     List<ConeCollectionMethodEntity> testEntityList =
         new ArrayList<>() {

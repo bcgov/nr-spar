@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/gametic-methodologies")
 @Tag(name = "GameticMethodologies")
-public class GameticMethodologiesEndpoint {
+public class GameticMethodologyEndpoint {
 
   private GameticMethodologyService gameticMethodologyService;
 
-  GameticMethodologiesEndpoint(GameticMethodologyService gameticMethodologyService) {
+  GameticMethodologyEndpoint(GameticMethodologyService gameticMethodologyService) {
     this.gameticMethodologyService = gameticMethodologyService;
   }
 
@@ -37,7 +37,12 @@ public class GameticMethodologiesEndpoint {
   @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Retrieves all male and female gametic methodologies",
-      description = "Returns a list containing all male and female gametic methodologies.")
+      description =
+          """
+      Returns a list of gametic methodology with helpful boolean indicators. The code field starts with
+      a character (M/F) that indicate the sex of the methodology, this is a legacy from the oracle database.
+      It is recommeneded to use the isFemaleMethodology flag instead.
+      """)
   @ApiResponses(
       value = {
         @ApiResponse(
@@ -62,7 +67,7 @@ public class GameticMethodologiesEndpoint {
                                   type = "string",
                                   description = "Describe the name of the methodology",
                                   example = "Portion of Ramets in Orchard")),
-                    @SchemaProperty(
+                      @SchemaProperty(
                           name = "isFemaleMethodology",
                           schema =
                               @Schema(

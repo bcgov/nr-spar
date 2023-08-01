@@ -20,8 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(GameticMethodologiesEndpoint.class)
-class GameticMethodologiesEndpointTest {
+@WebMvcTest(GameticMethodologyEndpoint.class)
+class GameticMethodologyEndpointTest {
 
   @Autowired private MockMvc mockMvc;
 
