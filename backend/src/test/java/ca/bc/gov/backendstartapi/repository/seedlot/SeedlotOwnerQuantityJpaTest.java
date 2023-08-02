@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOwnerQuantityId;
 import ca.bc.gov.backendstartapi.enums.PaymentMethodEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
+import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.math.BigDecimal;
@@ -24,8 +25,9 @@ class SeedlotOwnerQuantityJpaTest extends SeedlotEntityJpaTest {
   @Autowired
   SeedlotOwnerQuantityJpaTest(
       SeedlotRepository seedlotRepository,
+      GeneticClassRepository geneticClassRepository,
       SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository) {
-    super(seedlotRepository);
+    super(seedlotRepository, geneticClassRepository);
     repository = seedlotOwnerQuantityRepository;
   }
 

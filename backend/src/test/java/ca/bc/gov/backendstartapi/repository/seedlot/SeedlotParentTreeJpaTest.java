@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
+import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.math.BigDecimal;
@@ -23,8 +24,9 @@ class SeedlotParentTreeJpaTest extends SeedlotEntityJpaTest {
   @Autowired
   SeedlotParentTreeJpaTest(
       SeedlotRepository seedlotRepository,
+      GeneticClassRepository geneticClassRepository,
       SeedlotParentTreeRepository seedlotParentTreeRepository) {
-    super(seedlotRepository);
+    super(seedlotRepository, geneticClassRepository);
     this.repository = seedlotParentTreeRepository;
   }
 

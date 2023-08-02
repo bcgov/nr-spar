@@ -104,7 +104,7 @@ class GameticMethodologyServiceTest {
 
     List<GameticMethodologyDto> resultList = gameticMethodologyService.getAllGameticMethodologies();
 
-    Assertions.assertNotEquals(testEntityList.size(), resultList.size());
+    Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());
 
     IntStream.range(0, resultList.size())

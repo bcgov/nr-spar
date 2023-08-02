@@ -5,15 +5,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /** Entity for the list of genetic class */
 @Entity
+@NoArgsConstructor
 @Table(name = "genetic_class_list")
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
 public class GeneticClassEntity extends CodeDescriptionEntity {

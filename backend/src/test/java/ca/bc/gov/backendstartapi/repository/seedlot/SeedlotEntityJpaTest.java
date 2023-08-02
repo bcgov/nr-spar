@@ -1,24 +1,37 @@
 package ca.bc.gov.backendstartapi.repository.seedlot;
 
+import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
+import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.enums.GeneticClassEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotSourceEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
+import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 abstract class SeedlotEntityJpaTest {
 
-  protected SeedlotRepository repository;
+  protected SeedlotRepository seedlotRepository;
+  protected GeneticClassRepository geneticClassRepository;
 
-  protected SeedlotEntityJpaTest(SeedlotRepository seedlotRepository) {
-    repository = seedlotRepository;
+  protected SeedlotEntityJpaTest(
+      SeedlotRepository seedlotRepository, GeneticClassRepository geneticClassRepository) {
+    this.seedlotRepository = seedlotRepository;
+    this.geneticClassRepository = geneticClassRepository;
   }
 
   protected Seedlot createSeedlot(String id, SeedlotStatusEnum status) {
+    LocalDate now = LocalDate.now();
+    var effectiveDate = now.minusDays(2);
+    var nonExpiryDate = now.plusDays(2);
+    var effectiveDateRange = new EffectiveDateRange(effectiveDate, nonExpiryDate);
+
     var seedlot = new Seedlot(id, status);
+    var geneticClass = new GeneticClassEntity("V", "V for vendetta", effectiveDateRange);
+    geneticClassRepository.saveAndFlush(geneticClass);
 
     seedlot.setComment("A seedlot.");
     seedlot.setApplicantClientNumber("00000001");
@@ -26,7 +39,7 @@ abstract class SeedlotEntityJpaTest {
     seedlot.setApplicantEmailAddress("applicant@email.com");
 
     seedlot.setVegetationCode("VEG");
-    seedlot.setGeneticClassCode(GeneticClassEnum.A);
+    seedlot.setGeneticClassCode(geneticClass);
     seedlot.setSeedlotSourceCode(SeedlotSourceEnum.CUS);
     seedlot.setIntendedForCrownLand(true);
     seedlot.setSourceInBc(true);
@@ -75,6 +88,6 @@ abstract class SeedlotEntityJpaTest {
     seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
     seedlot.setAuditInformation(new AuditInformation("user1"));
 
-    return repository.saveAndFlush(seedlot);
+    return seedlotRepository.saveAndFlush(seedlot);
   }
 }

@@ -9,6 +9,7 @@ import ca.bc.gov.backendstartapi.entity.idclass.SmpMixGeneticQualityId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
+import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
@@ -29,9 +30,10 @@ class SmpMixGeneticQualityJpaTest extends SeedlotEntityJpaTest {
   @Autowired
   SmpMixGeneticQualityJpaTest(
       SeedlotRepository seedlotRepository,
+      GeneticClassRepository geneticClassRepository,
       SmpMixRepository smpMixRepository,
       SmpMixGeneticQualityRepository smpMixGeneticQualityRepository) {
-    super(seedlotRepository);
+    super(seedlotRepository, geneticClassRepository);
     this.smpMixRepository = smpMixRepository;
     repository = smpMixGeneticQualityRepository;
   }

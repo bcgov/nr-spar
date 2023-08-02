@@ -79,7 +79,7 @@ class ConeCollectionMethodServiceTest {
 
     List<CodeDescriptionDto> resultList = coneCollectionMethodService.getAllConeCollectionMethods();
 
-    Assertions.assertNotEquals(testEntityList.size(), resultList.size());
+    Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());
     Assertions.assertEquals(testDtoList.get(0).code(), resultList.get(0).code());
     Assertions.assertEquals(testDtoList.get(0).description(), resultList.get(0).description());

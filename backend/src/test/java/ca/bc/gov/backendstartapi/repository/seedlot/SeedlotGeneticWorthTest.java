@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotGeneticWorthId;
 import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
+import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.math.BigDecimal;
@@ -24,8 +25,9 @@ class SeedlotGeneticWorthTest extends SeedlotEntityJpaTest {
   @Autowired
   SeedlotGeneticWorthTest(
       SeedlotRepository seedlotRepository,
+      GeneticClassRepository geneticClassRepository,
       SeedlotGeneticWorthRepository seedlotGeneticWorthRepository) {
-    super(seedlotRepository);
+    super(seedlotRepository, geneticClassRepository);
     repository = seedlotGeneticWorthRepository;
   }
 
