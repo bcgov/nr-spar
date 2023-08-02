@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
     " * location code expired/trusted status.")
 public enum ForestClientExpiredEnum implements DescribedEnum {
   Y("Yes"),
-  S("No");
+  N("No");
 
   @Schema(description = "Description of the status", example = "Yes")
   private final String description;
