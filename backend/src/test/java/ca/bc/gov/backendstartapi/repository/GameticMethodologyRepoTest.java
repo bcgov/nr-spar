@@ -12,7 +12,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Sql(scripts = {"classpath:sql_scripts/GameticMethodologiesRepoTest.sql"})
+@Sql(scripts = {"classpath:sql_scripts/GameticMethodologyRepoTest.sql"})
 class GameticMethodologyRepoTest {
 
   @Autowired private GameticMethodologyRepository gameticMethodologyRepository;
