@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.DescribedEnumDto;
 import ca.bc.gov.backendstartapi.enums.DescribedEnum;
-import ca.bc.gov.backendstartapi.exception.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.Arrays;
 import java.util.List;
-import org.slf4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,8 +32,6 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
    */
   Class<E> enumClass();
 
-  Logger logger();
-
   /**
    * Fetch all the possible values of {@link E}.
    *
@@ -50,7 +46,6 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
             description = "A list of all the codes and their descriptions.")
       })
   default ResponseEntity<List<DescribedEnumDto<E>>> fetchAll() {
-    logger().info("Fetching all codes and descriptions for {}", enumClass().getSimpleName());
     var valueDtos =
         Arrays.stream(enumClass().getEnumConstants()).map(DescribedEnumDto::new).toList();
     return ResponseEntity.ok(valueDtos);
@@ -72,14 +67,13 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
             description = "No code was found",
             content = @Content(schema = @Schema(hidden = true)))
       })
-  default DescribedEnumDto<E> fetch(
+  default ResponseEntity<DescribedEnumDto<E>> fetch(
       @Parameter(description = "The code to be fetched.") @PathVariable("code") String code) {
-    String message = "Fetching description for code {} in the {} entity";
-    logger().info(message, code, enumClass().getSimpleName());
-    return Arrays.stream(enumClass().getEnumConstants())
-        .dropWhile(v -> !v.name().equals(code))
-        .findFirst()
-        .map(DescribedEnumDto::new)
-        .orElseThrow(NotFoundException::new);
+    var valueDto =
+        Arrays.stream(enumClass().getEnumConstants())
+            .dropWhile(v -> !v.name().equals(code))
+            .findFirst()
+            .map(DescribedEnumDto::new);
+    return ResponseEntity.of(valueDto);
   }
 }

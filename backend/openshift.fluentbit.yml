@@ -197,7 +197,7 @@ objects:
 
       fluent-bit.conf: |
         [SERVICE]
-            Log_Level       debug
+            Log_Level       info
             Parsers_File    parsers.conf
 
         @INCLUDE spar/input/inputs.conf
@@ -297,11 +297,6 @@ objects:
             region ca-central-1
             stream ${STREAM_NAME}
             role_arn ${ROLE_ARN}
-            Retry_Limit 3
-
-        [OUTPUT]
-            Name  stdout
-            Match *
             Retry_Limit 3
 
       parsers.conf: |

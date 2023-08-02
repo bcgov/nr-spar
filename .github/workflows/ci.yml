@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: bcgov-nr/action-test-and-analyse-java@v0.1.0
         with:
-          commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests -Dspring-boot.run.profiles=dev
+          commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
           dir: ${{ matrix.dir }}
           java-cache: maven
           java-distribution: temurin

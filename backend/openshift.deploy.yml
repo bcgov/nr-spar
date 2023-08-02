@@ -1,10 +1,16 @@
 apiVersion: template.openshift.io/v1
 kind: Template
+metadata:
+  name: ${NAME}
+  annotations:
+    description: "NR SPAR Backend"
+    tags: "nr-spar-backend,backend"
+    iconClass: icon-java
 labels:
   app: ${NAME}-${ZONE}
 parameters:
   - name: NAME
-    description: Product name
+    description: Module name
     value: nr-spar-backend
   - name: COMPONENT
     description: Component name

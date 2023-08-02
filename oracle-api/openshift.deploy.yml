@@ -4,7 +4,7 @@ labels:
   app: ${NAME}-${ZONE}
 parameters:
   - name: NAME
-    description: Product name
+    description: Module name
     value: nr-spar
   - name: COMPONENT
     description: Component name
