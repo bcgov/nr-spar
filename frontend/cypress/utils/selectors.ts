@@ -8,5 +8,5 @@ export enum SeedlotRegistrationSelectors {
 }
 
 export enum NavigationSelectors {
-  NavigationSideMenu = 'nav.bcgov--side-nav__navigation .bcgov--side-nav__item',
+  NavigationSideMenu = '.bx--side-nav--ux .bx--side-nav__item'
 }
