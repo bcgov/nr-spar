@@ -140,9 +140,15 @@ class OrchardServiceTest {
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of());
 
-    Assertions.assertThrows(
-        NoSpuForOrchardException.class,
-        () -> orchardService.findParentTreeGeneticQualityData(orchardId));
+    Exception exc =
+        Assertions.assertThrows(
+            NoSpuForOrchardException.class,
+            () -> {
+              orchardService.findParentTreeGeneticQualityData(orchardId);
+            });
+
+    Assertions.assertEquals(
+        "404 NOT_FOUND \"No active SPU for the given Orchard ID!\"", exc.getMessage());
   }
 
   @Test

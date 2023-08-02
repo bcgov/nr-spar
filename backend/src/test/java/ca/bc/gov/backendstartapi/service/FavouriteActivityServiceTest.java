@@ -72,9 +72,13 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto(null);
 
-    Assertions.assertThrows(
-        InvalidActivityException.class,
-        () -> favouriteActivityService.createUserActivity(createDto));
+    Exception notFoundExc =
+        Assertions.assertThrows(
+            InvalidActivityException.class,
+            () -> favouriteActivityService.createUserActivity(createDto));
+
+    Assertions.assertEquals(
+        "404 NOT_FOUND \"Invalid activity or page name!\"", notFoundExc.getMessage());
 
     List<FavouriteActivityEntity> userFavList = List.of(entity);
     when(favouriteActivityRepository.findAllByUserId(any())).thenReturn(userFavList);
@@ -82,9 +86,14 @@ class FavouriteActivityServiceTest {
     FavouriteActivityCreateDto createAnotherDto =
         new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT");
 
-    Assertions.assertThrows(
-        FavoriteActivityExistsToUser.class,
-        () -> favouriteActivityService.createUserActivity(createAnotherDto));
+    Exception activityExists =
+        Assertions.assertThrows(
+            FavoriteActivityExistsToUser.class,
+            () -> favouriteActivityService.createUserActivity(createAnotherDto));
+
+    Assertions.assertEquals(
+        "400 BAD_REQUEST \"Activity already registered to this user!\"",
+        activityExists.getMessage());
   }
 
   @Test
@@ -139,9 +148,12 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityUpdateDto updateDto = new FavouriteActivityUpdateDto(true, true);
 
-    Assertions.assertThrows(
-        InvalidActivityException.class,
-        () -> favouriteActivityService.updateUserActivity(1L, updateDto));
+    Exception e =
+        Assertions.assertThrows(
+            InvalidActivityException.class,
+            () -> favouriteActivityService.updateUserActivity(1L, updateDto));
+
+    Assertions.assertEquals("404 NOT_FOUND \"Invalid activity or page name!\"", e.getMessage());
   }
 
   @Test
@@ -175,7 +187,10 @@ class FavouriteActivityServiceTest {
 
     doNothing().when(favouriteActivityRepository).deleteById(any());
 
-    Assertions.assertThrows(
-        InvalidActivityException.class, () -> favouriteActivityService.deleteUserActivity(1L));
+    Exception e =
+        Assertions.assertThrows(
+            InvalidActivityException.class, () -> favouriteActivityService.deleteUserActivity(1L));
+
+    Assertions.assertEquals("404 NOT_FOUND \"Invalid activity or page name!\"", e.getMessage());
   }
 }
