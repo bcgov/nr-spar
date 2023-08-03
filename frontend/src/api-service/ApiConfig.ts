@@ -35,7 +35,7 @@ const ApiConfig = {
 
   geneticClasses: `${serverHost}/api/genetic-classes`,
 
-  methodOfPayment: `${serverHost}/api/method-of-payment`,
+  methodsOfPayment: `${serverHost}/api/methods-of-payment`,
 
   orchards: `${serverHost}/api/orchards`,
 

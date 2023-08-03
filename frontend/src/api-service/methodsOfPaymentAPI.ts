@@ -1,9 +1,9 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
 
-const getMethodOfPayment = () => {
-  const url = ApiConfig.methodOfPayment;
+const getMethodsOfPayment = () => {
+  const url = ApiConfig.methodsOfPayment;
   return api.get(url).then((res) => res.data);
 };
 
-export default getMethodOfPayment;
+export default getMethodsOfPayment;
