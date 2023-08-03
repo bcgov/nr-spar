@@ -15,9 +15,10 @@ import lombok.Setter;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
-/** Abstract class for entity with code and description, related to {@link CodeDescriptionDto}
+/**
+ * Abstract class for entity with code and description, related to {@link CodeDescriptionDto}
  * Inheritance must declare its own @Id column
-*/
+ */
 @NoArgsConstructor
 @Getter
 @Setter
@@ -31,6 +32,7 @@ public abstract class CodeDescriptionEntity {
 
   /** The date and time of the last update. */
   @UpdateTimestamp(source = SourceType.DB)
+  @Column(name = "update_timestamp")
   private Instant updateTimestamp;
 
   @Transient
