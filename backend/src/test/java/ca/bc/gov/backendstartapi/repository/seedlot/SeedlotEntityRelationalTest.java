@@ -2,14 +2,15 @@ package ca.bc.gov.backendstartapi.repository.seedlot;
 
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.enums.SeedlotSourceEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,12 +20,17 @@ abstract class SeedlotEntityRelationalTest {
   protected SeedlotRepository seedlotRepository;
   protected GeneticClassRepository geneticClassRepository;
   protected GeneticWorthRepository geneticWorthRepository;
+  protected SeedlotSourceRepository seedlotSourceRepository;
 
   protected SeedlotEntityRelationalTest(
-      SeedlotRepository seedlotRepository, GeneticClassRepository geneticClassRepository, GeneticWorthRepository geneticWorthRepository) {
+      SeedlotRepository seedlotRepository,
+      GeneticClassRepository geneticClassRepository,
+      GeneticWorthRepository geneticWorthRepository,
+      SeedlotSourceRepository seedlotSourceRepository) {
     this.seedlotRepository = seedlotRepository;
     this.geneticClassRepository = geneticClassRepository;
     this.geneticWorthRepository = geneticWorthRepository;
+    this.seedlotSourceRepository = seedlotSourceRepository;
   }
 
   protected Seedlot createSeedlot(String id, SeedlotStatusEnum status) {
@@ -41,14 +47,18 @@ abstract class SeedlotEntityRelationalTest {
         new GeneticWorthEntity("AD", "Animal browse resistance (deer)", effectiveDateRange);
     geneticWorthRepository.saveAndFlush(geneticWorth);
 
+
+    var seedlotSource = new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange);
+    seedlotSourceRepository.saveAndFlush(seedlotSource);
+
     seedlot.setComment("A seedlot.");
     seedlot.setApplicantClientNumber("00000001");
     seedlot.setApplicantLocationCode("02");
     seedlot.setApplicantEmailAddress("applicant@email.com");
 
     seedlot.setVegetationCode("VEG");
-    seedlot.setGeneticClassCode(geneticClass);
-    seedlot.setSeedlotSourceCode(SeedlotSourceEnum.CUS);
+    seedlot.setGeneticClass(geneticClass);
+    seedlot.setSeedlotSource(seedlotSource);
     seedlot.setIntendedForCrownLand(true);
     seedlot.setSourceInBc(true);
 

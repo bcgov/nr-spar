@@ -12,14 +12,14 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Sql(scripts = {"classpath:sql_scripts/MethodOfPaymentRepoTest.sql"})
-class MethodOfPaymentRepoTest {
-  @Autowired private MethodOfPaymentRepository methodOfPaymentRepository;
+@Sql(scripts = {"classpath:sql_scripts/SeedlotSourceRepoTest.sql"})
+class SeedlotSourceRepoTest {
+  @Autowired private SeedlotSourceRepository seedlotSourceRepository;
 
   @Test
-  @DisplayName("findAllMethodOfPaymentRepoTest")
-  void findAllMethodOfPaymentRepoTest() {
-    var allTestObj = methodOfPaymentRepository.findAll();
-    assertEquals(6, allTestObj.size());
+  @DisplayName("findAllSeedlotSourceRepoTest")
+  void findAllSeedlotSourceRepoTest() {
+    var allTestObj = seedlotSourceRepository.findAll();
+    assertEquals(3, allTestObj.size());
   }
 }

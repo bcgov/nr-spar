@@ -1,8 +1,8 @@
 package ca.bc.gov.backendstartapi.entity.seedlot;
 
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
-import ca.bc.gov.backendstartapi.enums.SeedlotSourceEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -67,11 +67,11 @@ public class Seedlot implements Serializable {
 
   @JoinColumn(name = "genetic_class_code")
   @ManyToOne
-  private GeneticClassEntity geneticClassCode;
+  private GeneticClassEntity geneticClass;
 
-  @Column(name = "seedlot_source_code", length = 3)
-  @Enumerated(EnumType.STRING)
-  private SeedlotSourceEnum seedlotSourceCode;
+  @JoinColumn(name = "seedlot_source_code")
+  @ManyToOne
+  private SeedlotSourceEntity seedlotSource;
 
   @Column(name = "to_be_registrd_ind")
   private Boolean intendedForCrownLand;

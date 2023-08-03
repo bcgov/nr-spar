@@ -13,6 +13,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
@@ -33,8 +34,10 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
       GeneticClassRepository geneticClassRepository,
       SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository,
       GeneticWorthRepository geneticWorthRepository,
-      MethodOfPaymentRepository methodOfPaymentRepository) {
-    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
+      MethodOfPaymentRepository methodOfPaymentRepository,
+      SeedlotSourceRepository seedlotSourceRepository) {
+    super(
+        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
     repository = seedlotOwnerQuantityRepository;
     this.methodOfPaymentRepository = methodOfPaymentRepository;
   }

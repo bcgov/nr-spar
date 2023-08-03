@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -26,8 +27,10 @@ class SeedlotOrchardRelationalTest extends SeedlotEntityRelationalTest {
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       SeedlotOrchardRepository seedlotOrchardRepository,
-      GeneticWorthRepository geneticWorthRepository) {
-    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
+      GeneticWorthRepository geneticWorthRepository,
+      SeedlotSourceRepository seedlotSourceRepository) {
+    super(
+        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
     repository = seedlotOrchardRepository;
   }
 

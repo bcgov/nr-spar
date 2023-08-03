@@ -67,8 +67,8 @@ public class GeneticClassEndpoint {
                           schema =
                               @Schema(
                                   type = "string",
-                                  description = "Orchard Seed or Cuttings",
-                                  example = "Aerial raking"))
+                                  description = "The description of a genetic class",
+                                  example = "Orchard Seed or Cuttings"))
                     })),
         @ApiResponse(
             responseCode = "401",
@@ -104,7 +104,7 @@ public class GeneticClassEndpoint {
           @Parameter(
               name = "code",
               in = ParameterIn.PATH,
-              description = "Identifier of the orchard.")
+              description = "Identifier of the genetic class.")
           String code) {
     return geneticClassService.getGeneticClassByCode(code);
   }

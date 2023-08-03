@@ -61,14 +61,14 @@ public class GeneticWorthEndpoint {
                               @Schema(
                                   type = "string",
                                   description = "This object represents a genetic worth code",
-                                  example = "A")),
+                                  example = "AD")),
                       @SchemaProperty(
                           name = "description",
                           schema =
                               @Schema(
                                   type = "string",
-                                  description = "Orchard Seed or Cuttings",
-                                  example = "Aerial raking"))
+                                  description = "The description of a genetic worth",
+                                  example = "Animal browse resistance (deer)"))
                     })),
         @ApiResponse(
             responseCode = "401",
@@ -104,7 +104,7 @@ public class GeneticWorthEndpoint {
           @Parameter(
               name = "code",
               in = ParameterIn.PATH,
-              description = "Identifier of the orchard.")
+              description = "Identifier of the genetic worth.")
           String code) {
     return geneticWorthService.getGeneticWorthByCode(code);
   }

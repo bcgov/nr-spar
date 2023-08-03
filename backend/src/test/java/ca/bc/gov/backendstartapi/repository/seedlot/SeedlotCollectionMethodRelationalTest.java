@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,10 @@ class SeedlotCollectionMethodRelationalTest extends SeedlotEntityRelationalTest 
       GeneticClassRepository geneticClassRepository,
       SeedlotCollectionMethodRepository seedlotCollectionMethodRepo,
       ConeCollectionMethodRepository coneCollectionMethodRepo,
-      GeneticWorthRepository geneticWorthRepository
-      ) {
-    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
+      GeneticWorthRepository geneticWorthRepository,
+      SeedlotSourceRepository seedlotSourceRepository) {
+    super(
+        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
     seedlotCollectionMethodTestRepo = seedlotCollectionMethodRepo;
     coneCollectionMethodTestRepo = coneCollectionMethodRepo;
   }
@@ -47,8 +49,7 @@ class SeedlotCollectionMethodRelationalTest extends SeedlotEntityRelationalTest 
     var expiryDate = now.plusDays(2);
     var effectiveDateRange = new EffectiveDateRange(effectiveDate, expiryDate);
     var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
-    var coneCollectionMethod =
-        new ConeCollectionMethodEntity(999, "digging", effectiveDateRange);
+    var coneCollectionMethod = new ConeCollectionMethodEntity(999, "digging", effectiveDateRange);
 
     coneCollectionMethodTestRepo.saveAndFlush(coneCollectionMethod);
 

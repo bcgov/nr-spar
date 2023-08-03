@@ -56,14 +56,14 @@ public class MethodOfPaymentEndpoint {
                               @Schema(
                                   type = "string",
                                   description = "This object represents a method of payment code",
-                                  example = "A")),
+                                  example = "ITC")),
                       @SchemaProperty(
                           name = "description",
                           schema =
                               @Schema(
                                   type = "string",
-                                  description = "Orchard Seed or Cuttings",
-                                  example = "Aerial raking"))
+                                  description = "The description of the payment code",
+                                  example = "Invoice to Client Address"))
                     })),
         @ApiResponse(
             responseCode = "401",
