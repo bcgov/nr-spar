@@ -45,16 +45,16 @@ describe('Recent Activities component', () => {
 
       // Setting this small timeout so the component ends rendering
       // the loading status and render the content we want to test
-      setTimeout(() => {
-        const tabPanelBefore = screen.getByRole('tabpanel');
-        expect(tabPanelBefore).toHaveTextContent('Activity type');
-        expect(tabPanelBefore).not.toHaveTextContent('File name');
+      //setTimeout(() => {
+      const tabPanelBefore = screen.getByRole('tabpanel');
+      expect(tabPanelBefore).toHaveTextContent('Activity type');
+      expect(tabPanelBefore).not.toHaveTextContent('File name');
 
-        fireEvent.click(tabs[1]);
-        const tabPanelAfter = screen.getByRole('tabpanel');
-        expect(tabPanelAfter).not.toHaveTextContent('Activity type');
-        expect(tabPanelAfter).toHaveTextContent('File name');
-      }, 100)
+      fireEvent.click(tabs[1]);
+      const tabPanelAfter = screen.getByRole('tabpanel');
+      expect(tabPanelAfter).not.toHaveTextContent('Activity type');
+      expect(tabPanelAfter).toHaveTextContent('File name');
+      //}, 100)
 
     });
   });

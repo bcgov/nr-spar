@@ -11,7 +11,8 @@ export default defineConfig({
     setupFiles: './src/__test__/setup.ts',
     css: false,
     coverage: {
-      provider: 'v8'
+      provider: 'v8',
+      reporter: ['lcov', 'cobertura', 'html']
     }
   }
 });
