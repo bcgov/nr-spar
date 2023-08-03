@@ -14,7 +14,7 @@ import {
 import { ArrowRight } from '@carbon/icons-react';
 
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
-import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
+import getMethodOfPayment from '../../../api-service/methodOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
 import getGameticMethodology from '../../../api-service/maleFemaleMethodologyAPI';
@@ -79,9 +79,9 @@ const SeedlotRegistrationForm = () => {
     queryFn: getFundingSources
   });
 
-  const paymentMethodsQuery = useQuery({
-    queryKey: ['payment-methods'],
-    queryFn: getPaymentMethods
+  const methodOfPaymentQuery = useQuery({
+    queryKey: ['method-of-payment'],
+    queryFn: getMethodOfPayment
   });
 
   const coneCollectionMethodsQuery = useQuery({
@@ -172,7 +172,7 @@ const SeedlotRegistrationForm = () => {
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             fundingSources={getMultiOptList(fundingSourcesQuery.data)}
-            paymentMethods={getMultiOptList(paymentMethodsQuery.data)}
+            methodOfPayment={getMultiOptList(methodOfPaymentQuery.data)}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
             setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
@@ -264,7 +264,7 @@ const SeedlotRegistrationForm = () => {
               (
                 seedlotInfoQuery.isSuccess
                 && fundingSourcesQuery.isSuccess
-                && paymentMethodsQuery.isSuccess
+                && methodOfPaymentQuery.isSuccess
                 && gameticMethodologyQuery.isSuccess
                 && coneCollectionMethodsQuery.isSuccess
               )

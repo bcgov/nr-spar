@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/** This class contains all routines and database access to a users' favorite activity. */
+/** This class contains all routines and database access to a list of cone collection method. */
 @Slf4j
 @Service
 public class ConeCollectionMethodService {

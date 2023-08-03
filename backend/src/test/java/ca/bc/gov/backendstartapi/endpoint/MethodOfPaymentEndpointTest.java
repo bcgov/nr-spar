@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.service.ConeCollectionMethodService;
+import ca.bc.gov.backendstartapi.service.MethodOfPaymentService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -20,27 +20,27 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(ConeCollectionMethodEndpoint.class)
-class ConeCollectionMethodEndpointTest {
+@WebMvcTest(MethodOfPaymentEndpoint.class)
+class MethodOfPaymentEndpointTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockBean private ConeCollectionMethodService coneCollectionMethodService;
+  @MockBean private MethodOfPaymentService methodOfPaymentService;
 
-  private static final String API_PATH = "/api/cone-collection-methods";
+  private static final String API_PATH = "/api/method-of-payment";
 
   private static final String CONTENT_HEADER = "Content-Type";
 
   private static final String JSON = "application/json";
 
   @Test
-  @DisplayName("getAllConeCollectionMethodsTest")
+  @DisplayName("getAllMethodOfPaymentTest")
   @WithMockUser(roles = "user_read")
-  void getAllConeCollectionMethodsTest() throws Exception {
+  void getAllMethodOfPaymentTest() throws Exception {
 
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("1", "Aerial raking");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("2", "Aerial clipping/topping");
-    CodeDescriptionDto thirdMethod = new CodeDescriptionDto("3", "Felled trees");
+    CodeDescriptionDto firstMethod = new CodeDescriptionDto("CLA", "Invoice to MOF Client Account");
+    CodeDescriptionDto secondMethod = new CodeDescriptionDto("CSH", "Cash Sale");
+    CodeDescriptionDto thirdMethod = new CodeDescriptionDto("ITC", "Invoice to Client Address");
 
     List<CodeDescriptionDto> testList =
         new ArrayList<>() {
@@ -51,7 +51,7 @@ class ConeCollectionMethodEndpointTest {
           }
         };
 
-    when(coneCollectionMethodService.getAllConeCollectionMethods()).thenReturn(testList);
+    when(methodOfPaymentService.getAllMethodOfPayment()).thenReturn(testList);
 
     mockMvc
         .perform(
