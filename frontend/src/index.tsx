@@ -9,7 +9,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemePreference } from './utils/ThemePreference';
 import makeServer from './mock-server/server';
 
-const appVersion: string = window.config?.VITE_NRSPARWEBAPP_VERSION || 'dev';
+const appVersion: string = import.meta.env.VITE_NRSPARWEBAPP_VERSION || 'dev';
 
 const isDevEnv = appVersion === 'dev'
   || appVersion.startsWith('test')
