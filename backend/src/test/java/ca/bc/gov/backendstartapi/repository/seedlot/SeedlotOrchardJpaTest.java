@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOrchardId;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import org.junit.jupiter.api.Test;
@@ -24,8 +25,9 @@ class SeedlotOrchardJpaTest extends SeedlotEntityJpaTest {
   protected SeedlotOrchardJpaTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
-      SeedlotOrchardRepository seedlotOrchardRepository) {
-    super(seedlotRepository, geneticClassRepository);
+      SeedlotOrchardRepository seedlotOrchardRepository,
+      GeneticWorthRepository geneticWorthRepository) {
+    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
     repository = seedlotOrchardRepository;
   }
 

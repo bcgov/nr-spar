@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodI
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.time.LocalDate;
@@ -31,8 +32,10 @@ class SeedlotCollectionMethodJpaTest extends SeedlotEntityJpaTest {
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       SeedlotCollectionMethodRepository seedlotCollectionMethodRepo,
-      ConeCollectionMethodRepository coneCollectionMethodRepo) {
-    super(seedlotRepository, geneticClassRepository);
+      ConeCollectionMethodRepository coneCollectionMethodRepo,
+      GeneticWorthRepository geneticWorthRepository
+      ) {
+    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
     seedlotCollectionMethodTestRepo = seedlotCollectionMethodRepo;
     coneCollectionMethodTestRepo = coneCollectionMethodRepo;
   }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -18,8 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class SeedlotJpaTest extends SeedlotEntityJpaTest {
   @Autowired
-  SeedlotJpaTest(SeedlotRepository seedlotRepository, GeneticClassRepository geneticClassRepository) {
-    super(seedlotRepository, geneticClassRepository);
+  SeedlotJpaTest(
+      SeedlotRepository seedlotRepository,
+      GeneticClassRepository geneticClassRepository,
+      GeneticWorthRepository geneticWorthRepository) {
+    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
   }
 
   @Test

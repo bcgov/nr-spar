@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotGeneticWorthId;
-import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.math.BigDecimal;
@@ -20,29 +20,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class SeedlotGeneticWorthTest extends SeedlotEntityJpaTest {
 
-  private final SeedlotGeneticWorthRepository repository;
+  private final SeedlotGeneticWorthRepository seedlotGeneticWorthRepository;
 
   @Autowired
   SeedlotGeneticWorthTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
+      GeneticWorthRepository geneticWorthRepository,
       SeedlotGeneticWorthRepository seedlotGeneticWorthRepository) {
-    super(seedlotRepository, geneticClassRepository);
-    repository = seedlotGeneticWorthRepository;
+    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
+    this.seedlotGeneticWorthRepository = seedlotGeneticWorthRepository;
   }
 
   @Test
   void create() {
     var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
+    var geneticWorth = geneticWorthRepository.findAll().get(0);
     var seedlotGeneticWorth =
-        new SeedlotGeneticWorth(seedlot, GeneticWorthEnum.AD, new AuditInformation("user1"));
+        new SeedlotGeneticWorth(seedlot, geneticWorth, new AuditInformation("user1"));
     seedlotGeneticWorth.setGeneticQualityValue(new BigDecimal(10));
 
-    repository.saveAndFlush(seedlotGeneticWorth);
+    seedlotGeneticWorthRepository.saveAndFlush(seedlotGeneticWorth);
 
     var savedSeedlotGeneticWorth =
-        repository.findById(
-            new SeedlotGeneticWorthId(seedlot.getId(), seedlotGeneticWorth.getGeneticWorthCode()));
+        seedlotGeneticWorthRepository.findById(
+            new SeedlotGeneticWorthId(seedlot.getId(), geneticWorth.getGeneticWorthCode()));
     assertTrue(savedSeedlotGeneticWorth.isPresent());
   }
 }

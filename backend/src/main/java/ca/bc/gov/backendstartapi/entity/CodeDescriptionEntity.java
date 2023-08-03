@@ -24,7 +24,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Setter
 @MappedSuperclass
 public abstract class CodeDescriptionEntity {
-  @Column(name = "description", length = 120)
+  @Column(name = "description", length = 120, nullable = false)
   @NonNull
   private String description;
 

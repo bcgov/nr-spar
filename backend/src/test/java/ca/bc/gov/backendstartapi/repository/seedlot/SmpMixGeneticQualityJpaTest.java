@@ -7,9 +7,9 @@ import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixGeneticQualityId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
-import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
@@ -32,8 +32,9 @@ class SmpMixGeneticQualityJpaTest extends SeedlotEntityJpaTest {
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       SmpMixRepository smpMixRepository,
-      SmpMixGeneticQualityRepository smpMixGeneticQualityRepository) {
-    super(seedlotRepository, geneticClassRepository);
+      SmpMixGeneticQualityRepository smpMixGeneticQualityRepository,
+      GeneticWorthRepository geneticWorthRepository) {
+    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
     this.smpMixRepository = smpMixRepository;
     repository = smpMixGeneticQualityRepository;
   }
@@ -45,16 +46,11 @@ class SmpMixGeneticQualityJpaTest extends SeedlotEntityJpaTest {
     smpMix.setProportion(new BigDecimal(10));
 
     var savedSmpMix = smpMixRepository.save(smpMix);
+    var geneticWorth = geneticWorthRepository.findAll().get(0);
 
     var smpMixGeneticQuality =
         new SmpMixGeneticQuality(
-            smpMix,
-            "GC",
-            GeneticWorthEnum.AD,
-            new BigDecimal(10),
-            true,
-            new AuditInformation("user1"),
-            0);
+            smpMix, "GC", geneticWorth, new BigDecimal(10), true, new AuditInformation("user1"), 0);
 
     repository.saveAndFlush(smpMixGeneticQuality);
 
@@ -63,7 +59,7 @@ class SmpMixGeneticQualityJpaTest extends SeedlotEntityJpaTest {
             new SmpMixGeneticQualityId(
                 new SmpMixId(seedlot.getId(), savedSmpMix.getParentTreeId()),
                 smpMixGeneticQuality.getGeneticTypeCode(),
-                smpMixGeneticQuality.getGeneticWorthCode()));
+                smpMixGeneticQuality.getGeneticWorth().getGeneticWorthCode()));
     assertTrue(savedSmpMixGeneticQuality.isPresent());
   }
 }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Endpoints to fetch {@link MaleFemaleMethodologyEnum}. */
+/** Endpoints to fetch {@link GameticMethodologyDto}. */
 @RestController
 @RequestMapping("/api/gametic-methodologies")
 @Tag(name = "GameticMethodologies")
@@ -31,7 +31,7 @@ public class GameticMethodologyEndpoint {
   /**
    * Get all male/female methodologies.
    *
-   * @return A list of {@link MaleFemaleMethodologyEnum}
+   * @return A list of {@link GameticMethodologyDto}
    */
   @GetMapping
   @PreAuthorize("hasRole('user_read')")

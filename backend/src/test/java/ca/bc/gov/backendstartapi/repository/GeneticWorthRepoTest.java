@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,24 +13,24 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Sql(scripts = {"classpath:sql_scripts/GeneticClassRepoTest.sql"})
-class GeneticClassRepoTest {
-  @Autowired private GeneticClassRepository geneticClassRepository;
+@Sql(scripts = {"classpath:sql_scripts/GeneticWorthRepoTest.sql"})
+class GeneticWorthRepoTest {
+  @Autowired private GeneticWorthRepository geneticWorthRepository;
 
   @Test
-  @DisplayName("testFindAllGeneticClass")
-  void testFindAllGeneticClass() {
-    var allTestObj = geneticClassRepository.findAll();
-    assertEquals(2, allTestObj.size());
+  @DisplayName("testFindAllGeneticWorth")
+  void testFindAllGeneticWorth() {
+    var allTestObj = geneticWorthRepository.findAll();
+    assertEquals(16, allTestObj.size());
   }
 
   @Test
-  @DisplayName("testFindGeneticClassById")
-  void testFindGeneticClassById() {
-    var testCode = "A";
-    var testObj = geneticClassRepository.findById(testCode);
+  @DisplayName("testFindGeneticWorthById")
+  void testFindGeneticWorthById() {
+    var testCode = "AD";
+    var testObj = geneticWorthRepository.findById(testCode);
     assertTrue(testObj.isPresent());
-    assertEquals(testCode ,testObj.get().getGeneticClassCode());
-    assertEquals("Orchard Seed or Cuttings" ,testObj.get().getDescription());
+    assertEquals(testCode, testObj.get().getGeneticWorthCode());
+    assertEquals("Animal browse resistance (deer)", testObj.get().getDescription());
   }
 }

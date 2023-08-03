@@ -7,9 +7,9 @@ import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeGeneticQualityId;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
-import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
@@ -25,17 +25,18 @@ class SeedlotParentTreeGeneticQualityJpaTest extends SeedlotEntityJpaTest {
 
   private final SeedlotParentTreeRepository seedlotParentTreeRepository;
 
-  private final SeedlotParentTreeGeneticQualityRepository repository;
+  private final SeedlotParentTreeGeneticQualityRepository seedlotParentTreeGeneticQualityRepository;
 
   @Autowired
   SeedlotParentTreeGeneticQualityJpaTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       SeedlotParentTreeRepository seedlotParentTreeRepository,
+      GeneticWorthRepository geneticWorthRepository,
       SeedlotParentTreeGeneticQualityRepository seedlotParentTreeGeneticQualityRepository) {
-    super(seedlotRepository, geneticClassRepository);
+    super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
     this.seedlotParentTreeRepository = seedlotParentTreeRepository;
-    repository = seedlotParentTreeGeneticQualityRepository;
+    this.seedlotParentTreeGeneticQualityRepository = seedlotParentTreeGeneticQualityRepository;
   }
 
   @Test
@@ -49,23 +50,25 @@ class SeedlotParentTreeGeneticQualityJpaTest extends SeedlotEntityJpaTest {
 
     var savedSeedlotParentTree = seedlotParentTreeRepository.save(seedlotParentTree);
 
+    var geneticWorth = geneticWorthRepository.findAll().get(0);
+
     var seedlotParentTreeGeneticQuality =
         new SeedlotParentTreeGeneticQuality(
             seedlotParentTree,
             "GC",
-            GeneticWorthEnum.AD,
+            geneticWorth,
             new BigDecimal(10),
             new AuditInformation("user1"));
     seedlotParentTreeGeneticQuality.setQualityValueEstimated(true);
 
-    repository.saveAndFlush(seedlotParentTreeGeneticQuality);
+    seedlotParentTreeGeneticQualityRepository.saveAndFlush(seedlotParentTreeGeneticQuality);
 
     var savedSeedlotParentTreeGeneticQuality =
-        repository.findById(
+        seedlotParentTreeGeneticQualityRepository.findById(
             new SeedlotParentTreeGeneticQualityId(
                 new SeedlotParentTreeId(seedlot.getId(), savedSeedlotParentTree.getParentTreeId()),
                 seedlotParentTreeGeneticQuality.getGeneticTypeCode(),
-                seedlotParentTreeGeneticQuality.getGeneticWorthCode()));
+                seedlotParentTreeGeneticQuality.getGeneticWorth().getGeneticWorthCode()));
     assertTrue(savedSeedlotParentTreeGeneticQuality.isPresent());
   }
 }

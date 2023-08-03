@@ -1,12 +1,14 @@
 package ca.bc.gov.backendstartapi.repository.seedlot;
 
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.enums.SeedlotSourceEnum;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,11 +18,13 @@ abstract class SeedlotEntityJpaTest {
 
   protected SeedlotRepository seedlotRepository;
   protected GeneticClassRepository geneticClassRepository;
+  protected GeneticWorthRepository geneticWorthRepository;
 
   protected SeedlotEntityJpaTest(
-      SeedlotRepository seedlotRepository, GeneticClassRepository geneticClassRepository) {
+      SeedlotRepository seedlotRepository, GeneticClassRepository geneticClassRepository, GeneticWorthRepository geneticWorthRepository) {
     this.seedlotRepository = seedlotRepository;
     this.geneticClassRepository = geneticClassRepository;
+    this.geneticWorthRepository = geneticWorthRepository;
   }
 
   protected Seedlot createSeedlot(String id, SeedlotStatusEnum status) {
@@ -32,6 +36,10 @@ abstract class SeedlotEntityJpaTest {
     var seedlot = new Seedlot(id, status);
     var geneticClass = new GeneticClassEntity("V", "V for vendetta", effectiveDateRange);
     geneticClassRepository.saveAndFlush(geneticClass);
+
+    var geneticWorth =
+        new GeneticWorthEntity("AD", "Animal browse resistance (deer)", effectiveDateRange);
+    geneticWorthRepository.saveAndFlush(geneticWorth);
 
     seedlot.setComment("A seedlot.");
     seedlot.setApplicantClientNumber("00000001");
