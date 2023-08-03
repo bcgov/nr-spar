@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Endpoints to fetch {@link PaymentMethodEnum}. */
 @RestController
 @RequestMapping(path = "/api/method-of-payment", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-@Tag(name = "MethodOfPayment")
+@Tag(name = "MethodsOfPayment")
 public class MethodOfPaymentEndpoint {
 
   private MethodOfPaymentService methodOfPaymentService;

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/cone-collection-methods")
 @Tag(
-    name = "ConeCollectionMethodEndpoint",
+    name = "ConeCollectionMethods",
     description = "Resources to handle all cone collection method codes")
 public class ConeCollectionMethodEndpoint {
 

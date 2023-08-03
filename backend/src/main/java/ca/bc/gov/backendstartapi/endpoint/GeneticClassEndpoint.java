@@ -25,7 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping(path = "/api/genetic-classes", produces = "application/json")
 @Tag(
-    name = "GeneticClassEndpoint",
+    name = "GeneticClasses",
     description = "Resources to handle all genetic classes")
 public class GeneticClassEndpoint {
 

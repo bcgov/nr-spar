@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Endpoints to fetch {@link SeedlotStatusEnum}. */
 @RestController
 @RequestMapping(path = "/api/seedlot-status", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-@Tag(name = "SeedlotStatus")
+@Tag(name = "SeedlotStatuses")
 public class SeedlotStatusEndpoint {
   private SeedlotStatusService seedlotStatusService;
 

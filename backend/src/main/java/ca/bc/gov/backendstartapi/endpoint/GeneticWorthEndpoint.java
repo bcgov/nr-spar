@@ -25,7 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping(path = "/api/genetic-worth", produces = "application/json")
 @Tag(
-    name = "GeneticWorthEndpoint",
+    name = "GeneticWorths",
     description = "Resources to handle all genetic worths.")
 public class GeneticWorthEndpoint {
 

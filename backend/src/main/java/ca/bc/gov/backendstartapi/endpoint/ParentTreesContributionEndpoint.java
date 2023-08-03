@@ -30,7 +30,7 @@ import org.springframework.web.server.ResponseStatusException;
 /** Endpoints to receive CSV files for parsing. */
 @RestController
 @RequestMapping(path = "/api/seedlots", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-@Tag(name = "Seedlot")
+@Tag(name = "Seedlots")
 public class ParentTreesContributionEndpoint {
 
   private final ConeAndPollenCountCsvTableParser contributionTableCsvParser;
