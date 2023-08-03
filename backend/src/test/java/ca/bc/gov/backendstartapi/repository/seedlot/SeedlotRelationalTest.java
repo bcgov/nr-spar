@@ -17,9 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Transactional
-class SeedlotJpaTest extends SeedlotEntityJpaTest {
+class SeedlotRelationalTest extends SeedlotEntityRelationalTest {
   @Autowired
-  SeedlotJpaTest(
+  SeedlotRelationalTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       GeneticWorthRepository geneticWorthRepository) {

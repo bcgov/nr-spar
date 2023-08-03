@@ -22,13 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Transactional
-class SeedlotCollectionMethodJpaTest extends SeedlotEntityJpaTest {
+class SeedlotCollectionMethodRelationalTest extends SeedlotEntityRelationalTest {
 
   private final SeedlotCollectionMethodRepository seedlotCollectionMethodTestRepo;
   private final ConeCollectionMethodRepository coneCollectionMethodTestRepo;
 
   @Autowired
-  protected SeedlotCollectionMethodJpaTest(
+  protected SeedlotCollectionMethodRelationalTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       SeedlotCollectionMethodRepository seedlotCollectionMethodRepo,

@@ -2,14 +2,14 @@ package ca.bc.gov.backendstartapi.repository.seedlot;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
+import ca.bc.gov.backendstartapi.entity.SmpMix;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
-import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
+import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,32 +18,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Transactional
-class SeedlotParentTreeJpaTest extends SeedlotEntityJpaTest {
+class SmpMixRelationalTest extends SeedlotEntityRelationalTest {
 
-  private final SeedlotParentTreeRepository repository;
+  private final SmpMixRepository repository;
 
   @Autowired
-  SeedlotParentTreeJpaTest(
+  SmpMixRelationalTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
-      SeedlotParentTreeRepository seedlotParentTreeRepository,
+      SmpMixRepository smpMixRepository,
       GeneticWorthRepository geneticWorthRepository) {
     super(seedlotRepository, geneticClassRepository, geneticWorthRepository);
-    this.repository = seedlotParentTreeRepository;
+    repository = smpMixRepository;
   }
 
   @Test
   void create() {
     var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
-    var seedlotParentTree =
-        new SeedlotParentTree(
-            seedlot, 1, new BigDecimal(10), new BigDecimal(10), new AuditInformation("user1"));
-    seedlotParentTree.setSmpSuccessPercentage(1);
-    seedlotParentTree.setNonOrchardPollenContaminationCount(1);
+    var smpMix = new SmpMix(seedlot, 1, 1, null, new AuditInformation("user1"), 0);
+    smpMix.setProportion(new BigDecimal(10));
 
-    repository.saveAndFlush(seedlotParentTree);
+    repository.saveAndFlush(smpMix);
 
-    var savedSeedlotParentTree = repository.findById(new SeedlotParentTreeId(seedlot.getId(), 1));
-    assertTrue(savedSeedlotParentTree.isPresent());
+    var savedSmpMix = repository.findById(new SmpMixId(seedlot.getId(), 1));
+    assertTrue(savedSmpMix.isPresent());
   }
 }

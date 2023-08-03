@@ -14,13 +14,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-abstract class SeedlotEntityJpaTest {
+abstract class SeedlotEntityRelationalTest {
 
   protected SeedlotRepository seedlotRepository;
   protected GeneticClassRepository geneticClassRepository;
   protected GeneticWorthRepository geneticWorthRepository;
 
-  protected SeedlotEntityJpaTest(
+  protected SeedlotEntityRelationalTest(
       SeedlotRepository seedlotRepository, GeneticClassRepository geneticClassRepository, GeneticWorthRepository geneticWorthRepository) {
     this.seedlotRepository = seedlotRepository;
     this.geneticClassRepository = geneticClassRepository;

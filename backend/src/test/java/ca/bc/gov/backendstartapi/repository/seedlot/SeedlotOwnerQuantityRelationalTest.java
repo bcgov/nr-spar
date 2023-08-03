@@ -22,13 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Transactional
-class SeedlotOwnerQuantityJpaTest extends SeedlotEntityJpaTest {
+class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
 
   private final SeedlotOwnerQuantityRepository repository;
   private final MethodOfPaymentRepository methodOfPaymentRepository;
 
   @Autowired
-  SeedlotOwnerQuantityJpaTest(
+  SeedlotOwnerQuantityRelationalTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository,

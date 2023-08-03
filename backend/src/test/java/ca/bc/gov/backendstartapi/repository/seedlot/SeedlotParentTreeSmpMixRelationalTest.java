@@ -21,14 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
 @Transactional
-class SeedlotParentTreeSmpMixJpaTest extends SeedlotEntityJpaTest {
+class SeedlotParentTreeSmpMixRelationalTest extends SeedlotEntityRelationalTest {
 
   private final SeedlotParentTreeRepository seedlotParentTreeRepository;
 
   private final SeedlotParentTreeSmpMixRepository seedlotParentTreeSmpMixRepository;
 
   @Autowired
-  SeedlotParentTreeSmpMixJpaTest(
+  SeedlotParentTreeSmpMixRelationalTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       SeedlotParentTreeRepository seedlotParentTreeRepository,
