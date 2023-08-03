@@ -2,11 +2,11 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Node 16",
   "compilerOptions": {
-    "target": "es2021",
+    "target": "ESNext",
     "lib": [
       "dom",
       "dom.iterable",
-      "es2021"
+      "esnext"
     ],
     "allowJs": true,
     "skipLibCheck": true,

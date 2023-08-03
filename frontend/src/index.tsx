@@ -7,10 +7,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemePreference } from './utils/ThemePreference';
-import { env } from './env';
 import makeServer from './mock-server/server';
 
-const appVersion: string = env.REACT_APP_NRSPARWEBAPP_VERSION || 'dev';
+const appVersion: string = window.config?.VITE_NRSPARWEBAPP_VERSION || 'dev';
 
 const isDevEnv = appVersion === 'dev'
   || appVersion.startsWith('test')

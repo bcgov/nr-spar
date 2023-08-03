@@ -6,7 +6,7 @@ WORKDIR /app
 COPY . .
 RUN apk add --no-cache python3 g++ make && \
     yarn install --frozen-lockfile --prefer-offline && \
-    yarn build:production && \
+    yarn build && \
     rm -rf node_modules
 
 # Caddy
@@ -14,7 +14,7 @@ FROM caddy:2.6.4-alpine
 
 # Copy static files and config
 COPY --from=build /app/build/ /app/dist
-COPY Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
 
 # Packages and caddy format
 RUN apk add --no-cache ca-certificates && \

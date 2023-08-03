@@ -23,16 +23,16 @@
 		Referrer-Policy "same-origin"
 	}
 
-	handle /env.js {
+	handle /env-config.js {
 		header {
 			Content-Type "text/javascript"
 		}
 		respond `
-			window.REACT_APP_SERVER_URL="{$REACT_APP_SERVER_URL}";
-			window.REACT_APP_KC_URL="{$REACT_APP_KC_URL}";
-			window.REACT_APP_KC_REALM="standard";
-			window.REACT_APP_KC_CLIENT_ID="seed-planning-test-4296";
-			window.REACT_APP_ORACLE_SERVER_URL="{$REACT_APP_ORACLE_SERVER_URL}";
+			window.config.VITE_SERVER_URL="{$VITE_SERVER_URL}";
+			window.config.VITE_APP_KC_URL="{$VITE_KC_URL}";
+			window.config.VITE_APP_KC_REALM="standard";
+			window.config.VITE_APP_KC_CLIENT_ID="seed-planning-test-4296";
+			window.config.VITE_APP_ORACLE_SERVER_URL="{$VITE_ORACLE_SERVER_URL}";
 		`
 	}
 
