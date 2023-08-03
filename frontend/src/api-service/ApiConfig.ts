@@ -26,6 +26,8 @@ const ApiConfig = {
 
   filesAndDocs: `${mockServerHost}/api/recent-files`,
 
+  applicantAgencies: `${mockServerHost}/api/applicant-agencies`,
+
   /**
    * Backend API
    */
