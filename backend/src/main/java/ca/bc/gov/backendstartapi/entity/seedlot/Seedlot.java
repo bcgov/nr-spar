@@ -2,13 +2,11 @@ package ca.bc.gov.backendstartapi.entity.seedlot;
 
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
-import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -36,15 +34,9 @@ public class Seedlot implements Serializable {
   @NonNull
   private String id;
 
-  @Column(name = "seedlot_status_code", length = 3, nullable = false)
-  @Enumerated(EnumType.STRING)
-  @NonNull
-  private SeedlotStatusEnum status;
-
-  public Seedlot(String id, SeedlotStatusEnum status) {
-    this.id = id;
-    this.status = status;
-  }
+  @JoinColumn(name = "seedlot_status_code")
+  @ManyToOne
+  private SeedlotStatusEntity seedlotStatus;
 
   @Column(name = "seedlot_comment", length = 2000)
   private String comment;
@@ -220,5 +212,10 @@ public class Seedlot implements Serializable {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
   // endregion
+
+  public Seedlot(String id) {
+    this.id = id;
+  }
 }

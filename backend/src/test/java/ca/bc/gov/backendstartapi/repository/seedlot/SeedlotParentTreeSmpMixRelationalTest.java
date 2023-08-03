@@ -7,7 +7,6 @@ import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
-import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
@@ -36,14 +35,15 @@ class SeedlotParentTreeSmpMixRelationalTest extends SeedlotEntityRelationalTest 
       SeedlotParentTreeSmpMixRepository seedlotParentTreeSmpMixRepository,
       GeneticWorthRepository geneticWorthRepository,
       SeedlotSourceRepository seedlotSourceRepository) {
-    super(seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
+    super(
+        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
     this.seedlotParentTreeRepository = seedlotParentTreeRepository;
     this.seedlotParentTreeSmpMixRepository = seedlotParentTreeSmpMixRepository;
   }
 
   @Test
   void create() {
-    var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
+    var seedlot = createSeedlot("00000");
     var seedlotParentTree =
         new SeedlotParentTree(
             seedlot, 1, new BigDecimal(10), new BigDecimal(10), new AuditInformation("user1"));

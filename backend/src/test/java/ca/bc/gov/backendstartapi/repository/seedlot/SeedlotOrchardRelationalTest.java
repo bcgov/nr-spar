@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOrchardId;
-import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
@@ -36,7 +35,7 @@ class SeedlotOrchardRelationalTest extends SeedlotEntityRelationalTest {
 
   @Test
   void create() {
-    var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
+    var seedlot = createSeedlot("00000");
     var seedlotOrchard = new SeedlotOrchard(seedlot, "ABC");
     seedlotOrchard.setPrimary(true);
     seedlotOrchard.setAuditInformation(new AuditInformation("user1"));

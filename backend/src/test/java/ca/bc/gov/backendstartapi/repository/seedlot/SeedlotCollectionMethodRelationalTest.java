@@ -8,7 +8,6 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodId;
-import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
@@ -48,7 +47,7 @@ class SeedlotCollectionMethodRelationalTest extends SeedlotEntityRelationalTest 
     var effectiveDate = now.minusDays(2);
     var expiryDate = now.plusDays(2);
     var effectiveDateRange = new EffectiveDateRange(effectiveDate, expiryDate);
-    var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
+    var seedlot = createSeedlot("00000");
     var coneCollectionMethod = new ConeCollectionMethodEntity(999, "digging", effectiveDateRange);
 
     coneCollectionMethodTestRepo.saveAndFlush(coneCollectionMethod);

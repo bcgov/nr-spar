@@ -12,17 +12,17 @@ import lombok.Setter;
 /** Entity for the list of seedlot status */
 @Entity
 @NoArgsConstructor
-@Table(name = "seedlot_source_list")
+@Table(name = "seedlot_status_list")
 @Getter
 @Setter
-public class SeedlotSourceEntity extends CodeDescriptionEntity {
+public class SeedlotStatusEntity extends CodeDescriptionEntity {
   @Id
-  @Column(name = "seedlot_source_code", length = 3)
-  private String seedlotSourceCode;
+  @Column(name = "seedlot_status_code", length = 3)
+  private String seedlotStatusCode;
 
-  public SeedlotSourceEntity(
-      String seedlotSourceCode, String description, EffectiveDateRange effectiveDateRange) {
+  public SeedlotStatusEntity(
+      String seedlotStatusCode, String description, EffectiveDateRange effectiveDateRange) {
     super(description, effectiveDateRange);
-    this.seedlotSourceCode = seedlotSourceCode;
+    this.seedlotStatusCode = seedlotStatusCode;
   }
 }

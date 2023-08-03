@@ -7,7 +7,6 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOwnerQuantityId;
-import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
@@ -44,7 +43,7 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
 
   @Test
   void create() {
-    var seedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
+    var seedlot = createSeedlot("00000");
     var seedlotOwnerQuantity = new SeedlotOwnerQuantity(seedlot, "00020", "21");
 
     LocalDate now = LocalDate.now();

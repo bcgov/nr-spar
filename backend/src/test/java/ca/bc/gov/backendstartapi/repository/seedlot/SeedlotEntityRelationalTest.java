@@ -6,7 +6,6 @@ import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
@@ -33,13 +32,13 @@ abstract class SeedlotEntityRelationalTest {
     this.seedlotSourceRepository = seedlotSourceRepository;
   }
 
-  protected Seedlot createSeedlot(String id, SeedlotStatusEnum status) {
+  protected Seedlot createSeedlot(String id) {
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
     var nonExpiryDate = now.plusDays(2);
     var effectiveDateRange = new EffectiveDateRange(effectiveDate, nonExpiryDate);
 
-    var seedlot = new Seedlot(id, status);
+    var seedlot = new Seedlot(id);
     var geneticClass = new GeneticClassEntity("V", "V for vendetta", effectiveDateRange);
     geneticClassRepository.saveAndFlush(geneticClass);
 

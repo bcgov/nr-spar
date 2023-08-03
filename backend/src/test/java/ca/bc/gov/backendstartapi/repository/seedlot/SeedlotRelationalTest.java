@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
@@ -31,7 +30,7 @@ class SeedlotRelationalTest extends SeedlotEntityRelationalTest {
 
   @Test
   void create() {
-    var savedSeedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
+    var savedSeedlot = createSeedlot("00000");
     var audit = savedSeedlot.getAuditInformation();
 
     assertEquals("user1", audit.getEntryUserId());
@@ -44,7 +43,7 @@ class SeedlotRelationalTest extends SeedlotEntityRelationalTest {
 
   @Test
   void update() {
-    var savedSeedlot = createSeedlot("00000", SeedlotStatusEnum.SUB);
+    var savedSeedlot = createSeedlot("00000");
     var auditInfo = savedSeedlot.getAuditInformation();
 
     final var entryUserId = auditInfo.getEntryUserId();
