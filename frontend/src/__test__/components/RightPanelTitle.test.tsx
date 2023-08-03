@@ -1,10 +1,11 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 import RightPanelTitle from '../../components/RightPanelTitle';
 import '@testing-library/jest-dom';
 
 describe('the right panel title component', () => {
-  const func = jest.fn();
+  const func = vi.fn();
   it('should render correctly', () => {
     const { container } = render(
       <RightPanelTitle title="Test Title" closeFn={func} />

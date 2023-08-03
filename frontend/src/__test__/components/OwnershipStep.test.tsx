@@ -2,20 +2,18 @@ import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm';
 import makeServer from '../../mock-server/server';
-import * as ReactQuery from '@tanstack/react-query';
 
 describe.skip('Ownership Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
 
-  jest.spyOn(ReactQuery, 'useQuery').mockImplementation(
-    jest
-      .fn()
-      .mockReturnValue({ data: [], isLoading: false, isSuccess: true })
-  );
+  vi.mock('react-query', () => {
+    useQuery: vi.fn().mockReturnValue({ data: [], isLoading: false, isSuccess: true });
+  });
 
   beforeEach(async () => {
 

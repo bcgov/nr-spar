@@ -42,6 +42,7 @@ export default function makeServer(environment = 'development') {
       }
       this.passthrough('https://test.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token');
       this.passthrough('https://nr-spar-test-backend.apps.silver.devops.gov.bc.ca/**');
+      this.passthrough('https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca/**');
       this.pretender.handledRequest = (verb) => {
         if (verb.toLowerCase() !== 'get' && verb.toLowerCase() !== 'head') {
           localStorage.setItem('spar-mock-db', JSON.stringify(this.db.dump()));
