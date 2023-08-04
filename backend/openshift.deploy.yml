@@ -57,6 +57,10 @@ parameters:
   - name: ORACLE_SERVER_URL
     description: Oracle back-end api URL
     required: true
+  - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
+    description: Backend environment for OpenSearch. # One of: development, test, production
+    required: true
+    value: development
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -106,9 +110,14 @@ objects:
             - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
               name: ${NAME}
+              volumeMounts:
+                - name: ${NAME}-${ZONE}-fluentbit-logs
+                  mountPath: /logs
               env:
                 - name: NR_SPAR_BACKEND_VERSION
                   value: ${BUILD}
+                - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
+                  value: ${NR_SPAR_BACKEND_ENV_OPENSEARCH}
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
                 - name: KEYCLOAK_REALM_URL
@@ -169,6 +178,10 @@ objects:
                 initialDelaySeconds: 20
                 periodSeconds: 30
                 timeoutSeconds: 10
+          volumes:
+            - name: ${NAME}-${ZONE}-fluentbit-logs
+              persistentVolumeClaim:
+                claimName: ${NAME}-${ZONE}-fluentbit-logs
   - apiVersion: v1
     kind: Service
     metadata:

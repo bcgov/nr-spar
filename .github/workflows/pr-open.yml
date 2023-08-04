@@ -48,10 +48,27 @@ jobs:
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
+            -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
+            -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
           triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
+      - name: FluentBit Init
+        uses: bcgov-nr/action-deployer-openshift@v1.1.1
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          file: backend/openshift.fluentbit.yml
+          overwrite: true
+          parameters:
+            -p NAMESPACE=${{ vars.OC_NAMESPACE }}
+            -p ZONE=${{ github.event.number }}
 
   builds:
     name: Builds
+    needs:
+      - init
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -125,6 +142,7 @@ jobs:
               -p MAX_REPLICAS=1
             triggers: ('common/' 'oracle-api/')
             verification_path: "actuator/health"
+
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.1.1
         with:
