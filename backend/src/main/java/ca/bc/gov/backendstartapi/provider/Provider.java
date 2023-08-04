@@ -18,8 +18,8 @@ public interface Provider {
     return Optional.empty();
   }
 
-  default Optional<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
-    return Optional.empty();
+  default List<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
+    return List.of();
   }
 
   // Oracle API

@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -94,7 +96,7 @@ public class ForestClientEndpoint {
             content = @Content(schema = @Schema(implementation = ForestClientLocationDto.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  public ResponseEntity<Serializable> fetchClientLocations(
+  public List<ForestClientLocationDto> fetchClientLocations(
       @PathVariable("number")
           @Pattern(regexp = "^\\d{8}$|^\\w{1,8}$")
           @Parameter(
@@ -102,12 +104,6 @@ public class ForestClientEndpoint {
               in = ParameterIn.PATH,
               description = "Number that identifies the client to get the locations.")
           String number) {
-    try {
-      var response = forestClientService.fetchClientLocations(number).map(Serializable.class::cast);
-      return ResponseEntity.of(response);
-    } catch (HttpStatusCodeException e) {
-      log.warn("External error while retrieving the locations for forest client " + number, e);
-      return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-    }
+    return forestClientService.fetchClientLocations(number);
   }
 }

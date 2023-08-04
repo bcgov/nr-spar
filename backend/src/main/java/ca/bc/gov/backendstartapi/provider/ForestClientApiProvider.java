@@ -114,26 +114,26 @@ public class ForestClientApiProvider implements Provider {
    * @return an list of the locations of the forest client
    */
   @Override
-  public Optional<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
-    String apiUrl = String.format("%s/clients/{number}/locations?size=70", rootUri);
+  public List<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
+    String apiUrl = String.format("%s/clients/{number}/locations", rootUri);
     log.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
-      ResponseEntity<ForestClientLocationDto> response =
+      ResponseEntity<List<ForestClientLocationDto>> response =
           restTemplate.exchange(
               apiUrl,
               HttpMethod.GET,
               new HttpEntity<>(addHttpHeaders()),
-              ForestClientLocationDto.class,
+              new ParameterizedTypeReference<List<ForestClientLocationDto>> () {},
               createParamsMap("number", number));
 
       log.info("Finished {} request - 200 OK!", PROVIDER);
-      return Optional.of(response.getBody());
+      return response.getBody();
     } catch (HttpClientErrorException httpExc) {
       log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
-    return Optional.empty();
+    return List.of();
   }
 
   @Override

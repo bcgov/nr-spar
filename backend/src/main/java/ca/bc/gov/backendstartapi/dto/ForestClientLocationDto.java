@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.dto;
 
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
 
 /**
  * The location information of Forest Clients
@@ -69,5 +68,4 @@ public record ForestClientLocationDto(
         String returnedMailDate,
     @Schema(description = "An open field containing comments about the location. Optional.")
         String comment
-)
-    implements Serializable{}
+) {}

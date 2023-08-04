@@ -13,6 +13,10 @@ import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -128,7 +132,7 @@ class ForestClientEndpointTest {
   @Test
   @DisplayName("fetchExistentClientLocations")
   void fetchExistentClientLocations() throws Exception {
-    ForestClientLocationDto location =
+    ForestClientLocationDto testLocation =
         new ForestClientLocationDto(
             "00000000",
             "123",
@@ -152,7 +156,15 @@ class ForestClientEndpointTest {
             "Near a park"
         );
 
-    when(forestClientService.fetchClientLocations("00000000")).thenReturn(Optional.of(location));
+
+    List<ForestClientLocationDto> locations =
+        new ArrayList<> () {
+            {
+                add(testLocation);
+            }
+        };
+
+    when(forestClientService.fetchClientLocations("00000000")).thenReturn(locations);
 
     mockMvc
         .perform(
@@ -163,32 +175,32 @@ class ForestClientEndpointTest {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpectAll(
-            jsonPath("$.clientNumber").value(location.clientNumber()),
-            jsonPath("$.locationCode").value(location.locationCode()),
-            jsonPath("$.locationName").value(location.locationName()),
-            jsonPath("$.companyCode").value(location.companyCode()),
-            jsonPath("$.address1").value(location.address1()),
-            jsonPath("$.address2").value(location.address2()),
-            jsonPath("$.address3").value(location.address3()),
-            jsonPath("$.city").value(location.city()),
-            jsonPath("$.province").value(location.province()),
-            jsonPath("$.postalCode").value(location.postalCode()),
-            jsonPath("$.country").value(location.country()),
-            jsonPath("$.businessPhone").value(location.businessPhone()),
-            jsonPath("$.homePhone").value(location.homePhone()),
-            jsonPath("$.cellPhone").value(location.cellPhone()),
-            jsonPath("$.faxNumber").value(location.faxNumber()),
-            jsonPath("$.email").value(location.email()),
-            jsonPath("$.expired").value(location.expired().name()),
-            jsonPath("$.trusted").value(location.trusted().name()),
-            jsonPath("$.returnedMailDate").value(location.returnedMailDate()),
-            jsonPath("$.comment").value(location.comment()));
+            jsonPath("$[0].clientNumber").value(locations.get(0).clientNumber()),
+            jsonPath("$[0].locationCode").value(locations.get(0).locationCode()),
+            jsonPath("$[0].locationName").value(locations.get(0).locationName()),
+            jsonPath("$[0].companyCode").value(locations.get(0).companyCode()),
+            jsonPath("$[0].address1").value(locations.get(0).address1()),
+            jsonPath("$[0].address2").value(locations.get(0).address2()),
+            jsonPath("$[0].address3").value(locations.get(0).address3()),
+            jsonPath("$[0].city").value(locations.get(0).city()),
+            jsonPath("$[0].province").value(locations.get(0).province()),
+            jsonPath("$[0].postalCode").value(locations.get(0).postalCode()),
+            jsonPath("$[0].country").value(locations.get(0).country()),
+            jsonPath("$[0].businessPhone").value(locations.get(0).businessPhone()),
+            jsonPath("$[0].homePhone").value(locations.get(0).homePhone()),
+            jsonPath("$[0].cellPhone").value(locations.get(0).cellPhone()),
+            jsonPath("$[0].faxNumber").value(locations.get(0).faxNumber()),
+            jsonPath("$[0].email").value(locations.get(0).email()),
+            jsonPath("$[0].expired").value(locations.get(0).expired().name()),
+            jsonPath("$[0].trusted").value(locations.get(0).trusted().name()),
+            jsonPath("$[0].returnedMailDate").value(locations.get(0).returnedMailDate()),
+            jsonPath("$[0].comment").value(locations.get(0).comment()));
   }
 
   @Test
   @DisplayName("fetchNonExistentClientByNumber")
   void fetchNonExistentClientLocations() throws Exception {
-    when(forestClientService.fetchClientLocations("00000000")).thenReturn(Optional.empty());
+    when(forestClientService.fetchClientLocations("00000000")).thenReturn(Collections.emptyList());
 
     mockMvc
         .perform(
