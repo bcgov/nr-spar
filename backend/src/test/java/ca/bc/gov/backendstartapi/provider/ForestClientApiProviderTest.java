@@ -151,7 +151,7 @@ class ForestClientApiProviderTest {
   @Test
   @DisplayName("fetchExistentClientLocation")
   void fetchExistentClientLocation() {
-    String number = "00012797";
+    String number = "00030064";
     String url = "/null/clients/" + number + "/locations";
 
     String json =

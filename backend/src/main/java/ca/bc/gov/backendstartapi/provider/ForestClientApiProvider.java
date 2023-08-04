@@ -114,7 +114,7 @@ public class ForestClientApiProvider implements Provider {
    */
   @Override
   public List<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
-    String apiUrl = String.format("%s/clients/{number}/locations", rootUri);
+    String apiUrl = String.format("%s/clients/%s/locations", rootUri, number);
     log.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
