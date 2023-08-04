@@ -18,6 +18,7 @@ import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
 import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
+import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
@@ -48,13 +49,6 @@ import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 
 import './styles.scss';
 
-const agencyOptions = [
-  '0032 - Strong Seeds Orchard - SSO',
-  '0035 - Weak Seeds Orchard - WSO',
-  '0038 - Okay Seeds Orchard - OSO',
-  '0041 - Great Seeds Orchard - GSO',
-  '0043 - Bad Seeds Orchard - BSO'
-];
 const defaultExtStorCode = '00';
 const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 
@@ -100,7 +94,11 @@ const SeedlotRegistrationForm = () => {
     queryFn: getMaleFemaleMethodology
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const applicantAgencyQuery = useQuery({
+    queryKey: ['applicant-agencies'],
+    queryFn: () => getApplicantAgenciesOptions()
+  });
+
   const [allInvalidationObj, setAllInvalidationObj] = useState<AllStepInvalidationObj>({
     collectionStep: initInvalidationObj(),
     interimStep: initInvalidationObj(),
@@ -142,6 +140,7 @@ const SeedlotRegistrationForm = () => {
   const renderStep = () => {
     const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
     const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
+    const agencyOptions = applicantAgencyQuery.data ? applicantAgencyQuery.data : [];
 
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
@@ -267,6 +266,7 @@ const SeedlotRegistrationForm = () => {
                 && paymentMethodsQuery.isSuccess
                 && maleFemaleMethodologyQuery.isSuccess
                 && coneCollectionMethodsQuery.isSuccess
+                && applicantAgencyQuery.isSuccess
               )
                 ? renderStep()
                 : <Loading />
