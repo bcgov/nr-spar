@@ -12,8 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import org.hibernate.annotations.SourceType;
-import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * Abstract class for entity with code and description, related to {@link CodeDescriptionDto}
@@ -31,7 +29,6 @@ public abstract class CodeDescriptionEntity {
   @Embedded @NonNull private EffectiveDateRange effectiveDateRange;
 
   /** The date and time of the last update. */
-  @UpdateTimestamp(source = SourceType.DB)
   @Column(name = "update_timestamp")
   private Instant updateTimestamp;
 
