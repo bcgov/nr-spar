@@ -20,6 +20,9 @@ public class MethodOfPaymentEntity extends CodeDescriptionEntity {
   @Column(name = "method_of_payment_code", length = 3)
   private String methodOfPaymentCode;
 
+  @Column(name = "default_method_ind", nullable = true)
+  private Boolean isDefault;
+
   public MethodOfPaymentEntity(
       String methodOfPaymentCode, String description, EffectiveDateRange effectiveDateRange) {
     super(description, effectiveDateRange);

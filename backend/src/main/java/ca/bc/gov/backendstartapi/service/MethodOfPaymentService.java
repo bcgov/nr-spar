@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.MethodOfPaymentDto;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,15 +17,18 @@ public class MethodOfPaymentService {
     this.methodOfPaymentRepository = methodOfPaymentRepository;
   }
 
-  public List<CodeDescriptionDto> getAllMethodOfPayment() {
+  public List<MethodOfPaymentDto> getAllMethodOfPayment() {
     log.info("Fetching all method of payment");
-    List<CodeDescriptionDto> resultList = new ArrayList<>();
+    List<MethodOfPaymentDto> resultList = new ArrayList<>();
     methodOfPaymentRepository.findAll().stream()
         .filter(method -> method.isValid())
         .forEach(
             method -> {
-              CodeDescriptionDto methodToAdd =
-                  new CodeDescriptionDto(method.getMethodOfPaymentCode(), method.getDescription());
+              MethodOfPaymentDto methodToAdd =
+                  new MethodOfPaymentDto(
+                      method.getMethodOfPaymentCode(),
+                      method.getDescription(),
+                      method.getIsDefault());
               resultList.add(methodToAdd);
             });
 

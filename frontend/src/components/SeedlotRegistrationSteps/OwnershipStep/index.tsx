@@ -217,7 +217,7 @@ const OwnershipStep = (
     const {
       newValidObj,
       newOwnerArr
-    }: StateReturnObj = insertOwnerForm(state, invalidState);
+    }: StateReturnObj = insertOwnerForm(state, invalidState, methodsOfPayment);
     setStepData(newOwnerArr);
     setInvalidState(newValidObj);
   };

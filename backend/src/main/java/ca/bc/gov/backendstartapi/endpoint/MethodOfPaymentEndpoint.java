@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.MethodOfPaymentDto;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
 import ca.bc.gov.backendstartapi.service.MethodOfPaymentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Endpoints to fetch {@link PaymentMethodEnum}. */
+/** Endpoints to fetch {@link MethodOfPaymentEntity}. */
 @RestController
 @RequestMapping(path = "/api/methods-of-payment", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
 @Tag(name = "MethodsOfPayment")
@@ -70,7 +70,7 @@ public class MethodOfPaymentEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<CodeDescriptionDto> getAllMethodOfPayment() {
+  public List<MethodOfPaymentDto> getAllMethodOfPayment() {
     return methodOfPaymentService.getAllMethodOfPayment();
   }
 }

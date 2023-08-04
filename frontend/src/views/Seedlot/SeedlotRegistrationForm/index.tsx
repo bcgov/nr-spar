@@ -48,6 +48,7 @@ import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptions
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 
 import './styles.scss';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 const defaultExtStorCode = '00';
 const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
@@ -71,11 +72,6 @@ const SeedlotRegistrationForm = () => {
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
     queryFn: getFundingSources
-  });
-
-  const methodsOfPaymentQuery = useQuery({
-    queryKey: ['methods-of-payment'],
-    queryFn: getMethodsOfPayment
   });
 
   const coneCollectionMethodsQuery = useQuery({
@@ -113,6 +109,20 @@ const SeedlotRegistrationForm = () => {
     newData[stepName] = stepData;
     setAllStepData(newData);
   };
+
+  const methodsOfPaymentQuery = useQuery({
+    queryKey: ['methods-of-payment'],
+    queryFn: getMethodsOfPayment,
+    onSuccess: (dataArr: MultiOptionsObj[]) => {
+      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
+      const defaultMethod = defaultMethodArr.length === 0 ? null : defaultMethodArr[0];
+      if (!allStepData.ownershipStep[0].methodOfPayment) {
+        const tempOwnershipData = structuredClone(allStepData.ownershipStep);
+        tempOwnershipData[0].methodOfPayment = defaultMethod;
+        setStepData('ownershipStep', tempOwnershipData);
+      }
+    }
+  });
 
   const setInvalidState = (stepName: keyof AllStepInvalidationObj, stepInvalidData: any) => {
     const newObj = { ...allInvalidationObj };
@@ -171,7 +181,7 @@ const SeedlotRegistrationForm = () => {
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             fundingSources={getMultiOptList(fundingSourcesQuery.data)}
-            methodsOfPayment={getMultiOptList(methodsOfPaymentQuery.data)}
+            methodsOfPayment={methodsOfPaymentQuery.data ?? []}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
             setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />

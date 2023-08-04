@@ -27,7 +27,7 @@ class SeedlotStatusEndpointTest {
 
   @MockBean private SeedlotStatusService seedlotStatusService;
 
-  private static final String API_PATH = "/api/seedlot-status";
+  private static final String API_PATH = "/api/seedlot-statuses";
 
   private static final String CONTENT_HEADER = "Content-Type";
 

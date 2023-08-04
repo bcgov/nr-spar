@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.MethodOfPaymentDto;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
@@ -31,10 +31,10 @@ class MethodOfPaymentServiceTest {
   @Test
   @DisplayName("getAllMethodOfPaymentServiceTest")
   void getAllMethodOfPaymentServiceTest() {
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("CLA", "Invoice to MOF Client Account");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("CSH", "Cash Sale");
+    MethodOfPaymentDto firstMethod = new MethodOfPaymentDto("CLA", "Invoice to MOF Client Account", null);
+    MethodOfPaymentDto secondMethod = new MethodOfPaymentDto("CSH", "Cash Sale", null);
 
-    List<CodeDescriptionDto> testDtoList =
+    List<MethodOfPaymentDto> testDtoList =
         new ArrayList<>() {
           {
             add(firstMethod);
@@ -72,7 +72,7 @@ class MethodOfPaymentServiceTest {
 
     when(methodOfPaymentRepository.findAll()).thenReturn(testEntityList);
 
-    List<CodeDescriptionDto> resultList = methodOfPaymentService.getAllMethodOfPayment();
+    List<MethodOfPaymentDto> resultList = methodOfPaymentService.getAllMethodOfPayment();
 
     Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());

@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.MethodOfPaymentDto;
 import ca.bc.gov.backendstartapi.service.MethodOfPaymentService;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ class MethodOfPaymentEndpointTest {
 
   @MockBean private MethodOfPaymentService methodOfPaymentService;
 
-  private static final String API_PATH = "/api/method-of-payment";
+  private static final String API_PATH = "/api/methods-of-payment";
 
   private static final String CONTENT_HEADER = "Content-Type";
 
@@ -38,11 +38,13 @@ class MethodOfPaymentEndpointTest {
   @WithMockUser(roles = "user_read")
   void getAllMethodOfPaymentTest() throws Exception {
 
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("CLA", "Invoice to MOF Client Account");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("CSH", "Cash Sale");
-    CodeDescriptionDto thirdMethod = new CodeDescriptionDto("ITC", "Invoice to Client Address");
+    MethodOfPaymentDto firstMethod =
+        new MethodOfPaymentDto("CLA", "Invoice to MOF Client Account", null);
+    MethodOfPaymentDto secondMethod = new MethodOfPaymentDto("CSH", "Cash Sale", null);
+    MethodOfPaymentDto thirdMethod =
+        new MethodOfPaymentDto("ITC", "Invoice to Client Address", true);
 
-    List<CodeDescriptionDto> testList =
+    List<MethodOfPaymentDto> testList =
         new ArrayList<>() {
           {
             add(firstMethod);

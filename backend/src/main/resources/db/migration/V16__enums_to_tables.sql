@@ -469,10 +469,12 @@ add
 create table spar.method_of_payment_list (
 	method_of_payment_code varchar(3) not null,
 	description varchar(120) not null,
+	default_method_ind boolean default null,
 	effective_date date not null,
 	expiry_date date not null,
 	update_timestamp timestamp not null,
-	constraint method_of_payment_list_pk primary key(method_of_payment_code)
+	constraint method_of_payment_list_pk primary key(method_of_payment_code),
+	constraint only_one_default_method unique (default_method_ind)
 );
 
 comment on table spar.method_of_payment_list is 'A list of valid Method of Payment Codes.';
@@ -481,7 +483,9 @@ comment on column spar.method_of_payment_list.method_of_payment_code is 'A code 
 
 comment on column spar.method_of_payment_list.description is 'A description for the affiliated code.';
 
-comment on column spar.method_of_payment_list.effective_date is 'The effective date the code is in effect';
+comment on column spar.method_of_payment_list.default_method_ind is 'A flag that determines if the method is default.';
+
+comment on column spar.method_of_payment_list.effective_date is 'The effective date the code is in effect.';
 
 comment on column spar.method_of_payment_list.expiry_date is 'The date the code expires on.';
 
@@ -491,6 +495,7 @@ insert into
 	spar.method_of_payment_list (
 		method_of_payment_code,
 		description,
+		default_method_ind,
 		effective_date,
 		expiry_date,
 		update_timestamp
@@ -499,6 +504,7 @@ values
 	(
 		'CLA',
 		'Invoice to MOF Client Account',
+		null,
 		'1905-01-01',
 		'9999-12-31',
 		current_timestamp
@@ -506,6 +512,7 @@ values
 	(
 		'CSH',
 		'Cash Sale',
+		null,
 		'1905-01-01',
 		'9999-12-31',
 		current_timestamp
@@ -513,6 +520,7 @@ values
 	(
 		'ITC',
 		'Invoice to Client Address',
+		true,
 		'1905-01-01',
 		'9999-12-31',
 		current_timestamp
@@ -520,6 +528,7 @@ values
 	(
 		'ITO',
 		'Invoice to Other Address',
+		null,
 		'1905-01-01',
 		'9999-12-31',
 		current_timestamp
@@ -527,6 +536,7 @@ values
 	(
 		'JV',
 		'Journal Voucher',
+		null,
 		'1905-01-01',
 		'9999-12-31',
 		current_timestamp
@@ -534,6 +544,7 @@ values
 	(
 		'NC',
 		'Non-chargeable',
+		null,
 		'1905-01-01',
 		'9999-12-31',
 		current_timestamp
@@ -697,6 +708,4 @@ alter column
 	cone_collection_method_desc type varchar(50);
 
 alter table
-	spar.seedlot_collection_method
-rename column
-	cone_collection_method_desc to cone_collection_method_other_desc;
+	spar.seedlot_collection_method rename column cone_collection_method_desc to cone_collection_method_other_desc;
