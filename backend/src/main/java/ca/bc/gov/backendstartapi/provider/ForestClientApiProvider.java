@@ -3,7 +3,6 @@ package ca.bc.gov.backendstartapi.provider;
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -124,7 +123,7 @@ public class ForestClientApiProvider implements Provider {
               apiUrl,
               HttpMethod.GET,
               new HttpEntity<>(addHttpHeaders()),
-              new ParameterizedTypeReference<List<ForestClientLocationDto>> () {},
+              new ParameterizedTypeReference<List<ForestClientLocationDto>>() {},
               createParamsMap("number", number));
 
       log.info("Finished {} request - 200 OK!", PROVIDER);

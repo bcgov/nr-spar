@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * This enumeration represents a forest client
  * location code expired/trusted status.
  */
-@Schema(description = "This object represents a forest client\n" + //
-    " * location code expired/trusted status.")
+@Schema(description = "This object represents a forest client\n" //
+    + " * location code expired/trusted status.")
 public enum ForestClientExpiredEnum implements DescribedEnum {
   Y("Yes"),
   N("No");

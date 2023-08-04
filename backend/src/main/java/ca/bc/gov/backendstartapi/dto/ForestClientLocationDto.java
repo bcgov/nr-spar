@@ -4,7 +4,7 @@ import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The location information of Forest Clients
+ * The location information of Forest Clients.
  *
  * @param clientNumber the number that identifies this client
  * @param locationCode the location's index

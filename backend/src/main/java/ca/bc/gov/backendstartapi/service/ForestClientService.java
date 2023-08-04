@@ -3,7 +3,6 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
-
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;

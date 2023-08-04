@@ -11,7 +11,6 @@ import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
-
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;

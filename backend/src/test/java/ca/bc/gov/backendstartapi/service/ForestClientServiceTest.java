@@ -8,7 +8,6 @@ import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
 import ca.bc.gov.backendstartapi.provider.ForestClientApiProvider;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,7 +83,8 @@ class ForestClientServiceTest {
   void fetchNonExistingLocation() {
     String number = "00000001";
 
-    when(forestClientApiProvider.fetchLocationsByClientNumber(number)).thenReturn(Collections.emptyList());
+    when(forestClientApiProvider.fetchLocationsByClientNumber(number))
+        .thenReturn(Collections.emptyList());
 
     List<ForestClientLocationDto> locationDto = forestClientService.fetchClientLocations(number);
 
@@ -120,9 +120,9 @@ class ForestClientServiceTest {
             "");
 
     List<ForestClientLocationDto> locations =
-        new ArrayList<> () {
+        new ArrayList<>() {
             {
-                add(location);
+              add(location);
             }
         };
 
@@ -147,7 +147,9 @@ class ForestClientServiceTest {
     Assertions.assertEquals("V1N1H3", singleLocationDto.postalCode());
     Assertions.assertEquals("CANADA", singleLocationDto.country());
     Assertions.assertEquals("2503658600", singleLocationDto.businessPhone());
-    Assertions.assertEquals(ForestClientExpiredEnum.N, ForestClientExpiredEnum.valueOf(singleLocationDto.expired().name()));
-    Assertions.assertEquals(ForestClientExpiredEnum.N, ForestClientExpiredEnum.valueOf(singleLocationDto.trusted().name()));
+    Assertions.assertEquals(ForestClientExpiredEnum.N,
+                            ForestClientExpiredEnum.valueOf(singleLocationDto.expired().name()));
+    Assertions.assertEquals(ForestClientExpiredEnum.N,
+                            ForestClientExpiredEnum.valueOf(singleLocationDto.trusted().name()));
   }
 }
