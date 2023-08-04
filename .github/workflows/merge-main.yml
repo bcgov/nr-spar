@@ -62,6 +62,10 @@ jobs:
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
+            -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
+            -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
 
   deploy-test:
     name: TEST Deployment
@@ -72,7 +76,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api]
+        name: [database, backend, frontend, oracle-api, fluentbit]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -84,6 +88,7 @@ jobs:
             parameters:
               -p BUILD=test
               -p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=test
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -102,6 +107,10 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
+          - name: fluentbit
+            file: backend/openshift.fluentbit.yml
+            overwrite: true
+            parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
@@ -174,6 +183,10 @@ jobs:
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
+            -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
+            -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
 
   deploy-prod:
     name: PROD Deployment
@@ -183,7 +196,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api]
+        name: [database, backend, frontend, oracle-api, fluentbit]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -195,6 +208,7 @@ jobs:
             parameters:
               -p BUILD=prod
               -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -213,6 +227,10 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
+          - name: fluentbit
+            file: backend/openshift.fluentbit.yml
+            overwrite: true
+            parameters: -p NAMESPACE=${{ vars.OC_NAMESPACE }}
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
