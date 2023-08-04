@@ -62,8 +62,15 @@ class MethodOfPaymentServiceTest {
     when(methodOfPaymentRepository.findAll()).thenReturn(testEntityList);
 
     MethodOfPaymentDto firstMethod =
-        new MethodOfPaymentDto("CLA", "Invoice to MOF Client Account", null);
-    MethodOfPaymentDto secondMethod = new MethodOfPaymentDto("CSH", "Cash Sale", null);
+        new MethodOfPaymentDto(
+            firstEntity.getMethodOfPaymentCode(),
+            firstEntity.getDescription(),
+            firstEntity.getIsDefault());
+    MethodOfPaymentDto secondMethod =
+        new MethodOfPaymentDto(
+            secondEntity.getMethodOfPaymentCode(),
+            secondEntity.getDescription(),
+            secondEntity.getIsDefault());
 
     List<MethodOfPaymentDto> testDtoList =
         new ArrayList<>() {

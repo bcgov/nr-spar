@@ -61,8 +61,10 @@ class SeedlotSourceServiceTest {
 
     when(seedlotSourceRepository.findAll()).thenReturn(testEntityList);
 
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("CUS", "Custom Lot");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("TPT", "Tested Parent Trees");
+    CodeDescriptionDto firstMethod =
+        new CodeDescriptionDto(firstEntity.getSeedlotSourceCode(), firstEntity.getDescription());
+    CodeDescriptionDto secondMethod =
+        new CodeDescriptionDto(secondEntity.getSeedlotSourceCode(), secondEntity.getDescription());
 
     List<CodeDescriptionDto> testDtoList =
         new ArrayList<>() {

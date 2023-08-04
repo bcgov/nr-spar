@@ -39,11 +39,6 @@ class GameticMethodologyServiceTest {
     var effectiveDateRange = new EffectiveDateRange(effectiveDate, nonExpiryDate);
     var expiredDateRange = new EffectiveDateRange(effectiveDate, expiredDate);
 
-    // String gameticMethodologyCode,
-    // String description,
-    // boolean isFemaleMethodology,
-    // boolean isPliSpecies,
-    // EffectiveDateRange effectiveDateRange
     GameticMethodologyEntity firstEntity =
         new GameticMethodologyEntity("F1", "Visual Estimate", true, false, effectiveDateRange);
     gameticMethodologyRepository.saveAndFlush(firstEntity);
@@ -85,14 +80,29 @@ class GameticMethodologyServiceTest {
     List<GameticMethodologyDto> resultList = gameticMethodologyService.getAllGameticMethodologies();
 
     GameticMethodologyDto firstMethod =
-        new GameticMethodologyDto("F1", "Visual Estimate", true, false);
+        new GameticMethodologyDto(
+            firstEntity.getGameticMethodologyCode(),
+            firstEntity.getDescription(),
+            firstEntity.isFemaleMethodology(),
+            firstEntity.isPliSpecies());
     GameticMethodologyDto secondMethod =
-        new GameticMethodologyDto("F8", "Ramet Proportion by Clone", true, true);
+        new GameticMethodologyDto(
+            secondEntity.getGameticMethodologyCode(),
+            secondEntity.getDescription(),
+            secondEntity.isFemaleMethodology(),
+            secondEntity.isPliSpecies());
     GameticMethodologyDto thirdMethod =
-        new GameticMethodologyDto("M1", "Portion of Ramets in Orchard", false, false);
+        new GameticMethodologyDto(
+            thirdEntity.getGameticMethodologyCode(),
+            thirdEntity.getDescription(),
+            thirdEntity.isFemaleMethodology(),
+            thirdEntity.isPliSpecies());
     GameticMethodologyDto fourthMethod =
         new GameticMethodologyDto(
-            "M5", "Ramet Proportion by Age and Expected Production", false, true);
+            fourthEntity.getGameticMethodologyCode(),
+            fourthEntity.getDescription(),
+            fourthEntity.isFemaleMethodology(),
+            fourthEntity.isPliSpecies());
 
     List<GameticMethodologyDto> testDtoList =
         new ArrayList<>() {

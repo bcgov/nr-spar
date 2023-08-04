@@ -68,10 +68,9 @@ class GeneticWorthServiceTest {
     List<CodeDescriptionDto> resultList = geneticWorthService.getAllGeneticWorth();
 
     CodeDescriptionDto firstMethod =
-        new CodeDescriptionDto("AD", "Animal browse resistance (deer)");
+        new CodeDescriptionDto(firstEntity.getGeneticWorthCode(), firstEntity.getDescription());
     CodeDescriptionDto secondMethod =
-        new CodeDescriptionDto(
-            "DFS", "Disease resistance for Dothistroma needle blight (Dothistroma septosporum)");
+        new CodeDescriptionDto(secondEntity.getGeneticWorthCode(), secondEntity.getDescription());
 
     List<CodeDescriptionDto> testDtoList =
         new ArrayList<>() {

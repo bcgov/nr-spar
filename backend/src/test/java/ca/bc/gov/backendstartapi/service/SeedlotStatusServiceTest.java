@@ -61,8 +61,10 @@ class SeedlotStatusServiceTest {
 
     when(seedlotStatusRepository.findAll()).thenReturn(testEntityList);
 
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("APP", "Approved");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("CAN", "Cancelled");
+    CodeDescriptionDto firstMethod =
+        new CodeDescriptionDto(firstEntity.getSeedlotStatusCode(), firstEntity.getDescription());
+    CodeDescriptionDto secondMethod =
+        new CodeDescriptionDto(secondEntity.getSeedlotStatusCode(), secondEntity.getDescription());
 
     List<CodeDescriptionDto> testDtoList =
         new ArrayList<>() {

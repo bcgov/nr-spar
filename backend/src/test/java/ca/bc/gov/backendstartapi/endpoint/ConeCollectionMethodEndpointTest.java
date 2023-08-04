@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.service.ConeCollectionMethodService;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,16 +41,8 @@ class ConeCollectionMethodEndpointTest {
     CodeDescriptionDto secondMethod = new CodeDescriptionDto("2", "Aerial clipping/topping");
     CodeDescriptionDto thirdMethod = new CodeDescriptionDto("3", "Felled trees");
 
-    List<CodeDescriptionDto> testList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-            add(thirdMethod);
-          }
-        };
-
-    when(coneCollectionMethodService.getAllConeCollectionMethods()).thenReturn(testList);
+    when(coneCollectionMethodService.getAllConeCollectionMethods())
+        .thenReturn(List.of(firstMethod, secondMethod, thirdMethod));
 
     mockMvc
         .perform(

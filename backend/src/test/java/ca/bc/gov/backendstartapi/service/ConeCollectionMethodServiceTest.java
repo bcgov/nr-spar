@@ -65,9 +65,18 @@ class ConeCollectionMethodServiceTest {
 
     when(coneCollectionMethodRepository.findAll()).thenReturn(testEntityList);
 
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("1", "Aerial raking");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("2", "Aerial clipping/topping");
-    CodeDescriptionDto thirdMethod = new CodeDescriptionDto("3", "Felled trees");
+    CodeDescriptionDto firstMethod =
+        new CodeDescriptionDto(
+            String.valueOf(firstEntity.getConeCollectionMethodCode()),
+            firstEntity.getDescription());
+    CodeDescriptionDto secondMethod =
+        new CodeDescriptionDto(
+            String.valueOf(secondEntity.getConeCollectionMethodCode()),
+            secondEntity.getDescription());
+    CodeDescriptionDto thirdMethod =
+        new CodeDescriptionDto(
+            String.valueOf(thirdEntity.getConeCollectionMethodCode()),
+            thirdEntity.getDescription());
 
     List<CodeDescriptionDto> testDtoList =
         new ArrayList<>() {

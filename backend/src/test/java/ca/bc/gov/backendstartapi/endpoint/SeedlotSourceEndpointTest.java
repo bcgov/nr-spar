@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.service.SeedlotSourceService;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,16 +41,8 @@ class SeedlotSourceEndpointTest {
     CodeDescriptionDto secondMethod = new CodeDescriptionDto("TPT", "Tested Parent Trees");
     CodeDescriptionDto thirdMethod = new CodeDescriptionDto("UPT", "Untested Parent Trees");
 
-    List<CodeDescriptionDto> testList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-            add(thirdMethod);
-          }
-        };
-
-    when(seedlotSourceService.getAllSeedlotSource()).thenReturn(testList);
+    when(seedlotSourceService.getAllSeedlotSource())
+        .thenReturn(List.of(firstMethod, secondMethod, thirdMethod));
 
     mockMvc
         .perform(

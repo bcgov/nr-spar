@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,15 +44,7 @@ class GeneticWorthEndpointTest {
         new CodeDescriptionDto(
             "DFS", "Disease resistance for Dothistroma needle blight (Dothistroma septosporum)");
 
-    List<CodeDescriptionDto> testList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-          }
-        };
-
-    when(geneticWorthService.getAllGeneticWorth()).thenReturn(testList);
+    when(geneticWorthService.getAllGeneticWorth()).thenReturn(List.of(firstMethod, secondMethod));
 
     mockMvc
         .perform(

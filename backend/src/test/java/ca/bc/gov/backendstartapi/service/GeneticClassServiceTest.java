@@ -63,8 +63,10 @@ class GeneticClassServiceTest {
 
     List<CodeDescriptionDto> resultList = geneticClassService.getAllGeneticClass();
 
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("A", "Orchard Seed or Cuttings");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("B", "Natural Stand Seed or Cuttings");
+    CodeDescriptionDto firstMethod =
+        new CodeDescriptionDto(firstEntity.getGeneticClassCode(), firstEntity.getDescription());
+    CodeDescriptionDto secondMethod =
+        new CodeDescriptionDto(secondEntity.getGeneticClassCode(), secondEntity.getDescription());
 
     List<CodeDescriptionDto> testDtoList =
         new ArrayList<>() {

@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.exception.NoGeneticClassException;
 import ca.bc.gov.backendstartapi.service.GeneticClassService;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,15 +43,7 @@ class GeneticClassEndpointTest {
     CodeDescriptionDto firstMethod = new CodeDescriptionDto("A", "Orchard Seed or Cuttings");
     CodeDescriptionDto secondMethod = new CodeDescriptionDto("B", "Natural Stand Seed or Cuttings");
 
-    List<CodeDescriptionDto> testList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-          }
-        };
-
-    when(geneticClassService.getAllGeneticClass()).thenReturn(testList);
+    when(geneticClassService.getAllGeneticClass()).thenReturn(List.of(firstMethod, secondMethod));
 
     mockMvc
         .perform(

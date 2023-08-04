@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.GameticMethodologyDto;
 import ca.bc.gov.backendstartapi.service.GameticMethodologyService;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,17 +40,8 @@ class GameticMethodologyEndpointTest {
         new GameticMethodologyDto(
             "M5", "Ramet Proportion by Age and Expected Production", false, true);
 
-    List<GameticMethodologyDto> testList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-            add(thirdMethod);
-            add(fourthMethod);
-          }
-        };
-
-    when(gameticMethodologyService.getAllGameticMethodologies()).thenReturn(testList);
+    when(gameticMethodologyService.getAllGameticMethodologies())
+        .thenReturn(List.of(firstMethod, secondMethod, thirdMethod, fourthMethod));
 
     mockMvc
         .perform(

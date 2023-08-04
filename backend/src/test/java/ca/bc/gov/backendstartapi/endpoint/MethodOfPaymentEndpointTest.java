@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.MethodOfPaymentDto;
 import ca.bc.gov.backendstartapi.service.MethodOfPaymentService;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,16 +43,8 @@ class MethodOfPaymentEndpointTest {
     MethodOfPaymentDto thirdMethod =
         new MethodOfPaymentDto("ITC", "Invoice to Client Address", true);
 
-    List<MethodOfPaymentDto> testList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-            add(thirdMethod);
-          }
-        };
-
-    when(methodOfPaymentService.getAllMethodOfPayment()).thenReturn(testList);
+    when(methodOfPaymentService.getAllMethodOfPayment())
+        .thenReturn(List.of(firstMethod, secondMethod, thirdMethod));
 
     mockMvc
         .perform(
