@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Entity for the list of genetic class */
+/** Entity for the list of genetic class. */
 @Entity
 @NoArgsConstructor
 @Table(name = "method_of_payment_list")

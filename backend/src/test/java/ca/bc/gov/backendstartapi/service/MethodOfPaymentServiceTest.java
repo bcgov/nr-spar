@@ -31,17 +31,6 @@ class MethodOfPaymentServiceTest {
   @Test
   @DisplayName("getAllMethodOfPaymentServiceTest")
   void getAllMethodOfPaymentServiceTest() {
-    MethodOfPaymentDto firstMethod = new MethodOfPaymentDto("CLA", "Invoice to MOF Client Account", null);
-    MethodOfPaymentDto secondMethod = new MethodOfPaymentDto("CSH", "Cash Sale", null);
-
-    List<MethodOfPaymentDto> testDtoList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-          }
-        };
-
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
     var nonExpiryDate = now.plusDays(2);
@@ -71,6 +60,18 @@ class MethodOfPaymentServiceTest {
         };
 
     when(methodOfPaymentRepository.findAll()).thenReturn(testEntityList);
+
+    MethodOfPaymentDto firstMethod =
+        new MethodOfPaymentDto("CLA", "Invoice to MOF Client Account", null);
+    MethodOfPaymentDto secondMethod = new MethodOfPaymentDto("CSH", "Cash Sale", null);
+
+    List<MethodOfPaymentDto> testDtoList =
+        new ArrayList<>() {
+          {
+            add(firstMethod);
+            add(secondMethod);
+          }
+        };
 
     List<MethodOfPaymentDto> resultList = methodOfPaymentService.getAllMethodOfPayment();
 

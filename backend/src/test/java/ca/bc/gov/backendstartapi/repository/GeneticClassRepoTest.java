@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ class GeneticClassRepoTest {
     var testCode = "A";
     var testObj = geneticClassRepository.findById(testCode);
     assertTrue(testObj.isPresent());
-    assertEquals(testCode ,testObj.get().getGeneticClassCode());
-    assertEquals("Orchard Seed or Cuttings" ,testObj.get().getDescription());
+    assertEquals(testCode, testObj.get().getGeneticClassCode());
+    assertEquals("Orchard Seed or Cuttings", testObj.get().getDescription());
   }
 }

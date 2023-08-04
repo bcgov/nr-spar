@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Entity for the list of seedlot status */
+/** Entity for the list of seedlot status. */
 @Entity
 @NoArgsConstructor
 @Table(name = "seedlot_source_list")

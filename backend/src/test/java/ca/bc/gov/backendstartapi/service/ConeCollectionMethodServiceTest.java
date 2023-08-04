@@ -31,18 +31,6 @@ class ConeCollectionMethodServiceTest {
   @Test
   @DisplayName("getAllCollectionMethod")
   void getAllCollectionMethod() {
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("1", "Aerial raking");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("2", "Aerial clipping/topping");
-    CodeDescriptionDto thirdMethod = new CodeDescriptionDto("3", "Felled trees");
-
-    List<CodeDescriptionDto> testDtoList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-            add(thirdMethod);
-          }
-        };
 
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
@@ -76,6 +64,19 @@ class ConeCollectionMethodServiceTest {
         };
 
     when(coneCollectionMethodRepository.findAll()).thenReturn(testEntityList);
+
+    CodeDescriptionDto firstMethod = new CodeDescriptionDto("1", "Aerial raking");
+    CodeDescriptionDto secondMethod = new CodeDescriptionDto("2", "Aerial clipping/topping");
+    CodeDescriptionDto thirdMethod = new CodeDescriptionDto("3", "Felled trees");
+
+    List<CodeDescriptionDto> testDtoList =
+        new ArrayList<>() {
+          {
+            add(firstMethod);
+            add(secondMethod);
+            add(thirdMethod);
+          }
+        };
 
     List<CodeDescriptionDto> resultList = coneCollectionMethodService.getAllConeCollectionMethods();
 

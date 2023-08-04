@@ -32,26 +32,6 @@ class GameticMethodologyServiceTest {
   @Test
   @DisplayName("getAllCollectionMethodServiceTest")
   void getAllCollectionMethod() {
-    GameticMethodologyDto firstMethod =
-        new GameticMethodologyDto("F1", "Visual Estimate", true, false);
-    GameticMethodologyDto secondMethod =
-        new GameticMethodologyDto("F8", "Ramet Proportion by Clone", true, true);
-    GameticMethodologyDto thirdMethod =
-        new GameticMethodologyDto("M1", "Portion of Ramets in Orchard", false, false);
-    GameticMethodologyDto fourthMethod =
-        new GameticMethodologyDto(
-            "M5", "Ramet Proportion by Age and Expected Production", false, true);
-
-    List<GameticMethodologyDto> testDtoList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-            add(thirdMethod);
-            add(fourthMethod);
-          }
-        };
-
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
     var nonExpiryDate = now.plusDays(2);
@@ -103,6 +83,26 @@ class GameticMethodologyServiceTest {
     when(gameticMethodologyRepository.findAll()).thenReturn(testEntityList);
 
     List<GameticMethodologyDto> resultList = gameticMethodologyService.getAllGameticMethodologies();
+
+    GameticMethodologyDto firstMethod =
+        new GameticMethodologyDto("F1", "Visual Estimate", true, false);
+    GameticMethodologyDto secondMethod =
+        new GameticMethodologyDto("F8", "Ramet Proportion by Clone", true, true);
+    GameticMethodologyDto thirdMethod =
+        new GameticMethodologyDto("M1", "Portion of Ramets in Orchard", false, false);
+    GameticMethodologyDto fourthMethod =
+        new GameticMethodologyDto(
+            "M5", "Ramet Proportion by Age and Expected Production", false, true);
+
+    List<GameticMethodologyDto> testDtoList =
+        new ArrayList<>() {
+          {
+            add(firstMethod);
+            add(secondMethod);
+            add(thirdMethod);
+            add(fourthMethod);
+          }
+        };
 
     Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());

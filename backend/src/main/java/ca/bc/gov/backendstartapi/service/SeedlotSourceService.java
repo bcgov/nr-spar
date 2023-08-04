@@ -17,6 +17,7 @@ public class SeedlotSourceService {
     this.seedlotSourceRepository = seedlotSourceRepository;
   }
 
+  /** Fetch all valid seedlot source from the repository. */
   public List<CodeDescriptionDto> getAllSeedlotSource() {
     log.info("Fetching all seedlot source");
     List<CodeDescriptionDto> resultList = new ArrayList<>();

@@ -20,6 +20,7 @@ public class GeneticClassService {
     this.geneticClassRepository = geneticClassRepository;
   }
 
+  /** Fetch all valid genetic class from the repository. */
   public List<CodeDescriptionDto> getAllGeneticClass() {
     log.info("Fetching all genetic class");
     List<CodeDescriptionDto> resultList = new ArrayList<>();
@@ -35,6 +36,7 @@ public class GeneticClassService {
     return resultList;
   }
 
+  /** Fetch a single genetic class by code. */
   public CodeDescriptionDto getGeneticClassByCode(String code) {
     log.info("Fetching genetic class with code %s", code);
 

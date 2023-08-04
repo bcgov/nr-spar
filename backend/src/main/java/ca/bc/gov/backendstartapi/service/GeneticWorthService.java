@@ -20,6 +20,7 @@ public class GeneticWorthService {
     this.geneticWorthRepository = geneticWorthRepository;
   }
 
+  /** Fetch all valid genetic worth from the repository. */
   public List<CodeDescriptionDto> getAllGeneticWorth() {
     log.info("Fetching all genetic worth");
     List<CodeDescriptionDto> resultList = new ArrayList<>();
@@ -36,6 +37,7 @@ public class GeneticWorthService {
     return resultList;
   }
 
+  /** Fetch a genetic worth from the repository by code. */
   public CodeDescriptionDto getGeneticWorthByCode(String code) {
     log.info("Fetching genetic worth with code %s", code);
 

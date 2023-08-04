@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * This general record is used for simple data object with only a code and description
- * to be consumed by endpoints
+ * to be consumed by endpoints.
  */
 @Schema(
     description =

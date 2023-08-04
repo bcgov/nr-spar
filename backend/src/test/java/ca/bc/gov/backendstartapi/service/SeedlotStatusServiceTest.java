@@ -31,17 +31,6 @@ class SeedlotStatusServiceTest {
   @Test
   @DisplayName("getAllSeedlotStatusServiceTest")
   void getAllSeedlotStatusServiceTest() {
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("APP", "Approved");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("CAN", "Cancelled");
-
-    List<CodeDescriptionDto> testDtoList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-          }
-        };
-
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
     var nonExpiryDate = now.plusDays(2);
@@ -71,6 +60,17 @@ class SeedlotStatusServiceTest {
         };
 
     when(seedlotStatusRepository.findAll()).thenReturn(testEntityList);
+
+    CodeDescriptionDto firstMethod = new CodeDescriptionDto("APP", "Approved");
+    CodeDescriptionDto secondMethod = new CodeDescriptionDto("CAN", "Cancelled");
+
+    List<CodeDescriptionDto> testDtoList =
+        new ArrayList<>() {
+          {
+            add(firstMethod);
+            add(secondMethod);
+          }
+        };
 
     List<CodeDescriptionDto> resultList = seedlotStatusService.getAllSeedlotStatus();
 

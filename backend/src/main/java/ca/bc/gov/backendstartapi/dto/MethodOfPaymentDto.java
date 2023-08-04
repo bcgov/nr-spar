@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/** A record of the method of payment, has one more field than {@link CodeDescriptionDto} */
+/** A record of the method of payment, has one more field than {@link CodeDescriptionDto}. */
 @Schema(
     description =
         """

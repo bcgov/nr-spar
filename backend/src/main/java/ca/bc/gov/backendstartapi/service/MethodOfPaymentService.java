@@ -17,6 +17,7 @@ public class MethodOfPaymentService {
     this.methodOfPaymentRepository = methodOfPaymentRepository;
   }
 
+  /** Fetch all valid method of payment from the repository. */
   public List<MethodOfPaymentDto> getAllMethodOfPayment() {
     log.info("Fetching all method of payment");
     List<MethodOfPaymentDto> resultList = new ArrayList<>();

@@ -17,7 +17,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * Abstract class for entity with code and description, related to {@link CodeDescriptionDto}
- * Inheritance must declare its own @Id column
+ * Inheritance must declare its own @Id column.
  */
 @NoArgsConstructor
 @Getter
@@ -35,6 +35,7 @@ public abstract class CodeDescriptionEntity {
   @Column(name = "update_timestamp")
   private Instant updateTimestamp;
 
+  /** The boolean value determines if the entity is within the effective date range. */
   @Transient
   public boolean isValid() {
     var today = LocalDate.now();

@@ -32,17 +32,6 @@ class GeneticClassServiceTest {
   @Test
   @DisplayName("getAllGeneticClassTest")
   void getAllGeneticClassTest() {
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("A", "Orchard Seed or Cuttings");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("B", "Natural Stand Seed or Cuttings");
-
-    List<CodeDescriptionDto> testDtoList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-          }
-        };
-
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
     var nonExpiryDate = now.plusDays(2);
@@ -73,6 +62,17 @@ class GeneticClassServiceTest {
     when(geneticClassRepository.findAll()).thenReturn(testEntityList);
 
     List<CodeDescriptionDto> resultList = geneticClassService.getAllGeneticClass();
+
+    CodeDescriptionDto firstMethod = new CodeDescriptionDto("A", "Orchard Seed or Cuttings");
+    CodeDescriptionDto secondMethod = new CodeDescriptionDto("B", "Natural Stand Seed or Cuttings");
+
+    List<CodeDescriptionDto> testDtoList =
+        new ArrayList<>() {
+          {
+            add(firstMethod);
+            add(secondMethod);
+          }
+        };
 
     Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());

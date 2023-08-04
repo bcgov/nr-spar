@@ -17,6 +17,7 @@ public class SeedlotStatusService {
     this.seedlotStatusRepository = seedlotStatusRepository;
   }
 
+  /** Fetch all valid seedlot status from the repository. */
   public List<CodeDescriptionDto> getAllSeedlotStatus() {
     log.info("Fetching all seedlot status");
     List<CodeDescriptionDto> resultList = new ArrayList<>();

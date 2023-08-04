@@ -31,17 +31,6 @@ class SeedlotSourceServiceTest {
   @Test
   @DisplayName("getAllSeedlotSourceServiceTest")
   void getAllSeedlotSourceServiceTest() {
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("CUS", "Custom Lot");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("TPT", "Tested Parent Trees");
-
-    List<CodeDescriptionDto> testDtoList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-          }
-        };
-
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
     var nonExpiryDate = now.plusDays(2);
@@ -71,6 +60,17 @@ class SeedlotSourceServiceTest {
         };
 
     when(seedlotSourceRepository.findAll()).thenReturn(testEntityList);
+
+    CodeDescriptionDto firstMethod = new CodeDescriptionDto("CUS", "Custom Lot");
+    CodeDescriptionDto secondMethod = new CodeDescriptionDto("TPT", "Tested Parent Trees");
+
+    List<CodeDescriptionDto> testDtoList =
+        new ArrayList<>() {
+          {
+            add(firstMethod);
+            add(secondMethod);
+          }
+        };
 
     List<CodeDescriptionDto> resultList = seedlotSourceService.getAllSeedlotSource();
 

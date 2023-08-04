@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Entity for the list of gametic methodology */
+/** Entity for the list of gametic methodology. */
 @Entity
 @Table(name = "gametic_methodology_list")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -27,6 +27,7 @@ public class GameticMethodologyEntity extends CodeDescriptionEntity {
   @Column(name = "pli_species_ind")
   private boolean isPliSpecies;
 
+  /** Constructor for {@link GameticMethodologyEntity}. */
   public GameticMethodologyEntity(
       String gameticMethodologyCode,
       String description,

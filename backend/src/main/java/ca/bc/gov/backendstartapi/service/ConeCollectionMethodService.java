@@ -18,6 +18,7 @@ public class ConeCollectionMethodService {
     this.coneCollectionMethodRepository = coneCollectionMethodRepository;
   }
 
+  /** Fetch all valid cone cllection method from the repository. */
   public List<CodeDescriptionDto> getAllConeCollectionMethods() {
     log.info("Fetching Cone Collection Methods");
     List<CodeDescriptionDto> resultList = new ArrayList<>();

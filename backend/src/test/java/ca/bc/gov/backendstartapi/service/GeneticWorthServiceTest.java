@@ -32,20 +32,6 @@ class GeneticWorthServiceTest {
   @Test
   @DisplayName("getAllGeneticWorthServiceTest")
   void getAllGeneticWorthServiceTest() {
-    CodeDescriptionDto firstMethod =
-        new CodeDescriptionDto("AD", "Animal browse resistance (deer)");
-    CodeDescriptionDto secondMethod =
-        new CodeDescriptionDto(
-            "DFS", "Disease resistance for Dothistroma needle blight (Dothistroma septosporum)");
-
-    List<CodeDescriptionDto> testDtoList =
-        new ArrayList<>() {
-          {
-            add(firstMethod);
-            add(secondMethod);
-          }
-        };
-
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
     var nonExpiryDate = now.plusDays(2);
@@ -80,6 +66,20 @@ class GeneticWorthServiceTest {
     when(geneticWorthRepository.findAll()).thenReturn(testEntityList);
 
     List<CodeDescriptionDto> resultList = geneticWorthService.getAllGeneticWorth();
+
+    CodeDescriptionDto firstMethod =
+        new CodeDescriptionDto("AD", "Animal browse resistance (deer)");
+    CodeDescriptionDto secondMethod =
+        new CodeDescriptionDto(
+            "DFS", "Disease resistance for Dothistroma needle blight (Dothistroma septosporum)");
+
+    List<CodeDescriptionDto> testDtoList =
+        new ArrayList<>() {
+          {
+            add(firstMethod);
+            add(secondMethod);
+          }
+        };
 
     Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());

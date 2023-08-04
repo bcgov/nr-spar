@@ -38,7 +38,6 @@ abstract class SeedlotEntityRelationalTest {
     var nonExpiryDate = now.plusDays(2);
     var effectiveDateRange = new EffectiveDateRange(effectiveDate, nonExpiryDate);
 
-    var seedlot = new Seedlot(id);
     var geneticClass = new GeneticClassEntity("V", "V for vendetta", effectiveDateRange);
     geneticClassRepository.saveAndFlush(geneticClass);
 
@@ -49,6 +48,8 @@ abstract class SeedlotEntityRelationalTest {
 
     var seedlotSource = new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange);
     seedlotSourceRepository.saveAndFlush(seedlotSource);
+
+    var seedlot = new Seedlot(id);
 
     seedlot.setComment("A seedlot.");
     seedlot.setApplicantClientNumber("00000001");

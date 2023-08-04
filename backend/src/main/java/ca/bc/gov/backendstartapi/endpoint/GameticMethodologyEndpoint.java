@@ -39,8 +39,9 @@ public class GameticMethodologyEndpoint {
       summary = "Retrieves all male and female gametic methodologies",
       description =
           """
-      Returns a list of gametic methodology with helpful boolean indicators. The code field starts with
-      a character (M/F) that indicate the sex of the methodology, this is a legacy from the oracle database.
+      Returns a list of gametic methodology with helpful boolean indicators.
+      The code field starts with a character (M/F) that indicate the sex of
+      the methodology, this is a legacy from the oracle database.
       It is recommeneded to use the isFemaleMethodology flag instead.
       """)
   @ApiResponses(

@@ -17,6 +17,7 @@ public class GameticMethodologyService {
     this.gameticMethodologyRepository = gameticMethodologyRepository;
   }
 
+  /** Fetch all valid gametic methodologies from the repository. */
   public List<GameticMethodologyDto> getAllGameticMethodologies() {
     log.info("Fetching Gametic Methodologies");
     List<GameticMethodologyDto> resultList = new ArrayList<>();

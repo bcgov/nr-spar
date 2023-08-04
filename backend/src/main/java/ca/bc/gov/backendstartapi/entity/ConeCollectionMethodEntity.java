@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** Entity for the list of cone collection method */
+/** Entity for the list of cone collection method. */
 @Entity
 @NoArgsConstructor
 @Table(name = "cone_collection_method_list")
