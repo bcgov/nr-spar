@@ -97,7 +97,7 @@ public class ForestClientEndpoint {
       })
   public List<ForestClientLocationDto> fetchClientLocations(
       @PathVariable("number")
-          @Pattern(regexp = "^\\d{8}$|^\\w{1,8}$")
+          @Pattern(regexp = "^\\d{8}$")
           @Parameter(
               name = "number",
               in = ParameterIn.PATH,
