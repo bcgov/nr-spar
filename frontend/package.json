@@ -60,7 +60,7 @@
     "url": "https://github.com/bcgov/nr-spar/issues"
   },
   "scripts": {
-    "start": "bash env.sh && vite",
+    "start": "bash env.sh && vite --host",
     "build": "tsc && vite build",
     "test": "vitest",
     "lint": "./node_modules/.bin/eslint \"src/**\"",
