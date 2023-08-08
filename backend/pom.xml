@@ -54,6 +54,9 @@
     </profile>
     <profile>
       <id>dev</id>
+      <properties>
+        <build.profile.id>dev</build.profile.id>
+      </properties>
     </profile>
     <profile>
       <id>integration-test</id>
@@ -200,6 +203,9 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
+          <profiles>
+            <profile>dev</profile>
+          </profiles>
         </configuration>
       </plugin>
 
