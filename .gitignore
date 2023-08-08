@@ -99,6 +99,7 @@ snyk.sarif
 
 # Environment variables file
 *.env
+frontend/public/env-config.js
 
 # VS Code
 .vscode

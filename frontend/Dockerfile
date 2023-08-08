@@ -5,8 +5,8 @@ FROM node:18.16.1-alpine3.17 AS build
 WORKDIR /app
 COPY . .
 RUN apk add --no-cache python3 g++ make && \
-    yarn install --frozen-lockfile --prefer-offline && \
-    yarn build && \
+    npm install && \
+    npm run build && \
     rm -rf node_modules
 
 # Caddy
