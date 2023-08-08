@@ -71,7 +71,7 @@ public class ForestClientApiProvider implements Provider {
               ForestClientDto.class,
               createParamsMap("number", number));
 
-      log.info("Finished {} request - 200 OK!", PROVIDER);
+      log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByNumber");
       return Optional.of(response.getBody());
     } catch (HttpClientErrorException httpExc) {
       log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
@@ -97,7 +97,7 @@ public class ForestClientApiProvider implements Provider {
         log.warn("More than one client found for acronym {}", acronym);
       }
 
-      log.info("Finished {} request - 200 OK!", PROVIDER);
+      log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByAcronym");
       return response.getBody().stream().findFirst();
     } catch (HttpClientErrorException httpExc) {
       log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
@@ -126,7 +126,10 @@ public class ForestClientApiProvider implements Provider {
               new ParameterizedTypeReference<List<ForestClientLocationDto>>() {},
               createParamsMap("number", number));
 
-      log.info("Finished {} request - 200 OK!", PROVIDER);
+      log.info(
+          "Finished {} request for function {} - 200 OK!",
+          PROVIDER,
+          "fetchLocationsByClientNumber");
       return response.getBody();
     } catch (HttpClientErrorException httpExc) {
       log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
