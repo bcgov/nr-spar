@@ -8,6 +8,7 @@ import mockServerConfig from './config';
 import { endpoints, jestEndpoints } from './endpoints';
 import fixtures from './fixtures';
 import models from './models';
+import EnvVars from '../utils/EnvUtils';
 
 // eslint-disable-next-line
 export default function makeServer(environment = 'development') {
@@ -37,8 +38,8 @@ export default function makeServer(environment = 'development') {
 
       this.namespace = mockServerConfig.namespace;
       if (environment !== 'jest-test') {
-        this.passthrough(`${import.meta.env.VITE_SERVER_URL}/api/**`);
-        this.passthrough(`${import.meta.env.VITE_ORACLE_SERVER_URL}/api/**`);
+        this.passthrough(`${EnvVars.VITE_SERVER_URL}/api/**`);
+        this.passthrough(`${EnvVars.VITE_ORACLE_SERVER_URL}/api/**`);
       }
       this.passthrough('https://test.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token');
       this.passthrough('https://nr-spar-test-backend.apps.silver.devops.gov.bc.ca/**');

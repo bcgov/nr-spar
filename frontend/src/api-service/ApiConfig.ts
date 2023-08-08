@@ -1,13 +1,14 @@
 import mockServerConfig from '../mock-server/config';
+import EnvVars from '../utils/EnvUtils';
 
-const serverHost = import.meta.env.VITE_SERVER_URL || mockServerConfig.namespace;
+const serverHost = EnvVars.VITE_SERVER_URL || mockServerConfig.namespace;
 
-const oracleServerHost = import.meta.env.VITE_ORACLE_SERVER_URL || mockServerConfig.namespace;
+const oracleServerHost = EnvVars.VITE_ORACLE_SERVER_URL || mockServerConfig.namespace;
 
-const isProdEnv = import.meta.env.VITE_NRSPARWEBAPP_VERSION?.startsWith('prod');
+const isProdEnv = EnvVars.VITE_NRSPARWEBAPP_VERSION?.startsWith('prod');
 
 // The API host should never be mock server in PROD
-const mockServerHost = isProdEnv ? import.meta.env.VITE_SERVER_URL : mockServerConfig.namespace;
+const mockServerHost = isProdEnv ? EnvVars.VITE_SERVER_URL : mockServerConfig.namespace;
 
 const ApiConfig = {
   /**

@@ -1,13 +1,10 @@
 import Keycloak from 'keycloak-js';
-
-const url = import.meta.env.VITE_KC_URL || '';
-const realm = import.meta.env.VITE_KC_REALM || '';
-const clientId = import.meta.env.VITE_KC_CLIENT_ID || '';
+import EnvVars from './utils/EnvUtils';
 
 const keycloak = new Keycloak({
-  url,
-  realm,
-  clientId
+  url: EnvVars.VITE_KC_URL,
+  realm: EnvVars.VITE_KC_REALM,
+  clientId: EnvVars.VITE_KC_CLIENT_ID
 });
 
 export default keycloak;
