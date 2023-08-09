@@ -6,7 +6,7 @@ COPY . ./
 RUN ./mvnw --no-transfer-progress --update-snapshots clean package -Dtests.skip=true -Dskip.unit.tests=true && \
     javac HealthCheck.java InstallCert.java
 
-FROM eclipse-temurin:17.0.7_7-jdk-jammy AS deploy
+FROM eclipse-temurin:17.0.8_7-jdk-jammy AS deploy
 
 # Java vars
 ENV LANG en_CA.UTF-8
