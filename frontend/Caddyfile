@@ -23,7 +23,7 @@
 		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		X-Content-Type-Options "nosniff"
 		Strict-Transport-Security "max-age=31536000"
-		Content-Security-Policy "base-uri 'self'; connect-src 'self' https://nr-spar-284-backend.apps.silver.devops.gov.bc.ca https://test.loginproxy.gov.bc.ca; default-src 'self'; font-src 'self'; frame-src 'self' https://test.loginproxy.gov.bc.ca; img-src 'self'; manifest-src 'self'; media-src 'self'; object-src 'none'; report-uri https://64d3caf1634833b61c7ab9b6.endpoint.csper.io/; script-src 'unsafe-inline' 'report-sample' 'self'; style-src 'report-sample' 'self'; worker-src 'none';"
+		Content-Security-Policy "base-uri 'self'; connect-src 'self' https://*.gov.bc.ca; default-src 'self'; font-src 'self'; frame-src 'self' https://*.gov.bc.ca; img-src 'self'; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'unsafe-inline' 'report-sample' 'self'; style-src 'report-sample' 'self'; worker-src 'none';"
 		Referrer-Policy "same-origin"
 	}
   
