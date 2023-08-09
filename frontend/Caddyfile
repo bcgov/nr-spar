@@ -3,41 +3,34 @@
   admin off
 }
 
-:3000
-root * /app/dist
+:3000 {
+  root * /app/dist
 
-file_server
+  encode gzip
 
-@www_host {
-  host www.{$HOST_ROUTE}
-}
+  log {
+    output stdout
+    format console {
+      time_format iso8601
+      level_format color
+    }
+    level {$LOG_LEVEL}
+  }
 
-redir @www_host http://{$HOST_ROUTE}{path}
+  header {
+		X-Frame-Options "SAMEORIGIN"
+		X-XSS-Protection "1;mode=block"
+		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
+		X-Content-Type-Options "nosniff"
+		Strict-Transport-Security "max-age=31536000"
+		Content-Security-Policy "default-src 'self' *.gov.bc.ca data:; script-src 'self' 'unsafe-eval' *.gov.bc.ca; style-src 'self' 'unsafe-inline' *.gov.bc.ca; font-src 'self' *.gov.bc.ca; img-src 'self' data: *.gov.bc.ca"
+		Referrer-Policy "same-origin"
+	}
+  
+  handle /env-config.js {
+    header Content-Type "text/javascript"
+    respond `window.config = {"VITE_KC_URL":"{$VITE_KC_URL}","VITE_KC_REALM":"standard","VITE_KC_CLIENT_ID":"seed-planning-test-4296","VITE_NRSPARWEBAPP_VERSION":"${VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}"};`
+  }
 
-@unspecified_path {
-  not path_regexp ^\/0.0.0.0
-  not path /api/*
-}
-
-handle @unspecified_path {
-  try_files {path} {path}/ /?_url={uri}
-}
-
-handle /env-config.js {
-  header Content-Type text/javascript
-  respond `window.config = {
-    VITE_KC_URL: "{$VITE_KC_URL}",
-    VITE_KC_REALM: "standard",
-    VITE_KC_CLIENT_ID: "seed-planning-test-4296",
-    VITE_NRSPARWEBAPP_VERSION: "${VITE_NRSPARWEBAPP_VERSION}",
-    VITE_SERVER_URL: "{$VITE_SERVER_URL}",
-    VITE_ORACLE_SERVER_URL: "{$VITE_ORACLE_SERVER_URL}"
-  };`
-}
-
-encode gzip
-
-log {
-  output stdout
-  level {$LOG_LEVEL}
+  file_server
 }

@@ -10,7 +10,7 @@ RUN apk add --no-cache python3 g++ make && \
     rm -rf node_modules
 
 # Caddy
-FROM caddy:2.6.4-alpine
+FROM caddy:2.7.2-alpine
 
 # Copy static files and config
 COPY --from=build /app/build/ /app/dist
