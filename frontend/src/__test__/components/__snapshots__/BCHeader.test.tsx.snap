@@ -609,6 +609,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -644,6 +645,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -679,6 +681,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -718,6 +721,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -768,6 +772,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -803,6 +808,7 @@ exports[`the Header component > should match the snapshot 1`] = `
   <nav
     aria-label="Side menu"
     className="cds--side-nav__navigation cds--side-nav cds--side-nav--ux"
+    inert={-1}
     onBlur={[Function]}
     onFocus={[Function]}
     onKeyDown={[Function]}
@@ -827,6 +833,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -862,6 +869,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -894,6 +902,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -926,6 +935,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -958,6 +968,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -993,6 +1004,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -1028,6 +1040,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -1060,6 +1073,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -1095,6 +1109,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -1130,6 +1145,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -1176,6 +1192,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -1208,6 +1225,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
@@ -1254,6 +1272,7 @@ exports[`the Header component > should match the snapshot 1`] = `
           <a
             className="cds--side-nav__link disabled-menu-option"
             onClick={[Function]}
+            tabIndex={0}
           >
             <div
               className="cds--side-nav__icon cds--side-nav__icon--small"
