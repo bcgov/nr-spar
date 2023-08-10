@@ -145,6 +145,7 @@ const BCHeader = () => {
             expanded={isSideNavExpanded}
             aria-expanded={isSideNavExpanded}
             aria-label={componentTexts.sideMenuAriaLabel}
+            inert={false}
           >
             <SideNavItems>
               {listItems.map((item: ListItems) => (
