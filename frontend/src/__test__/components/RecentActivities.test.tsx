@@ -6,6 +6,20 @@ import '@testing-library/jest-dom';
 import makeServer from '../../mock-server/server';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // Deprecated
+    removeListener: jest.fn(), // Deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
 // TODO test Empty Section
 describe('Recent Activities component', () => {
   beforeAll(() => {
