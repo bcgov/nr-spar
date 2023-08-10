@@ -37,9 +37,7 @@ exports[`Landing component test should match the snapshot 1`] = `
       </span>
     </p>
     <button
-      aria-describedby={null}
-      aria-pressed={null}
-      className="btn-landing cds--btn cds--btn--md cds--btn--primary"
+      className="btn-landing cds--btn cds--btn--md cds--layout--size-md cds--btn--primary"
       data-testid="landing-button__idir"
       disabled={false}
       onClick={[Function]}
@@ -66,9 +64,7 @@ exports[`Landing component test should match the snapshot 1`] = `
       </svg>
     </button>
     <button
-      aria-describedby={null}
-      aria-pressed={null}
-      className="btn-landing cds--btn cds--btn--md cds--btn--tertiary"
+      className="btn-landing cds--btn cds--btn--md cds--layout--size-md cds--btn--tertiary"
       data-testid="landing-button__bceid"
       disabled={false}
       onClick={[Function]}
