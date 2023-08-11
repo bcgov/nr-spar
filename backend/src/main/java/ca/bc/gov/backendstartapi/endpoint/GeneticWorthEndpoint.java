@@ -160,12 +160,14 @@ public class GeneticWorthEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   public GeneticWorthSummaryDto geneticTraitsCalculations(
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the traits and values to be used in the calculations",
               required = true,
               content =
                   @Content(schema = @Schema(implementation = GeneticWorthTraitsRequestDto.class)))
-      @Valid @RequestBody List<GeneticWorthTraitsRequestDto> traitsDto) {
+          @Valid
+          @RequestBody
+          List<GeneticWorthTraitsRequestDto> traitsDto) {
     return geneticWorthService.calculateGeneticWorth(traitsDto);
   }
 }

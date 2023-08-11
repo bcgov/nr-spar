@@ -15,7 +15,6 @@ import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
-
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
