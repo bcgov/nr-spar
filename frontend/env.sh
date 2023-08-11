@@ -2,7 +2,7 @@
 
 # Recreate config file
 ENV_CONFIG="./public/env-config.js"
-rm $ENV_CONFIG
+rm -f $ENV_CONFIG
 touch $ENV_CONFIG
 
 # Add assignment 

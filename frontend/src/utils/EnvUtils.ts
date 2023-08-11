@@ -13,15 +13,22 @@ declare global {
   }
 }
 
+const getEnvStrValue = (key: keyof IConfig): string => {
+  const fromWindow = window.config?.[key];
+  if (fromWindow) {
+    return fromWindow;
+  }
+
+  return import.meta.env[key] ?? '';
+};
+
 const EnvVars = {
-  VITE_KC_URL: window.config?.VITE_KC_URL || import.meta.env.VITE_KC_URL,
-  VITE_KC_REALM: window.config?.VITE_KC_REALM || import.meta.env.VITE_KC_REALM,
-  VITE_KC_CLIENT_ID: window.config?.VITE_KC_CLIENT_ID || import.meta.env.VITE_KC_CLIENT_ID,
-  VITE_NRSPARWEBAPP_VERSION: window.config?.VITE_NRSPARWEBAPP_VERSION
-    || import.meta.env.VITE_NRSPARWEBAPP_VERSION,
-  VITE_SERVER_URL: window.config?.VITE_SERVER_URL || import.meta.env.VITE_SERVER_URL,
-  VITE_ORACLE_SERVER_URL: window.config?.VITE_ORACLE_SERVER_URL
-    || import.meta.env.VITE_ORACLE_SERVER_URL
+  VITE_KC_URL: getEnvStrValue('VITE_KC_URL'),
+  VITE_KC_REALM: getEnvStrValue('VITE_KC_REALM'),
+  VITE_KC_CLIENT_ID: getEnvStrValue('VITE_KC_CLIENT_ID'),
+  VITE_NRSPARWEBAPP_VERSION: getEnvStrValue('VITE_NRSPARWEBAPP_VERSION'),
+  VITE_SERVER_URL: getEnvStrValue('VITE_SERVER_URL'),
+  VITE_ORACLE_SERVER_URL: getEnvStrValue('VITE_ORACLE_SERVER_URL')
 };
 
 export default EnvVars;
