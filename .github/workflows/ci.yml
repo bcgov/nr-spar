@@ -44,6 +44,7 @@ jobs:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     env:
+      VITE_NRSPARWEBAPP_VERSION: dev
       VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
       VITE_KC_REALM: standard
       VITE_KC_CLIENT_ID: seed-planning-test-4296
