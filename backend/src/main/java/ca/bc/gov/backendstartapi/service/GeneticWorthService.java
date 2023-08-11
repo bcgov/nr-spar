@@ -1,10 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
-import ca.bc.gov.backendstartapi.entity.GeneticWorth;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
+import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -15,15 +17,46 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/** This class contains all methods for handling Genetic Worth routines and calculations. */
-@Service
+/** This class contains all routines and database access to a list of genetic worth. */
 @Slf4j
+@Service
 public class GeneticWorthService {
+  private GeneticWorthRepository geneticWorthRepository;
 
-  private final GeneticWorthRepository geneticWorthRepository;
-
-  GeneticWorthService(GeneticWorthRepository geneticWorthRepository) {
+  public GeneticWorthService(GeneticWorthRepository geneticWorthRepository) {
     this.geneticWorthRepository = geneticWorthRepository;
+  }
+
+  /** Fetch all valid genetic worth from the repository. */
+  public List<CodeDescriptionDto> getAllGeneticWorth() {
+    log.info("Fetching all genetic worth");
+    List<CodeDescriptionDto> resultList = new ArrayList<>();
+
+    geneticWorthRepository.findAll().stream()
+        .filter(method -> method.isValid())
+        .forEach(
+            method -> {
+              CodeDescriptionDto methodToAdd =
+                  new CodeDescriptionDto(method.getGeneticWorthCode(), method.getDescription());
+              resultList.add(methodToAdd);
+            });
+
+    return resultList;
+  }
+
+  /** Fetch a genetic worth from the repository by code. */
+  public CodeDescriptionDto getGeneticWorthByCode(String code) {
+    log.info("Fetching genetic worth with code %s", code);
+
+    Optional<GeneticWorthEntity> foundRecord = geneticWorthRepository.findById(code);
+
+    if (foundRecord.isPresent()) {
+      CodeDescriptionDto dtoToReturn =
+          new CodeDescriptionDto(
+              foundRecord.get().getGeneticWorthCode(), foundRecord.get().getDescription());
+      return dtoToReturn;
+    }
+    throw new NoGeneticWorthException();
   }
 
   /**
@@ -36,7 +69,7 @@ public class GeneticWorthService {
   public GeneticWorthSummaryDto calculateGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
 
-    BigDecimal effectivePopulationSizeNe = calculateEffectivePopulationSizeNe(traitsDto);
+    BigDecimal effectivePopulationSizeNe = BigDecimal.ZERO;
     BigDecimal coancestry = BigDecimal.ZERO;
     int numberOfSmpParentFromOutside = 0;
 
@@ -61,14 +94,14 @@ public class GeneticWorthService {
     BigDecimal minimumTreshold = new BigDecimal("0.7");
 
     // Iterate over all traits
-    List<GeneticWorth> geneticWorths = geneticWorthRepository.findAll();
+    List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();
 
-    for (GeneticWorth trait : geneticWorths) {
+    for (CodeDescriptionDto trait : geneticWorths) {
       BigDecimal volumeGrowth = null;
       BigDecimal percentage = checkGeneticTraitTreshold(traitsDto, trait);
 
       if (percentage.compareTo(minimumTreshold) >= 0) {
-        log.info("Calculating Genetic Worth for {} trait", trait.getId());
+        log.info("Calculating Genetic Worth for {} trait", trait.code());
         volumeGrowth = calculateTraitGeneticWorth(traitsDto, trait);
       }
 
@@ -82,20 +115,6 @@ public class GeneticWorthService {
   }
 
   /**
-   * Do the calculations for the Effective Population Size (Ne). Note that in the case the parent
-   * tree does not attend the 70% treshold weight, the value for this trait will be zero;
-   *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
-   *     values to be calculated.
-   * @return A {@link BigDecimal} representing the value.
-   */
-  private BigDecimal calculateEffectivePopulationSizeNe(
-      List<GeneticWorthTraitsRequestDto> traitsDto) {
-    // Not implemented yet
-    return BigDecimal.ZERO;
-  }
-
-  /**
    * Do the calculations for the Volume Growth (GVO). Note that in the case the parent tree does not
    * attend the 70% treshold weight, the value for this trait will be zero;
    *
@@ -104,7 +123,7 @@ public class GeneticWorthService {
    * @return A {@link BigDecimal} representing the value.
    */
   private BigDecimal calculateTraitGeneticWorth(
-      List<GeneticWorthTraitsRequestDto> traitsDto, GeneticWorth trait) {
+      List<GeneticWorthTraitsRequestDto> traitsDto, CodeDescriptionDto trait) {
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
     BigDecimal femaleConeSum = reduceConeCount(traitsDto);
     BigDecimal sumGw = BigDecimal.ZERO;
@@ -131,7 +150,7 @@ public class GeneticWorthService {
    * @return A BigDecimal representing the trait treshold.
    */
   private BigDecimal checkGeneticTraitTreshold(
-      List<GeneticWorthTraitsRequestDto> traitsDto, GeneticWorth trait) {
+      List<GeneticWorthTraitsRequestDto> traitsDto, CodeDescriptionDto trait) {
     log.debug("Checking genetic trait treshold for {} trait", trait);
 
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
@@ -162,10 +181,11 @@ public class GeneticWorthService {
    * @param trait A {@link GeneticWorth} with the trait that should be considered.
    * @return a BigDecimal representing the trait value or BigDecimal.ZERO otherwise.
    */
-  private BigDecimal getTraitValue(GeneticWorthTraitsRequestDto traitDto, GeneticWorth trait) {
+  private BigDecimal getTraitValue(
+      GeneticWorthTraitsRequestDto traitDto, CodeDescriptionDto trait) {
     List<GeneticWorthTraitsDto> geneticTraits = traitDto.geneticTraits();
     Optional<GeneticWorthTraitsDto> traitOptional =
-        geneticTraits.stream().filter(x -> x.traitCode().equals(trait.getId())).findFirst();
+        geneticTraits.stream().filter(x -> x.traitCode().equals(trait.code())).findFirst();
     return traitOptional.isEmpty() ? BigDecimal.ZERO : traitOptional.get().traitValue();
   }
 

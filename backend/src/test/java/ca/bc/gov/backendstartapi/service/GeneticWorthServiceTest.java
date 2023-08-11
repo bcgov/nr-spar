@@ -5,9 +5,11 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
-import ca.bc.gov.backendstartapi.entity.GeneticWorth;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
+import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -115,8 +117,11 @@ class GeneticWorthServiceTest {
             List.of(dto3245gvo, dto3245wwd));
     requestList.add(requestDto3245);
 
-    GeneticWorth gvoGw = new GeneticWorth("gvo", "anything");
-    GeneticWorth wwdGw = new GeneticWorth("wwd", "something");
+    LocalDate yesterday = LocalDate.now().minusDays(1L);
+    LocalDate tomorrow = LocalDate.now().plusDays(1L);
+    EffectiveDateRange dateRange = new EffectiveDateRange(yesterday, tomorrow);
+    GeneticWorthEntity gvoGw = new GeneticWorthEntity("gvo", "anything", dateRange);
+    GeneticWorthEntity wwdGw = new GeneticWorthEntity("wwd", "something", dateRange);
     when(geneticWorthRepository.findAll()).thenReturn(List.of(gvoGw, wwdGw));
 
     GeneticWorthSummaryDto summaryDto = geneticWorthService.calculateGeneticWorth(requestList);

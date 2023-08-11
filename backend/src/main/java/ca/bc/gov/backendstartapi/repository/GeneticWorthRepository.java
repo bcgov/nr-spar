@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.repository;
 
-import ca.bc.gov.backendstartapi.entity.GeneticWorth;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/** This class represents the database repository for a {@link GeneticWorth}. */
-public interface GeneticWorthRepository extends JpaRepository<GeneticWorth, String> {}
+/** Repository for {@link GeneticWorthEntity}. */
+public interface GeneticWorthRepository extends JpaRepository<GeneticWorthEntity, String> {}
