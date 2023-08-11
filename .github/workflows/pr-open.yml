@@ -140,7 +140,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-            triggers: ('common/' 'oracle-api/')
+            triggers: ('common/' 'oracle-api/' 'frontend/')
             verification_path: "actuator/health"
 
     steps:
