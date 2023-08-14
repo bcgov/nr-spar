@@ -58,7 +58,7 @@ jobs:
             npm install
             npm run lint
             npm run build
-            npm test --update --coverage
+            npm run coverage
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud

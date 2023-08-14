@@ -29,7 +29,7 @@
   
   handle /env-config.js {
     header Content-Type "text/javascript"
-    respond `window.config = {"VITE_KC_URL":"{$VITE_KC_URL}","VITE_KC_REALM":"standard","VITE_KC_CLIENT_ID":"seed-planning-test-4296","VITE_NRSPARWEBAPP_VERSION":"${VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}"};`
+    respond `window.config = {"VITE_KC_URL":"{$VITE_KC_URL}","VITE_KC_REALM":"standard","VITE_KC_CLIENT_ID":"seed-planning-test-4296","VITE_NRSPARWEBAPP_VERSION":"{$VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}"};`
   }
 
   handle_path /* {

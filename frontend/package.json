@@ -62,7 +62,8 @@
   "scripts": {
     "start": "bash env.sh && vite --host",
     "build": "tsc && vite build",
-    "test": "vitest run",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "preview": "vite preview",
     "lint": "./node_modules/.bin/eslint \"src/**\"",
     "cy:open": "cypress open",
