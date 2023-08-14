@@ -8,7 +8,7 @@ interface PanelSectionNameProps {
 }
 
 const PanelSectionName = ({ title, light, testId }: PanelSectionNameProps) => (
-  <div className={light ? 'panel-section-light' : 'panel-section'} data-testid={testId} >
+  <div className={light ? 'panel-section-light' : 'panel-section'} data-testid={testId}>
     <span>
       {title}
     </span>
