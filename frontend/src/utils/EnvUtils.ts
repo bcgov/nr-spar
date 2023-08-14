@@ -31,4 +31,4 @@ const EnvVars = {
   VITE_ORACLE_SERVER_URL: getEnvStrValue('VITE_ORACLE_SERVER_URL')
 };
 
-export default EnvVars;
+export { getEnvStrValue, EnvVars };

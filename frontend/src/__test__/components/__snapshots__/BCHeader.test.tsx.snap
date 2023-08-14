@@ -809,7 +809,6 @@ exports[`the Header component > should match the snapshot 1`] = `
     aria-expanded={false}
     aria-label="Side menu"
     className="cds--side-nav__navigation cds--side-nav cds--side-nav--ux"
-    inert={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onKeyDown={[Function]}
@@ -1311,6 +1310,7 @@ exports[`the Header component > should match the snapshot 1`] = `
       </div>
       <div
         className="panel-section"
+        data-testid="version-panel"
       >
         <span>
           Version: dev

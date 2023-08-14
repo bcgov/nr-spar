@@ -145,7 +145,7 @@ const BCHeader = () => {
             expanded={isSideNavExpanded}
             aria-expanded={isSideNavExpanded}
             aria-label={componentTexts.sideMenuAriaLabel}
-            inert={false}
+            inert={undefined}
           >
             <SideNavItems>
               {listItems.map((item: ListItems) => (
@@ -172,7 +172,7 @@ const BCHeader = () => {
                   })}
                 </div>
               ))}
-              <PanelSectionName title={VERSION} />
+              <PanelSectionName title={VERSION} testId="version-panel" />
             </SideNavItems>
           </SideNav>
         </Header>

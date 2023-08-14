@@ -1,5 +1,5 @@
 import Keycloak from 'keycloak-js';
-import EnvVars from './utils/EnvUtils';
+import { EnvVars } from './utils/EnvUtils';
 
 const keycloak = new Keycloak({
   url: EnvVars.VITE_KC_URL,

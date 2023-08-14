@@ -1,4 +1,4 @@
-import EnvVars from '../../utils/EnvUtils';
+import { EnvVars } from '../../utils/EnvUtils';
 
 export const VERSION: string = `Version: ${EnvVars.VITE_NRSPARWEBAPP_VERSION}`;
 

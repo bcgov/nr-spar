@@ -3,11 +3,12 @@ import './styles.scss';
 
 interface PanelSectionNameProps {
   title?: string,
-  light?: boolean
+  light?: boolean,
+  testId?: string,
 }
 
-const PanelSectionName = ({ title, light }: PanelSectionNameProps) => (
-  <div className={light ? 'panel-section-light' : 'panel-section'}>
+const PanelSectionName = ({ title, light, testId }: PanelSectionNameProps) => (
+  <div className={light ? 'panel-section-light' : 'panel-section'} data-testid={testId} >
     <span>
       {title}
     </span>

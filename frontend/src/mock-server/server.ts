@@ -6,9 +6,9 @@ import {
 import mockServerConfig from './config';
 
 import { endpoints, jestEndpoints } from './endpoints';
+import { EnvVars } from '../utils/EnvUtils';
 import fixtures from './fixtures';
 import models from './models';
-import EnvVars from '../utils/EnvUtils';
 
 // eslint-disable-next-line
 export default function makeServer(environment = 'development') {
