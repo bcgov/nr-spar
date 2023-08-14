@@ -1,12 +1,10 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
-import ca.bc.gov.backendstartapi.exception.NoGeneticClassException;
+import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +38,10 @@ public class GeneticClassService {
   public CodeDescriptionDto getGeneticClassByCode(String code) {
     log.info("Fetching genetic class with code %s", code);
 
-    Optional<GeneticClassEntity> foundRecord = geneticClassRepository.findById(code);
-
-    if (foundRecord.isPresent()) {
-      CodeDescriptionDto dtoToReturn =
-          new CodeDescriptionDto(
-              foundRecord.get().getGeneticClassCode(), foundRecord.get().getDescription());
-      return dtoToReturn;
-    }
-    throw new NoGeneticClassException();
+    return geneticClassRepository
+        .findById(code)
+        .map(
+            entity -> new CodeDescriptionDto(entity.getGeneticClassCode(), entity.getDescription()))
+        .orElseThrow(NoGeneticWorthException::new);
   }
 }

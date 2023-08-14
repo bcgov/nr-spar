@@ -1,12 +1,10 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -41,14 +39,10 @@ public class GeneticWorthService {
   public CodeDescriptionDto getGeneticWorthByCode(String code) {
     log.info("Fetching genetic worth with code %s", code);
 
-    Optional<GeneticWorthEntity> foundRecord = geneticWorthRepository.findById(code);
-
-    if (foundRecord.isPresent()) {
-      CodeDescriptionDto dtoToReturn =
-          new CodeDescriptionDto(
-              foundRecord.get().getGeneticWorthCode(), foundRecord.get().getDescription());
-      return dtoToReturn;
-    }
-    throw new NoGeneticWorthException();
+    return geneticWorthRepository
+        .findById(code)
+        .map(
+            entity -> new CodeDescriptionDto(entity.getGeneticWorthCode(), entity.getDescription()))
+        .orElseThrow(NoGeneticWorthException::new);
   }
 }
