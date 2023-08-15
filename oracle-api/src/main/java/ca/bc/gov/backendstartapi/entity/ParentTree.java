@@ -40,8 +40,8 @@ public class ParentTree {
   private Boolean breedingProgram;
 
   @Column(name = "FEMALE_PARENT_PARENT_TREE_ID")
-  private Long femaleParentParentTreeId;
+  private Long femaleParentTreeId;
 
   @Column(name = "MALE_PARENT_PARENT_TREE_ID")
-  private Long maleParentParentTreeId;
+  private Long maleParentTreeId;
 }

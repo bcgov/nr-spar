@@ -5,29 +5,24 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanUnitDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTree;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
-import ca.bc.gov.backendstartapi.entity.ParentTreeSpuEntity;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
-import ca.bc.gov.backendstartapi.repository.ParentTreeSpuRepository;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods to handle orchards. */
@@ -43,19 +38,20 @@ public class OrchardService {
 
   private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
 
-  private ParentTreeSpuRepository parentTreeSpuRepository;
+  private ModelMapper modelMapper;
 
   OrchardService(
       OrchardRepository orchardRepository,
       ParentTreeOrchardRepository parentTreeOrchardRepository,
       ParentTreeRepository parentTreeRepository,
       ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
-      ParentTreeSpuRepository parentTreeSpuRepository) {
+      ModelMapper modelMapper) {
     this.orchardRepository = orchardRepository;
     this.parentTreeOrchardRepository = parentTreeOrchardRepository;
     this.parentTreeRepository = parentTreeRepository;
     this.parentTreeGeneticQualityRepository = parentTreeGeneticQualityRepository;
-    this.parentTreeSpuRepository = parentTreeSpuRepository;
+    this.modelMapper = modelMapper;
+    this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
   }
 
   /**
@@ -162,7 +158,7 @@ public class OrchardService {
 
   private List<ParentTreeGeneticInfoDto> findAllParentTree(
       String orchardId, Long spuId, long milli) {
-    List<ParentTreeGeneticInfoDto> parentTreeDtoList = new ArrayList<>();
+
     List<ParentTreeOrchard> parentTreeOrchards =
         parentTreeOrchardRepository.findByIdOrchardId(orchardId);
     long endingThree = Instant.now().toEpochMilli();
@@ -184,25 +180,18 @@ public class OrchardService {
     long endingSeven = Instant.now().toEpochMilli();
     log.info("Time elapsed querying all parent tree genetic quality: {}", endingSeven - endingFive);
 
-    for (ParentTree parentTree : parentTreeList) {
-      ParentTreeGeneticInfoDto parentTreeDto = new ParentTreeGeneticInfoDto();
-      parentTreeDto.setParentTreeId(parentTree.getId());
-      parentTreeDto.setParentTreeNumber(parentTree.getParentTreeNumber());
-      parentTreeDto.setParentTreeRegStatusCode(parentTree.getParentTreeRegStatusCode());
-      parentTreeDto.setLocalNumber(parentTree.getLocalNumber());
-      parentTreeDto.setActive(parentTree.getActive());
-      parentTreeDto.setTested(parentTree.getTested());
-      parentTreeDto.setBreedingProgram(parentTree.getBreedingProgram());
-      parentTreeDto.setFemaleParentTreeId(parentTree.getFemaleParentParentTreeId());
-      parentTreeDto.setMaleParentTreeId(parentTree.getMaleParentParentTreeId());
-
-      parentTreeDto.setParentTreeGeneticQualities(
-          qualityDtoList.stream()
-              .filter(x -> x.getParentTreeId().equals(parentTree.getId()))
-              .toList());
-
-      parentTreeDtoList.add(parentTreeDto);
-    }
+    List<ParentTreeGeneticInfoDto> parentTreeDtoList =
+        parentTreeList.stream()
+            .map(
+                parentTree -> {
+                  ParentTreeGeneticInfoDto converted = convertToParentTreeGenInfoDto(parentTree);
+                  converted.setParentTreeGeneticQualities(
+                      qualityDtoList.stream()
+                          .filter(x -> x.getParentTreeId().equals(parentTree.getId()))
+                          .toList());
+                  return converted;
+                })
+            .toList();
 
     long endingEight = Instant.now().toEpochMilli();
     log.info("Time elapsed creating ParentTreeDto list: {}", endingEight - endingSeven);
@@ -211,7 +200,6 @@ public class OrchardService {
 
   private List<ParentTreeGeneticQualityDto> findAllParentTreeGeneticQualities(
       Long spuId, List<Long> parentTreeIdList) {
-    List<ParentTreeGeneticQualityDto> list = new ArrayList<>();
 
     boolean geneticWorthCalcInd = true;
     String geneticType = "BV";
@@ -220,64 +208,43 @@ public class OrchardService {
         parentTreeGeneticQualityRepository.findAllBySpuGeneticWorthTypeParentTreeId(
             spuId, geneticWorthCalcInd, geneticType, parentTreeIdList);
 
-    for (ParentTreeGeneticQuality parentTreeGen : ptgqList) {
-      ParentTreeGeneticQualityDto geneticQualityDto = new ParentTreeGeneticQualityDto();
-      geneticQualityDto.setParentTreeId(parentTreeGen.getParentTreeId());
-      geneticQualityDto.setGeneticTypeCode(parentTreeGen.getGeneticTypeCode());
-      geneticQualityDto.setGeneticWorthCode(parentTreeGen.getGeneticWorthCode());
-      geneticQualityDto.setGeneticQualityValue(parentTreeGen.getGeneticQualityValue());
+    List<ParentTreeGeneticQualityDto> dtoList =
+        ptgqList.stream()
+            .map(parentTreeGen -> modelMapper.map(parentTreeGen, ParentTreeGeneticQualityDto.class))
+            .toList();
+    // for (ParentTreeGeneticQuality parentTreeGen : ptgqList) {
+    //   ParentTreeGeneticQualityDto geneticQualityDto = new ParentTreeGeneticQualityDto();
+    //   geneticQualityDto.setParentTreeId(parentTreeGen.getParentTreeId());
+    //   geneticQualityDto.setGeneticTypeCode(parentTreeGen.getGeneticTypeCode());
+    //   geneticQualityDto.setGeneticWorthCode(parentTreeGen.getGeneticWorthCode());
+    //   geneticQualityDto.setGeneticQualityValue(parentTreeGen.getGeneticQualityValue());
 
-      list.add(geneticQualityDto);
-    }
-    return list;
+    //   list.add(geneticQualityDto);
+    // }
+    return dtoList;
   }
 
-  /**
-   * Find all parent trees under a vegCode.
-   *
-   * <p>Step 1: Convert an array of spu object to map, assuming 1 orchardId to 1 spu relationship.
-   *
-   * <p>Step 2: Find all non-retired orchards under a vegCode.
-   *
-   * <p>Step 3: Contruct a list of spuId with orchard ids from Step 2
-   *
-   * <p>Step 4: Query for parent tree ids with spuIds in parent_tree_seed_plan_unit table
-   *
-   * <p>Step 5: Query for parent tree dtos with parent tree ids @Return the value of resultMap.
-   */
-  public List<ParentTreeDto> findParentTreesWithVegCode(
-      String vegCode, List<SeedPlanUnitDto> spuList) {
+  private ParentTreeDto convertToParentTreeDto(ParentTree parentTree) {
+    ParentTreeDto parentTreeDto = modelMapper.map(parentTree, ParentTreeDto.class);
+    parentTreeDto.setParentTreeId(Long.valueOf(parentTree.getId()));
+    return parentTreeDto;
+  }
 
-    // Key is orchard Id, Value is Spu
-    Map<String, Integer> orchardSpuMap = new HashMap<>();
+  private ParentTreeGeneticInfoDto convertToParentTreeGenInfoDto(ParentTree parentTree) {
+    ParentTreeGeneticInfoDto parentTreeGenInfoDto =
+        modelMapper.map(parentTree, ParentTreeGeneticInfoDto.class);
+    parentTreeGenInfoDto.setParentTreeId(Long.valueOf(parentTree.getId()));
+    return parentTreeGenInfoDto;
+  }
 
-    // Step 1
-    spuList.forEach(
-        spuObj -> {
-          orchardSpuMap.put(spuObj.orchardId(), spuObj.seedPlanningUnitId());
-        });
+  /** Find all parent trees under a vegCode. */
+  public List<ParentTreeDto> findParentTreesWithVegCode(String vegCode) {
 
-    // Step 2
-    List<Orchard> orchardList =
-        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, "RET");
+    List<ParentTree> resultList = parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode);
 
-    // Step 3, using a set
-    Set<Integer> spuIdSet = new HashSet<>();
+    List<ParentTreeDto> convertedList =
+        resultList.stream().map(parentTree -> convertToParentTreeDto(parentTree)).toList();
 
-    orchardList.forEach(
-        orchard -> {
-          Integer spuId = orchardSpuMap.get(orchard.getId());
-          spuIdSet.add(spuId);
-        });
-
-    List<Integer> list = new ArrayList<Integer>(spuIdSet);
-    List<ParentTreeSpuEntity> test = parentTreeSpuRepository.findByIdSpuIdIn(list);
-
-    log.info("KKKKKK " + Integer.toString(test.size()));
-
-    // Key is parent tree id, Value is parent tree dto
-    Map<String, ParentTreeDto> resultMap = new HashMap<>();
-
-    return new ArrayList<>(resultMap.values());
+    return convertedList;
   }
 }

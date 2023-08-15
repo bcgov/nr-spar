@@ -4,7 +4,6 @@ import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 /** This class contains methods for fetching data from Oracle REST API. */
 @Slf4j
@@ -88,7 +88,7 @@ public class OracleApiProvider implements Provider {
    */
   @Override
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/{vegCode}", rootUri);
+    String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/%s", rootUri, vegCode);
 
     log.info("Starting {} - {} request to {}", PROVIDER, "findOrchardsByVegCode", oracleApiUrl);
 
@@ -117,33 +117,29 @@ public class OracleApiProvider implements Provider {
    * @return An {@link List} of {@link ParentTreeDto}
    */
   @Override
-  public List<ParentTreeDto> findParentTreesByVegCode(
-      String vegCode, List<ActiveOrchardSpuEntity> activeSpuList) {
+  public List<ParentTreeDto> findParentTreesByVegCode(String vegCode) {
     String oracleApiUrl =
-        String.format("%s/api/orchards/parent-trees/vegetation-codes/{vegCode}", rootUri);
+        String.format("%s/api/orchards/parent-trees/vegetation-codes/%s", rootUri, vegCode);
 
     log.info("Starting {} - {} request to {}", PROVIDER, "findParentTreesByVegCode", oracleApiUrl);
-
-    HttpEntity<List<ActiveOrchardSpuEntity>> postHttpEntity =
-        new HttpEntity<>(activeSpuList, addHttpHeaders());
 
     try {
       ResponseEntity<List<ParentTreeDto>> parentTreesResult =
           restTemplate.exchange(
               oracleApiUrl,
-              HttpMethod.POST,
-              postHttpEntity,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
               new ParameterizedTypeReference<List<ParentTreeDto>>() {},
               createParamsMap("vegCode", vegCode));
-      log.info("POST orchards by vegCode with spu list to oracle - Success response!");
+      log.info("GET parent trees by vegCode from oracle - Success response!");
       return parentTreesResult.getBody();
     } catch (HttpClientErrorException httpExc) {
       log.error(
-          "POST parent trees by vegCode from oracle - Response code error: {}",
-          httpExc.getStatusCode());
+          "GET parent trees by vegCode from oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
     }
-
-    return List.of();
   }
 
   @Override

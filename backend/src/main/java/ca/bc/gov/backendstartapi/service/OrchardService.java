@@ -105,8 +105,6 @@ public class OrchardService {
    * @return An {@link List} of {@link ParentTreeDto} from oracle-api
    */
   public List<ParentTreeDto> findParentTreesByVegCode(String vegCode) {
-    List<ActiveOrchardSpuEntity> activeSpuList = findAllSpu(true);
-    return oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase(), activeSpuList);
+    return oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase());
   }
-
 }

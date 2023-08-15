@@ -4,7 +4,6 @@ import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +28,7 @@ public interface Provider {
     return List.of();
   }
 
-  default List<ParentTreeDto> findParentTreesByVegCode(
-      String vegCode, List<ActiveOrchardSpuEntity> activeSpuList) {
+  default List<ParentTreeDto> findParentTreesByVegCode(String vegCode) {
     return List.of();
   }
 

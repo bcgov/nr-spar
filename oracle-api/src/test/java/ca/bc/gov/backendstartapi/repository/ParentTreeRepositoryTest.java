@@ -39,8 +39,8 @@ class ParentTreeRepositoryTest {
     assertTrue(parentTree.getActive());
     assertTrue(parentTree.getTested());
     assertTrue(parentTree.getBreedingProgram());
-    assertNull(parentTree.getFemaleParentParentTreeId());
-    assertNull(parentTree.getMaleParentParentTreeId());
+    assertNull(parentTree.getFemaleParentTreeId());
+    assertNull(parentTree.getMaleParentTreeId());
 
     ParentTree parentTree2 = parentTreeList.get(1);
     assertEquals(4033L, parentTree2.getId());
@@ -51,7 +51,7 @@ class ParentTreeRepositoryTest {
     assertFalse(parentTree2.getActive());
     assertFalse(parentTree2.getTested());
     assertFalse(parentTree2.getBreedingProgram());
-    assertEquals(10001L, parentTree2.getFemaleParentParentTreeId());
-    assertEquals(10002L, parentTree2.getMaleParentParentTreeId());
+    assertEquals(10001L, parentTree2.getFemaleParentTreeId());
+    assertEquals(10002L, parentTree2.getMaleParentTreeId());
   }
 }

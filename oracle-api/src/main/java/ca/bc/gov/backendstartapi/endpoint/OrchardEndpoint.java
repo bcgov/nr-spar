@@ -3,7 +3,6 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanUnitDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,8 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -159,19 +156,15 @@ public class OrchardEndpoint {
                     String.format("Orchards not found with vegCode: %s.", vegCode)));
   }
 
-  @PostMapping(
-      path = "/parent-trees/vegetation-codes/{vegCode}",
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/parent-trees/vegetation-codes/{vegCode}")
   @PreAuthorize("hasRole('user_read')")
   public ResponseEntity<List<ParentTreeDto>> findParentTreesWithVegCode(
       @PathVariable("vegCode") @Parameter(description = "The vegetation code of an orchard.")
-          String vegCode,
-      @RequestBody @Parameter(description = "The list of active spu")
-          List<SeedPlanUnitDto> spuList) {
+          String vegCode) {
     try {
       // NEXT: validate the information against the seedlot's orchard
       //   All trees on the table must belong to the seedlot's orchard.
-      return ResponseEntity.ok(orchardService.findParentTreesWithVegCode(vegCode, spuList));
+      return ResponseEntity.ok(orchardService.findParentTreesWithVegCode(vegCode));
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
