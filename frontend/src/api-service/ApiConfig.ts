@@ -1,5 +1,4 @@
 import mockServerConfig from '../mock-server/config';
-import { EnvVars } from '../utils/EnvUtils';
 
 const serverHost = import.meta.env.VITE_SERVER_URL || mockServerConfig.namespace;
 
