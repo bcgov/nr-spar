@@ -107,7 +107,7 @@ public class ForestClientEndpoint {
   }
 
   /**
-   * Fetch the forest client location based on the client number and location code
+   * Fetch the forest client location based on the client number and location code.
    *
    * @param number the number that identifies the client to fetch the location
    * @param locationCode the location code that identifies the location to be fetched
