@@ -17,7 +17,7 @@ import {
   SingleOwnerForm,
   NumStepperVal
 } from '../definitions';
-import { inputText, DEFAULT_INDEX, DEFAULT_PAYMENT_INDEX } from '../constants';
+import { inputText, DEFAULT_INDEX } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/filterUtils';
 import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import CheckboxType from '../../../../types/CheckboxType';
@@ -241,7 +241,6 @@ const SingleOwnerInfo = ({
             name="methodOfPayment"
             items={methodsOfPayment}
             selectedItem={ownerInfo.methodOfPayment}
-            initialSelectedItem={methodsOfPayment[DEFAULT_PAYMENT_INDEX]}
             shouldFilterItem={
               ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
             }

@@ -3,8 +3,6 @@ import { SingleOwnerForm } from './definitions';
 
 export const DEFAULT_INDEX = 0;
 
-export const DEFAULT_PAYMENT_INDEX = 0;
-
 export const MAX_OWNERS = 100;
 
 export const inputText = {
@@ -61,11 +59,7 @@ export const ownerTemplate: SingleOwnerForm = {
     code: '',
     description: ''
   },
-  methodOfPayment: {
-    label: 'ITC - Invoice to Client Address',
-    code: 'ITC',
-    description: 'Invoice to Client Address'
-  }
+  methodOfPayment: null
 };
 
 export const validTemplate: FormInvalidationObj = {
