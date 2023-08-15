@@ -91,8 +91,7 @@ public class ForestClientEndpoint {
               by it's number.""",
       responses = {
         @ApiResponse(
-            responseCode = "200",
-            content = @Content(schema = @Schema(implementation = ForestClientLocationDto.class))),
+            responseCode = "200"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   public List<ForestClientLocationDto> fetchClientLocations(
