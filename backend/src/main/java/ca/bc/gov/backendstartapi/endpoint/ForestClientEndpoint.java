@@ -76,7 +76,7 @@ public class ForestClientEndpoint {
   }
 
   /**
-   * Fetch the forest client locations by the client number.
+   * Fetch up to the 10 first forest client locations by the client number.
    *
    * @param number the number that identifies the client to fetch the locations
    * @return the forest client locations
@@ -84,11 +84,11 @@ public class ForestClientEndpoint {
   @GetMapping(path = "/{number}/locations")
   @PreAuthorize("hasRole('user_read')")
   @Operation(
-      summary = "Fetch the locations of the forest client.",
+      summary = "Fetch up to the 10 first locations of the forest client.",
       description =
           """
-              Returns a list of locations associated with the forest client, identified
-              by it's number.""",
+              Returns a list up to the 10 first locations associated with the forest client,
+              identified by it's number.""",
       responses = {
         @ApiResponse(
             responseCode = "200"),
