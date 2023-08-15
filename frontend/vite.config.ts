@@ -4,27 +4,7 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    {
-      name: 'build-html',
-      apply: 'build',
-      transformIndexHtml: (html) => {
-        return {
-          html,
-          tags: [
-            {
-              tag: 'script',
-              attrs: {
-                src: '/env-config.js'
-              },
-              injectTo: 'head'
-            }
-          ]
-        }
-      }
-    },
-    react()
-  ],
+  plugins: [react()],
   build: {
     outDir: 'build'
   },

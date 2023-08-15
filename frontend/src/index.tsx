@@ -8,9 +8,8 @@ import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemePreference } from './utils/ThemePreference';
 import makeServer from './mock-server/server';
-import { EnvVars } from './utils/EnvUtils';
 
-const appVersion: string = EnvVars.VITE_NRSPARWEBAPP_VERSION;
+const appVersion: string = import.meta.env.VITE_NRSPARWEBAPP_VERSION;
 
 const isDevEnv = appVersion === 'dev'
   || appVersion.startsWith('test')

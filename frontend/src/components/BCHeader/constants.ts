@@ -1,6 +1,4 @@
-import { EnvVars } from '../../utils/EnvUtils';
-
-export const VERSION: string = `Version: ${EnvVars.VITE_NRSPARWEBAPP_VERSION}`;
+export const VERSION: string = `Version: ${import.meta.env.VITE_NRSPARWEBAPP_VERSION}`;
 
 export const HOME_LINK = '/dashboard';
 
