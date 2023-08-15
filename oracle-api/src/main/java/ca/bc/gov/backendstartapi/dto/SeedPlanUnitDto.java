@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * {@link ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode}.
  */
 @Schema(description = "Represents an Spu object with orchard id.")
-public record SeedPlanUnitObjDto(
+public record SeedPlanUnitDto(
     String orchardId,
     int seedPlanningUnitId,
     String vegetationCode,

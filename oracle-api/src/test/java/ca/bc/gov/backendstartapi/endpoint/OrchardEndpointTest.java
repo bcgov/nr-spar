@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.math.BigDecimal;
@@ -83,7 +83,7 @@ class OrchardEndpointTest {
     orchardParentTreeDto.setVegetationCode("FDC");
     orchardParentTreeDto.setSeedPlanningUnitId(7L);
 
-    ParentTreeDto parentTreeDto1 = new ParentTreeDto();
+    ParentTreeGeneticInfoDto parentTreeDto1 = new ParentTreeGeneticInfoDto();
     parentTreeDto1.setParentTreeId(4001L);
     parentTreeDto1.setParentTreeNumber("37");
     parentTreeDto1.setParentTreeRegStatusCode("APP");

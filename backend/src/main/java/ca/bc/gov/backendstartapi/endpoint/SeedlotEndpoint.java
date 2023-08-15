@@ -33,7 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/seedlots", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
 @Tag(name = "Seedlot")
 @RequiredArgsConstructor
-public class ParentTreesContributionEndpoint {
+public class SeedlotEndpoint {
 
   private final ConeAndPollenCountCsvTableParser contributionTableCsvParser;
 

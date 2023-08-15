@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.entity;
 
+import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

@@ -5,14 +5,14 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTree;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
-import ca.bc.gov.backendstartapi.entity.ParentTreeOrchardId;
+import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
@@ -216,7 +216,7 @@ class OrchardServiceTest {
     Assertions.assertEquals(1, orchardParentTreeDto.getParentTrees().size());
 
     // Parent Trees
-    ParentTreeDto parentTreeDto = orchardParentTreeDto.getParentTrees().get(0);
+    ParentTreeGeneticInfoDto parentTreeDto = orchardParentTreeDto.getParentTrees().get(0);
     Assertions.assertEquals(4032L, parentTreeDto.getParentTreeId());
     Assertions.assertEquals("37", parentTreeDto.getParentTreeNumber());
     Assertions.assertEquals("APP", parentTreeDto.getParentTreeRegStatusCode());

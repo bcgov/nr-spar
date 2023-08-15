@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +41,10 @@ class ActiveOrchardSeedPlanningUnitEndpointTest {
 
   @Test
   void testSearchActiveDefault() throws Exception {
-    List<ActiveOrchardSeedPlanningUnit> actives =
-        List.of(new ActiveOrchardSeedPlanningUnit("000", 1, true, false, false));
-    List<ActiveOrchardSeedPlanningUnit> inactives =
-        List.of(new ActiveOrchardSeedPlanningUnit("000", 2, false, false, false));
+    List<ActiveOrchardSpuEntity> actives =
+        List.of(new ActiveOrchardSpuEntity("000", 1, true, false, false));
+    List<ActiveOrchardSpuEntity> inactives =
+        List.of(new ActiveOrchardSpuEntity("000", 2, false, false, false));
     given(repository.findByOrchardIdAndActive("000", true)).willReturn(actives);
     given(repository.findByOrchardIdAndActive("000", false)).willReturn(inactives);
 
@@ -58,10 +58,10 @@ class ActiveOrchardSeedPlanningUnitEndpointTest {
 
   @Test
   void testSearchInactiveDefault() throws Exception {
-    List<ActiveOrchardSeedPlanningUnit> actives =
-        List.of(new ActiveOrchardSeedPlanningUnit("000", 1, true, false, false));
-    List<ActiveOrchardSeedPlanningUnit> inactives =
-        List.of(new ActiveOrchardSeedPlanningUnit("000", 2, false, false, false));
+    List<ActiveOrchardSpuEntity> actives =
+        List.of(new ActiveOrchardSpuEntity("000", 1, true, false, false));
+    List<ActiveOrchardSpuEntity> inactives =
+        List.of(new ActiveOrchardSpuEntity("000", 2, false, false, false));
     given(repository.findByOrchardIdAndActive("000", true)).willReturn(actives);
     given(repository.findByOrchardIdAndActive("000", false)).willReturn(inactives);
 

@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.exception.NoOrchardException;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
@@ -36,8 +35,7 @@ class OrchardEndpointTest {
   void getParentTreeGeneticQualityDataSuccessTest() throws Exception {
     String orchardId = "123";
 
-    OrchardSpuDto parentTreeDto =
-        new OrchardSpuDto(orchardId, "ACT", 1L, new ArrayList<>());
+    OrchardSpuDto parentTreeDto = new OrchardSpuDto(orchardId, "ACT", 1L, new ArrayList<>());
 
     when(orchardService.findParentTreeGeneticQualityData(orchardId)).thenReturn(parentTreeDto);
 
@@ -139,18 +137,15 @@ class OrchardEndpointTest {
   void findOrchardsWithVegCodeNotFoundTest() throws Exception {
     String vegCode = "BEEF";
 
-    when(orchardService.findOrchardsByVegCode(vegCode)).thenThrow(new NoOrchardException());
-
+    when(orchardService.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
     mockMvc
         .perform(
             get("/api/orchards/vegetation-code/{vegCode}", vegCode)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(status().reason("No orchard was found with the given VegCode!"))
-        .andReturn()
-        .getResolvedException()
-        .getMessage();
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0))
+        .andReturn();
   }
 }

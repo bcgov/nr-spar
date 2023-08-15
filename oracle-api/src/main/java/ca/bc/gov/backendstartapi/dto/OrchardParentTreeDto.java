@@ -34,7 +34,7 @@ public class OrchardParentTreeDto {
       example = "7")
   private Long seedPlanningUnitId;
 
-  private List<ParentTreeDto> parentTrees;
+  private List<ParentTreeGeneticInfoDto> parentTrees;
 
   public OrchardParentTreeDto() {
     this.parentTrees = new ArrayList<>();
