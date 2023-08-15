@@ -74,7 +74,7 @@ public class ForestClientApiProvider implements Provider {
       log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByNumber");
       return Optional.of(response.getBody());
     } catch (HttpClientErrorException httpExc) {
-      log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return Optional.empty();
@@ -100,7 +100,7 @@ public class ForestClientApiProvider implements Provider {
       log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByAcronym");
       return response.getBody().stream().findFirst();
     } catch (HttpClientErrorException httpExc) {
-      log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return Optional.empty();
@@ -132,7 +132,7 @@ public class ForestClientApiProvider implements Provider {
           "fetchLocationsByClientNumber");
       return response.getBody();
     } catch (HttpClientErrorException httpExc) {
-      log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return List.of();
