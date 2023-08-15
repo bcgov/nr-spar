@@ -21,12 +21,16 @@ const getNextId = (currentArray: Array<SingleOwnerForm>): number => {
 
 export const insertOwnerForm = (
   ownershiptArray: Array<SingleOwnerForm>,
-  validationObj: OwnershipInvalidObj
+  validationObj: OwnershipInvalidObj,
+  methodsOfPayment: MultiOptionsObj[]
 ) => {
-  const newOwnerForm = { ...ownerTemplate };
+  const newOwnerForm = structuredClone(ownerTemplate);
   const newValidForm = { ...validTemplate };
   const newId = getNextId(ownershiptArray);
   newOwnerForm.id = newId;
+  const defaultPayment = methodsOfPayment.filter((method) => method.isDefault)[0] ?? null;
+  newOwnerForm.methodOfPayment = defaultPayment;
+
   return {
     newOwnerArr: [...ownershiptArray, newOwnerForm],
     newValidObj: {

@@ -1,8 +1,8 @@
 package ca.bc.gov.backendstartapi.entity.seedlot;
 
+import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodId;
-import ca.bc.gov.backendstartapi.enums.ConeCollectionMethodEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -22,11 +22,10 @@ import lombok.Setter;
 @Entity
 @Table(name = "seedlot_collection_method")
 @IdClass(SeedlotCollectionMethodId.class)
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
 @Setter
+@NoArgsConstructor
 public class SeedlotCollectionMethod {
-
   // region Identifier
   @Id
   @JoinColumn(name = "seedlot_number")
@@ -35,10 +34,11 @@ public class SeedlotCollectionMethod {
   private Seedlot seedlot;
 
   @Id
-  @Column(name = "cone_collection_method_code", length = 30, nullable = false)
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.NONE)
-  private String coneCollectionMethodCode;
+  @JoinColumn(name = "cone_collection_method_code")
+  @ManyToOne
+  @NonNull
+  private ConeCollectionMethodEntity coneCollectionMethod;
+
   // endregion
 
   @Column(name = "cone_collection_method_desc", length = 400)
@@ -51,17 +51,8 @@ public class SeedlotCollectionMethod {
   @Setter(AccessLevel.NONE)
   private int revisionCount;
 
-  public SeedlotCollectionMethod(
-      @NonNull Seedlot seedlot, @NonNull ConeCollectionMethodEnum collectionMethod) {
+  public SeedlotCollectionMethod(Seedlot seedlot, ConeCollectionMethodEntity collectionMethod) {
     this.seedlot = seedlot;
-    setConeCollectionMethodCode(collectionMethod);
-  }
-
-  public ConeCollectionMethodEnum getConeCollectionMethodCode() {
-    return ConeCollectionMethodEnum.getByCode(coneCollectionMethodCode).orElseThrow();
-  }
-
-  public void setConeCollectionMethodCode(@NonNull ConeCollectionMethodEnum method) {
-    coneCollectionMethodCode = method.getCode();
+    this.coneCollectionMethod = collectionMethod;
   }
 }

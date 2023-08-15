@@ -19,7 +19,7 @@ export type SingleOwnerForm = {
   reservedPerc: string,
   surplusPerc: string,
   fundingSource: MultiOptionsObj,
-  methodOfPayment: MultiOptionsObj,
+  methodOfPayment: MultiOptionsObj | null,
 }
 
 export type SingleInvalidObj = {

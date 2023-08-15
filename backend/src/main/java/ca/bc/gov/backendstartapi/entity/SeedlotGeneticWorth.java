@@ -3,12 +3,9 @@ package ca.bc.gov.backendstartapi.entity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotGeneticWorthId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -41,10 +38,11 @@ public class SeedlotGeneticWorth {
   private Seedlot seedlot;
 
   @Id
-  @Column(name = "genetic_worth_code", length = 3, nullable = false)
-  @Enumerated(EnumType.STRING)
+  @JoinColumn(name = "genetic_worth_code")
+  @ManyToOne
   @NonNull
-  private GeneticWorthEnum geneticWorthCode;
+  private GeneticWorthEntity geneticWorth;
+
   // endregion
 
   @Column(name = "genetic_quality_value", precision = 4, scale = 1, nullable = false)

@@ -1,6 +1,8 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.enums.ConeCollectionMethodEnum;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
+import ca.bc.gov.backendstartapi.service.ConeCollectionMethodService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,14 +21,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/cone-collection-methods")
 @Tag(
-    name = "ConeCollectionMethodEndpoint",
+    name = "ConeCollectionMethods",
     description = "Resources to handle all cone collection method codes")
 public class ConeCollectionMethodEndpoint {
+
+  private ConeCollectionMethodService coneCollectionMethodService;
+
+  ConeCollectionMethodEndpoint(ConeCollectionMethodService coneCollectionMethodService) {
+    this.coneCollectionMethodService = coneCollectionMethodService;
+  }
 
   /**
    * Get all cone collection method codes.
    *
-   * @return A list of {@link ConeCollectionMethodEnum}
+   * @return A list of {@link ConeCollectionMethodEntity}
    */
   @GetMapping(produces = "application/json")
   @PreAuthorize("hasRole('user_read')")
@@ -50,8 +58,7 @@ public class ConeCollectionMethodEndpoint {
                                   type = "string",
                                   description =
                                       "This object represents a cone collection method code",
-                                  example = "01"
-                              )),
+                                  example = "1")),
                       @SchemaProperty(
                           name = "description",
                           schema =
@@ -65,7 +72,7 @@ public class ConeCollectionMethodEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<ConeCollectionMethodEnum> getAllConeCollectionMethods() {
-    return List.of(ConeCollectionMethodEnum.values());
+  public List<CodeDescriptionDto> getAllConeCollectionMethods() {
+    return coneCollectionMethodService.getAllConeCollectionMethods();
   }
 }

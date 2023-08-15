@@ -1,13 +1,11 @@
 package ca.bc.gov.backendstartapi.entity.seedlot;
 
+import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOwnerQuantityId;
-import ca.bc.gov.backendstartapi.enums.PaymentMethodEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -48,6 +46,7 @@ public class SeedlotOwnerQuantity {
   @Column(name = "owner_locn_code", length = 2, nullable = false)
   @NonNull
   private String ownerLocationCode;
+
   // endregion
 
   @Column(name = "original_pct_owned", precision = 4, scale = 1, nullable = false)
@@ -59,9 +58,9 @@ public class SeedlotOwnerQuantity {
   @Column(name = "original_pct_srpls", precision = 4, scale = 1, nullable = false)
   private BigDecimal originalPercentageSurplus;
 
-  @Column(name = "method_of_payment_code", length = 3)
-  @Enumerated(EnumType.STRING)
-  private PaymentMethodEnum methodOfPaymentCode;
+  @JoinColumn(name = "method_of_payment_code")
+  @ManyToOne
+  private MethodOfPaymentEntity methodOfPayment;
 
   @Column(name = "spar_fund_srce_code", length = 3)
   private String fundingSourceCode;

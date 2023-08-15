@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.entity.idclass;
 
 import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
-import ca.bc.gov.backendstartapi.enums.GeneticWorthEnum;
 import java.io.Serializable;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -23,5 +22,5 @@ public class SmpMixGeneticQualityId implements Serializable {
 
   @NonNull private String geneticTypeCode;
 
-  @NonNull private GeneticWorthEnum geneticWorthCode;
+  @NonNull private String geneticWorth;
 }

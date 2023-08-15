@@ -1,15 +1,15 @@
 package ca.bc.gov.backendstartapi.entity.seedlot;
 
+import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
-import ca.bc.gov.backendstartapi.enums.GeneticClassEnum;
-import ca.bc.gov.backendstartapi.enums.SeedlotSourceEnum;
-import ca.bc.gov.backendstartapi.enums.SeedlotStatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.io.Serializable;
@@ -19,14 +19,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /** A registered seedlot. */
 @Entity
 @Table(name = "seedlot")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-@RequiredArgsConstructor
 @Getter
 @Setter
 public class Seedlot implements Serializable {
@@ -36,10 +34,9 @@ public class Seedlot implements Serializable {
   @NonNull
   private String id;
 
-  @Column(name = "seedlot_status_code", length = 3, nullable = false)
-  @Enumerated(EnumType.STRING)
-  @NonNull
-  private SeedlotStatusEnum status;
+  @JoinColumn(name = "seedlot_status_code")
+  @ManyToOne
+  private SeedlotStatusEntity seedlotStatus;
 
   @Column(name = "seedlot_comment", length = 2000)
   private String comment;
@@ -53,25 +50,27 @@ public class Seedlot implements Serializable {
 
   @Column(name = "applicant_email_address", length = 100)
   private String applicantEmailAddress;
+
   // endregion
 
   // region Lot information
   @Column(name = "vegetation_code", length = 8)
   private String vegetationCode;
 
-  @Column(name = "genetic_class_code", length = 2)
-  @Enumerated(EnumType.STRING)
-  private GeneticClassEnum geneticClassCode;
+  @JoinColumn(name = "genetic_class_code")
+  @ManyToOne
+  private GeneticClassEntity geneticClass;
 
-  @Column(name = "seedlot_source_code", length = 3)
-  @Enumerated(EnumType.STRING)
-  private SeedlotSourceEnum seedlotSourceCode;
+  @JoinColumn(name = "seedlot_source_code")
+  @ManyToOne
+  private SeedlotSourceEntity seedlotSource;
 
   @Column(name = "to_be_registrd_ind")
   private Boolean intendedForCrownLand;
 
   @Column(name = "bc_source_ind")
   private Boolean sourceInBc;
+
   // endregion
 
   // region Collection
@@ -99,6 +98,7 @@ public class Seedlot implements Serializable {
    */
   @Column(name = "clctn_volume", precision = 6, scale = 2)
   private BigDecimal totalConeVolume;
+
   // endregion
 
   // region Interim storage
@@ -116,6 +116,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "interm_facility_code", length = 3)
   private String interimStorageFacilityCode;
+
   // endregion
 
   // region Orchard
@@ -142,6 +143,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "pollen_contamination_mthd_code", length = 4)
   private String pollenContaminationMethodCode;
+
   // endregion
 
   // region Parent tree & SMP
@@ -166,6 +168,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "non_orchard_pollen_contam_pct")
   private Integer nonOrchardPollenContaminationPercentage;
+
   // endregion
 
   // region Extraction & Storage
@@ -192,6 +195,7 @@ public class Seedlot implements Serializable {
 
   @Column(name = "temporary_storage_end_date")
   private LocalDateTime temporaryStorageEndDate;
+
   // endregion
 
   // region Legal & Audit
@@ -208,5 +212,10 @@ public class Seedlot implements Serializable {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
   // endregion
+
+  public Seedlot(String id) {
+    this.id = id;
+  }
 }

@@ -22,7 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 /** This class exposes endpoints for fetching Orchard related information. */
 @RestController
 @RequestMapping(path = "/api/orchards", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Orchard")
+@Tag(name = "Orchards")
 public class OrchardEndpoint {
 
   private OrchardService orchardService;

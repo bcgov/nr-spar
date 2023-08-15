@@ -1,11 +1,10 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.enums.LatitudeCodeEnum;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.web.context.WebApplicationContext;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@WebMvcTest(LatitudeCodeEndpoint.class)
 class LatitudeCodeEndpointTest extends DescribedEnumEndpointTest<LatitudeCodeEnum> {
 
   LatitudeCodeEndpointTest(WebApplicationContext webApplicationContext) {

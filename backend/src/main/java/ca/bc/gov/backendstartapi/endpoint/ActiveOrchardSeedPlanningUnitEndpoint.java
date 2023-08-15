@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Rest controller to fetch relations between orchards and Seed Plan Units (SPU). */
 @RestController
 @RequestMapping(path = "/api/orchards", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-@Tag(name = "Orchard")
+@Tag(name = "Orchards")
 @RequiredArgsConstructor
 public class ActiveOrchardSeedPlanningUnitEndpoint {
 
