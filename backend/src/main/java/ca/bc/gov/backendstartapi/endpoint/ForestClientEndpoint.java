@@ -105,4 +105,43 @@ public class ForestClientEndpoint {
           String number) {
     return forestClientService.fetchClientLocations(number);
   }
+
+  /**
+   * Fetch the forest client location based on the client number and location code
+   *
+   * @param number the number that identifies the client to fetch the location
+   * @param locationCode the location code that identifies the location to be fetched
+   * @return the forest client location
+   */
+  @GetMapping(path = "/{number}/location/{locationCode}")
+  @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Fetch the location of the forest client.",
+      description =
+          """
+              Returns a single location associated with the forest client, identified
+              by it's number and location code""",
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            content = @Content(schema = @Schema(implementation = ForestClientLocationDto.class))),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
+      })
+  public ForestClientLocationDto fetchSingleClientLocation(
+      @PathVariable("number")
+          @Pattern(regexp = "^\\d{8}$", message = "The value must an 8-digit number")
+          @Parameter(
+              name = "number",
+              in = ParameterIn.PATH,
+              description = "Number that identifies the client to get the locations.")
+          String number,
+      @PathVariable("locationCode")
+          @Parameter(
+              name = "locationCode",
+              in = ParameterIn.PATH,
+              description = "Number that identify the location."
+          )
+          String locationCode) {
+    return forestClientService.fetchSingleClientLocation(number, locationCode);
+  }
 }
