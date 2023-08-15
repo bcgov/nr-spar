@@ -44,7 +44,7 @@ interface OwnershipStepProps {
   setInvalidState: Function,
   readOnly?: boolean,
   fundingSources: Array<MultiOptionsObj>,
-  paymentMethods: Array<MultiOptionsObj>
+  methodsOfPayment: Array<MultiOptionsObj>
 }
 
 /*
@@ -61,7 +61,7 @@ const OwnershipStep = (
     agencyOptions,
     readOnly,
     fundingSources,
-    paymentMethods
+    methodsOfPayment
   }: OwnershipStepProps
 ) => {
   const [disableInputs, setDisableInputs] = useState(true);
@@ -217,7 +217,7 @@ const OwnershipStep = (
     const {
       newValidObj,
       newOwnerArr
-    }: StateReturnObj = insertOwnerForm(state, invalidState);
+    }: StateReturnObj = insertOwnerForm(state, invalidState, methodsOfPayment);
     setStepData(newOwnerArr);
     setInvalidState(newValidObj);
   };
@@ -327,7 +327,7 @@ const OwnershipStep = (
                   ownerInfo={singleOwnerInfo}
                   agencyOptions={agencyOptions}
                   fundingSources={fundingSources}
-                  methodsOfPayment={paymentMethods}
+                  methodsOfPayment={methodsOfPayment}
                   disableInputs={disableInputs}
                   addRefs={(element: HTMLInputElement, name: string) => {
                     addRefs(element, singleOwnerInfo.id, name);

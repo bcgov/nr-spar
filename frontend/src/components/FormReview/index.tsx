@@ -211,7 +211,7 @@ const FormReview = () => {
                       agencyOptions={agencyOptions}
                       setStepData={() => { }}
                       fundingSources={[]}
-                      paymentMethods={[]}
+                      methodsOfPayment={[]}
                       invalidState={{}}
                       setInvalidState={() => { }}
                       readOnly

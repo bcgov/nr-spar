@@ -35,7 +35,7 @@ const ApiConfig = {
 
   geneticClasses: `${serverHost}/api/genetic-classes`,
 
-  paymentMethod: `${serverHost}/api/payment-methods`,
+  methodsOfPayment: `${serverHost}/api/methods-of-payment`,
 
   orchards: `${serverHost}/api/orchards`,
 
@@ -47,7 +47,7 @@ const ApiConfig = {
 
   uploadSMPMix: `${serverHost}/api/seedlots/parent-trees-contribution/smp-calculation-table/upload`,
 
-  maleFemaleMethodology: `${serverHost}/api/male-female-methodologies`,
+  gameticMethodology: `${serverHost}/api/gametic-methodologies`,
 
   /**
    * ORACLE API
