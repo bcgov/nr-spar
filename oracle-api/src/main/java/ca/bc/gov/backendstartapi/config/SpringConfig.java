@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 /** This class contains general configurations for Spring. */
 @Configuration
 public class SpringConfig {
-  /** Add model mapper */
+  /** Add model mapper. */
   @Bean
   public ModelMapper modelMapper() {
     return new ModelMapper();

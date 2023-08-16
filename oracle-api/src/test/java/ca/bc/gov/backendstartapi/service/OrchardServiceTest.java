@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
@@ -19,7 +20,6 @@ import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -287,14 +287,7 @@ class OrchardServiceTest {
     expiredOrchard.setStageCode("ESB");
     expiredOrchard.setOrchardLotTypeCode(expiredlotTypeCode);
 
-    List<Orchard> repoResult =
-        new ArrayList<>() {
-          {
-            add(firstOrchard);
-            add(secondOrchard);
-            add(expiredOrchard);
-          }
-        };
+    List<Orchard> repoResult = List.of(firstOrchard, secondOrchard, expiredOrchard);
 
     when(orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, "RET"))
         .thenReturn(repoResult);
@@ -310,5 +303,53 @@ class OrchardServiceTest {
           Assertions.assertEquals("Seed Lot", testObj.lotTypeDescription());
           Assertions.assertFalse(testObj.id().isEmpty());
         });
+  }
+
+  @Test
+  @DisplayName("findParentTreesWithVegCodeServiceTest")
+  void findParentTreesWithVegCodeServiceTest() {
+    String vegCode = "PLI";
+    ParentTree firstEntity =
+        new ParentTree(
+            Long.valueOf(12345),
+            "456",
+            vegCode,
+            "S",
+            "cqm",
+            true,
+            true,
+            true,
+            Long.valueOf(123),
+            Long.valueOf(45));
+    ParentTree secondEntity =
+        new ParentTree(
+            Long.valueOf(45678),
+            "678",
+            vegCode,
+            "S",
+            "bnb",
+            true,
+            true,
+            true,
+            Long.valueOf(456),
+            Long.valueOf(78));
+
+    List<ParentTree> repoResult = List.of(firstEntity, secondEntity);
+
+    when(parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode)).thenReturn(repoResult);
+
+    List<ParentTreeDto> listToTest = orchardService.findParentTreesWithVegCode(vegCode);
+
+    Assertions.assertEquals(repoResult.size(), listToTest.size());
+
+    Assertions.assertEquals(repoResult.get(0).getId(), listToTest.get(0).getParentTreeId());
+    Assertions.assertEquals(
+        repoResult.get(0).getParentTreeNumber(), listToTest.get(0).getParentTreeNumber());
+    Assertions.assertEquals(repoResult.get(0).getActive(), listToTest.get(0).isActive());
+
+    Assertions.assertEquals(repoResult.get(1).getId(), listToTest.get(1).getParentTreeId());
+    Assertions.assertEquals(
+        repoResult.get(1).getParentTreeNumber(), listToTest.get(1).getParentTreeNumber());
+    Assertions.assertEquals(repoResult.get(1).getActive(), listToTest.get(1).isActive());
   }
 }

@@ -212,16 +212,18 @@ public class OrchardService {
         ptgqList.stream()
             .map(parentTreeGen -> modelMapper.map(parentTreeGen, ParentTreeGeneticQualityDto.class))
             .toList();
-    // for (ParentTreeGeneticQuality parentTreeGen : ptgqList) {
-    //   ParentTreeGeneticQualityDto geneticQualityDto = new ParentTreeGeneticQualityDto();
-    //   geneticQualityDto.setParentTreeId(parentTreeGen.getParentTreeId());
-    //   geneticQualityDto.setGeneticTypeCode(parentTreeGen.getGeneticTypeCode());
-    //   geneticQualityDto.setGeneticWorthCode(parentTreeGen.getGeneticWorthCode());
-    //   geneticQualityDto.setGeneticQualityValue(parentTreeGen.getGeneticQualityValue());
-
-    //   list.add(geneticQualityDto);
-    // }
     return dtoList;
+  }
+
+  /** Find all parent trees under a vegCode. */
+  public List<ParentTreeDto> findParentTreesWithVegCode(String vegCode) {
+
+    List<ParentTree> resultList = parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode);
+
+    List<ParentTreeDto> convertedList =
+        resultList.stream().map(parentTree -> convertToParentTreeDto(parentTree)).toList();
+
+    return convertedList;
   }
 
   private ParentTreeDto convertToParentTreeDto(ParentTree parentTree) {
@@ -235,16 +237,5 @@ public class OrchardService {
         modelMapper.map(parentTree, ParentTreeGeneticInfoDto.class);
     parentTreeGenInfoDto.setParentTreeId(Long.valueOf(parentTree.getId()));
     return parentTreeGenInfoDto;
-  }
-
-  /** Find all parent trees under a vegCode. */
-  public List<ParentTreeDto> findParentTreesWithVegCode(String vegCode) {
-
-    List<ParentTree> resultList = parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode);
-
-    List<ParentTreeDto> convertedList =
-        resultList.stream().map(parentTree -> convertToParentTreeDto(parentTree)).toList();
-
-    return convertedList;
   }
 }

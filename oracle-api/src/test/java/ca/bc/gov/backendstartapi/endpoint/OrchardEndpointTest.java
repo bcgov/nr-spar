@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
@@ -21,9 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(OrchardEndpoint.class)
 class OrchardEndpointTest {
@@ -209,5 +212,77 @@ class OrchardEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAllParentTreeByVegCodeTest")
+  @WithMockUser(roles = "user_read")
+  void getAllParentTreeByVegCodeTest() throws Exception {
+    String vegCode = "PLI";
+
+    ParentTreeDto firstDto =
+        new ParentTreeDto(
+            Long.valueOf(12345),
+            "456",
+            "S",
+            "cqm",
+            true,
+            true,
+            true,
+            Long.valueOf(123),
+            Long.valueOf(45));
+    ParentTreeDto secondDto =
+        new ParentTreeDto(
+            Long.valueOf(45678),
+            "678",
+            "S",
+            "bnb",
+            true,
+            true,
+            true,
+            Long.valueOf(456),
+            Long.valueOf(78));
+
+    List<ParentTreeDto> testList = List.of(firstDto, secondDto);
+
+    when(orchardService.findParentTreesWithVegCode(vegCode)).thenReturn(testList);
+
+    mockMvc
+        .perform(
+            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].parentTreeId").value(firstDto.getParentTreeId()))
+        .andExpect(jsonPath("$[0].parentTreeNumber").value(firstDto.getParentTreeNumber()))
+        .andExpect(jsonPath("$[0].active").value(firstDto.isActive()))
+        .andExpect(jsonPath("$[1].parentTreeId").value(secondDto.getParentTreeId()))
+        .andExpect(jsonPath("$[1].parentTreeNumber").value(secondDto.getParentTreeNumber()))
+        .andExpect(jsonPath("$[1].active").value(secondDto.isActive()))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAllParentTreeByVegCodeErrorTest")
+  @WithMockUser(roles = "user_read")
+  void getAllParentTreeByVegCodeErrorTest() throws Exception {
+    String vegCode = "LAMB";
+
+    HttpStatus errCode = HttpStatus.BAD_REQUEST;
+    String errMsg = "LAMB is not a veg code.";
+
+    when(orchardService.findParentTreesWithVegCode(vegCode))
+        .thenThrow(new ResponseStatusException(errCode, errMsg));
+    mockMvc
+        .perform(
+            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andReturn()
+        .getResolvedException()
+        .getMessage();
   }
 }

@@ -122,11 +122,11 @@ public class OrchardEndpoint {
   }
 
   /**
-   * Consumed by backend (postgres) service to retrieve a list of orchards witha vegCode.
+   * Consumed by backend (postgres) service to retrieve a list of orchards with a vegCode.
    *
    * @param vegCode an {@link Orchard}'s vegCode
    * @return an {@link List} of {@link OrchardLotTypeDescriptionDto}
-   * @throws ResponseStatusException if no data is found
+   * @throws ResponseStatusException if error occurs
    */
   @GetMapping(path = "/vegetation-code/{vegCode}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('user_read')")
@@ -156,6 +156,13 @@ public class OrchardEndpoint {
                     String.format("Orchards not found with vegCode: %s.", vegCode)));
   }
 
+  /**
+   * Consumed by backend (postgres) service to retrieve a list of parent trees with a vegCode.
+   *
+   * @param vegCode an {@link Orchard}'s vegCode
+   * @return an {@link List} of {@link ParentTreeDto}
+   * @throws ResponseStatusException if error occurs
+   */
   @GetMapping(path = "/parent-trees/vegetation-codes/{vegCode}")
   @PreAuthorize("hasRole('user_read')")
   public ResponseEntity<List<ParentTreeDto>> findParentTreesWithVegCode(
