@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 RUN apk add --no-cache python3 g++ make && \
     yarn install --frozen-lockfile --prefer-offline && \
-    yarn build:production && \
+    yarn build && \
     rm -rf node_modules
 
 # Caddy

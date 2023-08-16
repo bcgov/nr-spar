@@ -43,6 +43,8 @@ jobs:
     name: JavaScript CI
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
+    env:
+      VITE_NRSPARWEBAPP_VERSION: dev
     steps:
       - uses: bcgov-nr/action-test-and-analyse@v0.0.1
         with:
@@ -51,7 +53,7 @@ jobs:
             yarn --cwd frontend --prefer-offline
             yarn --cwd frontend run lint
             yarn --cwd frontend build
-            yarn --cwd frontend test -u --coverage
+            yarn --cwd frontend run coverage
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud

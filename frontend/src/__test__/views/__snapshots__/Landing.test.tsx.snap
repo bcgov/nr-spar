@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Landing component test should match the snapshot 1`] = `
+exports[`Landing component test > should match the snapshot 1`] = `
 <div
   className="landing-grid cds--css-grid cds--css-grid--full-width"
 >
@@ -10,7 +10,7 @@ exports[`Landing component test should match the snapshot 1`] = `
     <img
       alt="BCGov Logo"
       className="logo"
-      src=""
+      src="/src/assets/img/bc-gov-logo.png"
       width={160}
     />
     <h1
@@ -97,7 +97,7 @@ exports[`Landing component test should match the snapshot 1`] = `
     <img
       alt="Small green seedling on the dirt and watered"
       className="seeding-img"
-      src=""
+      src="/src/assets/img/seeding.png"
     />
   </div>
 </div>

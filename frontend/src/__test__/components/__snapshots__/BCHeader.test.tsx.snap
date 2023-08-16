@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`the Header component should match the snapshot 1`] = `
+exports[`the Header component > should match the snapshot 1`] = `
 <header
   aria-label=" Seed Planning and Registry System"
   className="cds--header spar-header"
@@ -572,7 +572,7 @@ exports[`the Header component should match the snapshot 1`] = `
         <img
           alt="undefined undefined"
           className="profile-image large"
-          src=""
+          src="/src/assets/img/emptyUser.jpg"
         />
       </div>
       <div
@@ -1311,7 +1311,7 @@ exports[`the Header component should match the snapshot 1`] = `
         className="panel-section"
       >
         <span>
-          Version: undefined
+          Version: dev
         </span>
       </div>
     </ul>

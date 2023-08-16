@@ -58,12 +58,12 @@ To do that, first you need to install required dependencies.
 Remember of setting up the required environment variables. You can create a `.env` file containing:
 
 ```
-REACT_APP_SERVER_URL=
-REACT_APP_ORACLE_SERVER_URL=
-REACT_APP_NRSPARWEBAPP_VERSION=
-REACT_APP_KC_URL=
-REACT_APP_KC_REALM=
-REACT_APP_KC_CLIENT_ID=
+VITE_SERVER_URL=
+VITE_ORACLE_SERVER_URL=
+VITE_NRSPARWEBAPP_VERSION=
+VITE_KC_URL=
+VITE_KC_REALM=
+VITE_KC_CLIENT_ID=
 ```
 
 And if you want to run Cypress, please add:
