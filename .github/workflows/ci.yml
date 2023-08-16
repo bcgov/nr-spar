@@ -51,7 +51,7 @@ jobs:
             yarn --cwd frontend --prefer-offline
             yarn --cwd frontend run lint
             yarn --cwd frontend build
-            yarn --cwd frontend test -u --coverage
+            yarn --cwd frontend run --coverage
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
