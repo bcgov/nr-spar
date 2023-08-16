@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.exception.VegCodeNotFoundException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -88,11 +90,15 @@ public class OrchardEndpoint {
       })
   public List<OrchardDto> getOrchardsByVegCode(
       @PathVariable
+          @Size(min = 1, max = 8)
           @Parameter(
               name = "vegCode",
               in = ParameterIn.PATH,
               description = "Identifier of the Orchard.")
           String vegCode) {
+    if (vegCode.isEmpty()) {
+      throw new VegCodeNotFoundException();
+    }
     return orchardService.findOrchardsByVegCode(vegCode);
   }
 
@@ -122,12 +128,15 @@ public class OrchardEndpoint {
       })
   public List<ParentTreeDto> getAllParentTreeByVegCode(
       @PathVariable
+          @Size(min = 1, max = 8)
           @Parameter(
               name = "vegCode",
               in = ParameterIn.PATH,
               description = "Identifier of the Orchard.")
           String vegCode) {
-    String requestVegCode = vegCode.length() > 0 ? vegCode : "";
-    return orchardService.findParentTreesByVegCode(requestVegCode);
+    if (vegCode.isEmpty()) {
+      throw new VegCodeNotFoundException();
+    }
+    return orchardService.findParentTreesByVegCode(vegCode);
   }
 }
