@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -90,7 +90,7 @@ public class OrchardEndpoint {
       })
   public List<OrchardDto> getOrchardsByVegCode(
       @PathVariable
-          @Size(min = 1, max = 8)
+          @Pattern(regexp = "^[a-zA-Z]{1,8}$")
           @Parameter(
               name = "vegCode",
               in = ParameterIn.PATH,
@@ -128,7 +128,7 @@ public class OrchardEndpoint {
       })
   public List<ParentTreeDto> getAllParentTreeByVegCode(
       @PathVariable
-          @Size(min = 1, max = 8)
+          @Pattern(regexp = "^[a-zA-Z]{1,8}$")
           @Parameter(
               name = "vegCode",
               in = ParameterIn.PATH,
