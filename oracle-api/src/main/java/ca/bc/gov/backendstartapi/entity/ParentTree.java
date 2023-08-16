@@ -48,4 +48,5 @@ public class ParentTree {
 
   @Column(name = "MALE_PARENT_PARENT_TREE_ID")
   private Long maleParentTreeId;
+
 }

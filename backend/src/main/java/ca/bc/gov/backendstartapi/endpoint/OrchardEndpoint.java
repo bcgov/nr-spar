@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
@@ -126,7 +127,7 @@ public class OrchardEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<ParentTreeDto> getAllParentTreeByVegCode(
+  public List<ListItemDto> getAllParentTreeByVegCode(
       @PathVariable("vegCode")
           @Pattern(regexp = "^[a-zA-Z]{1,8}$")
           @Parameter(

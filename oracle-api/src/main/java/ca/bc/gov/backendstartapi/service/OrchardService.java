@@ -1,8 +1,8 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.entity.ParentTree;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
+import ca.bc.gov.backendstartapi.entity.projection.ParentTreeNumberProj;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
@@ -214,17 +215,14 @@ public class OrchardService {
   }
 
   /** Find all parent trees under a vegCode. */
-  public List<ParentTreeDto> findParentTreesWithVegCode(String vegCode) {
+  public List<ListItemDto> findParentTreesWithVegCode(String vegCode) {
 
-    List<ParentTree> resultList = parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode);
+    List<ParentTreeNumberProj> resultList =
+        parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode);
 
-    return resultList.stream().map(parentTree -> this.convertToParentTreeDto(parentTree)).toList();
-  }
-
-  private ParentTreeDto convertToParentTreeDto(ParentTree parentTree) {
-    ParentTreeDto parentTreeDto = modelMapper.map(parentTree, ParentTreeDto.class);
-    parentTreeDto.setParentTreeId(parentTree.getId());
-    return parentTreeDto;
+    return resultList.stream()
+        .map(parentTree -> new ListItemDto(parentTree.getId().toString(), parentTree.getNumber()))
+        .toList();
   }
 
   private ParentTreeGeneticInfoDto convertToParentTreeGenInfoDto(ParentTree parentTree) {

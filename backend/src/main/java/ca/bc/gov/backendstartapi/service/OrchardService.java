@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
@@ -104,7 +105,7 @@ public class OrchardService {
    * @param vegCode Orchard's identification.
    * @return An {@link List} of {@link ParentTreeDto} from oracle-api
    */
-  public List<ParentTreeDto> findParentTreesByVegCode(String vegCode) {
+  public List<ListItemDto> findParentTreesByVegCode(String vegCode) {
     return oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase());
   }
 }

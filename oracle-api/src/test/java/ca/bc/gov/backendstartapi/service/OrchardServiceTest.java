@@ -3,9 +3,9 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.entity.ParentTree;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
+import ca.bc.gov.backendstartapi.entity.projection.ParentTreeNumberProj;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
@@ -32,6 +33,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.projection.ProjectionFactory;
+import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 
 @ExtendWith(MockitoExtension.class)
 class OrchardServiceTest {
@@ -308,48 +311,31 @@ class OrchardServiceTest {
   @Test
   @DisplayName("findParentTreesWithVegCodeServiceTest")
   void findParentTreesWithVegCodeServiceTest() {
-    String vegCode = "PLI";
-    ParentTree firstEntity =
-        new ParentTree(
-            Long.valueOf(12345),
-            "456",
-            vegCode,
-            "S",
-            "cqm",
-            true,
-            true,
-            true,
-            Long.valueOf(123),
-            Long.valueOf(45));
-    ParentTree secondEntity =
-        new ParentTree(
-            Long.valueOf(45678),
-            "678",
-            vegCode,
-            "S",
-            "bnb",
-            true,
-            true,
-            true,
-            Long.valueOf(456),
-            Long.valueOf(78));
 
-    List<ParentTree> repoResult = List.of(firstEntity, secondEntity);
+    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
+    ParentTreeNumberProj firstProj = factory.createProjection(ParentTreeNumberProj.class);
+    ParentTreeNumberProj secondProj = factory.createProjection(ParentTreeNumberProj.class);
+
+    firstProj.setId(Long.valueOf(12345));
+    firstProj.setNumber("456");
+
+    secondProj.setId(Long.valueOf(45678));
+    secondProj.setNumber("678");
+
+    List<ParentTreeNumberProj> repoResult = List.of(firstProj, secondProj);
+
+    String vegCode = "PLI";
 
     when(parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode)).thenReturn(repoResult);
 
-    List<ParentTreeDto> listToTest = orchardService.findParentTreesWithVegCode(vegCode);
+    List<ListItemDto> listToTest = orchardService.findParentTreesWithVegCode(vegCode);
 
     Assertions.assertEquals(repoResult.size(), listToTest.size());
 
-    Assertions.assertEquals(repoResult.get(0).getId(), listToTest.get(0).getParentTreeId());
-    Assertions.assertEquals(
-        repoResult.get(0).getParentTreeNumber(), listToTest.get(0).getParentTreeNumber());
-    Assertions.assertEquals(repoResult.get(0).getActive(), listToTest.get(0).isActive());
+    Assertions.assertEquals(repoResult.get(0).getId().toString(), listToTest.get(0).id());
+    Assertions.assertEquals(repoResult.get(0).getNumber().toString(), listToTest.get(0).value());
 
-    Assertions.assertEquals(repoResult.get(1).getId(), listToTest.get(1).getParentTreeId());
-    Assertions.assertEquals(
-        repoResult.get(1).getParentTreeNumber(), listToTest.get(1).getParentTreeNumber());
-    Assertions.assertEquals(repoResult.get(1).getActive(), listToTest.get(1).isActive());
+    Assertions.assertEquals(repoResult.get(1).getId().toString(), listToTest.get(1).id());
+    Assertions.assertEquals(repoResult.get(1).getNumber().toString(), listToTest.get(1).value());
   }
 }

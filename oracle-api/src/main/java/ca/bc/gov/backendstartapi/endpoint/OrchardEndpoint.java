@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
@@ -165,7 +166,7 @@ public class OrchardEndpoint {
    */
   @GetMapping(path = "/parent-trees/vegetation-codes/{vegCode}")
   @PreAuthorize("hasRole('user_read')")
-  public ResponseEntity<List<ParentTreeDto>> findParentTreesWithVegCode(
+  public ResponseEntity<List<ListItemDto>> findParentTreesWithVegCode(
       @PathVariable("vegCode") @Parameter(description = "The vegetation code of an orchard.")
           String vegCode) {
     try {

@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
@@ -117,19 +118,19 @@ public class OracleApiProvider implements Provider {
    * @return An {@link List} of {@link ParentTreeDto}
    */
   @Override
-  public List<ParentTreeDto> findParentTreesByVegCode(String vegCode) {
+  public List<ListItemDto> findParentTreesByVegCode(String vegCode) {
     String oracleApiUrl =
         String.format("%s/api/orchards/parent-trees/vegetation-codes/{vegCode}", rootUri);
 
     log.info("Starting {} - {} request to {}", PROVIDER, "findParentTreesByVegCode", oracleApiUrl);
 
     try {
-      ResponseEntity<List<ParentTreeDto>> parentTreesResult =
+      ResponseEntity<List<ListItemDto>> parentTreesResult =
           restTemplate.exchange(
               oracleApiUrl,
               HttpMethod.GET,
               new HttpEntity<>(addHttpHeaders()),
-              new ParameterizedTypeReference<List<ParentTreeDto>>() {},
+              new ParameterizedTypeReference<List<ListItemDto>>() {},
               createParamsMap("vegCode", vegCode));
       log.info("GET parent trees by vegCode from oracle - Success response!");
       return parentTreesResult.getBody();

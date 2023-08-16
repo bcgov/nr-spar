@@ -25,17 +25,17 @@ public record ParentTreeDto(
         String localNumber,
     @Schema(
             description = "Indicates whether the parent tree selection is active or inactive.",
-            example = "Y")
+            example = "true")
         boolean active,
     @Schema(
             description = "Indicates whether the parent tree selection is tested or untested.",
-            example = "Y")
+            example = "true")
         boolean tested,
     @Schema(
             description =
                 "A code indicating if a parent tree is included in the forest genetics breeding"
                     + " program.",
-            example = "Y")
+            example = "true")
         boolean breedingProgram,
     @Schema(description = "A unique identifier for each Parent Tree.", example = "123")
         Long femaleParentTreeId,

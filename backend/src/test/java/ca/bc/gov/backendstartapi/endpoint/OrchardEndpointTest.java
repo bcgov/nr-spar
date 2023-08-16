@@ -6,9 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
@@ -158,30 +158,10 @@ class OrchardEndpointTest {
   void getAllParentTreeByVegCodeTest() throws Exception {
     String vegCode = "PLI";
 
-    ParentTreeDto firstDto =
-        new ParentTreeDto(
-            Long.valueOf(12345),
-            "456",
-            "S",
-            "cqm",
-            true,
-            true,
-            true,
-            Long.valueOf(123),
-            Long.valueOf(45));
-    ParentTreeDto secondDto =
-        new ParentTreeDto(
-            Long.valueOf(45678),
-            "678",
-            "S",
-            "bnb",
-            true,
-            true,
-            true,
-            Long.valueOf(456),
-            Long.valueOf(78));
+    ListItemDto firstDto = new ListItemDto("12345", "456");
+    ListItemDto secondDto = new ListItemDto("45678", "678");
 
-    List<ParentTreeDto> testList = List.of(firstDto, secondDto);
+    List<ListItemDto> testList = List.of(firstDto, secondDto);
 
     when(orchardService.findParentTreesByVegCode(vegCode)).thenReturn(testList);
 
@@ -192,12 +172,10 @@ class OrchardEndpointTest {
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].parentTreeId").value(firstDto.parentTreeId()))
-        .andExpect(jsonPath("$[0].parentTreeNumber").value(firstDto.parentTreeNumber()))
-        .andExpect(jsonPath("$[0].active").value(firstDto.active()))
-        .andExpect(jsonPath("$[1].parentTreeId").value(secondDto.parentTreeId()))
-        .andExpect(jsonPath("$[1].parentTreeNumber").value(secondDto.parentTreeNumber()))
-        .andExpect(jsonPath("$[1].active").value(secondDto.active()))
+        .andExpect(jsonPath("$[0].id").value(firstDto.id()))
+        .andExpect(jsonPath("$[0].value").value(firstDto.value()))
+        .andExpect(jsonPath("$[1].id").value(secondDto.id()))
+        .andExpect(jsonPath("$[1].value").value(secondDto.value()))
         .andReturn();
   }
 

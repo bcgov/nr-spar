@@ -6,9 +6,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
 import java.util.Optional;
@@ -139,15 +139,8 @@ class OracleApiProviderTest {
         """
         [
           {
-            "parentTreeId": 1003477,
-            "parentTreeNumber": "5076",
-            "parentTreeRegStatusCode": "APP",
-            "localNumber": null,
-            "active": true,
-            "tested": true,
-            "breedingProgram": true,
-            "femaleParentTreeId": 4668,
-            "maleParentTreeId": 1003463
+            "id": "1003477",
+            "value": 34
           }
         ]
         """;
@@ -156,9 +149,10 @@ class OracleApiProviderTest {
         .expect(requestTo(url))
         .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-    List<ParentTreeDto> parentTreeDtoList = oracleApiProvider.findParentTreesByVegCode(vegCode);
+    List<ListItemDto> parentTreeDtoList = oracleApiProvider.findParentTreesByVegCode(vegCode);
 
-    Assertions.assertEquals(Long.valueOf(1003477), parentTreeDtoList.get(0).parentTreeId());
+    Assertions.assertEquals("1003477", parentTreeDtoList.get(0).id());
+    Assertions.assertEquals("34", parentTreeDtoList.get(0).value());
     Assertions.assertFalse(parentTreeDtoList.isEmpty());
   }
 
