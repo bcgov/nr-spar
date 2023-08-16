@@ -191,7 +191,7 @@ class ForestClientEndpointTest {
   }
 
   @Test
-  @DisplayName("fetchNonExistentClientByNumber")
+  @DisplayName("fetchNonExistentClientLocations")
   void fetchNonExistentClientLocations() throws Exception {
     when(forestClientService.fetchClientLocations("00000000")).thenReturn(Collections.emptyList());
 
