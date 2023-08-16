@@ -58,6 +58,9 @@ parameters:
   - name: REACT_APP_ORACLE_SERVER_URL
     description: Oracle back-end api URL
     required: true
+  - name: LOG_LEVEL
+    description: Caddy log level (debug, info, warn, error, panic, fatal)
+    value: "info"
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -107,6 +110,9 @@ objects:
             - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
               name: ${NAME}
+              securityContext:
+                capabilities:
+                  add: ["NET_BIND_SERVICE"]
               env:
                 - name: REACT_APP_SPAR_BUILD_VERSION
                   value: ${REACT_APP_SPAR_BUILD_VERSION}
@@ -122,6 +128,8 @@ objects:
                   value: ${REACT_APP_KC_CLIENT_ID}
                 - name: REACT_APP_ORACLE_SERVER_URL
                   value: ${REACT_APP_ORACLE_SERVER_URL}
+                - name: LOG_LEVEL
+                  value: ${LOG_LEVEL}
               ports:
                 - containerPort: 3000
                   protocol: TCP
