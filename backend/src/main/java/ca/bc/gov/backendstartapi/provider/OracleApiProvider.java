@@ -88,7 +88,7 @@ public class OracleApiProvider implements Provider {
    */
   @Override
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/%s", rootUri, vegCode);
+    String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/{vegCode}", rootUri);
 
     log.info("Starting {} - {} request to {}", PROVIDER, "findOrchardsByVegCode", oracleApiUrl);
 
@@ -119,7 +119,7 @@ public class OracleApiProvider implements Provider {
   @Override
   public List<ParentTreeDto> findParentTreesByVegCode(String vegCode) {
     String oracleApiUrl =
-        String.format("%s/api/orchards/parent-trees/vegetation-codes/%s", rootUri, vegCode);
+        String.format("%s/api/orchards/parent-trees/vegetation-codes/{vegCode}", rootUri);
 
     log.info("Starting {} - {} request to {}", PROVIDER, "findParentTreesByVegCode", oracleApiUrl);
 
