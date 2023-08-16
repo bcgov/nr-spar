@@ -90,7 +90,7 @@ npm run start
 You can run tests running `npm run test`. Tests coverage reports can be seen
 on you command line window and also on GitHub, in your commits and pull requests.
 
-PS: We have snapshot tests, so keep in mind the tests may break if you forget to update snapshots. To update them run `npm run test -u`
+PS: We have snapshot tests, so keep in mind the tests may break if you forget to update snapshots. To update them run `npm run test`
 
 ## Submit pull requests
 
