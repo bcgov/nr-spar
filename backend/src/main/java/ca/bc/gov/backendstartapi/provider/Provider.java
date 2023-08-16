@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
@@ -16,6 +17,10 @@ public interface Provider {
   // Forest Client
   default Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
     return Optional.empty();
+  }
+
+  default List<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
+    return List.of();
   }
 
   // Oracle API
