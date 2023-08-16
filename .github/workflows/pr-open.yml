@@ -113,7 +113,6 @@ jobs:
             overwrite: true
             parameters:
               -p NAMESPACE=${{ vars.OC_NAMESPACE }}
-              -p ZONE=${{ github.event.number }}
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
