@@ -8,7 +8,6 @@ import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
 import ca.bc.gov.backendstartapi.provider.ForestClientApiProvider;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -121,12 +120,7 @@ class ForestClientServiceTest {
             "",
             "");
 
-    List<ForestClientLocationDto> locations =
-        new ArrayList<>() {
-            {
-              add(location);
-            }
-        };
+    List<ForestClientLocationDto> locations = List.of(location);
 
     when(forestClientApiProvider.fetchLocationsByClientNumber(number))
         .thenReturn(locations);

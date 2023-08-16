@@ -108,7 +108,7 @@ public class ForestClientApiProvider implements Provider {
   }
 
   /**
-   * Fetch forest client locations by its number.
+   * Fetch up to the 10 first forest client location by its number.
    *
    * @param number the client number to search the location
    * @return an list of the locations of the forest client
