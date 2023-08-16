@@ -19,7 +19,8 @@ import java.io.Serializable;
  */
 @Schema(description = "One of the many agencies that work with the ministry.")
 public record ForestClientDto(
-    @Schema(description = "An eight-digit number that identifies the client.") String clientNumber,
+    @Schema(description = "An eight-digit number that identifies the client.")
+        String clientNumber,
     @Schema(
             description =
                 "The client last name if it's an individual or the company name if it's a company.")

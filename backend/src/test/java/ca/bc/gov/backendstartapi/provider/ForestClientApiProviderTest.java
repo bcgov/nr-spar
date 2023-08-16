@@ -7,8 +7,11 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -143,5 +146,102 @@ class ForestClientApiProviderTest {
         forestClientApiProvider.fetchClientByIdentifier(identifier);
 
     Assertions.assertTrue(clientDto.isEmpty());
+  }
+
+  @Test
+  @DisplayName("fetchExistentClientLocation")
+  void fetchExistentClientLocation() {
+    String number = "00030064";
+    String url = "/null/clients/" + number + "/locations";
+
+    String json =
+        """
+          [
+            {
+                "clientNumber": "00030064",
+                "locationCode": "00",
+                "companyCode": "30064",
+                "address1": "MINISTRY OF FORESTS",
+                "address2": "100 MILE HOUSE FOREST DISTRICT",
+                "address3": "PO BOX 129",
+                "city": "100 MILE HOUSE",
+                "province": "BC",
+                "postalCode": "V0K2E0",
+                "country": "CANADA",
+                "businessPhone": "2503957800",
+                "expired": "N",
+                "trusted": "N"
+            },
+            {
+                "clientNumber": "00030064",
+                "locationCode": "01",
+                "companyCode": " ",
+                "address1": "PO BOX 129",
+                "city": "100 MILE HOUSE",
+                "province": "BC",
+                "postalCode": "V0E2K0",
+                "country": "CANADA",
+                "expired": "N",
+                "trusted": "N"
+            }
+          ]
+        """;
+
+    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    List<ForestClientLocationDto> locationDto =
+        forestClientApiProvider.fetchLocationsByClientNumber(number);
+
+    Assertions.assertFalse(locationDto.isEmpty());
+
+    ForestClientLocationDto clientLocation = locationDto.get(0);
+    Assertions.assertEquals("00030064", clientLocation.clientNumber());
+    Assertions.assertEquals("00", clientLocation.locationCode());
+    Assertions.assertEquals("30064", clientLocation.companyCode());
+    Assertions.assertEquals("MINISTRY OF FORESTS", clientLocation.address1());
+    Assertions.assertEquals("100 MILE HOUSE FOREST DISTRICT", clientLocation.address2());
+    Assertions.assertEquals("PO BOX 129", clientLocation.address3());
+    Assertions.assertEquals("100 MILE HOUSE", clientLocation.city());
+    Assertions.assertEquals("BC", clientLocation.province());
+    Assertions.assertEquals("V0K2E0", clientLocation.postalCode());
+    Assertions.assertEquals("CANADA", clientLocation.country());
+    Assertions.assertEquals("2503957800", clientLocation.businessPhone());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.expired());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.trusted());
+
+    clientLocation = locationDto.get(1);
+    Assertions.assertEquals("00030064", clientLocation.clientNumber());
+    Assertions.assertEquals("01", clientLocation.locationCode());
+    Assertions.assertEquals(" ", clientLocation.companyCode());
+    Assertions.assertEquals("PO BOX 129", clientLocation.address1());
+    Assertions.assertEquals("100 MILE HOUSE", clientLocation.city());
+    Assertions.assertEquals("BC", clientLocation.province());
+    Assertions.assertEquals("V0E2K0", clientLocation.postalCode());
+    Assertions.assertEquals("CANADA", clientLocation.country());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.expired());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.trusted());
+
+  }
+
+  @Test
+  @DisplayName("fetchNonExistentClientLocation")
+  void fetchNonExistentClientLocation() {
+    String number = "00000000";
+    String url = "/null/clients/" + number + "/locations";
+
+    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withStatus(HttpStatusCode.valueOf(404)));
+
+    List<ForestClientLocationDto> locationDto =
+        forestClientApiProvider.fetchLocationsByClientNumber(number);
+
+    Assertions.assertTrue(locationDto.isEmpty());
   }
 }
