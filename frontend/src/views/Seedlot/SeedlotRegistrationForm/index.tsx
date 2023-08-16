@@ -14,10 +14,11 @@ import {
 import { ArrowRight } from '@carbon/icons-react';
 
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
-import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
+import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
-import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
+import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
+import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
@@ -47,14 +48,8 @@ import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptions
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 
 import './styles.scss';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
-const agencyOptions = [
-  '0032 - Strong Seeds Orchard - SSO',
-  '0035 - Weak Seeds Orchard - WSO',
-  '0038 - Okay Seeds Orchard - OSO',
-  '0041 - Great Seeds Orchard - GSO',
-  '0043 - Bad Seeds Orchard - BSO'
-];
 const defaultExtStorCode = '00';
 const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 
@@ -79,11 +74,6 @@ const SeedlotRegistrationForm = () => {
     queryFn: getFundingSources
   });
 
-  const paymentMethodsQuery = useQuery({
-    queryKey: ['payment-methods'],
-    queryFn: getPaymentMethods
-  });
-
   const coneCollectionMethodsQuery = useQuery({
     queryKey: ['cone-collection-methods'],
     queryFn: getConeCollectionMethod
@@ -95,12 +85,16 @@ const SeedlotRegistrationForm = () => {
     refetchOnWindowFocus: false
   });
 
-  const maleFemaleMethodologyQuery = useQuery({
-    queryKey: ['male-female-methodology'],
-    queryFn: getMaleFemaleMethodology
+  const gameticMethodologyQuery = useQuery({
+    queryKey: ['gametic-methodologies'],
+    queryFn: getGameticMethodology
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const applicantAgencyQuery = useQuery({
+    queryKey: ['applicant-agencies'],
+    queryFn: () => getApplicantAgenciesOptions()
+  });
+
   const [allInvalidationObj, setAllInvalidationObj] = useState<AllStepInvalidationObj>({
     collectionStep: initInvalidationObj(),
     interimStep: initInvalidationObj(),
@@ -115,6 +109,20 @@ const SeedlotRegistrationForm = () => {
     newData[stepName] = stepData;
     setAllStepData(newData);
   };
+
+  const methodsOfPaymentQuery = useQuery({
+    queryKey: ['methods-of-payment'],
+    queryFn: getMethodsOfPayment,
+    onSuccess: (dataArr: MultiOptionsObj[]) => {
+      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
+      const defaultMethod = defaultMethodArr.length === 0 ? null : defaultMethodArr[0];
+      if (!allStepData.ownershipStep[0].methodOfPayment) {
+        const tempOwnershipData = structuredClone(allStepData.ownershipStep);
+        tempOwnershipData[0].methodOfPayment = defaultMethod;
+        setStepData('ownershipStep', tempOwnershipData);
+      }
+    }
+  });
 
   const setInvalidState = (stepName: keyof AllStepInvalidationObj, stepInvalidData: any) => {
     const newObj = { ...allInvalidationObj };
@@ -142,6 +150,7 @@ const SeedlotRegistrationForm = () => {
   const renderStep = () => {
     const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
     const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
+    const agencyOptions = applicantAgencyQuery.data ? applicantAgencyQuery.data : [];
 
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
@@ -172,7 +181,7 @@ const SeedlotRegistrationForm = () => {
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             fundingSources={getMultiOptList(fundingSourcesQuery.data)}
-            paymentMethods={getMultiOptList(paymentMethodsQuery.data)}
+            methodsOfPayment={methodsOfPaymentQuery.data ?? []}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
             setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
@@ -192,7 +201,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
-            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data, true, false, true, ['isPliSpecies'])}
+            gameticOptions={getMultiOptList(gameticMethodologyQuery.data, true, false, true, ['isFemaleMethodology', 'isPliSpecies'])}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -264,9 +273,10 @@ const SeedlotRegistrationForm = () => {
               (
                 seedlotInfoQuery.isSuccess
                 && fundingSourcesQuery.isSuccess
-                && paymentMethodsQuery.isSuccess
-                && maleFemaleMethodologyQuery.isSuccess
+                && methodsOfPaymentQuery.isSuccess
+                && gameticMethodologyQuery.isSuccess
                 && coneCollectionMethodsQuery.isSuccess
+                && applicantAgencyQuery.isSuccess
               )
                 ? renderStep()
                 : <Loading />

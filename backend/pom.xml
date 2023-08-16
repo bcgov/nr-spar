@@ -54,6 +54,9 @@
     </profile>
     <profile>
       <id>dev</id>
+      <properties>
+        <build.profile.id>dev</build.profile.id>
+      </properties>
     </profile>
     <profile>
       <id>integration-test</id>
@@ -182,7 +185,7 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.1.0</version>
+      <version>2.2.0</version>
     </dependency>
 
   </dependencies>
@@ -200,6 +203,9 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
+          <profiles>
+            <profile>dev</profile>
+          </profiles>
         </configuration>
       </plugin>
 
@@ -409,7 +415,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.12.1</version>
+            <version>10.12.2</version>
           </dependency>
         </dependencies>
         <configuration>
