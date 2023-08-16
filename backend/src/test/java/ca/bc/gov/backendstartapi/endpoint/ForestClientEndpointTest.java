@@ -195,13 +195,15 @@ class ForestClientEndpointTest {
   void fetchNonExistentClientLocations() throws Exception {
     when(forestClientService.fetchClientLocations("00000000")).thenReturn(Collections.emptyList());
 
+    // Forest Client API returns an empty list for non existent
+    // clientNumber, with an OK status
     mockMvc
         .perform(
-            get("/api/forest-clients/00000000")
+            get("/api/forest-clients/00000000/locations")
                 .with(csrf().asHeader())
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isOk());
   }
 
 }
