@@ -1,11 +1,9 @@
 package ca.bc.gov.backendstartapi.dto;
 
-import java.math.BigDecimal;
 import java.util.List;
 
-/** This class represents the JSON that will be returned when doing the GW calculations. */
-public record GeneticWorthSummaryDto(
-    BigDecimal effectivePopulationSizeNe,
-    BigDecimal coancestry,
-    int numberOfSmpParentFromOutside,
-    List<GeneticWorthTraitsDto> geneticTraits) {}
+import io.swagger.v3.oas.annotations.media.Schema;
+
+/** This class represents the JSON that will be returned by the GW calculations. */
+@Schema(description = "Keep going from here..")
+public record GeneticWorthSummaryDto(List<GeneticWorthTraitsDto> geneticTraits) {}
