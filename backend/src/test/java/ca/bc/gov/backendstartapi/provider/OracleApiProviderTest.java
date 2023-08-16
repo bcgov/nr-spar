@@ -179,6 +179,6 @@ class OracleApiProviderTest {
               oracleApiProvider.findParentTreesByVegCode(vegCode);
             });
 
-    Assertions.assertEquals(httpExc.getStatusCode(), HttpStatus.BAD_REQUEST);
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, httpExc.getStatusCode());
   }
 }

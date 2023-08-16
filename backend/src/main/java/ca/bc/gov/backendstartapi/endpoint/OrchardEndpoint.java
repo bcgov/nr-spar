@@ -127,6 +127,7 @@ public class OrchardEndpoint {
               in = ParameterIn.PATH,
               description = "Identifier of the Orchard.")
           String vegCode) {
-    return orchardService.findParentTreesByVegCode(vegCode);
+    String requestVegCode = vegCode.length() > 0 ? vegCode : "";
+    return orchardService.findParentTreesByVegCode(requestVegCode);
   }
 }

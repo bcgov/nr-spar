@@ -208,11 +208,9 @@ public class OrchardService {
         parentTreeGeneticQualityRepository.findAllBySpuGeneticWorthTypeParentTreeId(
             spuId, geneticWorthCalcInd, geneticType, parentTreeIdList);
 
-    List<ParentTreeGeneticQualityDto> dtoList =
-        ptgqList.stream()
-            .map(parentTreeGen -> modelMapper.map(parentTreeGen, ParentTreeGeneticQualityDto.class))
-            .toList();
-    return dtoList;
+    return ptgqList.stream()
+        .map(parentTreeGen -> modelMapper.map(parentTreeGen, ParentTreeGeneticQualityDto.class))
+        .toList();
   }
 
   /** Find all parent trees under a vegCode. */
@@ -220,22 +218,19 @@ public class OrchardService {
 
     List<ParentTree> resultList = parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode);
 
-    List<ParentTreeDto> convertedList =
-        resultList.stream().map(parentTree -> convertToParentTreeDto(parentTree)).toList();
-
-    return convertedList;
+    return resultList.stream().map(parentTree -> this.convertToParentTreeDto(parentTree)).toList();
   }
 
   private ParentTreeDto convertToParentTreeDto(ParentTree parentTree) {
     ParentTreeDto parentTreeDto = modelMapper.map(parentTree, ParentTreeDto.class);
-    parentTreeDto.setParentTreeId(Long.valueOf(parentTree.getId()));
+    parentTreeDto.setParentTreeId(parentTree.getId());
     return parentTreeDto;
   }
 
   private ParentTreeGeneticInfoDto convertToParentTreeGenInfoDto(ParentTree parentTree) {
     ParentTreeGeneticInfoDto parentTreeGenInfoDto =
         modelMapper.map(parentTree, ParentTreeGeneticInfoDto.class);
-    parentTreeGenInfoDto.setParentTreeId(Long.valueOf(parentTree.getId()));
+    parentTreeGenInfoDto.setParentTreeId(parentTree.getId());
     return parentTreeGenInfoDto;
   }
 }
