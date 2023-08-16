@@ -107,6 +107,9 @@ objects:
             - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
               name: ${NAME}
+              securityContext:
+                capabilities:
+                  add: ["NET_BIND_SERVICE"]
               env:
                 - name: REACT_APP_SPAR_BUILD_VERSION
                   value: ${REACT_APP_SPAR_BUILD_VERSION}
