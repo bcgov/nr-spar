@@ -93,7 +93,7 @@ services:
       retries: 5
       start_period: 10s
     image: node:18.17.1-alpine3.17
-    entrypoint: sh -c "apk add --no-cache python3 g++ make && cd /app && yarn install --frozen-lockfile --prefer-offline && yarn start"
+    entrypoint: sh -c "apk add --no-cache python3 g++ make && cd /app && npm i && npm run start"
     user: root
     volumes:
       - ./frontend:/app:z

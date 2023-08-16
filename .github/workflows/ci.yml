@@ -50,10 +50,9 @@ jobs:
         with:
           node_version: "18.16.0"
           commands: |
-            yarn --cwd frontend --prefer-offline
-            yarn --cwd frontend run lint
-            yarn --cwd frontend build
-            yarn --cwd frontend run coverage
+            npm i
+            npm run lint
+            npm run coverage
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
