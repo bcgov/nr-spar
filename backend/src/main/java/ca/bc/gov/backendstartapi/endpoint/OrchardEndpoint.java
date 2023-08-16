@@ -120,7 +120,7 @@ public class OrchardEndpoint {
             description = "An array of parent tree dto.",
             content =
                 @Content(
-                    array = @ArraySchema(schema = @Schema(implementation = ParentTreeDto.class)),
+                    array = @ArraySchema(schema = @Schema(implementation = ListItemDto.class)),
                     mediaType = "application/json")),
         @ApiResponse(
             responseCode = "401",
