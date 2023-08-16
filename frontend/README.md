@@ -54,12 +54,12 @@ head to http://localhost:3000.
 Be aware of the required environment variables:
 
 ```sh
-REACT_APP_NRSPARWEBAPP_VERSION=dev
-REACT_APP_SERVER_URL=http://localhost:8090
-REACT_APP_ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-REACT_APP_KC_REALM=standard
-REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
+VITE_NRSPARWEBAPP_VERSION=dev
+VITE_SERVER_URL=http://localhost:8090
+VITE_ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
+VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
+VITE_KC_REALM=standard
+VITE_KC_CLIENT_ID=seed-planning-test-4296
 CYPRESS_USERNAME=LOAD-3-TEST
 CYPRESS_PASSWORD=[password-here]
 ```
