@@ -47,7 +47,7 @@ jobs:
       VITE_NRSPARWEBAPP_VERSION: dev
     steps:
       - uses: bcgov-nr/action-test-and-analyse@v0.0.1
-        with:Ha!
+        with:
           node_version: "18.16.0"
           commands: |
             npm i
