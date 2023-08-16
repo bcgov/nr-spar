@@ -300,7 +300,9 @@ class ForestClientApiProviderTest {
     Assertions.assertEquals("6045411685", locationDto.faxNumber());
     Assertions.assertEquals(ForestClientExpiredEnum.N, locationDto.expired());
     Assertions.assertEquals(ForestClientExpiredEnum.N, locationDto.trusted());
-    Assertions.assertEquals("OCT. 28/14 - POSTAL CODE CHANGED BY CANADA POST FROM V3S 0L5 TO V3Z 1A7.", locationDto.comment());
+    Assertions.assertEquals(
+        "OCT. 28/14 - POSTAL CODE CHANGED BY CANADA POST FROM V3S 0L5 TO V3Z 1A7.",
+        locationDto.comment());
   }
 
   @Test
@@ -317,11 +319,11 @@ class ForestClientApiProviderTest {
         .andRespond(withStatus(HttpStatusCode.valueOf(404)));
 
     ResponseStatusException exc =
-      Assertions.assertThrows(
-        ResponseStatusException.class,
-        () -> {
-          forestClientApiProvider.fetchSingleClientLocation(number, locationCode);
-        });
+        Assertions.assertThrows(
+          ResponseStatusException.class,
+          () -> {
+            forestClientApiProvider.fetchSingleClientLocation(number, locationCode);
+          });
 
     Assertions.assertEquals(HttpStatus.NOT_FOUND, exc.getStatusCode());
   }

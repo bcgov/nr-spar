@@ -197,7 +197,8 @@ class ForestClientServiceTest {
     when(forestClientApiProvider.fetchSingleClientLocation(number, locationCode))
         .thenReturn(location);
 
-    ForestClientLocationDto locationDto = forestClientService.fetchSingleClientLocation(number, locationCode);
+    ForestClientLocationDto locationDto =
+        forestClientService.fetchSingleClientLocation(number, locationCode);
 
     Assertions.assertNotNull(locationDto);
 
