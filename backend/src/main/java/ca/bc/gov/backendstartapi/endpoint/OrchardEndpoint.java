@@ -89,7 +89,7 @@ public class OrchardEndpoint {
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   public List<OrchardDto> getOrchardsByVegCode(
-      @PathVariable
+      @PathVariable("vegCode")
           @Pattern(regexp = "^[a-zA-Z]{1,8}$")
           @Parameter(
               name = "vegCode",
@@ -127,7 +127,7 @@ public class OrchardEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   public List<ParentTreeDto> getAllParentTreeByVegCode(
-      @PathVariable
+      @PathVariable("vegCode")
           @Pattern(regexp = "^[a-zA-Z]{1,8}$")
           @Parameter(
               name = "vegCode",
