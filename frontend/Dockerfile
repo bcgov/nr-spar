@@ -1,4 +1,4 @@
-FROM node:18.17.0-alpine3.17 AS build
+FROM node:18.17.1-alpine3.17 AS build
 
 # Build
 WORKDIR /app
@@ -8,7 +8,7 @@ RUN apk add --no-cache python3 g++ make && \
     yarn build:production && \
     rm -rf node_modules
 
-FROM node:18.17.0-alpine3.17 AS deploy
+FROM node:18.17.1-alpine3.17 AS deploy
 
 # Copy and prep app
 WORKDIR /app
