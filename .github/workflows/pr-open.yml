@@ -64,6 +64,7 @@ jobs:
           parameters:
             -p NAMESPACE=${{ vars.OC_NAMESPACE }}
             -p ZONE=${{ github.event.number }}
+          triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
 
   builds:
     name: Builds
