@@ -29,6 +29,7 @@ openshift*.yml
 
 # Environments and secrets
 .env
+.env.local
 .ps1
 
 # Node

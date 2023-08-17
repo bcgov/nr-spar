@@ -6,20 +6,6 @@ import '@testing-library/jest-dom';
 import makeServer from '../../mock-server/server';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), // Deprecated
-    removeListener: jest.fn(), // Deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
-
 // TODO test Empty Section
 describe('Recent Activities component', () => {
   beforeAll(() => {
@@ -59,16 +45,14 @@ describe('Recent Activities component', () => {
 
       // Setting this small timeout so the component ends rendering
       // the loading status and render the content we want to test
-      setTimeout(() => {
-        const tabPanelBefore = screen.getByRole('tabpanel');
-        expect(tabPanelBefore).toHaveTextContent('Activity type');
-        expect(tabPanelBefore).not.toHaveTextContent('File name');
+      const tabPanelBefore = screen.getByRole('tabpanel');
+      expect(tabPanelBefore).toHaveTextContent('Activity type');
+      expect(tabPanelBefore).not.toHaveTextContent('File name');
 
-        fireEvent.click(tabs[1]);
-        const tabPanelAfter = screen.getByRole('tabpanel');
-        expect(tabPanelAfter).not.toHaveTextContent('Activity type');
-        expect(tabPanelAfter).toHaveTextContent('File name');
-      }, 100)
+      fireEvent.click(tabs[1]);
+      const tabPanelAfter = screen.getByRole('tabpanel');
+      expect(tabPanelAfter).not.toHaveTextContent('Activity type');
+      expect(tabPanelAfter).toHaveTextContent('File name');
 
     });
   });
