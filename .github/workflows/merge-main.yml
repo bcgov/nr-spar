@@ -66,17 +66,6 @@ jobs:
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-      - name: FluentBit Init
-        uses: bcgov-nr/action-deployer-openshift@v1.1.1
-        with:
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          file: backend/openshift.fluentbit.yml
-          overwrite: true
-          parameters:
-            -p NAMESPACE=${{ vars.OC_NAMESPACE }}
-            -p ZONE=test
 
   deploy-test:
     name: TEST Deployment
@@ -87,7 +76,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api]
+        name: [database, backend, fluentbit, frontend, oracle-api]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -100,6 +89,11 @@ jobs:
               -p BUILD=test
               -p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=test
+          - name: fluentbit
+            file: backend/openshift.fluentbit.yml
+            overwrite: true
+            parameters:
+              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -194,17 +188,6 @@ jobs:
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-      - name: FluentBit Init
-        uses: bcgov-nr/action-deployer-openshift@v1.1.1
-        with:
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          file: backend/openshift.fluentbit.yml
-          overwrite: true
-          parameters:
-            -p NAMESPACE=${{ vars.OC_NAMESPACE }}
-            -p ZONE=prod
 
   deploy-prod:
     name: PROD Deployment
@@ -214,7 +197,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api]
+        name: [database, backend, fluentbit, frontend, oracle-api]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -227,6 +210,11 @@ jobs:
               -p BUILD=prod
               -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
+          - name: fluentbit
+            file: backend/openshift.fluentbit.yml
+            overwrite: true
+            parameters:
+              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
