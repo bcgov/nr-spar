@@ -44,14 +44,14 @@ Take a look
 [here](https://docs.docker.com/engine/install/#server) to learn how to get it
 installed.
 
-## NodeJS and Yarn (NPM)
+## NodeJS
 
 ⚠️ Note: *Please skip this step if you're going to work only with back-end
 tasks.*
 
 NodeJS is required to build and start SPAR Client. You can look for install
 instructions [here](https://nodejs.org/en/download/). Make sure you have
-at least the version 18 (yarn should be included).
+at least the version 18.
 
 ## Java and Maven
 
@@ -88,8 +88,7 @@ Eclipse or other IDE of your choice.
 **Airbnb ESLint** check-style was chosen. SPAR CI/CD Workflows also have a dedicated
 pipeline to check for common errors and possible bugs.
 
-You cab run `yarn lint` before opening a PR, so any style error not addressed
-can be checked and you can use `yarn lint --fix` to fix small issues.
+You cab run `npm run lint` before opening a PR, so any style error not addressed can be checked and you can use `npm run lint --fix` to fix small issues.
 
 > Note that if you choose VS Code, the above mentioned extension **ESLint**, by Microsoft is strongly recommend.
 > Here's the link to the Marketplace: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
@@ -150,8 +149,8 @@ for the back-end, and NodeJS for the front-end.
 
 ```sh
 cd frontend
-yarn install
-yarn start
+npm install
+npm run start
 ```
 
 If you want to understand more about the front-end component, you can read

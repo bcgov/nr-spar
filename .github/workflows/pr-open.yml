@@ -19,7 +19,7 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        uses: bcgov-nr/action-pr-description-add@v1.0.0
+        uses: bcgov-nr/action-pr-description-add@v1.0.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
@@ -64,6 +64,7 @@ jobs:
           parameters:
             -p NAMESPACE=${{ vars.OC_NAMESPACE }}
             -p ZONE=${{ github.event.number }}
+          triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
 
   builds:
     name: Builds
@@ -123,13 +124,13 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p REACT_APP_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
-              -p REACT_APP_SERVER_URL=https://nr-spar-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-              -p REACT_APP_ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
-              -p REACT_APP_NRSPARWEBAPP_VERSION=dev
-              -p REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-              -p REACT_APP_KC_REALM=standard
-              -p REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
+              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
+              -p VITE_SERVER_URL=https://nr-spar-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+              -p VITE_ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
+              -p VITE_NRSPARWEBAPP_VERSION=dev
+              -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
+              -p VITE_KC_REALM=standard
+              -p VITE_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
@@ -230,10 +231,12 @@ jobs:
   #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: "16"
-  #         cache: "yarn"
-  #         cache-dependency-path: frontend/yarn.lock
+  #         cache: "npm"
+  #         cache-dependency-path: frontend/package-lock.json
   #     - name: Install dependencies
-  #       run: yarn --prefer-offline --cwd frontend
+  #       run: |
+  #         cd frontend
+  #         npm ci
 
   #     - name: Cypress run
   #       uses: cypress-io/github-action@v5
