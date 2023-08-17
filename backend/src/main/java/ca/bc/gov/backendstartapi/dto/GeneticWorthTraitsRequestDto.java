@@ -6,17 +6,26 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /** This class represents the JSON request body when doing genetic worth calculations. */
-@Schema(
-    description =
-        """
-        An object representing the request body for the genetic worth calculations. The
-        `parentTreeNumber` contains the clone number, e.g.: 123, `coneCount` is a
-        number representing the value for the female (cone) count, `pollenCount` is a
-        number representing the value for the male (pollen) count, and finally 
-        `geneticTraits` is the object for each row.
-        """)
+@Schema(description = "An object representing the request body for the genetic worth calculations.")
 public record GeneticWorthTraitsRequestDto(
-    @NotNull String parentTreeNumber,
-    BigDecimal coneCount,
-    BigDecimal pollenCount,
-    List<GeneticWorthTraitsDto> geneticTraits) {}
+    @Schema(description = "The Parent Tree Id, same as clone number.", example = "4423") @NotNull
+        String parentTreeNumber,
+    @Schema(
+            description = "A float number representing the value for the female (cone) count",
+            example = "13",
+            type = "number",
+            format = "float")
+        BigDecimal coneCount,
+    @Schema(
+            description = "A float number representing the value for the male (pollen) count",
+            example = "48.5",
+            type = "number",
+            format = "float")
+        BigDecimal pollenCount,
+    @Schema(
+            description =
+                """
+                Represents each row of the table, containig traits code, value, and later
+                the calculated genetic worh and percentage
+                """)
+        List<GeneticWorthTraitsDto> geneticTraits) {}

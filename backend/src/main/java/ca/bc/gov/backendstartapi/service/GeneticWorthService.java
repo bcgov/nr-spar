@@ -54,7 +54,8 @@ public class GeneticWorthService {
   }
 
   /**
-   * Calculate all genetic worth for the traits received in the request.
+   * Does the calculation for each genetic trait. PS: if the treshold of 70% of contribution from
+   * the parent tree is not met, the trait will respond with zero as value growth.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
@@ -62,30 +63,9 @@ public class GeneticWorthService {
    */
   public GeneticWorthSummaryDto calculateGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
-
-    BigDecimal effectivePopulationSizeNe = BigDecimal.ZERO;
-    BigDecimal coancestry = BigDecimal.ZERO;
-    int numberOfSmpParentFromOutside = 0;
-
-    List<GeneticWorthTraitsDto> traits = calculateTraits(traitsDto);
-
-    return new GeneticWorthSummaryDto(
-        effectivePopulationSizeNe, coancestry, numberOfSmpParentFromOutside, traits);
-  }
-
-  /**
-   * Does the calculation for each genetic trait. PS: if the treshold of 70% of contribution from
-   * the parent tree is not met, the trait will respond with zero as value growth.
-   *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
-   *     values to be calculated.
-   * @return A {@link List} of {@link GeneticWorthTraitsDto} containing the trait code , its value
-   *     growth and the percentage of contribution
-   */
-  private List<GeneticWorthTraitsDto> calculateTraits(
-      List<GeneticWorthTraitsRequestDto> traitsDto) {
-    List<GeneticWorthTraitsDto> traits = new ArrayList<>();
     BigDecimal minimumTreshold = new BigDecimal("0.7");
+
+    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(new ArrayList<>());
 
     // Iterate over all traits
     List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();
@@ -101,10 +81,10 @@ public class GeneticWorthService {
 
       GeneticWorthTraitsDto traitResponse =
           new GeneticWorthTraitsDto(trait.code(), null, volumeGrowth, percentage);
-      traits.add(traitResponse);
+      summaryDto.geneticTraits().add(traitResponse);
     }
 
-    return traits;
+    return summaryDto;
   }
 
   /**

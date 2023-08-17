@@ -6,12 +6,31 @@ import java.math.BigDecimal;
 /** This class represents the JSON for the request and response containing all traits data. */
 @Schema(
     description =
-        """
-        This class represents the JSON for the request and response containing all traits data.
-        `traitCode` represents the code, e.g.: gvo, wwd. `traitValue` represents the value
-        filled by the user, e.g.: 11.2, `geneticWorthValue` contains the genetic woth value
-        for that trait, and finally `percentage` contains the percentage of contribution
-        for that trait.
-        """)
+        "This class represents the JSON for the request and response containing all traits data.")
 public record GeneticWorthTraitsDto(
-    String traitCode, BigDecimal traitValue, BigDecimal geneticWorthValue, BigDecimal percentage) {}
+    @Schema(description = "Represents the trait code, e.g.: gvo, wwd.", example = "gvo")
+        String traitCode,
+    @Schema(
+            description =
+                """
+            Represents the trait value filled by the user in the form table,
+            from the csv file.
+            """,
+            example = "11.2",
+            type = "number",
+            format = "float")
+        BigDecimal traitValue,
+    @Schema(
+            description =
+                "Contains the genetic worth value for that trait, calculated by the backend.",
+            example = "55",
+            type = "number",
+            format = "float")
+        BigDecimal geneticWorthValue,
+    @Schema(
+            description =
+                "Contains the percentage of contribution for that trait, calculated by the backend",
+            example = "56.7",
+            type = "number",
+            format = "float")
+        BigDecimal percentage) {}

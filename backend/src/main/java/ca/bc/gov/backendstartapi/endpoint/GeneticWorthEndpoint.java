@@ -116,7 +116,7 @@ public class GeneticWorthEndpoint {
   }
 
   /**
-   * Do the calculations of all Genetic Traits.
+   * Do the calculations of all Genetic Traits, given a trait list.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
@@ -137,11 +137,7 @@ public class GeneticWorthEndpoint {
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "A JSON containing all calculated values.",
-            content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = GeneticWorthSummaryDto.class))),
+            description = "A JSON containing all calculated values."),
         @ApiResponse(
             responseCode = "400",
             description = "The request is missing the Parent Tree Number.",
@@ -162,9 +158,7 @@ public class GeneticWorthEndpoint {
   public GeneticWorthSummaryDto geneticTraitsCalculations(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the traits and values to be used in the calculations",
-              required = true,
-              content =
-                  @Content(schema = @Schema(implementation = GeneticWorthTraitsRequestDto.class)))
+              required = true)
           @Valid
           @RequestBody
           List<GeneticWorthTraitsRequestDto> traitsDto) {

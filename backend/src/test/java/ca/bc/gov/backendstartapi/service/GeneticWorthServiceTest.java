@@ -212,11 +212,6 @@ class GeneticWorthServiceTest {
     GeneticWorthSummaryDto summaryDto = geneticWorthService.calculateGeneticWorth(requestList);
 
     Assertions.assertNotNull(summaryDto);
-    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.effectivePopulationSizeNe());
-    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.coancestry());
-    Assertions.assertEquals(0, summaryDto.numberOfSmpParentFromOutside());
-
-    List<GeneticWorthTraitsDto> geneticTraitsResponse = summaryDto.geneticTraits();
-    Assertions.assertEquals(2, geneticTraitsResponse.size());
+    Assertions.assertEquals(2, summaryDto.geneticTraits().size());
   }
 }

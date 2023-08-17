@@ -177,8 +177,7 @@ class GeneticWorthEndpointTest {
   @DisplayName("calculateAll_NoData")
   @WithMockUser(roles = "user_write")
   void calculateAll_NoData() throws Exception {
-    GeneticWorthSummaryDto summaryDto =
-        new GeneticWorthSummaryDto(BigDecimal.ZERO, BigDecimal.ZERO, 0, List.of());
+    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of());
     when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
 
     mockMvc
@@ -189,9 +188,6 @@ class GeneticWorthEndpointTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(stringifySuccess()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.effectivePopulationSizeNe").value("0"))
-        .andExpect(jsonPath("$.coancestry").value("0"))
-        .andExpect(jsonPath("$.numberOfSmpParentFromOutside").value("0"))
         .andExpect(jsonPath("$.geneticTraits", hasSize(0)))
         .andReturn();
   }
@@ -221,9 +217,7 @@ class GeneticWorthEndpointTest {
     GeneticWorthTraitsDto wwdTrait =
         new GeneticWorthTraitsDto(
             "wwd", new BigDecimal("19"), new BigDecimal("56"), new BigDecimal("68"));
-    GeneticWorthSummaryDto summaryDto =
-        new GeneticWorthSummaryDto(
-            BigDecimal.ZERO, BigDecimal.ZERO, 0, List.of(gvoTrait, wwdTrait));
+    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of(gvoTrait, wwdTrait));
     when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
 
     mockMvc
@@ -234,16 +228,13 @@ class GeneticWorthEndpointTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(stringifySuccess()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.effectivePopulationSizeNe").value("0"))
-        .andExpect(jsonPath("$.coancestry").value("0"))
-        .andExpect(jsonPath("$.numberOfSmpParentFromOutside").value("0"))
         .andExpect(jsonPath("$.geneticTraits[0].traitCode").value("gvo"))
         .andExpect(jsonPath("$.geneticTraits[0].traitValue").value("18"))
-        .andExpect(jsonPath("$.geneticTraits[0].volumeGrowth").value("55"))
+        .andExpect(jsonPath("$.geneticTraits[0].geneticWorthValue").value("55"))
         .andExpect(jsonPath("$.geneticTraits[0].percentage").value("67"))
         .andExpect(jsonPath("$.geneticTraits[1].traitCode").value("wwd"))
         .andExpect(jsonPath("$.geneticTraits[1].traitValue").value("19"))
-        .andExpect(jsonPath("$.geneticTraits[1].volumeGrowth").value("56"))
+        .andExpect(jsonPath("$.geneticTraits[1].geneticWorthValue").value("56"))
         .andExpect(jsonPath("$.geneticTraits[1].percentage").value("68"))
         .andReturn();
   }
