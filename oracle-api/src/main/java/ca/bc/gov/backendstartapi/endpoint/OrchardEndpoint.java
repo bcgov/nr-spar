@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -167,14 +168,15 @@ public class OrchardEndpoint {
   @GetMapping(path = "/parent-trees/vegetation-codes/{vegCode}")
   @PreAuthorize("hasRole('user_read')")
   public ResponseEntity<List<ListItemDto>> findParentTreesWithVegCode(
-      @PathVariable("vegCode") @Parameter(description = "The vegetation code of an orchard.")
+      @PathVariable("vegCode")
+          @Parameter(description = "The vegetation code of an orchard.")
+          @Pattern(regexp = "^[a-zA-Z]{1,8}$")
           String vegCode) {
     try {
-      // NEXT: validate the information against the seedlot's orchard
-      //   All trees on the table must belong to the seedlot's orchard.
       return ResponseEntity.ok(orchardService.findParentTreesWithVegCode(vegCode));
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      log.error("Orchard endpoint error from findParentTreesWithVegCode: %s", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 }
