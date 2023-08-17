@@ -48,7 +48,7 @@ test and deploy.
 # Getting started
 
 Once you have cloned this repository, you can get the app running by typing
-`yarn install` and then `yarn start` from the project root directory. Then
+`npm install` and then `npm run start` from the project root directory. Then
 head to http://localhost:3000.
 
 Be aware of the required environment variables:
@@ -70,7 +70,7 @@ CYPRESS_PASSWORD=[password-here]
 export $(cat .env | xargs)
 ```
 
-To run the unit tests all you need is `yarn test`. For end-to-end test you need to run `yarn cypress run` to run on console or `yarn cypress open` to use the Cypress IDE.
+To run the unit tests all you need is `npm run test`. For end-to-end test you need to run `npm run cypress run` to run on console or `npm run cypress open` to use the Cypress IDE.
 
 > Note that to run locally you'll need those environment variables: CYPRESS_USERNAME and CYPRESS_PASSWORD
 

@@ -27,7 +27,7 @@ Make sure you have Git installed on your machine. You can follow
 
 NodeJS is required to build and start this app. You can look for install
 instructions [here](https://nodejs.org/en/download/). Make sure you have
-at least the version 16.10 (that includes yarn)
+at least the version 18.
 
 ### IDE
 
@@ -44,8 +44,8 @@ To enforce a better solution and a stronger product we decided to use
 the Airbnb ESLint check-style. This way also helps us to have a dedicated
 pipeline to check for common errors and possible bugs.
 
-Also, run `yarn lint` before making a PR, so any style error not addressed
-can be checked and you can use `yarn lint --fix` to fix small issues.
+Also, run `npm run lint` before making a PR, so any style error not addressed
+can be checked and you can use `npm run lint --fix` to fix small issues.
 
 > Note that if you choose VS Code as your IDE, we highly recommend above mentioned extension **ESLint**, by Microsoft.
 > Here's the link to the Marketplace: https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
@@ -76,22 +76,21 @@ CYPRESS_PASSWORD=
 
 Just run:
 ```
-yarn install --frozen-lockfile
+npm install
 ```
 
 Once is finished, you can get it up and running by typing
 
 ```
-yarn start
+npm run start
 ```
 
 ## Run tests
 
-You can run tests running `yarn test`. Tests coverage reports can be seen
+You can run tests running `npm run test`. Tests coverage reports can be seen
 on you command line window and also on GitHub, in your commits and pull requests.
 
-PS: We have snapshot tests, so keep in mind the tests may break if you forget to
-update snapshots. To update them run `yarn test -u`
+PS: We have snapshot tests, so keep in mind the tests may break if you forget to update snapshots. To update them run `npm run test`
 
 ## Submit pull requests
 
