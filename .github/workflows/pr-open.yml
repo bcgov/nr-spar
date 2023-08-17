@@ -19,7 +19,7 @@ jobs:
       pull-requests: write
     steps:
       - name: PR Greeting
-        uses: bcgov-nr/action-pr-description-add@v1.0.0
+        uses: bcgov-nr/action-pr-description-add@v1.0.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
@@ -64,6 +64,7 @@ jobs:
           parameters:
             -p NAMESPACE=${{ vars.OC_NAMESPACE }}
             -p ZONE=${{ github.event.number }}
+          triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
 
   builds:
     name: Builds
