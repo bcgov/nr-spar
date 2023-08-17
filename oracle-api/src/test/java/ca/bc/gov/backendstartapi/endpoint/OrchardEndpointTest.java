@@ -22,11 +22,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(OrchardEndpoint.class)
 class OrchardEndpointTest {
@@ -245,20 +244,19 @@ class OrchardEndpointTest {
   @DisplayName("getAllParentTreeByVegCodeErrorTest")
   @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeErrorTest() throws Exception {
-    String vegCode = "LAMB";
-
-    HttpStatus errCode = HttpStatus.BAD_REQUEST;
-    String errMsg = "LAMB is not a veg code.";
+    String vegCode = "FDI";
+    String errMsg = "Oracle database has been defeated by postgres.";
 
     when(orchardService.findParentTreesWithVegCode(vegCode))
-        .thenThrow(new ResponseStatusException(errCode, errMsg));
+        .thenThrow(new DataRetrievalFailureException(errMsg));
+
     mockMvc
         .perform(
             get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest())
+        .andExpect(status().isInternalServerError())
         .andReturn()
         .getResolvedException()
         .getMessage();
