@@ -37,25 +37,25 @@ parameters:
   - name: PROMOTE
     description: Image (namespace/name:tag) to promote/import
     value: bcgov/nr-spar-webapp/frontend:test
-  - name: REACT_APP_SPAR_BUILD_VERSION
+  - name: VITE_SPAR_BUILD_VERSION
     description: Current sample app release version
     required: true
-  - name: REACT_APP_SERVER_URL
-    description: REACT_APP_SERVER_URL
+  - name: VITE_SERVER_URL
+    description: VITE_SERVER_URL
     required: true
-  - name: REACT_APP_NRSPARWEBAPP_VERSION
-    description: REACT_APP_NRSPARWEBAPP_VERSION
+  - name: VITE_NRSPARWEBAPP_VERSION
+    description: VITE_NRSPARWEBAPP_VERSION
     required: true
-  - name: REACT_APP_KC_URL
-    description: REACT_APP_KC_URL
+  - name: VITE_KC_URL
+    description: VITE_KC_URL
     required: true
-  - name: REACT_APP_KC_REALM
-    description: REACT_APP_KC_REALM
+  - name: VITE_KC_REALM
+    description: VITE_KC_REALM
     required: true
-  - name: REACT_APP_KC_CLIENT_ID
-    description: REACT_APP_KC_CLIENT_ID
+  - name: VITE_KC_CLIENT_ID
+    description: VITE_KC_CLIENT_ID
     required: true
-  - name: REACT_APP_ORACLE_SERVER_URL
+  - name: VITE_ORACLE_SERVER_URL
     description: Oracle back-end api URL
     required: true
   - name: LOG_LEVEL
@@ -114,20 +114,20 @@ objects:
                 capabilities:
                   add: ["NET_BIND_SERVICE"]
               env:
-                - name: REACT_APP_SPAR_BUILD_VERSION
-                  value: ${REACT_APP_SPAR_BUILD_VERSION}
-                - name: REACT_APP_SERVER_URL
-                  value: ${REACT_APP_SERVER_URL}
-                - name: REACT_APP_NRSPARWEBAPP_VERSION
-                  value: ${REACT_APP_NRSPARWEBAPP_VERSION}
-                - name: REACT_APP_KC_URL
-                  value: ${REACT_APP_KC_URL}
-                - name: REACT_APP_KC_REALM
-                  value: ${REACT_APP_KC_REALM}
-                - name: REACT_APP_KC_CLIENT_ID
-                  value: ${REACT_APP_KC_CLIENT_ID}
-                - name: REACT_APP_ORACLE_SERVER_URL
-                  value: ${REACT_APP_ORACLE_SERVER_URL}
+                - name: VITE_SPAR_BUILD_VERSION
+                  value: ${VITE_SPAR_BUILD_VERSION}
+                - name: VITE_SERVER_URL
+                  value: ${VITE_SERVER_URL}
+                - name: VITE_NRSPARWEBAPP_VERSION
+                  value: ${VITE_NRSPARWEBAPP_VERSION}
+                - name: VITE_KC_URL
+                  value: ${VITE_KC_URL}
+                - name: VITE_KC_REALM
+                  value: ${VITE_KC_REALM}
+                - name: VITE_KC_CLIENT_ID
+                  value: ${VITE_KC_CLIENT_ID}
+                - name: VITE_ORACLE_SERVER_URL
+                  value: ${VITE_ORACLE_SERVER_URL}
                 - name: LOG_LEVEL
                   value: ${LOG_LEVEL}
               ports:

@@ -1,6 +1,6 @@
 import { env } from '../../env';
 
-export const VERSION: string = `Version: ${env.REACT_APP_NRSPARWEBAPP_VERSION}`;
+export const VERSION: string = `Version: ${env.VITE_NRSPARWEBAPP_VERSION}`;
 
 export const HOME_LINK = '/dashboard';
 

@@ -11,13 +11,9 @@ describe.skip('Orchard Step test', () => {
   let dismount: Function;
   let component: HTMLElement;
 
-  jest
-    .spyOn(ReactQuery, 'useQuery')
-    .mockImplementation(
-      jest
-        .fn()
-        .mockReturnValue({ data: [], isLoading: false, isSuccess: true })
-    );
+  vi.mock('react-query', () => {
+    useQuery: vi.fn().mockReturnValue({ data: [], isLoading: false, isSuccess: true });
+  });
 
   beforeEach(() => {
     makeServer('jest-test');
