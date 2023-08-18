@@ -100,7 +100,8 @@ public class ForestClientEndpoint {
           @Parameter(
               name = "number",
               in = ParameterIn.PATH,
-              description = "Number that identifies the client to get the locations.")
+              description = "Number that identifies the client to get the locations.",
+              required = true)
           String number) {
     return forestClientService.fetchClientLocations(number);
   }
