@@ -44,14 +44,14 @@ describe('Login page test', () => {
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
-  it.skip('log in with BCeID and validate if after timeout the user is disconnected', () => {
-    cy.login();
-    // wait for 6 minutes
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(6 * 60 * 1000);
-    cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
-    cy.reload();
-  });
+  // it.skip('log in with BCeID and validate if after timeout the user is disconnected', () => {
+  //   cy.login();
+  //   // wait for 6 minutes
+  //   // eslint-disable-next-line cypress/no-unnecessary-waiting
+  //   cy.wait(6 * 60 * 1000);
+  //   cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
+  //   cy.reload();
+  // });
 
   it('log in with BCeID and validate user role', () => {
     cy.login();
