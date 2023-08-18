@@ -158,7 +158,9 @@ public class GeneticWorthService {
       GeneticWorthTraitsRequestDto traitDto, CodeDescriptionDto trait) {
     List<GeneticWorthTraitsDto> geneticTraits = traitDto.geneticTraits();
     Optional<GeneticWorthTraitsDto> traitOptional =
-        geneticTraits.stream().filter(x -> x.traitCode().equals(trait.code())).findFirst();
+        geneticTraits.stream()
+            .filter(x -> x.traitCode().equalsIgnoreCase(trait.code()))
+            .findFirst();
     return traitOptional.isEmpty() ? BigDecimal.ZERO : traitOptional.get().traitValue();
   }
 

@@ -205,8 +205,8 @@ class GeneticWorthServiceTest {
     LocalDate yesterday = LocalDate.now().minusDays(1L);
     LocalDate tomorrow = LocalDate.now().plusDays(1L);
     EffectiveDateRange dateRange = new EffectiveDateRange(yesterday, tomorrow);
-    GeneticWorthEntity gvoGw = new GeneticWorthEntity("gvo", "anything", dateRange);
-    GeneticWorthEntity wwdGw = new GeneticWorthEntity("wwd", "something", dateRange);
+    GeneticWorthEntity gvoGw = new GeneticWorthEntity("GVO", "Volume Growth", dateRange);
+    GeneticWorthEntity wwdGw = new GeneticWorthEntity("WWD", "Wood quality", dateRange);
     when(geneticWorthRepository.findAll()).thenReturn(List.of(gvoGw, wwdGw));
 
     GeneticWorthSummaryDto summaryDto = geneticWorthService.calculateGeneticWorth(requestList);

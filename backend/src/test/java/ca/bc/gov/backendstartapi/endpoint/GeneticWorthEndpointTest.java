@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -212,11 +213,9 @@ class GeneticWorthEndpointTest {
   @WithMockUser(roles = "user_write")
   void calculateAll_Success() throws Exception {
     GeneticWorthTraitsDto gvoTrait =
-        new GeneticWorthTraitsDto(
-            "gvo", new BigDecimal("18"), new BigDecimal("55"), new BigDecimal("67"));
+        new GeneticWorthTraitsDto("GVO", null, new BigDecimal("55"), new BigDecimal("67"));
     GeneticWorthTraitsDto wwdTrait =
-        new GeneticWorthTraitsDto(
-            "wwd", new BigDecimal("19"), new BigDecimal("56"), new BigDecimal("68"));
+        new GeneticWorthTraitsDto("WWD", null, new BigDecimal("56"), new BigDecimal("68"));
     GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of(gvoTrait, wwdTrait));
     when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
 
@@ -228,12 +227,12 @@ class GeneticWorthEndpointTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(stringifySuccess()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.geneticTraits[0].traitCode").value("gvo"))
-        .andExpect(jsonPath("$.geneticTraits[0].traitValue").value("18"))
+        .andExpect(jsonPath("$.geneticTraits[0].traitCode").value("GVO"))
+        .andExpect(jsonPath("$.geneticTraits[0].traitValue", nullValue()))
         .andExpect(jsonPath("$.geneticTraits[0].geneticWorthValue").value("55"))
         .andExpect(jsonPath("$.geneticTraits[0].percentage").value("67"))
-        .andExpect(jsonPath("$.geneticTraits[1].traitCode").value("wwd"))
-        .andExpect(jsonPath("$.geneticTraits[1].traitValue").value("19"))
+        .andExpect(jsonPath("$.geneticTraits[1].traitCode").value("WWD"))
+        .andExpect(jsonPath("$.geneticTraits[1].traitValue", nullValue()))
         .andExpect(jsonPath("$.geneticTraits[1].geneticWorthValue").value("56"))
         .andExpect(jsonPath("$.geneticTraits[1].percentage").value("68"))
         .andReturn();
