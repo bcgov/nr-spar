@@ -4,7 +4,7 @@ export enum GenericSelectors {
 }
 
 export enum SeedlotRegistrationSelectors {
-  SeedlotActivitiesCardTitle = '.seedlot-activities .std-card-title',
+  SeedlotActivitiesCardTitle = '.seedlot-activities-cards .std-card-title',
 }
 
 export enum NavigationSelectors {
