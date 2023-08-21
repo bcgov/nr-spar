@@ -45,10 +45,10 @@ public class ForestClientApiProvider implements Provider {
   }
 
   /**
-   * Fetch a forest client by its number or its acronym.
+   * Fetch a ForestClient by its number or its acronym.
    *
    * @param identifier the client number or acronym to search for
-   * @return the forest client with client number or acronym {@code identifier}, if one exists
+   * @return the ForestClient with client number or acronym {@code identifier}, if one exists
    */
   @Override
   public Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
@@ -108,9 +108,9 @@ public class ForestClientApiProvider implements Provider {
   }
 
   /**
-   * Fetch up to the 10 first forest client location by its number.
+   * Fetch up to the 10 first ForestClient's location by its number.
    *
-   * @param clientNumber the forest client identifier to fetch their locations
+   * @param clientNumber the ForestClient identifier to fetch their locations
    * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
   @Override
@@ -140,9 +140,9 @@ public class ForestClientApiProvider implements Provider {
   }
 
   /**
-   * Fetch a single location of a forest client its number and location code.
+   * Fetch a single location of a ForestClient its number and location code.
    *
-   * @param clientNumber the forest client identifier to fetch their location
+   * @param clientNumber the ForestClient identifier to fetch their location
    * @param locationCode the location code that identifies the location to be fetched
    * @return {@link ForestClientLocationDto} containing the client's location data
    */
