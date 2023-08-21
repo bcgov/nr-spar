@@ -147,7 +147,9 @@ public class ForestClientApiProvider implements Provider {
    * @return {@link ForestClientLocationDto} containing the client's location data
    */
   @Override
-  public ForestClientLocationDto fetchSingleClientLocation(String clientNumber, String locationCode) {
+  public ForestClientLocationDto fetchSingleClientLocation(
+      String clientNumber,
+      String locationCode) {
     String apiUrl = String.format("%s/clients/{clientNumber}/locations/{locationCode}", rootUri);
     log.info("Starting {} request to {}", PROVIDER, apiUrl);
 

@@ -54,7 +54,9 @@ public class ForestClientService {
    * @param locationCode the location code that identifies the location to be fetched
    * @return {@link ForestClientLocationDto} containing the client's location data
    */
-  public ForestClientLocationDto fetchSingleClientLocation(String clientNumber, String locationCode) {
+  public ForestClientLocationDto fetchSingleClientLocation(
+      String clientNumber,
+      String locationCode) {
     return forestClientApiProvider.fetchSingleClientLocation(clientNumber, locationCode);
   }
 }
