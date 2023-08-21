@@ -46,7 +46,7 @@ jobs:
     env:
       VITE_NRSPARWEBAPP_VERSION: dev
     steps:
-      - uses: bcgov-nr/action-test-and-analyse@v0.0.1
+      - uses: bcgov-nr/action-test-and-analyse@v1.0.0
         with:
           node_version: "18.16.0"
           commands: |
@@ -62,7 +62,7 @@ jobs:
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/**/__test__/**/*
             -Dsonar.test.inclusions=src/**/__test__/**/*
-          sonar_project_token: ${{ secrets.SONAR_FRONTEND }}
+          sonar_token: ${{ secrets.SONAR_FRONTEND }}
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
