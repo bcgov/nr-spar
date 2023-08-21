@@ -11,4 +11,4 @@ import jakarta.validation.constraints.NotNull;
  * @param enabled a boolean representing if the activity is enabled
  */
 @Schema(description = "An object representing the request body when updating a favourite activity")
-public record FavouriteActivityUpdateDto(@NotNull Boolean highlighted, @NotNull Boolean enabled) {}
+public record FavouriteActivityUpdateDto(@NotNull Boolean highlighted) {}
