@@ -78,8 +78,8 @@ public class ForestClientEndpoint {
   /**
    * Fetch up to the 10 first forest client locations by the client number.
    *
-   * @param number the number that identifies the client to fetch the locations
-   * @return the forest client locations
+   * @param number the forest client identifier to fetch their locations
+   * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
   @GetMapping(path = "/{number}/locations")
   @PreAuthorize("hasRole('user_read')")
@@ -96,7 +96,7 @@ public class ForestClientEndpoint {
       })
   public List<ForestClientLocationDto> fetchClientLocations(
       @PathVariable("number")
-          @Pattern(regexp = "^\\d{8}$", message = "The value must an 8-digit number")
+          @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
           @Parameter(
               name = "number",
               in = ParameterIn.PATH,
@@ -109,9 +109,9 @@ public class ForestClientEndpoint {
   /**
    * Fetch the forest client location based on the client number and location code.
    *
-   * @param number the number that identifies the client to fetch the location
+   * @param number the forest client identifier to fetch their location
    * @param locationCode the location code that identifies the location to be fetched
-   * @return the forest client location
+   * @return {@link ForestClientLocationDto} containing the client's location data
    */
   @GetMapping(path = "/{number}/location/{locationCode}")
   @PreAuthorize("hasRole('user_read')")
@@ -128,7 +128,7 @@ public class ForestClientEndpoint {
       })
   public ForestClientLocationDto fetchSingleClientLocation(
       @PathVariable("number")
-          @Pattern(regexp = "^\\d{8}$", message = "The value must an 8-digit number")
+          @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
           @Parameter(
               name = "number",
               in = ParameterIn.PATH,

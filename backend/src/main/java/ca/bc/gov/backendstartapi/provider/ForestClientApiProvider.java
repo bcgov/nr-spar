@@ -110,8 +110,8 @@ public class ForestClientApiProvider implements Provider {
   /**
    * Fetch up to the 10 first forest client location by its number.
    *
-   * @param number the client number to search the location
-   * @return an list of the locations of the forest client
+   * @param number the forest client identifier to fetch their locations
+   * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
   @Override
   public List<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
@@ -142,9 +142,9 @@ public class ForestClientApiProvider implements Provider {
   /**
    * Fetch a single location of a forest client its number and location code.
    *
-   * @param number the client number to search the location
+   * @param number the forest client identifier to fetch their location
    * @param locationCode the location code that identifies the location to be fetched
-   * @return a single location for a forest client
+   * @return {@link ForestClientLocationDto} containing the client's location data
    */
   @Override
   public ForestClientLocationDto fetchSingleClientLocation(String number, String locationCode) {

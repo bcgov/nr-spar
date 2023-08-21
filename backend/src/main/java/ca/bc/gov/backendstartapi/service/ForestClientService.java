@@ -40,8 +40,8 @@ public class ForestClientService {
   /**
    * Fetch up to the 10 first forest client location by its number.
    *
-   * @param number the client number to search the location
-   * @return an list of the locations of the forest client
+   * @param number the forest client identifier to fetch their locations
+   * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
   public List<ForestClientLocationDto> fetchClientLocations(String number) {
     return forestClientApiProvider.fetchLocationsByClientNumber(number);
@@ -50,9 +50,9 @@ public class ForestClientService {
   /**
    * Fetch a single location of a forest client its number and location code.
    *
-   * @param number the client number to search the location
+   * @param number the forest client identifier to fetch their location
    * @param locationCode the location code that identifies the location to be fetched
-   * @return a single forest client location
+   * @return {@link ForestClientLocationDto} containing the client's location data
    */
   public ForestClientLocationDto fetchSingleClientLocation(String number, String locationCode) {
     return forestClientApiProvider.fetchSingleClientLocation(number, locationCode);
