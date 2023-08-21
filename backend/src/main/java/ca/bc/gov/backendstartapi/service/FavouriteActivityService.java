@@ -70,7 +70,7 @@ public class FavouriteActivityService {
   public List<FavouriteActivityEntity> getAllUserFavoriteActivities() {
     String userId = loggedUserService.getLoggedUserId();
     log.info("Retrieving all favorite activities to user {}", userId);
-    return favouriteActivityRepository.findAllByEnabledAndUserId(Boolean.TRUE, userId);
+    return favouriteActivityRepository.findAllByUserId(userId);
   }
 
   /**
@@ -101,8 +101,7 @@ public class FavouriteActivityService {
     FavouriteActivityEntity entity =
         activityEntity
             .get()
-            .withHighlighted(updateDto.highlighted())
-            .withEnabled(updateDto.enabled());
+            .withHighlighted(updateDto.highlighted());
 
     return favouriteActivityRepository.save(entity);
   }
