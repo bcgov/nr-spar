@@ -213,8 +213,6 @@ jobs:
           - name: fluentbit
             file: backend/openshift.fluentbit.yml
             overwrite: true
-            parameters:
-              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
