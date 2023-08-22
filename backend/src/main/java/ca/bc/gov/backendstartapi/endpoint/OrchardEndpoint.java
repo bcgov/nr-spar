@@ -4,7 +4,6 @@ import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
-import ca.bc.gov.backendstartapi.exception.VegCodeNotFoundException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -97,9 +96,6 @@ public class OrchardEndpoint {
               in = ParameterIn.PATH,
               description = "Identifier of the Orchard.")
           String vegCode) {
-    if (vegCode.isEmpty()) {
-      throw new VegCodeNotFoundException();
-    }
     return orchardService.findOrchardsByVegCode(vegCode);
   }
 
@@ -135,9 +131,6 @@ public class OrchardEndpoint {
               in = ParameterIn.PATH,
               description = "Identifier of the Orchard.")
           String vegCode) {
-    if (vegCode.isEmpty()) {
-      throw new VegCodeNotFoundException();
-    }
     return orchardService.findParentTreesByVegCode(vegCode);
   }
 }
