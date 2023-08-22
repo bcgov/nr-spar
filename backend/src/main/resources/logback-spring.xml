@@ -16,7 +16,7 @@
     <!-- %n = new line -->
     <layout class="ch.qos.logback.classic.PatternLayout">
       <Pattern>
-        %date{HH:mm:ss.SSS} %highlight(%-5level) [%blue(%t)] %yellow(%C): %msg%n%throwable
+        %date{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%blue(%t)] %yellow(%C): %msg%n%throwable
       </Pattern>
     </layout>
   </appender>
