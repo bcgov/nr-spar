@@ -25,7 +25,7 @@ parameters:
   - name: MEMORY_REQUEST
     value: 50Mi
   - name: MEMORY_LIMIT
-    value: 100Mi
+    value: 150Mi
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
