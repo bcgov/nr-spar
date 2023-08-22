@@ -38,7 +38,7 @@ class OrchardEndpointTest {
   void getParentTreeGeneticQualityDataSuccessTest() throws Exception {
     String orchardId = "123";
 
-    OrchardSpuDto parentTreeDto = new OrchardSpuDto(orchardId, "ACT", 1L, new ArrayList<>());
+    OrchardSpuDto parentTreeDto = new OrchardSpuDto(orchardId, "ACT", 1L, List.of());
 
     when(orchardService.findParentTreeGeneticQualityData(orchardId)).thenReturn(parentTreeDto);
 

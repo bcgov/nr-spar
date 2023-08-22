@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +19,6 @@ public class ParentTreeGeneticInfoDto extends ParentTreeDto {
   private List<ParentTreeGeneticQualityDto> parentTreeGeneticQualities;
 
   public ParentTreeGeneticInfoDto() {
-    this.parentTreeGeneticQualities = new ArrayList<>();
+    this.parentTreeGeneticQualities = List.of();
   }
 }
