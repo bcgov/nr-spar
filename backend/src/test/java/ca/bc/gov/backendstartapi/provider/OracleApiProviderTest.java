@@ -151,9 +151,9 @@ class OracleApiProviderTest {
 
     List<ListItemDto> parentTreeDtoList = oracleApiProvider.findParentTreesByVegCode(vegCode);
 
+    Assertions.assertFalse(parentTreeDtoList.isEmpty());
     Assertions.assertEquals("1003477", parentTreeDtoList.get(0).id());
     Assertions.assertEquals("34", parentTreeDtoList.get(0).value());
-    Assertions.assertFalse(parentTreeDtoList.isEmpty());
   }
 
   @Test
