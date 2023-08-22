@@ -165,7 +165,6 @@ objects:
     apiVersion: v1
     metadata:
       name: ${NAME}-${ZONE}-${COMPONENT}-configs
-      namespace: ${NAMESPACE}
     data:
       filters.conf: |
         [FILTER]
