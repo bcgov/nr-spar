@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -228,13 +227,11 @@ class GeneticWorthEndpointTest {
                 .content(stringifySuccess()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.geneticTraits[0].traitCode").value("GVO"))
-        .andExpect(jsonPath("$.geneticTraits[0].traitValue", nullValue()))
-        .andExpect(jsonPath("$.geneticTraits[0].geneticWorthValue").value("55"))
-        .andExpect(jsonPath("$.geneticTraits[0].percentage").value("67"))
+        .andExpect(jsonPath("$.geneticTraits[0].calculatedValue").value("55"))
+        .andExpect(jsonPath("$.geneticTraits[0].testedParentTreePerc").value("67"))
         .andExpect(jsonPath("$.geneticTraits[1].traitCode").value("WWD"))
-        .andExpect(jsonPath("$.geneticTraits[1].traitValue", nullValue()))
-        .andExpect(jsonPath("$.geneticTraits[1].geneticWorthValue").value("56"))
-        .andExpect(jsonPath("$.geneticTraits[1].percentage").value("68"))
+        .andExpect(jsonPath("$.geneticTraits[1].calculatedValue").value("56"))
+        .andExpect(jsonPath("$.geneticTraits[1].testedParentTreePerc").value("68"))
         .andReturn();
   }
 }

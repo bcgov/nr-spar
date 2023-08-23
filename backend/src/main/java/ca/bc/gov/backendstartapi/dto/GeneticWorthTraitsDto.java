@@ -1,5 +1,7 @@
 package ca.bc.gov.backendstartapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 
@@ -7,6 +9,7 @@ import java.math.BigDecimal;
 @Schema(
     description =
         "This class represents the JSON for the request and response containing all traits data.")
+@JsonInclude(Include.NON_NULL)
 public record GeneticWorthTraitsDto(
     @Schema(description = "Represents the trait code, e.g.: gvo, wwd.", example = "gvo")
         String traitCode,
@@ -26,11 +29,11 @@ public record GeneticWorthTraitsDto(
             example = "55",
             type = "number",
             format = "float")
-        BigDecimal geneticWorthValue,
+        BigDecimal calculatedValue,
     @Schema(
             description =
                 "Contains the percentage of contribution for that trait, calculated by the backend",
             example = "56.7",
             type = "number",
             format = "float")
-        BigDecimal percentage) {}
+        BigDecimal testedParentTreePerc) {}
