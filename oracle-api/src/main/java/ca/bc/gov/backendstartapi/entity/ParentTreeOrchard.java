@@ -8,7 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * This class represents a relation between {@link ParentTree} and {@link Orchard} in the database.
+ * This class represents a relation between {@link ParentTreeEntity} and {@link Orchard} in the
+ * database.
  */
 @Getter
 @Setter

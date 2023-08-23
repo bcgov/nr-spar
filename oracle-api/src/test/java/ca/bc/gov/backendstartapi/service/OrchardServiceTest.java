@@ -10,7 +10,7 @@ import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
-import ca.bc.gov.backendstartapi.entity.ParentTree;
+import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
@@ -29,9 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.projection.ProjectionFactory;
 import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
@@ -46,8 +44,6 @@ class OrchardServiceTest {
   @Mock private ParentTreeRepository parentTreeRepository;
 
   @Mock private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
-
-  @Spy private ModelMapper modelMapper;
 
   @Autowired @InjectMocks private OrchardService orchardService;
 
@@ -181,7 +177,7 @@ class OrchardServiceTest {
         .thenReturn(List.of(parentTreeOrchard1));
 
     // Parent Tree
-    ParentTree parentTree = new ParentTree();
+    ParentTreeEntity parentTree = new ParentTreeEntity();
     parentTree.setId(4032L);
     parentTree.setParentTreeNumber("37");
     parentTree.setVegetationCode("FDC");
@@ -228,9 +224,9 @@ class OrchardServiceTest {
     Assertions.assertEquals("37", parentTreeDto.getParentTreeNumber());
     Assertions.assertEquals("APP", parentTreeDto.getParentTreeRegStatusCode());
     Assertions.assertEquals("123", parentTreeDto.getLocalNumber());
-    Assertions.assertTrue(parentTreeDto.isActive());
-    Assertions.assertTrue(parentTreeDto.isTested());
-    Assertions.assertTrue(parentTreeDto.isBreedingProgram());
+    Assertions.assertTrue(parentTreeDto.getActive());
+    Assertions.assertTrue(parentTreeDto.getTested());
+    Assertions.assertTrue(parentTreeDto.getBreedingProgram());
     Assertions.assertNull(parentTreeDto.getFemaleParentTreeId());
     Assertions.assertNull(parentTreeDto.getMaleParentTreeId());
     Assertions.assertEquals(1, parentTreeDto.getParentTreeGeneticQualities().size());

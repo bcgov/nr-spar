@@ -99,7 +99,11 @@ class OrchardEndpointTest {
     geneticQualityDto1.setGeneticTypeCode("BV");
     geneticQualityDto1.setGeneticWorthCode("GVO");
     geneticQualityDto1.setGeneticQualityValue(new BigDecimal("18"));
-    parentTreeDto1.getParentTreeGeneticQualities().add(geneticQualityDto1);
+
+    List<ParentTreeGeneticQualityDto> parentTreeDto1GenQual =
+        new ArrayList<>(parentTreeDto1.getParentTreeGeneticQualities());
+    parentTreeDto1GenQual.add(geneticQualityDto1);
+    parentTreeDto1.setParentTreeGeneticQualities(parentTreeDto1GenQual);
 
     orchardParentTreeDto.getParentTrees().add(parentTreeDto1);
 

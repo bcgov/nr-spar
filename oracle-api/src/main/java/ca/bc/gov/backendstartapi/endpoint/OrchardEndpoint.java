@@ -76,7 +76,7 @@ public class OrchardEndpoint {
   }
 
   /**
-   * Gets {@link ca.bc.gov.backendstartapi.entity.ParentTree} data to an {@link Orchard}.
+   * Gets {@link ca.bc.gov.backendstartapi.entity.ParentTreeEntity} data to an {@link Orchard}.
    *
    * @param orchardId {@link Orchard}'s identification
    * @param spuId Seed Planning Unit's identification

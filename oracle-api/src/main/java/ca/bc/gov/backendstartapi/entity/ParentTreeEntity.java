@@ -16,7 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "PARENT_TREE")
-public class ParentTree {
+public class ParentTreeEntity {
 
   @Id
   @Column(name = "PARENT_TREE_ID")
@@ -48,5 +48,4 @@ public class ParentTree {
 
   @Column(name = "MALE_PARENT_PARENT_TREE_ID")
   private Long maleParentTreeId;
-
 }

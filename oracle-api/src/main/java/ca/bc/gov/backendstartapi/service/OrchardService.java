@@ -7,7 +7,7 @@ import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
-import ca.bc.gov.backendstartapi.entity.ParentTree;
+import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
@@ -16,14 +16,13 @@ import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
+import ca.bc.gov.backendstartapi.util.ModelMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods to handle orchards. */
@@ -39,20 +38,15 @@ public class OrchardService {
 
   private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
 
-  private ModelMapper modelMapper;
-
   OrchardService(
       OrchardRepository orchardRepository,
       ParentTreeOrchardRepository parentTreeOrchardRepository,
       ParentTreeRepository parentTreeRepository,
-      ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
-      ModelMapper modelMapper) {
+      ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository) {
     this.orchardRepository = orchardRepository;
     this.parentTreeOrchardRepository = parentTreeOrchardRepository;
     this.parentTreeRepository = parentTreeRepository;
     this.parentTreeGeneticQualityRepository = parentTreeGeneticQualityRepository;
-    this.modelMapper = modelMapper;
-    this.modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
   }
 
   /**
@@ -171,7 +165,7 @@ public class OrchardService {
     long endingFour = Instant.now().toEpochMilli();
     log.info("Time elapsed mapping all parent tree orchard ids: {}", endingFour - endingThree);
 
-    List<ParentTree> parentTreeList = parentTreeRepository.findAllIn(parentTreeIdList);
+    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllIn(parentTreeIdList);
 
     long endingFive = Instant.now().toEpochMilli();
     log.info("Time elapsed finding all parent tree (select in): {}", endingFive - endingFour);
@@ -210,7 +204,7 @@ public class OrchardService {
             spuId, geneticWorthCalcInd, geneticType, parentTreeIdList);
 
     return ptgqList.stream()
-        .map(parentTreeGen -> modelMapper.map(parentTreeGen, ParentTreeGeneticQualityDto.class))
+        .map(parentTreeGen -> ModelMapper.convert(parentTreeGen, ParentTreeGeneticQualityDto.class))
         .toList();
   }
 
@@ -225,9 +219,9 @@ public class OrchardService {
         .toList();
   }
 
-  private ParentTreeGeneticInfoDto convertToParentTreeGenInfoDto(ParentTree parentTree) {
+  private ParentTreeGeneticInfoDto convertToParentTreeGenInfoDto(ParentTreeEntity parentTree) {
     ParentTreeGeneticInfoDto parentTreeGenInfoDto =
-        modelMapper.map(parentTree, ParentTreeGeneticInfoDto.class);
+        ModelMapper.convert(parentTree, ParentTreeGeneticInfoDto.class);
     parentTreeGenInfoDto.setParentTreeId(parentTree.getId());
     return parentTreeGenInfoDto;
   }
