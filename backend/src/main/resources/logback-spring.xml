@@ -5,6 +5,7 @@
   <springProperty scope="context" name="applicationName" source="spring.application.name" />
   <springProperty scope="context" name="sparTeamEmail" source="nr-spar-team-email-address" />
   <springProperty scope="context" name="ecsVersion" source="nr-spar-ecs-version" />
+  <springProperty scope="context" name="loggingLevel" source="logging.level.root" />
 
   <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
     <!-- https://logback.qos.ch/manual/layouts.html -->
@@ -41,7 +42,7 @@
       <appender-ref ref="Console" />
     </root>
     <!-- LOG "ca.bc.gov.backendstartapi*" at TRACE level -->
-    <logger name="ca.bc.gov.backendstartapi" level="trace" additivity="false">
+    <logger name="ca.bc.gov.backendstartapi" level="${loggingLevel}" additivity="false">
       <appender-ref ref="Console" />
     </logger>
   </springProfile>
@@ -53,7 +54,7 @@
       <appender-ref ref="Console" />
     </root>
     <!-- LOG "ca.bc.gov.backendstartapi*" at TRACE level -->
-    <logger name="ca.bc.gov.backendstartapi" level="trace" additivity="false">
+    <logger name="ca.bc.gov.backendstartapi" level="${loggingLevel}" additivity="false">
       <appender-ref ref="RollingFile" />
       <appender-ref ref="Console" />
     </logger>
