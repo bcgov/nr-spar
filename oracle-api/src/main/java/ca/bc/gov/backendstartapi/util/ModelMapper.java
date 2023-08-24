@@ -5,12 +5,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.stream.Stream;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 /**
  * A Class that provides a util function to convert an Object of one class to another. E.g. Entity
  * to Dto.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ModelMapper {
 
   /**
@@ -45,7 +48,7 @@ public class ModelMapper {
         }
 
         // Try to find a set method
-        Method setMethodInstance = findSetMethod(fromObj, fieldToSearch, instance);
+        Method setMethodInstance = findSetMethod(fieldToSearch, instance);
 
         if (setMethodInstance == null) {
           continue;
@@ -57,10 +60,9 @@ public class ModelMapper {
 
       return instance;
     } catch (Exception e) {
-      new RuntimeException("Unable to create or populate new instance of " + toClass.getName());
+      throw new RuntimeException(
+          "Unable to create or populate new instance of " + toClass.getName());
     }
-
-    return null;
   }
 
   private static Method findGetMethod(@NonNull Object fromObj, String fieldToSearch) {
@@ -71,8 +73,7 @@ public class ModelMapper {
         .orElse(null);
   }
 
-  private static <T> Method findSetMethod(
-      @NonNull Object fromObj, String fieldToSearch, T instance) {
+  private static <T> Method findSetMethod(String fieldToSearch, T instance) {
     String setMethod = String.format("set%s", fieldToSearch);
     return Stream.of(instance.getClass().getMethods())
         .filter(x -> x.getName().equals(setMethod))
