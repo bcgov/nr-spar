@@ -27,16 +27,21 @@ import {
 import { OrchardObj } from '../OrchardStep/definitions';
 import UploadFileModal from './UploadFileModal';
 import {
-  pageText, headerTemplate, rowTemplate, geneticWorthDict,
+  pageText, headerTemplate, geneticWorthDict,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig,
   gwSectionConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
 } from './constants';
 import {
-  TabTypes, HeaderObj, RowItem, RowDataDictType, CompUploadResponse
+  TabTypes, HeaderObj, RowItem
 } from './definitions';
 import {
   getTabString, processOrchards, combineObjectValues,
-  calcAverage, calcSum
+  calcSummaryItems,
+  processParentTreeData,
+  getParentTreesFetchStatus,
+  cleanTable,
+  fillCompostitionTables,
+  configHeaderOpt
 } from './utils';
 
 import './styles.scss';
@@ -84,17 +89,6 @@ const ParentTreeStep = (
   // Link reference to trigger click event
   const linkRef = useRef<HTMLAnchorElement>(null);
 
-  const toggleNotification = (notifType: string) => {
-    const modifiedState = { ...state };
-    if (notifType === 'info') {
-      modifiedState.notifCtrl[currentTab].showInfo = false;
-    }
-    if (notifType === 'error') {
-      modifiedState.notifCtrl[currentTab].showError = false;
-    }
-    setStepData(modifiedState);
-  };
-
   useEffect(
     () => {
       const processedOrchard = processOrchards(orchards);
@@ -104,35 +98,6 @@ const ParentTreeStep = (
     },
     [orchards]
   );
-
-  const calcSummaryItems = () => {
-    if (!disableOptions) {
-      const modifiedSummaryConfig = { ...summaryConfig };
-      const tableRows = Object.values(state.tableRowData);
-
-      // Calc Total Number of Parent Trees
-      modifiedSummaryConfig.sharedItems
-        .totalParentTree.value = tableRows.length.toString();
-
-      // Calc Total number of cone count
-      modifiedSummaryConfig.coneTab
-        .infoItems.totalCone.value = calcSum(tableRows, 'coneCount');
-
-      // Calc Total number of pollen count
-      modifiedSummaryConfig.coneTab
-        .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
-
-      // Calc AVG of SMP Success
-      modifiedSummaryConfig.sharedItems
-        .avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
-
-      // Calc AVG of of non-orchard pollen contam.
-      modifiedSummaryConfig.successTab
-        .infoItems.avgNonOrchardContam.value = calcAverage(tableRows, 'nonOrchardPollenContam');
-
-      setSummaryConfig(modifiedSummaryConfig);
-    }
-  };
 
   useEffect(
     () => {
@@ -144,46 +109,11 @@ const ParentTreeStep = (
         'parentTreeNumber',
         setSlicedRows
       );
-      calcSummaryItems();
+      const tableRows = Object.values(state.tableRowData);
+      calcSummaryItems(disableOptions, setSummaryConfig, summaryConfig, tableRows);
     },
     [state.tableRowData]
   );
-
-  const processParentTreeData = (data: ParentTreeGeneticQualityType) => {
-    const modifiedState = { ...state };
-    let clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
-
-    data.parentTrees.forEach((parentTree) => {
-      if (!Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)) {
-        const newRowData: RowItem = structuredClone(rowTemplate);
-        newRowData.parentTreeNumber = parentTree.parentTreeNumber;
-        // Assign genetic worth values
-        parentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
-          // We only care about breeding values of genetic worth
-          if (singleGenWorthObj.geneticTypeCode === 'BV') {
-            const genWorthName = singleGenWorthObj.geneticWorthCode.toLowerCase();
-            if (Object.prototype.hasOwnProperty.call(newRowData, genWorthName)) {
-              newRowData[genWorthName] = singleGenWorthObj.geneticQualityValue;
-            }
-          }
-        });
-        clonedTableRowData = Object.assign(clonedTableRowData, {
-          [parentTree.parentTreeNumber]: newRowData
-        });
-      }
-    });
-
-    modifiedState.tableRowData = clonedTableRowData;
-    sliceTableRowData(
-      Object.values(clonedTableRowData),
-      currentPage,
-      currPageSize,
-      false,
-      'parentTreeNumber',
-      setSlicedRows
-    );
-    setStepData(modifiedState);
-  };
 
   // Parent tree genetic quality queries
   useQueries({
@@ -193,142 +123,43 @@ const ParentTreeStep = (
         queryFn: () => (
           getParentTreeGeneQuali(orchard.selectedItem?.code)
         ),
-        onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(data)
+        onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(
+          data,
+          state,
+          currentPage,
+          currPageSize,
+          setSlicedRows,
+          setStepData
+        )
       }))
   });
 
-  const getParentTreesFetchStatus = (): boolean => {
-    let isFetching = false;
-    orchardsData.forEach((orchard) => {
-      const orchardId = orchard.selectedItem?.code ? orchard.selectedItem.code : '';
-      const queryKey = ['orchard', 'parent-tree-genetic-quality', orchardId];
-      const queryStatus = queryClient.getQueryState(queryKey);
-      if (!isFetching && queryStatus?.fetchStatus === 'fetching') {
-        isFetching = true;
-      }
-    });
-    return isFetching;
-  };
-
   useEffect(
-    () => setIsFetchingParentTrees(getParentTreesFetchStatus()),
+    () => setIsFetchingParentTrees(getParentTreesFetchStatus(orchardsData, queryClient)),
     [isQueryClientFetching]
   );
 
-  const setInputChange = (parentTreeNumber: string, colName: keyof RowItem, value: string) => {
-    // Using structuredClone so useEffect on state.tableRowData can be triggered
-    const clonedState = structuredClone(state);
-    clonedState.tableRowData[parentTreeNumber][colName] = value;
-    setStepData(clonedState);
-  };
-
-  /**
-   * Each seedlot species has its own associated Genetic Worth values that users can toggle,
-   * only those values associated are displayed to user.
-   * This function toggles the isAnOption field of a header column so it can be
-   * displayed as an option
-   */
-  const configHeaderOpt = () => {
-    const speciesHasGenWorth = Object.keys(geneticWorthDict);
-    if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
-      const availOptions = geneticWorthDict[seedlotSpecies.code];
-      const clonedHeaders = structuredClone(headerConfig);
-      let clonedGWItems = structuredClone(gwInfoConfig);
-      availOptions.forEach((opt: string) => {
-        const optionIndex = headerConfig.findIndex((header) => header.id === opt);
-        // Enable option in the column customization
-        clonedHeaders[optionIndex].isAnOption = true;
-        // Add GW input to the info section at the bottom
-        clonedGWItems = Object.assign(clonedGWItems, {
-          [clonedHeaders[optionIndex].id]: {
-            name: clonedHeaders[optionIndex].name,
-            value: ''
-          }
-        });
-      });
-      setHeaderConfig(clonedHeaders);
-      setGWInfoConfig(clonedGWItems);
-    }
-  };
-
-  useEffect(() => configHeaderOpt(), [seedlotSpecies]);
-
-  const toggleColumn = (colName: keyof RowItem, nodeName: string) => {
-    // Without this check the checkbox will be clicked twice
-    if (nodeName !== 'INPUT') {
-      const clonedHeaders = structuredClone(headerConfig);
-      const optionIndex = headerConfig.findIndex((header) => header.id === colName);
-      clonedHeaders[optionIndex].enabled = !headerConfig[optionIndex].enabled;
-      setHeaderConfig(clonedHeaders);
-    }
-  };
-
-  const cleanTable = () => {
-    const clonedState = structuredClone(state);
-    const fieldsToClean = headerConfig
-      .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
-      .map((header) => header.id);
-    const parentTreeNumbers = Object.keys(clonedState.tableRowData);
-    parentTreeNumbers.forEach((parentTreeNumber) => {
-      fieldsToClean.forEach((field) => {
-        clonedState.tableRowData[parentTreeNumber][field] = '';
-      });
-    });
-    setStepData(clonedState);
-    return clonedState;
-  };
-
-  const fillCompostitionTables = (res: AxiosResponse) => {
-    // Store parent tree numbers that does not exist in the orchards
-    const invalidParentTreeNumbers: Array<string> = [];
-
-    // Clean the table first
-    const clonedState = cleanTable();
-
-    res.data.forEach((row: CompUploadResponse) => {
-      const parentTreeNumber = row.parentTreeNumber.toString();
-      if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
-        // If the clone nubmer exist from user file then fill in the values
-        clonedState.tableRowData[parentTreeNumber].coneCount = row.coneCount.toString();
-        clonedState.tableRowData[parentTreeNumber].pollenCount = row.pollenCount.toString();
-        clonedState.tableRowData[parentTreeNumber].smpSuccessPerc = row.smpSuccess.toString();
-        clonedState.tableRowData[parentTreeNumber]
-          .nonOrchardPollenContam = row.pollenContamination.toString();
-      } else {
-        invalidParentTreeNumbers.push(parentTreeNumber);
-      }
-    });
-
-    setStepData(clonedState);
-
-    if (invalidParentTreeNumbers.length > 0) {
-      // A temporary solution to let users know they have invalid clone numbers
-      // eslint-disable-next-line no-alert
-      alert(`The following clone numbers cannot be found: ${invalidParentTreeNumbers}`);
-    }
-  };
+  useEffect(() => configHeaderOpt(
+    geneticWorthDict,
+    seedlotSpecies,
+    headerConfig,
+    gwInfoConfig,
+    setHeaderConfig,
+    setGWInfoConfig
+  ), [seedlotSpecies]);
 
   const uploadCompostion = useMutation({
     mutationFn: (coneCSV: File) => postCompositionFile(coneCSV),
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillCompostitionTables(res);
+      fillCompostitionTables(res, state, headerConfig, currentTab, setStepData);
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
       setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
     }
   });
-
-  const applyValueToAll = (field: keyof RowItem, value: string) => {
-    const clonedState = structuredClone(state);
-    const parentTreeNumbers = Object.keys(clonedState.tableRowData);
-    parentTreeNumbers.forEach((number) => {
-      clonedState.tableRowData[number][field] = value;
-    });
-    setStepData(clonedState);
-  };
 
   return (
     <FlexGrid className="parent-tree-step-container">
@@ -362,7 +193,7 @@ const ParentTreeStep = (
                       state,
                       currentTab,
                       orchardsData,
-                      toggleNotification
+                      setStepData
                     )
                   }
                 </Column>
@@ -390,7 +221,7 @@ const ParentTreeStep = (
                         </Column>
                       </Row>
                       {
-                        renderDefaultInputs(isSMPDefaultValChecked, applyValueToAll)
+                        renderDefaultInputs(isSMPDefaultValChecked, state, setStepData)
                       }
                     </>
                   )
@@ -412,7 +243,7 @@ const ParentTreeStep = (
                           disabled={disableOptions}
                         >
                           {
-                            renderColOptions(headerConfig, currentTab, toggleColumn)
+                            renderColOptions(headerConfig, currentTab, setHeaderConfig)
                           }
                         </OverflowMenu>
                         <OverflowMenu
@@ -487,7 +318,13 @@ const ParentTreeStep = (
                               </TableRow>
                             </TableHead>
                             {
-                              renderTableBody(currentTab, slicedRows, headerConfig, setInputChange)
+                              renderTableBody(
+                                currentTab,
+                                slicedRows,
+                                headerConfig,
+                                state,
+                                setStepData
+                              )
                             }
                           </Table>
                         )
@@ -559,7 +396,7 @@ const ParentTreeStep = (
         open={isCleanWarnOpen}
         onRequestClose={() => setIsCleanWarnOpen(false)}
         onRequestSubmit={() => {
-          cleanTable();
+          cleanTable(state, headerConfig, currentTab, setStepData);
           setIsCleanWarnOpen(false);
         }}
         danger
