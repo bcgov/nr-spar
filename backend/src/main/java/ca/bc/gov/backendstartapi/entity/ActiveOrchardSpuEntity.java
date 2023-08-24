@@ -23,7 +23,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Schema(description = "An association between an orchard and a Seed Plan Unit (SPU).")
-public class ActiveOrchardSeedPlanningUnit {
+public class ActiveOrchardSpuEntity {
 
   @Id
   @Column(name = "orchard_id", length = 3, nullable = false)

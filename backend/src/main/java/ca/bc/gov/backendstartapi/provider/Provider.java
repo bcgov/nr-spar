@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import java.util.HashMap;
@@ -32,7 +33,9 @@ public interface Provider {
     return List.of();
   }
 
-
+  default List<ListItemDto> findParentTreesByVegCode(String vegCode) {
+    return List.of();
+  }
 
   // Common methods
   String[] addAuthorizationHeader();
