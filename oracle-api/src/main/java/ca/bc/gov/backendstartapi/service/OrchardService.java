@@ -1,18 +1,22 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
-import ca.bc.gov.backendstartapi.entity.ParentTree;
+import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
+import ca.bc.gov.backendstartapi.entity.VegetationCode;
+import ca.bc.gov.backendstartapi.entity.projection.ParentTreeNumberProj;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
+import ca.bc.gov.backendstartapi.util.ModelMapper;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,8 +151,9 @@ public class OrchardService {
     return Optional.of(resultList);
   }
 
-  private List<ParentTreeDto> findAllParentTree(String orchardId, Long spuId, long milli) {
-    List<ParentTreeDto> parentTreeDtoList = new ArrayList<>();
+  private List<ParentTreeGeneticInfoDto> findAllParentTree(
+      String orchardId, Long spuId, long milli) {
+
     List<ParentTreeOrchard> parentTreeOrchards =
         parentTreeOrchardRepository.findByIdOrchardId(orchardId);
     long endingThree = Instant.now().toEpochMilli();
@@ -160,7 +165,7 @@ public class OrchardService {
     long endingFour = Instant.now().toEpochMilli();
     log.info("Time elapsed mapping all parent tree orchard ids: {}", endingFour - endingThree);
 
-    List<ParentTree> parentTreeList = parentTreeRepository.findAllIn(parentTreeIdList);
+    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllIn(parentTreeIdList);
 
     long endingFive = Instant.now().toEpochMilli();
     log.info("Time elapsed finding all parent tree (select in): {}", endingFive - endingFour);
@@ -170,25 +175,18 @@ public class OrchardService {
     long endingSeven = Instant.now().toEpochMilli();
     log.info("Time elapsed querying all parent tree genetic quality: {}", endingSeven - endingFive);
 
-    for (ParentTree parentTree : parentTreeList) {
-      ParentTreeDto parentTreeDto = new ParentTreeDto();
-      parentTreeDto.setParentTreeId(parentTree.getId());
-      parentTreeDto.setParentTreeNumber(parentTree.getParentTreeNumber());
-      parentTreeDto.setParentTreeRegStatusCode(parentTree.getParentTreeRegStatusCode());
-      parentTreeDto.setLocalNumber(parentTree.getLocalNumber());
-      parentTreeDto.setActive(parentTree.getActive());
-      parentTreeDto.setTested(parentTree.getTested());
-      parentTreeDto.setBreedingProgram(parentTree.getBreedingProgram());
-      parentTreeDto.setFemaleParentTreeId(parentTree.getFemaleParentParentTreeId());
-      parentTreeDto.setMaleParentTreeId(parentTree.getMaleParentParentTreeId());
-
-      parentTreeDto.setParentTreeGeneticQualities(
-          qualityDtoList.stream()
-              .filter(x -> x.getParentTreeId().equals(parentTree.getId()))
-              .toList());
-
-      parentTreeDtoList.add(parentTreeDto);
-    }
+    List<ParentTreeGeneticInfoDto> parentTreeDtoList =
+        parentTreeList.stream()
+            .map(
+                parentTree -> {
+                  ParentTreeGeneticInfoDto converted = convertToParentTreeGenInfoDto(parentTree);
+                  converted.setParentTreeGeneticQualities(
+                      qualityDtoList.stream()
+                          .filter(x -> x.getParentTreeId().equals(parentTree.getId()))
+                          .toList());
+                  return converted;
+                })
+            .toList();
 
     long endingEight = Instant.now().toEpochMilli();
     log.info("Time elapsed creating ParentTreeDto list: {}", endingEight - endingSeven);
@@ -197,7 +195,6 @@ public class OrchardService {
 
   private List<ParentTreeGeneticQualityDto> findAllParentTreeGeneticQualities(
       Long spuId, List<Long> parentTreeIdList) {
-    List<ParentTreeGeneticQualityDto> list = new ArrayList<>();
 
     boolean geneticWorthCalcInd = true;
     String geneticType = "BV";
@@ -206,15 +203,26 @@ public class OrchardService {
         parentTreeGeneticQualityRepository.findAllBySpuGeneticWorthTypeParentTreeId(
             spuId, geneticWorthCalcInd, geneticType, parentTreeIdList);
 
-    for (ParentTreeGeneticQuality parentTreeGen : ptgqList) {
-      ParentTreeGeneticQualityDto geneticQualityDto = new ParentTreeGeneticQualityDto();
-      geneticQualityDto.setParentTreeId(parentTreeGen.getParentTreeId());
-      geneticQualityDto.setGeneticTypeCode(parentTreeGen.getGeneticTypeCode());
-      geneticQualityDto.setGeneticWorthCode(parentTreeGen.getGeneticWorthCode());
-      geneticQualityDto.setGeneticQualityValue(parentTreeGen.getGeneticQualityValue());
+    return ptgqList.stream()
+        .map(parentTreeGen -> ModelMapper.convert(parentTreeGen, ParentTreeGeneticQualityDto.class))
+        .toList();
+  }
 
-      list.add(geneticQualityDto);
-    }
-    return list;
+  /** Find all parent trees under a vegCode. */
+  public List<ListItemDto> findParentTreesWithVegCode(String vegCode) {
+
+    List<ParentTreeNumberProj> resultList =
+        parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode);
+
+    return resultList.stream()
+        .map(parentTree -> new ListItemDto(parentTree.getId().toString(), parentTree.getNumber()))
+        .toList();
+  }
+
+  private ParentTreeGeneticInfoDto convertToParentTreeGenInfoDto(ParentTreeEntity parentTree) {
+    ParentTreeGeneticInfoDto parentTreeGenInfoDto =
+        ModelMapper.convert(parentTree, ParentTreeGeneticInfoDto.class);
+    parentTreeGenInfoDto.setParentTreeId(parentTree.getId());
+    return parentTreeGenInfoDto;
   }
 }

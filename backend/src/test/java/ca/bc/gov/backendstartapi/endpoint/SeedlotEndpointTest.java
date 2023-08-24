@@ -21,8 +21,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@WebMvcTest(ParentTreesContributionEndpoint.class)
-class ParentTreesContributionEndpointTest {
+@WebMvcTest(SeedlotEndpoint.class)
+class SeedlotEndpointTest {
 
   private final ClassLoader classLoader = getClass().getClassLoader();
 
@@ -34,7 +34,7 @@ class ParentTreesContributionEndpointTest {
 
   private final WebApplicationContext webApplicationContext;
 
-  ParentTreesContributionEndpointTest(WebApplicationContext webApplicationContext) {
+  SeedlotEndpointTest(WebApplicationContext webApplicationContext) {
     this.webApplicationContext = webApplicationContext;
   }
 

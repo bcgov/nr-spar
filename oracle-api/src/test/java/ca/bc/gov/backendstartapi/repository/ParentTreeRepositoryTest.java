@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.bc.gov.backendstartapi.entity.ParentTree;
+import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +25,12 @@ class ParentTreeRepositoryTest {
   @DisplayName("findAllInTest")
   @Sql(scripts = {"classpath:scripts/ParentTreeRepository.sql"})
   void findAllInTest() {
-    List<ParentTree> parentTreeList = parentTreeRepository.findAllIn(List.of(4032L, 4033L));
+    List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllIn(List.of(4032L, 4033L));
 
     assertFalse(parentTreeList.isEmpty());
     assertEquals(2, parentTreeList.size());
 
-    ParentTree parentTree = parentTreeList.get(0);
+    ParentTreeEntity parentTree = parentTreeList.get(0);
     assertEquals(4032L, parentTree.getId());
     assertEquals("37", parentTree.getParentTreeNumber());
     assertEquals("AT", parentTree.getVegetationCode());
@@ -39,10 +39,10 @@ class ParentTreeRepositoryTest {
     assertTrue(parentTree.getActive());
     assertTrue(parentTree.getTested());
     assertTrue(parentTree.getBreedingProgram());
-    assertNull(parentTree.getFemaleParentParentTreeId());
-    assertNull(parentTree.getMaleParentParentTreeId());
+    assertNull(parentTree.getFemaleParentTreeId());
+    assertNull(parentTree.getMaleParentTreeId());
 
-    ParentTree parentTree2 = parentTreeList.get(1);
+    ParentTreeEntity parentTree2 = parentTreeList.get(1);
     assertEquals(4033L, parentTree2.getId());
     assertEquals("38", parentTree2.getParentTreeNumber());
     assertEquals("AC", parentTree2.getVegetationCode());
@@ -51,7 +51,7 @@ class ParentTreeRepositoryTest {
     assertFalse(parentTree2.getActive());
     assertFalse(parentTree2.getTested());
     assertFalse(parentTree2.getBreedingProgram());
-    assertEquals(10001L, parentTree2.getFemaleParentParentTreeId());
-    assertEquals(10002L, parentTree2.getMaleParentParentTreeId());
+    assertEquals(10001L, parentTree2.getFemaleParentTreeId());
+    assertEquals(10002L, parentTree2.getMaleParentTreeId());
   }
 }

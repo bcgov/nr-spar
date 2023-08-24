@@ -22,7 +22,7 @@ public record OrchardSpuDto(
             description = "A unique identifier which is assigned to a Seed Planning Unit.",
             example = "7")
         Long seedPlanningUnitId,
-    List<ParentTreeDto> parentTrees) {
+    List<ParentTreeGeneticInfoDto> parentTrees) {
 
   /** Ensure immutability for the user's roles. */
   public OrchardSpuDto {

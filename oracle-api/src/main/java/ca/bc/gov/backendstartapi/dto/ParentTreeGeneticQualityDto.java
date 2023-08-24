@@ -10,7 +10,7 @@ import lombok.ToString;
 /**
  * This class holds the fields that will be returned from a {@link
  * ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality} of a{@link
- * ca.bc.gov.backendstartapi.entity.ParentTree}.
+ * ca.bc.gov.backendstartapi.entity.ParentTreeEntity}.
  */
 @Getter
 @Setter

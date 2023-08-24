@@ -7,9 +7,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -83,7 +85,7 @@ class OrchardEndpointTest {
     orchardParentTreeDto.setVegetationCode("FDC");
     orchardParentTreeDto.setSeedPlanningUnitId(7L);
 
-    ParentTreeDto parentTreeDto1 = new ParentTreeDto();
+    ParentTreeGeneticInfoDto parentTreeDto1 = new ParentTreeGeneticInfoDto();
     parentTreeDto1.setParentTreeId(4001L);
     parentTreeDto1.setParentTreeNumber("37");
     parentTreeDto1.setParentTreeRegStatusCode("APP");
@@ -97,7 +99,11 @@ class OrchardEndpointTest {
     geneticQualityDto1.setGeneticTypeCode("BV");
     geneticQualityDto1.setGeneticWorthCode("GVO");
     geneticQualityDto1.setGeneticQualityValue(new BigDecimal("18"));
-    parentTreeDto1.getParentTreeGeneticQualities().add(geneticQualityDto1);
+
+    List<ParentTreeGeneticQualityDto> parentTreeDto1GenQual =
+        new ArrayList<>(parentTreeDto1.getParentTreeGeneticQualities());
+    parentTreeDto1GenQual.add(geneticQualityDto1);
+    parentTreeDto1.setParentTreeGeneticQualities(parentTreeDto1GenQual);
 
     orchardParentTreeDto.getParentTrees().add(parentTreeDto1);
 
@@ -209,5 +215,54 @@ class OrchardEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAllParentTreeByVegCodeTest")
+  @WithMockUser(roles = "user_read")
+  void getAllParentTreeByVegCodeTest() throws Exception {
+    String vegCode = "PLI";
+
+    ListItemDto firstDto = new ListItemDto("123", "1000");
+    ListItemDto secondDto = new ListItemDto("456", "2000");
+
+    List<ListItemDto> testList = List.of(firstDto, secondDto);
+
+    when(orchardService.findParentTreesWithVegCode(vegCode)).thenReturn(testList);
+
+    mockMvc
+        .perform(
+            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].id").value(firstDto.id()))
+        .andExpect(jsonPath("$[0].value").value(firstDto.value()))
+        .andExpect(jsonPath("$[1].id").value(secondDto.id()))
+        .andExpect(jsonPath("$[1].value").value(secondDto.value()))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAllParentTreeByVegCodeErrorTest")
+  @WithMockUser(roles = "user_read")
+  void getAllParentTreeByVegCodeErrorTest() throws Exception {
+    String vegCode = "FDI";
+    String errMsg = "Oracle database has been defeated by postgres.";
+
+    when(orchardService.findParentTreesWithVegCode(vegCode))
+        .thenThrow(new DataRetrievalFailureException(errMsg));
+
+    mockMvc
+        .perform(
+            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError())
+        .andReturn()
+        .getResolvedException()
+        .getMessage();
   }
 }

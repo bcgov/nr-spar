@@ -1,15 +1,20 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -84,12 +89,48 @@ public class OrchardEndpoint {
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   public List<OrchardDto> getOrchardsByVegCode(
-      @PathVariable
+      @PathVariable("vegCode")
+          @Pattern(regexp = "^[a-zA-Z]{1,8}$")
           @Parameter(
               name = "vegCode",
               in = ParameterIn.PATH,
               description = "Identifier of the Orchard.")
           String vegCode) {
     return orchardService.findOrchardsByVegCode(vegCode);
+  }
+
+  /**
+   * Get all parent trees under a species (VegCode).
+   *
+   * @return A list of {@link ParentTreeDto}
+   */
+  @GetMapping(path = "/parent-trees/vegetation-codes/{vegCode}", produces = "application/json")
+  @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Retrieves all parent trees under a species (VegCode)",
+      description = "Returns a list containing all parent trees under a species (VegCode).")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "An array of parent tree dto.",
+            content =
+                @Content(
+                    array = @ArraySchema(schema = @Schema(implementation = ListItemDto.class)),
+                    mediaType = "application/json")),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public List<ListItemDto> getAllParentTreeByVegCode(
+      @PathVariable("vegCode")
+          @Pattern(regexp = "^[a-zA-Z]{1,8}$")
+          @Parameter(
+              name = "vegCode",
+              in = ParameterIn.PATH,
+              description = "Identifier of the Orchard.")
+          String vegCode) {
+    return orchardService.findParentTreesByVegCode(vegCode);
   }
 }

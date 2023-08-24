@@ -1,19 +1,21 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
  * This class holds the fields that will be returned from a {@link
- * ca.bc.gov.backendstartapi.entity.ParentTree}.
+ * ca.bc.gov.backendstartapi.entity.ParentTreeEntity}.
  */
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "The geographic location of a each Parent Tree sourced from a natural stand.")
 public class ParentTreeDto {
 
@@ -42,28 +44,22 @@ public class ParentTreeDto {
   @Schema(
       description = "Indicates whether the parent tree selection is active or inactive.",
       example = "Y")
-  private boolean active;
+  private Boolean active;
 
   @Schema(
       description = "Indicates whether the parent tree selection is tested or untested.",
       example = "Y")
-  private boolean tested;
+  private Boolean tested;
 
   @Schema(
       description =
           "A code indicating if a parent tree is included in the forest genetics breeding program.",
       example = "Y")
-  private boolean breedingProgram;
+  private Boolean breedingProgram;
 
   @Schema(description = "A unique identifier for each Parent Tree.", example = "123")
   private Long femaleParentTreeId;
 
   @Schema(description = "A unique identifier for each Parent Tree.", example = "123")
   private Long maleParentTreeId;
-
-  private List<ParentTreeGeneticQualityDto> parentTreeGeneticQualities;
-
-  public ParentTreeDto() {
-    this.parentTreeGeneticQualities = new ArrayList<>();
-  }
 }

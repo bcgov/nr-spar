@@ -1,15 +1,15 @@
 package ca.bc.gov.backendstartapi.repository;
 
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.idclass.ActiveOrchardSeedPlanningUnitId;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/** The repository for {@link ActiveOrchardSeedPlanningUnit ActiveOrchardSeedPlanningUnits}. */
+/** The repository for {@link ActiveOrchardSpuEntity ActiveOrchardSeedPlanningUnits}. */
 public interface ActiveOrchardSeedPlanningUnitRepository
-    extends JpaRepository<ActiveOrchardSeedPlanningUnit, ActiveOrchardSeedPlanningUnitId> {
+    extends JpaRepository<ActiveOrchardSpuEntity, ActiveOrchardSeedPlanningUnitId> {
 
-  List<ActiveOrchardSeedPlanningUnit> findAllByActive(boolean active);
+  List<ActiveOrchardSpuEntity> findAllByActive(boolean active);
 
-  List<ActiveOrchardSeedPlanningUnit> findByOrchardIdAndActive(String orchardId, boolean active);
+  List<ActiveOrchardSpuEntity> findByOrchardIdAndActive(String orchardId, boolean active);
 }

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,19 +31,13 @@ import org.springframework.web.server.ResponseStatusException;
 /** Endpoints to receive CSV files for parsing. */
 @RestController
 @RequestMapping(path = "/api/seedlots", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-@Tag(name = "Seedlots")
-public class ParentTreesContributionEndpoint {
+@Tag(name = "Seedlot")
+@RequiredArgsConstructor
+public class SeedlotEndpoint {
 
   private final ConeAndPollenCountCsvTableParser contributionTableCsvParser;
 
   private final SmpCalculationCsvTableParser smpCalculationTableParser;
-
-  ParentTreesContributionEndpoint(
-      ConeAndPollenCountCsvTableParser contributionTableCsvParser,
-      SmpCalculationCsvTableParser smpCalculationTableParser) {
-    this.contributionTableCsvParser = contributionTableCsvParser;
-    this.smpCalculationTableParser = smpCalculationTableParser;
-  }
 
   /**
    * Parse the CSV table in {@code file} and return the data stored in it.

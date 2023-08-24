@@ -1,5 +1,6 @@
-package ca.bc.gov.backendstartapi.entity;
+package ca.bc.gov.backendstartapi.entity.idclass;
 
+import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
