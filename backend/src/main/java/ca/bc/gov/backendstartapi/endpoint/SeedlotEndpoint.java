@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -28,15 +29,10 @@ public class SeedlotEndpoint {
    *
    * @param createDto A {@link SeedlotCreateDto} containig all required field to get a new
    *     registration started.
-   * @return A {@link Seedlot} with all created values.
+   * @return A {@link SeedlotCreateResponseDto} with all created values.
    */
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-  public Seedlot createSeedlot(@Valid @RequestBody SeedlotCreateDto createDto) {
+  public SeedlotCreateResponseDto createSeedlot(@Valid @RequestBody SeedlotCreateDto createDto) {
     return seedlotService.createSeedlot(createDto);
   }
 }
-
-/**
- * [ ] Endpoint [ ] Service [ ] Repository [ ] EndpointTest [ ] ServiceTest [ ] RepositoryTest [ ]
- * Checkstyle [ ] Tests passing
- */
