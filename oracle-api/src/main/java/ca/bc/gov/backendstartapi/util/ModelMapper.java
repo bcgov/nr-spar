@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.util;
 
+import ca.bc.gov.backendstartapi.exception.ModelMapperRunTimeException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -60,8 +61,7 @@ public class ModelMapper {
 
       return instance;
     } catch (Exception e) {
-      throw new RuntimeException(
-          "Unable to create or populate new instance of " + toClass.getName());
+      throw new ModelMapperRunTimeException(toClass.getName(), e.getMessage());
     }
   }
 
