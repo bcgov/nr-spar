@@ -28,8 +28,8 @@ import { OrchardObj } from '../OrchardStep/definitions';
 import UploadFileModal from './UploadFileModal';
 import {
   pageText, headerTemplate, geneticWorthDict,
-  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, summarySectionConfig,
-  gwSectionConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
+  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, SummarySectionConfig,
+  PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem
@@ -75,8 +75,10 @@ const ParentTreeStep = (
   const [slicedRows, setSlicedRows] = useState<Array<RowItem>>(
     sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true, 'parentTreeNumber')
   );
-  const [summaryConfig, setSummaryConfig] = useState(structuredClone(summarySectionConfig));
-  const [gwInfoConfig, setGWInfoConfig] = useState(structuredClone(gwSectionConfig));
+  const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
+  const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
+    structuredClone(PopSizeAndDiversityConfig)
+  );
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
   const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));
@@ -143,9 +145,9 @@ const ParentTreeStep = (
     geneticWorthDict,
     seedlotSpecies,
     headerConfig,
-    gwInfoConfig,
+    popSizeAndDiversityConfig,
     setHeaderConfig,
-    setGWInfoConfig
+    setPopSizeAndDiversityConfig
   ), [seedlotSpecies]);
 
   const uploadCompostion = useMutation({
@@ -266,7 +268,7 @@ const ParentTreeStep = (
                             }
                             onClick={() => linkRef.current?.click()}
                           />
-                          <OverflowMenuItem itemText="Export table as PDF file" disabled />
+                          <OverflowMenuItem itemText="Export table as CSV file" disabled />
                           <OverflowMenuItem
                             itemText="Clean table data"
                             onClick={() => setIsCleanWarnOpen(true)}
@@ -274,7 +276,7 @@ const ParentTreeStep = (
                         </OverflowMenu>
                         <Button
                           className="upload-button"
-                          size="sm"
+                          size="lg"
                           kind="primary"
                           renderIcon={Upload}
                           onClick={() => setIsUploadOpen(true)}
@@ -361,7 +363,7 @@ const ParentTreeStep = (
           : null
       }
       {
-        currentTab === 'coneTab' || currentTab === 'successTab'
+        (currentTab === 'coneTab' || currentTab === 'successTab')
           ? (
             <>
               <InfoSection
@@ -375,9 +377,9 @@ const ParentTreeStep = (
                 }
               />
               <InfoSection
-                title={pageText.gwAndDiverse.title}
-                description={pageText.gwAndDiverse.description}
-                infoItems={Object.values(gwInfoConfig)}
+                title={pageText.popSizeAndDiverse.title}
+                description={pageText.popSizeAndDiverse.description}
+                infoItems={Object.values(popSizeAndDiversityConfig)}
               />
             </>
           )

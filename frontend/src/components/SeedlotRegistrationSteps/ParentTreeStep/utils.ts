@@ -113,8 +113,8 @@ export const calcSummaryItems = (
       .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
 
     // Calc AVG of SMP Success
-    modifiedSummaryConfig.sharedItems
-      .avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
+    modifiedSummaryConfig.successTab
+      .infoItems.avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
 
     // Calc AVG of of non-orchard pollen contam.
     modifiedSummaryConfig.successTab
@@ -294,21 +294,21 @@ export const configHeaderOpt = (
   geneticWorthDict: GeneticWorthDictType,
   seedlotSpecies: MultiOptionsObj,
   headerConfig: HeaderObj[],
-  gwInfoConfig: InfoSectionConfigType,
+  popSizeAndDiversityConfig: InfoSectionConfigType,
   setHeaderConfig: Function,
-  setGWInfoConfig: Function
+  setPopSizeAndDiversityConfig: Function
 ) => {
   const speciesHasGenWorth = Object.keys(geneticWorthDict);
   if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
     const availOptions = geneticWorthDict[seedlotSpecies.code];
     const clonedHeaders = structuredClone(headerConfig);
-    let clonedGWItems = structuredClone(gwInfoConfig);
+    let clonedPopItems = structuredClone(popSizeAndDiversityConfig);
     availOptions.forEach((opt: string) => {
       const optionIndex = headerConfig.findIndex((header) => header.id === opt);
       // Enable option in the column customization
       clonedHeaders[optionIndex].isAnOption = true;
       // Add GW input to the info section at the bottom
-      clonedGWItems = Object.assign(clonedGWItems, {
+      clonedPopItems = Object.assign(clonedPopItems, {
         [clonedHeaders[optionIndex].id]: {
           name: clonedHeaders[optionIndex].name,
           value: ''
@@ -316,7 +316,7 @@ export const configHeaderOpt = (
       });
     });
     setHeaderConfig(clonedHeaders);
-    setGWInfoConfig(clonedGWItems);
+    setPopSizeAndDiversityConfig(clonedPopItems);
   }
 };
 

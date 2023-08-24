@@ -3,7 +3,7 @@ import {
   OverflowMenuItem, Checkbox, TableBody, TableRow, Row, Column,
   TableCell, TextInput, ActionableNotification, Pagination
 } from '@carbon/react';
-import { pageText, pageSizesConfig } from '../constants';
+import { pageText, PageSizesConfig } from '../constants';
 import { HeaderObj, RowItem, TabTypes } from '../definitions';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { OrchardObj } from '../../OrchardStep/definitions';
@@ -196,7 +196,7 @@ export const renderPagination = (
   return (
     <Pagination
       pageSize={currPageSize}
-      pageSizes={pageSizesConfig}
+      pageSizes={PageSizesConfig}
       itemsPerPageText=""
       totalItems={tableData.length}
       onChange={
