@@ -111,8 +111,6 @@ jobs:
           - name: fluentbit
             file: backend/openshift.fluentbit.yml
             overwrite: true
-            parameters:
-              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
           - name: frontend
             file: frontend/openshift.deploy.yml
