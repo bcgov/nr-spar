@@ -12,10 +12,6 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: NAMESPACE
-    description: Target namespace reference (i.e. '9f0fbe-dev')
-    displayName: Target Namespace
-    required: true
   - name: AWS_KINESIS_STREAM
     description: AWS Kinesis Stream identifier
     required: false
@@ -165,7 +161,6 @@ objects:
     apiVersion: v1
     metadata:
       name: ${NAME}-${ZONE}-${COMPONENT}-configs
-      namespace: ${NAMESPACE}
     data:
       filters.conf: |
         [FILTER]
