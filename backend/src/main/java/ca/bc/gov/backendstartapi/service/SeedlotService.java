@@ -5,17 +5,20 @@ import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
-
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import jakarta.transaction.Transactional;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/** This class contains methods for handling Seedlots in the database. */
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -27,16 +30,26 @@ public class SeedlotService {
 
   private final SeedlotStatusRepository seedlotStatusRepository;
 
+  private final LoggedUserService loggedUserService;
+
+  /**
+   * Creates a Seedlot in the database.
+   *
+   * @param createDto A {@link SeedlotCreateDto} with required fields to create a seedlot.
+   * @return A {@link SeedlotCreateResponseDto} containing the number and the status of the created
+   *     seedlot.
+   */
+  @Transactional
   public SeedlotCreateResponseDto createSeedlot(SeedlotCreateDto createDto) {
     log.info("Create Seedlot started.");
 
-    validateNewSeelot(createDto);
+    // !? validateNewSeelot(createDto);
 
     Seedlot seedlot = new Seedlot(nextSeedlotNumber());
 
     Optional<SeedlotStatusEntity> seedLotStatusEntity =
         seedlotStatusRepository.findById(Constants.CLASS_A_SEEDLOT_STATUS);
-    seedlot.setSeedlotStatus(seedLotStatusEntity.get());
+    seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(null));
 
     seedlot.setApplicantClientNumber(createDto.applicantClientNumber());
     seedlot.setApplicantLocationCode(createDto.applicantLocationCode());
@@ -49,25 +62,17 @@ public class SeedlotService {
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
+    seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserIdirOrBceId()));
 
-    // NEXT: add user id information
+    log.debug("Seedlot to insert: {}", seedlot);
 
     seedlotRepository.save(seedlot);
+    seedlotRepository.flush();
+
+    log.info("New seedlot saved with success!");
 
     return new SeedlotCreateResponseDto(
         seedlot.getId(), seedlot.getSeedlotStatus().getSeedlotStatusCode());
-  }
-
-  private void validateNewSeelot(SeedlotCreateDto createDto) {
-    log.info("Validating new Seedlot");
-
-    log.info("applicantClientNumber: {}", createDto.applicantClientNumber());
-    log.info("applicantLocationCode: {}", createDto.applicantLocationCode());
-    log.info("applicantEmailAddress: {}", createDto.applicantEmailAddress());
-    log.info("vegetationCode: {}", createDto.vegetationCode());
-    log.info("seedlotSourceCode: {}", createDto.seedlotSourceCode());
-    log.info("toBeRegistrdInd: {}", createDto.toBeRegistrdInd());
-    log.info("bcSourceInd: {}", createDto.bcSourceInd());
   }
 
   private String nextSeedlotNumber() {
@@ -80,7 +85,9 @@ public class SeedlotService {
       seedlotNumber = Constants.CLASS_A_SEEDLOT_NUM_MIN;
     }
 
-    log.info("Next seedlot number: {}", seedlotNumber);
+    seedlotNumber += 1;
+
+    log.debug("Next seedlot number: {}", seedlotNumber);
     return String.valueOf(seedlotNumber);
   }
 }

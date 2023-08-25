@@ -130,4 +130,29 @@ class UserServiceTest {
     Assertions.assertTrue(userInfoOp.isPresent());
     Assertions.assertEquals("123456789@idir", userInfoOp.get().id());
   }
+
+  // keep going from here!
+  @Test
+  @DisplayName("getLoggedUserIdirOrBceIdSuccessTest")
+  void getLoggedUserIdirOrBceIdSuccessTest() {
+    when(userAuthenticationHelper.getUserInfo()).thenReturn(Optional.of(userInfo));
+
+    Optional<UserInfo> userInfoOp = loggedUserService.getLoggedUserInfo();
+
+    Assertions.assertTrue(userInfoOp.isPresent());
+    Assertions.assertEquals("abcdef123456789", userInfoOp.get().jwtToken());
+  }
+
+  @Test
+  @DisplayName("getLoggedUserIdirOrBceIdEmptyTest")
+  void getLoggedUserIdirOrBceIdEmptyTest() {
+    Exception e =
+        Assertions.assertThrows(
+            UserNotFoundException.class,
+            () -> {
+              loggedUserService.getLoggedUserToken();
+            });
+
+    Assertions.assertEquals("404 NOT_FOUND \"User not registered!\"", e.getMessage());
+  }
 }

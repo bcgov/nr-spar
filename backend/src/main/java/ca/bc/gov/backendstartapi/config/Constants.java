@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.config;
 
+/** This class holds SPAR constants for a better grouping and organisation. */
 public final class Constants {
 
   public static final Integer CLASS_A_SEEDLOT_NUM_MIN = 63000;
