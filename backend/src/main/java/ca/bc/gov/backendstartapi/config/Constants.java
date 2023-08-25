@@ -2,5 +2,7 @@ package ca.bc.gov.backendstartapi.config;
 
 public final class Constants {
 
-  public static final String A_CLASS_SEEDLOT_STATUS = "PND";
+  public static final Integer CLASS_A_SEEDLOT_NUM_MIN = 63000;
+  public static final Integer CLASS_A_SEEDLOT_NUM_MAX = 69999;
+  public static final String CLASS_A_SEEDLOT_STATUS = "PND";
 }

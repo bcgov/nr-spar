@@ -9,10 +9,9 @@ public interface SeedlotRepository extends JpaRepository<Seedlot, String> {
 
   @Query(
       """
-      select MAX(TO_NUMBER(s.SEEDLOT_NUMBER))
-      from THE.SEEDLOT s
-      WHERE s.SEEDLOT_NUMBER
-        BETWEEN ?1 AND ?2
+      select max(cast(s.id as int))
+      from Seedlot s
+      where cast(s.id as int) between ?1 and ?2
       """)
-  String findNextSeedlotNumber(Long min, Long max);
+  Integer findNextSeedlotNumber(Integer min, Integer max);
 }

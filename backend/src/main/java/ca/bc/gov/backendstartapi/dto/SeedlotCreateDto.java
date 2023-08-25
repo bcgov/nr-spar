@@ -33,6 +33,7 @@ public record SeedlotCreateDto(
         @Email
         String applicantEmailAddress,
     @Schema(description = "A code which represents a species of tree or brush.", example = "FDI")
+        @NotNull
         String vegetationCode,
     @Schema(
             description =
@@ -50,8 +51,10 @@ public record SeedlotCreateDto(
             crown land reforestation use (`true` yes) or not (`false` no).
             """,
             example = "true")
-        boolean toBeRegistrdInd,
+        @NotNull
+        Boolean toBeRegistrdInd,
     @Schema(
             description = "Indicates whether the source of the Seedlot is within British Columbia",
             example = "true")
-        boolean bcSourceInd) {}
+        @NotNull
+        Boolean bcSourceInd) {}

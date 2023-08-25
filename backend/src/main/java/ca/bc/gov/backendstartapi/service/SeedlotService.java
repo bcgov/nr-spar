@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,8 @@ public class SeedlotService {
 
     Seedlot seedlot = new Seedlot(nextSeedlotNumber());
 
-    Optional<SeedlotStatusEntity> seedLotStatusEntity = 
-        seedlotStatusRepository.findById(Constants.A_CLASS_SEEDLOT_STATUS);
+    Optional<SeedlotStatusEntity> seedLotStatusEntity =
+        seedlotStatusRepository.findById(Constants.CLASS_A_SEEDLOT_STATUS);
     seedlot.setSeedlotStatus(seedLotStatusEntity.get());
 
     seedlot.setApplicantClientNumber(createDto.applicantClientNumber());
@@ -49,6 +50,8 @@ public class SeedlotService {
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
 
+    // NEXT: add user id information
+
     seedlotRepository.save(seedlot);
 
     return new SeedlotCreateResponseDto(
@@ -57,15 +60,27 @@ public class SeedlotService {
 
   private void validateNewSeelot(SeedlotCreateDto createDto) {
     log.info("Validating new Seedlot");
+
+    log.info("applicantClientNumber: {}", createDto.applicantClientNumber());
+    log.info("applicantLocationCode: {}", createDto.applicantLocationCode());
+    log.info("applicantEmailAddress: {}", createDto.applicantEmailAddress());
+    log.info("vegetationCode: {}", createDto.vegetationCode());
+    log.info("seedlotSourceCode: {}", createDto.seedlotSourceCode());
+    log.info("toBeRegistrdInd: {}", createDto.toBeRegistrdInd());
+    log.info("bcSourceInd: {}", createDto.bcSourceInd());
   }
 
   private String nextSeedlotNumber() {
     log.info("Retrieving the next Seedlot number");
-    Long min = 63000L;
-    Long max = 69999L;
-    String seedlotNumber = seedlotRepository.findNextSeedlotNumber(min, max);
+    Integer seedlotNumber =
+        seedlotRepository.findNextSeedlotNumber(
+            Constants.CLASS_A_SEEDLOT_NUM_MIN, Constants.CLASS_A_SEEDLOT_NUM_MAX);
 
-    log.debug("Next seedlot number: {}", seedlotNumber);
-    return seedlotNumber;
+    if (Objects.isNull(seedlotNumber)) {
+      seedlotNumber = Constants.CLASS_A_SEEDLOT_NUM_MIN;
+    }
+
+    log.info("Next seedlot number: {}", seedlotNumber);
+    return String.valueOf(seedlotNumber);
   }
 }
