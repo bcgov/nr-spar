@@ -320,6 +320,20 @@ objects:
             Add service.type postgres_api
             Add @metadata.keyAsPath true
 
+        [FILTER]
+            Name lua
+            Match oracle*
+            script ${FLUENT_CONF_HOME}/timestamp.lua
+            time_as_table True
+            call append_timestamp
+
+        [FILTER]
+            Name modify
+            Match oracle*
+            Add service.name spar_oracle_api
+            Add service.type oracle_api
+            Add @metadata.keyAsPath true
+
       spar_input_inputs.conf: |
         [INPUT]
             Name tail
@@ -330,6 +344,18 @@ objects:
             Path_Key log_file_path
             Offset_Key event_sequence
             DB /logs/fluent-bit-logs.db
+            Read_from_Head True
+            Refresh_Interval 15
+
+        [INPUT]
+            Name tail
+            Tag oracle-api.log
+            Buffer_Max_Size 1024k
+            Parser spar.json
+            Path /logs/oracle-api.log
+            Path_Key log_file_path
+            Offset_Key event_sequence
+            DB /logs/fluent-bit-logs-oracle.db
             Read_from_Head True
             Refresh_Interval 15
 
