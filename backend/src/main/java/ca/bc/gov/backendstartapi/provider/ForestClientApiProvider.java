@@ -45,10 +45,10 @@ public class ForestClientApiProvider implements Provider {
   }
 
   /**
-   * Fetch a forest client by its number or its acronym.
+   * Fetch a ForestClient by its number or its acronym.
    *
    * @param identifier the client number or acronym to search for
-   * @return the forest client with client number or acronym {@code identifier}, if one exists
+   * @return the ForestClient with client number or acronym {@code identifier}, if one exists
    */
   @Override
   public Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
@@ -108,14 +108,14 @@ public class ForestClientApiProvider implements Provider {
   }
 
   /**
-   * Fetch up to the 10 first forest client location by its number.
+   * Fetch up to the 10 first ForestClient's location by its number.
    *
-   * @param number the client number to search the location
-   * @return an list of the locations of the forest client
+   * @param clientNumber the ForestClient identifier to fetch their locations
+   * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
   @Override
-  public List<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
-    String apiUrl = String.format("%s/clients/{number}/locations", rootUri);
+  public List<ForestClientLocationDto> fetchLocationsByClientNumber(String clientNumber) {
+    String apiUrl = String.format("%s/clients/{clientNumber}/locations", rootUri);
     log.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
@@ -125,7 +125,7 @@ public class ForestClientApiProvider implements Provider {
               HttpMethod.GET,
               new HttpEntity<>(addHttpHeaders()),
               new ParameterizedTypeReference<List<ForestClientLocationDto>>() {},
-              createParamsMap("number", number));
+              createParamsMap("clientNumber", clientNumber));
 
       log.info(
           "Finished {} request for function {} - 200 OK!",
@@ -140,15 +140,17 @@ public class ForestClientApiProvider implements Provider {
   }
 
   /**
-   * Fetch a single location of a forest client its number and location code.
+   * Fetch a single location of a ForestClient its number and location code.
    *
-   * @param number the client number to search the location
+   * @param clientNumber the ForestClient identifier to fetch their location
    * @param locationCode the location code that identifies the location to be fetched
-   * @return a single location for a forest client
+   * @return {@link ForestClientLocationDto} containing the client's location data
    */
   @Override
-  public ForestClientLocationDto fetchSingleClientLocation(String number, String locationCode) {
-    String apiUrl = String.format("%s/clients/{number}/locations/{locationCode}", rootUri);
+  public ForestClientLocationDto fetchSingleClientLocation(
+      String clientNumber,
+      String locationCode) {
+    String apiUrl = String.format("%s/clients/{clientNumber}/locations/{locationCode}", rootUri);
     log.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
@@ -158,8 +160,8 @@ public class ForestClientApiProvider implements Provider {
               HttpMethod.GET,
               new HttpEntity<>(addHttpHeaders()),
               new ParameterizedTypeReference<ForestClientLocationDto>() {},
-              createParamsMap("number", number, "locationCode", locationCode));
-
+              createParamsMap("clientNumber", clientNumber, "locationCode", locationCode));
+      
       log.info(
           "Finished {} request for function {} - 200 OK!",
           PROVIDER,
