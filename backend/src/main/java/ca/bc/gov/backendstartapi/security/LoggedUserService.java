@@ -1,9 +1,8 @@
 package ca.bc.gov.backendstartapi.security;
 
 import ca.bc.gov.backendstartapi.exception.UserNotFoundException;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /** This class contains all user related methods and artifacts. */
