@@ -25,21 +25,26 @@ class UserServiceTest {
 
   private UserInfo userInfo;
 
+  private UserInfo createUserInfo(boolean isIdir) {
+    IdentityProvider provider = isIdir ? IdentityProvider.IDIR : IdentityProvider.BUSINESS_BCEID;
+
+    return new UserInfo(
+        "123456789@idir",
+        "User",
+        "Test",
+        "user@test.com",
+        "Test, User: LWRS:EX",
+        isIdir ? "USERT" : null,
+        !isIdir ? "user-my-bceid" : null,
+        provider,
+        Set.of(),
+        "abcdef123456789");
+  }
+
   @BeforeEach
   void setup() {
     loggedUserService = new LoggedUserService(userAuthenticationHelper);
-    userInfo =
-        new UserInfo(
-            "123456789@idir",
-            "User",
-            "Test",
-            "user@test.com",
-            "Test, User: LWRS:EX",
-            "USERT",
-            null,
-            IdentityProvider.IDIR,
-            Set.of(),
-            "abcdef123456789");
+    userInfo = createUserInfo(true);
   }
 
   @Test
@@ -131,16 +136,26 @@ class UserServiceTest {
     Assertions.assertEquals("123456789@idir", userInfoOp.get().id());
   }
 
-  // keep going from here!
   @Test
   @DisplayName("getLoggedUserIdirOrBceIdSuccessTest")
   void getLoggedUserIdirOrBceIdSuccessTest() {
-    when(userAuthenticationHelper.getUserInfo()).thenReturn(Optional.of(userInfo));
+    // IDIR
+    UserInfo idirUser = createUserInfo(true);
+    when(userAuthenticationHelper.getUserInfo()).thenReturn(Optional.of(idirUser));
+    String userId = loggedUserService.getLoggedUserIdirOrBceId();
 
-    Optional<UserInfo> userInfoOp = loggedUserService.getLoggedUserInfo();
+    Assertions.assertFalse(userId.isEmpty());
+    Assertions.assertEquals("USERT", idirUser.idirUsername());
+    Assertions.assertNull(idirUser.businessName());
 
-    Assertions.assertTrue(userInfoOp.isPresent());
-    Assertions.assertEquals("abcdef123456789", userInfoOp.get().jwtToken());
+    // BCeID
+    UserInfo bceIdUser = createUserInfo(false);
+    when(userAuthenticationHelper.getUserInfo()).thenReturn(Optional.of(bceIdUser));
+    userId = loggedUserService.getLoggedUserIdirOrBceId();
+
+    Assertions.assertFalse(userId.isEmpty());
+    Assertions.assertEquals("user-my-bceid", bceIdUser.businessName());
+    Assertions.assertNull(bceIdUser.idirUsername());
   }
 
   @Test
@@ -150,7 +165,7 @@ class UserServiceTest {
         Assertions.assertThrows(
             UserNotFoundException.class,
             () -> {
-              loggedUserService.getLoggedUserToken();
+              loggedUserService.getLoggedUserIdirOrBceId();
             });
 
     Assertions.assertEquals("404 NOT_FOUND \"User not registered!\"", e.getMessage());
