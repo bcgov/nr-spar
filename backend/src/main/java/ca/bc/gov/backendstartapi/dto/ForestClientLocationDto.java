@@ -64,7 +64,7 @@ public record ForestClientLocationDto(
     @Schema(description = "A five-digit code that identifies the company in the location.",
             example = "01382")
         String companyCode,
-    @Schema(description = "The current address of the forest client.",
+    @Schema(description = "The current address of the ForestClient.",
             example = "2080 Labieux Rd")
         String address1,
     @Schema(description = "First complementary address information. Optional.",

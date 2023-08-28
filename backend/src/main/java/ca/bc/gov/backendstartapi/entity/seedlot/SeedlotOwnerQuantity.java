@@ -20,7 +20,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-/** Relational entity between a {@link Seedlot} and a forest client. */
+/** Relational entity between a {@link Seedlot} and a ForestClient. */
 @Entity
 @Table(name = "seedlot_owner_quantity")
 @IdClass(SeedlotOwnerQuantityId.class)

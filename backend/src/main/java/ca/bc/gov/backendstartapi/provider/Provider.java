@@ -23,6 +23,10 @@ public interface Provider {
     return List.of();
   }
 
+  default ForestClientLocationDto fetchSingleClientLocation(String number, String locationCode) {
+    return null;
+  }
+
   // Oracle API
   default Optional<OrchardSpuDto> findOrchardParentTreeGeneticQualityData(
       String orchardId, int spuId) {

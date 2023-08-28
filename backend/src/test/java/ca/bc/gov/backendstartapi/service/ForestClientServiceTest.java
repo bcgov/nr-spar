@@ -17,7 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(SpringExtension.class)
 class ForestClientServiceTest {
@@ -145,5 +147,75 @@ class ForestClientServiceTest {
                             ForestClientExpiredEnum.valueOf(singleLocationDto.expired().name()));
     Assertions.assertEquals(ForestClientExpiredEnum.N,
                             ForestClientExpiredEnum.valueOf(singleLocationDto.trusted().name()));
+  }
+
+  @Test
+  @DisplayName("fetchNonExistingSingleLocation")
+  void fetchNonExistingSingleLocation() {
+    String number = "00000001";
+    String locationCode = "123";
+
+    when(forestClientApiProvider.fetchSingleClientLocation(number, locationCode))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    Assertions.assertThrows(
+        ResponseStatusException.class,
+        () -> {
+          forestClientService.fetchSingleClientLocation(number, locationCode);
+        });
+  }
+
+  @Test
+  @DisplayName("fetchClientSingleLocationSuccess")
+  void fetchClientSingleLocationSuccess() {
+    String number = "00030055";
+    String locationCode = "00";
+
+    ForestClientLocationDto location =
+        new ForestClientLocationDto(
+            number,
+            locationCode,
+            "",
+            "30055",
+            "MINISTRY OF FORESTS",
+            "ARROW FOREST DISTRICT",
+            "845 COLUMBIA AVENUE",
+            "CASTLEGAR",
+            "BC",
+            "V1N1H3",
+            "CANADA",
+            "2503658600",
+            "",
+            "",
+            "",
+            "",
+            ForestClientExpiredEnum.N,
+            ForestClientExpiredEnum.N,
+            "",
+            "");
+
+    when(forestClientApiProvider.fetchSingleClientLocation(number, locationCode))
+        .thenReturn(location);
+
+    ForestClientLocationDto locationDto =
+        forestClientService.fetchSingleClientLocation(number, locationCode);
+
+    Assertions.assertNotNull(locationDto);
+
+    Assertions.assertEquals("00030055", locationDto.clientNumber());
+    Assertions.assertEquals("00", locationDto.locationCode());
+    Assertions.assertEquals("30055", locationDto.companyCode());
+    Assertions.assertEquals("MINISTRY OF FORESTS", locationDto.address1());
+    Assertions.assertEquals("ARROW FOREST DISTRICT", locationDto.address2());
+    Assertions.assertEquals("845 COLUMBIA AVENUE", locationDto.address3());
+    Assertions.assertEquals("CASTLEGAR", locationDto.city());
+    Assertions.assertEquals("BC", locationDto.province());
+    Assertions.assertEquals("V1N1H3", locationDto.postalCode());
+    Assertions.assertEquals("CANADA", locationDto.country());
+    Assertions.assertEquals("2503658600", locationDto.businessPhone());
+    Assertions.assertEquals(ForestClientExpiredEnum.N,
+                            ForestClientExpiredEnum.valueOf(locationDto.expired().name()));
+    Assertions.assertEquals(ForestClientExpiredEnum.N,
+                            ForestClientExpiredEnum.valueOf(locationDto.trusted().name()));
   }
 }
