@@ -19,9 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestClientTest(ForestClientApiProvider.class)
 class ForestClientApiProviderTest {
@@ -243,5 +245,86 @@ class ForestClientApiProviderTest {
         forestClientApiProvider.fetchLocationsByClientNumber(number);
 
     Assertions.assertTrue(locationDto.isEmpty());
+  }
+
+  @Test
+  @DisplayName("fetchExistentSinglelientLocation")
+  void fetchExistentSinglelientLocation() {
+    String number = "00012797";
+    String locationCode = "00";
+    String url = "/null/clients/" + number + "/locations/" + locationCode;
+
+    String json =
+        """
+          {
+            "clientNumber": "00012797",
+            "locationCode": "00",
+            "locationName": "TREE SEED CENTRE",
+            "companyCode": "12797",
+            "address1": "TREE SEED CENTRE",
+            "address2": "18793 32ND AVENUE",
+            "city": "SURREY",
+            "province": "BC",
+            "postalCode": "V3Z1A7",
+            "country": "CANADA",
+            "businessPhone": "6045411683",
+            "faxNumber": "6045411685",
+            "expired": "N",
+            "trusted": "N",
+            "comment": "OCT. 28/14 - POSTAL CODE CHANGED BY CANADA POST FROM V3S 0L5 TO V3Z 1A7."
+          }
+        """;
+
+    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    ForestClientLocationDto locationDto =
+        forestClientApiProvider.fetchSingleClientLocation(number, locationCode);
+
+    Assertions.assertNotNull(locationDto);
+
+    Assertions.assertEquals("00012797", locationDto.clientNumber());
+    Assertions.assertEquals("00", locationDto.locationCode());
+    Assertions.assertEquals("TREE SEED CENTRE", locationDto.locationName());
+    Assertions.assertEquals("12797", locationDto.companyCode());
+    Assertions.assertEquals("TREE SEED CENTRE", locationDto.address1());
+    Assertions.assertEquals("18793 32ND AVENUE", locationDto.address2());
+    Assertions.assertEquals("SURREY", locationDto.city());
+    Assertions.assertEquals("BC", locationDto.province());
+    Assertions.assertEquals("V3Z1A7", locationDto.postalCode());
+    Assertions.assertEquals("CANADA", locationDto.country());
+    Assertions.assertEquals("6045411683", locationDto.businessPhone());
+    Assertions.assertEquals("6045411685", locationDto.faxNumber());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, locationDto.expired());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, locationDto.trusted());
+    Assertions.assertEquals(
+        "OCT. 28/14 - POSTAL CODE CHANGED BY CANADA POST FROM V3S 0L5 TO V3Z 1A7.",
+        locationDto.comment());
+  }
+
+  @Test
+  @DisplayName("fetchNonExistentSingleClientLocation")
+  void fetchNonExistentSingleClientLocation() {
+    String number = "00000000";
+    String locationCode = "00";
+    String url = "/null/clients/" + number + "/locations/" + locationCode;
+
+    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withStatus(HttpStatusCode.valueOf(404)));
+
+    ResponseStatusException exc =
+        Assertions.assertThrows(
+          ResponseStatusException.class,
+          () -> {
+            forestClientApiProvider.fetchSingleClientLocation(number, locationCode);
+          });
+
+    Assertions.assertEquals(HttpStatus.NOT_FOUND, exc.getStatusCode());
   }
 }
