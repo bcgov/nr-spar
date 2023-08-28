@@ -23,10 +23,10 @@ public class ForestClientService {
   }
 
   /**
-   * Fetch a forest client by its number or its acronym.
+   * Fetch a ForestClient by its number or its acronym.
    *
    * @param identifier the client number or acronym to search for
-   * @return the forest client with client number or acronym {@code identifier}, if one exists
+   * @return the ForestClient with client number or acronym {@code identifier}, if one exists
    */
   public Optional<ForestClientDto> fetchClient(String identifier) {
     try {
@@ -38,12 +38,25 @@ public class ForestClientService {
   }
 
   /**
-   * Fetch up to the 10 first forest client location by its number.
+   * Fetch up to the 10 first ForestClient location by its number.
    *
-   * @param number the client number to search the location
-   * @return an list of the locations of the forest client
+   * @param clientNumber the ForestClient identifier to fetch their locations
+   * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
-  public List<ForestClientLocationDto> fetchClientLocations(String number) {
-    return forestClientApiProvider.fetchLocationsByClientNumber(number);
+  public List<ForestClientLocationDto> fetchClientLocations(String clientNumber) {
+    return forestClientApiProvider.fetchLocationsByClientNumber(clientNumber);
+  }
+
+  /**
+   * Fetch a single location of a ForestClient its number and location code.
+   *
+   * @param clientNumber the ForestClient identifier to fetch their location
+   * @param locationCode the location code that identifies the location to be fetched
+   * @return {@link ForestClientLocationDto} containing the client's location data
+   */
+  public ForestClientLocationDto fetchSingleClientLocation(
+      String clientNumber,
+      String locationCode) {
+    return forestClientApiProvider.fetchSingleClientLocation(clientNumber, locationCode);
   }
 }

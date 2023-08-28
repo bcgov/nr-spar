@@ -1,9 +1,10 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
-import ca.bc.gov.backendstartapi.exception.NoOrchardException;
+import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.Provider;
@@ -35,9 +36,9 @@ public class OrchardService {
    * Find an active SPU ID given an Orchard ID.
    *
    * @param orchardId Orchard's identification.
-   * @return A {@link List} of {@link ActiveOrchardSeedPlanningUnit} or an empty list.
+   * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
    */
-  public List<ActiveOrchardSeedPlanningUnit> findSpuIdByOrchard(String orchardId) {
+  public List<ActiveOrchardSpuEntity> findSpuIdByOrchard(String orchardId) {
     return findSpuIdByOrchardWithActive(orchardId, true);
   }
 
@@ -45,9 +46,9 @@ public class OrchardService {
    * Find all SPU IDs. It can be active or not.
    *
    * @param active determine if the SPU should be active or not.
-   * @return A {@link List} of {@link ActiveOrchardSeedPlanningUnit} or an empty list.
+   * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
    */
-  public List<ActiveOrchardSeedPlanningUnit> findAllSpu(boolean active) {
+  public List<ActiveOrchardSpuEntity> findAllSpu(boolean active) {
     return activeOrchardSeedPlanningUnitRepository.findAllByActive(active);
   }
 
@@ -56,9 +57,9 @@ public class OrchardService {
    *
    * @param orchardId Orchard's identification.
    * @param active determine if the SPU should be active or not.
-   * @return A {@link List} of {@link ActiveOrchardSeedPlanningUnit} or an empty list.
+   * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
    */
-  public List<ActiveOrchardSeedPlanningUnit> findSpuIdByOrchardWithActive(
+  public List<ActiveOrchardSpuEntity> findSpuIdByOrchardWithActive(
       String orchardId, boolean active) {
     return activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, active);
   }
@@ -72,7 +73,7 @@ public class OrchardService {
   public OrchardSpuDto findParentTreeGeneticQualityData(String orchardId) {
     log.info("Fetching Parent Tree data for Orchard ID: {}", orchardId);
 
-    List<ActiveOrchardSeedPlanningUnit> spuList = findSpuIdByOrchard(orchardId);
+    List<ActiveOrchardSpuEntity> spuList = findSpuIdByOrchard(orchardId);
     if (spuList.isEmpty()) {
       throw new NoSpuForOrchardException();
     }
@@ -95,11 +96,16 @@ public class OrchardService {
    * @return An {@link List} of {@link OrchardDto} from oracle-api
    */
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    List<OrchardDto> orchardList =
-        oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
-    if (orchardList.isEmpty()) {
-      throw new NoOrchardException();
-    }
-    return orchardList;
+    return oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
+  }
+
+  /**
+   * Finds all parent trees from every orchard with the provided vegCode.
+   *
+   * @param vegCode Orchard's identification.
+   * @return An {@link List} of {@link ParentTreeDto} from oracle-api
+   */
+  public List<ListItemDto> findParentTreesByVegCode(String vegCode) {
+    return oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase());
   }
 }
