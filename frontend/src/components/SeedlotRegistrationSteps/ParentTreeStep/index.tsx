@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
 import { AxiosError, AxiosResponse } from 'axios';
@@ -8,7 +9,7 @@ import {
   TableContainer, TableToolbar, Checkbox,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
-  DataTableSkeleton, DefinitionTooltip, Modal
+  DataTableSkeleton, DefinitionTooltip, Modal, Loading
 } from '@carbon/react';
 import {
   View, Settings, Upload, Renew
@@ -24,7 +25,7 @@ import CheckboxType from '../../../types/CheckboxType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import EmptySection from '../../EmptySection';
 import { sortAndSliceRows, sliceTableRowData, handlePagination } from '../../../utils/PaginationUtils';
-import { recordValues } from '../../../utils/RecordUtils';
+import { recordKeys, recordValues } from '../../../utils/RecordUtils';
 import {
   renderColOptions, renderTableBody, renderNotification,
   renderDefaultInputs, renderPagination
@@ -35,7 +36,8 @@ import InfoSectionRow from '../../InfoSection/InfoSectionRow';
 import {
   pageText, headerTemplate, geneticWorthDict,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, SummarySectionConfig,
-  PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
+  PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate,
+  getEmptySectionDescription, EMPTY_NUMBER_STRING
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem
@@ -51,6 +53,8 @@ import {
 } from './utils';
 
 import './styles.scss';
+import { GeneticTrait, GenWorthCalcPayload } from '../../../types/GeneticWorthTypes';
+import postForCalculation from '../../../api-service/geneticWorthAPI';
 
 interface ParentTreeStepProps {
   seedlotSpecies: MultiOptionsObj
@@ -171,6 +175,61 @@ const ParentTreeStep = (
       const msg = (err.response as AxiosResponse).data.message;
       setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
     }
+  });
+
+  const fillGwInfo = (geneticTraits: GeneticTrait[]) => {
+    const tempGenWorthItems = structuredClone(genWorthInfoItems);
+    const gwCodesToFill = recordKeys(tempGenWorthItems);
+    gwCodesToFill.forEach((gwCode) => {
+      const upperCaseCode = String(gwCode).toUpperCase();
+      const traitIndex = geneticTraits.map((trait) => trait.traitCode).indexOf(upperCaseCode);
+      if (traitIndex > -1) {
+        const tuple = tempGenWorthItems[gwCode];
+        const traitValueInfoObj = tuple.filter((obj) => obj.name.startsWith('Genetic'))[0];
+        traitValueInfoObj.value = geneticTraits[traitIndex].calculatedValue
+          ? (Number(geneticTraits[traitIndex].calculatedValue)).toFixed(1)
+          : EMPTY_NUMBER_STRING;
+        const testedPercInfoObj = tuple.filter((obj) => obj.name.startsWith('Tested'))[0];
+        testedPercInfoObj.value = (
+          Number(geneticTraits[traitIndex].testedParentTreePerc) * 100
+        ).toFixed(2);
+        // testedPercInfoObj.value = geneticTraits[traitIndex].testedParentTreePerc
+        //   ? (Number(geneticTraits[traitIndex].testedParentTreePerc) * 100).toFixed(2)
+        //   : EMPTY_NUMBER_STRING;
+        tempGenWorthItems[gwCode] = [traitValueInfoObj, testedPercInfoObj];
+      }
+    });
+    setGenWorthInfoItems(tempGenWorthItems);
+  };
+
+  const generateGenWorthPayload = (): GenWorthCalcPayload[] => {
+    const { tableRowData } = state;
+    const payload: GenWorthCalcPayload[] = [];
+    const rows = Object.values(tableRowData);
+    const genWorthTypes = geneticWorthDict[seedlotSpecies.code];
+    rows.forEach((row) => {
+      const newPayloadItem: GenWorthCalcPayload = {
+        parentTreeNumber: row.parentTreeNumber,
+        coneCount: Number(row.coneCount),
+        pollenCount: Number(row.pollenCount),
+        geneticTraits: []
+      };
+      // Populate geneticTraits array
+      genWorthTypes.forEach((gwType) => {
+        newPayloadItem.geneticTraits.push({
+          traitCode: gwType,
+          traitValue: Number(row[gwType])
+        });
+      });
+      payload.push(newPayloadItem);
+    });
+
+    return payload;
+  };
+
+  const calculateGenWorthQuery = useMutation({
+    mutationFn: (data: GenWorthCalcPayload[]) => postForCalculation(data),
+    onSuccess: (res) => fillGwInfo(res.data.geneticTraits)
   });
 
   return (
@@ -384,26 +443,38 @@ const ParentTreeStep = (
               >
                 {
                   recordValues(genWorthInfoItems).map((gwTuple) => (
-                    <InfoSectionRow items={gwTuple} />
+                    <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
                   ))
                 }
               </InfoSection>
-              <Row className="gen-worth-cal-row">
-                <Button
-                  size="md"
-                  kind="tertiary"
-                  renderIcon={Renew}
-                  disabled={disableOptions}
-                >
-                  Recalculate values
-                </Button>
-              </Row>
               {/* Effective population size and diversity */}
               <InfoSection
                 title={pageText.popSizeAndDiverse.title}
                 description={pageText.popSizeAndDiverse.description}
                 infoItems={Object.values(popSizeAndDiversityConfig)}
               />
+              <Row className="gen-worth-cal-row">
+                <Button
+                  size="md"
+                  kind="tertiary"
+                  // renderIcon={Renew}
+                  renderIcon={
+                    () => (
+                      <div className="gw-calc-loading-icon">
+                        {
+                          calculateGenWorthQuery.isLoading
+                            ? <Loading withOverlay={false} small />
+                            : <Renew />
+                        }
+                      </div>
+                    )
+                  }
+                  disabled={disableOptions}
+                  onClick={() => calculateGenWorthQuery.mutate(generateGenWorthPayload())}
+                >
+                  Calculate Genetic worth and Effective population values
+                </Button>
+              </Row>
               {/* Summary Section */}
               <InfoSection
                 title={summaryConfig[currentTab].title}

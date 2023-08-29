@@ -300,10 +300,10 @@ export const configHeaderOpt = (
 ) => {
   const speciesHasGenWorth = Object.keys(geneticWorthDict);
   if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
-    const availOptions = geneticWorthDict[seedlotSpecies.code];
+    const availableOptions = geneticWorthDict[seedlotSpecies.code];
     const clonedHeaders = structuredClone(headerConfig);
     let clonedGwItems = structuredClone(genWorthInfoItems);
-    availOptions.forEach((opt: string) => {
+    availableOptions.forEach((opt: string) => {
       const optionIndex = headerConfig.findIndex((header) => header.id === opt);
       // Enable option in the column customization
       clonedHeaders[optionIndex].isAnOption = true;
@@ -312,11 +312,11 @@ export const configHeaderOpt = (
       clonedGwItems = Object.assign(clonedGwItems, {
         [clonedHeaders[optionIndex].id]: [
           {
-            name: `Genetic worth GVO ${gwAbbrevName}`,
+            name: `Genetic worth ${gwAbbrevName}`,
             value: EMPTY_NUMBER_STRING
           },
           {
-            name: `Tested parent trees (${gwAbbrevName})`,
+            name: `Tested parent trees % (${gwAbbrevName})`,
             value: EMPTY_NUMBER_STRING
           }
         ]

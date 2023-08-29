@@ -15,7 +15,7 @@ const InfoSectionRow = (
   <Row className="info-section-items-row">
     {
       items.map((item) => (
-        <InfoSectionColumn item={item} />
+        <InfoSectionColumn key={item.name} item={item} />
       ))
     }
   </Row>
