@@ -106,6 +106,10 @@ const getPageText = () => ({
     title: 'Effective population size and diversity',
     description: 'Check effective population size and diversity of your seedlot'
   },
+  gwAndTestedPerc: {
+    title: 'Genetic worth and percent of tested parent trees',
+    description: 'Check the genetic worth and percent of tested parent trees of your seedlot'
+  },
   cleanModal: {
     label: 'Clean table data',
     primaryButtonText: 'Clean table data',

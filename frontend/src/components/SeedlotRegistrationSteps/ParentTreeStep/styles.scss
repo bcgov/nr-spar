@@ -63,6 +63,11 @@
   .empty-section-icon {
     color: var(--#{vars.$bcgov-prefix}-border-interactive);
   }
+
+  .gen-worth-cal-row {
+    margin-left: 0;
+    margin-top: 2rem;
+  }
 }
 
 .parent-tree-tab-container {

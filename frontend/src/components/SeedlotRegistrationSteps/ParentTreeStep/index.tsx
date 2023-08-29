@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect, useRef } from 'react';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link } from 'react-router-dom';
@@ -9,7 +10,9 @@ import {
   Button, Table, TableHead, TableRow, TableHeader,
   DataTableSkeleton, DefinitionTooltip, Modal
 } from '@carbon/react';
-import { View, Settings, Upload } from '@carbon/icons-react';
+import {
+  View, Settings, Upload, Renew
+} from '@carbon/icons-react';
 import { getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
@@ -18,14 +21,17 @@ import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQu
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { postCompositionFile } from '../../../api-service/seedlotAPI';
 import CheckboxType from '../../../types/CheckboxType';
+import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import EmptySection from '../../EmptySection';
 import { sortAndSliceRows, sliceTableRowData, handlePagination } from '../../../utils/PaginationUtils';
+import { recordValues } from '../../../utils/RecordUtils';
 import {
   renderColOptions, renderTableBody, renderNotification,
   renderDefaultInputs, renderPagination
 } from './TableComponents';
 import { OrchardObj } from '../OrchardStep/definitions';
 import UploadFileModal from './UploadFileModal';
+import InfoSectionRow from '../../InfoSection/InfoSectionRow';
 import {
   pageText, headerTemplate, geneticWorthDict,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, SummarySectionConfig,
@@ -76,9 +82,13 @@ const ParentTreeStep = (
     sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true, 'parentTreeNumber')
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
-  const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
+  const [popSizeAndDiversityConfig] = useState(
     structuredClone(PopSizeAndDiversityConfig)
   );
+  const [
+    genWorthInfoItems,
+    setGenWorthInfoItems
+  ] = useState<Record<keyof RowItem, InfoDisplayObj[]>>({});
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
   const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));
@@ -145,9 +155,9 @@ const ParentTreeStep = (
     geneticWorthDict,
     seedlotSpecies,
     headerConfig,
-    popSizeAndDiversityConfig,
-    setHeaderConfig,
-    setPopSizeAndDiversityConfig
+    genWorthInfoItems,
+    setGenWorthInfoItems,
+    setHeaderConfig
   ), [seedlotSpecies]);
 
   const uploadCompostion = useMutation({
@@ -366,6 +376,35 @@ const ParentTreeStep = (
         (currentTab === 'coneTab' || currentTab === 'successTab')
           ? (
             <>
+              {/* Genetic worth and percent of tested parent trees */}
+              <InfoSection
+                title={pageText.gwAndTestedPerc.title}
+                description={pageText.gwAndTestedPerc.description}
+                infoItems={[]}
+              >
+                {
+                  recordValues(genWorthInfoItems).map((gwTuple) => (
+                    <InfoSectionRow items={gwTuple} />
+                  ))
+                }
+              </InfoSection>
+              <Row className="gen-worth-cal-row">
+                <Button
+                  size="md"
+                  kind="tertiary"
+                  renderIcon={Renew}
+                  disabled={disableOptions}
+                >
+                  Recalculate values
+                </Button>
+              </Row>
+              {/* Effective population size and diversity */}
+              <InfoSection
+                title={pageText.popSizeAndDiverse.title}
+                description={pageText.popSizeAndDiverse.description}
+                infoItems={Object.values(popSizeAndDiversityConfig)}
+              />
+              {/* Summary Section */}
               <InfoSection
                 title={summaryConfig[currentTab].title}
                 description={summaryConfig[currentTab].description}
@@ -375,11 +414,6 @@ const ParentTreeStep = (
                     summaryConfig[currentTab].infoItems
                   ])
                 }
-              />
-              <InfoSection
-                title={pageText.popSizeAndDiverse.title}
-                description={pageText.popSizeAndDiverse.description}
-                infoItems={Object.values(popSizeAndDiversityConfig)}
               />
             </>
           )

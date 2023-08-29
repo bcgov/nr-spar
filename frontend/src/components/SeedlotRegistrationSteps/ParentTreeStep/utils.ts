@@ -294,29 +294,36 @@ export const configHeaderOpt = (
   geneticWorthDict: GeneticWorthDictType,
   seedlotSpecies: MultiOptionsObj,
   headerConfig: HeaderObj[],
-  popSizeAndDiversityConfig: InfoSectionConfigType,
-  setHeaderConfig: Function,
-  setPopSizeAndDiversityConfig: Function
+  genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
+  setGenWorthInfoItems: Function,
+  setHeaderConfig: Function
 ) => {
   const speciesHasGenWorth = Object.keys(geneticWorthDict);
   if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
     const availOptions = geneticWorthDict[seedlotSpecies.code];
     const clonedHeaders = structuredClone(headerConfig);
-    let clonedPopItems = structuredClone(popSizeAndDiversityConfig);
+    let clonedGwItems = structuredClone(genWorthInfoItems);
     availOptions.forEach((opt: string) => {
       const optionIndex = headerConfig.findIndex((header) => header.id === opt);
       // Enable option in the column customization
       clonedHeaders[optionIndex].isAnOption = true;
-      // Add GW input to the info section at the bottom
-      clonedPopItems = Object.assign(clonedPopItems, {
-        [clonedHeaders[optionIndex].id]: {
-          name: clonedHeaders[optionIndex].name,
-          value: ''
-        }
+      // Add GW input to the corresponding info section
+      const gwAbbrevName = String(clonedHeaders[optionIndex].id).toUpperCase();
+      clonedGwItems = Object.assign(clonedGwItems, {
+        [clonedHeaders[optionIndex].id]: [
+          {
+            name: `Genetic worth GVO ${gwAbbrevName}`,
+            value: EMPTY_NUMBER_STRING
+          },
+          {
+            name: `Tested parent trees (${gwAbbrevName})`,
+            value: EMPTY_NUMBER_STRING
+          }
+        ]
       });
     });
     setHeaderConfig(clonedHeaders);
-    setPopSizeAndDiversityConfig(clonedPopItems);
+    setGenWorthInfoItems(clonedGwItems);
   }
 };
 
