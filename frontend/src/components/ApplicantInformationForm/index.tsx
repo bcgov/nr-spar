@@ -36,6 +36,7 @@ import './styles.scss';
 
 const ApplicantInformationForm = () => {
   const navigate = useNavigate();
+  const LOCATION_CODE_LIMIT = 2;
 
   const seedlotData: SeedlotRegistrationObj = {
     seedlotNumber: 0,
@@ -74,13 +75,16 @@ const ApplicantInformationForm = () => {
     queryFn: () => getVegCodes(true)
   });
 
-  const inputChangeHandlerApplicant = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const inputChangeHandlerApplicant = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    isNumberInput = false
+  ) => {
     const { name, value } = event.target;
     setResponseBody({
       ...responseBody,
       applicant: {
         ...responseBody.applicant,
-        [name]: value
+        [name]: (isNumberInput ? value : value.slice(0, LOCATION_CODE_LIMIT))
       }
     });
   };
@@ -222,6 +226,7 @@ const ApplicantInformationForm = () => {
               name="number"
               ref={numberInputRef}
               type="number"
+              value={responseBody.applicant.number}
               labelText="Applicant agency number"
               invalid={isAgencyNumberInvalid}
               placeholder="00"
