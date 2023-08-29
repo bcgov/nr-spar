@@ -11,6 +11,8 @@ import { sliceTableRowData } from '../../../utils/PaginationUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { recordKeys } from '../../../utils/RecordUtils';
+import { GenWorthCalcPayload, GeneticTrait } from '../../../types/GeneticWorthTypes';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -338,4 +340,59 @@ export const setInputChange = (
   const clonedState = structuredClone(state);
   clonedState.tableRowData[parentTreeNumber][colName] = value;
   setStepData(clonedState);
+};
+
+export const fillGwInfo = (
+  geneticTraits: GeneticTrait[],
+  genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
+  setGenWorthInfoItems: Function
+) => {
+  const tempGenWorthItems = structuredClone(genWorthInfoItems);
+  const gwCodesToFill = recordKeys(tempGenWorthItems);
+  gwCodesToFill.forEach((gwCode) => {
+    const upperCaseCode = String(gwCode).toUpperCase();
+    const traitIndex = geneticTraits.map((trait) => trait.traitCode).indexOf(upperCaseCode);
+    if (traitIndex > -1) {
+      const tuple = tempGenWorthItems[gwCode];
+      const traitValueInfoObj = tuple.filter((obj) => obj.name.startsWith('Genetic'))[0];
+      traitValueInfoObj.value = geneticTraits[traitIndex].calculatedValue
+        ? (Number(geneticTraits[traitIndex].calculatedValue)).toFixed(1)
+        : EMPTY_NUMBER_STRING;
+      const testedPercInfoObj = tuple.filter((obj) => obj.name.startsWith('Tested'))[0];
+      testedPercInfoObj.value = (
+        Number(geneticTraits[traitIndex].testedParentTreePerc) * 100
+      ).toFixed(2);
+      tempGenWorthItems[gwCode] = [traitValueInfoObj, testedPercInfoObj];
+    }
+  });
+  setGenWorthInfoItems(tempGenWorthItems);
+};
+
+export const generateGenWorthPayload = (
+  state: ParentTreeStepDataObj,
+  geneticWorthDict: GeneticWorthDictType,
+  seedlotSpecies: MultiOptionsObj
+): GenWorthCalcPayload[] => {
+  const { tableRowData } = state;
+  const payload: GenWorthCalcPayload[] = [];
+  const rows = Object.values(tableRowData);
+  const genWorthTypes = geneticWorthDict[seedlotSpecies.code];
+  rows.forEach((row) => {
+    const newPayloadItem: GenWorthCalcPayload = {
+      parentTreeNumber: row.parentTreeNumber,
+      coneCount: Number(row.coneCount),
+      pollenCount: Number(row.pollenCount),
+      geneticTraits: []
+    };
+    // Populate geneticTraits array
+    genWorthTypes.forEach((gwType) => {
+      newPayloadItem.geneticTraits.push({
+        traitCode: gwType,
+        traitValue: Number(row[gwType])
+      });
+    });
+    payload.push(newPayloadItem);
+  });
+
+  return payload;
 };
