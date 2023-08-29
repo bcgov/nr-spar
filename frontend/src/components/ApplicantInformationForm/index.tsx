@@ -30,19 +30,18 @@ import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 
 import ComboBoxPropsType from './definitions';
-import { applicantAgencyFieldProps, speciesFieldProps } from './constants';
+import { applicantAgencyFieldProps, speciesFieldProps, LOCATION_CODE_LIMIT } from './constants';
 
 import './styles.scss';
 
 const ApplicantInformationForm = () => {
   const navigate = useNavigate();
-  const LOCATION_CODE_LIMIT = 2;
 
   const seedlotData: SeedlotRegistrationObj = {
     seedlotNumber: 0,
     applicant: {
       name: '',
-      number: '0',
+      number: '',
       email: ''
     },
     species: {

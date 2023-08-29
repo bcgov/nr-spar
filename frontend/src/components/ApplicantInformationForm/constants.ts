@@ -1,5 +1,7 @@
 import ComboBoxPropsType from './definitions';
 
+export const LOCATION_CODE_LIMIT = 2;
+
 export const applicantAgencyFieldProps: ComboBoxPropsType = {
   id: 'applicant-info-combobox',
   className: '',
