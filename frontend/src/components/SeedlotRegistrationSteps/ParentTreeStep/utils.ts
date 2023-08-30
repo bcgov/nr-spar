@@ -100,7 +100,6 @@ export const calcSummaryItems = (
 ) => {
   if (!disableOptions) {
     const modifiedSummaryConfig = { ...summaryConfig };
-    // const tableRows = Object.values(state.tableRowData);
 
     // Calc Total Number of Parent Trees
     modifiedSummaryConfig.sharedItems

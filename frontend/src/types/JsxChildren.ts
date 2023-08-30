@@ -1,3 +1,5 @@
-type JsxChildren = string | JSX.Element | JSX.Element[] | (() => JSX.Element);
+import React from 'react';
+
+type JsxChildren = string | React.JSX.Element | React.JSX.Element[] | (() => React.JSX.Element);
 
 export default JsxChildren;
