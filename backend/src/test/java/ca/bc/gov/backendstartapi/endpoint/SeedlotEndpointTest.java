@@ -1,15 +1,20 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
+import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,6 +36,8 @@ class SeedlotEndpointTest {
   @Autowired private MockMvc mockMvc;
 
   @MockBean ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
+
+  @MockBean SeedlotService seedlotService;
 
   private final WebApplicationContext webApplicationContext;
 
@@ -138,5 +145,26 @@ class SeedlotEndpointTest {
         .andDo(print())
         .andExpect(status().isBadRequest())
         .andExpect(status().reason(errorReason));
+  }
+
+  @Test
+  @DisplayName("createSeedlotBadRequestTest")
+  void createSeedlotBadRequestTest() throws Exception {
+    when(seedlotService.createSeedlot(any())).thenThrow(new RuntimeException("Oops"));
+
+    mockMvc
+        .perform(
+            post("/api/seedlots")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content("Here"))
+        .andExpect(status().isBadRequest())
+        .andExpect(status().reason("Reason hre"))
+        .andReturn();
+  }
+
+  void createSeedlotSuccessTest() {
+    //
   }
 }
