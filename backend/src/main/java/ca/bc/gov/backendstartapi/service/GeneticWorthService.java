@@ -88,8 +88,8 @@ public class GeneticWorthService {
   }
 
   /**
-   * Do the calculations for each Genetic Worth trait. Note that in the case the parent tree does not
-   * attend the 70% treshold weight, the value for this trait will be zero;
+   * Do the calculations for each Genetic Worth trait. Note that in the case the parent tree does
+   * not attend the 70% treshold weight, the value for this trait will be zero.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values.
