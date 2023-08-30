@@ -178,11 +178,13 @@ public class GeneticWorthService {
       BigDecimal pollenCount, BigDecimal coneCount, BigDecimal pollenSum, BigDecimal coneSum) {
     BigDecimal bigZero = BigDecimal.ZERO;
     BigDecimal mi =
-        pollenSum.equals(bigZero)
+        pollenSum.compareTo(bigZero) == 0
             ? bigZero
             : pollenCount.divide(pollenSum, 10, RoundingMode.HALF_UP);
     BigDecimal fi =
-        coneSum.equals(bigZero) ? bigZero : coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);
+        coneSum.compareTo(bigZero) == 0
+            ? bigZero
+            : coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);
     return mi.add(fi).divide(new BigDecimal("2"), 10, RoundingMode.HALF_UP);
   }
 
