@@ -4,10 +4,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
@@ -16,7 +19,6 @@ import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -33,7 +35,7 @@ class SeedlotEndpointTest {
 
   @MockBean private SmpCalculationCsvTableParser smpCalculationCsvTableParser;
 
-  @Autowired private MockMvc mockMvc;
+  private MockMvc mockMvc;
 
   @MockBean ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
 
@@ -148,9 +150,27 @@ class SeedlotEndpointTest {
   }
 
   @Test
-  @DisplayName("createSeedlotBadRequestTest")
-  void createSeedlotBadRequestTest() throws Exception {
-    when(seedlotService.createSeedlot(any())).thenThrow(new RuntimeException("Oops"));
+  @DisplayName("createSeedlotSuccessTest")
+  void createSeedlotSuccessTest() throws Exception {
+    String seedlotNumber = "630001";
+    String seedlotStatus = "PND";
+    SeedlotCreateResponseDto responseDto =
+        new SeedlotCreateResponseDto(seedlotNumber, seedlotStatus);
+
+    when(seedlotService.createSeedlot(any())).thenReturn(responseDto);
+
+    String json =
+        """
+        {
+          "applicantClientNumber": "00012797",
+          "applicantLocationCode": "01",
+          "applicantEmailAddress": "user.lastname@domain.com",
+          "vegetationCode": "FDI",
+          "seedlotSourceCode": "TPT",
+          "toBeRegistrdInd": true,
+          "bcSourceInd": true
+        }
+        """;
 
     mockMvc
         .perform(
@@ -158,13 +178,10 @@ class SeedlotEndpointTest {
                 .with(csrf().asHeader())
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .content("Here"))
-        .andExpect(status().isBadRequest())
-        .andExpect(status().reason("Reason hre"))
+                .content(json))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.seedlotNumber").value("630001"))
+        .andExpect(jsonPath("$.seedlotStatusCode").value("PND"))
         .andReturn();
-  }
-
-  void createSeedlotSuccessTest() {
-    //
   }
 }
