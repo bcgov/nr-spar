@@ -21,9 +21,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(ForestClientEndpoint.class)
 @WithMockUser(roles = "user_read")
@@ -206,4 +208,78 @@ class ForestClientEndpointTest {
         .andExpect(status().isOk());
   }
 
+  @Test
+  @DisplayName("fetchExistentSingleClientLocation")
+  void fetchExistentSingleClientLocation() throws Exception {
+    ForestClientLocationDto testLocation =
+        new ForestClientLocationDto(
+            "00000000",
+            "12",
+            "Office",
+            "0987",
+            "25 Some Street",
+            "",
+            "",
+            "Vancouver",
+            "BC",
+            "V9T6J9",
+            "Canada",
+            "123456987",
+            "",
+            "987654321",
+            "",
+            "office@email.com",
+            ForestClientExpiredEnum.N,
+            ForestClientExpiredEnum.Y,
+            "",
+            "Near a park"
+        );
+
+    when(forestClientService.fetchSingleClientLocation("00000000", "12")).thenReturn(testLocation);
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/00000000/location/12")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpectAll(
+            jsonPath("$.clientNumber").value(testLocation.clientNumber()),
+            jsonPath("$.locationCode").value(testLocation.locationCode()),
+            jsonPath("$.locationName").value(testLocation.locationName()),
+            jsonPath("$.companyCode").value(testLocation.companyCode()),
+            jsonPath("$.address1").value(testLocation.address1()),
+            jsonPath("$.address2").value(testLocation.address2()),
+            jsonPath("$.address3").value(testLocation.address3()),
+            jsonPath("$.city").value(testLocation.city()),
+            jsonPath("$.province").value(testLocation.province()),
+            jsonPath("$.postalCode").value(testLocation.postalCode()),
+            jsonPath("$.country").value(testLocation.country()),
+            jsonPath("$.businessPhone").value(testLocation.businessPhone()),
+            jsonPath("$.homePhone").value(testLocation.homePhone()),
+            jsonPath("$.cellPhone").value(testLocation.cellPhone()),
+            jsonPath("$.faxNumber").value(testLocation.faxNumber()),
+            jsonPath("$.email").value(testLocation.email()),
+            jsonPath("$.expired").value(testLocation.expired().name()),
+            jsonPath("$.trusted").value(testLocation.trusted().name()),
+            jsonPath("$.returnedMailDate").value(testLocation.returnedMailDate()),
+            jsonPath("$.comment").value(testLocation.comment()));
+  }
+
+  @Test
+  @DisplayName("fetchNonExistentSingleClientLocation")
+  void fetchNonExistentSingleClientLocation() throws Exception {
+    when(forestClientService.fetchSingleClientLocation("00000000", "12"))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/00000000/locations/12")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
 }

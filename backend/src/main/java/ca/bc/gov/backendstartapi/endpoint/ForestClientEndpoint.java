@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 
-/** Controller for forest client-related endpoints. */
+/** Controller for ForestClient-related endpoints. */
 @RestController
 @RequestMapping(path = "/api/forest-clients", produces = MediaType.APPLICATION_JSON_VALUE)
 @Validated
@@ -39,7 +39,7 @@ public class ForestClientEndpoint {
   }
 
   /**
-   * Fetch a forest client by its identifier (either its number or its acronym).
+   * Fetch a ForestClient by its identifier (either its number or its acronym).
    *
    * @param identifier the number that identifies the desired client
    * @return the forest with client number or acronym {@code identifier}, if one exists
@@ -47,10 +47,10 @@ public class ForestClientEndpoint {
   @GetMapping(path = "/{identifier}")
   @PreAuthorize("hasRole('user_read')")
   @Operation(
-      summary = "Fetch a forest client",
+      summary = "Fetch a ForestClient",
       description =
           """
-              Returns the forest client identified by `identifier` (a number or an acronym),
+              Returns the ForestClient identified by `identifier` (a number or an acronym),
               if there is one.""",
       responses = {
         @ApiResponse(
@@ -70,24 +70,24 @@ public class ForestClientEndpoint {
       var response = forestClientService.fetchClient(identifier).map(Serializable.class::cast);
       return ResponseEntity.of(response);
     } catch (HttpStatusCodeException e) {
-      log.warn("External error while retrieving forest client " + identifier, e);
+      log.warn("External error while retrieving ForestClient " + identifier, e);
       return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
     }
   }
 
   /**
-   * Fetch up to the 10 first forest client locations by the client number.
+   * Fetch up to the 10 first ForestClient's locations by the client number.
    *
-   * @param number the number that identifies the client to fetch the locations
-   * @return the forest client locations
+   * @param clientNumber the ForestClient identifier to fetch their locations
+   * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
-  @GetMapping(path = "/{number}/locations")
+  @GetMapping(path = "/{clientNumber}/locations")
   @PreAuthorize("hasRole('user_read')")
   @Operation(
-      summary = "Fetch up to the 10 first locations of the forest client.",
+      summary = "Fetch up to the 10 first locations of the ForestClient.",
       description =
           """
-              Returns a list up to the 10 first locations associated with the forest client,
+              Returns a list up to the 10 first locations associated with the ForestClient,
               identified by it's number.""",
       responses = {
         @ApiResponse(
@@ -95,14 +95,52 @@ public class ForestClientEndpoint {
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   public List<ForestClientLocationDto> fetchClientLocations(
-      @PathVariable("number")
-          @Pattern(regexp = "^\\d{8}$", message = "The value must an 8-digit number")
+      @PathVariable("clientNumber")
+          @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
           @Parameter(
-              name = "number",
+              name = "clientNumber",
               in = ParameterIn.PATH,
               description = "Number that identifies the client to get the locations.",
               required = true)
-          String number) {
-    return forestClientService.fetchClientLocations(number);
+          String clientNumber) {
+    return forestClientService.fetchClientLocations(clientNumber);
+  }
+
+  /**
+   * Fetch the ForestClient location based on the client number and location code.
+   *
+   * @param clientNumber the ForestClient identifier to fetch their location
+   * @param locationCode the location code that identifies the location to be fetched
+   * @return {@link ForestClientLocationDto} containing the client's location data
+   */
+  @GetMapping(path = "/{clientNumber}/location/{locationCode}")
+  @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Fetch the location of the ForestClient.",
+      description =
+          """
+              Returns a single location associated with the ForestClient, identified
+              by it's number and location code""",
+      responses = {
+        @ApiResponse(
+            responseCode = "200"),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
+      })
+  public ForestClientLocationDto fetchSingleClientLocation(
+      @PathVariable("clientNumber")
+          @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
+          @Parameter(
+              name = "clientNumber",
+              in = ParameterIn.PATH,
+              description = "Number that identifies the client to get the locations.")
+          String clientNumber,
+      @PathVariable("locationCode")
+          @Parameter(
+              name = "locationCode",
+              in = ParameterIn.PATH,
+              description = "Number that identify the location."
+          )
+          String locationCode) {
+    return forestClientService.fetchSingleClientLocation(clientNumber, locationCode);
   }
 }
