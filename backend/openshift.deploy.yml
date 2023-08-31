@@ -133,7 +133,7 @@ objects:
                       key: forest-client-api-key
                 - name: POSTGRES_HOST
                   value: ${NAME}-${ZONE}-database
-                - name: POSTGRES_DATABASE
+                - name: POSTGRES_DB
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
