@@ -1,6 +1,6 @@
 export type FavActivityType = {
-  id: number,
-  type: string,
+  id: number;
+  type: string;
   image: string;
   header: string;
   description: string;

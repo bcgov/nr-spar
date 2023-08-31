@@ -1,12 +1,12 @@
 type SingleOwnerForm = {
-  id: number,
-  ownerAgency: string,
-  ownerCode: string,
-  ownerPortion: string,
-  reservedPerc: string,
-  surplusPerc: string,
-  fundingSource: string,
-  methodOfPayment: string
+  id: number;
+  ownerAgency: string;
+  ownerCode: string;
+  ownerPortion: string;
+  reservedPerc: string;
+  surplusPerc: string;
+  fundingSource: string;
+  methodOfPayment: string;
 };
 
 type RegisterOwnerArray = Array<SingleOwnerForm>;
