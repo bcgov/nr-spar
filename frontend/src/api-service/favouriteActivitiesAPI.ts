@@ -9,9 +9,9 @@ export const getFavAct = () => {
     .then((response) => {
       const data = [...response.data];
       const userList: FavActivityType[] = [];
-      const acitivityList = Object.keys(FavouriteActivityMap);
+      const activityList = Object.keys(FavouriteActivityMap);
       data.forEach((item) => {
-        if (acitivityList.includes(item.activity)) {
+        if (activityList.includes(item.activity)) {
           const activityToAdd = structuredClone(FavouriteActivityMap[item.activity]);
           activityToAdd.id = item.id;
           activityToAdd.highlighted = item.highlighted;
