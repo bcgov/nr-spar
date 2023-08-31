@@ -65,6 +65,11 @@ services:
     working_dir: /app
     volumes:
       - ./backend:/app:z
+    healthcheck:
+      test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   oracle-api:
     container_name: oracle-api
