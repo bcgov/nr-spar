@@ -1,12 +1,9 @@
 version: '3.9'
 
-x-var:
-  - &POSTGRES_USER
-    postgres
-  - &POSTGRES_PASSWORD
-    default
-  - &POSTGRES_DB
-    postgres
+x-db-vars: &db-vars
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: default
+  POSTGRES_DB: postgres
 
 x-frontend: &frontend
   depends_on:
@@ -30,11 +27,8 @@ services:
   database:
     container_name: database
     environment:
-      POSTGRES_USER: *POSTGRES_USER
-      POSTGRES_PASSWORD: *POSTGRES_PASSWORD
-      POSTGRES_DB: *POSTGRES_DB
-    volumes:
-      - /pgdata
+      <<: *db-vars
+    volumes: ["/pgdata"]
     healthcheck:
       test: pg_isready -U postgres
       interval: 5s
@@ -50,21 +44,16 @@ services:
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
-      POSTGRESQL_HOST: database
-      POSTGRESQL_DATABASE: *POSTGRES_DB
-      POSTGRESQL_USER: *POSTGRES_USER
-      POSTGRESQL_PASSWORD: *POSTGRES_PASSWORD
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-    ports:
-      - "8090:8090"
-      - "5005:5005"
+      POSTGRES_HOST: database
+      <<: *db-vars
+    ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.3-eclipse-temurin-17
     entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005"
     working_dir: /app
-    volumes:
-      - ./backend:/app:z
+    volumes: ["./backend:/app:z"]
     healthcheck:
       test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
       interval: 5s
@@ -86,14 +75,12 @@ services:
       DATABASE_USER: proxy_fsa_spar_read_only_user
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
-    ports:
-      - "8091:8091"
+    ports: ["8091:8091"]
     image: maven:3.9.3-eclipse-temurin-17
     entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
     network_mode: "host"
     working_dir: /app
-    volumes:
-      - ./oracle-api:/app:z
+    volumes: ["./oracle-api:/app:z"]
     healthcheck:
       test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
       interval: 5s
