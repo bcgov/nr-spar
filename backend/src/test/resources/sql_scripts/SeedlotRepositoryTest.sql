@@ -1,4 +1,30 @@
-insert into seedlot_source_code ();
+insert into seedlot_status_list (
+  seedlot_status_code,
+  description,
+  effective_date,
+  expiry_date,
+  update_timestamp
+) values (
+  'PND',
+  'Pending',
+  '1905-01-01',
+  '9999-12-31',
+  current_timestamp
+);
+
+insert into seedlot_source_list (
+  seedlot_source_code,
+  description,
+  effective_date,
+  expiry_date,
+  update_timestamp
+) values (
+  'TPT',
+  'Tested Parent Trees',
+  '2005-07-25',
+  '9999-12-31',
+  current_timestamp
+);
 
 insert into seedlot (
   seedlot_number,
@@ -26,8 +52,8 @@ insert into seedlot (
   true,
   true,
   'IDIR',
-  NOW(),
+  current_timestamp,
   'IDIR',
-  NOW(),
+  current_timestamp,
   0
 );

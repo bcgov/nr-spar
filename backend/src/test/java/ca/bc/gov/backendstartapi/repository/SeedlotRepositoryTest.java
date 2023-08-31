@@ -19,9 +19,8 @@ class SeedlotRepositoryTest {
   @Test
   @DisplayName("findNextSeedlotNumberTest")
   void findNextSeedlotNumberTest() {
-    Integer nextNumber = seedlotRepository.findNextSeedlotNumber(63000, 65000);
-
-    Assertions.assertNotNull(nextNumber);
-    Assertions.assertEquals(63001, nextNumber);
+    Integer nextNumberA = seedlotRepository.findNextSeedlotNumber(63000, 65000);
+    Assertions.assertNotNull(nextNumberA);
+    Assertions.assertEquals(63000, nextNumberA);
   }
 }
