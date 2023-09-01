@@ -53,7 +53,7 @@ services:
     image: maven:3.9.3-eclipse-temurin-17
     entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005"
     working_dir: /app
-    volumes: ["./backend:/app:z"]
+    volumes: ["./backend:/app"]
     healthcheck:
       test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
       interval: 5s
@@ -65,7 +65,7 @@ services:
     profiles: ["oracle-api"]
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     environment:
       NR_SPAR_ORACLE_API_VERSION: "dev"
       SERVER_PORT: "8091"
@@ -80,9 +80,9 @@ services:
     entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
     network_mode: "host"
     working_dir: /app
-    volumes: ["./oracle-api:/app:z"]
+    volumes: ["./oracle-api:/app"]
     healthcheck:
-      test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+      test: curl -f http://localhost:8091/actuator/health | grep '"status":"UP"'
       interval: 5s
       timeout: 5s
       retries: 5
@@ -93,7 +93,7 @@ services:
     image: node:18.17.1-alpine3.17
     entrypoint: sh -c "apk add --no-cache python3 g++ make && cd /app && npm i && npm run start"
     user: root
-    volumes: ["./frontend:/app:z"]
+    volumes: ["./frontend:/app"]
     <<: *frontend
 
   caddy:
