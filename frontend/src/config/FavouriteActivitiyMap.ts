@@ -4,7 +4,7 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
   seedlots: {
     id: -1,
     type: 'seedlots',
-    image: 'QuadrantPlot',
+    image: 'SoilMoistureField',
     header: 'Seedlots',
     description: 'Register and manage your seedlots',
     link: '/seedlots',
@@ -22,7 +22,7 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
   mySeedlots: {
     id: -1,
     type: 'mySeedlots',
-    image: 'CropGrowth',
+    image: 'TableSplit',
     header: 'My Seedlots',
     description: 'Check and manage your own seedlots',
     link: '/seedlots/my-seedlots',

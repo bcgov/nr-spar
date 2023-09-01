@@ -46,7 +46,7 @@ const FavouriteCard = ({
       <div className="fav-card-header">
         <Icon className="fav-card-icon" />
         <p className="fav-card-title-small">{favObject.header}</p>
-        <OverflowMenu className="fav-card-overflow" aria-label={`${favObject.header} options`} flipped iconDescription="More actions">
+        <OverflowMenu className="fav-card-overflow" menuOptionsClass="fav-card-menu-options" aria-label={`${favObject.header} options`} flipped iconDescription="More actions">
           <OverflowMenuItem
             itemText={favObject.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'}
             onClick={(e: Event) => {
