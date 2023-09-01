@@ -34,7 +34,7 @@ const FormProgress = ({ seedlotNumber }: FormProgressProps) => {
           size="md"
           className="btn-fp"
           renderIcon={DocumentBlank}
-          onClick={() => navigate(`/seedlot/registration/${seedlotNumber}`)}
+          onClick={() => navigate(`/seedlots/registration/${seedlotNumber}`)}
         >
           Complete registration
         </Button>

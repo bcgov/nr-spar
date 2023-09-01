@@ -49,7 +49,7 @@ const PageTitle = ({
     }
   });
 
-  const thisFavAct = favActQuery?.data?.filter((act) => act.activity === activity)[0];
+  const thisFavAct = favActQuery?.data?.filter((act) => act.type === activity)[0];
 
   const isFavourited = thisFavAct !== undefined;
 
@@ -57,24 +57,28 @@ const PageTitle = ({
     <Column className="title-section">
       <div className="title-favourite">
         <h1>{title}</h1>
-        {enableFavourite && activity && (
-          <IconButton
-            kind="ghost"
-            label={isFavourited ? 'Unfavourite' : 'Favourite'}
-            align="right"
-            onClick={
-              isFavourited
-                ? () => removeFavAct.mutate(thisFavAct.id)
-                : () => highlightFavAct.mutate({ activity })
-            }
-          >
-            {
-              isFavourited
-                ? (<FavoriteFilled size={28} />)
-                : (<Favorite size={28} />)
-            }
-          </IconButton>
-        )}
+        {
+          (enableFavourite && activity)
+            ? (
+              <IconButton
+                kind="ghost"
+                label={isFavourited ? 'Unfavourite' : 'Favourite'}
+                align="right"
+                onClick={
+                  isFavourited
+                    ? () => removeFavAct.mutate(thisFavAct.id)
+                    : () => highlightFavAct.mutate({ activity })
+                }
+              >
+                {
+                  isFavourited
+                    ? (<FavoriteFilled size={28} />)
+                    : (<Favorite size={28} />)
+                }
+              </IconButton>
+            )
+            : null
+        }
       </div>
       <Subtitle text={subtitle} />
     </Column>

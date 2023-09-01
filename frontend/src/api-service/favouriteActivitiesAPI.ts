@@ -1,32 +1,38 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
-import getActivityProps from '../enums/ActivityType';
 import { FavActivityType, FavActivityPostType } from '../types/FavActivityTypes';
+import FavouriteActivityMap from '../config/FavouriteActivitiyMap';
 
 export const getFavAct = () => {
   const url = ApiConfig.favouriteActivities;
   return api.get(url)
     .then((response) => {
       const data = [...response.data];
-      data.forEach((item, i: number) => {
-        const card = item;
-        const activityProps = getActivityProps(item.activity);
-        card.image = activityProps.icon;
-        card.header = activityProps.header;
-        card.description = activityProps.description;
-        card.link = activityProps.link;
-
-        if (card.highlighted) {
-          data.splice(i, 1);
-          data.unshift(item);
+      const userList: FavActivityType[] = [];
+      const activityList = Object.keys(FavouriteActivityMap);
+      data.forEach((item) => {
+        if (activityList.includes(item.activity)) {
+          const activityToAdd = structuredClone(FavouriteActivityMap[item.activity]);
+          activityToAdd.id = item.id;
+          activityToAdd.highlighted = item.highlighted;
+          if (activityToAdd.highlighted) {
+            userList.unshift(activityToAdd);
+          } else {
+            userList.push(activityToAdd);
+          }
+        } else {
+          const invalidActivity = structuredClone(FavouriteActivityMap.unkown);
+          invalidActivity.id = item.id;
+          invalidActivity.type = item.activity;
+          invalidActivity.header += item.activity;
+          userList.push(invalidActivity);
         }
       });
-      return data;
+      return userList;
     })
     .catch((error) => {
       // eslint-disable-next-line
       console.error(`Failed to get favourite activity: ${error}`);
-      return [];
     });
 };
 

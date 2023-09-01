@@ -1,13 +1,13 @@
 type Step = {
-  step: number,
-  status: string,
-  description: string,
-  date: string
+  step: number;
+  status: string;
+  description: string;
+  date: string;
 }
 
 type History = {
-  id: number,
-  steps: Step[]
+  id: number;
+  steps: Step[];
 }
 
 export default History;

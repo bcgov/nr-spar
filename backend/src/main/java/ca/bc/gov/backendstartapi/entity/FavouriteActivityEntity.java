@@ -45,14 +45,7 @@ public class FavouriteActivityEntity {
       example = "false")
   private Boolean highlighted;
 
-  @Column
-  @Schema(
-      description = "Defines if the favourite activity is enabled on the dashboard",
-      example = "true")
-  private Boolean enabled;
-
   public FavouriteActivityEntity() {
     this.highlighted = false;
-    this.enabled = true;
   }
 }

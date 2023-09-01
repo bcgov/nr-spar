@@ -12,14 +12,15 @@ import {
 import { Add } from '@carbon/icons-react';
 
 import PageTitle from '../../../components/PageTitle';
+import EmptySection from '../../../components/EmptySection';
 import SeedlotDataTable from './SeedlotDataTable';
+import { tableText } from './constants';
 
 import api from '../../../api-service/api';
 import ApiConfig from '../../../api-service/ApiConfig';
 import Seedlot from '../../../types/Seedlot';
 
 import './styles.scss';
-import { tableText } from './constants';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const MySeedlots = () => {
     <FlexGrid fullWidth className="my-seedlot-content">
       <Row className="my-seedlot-breadcrumb">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Row className="my-seedlot-title">
@@ -55,13 +56,13 @@ const MySeedlots = () => {
             title={tableText.pageTitle}
             subtitle={tableText.pageSubtitle}
             enableFavourite
-            activity="My Seedlots"
+            activity="mySeedlots"
           />
         </Column>
         <Column sm={4} md={2} lg={2} xlg={4}>
           <Button
             kind="primary"
-            onClick={() => { navigate('/seedlot/register-a-class'); }}
+            onClick={() => { navigate('/seedlots/register-a-class'); }}
             size="lg"
             className="btn-my-seedlot"
             renderIcon={Add}
@@ -71,7 +72,19 @@ const MySeedlots = () => {
         </Column>
       </Row>
       <Row className="my-seedlot-data-table-row">
-        {seedlotsData.length > 0 && <SeedlotDataTable seedlots={seedlotsData} /> }
+        {
+          seedlotsData.length === 0
+            ? (
+              <div className="empty-seedlots">
+                <EmptySection
+                  pictogram={tableText.emptyPictogram}
+                  title={tableText.emptyTitle}
+                  description={tableText.emptyDescription}
+                />
+              </div>
+            )
+            : <SeedlotDataTable seedlots={seedlotsData} />
+        }
       </Row>
     </FlexGrid>
   );

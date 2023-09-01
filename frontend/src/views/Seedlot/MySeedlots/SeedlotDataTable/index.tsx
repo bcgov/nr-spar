@@ -84,7 +84,7 @@ const SeedlotDataTable = ({ seedlots }: SeedlotDataTableProps) => {
               </TableHead>
               <TableBody>
                 {rows.map((item: RowInterface) => (
-                  <TableRow key={item.cells[0].value} onClick={() => navigate(`/seedlot/details/${item.cells[0].value}`)}>
+                  <TableRow key={item.cells[0].value} onClick={() => navigate(`/seedlots/details/${item.cells[0].value}`)}>
                     <TableCell>{item.cells[0].value}</TableCell>
                     <TableCell>{`${item.cells[1].value} class`}</TableCell>
                     <TableCell>{item.cells[2].value.label}</TableCell>

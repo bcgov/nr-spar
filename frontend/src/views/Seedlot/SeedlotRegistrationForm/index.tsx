@@ -242,9 +242,9 @@ const SeedlotRegistrationForm = () => {
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
             <Breadcrumb>
-              <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
-              <BreadcrumbItem onClick={() => navigate('/seedlot/my-seedlots')}>My seedlots</BreadcrumbItem>
-              <BreadcrumbItem onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate('/seedlots/my-seedlots')}>My seedlots</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
             </Breadcrumb>
           </Column>
         </Row>
@@ -303,7 +303,7 @@ const SeedlotRegistrationForm = () => {
                       kind="secondary"
                       size="lg"
                       className="back-next-btn"
-                      onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
+                      onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}
                     >
                       Cancel
                     </Button>

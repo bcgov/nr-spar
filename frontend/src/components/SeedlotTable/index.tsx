@@ -43,7 +43,7 @@ const SeedlotTable = ({ elements, headers }: TableProps) => {
       </TableHead>
       <TableBody>
         {elements.map((item, idx) => (
-          <TableRow key={hashObject(item)} id={`row${idx}`} onClick={() => navigate(`/seedlot/details/${item.number}`)}>
+          <TableRow key={hashObject(item)} id={`row${idx}`} onClick={() => navigate(`/seedlots/details/${item.number}`)}>
             <TableCell>{item.number}</TableCell>
             <TableCell>{`${item.class} class`}</TableCell>
             <TableCell>{item.lot_species.label}</TableCell>

@@ -19,7 +19,7 @@ const SeedlotDashboard = () => (
           title="Seedlots"
           subtitle="Register and manage your seedlots"
           enableFavourite
-          activity="SEEDLOT_DASHBOARD"
+          activity="seedlots"
         />
       </Row>
       <SeedlotActivities />

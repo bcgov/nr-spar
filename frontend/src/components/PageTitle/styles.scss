@@ -1,6 +1,6 @@
 @use '@carbon/type';
 
-.title-section{
+.title-section {
   margin: 0;
 }
 
@@ -14,11 +14,14 @@
   align-items: center;
 }
 
-.title-favourite button{
+.title-favourite button {
   margin-left: 0.5rem;
-  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
 }
 
-.title-favourite button svg{
-  margin-bottom: 0.1875rem;
+.title-favourite button svg {
+  width: 1rem;
 }

@@ -77,8 +77,8 @@ const SeedlotDetails = () => {
     <FlexGrid className="seedlot-details-page">
       <Row className="seedlot-details-breadcrumb">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate('/seedlot/my-seedlots')}>My seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate('/seedlots/my-seedlots')}>My seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Stack gap={6}>

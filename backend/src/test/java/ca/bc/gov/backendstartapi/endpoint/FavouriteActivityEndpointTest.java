@@ -52,7 +52,6 @@ class FavouriteActivityEndpointTest {
     FavouriteActivityEntity activityEntity = new FavouriteActivityEntity();
     activityEntity.setActivity(activity);
     activityEntity.setHighlighted(Boolean.FALSE);
-    activityEntity.setEnabled(Boolean.TRUE);
     return activityEntity;
   }
 
@@ -73,7 +72,6 @@ class FavouriteActivityEndpointTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.activity").value("CREATE_A_CLASS_SEEDLOT"))
         .andExpect(jsonPath("$.highlighted").value("false"))
-        .andExpect(jsonPath("$.enabled").value("true"))
         .andReturn();
   }
 
@@ -113,7 +111,6 @@ class FavouriteActivityEndpointTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.activity").value("CREATE_A_CLASS_SEEDLOT"))
         .andExpect(jsonPath("$.highlighted").value("false"))
-        .andExpect(jsonPath("$.enabled").value("true"))
         .andReturn();
 
     when(favouriteActivityService.createUserActivity(any()))
@@ -151,10 +148,8 @@ class FavouriteActivityEndpointTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].activity").value("CREATE_A_CLASS_SEEDLOT"))
         .andExpect(jsonPath("$[0].highlighted").value("false"))
-        .andExpect(jsonPath("$[0].enabled").value("true"))
         .andExpect(jsonPath("$[1].activity").value("SEEDLOT_REGISTRATION"))
         .andExpect(jsonPath("$[1].highlighted").value("true"))
-        .andExpect(jsonPath("$[1].enabled").value("true"))
         .andReturn();
   }
 
@@ -176,7 +171,6 @@ class FavouriteActivityEndpointTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.activity").value("EXISTING_SEEDLOTS"))
         .andExpect(jsonPath("$.highlighted").value("false"))
-        .andExpect(jsonPath("$.enabled").value("true"))
         .andReturn();
 
     FavouriteActivityEntity activityUpdated = activityEntity.withHighlighted(true);
@@ -195,7 +189,6 @@ class FavouriteActivityEndpointTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.activity").value("EXISTING_SEEDLOTS"))
         .andExpect(jsonPath("$.highlighted").value("true"))
-        .andExpect(jsonPath("$.enabled").value("true"))
         .andReturn();
   }
 
@@ -218,7 +211,6 @@ class FavouriteActivityEndpointTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.activity").value("EXISTING_SEEDLOTS"))
         .andExpect(jsonPath("$.highlighted").value("false"))
-        .andExpect(jsonPath("$.enabled").value("true"))
         .andReturn();
 
     FavouriteActivityEntity activityUpdated = activityEntity.withHighlighted(true);

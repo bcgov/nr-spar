@@ -19,7 +19,7 @@ const CreateAClass = () => {
       <Stack gap={3}>
         <Row className="create-a-class-seedlot-breadcrumb">
           <Breadcrumb>
-            <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
+            <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
           </Breadcrumb>
         </Row>
         <Row>
@@ -27,7 +27,7 @@ const CreateAClass = () => {
             title="Create A class seedlot"
             subtitle="Register a new A class seedlot"
             enableFavourite
-            activity="CREATE_A_CLASS_SEEDLOT"
+            activity="registerAClass"
           />
         </Row>
         <ApplicantInformationForm />

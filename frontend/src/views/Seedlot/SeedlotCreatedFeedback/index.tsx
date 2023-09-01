@@ -42,7 +42,7 @@ const SeedlotCreatedFeedback = () => {
             <Row className="navigate-btn">
               <Column sm={4} md={4} lg={12} xlg={10} max={8}>
                 <Button
-                  onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
+                  onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}
                   size="lg"
                   className="btn-scf"
                 >
@@ -54,7 +54,7 @@ const SeedlotCreatedFeedback = () => {
               <Column sm={4} md={4} lg={12} xlg={10} max={8}>
                 <Button
                   kind="tertiary"
-                  onClick={() => navigate('/seedlot/register-a-class')}
+                  onClick={() => navigate('/seedlots/register-a-class')}
                   size="lg"
                   className="btn-scf"
                 >
@@ -66,7 +66,7 @@ const SeedlotCreatedFeedback = () => {
               <Column sm={4} md={4} lg={12} xlg={10} max={8}>
                 <Button
                   kind="tertiary"
-                  onClick={() => navigate('/seedlot')}
+                  onClick={() => navigate('/seedlots')}
                   size="lg"
                   className="btn-scf"
                 >

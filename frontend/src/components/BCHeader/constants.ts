@@ -22,7 +22,7 @@ export const listItems = [
       {
         name: 'Seedlots',
         icon: 'SoilMoistureField',
-        link: '/seedlot',
+        link: '/seedlots',
         disabled: false
       },
       {
