@@ -13,22 +13,22 @@ export enum GenWorthCodeEnum{
 }
 
 type SingleParentTreeGeneticObj = {
-  geneticTypeCode: string,
-  geneticWorthCode: keyof typeof GenWorthCodeEnum,
-  geneticQualityValue: number,
+  geneticTypeCode: string;
+  geneticWorthCode: keyof typeof GenWorthCodeEnum;
+  geneticQualityValue: number;
 };
 
 type ParentTreeType = {
-  [key: string]: any,
-  parentTreeId: number,
-  parentTreeNumber: string,
-  parentTreeGeneticQualities: Array<SingleParentTreeGeneticObj>
+  [key: string]: any;
+  parentTreeId: number;
+  parentTreeNumber: string;
+  parentTreeGeneticQualities: Array<SingleParentTreeGeneticObj>;
 }
 
 export type ParentTreeGeneticQualityType = {
-  [key: string]: any,
-  orchardId:string,
-  vegetationCode: string,
-  seedPlanningUnitId: number,
-  parentTrees: Array<ParentTreeType>
+  [key: string]: any;
+  orchardId:string;
+  vegetationCode: string;
+  seedPlanningUnitId: number;
+  parentTrees: Array<ParentTreeType>;
 }

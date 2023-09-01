@@ -41,8 +41,8 @@ const FavouriteActivities = () => {
       </Column>
       <Column sm={4} md={8} lg={16} xlg={12} className="favourite-activities-cards">
         <Row>
-          {favActQuery.isLoading && <Loading withOverlay={false} />}
-          {favActQuery.isSuccess && (
+          {favActQuery.isLoading ? <Loading withOverlay={false} /> : null}
+          {favActQuery.isSuccess && favActQuery.data && (
             (favActQuery.data.length === 0)
               ? (
                 <EmptySection
@@ -51,10 +51,10 @@ const FavouriteActivities = () => {
                   description="You can favourite your most used activities by clicking on the heart icon
                 inside each page"
                 />
-              ) : favActQuery.data.map((card, index) => (
+              ) : favActQuery.data.map((favObject, index) => (
                 <Card
-                  key={card.id}
-                  activity={card}
+                  key={favObject.type}
+                  favObject={favObject}
                   index={index}
                 />
               ))
