@@ -136,15 +136,14 @@ const ApplicantInformationForm = () => {
   };
 
   const inputChangeHandlerApplicant = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    isNumberInput = false
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = event.target;
     setResponseBody({
       ...responseBody,
       applicant: {
         ...responseBody.applicant,
-        [name]: (isNumberInput ? value : value.slice(0, LOCATION_CODE_LIMIT))
+        [name]: value
       }
     });
   };
@@ -194,6 +193,8 @@ const ApplicantInformationForm = () => {
   };
 
   const validateApplicantEmail = () => {
+    // eslint-disable-next-line no-debugger
+    debugger;
     if (validator.isEmail(responseBody.applicant.email)) {
       setIsEmailInvalid(false);
     } else {
