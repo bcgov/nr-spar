@@ -3,8 +3,12 @@ import ComboBoxPropsType from './definitions';
 export const LOCATION_CODE_LIMIT = 2;
 
 export const pageTexts = {
-  invalidLocationValue: 'Please enter a valid value between 0 and 99',
-  invalidLocationForSelectedAgency: 'This agency number is not valid for the selected client, please enter a valid one'
+  locCodeInput: {
+    helperTextDisabled: 'Please select an Applicant Agency before setting the agency number',
+    helperTextEnabled: '2-digit code that identifies the address of operated office or division',
+    invalidLocationValue: 'Please enter a valid value between 0 and 99',
+    invalidLocationForSelectedAgency: 'This agency number is not valid for the selected agency, please enter a valid one or change the agency'
+  }
 };
 
 export const applicantAgencyFieldProps: ComboBoxPropsType = {

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, UseQueryResult, useIsFetching } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import {
   Row,
@@ -74,13 +74,13 @@ const ApplicantInformationForm = () => {
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
   const [enableLocValidation, setEnableLocValidation] = useState<boolean>(false);
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
+  const [locHelper, setLocHelper] = useState<string>(pageTexts.locCodeInput.helperTextDisabled);
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
     setIsLocationCodeInvalid(isInvalid);
+    setLocHelper(pageTexts.locCodeInput.helperTextEnabled);
     setEnableLocValidation(false);
   };
-
-  const isFetchingValidation = useIsFetching({ queryKey: ['location-codes'] });
 
   useQuery({
     queryKey: ['location-codes', forestClientNumber, responseBody.applicant.number],
@@ -88,7 +88,7 @@ const ApplicantInformationForm = () => {
     enabled: enableLocValidation,
     onSuccess: () => updateAfterLocValidation(false),
     onError: () => {
-      setInvalidLocationMessage(pageTexts.invalidLocationForSelectedAgency);
+      setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationForSelectedAgency);
       updateAfterLocValidation(true);
     },
     retry: false
@@ -123,13 +123,15 @@ const ApplicantInformationForm = () => {
       && validator.isInt(applicantNumber, { min: 0, max: 99 });
 
     if (!isDoubleAndInRange) {
-      setInvalidLocationMessage(pageTexts.invalidLocationValue);
+      setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationValue);
       setIsLocationCodeInvalid(true);
       return;
     }
 
     if (forestClientNumber) {
       setEnableLocValidation(true);
+      setIsLocationCodeInvalid(false);
+      setLocHelper('');
     }
   };
 
@@ -154,10 +156,19 @@ const ApplicantInformationForm = () => {
         ...responseBody,
         applicant: {
           ...responseBody.applicant,
-          name: selectedItem
+          name: selectedItem,
+          number: selectedItem ? responseBody.applicant.number : ''
         }
       });
-      setForestClientNumber(getForestClientNumber(selectedItem));
+      if (!selectedItem) {
+        setIsLocationCodeInvalid(false);
+      }
+      setForestClientNumber(selectedItem ? getForestClientNumber(selectedItem) : '');
+      setLocHelper(
+        selectedItem
+          ? pageTexts.locCodeInput.helperTextEnabled
+          : pageTexts.locCodeInput.helperTextDisabled
+      );
     } else {
       setResponseBody({
         ...responseBody,
@@ -281,15 +292,18 @@ const ApplicantInformationForm = () => {
               value={responseBody.applicant.number}
               labelText="Applicant agency number"
               invalid={isLocationCodeInvalid}
-              placeholder="00"
+              placeholder={!forestClientNumber ? '' : '00'}
               invalidText={invalidLocationMessage}
+              disabled={!forestClientNumber}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => locationCodeChangeHandler(e)}
               onBlur={() => validateLocationCode()}
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-              helperText={isFetchingValidation ? '' : '2-digit code that identifies the address of operated office or division'}
+              helperText={locHelper}
             />
+            {/* helperText={enableLocValidation
+              ? '' : '2-digit code that identifies the address of operated office or division'} */}
             {
-              isFetchingValidation
+              enableLocValidation
                 ? <InlineLoading description="Loading..." />
                 : null
             }
