@@ -10,28 +10,28 @@ import { putFavAct, deleteFavAct } from '../../../api-service/favouriteActivitie
 import './styles.scss';
 
 interface FavouriteCardProps {
-  activity: FavActivityType,
+  favObject: FavActivityType,
   index: number
 }
 
 const FavouriteCard = ({
-  activity,
+  favObject,
   index
 }: FavouriteCardProps) => {
-  const Icon = Icons[activity.image];
+  const Icon = Icons[favObject.image];
   const navigate = useNavigate();
   const favActQueryKey = ['favourite-activities'];
   const queryClient = useQueryClient();
 
   const highlightFavAct = useMutation({
-    mutationFn: () => putFavAct('highlighted', activity),
+    mutationFn: () => putFavAct('highlighted', favObject),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: favActQueryKey });
     }
   });
 
   const removeFavAct = useMutation({
-    mutationFn: () => deleteFavAct(activity.id),
+    mutationFn: () => deleteFavAct(favObject.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: favActQueryKey });
     }
@@ -39,16 +39,16 @@ const FavouriteCard = ({
 
   return (
     <Tile
-      className={activity.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
+      className={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
       tabIndex={index}
-      onClick={() => navigate(activity.link)}
+      onClick={() => navigate(favObject.link)}
     >
       <div className="fav-card-header">
         <Icon className="fav-card-icon" />
-        <p className="fav-card-title-small">{activity.header}</p>
-        <OverflowMenu className="fav-card-overflow" aria-label={`${activity.header} options`} flipped>
+        <p className="fav-card-title-small">{favObject.header}</p>
+        <OverflowMenu className="fav-card-overflow" menuOptionsClass="fav-card-menu-options" aria-label={`${favObject.header} options`} flipped iconDescription="More actions">
           <OverflowMenuItem
-            itemText={activity.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'}
+            itemText={favObject.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'}
             onClick={(e: Event) => {
               e.stopPropagation();
               highlightFavAct.mutate();
@@ -64,8 +64,8 @@ const FavouriteCard = ({
         </OverflowMenu>
       </div>
       <div className="fav-card-content">
-        <p className="fav-card-title-large">{activity.header}</p>
-        <p className="fav-card-content-description">{activity.description}</p>
+        <p className="fav-card-title-large">{favObject.header}</p>
+        <p className="fav-card-content-description">{favObject.description}</p>
       </div>
     </Tile>
   );

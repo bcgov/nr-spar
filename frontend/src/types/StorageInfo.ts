@@ -1,7 +1,7 @@
 type StorageInfo = {
   startDate: string;
   endDate: string;
-  location: string
+  location: string;
 }
 
 export default StorageInfo;
