@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, UseQueryResult, useIsFetching } from '@tanstack/react-query';
 
 import {
   Row,
@@ -11,7 +11,8 @@ import {
   Checkbox,
   Button,
   ComboBox,
-  TextInputSkeleton
+  TextInputSkeleton,
+  InlineLoading
 } from '@carbon/react';
 import { DocumentAdd } from '@carbon/icons-react';
 import validator from 'validator';
@@ -19,18 +20,25 @@ import validator from 'validator';
 import Subtitle from '../Subtitle';
 import InputErrorText from '../InputErrorText';
 
-import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
-
+import getForestClientNumber from '../../utils/StringUtils';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
+
+import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 
 import api from '../../api-service/api';
 import ApiConfig from '../../api-service/ApiConfig';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
+import getForestClientLocation from '../../api-service/forestClientsAPI';
 
 import ComboBoxPropsType from './definitions';
-import { applicantAgencyFieldProps, speciesFieldProps, LOCATION_CODE_LIMIT } from './constants';
+import {
+  applicantAgencyFieldProps,
+  speciesFieldProps,
+  LOCATION_CODE_LIMIT,
+  pageTexts
+} from './constants';
 
 import './styles.scss';
 
@@ -60,9 +68,31 @@ const ApplicantInformationForm = () => {
   const speciesInputRef = useRef<HTMLButtonElement>(null);
 
   const [responseBody, setResponseBody] = useState<SeedlotRegistrationObj>(seedlotData);
-  const [isAgencyNumberInvalid, setIsAgencyNumberInvalid] = useState<boolean>(false);
+  const [isLocationCodeInvalid, setIsLocationCodeInvalid] = useState<boolean>(false);
   const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
   const [isSpeciesInvalid, setIsSpeciesInvalid] = useState<boolean>(false);
+  const [forestClientNumber, setForestClientNumber] = useState<string>('');
+  const [enableLocValidation, setEnableLocValidation] = useState<boolean>(false);
+  const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
+
+  const updateAfterLocValidation = (isInvalid: boolean) => {
+    setIsLocationCodeInvalid(isInvalid);
+    setEnableLocValidation(false);
+  };
+
+  const isFetchingValidation = useIsFetching({ queryKey: ['location-codes'] });
+
+  useQuery({
+    queryKey: ['location-codes', forestClientNumber, responseBody.applicant.number],
+    queryFn: () => getForestClientLocation(forestClientNumber, responseBody.applicant.number),
+    enabled: enableLocValidation,
+    onSuccess: () => updateAfterLocValidation(false),
+    onError: () => {
+      setInvalidLocationMessage(pageTexts.invalidLocationForSelectedAgency);
+      updateAfterLocValidation(true);
+    },
+    retry: false
+  });
 
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
@@ -73,6 +103,35 @@ const ApplicantInformationForm = () => {
     queryKey: ['vegetation-codes'],
     queryFn: () => getVegCodes(true)
   });
+
+  const locationCodeChangeHandler = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { value } = event.target;
+    setResponseBody({
+      ...responseBody,
+      applicant: {
+        ...responseBody.applicant,
+        number: (value.slice(0, LOCATION_CODE_LIMIT))
+      }
+    });
+  };
+
+  const validateLocationCode = () => {
+    const applicantNumber = responseBody.applicant.number;
+    const isDoubleAndInRange = applicantNumber.length === 2
+      && validator.isInt(applicantNumber, { min: 0, max: 99 });
+
+    if (!isDoubleAndInRange) {
+      setInvalidLocationMessage(pageTexts.invalidLocationValue);
+      setIsLocationCodeInvalid(true);
+      return;
+    }
+
+    if (forestClientNumber) {
+      setEnableLocValidation(true);
+    }
+  };
 
   const inputChangeHandlerApplicant = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -98,6 +157,7 @@ const ApplicantInformationForm = () => {
           name: selectedItem
         }
       });
+      setForestClientNumber(getForestClientNumber(selectedItem));
     } else {
       setResponseBody({
         ...responseBody,
@@ -122,13 +182,6 @@ const ApplicantInformationForm = () => {
     });
   };
 
-  const validateApplicantNumber = () => {
-    const applicantNumber = responseBody.applicant.number;
-    const isDoubleAndInRange = applicantNumber.length === 2
-      && validator.isInt(applicantNumber, { min: 0, max: 99 });
-    setIsAgencyNumberInvalid(!isDoubleAndInRange);
-  };
-
   const validateApplicantEmail = () => {
     if (validator.isEmail(responseBody.applicant.email)) {
       setIsEmailInvalid(false);
@@ -140,7 +193,7 @@ const ApplicantInformationForm = () => {
   const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (isAgencyNumberInvalid) {
+    if (isLocationCodeInvalid) {
       numberInputRef.current?.focus();
     } else if (isEmailInvalid) {
       emailInputRef.current?.focus();
@@ -227,14 +280,19 @@ const ApplicantInformationForm = () => {
               type="number"
               value={responseBody.applicant.number}
               labelText="Applicant agency number"
-              invalid={isAgencyNumberInvalid}
+              invalid={isLocationCodeInvalid}
               placeholder="00"
-              invalidText="Please enter a valid value between 0 and 99"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerApplicant(e)}
-              onBlur={validateApplicantNumber}
+              invalidText={invalidLocationMessage}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => locationCodeChangeHandler(e)}
+              onBlur={() => validateLocationCode()}
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-              helperText="2-digit code that identifies the address of operated office or division"
+              helperText={isFetchingValidation ? '' : '2-digit code that identifies the address of operated office or division'}
             />
+            {
+              isFetchingValidation
+                ? <InlineLoading description="Loading..." />
+                : null
+            }
           </Column>
         </Row>
         <Row className="agency-email">
