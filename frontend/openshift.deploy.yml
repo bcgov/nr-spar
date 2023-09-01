@@ -40,9 +40,6 @@ parameters:
   - name: VITE_SPAR_BUILD_VERSION
     description: Current sample app release version
     required: true
-  - name: VITE_SERVER_URL
-    description: VITE_SERVER_URL
-    required: true
   - name: VITE_NRSPARWEBAPP_VERSION
     description: VITE_NRSPARWEBAPP_VERSION
     required: true
@@ -117,7 +114,7 @@ objects:
                 - name: VITE_SPAR_BUILD_VERSION
                   value: ${VITE_SPAR_BUILD_VERSION}
                 - name: VITE_SERVER_URL
-                  value: ${VITE_SERVER_URL}
+                  value: https://${NAME}-${ZONE}-backend.${DOMAIN}
                 - name: VITE_NRSPARWEBAPP_VERSION
                   value: ${VITE_NRSPARWEBAPP_VERSION}
                 - name: VITE_KC_URL
