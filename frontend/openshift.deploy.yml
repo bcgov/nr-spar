@@ -52,9 +52,6 @@ parameters:
   - name: VITE_KC_CLIENT_ID
     description: VITE_KC_CLIENT_ID
     required: true
-  - name: VITE_ORACLE_SERVER_URL
-    description: Oracle back-end api URL
-    required: true
   - name: LOG_LEVEL
     description: Caddy log level (debug, info, warn, error, panic, fatal)
     value: "info"
@@ -124,7 +121,7 @@ objects:
                 - name: VITE_KC_CLIENT_ID
                   value: ${VITE_KC_CLIENT_ID}
                 - name: VITE_ORACLE_SERVER_URL
-                  value: ${VITE_ORACLE_SERVER_URL}
+                  value: https://${NAME}-${ZONE}-oracle-api.${DOMAIN}
                 - name: LOG_LEVEL
                   value: ${LOG_LEVEL}
               ports:
