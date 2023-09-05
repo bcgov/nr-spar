@@ -12,9 +12,7 @@ def open_json_file(file: str) -> str:
         str: Properties defined in the JSON
     """
     with open(file) as config_file:
-        return json.load(config_file)    
-    # except FileNotFoundError:
-    #     raise Exception('JSON file not found.')
+        return json.load(config_file)
 
 def get_query_from_file(path: str, file_name: str) -> str:
     """
@@ -30,8 +28,6 @@ def get_query_from_file(path: str, file_name: str) -> str:
     with open(path+file_name, 'r', encoding='utf-8') as query_file:
         query = query_file.read()
     return query
-    # except FileNotFoundError:
-    #     raise Exception('File not found')
   
 def get_inc_dt_qry_from_file(path: str, file_name: str, table_metadata: dict) -> str:
     """

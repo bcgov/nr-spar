@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import module.utils as util
+import module.metadata_handler as meta
 import module.database_connection as db_conn
 import module.data_sync_control as data_sync_ctl
 import transformations as transf
@@ -17,7 +17,7 @@ def data_sync():
     current_cwd = getcwd().split('/spar_data_sync')[0]
        
     # Loading database parameters from configuration file
-    db_config = util.open_json_file('{}/spar_data_sync/config/database_config.json'.format(current_cwd))
+    db_config = meta.open_json_file('{}/spar_data_sync/config/database_config.json'.format(current_cwd))
     
     # Loading source and target database connections parameters
     source_db_config = db_config['postgres_local']
@@ -65,8 +65,8 @@ def sync_domain(source_db_conn: object,
     
     # Defining the full path to the query files folder and loading source and target domain metadata 
     query_files_path = '{}/queries/'.format(domain_folder_path)
-    src_domain_metadata = util.open_json_file('{}/source.json'.format(domain_folder_path))
-    tgt_domain_metadata = util.open_json_file('{}/target.json'.format(domain_folder_path))
+    src_domain_metadata = meta.open_json_file('{}/source.json'.format(domain_folder_path))
+    tgt_domain_metadata = meta.open_json_file('{}/target.json'.format(domain_folder_path))
     
     domain_dfs, staging_dfs = extract_domain(source_db_conn, source_db_schema, query_files_path, domain_name, src_domain_metadata)
     domain_dfs = transform_domain(domain_dfs, staging_dfs, tgt_domain_metadata)
@@ -102,7 +102,7 @@ def extract_domain(database_conn: object,
         
     for table_name in tables_metadata:
         # Extracting all data using incremental date from last completed execution
-        table_df = pd.read_sql(util.get_inc_dt_qry_from_file(query_files_path, 
+        table_df = pd.read_sql(meta.get_inc_dt_qry_from_file(query_files_path, 
                                                              tables_metadata[table_name]['file_name'], 
                                                              tables_metadata[table_name]), 
                                database_conn.engine,
@@ -113,7 +113,7 @@ def extract_domain(database_conn: object,
             retry_df = extract_retry_records(database_conn,
                                              database_schema,
                                              domain_name,
-                                             util.get_retry_records_qry_from_file(query_files_path,
+                                             meta.get_retry_records_qry_from_file(query_files_path,
                                                                                   tables_metadata[table_name]['file_name'], 
                                                                                   tables_metadata[table_name]))
         else:
@@ -121,7 +121,7 @@ def extract_domain(database_conn: object,
             retry_df = extract_retry_records(database_conn,
                                              database_schema,
                                              table_name.lower(),
-                                             util.get_retry_records_qry_from_file(query_files_path,
+                                             meta.get_retry_records_qry_from_file(query_files_path,
                                                                                   tables_metadata[table_name]['file_name'], 
                                                                                   tables_metadata[table_name]))
         # Adding extracted table data to the dictionary
@@ -135,16 +135,16 @@ def extract_domain(database_conn: object,
         stg_table_df = pd.DataFrame()
         if stagings_metadata[table_name]['query_type'] == 'lookup' or not(domain_metadata.get('leading_column')):
             # Getting all data from lookup table - no filters applied
-            stg_table_df = pd.read_sql(util.get_query_from_file(query_files_path, stagings_metadata[table_name]['file_name']), database_conn.engine)
+            stg_table_df = pd.read_sql(meta.get_query_from_file(query_files_path, stagings_metadata[table_name]['file_name']), database_conn.engine)
         else:
             # Getting all leading values driving the domain sync
             leading_values = list_leading_values(domain_dfs, domain_metadata['leading_column'])
             for value in leading_values:
                 params = {domain_metadata['leading_column']: value}
                 # Fetching table data filtering the leading column by each leading value
-                df = pd.read_sql(util.get_staging_records_qry_from_file(query_files_path,
-                                                                      stagings_metadata[table_name]['file_name'],
-                                                                      stagings_metadata[table_name]),
+                df = pd.read_sql(meta.get_staging_records_qry_from_file(query_files_path,
+                                                                        stagings_metadata[table_name]['file_name'],
+                                                                        stagings_metadata[table_name]),
                                  database_conn.engine,
                                  params=params)
                 stg_table_df = pd.concat([stg_table_df, df]).reset_index(drop=True)
@@ -287,7 +287,7 @@ def load_domain(source_database_conn: object,
                     # Rollbacking the table loaded for the primary key if any database errors happened
                     target_database_conn.rollback()
                     # Marking the primary key that had an error for retry
-                    pk_values = util.build_stm_pk_params(tables_metadata[i], row)
+                    pk_values = meta.build_stm_pk_params(tables_metadata[i], row)
                     entity_id = {tables_metadata[i]['columns'][pk_column]: pk_values[pk_column] for pk_column in pk_values}
                     data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
                     print(e)
@@ -327,15 +327,15 @@ def upsert_record(database_conn: object,
         table_metadata (str): Table metadata as defined in the domain metadata
     """
     # Retrieve the number of records from the target table that matches the primary key
-    count_qry = util.build_select_count_qry(table_metadata)
-    params = util.build_stm_pk_params(table_metadata, row)
+    count_qry = meta.build_select_count_qry(table_metadata)
+    params = meta.build_stm_pk_params(table_metadata, row)
     record_exists = database_conn.select(count_qry, params)
     
     # If the record does not exist in the target table, the inserts it, otherwise updates it
     if record_exists.first()[0] == 0:
-        execute_stm = util.build_insert_stm(table_metadata)
+        execute_stm = meta.build_insert_stm(table_metadata)
     else:
-        execute_stm = util.build_update_stm(table_metadata)
+        execute_stm = meta.build_update_stm(table_metadata)
     
-    params = util.build_stm_params(table_metadata, row)
+    params = meta.build_stm_params(table_metadata, row)
     database_conn.execute(execute_stm, params)
