@@ -33,7 +33,6 @@ select
 	s.total_parent_trees,
 	s.smp_success_pct,
 	s.effective_pop_size,
-	s.coancestry,
 	s.smp_parents_outside,
 	-- s.non_orchard_pollen_contam_pct,
 	s.extractory_client_number,

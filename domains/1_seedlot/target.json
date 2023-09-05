@@ -82,7 +82,6 @@
                 "SMP_MEAN_BV_GROWTH": "smp_mean_bv_growth",
                 "SMP_SUCCESS_PCT": "smp_success_pct",
                 "CONTAMINANT_POLLEN_BV": "contaminant_pollen_bv",
-                "COANCESTRY": "coancestry",
                 "POLLEN_CONTAMINATION_MTHD_CODE": "pollen_contamination_mthd_code",
                 "APPLICANT_CLIENT_NUMBER": "applicant_client_number",
                 "APPLICANT_CLIENT_LOCN": "applicant_locn_code",
@@ -155,7 +154,7 @@
                 "POLLEN_COUNT": "pollen_count",
                 "SMP_SUCCESS_PCT": "smp_success_pct",
                 "NON_ORCHARD_POLLEN_CONTAM_PCT": "non_orchard_pollen_contam_pct",
-                "TOTAL_GENETIC_WORTH_CONTRIB": "total_genetic_worth_contrib",
+                "TOTAL_GENETIC_WORTH_CONTRIB": "TOTAL_GENETIC_WORTH_CONTRIB",
                 "REVISION_COUNT": "revision_count"
             }
         },

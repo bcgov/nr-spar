@@ -39,3 +39,11 @@ def seedlot_owner_quantity(df: pd.DataFrame, stage_dfs: dict) -> pd.DataFrame:
         print(e)
     finally: 
         return df
+    
+def seedlot_parent_tree(df: pd.DataFrame, stage_dfs: dict) -> pd.DataFrame:
+    try:
+        df['TOTAL_GENETIC_WORTH_CONTRIB'] = 0
+    except Exception as e:
+        print(e)
+    finally: 
+        return df
