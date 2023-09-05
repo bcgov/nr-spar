@@ -55,7 +55,7 @@ public class GeneticWorthService {
 
   /**
    * Does the calculation for each genetic trait. PS: if the treshold of 70% of contribution from
-   * the parent tree is not met, the trait will respond with zero as value growth.
+   * the parent tree is not met, the trait value will not be shown.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
@@ -71,16 +71,16 @@ public class GeneticWorthService {
     List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();
 
     for (CodeDescriptionDto trait : geneticWorths) {
-      BigDecimal volumeGrowth = null;
+      BigDecimal calculatedValue = null;
       BigDecimal percentage = checkGeneticTraitTreshold(traitsDto, trait);
 
       if (percentage.compareTo(minimumTreshold) >= 0) {
         log.info("Calculating Genetic Worth for {} trait", trait.code());
-        volumeGrowth = calculateTraitGeneticWorth(traitsDto, trait);
+        calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);
       }
 
       GeneticWorthTraitsDto traitResponse =
-          new GeneticWorthTraitsDto(trait.code(), null, volumeGrowth, percentage);
+          new GeneticWorthTraitsDto(trait.code(), null, calculatedValue, percentage);
       summaryDto.geneticTraits().add(traitResponse);
     }
 
@@ -88,8 +88,8 @@ public class GeneticWorthService {
   }
 
   /**
-   * Do the calculations for the Volume Growth (GVO). Note that in the case the parent tree does not
-   * attend the 70% treshold weight, the value for this trait will be zero;
+   * Do the calculations for each Genetic Worth trait. Note that in the case the parent tree does
+   * not attend the 70% treshold weight, the value for this trait will be zero.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values.
@@ -176,8 +176,15 @@ public class GeneticWorthService {
    */
   private BigDecimal calculatePi(
       BigDecimal pollenCount, BigDecimal coneCount, BigDecimal pollenSum, BigDecimal coneSum) {
-    BigDecimal mi = pollenCount.divide(pollenSum, 10, RoundingMode.HALF_UP);
-    BigDecimal fi = coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);
+    BigDecimal bigZero = BigDecimal.ZERO;
+    BigDecimal mi =
+        pollenSum.compareTo(bigZero) == 0
+            ? bigZero
+            : pollenCount.divide(pollenSum, 10, RoundingMode.HALF_UP);
+    BigDecimal fi =
+        coneSum.compareTo(bigZero) == 0
+            ? bigZero
+            : coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);
     return mi.add(fi).divide(new BigDecimal("2"), 10, RoundingMode.HALF_UP);
   }
 
