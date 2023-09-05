@@ -63,6 +63,27 @@
   .empty-section-icon {
     color: var(--#{vars.$bcgov-prefix}-border-interactive);
   }
+
+  .gen-worth-cal-row {
+    margin-left: 0;
+    margin-top: 2rem;
+    padding-right: 1rem;
+
+    button {
+      max-width: none;
+      width: fit-content;
+    }
+
+    .gw-calc-loading-icon {
+      position: absolute;
+      top: min((var(--#{vars.$bcgov-prefix}-layout-size-height-local) - 1rem) / 2 - 0.0625rem, var(--temp-padding-block-max));
+      right: var(--#{vars.$bcgov-prefix}-layout-density-padding-inline-local);
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+      margin-block-start: 0.0625rem;
+    }
+  }
 }
 
 .parent-tree-tab-container {

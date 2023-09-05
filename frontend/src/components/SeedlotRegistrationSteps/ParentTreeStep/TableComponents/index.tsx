@@ -3,19 +3,22 @@ import {
   OverflowMenuItem, Checkbox, TableBody, TableRow, Row, Column,
   TableCell, TextInput, ActionableNotification, Pagination
 } from '@carbon/react';
-import { pageText, pageSizesConfig } from '../constants';
+import { pageText, PageSizesConfig } from '../constants';
 import { HeaderObj, RowItem, TabTypes } from '../definitions';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { OrchardObj } from '../../OrchardStep/definitions';
 import PaginationChangeType from '../../../../types/PaginationChangeType';
 import blurOnEnter from '../../../../utils/KeyboardUtil';
+import {
+  applyValueToAll, setInputChange, toggleColumn, toggleNotification
+} from '../utils';
 
 import '../styles.scss';
 
 export const renderColOptions = (
   headerConfig: Array<HeaderObj>,
   currentTab: keyof TabTypes,
-  toggleColumn: Function
+  setHeaderConfig: Function
 ) => {
   const toggleableCols = headerConfig
     .filter((header) => header.isAnOption && header.availableInTabs.includes(currentTab));
@@ -34,7 +37,7 @@ export const renderColOptions = (
             key={header.id}
             closeMenu={() => false}
             onClick={(e: React.ChangeEvent<HTMLInputElement>) => {
-              toggleColumn(header.id, e.target.nodeName);
+              toggleColumn(header.id, e.target.nodeName, headerConfig, setHeaderConfig);
             }}
             itemText={
               (
@@ -55,7 +58,8 @@ export const renderColOptions = (
 const renderTableCell = (
   rowData: RowItem,
   header: HeaderObj,
-  setInputChange: Function
+  state: ParentTreeStepDataObj,
+  setStepData: Function
 ) => {
   const className = header.editable ? 'td-no-padding' : null;
   return (
@@ -71,7 +75,13 @@ const renderTableCell = (
               value={rowData[header.id]}
               id={`${rowData.parentTreeNumber}-${rowData[header.id]}`}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setInputChange(rowData.parentTreeNumber, header.id, event.target.value);
+                setInputChange(
+                  rowData.parentTreeNumber,
+                  header.id,
+                  event.target.value,
+                  state,
+                  setStepData
+                );
               }}
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
               onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
@@ -91,7 +101,8 @@ export const renderTableBody = (
   currentTab: keyof TabTypes,
   slicedRows: Array<RowItem>,
   headerConfig: Array<HeaderObj>,
-  setInputChange: Function
+  state: ParentTreeStepDataObj,
+  setStepData: Function
 ) => {
   if (currentTab === 'mixTab') {
     return null;
@@ -110,7 +121,7 @@ export const renderTableBody = (
                       header.availableInTabs.includes(currentTab) && header.enabled
                     ))
                     .map((header) => (
-                      renderTableCell(rowData, header, setInputChange)
+                      renderTableCell(rowData, header, state, setStepData)
                     ))
                 }
               </TableRow>
@@ -125,7 +136,7 @@ export const renderNotification = (
   state: ParentTreeStepDataObj,
   currentTab: keyof TabTypes,
   orchardsData: Array<OrchardObj>,
-  toggleNotification: Function
+  setStepData: Function
 ) => {
   if (state.notifCtrl[currentTab].showInfo && orchardsData.length > 0) {
     return (
@@ -136,7 +147,7 @@ export const renderNotification = (
         inline
         actionButtonLabel=""
         onClose={() => {
-          toggleNotification('info');
+          toggleNotification('info', state, currentTab, setStepData);
           return false;
         }}
       >
@@ -155,7 +166,7 @@ export const renderNotification = (
         title={pageText.errorNotifTitle}
         actionButtonLabel=""
         onClose={() => {
-          toggleNotification('error');
+          toggleNotification('error', state, currentTab, setStepData);
           return false;
         }}
       >
@@ -185,7 +196,7 @@ export const renderPagination = (
   return (
     <Pagination
       pageSize={currPageSize}
-      pageSizes={pageSizesConfig}
+      pageSizes={PageSizesConfig}
       itemsPerPageText=""
       totalItems={tableData.length}
       onChange={
@@ -207,7 +218,8 @@ export const renderPagination = (
 
 export const renderDefaultInputs = (
   isSMPDefaultValChecked: boolean,
-  applyValueToAll: Function
+  state: ParentTreeStepDataObj,
+  setStepData: Function
 ) => {
   if (isSMPDefaultValChecked) {
     return (
@@ -218,7 +230,7 @@ export const renderDefaultInputs = (
             type="number"
             labelText={pageText.successTab.smpInputLabel}
             onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
-              applyValueToAll('smpSuccessPerc', event.target.value);
+              applyValueToAll('smpSuccessPerc', event.target.value, state, setStepData);
             }}
             onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
               blurOnEnter(event);
@@ -231,7 +243,7 @@ export const renderDefaultInputs = (
             type="number"
             labelText={pageText.successTab.pollenCotamInputLabel}
             onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
-              applyValueToAll('nonOrchardPollenContam', event.target.value);
+              applyValueToAll('nonOrchardPollenContam', event.target.value, state, setStepData);
             }}
             onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
               blurOnEnter(event);

@@ -102,9 +102,13 @@ const getPageText = () => ({
     toggleNameBottom: 'Show weighted value',
     cleanModalHeading: getCleanTableDesc('Calculation of SMP mix')
   },
-  gwAndDiverse: {
-    title: 'Genetic worth and diversity',
-    description: 'Check the genetic worth and diversity of your seedlot'
+  popSizeAndDiverse: {
+    title: 'Effective population size and diversity',
+    description: 'Check effective population size and diversity of your seedlot'
+  },
+  gwAndTestedPerc: {
+    title: 'Genetic worth and percent of tested parent trees',
+    description: 'Check the genetic worth and percent of tested parent trees of your seedlot'
   },
   cleanModal: {
     label: 'Clean table data',
@@ -385,11 +389,11 @@ export const headerTemplate: Array<HeaderObj> = [
   }
 ];
 
-export const pageSizesConfig = [
+export const PageSizesConfig = [
   20, 40, 60, 80, 100
 ];
 
-export const summarySectionConfig = {
+export const SummarySectionConfig = {
   coneTab: {
     title: 'Summary',
     description: 'Check the parent tree contribution summary',
@@ -408,6 +412,10 @@ export const summarySectionConfig = {
     title: 'Summary',
     description: 'Check the SMP success on parent summary',
     infoItems: {
+      avgSMPSuccess: {
+        name: 'Average number of SMP success %',
+        value: EMPTY_NUMBER_STRING
+      },
       avgNonOrchardContam: {
         name: 'Average number of non-orchard pollen contam. (%)',
         value: EMPTY_NUMBER_STRING
@@ -418,21 +426,13 @@ export const summarySectionConfig = {
     totalParentTree: {
       name: 'Total number of parent trees',
       value: EMPTY_NUMBER_STRING
-    },
-    avgSMPSuccess: {
-      name: 'Average number of SMP success %',
-      value: EMPTY_NUMBER_STRING
     }
   }
 };
 
-export const gwSectionConfig: InfoSectionConfigType = {
+export const PopSizeAndDiversityConfig: InfoSectionConfigType = {
   ne: {
     name: 'Effective population size (Ne)',
-    value: EMPTY_NUMBER_STRING
-  },
-  testedParentTreeContri: {
-    name: 'Tested parent tree contribution (%)',
     value: EMPTY_NUMBER_STRING
   },
   coancestry: {
