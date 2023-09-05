@@ -32,11 +32,12 @@ import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 import getForestClientLocation from '../../api-service/forestClientsAPI';
 
+import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
+
 import ComboBoxPropsType from './definitions';
 import {
   applicantAgencyFieldProps,
   speciesFieldProps,
-  LOCATION_CODE_LIMIT,
   pageTexts
 } from './constants';
 
@@ -193,8 +194,6 @@ const ApplicantInformationForm = () => {
   };
 
   const validateApplicantEmail = () => {
-    // eslint-disable-next-line no-debugger
-    debugger;
     if (validator.isEmail(responseBody.applicant.email)) {
       setIsEmailInvalid(false);
     } else {
@@ -301,8 +300,6 @@ const ApplicantInformationForm = () => {
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
               helperText={locHelper}
             />
-            {/* helperText={enableLocValidation
-              ? '' : '2-digit code that identifies the address of operated office or division'} */}
             {
               enableLocValidation
                 ? <InlineLoading description="Loading..." />

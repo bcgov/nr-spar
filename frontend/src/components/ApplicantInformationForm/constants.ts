@@ -1,7 +1,5 @@
 import ComboBoxPropsType from './definitions';
 
-export const LOCATION_CODE_LIMIT = 2;
-
 export const pageTexts = {
   locCodeInput: {
     helperTextDisabled: 'Please select an Applicant Agency before setting the agency number',

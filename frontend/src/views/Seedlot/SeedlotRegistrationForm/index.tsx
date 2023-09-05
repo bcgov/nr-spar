@@ -19,6 +19,7 @@ import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAP
 import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
+
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
@@ -163,12 +164,12 @@ const SeedlotRegistrationForm = () => {
         return (
           <CollectionStep
             state={allStepData.collectionStep}
+            setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
             defaultAgency={defaultAgency}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
             // invalidateObj={allInvalidationObj.collectionStep}
-            setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
           />
         );
       // Ownership
