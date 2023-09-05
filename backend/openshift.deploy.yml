@@ -131,19 +131,19 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-backend
                       key: forest-client-api-key
-                - name: POSTGRESQL_HOST
+                - name: POSTGRES_HOST
                   value: ${NAME}-${ZONE}-database
-                - name: POSTGRESQL_DATABASE
+                - name: POSTGRES_DB
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-name
-                - name: POSTGRESQL_PASSWORD
+                - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-password
-                - name: POSTGRESQL_USER
+                - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
