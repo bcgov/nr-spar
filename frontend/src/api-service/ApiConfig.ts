@@ -49,6 +49,8 @@ const ApiConfig = {
 
   gameticMethodology: `${serverHost}/api/gametic-methodologies`,
 
+  geneticWorth: `${serverHost}/api/genetic-worth/calculate-all`,
+
   /**
    * ORACLE API
    */
