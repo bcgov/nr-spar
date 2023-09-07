@@ -9,6 +9,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
@@ -32,6 +33,8 @@ class SeedlotServiceTest {
 
   @Mock SeedlotStatusRepository seedlotStatusRepository;
 
+  @Mock GeneticClassRepository geneticClassRepository;
+
   @Mock LoggedUserService loggedUserService;
 
   private SeedlotService seedlotService;
@@ -40,7 +43,11 @@ class SeedlotServiceTest {
   void setup() {
     seedlotService =
         new SeedlotService(
-            seedlotRepository, seedlotSourceRepository, seedlotStatusRepository, loggedUserService);
+            seedlotRepository,
+            seedlotSourceRepository,
+            seedlotStatusRepository,
+            geneticClassRepository,
+            loggedUserService);
   }
 
   @Test
@@ -63,7 +70,7 @@ class SeedlotServiceTest {
 
     SeedlotCreateDto createDto =
         new SeedlotCreateDto(
-            "00012797", "01", "user.lastname@domain.com", "FDI", "TPT", true, true);
+            "00012797", "01", "user.lastname@domain.com", "FDI", "TPT", true, true, 'A');
 
     SeedlotCreateResponseDto response = seedlotService.createSeedlot(createDto);
 

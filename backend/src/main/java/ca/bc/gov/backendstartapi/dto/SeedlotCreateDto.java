@@ -57,4 +57,12 @@ public record SeedlotCreateDto(
             description = "Indicates whether the source of the Seedlot is within British Columbia",
             example = "true")
         @NotNull
-        Boolean bcSourceInd) {}
+        Boolean bcSourceInd,
+    @Schema(
+            description =
+            """
+            A code which represents the Genetic Quality of material (seed or cuttings). "A" class 
+            represents superior Orchard produced seed or cuttings. "B" class represents naturally 
+            collected seed or cuttings.
+            """, example = "A")
+        Character geneticClassCode) {}
