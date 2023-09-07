@@ -47,9 +47,9 @@ import {
 } from './utils';
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import './styles.scss';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 const defaultExtStorCode = '00';
 const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
