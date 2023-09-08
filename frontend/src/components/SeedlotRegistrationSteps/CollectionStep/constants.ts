@@ -21,9 +21,9 @@ const fieldsConfig = {
     name: 'locationCode',
     placeholder: 'Example: 00',
     label: 'Cone Collector location code',
-    helperTextDisabled: 'Please select an Applicant Agency before setting the agency number',
+    helperTextDisabled: 'Please select a cone collector agency before setting the location code',
     helperTextEnabled: '2-digit code that identifies the address of operated office or division',
-    invalidLocationForSelectedAgency: 'This agency number is not valid for the selected agency, please enter a valid one or change the agency',
+    invalidLocationForSelectedAgency: 'This location code is not valid for the selected agency, please enter a valid one or change the agency',
     invalidText: 'Please enter a valid 2-digit code that identifies the address of operated office or division'
   },
   collectionTitle: {

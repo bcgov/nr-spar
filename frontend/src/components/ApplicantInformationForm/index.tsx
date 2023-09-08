@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, UseQueryResult, useMutation } from '@tanstack/react-query';
 
 import {
   Row,
@@ -73,26 +73,24 @@ const ApplicantInformationForm = () => {
   const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
   const [isSpeciesInvalid, setIsSpeciesInvalid] = useState<boolean>(false);
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
-  const [enableLocValidation, setEnableLocValidation] = useState<boolean>(false);
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
   const [locHelper, setLocHelper] = useState<string>(pageTexts.locCodeInput.helperTextDisabled);
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
     setIsLocationCodeInvalid(isInvalid);
     setLocHelper(pageTexts.locCodeInput.helperTextEnabled);
-    setEnableLocValidation(false);
   };
 
-  useQuery({
-    queryKey: ['location-codes', forestClientNumber, responseBody.applicant.number],
-    queryFn: () => getForestClientLocation(forestClientNumber, responseBody.applicant.number),
-    enabled: enableLocValidation,
-    onSuccess: () => updateAfterLocValidation(false),
+  const validateLocationCodeMutation = useMutation({
+    mutationFn: (queryParams:string[]) => getForestClientLocation(
+      queryParams[0],
+      queryParams[1]
+    ),
     onError: () => {
       setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationForSelectedAgency);
       updateAfterLocValidation(true);
     },
-    retry: false
+    onSuccess: () => updateAfterLocValidation(false)
   });
 
   const applicantAgencyQuery = useQuery({
@@ -130,7 +128,7 @@ const ApplicantInformationForm = () => {
     }
 
     if (forestClientNumber) {
-      setEnableLocValidation(true);
+      validateLocationCodeMutation.mutate([forestClientNumber, applicantNumber]);
       setIsLocationCodeInvalid(false);
       setLocHelper('');
     }
@@ -301,8 +299,8 @@ const ApplicantInformationForm = () => {
               helperText={locHelper}
             />
             {
-              enableLocValidation
-                ? <InlineLoading description="Loading..." />
+              validateLocationCodeMutation.isLoading
+                ? <InlineLoading description="Validating..." />
                 : null
             }
           </Column>

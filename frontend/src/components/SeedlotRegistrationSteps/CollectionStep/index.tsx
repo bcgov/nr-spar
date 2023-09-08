@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import moment from 'moment';
 
 import {
@@ -60,7 +60,6 @@ const CollectionStep = (
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
-  const [enableLocValidation, setEnableLocValidation] = useState<boolean>(false);
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
   const [locHelper, setLocHelper] = useState<string>(fieldsConfig.code.helperTextEnabled);
 
@@ -85,19 +84,18 @@ const CollectionStep = (
       isLocationCodeInvalid: isInvalid
     });
     setLocHelper(fieldsConfig.code.helperTextEnabled);
-    setEnableLocValidation(false);
   };
 
-  useQuery({
-    queryKey: ['location-codes', forestClientNumber, state.locationCode],
-    queryFn: () => getForestClientLocation(forestClientNumber, state.locationCode),
-    enabled: enableLocValidation,
-    onSuccess: () => updateAfterLocValidation(false),
+  const validateLocationCodeMutation = useMutation({
+    mutationFn: (queryParams:string[]) => getForestClientLocation(
+      queryParams[0],
+      queryParams[1]
+    ),
     onError: () => {
       setInvalidLocationMessage(fieldsConfig.code.invalidLocationForSelectedAgency);
       updateAfterLocValidation(true);
     },
-    retry: false
+    onSuccess: () => updateAfterLocValidation(false)
   });
 
   const validateInput = (name: string) => {
@@ -254,7 +252,7 @@ const CollectionStep = (
     }
 
     if (forestClientNumber) {
-      setEnableLocValidation(true);
+      validateLocationCodeMutation.mutate([forestClientNumber, locationCode]);
       setValidationObj({
         ...validationObj,
         isLocationCodeInvalid: false
@@ -282,6 +280,11 @@ const CollectionStep = (
             checked={state.useDefaultAgencyInfo}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
+              setLocHelper(
+                !checked
+                  ? fieldsConfig.code.helperTextDisabled
+                  : fieldsConfig.code.helperTextEnabled
+              );
               handleFormInput(
                 fieldsConfig.collector.name,
                 checked ? defaultAgency : '',
@@ -342,11 +345,13 @@ const CollectionStep = (
               );
             }}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => validateLocationCode(e)}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              validateLocationCode(e);
+            }}
           />
           {
-            enableLocValidation
-              ? <InlineLoading description="Loading..." />
+            validateLocationCodeMutation.isLoading
+              ? <InlineLoading description="Validating..." />
               : null
           }
         </Column>
