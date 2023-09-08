@@ -98,9 +98,15 @@ const CollectionStep = (
     onSuccess: () => updateAfterLocValidation(false)
   });
 
-  const validateInput = (name: string) => {
+  const validateInput = (name: string, value?: string) => {
     const newValidObj = { ...validationObj };
     let isInvalid = false;
+    if (name === fieldsConfig.collector.name) {
+      if (!value) {
+        newValidObj.isLocationCodeInvalid = false;
+      }
+    }
+
     if (name === fieldsConfig.startDate.name || name === fieldsConfig.endDate.name) {
       // Have both start and end dates
       if (state.startDate !== '' && state.endDate !== '') {
@@ -155,12 +161,6 @@ const CollectionStep = (
     } else if (name === fieldsConfig.collector.name) {
       const getValue: string = (Array.isArray(value)) ? value[0] : value;
       setForestClientNumber(getValue ? getForestClientNumber(getValue) : '');
-      if (!getValue) {
-        setValidationObj({
-          ...validationObj,
-          isLocationCodeInvalid: false
-        });
-      }
       setLocHelper(
         getValue
           ? fieldsConfig.code.helperTextEnabled
@@ -168,7 +168,7 @@ const CollectionStep = (
       );
       setStepData({
         ...state,
-        [name]: (name === fieldsConfig.code.name ? value.slice(0, LOCATION_CODE_LIMIT) : value),
+        [name]: value,
         locationCode: getValue ? state.locationCode : ''
       });
     } else {
@@ -177,7 +177,7 @@ const CollectionStep = (
         [name]: (name === fieldsConfig.code.name ? value.slice(0, LOCATION_CODE_LIMIT) : value)
       });
     }
-    validateInput(name);
+    validateInput(name, (Array.isArray(value)) ? value[0] : value);
     if (optName && optValue) {
       validateInput(optName);
     }
