@@ -152,8 +152,10 @@ const SingleOwnerInfo = ({
                   : inputText.code.invalidTextValue
               }
               onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setLocationHelper('');
-                validateLocationCode.mutate([forestClientNumber, e.target.value]);
+                if (!e.target.readOnly) {
+                  setLocationHelper('');
+                  validateLocationCode.mutate([forestClientNumber, e.target.value]);
+                }
               }}
               readOnly={readOnly}
             />

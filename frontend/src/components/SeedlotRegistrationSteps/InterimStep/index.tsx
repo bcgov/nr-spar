@@ -302,7 +302,9 @@ const InterimStorage = (
             }}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              validateLocationCode(e);
+              if (!e.target.readOnly) {
+                validateLocationCode(e);
+              }
             }}
             readOnly={readOnly ?? state.useCollectorAgencyInfo}
           />
