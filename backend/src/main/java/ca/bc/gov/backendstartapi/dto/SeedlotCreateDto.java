@@ -65,4 +65,5 @@ public record SeedlotCreateDto(
             represents superior Orchard produced seed or cuttings. "B" class represents naturally 
             collected seed or cuttings.
             """, example = "A")
+            @NotNull
         Character geneticClassCode) {}
