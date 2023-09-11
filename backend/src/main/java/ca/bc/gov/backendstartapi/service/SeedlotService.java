@@ -8,6 +8,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -47,28 +48,24 @@ public class SeedlotService {
   public SeedlotCreateResponseDto createSeedlot(SeedlotCreateDto createDto) {
     log.info("Create Seedlot started.");
 
-    // !? validateNewSeelot(createDto);
-
-    Seedlot seedlot = new Seedlot(nextSeedlotNumber());
+    Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
 
     Optional<SeedlotStatusEntity> seedLotStatusEntity =
         seedlotStatusRepository.findById(Constants.CLASS_A_SEEDLOT_STATUS);
-    seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(null));
+    seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(InvalidSeedlotRequestException::new));
 
     seedlot.setApplicantClientNumber(createDto.applicantClientNumber());
     seedlot.setApplicantLocationCode(createDto.applicantLocationCode());
     seedlot.setApplicantEmailAddress(createDto.applicantEmailAddress());
     seedlot.setVegetationCode(createDto.vegetationCode());
 
-    if (!Objects.isNull(createDto.geneticClassCode())) {
-      Optional<GeneticClassEntity> classEntity =
-          geneticClassRepository.findById(createDto.geneticClassCode().toString());
-      seedlot.setGeneticClass(classEntity.get());
-    }
+    Optional<GeneticClassEntity> classEntity =
+        geneticClassRepository.findById(createDto.geneticClassCode().toString());
+    seedlot.setGeneticClass(classEntity.orElseThrow(InvalidSeedlotRequestException::new));
 
     Optional<SeedlotSourceEntity> seedlotSourceEntity =
         seedlotSourceRepository.findById(createDto.seedlotSourceCode());
-    seedlot.setSeedlotSource(seedlotSourceEntity.get());
+    seedlot.setSeedlotSource(seedlotSourceEntity.orElseThrow(InvalidSeedlotRequestException::new));
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
@@ -85,8 +82,20 @@ public class SeedlotService {
         seedlot.getId(), seedlot.getSeedlotStatus().getSeedlotStatusCode());
   }
 
-  private String nextSeedlotNumber() {
-    log.info("Retrieving the next Seedlot number");
+  /**
+   * Retrieved the next Seedlot number according to genetic class.
+   *
+   * @return A String containing the next number.
+   * @throws InvalidSeedlotRequestException in case of errors.
+   */
+  private String nextSeedlotNumber(Character seedlotClassCode) {
+    log.info("Retrieving the next class {} Seedlot number", seedlotClassCode);
+
+    if (seedlotClassCode.equals('B')) {
+      log.error("Class B Seedlots not implemented yet!");
+      throw new InvalidSeedlotRequestException();
+    }
+
     Integer seedlotNumber =
         seedlotRepository.findNextSeedlotNumber(
             Constants.CLASS_A_SEEDLOT_NUM_MIN, Constants.CLASS_A_SEEDLOT_NUM_MAX);
@@ -97,7 +106,7 @@ public class SeedlotService {
 
     seedlotNumber += 1;
 
-    log.debug("Next seedlot number: {}", seedlotNumber);
+    log.debug("Next class {} seedlot number: {}", seedlotNumber);
     return String.valueOf(seedlotNumber);
   }
 }

@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
+import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -168,7 +169,8 @@ class SeedlotEndpointTest {
           "vegetationCode": "FDI",
           "seedlotSourceCode": "TPT",
           "toBeRegistrdInd": true,
-          "bcSourceInd": true
+          "bcSourceInd": true,
+          "geneticClassCode": "A"
         }
         """;
 
@@ -182,6 +184,23 @@ class SeedlotEndpointTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.seedlotNumber").value("630001"))
         .andExpect(jsonPath("$.seedlotStatusCode").value("PND"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("createSeedlotBadRequestTest")
+  void createSeedlotBadRequestTest() throws Exception {
+    when(seedlotService.createSeedlot(any())).thenThrow(new InvalidSeedlotRequestException());
+
+    mockMvc
+        .perform(
+            post("/api/seedlots")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content("here"))
+        .andDo(print())
+        .andExpect(status().isBadRequest())
         .andReturn();
   }
 }
