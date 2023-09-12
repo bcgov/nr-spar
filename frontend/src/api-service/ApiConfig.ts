@@ -53,7 +53,6 @@ const ApiConfig = {
 
   geneticWorth: `${serverHost}/api/genetic-worth/calculate-all`,
 
-
   /**
    * ORACLE API
    */
