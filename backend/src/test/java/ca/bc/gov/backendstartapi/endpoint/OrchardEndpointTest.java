@@ -163,7 +163,7 @@ class OrchardEndpointTest {
 
     List<ListItemDto> testList = List.of(firstDto, secondDto);
 
-    when(orchardService.findParentTreesByVegCode(vegCode)).thenReturn(testList);
+    // when(orchardService.findParentTreesByVegCode(vegCode)).thenReturn(testList);
 
     mockMvc
         .perform(

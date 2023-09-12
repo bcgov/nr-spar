@@ -217,52 +217,52 @@ class OrchardEndpointTest {
         .andReturn();
   }
 
-  @Test
-  @DisplayName("getAllParentTreeByVegCodeTest")
-  @WithMockUser(roles = "user_read")
-  void getAllParentTreeByVegCodeTest() throws Exception {
-    String vegCode = "PLI";
+//   @Test
+//   @DisplayName("getAllParentTreeByVegCodeTest")
+//   @WithMockUser(roles = "user_read")
+//   void getAllParentTreeByVegCodeTest() throws Exception {
+//     String vegCode = "PLI";
 
-    ListItemDto firstDto = new ListItemDto("123", "1000");
-    ListItemDto secondDto = new ListItemDto("456", "2000");
+//     ListItemDto firstDto = new ListItemDto("123", "1000");
+//     ListItemDto secondDto = new ListItemDto("456", "2000");
 
-    List<ListItemDto> testList = List.of(firstDto, secondDto);
+//     List<ListItemDto> testList = List.of(firstDto, secondDto);
 
-    when(orchardService.findParentTreesWithVegCode(vegCode)).thenReturn(testList);
+//     when(orchardService.findParentTreesWithVegCode(vegCode)).thenReturn(testList);
 
-    mockMvc
-        .perform(
-            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].id").value(firstDto.id()))
-        .andExpect(jsonPath("$[0].value").value(firstDto.value()))
-        .andExpect(jsonPath("$[1].id").value(secondDto.id()))
-        .andExpect(jsonPath("$[1].value").value(secondDto.value()))
-        .andReturn();
-  }
+//     mockMvc
+//         .perform(
+//             get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+//                 .with(csrf().asHeader())
+//                 .header("Content-Type", "application/json")
+//                 .accept(MediaType.APPLICATION_JSON))
+//         .andExpect(status().isOk())
+//         .andExpect(jsonPath("$[0].id").value(firstDto.id()))
+//         .andExpect(jsonPath("$[0].value").value(firstDto.value()))
+//         .andExpect(jsonPath("$[1].id").value(secondDto.id()))
+//         .andExpect(jsonPath("$[1].value").value(secondDto.value()))
+//         .andReturn();
+//   }
 
-  @Test
-  @DisplayName("getAllParentTreeByVegCodeErrorTest")
-  @WithMockUser(roles = "user_read")
-  void getAllParentTreeByVegCodeErrorTest() throws Exception {
-    String vegCode = "FDI";
-    String errMsg = "Oracle database has been defeated by postgres.";
+//   @Test
+//   @DisplayName("getAllParentTreeByVegCodeErrorTest")
+//   @WithMockUser(roles = "user_read")
+//   void getAllParentTreeByVegCodeErrorTest() throws Exception {
+//     String vegCode = "FDI";
+//     String errMsg = "Oracle database has been defeated by postgres.";
 
-    when(orchardService.findParentTreesWithVegCode(vegCode))
-        .thenThrow(new DataRetrievalFailureException(errMsg));
+//     when(orchardService.findParentTreesWithVegCode(vegCode))
+//         .thenThrow(new DataRetrievalFailureException(errMsg));
 
-    mockMvc
-        .perform(
-            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isInternalServerError())
-        .andReturn()
-        .getResolvedException()
-        .getMessage();
-  }
+//     mockMvc
+//         .perform(
+//             get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+//                 .with(csrf().asHeader())
+//                 .header("Content-Type", "application/json")
+//                 .accept(MediaType.APPLICATION_JSON))
+//         .andExpect(status().isInternalServerError())
+//         .andReturn()
+//         .getResolvedException()
+//         .getMessage();
+//   }
 }

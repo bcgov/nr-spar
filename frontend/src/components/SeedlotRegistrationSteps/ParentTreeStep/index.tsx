@@ -12,7 +12,7 @@ import {
 import {
   View, Settings, Upload, Renew
 } from '@carbon/icons-react';
-import { getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
+import { getAllParentTrees } from '../../../api-service/orchardAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
@@ -135,13 +135,14 @@ const ParentTreeStep = (
   useQueries({
     queries:
       orchardsData.map((orchard) => ({
-        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.selectedItem?.code],
+        queryKey: ['orchards', 'parent-trees', 'vegetation-codes', orchard.selectedItem?.code],
         queryFn: () => (
-          getParentTreeGeneQuali(orchard.selectedItem?.code)
+          getAllParentTrees(seedlotSpecies.code)
         ),
-        onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(
+        onSuccess: (data: ParentTreeGeneticQualityType[]) => processParentTreeData(
           data,
           state,
+          orchardsData.map((o) => o.selectedItem?.code),
           currentPage,
           currPageSize,
           setSlicedRows,
