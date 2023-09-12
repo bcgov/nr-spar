@@ -1,11 +1,11 @@
 export type FavActivityType = {
   id: number;
+  type: string;
   image: string;
   header: string;
   description: string;
   link: string;
-  highlighted?: boolean;
-  activity: string;
+  highlighted: boolean;
 }
 
 export type FavActivityPostType = {

@@ -1,7 +1,5 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-labels:
-  app: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name

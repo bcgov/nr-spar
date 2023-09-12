@@ -1,22 +1,34 @@
 version: '3.9'
 
-x-var:
-  - &POSTGRES_USER
-    postgres
-  - &POSTGRES_PASSWORD
-    default
-  - &POSTGRES_DB
-    postgres
+x-db-vars: &db-vars
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: default
+  POSTGRES_DB: postgres
+
+x-frontend: &frontend
+  depends_on:
+    backend:
+      condition: service_started
+  environment:
+    VITE_SERVER_URL: http://localhost:8090
+    VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
+    VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
+    VITE_KC_REALM: standard
+    VITE_KC_CLIENT_ID: seed-planning-test-4296
+    LOG_LEVEL: debug
+  healthcheck:
+    test: wget --spider http://localhost:3000
+    interval: 10s
+    timeout: 10s
+    retries: 5
+    start_period: 10s
 
 services:
   database:
     container_name: database
     environment:
-      POSTGRES_USER: *POSTGRES_USER
-      POSTGRES_PASSWORD: *POSTGRES_PASSWORD
-      POSTGRES_DB: *POSTGRES_DB
-    volumes:
-      - /pgdata
+      <<: *db-vars
+    volumes: ["/pgdata"]
     healthcheck:
       test: pg_isready -U postgres
       interval: 5s
@@ -32,68 +44,62 @@ services:
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
       KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
-      POSTGRESQL_HOST: database
-      POSTGRESQL_DATABASE: *POSTGRES_DB
-      POSTGRESQL_USER: *POSTGRES_USER
-      POSTGRESQL_PASSWORD: *POSTGRES_PASSWORD
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-    ports:
-      - "8090:8090"
-      - "5005:5005"
+      POSTGRES_HOST: database
+      <<: *db-vars
+    ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.3-eclipse-temurin-17
     entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005"
     working_dir: /app
-    volumes:
-      - ./backend:/app:z
+    volumes: ["./backend:/app"]
+    healthcheck:
+      test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  oracle-api:
-    container_name: oracle-api
-    depends_on:
-      backend:
-        condition: service_started
-    environment:
-      NR_SPAR_ORACLE_API_VERSION: "dev"
-      SERVER_PORT: "8091"
-      DATABASE_HOST: nrcdb03.bcgov
-      DATABASE_PORT: "1543"
-      SERVICE_NAME: dbq01.nrs.bcgov
-      DATABASE_USER: proxy_fsa_spar_read_only_user
-      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
-      KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
-    ports:
-      - "8091:8091"
-    image: maven:3.9.3-eclipse-temurin-17
-    entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
-    profiles: ["oracle-api"]
-    network_mode: "host"
-    working_dir: /app
-    volumes:
-      - ./oracle-api:/app:z
+  # oracle-api:
+  #   container_name: oracle-api
+  #   profiles: ["oracle-api"]
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+  #   environment:
+  #     NR_SPAR_ORACLE_API_VERSION: "dev"
+  #     SERVER_PORT: "8091"
+  #     DATABASE_HOST: nrcdb03.bcgov
+  #     DATABASE_PORT: "1543"
+  #     SERVICE_NAME: dbq01.nrs.bcgov
+  #     DATABASE_USER: proxy_fsa_spar_read_only_user
+  #     DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+  #     KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
+  #   ports: ["8091:8091"]
+  #   image: maven:3.9.3-eclipse-temurin-17
+  #   entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
+  #   network_mode: "host"
+  #   working_dir: /app
+  #   volumes: ["./oracle-api:/app"]
+  #   healthcheck:
+  #     test: curl -f http://localhost:8091/actuator/health | grep '"status":"UP"'
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
 
   frontend:
     container_name: frontend
-    depends_on:
-      backend:
-        condition: service_started
-    environment:
-      VITE_SERVER_URL: http://localhost:8090
-      VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-      VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
-      VITE_KC_REALM: standard
-      VITE_KC_CLIENT_ID: seed-planning-test-4296
-      CHOKIDAR_USEPOLLING: true
-    ports:
-      - "3000:3000"
-    healthcheck:
-      test: wget --spider http://localhost:3000
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
+    ports: ["3000:3000"]
     image: node:18.17.1-alpine3.17
     entrypoint: sh -c "apk add --no-cache python3 g++ make && cd /app && npm i && npm run start"
     user: root
-    volumes:
-      - ./frontend:/app:z
+    volumes: ["./frontend:/app"]
+    <<: *frontend
+
+  caddy:
+    container_name: caddy
+    profiles: ["caddy"]
+    build: ./frontend
+    ports: ["3005:3000"]
+    volumes: ["./frontend/Caddyfile:/etc/caddy/Caddyfile"]
+    <<: *frontend

@@ -46,8 +46,7 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityEntity entity = new FavouriteActivityEntity();
     entity.setActivity("CREATE_A_CLASS_SEEDLOT");
-    entity.setHighlighted(false);
-    entity.setEnabled(true);
+    entity.setHighlighted(Boolean.FALSE);
     when(favouriteActivityRepository.save(any())).thenReturn(entity);
 
     FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT");
@@ -56,7 +55,6 @@ class FavouriteActivityServiceTest {
     Assertions.assertNotNull(entitySaved);
     Assertions.assertEquals("CREATE_A_CLASS_SEEDLOT", entitySaved.getActivity());
     Assertions.assertFalse(entitySaved.getHighlighted());
-    Assertions.assertTrue(entitySaved.getEnabled());
   }
 
   @Test
@@ -66,8 +64,7 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityEntity entity = new FavouriteActivityEntity();
     entity.setActivity("CREATE_A_CLASS_SEEDLOT");
-    entity.setHighlighted(false);
-    entity.setEnabled(true);
+    entity.setHighlighted(Boolean.FALSE);
     when(favouriteActivityRepository.save(any())).thenReturn(entity);
 
     FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto(null);
@@ -105,8 +102,7 @@ class FavouriteActivityServiceTest {
     FavouriteActivityEntity activityTwo = new FavouriteActivityEntity();
     List<FavouriteActivityEntity> activityEntities =
         new ArrayList<>(List.of(activityOne, activityTwo));
-    when(favouriteActivityRepository.findAllByEnabledAndUserId(true, USER_ID))
-        .thenReturn(activityEntities);
+    when(favouriteActivityRepository.findAllByUserId(USER_ID)).thenReturn(activityEntities);
 
     List<FavouriteActivityEntity> entityList =
         favouriteActivityService.getAllUserFavoriteActivities();
@@ -121,13 +117,12 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityEntity entity = new FavouriteActivityEntity();
     entity.setActivity("CREATE_A_CLASS_SEEDLOT");
-    entity.setHighlighted(false);
-    entity.setEnabled(true);
+    entity.setHighlighted(Boolean.FALSE);
     when(favouriteActivityRepository.findById(any())).thenReturn(Optional.of(entity));
 
     when(favouriteActivityRepository.save(any())).thenReturn(entity);
 
-    FavouriteActivityUpdateDto updateDto = new FavouriteActivityUpdateDto(true, true);
+    FavouriteActivityUpdateDto updateDto = new FavouriteActivityUpdateDto(Boolean.TRUE);
     FavouriteActivityEntity saved = favouriteActivityService.updateUserActivity(1L, updateDto);
 
     Assertions.assertNotNull(saved);
@@ -140,13 +135,12 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityEntity entity = new FavouriteActivityEntity();
     entity.setActivity("CREATE_A_CLASS_SEEDLOT");
-    entity.setHighlighted(false);
-    entity.setEnabled(true);
+    entity.setHighlighted(Boolean.FALSE);
     when(favouriteActivityRepository.findById(any())).thenReturn(Optional.empty());
 
     when(favouriteActivityRepository.save(any())).thenReturn(entity);
 
-    FavouriteActivityUpdateDto updateDto = new FavouriteActivityUpdateDto(true, true);
+    FavouriteActivityUpdateDto updateDto = new FavouriteActivityUpdateDto(Boolean.TRUE);
 
     Exception e =
         Assertions.assertThrows(
@@ -163,8 +157,7 @@ class FavouriteActivityServiceTest {
 
     FavouriteActivityEntity entity = new FavouriteActivityEntity();
     entity.setActivity("CREATE_A_CLASS_SEEDLOT");
-    entity.setHighlighted(false);
-    entity.setEnabled(true);
+    entity.setHighlighted(Boolean.FALSE);
     when(favouriteActivityRepository.findById(any())).thenReturn(Optional.of(entity));
 
     doNothing().when(favouriteActivityRepository).deleteById(any());

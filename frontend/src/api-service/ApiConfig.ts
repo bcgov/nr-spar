@@ -51,6 +51,9 @@ const ApiConfig = {
 
   forestClient: `${serverHost}/api/forest-clients`,
 
+  geneticWorth: `${serverHost}/api/genetic-worth/calculate-all`,
+
+
   /**
    * ORACLE API
    */

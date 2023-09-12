@@ -46,7 +46,7 @@ const App: React.FC = () => {
           />
 
           <Route
-            path="/seedlot"
+            path="/seedlots"
             element={(
               <ProtectedRoute signed={signed}>
                 <SeedlotDashboard />
@@ -55,7 +55,7 @@ const App: React.FC = () => {
           />
 
           <Route
-            path="/seedlot/register-a-class"
+            path="/seedlots/register-a-class"
             element={(
               <ProtectedRoute signed={signed}>
                 <CreateAClass />
@@ -64,7 +64,7 @@ const App: React.FC = () => {
           />
 
           <Route
-            path="/seedlot/successfully-created/:seedlot"
+            path="/seedlots/successfully-created/:seedlot"
             element={(
               <ProtectedRoute signed={signed}>
                 <SeedlotCreatedFeedback />
@@ -73,7 +73,7 @@ const App: React.FC = () => {
           />
 
           <Route
-            path="/seedlot/details/:seedlot"
+            path="/seedlots/details/:seedlot"
             element={(
               <ProtectedRoute signed={signed}>
                 <SeedlotDetails />
@@ -82,7 +82,7 @@ const App: React.FC = () => {
           />
 
           <Route
-            path="/seedlot/registration/:seedlot"
+            path="/seedlots/registration/:seedlot"
             element={(
               <ProtectedRoute signed={signed}>
                 <SeedlotRegistrationForm />
@@ -91,7 +91,7 @@ const App: React.FC = () => {
           />
 
           <Route
-            path="/seedlot/my-seedlots"
+            path="/seedlots/my-seedlots"
             element={(
               <ProtectedRoute signed={signed}>
                 <MySeedlots />
