@@ -147,6 +147,21 @@ const ParentTreeStep = (
     cacheTime: 3.5 * (60 * 60 * 1000) // data is cached 3.5 hours then deleted
   });
 
+  // Re-populate table if it is emptied by users and data is cached
+  useEffect(() => {
+    if (Object.keys(state.tableRowData).length === 0 && allParentTreeQuery.data) {
+      processParentTreeData(
+        allParentTreeQuery.data,
+        state,
+        orchardsData.map((o) => o.selectedItem?.code),
+        currentPage,
+        currPageSize,
+        setSlicedRows,
+        setStepData
+      );
+    }
+  }, [state.tableRowData]);
+
   useEffect(() => configHeaderOpt(
     geneticWorthDict,
     seedlotSpecies,
