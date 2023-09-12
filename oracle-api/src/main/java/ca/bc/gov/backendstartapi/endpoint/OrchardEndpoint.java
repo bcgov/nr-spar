@@ -184,7 +184,6 @@ public class OrchardEndpoint {
           @RequestBody
           Map<String, String> orchardSpuMap) {
     try {
-      log.info(orchardSpuMap.entrySet().toString());
       return ResponseEntity.ok(orchardService.findParentTreesWithVegCode(vegCode, orchardSpuMap));
     } catch (Exception e) {
       log.error("Orchard endpoint error from findParentTreesWithVegCode: %s", e.getMessage());

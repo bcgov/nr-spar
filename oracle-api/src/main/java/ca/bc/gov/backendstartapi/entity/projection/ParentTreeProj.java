@@ -1,9 +1,7 @@
 package ca.bc.gov.backendstartapi.entity.projection;
 
-/**
- * The projection used to get parent tree id and parent tree number from the ParentTree Repository.
- */
-public interface ParentTreeIdNumberProj {
+/** This projection consists of a mix of joined column from various tables. */
+public interface ParentTreeProj {
   Long getParentTreeId();
 
   String getParentTreeNumber();

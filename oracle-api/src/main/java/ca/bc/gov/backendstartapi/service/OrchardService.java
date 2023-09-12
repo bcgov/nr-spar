@@ -11,7 +11,7 @@ import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
-import ca.bc.gov.backendstartapi.entity.projection.ParentTreeIdNumberProj;
+import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
@@ -157,8 +157,7 @@ public class OrchardService {
       String vegCode, Map<String, String> orchardSpuMap) {
 
     // Step 1: Get all the parent trees under a species
-    List<ParentTreeIdNumberProj> parentTrees =
-        parentTreeRepository.findAllParentTreeWithVegCode(vegCode);
+    List<ParentTreeProj> parentTrees = parentTreeRepository.findAllParentTreeWithVegCode(vegCode);
 
     // Step 2: Convert projections to Dto
     List<SameSpeciesTreeDto> resultList =

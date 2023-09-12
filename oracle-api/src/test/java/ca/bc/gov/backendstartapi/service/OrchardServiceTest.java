@@ -3,25 +3,27 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
-import ca.bc.gov.backendstartapi.entity.projection.ParentTreeIdNumberProj;
+import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -304,34 +306,47 @@ class OrchardServiceTest {
         });
   }
 
-  // @Test
-  // @DisplayName("findParentTreesWithVegCodeServiceTest")
-  // void findParentTreesWithVegCodeServiceTest() {
+  @Test
+  @DisplayName("findParentTreesWithVegCodeServiceTest")
+  void findParentTreesWithVegCodeServiceTest() {
 
-  //   ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
-  //   ParentTreeIdNumberProj firstProj = factory.createProjection(ParentTreeIdNumberProj.class);
-  //   ParentTreeIdNumberProj secondProj = factory.createProjection(ParentTreeIdNumberProj.class);
+    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
+    ParentTreeProj firstProj = factory.createProjection(ParentTreeProj.class);
 
-  //   firstProj.setId(Long.valueOf(12345));
-  //   firstProj.setNumber("456");
+    firstProj.setParentTreeId(Long.valueOf(12345));
+    firstProj.setParentTreeNumber("456");
+    firstProj.setOrchardId("1");
+    firstProj.setSpu(Long.valueOf(7));
 
-  //   secondProj.setId(Long.valueOf(45678));
-  //   secondProj.setNumber("678");
+    ParentTreeProj secondProj = factory.createProjection(ParentTreeProj.class);
+    secondProj.setParentTreeId(Long.valueOf(45678));
+    secondProj.setParentTreeNumber("678");
+    secondProj.setOrchardId("1");
+    secondProj.setSpu(Long.valueOf(7));
 
-  //   List<ParentTreeIdNumberProj> repoResult = List.of(firstProj, secondProj);
+    List<ParentTreeProj> repoResult = List.of(firstProj, secondProj);
 
-  //   String vegCode = "PLI";
+    String vegCode = "PLI";
 
-  //   when(parentTreeRepository.findAllNonRetParentTreeWithVegCode(vegCode)).thenReturn(repoResult);
+    when(parentTreeRepository.findAllParentTreeWithVegCode(vegCode)).thenReturn(repoResult);
 
-  //   List<ListItemDto> listToTest = orchardService.findParentTreesWithVegCode(vegCode);
+    Map<String, String> testMap = new HashMap<>();
 
-  //   Assertions.assertEquals(repoResult.size(), listToTest.size());
+    testMap.put("1", "7");
 
-  //   Assertions.assertEquals(repoResult.get(0).getId().toString(), listToTest.get(0).id());
-  //   Assertions.assertEquals(repoResult.get(0).getNumber().toString(), listToTest.get(0).value());
+    List<SameSpeciesTreeDto> listToTest =
+        orchardService.findParentTreesWithVegCode(vegCode, testMap);
 
-  //   Assertions.assertEquals(repoResult.get(1).getId().toString(), listToTest.get(1).id());
-  //   Assertions.assertEquals(repoResult.get(1).getNumber().toString(), listToTest.get(1).value());
-  // }
+    Assertions.assertEquals(repoResult.size(), listToTest.size());
+
+    Assertions.assertEquals(
+        repoResult.get(0).getParentTreeId(), listToTest.get(0).getParentTreeId());
+    Assertions.assertEquals(
+        repoResult.get(0).getParentTreeNumber(), listToTest.get(0).getParentTreeNumber());
+
+    Assertions.assertEquals(
+        repoResult.get(1).getParentTreeId(), listToTest.get(1).getParentTreeId());
+    Assertions.assertEquals(
+        repoResult.get(1).getParentTreeNumber(), listToTest.get(1).getParentTreeNumber());
+  }
 }
