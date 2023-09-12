@@ -1,4 +1,3 @@
-import { QueryClient } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
@@ -167,22 +166,6 @@ export const processParentTreeData = (
     setSlicedRows
   );
   setStepData(modifiedState);
-};
-
-export const getParentTreesFetchStatus = (
-  orchardsData: OrchardObj[],
-  queryClient: QueryClient
-): boolean => {
-  let isFetching = false;
-  orchardsData.forEach((orchard) => {
-    const orchardId = orchard.selectedItem?.code ? orchard.selectedItem.code : '';
-    const queryKey = ['orchard', 'parent-tree-genetic-quality', orchardId];
-    const queryStatus = queryClient.getQueryState(queryKey);
-    if (!isFetching && queryStatus?.fetchStatus === 'fetching') {
-      isFetching = true;
-    }
-  });
-  return isFetching;
 };
 
 export const cleanTable = (
