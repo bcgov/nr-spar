@@ -2,18 +2,18 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import FavouriteCard from '../../components/Card/FavouriteCard';
-import '@testing-library/jest-dom/extend-expect';
 import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { FavActivityType } from '../../types/FavActivityTypes';
 
-const testActivity = {
+const testActivity: FavActivityType = {
   id: 0,
+  type: 'Unknown',
   image: 'Unknown',
   header: 'TestHeader',
   description: 'TestDescription',
   link: '#',
-  highlighted: false,
-  activity: 'SEEDLING_REQUEST'
+  highlighted: false
 }
 
 describe('the favourite card component', () => {
@@ -23,7 +23,7 @@ describe('the favourite card component', () => {
       <BrowserRouter>
         <QueryClientProvider client={qc}>
           <FavouriteCard
-            activity={testActivity}
+            favObject={testActivity}
             index={0}
           />
         </QueryClientProvider>
@@ -45,7 +45,7 @@ describe('the favourite card component', () => {
       <BrowserRouter>
         <QueryClientProvider client={qc}>
           <FavouriteCard
-            activity={highlightedAct}
+            favObject={highlightedAct}
             index={0}
           />
         </QueryClientProvider>
@@ -62,7 +62,7 @@ describe('the favourite card component', () => {
       <BrowserRouter>
         <QueryClientProvider client={qc}>
           <FavouriteCard
-            activity={testActivity}
+            favObject={testActivity}
             index={0}
           />
         </QueryClientProvider>
@@ -81,7 +81,7 @@ describe('the favourite card component', () => {
       <BrowserRouter>
         <QueryClientProvider client={qc}>
           <FavouriteCard
-            activity={testActivity}
+            favObject={testActivity}
             index={0}
           />
         </QueryClientProvider>

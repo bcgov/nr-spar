@@ -37,7 +37,6 @@ class FavouriteActivityRepositoryTest {
     Assertions.assertEquals(USER_ID, created.getUserId());
     Assertions.assertEquals("SEEDLOT_REGISTRATION", created.getActivity());
     Assertions.assertFalse(created.getHighlighted());
-    Assertions.assertTrue(created.getEnabled());
   }
 
   @Test
@@ -48,13 +47,11 @@ class FavouriteActivityRepositoryTest {
     activity.setUserId(USER_ID);
     activity.setActivity("CREATE_A_CLASS_SEEDLOT");
     activity.setHighlighted(true);
-    activity.setEnabled(false);
     FavouriteActivityEntity created = favouriteActivityRepository.save(activity);
 
     Assertions.assertEquals("CREATE_A_CLASS_SEEDLOT", created.getActivity());
     Assertions.assertEquals(USER_ID, created.getUserId());
     Assertions.assertTrue(created.getHighlighted());
-    Assertions.assertFalse(created.getEnabled());
   }
 
   @Test
@@ -80,9 +77,7 @@ class FavouriteActivityRepositoryTest {
     Assertions.assertEquals(USER_ID, activity.getUserId());
     Assertions.assertEquals("SEEDLOT_REGISTRATION", activity.getActivity());
     Assertions.assertFalse(activity.getHighlighted());
-    Assertions.assertTrue(activity.getEnabled());
 
-    activity.setEnabled(Boolean.FALSE);
     activity.setHighlighted(Boolean.TRUE);
     FavouriteActivityEntity saved = favouriteActivityRepository.save(activity);
 
@@ -91,7 +86,6 @@ class FavouriteActivityRepositoryTest {
     Assertions.assertEquals(USER_ID, saved.getUserId());
     Assertions.assertEquals("SEEDLOT_REGISTRATION", saved.getActivity());
     Assertions.assertTrue(saved.getHighlighted());
-    Assertions.assertFalse(saved.getEnabled());
   }
 
   @Test

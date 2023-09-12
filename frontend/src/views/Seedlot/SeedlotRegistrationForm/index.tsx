@@ -14,10 +14,10 @@ import {
 import { ArrowRight } from '@carbon/icons-react';
 
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
-import getPaymentMethods from '../../../api-service/paymentMethodsAPI';
+import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
-import getMaleFemaleMethodology from '../../../api-service/maleFemaleMethodologyAPI';
+import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -48,6 +48,7 @@ import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptions
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 
 import './styles.scss';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 const defaultExtStorCode = '00';
 const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
@@ -73,11 +74,6 @@ const SeedlotRegistrationForm = () => {
     queryFn: getFundingSources
   });
 
-  const paymentMethodsQuery = useQuery({
-    queryKey: ['payment-methods'],
-    queryFn: getPaymentMethods
-  });
-
   const coneCollectionMethodsQuery = useQuery({
     queryKey: ['cone-collection-methods'],
     queryFn: getConeCollectionMethod
@@ -89,9 +85,9 @@ const SeedlotRegistrationForm = () => {
     refetchOnWindowFocus: false
   });
 
-  const maleFemaleMethodologyQuery = useQuery({
-    queryKey: ['male-female-methodology'],
-    queryFn: getMaleFemaleMethodology
+  const gameticMethodologyQuery = useQuery({
+    queryKey: ['gametic-methodologies'],
+    queryFn: getGameticMethodology
   });
 
   const applicantAgencyQuery = useQuery({
@@ -113,6 +109,20 @@ const SeedlotRegistrationForm = () => {
     newData[stepName] = stepData;
     setAllStepData(newData);
   };
+
+  const methodsOfPaymentQuery = useQuery({
+    queryKey: ['methods-of-payment'],
+    queryFn: getMethodsOfPayment,
+    onSuccess: (dataArr: MultiOptionsObj[]) => {
+      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
+      const defaultMethod = defaultMethodArr.length === 0 ? null : defaultMethodArr[0];
+      if (!allStepData.ownershipStep[0].methodOfPayment) {
+        const tempOwnershipData = structuredClone(allStepData.ownershipStep);
+        tempOwnershipData[0].methodOfPayment = defaultMethod;
+        setStepData('ownershipStep', tempOwnershipData);
+      }
+    }
+  });
 
   const setInvalidState = (stepName: keyof AllStepInvalidationObj, stepInvalidData: any) => {
     const newObj = { ...allInvalidationObj };
@@ -171,7 +181,7 @@ const SeedlotRegistrationForm = () => {
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             fundingSources={getMultiOptList(fundingSourcesQuery.data)}
-            paymentMethods={getMultiOptList(paymentMethodsQuery.data)}
+            methodsOfPayment={methodsOfPaymentQuery.data ?? []}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
             setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
@@ -191,7 +201,7 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
-            gameticOptions={getMultiOptList(maleFemaleMethodologyQuery.data, true, false, true, ['isPliSpecies'])}
+            gameticOptions={getMultiOptList(gameticMethodologyQuery.data, true, false, true, ['isFemaleMethodology', 'isPliSpecies'])}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -232,9 +242,9 @@ const SeedlotRegistrationForm = () => {
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
             <Breadcrumb>
-              <BreadcrumbItem onClick={() => navigate('/seedlot')}>Seedlots</BreadcrumbItem>
-              <BreadcrumbItem onClick={() => navigate('/seedlot/my-seedlots')}>My seedlots</BreadcrumbItem>
-              <BreadcrumbItem onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate('/seedlots/my-seedlots')}>My seedlots</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
             </Breadcrumb>
           </Column>
         </Row>
@@ -263,8 +273,8 @@ const SeedlotRegistrationForm = () => {
               (
                 seedlotInfoQuery.isSuccess
                 && fundingSourcesQuery.isSuccess
-                && paymentMethodsQuery.isSuccess
-                && maleFemaleMethodologyQuery.isSuccess
+                && methodsOfPaymentQuery.isSuccess
+                && gameticMethodologyQuery.isSuccess
                 && coneCollectionMethodsQuery.isSuccess
                 && applicantAgencyQuery.isSuccess
               )
@@ -293,7 +303,7 @@ const SeedlotRegistrationForm = () => {
                       kind="secondary"
                       size="lg"
                       className="back-next-btn"
-                      onClick={() => navigate(`/seedlot/details/${seedlotNumber}`)}
+                      onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}
                     >
                       Cancel
                     </Button>

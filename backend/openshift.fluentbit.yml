@@ -12,10 +12,6 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: NAMESPACE
-    description: Target namespace reference (i.e. '9f0fbe-dev')
-    displayName: Target Namespace
-    required: true
   - name: AWS_KINESIS_STREAM
     description: AWS Kinesis Stream identifier
     required: false
@@ -28,6 +24,8 @@ parameters:
   - name: FLUENT_VERSION
     description: FluentBit version (docker tag). You may include a debug version.
     value: "2.1"
+  - name: PROMOTE
+    description: Dummy parameter used by most/all other templates in this repo
   # Parameters for logging sidecar
   - name: LOGGING_CPU_LIMIT
     description: Limit Peak CPU per pod (in millicores ex. 1000m)
@@ -163,7 +161,6 @@ objects:
     apiVersion: v1
     metadata:
       name: ${NAME}-${ZONE}-${COMPONENT}-configs
-      namespace: ${NAMESPACE}
     data:
       filters.conf: |
         [FILTER]

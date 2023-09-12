@@ -48,18 +48,17 @@ test and deploy.
 # Getting started
 
 Once you have cloned this repository, you can get the app running by typing
-`yarn install` and then `yarn start` from the project root directory. Then
+`npm install` and then `npm run start` from the project root directory. Then
 head to http://localhost:3000.
 
 Be aware of the required environment variables:
 
 ```sh
-REACT_APP_NRSPARWEBAPP_VERSION=dev
-REACT_APP_SERVER_URL=http://localhost:8090
-REACT_APP_ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-REACT_APP_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-REACT_APP_KC_REALM=standard
-REACT_APP_KC_CLIENT_ID=seed-planning-test-4296
+VITE_NRSPARWEBAPP_VERSION=dev
+VITE_SERVER_URL=http://localhost:8090
+VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
+VITE_KC_REALM=standard
+VITE_KC_CLIENT_ID=seed-planning-test-4296
 CYPRESS_USERNAME=LOAD-3-TEST
 CYPRESS_PASSWORD=[password-here]
 ```
@@ -70,7 +69,7 @@ CYPRESS_PASSWORD=[password-here]
 export $(cat .env | xargs)
 ```
 
-To run the unit tests all you need is `yarn test`. For end-to-end test you need to run `yarn cypress run` to run on console or `yarn cypress open` to use the Cypress IDE.
+To run the unit tests all you need is `npm run test`. For end-to-end test you need to run `npm run cypress run` to run on console or `npm run cypress open` to use the Cypress IDE.
 
 > Note that to run locally you'll need those environment variables: CYPRESS_USERNAME and CYPRESS_PASSWORD
 

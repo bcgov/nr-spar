@@ -65,19 +65,19 @@ const OrchardStep = ({
   // Store the orchard selection until the user has confirmed the warning modal
   const [stagedOrchard, setStagedOrchard] = useState<OrchardObj>(initialStagedOrchard);
 
-  const filterGameticOptions = (gender: string) => {
+  const filterGameticOptions = (isFemale: boolean) => {
     const result = gameticOptions
       .filter((option) => {
         if (!isPliSpecies && option.isPliSpecies) {
           return false;
         }
-        return option.code.toLowerCase().startsWith(gender);
+        return option.isFemaleMethodology === isFemale;
       });
     return result;
   };
 
-  const maleGameticOptions = useMemo(() => filterGameticOptions('m'), []);
-  const femaleGameticOptions = useMemo(() => filterGameticOptions('f'), []);
+  const maleGameticOptions = useMemo(() => filterGameticOptions(false), []);
+  const femaleGameticOptions = useMemo(() => filterGameticOptions(true), []);
 
   const addRefs = (element: HTMLInputElement, name: string) => {
     if (element !== null) {

@@ -148,7 +148,7 @@ const ApplicantInformationForm = () => {
       const url = ApiConfig.aClassSeedlot;
       api.post(url, responseBody)
         .then((response) => {
-          navigate(`/seedlot/successfully-created/${response.data.seedlotNumber}`);
+          navigate(`/seedlots/successfully-created/${response.data.seedlotNumber}`);
         })
         .catch((error) => {
           // eslint-disable-next-line

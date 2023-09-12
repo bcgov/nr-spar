@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.type.YesNoConverter;
 
-/** This class represents a Genetic Quality of an {@link ParentTree} in the database. */
+/** This class represents a Genetic Quality of an {@link ParentTreeEntity} in the database. */
 @Getter
 @Setter
 @Entity
@@ -38,8 +38,8 @@ public class ParentTreeGeneticQuality {
 
   /**
    * Indicates that the {@link #geneticQualityValue} will be used in Genetic Worth calculations if
-   * the associated {@link ParentTree} is used in Seedlot composition. Only one GQ value can be
-   * designated as such per unique combination of {@link #seedPlanningUnitId}, {@link
+   * the associated {@link ParentTreeEntity} is used in Seedlot composition. Only one GQ value can
+   * be designated as such per unique combination of {@link #seedPlanningUnitId}, {@link
    * #geneticTypeCode} and {@link #geneticWorthCode}.
    */
   @Column(name = "GENETIC_WORTH_CALC_IND", nullable = false)

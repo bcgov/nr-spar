@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 /** Makes HTTP requests to the Forest Client API server. */
 @Slf4j
@@ -43,10 +45,10 @@ public class ForestClientApiProvider implements Provider {
   }
 
   /**
-   * Fetch a forest client by its number or its acronym.
+   * Fetch a ForestClient by its number or its acronym.
    *
    * @param identifier the client number or acronym to search for
-   * @return the forest client with client number or acronym {@code identifier}, if one exists
+   * @return the ForestClient with client number or acronym {@code identifier}, if one exists
    */
   @Override
   public Optional<ForestClientDto> fetchClientByIdentifier(String identifier) {
@@ -70,10 +72,10 @@ public class ForestClientApiProvider implements Provider {
               ForestClientDto.class,
               createParamsMap("number", number));
 
-      log.info("Finished {} request - 200 OK!", PROVIDER);
+      log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByNumber");
       return Optional.of(response.getBody());
     } catch (HttpClientErrorException httpExc) {
-      log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return Optional.empty();
@@ -96,13 +98,79 @@ public class ForestClientApiProvider implements Provider {
         log.warn("More than one client found for acronym {}", acronym);
       }
 
-      log.info("Finished {} request - 200 OK!", PROVIDER);
+      log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByAcronym");
       return response.getBody().stream().findFirst();
     } catch (HttpClientErrorException httpExc) {
-      log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return Optional.empty();
+  }
+
+  /**
+   * Fetch up to the 10 first ForestClient's location by its number.
+   *
+   * @param clientNumber the ForestClient identifier to fetch their locations
+   * @return a list of {@link ForestClientLocationDto} containing the client's locations data
+   */
+  @Override
+  public List<ForestClientLocationDto> fetchLocationsByClientNumber(String clientNumber) {
+    String apiUrl = String.format("%s/clients/{clientNumber}/locations", rootUri);
+    log.info("Starting {} request to {}", PROVIDER, apiUrl);
+
+    try {
+      ResponseEntity<List<ForestClientLocationDto>> response =
+          restTemplate.exchange(
+              apiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<List<ForestClientLocationDto>>() {},
+              createParamsMap("clientNumber", clientNumber));
+
+      log.info(
+          "Finished {} request for function {} - 200 OK!",
+          PROVIDER,
+          "fetchLocationsByClientNumber");
+      return response.getBody();
+    } catch (HttpClientErrorException httpExc) {
+      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+    }
+
+    return List.of();
+  }
+
+  /**
+   * Fetch a single location of a ForestClient its number and location code.
+   *
+   * @param clientNumber the ForestClient identifier to fetch their location
+   * @param locationCode the location code that identifies the location to be fetched
+   * @return {@link ForestClientLocationDto} containing the client's location data
+   */
+  @Override
+  public ForestClientLocationDto fetchSingleClientLocation(
+      String clientNumber,
+      String locationCode) {
+    String apiUrl = String.format("%s/clients/{clientNumber}/locations/{locationCode}", rootUri);
+    log.info("Starting {} request to {}", PROVIDER, apiUrl);
+
+    try {
+      ResponseEntity<ForestClientLocationDto> response =
+          restTemplate.exchange(
+              apiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<ForestClientLocationDto>() {},
+              createParamsMap("clientNumber", clientNumber, "locationCode", locationCode));
+
+      log.info(
+          "Finished {} request for function {} - 200 OK!",
+          PROVIDER,
+          "fetchSingleClientLocation");
+      return response.getBody();
+    } catch (HttpClientErrorException httpExc) {
+      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage(), httpExc);
+    }
   }
 
   @Override

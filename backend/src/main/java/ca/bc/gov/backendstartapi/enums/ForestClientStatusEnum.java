@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A {@link DescribedEnum} of the possible status a {@link
- * ca.bc.gov.backendstartapi.dto.ForestClientDto forest client} can have.
+ * ca.bc.gov.backendstartapi.dto.ForestClientDto ForestClient} can have.
  */
 @Schema(
     description =

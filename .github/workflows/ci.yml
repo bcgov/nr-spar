@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+    types: ["opened", "reopened", "synchronize", "ready_for_review"]
   push:
     branches:
       - main
@@ -43,15 +44,16 @@ jobs:
     name: JavaScript CI
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
+    env:
+      VITE_NRSPARWEBAPP_VERSION: dev
     steps:
-      - uses: bcgov-nr/action-test-and-analyse@v0.0.1
+      - uses: bcgov-nr/action-test-and-analyse@v1.0.0
         with:
           node_version: "18.16.0"
           commands: |
-            yarn --cwd frontend --prefer-offline
-            yarn --cwd frontend run lint
-            yarn --cwd frontend build
-            yarn --cwd frontend test -u --coverage
+            npm i
+            npm run lint
+            npm run coverage
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
@@ -61,7 +63,7 @@ jobs:
             -Dsonar.sources=src/
             -Dsonar.exclusions=src/**/__test__/**/*
             -Dsonar.test.inclusions=src/**/__test__/**/*
-          sonar_project_token: ${{ secrets.SONAR_FRONTEND }}
+          sonar_token: ${{ secrets.SONAR_FRONTEND }}
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:

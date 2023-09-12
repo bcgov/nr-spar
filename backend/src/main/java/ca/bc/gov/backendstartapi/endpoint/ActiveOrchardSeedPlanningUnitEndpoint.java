@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** Rest controller to fetch relations between orchards and Seed Plan Units (SPU). */
 @RestController
 @RequestMapping(path = "/api/orchards", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-@Tag(name = "Orchard")
+@Tag(name = "Orchards")
 @RequiredArgsConstructor
 public class ActiveOrchardSeedPlanningUnitEndpoint {
 
@@ -37,7 +37,7 @@ public class ActiveOrchardSeedPlanningUnitEndpoint {
       })
   @GetMapping(path = "/{orchardId}/seed-plan-units")
   @PreAuthorize("hasRole('user_read')")
-  public List<ActiveOrchardSeedPlanningUnit> findByOrchard(
+  public List<ActiveOrchardSpuEntity> findByOrchard(
       @Parameter(description = "The identifier of an orchard") @PathVariable(name = "orchardId")
           String orchardId,
       @Parameter(description = "If the association must be active or not")
