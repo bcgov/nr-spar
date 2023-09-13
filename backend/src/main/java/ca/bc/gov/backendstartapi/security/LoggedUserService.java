@@ -2,17 +2,15 @@ package ca.bc.gov.backendstartapi.security;
 
 import ca.bc.gov.backendstartapi.exception.UserNotFoundException;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /** This class contains all user related methods and artifacts. */
 @Service
+@RequiredArgsConstructor
 public class LoggedUserService {
 
-  private UserAuthenticationHelper userAuthenticationHelper;
-
-  LoggedUserService(UserAuthenticationHelper userAuthenticationHelper) {
-    this.userAuthenticationHelper = userAuthenticationHelper;
-  }
+  private final UserAuthenticationHelper userAuthenticationHelper;
 
   /**
    * Get all user info included in the JWT decoded token.
@@ -66,5 +64,30 @@ public class LoggedUserService {
     }
 
     return userInfo.get().jwtToken();
+  }
+
+  /**
+   * Get the logged user IDIR username or Business BCeID username.
+   *
+   * @return A String containing one of the above, according to provider.
+   */
+  public String getLoggedUserIdirOrBceId() {
+    Optional<UserInfo> userInfoOp = userAuthenticationHelper.getUserInfo();
+    if (userInfoOp.isEmpty()) {
+      throw new UserNotFoundException();
+    }
+
+    UserInfo userInfo = userInfoOp.get();
+    switch (userInfo.identityProvider()) {
+      case IDIR: {
+        return userInfo.idirUsername();
+      }
+      case BUSINESS_BCEID: {
+        return userInfo.businessName();
+      }
+      default: {
+        return "";
+      }
+    }
   }
 }

@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 
 /** A registered seedlot. */
 @Entity
@@ -27,6 +28,7 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
+@ToString
 public class Seedlot implements Serializable {
 
   @Id

@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /** Entity for the list of seedlot status. */
 @Entity
@@ -15,6 +16,7 @@ import lombok.Setter;
 @Table(name = "seedlot_status_list")
 @Getter
 @Setter
+@ToString
 public class SeedlotStatusEntity extends CodeDescriptionEntity {
   @Id
   @Column(name = "seedlot_status_code", length = 3)
