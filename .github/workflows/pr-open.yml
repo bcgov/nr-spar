@@ -117,8 +117,6 @@ jobs:
             overwrite: true
             parameters:
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
-              -p VITE_SERVER_URL=https://nr-spar-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-              -p VITE_ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
               -p VITE_NRSPARWEBAPP_VERSION=dev
               -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
               -p VITE_KC_REALM=standard
