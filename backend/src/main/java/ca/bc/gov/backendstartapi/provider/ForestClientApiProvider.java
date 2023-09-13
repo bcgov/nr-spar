@@ -94,12 +94,18 @@ public class ForestClientApiProvider implements Provider {
               new ParameterizedTypeReference<List<ForestClientDto>>() {},
               createParamsMap("acronym", acronym));
 
-      if (response.getBody().size() > 1) {
+      List<ForestClientDto> dtoList = response.getBody();
+      
+      if (dtoList == null) {
+        return Optional.empty();
+      }
+
+      if (dtoList.size() > 1) {
         log.warn("More than one client found for acronym {}", acronym);
       }
 
       log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByAcronym");
-      return response.getBody().stream().findFirst();
+      return dtoList.stream().findFirst();
     } catch (HttpClientErrorException httpExc) {
       log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
