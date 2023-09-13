@@ -12,11 +12,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 
 /** Used to track the changes made in a registry. */
 @Embeddable
 @NoArgsConstructor
 @Getter
+@ToString
 public class AuditInformation implements Serializable {
 
   @Generated @Serial private static final long serialVersionUID = -4611969329464135377L;
