@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
@@ -105,7 +104,7 @@ public class OrchardService {
    * Finds all parent trees from every orchard with the provided vegCode.
    *
    * @param vegCode Orchard's identification.
-   * @return An {@link List} of {@link ParentTreeDto} from oracle-api
+   * @return An {@link List} of {@link SameSpeciesTreeDto} from oracle-api
    */
   public List<SameSpeciesTreeDto> findParentTreesByVegCode(String vegCode) {
     List<ActiveOrchardSpuEntity> spuList = findAllSpu(true);
@@ -116,8 +115,6 @@ public class OrchardService {
             spuObj ->
                 orchardSpuMap.put(
                     spuObj.getOrchardId(), String.valueOf(spuObj.getSeedPlanningUnitId())));
-
-    log.info(String.valueOf(orchardSpuMap.size()));
 
     return oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase(), orchardSpuMap);
   }
