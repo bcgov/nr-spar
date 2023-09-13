@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.service;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
@@ -14,7 +13,9 @@ import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -201,10 +202,13 @@ class OrchardServiceTest {
         new SameSpeciesTreeDto(Long.valueOf(456), "2000", "1", Long.valueOf(7), List.of());
 
     List<SameSpeciesTreeDto> testList = List.of(firstDto, secondDto);
-    when(oracleApiProvider.findParentTreesByVegCode(vegCode, any())).thenReturn(testList);
+
+    Map<String, String> testMap = new HashMap<>();
+    testMap.put("1", "1");
+    when(oracleApiProvider.findParentTreesByVegCode(vegCode, testMap)).thenReturn(testList);
 
     ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu("1", true);
-    when(orchardService.findAllSpu(any())).thenReturn(List.of(activeOrchardSpu));
+    when(orchardService.findAllSpu(true)).thenReturn(List.of(activeOrchardSpu));
 
     List<SameSpeciesTreeDto> responseFromService = orchardService.findParentTreesByVegCode(vegCode);
 
