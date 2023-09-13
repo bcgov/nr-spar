@@ -13,5 +13,7 @@ import java.util.List;
         """)
 public record GeneticWorthSummaryDto(
     @Schema(description = "Contains a list of traits.") List<GeneticWorthTraitsDto> geneticTraits,
-    @Schema(description = "The calculated value for the Effective Population Size.")
+    @Schema(
+            description = "The calculated value for the Effective Population Size.",
+            example = "2.97655")
         BigDecimal neValue) {}
