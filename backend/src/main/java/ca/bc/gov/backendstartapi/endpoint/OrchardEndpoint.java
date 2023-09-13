@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
@@ -117,7 +116,8 @@ public class OrchardEndpoint {
             description = "An array of parent tree dto.",
             content =
                 @Content(
-                    array = @ArraySchema(schema = @Schema(implementation = ListItemDto.class)),
+                    array =
+                        @ArraySchema(schema = @Schema(implementation = SameSpeciesTreeDto.class)),
                     mediaType = "application/json")),
         @ApiResponse(
             responseCode = "401",
