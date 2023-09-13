@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
@@ -202,12 +203,10 @@ class OrchardServiceTest {
         new SameSpeciesTreeDto(Long.valueOf(456), "2000", "1", Long.valueOf(7), List.of());
 
     List<SameSpeciesTreeDto> testList = List.of(firstDto, secondDto);
-
-    Map<String, String> testMap = new HashMap<>();
-    when(oracleApiProvider.findParentTreesByVegCode(vegCode, testMap)).thenReturn(testList);
+    when(oracleApiProvider.findParentTreesByVegCode(vegCode, any())).thenReturn(testList);
 
     ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu("1", true);
-    when(orchardService.findAllSpu(false)).thenReturn(List.of(activeOrchardSpu));
+    when(orchardService.findAllSpu(any())).thenReturn(List.of(activeOrchardSpu));
 
     List<SameSpeciesTreeDto> responseFromService = orchardService.findParentTreesByVegCode(vegCode);
 
