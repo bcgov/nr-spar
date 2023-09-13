@@ -206,6 +206,9 @@ class OrchardServiceTest {
     Map<String, String> testMap = new HashMap<>();
     when(oracleApiProvider.findParentTreesByVegCode(vegCode, testMap)).thenReturn(testList);
 
+    ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu("1", true);
+    when(orchardService.findAllSpu(false)).thenReturn(List.of(activeOrchardSpu));
+
     List<SameSpeciesTreeDto> responseFromService = orchardService.findParentTreesByVegCode(vegCode);
 
     Assertions.assertNotNull(responseFromService);
