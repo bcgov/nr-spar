@@ -137,11 +137,13 @@ public class OracleApiProvider implements Provider {
               requestEntity,
               new ParameterizedTypeReference<List<SameSpeciesTreeDto>>() {},
               createParamsMap("vegCode", vegCode));
-      log.info("GET parent trees by vegCode from oracle - Success response!");
+      log.info(
+          "POST spu to oracle to get parent trees with vegCode - Success response with size: {}!",
+          parentTreesResult.getBody().size());
       return parentTreesResult.getBody();
     } catch (HttpClientErrorException httpExc) {
       log.error(
-          "GET parent trees by vegCode from oracle - Response code error: {}, {}",
+          "POST spu to oracle to get parent trees with vegCode - Response code error: {}, {}",
           httpExc.getStatusCode(),
           httpExc.getMessage());
       throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
