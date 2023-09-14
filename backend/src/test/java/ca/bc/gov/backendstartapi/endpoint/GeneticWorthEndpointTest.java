@@ -177,7 +177,7 @@ class GeneticWorthEndpointTest {
   @DisplayName("calculateAll_NoData")
   @WithMockUser(roles = "user_write")
   void calculateAll_NoData() throws Exception {
-    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of());
+    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of(), BigDecimal.ZERO);
     when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
 
     mockMvc
@@ -215,7 +215,9 @@ class GeneticWorthEndpointTest {
         new GeneticWorthTraitsDto("GVO", null, new BigDecimal("55"), new BigDecimal("67"));
     GeneticWorthTraitsDto wwdTrait =
         new GeneticWorthTraitsDto("WWD", null, new BigDecimal("56"), new BigDecimal("68"));
-    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of(gvoTrait, wwdTrait));
+    BigDecimal neValue = new BigDecimal("4.92586");
+    GeneticWorthSummaryDto summaryDto =
+        new GeneticWorthSummaryDto(List.of(gvoTrait, wwdTrait), neValue);
     when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
 
     mockMvc
@@ -232,6 +234,7 @@ class GeneticWorthEndpointTest {
         .andExpect(jsonPath("$.geneticTraits[1].traitCode").value("WWD"))
         .andExpect(jsonPath("$.geneticTraits[1].calculatedValue").value("56"))
         .andExpect(jsonPath("$.geneticTraits[1].testedParentTreePerc").value("68"))
+        .andExpect(jsonPath("$.neValue").value(neValue.toString()))
         .andReturn();
   }
 }
