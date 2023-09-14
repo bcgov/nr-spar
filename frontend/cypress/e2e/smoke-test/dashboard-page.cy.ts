@@ -24,9 +24,9 @@ describe('Dashboard page test', () => {
   it('dashboard page is displayed and loads correctly', () => {
     // SPAR log in
     cy.login();
-    cy.wait(3 * 1000); // login its lagging
 
     cy.url().should('include', '/dashboard').and('not.include', '?page=');
+    cy.wait(8 * 1000); // login is lagging, remove this in the future
 
     cy.isPageTitle(NavigationLabels.Dashboard);
     cy.get('.title-section')

@@ -24,7 +24,8 @@ describe('A Class Seedlot registration flow', () => {
     // SPAR log in
     cy.login();
     cy.url().should('include', '/dashboard').and('not.include', '?page=');
-    cy.wait(4 * 1000);
+
+    cy.wait(8 * 1000); // login is lagging, remove this in the future
 
     cy.isPageTitle(NavigationLabels.Dashboard);
     // Select the “Seedlots” section from the left-hand panel

@@ -43,7 +43,6 @@ describe('Login page test', () => {
     cy.visit('/dashboard');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
-
   // it.skip('log in with BCeID and validate if after timeout the user is disconnected', () => {
   //   cy.login();
   //   // wait for 6 minutes
@@ -63,7 +62,8 @@ describe('Login page test', () => {
 
   it('log in with BCeID and validate user information', () => {
     cy.login();
-    cy.wait(2 * 1000);
+    cy.wait(8 * 1000); // login is lagging, remove this in the future
+
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('NRS Load Test-3');
