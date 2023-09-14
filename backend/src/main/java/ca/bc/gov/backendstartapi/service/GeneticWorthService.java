@@ -64,8 +64,10 @@ public class GeneticWorthService {
   public GeneticWorthSummaryDto calculateGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
     BigDecimal minimumTreshold = new BigDecimal("0.7");
+    BigDecimal neValue = calculateNe(traitsDto);
 
-    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(new ArrayList<>());
+    GeneticWorthSummaryDto summaryDto =
+        new GeneticWorthSummaryDto(new ArrayList<>(), neValue);
 
     // Iterate over all traits
     List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();
@@ -85,6 +87,31 @@ public class GeneticWorthService {
     }
 
     return summaryDto;
+  }
+
+  /**
+   * Does the Ne calculation (effective population size).
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values to be calculated.
+   * @return A {@link BigDecimal} representing the calculated value.
+   */
+  private BigDecimal calculateNe(List<GeneticWorthTraitsRequestDto> traitsDto) {
+    BigDecimal malePollenSum = reducePollenCount(traitsDto);
+    BigDecimal femaleConeSum = reduceConeCount(traitsDto);
+
+    BigDecimal piSquareSum = BigDecimal.ZERO;
+    for (GeneticWorthTraitsRequestDto dto : traitsDto) {
+      BigDecimal pi = calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);
+      BigDecimal piSquare = pi.multiply(pi);
+
+      piSquareSum = piSquareSum.add(piSquare);
+      log.debug("calculateNe - piSquareSum {}", piSquareSum);
+    }
+
+    BigDecimal neValue = BigDecimal.ONE.divide(piSquareSum, 10, RoundingMode.HALF_UP);
+    log.debug("calculateNe - neValue {}", neValue);
+    return neValue;
   }
 
   /**
