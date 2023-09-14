@@ -125,6 +125,8 @@ describe('A Class Seedlot registration flow', () => {
       .click();
     cy.get('.bx--data-table-content')
       .contains('CW - Western redcedar');
+
+  // Code commented below is to create a test in the future
   //   // Click on Complete registration
   //   cy.contains('button', 'Complete registration')
   //     .click();
