@@ -1,4 +1,3 @@
-import { QueryClient } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
@@ -126,8 +125,9 @@ export const calcSummaryItems = (
 };
 
 export const processParentTreeData = (
-  data: ParentTreeGeneticQualityType,
+  data: ParentTreeGeneticQualityType[],
   state: ParentTreeStepDataObj,
+  orchardIds: (string | undefined)[],
   currentPage: number,
   currPageSize: number,
   setSlicedRows: Function,
@@ -136,18 +136,18 @@ export const processParentTreeData = (
   const modifiedState = { ...state };
   let clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
 
-  data.parentTrees.forEach((parentTree) => {
-    if (!Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)) {
+  data.forEach((parentTree) => {
+    if (
+      !Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)
+      && orchardIds.includes(parentTree.orchardId)
+    ) {
       const newRowData: RowItem = structuredClone(rowTemplate);
       newRowData.parentTreeNumber = parentTree.parentTreeNumber;
       // Assign genetic worth values
       parentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
-        // We only care about breeding values of genetic worth
-        if (singleGenWorthObj.geneticTypeCode === 'BV') {
-          const genWorthName = singleGenWorthObj.geneticWorthCode.toLowerCase();
-          if (Object.prototype.hasOwnProperty.call(newRowData, genWorthName)) {
-            newRowData[genWorthName] = singleGenWorthObj.geneticQualityValue;
-          }
+        const genWorthName = singleGenWorthObj.geneticWorthCode.toLowerCase();
+        if (Object.prototype.hasOwnProperty.call(newRowData, genWorthName)) {
+          newRowData[genWorthName] = singleGenWorthObj.geneticQualityValue;
         }
       });
       clonedTableRowData = Object.assign(clonedTableRowData, {
@@ -166,22 +166,6 @@ export const processParentTreeData = (
     setSlicedRows
   );
   setStepData(modifiedState);
-};
-
-export const getParentTreesFetchStatus = (
-  orchardsData: OrchardObj[],
-  queryClient: QueryClient
-): boolean => {
-  let isFetching = false;
-  orchardsData.forEach((orchard) => {
-    const orchardId = orchard.selectedItem?.code ? orchard.selectedItem.code : '';
-    const queryKey = ['orchard', 'parent-tree-genetic-quality', orchardId];
-    const queryStatus = queryClient.getQueryState(queryKey);
-    if (!isFetching && queryStatus?.fetchStatus === 'fetching') {
-      isFetching = true;
-    }
-  });
-  return isFetching;
 };
 
 export const cleanTable = (
