@@ -6,13 +6,16 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -186,5 +189,31 @@ class OrchardServiceTest {
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(0, responseFromService.size());
+  }
+
+  @Test
+  @DisplayName("findParentTreesByVegCodeTest")
+  void findParentTreesByVegCodeTest() {
+    String vegCode = "FDI";
+
+    SameSpeciesTreeDto firstDto =
+        new SameSpeciesTreeDto(Long.valueOf(123), "1000", "1", Long.valueOf(7), List.of());
+    SameSpeciesTreeDto secondDto =
+        new SameSpeciesTreeDto(Long.valueOf(456), "2000", "1", Long.valueOf(7), List.of());
+
+    List<SameSpeciesTreeDto> testList = List.of(firstDto, secondDto);
+
+    Map<String, String> testMap = new HashMap<>();
+    testMap.put("1", "1");
+    when(oracleApiProvider.findParentTreesByVegCode(vegCode, testMap)).thenReturn(testList);
+
+    ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu("1", true);
+    when(orchardService.findAllSpu(true)).thenReturn(List.of(activeOrchardSpu));
+
+    List<SameSpeciesTreeDto> responseFromService = orchardService.findParentTreesByVegCode(vegCode);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(testList.size(), responseFromService.size());
+    Assertions.assertEquals(testList, responseFromService);
   }
 }

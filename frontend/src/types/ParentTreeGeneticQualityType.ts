@@ -1,4 +1,4 @@
-export enum GenWorthCodeEnum{
+export enum GenWorthCodeEnum {
   AD = 'ad',
   DFS = 'dfs',
   DFU = 'dfu',
@@ -18,17 +18,11 @@ type SingleParentTreeGeneticObj = {
   geneticQualityValue: number;
 };
 
-type ParentTreeType = {
+export type ParentTreeGeneticQualityType = {
   [key: string]: any;
   parentTreeId: number;
   parentTreeNumber: string;
+  orchardId: string;
+  spu: number;
   parentTreeGeneticQualities: Array<SingleParentTreeGeneticObj>;
-}
-
-export type ParentTreeGeneticQualityType = {
-  [key: string]: any;
-  orchardId:string;
-  vegetationCode: string;
-  seedPlanningUnitId: number;
-  parentTrees: Array<ParentTreeType>;
 }

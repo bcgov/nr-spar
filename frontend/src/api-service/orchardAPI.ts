@@ -13,12 +13,9 @@ export const getSeedPlanUnits = (orchardId: string) => {
   return api.get(url).then((res) => res.data);
 };
 
-export const getParentTreeGeneQuali = (orchardId: string | undefined) => {
-  if (orchardId) {
-    const url = `${ApiConfig.orchards}/${orchardId}/parent-tree-genetic-quality`;
-    return api.get(url).then((res) => res.data);
-  }
-  throw new Error('orchardId is undefined in url params');
+export const getAllParentTrees = (vegCode: string) => {
+  const url = `${ApiConfig.orchards}/parent-trees/vegetation-codes/${vegCode}`;
+  return api.get(url).then((res) => res.data);
 };
 
 export const getOrchardByVegCode = (vegCode: string) => {

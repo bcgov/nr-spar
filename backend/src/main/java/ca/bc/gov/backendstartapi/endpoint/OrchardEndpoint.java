@@ -1,9 +1,9 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -116,14 +116,15 @@ public class OrchardEndpoint {
             description = "An array of parent tree dto.",
             content =
                 @Content(
-                    array = @ArraySchema(schema = @Schema(implementation = ListItemDto.class)),
+                    array =
+                        @ArraySchema(schema = @Schema(implementation = SameSpeciesTreeDto.class)),
                     mediaType = "application/json")),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<ListItemDto> getAllParentTreeByVegCode(
+  public List<SameSpeciesTreeDto> getAllParentTreeByVegCode(
       @PathVariable("vegCode")
           @Pattern(regexp = "^[a-zA-Z]{1,8}$")
           @Parameter(

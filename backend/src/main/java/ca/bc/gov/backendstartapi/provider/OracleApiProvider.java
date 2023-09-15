@@ -1,12 +1,13 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
-import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -118,25 +119,31 @@ public class OracleApiProvider implements Provider {
    * @return An {@link List} of {@link ParentTreeDto}
    */
   @Override
-  public List<ListItemDto> findParentTreesByVegCode(String vegCode) {
+  public List<SameSpeciesTreeDto> findParentTreesByVegCode(
+      String vegCode, Map<String, String> orchardSpuMap) {
     String oracleApiUrl =
         String.format("%s/api/orchards/parent-trees/vegetation-codes/{vegCode}", rootUri);
 
     log.info("Starting {} - {} request to {}", PROVIDER, "findParentTreesByVegCode", oracleApiUrl);
 
+    HttpEntity<Map<String, String>> requestEntity =
+        new HttpEntity<>(orchardSpuMap, addHttpHeaders());
+
     try {
-      ResponseEntity<List<ListItemDto>> parentTreesResult =
+      ResponseEntity<List<SameSpeciesTreeDto>> parentTreesResult =
           restTemplate.exchange(
               oracleApiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
-              new ParameterizedTypeReference<List<ListItemDto>>() {},
+              HttpMethod.POST,
+              requestEntity,
+              new ParameterizedTypeReference<List<SameSpeciesTreeDto>>() {},
               createParamsMap("vegCode", vegCode));
-      log.info("GET parent trees by vegCode from oracle - Success response!");
+      log.info(
+          "POST spu to oracle to get parent trees with vegCode - Success response with size: {}!",
+          parentTreesResult.getBody().size());
       return parentTreesResult.getBody();
     } catch (HttpClientErrorException httpExc) {
       log.error(
-          "GET parent trees by vegCode from oracle - Response code error: {}, {}",
+          "POST spu to oracle to get parent trees with vegCode - Response code error: {}, {}",
           httpExc.getStatusCode(),
           httpExc.getMessage());
       throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());

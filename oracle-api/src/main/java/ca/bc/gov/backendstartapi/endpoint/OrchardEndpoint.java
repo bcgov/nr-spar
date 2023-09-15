@@ -1,9 +1,9 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -165,15 +168,23 @@ public class OrchardEndpoint {
    * @return an {@link List} of {@link ParentTreeDto}
    * @throws ResponseStatusException if error occurs
    */
-  @GetMapping(path = "/parent-trees/vegetation-codes/{vegCode}")
+  @PostMapping(
+      path = "/parent-trees/vegetation-codes/{vegCode}",
+      consumes = "application/json",
+      produces = "application/json")
   @PreAuthorize("hasRole('user_read')")
-  public ResponseEntity<List<ListItemDto>> findParentTreesWithVegCode(
+  public ResponseEntity<List<SameSpeciesTreeDto>> findParentTreesWithVegCode(
       @PathVariable("vegCode")
           @Parameter(description = "The vegetation code of an orchard.")
           @Pattern(regexp = "^[a-zA-Z]{1,8}$")
-          String vegCode) {
+          String vegCode,
+      @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "A map of <orchard_id: spu>",
+              required = true)
+          @RequestBody
+          Map<String, String> orchardSpuMap) {
     try {
-      return ResponseEntity.ok(orchardService.findParentTreesWithVegCode(vegCode));
+      return ResponseEntity.ok(orchardService.findParentTreesWithVegCode(vegCode, orchardSpuMap));
     } catch (Exception e) {
       log.error("Orchard endpoint error from findParentTreesWithVegCode: %s", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
