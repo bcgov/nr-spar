@@ -3,11 +3,13 @@ import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimSte
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
-import { RowDataDictType, NotifCtrlType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 
 export type ParentTreeStepDataObj = {
   tableRowData: RowDataDictType,
-  notifCtrl: NotifCtrlType
+  allParentTreeData: AllParentTreeMap // Contains all parent tree numbers under a species
+  mixTabData: RowDataDictType, // table row data used exclusively for SMP mix tab
+  notifCtrl: NotifCtrlType,
 }
 
 export type AllStepData = {

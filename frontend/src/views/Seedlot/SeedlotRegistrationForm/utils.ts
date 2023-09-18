@@ -4,6 +4,8 @@ import {
   validTemplate as ownerInvalidTemplate
 } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { FormInvalidationObj, OwnershipInvalidObj, ParentTreeStepDataObj } from './definitions';
 
 export const initCollectionState = (
@@ -65,14 +67,24 @@ export const initOrchardState = (): OrchardForm => (
   }
 );
 
-// {
-//   tableRowData: RowDataDictType,
-//   notifCtrl
-// }
+// Generate 20 default rows to be used in the SMP mix tab in Parent Tree step
+export const generateDefaultRows = (): RowDataDictType => {
+  const generated = {};
+  for (let i = 0; i < 20; i += 1) {
+    const newRow = getMixRowTemplate();
+    const stringIndex = String(i);
+    newRow.rowId = stringIndex;
+    Object.assign(generated, { [stringIndex]: newRow });
+  }
+  return generated;
+};
+
 export const initParentTreeState = (): ParentTreeStepDataObj => (
   {
     tableRowData: {},
-    notifCtrl: structuredClone(notificationCtrlObj)
+    mixTabData: generateDefaultRows(),
+    notifCtrl: structuredClone(notificationCtrlObj),
+    allParentTreeData: {}
   }
 );
 
