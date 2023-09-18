@@ -17,7 +17,7 @@ x-frontend: &frontend
     VITE_KC_CLIENT_ID: seed-planning-test-4296
     LOG_LEVEL: debug
   healthcheck:
-    test: wget --spider http://localhost:3000
+    test: wget --spider http://localhost:3000/index.html
     interval: 10s
     timeout: 10s
     retries: 5
