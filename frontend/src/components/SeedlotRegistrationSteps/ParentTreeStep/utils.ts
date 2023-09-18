@@ -131,8 +131,7 @@ const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
   const ptNumsInMixTab: string[] = [];
   Object.values(state.mixTabData).forEach((row) => {
     if (
-      row.parentTreeNumber
-      && row.parentTreeNumber.length
+      row.parentTreeNumber?.length
       && !row.invalidObjs.parentTreeNumber.isInvalid
     ) {
       ptNumsInMixTab.push(row.parentTreeNumber);

@@ -150,7 +150,9 @@ const FormReview = () => {
     extractionStorageStep: extractionMock,
     parentTreeStep: {
       tableRowData: {},
-      notifCtrl: {}
+      notifCtrl: {},
+      allParentTreeData: {},
+      mixTabData: {}
     }
   });
 
