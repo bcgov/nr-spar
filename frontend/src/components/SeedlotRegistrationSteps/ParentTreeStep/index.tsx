@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link } from 'react-router-dom';
-import { useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,
   TableContainer, TableToolbar, Checkbox,
@@ -12,7 +12,7 @@ import {
 import {
   View, Settings, Upload, Renew
 } from '@carbon/icons-react';
-import { getParentTreeGeneQuali } from '../../../api-service/orchardAPI';
+import { getAllParentTrees } from '../../../api-service/orchardAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
@@ -46,7 +46,6 @@ import {
   getTabString, processOrchards, combineObjectValues,
   calcSummaryItems,
   processParentTreeData,
-  getParentTreesFetchStatus,
   cleanTable,
   fillCompostitionTables,
   configHeaderOpt,
@@ -74,7 +73,6 @@ const ParentTreeStep = (
   }: ParentTreeStepProps
 ) => {
   const queryClient = useQueryClient();
-  const isQueryClientFetching = queryClient.isFetching() > 0;
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
@@ -100,7 +98,6 @@ const ParentTreeStep = (
   const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
-  const [isFetchingParentTrees, setIsFetchingParentTrees] = useState(true);
 
   // Link reference to trigger click event
   const linkRef = useRef<HTMLAnchorElement>(null);
@@ -131,29 +128,39 @@ const ParentTreeStep = (
     [state.tableRowData]
   );
 
-  // Parent tree genetic quality queries
-  useQueries({
-    queries:
-      orchardsData.map((orchard) => ({
-        queryKey: ['orchard', 'parent-tree-genetic-quality', orchard.selectedItem?.code],
-        queryFn: () => (
-          getParentTreeGeneQuali(orchard.selectedItem?.code)
-        ),
-        onSuccess: (data: ParentTreeGeneticQualityType) => processParentTreeData(
-          data,
-          state,
-          currentPage,
-          currPageSize,
-          setSlicedRows,
-          setStepData
-        )
-      }))
+  // Parent trees Query
+  const allParentTreeQuery = useQuery({
+    queryKey: ['orchards', 'parent-trees', 'vegetation-codes', seedlotSpecies.code],
+    queryFn: () => (
+      getAllParentTrees(seedlotSpecies.code)
+    ),
+    onSuccess: (data: ParentTreeGeneticQualityType[]) => processParentTreeData(
+      data,
+      state,
+      orchardsData.map((o) => o.selectedItem?.code),
+      currentPage,
+      currPageSize,
+      setSlicedRows,
+      setStepData
+    ),
+    staleTime: 3 * (60 * 60 * 1000), // will not refetch for 3 hours
+    cacheTime: 3.5 * (60 * 60 * 1000) // data is cached 3.5 hours then deleted
   });
 
-  useEffect(
-    () => setIsFetchingParentTrees(getParentTreesFetchStatus(orchardsData, queryClient)),
-    [isQueryClientFetching]
-  );
+  // Re-populate table if it is emptied by users and data is cached
+  useEffect(() => {
+    if (Object.keys(state.tableRowData).length === 0 && allParentTreeQuery.data) {
+      processParentTreeData(
+        allParentTreeQuery.data,
+        state,
+        orchardsData.map((o) => o.selectedItem?.code),
+        currentPage,
+        currPageSize,
+        setSlicedRows,
+        setStepData
+      );
+    }
+  }, [state.tableRowData]);
 
   useEffect(() => configHeaderOpt(
     geneticWorthDict,
@@ -307,7 +314,7 @@ const ParentTreeStep = (
                     </TableToolbar>
                     {
                       // Check if it's fetching parent tree data
-                      (!disableOptions && isFetchingParentTrees)
+                      (!disableOptions && allParentTreeQuery.isFetching)
                         ? (
                           <DataTableSkeleton
                             showToolbar={false}

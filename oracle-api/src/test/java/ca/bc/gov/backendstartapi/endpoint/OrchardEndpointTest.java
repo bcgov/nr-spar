@@ -4,18 +4,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -221,26 +224,32 @@ class OrchardEndpointTest {
   @DisplayName("getAllParentTreeByVegCodeTest")
   @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeTest() throws Exception {
+
+    SameSpeciesTreeDto firstDto =
+        new SameSpeciesTreeDto(Long.valueOf(123), "1000", "1", Long.valueOf(7), List.of());
+    SameSpeciesTreeDto secondDto =
+        new SameSpeciesTreeDto(Long.valueOf(456), "2000", "1", Long.valueOf(7), List.of());
+
+    List<SameSpeciesTreeDto> testList = List.of(firstDto, secondDto);
+
     String vegCode = "PLI";
+    Map<String, String> testMap = new HashMap<>();
 
-    ListItemDto firstDto = new ListItemDto("123", "1000");
-    ListItemDto secondDto = new ListItemDto("456", "2000");
-
-    List<ListItemDto> testList = List.of(firstDto, secondDto);
-
-    when(orchardService.findParentTreesWithVegCode(vegCode)).thenReturn(testList);
+    when(orchardService.findParentTreesWithVegCode(vegCode, testMap)).thenReturn(testList);
 
     mockMvc
         .perform(
-            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+            post("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
                 .with(csrf().asHeader())
+                .content(testMap.toString())
+                .contentType(MediaType.APPLICATION_JSON)
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].id").value(firstDto.id()))
-        .andExpect(jsonPath("$[0].value").value(firstDto.value()))
-        .andExpect(jsonPath("$[1].id").value(secondDto.id()))
-        .andExpect(jsonPath("$[1].value").value(secondDto.value()))
+        .andExpect(jsonPath("$[0].parentTreeId").value(firstDto.getParentTreeId()))
+        .andExpect(jsonPath("$[0].parentTreeNumber").value(firstDto.getParentTreeNumber()))
+        .andExpect(jsonPath("$[1].parentTreeId").value(secondDto.getParentTreeId()))
+        .andExpect(jsonPath("$[1].parentTreeNumber").value(secondDto.getParentTreeNumber()))
         .andReturn();
   }
 
@@ -251,13 +260,16 @@ class OrchardEndpointTest {
     String vegCode = "FDI";
     String errMsg = "Oracle database has been defeated by postgres.";
 
-    when(orchardService.findParentTreesWithVegCode(vegCode))
+    Map<String, String> testMap = new HashMap<>();
+    when(orchardService.findParentTreesWithVegCode(vegCode, testMap))
         .thenThrow(new DataRetrievalFailureException(errMsg));
 
     mockMvc
         .perform(
-            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+            post("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
                 .with(csrf().asHeader())
+                .content(testMap.toString())
+                .contentType(MediaType.APPLICATION_JSON)
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError())

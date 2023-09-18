@@ -6,11 +6,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
-import ca.bc.gov.backendstartapi.dto.ListItemDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -139,8 +141,17 @@ class OracleApiProviderTest {
         """
         [
           {
-            "id": "1003477",
-            "value": 34
+            "parentTreeId": 1003477,
+            "parentTreeNumber": "34",
+            "orchardId": "1",
+            "spu": 0,
+            "parentTreeGeneticQualities": [
+              {
+                "geneticTypeCode": "BV",
+                "geneticWorthCode": "GVO",
+                "geneticQualityValue": 18
+              }
+            ]
           }
         ]
         """;
@@ -149,11 +160,14 @@ class OracleApiProviderTest {
         .expect(requestTo(url))
         .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-    List<ListItemDto> parentTreeDtoList = oracleApiProvider.findParentTreesByVegCode(vegCode);
+    Map<String, String> testMap = new HashMap<>();
+
+    List<SameSpeciesTreeDto> parentTreeDtoList =
+        oracleApiProvider.findParentTreesByVegCode(vegCode, testMap);
 
     Assertions.assertFalse(parentTreeDtoList.isEmpty());
-    Assertions.assertEquals("1003477", parentTreeDtoList.get(0).id());
-    Assertions.assertEquals("34", parentTreeDtoList.get(0).value());
+    Assertions.assertEquals("1003477", parentTreeDtoList.get(0).getParentTreeId().toString());
+    Assertions.assertEquals("34", parentTreeDtoList.get(0).getParentTreeNumber());
   }
 
   @Test
@@ -166,11 +180,13 @@ class OracleApiProviderTest {
 
     mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.BAD_REQUEST));
 
+    Map<String, String> testMap = new HashMap<>();
+
     ResponseStatusException httpExc =
         Assertions.assertThrows(
             ResponseStatusException.class,
             () -> {
-              oracleApiProvider.findParentTreesByVegCode(vegCode);
+              oracleApiProvider.findParentTreesByVegCode(vegCode, testMap);
             });
 
     Assertions.assertEquals(HttpStatus.BAD_REQUEST, httpExc.getStatusCode());
