@@ -214,4 +214,31 @@ class GeneticWorthServiceTest {
     Assertions.assertNotNull(summaryDto);
     Assertions.assertEquals(2, summaryDto.geneticTraits().size());
   }
+
+  @Test
+  @DisplayName("calculateGeneticWorth_EmptyTest")
+  void calculateGeneticWorthTest_emptyRequest_shouldNotThrowError() {
+    LocalDate yesterday = LocalDate.now().minusDays(1L);
+    LocalDate tomorrow = LocalDate.now().plusDays(1L);
+    EffectiveDateRange dateRange = new EffectiveDateRange(yesterday, tomorrow);
+    GeneticWorthEntity gvoGw = new GeneticWorthEntity("GVO", "Volume Growth", dateRange);
+    GeneticWorthEntity wwdGw = new GeneticWorthEntity("WWD", "Wood quality", dateRange);
+    when(geneticWorthRepository.findAll()).thenReturn(List.of(gvoGw, wwdGw));
+
+    GeneticWorthSummaryDto summaryDto = geneticWorthService.calculateGeneticWorth(List.of());
+
+    Assertions.assertNotNull(summaryDto);
+    Assertions.assertEquals(2, summaryDto.geneticTraits().size());
+    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.neValue());
+    Assertions.assertEquals("GVO", summaryDto.geneticTraits().get(0).traitCode());
+    Assertions.assertNull(summaryDto.geneticTraits().get(0).traitValue());
+    Assertions.assertNull(summaryDto.geneticTraits().get(0).calculatedValue());
+    Assertions.assertEquals(
+        BigDecimal.ZERO, summaryDto.geneticTraits().get(0).testedParentTreePerc());
+    Assertions.assertEquals("WWD", summaryDto.geneticTraits().get(1).traitCode());
+    Assertions.assertNull(summaryDto.geneticTraits().get(1).traitValue());
+    Assertions.assertNull(summaryDto.geneticTraits().get(1).calculatedValue());
+    Assertions.assertEquals(
+        BigDecimal.ZERO, summaryDto.geneticTraits().get(1).testedParentTreePerc());
+  }
 }

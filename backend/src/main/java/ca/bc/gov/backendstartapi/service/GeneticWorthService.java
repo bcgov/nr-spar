@@ -109,6 +109,11 @@ public class GeneticWorthService {
       log.debug("calculateNe - piSquareSum {}", piSquareSum);
     }
 
+    if (piSquareSum.compareTo(BigDecimal.ZERO) == 0) {
+      log.debug("calculateNe - piSquareSum is zero!");
+      return BigDecimal.ZERO;
+    }
+
     BigDecimal neValue = BigDecimal.ONE.divide(piSquareSum, 10, RoundingMode.HALF_UP);
     log.debug("calculateNe - neValue {}", neValue);
     return neValue;
