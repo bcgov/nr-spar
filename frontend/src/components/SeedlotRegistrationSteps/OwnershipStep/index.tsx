@@ -187,7 +187,7 @@ const OwnershipStep = (
     } else if (name === 'ownerCode' && optionalName === 'ownerAgency') {
       // This if block is needed due to the checkbox, if unchecked, set both input to invalid
       setStepData(updatedArray);
-      validateInput(id, optionalName, optionalValue || '');
+      validateInput(id, optionalName, optionalValue ?? '');
     } else if (name === 'ownerPortion') {
       setStepData(updatedArray);
       // Prioritize single input validation
