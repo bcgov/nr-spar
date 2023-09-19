@@ -4,9 +4,9 @@ export enum GenericSelectors {
 }
 
 export enum SeedlotRegistrationSelectors {
-  SeedlotActivitiesCardTitle = '.seedlot-activities .std-card-title',
+  SeedlotActivitiesCardTitle = '.seedlot-activities-cards .std-card-title',
 }
 
 export enum NavigationSelectors {
-  NavigationSideMenu = 'nav.bcgov--side-nav__navigation .bcgov--side-nav__item',
+  NavigationSideMenu = '.bx--side-nav--ux .bx--side-nav__item'
 }
