@@ -62,7 +62,7 @@
   "scripts": {
     "start": "vite --host",
     "build": "tsc && vite build",
-    "test": "vitest",
+    "test": "vitest -u",
     "coverage": "vitest run --coverage",
     "preview": "vite preview",
     "lint": "./node_modules/.bin/eslint \"src/**\"",
