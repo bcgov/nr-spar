@@ -117,11 +117,23 @@ const ApplicantInformationForm = () => {
   };
 
   const validateLocationCode = () => {
-    const applicantNumber = responseBody.applicant.number;
-    const isDoubleAndInRange = applicantNumber.length === 2
-      && validator.isInt(applicantNumber, { min: 0, max: 99 });
+    let applicantNumber = responseBody.applicant.number;
+    const isInRange = validator.isInt(applicantNumber, { min: 0, max: 99 });
 
-    if (!isDoubleAndInRange) {
+    // Adding this check to add an extra 0 on the left, for cases where
+    // the user types values between 0 and 9
+    if (isInRange && applicantNumber.length === 1) {
+      applicantNumber = `0${applicantNumber}`;
+      setResponseBody({
+        ...responseBody,
+        applicant: {
+          ...responseBody.applicant,
+          number: applicantNumber
+        }
+      });
+    }
+
+    if (!isInRange) {
       setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationValue);
       setIsLocationCodeInvalid(true);
       return;

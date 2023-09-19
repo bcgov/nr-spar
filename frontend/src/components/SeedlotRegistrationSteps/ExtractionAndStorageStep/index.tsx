@@ -94,11 +94,21 @@ const ExtractionAndStorage = (
     event: React.ChangeEvent<HTMLInputElement>,
     section: string
   ) => {
-    const locationCode = event.target.value;
-    const isDoubleAndInRange = locationCode.length === 2
-      && validator.isInt(locationCode, { min: 0, max: 99 });
+    let locationCode = event.target.value;
+    const stepDataField = section === 'extractorFields' ? 'extractoryLocationCode' : 'seedStorageLocationCode';
+    const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
 
-    if (!isDoubleAndInRange) {
+    // Adding this check to add an extra 0 on the left, for cases where
+    // the user types values between 0 and 9
+    if (isInRange && locationCode.length === 1) {
+      locationCode = `0${locationCode}`;
+      setStepData({
+        ...state,
+        [stepDataField]: locationCode
+      });
+    }
+
+    if (!isInRange) {
       setLocValidationObj({
         ...locValidationObj,
         [section]: {
