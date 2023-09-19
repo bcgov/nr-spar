@@ -67,7 +67,7 @@
     "preview": "vite preview",
     "lint": "./node_modules/.bin/eslint \"src/**\"",
     "cy:open": "cypress open",
-    "cy:run": "cypress run"
+    "cy:run": "cypress run --browser chrome"
   },
   "eslintConfig": {
     "extends": [
