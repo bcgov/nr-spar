@@ -233,10 +233,12 @@ class GeneticWorthServiceTest {
     Assertions.assertEquals("GVO", summaryDto.geneticTraits().get(0).traitCode());
     Assertions.assertNull(summaryDto.geneticTraits().get(0).traitValue());
     Assertions.assertNull(summaryDto.geneticTraits().get(0).calculatedValue());
-    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.geneticTraits().get(0).testedParentTreePerc());
+    Assertions.assertEquals(
+        BigDecimal.ZERO, summaryDto.geneticTraits().get(0).testedParentTreePerc());
     Assertions.assertEquals("WWD", summaryDto.geneticTraits().get(1).traitCode());
     Assertions.assertNull(summaryDto.geneticTraits().get(1).traitValue());
     Assertions.assertNull(summaryDto.geneticTraits().get(1).calculatedValue());
-    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.geneticTraits().get(1).testedParentTreePerc());
+    Assertions.assertEquals(
+        BigDecimal.ZERO, summaryDto.geneticTraits().get(1).testedParentTreePerc());
   }
 }
