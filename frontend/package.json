@@ -6,7 +6,7 @@
     "@babel/core": "^7.20.12",
     "@babel/plugin-syntax-flow": "^7.18.6",
     "@babel/plugin-transform-react-jsx": "^7.21.0",
-    "@bcgov-nr/nr-fsa-theme": "^1.1.2",
+    "@bcgov-nr/nr-fsa-theme": "^1.2.0",
     "@carbon/icons-react": "^11.9.0",
     "@carbon/pictograms-react": "^11.38.0",
     "@carbon/react": "^1.22.0",
