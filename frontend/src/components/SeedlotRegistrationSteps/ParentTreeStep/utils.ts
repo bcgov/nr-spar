@@ -11,7 +11,7 @@ import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistratio
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
-import { GenWorthCalcPayload, GeneticTrait } from '../../../types/GeneticWorthTypes';
+import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -325,13 +325,17 @@ export const setInputChange = (
   setStepData(clonedState);
 };
 
-export const fillGwInfo = (
-  geneticTraits: GeneticTrait[],
+export const fillCalculatedInfo = (
+  res: AxiosResponse,
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
-  setGenWorthInfoItems: Function
+  setGenWorthInfoItems: Function,
+  popSizeAndDiversityConfig: Record<string, any>,
+  setPopSizeAndDiversity: Function
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
+  const { geneticTraits, neValue }: CalcPayloadResType = res.data;
+  // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
     const traitIndex = geneticTraits.map((trait) => trait.traitCode).indexOf(upperCaseCode);
@@ -349,6 +353,11 @@ export const fillGwInfo = (
     }
   });
   setGenWorthInfoItems(tempGenWorthItems);
+
+  // Fill in Ne value
+  const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
+  newPopAndDiversityConfig.ne.value = neValue.toFixed(1);
+  setPopSizeAndDiversity(newPopAndDiversityConfig);
 };
 
 export const generateGenWorthPayload = (

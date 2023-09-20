@@ -49,7 +49,7 @@ import {
   cleanTable,
   fillCompostitionTables,
   configHeaderOpt,
-  fillGwInfo,
+  fillCalculatedInfo,
   generateGenWorthPayload
 } from './utils';
 
@@ -84,7 +84,7 @@ const ParentTreeStep = (
     sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true, 'parentTreeNumber')
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
-  const [popSizeAndDiversityConfig] = useState(
+  const [popSizeAndDiversityConfig, setPopSizeAndDiversity] = useState(
     structuredClone(PopSizeAndDiversityConfig)
   );
   const [
@@ -186,7 +186,13 @@ const ParentTreeStep = (
 
   const calculateGenWorthQuery = useMutation({
     mutationFn: (data: GenWorthCalcPayload[]) => postForCalculation(data),
-    onSuccess: (res) => fillGwInfo(res.data.geneticTraits, genWorthInfoItems, setGenWorthInfoItems)
+    onSuccess: (res) => fillCalculatedInfo(
+      res,
+      genWorthInfoItems,
+      setGenWorthInfoItems,
+      popSizeAndDiversityConfig,
+      setPopSizeAndDiversity
+    )
   });
 
   return (
