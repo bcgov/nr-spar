@@ -74,11 +74,13 @@ const ApplicantInformationForm = () => {
   const [isSpeciesInvalid, setIsSpeciesInvalid] = useState<boolean>(false);
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
-  const [locHelper, setLocHelper] = useState<string>(pageTexts.locCodeInput.helperTextDisabled);
+  const [locationCodeHelper, setLocationCodeHelper] = useState<string>(
+    pageTexts.locCodeInput.helperTextDisabled
+  );
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
     setIsLocationCodeInvalid(isInvalid);
-    setLocHelper(pageTexts.locCodeInput.helperTextEnabled);
+    setLocationCodeHelper(pageTexts.locCodeInput.helperTextEnabled);
   };
 
   const validateLocationCodeMutation = useMutation({
@@ -142,7 +144,7 @@ const ApplicantInformationForm = () => {
     if (forestClientNumber) {
       validateLocationCodeMutation.mutate([forestClientNumber, applicantNumber]);
       setIsLocationCodeInvalid(false);
-      setLocHelper('');
+      setLocationCodeHelper('');
     }
   };
 
@@ -174,7 +176,7 @@ const ApplicantInformationForm = () => {
         setIsLocationCodeInvalid(false);
       }
       setForestClientNumber(selectedItem ? getForestClientNumber(selectedItem) : '');
-      setLocHelper(
+      setLocationCodeHelper(
         selectedItem
           ? pageTexts.locCodeInput.helperTextEnabled
           : pageTexts.locCodeInput.helperTextDisabled
@@ -308,7 +310,7 @@ const ApplicantInformationForm = () => {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => locationCodeChangeHandler(e)}
               onBlur={() => validateLocationCode()}
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-              helperText={locHelper}
+              helperText={locationCodeHelper}
             />
             {
               validateLocationCodeMutation.isLoading

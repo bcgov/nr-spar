@@ -72,11 +72,11 @@ export const initLocationValidateObj: ValidateLocationType = {
   extractorFields: {
     forestClientNumber: '',
     invalidLocationMessage: '',
-    locHelper: inputText.extractorCode.helperTextEnabled
+    locationCodeHelper: inputText.extractorCode.helperTextEnabled
   },
   storageFields: {
     forestClientNumber: '',
     invalidLocationMessage: '',
-    locHelper: inputText.storageCode.helperTextEnabled
+    locationCodeHelper: inputText.storageCode.helperTextEnabled
   }
 };

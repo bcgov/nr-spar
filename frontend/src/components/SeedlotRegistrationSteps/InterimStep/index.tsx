@@ -72,7 +72,9 @@ const InterimStorage = (
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
-  const [locHelper, setLocHelper] = useState<string>(pageTexts.locationCode.helperTextEnabled);
+  const [locationCodeHelper, setLocationCodeHelper] = useState<string>(
+    pageTexts.locationCode.helperTextEnabled
+  );
 
   const [otherRadioChecked, setOtherChecked] = useState(false);
 
@@ -81,7 +83,7 @@ const InterimStorage = (
       ...validationObj,
       isCodeInvalid: isInvalid
     });
-    setLocHelper(pageTexts.locationCode.helperTextEnabled);
+    setLocationCodeHelper(pageTexts.locationCode.helperTextEnabled);
   };
 
   const validateLocationCodeMutation = useMutation({
@@ -125,7 +127,7 @@ const InterimStorage = (
         ...validationObj,
         isCodeInvalid: false
       });
-      setLocHelper('');
+      setLocationCodeHelper('');
     }
   };
 
@@ -185,7 +187,7 @@ const InterimStorage = (
       setStepData(newState);
     } else if (name === 'agencyName') {
       setForestClientNumber(value ? getForestClientNumber(value) : '');
-      setLocHelper(
+      setLocationCodeHelper(
         value
           ? pageTexts.locationCode.helperTextEnabled
           : pageTexts.locationCode.helperTextDisabled
@@ -255,7 +257,7 @@ const InterimStorage = (
             checked={state.useCollectorAgencyInfo}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
-              setLocHelper(
+              setLocationCodeHelper(
                 !checked
                   ? pageTexts.locationCode.helperTextDisabled
                   : pageTexts.locationCode.helperTextEnabled
@@ -302,7 +304,7 @@ const InterimStorage = (
             type="number"
             placeholder={!forestClientNumber ? '' : 'Example: 00'}
             labelText="Interim agency location code"
-            helperText={locHelper}
+            helperText={locationCodeHelper}
             invalid={validationObj.isCodeInvalid}
             invalidText={invalidLocationMessage}
             disabled={!forestClientNumber}

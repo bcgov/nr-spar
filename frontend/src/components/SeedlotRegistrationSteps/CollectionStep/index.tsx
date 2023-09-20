@@ -61,7 +61,9 @@ const CollectionStep = (
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
-  const [locHelper, setLocHelper] = useState<string>(fieldsConfig.code.helperTextEnabled);
+  const [locationCodeHelper, setLocationCodeHelper] = useState<string>(
+    fieldsConfig.code.helperTextEnabled
+  );
 
   // Commenting this for now until we decide how to deal
   // with the 'other' option
@@ -83,7 +85,7 @@ const CollectionStep = (
       ...validationObj,
       isLocationCodeInvalid: isInvalid
     });
-    setLocHelper(fieldsConfig.code.helperTextEnabled);
+    setLocationCodeHelper(fieldsConfig.code.helperTextEnabled);
   };
 
   const validateLocationCodeMutation = useMutation({
@@ -161,7 +163,7 @@ const CollectionStep = (
     } else if (name === fieldsConfig.collector.name) {
       const getValue: string = (Array.isArray(value)) ? value[0] : value;
       setForestClientNumber(getValue ? getForestClientNumber(getValue) : '');
-      setLocHelper(
+      setLocationCodeHelper(
         getValue
           ? fieldsConfig.code.helperTextEnabled
           : fieldsConfig.code.helperTextDisabled
@@ -266,7 +268,7 @@ const CollectionStep = (
         ...validationObj,
         isLocationCodeInvalid: false
       });
-      setLocHelper('');
+      setLocationCodeHelper('');
     }
   };
 
@@ -289,7 +291,7 @@ const CollectionStep = (
             checked={state.useDefaultAgencyInfo}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
-              setLocHelper(
+              setLocationCodeHelper(
                 !checked
                   ? fieldsConfig.code.helperTextDisabled
                   : fieldsConfig.code.helperTextEnabled
@@ -342,7 +344,7 @@ const CollectionStep = (
             type="number"
             placeholder={!forestClientNumber ? '' : fieldsConfig.code.placeholder}
             labelText={fieldsConfig.code.label}
-            helperText={locHelper}
+            helperText={locationCodeHelper}
             invalid={validationObj.isLocationCodeInvalid}
             invalidText={invalidLocationMessage}
             readOnly={state.useDefaultAgencyInfo || readOnly}

@@ -24,6 +24,6 @@ export type ValidateLocationType = {
   [key: string]: {
     forestClientNumber: string,
     invalidLocationMessage: string,
-    locHelper: string
+    locationCodeHelper: string
   }
 };

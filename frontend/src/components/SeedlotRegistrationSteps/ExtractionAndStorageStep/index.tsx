@@ -75,7 +75,7 @@ const ExtractionAndStorage = (
       ...locValidationObj,
       [currentSection]: {
         ...locValidationObj[currentSection],
-        locHelper: inputText.extractorCode.helperTextEnabled,
+        locationCodeHelper: inputText.extractorCode.helperTextEnabled,
         invalidLocationMessage: isInvalid ? inputText.extractorCode.invalidLocationForSelectedAgency : ''
       }
     });
@@ -128,7 +128,7 @@ const ExtractionAndStorage = (
         ...locValidationObj,
         [section]: {
           ...locValidationObj[section],
-          locHelper: ''
+          locationCodeHelper: ''
         }
       });
       setValidationObj({
@@ -214,7 +214,7 @@ const ExtractionAndStorage = (
         [section]: {
           ...locValidationObj[section],
           forestClientNumber: value ? getForestClientNumber(value as string) : '',
-          locHelper:
+          locationCodeHelper:
             value
               ? inputText.extractorCode.helperTextEnabled
               : inputText.extractorCode.helperTextDisabled
@@ -260,7 +260,7 @@ const ExtractionAndStorage = (
                 ...locValidationObj,
                 extractorFields: {
                   ...locValidationObj.extractorFields,
-                  locHelper:
+                  locationCodeHelper:
                     !checked
                       ? inputText.extractorCode.helperTextDisabled
                       : inputText.extractorCode.helperTextEnabled
@@ -307,7 +307,7 @@ const ExtractionAndStorage = (
             type="number"
             placeholder={!locValidationObj.extractorFields.forestClientNumber ? '' : 'Example: 00'}
             labelText={inputText.extractorCode.labelText}
-            helperText={locValidationObj.extractorFields.locHelper}
+            helperText={locValidationObj.extractorFields.locationCodeHelper}
             invalid={validationObj.isExtractorCodeInvalid}
             invalidText={locValidationObj.extractorFields.invalidLocationMessage}
             disabled={!locValidationObj.extractorFields.forestClientNumber}
@@ -407,7 +407,7 @@ const ExtractionAndStorage = (
                 ...locValidationObj,
                 storageFields: {
                   ...locValidationObj.storageFields,
-                  locHelper:
+                  locationCodeHelper:
                     !checked
                       ? inputText.storageCode.helperTextDisabled
                       : inputText.storageCode.helperTextEnabled
@@ -454,7 +454,7 @@ const ExtractionAndStorage = (
             type="number"
             placeholder={!locValidationObj.storageFields.forestClientNumber ? '' : 'Example: 00'}
             labelText={inputText.storageCode.labelText}
-            helperText={locValidationObj.storageFields.locHelper}
+            helperText={locValidationObj.storageFields.locationCodeHelper}
             invalid={validationObj.isStorageCodeInvalid}
             invalidText={locValidationObj.storageFields.invalidLocationMessage}
             disabled={!locValidationObj.storageFields.forestClientNumber}
