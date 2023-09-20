@@ -16,7 +16,7 @@ Cypress.Commands.add('login', () => {
     Cypress.env('keycloakLoginUrl'),
     { args: credentials },
     ({ username, password }) => {
-      cy.get('#bceidLogo', { timeout: 6000 }).should('be.visible');
+      cy.get('#bceidLogo', { timeout: 10000 }).should('be.visible');
       cy.get('input[name=user]')
         .clear()
         .type(username, { delay: 50 });
