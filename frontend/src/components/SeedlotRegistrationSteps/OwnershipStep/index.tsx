@@ -200,6 +200,10 @@ const OwnershipStep = (
         const portionsInvalid = !arePortionsValid(updatedArray);
         setPortionsValid(portionsInvalid);
       }
+    } else if (name === 'ownerAgency') {
+      // This if block is needed due to clean location code input when changing owner agency
+      setStepData(updatedArray);
+      validateInput(id, name, value, 'ownerCode', false, '');
     } else {
       setStepData(updatedArray);
       validateInput(id, name, value);
@@ -331,8 +335,8 @@ const OwnershipStep = (
                   }}
                   validationProp={invalidState[singleOwnerInfo.id]}
                   handleInputChange={
-                    (name: string, value: string) => {
-                      handleInputChange(singleOwnerInfo.id, name, value);
+                    (name: string, value: string, optName?: string, optValue?: string) => {
+                      handleInputChange(singleOwnerInfo.id, name, value, optName, optValue);
                     }
                   }
                   setDefaultAgencyNCode={

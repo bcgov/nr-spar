@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import validator from 'validator';
 import {
   TextInput,
   NumberInput,
@@ -51,6 +52,7 @@ const SingleOwnerInfo = ({
   useDefaultAgency, readOnly
 }: SingleOwnerInfoProps) => {
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
+  const [locCodeValidationFail, setLocCodeValidationFail] = useState<boolean>(false);
   const [locationHelper, setLocationHelper] = useState<string>(
     ownerInfo.id === DEFAULT_INDEX
       ? inputText.code.helperTextEnabled
@@ -61,7 +63,13 @@ const SingleOwnerInfo = ({
     mutationFn: (queryParams:string[]) => getForestClientLocation(
       queryParams[0],
       queryParams[1]
-    )
+    ),
+    onSuccess: () => {
+      setLocCodeValidationFail(false);
+    },
+    onError: () => {
+      setLocCodeValidationFail(true);
+    }
   });
 
   return (
@@ -112,7 +120,12 @@ const SingleOwnerInfo = ({
                   ? ((e: ComboBoxEvent) => {
                     setForestClientNumber(e.selectedItem ? getForestClientNumber(e.selectedItem) : '');
                     setLocationHelper(inputText.code.helperTextEnabled);
-                    handleInputChange('ownerAgency', e.selectedItem);
+                    if (e.selectedItem) {
+                      handleInputChange('ownerAgency', e.selectedItem);
+                    } else {
+                      setLocCodeValidationFail(false);
+                      handleInputChange('ownerAgency', e.selectedItem, 'ownerCode', '');
+                    }
                   })
                   : () => { }
                 }
@@ -144,17 +157,26 @@ const SingleOwnerInfo = ({
                 handleInputChange(e.target.name, e.target.value);
               }}
               invalid={
-                validationProp.code.isInvalid || validateLocationCode.isError
+                validationProp.code.isInvalid || locCodeValidationFail
               }
               invalidText={
-                validateLocationCode.isError
+                locCodeValidationFail
                   ? inputText.code.invalidLocationForSelectedAgency
                   : inputText.code.invalidTextValue
               }
               onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                 if (!e.target.readOnly) {
+                  let locationCode = e.target.value;
                   setLocationHelper('');
-                  validateLocationCode.mutate([forestClientNumber, e.target.value]);
+                  const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+
+                  // Adding this check to add an extra 0 on the left, for cases where
+                  // the user types values between 0 and 9
+                  if (isInRange && locationCode.length === 1) {
+                    locationCode = `0${locationCode}`;
+                    handleInputChange('ownerCode', locationCode);
+                  }
+                  validateLocationCode.mutate([forestClientNumber, locationCode]);
                 }
               }}
               readOnly={readOnly}
