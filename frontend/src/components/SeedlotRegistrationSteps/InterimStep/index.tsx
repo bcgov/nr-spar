@@ -105,7 +105,7 @@ const InterimStorage = (
     // Adding this check to add an extra 0 on the left, for cases where
     // the user types values between 0 and 9
     if (isInRange && locationCode.length === 1) {
-      locationCode = `0${locationCode}`;
+      locationCode = locationCode.padStart(2, '0');
       setStepData({
         ...state,
         locationCode
