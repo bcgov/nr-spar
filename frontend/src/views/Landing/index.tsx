@@ -85,6 +85,7 @@ const Landing = () => {
           renderIcon={Login}
           data-testid="landing-button__bceid"
           className="btn-landing"
+          id="bceid-login-btn"
         >
           Login with Business BCeID
         </Button>

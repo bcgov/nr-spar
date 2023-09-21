@@ -67,6 +67,7 @@ exports[`Landing component test > should match the snapshot 1`] = `
       className="btn-landing cds--btn cds--btn--md cds--layout--size-md cds--btn--tertiary"
       data-testid="landing-button__bceid"
       disabled={false}
+      id="bceid-login-btn"
       onClick={[Function]}
       type="button"
     >
