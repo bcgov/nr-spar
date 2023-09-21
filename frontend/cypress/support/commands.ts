@@ -1,7 +1,7 @@
 // @ts-check
 /// <reference path="../global.d.ts" />
 
-import { HALF_SECOND, ONE_SECOND, TYPE_DELAY } from '../constants';
+import { FIVE_SECOND, HALF_SECOND, ONE_SECOND, TYPE_DELAY } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
@@ -54,6 +54,7 @@ Cypress.Commands.add('login', () => {
           );
         }
       });
+      cy.wait(FIVE_SECOND);
       cy.getCookies().then((cookies) => {
         cookies.forEach((cookie) => {
           cy.log(cookie.name, cookie.domain, '\n');
