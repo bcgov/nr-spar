@@ -46,6 +46,8 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       VITE_NRSPARWEBAPP_VERSION: dev
+      VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
+      VITE_ORACLE_SERVER_URL: ${{ vars.VITE_ORACLE_SERVER_URL }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
     steps:

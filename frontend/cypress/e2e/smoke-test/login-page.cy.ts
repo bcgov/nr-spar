@@ -1,4 +1,4 @@
-import { HALF_SECOND, FIVE_SECOND } from '../../constants';
+import { THREE_SECOND, FIVE_SECOND } from '../../constants';
 
 describe('Login page test', () => {
   let loginPageData: {
@@ -13,7 +13,7 @@ describe('Login page test', () => {
       loginPageData = ttls;
     });
     cy.visit('/');
-    cy.wait(HALF_SECOND);
+    cy.wait(THREE_SECOND);
   });
 
   it('login page is displayed and loads correctly', () => {

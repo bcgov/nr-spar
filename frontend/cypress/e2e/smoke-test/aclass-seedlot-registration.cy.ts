@@ -1,6 +1,6 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
-import { HALF_SECOND, ONE_SECOND, TYPE_DELAY } from '../../constants';
+import { FIVE_SECOND, THREE_SECOND, TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot registration flow', () => {
   let data: {
@@ -16,7 +16,7 @@ describe('A Class Seedlot registration flow', () => {
     cy.login();
     cy.visit('/');
     cy.navigateTo(NavigationLabels.Seedlots);
-    cy.wait(HALF_SECOND);
+    cy.wait(THREE_SECOND);
   });
 
   it('should register a Class A Seedlot', () => {
@@ -59,7 +59,7 @@ describe('A Class Seedlot registration flow', () => {
       .clear()
       .type(data.applicantAgency.email, { delay: TYPE_DELAY });
     // Enter the seedlot species, wait for species data to load
-    cy.wait(ONE_SECOND + HALF_SECOND);
+    cy.wait(FIVE_SECOND);
     cy.get('.applicant-info-combobox-species')
       .click();
     cy.get('#downshift-3-item-0')
@@ -116,7 +116,7 @@ describe('A Class Seedlot registration flow', () => {
     //   });
     cy.contains('button', "Go back to seedlot's main screen")
       .click();
-    cy.wait(HALF_SECOND);
+    cy.wait(THREE_SECOND);
     cy.get('.bx--data-table-content').contains('CW - Western redcedar');
   });
 });
