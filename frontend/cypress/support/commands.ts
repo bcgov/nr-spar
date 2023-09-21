@@ -23,24 +23,37 @@ Cypress.Commands.add('login', () => {
       cy.visit('/');
       cy.wait(ONE_SECOND);
       cy.getByDataTest('landing-button__bceid').click();
-      cy.origin(
-        Cypress.env('keycloakLoginUrl'),
-        { args: config },
-        (
-          {
-            username, password, delay, timeout
-          }
-        ) => {
-          cy.get('#bceidLogo', { timeout }).should('be.visible');
+      cy.url().then((url) => {
+        if (url.includes('.gov.bc.ca')) {
+          cy.get('#bceidLogo', { timeout: config.timeout }).should('be.visible');
           cy.get('input[name=user]')
             .clear()
-            .type(username, { delay });
+            .type(config.username, { delay: config.delay });
           cy.get('input[name=password]')
             .clear()
-            .type(password, { delay });
+            .type(config.password, { delay: config.delay });
           cy.get('input[name=btnSubmit]').click();
+        } else {
+          cy.origin(
+            Cypress.env('keycloakLoginUrl'),
+            { args: config },
+            (
+              {
+                username, password, delay, timeout
+              }
+            ) => {
+              cy.get('#bceidLogo', { timeout }).should('be.visible');
+              cy.get('input[name=user]')
+                .clear()
+                .type(username, { delay });
+              cy.get('input[name=password]')
+                .clear()
+                .type(password, { delay });
+              cy.get('input[name=btnSubmit]').click();
+            }
+          );
         }
-      );
+      });
     },
     {
       validate: () => {
