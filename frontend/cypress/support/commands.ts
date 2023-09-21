@@ -1,7 +1,7 @@
 // @ts-check
 /// <reference path="../global.d.ts" />
 
-import { HALF_SECOND, ONE_SECOND, TYPE_DELAY } from '../constants';
+import { HALF_SECOND, ONE_SECOND, THREE_SECOND, TYPE_DELAY } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
@@ -57,6 +57,7 @@ Cypress.Commands.add('login', () => {
     },
     {
       validate: () => {
+        cy.wait(THREE_SECOND);
         cy.getCookie('GUID', { domain: 'https://test.loginproxy.gov.bc.ca' }).should('exist');
       }
     }
