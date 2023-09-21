@@ -55,7 +55,7 @@ jobs:
         with:
           node_version: "18.16.0"
           commands: |
-            npm i
+            npm ci
             npm run cy:ci
           dir: frontend
       - uses: bcgov-nr/action-test-and-analyse@v1.0.0
