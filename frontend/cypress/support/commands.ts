@@ -63,7 +63,7 @@ Cypress.Commands.add('login', () => {
     },
     {
       validate: () => {
-        cy.getCookie('SMSESSION', { domain: 'https://test.loginproxy.gov.bc.ca' }).should('exist');
+        cy.getCookie('GUID', { domain: 'https://test.loginproxy.gov.bc.ca' }).should('exist');
       }
     }
   );
