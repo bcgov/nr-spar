@@ -24,6 +24,7 @@ describe('Login page test', () => {
 
   it('navigate to the user form page IDIR', () => {
     cy.getByDataTest('landing-button__idir').click();
+    cy.wait(THREE_SECOND);
     cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
       cy.get('#idirLogo', { timeout }).should('be.visible');
     });
@@ -31,6 +32,7 @@ describe('Login page test', () => {
 
   it('navigate to the user form page BCeID', () => {
     cy.getByDataTest('landing-button__bceid').click();
+    cy.wait(THREE_SECOND);
     cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
       cy.get('#bceidLogo', { timeout }).should('be.visible');
     });
@@ -44,6 +46,7 @@ describe('Login page test', () => {
   it('log in with BCeID and validate user role', () => {
     cy.login();
     cy.visit('/');
+    cy.wait(THREE_SECOND);
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('IDIR: undefined');
@@ -52,6 +55,7 @@ describe('Login page test', () => {
   it('log in with BCeID and validate user information', () => {
     cy.login();
     cy.visit('/');
+    cy.wait(THREE_SECOND);
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('NRS Load Test-3');
