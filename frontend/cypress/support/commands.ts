@@ -1,7 +1,7 @@
 // @ts-check
 /// <reference path="../global.d.ts" />
 
-import { HALF_SECOND, ONE_SECOND, THREE_SECOND, TYPE_DELAY } from '../constants';
+import { HALF_SECOND, ONE_SECOND, TYPE_DELAY } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
@@ -54,9 +54,16 @@ Cypress.Commands.add('login', () => {
           );
         }
       });
+
+      cy.getCookies().then((cookies) => {
+        cy.log(JSON.stringify(cookies));
+      });
     },
     {
       validate: () => {
+        cy.getCookies().then((cookies) => {
+          cy.log(JSON.stringify(cookies));
+        });
         cy.getCookie('GUID', { domain: 'https://test.loginproxy.gov.bc.ca' }).should('exist');
       }
     }
@@ -77,4 +84,13 @@ Cypress.Commands.add('isPageTitle', (pageTitle) => {
 Cypress.Commands.add('toogleFavourite', () => {
   cy.get(GenericSelectors.FavouriteButton)
     .click();
+});
+
+Cypress.Commands.overwrite('log', (log, ...args) => {
+  if (Cypress.browser.isHeadless) {
+    return cy.task('log', args, { log: false }).then(() => log(...args));
+  }
+  // eslint-disable-next-line no-console
+  console.log(...args);
+  return log(...args);
 });
