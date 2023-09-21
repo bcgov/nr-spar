@@ -60,9 +60,11 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.31.8",
     "eslint-plugin-react-hooks": "4.6.0",
+    "esbuild": "^0.19.3",
     "fork-ts-checker-webpack-plugin": "8.0.0",
     "jest-environment-jsdom": "^29.0.1",
-    "playwright-webkit": "^1.27.1"
+    "playwright-webkit": "^1.27.1",
+    "start-server-and-test": "^2.0.1"
   },
   "repository": {
     "type": "git",
@@ -89,7 +91,8 @@
     "preview": "vite preview",
     "lint": "./node_modules/.bin/eslint \"src/**\"",
     "cy:open": "cypress open",
-    "cy:run": "cypress run --browser chrome"
+    "cy:run": "cypress run --browser chrome",
+    "cy:ci": "start-server-and-test start http://localhost:3000 cy:run"
   },
   "eslintConfig": {
     "extends": [
