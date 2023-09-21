@@ -6,46 +6,27 @@ import {
   Column
 } from '@carbon/react';
 import { Login } from '@carbon/icons-react';
-import { KeycloakLoginOptions } from 'keycloak-js';
 import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../../contexts/AuthContext';
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/seeding.png';
-
+import { signIn } from '../../service/AuthService';
 import LoginProviders from '../../types/LoginProviders';
-
-import './styles.scss';
-
 import getUrlQueryParam from '../../utils/UrlUtils';
 
+import './styles.scss';
+import { useAuth } from '../../contexts/AuthContext';
+
 const Landing = () => {
-  const { startKeycloak, login, signed } = useAuth();
+  const { signed } = useAuth();
   const navigate = useNavigate();
   const homePage = '/dashboard';
-
-  const handleLogin = (provider: LoginProviders) => {
-    if (signed) {
-      navigate(getUrlQueryParam(window.location, 'page') || homePage);
-      return;
-    }
-
-    const idpHint = provider;
-    const loginOptions: KeycloakLoginOptions = {
-      redirectUri: `${window.location.origin}${homePage}`,
-      idpHint
-    };
-
-    login(loginOptions);
-  };
 
   useEffect(() => {
     if (signed) {
       navigate(getUrlQueryParam(window.location, 'page') || homePage);
-    } else {
-      startKeycloak();
     }
-  }, [signed]);
+  }, []);
 
   return (
     <Grid fullWidth className="landing-grid">
@@ -69,7 +50,7 @@ const Landing = () => {
 
         {/* Login buttons */}
         <Button
-          onClick={() => { handleLogin(LoginProviders.IDIR); }}
+          onClick={() => { signIn(LoginProviders.IDIR); }}
           size="md"
           renderIcon={Login}
           data-testid="landing-button__idir"
@@ -80,7 +61,7 @@ const Landing = () => {
 
         <Button
           kind="tertiary"
-          onClick={() => { handleLogin(LoginProviders.BCEID_BUSINESS); }}
+          onClick={() => { signIn(LoginProviders.BCEID_BUSINESS); }}
           size="md"
           renderIcon={Login}
           data-testid="landing-button__bceid"

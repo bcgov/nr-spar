@@ -1,22 +1,19 @@
-import { KeycloakLoginOptions } from 'keycloak-js';
 import React, {
   createContext,
   useContext,
   useMemo,
   useState
 } from 'react';
-import KeycloakService from '../service/KeycloakService';
-import KeycloakUser from '../types/KeycloakUser';
+import type { CognitoUserSession } from 'amazon-cognito-identity-js';
+import FamUser from '../types/FamUser';
+import { isLoggedIn, getUserFromStorage, refreshToken } from '../service/AuthService';
 
 interface AuthContextData {
   signed: boolean;
-  user: KeycloakUser | {};
-  startKeycloak(): Promise<boolean>;
-  login(options?: KeycloakLoginOptions): Promise<void>;
-  logout(): Promise<void>;
-  createLoginUrl(options?: KeycloakLoginOptions): string;
+  user: FamUser | undefined;
+  startKeycloak(): boolean;
   provider: string;
-  token: string | undefined,
+  token: CognitoUserSession | undefined,
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -29,16 +26,16 @@ interface Props {
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Props) => {
   const [signed, setSigned] = useState<boolean>(false);
-  const [user, setUser] = useState<KeycloakUser | {}>({});
+  const [user, setUser] = useState<FamUser | undefined>(undefined);
 
   /**
    * Starts Keycloak instance.
    */
-  async function startKeycloak() {
+  function startKeycloak() {
     try {
-      const userIsLoggedIn = await KeycloakService.initKeycloak();
+      const userIsLoggedIn = isLoggedIn();
       setSigned(userIsLoggedIn);
-      const kcUser = KeycloakService.getUser();
+      const kcUser = getUserFromStorage();
       setUser(kcUser);
       return userIsLoggedIn;
     } catch (e) {
@@ -49,49 +46,28 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   }
 
   /**
-   * Logout the user
-   */
-  async function logout() {
-    try {
-      localStorage.clear();
-      await KeycloakService.logout();
-      setUser({});
-      setSigned(false);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Keycloak logout error:', e);
-    }
-  }
-
-  /**
    * Refresh the token
    */
   setInterval(() => {
     if (signed) {
-      KeycloakService.updateToken(30)
-        .catch(async (err) => {
-          // eslint-disable-next-line no-console
-          console.error('Keycloack service update error: ', err);
-          await logout();
-        });
+      refreshToken();
+      // No need to call logout here, since the refresh
+      // will automatically call
     }
   }, REFRESH_TIMER);
 
-  const { createLoginUrl, login } = KeycloakService;
-  const provider = KeycloakService.authMethod();
-  const token = KeycloakService.getToken();
+  
+  const provider = 'SOME';
+  const token = getUserFromStorage()?.authToken;
 
   // memoize
   const contextValue = useMemo(() => ({
     signed,
     user,
     startKeycloak,
-    login,
-    logout,
-    createLoginUrl,
     provider,
     token
-  }), [signed, user, startKeycloak, login, logout, createLoginUrl, provider, token]);
+  }), [signed, user, startKeycloak, provider, token]);
 
   return (
     <AuthContext.Provider value={contextValue}>

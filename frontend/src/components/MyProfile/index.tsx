@@ -6,14 +6,13 @@ import {
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
-import KeycloakService from '../../service/KeycloakService';
-
 import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
 
 import { useThemePreference } from '../../utils/ThemePreference';
 
 import './style.scss';
+import { useAuth } from '../../contexts/AuthContext';
 
 const accountOptions = [
   {
@@ -35,7 +34,7 @@ const accountOptions = [
 
 const MyProfile = () => {
   const { theme, setTheme } = useThemePreference();
-  const userData = KeycloakService.getUser();
+  const { user } = useAuth();
 
   const [goToURL, setGoToURL] = useState<string>('');
   const [goTo, setGoTo] = useState<boolean>(false);
@@ -72,12 +71,12 @@ const MyProfile = () => {
     <>
       <div className="user-info-section">
         <div className="user-image">
-          <AvatarImage userName={`${userData.firstName} ${userData.lastName}`} size="large" />
+          <AvatarImage userName={`${user?.firstName} ${user?.lastName}`} size="large" />
         </div>
         <div className="user-data">
-          <p className="user-name">{`${userData.firstName} ${userData.lastName}`}</p>
-          <p>{`IDIR: ${userData.idirUsername}`}</p>
-          <p>{userData.email}</p>
+          <p className="user-name">{`${user?.firstName} ${user?.lastName}`}</p>
+          <p>{`IDIR: ${user?.idirUsername}`}</p>
+          <p>{user?.email}</p>
         </div>
       </div>
       <hr className="divisory" />
