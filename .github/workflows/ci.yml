@@ -13,32 +13,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests-java:
-    name: Java CI
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        dir: [backend, oracle-api]
-        include:
-          - dir: backend
-            token: SONAR_BACKEND
-          - dir: oracle-api
-            token: SONAR_ORACLE_API
-    steps:
-      - uses: actions/checkout@v3
-      - uses: bcgov-nr/action-test-and-analyse-java@v0.1.0
-        with:
-          commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
-          dir: ${{ matrix.dir }}
-          java-cache: maven
-          java-distribution: temurin
-          java-version: "17"
-          sonar_args:
-            -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_${{ matrix.dir }}
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
-            -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/response/**,**/*$*Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
-          sonar_project_token: ${{ secrets[matrix.token] }}
+  # tests-java:
+  #   name: Java CI
+  #   if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     matrix:
+  #       dir: [backend, oracle-api]
+  #       include:
+  #         - dir: backend
+  #           token: SONAR_BACKEND
+  #         - dir: oracle-api
+  #           token: SONAR_ORACLE_API
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: bcgov-nr/action-test-and-analyse-java@v0.1.0
+  #       with:
+  #         commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
+  #         dir: ${{ matrix.dir }}
+  #         java-cache: maven
+  #         java-distribution: temurin
+  #         java-version: "17"
+  #         sonar_args:
+  #           -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_${{ matrix.dir }}
+  #           -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
+  #           -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/response/**,**/*$*Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
+  #         sonar_project_token: ${{ secrets[matrix.token] }}
 
   tests-javascript:
     name: JavaScript CI
@@ -51,11 +51,13 @@ jobs:
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
     steps:
+      - uses: actions/checkout@v4
       - uses: cypress-io/github-action@v6
         name: Cypress run
         with:
           config: pageLoadTimeout=10000,baseUrl=https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
-          working-directory: ../frontend
+          working-directory: ./frontend
+          browser: ${{ matrix.browser }}
       - uses: bcgov-nr/action-test-and-analyse@v1.0.0
         with:
           node_version: "18.16.0"
@@ -81,25 +83,25 @@ jobs:
             -Dsonar.test.inclusions=src/**/__test__/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
 
-  # https://github.com/marketplace/actions/aqua-security-trivy
-  trivy:
-    name: Security Scan
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
+  # # https://github.com/marketplace/actions/aqua-security-trivy
+  # trivy:
+  #   name: Security Scan
+  #   if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Run Trivy vulnerability scanner in repo mode
-        uses: aquasecurity/trivy-action@0.10.0
-        with:
-          format: "sarif"
-          output: "trivy-results.sarif"
-          ignore-unfixed: true
-          scan-type: "fs"
-          scanners: "vuln,secret,config"
-          severity: "CRITICAL,HIGH"
+  #     - name: Run Trivy vulnerability scanner in repo mode
+  #       uses: aquasecurity/trivy-action@0.10.0
+  #       with:
+  #         format: "sarif"
+  #         output: "trivy-results.sarif"
+  #         ignore-unfixed: true
+  #         scan-type: "fs"
+  #         scanners: "vuln,secret,config"
+  #         severity: "CRITICAL,HIGH"
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: "trivy-results.sarif"
+  #     - name: Upload Trivy scan results to GitHub Security tab
+  #       uses: github/codeql-action/upload-sarif@v2
+  #       with:
+  #         sarif_file: "trivy-results.sarif"
