@@ -17,6 +17,9 @@ Cypress.Commands.add('login', () => {
   cy.session(
     config.username,
     () => {
+      cy.clearAllCookies();
+      cy.clearAllLocalStorage();
+      cy.clearAllSessionStorage();
       cy.visit('/');
       cy.wait(ONE_SECOND);
       cy.getByDataTest('landing-button__bceid').click();
