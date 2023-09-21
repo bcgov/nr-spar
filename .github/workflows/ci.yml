@@ -46,7 +46,16 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       VITE_NRSPARWEBAPP_VERSION: dev
+      CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+      CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
     steps:
+      - uses: bcgov-nr/action-test-and-analyse@v1.0.0
+        with:
+          node_version: "18.16.0"
+          commands: |
+            npm i
+            npm run cy:ci
+          dir: frontend
       - uses: bcgov-nr/action-test-and-analyse@v1.0.0
         with:
           node_version: "18.16.0"
