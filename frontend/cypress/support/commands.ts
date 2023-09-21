@@ -54,16 +54,14 @@ Cypress.Commands.add('login', () => {
           );
         }
       });
-
       cy.getCookies().then((cookies) => {
-        cy.log(JSON.stringify(cookies));
+        cookies.forEach((cookie) => {
+          cy.log(cookie.name, cookie.domain, '\n');
+        });
       });
     },
     {
       validate: () => {
-        cy.getCookies().then((cookies) => {
-          cy.log(JSON.stringify(cookies));
-        });
         cy.getCookie('GUID', { domain: 'https://test.loginproxy.gov.bc.ca' }).should('exist');
       }
     }
