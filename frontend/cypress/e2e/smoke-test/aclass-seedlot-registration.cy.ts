@@ -1,6 +1,8 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
-import { FIVE_SECOND, THREE_SECOND, TYPE_DELAY } from '../../constants';
+import {
+  ONE_SECOND, THREE_SECOND, FIVE_SECOND, TYPE_DELAY
+} from '../../constants';
 
 describe('A Class Seedlot registration flow', () => {
   let data: {
@@ -16,7 +18,7 @@ describe('A Class Seedlot registration flow', () => {
     cy.login();
     cy.visit('/');
     cy.navigateTo(NavigationLabels.Seedlots);
-    cy.wait(THREE_SECOND);
+    cy.wait(ONE_SECOND);
   });
 
   it('should register a Class A Seedlot', () => {

@@ -1,4 +1,4 @@
-import { THREE_SECOND } from '../../constants';
+import { ONE_SECOND } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
 
 describe('Dashboard page test', () => {
@@ -15,7 +15,7 @@ describe('Dashboard page test', () => {
     });
     cy.login();
     cy.visit('/');
-    cy.wait(THREE_SECOND);
+    cy.wait(ONE_SECOND);
   });
 
   it('dashboard page is displayed and loads correctly', () => {
