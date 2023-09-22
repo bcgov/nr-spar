@@ -17,7 +17,6 @@ import formReviewText from './constants';
 import './styles.scss';
 import OrchardStep from '../SeedlotRegistrationSteps/OrchardStep';
 import InterimStorage from '../SeedlotRegistrationSteps/InterimStep';
-import OwnershipStep from '../SeedlotRegistrationSteps/OwnershipStep';
 import CollectionStep from '../SeedlotRegistrationSteps/CollectionStep';
 import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import { OrchardForm } from '../SeedlotRegistrationSteps/OrchardStep/definitions';
@@ -204,18 +203,6 @@ const FormReview = () => {
                   )}
                 >
                   <div className="form-item">
-                    <OwnershipStep
-                      state={allStepData.ownershipStep}
-                      defaultAgency={defaultAgency}
-                      defaultCode={defaultCode}
-                      agencyOptions={agencyOptions}
-                      setStepData={() => { }}
-                      fundingSources={[]}
-                      methodsOfPayment={[]}
-                      invalidState={{}}
-                      setInvalidState={() => { }}
-                      readOnly
-                    />
                     <Button
                       kind="tertiary"
                       size="md"
