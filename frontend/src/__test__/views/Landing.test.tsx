@@ -4,16 +4,14 @@ import { BrowserRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import Landing from '../../views/Landing';
-import { AuthProvider } from '../../contexts/AuthContext';
 import '@testing-library/jest-dom';
+import { describe, it, expect } from 'vitest';
 
 describe('Landing component test', () => {
   it('should have the correct title', () => {
     const { getByTestId } = render(
       <BrowserRouter>
-        <AuthProvider>
-          <Landing />
-        </AuthProvider>
+        <Landing />
       </BrowserRouter>
     );
 
@@ -37,9 +35,7 @@ describe('Landing component test', () => {
     const landing = renderer
       .create(
         <BrowserRouter>
-          <AuthProvider>
-            <Landing />
-          </AuthProvider>
+          <Landing />
         </BrowserRouter>
       ).toJSON();
 

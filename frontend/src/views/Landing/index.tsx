@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   Button,
@@ -10,23 +10,28 @@ import { useNavigate } from 'react-router-dom';
 
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/seeding.png';
-import { signIn } from '../../service/AuthService';
+import { isCurrentAuthUser, signIn } from '../../service/AuthService';
 import LoginProviders from '../../types/LoginProviders';
 import getUrlQueryParam from '../../utils/UrlUtils';
 
 import './styles.scss';
-import { useAuth } from '../../contexts/AuthContext';
 
 const Landing = () => {
-  const { signed } = useAuth();
+  const [signed, setSigned] = useState<boolean>(false);
   const navigate = useNavigate();
   const homePage = '/dashboard';
 
+  useCallback(async () => {
+    const isSigned = await isCurrentAuthUser();
+    setSigned(isSigned);
+  }, []);
+
   useEffect(() => {
+    console.log('signed', signed);
     if (signed) {
       navigate(getUrlQueryParam(window.location, 'page') || homePage);
     }
-  }, []);
+  }, [signed]);
 
   return (
     <Grid fullWidth className="landing-grid">

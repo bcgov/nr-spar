@@ -1,10 +1,12 @@
 import axios from 'axios';
-import KeycloakService from '../service/KeycloakService';
+import { getUserFromStorage } from '../service/AuthService';
 
 const getHeader = (useMultipart = false) => {
-  const token = KeycloakService.getToken();
+  const famUser = getUserFromStorage();
+
+  console.log(`token for api ${famUser?.authToken}`);
   let headers = {
-    Authorization: `Bearer ${token}`
+    Authorization: `Bearer ${famUser?.authToken}`
   };
   if (useMultipart) {
     headers = Object.assign(headers, { 'content-type': 'multipart/form-data' });

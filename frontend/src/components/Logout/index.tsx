@@ -1,16 +1,29 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { isCurrentAuthUser, logout } from '../../service/AuthService';
 
 const Logout = () => {
-  const { logout, signed } = useAuth();
+  const navigate = useNavigate();
+  const [ signed, setSigned ] = useState<boolean>(false);
 
-  if (signed) {
-    logout()
-      .then(() => <Navigate to="/" />);
-  } else {
-    return <Navigate to="/" />;
-  }
+  useCallback(async () => {
+    const isAuth = await isCurrentAuthUser();
+    setSigned(isAuth);
+    //logout
+  }, []);
+
+  useEffect(() => {
+    if (signed) {
+      logout()
+        .then(() => {
+          navigate('/');
+        });
+    } else {
+      navigate('/');
+    }
+  }, [signed]);
+
+  
 
   return (
     <>

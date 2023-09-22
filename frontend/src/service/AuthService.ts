@@ -12,23 +12,23 @@ export const signIn = async (provider: LoginProviders): Promise<any> => {
   if (provider === LoginProviders.IDIR) {
     Auth.federatedSignIn({
       customProvider: `${(appEnv).toLocaleUpperCase()}-IDIR`
-    })
+    });
   } else if (provider === LoginProviders.BCEID_BUSINESS) {
     Auth.federatedSignIn({
       customProvider: `${(appEnv).toLocaleUpperCase()}-BCEIDBUSINESS`
-    })
+    });
   }
   // else if invalid option passed logout the user
   else {
     logout();
   }
-}
+};
 
 export const isLoggedIn = () => {
   // this will convert the locally stored string to FamLoginUser interface type
   // TODO add this to state once redux store is configured
   const stateInfo = getUserFromStorage();
-  console.log(stateInfo);
+  console.log('isLoggedIn - stateInfo:', stateInfo);
   // check if the user is logged in
   const loggedIn = !!stateInfo?.authToken; // TODO check if token expired later?
   return loggedIn;
@@ -42,6 +42,7 @@ export const getUserFromStorage = () => {
 
 export const handlePostLogin = async () => {
   try {
+    console.log('handlePostLogin');
     await refreshToken();
   } catch (error) {
     console.log('Authentication Error:', error);

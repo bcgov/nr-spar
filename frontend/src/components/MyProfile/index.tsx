@@ -12,7 +12,7 @@ import PanelSectionName from '../PanelSectionName';
 import { useThemePreference } from '../../utils/ThemePreference';
 
 import './style.scss';
-import { useAuth } from '../../contexts/AuthContext';
+import { getUserFromStorage } from '../../service/AuthService';
 
 const accountOptions = [
   {
@@ -34,7 +34,7 @@ const accountOptions = [
 
 const MyProfile = () => {
   const { theme, setTheme } = useThemePreference();
-  const { user } = useAuth();
+  const user = getUserFromStorage();
 
   const [goToURL, setGoToURL] = useState<string>('');
   const [goTo, setGoTo] = useState<boolean>(false);
