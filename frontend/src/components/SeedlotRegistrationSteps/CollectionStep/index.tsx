@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import moment from 'moment';
 
 import {
@@ -10,19 +11,27 @@ import {
   Checkbox,
   DatePickerInput,
   DatePicker,
-  TextArea
+  TextArea,
+  TextInput,
+  InlineLoading
 } from '@carbon/react';
+
+import validator from 'validator';
 
 import Subtitle from '../../Subtitle';
 
+import getForestClientLocation from '../../../api-service/forestClientsAPI';
+
 import { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig } from './constants';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
+import getForestClientNumber from '../../../utils/StringUtils';
+import { LOCATION_CODE_LIMIT } from '../../../shared-constants/shared-constants';
+import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import {
   CollectionStepProps,
   CollectionForm,
   FormValidation
 } from './definitions';
-import ComboBoxEvent from '../../../types/ComboBoxEvent';
 
 import './styles.scss';
 
@@ -50,6 +59,12 @@ const CollectionStep = (
 
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
+  const [forestClientNumber, setForestClientNumber] = useState<string>('');
+  const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
+  const [locationCodeHelper, setLocationCodeHelper] = useState<string>(
+    fieldsConfig.code.helperTextEnabled
+  );
+
   // Commenting this for now until we decide how to deal
   // with the 'other' option
   // const [isOtherChecked, setIsOtherChecked] = useState<boolean | string>(state.other);
@@ -65,15 +80,35 @@ const CollectionStep = (
     }
   };
 
-  const validateInput = (name: string, value: string | string[]) => {
+  const updateAfterLocValidation = (isInvalid: boolean) => {
+    setValidationObj({
+      ...validationObj,
+      isLocationCodeInvalid: isInvalid
+    });
+    setLocationCodeHelper(fieldsConfig.code.helperTextEnabled);
+  };
+
+  const validateLocationCodeMutation = useMutation({
+    mutationFn: (queryParams:string[]) => getForestClientLocation(
+      queryParams[0],
+      queryParams[1]
+    ),
+    onError: () => {
+      setInvalidLocationMessage(fieldsConfig.code.invalidLocationForSelectedAgency);
+      updateAfterLocValidation(true);
+    },
+    onSuccess: () => updateAfterLocValidation(false)
+  });
+
+  const validateInput = (name: string, value?: string) => {
     const newValidObj = { ...validationObj };
     let isInvalid = false;
-    if (name === fieldsConfig.code.name) {
-      if ((value as string).length !== 2) {
-        isInvalid = true;
+    if (name === fieldsConfig.collector.name) {
+      if (!value) {
+        newValidObj.isLocationCodeInvalid = false;
       }
-      newValidObj.isLocationCodeInvalid = isInvalid;
     }
+
     if (name === fieldsConfig.startDate.name || name === fieldsConfig.endDate.name) {
       // Have both start and end dates
       if (state.startDate !== '' && state.endDate !== '') {
@@ -125,15 +160,28 @@ const CollectionStep = (
       }
 
       setStepData(newState);
+    } else if (name === fieldsConfig.collector.name) {
+      const getValue: string = (Array.isArray(value)) ? value[0] : value;
+      setForestClientNumber(getValue ? getForestClientNumber(getValue) : '');
+      setLocationCodeHelper(
+        getValue
+          ? fieldsConfig.code.helperTextEnabled
+          : fieldsConfig.code.helperTextDisabled
+      );
+      setStepData({
+        ...state,
+        [name]: value,
+        locationCode: getValue ? state.locationCode : ''
+      });
     } else {
       setStepData({
         ...state,
-        [name]: value
+        [name]: (name === fieldsConfig.code.name ? value.slice(0, LOCATION_CODE_LIMIT) : value)
       });
     }
-    validateInput(name, value);
+    validateInput(name, (Array.isArray(value)) ? value[0] : value);
     if (optName && optValue) {
-      validateInput(optName, optValue);
+      validateInput(optName);
     }
   };
 
@@ -191,6 +239,39 @@ const CollectionStep = (
     handleFormInput('selectedCollectionCodes', selectedCollectionCodes);
   };
 
+  const validateLocationCode = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let locationCode = event.target.value;
+    const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+
+    // Adding this check to add an extra 0 on the left, for cases where
+    // the user types values between 0 and 9
+    if (isInRange && locationCode.length === 1) {
+      locationCode = locationCode.padStart(2, '0');
+      setStepData({
+        ...state,
+        locationCode
+      });
+    }
+
+    if (!isInRange) {
+      setInvalidLocationMessage(fieldsConfig.code.invalidText);
+      setValidationObj({
+        ...validationObj,
+        isLocationCodeInvalid: true
+      });
+      return;
+    }
+
+    if (forestClientNumber) {
+      validateLocationCodeMutation.mutate([forestClientNumber, locationCode]);
+      setValidationObj({
+        ...validationObj,
+        isLocationCodeInvalid: false
+      });
+      setLocationCodeHelper('');
+    }
+  };
+
   return (
     <FlexGrid className="collection-step-container">
       <Row className="collection-step-row">
@@ -210,6 +291,11 @@ const CollectionStep = (
             checked={state.useDefaultAgencyInfo}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
+              setLocationCodeHelper(
+                !checked
+                  ? fieldsConfig.code.helperTextDisabled
+                  : fieldsConfig.code.helperTextEnabled
+              );
               handleFormInput(
                 fieldsConfig.collector.name,
                 checked ? defaultAgency : '',
@@ -249,25 +335,38 @@ const CollectionStep = (
           />
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
-          <NumberInput
+          <TextInput
             id="collector-location-code-input"
+            className="cone-collector-location-code"
             name={fieldsConfig.code.name}
             ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.code.name)}
             value={state.locationCode}
-            placeholder={fieldsConfig.code.placeholder}
-            label={fieldsConfig.code.label}
-            helperText={fieldsConfig.code.helperText}
-            invalidText={fieldsConfig.code.invalidText}
+            type="number"
+            placeholder={!forestClientNumber ? '' : fieldsConfig.code.placeholder}
+            labelText={fieldsConfig.code.label}
+            helperText={locationCodeHelper}
+            invalid={validationObj.isLocationCodeInvalid}
+            invalidText={invalidLocationMessage}
             readOnly={state.useDefaultAgencyInfo || readOnly}
+            disabled={!forestClientNumber}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput(
                 fieldsConfig.code.name,
                 e.target.value
               );
             }}
-            hideSteppers
-            disableWheel
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              if (!e.target.readOnly) {
+                validateLocationCode(e);
+              }
+            }}
           />
+          {
+            validateLocationCodeMutation.isLoading
+              ? <InlineLoading description="Validating..." />
+              : null
+          }
         </Column>
       </Row>
       <Row className="collection-step-row">

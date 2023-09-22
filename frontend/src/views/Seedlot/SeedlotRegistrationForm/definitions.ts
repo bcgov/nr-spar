@@ -22,6 +22,7 @@ export type AllStepData = {
 type SingleInvalidObj = {
   isInvalid: boolean,
   invalidText: string,
+  optInvalidText?: string
 }
 
 export type FormInvalidationObj = {

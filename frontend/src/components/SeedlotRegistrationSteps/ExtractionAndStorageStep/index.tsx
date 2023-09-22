@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import moment from 'moment';
+import validator from 'validator';
 
 import {
   Checkbox,
@@ -10,22 +12,29 @@ import {
   FlexGrid,
   InlineNotification,
   Row,
-  TextInput
+  TextInput,
+  InlineLoading
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
 
 import {
   inputText,
-  DATE_FORMAT
+  DATE_FORMAT,
+  initLocationValidateObj
 } from './constants';
 
+import getForestClientLocation from '../../../api-service/forestClientsAPI';
+
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
-import { FilterObj, filterInput } from '../../../utils/filterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
+
+import { FilterObj, filterInput } from '../../../utils/filterUtils';
+import getForestClientNumber from '../../../utils/StringUtils';
 import {
   FormValidation,
-  initialValidationObj
+  initialValidationObj,
+  ValidateLocationType
 } from './definitions';
 
 import './styles.scss';
@@ -52,22 +61,96 @@ const ExtractionAndStorage = (
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
+  const [currentSection, setCurrentSection] = useState<string>('');
+  const [locValidationObj, setLocValidationObj] = useState<ValidateLocationType>(
+    initLocationValidateObj
+  );
+
+  const updateAfterLocValidation = (isInvalid: boolean) => {
+    setValidationObj({
+      ...validationObj,
+      [currentSection === 'extractorFields' ? 'isExtractorCodeInvalid' : 'isStorageCodeInvalid']: isInvalid
+    });
+    setLocValidationObj({
+      ...locValidationObj,
+      [currentSection]: {
+        ...locValidationObj[currentSection],
+        locationCodeHelper: inputText.extractorCode.helperTextEnabled,
+        invalidLocationMessage: isInvalid ? inputText.extractorCode.invalidLocationForSelectedAgency : ''
+      }
+    });
+  };
+
+  const validateLocationCodeMutation = useMutation({
+    mutationFn: (queryParams:string[]) => getForestClientLocation(
+      queryParams[0],
+      queryParams[1]
+    ),
+    onError: () => updateAfterLocValidation(true),
+    onSuccess: () => updateAfterLocValidation(false)
+  });
+
+  const validateLocationCode = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    section: string
+  ) => {
+    let locationCode = event.target.value;
+    const stepDataField = section === 'extractorFields' ? 'extractoryLocationCode' : 'seedStorageLocationCode';
+    const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+
+    // Adding this check to add an extra 0 on the left, for cases where
+    // the user types values between 0 and 9
+    if (isInRange && locationCode.length === 1) {
+      locationCode = locationCode.padStart(2, '0');
+      setStepData({
+        ...state,
+        [stepDataField]: locationCode
+      });
+    }
+
+    if (!isInRange) {
+      setLocValidationObj({
+        ...locValidationObj,
+        [section]: {
+          ...locValidationObj[section],
+          invalidLocationMessage: inputText.extractorCode.invalidLocationValue
+        }
+      });
+      setValidationObj({
+        ...validationObj,
+        [section === 'extractorFields' ? 'isExtractorCodeInvalid' : 'isStorageCodeInvalid']: true
+      });
+    } else if (locValidationObj[section].forestClientNumber) {
+      validateLocationCodeMutation.mutate(
+        [locValidationObj[section].forestClientNumber, locationCode]
+      );
+      setLocValidationObj({
+        ...locValidationObj,
+        [section]: {
+          ...locValidationObj[section],
+          locationCodeHelper: ''
+        }
+      });
+      setValidationObj({
+        ...validationObj,
+        [section === 'extractorFields' ? 'isExtractorCodeInvalid' : 'isStorageCodeInvalid']: false
+      });
+    }
+  };
 
   const validateInput = (name: string, value: string | boolean) => {
     const newValidObj = { ...validationObj };
     let isInvalid = false;
     switch (name) {
-      case 'extractoryLocationCode':
-        if (typeof value === 'string' && value.length !== 2) {
-          isInvalid = true;
+      case 'extractoryAgency':
+        if (!value) {
+          newValidObj.isExtractorCodeInvalid = isInvalid;
         }
-        newValidObj.isExtractorCodeInvalid = isInvalid;
         break;
-      case 'seedStorageLocationCode':
-        if (typeof value === 'string' && value.length !== 2) {
-          isInvalid = true;
+      case 'seedStorageAgency':
+        if (!value) {
+          newValidObj.isStorageCodeInvalid = isInvalid;
         }
-        newValidObj.isStorageCodeInvalid = isInvalid;
         break;
       case 'extractionStartDate':
       case 'extractionEndDate':
@@ -123,6 +206,25 @@ const ExtractionAndStorage = (
       }
 
       setStepData(newState);
+    } else if (name === 'extractoryAgency' || name === 'seedStorageAgency') {
+      const section = name === 'extractoryAgency' ? 'extractorFields' : 'storageFields';
+      const stepDataField = section === 'extractorFields' ? 'extractoryLocationCode' : 'seedStorageLocationCode';
+      setLocValidationObj({
+        ...locValidationObj,
+        [section]: {
+          ...locValidationObj[section],
+          forestClientNumber: value ? getForestClientNumber(value as string) : '',
+          locationCodeHelper:
+            value
+              ? inputText.extractorCode.helperTextEnabled
+              : inputText.extractorCode.helperTextDisabled
+        }
+      });
+      setStepData({
+        ...state,
+        [name]: value,
+        [stepDataField]: value ? state[stepDataField] : ''
+      });
     } else {
       setStepData({
         ...state,
@@ -154,6 +256,16 @@ const ExtractionAndStorage = (
             readOnly={readOnly}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
+              setLocValidationObj({
+                ...locValidationObj,
+                extractorFields: {
+                  ...locValidationObj.extractorFields,
+                  locationCodeHelper:
+                    !checked
+                      ? inputText.extractorCode.helperTextDisabled
+                      : inputText.extractorCode.helperTextEnabled
+                }
+              });
               handleFormInput(
                 'extractoryAgency',
                 checked ? defaultAgency : '',
@@ -188,19 +300,34 @@ const ExtractionAndStorage = (
         <Column className="extractor-agency-col" sm={4} md={4} lg={8} xlg={6}>
           <TextInput
             id="extractory-agency-location-code-input"
+            className="extractory-agency-location-code"
             name="extractory-agency-location-code"
             ref={extractorNumberInputRef}
             value={state.extractoryLocationCode}
             type="number"
+            placeholder={!locValidationObj.extractorFields.forestClientNumber ? '' : 'Example: 00'}
             labelText={inputText.extractorCode.labelText}
-            helperText={inputText.extractorCode.helperText}
+            helperText={locValidationObj.extractorFields.locationCodeHelper}
             invalid={validationObj.isExtractorCodeInvalid}
-            invalidText={inputText.extractorCode.invalidText}
+            invalidText={locValidationObj.extractorFields.invalidLocationMessage}
+            disabled={!locValidationObj.extractorFields.forestClientNumber}
             readOnly={readOnly ?? state.extractoryUseTSC}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput('extractoryLocationCode', e.target.value);
             }}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              if (!e.target.readOnly) {
+                setCurrentSection('extractorFields');
+                validateLocationCode(e, 'extractorFields');
+              }
+            }}
           />
+          {
+            validateLocationCodeMutation.isLoading && currentSection === 'extractorFields'
+              ? <InlineLoading description="Validating..." />
+              : null
+          }
         </Column>
       </Row>
       <Row className="extraction-date-row">
@@ -276,6 +403,16 @@ const ExtractionAndStorage = (
             readOnly={readOnly}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
+              setLocValidationObj({
+                ...locValidationObj,
+                storageFields: {
+                  ...locValidationObj.storageFields,
+                  locationCodeHelper:
+                    !checked
+                      ? inputText.storageCode.helperTextDisabled
+                      : inputText.storageCode.helperTextEnabled
+                }
+              });
               handleFormInput(
                 'seedStorageAgency',
                 checked ? defaultAgency : '',
@@ -310,19 +447,34 @@ const ExtractionAndStorage = (
         <Column className="seed-storage-location-code-col" sm={4} md={4} lg={8} xlg={6}>
           <TextInput
             id="seed-storage-location-code-input"
+            className="storage-agency-location-code"
             name="seed-storage-location-code"
             ref={storageNumberInputRef}
             value={state.seedStorageLocationCode}
             type="number"
+            placeholder={!locValidationObj.storageFields.forestClientNumber ? '' : 'Example: 00'}
             labelText={inputText.storageCode.labelText}
-            helperText={inputText.storageCode.helperText}
+            helperText={locValidationObj.storageFields.locationCodeHelper}
             invalid={validationObj.isStorageCodeInvalid}
-            invalidText={inputText.storageCode.invalidText}
+            invalidText={locValidationObj.storageFields.invalidLocationMessage}
+            disabled={!locValidationObj.storageFields.forestClientNumber}
             readOnly={readOnly || state.seedStorageUseTSC}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput('seedStorageLocationCode', e.target.value);
             }}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              if (!e.target.readOnly) {
+                setCurrentSection('storageFields');
+                validateLocationCode(e, 'storageFields');
+              }
+            }}
           />
+          {
+            validateLocationCodeMutation.isLoading && currentSection === 'storageFields'
+              ? <InlineLoading description="Validating..." />
+              : null
+          }
         </Column>
       </Row>
       <Row className="storage-date-row">

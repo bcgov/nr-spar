@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import moment from 'moment';
+import validator from 'validator';
 
 import {
   Checkbox,
@@ -11,13 +13,20 @@ import {
   RadioButtonGroup,
   Row,
   TextInput,
-  FlexGrid
+  FlexGrid,
+  InlineLoading
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
+
+import getForestClientLocation from '../../../api-service/forestClientsAPI';
+
 import { FilterObj, filterInput } from '../../../utils/filterUtils';
+import getForestClientNumber from '../../../utils/StringUtils';
+import { LOCATION_CODE_LIMIT } from '../../../shared-constants/shared-constants';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import InterimForm from './definitions';
+import pageTexts from './constants';
 
 import './styles.scss';
 
@@ -61,17 +70,75 @@ const InterimStorage = (
   };
 
   const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
+  const [forestClientNumber, setForestClientNumber] = useState<string>('');
+  const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
+  const [locationCodeHelper, setLocationCodeHelper] = useState<string>(
+    pageTexts.locationCode.helperTextEnabled
+  );
 
   const [otherRadioChecked, setOtherChecked] = useState(false);
 
-  const validateInput = (name: string, value: string) => {
-    const newValidObj = { ...validationObj };
+  const updateAfterLocValidation = (isInvalid: boolean) => {
+    setValidationObj({
+      ...validationObj,
+      isCodeInvalid: isInvalid
+    });
+    setLocationCodeHelper(pageTexts.locationCode.helperTextEnabled);
+  };
+
+  const validateLocationCodeMutation = useMutation({
+    mutationFn: (queryParams:string[]) => getForestClientLocation(
+      queryParams[0],
+      queryParams[1]
+    ),
+    onError: () => {
+      setInvalidLocationMessage(pageTexts.locationCode.invalidLocationForSelectedAgency);
+      updateAfterLocValidation(true);
+    },
+    onSuccess: () => updateAfterLocValidation(false)
+  });
+
+  const validateLocationCode = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let locationCode = event.target.value;
+    const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+
+    // Adding this check to add an extra 0 on the left, for cases where
+    // the user types values between 0 and 9
+    if (isInRange && locationCode.length === 1) {
+      locationCode = locationCode.padStart(2, '0');
+      setStepData({
+        ...state,
+        locationCode
+      });
+    }
+
+    if (!isInRange) {
+      setInvalidLocationMessage(pageTexts.locationCode.invalidLocationValue);
+      setValidationObj({
+        ...validationObj,
+        isCodeInvalid: true
+      });
+      return;
+    }
+
+    if (forestClientNumber) {
+      validateLocationCodeMutation.mutate([forestClientNumber, locationCode]);
+      setValidationObj({
+        ...validationObj,
+        isCodeInvalid: false
+      });
+      setLocationCodeHelper('');
+    }
+  };
+
+  const validateInput = (name: string, value?: string) => {
+    const newValidObj = structuredClone(validationObj);
     let isInvalid = false;
-    if (name === 'locationCode') {
-      if (value.length !== 2) {
-        isInvalid = true;
+
+    if (name === 'agencyName') {
+      if (!value) {
+        newValidObj.isCodeInvalid = false;
       }
-      newValidObj.isCodeInvalid = isInvalid;
     }
     if (name === 'startDate' || name === 'endDate') {
       // Have both start and end dates
@@ -118,16 +185,28 @@ const InterimStorage = (
       }
 
       setStepData(newState);
+    } else if (name === 'agencyName') {
+      setForestClientNumber(value ? getForestClientNumber(value) : '');
+      setLocationCodeHelper(
+        value
+          ? pageTexts.locationCode.helperTextEnabled
+          : pageTexts.locationCode.helperTextDisabled
+      );
+      setStepData({
+        ...state,
+        [name]: value,
+        locationCode: value ? state.locationCode : ''
+      });
     } else {
       setStepData({
         ...state,
-        [name]: value
+        [name]: (name === 'locationCode' ? value.slice(0, LOCATION_CODE_LIMIT) : value)
       });
     }
 
     validateInput(name, value);
     if (optName && optValue) {
-      validateInput(optName, optValue);
+      validateInput(optName, value);
     }
   };
 
@@ -178,6 +257,11 @@ const InterimStorage = (
             checked={state.useCollectorAgencyInfo}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
+              setLocationCodeHelper(
+                !checked
+                  ? pageTexts.locationCode.helperTextDisabled
+                  : pageTexts.locationCode.helperTextEnabled
+              );
               handleFormInput(
                 'agencyName',
                 checked ? collectorAgency : '',
@@ -213,19 +297,33 @@ const InterimStorage = (
         <Column sm={4} md={4} lg={8} xlg={6}>
           <TextInput
             id="agency-number-input"
+            className="agency-number-location-code"
             name="locationCode"
             ref={numberInputRef}
             value={state.locationCode}
             type="number"
+            placeholder={!forestClientNumber ? '' : 'Example: 00'}
             labelText="Interim agency location code"
-            helperText="2-digit code that identifies the address of operated office or division"
+            helperText={locationCodeHelper}
             invalid={validationObj.isCodeInvalid}
-            invalidText="Please enter a valid value"
+            invalidText={invalidLocationMessage}
+            disabled={!forestClientNumber}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput('locationCode', e.target.value);
             }}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              if (!e.target.readOnly) {
+                validateLocationCode(e);
+              }
+            }}
             readOnly={readOnly ?? state.useCollectorAgencyInfo}
           />
+          {
+            validateLocationCodeMutation.isLoading
+              ? <InlineLoading description="Validating..." />
+              : null
+          }
         </Column>
       </Row>
       <Row className="interim-title-row">

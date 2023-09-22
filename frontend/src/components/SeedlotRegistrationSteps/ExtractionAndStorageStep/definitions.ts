@@ -19,3 +19,11 @@ export const initialValidationObj: FormValidation = {
   isStorageStartDateInvalid: false,
   isStorageEndDateInvalid: false
 };
+
+export type ValidateLocationType = {
+  [key: string]: {
+    forestClientNumber: string,
+    invalidLocationMessage: string,
+    locationCodeHelper: string
+  }
+};
