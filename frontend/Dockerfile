@@ -1,25 +1,26 @@
-FROM node:18.17.1-alpine3.17 AS build
+# Build static files
+# Node Bullseye has npm
+FROM node:18.18.0-bullseye-slim AS build
 
 # Build
 WORKDIR /app
-COPY . .
-RUN apk add --no-cache python3 g++ make && \
-    npm ci && \
+COPY *.html *.json *.ts ./
+COPY ./src ./src
+RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
     npm run build && \
     rm -rf node_modules
 
-# Caddy
-FROM caddy:2.7.2-alpine
+# Deploy container
+# Caddy serves static files
+FROM caddy:2.7.4-alpine
+RUN apk add --no-cache ca-certificates
 
-# Copy static files and config
+# Copy files and run formatting
 COPY --from=build /app/build/ /app/dist
-COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
-
-# Packages and caddy format
-RUN apk add --no-cache ca-certificates && \
-    caddy fmt --overwrite /etc/caddy/Caddyfile
+COPY Caddyfile /etc/caddy/Caddyfile
+RUN caddy fmt --overwrite /etc/caddy/Caddyfile
 
 # User, port and healthcheck
-USER 1001
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000
+USER 1001
