@@ -58,29 +58,22 @@ jobs:
           config: chromeWebSecurity=false,pageLoadTimeout=10000,baseUrl=https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca/
           working-directory: ./frontend
           browser: chrome
-      - uses: bcgov-nr/action-test-and-analyse@v1.1.0
-        with:
-          node_version: "18.16.0"
-          commands: |
-            npm ci
-            npm run cy:ci
-          dir: frontend
 
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots-chrome
-          path: cypress/screenshots
+          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/screenshots
 
       - name: Upload videos
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: cypress-videos-chrome
-          path: cypress/videos
+          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/
 
-      - uses: bcgov-nr/action-test-and-analyse@v1.0.0
+      - uses: bcgov-nr/action-test-and-analyse@v1.1.0
         with:
           node_version: "18.16.0"
           commands: |
