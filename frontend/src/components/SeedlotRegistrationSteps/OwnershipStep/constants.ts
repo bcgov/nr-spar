@@ -18,8 +18,10 @@ export const inputText = {
   code: {
     placeholder: 'Example: 00',
     labelText: 'Owner location code',
-    helperText: '2-digit code that identifies the address of operated office or division',
-    invalidText: 'Please enter a valid 2-digit code that identifies the address of operated office or division'
+    helperTextEnabled: '2-digit code that identifies the address of operated office or division',
+    helperTextDisabled: 'Please select an owner agency before setting the location code',
+    invalidTextValue: 'Please enter a valid 2-digit code that identifies the address of operated office or division',
+    invalidLocationForSelectedAgency: 'This owner location code is not valid for the selected agency, please enter a valid one or change the agency'
   },
   portion: {
     label: 'Owner portion (%)',
@@ -69,7 +71,8 @@ export const validTemplate: FormInvalidationObj = {
   },
   code: {
     isInvalid: false,
-    invalidText: inputText.code.invalidText
+    invalidText: inputText.code.invalidTextValue,
+    optInvalidText: inputText.code.invalidLocationForSelectedAgency
   },
   portion: {
     isInvalid: false,

@@ -1,3 +1,4 @@
+import { HALF_SECOND } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
 
 describe('Dashboard page test', () => {
@@ -8,25 +9,16 @@ describe('Dashboard page test', () => {
   };
 
   beforeEach(() => {
-    cy.visit('/');
-    cy.wait(2 * 1000);
-
-    // Clear cookies and local storage
-    cy.clearCookies({ log: true });
-    cy.clearLocalStorage({ log: true });
-
     // Loading test data
     cy.fixture('dashboard-page').then((fData) => {
       dashboardPageData = fData;
     });
+    cy.login();
+    cy.visit('/');
+    cy.wait(HALF_SECOND);
   });
 
   it('dashboard page is displayed and loads correctly', () => {
-    // SPAR log in
-    cy.login();
-
-    cy.wait(10 * 1000); // login is lagging, remove this in the future
-
     cy.isPageTitle(NavigationLabels.Dashboard);
     cy.get('.title-section')
       .find('.subtitle-section')
