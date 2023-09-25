@@ -1,4 +1,4 @@
-import { ONE_SECOND, FIVE_SECOND } from '../../constants';
+import { ONE_SECOND, FIVE_SECOND, THREE_SECOND } from '../../constants';
 
 describe('Login page test', () => {
   let loginPageData: {
@@ -12,17 +12,19 @@ describe('Login page test', () => {
     cy.fixture('login-page').then((ttls) => {
       loginPageData = ttls;
     });
-    cy.visit('/');
-    cy.wait(ONE_SECOND);
   });
 
   it('login page is displayed and loads correctly', () => {
+    cy.visit('/');
+    cy.wait(ONE_SECOND);
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
     cy.getByDataTest('landing-subtitle').should('have.text', loginPageData.subtitle);
     cy.getByDataTest('landing-desc').should('have.text', loginPageData.description);
   });
 
   it('navigate to the user form page IDIR', () => {
+    cy.visit('/');
+    cy.wait(ONE_SECOND);
     cy.getByDataTest('landing-button__idir').click();
     cy.url().then((url) => {
       if (url.includes('.gov.bc.ca')) {
@@ -36,6 +38,8 @@ describe('Login page test', () => {
   });
 
   it('navigate to the user form page BCeID', () => {
+    cy.visit('/');
+    cy.wait(ONE_SECOND);
     cy.getByDataTest('landing-button__bceid').click();
     cy.url().then((url) => {
       if (url.includes('.gov.bc.ca')) {
@@ -50,12 +54,14 @@ describe('Login page test', () => {
 
   it('try to access system using a link without user connected', () => {
     cy.visit('/dashboard');
+    cy.wait(ONE_SECOND);
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
   it('log in with BCeID and validate user role', () => {
     cy.login();
     cy.visit('/');
+    cy.wait(THREE_SECOND);
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('IDIR: undefined');
@@ -64,6 +70,7 @@ describe('Login page test', () => {
   it('log in with BCeID and validate user information', () => {
     cy.login();
     cy.visit('/');
+    cy.wait(THREE_SECOND);
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('NRS Load Test-3');
