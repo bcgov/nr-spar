@@ -187,10 +187,7 @@ const OwnershipStep = (
     } else if (name === 'ownerCode' && optionalName === 'ownerAgency') {
       // This if block is needed due to the checkbox, if unchecked, set both input to invalid
       setStepData(updatedArray);
-      const agencyKey = getValidKey(optionalName);
-      const isInvalid = optionalValue === '';
-      const { invalidText } = inputText.owner;
-      validateInput(id, name, value, agencyKey, isInvalid, invalidText);
+      validateInput(id, optionalName, optionalValue ?? '');
     } else if (name === 'ownerPortion') {
       setStepData(updatedArray);
       // Prioritize single input validation
@@ -203,6 +200,10 @@ const OwnershipStep = (
         const portionsInvalid = !arePortionsValid(updatedArray);
         setPortionsValid(portionsInvalid);
       }
+    } else if (name === 'ownerAgency') {
+      // This if block is needed due to clean location code input when changing owner agency
+      setStepData(updatedArray);
+      validateInput(id, name, value, 'ownerCode', false, '');
     } else {
       setStepData(updatedArray);
       validateInput(id, name, value);
@@ -332,10 +333,10 @@ const OwnershipStep = (
                   addRefs={(element: HTMLInputElement, name: string) => {
                     addRefs(element, singleOwnerInfo.id, name);
                   }}
-                  validationProp={readOnly ? null : invalidState[singleOwnerInfo.id]}
+                  validationProp={invalidState[singleOwnerInfo.id]}
                   handleInputChange={
-                    (name: string, value: string) => {
-                      handleInputChange(singleOwnerInfo.id, name, value);
+                    (name: string, value: string, optName?: string, optValue?: string) => {
+                      handleInputChange(singleOwnerInfo.id, name, value, optName, optValue);
                     }
                   }
                   setDefaultAgencyNCode={

@@ -1,14 +1,17 @@
 import React from 'react';
-import { Row, Column, TextInput } from '@carbon/react';
+import { Row, Column } from '@carbon/react';
 import InfoDisplayObj from '../../types/InfoDisplayObj';
 import DescriptionBox from '../DescriptionBox';
+import InfoSectionRow from './InfoSectionRow';
+import JsxChildren from '../../types/JsxChildren';
 
 import './styles.scss';
 
 interface InfoSectionProps {
   title: string
   description: string;
-  infoItems: Array<InfoDisplayObj>
+  infoItems: Array<InfoDisplayObj>;
+  children?: JsxChildren;
 }
 
 /**
@@ -18,44 +21,22 @@ interface InfoSectionProps {
  */
 const InfoSection = (
   {
-    title, description, infoItems
+    title, description, infoItems, children
   }: InfoSectionProps
-) => {
-  const formatStrForKey = (str: string) => (
-    str.replace(/[^a-zA-Z]+/g, '').toLowerCase()
-  );
-
-  return (
-    <>
-      <Row className="info-section-desc-row">
-        <Column>
-          <DescriptionBox header={title} description={description} />
-        </Column>
-      </Row>
-      <Row className="info-section-items-row">
-        {
-          infoItems.map((item) => (
-            <Column
-              key={`${formatStrForKey(item.name)}-col`}
-              sm={4}
-              md={4}
-              lg={8}
-              xlg={4}
-              max={4}
-            >
-              <TextInput
-                id={`${formatStrForKey(item.name)}-id`}
-                labelText={item.name}
-                value={item.value}
-                placeholder="--"
-                readOnly
-              />
-            </Column>
-          ))
-        }
-      </Row>
-    </>
-  );
-};
+) => (
+  <>
+    <Row className="info-section-desc-row">
+      <Column>
+        <DescriptionBox header={title} description={description} />
+      </Column>
+    </Row>
+    {
+      infoItems.length === 0
+        ? null
+        : <InfoSectionRow items={infoItems} />
+    }
+    {children}
+  </>
+);
 
 export default InfoSection;

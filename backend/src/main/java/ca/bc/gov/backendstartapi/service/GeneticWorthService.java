@@ -55,7 +55,7 @@ public class GeneticWorthService {
 
   /**
    * Does the calculation for each genetic trait. PS: if the treshold of 70% of contribution from
-   * the parent tree is not met, the trait will respond with zero as value growth.
+   * the parent tree is not met, the trait value will not be shown.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
@@ -64,23 +64,25 @@ public class GeneticWorthService {
   public GeneticWorthSummaryDto calculateGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
     BigDecimal minimumTreshold = new BigDecimal("0.7");
+    BigDecimal neValue = calculateNe(traitsDto);
 
-    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(new ArrayList<>());
+    GeneticWorthSummaryDto summaryDto =
+        new GeneticWorthSummaryDto(new ArrayList<>(), neValue);
 
     // Iterate over all traits
     List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();
 
     for (CodeDescriptionDto trait : geneticWorths) {
-      BigDecimal volumeGrowth = null;
+      BigDecimal calculatedValue = null;
       BigDecimal percentage = checkGeneticTraitTreshold(traitsDto, trait);
 
       if (percentage.compareTo(minimumTreshold) >= 0) {
         log.info("Calculating Genetic Worth for {} trait", trait.code());
-        volumeGrowth = calculateTraitGeneticWorth(traitsDto, trait);
+        calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);
       }
 
       GeneticWorthTraitsDto traitResponse =
-          new GeneticWorthTraitsDto(trait.code(), null, volumeGrowth, percentage);
+          new GeneticWorthTraitsDto(trait.code(), null, calculatedValue, percentage);
       summaryDto.geneticTraits().add(traitResponse);
     }
 
@@ -88,8 +90,38 @@ public class GeneticWorthService {
   }
 
   /**
-   * Do the calculations for the Volume Growth (GVO). Note that in the case the parent tree does not
-   * attend the 70% treshold weight, the value for this trait will be zero;
+   * Does the Ne calculation (effective population size).
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values to be calculated.
+   * @return A {@link BigDecimal} representing the calculated value.
+   */
+  private BigDecimal calculateNe(List<GeneticWorthTraitsRequestDto> traitsDto) {
+    BigDecimal malePollenSum = reducePollenCount(traitsDto);
+    BigDecimal femaleConeSum = reduceConeCount(traitsDto);
+
+    BigDecimal piSquareSum = BigDecimal.ZERO;
+    for (GeneticWorthTraitsRequestDto dto : traitsDto) {
+      BigDecimal pi = calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);
+      BigDecimal piSquare = pi.multiply(pi);
+
+      piSquareSum = piSquareSum.add(piSquare);
+      log.debug("calculateNe - piSquareSum {}", piSquareSum);
+    }
+
+    if (piSquareSum.compareTo(BigDecimal.ZERO) == 0) {
+      log.debug("calculateNe - piSquareSum is zero!");
+      return BigDecimal.ZERO;
+    }
+
+    BigDecimal neValue = BigDecimal.ONE.divide(piSquareSum, 10, RoundingMode.HALF_UP);
+    log.debug("calculateNe - neValue {}", neValue);
+    return neValue;
+  }
+
+  /**
+   * Do the calculations for each Genetic Worth trait. Note that in the case the parent tree does
+   * not attend the 70% treshold weight, the value for this trait will be zero.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values.
@@ -176,8 +208,15 @@ public class GeneticWorthService {
    */
   private BigDecimal calculatePi(
       BigDecimal pollenCount, BigDecimal coneCount, BigDecimal pollenSum, BigDecimal coneSum) {
-    BigDecimal mi = pollenCount.divide(pollenSum, 10, RoundingMode.HALF_UP);
-    BigDecimal fi = coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);
+    BigDecimal bigZero = BigDecimal.ZERO;
+    BigDecimal mi =
+        pollenSum.compareTo(bigZero) == 0
+            ? bigZero
+            : pollenCount.divide(pollenSum, 10, RoundingMode.HALF_UP);
+    BigDecimal fi =
+        coneSum.compareTo(bigZero) == 0
+            ? bigZero
+            : coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);
     return mi.add(fi).divide(new BigDecimal("2"), 10, RoundingMode.HALF_UP);
   }
 
