@@ -1,3 +1,5 @@
+import { ValidateLocationType } from './definitions';
+
 export const DATE_FORMAT = 'Y/m/d';
 
 export const inputText = {
@@ -9,14 +11,16 @@ export const inputText = {
     labelText: 'The extractory agency is the Tree Seed Center (TSC)'
   },
   extractor: {
-    placeholder: 'Select Interim agency name',
+    placeholder: 'Select Extractory agency name',
     titleText: 'Extractory agency',
     helperText: 'You can enter your agency number, name or acronym'
   },
   extractorCode: {
     labelText: 'Extractory agency location code',
-    helperText: '2-digit code that identifies the address of operated office or division',
-    invalidText: 'Please enter a valid value'
+    helperTextEnabled: '2-digit code that identifies the address of operated office or division',
+    helperTextDisabled: 'Please select an extractory agency before setting the agency location code',
+    invalidLocationValue: 'Please enter a valid value between 0 and 99',
+    invalidLocationForSelectedAgency: 'This agency location code is not valid for the selected agency, please enter a valid one or change the agency'
   },
   date: {
     extraction: {
@@ -57,7 +61,22 @@ export const inputText = {
   },
   storageCode: {
     labelText: 'Seed storage location code',
-    helperText: '2-digit code that identifies the address of operated office or division',
-    invalidText: 'Please enter a valid value'
+    helperTextEnabled: '2-digit code that identifies the address of operated office or division',
+    helperTextDisabled: 'Please select an extractory agency before setting the agency location code',
+    invalidLocationValue: 'Please enter a valid value between 0 and 99',
+    invalidLocationForSelectedAgency: 'This agency location code is not valid for the selected agency, please enter a valid one or change the agency'
+  }
+};
+
+export const initLocationValidateObj: ValidateLocationType = {
+  extractorFields: {
+    forestClientNumber: '',
+    invalidLocationMessage: '',
+    locationCodeHelper: inputText.extractorCode.helperTextEnabled
+  },
+  storageFields: {
+    forestClientNumber: '',
+    invalidLocationMessage: '',
+    locationCodeHelper: inputText.storageCode.helperTextEnabled
   }
 };
