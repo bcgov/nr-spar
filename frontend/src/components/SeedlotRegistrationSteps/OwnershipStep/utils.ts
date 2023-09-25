@@ -171,7 +171,7 @@ export const isInputInvalid = (name: string, value: string): SingleInvalidObj =>
       };
     case 'ownerCode':
       isInvalid = !twoDigitRegex.test(value);
-      invalidText = inputText.code.invalidText;
+      invalidText = inputText.code.invalidTextValue;
       return {
         isInvalid,
         invalidText

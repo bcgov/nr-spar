@@ -60,38 +60,11 @@ services:
       timeout: 5s
       retries: 5
 
-  # oracle-api:
-  #   container_name: oracle-api
-  #   profiles: ["oracle-api"]
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
-  #   environment:
-  #     NR_SPAR_ORACLE_API_VERSION: "dev"
-  #     SERVER_PORT: "8091"
-  #     DATABASE_HOST: nrcdb03.bcgov
-  #     DATABASE_PORT: "1543"
-  #     SERVICE_NAME: dbq01.nrs.bcgov
-  #     DATABASE_USER: proxy_fsa_spar_read_only_user
-  #     DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
-  #     KEYCLOAK_REALM_URL: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
-  #   ports: ["8091:8091"]
-  #   image: maven:3.9.3-eclipse-temurin-17
-  #   entrypoint: mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
-  #   network_mode: "host"
-  #   working_dir: /app
-  #   volumes: ["./oracle-api:/app"]
-  #   healthcheck:
-  #     test: curl -f http://localhost:8091/actuator/health | grep '"status":"UP"'
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
-
   frontend:
     container_name: frontend
     ports: ["3000:3000"]
-    image: node:18.17.1-alpine3.17
-    entrypoint: sh -c "apk add --no-cache python3 g++ make && cd /app && npm i && npm run start"
+    image: node:18-bullseye-slim
+    entrypoint: sh -c "npm i && npm run start"
     user: root
     volumes: ["./frontend:/app"]
     <<: *frontend
