@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { isCurrentAuthUser } from '../service/AuthService';
+import { Navigate } from 'react-router-dom';
 
 interface IProps {
   children: JSX.Element;
@@ -9,18 +9,24 @@ interface IProps {
 const ProtectedRoute = ({ children }: IProps): JSX.Element => {
   const [ signed, setSigned ] = useState<boolean>(false);
 
-  useCallback(async () => {
-    const isAuth = await isCurrentAuthUser();
-    setSigned(isAuth);
-  }, []);
-
-  if (!signed) {
+  const getEncodedUri = () :string => {
     const { pathname } = window.location;
-    const encodedUrl = encodeURI(`/?page=${pathname}`);
-    return <Navigate to={encodedUrl} replace />;
-  }
+    return encodeURI(`/?page=${pathname}`);
+  };
 
-  return children;
+  useEffect(() => {
+    const isAuthFn = async () => {
+      const isAuth = await isCurrentAuthUser();
+      console.log(`ProtectedRoute - useEffect: isAuth=${isAuth}`);
+      setSigned(isAuth);
+    };
+
+    isAuthFn();
+  }, [signed]);
+
+  return (
+    signed ? children : <Navigate to={"/"} />
+  );
 };
 
 export default ProtectedRoute;

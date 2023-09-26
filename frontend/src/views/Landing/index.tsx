@@ -21,16 +21,20 @@ const Landing = () => {
   const navigate = useNavigate();
   const homePage = '/dashboard';
 
-  useCallback(async () => {
-    const isSigned = await isCurrentAuthUser();
-    setSigned(isSigned);
-  }, []);
-
   useEffect(() => {
-    console.log('signed', signed);
+    console.log(`Landing: signed=${signed}`);
     if (signed) {
+      console.log(`Landing - useEffect - if signed - signed=${signed}`);
       navigate(getUrlQueryParam(window.location, 'page') || homePage);
     }
+    
+    const checkUserSignin = async () => {
+      const isSigned = await isCurrentAuthUser();
+      console.log(`Landing - useEffect - checkUserSignin: isSigned=${isSigned}`);
+      setSigned(isSigned);
+    };
+
+    checkUserSignin();
   }, [signed]);
 
   return (

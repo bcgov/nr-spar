@@ -4,7 +4,7 @@ import { env } from './env';
 const ZONE = env.VITE_ZONE.toLocaleLowerCase();
 
 // [https://logon7.gov.bc.ca] for PROD and [https://logontest7.gov.bc.ca] for everyting else
-const logoutDomain = ZONE === 'prod'? 'https://logon7.gov.bc.ca' : 'https://logon7test.gov.bc.ca';
+const logoutDomain = ZONE === 'prod'? 'https://logon7.gov.bc.ca' : 'https://logontest7.gov.bc.ca';
 
 const signOutUrl = [
   `${logoutDomain}/clp-cgi/logoff.cgi`,

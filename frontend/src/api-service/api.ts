@@ -3,10 +3,17 @@ import { getUserFromStorage } from '../service/AuthService';
 
 const getHeader = (useMultipart = false) => {
   const famUser = getUserFromStorage();
+  const tokenObj = famUser?.authToken as any ?? {};
+  let tokenValue = '';
+  if ('idToken' in tokenObj) {
+    const idToken = tokenObj.idToken;
+    if ('jwtToken' in idToken) {
+      tokenValue = String(idToken.jwtToken);
+    }
+  }
 
-  console.log(`token for api ${famUser?.authToken}`);
   let headers = {
-    Authorization: `Bearer ${famUser?.authToken}`
+    Authorization: `Bearer ${tokenValue}`
   };
   if (useMultipart) {
     headers = Object.assign(headers, { 'content-type': 'multipart/form-data' });
