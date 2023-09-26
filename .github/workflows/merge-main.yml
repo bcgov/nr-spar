@@ -87,7 +87,6 @@ jobs:
             verification_path: "actuator/health"
             parameters:
               -p BUILD=test
-              -p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=test
           - name: fluentbit
             file: backend/openshift.fluentbit.yml
@@ -201,8 +200,8 @@ jobs:
             parameters:
               -p KEYCLOAK_REALM_URL="https://loginproxy.gov.bc.ca/auth/realms/standard"
               -p BUILD=prod
-              -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
+              -p ORACLE_SERVER_URL="https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca"
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH="production"
           - name: fluentbit
             file: backend/openshift.fluentbit.yml
             overwrite: true
@@ -211,14 +210,14 @@ jobs:
             overwrite: true
             parameters:
               -p VITE_NRSPARWEBAPP_VERSION=prod
-              -p VITE_KC_URL=https://loginproxy.gov.bc.ca/auth
-              -p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
+              -p VITE_KC_URL="https://loginproxy.gov.bc.ca/auth"
+              -p VITE_ORACLE_SERVER_URL="https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca"
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             verification_path: "actuator/health"
             parameters:
-              -p KEYCLOAK_REALM_URL="https://loginproxy.gov.bc.ca/auth/realms/standard "
+              -p KEYCLOAK_REALM_URL="https://loginproxy.gov.bc.ca/auth/realms/standard"
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
     steps:
