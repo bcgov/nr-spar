@@ -199,7 +199,7 @@ jobs:
             overwrite: true
             verification_path: "actuator/health"
             parameters:
-              -p KEYCLOAK_REALM_URL="https://loginproxy.gov.bc.ca/auth/realms/standard "
+              -p KEYCLOAK_REALM_URL="https://loginproxy.gov.bc.ca/auth/realms/standard"
               -p BUILD=prod
               -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
