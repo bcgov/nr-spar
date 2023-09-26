@@ -27,6 +27,7 @@ parameters:
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
   - name: KEYCLOAK_REALM_URL
+    description: KeyCloak realm address
     value: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
