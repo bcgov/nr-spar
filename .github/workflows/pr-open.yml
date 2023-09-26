@@ -45,19 +45,16 @@ jobs:
           parameters:
             -p ZONE=${{ github.event.number }}
             -p NAME=${{ github.event.repository.name }}
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
-            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
           triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
 
   builds:
     name: Builds
-    needs:
-      - init
     runs-on: ubuntu-22.04
     permissions:
       packages: write
@@ -74,7 +71,7 @@ jobs:
           - package: oracle-api
             triggers: ('oracle-api/')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
@@ -145,87 +142,3 @@ jobs:
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path}}
-
-  # tests-api:
-  #   name: API Tests
-  #   needs:
-  #     - deploys
-  #   env:
-  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16
-  #     - run: |
-  #         # Install newman
-  #         npm install -g newman
-  #         npm install -g newman-reporter-htmlextra
-  #         mkdir -p testArtifacts
-
-  #     - run: |
-  #         # Run Postman Collection
-  #         newman run oracle-api/test/postman/oracle-api.postman_collection.json \
-  #           -e oracle-api/test/postman/oracle-api.postman_environment.json \
-  #           --env-var "apiAddr=${{ env.TARGET }}" \
-  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-  #           --env-var "authServer=${{ secrets.KEYCLOAK_SERVER_REALM }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_NAME }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
-
-  # tests-backend:
-  #   name: Backend Tests
-  #   needs:
-  #     - deploys
-  #   env:
-  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16
-  #     - run: |
-  #         # Install newman
-  #         npm install -g newman
-  #         npm install -g newman-reporter-htmlextra
-  #         mkdir -p testArtifacts
-
-  #     - run: |
-  #         # Run Postman Collection
-  #         newman run backend/test/postman/starting-api.postman_collection.json \
-  #           -e backend/test/postman/starting-api.postman_environment.json \
-  #           --env-var "apiAddr=${{ env.TARGET }}" \
-  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-  #           --env-var "authServer=${{ vars.KEYCLOAK_SERVER_REALM }}" \
-  #           --env-var "authClient=${{ vars.KC_SERVICE_ACCOUNT_NAME }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
-
-  # tests-frontend:
-  #   name: Frontend Tests
-  #   env:
-  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-  #   needs:
-  #     - deploys
-  #   continue-on-error: true
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: "16"
-  #         cache: "npm"
-  #         cache-dependency-path: frontend/package-lock.json
-  #     - name: Install dependencies
-  #       run: |
-  #         cd frontend
-  #         npm ci
-
-  #     - name: Cypress run
-  #       uses: cypress-io/github-action@v5
-  #       with:
-  #         config: baseUrl=https://${{ env.TARGET }}
-  #         install: false
-  #         working-directory: frontend
