@@ -176,7 +176,7 @@ const ParentTreeStep = (
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillCompostitionTables(res, state, headerConfig, currentTab, setStepData);
+      fillCompostitionTables(res.data, state, headerConfig, currentTab, setStepData);
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -187,7 +187,7 @@ const ParentTreeStep = (
   const calculateGenWorthQuery = useMutation({
     mutationFn: (data: GenWorthCalcPayload[]) => postForCalculation(data),
     onSuccess: (res) => fillCalculatedInfo(
-      res,
+      res.data,
       genWorthInfoItems,
       setGenWorthInfoItems,
       popSizeAndDiversityConfig,

@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
@@ -203,7 +202,7 @@ export const applyValueToAll = (
 };
 
 export const fillCompostitionTables = (
-  res: AxiosResponse,
+  data: CompUploadResponse[],
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
   currentTab: keyof TabTypes,
@@ -215,7 +214,7 @@ export const fillCompostitionTables = (
   // Clean the table first
   const clonedState = cleanTable(state, headerConfig, currentTab, setStepData);
 
-  res.data.forEach((row: CompUploadResponse) => {
+  data.forEach((row: CompUploadResponse) => {
     const parentTreeNumber = row.parentTreeNumber.toString();
     if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
       // If the clone nubmer exist from user file then fill in the values
@@ -326,7 +325,7 @@ export const setInputChange = (
 };
 
 export const fillCalculatedInfo = (
-  res: AxiosResponse,
+  data: CalcPayloadResType,
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: Function,
   popSizeAndDiversityConfig: Record<string, any>,
@@ -334,7 +333,7 @@ export const fillCalculatedInfo = (
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
-  const { geneticTraits, neValue }: CalcPayloadResType = res.data;
+  const { geneticTraits, neValue }: CalcPayloadResType = data;
   // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
