@@ -88,8 +88,8 @@
     "coverage": "vitest run --coverage",
     "preview": "vite preview",
     "lint": "./node_modules/.bin/eslint \"src/**\"",
-    "cy:open": "./node_modules/.bin/cypress open",
-    "cy:run": "./node_modules/.bin/cypress run --browser chrome"
+    "cy:open": "cypress open",
+    "cy:run": "cypress run --browser chrome"
   },
   "eslintConfig": {
     "extends": [
