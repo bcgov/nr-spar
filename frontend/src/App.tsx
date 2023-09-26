@@ -4,7 +4,7 @@ import {
   BrowserRouter, Routes, Route
 } from 'react-router-dom';
 
-import './custom.scss';
+import './styles/custom.scss';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import { useAuth } from './contexts/AuthContext';
