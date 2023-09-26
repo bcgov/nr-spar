@@ -43,12 +43,6 @@ parameters:
   - name: VITE_KC_URL
     description: VITE_KC_URL
     required: true
-  - name: VITE_KC_REALM
-    description: VITE_KC_REALM
-    required: true
-  - name: VITE_KC_CLIENT_ID
-    description: VITE_KC_CLIENT_ID
-    required: true
   - name: VITE_ORACLE_SERVER_URL
     description: Oracle API server, everything except PROD uses the same
     value: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
@@ -114,10 +108,6 @@ objects:
                   value: ${VITE_NRSPARWEBAPP_VERSION}
                 - name: VITE_KC_URL
                   value: ${VITE_KC_URL}
-                - name: VITE_KC_REALM
-                  value: ${VITE_KC_REALM}
-                - name: VITE_KC_CLIENT_ID
-                  value: ${VITE_KC_CLIENT_ID}
                 - name: VITE_ORACLE_SERVER_URL
                   value: ${VITE_ORACLE_SERVER_URL}
                 - name: LOG_LEVEL

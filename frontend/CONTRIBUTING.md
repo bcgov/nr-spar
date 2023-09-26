@@ -59,9 +59,6 @@ Remember of setting up the required environment variables. You can create a `.en
 
 ```
 VITE_NRSPARWEBAPP_VERSION=
-VITE_KC_URL=
-VITE_KC_REALM=
-VITE_KC_CLIENT_ID=
 ```
 
 And if you want to run Cypress, please add:

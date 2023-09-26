@@ -56,9 +56,6 @@ Be aware of the required environment variables:
 ```sh
 VITE_NRSPARWEBAPP_VERSION=dev
 VITE_SERVER_URL=http://localhost:8090
-VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-VITE_KC_REALM=standard
-VITE_KC_CLIENT_ID=seed-planning-test-4296
 CYPRESS_USERNAME=LOAD-3-TEST
 CYPRESS_PASSWORD=[password-here]
 ```
