@@ -64,7 +64,7 @@ services:
     container_name: frontend
     image: node:18-bullseye-slim
     ports: ["3000:3000"]
-    entrypoint: sh -c "npm i && npm run start"
+    entrypoint: sh -c "npm i --no-update-notifier && npm run start"
     user: root
     volumes: ["./frontend:/app"]
     working_dir: /app
@@ -77,3 +77,20 @@ services:
     ports: ["3005:3000"]
     volumes: ["./frontend/Caddyfile:/etc/caddy/Caddyfile"]
     <<: *frontend
+
+  # Cypress image tag must match what's in frontend/package.json
+  cypress:
+    container_name: cypress
+    depends_on:
+      frontend:
+        condition: service_started
+    entrypoint: sh -c "npm run cy:run --no-update-notifier"
+    environment:
+      CYPRESS_baseUrl: http://frontend:3000
+      CYPRESS_USERNAME: LOAD-3-TEST
+      CYPRESS_PASSWORD: ${CYPRESS_PASSWORD}
+    image: cypress/included:12.17.4
+    profiles: ["cypress"]
+    user: root
+    volumes: ["./frontend:/app"]
+    working_dir: /app
