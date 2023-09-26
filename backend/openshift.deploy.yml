@@ -128,7 +128,10 @@ objects:
                 - name: ORACLE_SERVER_URL
                   value: ${ORACLE_SERVER_URL}
                 - name: FORESTCLIENTAPI_KEY
-                  value: ${FORESTCLIENTAPI_KEY}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}
+                      key: forestclientapi-key
                 - name: POSTGRES_HOST
                   value: ${NAME}-${ZONE}-database
                 - name: POSTGRES_DB

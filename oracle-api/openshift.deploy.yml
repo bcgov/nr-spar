@@ -14,8 +14,6 @@ parameters:
     required: true
   - name: ORACLE_USER
     value: "proxy_fsa_spar_read_only_user"
-  - name: ORACLE_PASSWORD
-    required: true
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -122,7 +120,10 @@ objects:
                 - name: DATABASE_USER
                   value: ${ORACLE_USER}
                 - name: DATABASE_PASSWORD
-                  value: ${ORACLE_PASSWORD}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}
+                      key: oracle-password
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
               ports:

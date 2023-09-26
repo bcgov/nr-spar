@@ -16,10 +16,7 @@ parameters:
     generate: expression
   - name: FORESTCLIENTAPI_KEY
     required: true
-  - name: ORACLE_DB_USER
-    description: Oracle database username for API
-    required: true
-  - name: ORACLE_DB_PASSWORD
+  - name: ORACLE_PASSWORD
     description: Oracle database password for API
     required: true
   - name: AWS_ACCESS_KEY_ID
@@ -45,6 +42,15 @@ objects:
       database-name: ${NAME}
       database-password: ${DB_PASSWORD}
       database-user: ${NAME}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      oracle-password: ${ORACLE_PASSWORD}
+      forestclientapi-key: ${FORESTCLIENTAPI_KEY}
   - apiVersion: v1
     kind: Secret
     metadata:

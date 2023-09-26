@@ -58,14 +58,14 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
-            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p ZONE=test
+            -p NAME=${{ github.event.repository.name }}
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p ORACLE_PASSWORD=${{ secrets.ORACLE_PASSWORD }}
 
   deploy-test:
     name: TEST Deployment
@@ -172,14 +172,14 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
-            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p ZONE=prod
+            -p NAME=${{ github.event.repository.name }}
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
 
   deploy-prod:
     name: PROD Deployment
