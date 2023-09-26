@@ -330,7 +330,7 @@ export const fillCalculatedInfo = (
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: Function,
   popSizeAndDiversityConfig: Record<string, any>,
-  setPopSizeAndDiversity: Function
+  setPopSizeAndDiversityConfig: Function
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
@@ -357,7 +357,7 @@ export const fillCalculatedInfo = (
   // Fill in Ne value
   const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
   newPopAndDiversityConfig.ne.value = neValue.toFixed(1);
-  setPopSizeAndDiversity(newPopAndDiversityConfig);
+  setPopSizeAndDiversityConfig(newPopAndDiversityConfig);
 };
 
 export const generateGenWorthPayload = (

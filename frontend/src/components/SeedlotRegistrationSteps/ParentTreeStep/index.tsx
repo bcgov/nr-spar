@@ -84,7 +84,7 @@ const ParentTreeStep = (
     sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true, 'parentTreeNumber')
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
-  const [popSizeAndDiversityConfig, setPopSizeAndDiversity] = useState(
+  const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
     structuredClone(PopSizeAndDiversityConfig)
   );
   const [
@@ -191,7 +191,7 @@ const ParentTreeStep = (
       genWorthInfoItems,
       setGenWorthInfoItems,
       popSizeAndDiversityConfig,
-      setPopSizeAndDiversity
+      setPopSizeAndDiversityConfig
     )
   });
 
