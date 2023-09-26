@@ -47,7 +47,7 @@ parameters:
     description: The database's name
     value: dbq01.nrs.bcgov
   - name: KEYCLOAK_REALM_URL
-    description: Keycloak realm address
+    description: KeyCloak realm address
     value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
