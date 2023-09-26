@@ -57,14 +57,6 @@ objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${NAME}-${ZONE}-backend
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      forest-client-api-key: ${FORESTCLIENTAPI_KEY}
-  - apiVersion: v1
-    kind: Secret
-    metadata:
       name: ${NAME}-${ZONE}-fluentbit
       labels:
         app: ${NAME}-${ZONE}

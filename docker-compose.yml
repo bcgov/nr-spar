@@ -39,7 +39,6 @@ services:
         condition: service_started
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
-      FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       POSTGRES_HOST: database
       <<: *db-vars
