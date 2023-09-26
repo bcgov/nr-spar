@@ -1,23 +1,13 @@
 package ca.bc.gov.backendstartapi.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
@@ -39,6 +29,7 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    /*
     http.cors(Customizer.withDefaults())
         .csrf(
             customize ->
@@ -58,20 +49,32 @@ public class SecurityConfig {
             customize ->
                 customize.jwt(
                     jwt -> jwt.jwtAuthenticationConverter(converter()).jwkSetUri(jwkSetUri)));
+    */
+
+    http.cors(Customizer.withDefaults())
+        .csrf(
+            customize ->
+                customize.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+        .authorizeHttpRequests(customize -> customize.requestMatchers("**").permitAll())
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable);
 
     return http.build();
   }
 
+  /*
   private Converter<Jwt, AbstractAuthenticationToken> converter() {
     JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(roleConverter);
     return converter;
   }
+  */
 
   /**
    * Parse the roles of a client from the JWT, if they're present; if not, subjects with service
    * accounts are granted read and write permissions.
    */
+  /*
   private final Converter<Jwt, Collection<GrantedAuthority>> roleConverter =
       jwt -> {
         if (!jwt.getClaims().containsKey("client_roles")) {
@@ -94,4 +97,5 @@ public class SecurityConfig {
             .map(roleName -> (GrantedAuthority) new SimpleGrantedAuthority(roleName))
             .toList();
       };
+  */
 }

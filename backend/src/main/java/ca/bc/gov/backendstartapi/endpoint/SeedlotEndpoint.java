@@ -27,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -75,7 +74,6 @@ public class SeedlotEndpoint {
   @PostMapping(
       path = "/parent-trees-contribution/cone-pollen-count-table/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('user_read')")
   public ResponseEntity<List<ConeAndPollenCount>> handleConeAndPollenCountTableUpload(
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
@@ -113,7 +111,6 @@ public class SeedlotEndpoint {
   @PostMapping(
       path = "/parent-trees-contribution/smp-calculation-table/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @PreAuthorize("hasRole('user_read')")
   public ResponseEntity<List<SmpMixVolume>> handleSmpCalculationTableUpload(
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
@@ -148,7 +145,6 @@ public class SeedlotEndpoint {
    * @return A {@link SeedlotCreateResponseDto} with all created values.
    */
   @PostMapping(consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('user_write')")
   @Operation(
       summary = "Creates a Seedlot",
       description = """

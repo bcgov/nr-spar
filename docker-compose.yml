@@ -12,10 +12,10 @@ x-frontend: &frontend
   environment:
     VITE_SERVER_URL: http://localhost:8090
     VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-    VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
-    VITE_KC_REALM: standard
-    VITE_KC_CLIENT_ID: seed-planning-test-4296
     LOG_LEVEL: debug
+    VITE_USER_POOLS_ID: ca-central-1_t2HSZBHurS
+    VITE_USER_POOLS_WEB_CLIENT_ID: 37798cpec8d4u1a2njt02nonp7
+    VITE_AWS_DOMAIN: prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com
   healthcheck:
     test: wget --spider http://localhost:3000/index.html
     interval: 10s
@@ -29,7 +29,7 @@ services:
     environment:
       <<: *db-vars
     volumes: ["/pgdata"]
-    healthcheck:
+        healthcheck:
       test: pg_isready -U postgres
       interval: 5s
       timeout: 5s
@@ -43,7 +43,7 @@ services:
         condition: service_started
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
-      KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
+      KEYCLOAK_REALM_URL: https://dev.loginproxy.gov.bc.ca/auth/realms/standard
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
