@@ -87,6 +87,8 @@ services:
     entrypoint: sh -c "npm run cy:run --no-update-notifier"
     environment:
       CYPRESS_baseUrl: http://frontend:3000
+      CYPRESS_USERNAME: LOAD-3-TEST
+      CYPRESS_PASSWORD: ${CYPRESS_PASSWORD}
     image: cypress/included:12.17.4
     profiles: ["cypress"]
     user: root
