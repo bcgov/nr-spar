@@ -117,9 +117,6 @@ jobs:
             overwrite: true
             parameters:
               -p VITE_NRSPARWEBAPP_VERSION=dev
-              -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-              -p VITE_KC_REALM=standard
-              -p VITE_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
             triggers: ('common/' 'database/' 'backend/' 'frontend/')

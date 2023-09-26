@@ -97,9 +97,6 @@ jobs:
             overwrite: true
             parameters:
               -p VITE_NRSPARWEBAPP_VERSION=test
-              -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-              -p VITE_KC_REALM=standard
-              -p VITE_KC_CLIENT_ID=seed-planning-test-4296
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -214,8 +211,6 @@ jobs:
             parameters:
               -p VITE_NRSPARWEBAPP_VERSION=prod
               -p VITE_KC_URL=https://loginproxy.gov.bc.ca/auth
-              -p VITE_KC_REALM=standard
-              -p VITE_KC_CLIENT_ID=seed-planning-test-4296
               -p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml

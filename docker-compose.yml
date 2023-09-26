@@ -11,9 +11,6 @@ x-frontend: &frontend
       condition: service_started
   environment:
     VITE_SERVER_URL: http://backend:8090
-    VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
-    VITE_KC_REALM: standard
-    VITE_KC_CLIENT_ID: seed-planning-test-4296
     LOG_LEVEL: debug
   healthcheck:
     test: wget --spider http://localhost:3000/index.html
