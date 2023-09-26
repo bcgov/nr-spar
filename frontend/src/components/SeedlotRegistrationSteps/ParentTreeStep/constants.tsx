@@ -388,7 +388,7 @@ export const headerTemplate: Array<HeaderObj> = [
   {
     id: 'w_ad',
     name: 'Weighted AD',
-    description: 'Weighted Weighted animal browse resistance (deer)',
+    description: 'Weighted animal browse resistance (deer)',
     enabled: false,
     editable: false,
     isAnOption: false,
