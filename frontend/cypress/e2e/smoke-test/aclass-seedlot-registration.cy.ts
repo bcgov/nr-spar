@@ -107,6 +107,7 @@ describe('A Class Seedlot registration flow', () => {
     cy.get('.save-button')
       .find('button')
       .click();
+    cy.wait(THREE_SECOND);
     // To-do Validate seedlot id
     cy.get('.scf-info-container')
       .find('h2')
