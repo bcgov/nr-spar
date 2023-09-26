@@ -48,15 +48,6 @@ objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${NAME}-${ZONE}-oracle-api
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      oracle-user: ${ORACLE_DB_USER}
-      oracle-password: ${ORACLE_DB_PASSWORD}
-  - apiVersion: v1
-    kind: Secret
-    metadata:
       name: ${NAME}-${ZONE}-fluentbit
       labels:
         app: ${NAME}-${ZONE}

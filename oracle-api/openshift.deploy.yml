@@ -13,8 +13,9 @@ parameters:
     description: Deployment zone, e.g. pr-### or prod
     required: true
   - name: ORACLE_USER
-    description: Oracle username
     value: "proxy_fsa_spar_read_only_user"
+  - name: ORACLE_PASSWORD
+    required: true
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -121,10 +122,7 @@ objects:
                 - name: DATABASE_USER
                   value: ${ORACLE_USER}
                 - name: DATABASE_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: oracle-password
+                  value: ${ORACLE_PASSWORD}
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
               ports:
