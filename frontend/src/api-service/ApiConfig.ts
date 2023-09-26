@@ -49,6 +49,8 @@ const ApiConfig = {
 
   gameticMethodology: `${serverHost}/api/gametic-methodologies`,
 
+  forestClient: `${serverHost}/api/forest-clients`,
+
   geneticWorth: `${serverHost}/api/genetic-worth/calculate-all`,
 
   /**
