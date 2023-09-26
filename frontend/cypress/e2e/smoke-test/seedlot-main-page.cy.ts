@@ -1,4 +1,4 @@
-import { ONE_SECOND } from '../../constants';
+import { HALF_SECOND, TWO_SECOND } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
 
 describe('Seedlot Main page test', () => {
@@ -16,8 +16,9 @@ describe('Seedlot Main page test', () => {
 
     cy.login();
     cy.visit('/');
+    cy.wait(TWO_SECOND);
     cy.navigateTo(NavigationLabels.Seedlots);
-    cy.wait(ONE_SECOND);
+    cy.wait(HALF_SECOND);
   });
 
   it('seedlot main page is displayed and loads correctly', () => {

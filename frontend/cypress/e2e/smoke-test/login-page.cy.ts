@@ -1,4 +1,6 @@
-import { ONE_SECOND, FIVE_SECOND, THREE_SECOND } from '../../constants';
+import {
+  ONE_SECOND, TWO_SECOND, THREE_SECOND, FIVE_SECOND
+} from '../../constants';
 
 describe('Login page test', () => {
   let loginPageData: {
@@ -70,7 +72,7 @@ describe('Login page test', () => {
   it('log in with BCeID and validate user information', () => {
     cy.login();
     cy.visit('/');
-    cy.wait(THREE_SECOND);
+    cy.wait(TWO_SECOND);
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('NRS Load Test-3');
