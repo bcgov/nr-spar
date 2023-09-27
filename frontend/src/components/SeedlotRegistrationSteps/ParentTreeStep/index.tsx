@@ -48,7 +48,7 @@ import {
   cleanTable,
   fillCompostitionTables,
   configHeaderOpt,
-  fillGwInfo,
+  fillCalculatedInfo,
   generateGenWorthPayload,
   addNewMixRow,
   calcMixTabInfoItems,
@@ -90,7 +90,7 @@ const ParentTreeStep = (
     sortAndSliceRows(Object.values(state.mixTabData), currentMixPage, currMixPageSize, true, 'parentTreeNumber')
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
-  const [popSizeAndDiversityConfig] = useState(
+  const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
     structuredClone(PopSizeAndDiversityConfig)
   );
   const [
@@ -211,7 +211,7 @@ const ParentTreeStep = (
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillCompostitionTables(res, state, headerConfig, currentTab, setStepData);
+      fillCompostitionTables(res.data, state, headerConfig, currentTab, setStepData);
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -224,7 +224,7 @@ const ParentTreeStep = (
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillMixTable(res, state, setStepData);
+      fillMixTable(res.data, state, setStepData);
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -234,7 +234,13 @@ const ParentTreeStep = (
 
   const calculateGenWorthQuery = useMutation({
     mutationFn: (data: GenWorthCalcPayload[]) => postForCalculation(data),
-    onSuccess: (res) => fillGwInfo(res.data.geneticTraits, genWorthInfoItems, setGenWorthInfoItems)
+    onSuccess: (res) => fillCalculatedInfo(
+      res.data,
+      genWorthInfoItems,
+      setGenWorthInfoItems,
+      popSizeAndDiversityConfig,
+      setPopSizeAndDiversityConfig
+    )
   });
 
   return (
