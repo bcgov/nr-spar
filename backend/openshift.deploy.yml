@@ -56,7 +56,7 @@ parameters:
     value: nightly
   - name: ORACLE_SERVER_URL
     description: Oracle back-end api URL
-    required: true
+    value: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
   - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
     description: Backend environment for OpenSearch. # One of: development, test, production
     required: true
