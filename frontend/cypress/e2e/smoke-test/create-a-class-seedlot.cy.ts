@@ -1,8 +1,10 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
-import { HALF_SECOND, ONE_SECOND, TYPE_DELAY } from '../../constants';
+import {
+  HALF_SECOND, TWO_SECOND, THREE_SECOND, TYPE_DELAY
+} from '../../constants';
 
-describe('A Class Seedlot registration flow', () => {
+describe('Create A Class Seedlot', () => {
   let data: {
     applicantAgency: { name: string; number: string; email: string; invalidEmail: string; };
     seedlotInformation: { species: string; };
@@ -15,6 +17,7 @@ describe('A Class Seedlot registration flow', () => {
 
     cy.login();
     cy.visit('/');
+    cy.wait(TWO_SECOND);
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.wait(HALF_SECOND);
   });
@@ -33,15 +36,10 @@ describe('A Class Seedlot registration flow', () => {
     cy.toogleFavourite();
     // To do - validate after to be fixed
     // Enter the applicant agency name
-    cy.get('.agency-information')
-      .find('.bx--combo-box')
+    cy.get('#applicant-info-combobox')
       .click();
-    cy.get('#downshift-1-menu')
-      .find('#downshift-1-item-0')
+    cy.contains('.bx--list-box__menu-item__option', data.applicantAgency.name)
       .click();
-    // cy.get('.agency-information')
-    //   .contains(data.applicantAgency.name)
-    //   .click();
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
@@ -59,10 +57,10 @@ describe('A Class Seedlot registration flow', () => {
       .clear()
       .type(data.applicantAgency.email, { delay: TYPE_DELAY });
     // Enter the seedlot species, wait for species data to load
-    cy.wait(ONE_SECOND + HALF_SECOND);
-    cy.get('.applicant-info-combobox-species')
+    cy.wait(THREE_SECOND);
+    cy.get('#seedlot-species-combobox')
       .click();
-    cy.get('#downshift-3-item-0')
+    cy.contains('.bx--list-box__menu-item__option', data.seedlotInformation.species)
       .scrollIntoView()
       .click();
     // Check checkbox behavior when Tested parent tree selected
@@ -104,20 +102,15 @@ describe('A Class Seedlot registration flow', () => {
     cy.get('.save-button')
       .find('button')
       .click();
+    cy.wait(THREE_SECOND);
     // To-do Validate seedlot id
     cy.get('.scf-info-container')
       .find('h2')
       .contains(/^Your A class seedlot [0-9]/);
-    // Click on Go to seedlot's detail screen
-    // cy.get('.scf-info-container')
-    //   .find('h2')
-    //   .then(($txt) => {
-    //     const seedlotNumber = $txt.text().slice(21, 26);
-    //   });
     cy.contains('button', "Go back to seedlot's main screen")
       .click();
-    cy.wait(HALF_SECOND);
-    cy.get('.bx--data-table-content').contains('CW - Western redcedar');
+    cy.wait(THREE_SECOND);
+    cy.get('.bx--data-table-content').contains(data.seedlotInformation.species);
   });
 });
 

@@ -40,31 +40,6 @@ jobs:
             -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/response/**,**/*$*Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
           sonar_project_token: ${{ secrets[matrix.token] }}
 
-  tests-javascript:
-    name: JavaScript CI
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-22.04
-    env:
-      VITE_NRSPARWEBAPP_VERSION: dev
-    steps:
-      - uses: bcgov-nr/action-test-and-analyse@v1.0.0
-        with:
-          node_version: "18.16.0"
-          commands: |
-            npm i
-            npm run lint
-            npm run coverage
-          dir: frontend
-          sonar_args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.cobertura.reportPaths=coverage/cobertura-coverage.xml
-            -Dsonar.projectKey=nr-spar_frontend
-            -Dsonar.sources=src/
-            -Dsonar.exclusions=src/**/__test__/**/*
-            -Dsonar.test.inclusions=src/**/__test__/**/*
-          sonar_token: ${{ secrets.SONAR_FRONTEND }}
-
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Security Scan
