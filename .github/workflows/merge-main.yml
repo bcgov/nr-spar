@@ -87,7 +87,6 @@ jobs:
             verification_path: "actuator/health"
             parameters:
               -p BUILD=test
-              -p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=test
           - name: fluentbit
             file: backend/openshift.fluentbit.yml
@@ -217,6 +216,7 @@ jobs:
               -p VITE_KC_URL=https://loginproxy.gov.bc.ca/auth
               -p VITE_KC_REALM=standard
               -p VITE_KC_CLIENT_ID=seed-planning-test-4296
+              -p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
