@@ -13,7 +13,7 @@ export default defineConfig({
       '**/login-page.cy.ts',
       '**/dashboard-page.cy.ts',
       '**/seedlot-main-page.cy.ts',
-      '**/aclass-seedlot-registration.cy.ts'
+      '**/create-a-class-seedlot.cy.ts'
     ],
     // testIsolation: false,
     chromeWebSecurity: false,

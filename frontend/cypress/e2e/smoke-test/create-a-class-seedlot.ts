@@ -4,7 +4,7 @@ import {
   HALF_SECOND, TWO_SECOND, THREE_SECOND, TYPE_DELAY
 } from '../../constants';
 
-describe('A Class Seedlot registration flow', () => {
+describe('Create A Class Seedlot', () => {
   let data: {
     applicantAgency: { name: string; number: string; email: string; invalidEmail: string; };
     seedlotInformation: { species: string; };
@@ -38,7 +38,7 @@ describe('A Class Seedlot registration flow', () => {
     // Enter the applicant agency name
     cy.get('#applicant-info-combobox')
       .click();
-    cy.get('#downshift-1-item-0')
+    cy.contains('.bx--list-box__menu-item__option', data.applicantAgency.name)
       .click();
     // Enter the applicant agency number
     cy.get('#agency-number-input')
@@ -60,7 +60,7 @@ describe('A Class Seedlot registration flow', () => {
     cy.wait(THREE_SECOND);
     cy.get('#seedlot-species-combobox')
       .click();
-    cy.get('#downshift-3-item-0')
+    cy.contains('.bx--list-box__menu-item__option', data.seedlotInformation.species)
       .scrollIntoView()
       .click();
     // Check checkbox behavior when Tested parent tree selected
@@ -110,7 +110,7 @@ describe('A Class Seedlot registration flow', () => {
     cy.contains('button', "Go back to seedlot's main screen")
       .click();
     cy.wait(THREE_SECOND);
-    cy.get('.bx--data-table-content').contains('CW - Western redcedar');
+    cy.get('.bx--data-table-content').contains(data.seedlotInformation.species);
   });
 });
 
