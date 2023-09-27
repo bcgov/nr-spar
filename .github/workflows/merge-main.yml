@@ -65,7 +65,7 @@ jobs:
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
-            -p ORACLE_PASSWORD=${{ secrets.ORACLE_PASSWORD }}
+            -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
 
   deploy-test:
     name: TEST Deployment
@@ -102,7 +102,6 @@ jobs:
             verification_path: "actuator/health"
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
-              -p ORACLE_PASSWORD=${{ secrets.ORACLE_PASSWORD }}
               -p SERVICE_NAME=dbq01.nrs.bcgov
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
@@ -220,7 +219,7 @@ jobs:
             parameters:
               -p KEYCLOAK_REALM_URL="https://loginproxy.gov.bc.ca/auth/realms/standard"
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
-              -p ORACLE_PASSWORD=${{ secrets.ORACLE_PASSWORD }}
+              -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
               -p SERVICE_NAME=dbq01.nrs.bcgov
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4

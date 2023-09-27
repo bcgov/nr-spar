@@ -13,7 +13,7 @@ parameters:
     description: Deployment zone, e.g. pr-### or prod
     required: true
   - name: ORACLE_USER
-    value: "proxy_fsa_spar_read_only_user"
+    value: proxy_fsa_spar_read_only_user
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
