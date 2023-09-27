@@ -148,6 +148,40 @@ jobs:
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path}}
 
+  tests-javascript:
+    name: JavaScript CI
+    needs: [deploys]
+    runs-on: ubuntu-22.04
+    env:
+      CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca
+      CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+      CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+      VITE_NRSPARWEBAPP_VERSION: dev
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca
+      VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cypress-io/github-action@v6
+        name: Cypress run
+        with:
+          config: chromeWebSecurity=false,pageLoadTimeout=10000
+          working-directory: ./frontend
+          browser: chrome
+
+      - name: Upload screenshots on failure
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots-chrome
+          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/screenshots
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos-chrome
+          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/
+
   # tests-api:
   #   name: API Tests
   #   needs:
