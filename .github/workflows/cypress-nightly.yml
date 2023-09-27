@@ -16,7 +16,7 @@ jobs:
     name: E2E on Chrome
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Cypress run
         uses: cypress-io/github-action@v4
@@ -48,7 +48,7 @@ jobs:
     name: E2E on Firefox
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Cypress run
         run: cypress run --browser firefox
@@ -75,7 +75,7 @@ jobs:
     name: E2E on Edge
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Cypress run
         uses: cypress-io/github-action@v4
