@@ -49,7 +49,7 @@ jobs:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       VITE_NRSPARWEBAPP_VERSION: dev
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.apps.silver.devops.gov.bc.ca
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-test-backend.apps.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.apps.silver.devops.gov.bc.ca
     steps:
       - uses: actions/checkout@v4
