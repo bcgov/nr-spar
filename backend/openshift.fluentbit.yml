@@ -24,8 +24,6 @@ parameters:
   - name: FLUENT_VERSION
     description: FluentBit version (docker tag). You may include a debug version.
     value: "2.1"
-  - name: PROMOTE
-    description: Dummy parameter used by most/all other templates in this repo
   # Parameters for logging sidecar
   - name: LOGGING_CPU_LIMIT
     description: Limit Peak CPU per pod (in millicores ex. 1000m)

@@ -12,6 +12,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: ORG_NAME
+    description: Organization name
+    value: bcgov
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -31,12 +37,6 @@ parameters:
     displayName: Database Volume Capacity
     required: true
     value: 256Mi
-  - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
-    value: ghcr.io
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    required: true
 objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
@@ -64,7 +64,7 @@ objects:
         - name: ${IMAGE_TAG}
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${PROMOTE}
+            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}
           referencePolicy:
             type: Local
   - kind: DeploymentConfig
