@@ -10,11 +10,7 @@ import { ThemePreference } from './utils/ThemePreference';
 import { env } from './env';
 import makeServer from './mock-server/server';
 
-const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
-
-const isDevEnv = appVersion === 'dev'
-  || appVersion.startsWith('test')
-  || appVersion.startsWith('PR-');
+const isDevEnv = env.ZONE !== 'prod';
 
 if (isDevEnv) {
   makeServer('development');

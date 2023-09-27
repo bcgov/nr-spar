@@ -116,7 +116,6 @@ jobs:
             overwrite: true
             parameters:
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
-              -p VITE_NRSPARWEBAPP_VERSION=dev
               -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
               -p VITE_KC_REALM=standard
               -p VITE_KC_CLIENT_ID=seed-planning-test-4296
