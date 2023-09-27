@@ -5,12 +5,12 @@ import formatDate from '../../utils/DateUtils';
 
 import ApiConfig from '../../api-service/ApiConfig';
 import mockServerConfig from '../config';
-import { getUserFromStorage } from '../../service/AuthService';
 
 // TODO: refactor or remove: the way we keep data here is really messy and unnecessarily complicated
 const SeedlotRegistrationEndpoints = (server: Server) => {
   const aClassUrl = ApiConfig.aClassSeedlot.replace(mockServerConfig.namespace, '');
-  const user = getUserFromStorage();
+  // TODO: fix the line below. 
+  const user = { firstName: 'hi', lastName: 'hello' };
 
   server.post(aClassUrl, (schema: AppSchema, request) => {
     const attrs = JSON.parse(request.requestBody);

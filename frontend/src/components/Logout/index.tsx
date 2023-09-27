@@ -1,27 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { isLoggedIn, logout } from '../../service/AuthService';
+import React, { useCallback } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Logout = () => {
-  const navigate = useNavigate();
-  const [ signed, setSigned ] = useState<boolean>(false);
+  const { signOut, signed } = useAuth();
 
-  useEffect(() => {
-    const isAuth = isLoggedIn();
-    console.log(`Logout - useEffect: isAuth=${isAuth}`);
-    setSigned(isAuth);
-    if (signed) {
-      logout()
-        .then(() => {
-          navigate('/');
-        });
-    }
-  }, [signed]);
+  const goOut = useCallback(async () => {
+    await signOut();
+  }, []);
 
-  return (
-    <>
-    </>
-  );
+  if (signed) {
+    goOut();
+  }
+
+  return <Navigate to="/" />;
 };
 
 export default Logout;

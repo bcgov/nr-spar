@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import {
   Button,
@@ -10,31 +10,27 @@ import { useNavigate } from 'react-router-dom';
 
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/seeding.png';
-import { isCurrentAuthUser, signIn } from '../../service/AuthService';
 import LoginProviders from '../../types/LoginProviders';
 import getUrlQueryParam from '../../utils/UrlUtils';
 
 import './styles.scss';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Landing = () => {
-  const [signed, setSigned] = useState<boolean>(false);
+  const { signed, signIn, isCurrentAuthUser } = useAuth();
   const navigate = useNavigate();
   const homePage = '/dashboard';
 
   useEffect(() => {
-    console.log(`Landing: signed=${signed}`);
-    if (signed) {
-      console.log(`Landing - useEffect - if signed - signed=${signed}`);
-      navigate(getUrlQueryParam(window.location, 'page') || homePage);
-    }
-    
-    const checkUserSignin = async () => {
-      const isSigned = await isCurrentAuthUser();
-      console.log(`Landing - useEffect - checkUserSignin: isSigned=${isSigned}`);
-      setSigned(isSigned);
+    const checkForAuth = async () => {
+      const is = await isCurrentAuthUser();
     };
 
-    checkUserSignin();
+    if (signed) {
+      navigate(getUrlQueryParam(window.location, 'page') || homePage);
+    } else {
+      checkForAuth();
+    }
   }, [signed]);
 
   return (

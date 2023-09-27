@@ -6,13 +6,14 @@ import {
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
+import { useAuth } from '../../contexts/AuthContext';
+
 import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
 
 import { useThemePreference } from '../../utils/ThemePreference';
 
 import './style.scss';
-import { getUserFromStorage } from '../../service/AuthService';
 
 const accountOptions = [
   {
@@ -34,7 +35,7 @@ const accountOptions = [
 
 const MyProfile = () => {
   const { theme, setTheme } = useThemePreference();
-  const user = getUserFromStorage();
+  const { user } = useAuth();
 
   const [goToURL, setGoToURL] = useState<string>('');
   const [goTo, setGoTo] = useState<boolean>(false);

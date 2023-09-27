@@ -1,5 +1,3 @@
-import type { CognitoUserSession } from 'amazon-cognito-identity-js';
-
 type FamUser = {
   displayName: string;
   email: string;
@@ -8,7 +6,11 @@ type FamUser = {
   idirUsername: string;
   name: string;
   roles: string[];
-  authToken: CognitoUserSession;
+  provider: string;
+  jwtToken: string;
+  refreshToken: string;
+  axiosRequestUser: string;
+  tokenExpiration: number;
 }
 
 export default FamUser;

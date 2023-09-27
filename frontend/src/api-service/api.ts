@@ -1,19 +1,14 @@
 import axios from 'axios';
-import { getUserFromStorage } from '../service/AuthService';
+import { useAuth } from '../contexts/AuthContext';
 
 const getHeader = (useMultipart = false) => {
-  const famUser = getUserFromStorage();
-  const tokenObj = famUser?.authToken as any ?? {};
-  let tokenValue = '';
-  if ('idToken' in tokenObj) {
-    const idToken = tokenObj.idToken;
-    if ('jwtToken' in idToken) {
-      tokenValue = String(idToken.jwtToken);
-    }
-  }
+  const { token } = useAuth();
 
   let headers = {
-    Authorization: `Bearer ${tokenValue}`
+    // Until we have the backend ready for receiving the actual token,
+    // let's have a simple header with user identification
+    'Temporary-User-Identification': token
+    // Authorization: `Bearer ${token}`
   };
   if (useMultipart) {
     headers = Object.assign(headers, { 'content-type': 'multipart/form-data' });

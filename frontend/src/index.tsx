@@ -9,6 +9,7 @@ import reportWebVitals from './reportWebVitals';
 import { ThemePreference } from './utils/ThemePreference';
 import { env } from './env';
 import makeServer from './mock-server/server';
+import { AuthProvider } from './contexts/AuthContext';
 
 const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
 
@@ -37,18 +38,20 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <React.StrictMode>
-    <ClassPrefix prefix="bx">
-      <ThemePreference>
-        <QueryClientProvider client={queryClient}>
-          <App />
-          {
-            isDevEnv && <ReactQueryDevtools initialIsOpen={false} />
-          }
-        </QueryClientProvider>
-      </ThemePreference>
-    </ClassPrefix>
-  </React.StrictMode>
+  <AuthProvider>
+    <React.StrictMode>
+      <ClassPrefix prefix="bx">
+        <ThemePreference>
+          <QueryClientProvider client={queryClient}>
+            <App />
+            {
+              isDevEnv && <ReactQueryDevtools initialIsOpen={false} />
+            }
+          </QueryClientProvider>
+        </ThemePreference>
+      </ClassPrefix>
+    </React.StrictMode>
+  </AuthProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
