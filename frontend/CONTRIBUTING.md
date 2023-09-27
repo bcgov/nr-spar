@@ -58,8 +58,6 @@ To do that, first you need to install required dependencies.
 Remember of setting up the required environment variables. You can create a `.env` file containing:
 
 ```
-VITE_SERVER_URL=
-VITE_ORACLE_SERVER_URL=
 VITE_NRSPARWEBAPP_VERSION=
 VITE_KC_URL=
 VITE_KC_REALM=

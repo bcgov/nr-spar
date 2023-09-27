@@ -21,8 +21,20 @@ public interface ParentTreeGeneticQualityRepository
             and parentTreeId in ?4
           """)
   List<ParentTreeGeneticQuality> findAllBySpuGeneticWorthTypeParentTreeId(
-      Long spuId,
+      Long spuId, boolean geneticWorthCalcInd, String geneticTypeCode, List<Long> parentTreeIdList);
+
+  @Query(
+      value =
+          """
+          from ParentTreeGeneticQuality
+          where toBeUsedInCalculations = ?1
+            and geneticTypeCode = ?2
+            and seedPlanningUnitId in ?3
+            and parentTreeId in ?4
+          """)
+  List<ParentTreeGeneticQuality> findAllByListOfSpuAndId(
       boolean geneticWorthCalcInd,
       String geneticTypeCode,
+      List<Long> spuList,
       List<Long> parentTreeIdList);
 }

@@ -5,22 +5,25 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
-import ca.bc.gov.backendstartapi.entity.ParentTree;
+import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
-import ca.bc.gov.backendstartapi.entity.ParentTreeOrchardId;
+import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
+import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +33,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.projection.ProjectionFactory;
+import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 
 @ExtendWith(MockitoExtension.class)
 class OrchardServiceTest {
@@ -174,7 +179,7 @@ class OrchardServiceTest {
         .thenReturn(List.of(parentTreeOrchard1));
 
     // Parent Tree
-    ParentTree parentTree = new ParentTree();
+    ParentTreeEntity parentTree = new ParentTreeEntity();
     parentTree.setId(4032L);
     parentTree.setParentTreeNumber("37");
     parentTree.setVegetationCode("FDC");
@@ -216,14 +221,14 @@ class OrchardServiceTest {
     Assertions.assertEquals(1, orchardParentTreeDto.getParentTrees().size());
 
     // Parent Trees
-    ParentTreeDto parentTreeDto = orchardParentTreeDto.getParentTrees().get(0);
+    ParentTreeGeneticInfoDto parentTreeDto = orchardParentTreeDto.getParentTrees().get(0);
     Assertions.assertEquals(4032L, parentTreeDto.getParentTreeId());
     Assertions.assertEquals("37", parentTreeDto.getParentTreeNumber());
     Assertions.assertEquals("APP", parentTreeDto.getParentTreeRegStatusCode());
     Assertions.assertEquals("123", parentTreeDto.getLocalNumber());
-    Assertions.assertTrue(parentTreeDto.isActive());
-    Assertions.assertTrue(parentTreeDto.isTested());
-    Assertions.assertTrue(parentTreeDto.isBreedingProgram());
+    Assertions.assertTrue(parentTreeDto.getActive());
+    Assertions.assertTrue(parentTreeDto.getTested());
+    Assertions.assertTrue(parentTreeDto.getBreedingProgram());
     Assertions.assertNull(parentTreeDto.getFemaleParentTreeId());
     Assertions.assertNull(parentTreeDto.getMaleParentTreeId());
     Assertions.assertEquals(1, parentTreeDto.getParentTreeGeneticQualities().size());
@@ -283,14 +288,7 @@ class OrchardServiceTest {
     expiredOrchard.setStageCode("ESB");
     expiredOrchard.setOrchardLotTypeCode(expiredlotTypeCode);
 
-    List<Orchard> repoResult =
-        new ArrayList<>() {
-          {
-            add(firstOrchard);
-            add(secondOrchard);
-            add(expiredOrchard);
-          }
-        };
+    List<Orchard> repoResult = List.of(firstOrchard, secondOrchard, expiredOrchard);
 
     when(orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, "RET"))
         .thenReturn(repoResult);
@@ -306,5 +304,49 @@ class OrchardServiceTest {
           Assertions.assertEquals("Seed Lot", testObj.lotTypeDescription());
           Assertions.assertFalse(testObj.id().isEmpty());
         });
+  }
+
+  @Test
+  @DisplayName("findParentTreesWithVegCodeServiceTest")
+  void findParentTreesWithVegCodeServiceTest() {
+
+    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
+    ParentTreeProj firstProj = factory.createProjection(ParentTreeProj.class);
+
+    firstProj.setParentTreeId(Long.valueOf(12345));
+    firstProj.setParentTreeNumber("456");
+    firstProj.setOrchardId("1");
+    firstProj.setSpu(Long.valueOf(7));
+
+    ParentTreeProj secondProj = factory.createProjection(ParentTreeProj.class);
+    secondProj.setParentTreeId(Long.valueOf(45678));
+    secondProj.setParentTreeNumber("678");
+    secondProj.setOrchardId("1");
+    secondProj.setSpu(Long.valueOf(7));
+
+    List<ParentTreeProj> repoResult = List.of(firstProj, secondProj);
+
+    String vegCode = "PLI";
+
+    when(parentTreeRepository.findAllParentTreeWithVegCode(vegCode)).thenReturn(repoResult);
+
+    Map<String, String> testMap = new HashMap<>();
+
+    testMap.put("1", "7");
+
+    List<SameSpeciesTreeDto> listToTest =
+        orchardService.findParentTreesWithVegCode(vegCode, testMap);
+
+    Assertions.assertEquals(repoResult.size(), listToTest.size());
+
+    Assertions.assertEquals(
+        repoResult.get(0).getParentTreeId(), listToTest.get(0).getParentTreeId());
+    Assertions.assertEquals(
+        repoResult.get(0).getParentTreeNumber(), listToTest.get(0).getParentTreeNumber());
+
+    Assertions.assertEquals(
+        repoResult.get(1).getParentTreeId(), listToTest.get(1).getParentTreeId());
+    Assertions.assertEquals(
+        repoResult.get(1).getParentTreeNumber(), listToTest.get(1).getParentTreeNumber());
   }
 }

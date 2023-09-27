@@ -74,7 +74,7 @@ jobs:
           - package: oracle-api
             triggers: ('oracle-api/')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
@@ -111,16 +111,12 @@ jobs:
           - name: fluentbit
             file: backend/openshift.fluentbit.yml
             overwrite: true
-            parameters:
-              -p NAMESPACE=${{ vars.OC_NAMESPACE }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
-              -p VITE_SERVER_URL=https://nr-spar-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-              -p VITE_ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
               -p VITE_NRSPARWEBAPP_VERSION=dev
               -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
               -p VITE_KC_REALM=standard
@@ -162,7 +158,7 @@ jobs:
   #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: 16
@@ -190,7 +186,7 @@ jobs:
   #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
   #   runs-on: ubuntu-22.04
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: 16
@@ -220,7 +216,7 @@ jobs:
   #   runs-on: ubuntu-22.04
   #   timeout-minutes: 10
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: "16"

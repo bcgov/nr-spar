@@ -4,6 +4,7 @@ import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,10 @@ public interface Provider {
     return List.of();
   }
 
+  default ForestClientLocationDto fetchSingleClientLocation(String number, String locationCode) {
+    return null;
+  }
+
   // Oracle API
   default Optional<OrchardSpuDto> findOrchardParentTreeGeneticQualityData(
       String orchardId, int spuId) {
@@ -32,7 +37,10 @@ public interface Provider {
     return List.of();
   }
 
-
+  default List<SameSpeciesTreeDto> findParentTreesByVegCode(
+      String vegCode, Map<String, String> orchardSpuMap) {
+    return List.of();
+  }
 
   // Common methods
   String[] addAuthorizationHeader();

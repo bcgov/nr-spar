@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.exception.NoOrchardException;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
@@ -19,9 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(OrchardEndpoint.class)
 class OrchardEndpointTest {
@@ -36,8 +38,7 @@ class OrchardEndpointTest {
   void getParentTreeGeneticQualityDataSuccessTest() throws Exception {
     String orchardId = "123";
 
-    OrchardSpuDto parentTreeDto =
-        new OrchardSpuDto(orchardId, "ACT", 1L, new ArrayList<>());
+    OrchardSpuDto parentTreeDto = new OrchardSpuDto(orchardId, "ACT", 1L, List.of());
 
     when(orchardService.findParentTreeGeneticQualityData(orchardId)).thenReturn(parentTreeDto);
 
@@ -139,16 +140,66 @@ class OrchardEndpointTest {
   void findOrchardsWithVegCodeNotFoundTest() throws Exception {
     String vegCode = "BEEF";
 
-    when(orchardService.findOrchardsByVegCode(vegCode)).thenThrow(new NoOrchardException());
-
+    when(orchardService.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
     mockMvc
         .perform(
             get("/api/orchards/vegetation-code/{vegCode}", vegCode)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(status().reason("No orchard was found with the given VegCode!"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAllParentTreeByVegCodeTest")
+  @WithMockUser(roles = "user_read")
+  void getAllParentTreeByVegCodeTest() throws Exception {
+    String vegCode = "PLI";
+
+    SameSpeciesTreeDto firstDto =
+        new SameSpeciesTreeDto(Long.valueOf(123), "1000", "1", Long.valueOf(7), List.of());
+    SameSpeciesTreeDto secondDto =
+        new SameSpeciesTreeDto(Long.valueOf(456), "2000", "1", Long.valueOf(7), List.of());
+
+    List<SameSpeciesTreeDto> testList = List.of(firstDto, secondDto);
+
+    when(orchardService.findParentTreesByVegCode(vegCode)).thenReturn(testList);
+
+    mockMvc
+        .perform(
+            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].parentTreeId").value(firstDto.getParentTreeId()))
+        .andExpect(jsonPath("$[0].parentTreeNumber").value(firstDto.getParentTreeNumber()))
+        .andExpect(jsonPath("$[1].parentTreeId").value(secondDto.getParentTreeId()))
+        .andExpect(jsonPath("$[1].parentTreeNumber").value(secondDto.getParentTreeNumber()))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAllParentTreeByVegCodeErrorTest")
+  @WithMockUser(roles = "user_read")
+  void getAllParentTreeByVegCodeErrorTest() throws Exception {
+    String vegCode = "LAMB";
+
+    HttpStatus errCode = HttpStatus.BAD_REQUEST;
+    String errMsg = "LAMB is not a veg code.";
+
+    when(orchardService.findParentTreesByVegCode(vegCode))
+        .thenThrow(new ResponseStatusException(errCode, errMsg));
+    mockMvc
+        .perform(
+            get("/api/orchards/parent-trees/vegetation-codes/{vegCode}", vegCode)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(status().reason(errMsg))
         .andReturn()
         .getResolvedException()
         .getMessage();

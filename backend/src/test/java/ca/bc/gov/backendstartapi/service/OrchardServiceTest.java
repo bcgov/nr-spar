@@ -4,16 +4,18 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSeedPlanningUnit;
-import ca.bc.gov.backendstartapi.exception.NoOrchardException;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,8 +39,8 @@ class OrchardServiceTest {
     orchardService = new OrchardService(activeOrchardSeedPlanningUnitRepository, oracleApiProvider);
   }
 
-  private ActiveOrchardSeedPlanningUnit createOrchardSpu(String orchardId, boolean active) {
-    return new ActiveOrchardSeedPlanningUnit(orchardId, 1, active, false, false);
+  private ActiveOrchardSpuEntity createOrchardSpu(String orchardId, boolean active) {
+    return new ActiveOrchardSpuEntity(orchardId, 1, active, false, false);
   }
 
   @Test
@@ -46,16 +48,16 @@ class OrchardServiceTest {
   void findSpuIdByOrchardActiveServiceTest() {
     String orchardId = "127";
 
-    ActiveOrchardSeedPlanningUnit activeOrchardSpu = createOrchardSpu(orchardId, true);
+    ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu(orchardId, true);
 
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of(activeOrchardSpu));
 
-    List<ActiveOrchardSeedPlanningUnit> list = orchardService.findSpuIdByOrchard(orchardId);
+    List<ActiveOrchardSpuEntity> list = orchardService.findSpuIdByOrchard(orchardId);
 
     Assertions.assertFalse(list.isEmpty());
 
-    ActiveOrchardSeedPlanningUnit orchardSpu = list.get(0);
+    ActiveOrchardSpuEntity orchardSpu = list.get(0);
     Assertions.assertEquals(orchardId, orchardSpu.getOrchardId());
     Assertions.assertTrue(orchardSpu.isActive());
   }
@@ -65,16 +67,16 @@ class OrchardServiceTest {
   void findSpuIdByOrchardInactiveServiceTest() {
     String orchardId = "129";
 
-    ActiveOrchardSeedPlanningUnit activeOrchardSpu = createOrchardSpu(orchardId, false);
+    ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu(orchardId, false);
 
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of(activeOrchardSpu));
 
-    List<ActiveOrchardSeedPlanningUnit> list = orchardService.findSpuIdByOrchard(orchardId);
+    List<ActiveOrchardSpuEntity> list = orchardService.findSpuIdByOrchard(orchardId);
 
     Assertions.assertFalse(list.isEmpty());
 
-    ActiveOrchardSeedPlanningUnit orchardSpu = list.get(0);
+    ActiveOrchardSpuEntity orchardSpu = list.get(0);
     Assertions.assertEquals(orchardId, orchardSpu.getOrchardId());
     Assertions.assertFalse(orchardSpu.isActive());
   }
@@ -84,7 +86,7 @@ class OrchardServiceTest {
   void findParentTreeGeneticQualityDataSuccessServiceTest() {
     String orchardId = "405";
 
-    ActiveOrchardSeedPlanningUnit activeOrchardSpu = createOrchardSpu(orchardId, true);
+    ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu(orchardId, true);
 
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of(activeOrchardSpu));
@@ -92,8 +94,8 @@ class OrchardServiceTest {
     ParentTreeGeneticQualityDto geneticQualityDto =
         new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18.0"));
 
-    ParentTreeDto parentDto =
-        new ParentTreeDto(
+    ParentTreeGeneticInfoDto parentDto =
+        new ParentTreeGeneticInfoDto(
             123L, "37", "App", "123456", true, true, false, null, null, List.of(geneticQualityDto));
 
     OrchardSpuDto parentTreeDto = new OrchardSpuDto(orchardId, "FDC", 1L, List.of(parentDto));
@@ -110,7 +112,7 @@ class OrchardServiceTest {
     Assertions.assertEquals("FDC", orchardSpuDto.vegetationCode());
     Assertions.assertEquals(1L, orchardSpuDto.seedPlanningUnitId());
 
-    List<ParentTreeDto> parentTreeDtos = orchardSpuDto.parentTrees();
+    List<ParentTreeGeneticInfoDto> parentTreeDtos = orchardSpuDto.parentTrees();
 
     Assertions.assertFalse(parentTreeDtos.isEmpty());
     Assertions.assertEquals(123L, parentTreeDtos.get(0).parentTreeId());
@@ -172,7 +174,7 @@ class OrchardServiceTest {
     List<OrchardDto> responseFromService = orchardService.findOrchardsByVegCode(vegCode);
 
     Assertions.assertNotNull(responseFromService);
-    Assertions.assertEquals(responseFromService.size(), testList.size());
+    Assertions.assertEquals(testList.size(), responseFromService.size());
     Assertions.assertEquals(testList, responseFromService);
   }
 
@@ -183,14 +185,35 @@ class OrchardServiceTest {
 
     when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
 
-    Exception exc =
-        Assertions.assertThrows(
-            NoOrchardException.class,
-            () -> {
-              orchardService.findOrchardsByVegCode(vegCode);
-            });
+    List<OrchardDto> responseFromService = orchardService.findOrchardsByVegCode(vegCode);
 
-    Assertions.assertEquals(
-        "404 NOT_FOUND \"No orchard was found with the given VegCode!\"", exc.getMessage());
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(0, responseFromService.size());
+  }
+
+  @Test
+  @DisplayName("findParentTreesByVegCodeTest")
+  void findParentTreesByVegCodeTest() {
+    String vegCode = "FDI";
+
+    SameSpeciesTreeDto firstDto =
+        new SameSpeciesTreeDto(Long.valueOf(123), "1000", "1", Long.valueOf(7), List.of());
+    SameSpeciesTreeDto secondDto =
+        new SameSpeciesTreeDto(Long.valueOf(456), "2000", "1", Long.valueOf(7), List.of());
+
+    List<SameSpeciesTreeDto> testList = List.of(firstDto, secondDto);
+
+    Map<String, String> testMap = new HashMap<>();
+    testMap.put("1", "1");
+    when(oracleApiProvider.findParentTreesByVegCode(vegCode, testMap)).thenReturn(testList);
+
+    ActiveOrchardSpuEntity activeOrchardSpu = createOrchardSpu("1", true);
+    when(orchardService.findAllSpu(true)).thenReturn(List.of(activeOrchardSpu));
+
+    List<SameSpeciesTreeDto> responseFromService = orchardService.findParentTreesByVegCode(vegCode);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(testList.size(), responseFromService.size());
+    Assertions.assertEquals(testList, responseFromService);
   }
 }

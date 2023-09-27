@@ -1,11 +1,9 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Collections;
-import java.util.List;
 
 /** This class holds the fields that will be returned from a ParentTree. */
-@Schema(description = "The geographic location of a each Parent Tree sourced from a natural stand.")
+@Schema(description = "A record that contains parent tree information")
 public record ParentTreeDto(
     @Schema(description = "A unique identifier for each Parent Tree.", example = "4032")
         Long parentTreeId,
@@ -27,26 +25,19 @@ public record ParentTreeDto(
         String localNumber,
     @Schema(
             description = "Indicates whether the parent tree selection is active or inactive.",
-            example = "Y")
+            example = "true")
         boolean active,
     @Schema(
             description = "Indicates whether the parent tree selection is tested or untested.",
-            example = "Y")
+            example = "true")
         boolean tested,
     @Schema(
             description =
                 "A code indicating if a parent tree is included in the forest genetics breeding"
                     + " program.",
-            example = "Y")
+            example = "true")
         boolean breedingProgram,
     @Schema(description = "A unique identifier for each Parent Tree.", example = "123")
         Long femaleParentTreeId,
     @Schema(description = "A unique identifier for each Parent Tree.", example = "123")
-        Long maleParentTreeId,
-    List<ParentTreeGeneticQualityDto> parentTreeGeneticQualities) {
-
-  /** Ensure immutability for the user's roles. */
-  public ParentTreeDto {
-    parentTreeGeneticQualities = Collections.unmodifiableList(parentTreeGeneticQualities);
-  }
-}
+        Long maleParentTreeId) {}

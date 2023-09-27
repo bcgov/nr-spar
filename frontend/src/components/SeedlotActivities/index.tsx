@@ -14,7 +14,7 @@ const SeedlotActivities = () => {
       header: 'Register an A class seedlot',
       description:
         'Register a seedlot which has been collected in an orchard from parent trees',
-      link: '/seedlot/register-a-class',
+      link: '/seedlots/register-a-class',
       highlighted: false,
       isEmpty: false,
       emptyTitle: '',
@@ -38,7 +38,7 @@ const SeedlotActivities = () => {
       header: 'My seedlots',
       description:
         'Consult and manage your own seedlots',
-      link: '/seedlot/my-seedlots',
+      link: '/seedlots/my-seedlots',
       highlighted: false,
       isEmpty: false,
       emptyTitle: '',
