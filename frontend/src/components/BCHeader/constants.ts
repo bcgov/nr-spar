@@ -1,5 +1,3 @@
-import { env } from '../../env';
-
 export const HOME_LINK = '/dashboard';
 
 export const clearPanelState = {
