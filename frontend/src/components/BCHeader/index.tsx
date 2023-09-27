@@ -22,7 +22,6 @@ import PanelSectionName from '../PanelSectionName';
 
 import {
   HOME_LINK,
-  VERSION,
   clearPanelState,
   componentTexts,
   listItems
@@ -171,7 +170,6 @@ const BCHeader = () => {
                   })}
                 </div>
               ))}
-              <PanelSectionName title={VERSION} />
             </SideNavItems>
           </SideNav>
         </Header>

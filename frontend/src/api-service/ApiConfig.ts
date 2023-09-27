@@ -5,7 +5,7 @@ const serverHost = env.VITE_SERVER_URL || mockServerConfig.namespace;
 
 const oracleServerHost = env.VITE_ORACLE_SERVER_URL || mockServerConfig.namespace;
 
-const isProdEnv = env.VITE_NRSPARWEBAPP_VERSION?.startsWith('prod');
+const isProdEnv = env.ZONE === 'prod';
 
 // The API host should never be mock server in PROD
 const mockServerHost = isProdEnv ? env.VITE_SERVER_URL : mockServerConfig.namespace;

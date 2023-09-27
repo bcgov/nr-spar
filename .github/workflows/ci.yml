@@ -44,8 +44,6 @@ jobs:
     name: JavaScript CI
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
-    env:
-      VITE_NRSPARWEBAPP_VERSION: dev
     steps:
       - uses: bcgov-nr/action-test-and-analyse@v1.0.0
         with:
