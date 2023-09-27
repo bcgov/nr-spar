@@ -120,7 +120,6 @@ jobs:
           verification_path: "actuator/health"
           parameters:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             ${{ matrix.parameters }}
 
   # api-tests:
@@ -237,7 +236,6 @@ jobs:
           verification_path: "actuator/health"
           parameters:
             -p ZONE=prod -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             ${{ matrix.parameters }}
 
   image-promotions:
