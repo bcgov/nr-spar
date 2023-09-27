@@ -29,7 +29,7 @@ services:
     environment:
       <<: *db-vars
     volumes: ["/pgdata"]
-        healthcheck:
+    healthcheck:
       test: pg_isready -U postgres
       interval: 5s
       timeout: 5s
