@@ -118,8 +118,6 @@ objects:
                   value: ${VITE_KC_URL}
                 - name: VITE_ORACLE_SERVER_URL
                   value: https://${NAME}-${ZONE}-oracle-api.${DOMAIN}
-                - name: VITE_SPAR_BUILD_VERSION
-                  value: ${VITE_SPAR_BUILD_VERSION}
                 - name: VITE_SERVER_URL
                   value: https://${NAME}-${ZONE}-backend.${DOMAIN}
                 - name: ZONE
