@@ -156,9 +156,13 @@ jobs:
       CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+      LOG_LEVEL: debug
       VITE_NRSPARWEBAPP_VERSION: dev
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
+      VITE_KC_CLIENT_ID: seed-planning-test-4296
+      VITE_KC_REALM: standard
+      VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
     steps:
       - uses: actions/checkout@v4
       - uses: cypress-io/github-action@v6
