@@ -12,9 +12,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  DOMAIN: apps.silver.devops.gov.bc.ca
-
 jobs:
   tests-java:
     name: Java CI
@@ -48,12 +45,12 @@ jobs:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-22.04
     env:
-      CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.${{ env.DOMAIN }}
+      CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.apps.silver.devops.gov.bc.ca
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       VITE_NRSPARWEBAPP_VERSION: dev
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.${{ env.DOMAIN }}
-      VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.${{ env.DOMAIN }}
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.apps.silver.devops.gov.bc.ca
+      VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.apps.silver.devops.gov.bc.ca
     steps:
       - uses: actions/checkout@v4
       - uses: cypress-io/github-action@v6
