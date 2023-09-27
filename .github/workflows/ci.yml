@@ -49,7 +49,7 @@ jobs:
         with:
           node_version: "18.16.0"
           commands: |
-            npm i
+            npm ci
             npm run lint
             npm run coverage
           dir: frontend
