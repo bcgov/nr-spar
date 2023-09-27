@@ -1,4 +1,3 @@
-import { AxiosResponse } from 'axios';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
@@ -11,7 +10,7 @@ import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistratio
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
-import { GenWorthCalcPayload, GeneticTrait } from '../../../types/GeneticWorthTypes';
+import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -203,7 +202,7 @@ export const applyValueToAll = (
 };
 
 export const fillCompostitionTables = (
-  res: AxiosResponse,
+  data: CompUploadResponse[],
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
   currentTab: keyof TabTypes,
@@ -215,7 +214,7 @@ export const fillCompostitionTables = (
   // Clean the table first
   const clonedState = cleanTable(state, headerConfig, currentTab, setStepData);
 
-  res.data.forEach((row: CompUploadResponse) => {
+  data.forEach((row: CompUploadResponse) => {
     const parentTreeNumber = row.parentTreeNumber.toString();
     if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
       // If the clone nubmer exist from user file then fill in the values
@@ -325,13 +324,17 @@ export const setInputChange = (
   setStepData(clonedState);
 };
 
-export const fillGwInfo = (
-  geneticTraits: GeneticTrait[],
+export const fillCalculatedInfo = (
+  data: CalcPayloadResType,
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
-  setGenWorthInfoItems: Function
+  setGenWorthInfoItems: Function,
+  popSizeAndDiversityConfig: Record<string, any>,
+  setPopSizeAndDiversityConfig: Function
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
+  const { geneticTraits, neValue }: CalcPayloadResType = data;
+  // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
     const traitIndex = geneticTraits.map((trait) => trait.traitCode).indexOf(upperCaseCode);
@@ -349,6 +352,11 @@ export const fillGwInfo = (
     }
   });
   setGenWorthInfoItems(tempGenWorthItems);
+
+  // Fill in Ne value
+  const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
+  newPopAndDiversityConfig.ne.value = neValue.toFixed(1);
+  setPopSizeAndDiversityConfig(newPopAndDiversityConfig);
 };
 
 export const generateGenWorthPayload = (
