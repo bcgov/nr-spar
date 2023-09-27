@@ -1,7 +1,9 @@
 // @ts-check
 /// <reference path="../global.d.ts" />
 
-import { FIVE_SECOND, HALF_SECOND, ONE_SECOND, TYPE_DELAY } from '../constants';
+import {
+  HALF_SECOND, ONE_SECOND, THREE_SECOND, TYPE_DELAY
+} from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
@@ -54,7 +56,7 @@ Cypress.Commands.add('login', () => {
           );
         }
       });
-      cy.wait(FIVE_SECOND);
+      cy.wait(THREE_SECOND);
       cy.getCookies().then((cookies) => {
         cookies.forEach((cookie) => {
           cy.log(cookie.name, cookie.domain, '\n');
@@ -64,7 +66,7 @@ Cypress.Commands.add('login', () => {
     {
       validate: () => {
         cy.visit('/');
-        cy.wait(FIVE_SECOND);
+        cy.wait(THREE_SECOND);
         cy.getCookie('SMSESSION', { domain: '.gov.bc.ca' }).should('exist');
       }
     }

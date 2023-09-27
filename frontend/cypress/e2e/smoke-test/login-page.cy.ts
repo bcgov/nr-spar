@@ -1,5 +1,5 @@
 import {
-  ONE_SECOND, TWO_SECOND, THREE_SECOND, FIVE_SECOND
+  ONE_SECOND, TWO_SECOND, FIVE_SECOND
 } from '../../constants';
 
 describe('Login page test', () => {
@@ -63,7 +63,7 @@ describe('Login page test', () => {
   it('log in with BCeID and validate user role', () => {
     cy.login();
     cy.visit('/');
-    cy.wait(THREE_SECOND);
+    cy.wait(TWO_SECOND);
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('IDIR: undefined');

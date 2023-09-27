@@ -1,7 +1,7 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
 import {
-  THREE_SECOND, FIVE_SECOND, TYPE_DELAY, TWO_SECOND, HALF_SECOND
+  HALF_SECOND, TWO_SECOND, THREE_SECOND, TYPE_DELAY
 } from '../../constants';
 
 describe('A Class Seedlot registration flow', () => {
@@ -36,15 +36,10 @@ describe('A Class Seedlot registration flow', () => {
     cy.toogleFavourite();
     // To do - validate after to be fixed
     // Enter the applicant agency name
-    cy.get('.agency-information')
-      .find('.bx--combo-box')
+    cy.get('#applicant-info-combobox')
       .click();
-    cy.get('#downshift-1-menu')
-      .find('#downshift-1-item-0')
+    cy.get('#downshift-1-item-0')
       .click();
-    // cy.get('.agency-information')
-    //   .contains(data.applicantAgency.name)
-    //   .click();
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
@@ -62,8 +57,8 @@ describe('A Class Seedlot registration flow', () => {
       .clear()
       .type(data.applicantAgency.email, { delay: TYPE_DELAY });
     // Enter the seedlot species, wait for species data to load
-    cy.wait(FIVE_SECOND);
-    cy.get('.applicant-info-combobox-species')
+    cy.wait(THREE_SECOND);
+    cy.get('#seedlot-species-combobox')
       .click();
     cy.get('#downshift-3-item-0')
       .scrollIntoView()
@@ -112,12 +107,6 @@ describe('A Class Seedlot registration flow', () => {
     cy.get('.scf-info-container')
       .find('h2')
       .contains(/^Your A class seedlot [0-9]/);
-    // Click on Go to seedlot's detail screen
-    // cy.get('.scf-info-container')
-    //   .find('h2')
-    //   .then(($txt) => {
-    //     const seedlotNumber = $txt.text().slice(21, 26);
-    //   });
     cy.contains('button', "Go back to seedlot's main screen")
       .click();
     cy.wait(THREE_SECOND);
