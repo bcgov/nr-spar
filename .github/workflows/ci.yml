@@ -53,8 +53,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: cypress-io/github-action@v6
         name: Cypress run
+        env:
+          CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+          CYPRESS_USERNAME: LOAD-3-TEST
         with:
-          config: chromeWebSecurity=false,pageLoadTimeout=10000,baseUrl=https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.${{ env.DOMAIN }}
+          config: chromeWebSecurity=false,pageLoadTimeout=10000
           working-directory: ./frontend
           browser: chrome
 
