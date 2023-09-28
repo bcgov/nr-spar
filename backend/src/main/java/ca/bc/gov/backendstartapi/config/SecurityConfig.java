@@ -76,7 +76,7 @@ public class SecurityConfig {
   }
   */
 
-  /**
+  /*
    * Parse the roles of a client from the JWT, if they're present; if not, subjects with service
    * accounts are granted read and write permissions.
    */
