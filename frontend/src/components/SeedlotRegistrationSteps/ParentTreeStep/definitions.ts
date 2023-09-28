@@ -1,9 +1,15 @@
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
+import { SingleInvalidObj } from '../OwnershipStep/definitions';
 
 export type TabTypes = {
   coneTab: 'coneTab',
   successTab: 'successTab',
   mixTab: 'mixTab'
+};
+
+type InvalidObjs = {
+  [key: string]: SingleInvalidObj
 };
 
 export type RowItem = {
@@ -12,6 +18,9 @@ export type RowItem = {
   coneCount: string | null,
   pollenCount: string | null,
   smpSuccessPerc: string | null,
+  nonOrchardPollenContam: string | null,
+  volume: string | null,
+  proportion: string | null,
   ad: string | null,
   dfs: string | null,
   dfu: string | null,
@@ -23,15 +32,24 @@ export type RowItem = {
   wwd: string | null,
   dsg: string | null,
   iws: string | null,
-  nonOrchardPollenContam: string | null,
+  w_ad: string | null,
+  w_dfs: string | null,
+  w_dfu: string | null,
+  w_dfw: string | null,
+  w_dsb: string | null,
+  w_dsc: string | null,
+  w_gvo: string | null,
+  w_wdu: string | null,
+  w_wwd: string | null,
+  w_dsg: string | null,
+  w_iws: string | null,
   meanDegLat: string | null,
   meanMinLat: string | null,
   meanDegLong: string | null,
   meanMinLong: string | null,
   meanElevation: string | null,
-  volume: string | null,
-  proportion: string | null
-  isMixTab: boolean
+  isMixTab: boolean,
+  invalidObjs: InvalidObjs
 };
 
 /**
@@ -87,4 +105,13 @@ export type CompUploadResponse = {
   pollenCount: number,
   smpSuccess: number,
   pollenContamination: number
+}
+
+export type MixUploadResponse = {
+  parentTreeNumber: number,
+  pollenVolume: number
+}
+
+export type AllParentTreeMap = {
+  [key: string]: ParentTreeGeneticQualityType
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link } from 'react-router-dom';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Tabs, TabList, Tab, FlexGrid, Row, Column,
   TableContainer, TableToolbar, Checkbox,
@@ -10,7 +10,7 @@ import {
   DataTableSkeleton, DefinitionTooltip, Modal, Loading
 } from '@carbon/react';
 import {
-  View, Settings, Upload, Renew
+  View, Settings, Upload, Renew, Add
 } from '@carbon/icons-react';
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
@@ -18,12 +18,12 @@ import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { postCompositionFile } from '../../../api-service/seedlotAPI';
+import { postFile } from '../../../api-service/seedlotAPI';
 import postForCalculation from '../../../api-service/geneticWorthAPI';
 import CheckboxType from '../../../types/CheckboxType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import EmptySection from '../../EmptySection';
-import { sortAndSliceRows, sliceTableRowData, handlePagination } from '../../../utils/PaginationUtils';
+import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
 import { recordValues } from '../../../utils/RecordUtils';
 import { GenWorthCalcPayload } from '../../../types/GeneticWorthTypes';
 import {
@@ -34,10 +34,9 @@ import { OrchardObj } from '../OrchardStep/definitions';
 import UploadFileModal from './UploadFileModal';
 import InfoSectionRow from '../../InfoSection/InfoSectionRow';
 import {
-  pageText, headerTemplate, geneticWorthDict,
-  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, SummarySectionConfig,
-  PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate,
-  getEmptySectionDescription
+  pageText, headerTemplate, geneticWorthDict, SummarySectionConfig,
+  DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, DEFAULT_MIX_PAGE_SIZE,
+  PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem
@@ -50,7 +49,10 @@ import {
   fillCompostitionTables,
   configHeaderOpt,
   fillCalculatedInfo,
-  generateGenWorthPayload
+  generateGenWorthPayload,
+  addNewMixRow,
+  calcMixTabInfoItems,
+  fillMixTable
 } from './utils';
 
 import './styles.scss';
@@ -72,7 +74,6 @@ const ParentTreeStep = (
     orchards
   }: ParentTreeStepProps
 ) => {
-  const queryClient = useQueryClient();
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
@@ -83,6 +84,11 @@ const ParentTreeStep = (
   const [slicedRows, setSlicedRows] = useState<Array<RowItem>>(
     sortAndSliceRows(Object.values(state.tableRowData), currentPage, currPageSize, true, 'parentTreeNumber')
   );
+  const [currMixPageSize, setCurrMixPageSize] = useState<number>(DEFAULT_MIX_PAGE_SIZE);
+  const [currentMixPage, setCurrentMixPage] = useState<number>(DEFAULT_PAGE_NUMBER);
+  const [slicedMixRows, setSlicedMixRows] = useState<Array<RowItem>>(
+    sortAndSliceRows(Object.values(state.mixTabData), currentMixPage, currMixPageSize, true, 'parentTreeNumber')
+  );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
   const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
     structuredClone(PopSizeAndDiversityConfig)
@@ -91,6 +97,10 @@ const ParentTreeStep = (
     genWorthInfoItems,
     setGenWorthInfoItems
   ] = useState<Record<keyof RowItem, InfoDisplayObj[]>>({});
+  const [
+    weightedGwInfoItems,
+    setWeightedGwInfoItems
+  ] = useState<Record<keyof RowItem, InfoDisplayObj>>({});
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
   const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));
@@ -98,6 +108,7 @@ const ParentTreeStep = (
   const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
+  const emptySectionDescription = getEmptySectionDescription(setStep);
 
   // Link reference to trigger click event
   const linkRef = useRef<HTMLAnchorElement>(null);
@@ -105,13 +116,14 @@ const ParentTreeStep = (
   useEffect(
     () => {
       const processedOrchard = processOrchards(orchards);
-      setDisableOptions(processedOrchard.length === 0);
+      const disabled = processedOrchard.length === 0;
+      setDisableOptions(disabled);
       setOrchardsData(processedOrchard);
-      queryClient.resetQueries({ queryKey: ['orchard', 'parent-tree-genetic-quality'] });
     },
     [orchards]
   );
 
+  // Effects for 'Cone and Pollen' and 'SMP Success' tabs
   useEffect(
     () => {
       sliceTableRowData(
@@ -126,6 +138,22 @@ const ParentTreeStep = (
       calcSummaryItems(disableOptions, setSummaryConfig, summaryConfig, tableRows);
     },
     [state.tableRowData]
+  );
+
+  // Effects 'SMP mix' tab
+  useEffect(
+    () => {
+      sliceTableRowData(
+        Object.values(state.mixTabData),
+        currentMixPage,
+        currMixPageSize,
+        true,
+        'parentTreeNumber',
+        setSlicedMixRows
+      );
+      calcMixTabInfoItems(disableOptions, summaryConfig, setSummaryConfig, state);
+    },
+    [state.mixTabData]
   );
 
   // Parent trees Query
@@ -149,7 +177,12 @@ const ParentTreeStep = (
 
   // Re-populate table if it is emptied by users and data is cached
   useEffect(() => {
-    if (Object.keys(state.tableRowData).length === 0 && allParentTreeQuery.data) {
+    const disabled = processOrchards(orchards).length === 0;
+    if (
+      !disabled
+      && Object.keys(state.tableRowData).length === 0
+      && allParentTreeQuery.data
+    ) {
       processParentTreeData(
         allParentTreeQuery.data,
         state,
@@ -168,15 +201,30 @@ const ParentTreeStep = (
     headerConfig,
     genWorthInfoItems,
     setGenWorthInfoItems,
-    setHeaderConfig
+    setHeaderConfig,
+    weightedGwInfoItems,
+    setWeightedGwInfoItems
   ), [seedlotSpecies]);
 
   const uploadCompostion = useMutation({
-    mutationFn: (coneCSV: File) => postCompositionFile(coneCSV),
+    mutationFn: (coneCSV: File) => postFile(coneCSV, false),
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
       fillCompostitionTables(res.data, state, headerConfig, currentTab, setStepData);
+    },
+    onError: (err: AxiosError) => {
+      const msg = (err.response as AxiosResponse).data.message;
+      setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
+    }
+  });
+
+  const uploadMixFile = useMutation({
+    mutationFn: (mixCsv: File) => postFile(mixCsv, true),
+    onSuccess: (res) => {
+      resetFileUploadConfig();
+      setIsUploadOpen(false);
+      fillMixTable(res.data, state, setStepData);
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -269,6 +317,20 @@ const ParentTreeStep = (
                   >
                     <TableToolbar aria-label="data table toolbar">
                       <TableToolbarContent>
+                        {
+                          currentTab === 'mixTab'
+                            ? (
+                              <Button
+                                kind="ghost"
+                                hasIconOnly
+                                disabled={disableOptions}
+                                renderIcon={Add}
+                                iconDescription="Add a new row"
+                                onClick={() => addNewMixRow(state, setStepData)}
+                              />
+                            )
+                            : null
+                        }
                         <OverflowMenu
                           menuOptionsClass="parent-tree-table-toggle-menu"
                           renderIcon={View}
@@ -352,28 +414,34 @@ const ParentTreeStep = (
                               </TableRow>
                             </TableHead>
                             {
-                              renderTableBody(
-                                currentTab,
-                                slicedRows,
-                                headerConfig,
-                                state,
-                                setStepData
-                              )
+                              disableOptions
+                                ? null
+                                : renderTableBody(
+                                  currentTab,
+                                  slicedRows,
+                                  slicedMixRows,
+                                  headerConfig,
+                                  state,
+                                  setStepData
+                                )
                             }
                           </Table>
                         )
                     }
                     {
                       disableOptions
-                        ? <EmptySection title={pageText.emptySection.title} description={getEmptySectionDescription(setStep)} pictogram="CloudyWindy" />
+                        ? <EmptySection title={pageText.emptySection.title} description={emptySectionDescription} pictogram="CloudyWindy" />
                         : renderPagination(
                           state,
                           currentTab,
                           currPageSize,
                           setCurrentPage,
                           setCurrPageSize,
-                          handlePagination,
-                          setSlicedRows
+                          setSlicedRows,
+                          currMixPageSize,
+                          setCurrMixPageSize,
+                          setCurrentMixPage,
+                          setSlicedMixRows
                         )
                     }
                   </TableContainer>
@@ -383,17 +451,6 @@ const ParentTreeStep = (
           </Tabs>
         </Column>
       </Row>
-      {
-        currentTab === 'mixTab'
-          ? (
-            <EmptySection
-              title="Coming soon"
-              description=""
-              icon="Construction"
-            />
-          )
-          : null
-      }
       {
         (currentTab === 'coneTab' || currentTab === 'successTab')
           ? (
@@ -453,12 +510,31 @@ const ParentTreeStep = (
               />
             </>
           )
-          : null
+          : (
+            <InfoSection
+              title={summaryConfig[currentTab].title}
+              description={summaryConfig[currentTab].description}
+              infoItems={
+                combineObjectValues([
+                  summaryConfig[currentTab].infoItems,
+                  weightedGwInfoItems
+                ])
+              }
+            />
+          )
       }
       <UploadFileModal
         open={isUploadOpen}
         setOpen={setIsUploadOpen}
-        onSubmit={(file: File) => uploadCompostion.mutate(file)}
+        onSubmit={
+          (file: File) => {
+            if (currentTab === 'mixTab') {
+              uploadMixFile.mutate(file);
+            } else {
+              uploadCompostion.mutate(file);
+            }
+          }
+        }
         fileUploadConfig={fileUploadConfig}
         setFileUploadConfig={setFileUploadConfig}
         resetFileUploadConfig={resetFileUploadConfig}
