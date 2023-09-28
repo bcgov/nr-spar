@@ -9,6 +9,7 @@ import { Auth } from 'aws-amplify';
 import { env } from '../env';
 import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
+import axios from 'axios';
 
 interface AuthContextData {
   signed: boolean;
@@ -85,6 +86,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       setUser(famUser);
       setProvider(famUser.provider);
       setToken(famUser.axiosRequestUser);
+
+      // axios token
+      axios.defaults.headers.common = {
+        // Authorization: `Bearer ${token}`
+        'Temporary-User-Identification': famUser.axiosRequestUser
+      };
     }
 
     return userIsLoggedIn;

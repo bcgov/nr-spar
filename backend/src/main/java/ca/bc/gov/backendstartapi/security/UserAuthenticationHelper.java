@@ -1,8 +1,10 @@
 package ca.bc.gov.backendstartapi.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,7 +14,12 @@ import org.springframework.stereotype.Component;
 /** This class contains helper methods to retrieved authenticated user. */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserAuthenticationHelper {
+
+  private final HttpServletRequest request;
+
+  private static final String TEMP_HEADER = "Temporary-User-Identification";
 
   /**
    * Get the logged user information.
@@ -25,10 +32,14 @@ public class UserAuthenticationHelper {
 
     if (authentication.isAuthenticated()) {
       if (authentication.getPrincipal() instanceof String userPrincipal) {
-        // Fake user until we get the back end working with Cognito on task #481
+        // Fake user until we get back end working with Cognito on task #481
+        String id = request.getHeader(TEMP_HEADER);
+        if (id == null) {
+          id = "dev-generic-user";
+        }
         UserInfo userInfo =
             new UserInfo(
-                userPrincipal,
+                id,
                 "fake-given_name",
                 "fake-family_name",
                 "fake-email",
@@ -37,7 +48,7 @@ public class UserAuthenticationHelper {
                 "fake-bceid_business_name",
                 IdentityProvider.IDIR,
                 Set.of(),
-                "fake-token");
+                userPrincipal);
 
         return Optional.of(userInfo);
       } else if (authentication.getPrincipal() instanceof Jwt jwtPrincipal) {

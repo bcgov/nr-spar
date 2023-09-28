@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /** This class contains all configurations related to security and authentication. */
 @Configuration
@@ -53,9 +52,7 @@ public class SecurityConfig {
     */
 
     http.cors(Customizer.withDefaults())
-        .csrf(
-            customize ->
-                customize.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+        .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             customize ->
                 customize

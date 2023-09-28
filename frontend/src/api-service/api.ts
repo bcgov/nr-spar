@@ -1,15 +1,7 @@
 import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext';
 
 const getHeader = (useMultipart = false) => {
-  const { token } = useAuth();
-
-  let headers = {
-    // Until we have the backend ready for receiving the actual token,
-    // let's have a simple header with user identification
-    'Temporary-User-Identification': token
-    // Authorization: `Bearer ${token}`
-  };
+  let headers = {};
   if (useMultipart) {
     headers = Object.assign(headers, { 'content-type': 'multipart/form-data' });
   }
