@@ -43,7 +43,8 @@ import {
   initExtractionStorageState,
   initInvalidationObj,
   initOwnerShipInvalidState,
-  initParentTreeState
+  initParentTreeState,
+  generateDefaultRows
 } from './utils';
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
@@ -145,6 +146,7 @@ const SeedlotRegistrationForm = () => {
   const cleanParentTables = () => {
     const clonedState = { ...allStepData };
     clonedState.parentTreeStep.tableRowData = {};
+    clonedState.parentTreeStep.mixTabData = generateDefaultRows();
     setAllStepData(clonedState);
   };
 
