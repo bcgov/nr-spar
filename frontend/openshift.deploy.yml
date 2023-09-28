@@ -37,9 +37,6 @@ parameters:
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
-  - name: VITE_SPAR_BUILD_VERSION
-    description: Current sample app release version
-    required: true
   - name: VITE_KC_URL
     description: VITE_KC_URL
     required: true
