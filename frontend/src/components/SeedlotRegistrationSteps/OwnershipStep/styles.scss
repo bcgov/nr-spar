@@ -33,6 +33,10 @@ svg.#{vars.$bcgov-prefix}--accordion__arrow {
 .ownership-form-container {
   margin-top: 1.25rem;
 
+  ul.#{vars.$bcgov-prefix}--accordion .#{vars.$bcgov-prefix}--accordion__title {
+    padding: 1rem;
+  }
+
   .single-accordion-item {
     margin-bottom: 1rem;
     background-color: var(--#{vars.$bcgov-prefix}-layer-01);

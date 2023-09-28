@@ -43,10 +43,6 @@
     background-color: var(--#{vars.$bcgov-prefix}-layer-hover-02);
   }
 
-  .#{vars.$bcgov-prefix}--label--disabled {
-    color: var(--#{vars.$bcgov-prefix}-text-secondary);
-  }
-
   .#{vars.$bcgov-prefix}--form__helper-text--disabled {
     color: var(--#{vars.$bcgov-prefix}-text-secondary);
   }
