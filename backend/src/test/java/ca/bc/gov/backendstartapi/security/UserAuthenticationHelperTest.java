@@ -111,4 +111,20 @@ class UserAuthenticationHelperTest {
     Optional<UserInfo> userInfoOptional = userAuthenticationHelper.getUserInfo();
     Assertions.assertFalse(userInfoOptional.isPresent());
   }
+
+  @Test
+  @DisplayName("getUserStringAuthenticationTest")
+  void getUserStringAuthenticationTest() {
+    Authentication authentication = mock(Authentication.class);
+    SecurityContext securityContext = mock(SecurityContext.class);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.isAuthenticated()).thenReturn(true);
+    when(authentication.getPrincipal()).thenReturn("simple-user-id");
+
+    Optional<UserInfo> userInfoOptional = userAuthenticationHelper.getUserInfo();
+    Assertions.assertTrue(userInfoOptional.isPresent());
+    Assertions.assertEquals("dev-generic-user", userInfoOptional.get().id());
+  }
 }
