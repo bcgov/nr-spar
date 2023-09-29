@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 
 import {
   Button,
@@ -14,10 +14,10 @@ import LoginProviders from '../../types/LoginProviders';
 import getUrlQueryParam from '../../utils/UrlUtils';
 
 import './styles.scss';
-import { useAuth } from '../../contexts/AuthContext';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const Landing = () => {
-  const { signed, signIn, isCurrentAuthUser } = useAuth();
+  const { signed, signIn, isCurrentAuthUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const homePage = '/dashboard';
 
