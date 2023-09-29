@@ -1,8 +1,6 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
-import {
-  TYPE_DELAY
-} from '../../constants';
+import { TYPE_DELAY } from '../../constants';
 
 describe('Create A Class Seedlot', () => {
   let data: {

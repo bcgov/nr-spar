@@ -1,4 +1,3 @@
-// import { TWO_SECOND } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
 
 describe('Dashboard page test', () => {

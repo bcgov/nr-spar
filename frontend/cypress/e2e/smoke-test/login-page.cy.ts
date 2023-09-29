@@ -1,6 +1,4 @@
-import {
-  FIVE_SECOND
-} from '../../constants';
+import { FIVE_SECOND } from '../../constants';
 
 describe('Login page test', () => {
   let loginPageData: {

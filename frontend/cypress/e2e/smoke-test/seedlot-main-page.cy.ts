@@ -1,4 +1,3 @@
-// import { HALF_SECOND, TWO_SECOND } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
 
 describe('Seedlot Main page test', () => {
