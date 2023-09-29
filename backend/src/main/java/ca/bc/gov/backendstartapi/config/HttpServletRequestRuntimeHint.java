@@ -6,6 +6,7 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.context.annotation.Configuration;
 
+/** This class creates a RuntimeHint for the ServletRequest class. */
 @Configuration
 public class HttpServletRequestRuntimeHint implements RuntimeHintsRegistrar {
 
