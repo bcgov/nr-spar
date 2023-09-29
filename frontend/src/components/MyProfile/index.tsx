@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -6,7 +6,7 @@ import {
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
-import { useAuth } from '../../contexts/AuthContext';
+import { AuthContext } from '../../contexts/AuthContext';
 
 import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
@@ -35,7 +35,7 @@ const accountOptions = [
 
 const MyProfile = () => {
   const { theme, setTheme } = useThemePreference();
-  const { user } = useAuth();
+  const { user } = useContext(AuthContext);
 
   const [goToURL, setGoToURL] = useState<string>('');
   const [goTo, setGoTo] = useState<boolean>(false);

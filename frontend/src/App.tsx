@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   BrowserRouter, Routes, Route
 } from 'react-router-dom';
@@ -20,7 +20,7 @@ import MySeedlots from './views/Seedlot/MySeedlots';
 import SeedlotRegistrationForm from './views/Seedlot/SeedlotRegistrationForm';
 import { Amplify } from 'aws-amplify';
 import awsconfig from './aws-exports';
-import { useAuth } from './contexts/AuthContext';
+import { AuthContext } from './contexts/AuthContext';
 
 Amplify.configure(awsconfig);
 
@@ -30,7 +30,7 @@ Amplify.configure(awsconfig);
  * @returns {JSX.Element} instance of the app ready to use.
  */
 const App: React.FC = () => {
-  const { signed } = useAuth();
+  const { signed } = useContext(AuthContext);
 
   return (
     <BrowserRouter>

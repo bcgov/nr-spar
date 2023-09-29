@@ -7,21 +7,12 @@ import Landing from '../../views/Landing';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
 import { AuthContext } from '../../contexts/AuthContext';
+import authContextMock from '../__mocks__/authContextMock';
 
 describe('Landing component test', () => {
-  const contextValue = {
-    signed: true,
-    user: null,
-    isCurrentAuthUser: vi.fn(),
-    signIn: vi.fn(),
-    signOut: vi.fn(),
-    provider: 'idir',
-    token: 'anything'
-  };
-
   it('should have the correct title', () => {
     const { getByTestId } = render(
-      <AuthContext.Provider value={contextValue}>
+      <AuthContext.Provider value={authContextMock}>
         <BrowserRouter>
           <Landing />
         </BrowserRouter>
@@ -47,7 +38,7 @@ describe('Landing component test', () => {
   it('should match the snapshot', () => {
     const landing = renderer
       .create(
-        <AuthContext.Provider value={contextValue}>
+        <AuthContext.Provider value={authContextMock}>
           <BrowserRouter>
             <Landing />
           </BrowserRouter>
