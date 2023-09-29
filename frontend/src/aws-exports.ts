@@ -1,7 +1,7 @@
 import { env } from './env';
 
 // VITE_ZONE: One of dev | test | prod
-const ZONE = env.VITE_ZONE.toLocaleLowerCase();
+const ZONE = env.VITE_ZONE? env.VITE_ZONE.toLocaleLowerCase() : 'dev';
 const retUrlEnv = ZONE !== 'prod' && ZONE !== 'test'? 'dev' : ZONE;
 
 // [https://logon7.gov.bc.ca] for PROD and [https://logontest7.gov.bc.ca] for everyting else
