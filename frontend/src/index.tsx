@@ -9,7 +9,7 @@ import reportWebVitals from './reportWebVitals';
 import { ThemePreference } from './utils/ThemePreference';
 import { env } from './env';
 import makeServer from './mock-server/server';
-import { AuthProvider } from './contexts/AuthContext';
+import AuthProvider from './contexts/AuthProvider';
 
 const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
 
