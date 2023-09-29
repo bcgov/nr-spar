@@ -1,7 +1,9 @@
 // @ts-check
 /// <reference path="../global.d.ts" />
 
-import { HALF_SECOND, ONE_SECOND, TYPE_DELAY } from '../constants';
+import {
+  HALF_SECOND, ONE_SECOND, THREE_SECOND, TYPE_DELAY
+} from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
@@ -23,28 +25,49 @@ Cypress.Commands.add('login', () => {
       cy.visit('/');
       cy.wait(ONE_SECOND);
       cy.getByDataTest('landing-button__bceid').click();
-      cy.origin(
-        Cypress.env('keycloakLoginUrl'),
-        { args: config },
-        (
-          {
-            username, password, delay, timeout
-          }
-        ) => {
-          cy.get('#bceidLogo', { timeout }).should('be.visible');
+      cy.url().then((url) => {
+        if (url.includes('.gov.bc.ca')) {
+          cy.get('#bceidLogo', { timeout: config.timeout }).should('be.visible');
           cy.get('input[name=user]')
             .clear()
-            .type(username, { delay });
+            .type(config.username, { delay: config.delay });
           cy.get('input[name=password]')
             .clear()
-            .type(password, { delay });
+            .type(config.password, { delay: config.delay });
           cy.get('input[name=btnSubmit]').click();
+        } else {
+          cy.origin(
+            Cypress.env('keycloakLoginUrl'),
+            { args: config },
+            (
+              {
+                username, password, delay, timeout
+              }
+            ) => {
+              cy.get('#bceidLogo', { timeout }).should('be.visible');
+              cy.get('input[name=user]')
+                .clear()
+                .type(username, { delay });
+              cy.get('input[name=password]')
+                .clear()
+                .type(password, { delay });
+              cy.get('input[name=btnSubmit]').click();
+            }
+          );
         }
-      );
+      });
+      cy.wait(THREE_SECOND);
+      cy.getCookies().then((cookies) => {
+        cookies.forEach((cookie) => {
+          cy.log(cookie.name, cookie.domain, '\n');
+        });
+      });
     },
     {
       validate: () => {
-        cy.getCookie('GUID', { domain: 'https://test.loginproxy.gov.bc.ca' }).should('exist');
+        cy.visit('/');
+        cy.wait(THREE_SECOND);
+        cy.getCookie('SMSESSION', { domain: '.gov.bc.ca' }).should('exist');
       }
     }
   );
@@ -64,4 +87,13 @@ Cypress.Commands.add('isPageTitle', (pageTitle) => {
 Cypress.Commands.add('toogleFavourite', () => {
   cy.get(GenericSelectors.FavouriteButton)
     .click();
+});
+
+Cypress.Commands.overwrite('log', (log, ...args) => {
+  if (Cypress.browser.isHeadless) {
+    return cy.task('log', args, { log: false }).then(() => log(...args));
+  }
+  // eslint-disable-next-line no-console
+  console.log(...args);
+  return log(...args);
 });
