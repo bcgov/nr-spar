@@ -2,6 +2,7 @@ import { env } from './env';
 
 // VITE_ZONE: One of dev | test | prod
 const ZONE = env.VITE_ZONE.toLocaleLowerCase();
+const retUrlEnv = ZONE !== 'prod' && ZONE !== 'test'? 'dev' : ZONE;
 
 // [https://logon7.gov.bc.ca] for PROD and [https://logontest7.gov.bc.ca] for everyting else
 const logoutDomain = ZONE === 'prod'? 'https://logon7.gov.bc.ca' : 'https://logontest7.gov.bc.ca';
@@ -9,7 +10,7 @@ const logoutDomain = ZONE === 'prod'? 'https://logon7.gov.bc.ca' : 'https://logo
 const signOutUrl = [
   `${logoutDomain}/clp-cgi/logoff.cgi`,
   '?retnow=1',
-  `&returl=https://${ZONE}.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/logout`,
+  `&returl=https://${retUrlEnv}.loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/logout`,
   `?redirect_uri=${window.location.origin}/`
 ].join('');
 

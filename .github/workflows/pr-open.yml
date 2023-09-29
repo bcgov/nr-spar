@@ -117,11 +117,10 @@ jobs:
             parameters:
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
               -p VITE_NRSPARWEBAPP_VERSION=dev
-              -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-              -p VITE_KC_REALM=standard
-              -p VITE_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
+              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
+              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
             triggers: ('common/' 'database/' 'backend/' 'oracle-api/' 'frontend/')
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
@@ -160,9 +159,8 @@ jobs:
       VITE_NRSPARWEBAPP_VERSION: dev
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
-      VITE_KC_CLIENT_ID: seed-planning-test-4296
-      VITE_KC_REALM: standard
-      VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
+      VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
+      VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: cypress-io/github-action@v6
