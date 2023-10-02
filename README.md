@@ -80,6 +80,7 @@ You can learn more about it [by looking its README](backend/README.md)
 
 **SPAR Back end - Oracle THE**
 - REST API
+  - [Java 17](https://www.oracle.com/java/technologies/downloads/#java17)
   - [Spring Boot Web](https://spring.io/guides/gs/spring-boot/)
   - [Apache Maven](https://maven.apache.org/)
   - [Hibernate ORM](https://hibernate.org/orm/)
@@ -89,7 +90,7 @@ You can learn more about it [by looking its README](oracle-api/README.md)
 
 # Getting started
 
-Once you have cloned this repository, can get it running by typing at the 
+Once you have cloned this repository, you can get it running by typing at the 
 project root directory
 
 ```sh
@@ -101,18 +102,18 @@ docker compose file. If you need that or want to have a fully working
 environment, get in touch with a team member to request this API KEY.
 
 If everything went well, you should be able to see three running
-services in the output of `docker ps`.
+services in the output of `docker ps`. You'll find:
 
-You can see the SPAR client at http://localhost:3000 and
-You also can see SPAR back end running at http://localhost:8090/swagger-ui/index.html
+- SPAR Client - http://localhost:3000 
+- SPAR Back end Postgres - http://localhost:8090/swagger-ui/index.html
+- SPAR Postgres Database
 
 
-⚠️ in case you may want to try the back end API, you'll need to unlock 
+⚠️ In case you may want to try the back end API, you'll need to unlock 
 swagger, otherwhise you'll only see 401 responses. Follow the steps bellow
 to get a JWT token to your user.
 
-⚠️ Note that you user (or any user that will do the request) needs to have
-these roles: `user_read` and `user_write`.
+⚠️ Note that users needs to have one of these roles: `user_read` and `user_write`.
 
 **Getting a JWT token for SPAR services**
 
