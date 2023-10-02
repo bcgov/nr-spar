@@ -1,4 +1,4 @@
-# SPAR Back-end REST API
+# SPAR Back end REST API
 
 This repository holds a set of policies, standards, guides, and pipelines to
 get started with a back-end API. Before writing your first line of code, please
