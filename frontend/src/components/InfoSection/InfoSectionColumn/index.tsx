@@ -27,8 +27,7 @@ const InfoSectionColumn = (
       <TextInput
         id={`${formatStrForKey(item.name)}-id`}
         labelText={item.name}
-        value={item.value}
-        placeholder="--"
+        value={item.value ? item.value : '--'}
         readOnly
       />
     </Column>

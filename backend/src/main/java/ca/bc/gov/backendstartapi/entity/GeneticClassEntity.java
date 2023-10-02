@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /** Entity for the list of genetic class. */
 @Entity
@@ -15,6 +16,7 @@ import lombok.Setter;
 @Table(name = "genetic_class_list")
 @Getter
 @Setter
+@ToString
 public class GeneticClassEntity extends CodeDescriptionEntity {
   @Id
   @Column(name = "genetic_class_code", length = 1)

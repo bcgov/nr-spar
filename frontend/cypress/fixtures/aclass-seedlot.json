@@ -1,0 +1,11 @@
+{
+  "applicantAgency": {
+    "name": "00012797 - Ministry Of Forests - MOF",
+    "number": "30",
+    "email": "test@gov.bc.ca",
+    "invalidEmail": "test.com.br"
+  },
+  "seedlotInformation": {
+    "species": "PLI - Lodgepole pine"
+  }
+}

@@ -12,6 +12,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: ORG_NAME
+    description: Organization name
+    value: bcgov
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -31,12 +37,6 @@ parameters:
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
-  - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
-    value: ghcr.io
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    value: bcgov/nr-spar-webapp/frontend:test
   - name: VITE_SPAR_BUILD_VERSION
     description: Current sample app release version
     required: true
@@ -52,6 +52,9 @@ parameters:
   - name: VITE_KC_CLIENT_ID
     description: VITE_KC_CLIENT_ID
     required: true
+  - name: VITE_ORACLE_SERVER_URL
+    description: Oracle server (can change!)
+    value: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
   - name: LOG_LEVEL
     description: Caddy log level (debug, info, warn, error, panic, fatal)
     value: "info"
@@ -69,7 +72,7 @@ objects:
         - name: ${IMAGE_TAG}
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${PROMOTE}
+            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}
           referencePolicy:
             type: Local
   - apiVersion: v1
@@ -121,7 +124,7 @@ objects:
                 - name: VITE_KC_CLIENT_ID
                   value: ${VITE_KC_CLIENT_ID}
                 - name: VITE_ORACLE_SERVER_URL
-                  value: https://${NAME}-${ZONE}-oracle-api.${DOMAIN}
+                  value: ${VITE_ORACLE_SERVER_URL}
                 - name: LOG_LEVEL
                   value: ${LOG_LEVEL}
               ports:

@@ -1,3 +1,7 @@
+import {
+  ONE_SECOND, TWO_SECOND, FIVE_SECOND
+} from '../../constants';
+
 describe('Login page test', () => {
   let loginPageData: {
     title: string,
@@ -6,13 +10,6 @@ describe('Login page test', () => {
   };
 
   beforeEach(() => {
-    cy.visit('/');
-    cy.wait(2 * 1000);
-
-    // Clear cookies and local storage
-    cy.clearCookies({ log: true });
-    cy.clearLocalStorage({ log: true });
-
     // Loading test data
     cy.fixture('login-page').then((ttls) => {
       loginPageData = ttls;
@@ -20,42 +17,53 @@ describe('Login page test', () => {
   });
 
   it('login page is displayed and loads correctly', () => {
+    cy.visit('/');
+    cy.wait(ONE_SECOND);
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
     cy.getByDataTest('landing-subtitle').should('have.text', loginPageData.subtitle);
     cy.getByDataTest('landing-desc').should('have.text', loginPageData.description);
   });
 
   it('navigate to the user form page IDIR', () => {
+    cy.visit('/');
+    cy.wait(ONE_SECOND);
     cy.getByDataTest('landing-button__idir').click();
-    cy.origin(Cypress.env('keycloakLoginUrl'), () => {
-      cy.get('#idirLogo', { timeout: 6000 }).should('be.visible');
+    cy.url().then((url) => {
+      if (url.includes('.gov.bc.ca')) {
+        cy.get('#idirLogo', { timeout: 5000 }).should('be.visible');
+      } else {
+        cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
+          cy.get('#idirLogo', { timeout }).should('be.visible');
+        });
+      }
     });
   });
 
   it('navigate to the user form page BCeID', () => {
+    cy.visit('/');
+    cy.wait(ONE_SECOND);
     cy.getByDataTest('landing-button__bceid').click();
-    cy.origin(Cypress.env('keycloakLoginUrl'), () => {
-      cy.get('#bceidLogo', { timeout: 6000 }).should('be.visible');
+    cy.url().then((url) => {
+      if (url.includes('.gov.bc.ca')) {
+        cy.get('#bceidLogo', { timeout: 5000 }).should('be.visible');
+      } else {
+        cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
+          cy.get('#bceidLogo', { timeout }).should('be.visible');
+        });
+      }
     });
   });
 
   it('try to access system using a link without user connected', () => {
     cy.visit('/dashboard');
+    cy.wait(ONE_SECOND);
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
-  });
-
-  it.skip('log in with BCeID and validate if after timeout the user is disconnected', () => {
-    cy.login();
-    // wait for 6 minutes
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(6 * 60 * 1000);
-    cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
-    cy.reload();
   });
 
   it('log in with BCeID and validate user role', () => {
     cy.login();
-    cy.wait(2 * 1000);
+    cy.visit('/');
+    cy.wait(TWO_SECOND);
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('IDIR: undefined');
@@ -63,7 +71,8 @@ describe('Login page test', () => {
 
   it('log in with BCeID and validate user information', () => {
     cy.login();
-    cy.wait(2 * 1000);
+    cy.visit('/');
+    cy.wait(TWO_SECOND);
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('NRS Load Test-3');
