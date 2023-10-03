@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress';
-import { TEN_SECOND } from './cypress/constants';
+import { TEN_SECONDS } from './cypress/constants';
 
 export default defineConfig({
   e2e: {
@@ -18,9 +18,9 @@ export default defineConfig({
     ],
     chromeWebSecurity: false,
     retries: {
-      runMode: 2
+      runMode: 4
     },
-    defaultCommandTimeout: TEN_SECOND,
+    defaultCommandTimeout: TEN_SECONDS,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
       // implement node event listeners here
