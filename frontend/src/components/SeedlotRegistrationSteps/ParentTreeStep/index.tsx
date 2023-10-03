@@ -42,16 +42,9 @@ import {
   TabTypes, HeaderObj, RowItem
 } from './definitions';
 import {
-  getTabString, processOrchards, combineObjectValues,
-  calcSummaryItems,
-  processParentTreeData,
-  cleanTable,
-  fillCompostitionTables,
-  configHeaderOpt,
-  fillCalculatedInfo,
-  generateGenWorthPayload,
-  addNewMixRow,
-  calcMixTabInfoItems,
+  getTabString, processOrchards, combineObjectValues, calcSummaryItems,
+  processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
+  fillCalculatedInfo, generateGenWorthPayload, addNewMixRow, calcMixTabInfoItems,
   fillMixTable
 } from './utils';
 
