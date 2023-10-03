@@ -156,7 +156,6 @@ jobs:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       LOG_LEVEL: debug
-      VITE_AWS_DOMAIN: https://test-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com
       VITE_NRSPARWEBAPP_VERSION: dev
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
