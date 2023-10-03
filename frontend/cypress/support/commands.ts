@@ -2,7 +2,7 @@
 /// <reference path="../global.d.ts" />
 
 import {
-  HALF_SECOND, TYPE_DELAY, THREE_SECOND
+  HALF_SECOND, THREE_SECONDS, TYPE_DELAY
 } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
@@ -24,7 +24,7 @@ Cypress.Commands.add('login', () => {
       cy.clearAllSessionStorage();
       cy.visit('/');
       // We have to wait here because page might reload again, causing the login to fail
-      cy.wait(THREE_SECOND);
+      cy.wait(THREE_SECONDS);
       cy.getByDataTest('landing-button__bceid').click();
       cy.url().then((url) => {
         if (url.includes('.gov.bc.ca')) {
