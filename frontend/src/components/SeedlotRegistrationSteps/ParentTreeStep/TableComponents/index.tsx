@@ -28,7 +28,7 @@ export const renderColOptions = (
   const toggleableCols = headerConfig
     .filter((header) => (header.isAnOption
       && header.availableInTabs.includes(currentTab)
-      && !String(header.id).startsWith('w_') // id starts with w_ is only for smp mix
+      && !String(header.id).startsWith('w_') // id starts with w_ is only for smp mix table
     ));
 
   const smpWeightedCols = headerConfig
