@@ -14,62 +14,58 @@ def open_json_file(file: str) -> str:
     with open(file) as config_file:
         return json.load(config_file)
 
-def get_query_from_file(path: str, file_name: str) -> str:
+def get_query_from_file(full_file_path: str) -> str:
     """
     Given a SQL file, returns a string with the file query content.
 
     Args:
-        path (str): Path to the file's folder
-        file_name (str): File name
+        full_file_path (str): Full file path (with file name)
 
     Returns:
         str: Query string
     """
-    with open(path+file_name, 'r', encoding='utf-8') as query_file:
+    with open(full_file_path, 'r', encoding='utf-8') as query_file:
         query = query_file.read()
     return query
   
-def get_inc_dt_qry_from_file(path: str, file_name: str, table_metadata: dict) -> str:
+def get_inc_dt_qry_from_file(table_metadata: dict, full_file_path: str) -> str:
     """
     Get query string from file using incremental date as filter defined in the domain metadata.
 
     Args:
-        path (str): Path to queries files folder 
-        file_name (str): Query file name
         table_metadata (dict): Table metadata
+        full_file_path (str): Full file path (with file name)
 
     Returns:
         str: Query string using incremental date as filter
     """
-    return ''.join([get_query_from_file(path, file_name), ' ', table_metadata['incremental_dt']])
+    return ''.join([get_query_from_file(full_file_path), ' ', table_metadata['incremental_dt']])
     
-def get_retry_records_qry_from_file(path: str, file_name: str, table_metadata: dict) -> str:
+def get_retry_records_qry_from_file(table_metadata: dict, full_file_path: str) -> str:
     """
     Get query string from file entity id (leading column or primary key) as filter defined in the domain metadata.
 
     Args:
-        path (str): Path to queries files folder 
-        file_name (str): Query file name
         table_metadata (dict): Table metadata
+        full_file_path (str): Full file path (with file name)
 
     Returns:
         str: Query string using entity id (leading column or primary key) as filter
     """
-    return ''.join([get_query_from_file(path, file_name), ' ', table_metadata['retry_records']])
+    return ''.join([get_query_from_file(full_file_path), ' ', table_metadata['retry_records']])
 
-def get_staging_records_qry_from_file(path: str, file_name: str, table_metadata: dict) -> str:
+def get_staging_records_qry_from_file(table_metadata: dict, full_file_path: str) -> str:
     """
     Get query string from file entity id (leading column or primary key) as filter defined in the domain metadata.
 
     Args:
-        path (str): Path to queries files folder 
-        file_name (str): Query file name
         table_metadata (dict): Table metadata
+        full_file_path (str): Full file path (with file name)
 
     Returns:
         str: Query string using entity id (leading column or primary key) as filter
     """
-    return ''.join([get_query_from_file(path, file_name), ' ', table_metadata['staging_records']])
+    return ''.join([get_query_from_file(full_file_path), ' ', table_metadata['staging_records']])
 
 def build_stm_params(table_metadata: str, row: object) -> dict:
     """
