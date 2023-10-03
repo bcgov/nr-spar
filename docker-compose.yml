@@ -15,7 +15,7 @@ x-frontend: &frontend
     LOG_LEVEL: debug
     VITE_USER_POOLS_ID: ca-central-1_t2HSZBHurS
     VITE_USER_POOLS_WEB_CLIENT_ID: 37798cpec8d4u1a2njt02nonp7
-    VITE_AWS_DOMAIN: prod-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com
+    VITE_AWS_DOMAIN: test-fam-user-pool-domain.auth.ca-central-1.amazoncognito.com
   healthcheck:
     test: timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/3000'
     interval: 10s
