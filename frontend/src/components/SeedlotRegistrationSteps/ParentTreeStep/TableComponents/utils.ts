@@ -30,7 +30,7 @@ const cleanRowData = (rowId: string, ptNumber?: string): RowItem => {
   return newRow;
 };
 
-const calculateProportion = (
+const calculateSmpRow = (
   volume: string,
   rowData: RowItem,
   mixTabData: RowDataDictType
@@ -85,13 +85,15 @@ export const handleInput = (
           rowData.rowId,
           rowData.parentTreeNumber
         );
+        const rowVolume = Number(rowData.volume).toString();
+        mixTabData = calculateSmpRow(rowVolume, rowData, mixTabData);
       }
     } else {
       mixTabData[rowData.rowId] = cleanRowData(rowData.rowId);
     }
   }
   if (colName === 'volume') {
-    mixTabData = calculateProportion(inputValue, rowData, state.mixTabData);
+    mixTabData = calculateSmpRow(inputValue, rowData, state.mixTabData);
   }
 
   if (rowData.isMixTab) {
@@ -114,6 +116,6 @@ export const deleteMixRow = (
   const mixTabData = { ...clonedState.mixTabData };
   delete mixTabData[rowData.rowId];
   const volume = rowData.volume === null ? '0' : rowData.volumel;
-  clonedState.mixTabData = calculateProportion(volume, rowData, mixTabData);
+  clonedState.mixTabData = calculateSmpRow(volume, rowData, mixTabData);
   setStepData(clonedState);
 };
