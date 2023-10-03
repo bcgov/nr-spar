@@ -1,3 +1,5 @@
+import time
+import logging
 import numpy as np
 import pandas as pd
 import module.metadata_handler as meta
@@ -6,45 +8,60 @@ import module.data_sync_control as data_sync_ctl
 import transformations as transf
 
 from typing import Tuple
-from os import getcwd, listdir
+from os import listdir, path
+from datetime import timedelta
 from sqlalchemy.exc import SQLAlchemyError
+from module.custom_exception import TransformException
+
+logger = logging.getLogger(__name__)
 
 def data_sync():
     """ 
     Runs the data synchronization between source and target databases for all defined domains - one at a time.
     """
+    sync_start_time = time.time()
+    logger.info('***** Start Data Sync *****')
     
-    current_cwd = getcwd().split('/spar_data_sync')[0]
-       
     # Loading database parameters from configuration file
-    db_config = meta.open_json_file('{}/spar_data_sync/config/database_config.json'.format(current_cwd))
+    current_cwd = path.abspath(path.dirname(__file__).split('src')[0]) 
+    db_config = meta.open_json_file(path.abspath(path.join(current_cwd, 'config', 'database_config.json')))
     
     # Loading source and target database connections parameters
     source_db_config = db_config['postgres_local']
     target_db_config = db_config['oracle_local']
     
     # Getting all the folders under domains folder and creating a sorted list of domains
-    domains_path = '{}/spar_data_sync/domains/'.format(current_cwd)
+    domains_path = path.abspath(path.join(current_cwd, 'domains'))
     domains_folders = {int(folder_name.split('_', 1)[0]): folder_name for folder_name in listdir(domains_path)}
     domain_loading_order = list(domains_folders.keys())
     domain_loading_order.sort()
     
+    logger.info('Initializing Source Database Connection')
     with db_conn.database_connection(source_db_config) as source_db_conn:
         try:
             data_sync_id = data_sync_ctl.get_next_data_sync_id(source_db_conn, source_db_config['schema'])
             data_sync_ctl.insert_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id)
+            
+            logger.info('Initializing Target Database Connection')
             with db_conn.database_connection(target_db_config) as target_db_conn:
-        
                 for i in domain_loading_order:
-                    domain_folder_path = '{}{}'.format(domains_path, domains_folders[i])
+                    domain_folder_path = path.abspath(path.join(domains_path, domains_folders[i]))
                     domain_name = domains_folders[i].split('_', 1)[1]
+                    logger.info(f'Sync {domain_name} Domain ({i}/{len(domain_loading_order)})')
                     sync_domain(source_db_conn, source_db_config['schema'], target_db_conn, domain_folder_path, domain_name)
         
-        except Exception as e:
+        except TransformException:
             data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
-            raise(e)
+            logger.critical('TransformException - A fatal error has occured during data transformation')
+        except Exception:
+            data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
+            logger.critical('A fatal error has occured', exc_info = True)
         else:        
             data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Completed')
+    
+    sync_elapsed_time = time.time() - sync_start_time
+    logger.debug(f'Data Sync process took {timedelta(seconds=sync_elapsed_time)}')
+    logger.info('***** Finish Data Sync *****')
         
 def sync_domain(source_db_conn: object,
                 source_db_schema: str,
@@ -64,13 +81,24 @@ def sync_domain(source_db_conn: object,
     """
     
     # Defining the full path to the query files folder and loading source and target domain metadata 
-    query_files_path = '{}/queries/'.format(domain_folder_path)
-    src_domain_metadata = meta.open_json_file('{}/source.json'.format(domain_folder_path))
-    tgt_domain_metadata = meta.open_json_file('{}/target.json'.format(domain_folder_path))
+    query_files_path = path.abspath(path.join(domain_folder_path, 'queries'))
+    src_domain_metadata = meta.open_json_file(path.abspath(path.join(domain_folder_path, 'source.json')))
+    tgt_domain_metadata = meta.open_json_file(path.abspath(path.join(domain_folder_path, 'target.json')))
     
+    start_time = time.time()
     domain_dfs, staging_dfs = extract_domain(source_db_conn, source_db_schema, query_files_path, domain_name, src_domain_metadata)
+    elapsed_time = time.time() - start_time
+    logger.debug(f'Extraction of {domain_name} took {timedelta(seconds=elapsed_time)}')
+    
+    start_time = time.time()
     domain_dfs = transform_domain(domain_dfs, staging_dfs, tgt_domain_metadata)
+    elapsed_time = time.time() - start_time
+    logger.debug(f'Transformation of {domain_name} took {timedelta(seconds=elapsed_time)}')
+    
+    start_time = time.time()
     load_domain(source_db_conn, source_db_schema, target_db_conn, domain_dfs, domain_name, tgt_domain_metadata, src_domain_metadata.get('leading_column'))
+    elapsed_time = time.time() - start_time
+    logger.debug(f'Loading of {domain_name} took {timedelta(seconds=elapsed_time)}')
     
 def extract_domain(database_conn: object,
                    database_schema: str,
@@ -92,6 +120,8 @@ def extract_domain(database_conn: object,
         with all extracted data where the keys are the table names (based on the query file name) and 
         the values are table data on a Pandas DataFrame object
     """
+    
+    logger.info('***** Start Extraction Session *****')
     domain_dfs = {}
     
     # Getting metadata for each extraction table defined in the domain metadata
@@ -101,10 +131,11 @@ def extract_domain(database_conn: object,
     params = {'incremental_dt': incremental_dt}
         
     for table_name in tables_metadata:
+        logger.info(f'{table_name} Table Extraction')
         # Extracting all data using incremental date from last completed execution
-        table_df = pd.read_sql(meta.get_inc_dt_qry_from_file(query_files_path, 
-                                                             tables_metadata[table_name]['file_name'], 
-                                                             tables_metadata[table_name]), 
+        table_df = pd.read_sql(meta.get_inc_dt_qry_from_file(tables_metadata[table_name],
+                                                             path.abspath(path.join(query_files_path, 
+                                                                                    tables_metadata[table_name]['file_name']))), 
                                database_conn.engine,
                                params = params)
     
@@ -113,42 +144,47 @@ def extract_domain(database_conn: object,
             retry_df = extract_retry_records(database_conn,
                                              database_schema,
                                              domain_name,
-                                             meta.get_retry_records_qry_from_file(query_files_path,
-                                                                                  tables_metadata[table_name]['file_name'], 
-                                                                                  tables_metadata[table_name]))
+                                             meta.get_retry_records_qry_from_file(tables_metadata[table_name],
+                                                                                  path.abspath(path.join(query_files_path, 
+                                                                                                         tables_metadata[table_name]['file_name']))))
         else:
             # Extracting records that had some errors and were marked for retry based on the table's primary key
             retry_df = extract_retry_records(database_conn,
                                              database_schema,
                                              table_name.lower(),
-                                             meta.get_retry_records_qry_from_file(query_files_path,
-                                                                                  tables_metadata[table_name]['file_name'], 
-                                                                                  tables_metadata[table_name]))
+                                             meta.get_retry_records_qry_from_file(tables_metadata[table_name],
+                                                                                  path.abspath(path.join(query_files_path, 
+                                                                                                         tables_metadata[table_name]['file_name']))))
         # Adding extracted table data to the dictionary
         domain_dfs[table_name] = pd.concat([table_df, retry_df]).reset_index(drop=True)
+        logger.info(f'{len(domain_dfs[table_name].index)} rows extracted')
     
     # Getting metadata for each stagging/lookup table defined in the domain metadata 
     stagings_metadata = {table['file_name'].split('.')[0]: table for table in domain_metadata['tables'] if table['query_type'] in ('staging', 'lookup')}
     staging_dfs = {}   
     
     for table_name in stagings_metadata:
+        logger.info(f'{table_name} Lookup/Stage Table Extract')
         stg_table_df = pd.DataFrame()
         if stagings_metadata[table_name]['query_type'] == 'lookup' or not(domain_metadata.get('leading_column')):
             # Getting all data from lookup table - no filters applied
-            stg_table_df = pd.read_sql(meta.get_query_from_file(query_files_path, stagings_metadata[table_name]['file_name']), database_conn.engine)
+            stg_table_df = pd.read_sql(meta.get_query_from_file(path.abspath(path.join(query_files_path,
+                                                                                       stagings_metadata[table_name]['file_name']))), 
+                                       database_conn.engine)
         else:
             # Getting all leading values driving the domain sync
             leading_values = list_leading_values(domain_dfs, domain_metadata['leading_column'])
             for value in leading_values:
                 params = {domain_metadata['leading_column']: value}
                 # Fetching table data filtering the leading column by each leading value
-                df = pd.read_sql(meta.get_staging_records_qry_from_file(query_files_path,
-                                                                        stagings_metadata[table_name]['file_name'],
-                                                                        stagings_metadata[table_name]),
+                df = pd.read_sql(meta.get_staging_records_qry_from_file(stagings_metadata[table_name],
+                                                                        path.abspath(path.join(query_files_path,
+                                                                                               stagings_metadata[table_name]['file_name']))),
                                  database_conn.engine,
                                  params=params)
                 stg_table_df = pd.concat([stg_table_df, df]).reset_index(drop=True)
         
+        logger.info(f'{len(stg_table_df.index)} rows extracted')
         # Adding extracted staging and lookup table data to the dictionary
         staging_dfs[table_name] = stg_table_df
 
@@ -198,10 +234,13 @@ def transform_domain(domain_dfs: dict,
     Returns:
         dict: Dictionary with all target tables data transformed, ready to be loaded (as Pandas DataFrames objects)
     """
+    logger.info('***** Start Transformation Session *****')
     for key in domain_dfs:
         # Running transformations for each target table
         domain_dfs[key] = transf.run_transformations(domain_dfs[key], staging_dfs, key)
-    
+        if domain_dfs[key] is None:
+            raise TransformException
+        
     # Adjusting columns name and dropping non used columns as mapped on the target domain metadata file
     domain_dfs = adjust_columns(domain_dfs, domain_metadata)
     
@@ -221,17 +260,22 @@ def adjust_columns(domain_dfs: dict,
     Returns:
         dict: Dictionary with all target tables columns adjusted (as Pandas DataFrames objects)
     """
-    for table_metadata in domain_metadata['tables']:
-        columns_map = table_metadata['columns']
-        rename_columns = {columns_map[key]: key for key in columns_map}
-        # Renaming columns as mapped in the target domain metadata
-        domain_dfs[table_metadata['table_name']].rename(columns=rename_columns, inplace=True)
-        # Removing unwanted columns as mapped in the target domain metadata
-        domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']][list(columns_map)]
-        domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']].sort_values(by=table_metadata['primary_key'])
-        domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']].replace(np.nan, None)
-        
-    return domain_dfs
+    logger.info('Adjusting and Mapping Columns')
+    try:
+        for table_metadata in domain_metadata['tables']:
+            columns_map = table_metadata['columns']
+            rename_columns = {columns_map[key]: key for key in columns_map}
+            # Renaming columns as mapped in the target domain metadata
+            domain_dfs[table_metadata['table_name']].rename(columns=rename_columns, inplace=True)
+            # Removing unwanted columns as mapped in the target domain metadata
+            domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']][list(columns_map)]
+            domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']].sort_values(by=table_metadata['primary_key'])
+            domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']].replace(np.nan, None)
+    except Exception:
+        logger.critical('Error while Adjusting and Mapping Columns', exc_info=True)
+        raise TransformException
+    else:
+        return domain_dfs
 
 def load_domain(source_database_conn: object,
                 source_database_schema: str,
@@ -252,46 +296,50 @@ def load_domain(source_database_conn: object,
         domain_metadata (str): Target domain metadata
         src_leading_column (str): Leading column for the extraction domain - used to mark error records for retry
     """
+    logger.info('***** Start Loading Session *****')
     tables_metadata = {table['loading_order']: table for table in domain_metadata['tables']}
     loading_order = list(tables_metadata.keys())
     loading_order.sort()
     
     if domain_metadata.get('leading_column'):
         # Retrieving all values for the leading column. All the tables in the domain will be synced at once - one leading value at a time
-        leading_values = list_leading_values(domain_dfs, domain_metadata['leading_column'])
+        leading_column = domain_metadata['leading_column']
+        leading_values = list_leading_values(domain_dfs, leading_column)
         for value in leading_values:
+            logger.info(f'Domain Loading - {leading_column} = {value}')
             try:
                 # Starting loading each table in the domain for the current leading value
                 for i in loading_order:
                     table_name = tables_metadata[i]['table_name']
-                    filtered_df = domain_dfs[table_name].loc[domain_dfs[table_name][domain_metadata['leading_column']] == value] 
+                    filtered_df = domain_dfs[table_name].loc[domain_dfs[table_name][leading_column] == value] 
                     for row in filtered_df.itertuples():
                         upsert_record(target_database_conn, row, tables_metadata[i])                            
             except SQLAlchemyError as e:
-                # Rollbacking all tables loaded for the leading value if any database errors happened
+                # Rollback all tables loaded for the leading value if any database errors happened
                 target_database_conn.rollback()
                 # Marking the leading value that had an error for retry
                 entity_id = {src_leading_column: value}
+                logger.error(f'Domain Loading ERROR - {leading_column} = {value} - Error message: {e}')
                 data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
-                print(e)
             else:        
                 target_database_conn.commit()
     else:
         for i in loading_order:
             table_name = tables_metadata[i]['table_name']
+            logger.info(f'{table_name} Table Loading')
             for row in domain_dfs[table_name].itertuples():
                 try:
                     # Starting loading each table in the domain - one primary key at a time
                     upsert_record(target_database_conn, row, tables_metadata[i])                                               
                 except SQLAlchemyError as e:
-                    # Rollbacking the table loaded for the primary key if any database errors happened
+                    # Rollback the table loaded for the primary key if any database errors happened
                     target_database_conn.rollback()
                     # Marking the primary key that had an error for retry
                     pk_values = meta.build_stm_pk_params(tables_metadata[i], row)
                     entity_id = {tables_metadata[i]['columns'][pk_column]: pk_values[pk_column] for pk_column in pk_values}
+                    logger.error(f'Table Loading ERROR - {table_name} - Entity ID: {entity_id} - Error message: {e}')
                     data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
-                    print(e)
-                else:        
+                else:
                     target_database_conn.commit()
 
 def list_leading_values(domain_dfs: dict,
