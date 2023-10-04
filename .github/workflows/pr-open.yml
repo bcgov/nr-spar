@@ -42,8 +42,7 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
           overwrite: false
-          parameters:
-            -p ZONE=${{ github.event.number }}
+          parameters: -p ZONE=${{ github.event.number }}
             -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
@@ -101,8 +100,7 @@ jobs:
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters:
-              -p MIN_REPLICAS=1
+            parameters: -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
@@ -141,8 +139,7 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
-          parameters:
-            -p ZONE=${{ github.event.number }}
+          parameters: -p ZONE=${{ github.event.number }}
             -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
@@ -172,19 +169,19 @@ jobs:
           working-directory: ./frontend
           browser: chrome
 
-      - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: cypress-screenshots-chrome
-          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/screenshots
-
       - name: Upload videos
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: cypress-videos-chrome
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: cypress-coverage
+          path: /home/runner/work/nr-spar/nr-spar/frontend/coverage
 
   # tests-api:
   #   name: API Tests
