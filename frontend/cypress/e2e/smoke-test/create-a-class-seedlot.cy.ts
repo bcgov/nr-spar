@@ -1,8 +1,6 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
-import {
-  HALF_SECOND, TWO_SECOND, THREE_SECOND, TYPE_DELAY
-} from '../../constants';
+import { TYPE_DELAY } from '../../constants';
 
 describe('Create A Class Seedlot', () => {
   let data: {
@@ -16,10 +14,8 @@ describe('Create A Class Seedlot', () => {
     });
 
     cy.login();
-    cy.visit('/');
-    cy.wait(TWO_SECOND);
-    cy.navigateTo(NavigationLabels.Seedlots);
-    cy.wait(HALF_SECOND);
+    cy.visit('/seedlots');
+    cy.url().should('contains', '/seedlots');
   });
 
   it('should register a Class A Seedlot', () => {
@@ -29,11 +25,7 @@ describe('Create A Class Seedlot', () => {
     cy.get(SeedlotRegistrationSelectors.SeedlotActivitiesCardTitle)
       .contains(SeedlotActivities.RegisterAClass)
       .click();
-    // Clicking the heart icon to enable it
-    cy.toogleFavourite();
-    // To do - validate after to be fixed
-    // Clicking the heart icon to disable it
-    cy.toogleFavourite();
+    cy.url().should('contains', '/register-a-class');
     // To do - validate after to be fixed
     // Enter the applicant agency name
     cy.get('#applicant-info-combobox')
@@ -57,7 +49,6 @@ describe('Create A Class Seedlot', () => {
       .clear()
       .type(data.applicantAgency.email, { delay: TYPE_DELAY });
     // Enter the seedlot species, wait for species data to load
-    cy.wait(THREE_SECOND);
     cy.get('#seedlot-species-combobox')
       .click();
     cy.contains('.bx--list-box__menu-item__option', data.seedlotInformation.species)
@@ -102,14 +93,12 @@ describe('Create A Class Seedlot', () => {
     cy.get('.save-button')
       .find('button')
       .click();
-    cy.wait(THREE_SECOND);
     // To-do Validate seedlot id
     cy.get('.scf-info-container')
       .find('h2')
       .contains(/^Your A class seedlot [0-9]/);
     cy.contains('button', "Go back to seedlot's main screen")
       .click();
-    cy.wait(THREE_SECOND);
     cy.get('.bx--data-table-content').contains(data.seedlotInformation.species);
   });
 });
