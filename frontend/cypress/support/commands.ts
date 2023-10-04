@@ -2,7 +2,7 @@
 /// <reference path="../global.d.ts" />
 
 import {
-  HALF_SECOND, ONE_SECOND, THREE_SECOND, TYPE_DELAY
+  HALF_SECOND, THREE_SECONDS, TYPE_DELAY
 } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
@@ -23,7 +23,8 @@ Cypress.Commands.add('login', () => {
       cy.clearAllLocalStorage();
       cy.clearAllSessionStorage();
       cy.visit('/');
-      cy.wait(ONE_SECOND);
+      // We have to wait here because page might reload again, causing the login to fail
+      cy.wait(THREE_SECONDS);
       cy.getByDataTest('landing-button__bceid').click();
       cy.url().then((url) => {
         if (url.includes('.gov.bc.ca')) {
@@ -56,7 +57,6 @@ Cypress.Commands.add('login', () => {
           );
         }
       });
-      cy.wait(THREE_SECOND);
       cy.getCookies().then((cookies) => {
         cookies.forEach((cookie) => {
           cy.log(cookie.name, cookie.domain, '\n');
@@ -65,10 +65,9 @@ Cypress.Commands.add('login', () => {
     },
     {
       validate: () => {
-        cy.visit('/');
-        cy.wait(THREE_SECOND);
         cy.getCookie('SMSESSION', { domain: '.gov.bc.ca' }).should('exist');
-      }
+      },
+      cacheAcrossSpecs: true
     }
   );
 });
