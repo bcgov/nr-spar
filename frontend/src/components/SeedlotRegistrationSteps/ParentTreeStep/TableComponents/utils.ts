@@ -30,22 +30,26 @@ const cleanRowData = (rowId: string, ptNumber?: string): RowItem => {
   return newRow;
 };
 
+/**
+ * Calculate proportion for each row, then calculate weighted GV for each row
+ */
 const calculateSmpRow = (
   volume: string,
   rowData: RowItem,
-  mixTabData: RowDataDictType
+  mixTabData: RowDataDictType,
+  applicableGenWorths: string[]
 ): RowDataDictType => {
   const clonedData = structuredClone(mixTabData);
 
   // Calculate volume sum
   let volumeSum = 0;
-  Object.values(mixTabData).forEach((row) => {
+  Object.values(clonedData).forEach((row) => {
     volumeSum += Number(row.volume);
   });
 
-  // Update volume for each row
-  Object.values(mixTabData).forEach((row) => {
-    const updatedRow = { ...row };
+  // Update proportion for each row
+  Object.values(clonedData).forEach((row) => {
+    const updatedRow = structuredClone(row);
     if (updatedRow.volume?.length) {
       let rowVolume = updatedRow.rowId === rowData.rowId ? volume : updatedRow.volume;
       rowVolume = rowVolume === '' ? '0' : rowVolume;
@@ -59,6 +63,18 @@ const calculateSmpRow = (
     clonedData[updatedRow.rowId] = updatedRow;
   });
 
+  // Update Weighted GVs only if applicableGenWorths is passed in
+  Object.values(clonedData).forEach((row) => {
+    const updatedRow = structuredClone(row);
+    const { proportion } = updatedRow;
+    if (proportion?.length) {
+      applicableGenWorths.forEach((gw) => {
+        updatedRow[`w_${gw}`] = (Number(updatedRow[gw]) * Number(proportion)).toFixed(3);
+      });
+      clonedData[updatedRow.rowId] = updatedRow;
+    }
+  });
+
   return clonedData;
 };
 
@@ -67,6 +83,7 @@ export const handleInput = (
   rowData: RowItem,
   inputValue: string,
   colName: keyof RowItem,
+  applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
 ) => {
@@ -86,14 +103,14 @@ export const handleInput = (
           rowData.parentTreeNumber
         );
         const rowVolume = Number(rowData.volume).toString();
-        mixTabData = calculateSmpRow(rowVolume, rowData, mixTabData);
+        mixTabData = calculateSmpRow(rowVolume, rowData, mixTabData, applicableGenWorths);
       }
     } else {
       mixTabData[rowData.rowId] = cleanRowData(rowData.rowId);
     }
   }
   if (colName === 'volume') {
-    mixTabData = calculateSmpRow(inputValue, rowData, state.mixTabData);
+    mixTabData = calculateSmpRow(inputValue, rowData, state.mixTabData, applicableGenWorths);
   }
 
   if (rowData.isMixTab) {
@@ -109,6 +126,7 @@ export const handleInput = (
 
 export const deleteMixRow = (
   rowData: RowItem,
+  applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
 ) => {
@@ -116,6 +134,6 @@ export const deleteMixRow = (
   const mixTabData = { ...clonedState.mixTabData };
   delete mixTabData[rowData.rowId];
   const volume = rowData.volume === null ? '0' : rowData.volumel;
-  clonedState.mixTabData = calculateSmpRow(volume, rowData, mixTabData);
+  clonedState.mixTabData = calculateSmpRow(volume, rowData, mixTabData, applicableGenWorths);
   setStepData(clonedState);
 };
