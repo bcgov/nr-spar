@@ -27,7 +27,8 @@ export default defineConfig({
       include: 'src/*',
       exclude: ['node_modules', '__test__'],
       extension: ['.ts', '.tsx'],
-      cypress: true
+      cypress: true,
+      forceBuildInstrument: true
     })
   ],
   build: {
