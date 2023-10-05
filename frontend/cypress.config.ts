@@ -23,6 +23,7 @@ export default defineConfig({
       runMode: 4
     },
     defaultCommandTimeout: TEN_SECONDS,
+    video: true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
       require('@cypress/code-coverage/task')(on, config);
