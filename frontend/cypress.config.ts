@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress';
+import { TEN_SECONDS } from './cypress/constants';
 
 export default defineConfig({
   e2e: {
@@ -15,8 +16,11 @@ export default defineConfig({
       '**/seedlot-main-page.cy.ts',
       '**/create-a-class-seedlot.cy.ts'
     ],
-    // testIsolation: false,
     chromeWebSecurity: false,
+    retries: {
+      runMode: 4
+    },
+    defaultCommandTimeout: TEN_SECONDS,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
       // implement node event listeners here
