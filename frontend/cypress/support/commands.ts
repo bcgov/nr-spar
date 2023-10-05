@@ -37,7 +37,7 @@ Cypress.Commands.add('login', () => {
           cy.get('input[name=btnSubmit]').click();
         } else {
           cy.origin(
-            Cypress.env('keycloakLoginUrl'),
+            Cypress.env('loginUrl'),
             { args: config },
             (
               {

@@ -208,9 +208,6 @@ jobs:
   #           -e oracle-api/test/postman/oracle-api.postman_environment.json \
   #           --env-var "apiAddr=${{ env.TARGET }}" \
   #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-  #           --env-var "authServer=${{ secrets.KEYCLOAK_SERVER_REALM }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_NAME }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
 
   # tests-backend:
   #   name: Backend Tests
@@ -235,10 +232,7 @@ jobs:
   #         newman run backend/test/postman/starting-api.postman_collection.json \
   #           -e backend/test/postman/starting-api.postman_environment.json \
   #           --env-var "apiAddr=${{ env.TARGET }}" \
-  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-  #           --env-var "authServer=${{ vars.KEYCLOAK_SERVER_REALM }}" \
-  #           --env-var "authClient=${{ vars.KC_SERVICE_ACCOUNT_NAME }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
+  #           --env-var "releaseVer=snapshot-${{ github.event.number }}"
 
   # tests-frontend:
   #   name: Frontend Tests

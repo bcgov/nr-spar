@@ -43,7 +43,7 @@ test and deploy.
 - Styling
   - Carbon Design System
 - Authentication
-  - Keycloak
+  - FAM
 
 # Getting started
 

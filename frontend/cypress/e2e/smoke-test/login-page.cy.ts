@@ -32,7 +32,7 @@ describe('Login page test', () => {
       if (url.includes('.gov.bc.ca')) {
         cy.get('#idirLogo', { timeout: 5000 }).should('be.visible');
       } else {
-        cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
+        cy.origin(Cypress.env('loginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
           cy.get('#idirLogo', { timeout }).should('be.visible');
         });
       }
@@ -47,7 +47,7 @@ describe('Login page test', () => {
       if (url.includes('.gov.bc.ca')) {
         cy.get('#bceidLogo', { timeout: 5000 }).should('be.visible');
       } else {
-        cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
+        cy.origin(Cypress.env('loginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
           cy.get('#bceidLogo', { timeout }).should('be.visible');
         });
       }

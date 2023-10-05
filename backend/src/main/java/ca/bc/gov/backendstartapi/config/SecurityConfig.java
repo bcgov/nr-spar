@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -16,9 +15,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-
-  @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
-  String jwkSetUri;
 
   /**
    * Filters a request to add security checks and configurations.
