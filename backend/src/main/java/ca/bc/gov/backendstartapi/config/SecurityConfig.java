@@ -29,28 +29,6 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    /*
-    http.cors(Customizer.withDefaults())
-        .csrf(
-            customize ->
-                customize.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-        .authorizeHttpRequests(
-            customize ->
-                customize
-                    .requestMatchers("/api/**")
-                    .authenticated()
-                    .requestMatchers(HttpMethod.OPTIONS, "/**")
-                    .permitAll()
-                    .anyRequest()
-                    .permitAll())
-        .httpBasic(AbstractHttpConfigurer::disable)
-        .formLogin(AbstractHttpConfigurer::disable)
-        .oauth2ResourceServer(
-            customize ->
-                customize.jwt(
-                    jwt -> jwt.jwtAuthenticationConverter(converter()).jwkSetUri(jwkSetUri)));
-    */
-
     http.cors(Customizer.withDefaults())
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
@@ -67,41 +45,4 @@ public class SecurityConfig {
 
     return http.build();
   }
-
-  /*
-  private Converter<Jwt, AbstractAuthenticationToken> converter() {
-    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-    converter.setJwtGrantedAuthoritiesConverter(roleConverter);
-    return converter;
-  }
-  */
-
-  /*
-   * Parse the roles of a client from the JWT, if they're present; if not, subjects with service
-   * accounts are granted read and write permissions.
-   */
-  /*
-  private final Converter<Jwt, Collection<GrantedAuthority>> roleConverter =
-      jwt -> {
-        if (!jwt.getClaims().containsKey("client_roles")) {
-          String sub = String.valueOf(jwt.getClaims().get("sub"));
-          return (sub.startsWith("service-account-nr-fsa"))
-              ? List.of(
-                  new SimpleGrantedAuthority("ROLE_user_read"),
-                  new SimpleGrantedAuthority("ROLE_user_write"))
-              : List.of();
-        }
-        Object clientRolesObj = jwt.getClaims().get("client_roles");
-        final List<String> realmAccess = new ArrayList<>();
-        if (clientRolesObj instanceof List<?> list) {
-          for (Object item : list) {
-            realmAccess.add(String.valueOf(item));
-          }
-        }
-        return realmAccess.stream()
-            .map(roleName -> "ROLE_" + roleName)
-            .map(roleName -> (GrantedAuthority) new SimpleGrantedAuthority(roleName))
-            .toList();
-      };
-  */
 }
