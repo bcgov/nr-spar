@@ -1,4 +1,4 @@
-window.global ||= window;
+import './init';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ClassPrefix } from '@carbon/react';
