@@ -35,17 +35,14 @@ export default defineConfig({
     outDir: 'build'
   },
   server: {
-    port: 3000
+    port: 3000,
+    watch: {
+      ignored: ['**/coverage/**']
+    }
   },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
-  },
-  test: {
-    coverage: {
-      provider: 'v8',
-      reporter: ['lcov', 'cobertura', 'html']
     }
   }
 });
