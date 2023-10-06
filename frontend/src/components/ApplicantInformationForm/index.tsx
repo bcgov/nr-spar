@@ -9,6 +9,7 @@ import {
   RadioButtonGroup,
   RadioButton,
   Checkbox,
+  CheckboxGroup,
   Button,
   ComboBox,
   TextInputSkeleton,
@@ -375,30 +376,32 @@ const ApplicantInformationForm = () => {
         </Row>
         <Row className="registered-checkbox">
           <Column sm={4} md={8} lg={16}>
-            <label htmlFor="registered-tree-seed-center" className="bcgov--label">
-              To be registered?
-            </label>
-            <Checkbox
-              id="registered-tree-seed-center"
-              name="registered"
-              labelText="Yes, to be registered with the Tree Seed Centre"
-              defaultChecked
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerCheckboxes(e)}
-            />
+            <CheckboxGroup legendText="To be registered?">
+              <Checkbox
+                id="registered-tree-seed-center"
+                name="registered"
+                labelText="Yes, to be registered with the Tree Seed Centre"
+                defaultChecked
+                onChange={
+                  (e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerCheckboxes(e)
+                }
+              />
+            </CheckboxGroup>
           </Column>
         </Row>
         <Row className="collected-checkbox">
           <Column sm={4} md={8} lg={16}>
-            <label htmlFor="collected-bc" className="bcgov--label">
-              Collected from B.C. source?
-            </label>
-            <Checkbox
-              id="collected-bc"
-              name="collectedBC"
-              labelText="Yes, collected from a location within B.C."
-              defaultChecked
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerCheckboxes(e)}
-            />
+            <CheckboxGroup legendText="Collected from B.C. source?">
+              <Checkbox
+                id="collected-bc"
+                name="collectedBC"
+                labelText="Yes, collected from a location within B.C."
+                defaultChecked
+                onChange={
+                  (e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerCheckboxes(e)
+                }
+              />
+            </CheckboxGroup>
           </Column>
         </Row>
         <Row className="save-button">
