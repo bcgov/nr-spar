@@ -1,5 +1,5 @@
 @use '@carbon/type';
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .single-owner-info-container {
   padding: 1rem;
@@ -41,10 +41,6 @@
 
   .#{vars.$bcgov-prefix}--list-box__menu-item--active {
     background-color: var(--#{vars.$bcgov-prefix}-layer-hover-02);
-  }
-
-  .#{vars.$bcgov-prefix}--label--disabled {
-    color: var(--#{vars.$bcgov-prefix}-text-secondary);
   }
 
   .#{vars.$bcgov-prefix}--form__helper-text--disabled {
