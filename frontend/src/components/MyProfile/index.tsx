@@ -35,19 +35,20 @@ const accountOptions = [
 
 const MyProfile = () => {
   const { theme, setTheme } = useThemePreference();
-  const { user } = useContext(AuthContext);
+  const { user, signOut } = useContext(AuthContext);
 
   const [goToURL, setGoToURL] = useState<string>('');
   const [goTo, setGoTo] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
-  const goOut = useCallback(() => {
+  const goOut = useCallback(async () => {
     if (theme === 'g100') {
       setTheme('g10');
       localStorage.setItem('mode', 'light');
     }
-    navigate('/logout');
+    
+    await signOut();
   }, []);
 
   const changeTheme = () => {

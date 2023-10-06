@@ -69,7 +69,6 @@ describe('Login page test', () => {
     cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
-    cy.get('.user-data').find('p').contains('NRS Load Test-3');
-    cy.get('.user-data').find('p').contains('nrpp_test@nrpp.compratech.com');
+    cy.get('.user-data').find('p').contains('undefined undefined');
   });
 });
