@@ -1,35 +1,39 @@
 @use 'sass:map';
 @use '@carbon/themes/scss/utilities';
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/light-theme.scss' as light;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/dark-theme.scss' as dark;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/colors.scss' as colors;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/type-family.scss' as types;
+@use '@bcgov-nr/nr-theme/design-tokens/light-theme.scss' as light;
+@use '@bcgov-nr/nr-theme/design-tokens/dark-theme.scss' as dark;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@bcgov-nr/nr-theme/design-tokens/type-family.scss' as types;
 
-@use '@bcgov-nr/nr-fsa-theme/style-sheets/carbon-components-overrides.scss';
+@use '@bcgov-nr/nr-theme/style-sheets/carbon-components-overrides.scss';
 
-@use '@carbon/type/scss/_font-family.scss' with ($font-families: types.$type-family,
-  $font-weights: types.$font-weights );
+@use '@carbon/type/scss/_font-family.scss' with (
+  $font-families: types.$type-family,
+  $font-weights: types.$font-weights
+);
 
 // Set the correct light theme
 @use '@carbon/react/scss/themes';
-@use '@carbon/react/scss/theme' with ($fallback: themes.$white,
-  $theme: (light.$light-theme));
+@use '@carbon/react/scss/theme' with (
+  $fallback: themes.$white,
+  $theme: (light.$light-theme)
+);
 
 // Buttons, tags and notifications components tokens doesn't work properly
 // when setting directly on the theme, so we override the tokens directly
 // on the components
 // (Open issue: https://github.com/carbon-design-system/carbon/issues/12376)
 @use '@carbon/react/scss/components/button/tokens' as button-tokens;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/light-buttons.scss' as light-button-overrides;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/dark-buttons.scss' as dark-button-overrides;
+@use '@bcgov-nr/nr-theme/design-tokens/light-buttons.scss' as light-button-overrides;
+@use '@bcgov-nr/nr-theme/design-tokens/dark-buttons.scss' as dark-button-overrides;
 
 @use '@carbon/react/scss/components/tag/tokens' as tag-tokens;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/light-tags.scss' as light-tag-overrides;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/dark-tags.scss' as dark-tag-overrides;
+@use '@bcgov-nr/nr-theme/design-tokens/light-tags.scss' as light-tag-overrides;
+@use '@bcgov-nr/nr-theme/design-tokens/dark-tags.scss' as dark-tag-overrides;
 
 @use '@carbon/react/scss/components/notification/tokens' as notification-tokens;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/light-notifications.scss' as light-notification-overrides;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/dark-notifications.scss' as dark-notification-overrides;
+@use '@bcgov-nr/nr-theme/design-tokens/light-notifications.scss' as light-notification-overrides;
+@use '@bcgov-nr/nr-theme/design-tokens/dark-notifications.scss' as dark-notification-overrides;
 
 @use '@carbon/react';
 @use '@carbon/grid';

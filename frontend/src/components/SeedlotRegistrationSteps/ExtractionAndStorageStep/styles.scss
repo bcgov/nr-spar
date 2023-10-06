@@ -1,7 +1,7 @@
 @use '@carbon/type';
 // Light Theme/Notifications/$notification-info-background
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/colors.scss' as colors;
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .seedlot-registration-forms.#{vars.$bcgov-prefix}--row {
   padding-top: 0;
