@@ -220,7 +220,7 @@ public class SeedlotEndpoint {
         })
   public Optional<Seedlot> getSingleSeedlotInfo(
       @Parameter(
-              name = "id",
+              name = "seedlotNumber",
               in = ParameterIn.PATH,
               description = "Seedlot ID",
               required = true,
