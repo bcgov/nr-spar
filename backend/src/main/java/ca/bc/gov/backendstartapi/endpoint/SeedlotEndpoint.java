@@ -23,7 +23,6 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -217,7 +216,7 @@ public class SeedlotEndpoint {
         @ApiResponse(
             responseCode = "404",
             description = "Could not find information for the given seedlot number")
-        })
+      })
   public Optional<Seedlot> getSingleSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
