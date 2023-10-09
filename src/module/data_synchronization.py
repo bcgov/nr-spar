@@ -11,7 +11,7 @@ from typing import Tuple
 from os import listdir, path
 from datetime import timedelta
 from sqlalchemy.exc import SQLAlchemyError
-from module.custom_exception import TransformException
+from module.custom_exception import TransformException, LoadException, ExtractException
 
 logger = logging.getLogger(__name__)
 
@@ -50,12 +50,18 @@ def data_sync():
                     logger.info(f'Sync {domain_name} Domain ({i}/{len(domain_loading_order)})')
                     sync_domain(source_db_conn, source_db_config['schema'], target_db_conn, domain_folder_path, domain_name)
         
+        except ExtractException:
+            data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
+            logger.critical('ExtractException - A fatal error has occurred during data extraction')
         except TransformException:
             data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
-            logger.critical('TransformException - A fatal error has occured during data transformation')
+            logger.critical('TransformException - A fatal error has occurred during data transformation')
+        except LoadException:
+            data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
+            logger.critical('LoadException - A fatal error has occurred during data loading')
         except Exception:
             data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
-            logger.critical('A fatal error has occured', exc_info = True)
+            logger.critical('A fatal error has occurred', exc_info = True)
         else:        
             data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Completed')
     
@@ -124,71 +130,75 @@ def extract_domain(database_conn: object,
     logger.info('***** Start Extraction Session *****')
     domain_dfs = {}
     
-    # Getting metadata for each extraction table defined in the domain metadata
-    tables_metadata = {table['file_name'].split('.')[0]: table for table in domain_metadata['tables'] if table['query_type'] == 'extract'}
-    # Getting incremental data to be used in the extraction
-    incremental_dt = data_sync_ctl.get_incrementa_dt(database_conn, database_schema)
-    params = {'incremental_dt': incremental_dt}
+    try:
+        # Getting metadata for each extraction table defined in the domain metadata
+        tables_metadata = {table['file_name'].split('.')[0]: table for table in domain_metadata['tables'] if table['query_type'] == 'extract'}
+        # Getting incremental data to be used in the extraction
+        incremental_dt = data_sync_ctl.get_incrementa_dt(database_conn, database_schema)
+        params = {'incremental_dt': incremental_dt}
+            
+        for table_name in tables_metadata:
+            logger.info(f'{table_name} Table Extraction')
+            # Extracting all data using incremental date from last completed execution
+            table_df = pd.read_sql(meta.get_inc_dt_qry_from_file(tables_metadata[table_name],
+                                                                path.abspath(path.join(query_files_path, 
+                                                                                        tables_metadata[table_name]['file_name']))), 
+                                database_conn.engine,
+                                params = params)
         
-    for table_name in tables_metadata:
-        logger.info(f'{table_name} Table Extraction')
-        # Extracting all data using incremental date from last completed execution
-        table_df = pd.read_sql(meta.get_inc_dt_qry_from_file(tables_metadata[table_name],
-                                                             path.abspath(path.join(query_files_path, 
-                                                                                    tables_metadata[table_name]['file_name']))), 
-                               database_conn.engine,
-                               params = params)
-    
-        if domain_metadata.get('leading_column'):
-            # Extracting records that had some errors and were marked for retry based on the leading column defined for the domain
-            retry_df = extract_retry_records(database_conn,
-                                             database_schema,
-                                             domain_name,
-                                             meta.get_retry_records_qry_from_file(tables_metadata[table_name],
-                                                                                  path.abspath(path.join(query_files_path, 
-                                                                                                         tables_metadata[table_name]['file_name']))))
-        else:
-            # Extracting records that had some errors and were marked for retry based on the table's primary key
-            retry_df = extract_retry_records(database_conn,
-                                             database_schema,
-                                             table_name.lower(),
-                                             meta.get_retry_records_qry_from_file(tables_metadata[table_name],
-                                                                                  path.abspath(path.join(query_files_path, 
-                                                                                                         tables_metadata[table_name]['file_name']))))
-        # Adding extracted table data to the dictionary
-        domain_dfs[table_name] = pd.concat([table_df, retry_df]).reset_index(drop=True)
-        logger.info(f'{len(domain_dfs[table_name].index)} rows extracted')
-    
-    # Getting metadata for each stagging/lookup table defined in the domain metadata 
-    stagings_metadata = {table['file_name'].split('.')[0]: table for table in domain_metadata['tables'] if table['query_type'] in ('staging', 'lookup')}
-    staging_dfs = {}   
-    
-    for table_name in stagings_metadata:
-        logger.info(f'{table_name} Lookup/Stage Table Extract')
-        stg_table_df = pd.DataFrame()
-        if stagings_metadata[table_name]['query_type'] == 'lookup' or not(domain_metadata.get('leading_column')):
-            # Getting all data from lookup table - no filters applied
-            stg_table_df = pd.read_sql(meta.get_query_from_file(path.abspath(path.join(query_files_path,
-                                                                                       stagings_metadata[table_name]['file_name']))), 
-                                       database_conn.engine)
-        else:
-            # Getting all leading values driving the domain sync
-            leading_values = list_leading_values(domain_dfs, domain_metadata['leading_column'])
-            for value in leading_values:
-                params = {domain_metadata['leading_column']: value}
-                # Fetching table data filtering the leading column by each leading value
-                df = pd.read_sql(meta.get_staging_records_qry_from_file(stagings_metadata[table_name],
-                                                                        path.abspath(path.join(query_files_path,
-                                                                                               stagings_metadata[table_name]['file_name']))),
-                                 database_conn.engine,
-                                 params=params)
-                stg_table_df = pd.concat([stg_table_df, df]).reset_index(drop=True)
+            if domain_metadata.get('leading_column'):
+                # Extracting records that had some errors and were marked for retry based on the leading column defined for the domain
+                retry_df = extract_retry_records(database_conn,
+                                                database_schema,
+                                                domain_name,
+                                                meta.get_retry_records_qry_from_file(tables_metadata[table_name],
+                                                                                    path.abspath(path.join(query_files_path, 
+                                                                                                            tables_metadata[table_name]['file_name']))))
+            else:
+                # Extracting records that had some errors and were marked for retry based on the table's primary key
+                retry_df = extract_retry_records(database_conn,
+                                                database_schema,
+                                                table_name.lower(),
+                                                meta.get_retry_records_qry_from_file(tables_metadata[table_name],
+                                                                                    path.abspath(path.join(query_files_path, 
+                                                                                                            tables_metadata[table_name]['file_name']))))
+            # Adding extracted table data to the dictionary
+            domain_dfs[table_name] = pd.concat([table_df, retry_df]).reset_index(drop=True)
+            logger.info(f'{len(domain_dfs[table_name].index)} rows extracted')
         
-        logger.info(f'{len(stg_table_df.index)} rows extracted')
-        # Adding extracted staging and lookup table data to the dictionary
-        staging_dfs[table_name] = stg_table_df
-
-    return domain_dfs, staging_dfs
+        # Getting metadata for each stagging/lookup table defined in the domain metadata 
+        stagings_metadata = {table['file_name'].split('.')[0]: table for table in domain_metadata['tables'] if table['query_type'] in ('staging', 'lookup')}
+        staging_dfs = {}   
+        
+        for table_name in stagings_metadata:
+            logger.info(f'{table_name} Lookup/Stage Table Extract')
+            stg_table_df = pd.DataFrame()
+            if stagings_metadata[table_name]['query_type'] == 'lookup' or not(domain_metadata.get('leading_column')):
+                # Getting all data from lookup table - no filters applied
+                stg_table_df = pd.read_sql(meta.get_query_from_file(path.abspath(path.join(query_files_path,
+                                                                                        stagings_metadata[table_name]['file_name']))), 
+                                        database_conn.engine)
+            else:
+                # Getting all leading values driving the domain sync
+                leading_values = list_leading_values(domain_dfs, domain_metadata['leading_column'])
+                for value in leading_values:
+                    params = {domain_metadata['leading_column']: value}
+                    # Fetching table data filtering the leading column by each leading value
+                    df = pd.read_sql(meta.get_staging_records_qry_from_file(stagings_metadata[table_name],
+                                                                            path.abspath(path.join(query_files_path,
+                                                                                                stagings_metadata[table_name]['file_name']))),
+                                    database_conn.engine,
+                                    params=params)
+                    stg_table_df = pd.concat([stg_table_df, df]).reset_index(drop=True)
+            
+            logger.info(f'{len(stg_table_df.index)} rows extracted')
+            # Adding extracted staging and lookup table data to the dictionary
+            staging_dfs[table_name] = stg_table_df
+    except:
+        logger.critical('Error extracting data', exc_info=True)
+        raise ExtractException
+    else:
+        return domain_dfs, staging_dfs
 
 def extract_retry_records(database_conn: object,
                           database_schema: str,
@@ -307,40 +317,46 @@ def load_domain(source_database_conn: object,
         leading_values = list_leading_values(domain_dfs, leading_column)
         for value in leading_values:
             logger.info(f'Domain Loading - {leading_column} = {value}')
-            try:
-                # Starting loading each table in the domain for the current leading value
-                for i in loading_order:
-                    table_name = tables_metadata[i]['table_name']
-                    filtered_df = domain_dfs[table_name].loc[domain_dfs[table_name][leading_column] == value] 
-                    for row in filtered_df.itertuples():
-                        upsert_record(target_database_conn, row, tables_metadata[i])                            
-            except SQLAlchemyError as e:
-                # Rollback all tables loaded for the leading value if any database errors happened
-                target_database_conn.rollback()
-                # Marking the leading value that had an error for retry
-                entity_id = {src_leading_column: value}
-                logger.error(f'Domain Loading ERROR - {leading_column} = {value} - Error message: {e}')
-                data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
-            else:        
-                target_database_conn.commit()
+            if target_database_conn.health_check():
+                try:
+                    # Starting loading each table in the domain for the current leading value
+                    for i in loading_order:
+                        table_name = tables_metadata[i]['table_name']
+                        filtered_df = domain_dfs[table_name].loc[domain_dfs[table_name][leading_column] == value] 
+                        for row in filtered_df.itertuples():
+                            upsert_record(target_database_conn, row, tables_metadata[i])                            
+                except SQLAlchemyError as e:
+                    # Rollback all tables loaded for the leading value if any database errors happened
+                    target_database_conn.rollback()
+                    # Marking the leading value that had an error for retry
+                    entity_id = {src_leading_column: value}
+                    logger.error(f'Domain Loading ERROR - {leading_column} = {value} - Error message: {e}')
+                    data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
+                else:        
+                    target_database_conn.commit()
+            else:
+                raise LoadException
     else:
         for i in loading_order:
             table_name = tables_metadata[i]['table_name']
             logger.info(f'{table_name} Table Loading')
-            for row in domain_dfs[table_name].itertuples():
-                try:
-                    # Starting loading each table in the domain - one primary key at a time
-                    upsert_record(target_database_conn, row, tables_metadata[i])                                               
-                except SQLAlchemyError as e:
-                    # Rollback the table loaded for the primary key if any database errors happened
-                    target_database_conn.rollback()
-                    # Marking the primary key that had an error for retry
-                    pk_values = meta.build_stm_pk_params(tables_metadata[i], row)
-                    entity_id = {tables_metadata[i]['columns'][pk_column]: pk_values[pk_column] for pk_column in pk_values}
-                    logger.error(f'Table Loading ERROR - {table_name} - Entity ID: {entity_id} - Error message: {e}')
-                    data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
-                else:
-                    target_database_conn.commit()
+            if target_database_conn.health_check():
+                for row in domain_dfs[table_name].itertuples():
+                    try:
+                        # Starting loading each table in the domain - one primary key at a time
+                        upsert_record(target_database_conn, row, tables_metadata[i])                                               
+                    except SQLAlchemyError as e:
+                        # Rollback the table loaded for the primary key if any database errors happened
+                        target_database_conn.rollback()
+                        # Marking the primary key that had an error for retry
+                        pk_values = meta.build_stm_pk_params(tables_metadata[i], row)
+                        entity_id = {tables_metadata[i]['columns'][pk_column]: pk_values[pk_column] for pk_column in pk_values}
+                        logger.error(f'Table Loading ERROR - {table_name} - Entity ID: {entity_id} - Error message: {e}')
+                        data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
+                    else:
+                        target_database_conn.commit()
+            else:
+                raise LoadException
 
 def list_leading_values(domain_dfs: dict,
                         leading_column: str) -> list:
