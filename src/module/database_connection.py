@@ -1,14 +1,17 @@
+import logging
 import cx_Oracle
-import psycopg2
 from sqlalchemy import create_engine, text
+
+logger = logging.getLogger(__name__)
 
 class database_connection(object):
     """ Class used to control database connections. """
     def __init__(self, database_config: str):
-        self.conn_string = self.format_connection_string(database_config)
-        self.engine = None
         self.conn = None
-        
+        self.engine = None
+        self.database_type = database_config['type']
+        self.conn_string = self.format_connection_string(database_config)
+
     def __enter__(self):
         self.engine = create_engine(self.conn_string)
         self.conn = self.engine.connect().execution_options(autocommit=False)
@@ -25,6 +28,20 @@ class database_connection(object):
         """ Runs a SQL statement. """
         result = self.conn.execute(text(query), params)
         return result
+        
+    def health_check(self) -> bool:
+        """ Runs a simple query to check if database is still active/working. """
+        query = 'SELECT 1' 
+        if self.database_type == 'ORACLE':
+            query = ' '.join([query, 'FROM DUAL'])
+        
+        try:            
+            self.conn.execute(text(query))
+        except:
+            logger.critical('Connection health check resulted in an error', exc_info=True)
+            return False
+        else:
+            return True
     
     def commit(self):
         """ Runs a SQL statement. """
