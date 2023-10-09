@@ -1,4 +1,4 @@
-import { FIVE_SECOND, HALF_SECOND, TWO_SECOND } from '../../constants';
+import { FIVE_SECONDS, HALF_SECOND, TWO_SECONDS } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
 
 describe('Dashboard page test', () => {
@@ -15,12 +15,10 @@ describe('Dashboard page test', () => {
     });
     cy.login();
     cy.visit('/');
-    cy.wait(TWO_SECOND);
+    cy.url().should('contains', '/dashboard');
   });
 
   it('dashboard page is displayed and loads correctly', () => {
-    cy.wait(FIVE_SECOND);
-
     cy.isPageTitle(NavigationLabels.Dashboard);
     cy.get('.title-section')
       .find('.subtitle-section')
@@ -41,7 +39,7 @@ describe('Dashboard page test', () => {
     cy.get('.title-favourite')
       .find('.bx--popover-container')
       .click();
-    cy.wait(TWO_SECOND);
+    cy.wait(TWO_SECONDS);
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
     cy.wait(HALF_SECOND);
@@ -62,7 +60,7 @@ describe('Dashboard page test', () => {
     cy.get('.title-favourite')
       .find('.bx--popover-container')
       .click();
-    cy.wait(TWO_SECOND);
+    cy.wait(TWO_SECONDS);
 
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
@@ -89,7 +87,7 @@ describe('Dashboard page test', () => {
     cy.get('.title-favourite')
       .find('.bx--popover-container')
       .click();
-    cy.wait(TWO_SECOND);
+    cy.wait(TWO_SECONDS);
 
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
