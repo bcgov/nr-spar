@@ -25,10 +25,9 @@ export default defineConfig({
     react(),
     istanbul({
       include: 'src/*',
-      exclude: ['node_modules', '__test__'],
+      exclude: ['node_modules', '__test__', 'mock_server', 'assets'],
       extension: ['.ts', '.tsx'],
-      cypress: true,
-      forceBuildInstrument: true
+      cypress: true
     })
   ],
   build: {
