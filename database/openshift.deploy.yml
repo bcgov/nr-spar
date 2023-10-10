@@ -54,7 +54,7 @@ objects:
   - kind: ConfigMap
     apiVersion: v1
     metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}-configs
+      name: ${NAME}-${ZONE}-${COMPONENT}-config
     data:
       postgresql.conf: |
         # -----------------------------
