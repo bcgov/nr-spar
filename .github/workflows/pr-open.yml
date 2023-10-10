@@ -145,43 +145,80 @@ jobs:
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path}}
 
-  tests-javascript:
-    name: JavaScript CI
+  cypress-test-coverage:
+    name: Cypress Test and Coverage
     needs: [deploys]
     runs-on: ubuntu-22.04
     env:
-      CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
-      LOG_LEVEL: debug
-      VITE_NRSPARWEBAPP_VERSION: dev
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_KC_CLIENT_ID: seed-planning-test-4296
       VITE_KC_REALM: standard
       VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
+      VITE_NRSPARWEBAPP_VERSION: dev
     steps:
       - uses: actions/checkout@v4
-      - uses: cypress-io/github-action@v6
-        name: Cypress run
+      - name: Run Cypress CI
+        uses: bcgov-nr/action-test-and-analyse@v1.0.0
         with:
-          config: chromeWebSecurity=false,pageLoadTimeout=10000
-          working-directory: ./frontend
-          browser: chrome
-
+          node_version: "18.16.0"
+          commands: |
+            npm i
+            npm run cy:ci
+          dir: frontend
       - name: Upload videos
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: cypress-videos-chrome
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/
-
       - name: Upload coverage
         uses: actions/upload-artifact@v3
         if: success()
         with:
           name: cypress-coverage
           path: /home/runner/work/nr-spar/nr-spar/frontend/coverage
+
+  # TODO: uncomment
+  # tests-javascript:
+  #   name: JavaScript CI
+  #   needs: [deploys]
+  #   runs-on: ubuntu-22.04
+  #   env:
+  #     CYPRESS_baseUrl: https://${{ github.event.repository.name }}-${{ github.event.number }}-frontend.apps.silver.devops.gov.bc.ca
+  #     CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+  #     CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+  #     LOG_LEVEL: debug
+  #     VITE_NRSPARWEBAPP_VERSION: dev
+  #     VITE_SERVER_URL: https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca
+  #     VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
+  #     VITE_KC_CLIENT_ID: seed-planning-test-4296
+  #     VITE_KC_REALM: standard
+  #     VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: cypress-io/github-action@v6
+  #       name: Cypress run
+  #       with:
+  #         config: chromeWebSecurity=false,pageLoadTimeout=10000
+  #         working-directory: ./frontend
+  #         browser: chrome
+
+  #     - name: Upload videos
+  #       uses: actions/upload-artifact@v3
+  #       if: always()
+  #       with:
+  #         name: cypress-videos-chrome
+  #         path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/
+
+  #     - name: Upload coverage
+  #       uses: actions/upload-artifact@v3
+  #       if: success()
+  #       with:
+  #         name: cypress-coverage
+  #         path: /home/runner/work/nr-spar/nr-spar/frontend/coverage
 
   # tests-api:
   #   name: API Tests
