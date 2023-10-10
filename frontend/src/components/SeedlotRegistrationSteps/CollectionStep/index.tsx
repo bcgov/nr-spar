@@ -8,6 +8,7 @@ import {
   Row,
   NumberInput,
   ComboBox,
+  CheckboxGroup,
   Checkbox,
   DatePickerInput,
   DatePicker,
@@ -496,8 +497,9 @@ const CollectionStep = (
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>
-          <fieldset>
-            <Subtitle text={fieldsConfig.collectionMethodOptionsLabel} />
+          <CheckboxGroup
+            legendText={fieldsConfig.collectionMethodOptionsLabel}
+          >
             {
               collectionMethods.map((method) => (
                 <Checkbox
@@ -511,9 +513,8 @@ const CollectionStep = (
                   onChange={() => collectionMethodsCheckboxes(method.code)}
                 />
               ))
-
             }
-          </fieldset>
+          </CheckboxGroup>
         </Column>
         {
         // Commenting this for now until we decide how to deal
