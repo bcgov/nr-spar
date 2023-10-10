@@ -928,9 +928,6 @@ objects:
             - name: ${NAME}-${ZONE}-${COMPONENT}-config
               configMap:
                 name: ${NAME}-${ZONE}-${COMPONENT}-config
-                items:
-                  - key: postgresql.conf
-                    path: postgresql.conf
           containers:
             - name: ${NAME}
               image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
@@ -988,8 +985,11 @@ objects:
                 - name: ${NAME}-${ZONE}-${COMPONENT}
                   mountPath: ${PVC_MOUNT_PATH}
                 - name: ${NAME}-${ZONE}-${COMPONENT}-config
-                  mountPath: /var/lib/postgresql/postgresql.conf
+                  mountPath: ${PVC_MOUNT_PATH}/data/postgresql.conf
                   subPath: postgresql.conf
+              args:
+                - "-c"
+                - "config_file=/var/lib/postgresql/data/postgresql.conf"
               terminationMessagePath: "/dev/termination-log"
               terminationMessagePolicy: File
               imagePullPolicy: Always
