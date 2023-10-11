@@ -24,19 +24,18 @@ export default defineConfig({
     },
     react(),
     istanbul({
-      include: 'src/*',
-      exclude: ['node_modules', '__test__', 'mock_server', 'assets'],
       extension: ['.ts', '.tsx'],
       cypress: true
     })
   ],
   build: {
-    outDir: 'build'
+    outDir: 'build',
+    sourcemap: true
   },
   server: {
     port: 3000,
     watch: {
-      ignored: ['**/coverage/**', '**/cypress/**']
+      ignored: ['**/coverage/**', '**/cypress-coverage/**', '**/cypress/**']
     }
   },
   resolve: {
