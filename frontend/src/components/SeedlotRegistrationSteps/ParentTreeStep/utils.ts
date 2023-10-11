@@ -150,6 +150,9 @@ export const calcMixTabInfoItems = (
   disableOptions: boolean,
   summaryConfig: Record<string, any>,
   setSummaryConfig: Function,
+  applicableGenWorths: string[],
+  weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
+  setWeightedGwInfoItems: Function,
   state: ParentTreeStepDataObj
 ) => {
   if (!disableOptions) {
@@ -163,6 +166,15 @@ export const calcMixTabInfoItems = (
     modifiedSummaryConfig.mixTab.infoItems.totalVolume.value = calcSum(tableRows, 'volume');
 
     setSummaryConfig(modifiedSummaryConfig);
+
+    // Calculate the sum of each weighted gw value
+    const modifiedWeightedGwInfoItems = { ...weightedGwInfoItems };
+    applicableGenWorths.forEach((gw) => {
+      const weightedId = `w_${gw}`;
+      const sumWeighted = calcSum(tableRows, weightedId);
+      modifiedWeightedGwInfoItems[gw].value = Number(sumWeighted).toFixed(3);
+    });
+    setWeightedGwInfoItems(modifiedWeightedGwInfoItems);
   }
 };
 
@@ -328,11 +340,13 @@ export const configHeaderOpt = (
   setGenWorthInfoItems: Function,
   setHeaderConfig: Function,
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
-  setWeightedGwInfoItems: Function
+  setWeightedGwInfoItems: Function,
+  setApplicableGenWorths: Function
 ) => {
   const speciesHasGenWorth = Object.keys(geneticWorthDict);
   if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
     const availableOptions = geneticWorthDict[seedlotSpecies.code];
+    setApplicableGenWorths(availableOptions);
     const clonedHeaders = structuredClone(headerConfig);
     let clonedGwItems = structuredClone(genWorthInfoItems);
     let clonedWeightedGwItems = structuredClone(weightedGwInfoItems);
@@ -481,7 +495,13 @@ export const addNewMixRow = (state: ParentTreeStepDataObj, setStepData: Function
   setStepData(clonedState);
 };
 
-const updateProportion = (tableDataObj: RowDataDictType): RowDataDictType => {
+/**
+ * Update proportions and relavent weighted GW values.
+ */
+const updateCalculations = (
+  tableDataObj: RowDataDictType,
+  applicableGenWorths: string[]
+): RowDataDictType => {
   const clonedTable = structuredClone(tableDataObj);
   const tableRows = Object.values(clonedTable);
 
@@ -494,6 +514,10 @@ const updateProportion = (tableDataObj: RowDataDictType): RowDataDictType => {
       const { rowId, volume } = row;
       const proportion = (Number(volume) / sum).toFixed(3);
       clonedTable[rowId].proportion = proportion;
+      // Update relavent weighted gw
+      applicableGenWorths.forEach((gw) => {
+        clonedTable[rowId][`w_${gw}`] = (Number(clonedTable[rowId][gw]) * Number(proportion)).toFixed(3);
+      });
     });
   }
   return clonedTable;
@@ -501,6 +525,7 @@ const updateProportion = (tableDataObj: RowDataDictType): RowDataDictType => {
 
 export const fillMixTable = (
   data: MixUploadResponse[],
+  applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
 ) => {
@@ -525,7 +550,7 @@ export const fillMixTable = (
     Object.assign(newRows, { [newRow.rowId]: newRow });
   });
 
-  newRows = updateProportion(newRows);
+  newRows = updateCalculations(newRows, applicableGenWorths);
   clonedState.mixTabData = newRows;
   setStepData(clonedState);
 };
