@@ -29,7 +29,7 @@ parameters:
   - name: CPU_LIMIT
     value: 115m
   - name: MEMORY_REQUEST
-    value: 50Mi
+    value: 150Mi
   - name: MEMORY_LIMIT
     value: 250Mi
   - name: DB_PVC_SIZE
