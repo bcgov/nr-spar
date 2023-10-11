@@ -1,4 +1,4 @@
-import { FIVE_SECONDS, HALF_SECOND, TWO_SECONDS } from '../../constants';
+import { HALF_SECOND, TWO_SECONDS } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
 
 describe('Dashboard page test', () => {
@@ -31,7 +31,7 @@ describe('Dashboard page test', () => {
       .should('have.text', dashboardPageData.secondSectionSubtitle);
   });
 
-  it('fav activity is working proprely', () => {
+  it('fav activity is working properly', () => {
     // Navigate to Seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.wait(HALF_SECOND);
@@ -43,7 +43,7 @@ describe('Dashboard page test', () => {
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
     cy.wait(HALF_SECOND);
-    // Check if seedlot card is appearing at fauvorites activities
+    // Check if seedlot card is appearing at favourites activities
     cy.get('.favourite-activities-cards')
       .find('.fav-card-content')
       .find('.fav-card-title-large')
@@ -66,7 +66,7 @@ describe('Dashboard page test', () => {
     cy.navigateTo(NavigationLabels.Dashboard);
     cy.wait(HALF_SECOND);
 
-    // Check if Create A Class Seedlot card is appearing at fauvorites activities
+    // Check if Create A Class Seedlot card is appearing at favourites activities
     cy.get('.favourite-activities-cards')
       .find('.fav-card-content')
       .find('.fav-card-title-large')
@@ -93,7 +93,7 @@ describe('Dashboard page test', () => {
     cy.navigateTo(NavigationLabels.Dashboard);
     cy.wait(HALF_SECOND);
 
-    // Check if My Seedlot card is appearing at fauvorites activities
+    // Check if My Seedlot card is appearing at favourites activities
     // and if redirects to the correct page
     cy.get('.favourite-activities-cards')
       .find('.fav-card-content')
