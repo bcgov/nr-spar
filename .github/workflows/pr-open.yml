@@ -156,7 +156,7 @@ jobs:
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-test-backend.apps.silver.devops.gov.bc.ca
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_KC_CLIENT_ID: seed-planning-test-4296
       VITE_KC_REALM: standard
