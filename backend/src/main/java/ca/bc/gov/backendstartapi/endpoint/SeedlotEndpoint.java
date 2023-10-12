@@ -13,6 +13,7 @@ import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,6 +30,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -185,5 +188,49 @@ public class SeedlotEndpoint {
           SeedlotCreateDto createDto) {
     SeedlotCreateResponseDto response = seedlotService.createSeedlot(createDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  /**
+   * Gets seedlots for a given user.
+   *
+   * @param userID id of the user who created the {@link Seedlot}
+   * @return a list of {@link Seedlot}
+   * @throws ResponseStatusException if no data is found
+   */
+  @GetMapping(path = "/search-seedlots/{userID}")
+  @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Fetch seedlots registered by a given user.",
+      description = "Returns a paginated list containing the seedlots",
+      responses = {
+        @ApiResponse(responseCode = "200",
+                     description = "The Seedlots were successfully found"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "No seedlots found for this user",
+            content = @Content(schema = @Schema(hidden = true)))
+      })
+  public List<Seedlot> getUserSeedlots(
+      @PathVariable
+          @Parameter(
+              name = "userID",
+              in = ParameterIn.PATH,
+              description = "Identifier of the user")
+          String userID,
+      @RequestParam(
+          value = "page",
+          required = false,
+          defaultValue = "0")
+          int page,
+      @RequestParam(
+          value = "size",
+          required = false,
+          defaultValue = "10")
+          int size) {
+    return seedlotService.getUserSeedlots(userID, page, size);
   }
 }

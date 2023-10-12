@@ -15,10 +15,16 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods for handling Seedlots in the database. */
@@ -108,5 +114,21 @@ public class SeedlotService {
 
     log.debug("Next class {} seedlot number: {}", seedlotNumber);
     return String.valueOf(seedlotNumber);
+  }
+
+  /**
+   * Retrieve a paginated list of seedlot for a given user
+   *
+   * @param userID the id of the user to fetch the seedlots for
+   * @param pageNumber the page number for the paginated search
+   * @param pageSize the size of the page
+   * @return a list of the user's seedlots
+   */
+  public List<Seedlot> getUserSeedlots(
+      String userID,
+      Integer pageNumber,
+      Integer pageSize) {
+    Pageable sortedPageable = PageRequest.of(pageNumber, pageSize, Sort.by("entryUserId"));
+    return seedlotRepository.findAllByAuditInformation_EntryUserId(userID, sortedPageable);
   }
 }
