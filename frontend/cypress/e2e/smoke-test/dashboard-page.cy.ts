@@ -1,5 +1,6 @@
-import { HALF_SECOND, TWO_SECONDS } from '../../constants';
+import { HALF_SECOND } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
+import prefix from '../../../src/styles/classPrefix';
 
 describe('Dashboard page test', () => {
   let dashboardPageData: {
@@ -37,9 +38,9 @@ describe('Dashboard page test', () => {
     cy.wait(HALF_SECOND);
     // Favourite Seedlot page
     cy.get('.title-favourite')
-      .find('.bx--popover-container')
+      .find(`.${prefix}--popover-container`)
       .click();
-    cy.wait(TWO_SECONDS);
+    cy.wait(HALF_SECOND);
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
     cy.wait(HALF_SECOND);
@@ -58,9 +59,9 @@ describe('Dashboard page test', () => {
       .contains('Register an A class seedlot')
       .click();
     cy.get('.title-favourite')
-      .find('.bx--popover-container')
+      .find(`.${prefix}--popover-container`)
       .click();
-    cy.wait(TWO_SECONDS);
+    cy.wait(HALF_SECOND);
 
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
@@ -85,9 +86,9 @@ describe('Dashboard page test', () => {
 
     // Favourite My Seedlot page
     cy.get('.title-favourite')
-      .find('.bx--popover-container')
+      .find(`.${prefix}--popover-container`)
       .click();
-    cy.wait(TWO_SECONDS);
+    cy.wait(HALF_SECOND);
 
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
@@ -111,7 +112,7 @@ describe('Dashboard page test', () => {
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get('.bx--overflow-menu-options__option-content:first')
+    cy.get(`.${prefix}--overflow-menu-options__option-content:first`)
       .click();
 
     // Check if the Seedlots card is unique and highlighted
@@ -124,7 +125,7 @@ describe('Dashboard page test', () => {
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get('.bx--overflow-menu-options__option-content:first')
+    cy.get(`.${prefix}--overflow-menu-options__option-content:first`)
       .click();
 
     // Check if the Create A Class Seedlot card is unique and highlighted
@@ -133,20 +134,20 @@ describe('Dashboard page test', () => {
       .should('contain.text', 'Create A class seedlot');
   });
 
-  it('Check if delete favourite activities is working', () => {
+  it('check if delete favourite activities is working', () => {
     // Delete Seedlots card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get('.bx--overflow-menu-options__option-content:last')
+    cy.get(`.${prefix}--overflow-menu-options__option-content:last`)
       .click();
 
     // Delete Create A Class Seedlot card
     cy.get('.fav-card-main-highlighted')
       .find('.fav-card-overflow')
       .click();
-    cy.get('.bx--overflow-menu-options__option-content:last')
+    cy.get(`.${prefix}--overflow-menu-options__option-content:last`)
       .click();
 
     // Delete Last card
@@ -154,7 +155,7 @@ describe('Dashboard page test', () => {
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get('.bx--overflow-menu-options__option-content:last')
+    cy.get(`.${prefix}--overflow-menu-options__option-content:last`)
       .click();
 
     // Check if the empty section is correctly appearing
