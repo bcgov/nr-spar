@@ -31,7 +31,7 @@ describe('Dashboard page test', () => {
       .should('have.text', dashboardPageData.secondSectionSubtitle);
   });
 
-  it('fav activity is working properly', () => {
+  it('favourite activity is working properly', () => {
     // Navigate to Seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.wait(HALF_SECOND);
@@ -103,12 +103,10 @@ describe('Dashboard page test', () => {
       .click();
 
     cy.isPageTitle('My Seedlots');
+  });
 
-    // Navigate to Dashboard page
-    cy.navigateTo(NavigationLabels.Dashboard);
-    cy.wait(HALF_SECOND);
-
-    // Highlight Seedlots Card
+  it('highlight favourite activity is working', () => {
+  // Highlight Seedlots Card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
@@ -133,7 +131,9 @@ describe('Dashboard page test', () => {
     cy.get('.fav-card-main-highlighted')
       .should('have.length', 1)
       .should('contain.text', 'Create A class seedlot');
+  });
 
+  it('Check if delete favourite activities is working', () => {
     // Delete Seedlots card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
@@ -157,7 +157,7 @@ describe('Dashboard page test', () => {
     cy.get('.bx--overflow-menu-options__option-content:last')
       .click();
 
-    // Check if the empty section is showing
+    // Check if the empty section is correctly appearing
     cy.get('.empty-section-title')
       .should('contain.text', "You don't have any favourites to show yet!");
   });
