@@ -42,7 +42,8 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
           overwrite: false
-          parameters: -p ZONE=${{ github.event.number }}
+          parameters:
+            -p ZONE=${{ github.event.number }}
             -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
@@ -94,13 +95,15 @@ jobs:
         include:
           - name: database
             file: database/openshift.deploy.yml
-            parameters: -p DB_PVC_SIZE=128Mi
+            parameters:
+              -p DB_PVC_SIZE=128Mi
             overwrite: false
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
-            parameters: -p MIN_REPLICAS=1
+            parameters:
+              -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
@@ -139,7 +142,8 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
-          parameters: -p ZONE=${{ github.event.number }}
+          parameters:
+            -p ZONE=${{ github.event.number }}
             -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
