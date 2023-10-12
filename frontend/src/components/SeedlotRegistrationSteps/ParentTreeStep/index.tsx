@@ -42,16 +42,9 @@ import {
   TabTypes, HeaderObj, RowItem
 } from './definitions';
 import {
-  getTabString, processOrchards, combineObjectValues,
-  calcSummaryItems,
-  processParentTreeData,
-  cleanTable,
-  fillCompostitionTables,
-  configHeaderOpt,
-  fillCalculatedInfo,
-  generateGenWorthPayload,
-  addNewMixRow,
-  calcMixTabInfoItems,
+  getTabString, processOrchards, combineObjectValues, calcSummaryItems,
+  processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
+  fillCalculatedInfo, generateGenWorthPayload, addNewMixRow, calcMixTabInfoItems,
   fillMixTable
 } from './utils';
 
@@ -108,6 +101,7 @@ const ParentTreeStep = (
   const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
+  const [applicableGenWorths, setApplicableGenWorths] = useState<string[]>([]);
   const emptySectionDescription = getEmptySectionDescription(setStep);
 
   // Link reference to trigger click event
@@ -151,7 +145,15 @@ const ParentTreeStep = (
         'parentTreeNumber',
         setSlicedMixRows
       );
-      calcMixTabInfoItems(disableOptions, summaryConfig, setSummaryConfig, state);
+      calcMixTabInfoItems(
+        disableOptions,
+        summaryConfig,
+        setSummaryConfig,
+        applicableGenWorths,
+        weightedGwInfoItems,
+        setWeightedGwInfoItems,
+        state
+      );
     },
     [state.mixTabData]
   );
@@ -203,7 +205,8 @@ const ParentTreeStep = (
     setGenWorthInfoItems,
     setHeaderConfig,
     weightedGwInfoItems,
-    setWeightedGwInfoItems
+    setWeightedGwInfoItems,
+    setApplicableGenWorths
   ), [seedlotSpecies]);
 
   const uploadCompostion = useMutation({
@@ -224,7 +227,7 @@ const ParentTreeStep = (
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillMixTable(res.data, state, setStepData);
+      fillMixTable(res.data, applicableGenWorths, state, setStepData);
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -421,6 +424,7 @@ const ParentTreeStep = (
                                   slicedRows,
                                   slicedMixRows,
                                   headerConfig,
+                                  applicableGenWorths,
                                   state,
                                   setStepData
                                 )
