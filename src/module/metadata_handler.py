@@ -144,15 +144,12 @@ def build_select_count_qry(table_metadata: str) -> str:
     if len(primary_keys) > 1:
         for i in range(len(primary_keys)):
             if i == 0:
-                pass
+                primary_keys_str = ''.join([primary_keys[0], ' = :', primary_keys[0]])
             else:
-                primary_keys_str = ''.join([' AND ', primary_keys[i], ' = :', primary_keys[i]])
+                primary_keys_str = ''.join([primary_keys_str, ' AND ', primary_keys[i], ' = :', primary_keys[i]])
 
     select_qry = ''.join([
         select_qry, 
-        primary_keys[0],
-        ' = :',
-        primary_keys[0],
         primary_keys_str  
     ])
     
