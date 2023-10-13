@@ -73,7 +73,7 @@ def get_incrementa_dt(database_conn: object,
     Returns:
         datetime: Incremental date filter
     """
-    DEFATUL_INCREMENTAL_DT = '01/01/2000 00:00:00'
+    DEFATUL_INCREMENTAL_DT = '01/01/2023 00:00:00'
 
     defatult_inc_dt = datetime.strptime(DEFATUL_INCREMENTAL_DT, '%m/%d/%Y %H:%M:%S')
     
