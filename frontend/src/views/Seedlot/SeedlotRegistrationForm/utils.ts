@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import {
   ownerTemplate,
@@ -6,22 +7,94 @@ import {
 import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
-import { FormInvalidationObj, OwnershipInvalidObj, ParentTreeStepDataObj } from './definitions';
+import {
+  FormInvalidationObj, OwnershipInvalidObj, ParentTreeStepDataObj
+} from './definitions';
 
 export const initCollectionState = (
   defaultAgency: string,
   defaultCode: string
 ) => ({
-  useDefaultAgencyInfo: true,
-  collectorAgency: defaultAgency,
-  locationCode: defaultCode,
-  startDate: '',
-  endDate: '',
-  numberOfContainers: '1',
-  volumePerContainers: '1',
-  volumeOfCones: '1',
-  selectedCollectionCodes: [],
-  comments: ''
+  useDefaultAgencyInfo: {
+    value: true,
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  collectorAgency: {
+    value: defaultAgency,
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  locationCode: {
+    value: defaultCode,
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  startDate: {
+    value: '',
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  endDate: {
+    value: '',
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  numberOfContainers: {
+    value: '1',
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  volumePerContainers: {
+    value: '1',
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  volumeOfCones: {
+    value: '1',
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  selectedCollectionCodes: {
+    value: [],
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  },
+  comments: {
+    value: '',
+    ref: useRef(null),
+    invalid: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  }
 });
 
 export const initOwnershipState = (
