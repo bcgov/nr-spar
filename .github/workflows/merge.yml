@@ -1,9 +1,9 @@
-name: Merge to Main
+name: Merge
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [PR Closed]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -69,9 +69,7 @@ jobs:
 
   deploy-test:
     name: TEST Deployment
-    needs:
-      - codeql
-      - init-test
+    needs: [init-test]
     environment: test
     runs-on: ubuntu-22.04
     strategy:
