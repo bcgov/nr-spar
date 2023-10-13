@@ -69,9 +69,7 @@ jobs:
 
   deploy-test:
     name: TEST Deployment
-    needs:
-      - codeql
-      - init-test
+    needs: [init-test]
     environment: test
     runs-on: ubuntu-22.04
     strategy:
