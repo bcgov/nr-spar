@@ -61,6 +61,15 @@ parameters:
     description: Backend environment for OpenSearch. # One of: development, test, production
     required: true
     value: development
+  - name: DB_POOL_CONN_TIMEOUT
+    description: Maximum number of milliseconds that a client will wait for a connection from the pool.
+    value: "90000"
+  - name: DB_POOL_IDLE_TIMEOUT
+    description: Maximum amount of milliseconds that a connection is allowed to sit idle in the pool.
+    value: "0"
+  - name: DB_POOL_MAX_LIFETIME
+    description: Maximum lifetime of a connection in the pool.
+    value: "1800000"
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -148,6 +157,12 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-database
                       key: database-user
+                - name: DB_POOL_CONN_TIMEOUT
+                  value: ${DB_POOL_CONN_TIMEOUT}
+                - name: DB_POOL_IDLE_TIMEOUT
+                  value: ${DB_POOL_IDLE_TIMEOUT}
+                - name: DB_POOL_MAX_LIFETIME
+                  value: ${DB_POOL_MAX_LIFETIME}
               ports:
                 - containerPort: 8090
                   protocol: TCP
