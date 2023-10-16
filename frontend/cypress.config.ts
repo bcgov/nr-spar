@@ -1,6 +1,8 @@
 import { defineConfig } from 'cypress';
 import { TEN_SECONDS } from './cypress/constants';
 
+declare const require: any;
+
 export default defineConfig({
   e2e: {
     baseUrl: 'http://localhost:3000/',
@@ -21,8 +23,10 @@ export default defineConfig({
       runMode: 4
     },
     defaultCommandTimeout: TEN_SECONDS,
+    video: true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setupNodeEvents(on, config) {
+      require('@cypress/code-coverage/task')(on, config);
       // implement node event listeners here
       on('task', {
         log(args) {
@@ -31,6 +35,10 @@ export default defineConfig({
           return null;
         }
       });
+
+      // It's IMPORTANT to return the config object
+      // with any changed environment variables
+      return config;
     }
   }
 });

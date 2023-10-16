@@ -1,10 +1,11 @@
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vite';
+import { ConfigEnv, defineConfig, UserConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import istanbul from 'vite-plugin-istanbul';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  const config = {
+export default defineConfig(({ mode }: ConfigEnv) => {
+  const config: UserConfig = {
     define: {} as any,
     plugins: [
       {
@@ -25,36 +26,33 @@ export default defineConfig(({ mode }) => {
             }
           }
         },
-      react()
+      react(),
+      istanbul({
+        extension: ['.ts', '.tsx'],
+        cypress: true
+      })
     ],
     build: {
-      outDir: 'build'
+      outDir: 'build',
+      sourcemap: true
     },
     server: {
-      port: 3000
+      port: 3000,
+      watch: {
+        ignored: ['**/coverage/**', '**/cypress-coverage/**', '**/cypress/**']
+      }
     },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       }
-    },
-    test: {
-      globals: true,
-      environment: 'jsdom',
-      setupFiles: './src/setupTests.ts',
-      css: true,
-      reporters: ['verbose'],
-      coverage: {
-        provider: 'v8',
-        reporter: ['lcov', 'cobertura', 'html'],
-        include: ['src/**/*'],
-        exclude: [],
-      }
     }
   };
 
   if (mode === 'development') {
-    config.define.global = {};
+    if (config.define) {
+      config.define.global = {};
+    }
   }
 
   return config;
