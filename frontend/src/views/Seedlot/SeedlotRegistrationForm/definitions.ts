@@ -28,7 +28,7 @@ type SingleInvalidObj = {
 }
 
 export type FormInputType = {
-  ref: HTMLInputElement | null;
+  id: string;
   invalid: SingleInvalidObj;
 }
 

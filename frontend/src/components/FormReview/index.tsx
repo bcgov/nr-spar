@@ -115,7 +115,7 @@ const ownershipMock = {
   }
 };
 
-const collectionMock = initCollectionState('', '');
+const collectionMock = initCollectionState(defaultAgency, defaultCode);
 
 const extractionMock = {
   extractoryUseTSC: true,

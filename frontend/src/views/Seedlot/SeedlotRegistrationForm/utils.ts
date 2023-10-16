@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import {
   ownerTemplate,
@@ -16,80 +15,80 @@ export const initCollectionState = (
   defaultCode: string
 ) => ({
   useDefaultAgencyInfo: {
+    id: 'collection-use-default-agency',
     value: true,
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   collectorAgency: {
+    id: 'collection-collector-agency',
     value: defaultAgency,
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   locationCode: {
+    id: 'collection-location-code',
     value: defaultCode,
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   startDate: {
+    id: 'collection-start-date',
     value: '',
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   endDate: {
+    id: 'collection-end-date',
     value: '',
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   numberOfContainers: {
+    id: 'collection-num-of-container',
     value: '1',
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   volumePerContainers: {
+    id: 'collection-vol-per-container',
     value: '1',
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   volumeOfCones: {
+    id: 'collection-vol-of-cones',
     value: '1',
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   selectedCollectionCodes: {
+    id: 'collection-selected-collection-code',
     value: [],
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''
     }
   },
   comments: {
+    id: 'collection-comments',
     value: '',
-    ref: useRef(null),
     invalid: {
       isInvalid: false,
       invalidText: ''

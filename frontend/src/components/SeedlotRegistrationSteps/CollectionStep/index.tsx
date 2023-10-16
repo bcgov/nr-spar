@@ -92,14 +92,14 @@ const CollectionStep = (
   //   return structuredClone(state, { transfer: transferredObjs });
   // };
 
-  const setRef = (el: HTMLInputElement, name: keyof CollectionForm) => {
-    console.log('settingref...', name);
-    if (state && el) {
-      const clonedState = { ...state };
-      clonedState[name].ref = el;
-      // setStepData(clonedState);
-    }
-  };
+  // const setRef = (el: HTMLInputElement, name: keyof CollectionForm) => {
+  //   console.log('settingref...', name);
+  //   if (state && el) {
+  //     const clonedState = { ...state };
+  //     clonedState[name].ref = el;
+  //     // setStepData(clonedState);
+  //   }
+  // };
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
     setValidationObj({
@@ -170,9 +170,9 @@ const CollectionStep = (
     checked?: boolean
   ) => {
     const clonedState = { ...state };
-    if (optName && optName !== name) {
+    if (optName && optName !== name && optValue) {
       clonedState[name].value = value;
-      clonedState[optName].value = optName;
+      clonedState[optName].value = optValue;
 
       if (setDefaultAgency) {
         clonedState.useDefaultAgencyInfo.value = checked ?? false;
@@ -205,14 +205,14 @@ const CollectionStep = (
 
   useEffect(() => {
     const useDefault = state.useDefaultAgencyInfo.value;
-    const agency = useDefault ? defaultAgency : state.collectorAgency.value;
-    const code = useDefault ? defaultCode : state.locationCode.value;
+    const agencyValue = useDefault ? defaultAgency : state.collectorAgency.value;
+    const codeValue = useDefault ? defaultCode : state.locationCode.value;
 
     handleFormInput(
       'collectorAgency',
-      agency,
+      agencyValue,
       'locationCode',
-      code,
+      codeValue,
       true,
       useDefault
     );
@@ -258,17 +258,16 @@ const CollectionStep = (
   };
 
   const validateLocationCode = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let locationCode = event.target.value;
-    const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+    let locationCodeValue = event.target.value;
+    const isInRange = validator.isInt(locationCodeValue, { min: 0, max: 99 });
 
     // Adding this check to add an extra 0 on the left, for cases where
     // the user types values between 0 and 9
-    if (isInRange && locationCode.length === 1) {
-      locationCode = locationCode.padStart(2, '0');
-      setStepData({
-        ...state,
-        locationCode
-      });
+    if (isInRange && locationCodeValue.length === 1) {
+      locationCodeValue = locationCodeValue.padStart(2, '0');
+      const clonedState = structuredClone(state);
+      clonedState.locationCode.value = locationCodeValue;
+      setStepData(clonedState);
     }
 
     if (!isInRange) {
@@ -281,7 +280,7 @@ const CollectionStep = (
     }
 
     if (forestClientNumber) {
-      validateLocationCodeMutation.mutate([forestClientNumber, locationCode]);
+      validateLocationCodeMutation.mutate([forestClientNumber, locationCodeValue]);
       setValidationObj({
         ...validationObj,
         isLocationCodeInvalid: false
@@ -301,9 +300,8 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>
           <Checkbox
-            id={fieldsConfig.checkbox.name}
+            id={state.useDefaultAgencyInfo.id}
             name={fieldsConfig.checkbox.name}
-            ref={(el: HTMLInputElement) => setRef(el, 'useDefaultAgencyInfo')}
             labelText={fieldsConfig.checkbox.labelText}
             readOnly={readOnly}
             checked={state.useDefaultAgencyInfo.value}
@@ -329,15 +327,14 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
-            id="collector-agency-combobox"
+            id={state.collectorAgency.id}
             name={fieldsConfig.collector.name}
-            ref={(el: HTMLInputElement) => setRef(el, 'collectorAgency')}
             placeholder={fieldsConfig.collector.placeholder}
             titleText={fieldsConfig.collector.titleText}
             helperText={fieldsConfig.collector.helperText}
             invalidText={fieldsConfig.collector.invalidText}
             items={agencyOptions}
-            readOnly={state.useDefaultAgencyInfo || readOnly}
+            readOnly={state.useDefaultAgencyInfo.value || readOnly}
             selectedItem={state.collectorAgency.value}
             onChange={(e: ComboBoxEvent) => {
               handleFormInput(
@@ -354,10 +351,9 @@ const CollectionStep = (
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
           <TextInput
-            id="collector-location-code-input"
+            id={state.locationCode.id}
             className="cone-collector-location-code"
             name={fieldsConfig.code.name}
-            ref={(el: HTMLInputElement) => setRef(el, 'locationCode')}
             value={state.locationCode.value}
             type="number"
             placeholder={!forestClientNumber ? '' : fieldsConfig.code.placeholder}
@@ -365,7 +361,7 @@ const CollectionStep = (
             helperText={locationCodeHelperText}
             invalid={validationObj.isLocationCodeInvalid}
             invalidText={invalidLocationMessage}
-            readOnly={state.useDefaultAgencyInfo.value || readOnly}
+            readOnly={state.useDefaultAgencyInfo.value ?? readOnly}
             disabled={!forestClientNumber}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleFormInput(
@@ -408,9 +404,8 @@ const CollectionStep = (
             }}
           >
             <DatePickerInput
-              id="collection-start-date-picker"
+              id={state.startDate.id}
               name={fieldsConfig.startDate.name}
-              ref={(el: HTMLInputElement) => setRef(el, 'startDate')}
               placeholder={fieldsConfig.startDate.placeholder}
               labelText={fieldsConfig.startDate.labelText}
               helperText={fieldsConfig.startDate.helperText}
@@ -435,9 +430,8 @@ const CollectionStep = (
             }}
           >
             <DatePickerInput
-              id="collection-end-date-picker"
+              id={state.endDate.id}
               name={fieldsConfig.endDate.name}
-              ref={(el: HTMLInputElement) => setRef(el, 'endDate')}
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               helperText={fieldsConfig.endDate.helperText}
@@ -451,9 +445,8 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
           <NumberInput
-            id="collection-num-of-container-input"
+            id={state.numberOfContainers.id}
             name={fieldsConfig.numberOfContainers.name}
-            ref={(el: HTMLInputElement) => setRef(el, 'numberOfContainers')}
             value={state.numberOfContainers.value}
             label={fieldsConfig.numberOfContainers.labelText}
             readOnly={readOnly}
@@ -470,10 +463,9 @@ const CollectionStep = (
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
           <NumberInput
-            id="collection-colume-perc-input"
+            id={state.volumePerContainers.id}
             name={fieldsConfig.volumePerContainers.name}
-            ref={(el: HTMLInputElement) => setRef(el, 'volumePerContainers')}
-            value={state.volumePerContainers}
+            value={state.volumePerContainers.value}
             label={fieldsConfig.volumePerContainers.labelText}
             readOnly={readOnly}
             invalidText={fieldsConfig.volumePerContainers.invalidText}
@@ -491,9 +483,8 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={16} xlg={12}>
           <NumberInput
-            id="collection-value-of-cones-input"
+            id={state.volumeOfCones.id}
             name={fieldsConfig.volumeOfCones.name}
-            ref={(el: HTMLInputElement) => setRef(el, 'volumeOfCones')}
             value={state.volumeOfCones.value}
             label={fieldsConfig.volumeOfCones.labelText}
             invalidText={fieldsConfig.volumeOfCones.invalidText}
@@ -516,7 +507,7 @@ const CollectionStep = (
         <Column sm={4} md={8} lg={16} xlg={16}>
           <CheckboxGroup
             legendText={fieldsConfig.collectionMethodOptionsLabel}
-            ref={(el: HTMLInputElement) => setRef(el, 'selectedCollectionCodes')}
+            id={state.selectedCollectionCodes.id}
           >
             {
               collectionMethods.map((method) => (
@@ -564,8 +555,8 @@ const CollectionStep = (
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={16} xlg={12}>
           <TextArea
+            id={state.comments.id}
             name={fieldsConfig.comments.name}
-            ref={(el: HTMLInputElement) => setRef(el, 'comments')}
             value={state.comments.value}
             labelText={fieldsConfig.comments.labelText}
             readOnly={readOnly}
