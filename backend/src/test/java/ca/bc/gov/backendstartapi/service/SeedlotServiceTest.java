@@ -1,8 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
+import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
@@ -17,6 +21,8 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -161,5 +167,37 @@ class SeedlotServiceTest {
             });
 
     Assertions.assertEquals(BAD_REQUEST_STR, exc.getMessage());
+  }
+
+  @Test
+  @DisplayName("findSeedlotsByUserIDSuccessTest")
+  void findSeedlotsByUserIDSuccessTest() {
+    String userID = "USERID";
+
+    Seedlot firstSeedlot = new Seedlot("0000000");
+    Seedlot secondSeedlot = new Seedlot("0000001");
+
+    List<Seedlot> testList = List.of(firstSeedlot, secondSeedlot);
+
+    when(seedlotService.getUserSeedlots(userID, 0, 10)).thenReturn(testList);
+
+    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userID, 0, 10);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(testList.size(), responseFromService.size());
+    Assertions.assertEquals(testList, responseFromService);
+  }
+
+  @Test
+  @DisplayName("findSeedlotsByUserIDEmptyTest")
+  void findSeedlotsByUserIDEmptyTest() {
+    String userID = "USERID";
+
+    when(seedlotService.getUserSeedlots(userID, 0, 10)).thenReturn(List.of());
+
+    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userID, 0, 10);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(0, responseFromService.size());
   }
 }
