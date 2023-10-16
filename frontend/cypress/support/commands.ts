@@ -1,6 +1,7 @@
 // @ts-check
 /// <reference path="../global.d.ts" />
 
+import '@cypress/code-coverage/support';
 import {
   HALF_SECOND, THREE_SECONDS, TYPE_DELAY
 } from '../constants';

@@ -13,7 +13,7 @@ describe('Dashboard page test', () => {
       dashboardPageData = fData;
     });
     cy.login();
-    cy.visit('/');
+    cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');
   });
 
