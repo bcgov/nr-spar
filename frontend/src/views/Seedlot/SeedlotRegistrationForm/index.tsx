@@ -194,8 +194,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency}
-            collectorCode={allStepData.collectionStep.locationCode}
+            collectorAgency={allStepData.collectionStep.collectorAgency.value}
+            collectorCode={allStepData.collectionStep.locationCode.value}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />

@@ -27,6 +27,11 @@ type SingleInvalidObj = {
   optInvalidText?: string
 }
 
+export type FormInputType = {
+  ref: HTMLInputElement | null;
+  invalid: SingleInvalidObj;
+}
+
 export type FormInvalidationObj = {
   [key: string]: SingleInvalidObj;
 }
