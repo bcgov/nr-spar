@@ -193,7 +193,7 @@ public class SeedlotEndpoint {
   /**
    * Gets seedlots for a given user.
    *
-   * @param userID id of the user who created the {@link Seedlot}
+   * @param userId id of the user who created the {@link Seedlot}
    * @return a list of {@link Seedlot}
    * @throws ResponseStatusException if no data is found
    */
@@ -217,10 +217,10 @@ public class SeedlotEndpoint {
   public List<Seedlot> getUserSeedlots(
       @PathVariable
           @Parameter(
-              name = "userID",
+              name = "userId",
               in = ParameterIn.PATH,
               description = "Identifier of the user")
-          String userID,
+          String userId,
       @RequestParam(
           value = "page",
           required = false,
@@ -231,6 +231,6 @@ public class SeedlotEndpoint {
           required = false,
           defaultValue = "10")
           int size) {
-    return seedlotService.getUserSeedlots(userID, page, size);
+    return seedlotService.getUserSeedlots(userId, page, size);
   }
 }

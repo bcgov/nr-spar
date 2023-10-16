@@ -165,18 +165,18 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserIDSuccessTest")
-  void findSeedlotsByUserIDSuccessTest() {
-    String userID = "USERID";
+  @DisplayName("findSeedlotsByUserIdSuccessTest")
+  void findSeedlotsByUserIdSuccessTest() {
+    String userId = "userId";
 
     Seedlot firstSeedlot = new Seedlot("0000000");
     Seedlot secondSeedlot = new Seedlot("0000001");
 
     List<Seedlot> testList = List.of(firstSeedlot, secondSeedlot);
 
-    when(seedlotService.getUserSeedlots(userID, 0, 10)).thenReturn(testList);
+    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(testList);
 
-    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userID, 0, 10);
+    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(testList.size(), responseFromService.size());
@@ -184,13 +184,13 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserIDEmptyTest")
-  void findSeedlotsByUserIDEmptyTest() {
-    String userID = "USERID";
+  @DisplayName("findSeedlotsByUserIdEmptyTest")
+  void findSeedlotsByUserIdEmptyTest() {
+    String userId = "userId";
 
-    when(seedlotService.getUserSeedlots(userID, 0, 10)).thenReturn(List.of());
+    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
 
-    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userID, 0, 10);
+    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(0, responseFromService.size());

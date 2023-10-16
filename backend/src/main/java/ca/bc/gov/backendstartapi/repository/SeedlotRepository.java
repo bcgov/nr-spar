@@ -1,9 +1,7 @@
 package ca.bc.gov.backendstartapi.repository;
 
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-
 import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,9 +20,9 @@ public interface SeedlotRepository extends JpaRepository<Seedlot, String> {
   /**
    * Paginated search for seedlots by the user who registered it.
    *
-   * @param userID a string wih the user id
+   * @param userId a string wih the user id
    * @param pageable an object with the pagination and sorting information
    * @return a list with the seedlots with the specific pagination size
    */
-  List<Seedlot> findAllByAuditInformation_EntryUserId(String userID, Pageable pageable);
+  List<Seedlot> findAllByAuditInformation_EntryUserId(String userId, Pageable pageable);
 }
