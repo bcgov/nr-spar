@@ -28,7 +28,7 @@ export const renderColOptions = (
   const toggleableCols = headerConfig
     .filter((header) => (header.isAnOption
       && header.availableInTabs.includes(currentTab)
-      && !String(header.id).startsWith('w_') // id starts with w_ is only for smp mix
+      && !String(header.id).startsWith('w_') // id starts with w_ is only for smp mix table
     ));
 
   const smpWeightedCols = headerConfig
@@ -101,9 +101,13 @@ export const renderColOptions = (
   );
 };
 
+/**
+ * Used to render cell that isn't a text input, e.g. delete button
+ */
 const renderNonInputCell = (
   rowData: RowItem,
   colName: keyof RowItem,
+  applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
 ) => {
@@ -114,7 +118,7 @@ const renderNonInputCell = (
         hasIconOnly
         renderIcon={TrashCan}
         iconDescription="Delete this row"
-        onClick={() => deleteMixRow(rowData, state, setStepData)}
+        onClick={() => deleteMixRow(rowData, applicableGenWorths, state, setStepData)}
       />
     );
   }
@@ -124,6 +128,7 @@ const renderNonInputCell = (
 const renderTableCell = (
   rowData: RowItem,
   header: HeaderObj,
+  applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
 ) => {
@@ -158,6 +163,7 @@ const renderTableCell = (
                   rowData,
                   event.target.value,
                   header.id,
+                  applicableGenWorths,
                   state,
                   setStepData
                 )
@@ -166,7 +172,7 @@ const renderTableCell = (
             />
           )
           : (
-            renderNonInputCell(rowData, header.id, state, setStepData)
+            renderNonInputCell(rowData, header.id, applicableGenWorths, state, setStepData)
           )
       }
     </TableCell>
@@ -178,6 +184,7 @@ export const renderTableBody = (
   slicedRows: Array<RowItem>,
   mixTabRows: Array<RowItem>,
   headerConfig: Array<HeaderObj>,
+  applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
 ) => {
@@ -197,7 +204,13 @@ export const renderTableBody = (
                     if (header.id === 'parentTreeNumber') {
                       clonedHeader.editable = true;
                     }
-                    return renderTableCell(rowData, clonedHeader, state, setStepData);
+                    return renderTableCell(
+                      rowData,
+                      clonedHeader,
+                      applicableGenWorths,
+                      state,
+                      setStepData
+                    );
                   })
               }
             </TableRow>
@@ -220,7 +233,7 @@ export const renderTableBody = (
                       header.availableInTabs.includes(currentTab) && header.enabled
                     ))
                     .map((header) => (
-                      renderTableCell(rowData, header, state, setStepData)
+                      renderTableCell(rowData, header, applicableGenWorths, state, setStepData)
                     ))
                 }
               </TableRow>
