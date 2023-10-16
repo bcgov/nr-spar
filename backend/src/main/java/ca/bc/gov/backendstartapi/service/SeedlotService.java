@@ -128,7 +128,7 @@ public class SeedlotService {
       String userID,
       Integer pageNumber,
       Integer pageSize) {
-    Pageable sortedPageable = PageRequest.of(pageNumber, pageSize, Sort.by("entryUserId"));
+    Pageable sortedPageable = PageRequest.of(pageNumber, pageSize, Sort.by("AuditInformation_UpdateTimestamp"));
     return seedlotRepository.findAllByAuditInformation_EntryUserId(userID, sortedPageable);
   }
 }
