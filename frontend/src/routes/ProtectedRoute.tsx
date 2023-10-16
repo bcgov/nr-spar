@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { GO_TO_PAGE_KEY } from '../shared-constants/shared-constants';
 
 interface IProps {
   signed: boolean,
@@ -9,8 +10,8 @@ interface IProps {
 const ProtectedRoute = ({ signed, children }: IProps): JSX.Element => {
   if (!signed) {
     const { pathname } = window.location;
-    const encodedUrl = encodeURI(`/?page=${pathname}`);
-    return <Navigate to={encodedUrl} replace />;
+    localStorage.setItem(GO_TO_PAGE_KEY, pathname);
+    return <Navigate to={'/'} replace />;
   }
 
   return children;

@@ -11,15 +11,14 @@ import { useNavigate } from 'react-router-dom';
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/seeding.png';
 import LoginProviders from '../../types/LoginProviders';
-import getUrlQueryParam from '../../utils/UrlUtils';
 
 import './styles.scss';
 import { AuthContext } from '../../contexts/AuthContext';
+import { GO_TO_PAGE_KEY } from '../../shared-constants/shared-constants';
 
 const Landing = () => {
   const { signed, signIn, isCurrentAuthUser } = useContext(AuthContext);
   const navigate = useNavigate();
-  const homePage = '/dashboard';
 
   useEffect(() => {
     const checkForAuth = async () => {
@@ -27,7 +26,8 @@ const Landing = () => {
     };
 
     if (signed) {
-      navigate(getUrlQueryParam(window.location, 'page') || homePage);
+      const page = localStorage.getItem(GO_TO_PAGE_KEY) ?? '/dashboard';
+      navigate(page);
     } else {
       checkForAuth();
     }
