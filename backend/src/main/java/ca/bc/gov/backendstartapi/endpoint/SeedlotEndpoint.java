@@ -197,7 +197,7 @@ public class SeedlotEndpoint {
    * @return a list of {@link Seedlot}
    * @throws ResponseStatusException if no data is found
    */
-  @GetMapping(path = "/search-seedlots/{userID}")
+  @GetMapping(path = "/search-seedlots/{userId}")
   @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch seedlots registered by a given user.",
