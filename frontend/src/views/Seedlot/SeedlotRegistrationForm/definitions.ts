@@ -29,7 +29,7 @@ type SingleInvalidObj = {
 
 export type FormInputType = {
   id: string;
-  invalid: SingleInvalidObj;
+  isInvalid: boolean;
 }
 
 export type FormInvalidationObj = {

@@ -17,82 +17,52 @@ export const initCollectionState = (
   useDefaultAgencyInfo: {
     id: 'collection-use-default-agency',
     value: true,
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   collectorAgency: {
     id: 'collection-collector-agency',
     value: defaultAgency,
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   locationCode: {
     id: 'collection-location-code',
     value: defaultCode,
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   startDate: {
     id: 'collection-start-date',
     value: '',
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   endDate: {
     id: 'collection-end-date',
     value: '',
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   numberOfContainers: {
     id: 'collection-num-of-container',
     value: '1',
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   volumePerContainers: {
     id: 'collection-vol-per-container',
     value: '1',
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   volumeOfCones: {
     id: 'collection-vol-of-cones',
     value: '1',
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   selectedCollectionCodes: {
     id: 'collection-selected-collection-code',
     value: [],
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   },
   comments: {
     id: 'collection-comments',
     value: '',
-    invalid: {
-      isInvalid: false,
-      invalidText: ''
-    }
+    isInvalid: false
   }
 });
 

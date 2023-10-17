@@ -30,8 +30,7 @@ import { LOCATION_CODE_LIMIT } from '../../../shared-constants/shared-constants'
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import {
   CollectionStepProps,
-  CollectionForm,
-  FormValidation
+  CollectionForm
 } from './definitions';
 
 import './styles.scss';
@@ -47,18 +46,6 @@ const CollectionStep = (
     readOnly
   }: CollectionStepProps
 ) => {
-  const initialValidationObj: FormValidation = {
-    isNameInvalid: false,
-    isLocationCodeInvalid: false,
-    isStartDateInvalid: false,
-    isEndDateInvalid: false,
-    isNumberOfContainersInvalid: false,
-    isVolumePerContainersInvalid: false,
-    isVolumeOfConesInvalid: false,
-    isCollectionMethodsInvalid: false
-  };
-
-  const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
@@ -66,47 +53,11 @@ const CollectionStep = (
     fieldsConfig.code.helperTextEnabled
   );
 
-  // Commenting this for now until we decide how to deal
-  // with the 'other' option
-  // const [isOtherChecked, setIsOtherChecked] = useState<boolean | string>(state.other);
-
-  // const refControl = useRef<any>({});
-
-  // const addRefs = (element: HTMLInputElement, name: string) => {
-  //   if (element !== null) {
-  //     refControl.current = {
-  //       ...refControl.current,
-  //       [name]: element
-  //     };
-  //   }
-  // };
-
-  // const cloneState = (): CollectionForm => {
-  //   const transferredObjs: TransferListItem[] = [];
-  //   const keys = Object.keys(state) as Array<keyof typeof state>;
-  //   keys.forEach((key) => {
-  //     if (state[key].ref) {
-  //       transferredObjs.push(state[key].ref);
-  //     }
-  //   });
-  //   return structuredClone(state, { transfer: transferredObjs });
-  // };
-
-  // const setRef = (el: HTMLInputElement, name: keyof CollectionForm) => {
-  //   console.log('settingref...', name);
-  //   if (state && el) {
-  //     const clonedState = { ...state };
-  //     clonedState[name].ref = el;
-  //     // setStepData(clonedState);
-  //   }
-  // };
-
   const updateAfterLocValidation = (isInvalid: boolean) => {
-    setValidationObj({
-      ...validationObj,
-      isLocationCodeInvalid: isInvalid
-    });
+    const clonedState = structuredClone(state);
+    clonedState.locationCode.isInvalid = isInvalid;
     setLocationCodeHelperText(fieldsConfig.code.helperTextEnabled);
+    setStepData(clonedState);
   };
 
   const validateLocationCodeMutation = useMutation({
@@ -121,172 +72,147 @@ const CollectionStep = (
     onSuccess: () => updateAfterLocValidation(false)
   });
 
-  const validateInput = (name: string, value?: string) => {
-    const newValidObj = { ...validationObj };
-    let isInvalid = false;
-    if (name === fieldsConfig.collector.name) {
-      if (!value) {
-        newValidObj.isLocationCodeInvalid = false;
-      }
-    }
-
-    if (name === fieldsConfig.startDate.name || name === fieldsConfig.endDate.name) {
-      // Have both start and end dates
-      if (state.startDate.value !== '' && state.endDate.value !== '') {
-        isInvalid = moment(state.endDate.value, MOMENT_DATE_FORMAT)
-          .isBefore(moment(state.startDate.value, MOMENT_DATE_FORMAT));
-      }
-      newValidObj.isStartDateInvalid = isInvalid;
-      newValidObj.isEndDateInvalid = isInvalid;
-    }
-    if (name === fieldsConfig.numberOfContainers.name) {
-      if (+state.numberOfContainers.value < 0) {
-        isInvalid = true;
-      }
-      newValidObj.isNumberOfContainersInvalid = isInvalid;
-    }
-    if (name === fieldsConfig.volumePerContainers.name) {
-      if (+state.volumePerContainers.value < 0) {
-        isInvalid = true;
-      }
-      newValidObj.isVolumePerContainersInvalid = isInvalid;
-    }
-    if (name === fieldsConfig.volumeOfCones.name) {
-      if (+state.volumeOfCones.value < 0) {
-        isInvalid = true;
-      }
-      newValidObj.isVolumeOfConesInvalid = isInvalid;
-    }
-
-    setValidationObj(newValidObj);
-  };
-
-  const handleFormInput = (
-    name: keyof CollectionForm,
-    value: string | string[],
-    optName?: keyof CollectionForm,
-    optValue?: string | string[],
-    setDefaultAgency?: boolean,
-    checked?: boolean
-  ) => {
-    const clonedState = { ...state };
-    if (optName && optName !== name && optValue) {
-      clonedState[name].value = value;
-      clonedState[optName].value = optValue;
-
-      if (setDefaultAgency) {
-        clonedState.useDefaultAgencyInfo.value = checked ?? false;
-      }
-
-      setStepData(clonedState);
-    } else if (name === fieldsConfig.collector.name) {
-      const getValue: string = (Array.isArray(value)) ? value[0] : value;
-      setForestClientNumber(getValue ? getForestClientNumber(getValue) : '');
-      setLocationCodeHelperText(
-        getValue
-          ? fieldsConfig.code.helperTextEnabled
-          : fieldsConfig.code.helperTextDisabled
-      );
-      clonedState[name].value = value;
-      clonedState.locationCode.value = getValue ? state.locationCode.value : '';
-      setStepData(clonedState);
-    } else {
-      clonedState[name].value = name === fieldsConfig.code.name
-        ? value.slice(0, LOCATION_CODE_LIMIT)
-        : value;
-      setStepData(clonedState);
-    }
-
-    validateInput(name, (Array.isArray(value)) ? value[0] : value);
-    if (optName && optValue) {
-      validateInput(optName);
-    }
-  };
-
   useEffect(() => {
     const useDefault = state.useDefaultAgencyInfo.value;
     const agencyValue = useDefault ? defaultAgency : state.collectorAgency.value;
     const codeValue = useDefault ? defaultCode : state.locationCode.value;
 
-    handleFormInput(
-      'collectorAgency',
-      agencyValue,
-      'locationCode',
-      codeValue,
-      true,
-      useDefault
-    );
+    const clonedState = structuredClone(state);
+    clonedState.collectorAgency.value = agencyValue;
+    clonedState.locationCode.value = codeValue;
+    setStepData(clonedState);
   }, [defaultAgency, defaultCode]);
 
-  const collectionVolumeInformationHandler = (
-    name: keyof CollectionForm,
-    value: string | string[]
-  ) => {
-    const numberOfContainers = state.numberOfContainers.value;
-    const volumePerContainers = state.volumePerContainers.value;
-    const volumeOfCones = state.volumeOfCones.value;
-    const conesCalc = Number(numberOfContainers) * Number(volumePerContainers);
-
-    if (name === fieldsConfig.volumeOfCones.name) {
-      handleFormInput(
-        fieldsConfig.volumeOfCones.name,
-        value
-      );
-      setIsCalcWrong(
-        conesCalc !== Number(volumeOfCones)
-      );
-    } else {
-      handleFormInput(
-        name,
-        value,
-        'volumeOfCones',
-        conesCalc.toString()
-      );
-      setIsCalcWrong(false);
-    }
+  const handleDefaultCheckBox = (checked: boolean) => {
+    setLocationCodeHelperText(
+      checked
+        ? fieldsConfig.code.helperTextEnabled
+        : fieldsConfig.code.helperTextDisabled
+    );
+    const clonedState = structuredClone(state);
+    clonedState.collectorAgency.value = checked ? defaultAgency : '';
+    clonedState.locationCode.value = checked ? defaultCode : '';
+    clonedState.useDefaultAgencyInfo.value = checked;
+    setStepData(clonedState);
   };
 
-  const collectionMethodsCheckboxes = (selectedMethod: string) => {
-    const { selectedCollectionCodes } = state;
-    const index = selectedCollectionCodes.value.indexOf(selectedMethod);
-    if (index > -1) {
-      selectedCollectionCodes.value.splice(index, 1);
-    } else {
-      selectedCollectionCodes.value.push(selectedMethod);
-    }
-    handleFormInput('selectedCollectionCodes', selectedCollectionCodes.value);
+  const handleCollectorInput = (value: string) => {
+    setForestClientNumber(value ? getForestClientNumber(value) : '');
+    setLocationCodeHelperText(
+      value
+        ? fieldsConfig.code.helperTextEnabled
+        : fieldsConfig.code.helperTextDisabled
+    );
+    const clonedState = structuredClone(state);
+    clonedState.collectorAgency.value = value;
+    clonedState.locationCode.value = value ? state.locationCode.value : '';
+    setStepData(clonedState);
   };
 
-  const validateLocationCode = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let locationCodeValue = event.target.value;
-    const isInRange = validator.isInt(locationCodeValue, { min: 0, max: 99 });
-
-    // Adding this check to add an extra 0 on the left, for cases where
-    // the user types values between 0 and 9
-    if (isInRange && locationCodeValue.length === 1) {
-      locationCodeValue = locationCodeValue.padStart(2, '0');
-      const clonedState = structuredClone(state);
-      clonedState.locationCode.value = locationCodeValue;
-      setStepData(clonedState);
-    }
-
+  const handleLocationCodeChange = (value: string) => {
+    const clonedState = structuredClone(state);
+    clonedState.locationCode.value = value.slice(0, LOCATION_CODE_LIMIT);
+    const isInRange = validator.isInt(value, { min: 0, max: 99 });
     if (!isInRange) {
       setInvalidLocationMessage(fieldsConfig.code.invalidText);
-      setValidationObj({
-        ...validationObj,
-        isLocationCodeInvalid: true
-      });
-      return;
+      clonedState.locationCode.isInvalid = true;
     }
+    setStepData(clonedState);
+  };
 
+  const formatLocationCode = (value: string) => (value.length > 1 ? value : value.padStart(2, '0'));
+
+  const handleLocationCodeBlur = (value: string) => {
+    const formattedCode = value.length ? formatLocationCode(value) : '';
+    if (formattedCode === '') return;
+    const clonedState = structuredClone(state);
+    clonedState.locationCode.value = formattedCode;
+    setStepData(clonedState);
     if (forestClientNumber) {
-      validateLocationCodeMutation.mutate([forestClientNumber, locationCodeValue]);
-      setValidationObj({
-        ...validationObj,
-        isLocationCodeInvalid: false
-      });
+      validateLocationCodeMutation.mutate([forestClientNumber, formattedCode]);
       setLocationCodeHelperText('');
     }
+  };
+
+  const handleDateChange = (isStartDate: boolean, value: string) => {
+    const clonedState = structuredClone(state);
+    const dateType: keyof CollectionForm = isStartDate ? 'startDate' : 'endDate';
+
+    clonedState[dateType].value = value;
+
+    const isInvalid = moment(clonedState.endDate.value, MOMENT_DATE_FORMAT)
+      .isBefore(moment(clonedState.startDate.value, MOMENT_DATE_FORMAT));
+
+    clonedState.startDate.isInvalid = isInvalid;
+    clonedState.endDate.isInvalid = isInvalid;
+
+    setStepData(clonedState);
+  };
+
+  /**
+   * Calculate volume_of_cones = num_of_container * vol_per_container
+   */
+  const calcVolume = (numOfContainer: string, volPerContainer: string) => (
+    (Number(numOfContainer) * Number(volPerContainer)).toFixed(3)
+  );
+
+  /**
+   * Only for number of container and vol per container
+   */
+  const isNumNotInRange = (value: string): boolean => (
+    !((Number(value) > 0) && (Number(value) < 9999.999))
+  );
+
+  const handleContainerNumAndVol = (isNum: boolean, value: string) => {
+    const clonedState = structuredClone(state);
+    const isOverDecimal = !validator.isDecimal(value, { decimal_digits: '0,3' });
+
+    const isNotInRange = isNumNotInRange(value);
+    const valType: keyof CollectionForm = isNum ? 'numberOfContainers' : 'volumePerContainers';
+    clonedState[valType].value = value;
+    clonedState[valType].isInvalid = isNotInRange || isOverDecimal;
+
+    const multipliedVol = calcVolume(
+      clonedState.numberOfContainers.value,
+      clonedState.volumePerContainers.value
+    );
+    clonedState.volumeOfCones.value = multipliedVol;
+
+    setStepData(clonedState);
+  };
+
+  const handleVolOfCones = (value: string) => {
+    const clonedState = structuredClone(state);
+    const isOverDecimal = !validator.isDecimal(value, { decimal_digits: '0,3' });
+    clonedState.volumeOfCones.isInvalid = isOverDecimal;
+    clonedState.volumeOfCones.value = value;
+
+    const multipliedVol = calcVolume(
+      clonedState.numberOfContainers.value,
+      clonedState.volumePerContainers.value
+    );
+
+    if (!isOverDecimal) {
+      setIsCalcWrong(Number(multipliedVol).toFixed(3) !== Number(value).toFixed(3));
+    }
+    setStepData(clonedState);
+  };
+
+  const handleCollectionMethods = (selectedMethod: string) => {
+    const clonedState = structuredClone(state);
+    const index = clonedState.selectedCollectionCodes.value.indexOf(selectedMethod);
+    if (index > -1) {
+      clonedState.selectedCollectionCodes.value.splice(index, 1);
+    } else {
+      clonedState.selectedCollectionCodes.value.push(selectedMethod);
+    }
+    setStepData(clonedState);
+  };
+
+  const handleComment = (value: string) => {
+    const clonedState = structuredClone(state);
+    clonedState.comments.value = value;
+    setStepData(clonedState);
   };
 
   return (
@@ -306,20 +232,7 @@ const CollectionStep = (
             readOnly={readOnly}
             checked={state.useDefaultAgencyInfo.value}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const { checked } = e.target;
-              setLocationCodeHelperText(
-                !checked
-                  ? fieldsConfig.code.helperTextDisabled
-                  : fieldsConfig.code.helperTextEnabled
-              );
-              handleFormInput(
-                'collectorAgency',
-                checked ? defaultAgency : '',
-                'locationCode',
-                checked ? defaultCode : '',
-                true,
-                checked
-              );
+              handleDefaultCheckBox(e.target.checked);
             }}
           />
         </Column>
@@ -336,13 +249,8 @@ const CollectionStep = (
             items={agencyOptions}
             readOnly={state.useDefaultAgencyInfo.value || readOnly}
             selectedItem={state.collectorAgency.value}
-            onChange={(e: ComboBoxEvent) => {
-              handleFormInput(
-                'collectorAgency',
-                e.selectedItem
-              );
-            }}
-            invalid={validationObj.isNameInvalid}
+            onChange={(e: ComboBoxEvent) => handleCollectorInput(e.selectedItem)}
+            invalid={state.collectorAgency.isInvalid}
             shouldFilterItem={
               ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
             }
@@ -359,21 +267,16 @@ const CollectionStep = (
             placeholder={!forestClientNumber ? '' : fieldsConfig.code.placeholder}
             labelText={fieldsConfig.code.label}
             helperText={locationCodeHelperText}
-            invalid={validationObj.isLocationCodeInvalid}
+            invalid={state.locationCode.isInvalid}
             invalidText={invalidLocationMessage}
-            readOnly={state.useDefaultAgencyInfo.value ?? readOnly}
+            readOnly={state.useDefaultAgencyInfo.value || readOnly}
             disabled={!forestClientNumber}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleFormInput(
-                'locationCode',
-                e.target.value
-              );
+              handleLocationCodeChange(e.target.value);
             }}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (!e.target.readOnly) {
-                validateLocationCode(e);
-              }
+              handleLocationCodeBlur(e.target.value);
             }}
           />
           {
@@ -397,10 +300,7 @@ const CollectionStep = (
             readOnly={readOnly}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput(
-                'startDate',
-                selectedDate
-              );
+              handleDateChange(true, selectedDate);
             }}
           >
             <DatePickerInput
@@ -409,7 +309,7 @@ const CollectionStep = (
               placeholder={fieldsConfig.startDate.placeholder}
               labelText={fieldsConfig.startDate.labelText}
               helperText={fieldsConfig.startDate.helperText}
-              invalid={validationObj.isStartDateInvalid}
+              invalid={state.startDate.isInvalid}
               invalidText={fieldsConfig.startDate.invalidText}
               size="md"
             />
@@ -423,10 +323,7 @@ const CollectionStep = (
             readOnly={readOnly}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput(
-                'endDate',
-                selectedDate
-              );
+              handleDateChange(false, selectedDate);
             }}
           >
             <DatePickerInput
@@ -435,7 +332,7 @@ const CollectionStep = (
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
               helperText={fieldsConfig.endDate.helperText}
-              invalid={validationObj.isEndDateInvalid}
+              invalid={state.endDate.isInvalid}
               invalidText={fieldsConfig.endDate.invalidText}
               size="md"
             />
@@ -450,12 +347,10 @@ const CollectionStep = (
             value={state.numberOfContainers.value}
             label={fieldsConfig.numberOfContainers.labelText}
             readOnly={readOnly}
+            invalid={state.numberOfContainers.isInvalid}
             invalidText={fieldsConfig.numberOfContainers.invalidText}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              collectionVolumeInformationHandler(
-                fieldsConfig.numberOfContainers.name as keyof CollectionForm,
-                e.target.value
-              );
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              handleContainerNumAndVol(true, e.target.value);
             }}
             hideSteppers
             disableWheel
@@ -468,12 +363,10 @@ const CollectionStep = (
             value={state.volumePerContainers.value}
             label={fieldsConfig.volumePerContainers.labelText}
             readOnly={readOnly}
+            invalid={state.volumePerContainers.isInvalid}
             invalidText={fieldsConfig.volumePerContainers.invalidText}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              collectionVolumeInformationHandler(
-                fieldsConfig.volumePerContainers.name as keyof CollectionForm,
-                e.target.value
-              );
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              handleContainerNumAndVol(false, e.target.value);
             }}
             hideSteppers
             disableWheel
@@ -487,16 +380,14 @@ const CollectionStep = (
             name={fieldsConfig.volumeOfCones.name}
             value={state.volumeOfCones.value}
             label={fieldsConfig.volumeOfCones.labelText}
+            invalid={state.volumeOfCones.isInvalid}
             invalidText={fieldsConfig.volumeOfCones.invalidText}
             helperText={fieldsConfig.volumeOfCones.helperText}
             warn={isCalcWrong}
             readOnly={readOnly}
             warnText={fieldsConfig.volumeOfCones.warnText}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              collectionVolumeInformationHandler(
-                fieldsConfig.volumeOfCones.name as keyof CollectionForm,
-                e.target.value
-              );
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              handleVolOfCones(e.target.value);
             }}
             hideSteppers
             disableWheel
@@ -518,39 +409,12 @@ const CollectionStep = (
                   labelText={method.description}
                   readOnly={readOnly}
                   checked={state.selectedCollectionCodes.value.includes(method.code)}
-                  onChange={() => collectionMethodsCheckboxes(method.code)}
+                  onChange={() => handleCollectionMethods(method.code)}
                 />
               ))
             }
           </CheckboxGroup>
         </Column>
-        {
-        // Commenting this for now until we decide how to deal
-        // with the 'other' option
-        /* <Column className="" sm={4} md={4} lg={16} xlg={12}>
-          {
-            isOtherChecked && (
-              <TextInput
-                className="collection-method__input"
-                id={fieldsConfig.collectionMethod.name}
-                name={fieldsConfig.collectionMethod.name}
-                type="text"
-                ref={(el: HTMLInputElement) => addRefs(el, fieldsConfig.collectionMethod.name)}
-                labelText={fieldsConfig.collectionMethod.labelText}
-                placeholder={fieldsConfig.collectionMethod.placeholder}
-                helperText={fieldsConfig.collectionMethod.helperText}
-                readOnly={readOnly}
-                value={state.collectionMethodName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  handleFormInput(
-                    fieldsConfig.collectionMethod.name,
-                    e.target.value
-                  );
-                }}
-              />
-            )
-          }
-        </Column> */}
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={16} xlg={12}>
@@ -562,10 +426,7 @@ const CollectionStep = (
             readOnly={readOnly}
             placeholder={fieldsConfig.comments.placeholder}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleFormInput(
-                'comments',
-                e.target.value
-              );
+              handleComment(e.target.value);
             }}
             rows={5}
             maxCount={400}
