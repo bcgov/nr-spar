@@ -8,7 +8,6 @@ import './styles/custom.scss';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import SilentCheckSso from './components/SilentCheckSso';
-import Logout from './components/Logout';
 import Layout from './layout/PrivateLayout';
 import Landing from './views/Landing';
 import Dashboard from './views/Dashboard/dashboard';
@@ -38,7 +37,6 @@ const App: React.FC = () => {
         <Route path="/" element={<Landing />} />
         <Route path="/" element={<Layout />}>
           <Route path="/silent-check-sso" element={<SilentCheckSso />} />
-          <Route path="/logout" element={<Logout />} />
 
           <Route
             path="/dashboard"

@@ -42,14 +42,13 @@ const MyProfile = () => {
 
   const navigate = useNavigate();
 
-  const goOut = useCallback(async () => {
+  const goOut = (): void => {
     if (theme === 'g100') {
-      setTheme('g10');
-      localStorage.setItem('mode', 'light');
+      changeTheme();
     }
     
-    await signOut();
-  }, []);
+    signOut();
+  };
 
   const changeTheme = () => {
     if (theme === 'g10') {
@@ -109,7 +108,7 @@ const MyProfile = () => {
           </SideNavLink>
           <SideNavLink
             renderIcon={Icons.UserFollow}
-            onClick={goOut}
+            onClick={() => { goOut(); }}
           >
             Sign out
           </SideNavLink>

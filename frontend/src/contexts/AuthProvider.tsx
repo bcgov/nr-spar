@@ -99,18 +99,17 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     }
   };
 
-  const signOut = async (): Promise<void> => {
+  const signOut = (): void => {
     try {
+      Auth.signOut();
       localStorage.removeItem(FAM_LOGIN_USER);
       setSigned(false);
       setUser(null);
       setProvider('');
       setToken('');
-      await Auth.signOut();
     } catch (e) {
       console.log(e);
     }
-    return Promise.resolve();
   };
 
   // memoize

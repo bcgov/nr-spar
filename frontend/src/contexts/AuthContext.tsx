@@ -7,7 +7,7 @@ interface AuthContextData {
   user: FamUser | null;
   isCurrentAuthUser(): Promise<boolean>;
   signIn(provider: LoginProviders): void;
-  signOut(): Promise<void>;
+  signOut(): void;
   provider: string;
   token: string | undefined;
 }
