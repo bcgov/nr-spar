@@ -9,6 +9,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -108,5 +109,26 @@ public class SeedlotService {
 
     log.debug("Next class {} seedlot number: {}", seedlotNumber);
     return String.valueOf(seedlotNumber);
+  }
+
+  /**
+   * Retrieve a single seedlot information.
+   *
+   * @param seedlotNumber the seedlot number of the seedlot to fetch the information
+   * @return A Seedlot entity.
+   * @throws SeedlotNotFoundException in case of errors.
+   */
+  public Optional<Seedlot> getSingleSeedlotInfo(String seedlotNumber) {
+    log.info("Retrieving information for Seedlot number {}", seedlotNumber);
+
+    Optional<Seedlot> seedlotInfo =
+        seedlotRepository.findById(seedlotNumber);
+
+    if (seedlotInfo.isEmpty()) {
+      log.error("Nothing found for seedlot number: {}", seedlotNumber);
+      throw new SeedlotNotFoundException();
+    }
+
+    return seedlotInfo;
   }
 }

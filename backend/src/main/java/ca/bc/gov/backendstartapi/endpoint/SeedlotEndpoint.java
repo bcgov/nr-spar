@@ -13,6 +13,7 @@ import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,8 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -185,5 +189,43 @@ public class SeedlotEndpoint {
           SeedlotCreateDto createDto) {
     SeedlotCreateResponseDto response = seedlotService.createSeedlot(createDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  }
+
+  /**
+   * Get information from a single seedlot.
+   *
+   * @param seedlotNumber the seedlot number to fetch the info for
+   * @return A {@link Seedlot} with all the current information for the seedlot.
+   */
+  @GetMapping(path = "/{seedlotNumber}")
+  @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Fetch a single seedlot information",
+      description = """
+          Fetch all current information from a single seedlot, identified by it's number
+          """)
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "The Seedlot info was correctly found"),
+        @ApiResponse(
+          responseCode = "401",
+          description = "Access token is missing or invalid",
+          content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Could not find information for the given seedlot number")
+      })
+  public Optional<Seedlot> getSingleSeedlotInfo(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber) {
+    return seedlotService.getSingleSeedlotInfo(seedlotNumber);
   }
 }
