@@ -129,7 +129,6 @@ public class SeedlotService {
       throw new SeedlotNotFoundException();
     }
 
-    log.debug("Next class {} seedlot number: {}", seedlotNumber);
     return seedlotInfo;
   }
 }
