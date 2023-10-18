@@ -165,27 +165,25 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserIdSuccessTest")
-  void findSeedlotsByUserIdSuccessTest() {
-    String userId = "userId";
+  @DisplayName("findSeedlotsByUserWithTwoSeedlots")
+  void getUserSeedlots_findsTwoSeedlots_shouldSucceed() {
+    String userId = "123456abcde@idir";
 
-    Seedlot firstSeedlot = new Seedlot("0000000");
-    Seedlot secondSeedlot = new Seedlot("0000001");
-
-    List<Seedlot> testList = List.of(firstSeedlot, secondSeedlot);
+    List<Seedlot> testList = List.of(new Seedlot("63001"), new Seedlot("63002"));
 
     when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(testList);
 
     List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
 
     Assertions.assertNotNull(responseFromService);
-    Assertions.assertEquals(testList.size(), responseFromService.size());
-    Assertions.assertEquals(testList, responseFromService);
+    Assertions.assertEquals(2, responseFromService.size());
+    Assertions.assertEquals("63001", responseFromService.get(0).getId());
+    Assertions.assertEquals("63002", responseFromService.get(1).getId());
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserIdEmptyTest")
-  void findSeedlotsByUserIdEmptyTest() {
+  @DisplayName("findSeedlotsByUserNoSeedlots")
+  void getUserSeedlots_noSeedlots_shouldSucceed() {
     String userId = "userId";
 
     when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
@@ -193,6 +191,19 @@ class SeedlotServiceTest {
     List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
 
     Assertions.assertNotNull(responseFromService);
-    Assertions.assertEquals(0, responseFromService.size());
+    Assertions.assertTrue(responseFromService.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findSeedlotsByUserNoPageSize")
+  void getUserSeedlots_noPageSize_shouldSucceed() {
+    String userId = "userId";
+
+    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
+
+    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 0);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertTrue(responseFromService.isEmpty());
   }
 }

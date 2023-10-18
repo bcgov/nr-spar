@@ -218,7 +218,7 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots(any(), any(), any())).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots("USERID", 0, 10)).thenReturn(userSeedlots);
 
     mockMvc
         .perform(
@@ -233,15 +233,14 @@ class SeedlotEndpointTest {
   @WithMockUser(roles = "user_read")
   void getUserSeedlotInfoTestChangePageNumber() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000001");
-    Integer pageNumber = 1;
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots(any(), eq(pageNumber), any())).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots("USERID", 0, 10)).thenReturn(userSeedlots);
 
     mockMvc
         .perform(
-            get(String.format("/api/seedlots/search-seedlots/USERID?page=%s", pageNumber))
+            get(String.format("/api/seedlots/search-seedlots/USERID?page=%s", 1))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
@@ -252,19 +251,18 @@ class SeedlotEndpointTest {
   @WithMockUser(roles = "user_read")
   void getUserSeedlotInfoTestChangePageSize() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000002");
-    Integer pageSize = 2;
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots(any(), any(), eq(pageSize))).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots("USERID", 0, 2)).thenReturn(userSeedlots);
 
     mockMvc
         .perform(
-            get(String.format("/api/seedlots/search-seedlots/USERID?page=0&size=%s", pageSize))
+            get(String.format("/api/seedlots/search-seedlots/USERID?page=0&size=%s", 2))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.length()").value(pageSize))
+        .andExpect(jsonPath("$.length()").value(2))
         .andReturn();
   }
 
@@ -272,7 +270,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("getSingleSeedlotInfoNotFoundTest")
   void getSingleSeedlotInfoNotFoundTest() throws Exception {
-    when(seedlotService.getUserSeedlots(any(), any(), any())).thenReturn(List.of());
+    when(seedlotService.getUserSeedlots("USERID", 0, 10)).thenReturn(List.of());
 
     mockMvc
         .perform(get("/api/seedlots/search-seedlots/USERID")

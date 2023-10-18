@@ -124,8 +124,12 @@ public class SeedlotService {
    */
   public List<Seedlot> getUserSeedlots(
       String userId,
-      Integer pageNumber,
-      Integer pageSize) {
+      int pageNumber,
+      int pageSize) {
+    if (pageSize == 0) {
+      pageSize = 10;
+    }
+
     Pageable sortedPageable = PageRequest.of(
         pageNumber,
         pageSize,
