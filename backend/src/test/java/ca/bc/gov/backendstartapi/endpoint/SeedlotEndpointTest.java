@@ -15,12 +15,14 @@ import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -220,9 +222,7 @@ class SeedlotEndpointTest {
     when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(userSeedlots);
 
     mockMvc
-        .perform(
-            get("/api/seedlots/search-seedlots/USERID")
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/seedlots/search-seedlots/USERID").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
   }
@@ -265,17 +265,41 @@ class SeedlotEndpointTest {
         .andReturn();
   }
 
+  @Test
+  @DisplayName("getSingleSeedlotInfoNotFoundNoPageTest")
+  void getSingleSeedlotInfoNotFoundNoPageTest() throws Exception {
+    when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(List.of());
+
+    mockMvc
+        .perform(get("/api/seedlots/search-seedlots/USERID").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotInfoTest")
+  @WithMockUser(roles = "user_read")
+  void getSingleSeedlotInfoTest() throws Exception {
+    Seedlot seedlotEntity = new Seedlot("0000000");
+
+    when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(Optional.of(seedlotEntity));
+
+    mockMvc
+        .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
 
   @Test
   @DisplayName("getSingleSeedlotInfoNotFoundTest")
   void getSingleSeedlotInfoNotFoundTest() throws Exception {
-    when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(List.of());
+    when(seedlotService.getSingleSeedlotInfo(any())).thenThrow(new SeedlotNotFoundException());
 
     mockMvc
-        .perform(get("/api/seedlots/search-seedlots/USERID")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.length()").value(0))
+        .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
+        .andDo(print())
+        .andExpect(status().isNotFound())
         .andReturn();
   }
 }

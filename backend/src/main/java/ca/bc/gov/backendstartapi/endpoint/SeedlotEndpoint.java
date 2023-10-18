@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -203,8 +204,7 @@ public class SeedlotEndpoint {
       summary = "Fetch seedlots registered by a given user.",
       description = "Returns a paginated list containing the seedlots",
       responses = {
-        @ApiResponse(responseCode = "200",
-                     description = "The Seedlots were successfully found"),
+        @ApiResponse(responseCode = "200", description = "The Seedlots were successfully found"),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
@@ -216,21 +216,47 @@ public class SeedlotEndpoint {
       })
   public List<Seedlot> getUserSeedlots(
       @PathVariable
-          @Parameter(
-              name = "userId",
-              in = ParameterIn.PATH,
-              description = "Identifier of the user")
+          @Parameter(name = "userId", in = ParameterIn.PATH, description = "Identifier of the user")
           String userId,
-      @RequestParam(
-          value = "page",
-          required = false,
-          defaultValue = "1")
-          int page,
-      @RequestParam(
-          value = "size",
-          required = false,
-          defaultValue = "10")
-          int size) {
+      @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+      @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
     return seedlotService.getUserSeedlots(userId, page, size);
+  }
+
+  /**
+   * Get information from a single seedlot.
+   *
+   * @param seedlotNumber the seedlot number to fetch the info for
+   * @return A {@link Seedlot} with all the current information for the seedlot.
+   */
+  @GetMapping(path = "/{seedlotNumber}")
+  @PreAuthorize("hasRole('user_read')")
+  @Operation(
+      summary = "Fetch a single seedlot information",
+      description =
+          """
+          Fetch all current information from a single seedlot, identified by it's number
+          """)
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "The Seedlot info was correctly found"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Could not find information for the given seedlot number")
+      })
+  public Optional<Seedlot> getSingleSeedlotInfo(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber) {
+    return seedlotService.getSingleSeedlotInfo(seedlotNumber);
   }
 }
