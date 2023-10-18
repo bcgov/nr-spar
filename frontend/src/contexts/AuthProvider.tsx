@@ -59,6 +59,27 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const [provider, setProvider] = useState<string>('');
   const [token, setToken] = useState<string>('');
 
+  const fetchFamCurrentSession = async (): Promise<FamUser | null> => {
+    try {
+      const currentSession: CognitoUserSession = await Auth.currentSession();
+      const famUser = parseToken(currentSession);
+      return famUser;
+    } catch (e) {
+      console.log(`Error while fetching user session ${JSON.stringify(e)}`)
+    }
+    return null;
+  };
+
+  const updateUserFamSession = (famUser: FamUser) => {
+    localStorage.setItem(FAM_LOGIN_USER, JSON.stringify(famUser));
+
+    // axios token
+    axios.defaults.headers.common = {
+      // Authorization: `Bearer ${token}`
+      'Temporary-User-Identification': famUser.axiosRequestUser
+    };
+  };
+
   const isCurrentAuthUser = async () => {
     let userIsLoggedIn = false;
     try {
@@ -68,18 +89,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     } catch (e) {}
 
     if (userIsLoggedIn) {
-      const currentAuthToken: CognitoUserSession = await Auth.currentSession();
-      const famUser = parseToken(currentAuthToken);
-      localStorage.setItem(FAM_LOGIN_USER, JSON.stringify(famUser));
-      setUser(famUser);
-      setProvider(famUser.provider);
-      setToken(famUser.axiosRequestUser);
-
-      // axios token
-      axios.defaults.headers.common = {
-        // Authorization: `Bearer ${token}`
-        'Temporary-User-Identification': famUser.axiosRequestUser
-      };
+      const famUser = await fetchFamCurrentSession();
+      if (famUser) {
+        updateUserFamSession(famUser);
+        setUser(famUser);
+        setProvider(famUser.provider);
+        setToken(famUser.axiosRequestUser);
+      }
     }
 
     return userIsLoggedIn;
@@ -111,6 +127,24 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       console.log(e);
     }
   };
+
+  const refreshTokenPvt = async () => {
+    const famUser = await fetchFamCurrentSession();
+    if (famUser) {
+      updateUserFamSession(famUser);
+    }
+  };
+
+  // 2 minutes
+  const REFRESH_TIMER = 2 * 60 * 1000;
+
+  setInterval(() => {
+    refreshTokenPvt()
+      .then(() => {
+        console.log('User session successfully refreshed!');
+      })
+      .catch((e) => console.error(e));
+  }, REFRESH_TIMER);
 
   // memoize
   const contextValue = useMemo(() => ({
