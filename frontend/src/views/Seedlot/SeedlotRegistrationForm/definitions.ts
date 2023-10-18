@@ -47,3 +47,22 @@ export type AllStepInvalidationObj = {
   orchardStep: FormInvalidationObj,
   extractionStorageStep: FormInvalidationObj
 }
+
+type ProgressStepStatus = {
+  isComplete: boolean;
+  isCurrent: boolean;
+  isInvalid: boolean;
+}
+
+export type ProgressIndicatorConfig = {
+  collection: ProgressStepStatus;
+  ownership: ProgressStepStatus;
+  interim: ProgressStepStatus;
+  orchard: ProgressStepStatus;
+  parent: ProgressStepStatus;
+  extraction: ProgressStepStatus;
+}
+
+export type StepMap = {
+  [key: number]: keyof ProgressIndicatorConfig;
+}

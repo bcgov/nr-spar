@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import moment from 'moment';
-
 import {
   FlexGrid,
   Column,
@@ -16,22 +14,22 @@ import {
   TextInput,
   InlineLoading
 } from '@carbon/react';
-
+import moment from 'moment';
 import validator from 'validator';
 
 import Subtitle from '../../Subtitle';
-
 import getForestClientLocation from '../../../api-service/forestClientsAPI';
-
-import { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig } from './constants';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 import getForestClientNumber from '../../../utils/StringUtils';
 import { LOCATION_CODE_LIMIT } from '../../../shared-constants/shared-constants';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
+
+import { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig } from './constants';
 import {
   CollectionStepProps,
   CollectionForm
 } from './definitions';
+import { calcVolume, formatLocationCode, isNumNotInRange } from './utils';
 
 import './styles.scss';
 
@@ -120,8 +118,6 @@ const CollectionStep = (
     setStepData(clonedState);
   };
 
-  const formatLocationCode = (value: string) => (value.length > 1 ? value : value.padStart(2, '0'));
-
   const handleLocationCodeBlur = (value: string) => {
     const formattedCode = value.length ? formatLocationCode(value) : '';
     if (formattedCode === '') return;
@@ -148,20 +144,6 @@ const CollectionStep = (
 
     setStepData(clonedState);
   };
-
-  /**
-   * Calculate volume_of_cones = num_of_container * vol_per_container
-   */
-  const calcVolume = (numOfContainer: string, volPerContainer: string) => (
-    (Number(numOfContainer) * Number(volPerContainer)).toFixed(3)
-  );
-
-  /**
-   * Only for number of container and vol per container
-   */
-  const isNumNotInRange = (value: string): boolean => (
-    !((Number(value) > 0) && (Number(value) < 9999.999))
-  );
 
   const handleContainerNumAndVol = (isNum: boolean, value: string) => {
     const clonedState = structuredClone(state);

@@ -1,3 +1,4 @@
+import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import {
   ownerTemplate,
@@ -158,4 +159,51 @@ export const initOwnerShipInvalidState = (): OwnershipInvalidObj => {
   return {
     0: initialOwnerInvalidState
   };
+};
+
+/**
+ * Validate Collection Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateCollectionStep = (collectionData: CollectionForm): boolean => {
+  let isInvalid = false;
+  const collectionkeys = Object.keys(collectionData) as Array<keyof CollectionForm>;
+  collectionkeys.forEach((key) => {
+    if (collectionData[key].isInvalid) {
+      isInvalid = true;
+    }
+  });
+  return isInvalid;
+};
+
+/**
+ * Verify if the collection step is compelete
+ * Return true if it's compelte, false otherwise
+ */
+export const verifyCollectionStepCompleteness = (collectionData: CollectionForm): boolean => {
+  if (!collectionData.collectorAgency.value.length) {
+    return false;
+  }
+  if (!collectionData.locationCode.value.length) {
+    return false;
+  }
+  if (!collectionData.startDate.value.length) {
+    return false;
+  }
+  if (!collectionData.endDate.value.length) {
+    return false;
+  }
+  if (!collectionData.numberOfContainers.value.length) {
+    return false;
+  }
+  if (!collectionData.volumePerContainers.value.length) {
+    return false;
+  }
+  if (!collectionData.volumeOfCones.value.length) {
+    return false;
+  }
+  if (!collectionData.selectedCollectionCodes.value.length) {
+    return false;
+  }
+  return true;
 };
