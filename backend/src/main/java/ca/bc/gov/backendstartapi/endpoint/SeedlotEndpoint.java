@@ -224,7 +224,7 @@ public class SeedlotEndpoint {
       @RequestParam(
           value = "page",
           required = false,
-          defaultValue = "0")
+          defaultValue = "1")
           int page,
       @RequestParam(
           value = "size",

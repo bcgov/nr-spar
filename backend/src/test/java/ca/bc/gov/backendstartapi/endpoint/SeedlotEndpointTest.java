@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -218,7 +217,7 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots("USERID", 0, 10)).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(userSeedlots);
 
     mockMvc
         .perform(
@@ -236,11 +235,11 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots("USERID", 0, 10)).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(userSeedlots);
 
     mockMvc
         .perform(
-            get(String.format("/api/seedlots/search-seedlots/USERID?page=%s", 1))
+            get("/api/seedlots/search-seedlots/USERID?page={page}", 1)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
@@ -255,11 +254,11 @@ class SeedlotEndpointTest {
     userSeedlots.add(seedlotEntity);
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots("USERID", 0, 2)).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots("USERID", 1, 2)).thenReturn(userSeedlots);
 
     mockMvc
         .perform(
-            get(String.format("/api/seedlots/search-seedlots/USERID?page=0&size=%s", 2))
+            get("/api/seedlots/search-seedlots/USERID?page=1&size={size}", 2)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2))
@@ -270,7 +269,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("getSingleSeedlotInfoNotFoundTest")
   void getSingleSeedlotInfoNotFoundTest() throws Exception {
-    when(seedlotService.getUserSeedlots("USERID", 0, 10)).thenReturn(List.of());
+    when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(List.of());
 
     mockMvc
         .perform(get("/api/seedlots/search-seedlots/USERID")

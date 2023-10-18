@@ -126,6 +126,9 @@ public class SeedlotService {
       String userId,
       int pageNumber,
       int pageSize) {
+    if (pageNumber == 0) {
+      pageNumber = 1;
+    }
     if (pageSize == 0) {
       pageSize = 10;
     }
