@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -42,6 +43,8 @@ class SeedlotServiceTest {
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
+
+  private static final String SEEDLOT_NOT_FOUND_STR = "404 NOT_FOUND \"Seedlot doesn't exist\"";
 
   private static final EffectiveDateRange DATE_RANGE =
       new EffectiveDateRange(LocalDate.now(), LocalDate.now());
@@ -161,5 +164,35 @@ class SeedlotServiceTest {
             });
 
     Assertions.assertEquals(BAD_REQUEST_STR, exc.getMessage());
+  }
+
+  @Test
+  @DisplayName("findSingleSeedlotSuccessTest")
+  void findSingleSeedlotSuccessTest() {
+    Seedlot seedlotEntity = new Seedlot("0000000");
+
+    when(seedlotRepository.findById("0000000")).thenReturn(Optional.of(seedlotEntity));
+
+    Optional<Seedlot> responseFromService = seedlotService.getSingleSeedlotInfo("0000000");
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(Optional.of(seedlotEntity), responseFromService);
+  }
+
+  @Test
+  @DisplayName("findSingleSeedlotFailTest")
+  void findSingleSeedlotFailTest() {
+    String seedlotNumber = "123456";
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+
+    Exception exc =
+        Assertions.assertThrows(
+            SeedlotNotFoundException.class,
+            () -> {
+              seedlotService.getSingleSeedlotInfo(seedlotNumber);
+            });
+
+    Assertions.assertEquals(SEEDLOT_NOT_FOUND_STR, exc.getMessage());
   }
 }
