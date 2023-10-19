@@ -65,7 +65,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       const famUser = parseToken(currentSession);
       return famUser;
     } catch (e) {
-      console.log(`Error while fetching user session ${JSON.stringify(e)}`)
+      console.warn('Error while fetching user session: ', e);
     }
     return null;
   };
