@@ -1,7 +1,8 @@
-const DATE_FORMAT = 'Y/m/d';
-const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
+export const DATE_FORMAT = 'Y/m/d';
+export const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
+export const MAX_INPUT_DECIMAL = 9999.999;
 
-const fieldsConfig = {
+export const fieldsConfig = {
   titleSection: {
     title: 'Collector agency',
     subtitle: 'Enter the collector agency information'
@@ -74,5 +75,3 @@ const fieldsConfig = {
     placeholder: 'Additional comments about the seedlot'
   }
 };
-
-export { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig };
