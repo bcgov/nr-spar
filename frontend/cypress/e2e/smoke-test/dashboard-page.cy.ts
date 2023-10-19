@@ -1,4 +1,3 @@
-import { HALF_SECOND } from '../../constants';
 import { NavigationLabels } from '../../utils/labels';
 import prefix from '../../../src/styles/classPrefix';
 
@@ -46,7 +45,6 @@ describe('Dashboard page test', () => {
       .find('.fav-card-content')
       .find('.fav-card-title-large')
       .contains('Seedlots')
-      .wait(HALF_SECOND)
       .click();
     cy.isPageTitle(NavigationLabels.Seedlots);
   });
@@ -72,7 +70,6 @@ describe('Dashboard page test', () => {
       .find('.fav-card-content')
       .find('.fav-card-title-large')
       .contains('Create A class seedlot')
-      .wait(HALF_SECOND)
       .click();
 
     cy.isPageTitle('Create A class seedlot');
@@ -100,7 +97,6 @@ describe('Dashboard page test', () => {
       .find('.fav-card-content')
       .find('.fav-card-title-large')
       .contains('My Seedlots')
-      .wait(HALF_SECOND)
       .click();
 
     cy.isPageTitle('My Seedlots');
