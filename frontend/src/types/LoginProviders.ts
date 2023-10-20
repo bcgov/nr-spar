@@ -3,8 +3,8 @@
  * BCeID Business: bceidbusiness
  */
 enum LoginProviders {
-  IDIR = 'idir',
-  BCEID_BUSINESS = 'bceidbusiness'
+  IDIR = 'IDIR',
+  BCEID_BUSINESS = 'BCEIDBUSINESS'
 }
 
 export default LoginProviders;

@@ -5,3 +5,5 @@ export const THREE_SECONDS = 3 * ONE_SECOND;
 export const FIVE_SECONDS = 5 * ONE_SECOND;
 export const TEN_SECONDS = 10 * ONE_SECOND;
 export const TYPE_DELAY = 50;
+export const USERNAME = 'Load Test-3 NRS';
+export const BCEID_NAME = 'LOAD-3-TEST';

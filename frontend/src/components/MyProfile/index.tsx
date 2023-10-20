@@ -14,6 +14,7 @@ import PanelSectionName from '../PanelSectionName';
 import { useThemePreference } from '../../utils/ThemePreference';
 
 import './style.scss';
+import LoginProviders from '../../types/LoginProviders';
 
 const accountOptions = [
   {
@@ -76,7 +77,12 @@ const MyProfile = () => {
         </div>
         <div className="user-data">
           <p className="user-name">{`${user?.firstName} ${user?.lastName}`}</p>
-          <p>{`IDIR: ${user?.idirUsername}`}</p>
+          {user?.provider === LoginProviders.IDIR && (
+            <p>{`IDIR: ${user?.providerUsername}`}</p>
+          )}
+          {user?.provider === LoginProviders.BCEID_BUSINESS && (
+            <p>{`BCeID: ${user?.providerUsername}`}</p>
+          )}
           <p>{user?.email}</p>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { FIVE_SECONDS } from '../../constants';
+import { BCEID_NAME, FIVE_SECONDS, USERNAME } from '../../constants';
 
 describe('Login page test', () => {
   let loginPageData: {
@@ -60,7 +60,7 @@ describe('Login page test', () => {
     cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
-    cy.get('.user-data').find('p').contains('IDIR: undefined');
+    cy.get('.user-data').find('p').contains(`BCeID: ${BCEID_NAME}`);
   });
 
   it('log in with BCeID and validate user information', () => {
@@ -69,6 +69,6 @@ describe('Login page test', () => {
     cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
-    cy.get('.user-data').find('p').contains('undefined undefined');
+    cy.get('.user-data').find('p').contains(USERNAME);
   });
 });

@@ -1,5 +1,4 @@
 import React, {
-  useContext,
   useMemo,
   useState
 } from 'react';
@@ -17,6 +16,27 @@ interface Props {
 
 const FAM_LOGIN_USER = 'famLoginUser';
 
+const findFindAndLastName = (displayName: string, provider: string): Array<string> => {
+  let splitString = ', ';
+  if (!displayName.includes(splitString)) {
+    splitString = ' ';
+  }
+  let parts = displayName.split(splitString);
+  let firstName = parts[0];
+  let lastName = parts[1];
+
+  if (parts.length > 2) {
+    lastName = `${lastName} ${parts[2]}`;
+  }
+  
+  if (provider === LoginProviders.IDIR)  {
+    firstName = parts[1].split(' ')[0].trim();
+    lastName = parts[0].includes(' ') ? parts[0].split(' ')[1] : parts[0];
+  }
+
+  return [firstName, lastName];
+};
+
 /**
  * Parses a CognitoUserSession into a JS object. For a deeper understanding
  * you can take a look on the attribute mapping reference at:
@@ -31,17 +51,14 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
 
   // Extract the first name and last name from the displayName and remove unwanted part
   const displayName = decodedIdToken['custom:idp_display_name'] as string;
-  const [lastName, firstName] = displayName.split(', ');
-  const sanitizedFirstName = firstName.split(' ')[0].trim(); // Remove unwanted part (WLRS:EX)
-  const sanitizedLastName = lastName.includes(' ') ? lastName.split(' ')[1].trim() : lastName;
-
+  const [lastName, firstName] = findFindAndLastName(displayName, decodedIdToken['custom:idp_name']);
   const famUser: FamUser = {
     displayName: decodedIdToken['custom:idp_display_name'], // E.g: 'de Campos, Ricardo WLRS:EX'
     email: decodedIdToken['email'],
-    lastName: sanitizedLastName,
-    firstName: sanitizedFirstName,
-    idirUsername: decodedIdToken['custom:idp_username'], // E.g: RDECAMPO
-    name: `${sanitizedFirstName} ${sanitizedLastName}`,
+    lastName,
+    firstName,
+    providerUsername: decodedIdToken['custom:idp_username'], // E.g: RDECAMPO
+    name: `${firstName} ${lastName}`,
     roles: decodedAccessToken['cognito:groups'],
     provider: decodedIdToken['custom:idp_name'].toLocaleUpperCase(),
     jwtToken: authToken.getIdToken().getJwtToken(),
@@ -58,6 +75,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const [user, setUser] = useState<FamUser | null>(null);
   const [provider, setProvider] = useState<string>('');
   const [token, setToken] = useState<string>('');
+  const [intervalInstance, setIntervalInstance] = useState<NodeJS.Timeout | null>(null);
 
   const fetchFamCurrentSession = async (): Promise<FamUser | null> => {
     try {
@@ -65,7 +83,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       const famUser = parseToken(currentSession);
       return famUser;
     } catch (e) {
-      console.warn('Error while fetching user session: ', e);
+      console.warn('Error while fetching user current session!');
+      console.log(e);
     }
     return null;
   };
@@ -104,15 +123,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const signIn = (provider: LoginProviders): void => {
     const appEnv = env.VITE_ZONE ?? 'DEV';
   
-    if (provider === LoginProviders.IDIR) {
-      Auth.federatedSignIn({
-        customProvider: `${(appEnv).toLocaleUpperCase()}-IDIR`
-      });
-    } else if (provider === LoginProviders.BCEID_BUSINESS) {
-      Auth.federatedSignIn({
-        customProvider: `${(appEnv).toLocaleUpperCase()}-BCEIDBUSINESS`
-      });
-    }
+    Auth.federatedSignIn({
+      customProvider: `${(appEnv).toLocaleUpperCase()}-${provider.toString()}`
+    });
   };
 
   const signOut = (): void => {
@@ -123,6 +136,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       setUser(null);
       setProvider('');
       setToken('');
+      if (intervalInstance) {
+        console.log('stopping refresh token');
+        clearInterval(intervalInstance);
+        setIntervalInstance(null);
+      }
     } catch (e) {
       console.log(e);
     }
@@ -138,13 +156,17 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   // 2 minutes
   const REFRESH_TIMER = 2 * 60 * 1000;
 
-  setInterval(() => {
-    refreshTokenPvt()
-      .then(() => {
-        console.log('User session successfully refreshed!');
-      })
-      .catch((e) => console.error(e));
-  }, REFRESH_TIMER);
+  if (intervalInstance == null) {
+    const instance = setInterval(() => {
+      refreshTokenPvt()
+        .then(() => {
+          console.log('User session successfully refreshed!');
+        })
+        .catch((e) => console.error(e));
+    }, REFRESH_TIMER);
+
+    setIntervalInstance(instance);
+  }
 
   // memoize
   const contextValue = useMemo(() => ({

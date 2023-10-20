@@ -3,7 +3,7 @@ type FamUser = {
   email: string;
   lastName: string;
   firstName: string;
-  idirUsername: string;
+  providerUsername: string;
   name: string;
   roles: string[];
   provider: string;
