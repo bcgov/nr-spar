@@ -1,7 +1,8 @@
-const DATE_FORMAT = 'Y/m/d';
-const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
+export const DATE_FORMAT = 'Y/m/d';
+export const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
+export const MAX_INPUT_DECIMAL = 9999.999;
 
-const fieldsConfig = {
+export const fieldsConfig = {
   titleSection: {
     title: 'Collector agency',
     subtitle: 'Enter the collector agency information'
@@ -47,17 +48,17 @@ const fieldsConfig = {
   numberOfContainers: {
     name: 'numberOfContainers',
     labelText: 'Number of Containers',
-    invalidText: 'Number is not valid'
+    invalidText: 'Number has more than 3 decimals or bigger than 9,999.999'
   },
   volumePerContainers: {
     name: 'volumePerContainers',
     labelText: 'Volume per Containers (HI)',
-    invalidText: 'Number is not valid'
+    invalidText: 'Number has more than 3 decimals or bigger than 9,999.999'
   },
   volumeOfCones: {
     name: 'volumeOfCones',
     labelText: 'Volume of Cones (HI)',
-    invalidText: 'Number is not valid',
+    invalidText: 'Number has more than 3 decimals',
     helperText: 'This value should be the "Volume per container" X "Number of containers".',
     warnText: 'The total volume of cones does not equal, please note that this value should be the "Volume per container" x "Number of containers"'
   },
@@ -74,5 +75,3 @@ const fieldsConfig = {
     placeholder: 'Additional comments about the seedlot'
   }
 };
-
-export { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig };

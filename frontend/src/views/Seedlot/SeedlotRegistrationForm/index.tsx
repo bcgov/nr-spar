@@ -34,7 +34,13 @@ import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/Col
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
-import { AllStepData, AllStepInvalidationObj, FormInvalidationObj } from './definitions';
+import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
+import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import {
+  AllStepData, AllStepInvalidationObj,
+  FormInvalidationObj, ProgressIndicatorConfig
+} from './definitions';
 import {
   initCollectionState,
   initInterimState,
@@ -44,11 +50,11 @@ import {
   initInvalidationObj,
   initOwnerShipInvalidState,
   initParentTreeState,
-  generateDefaultRows
+  generateDefaultRows,
+  validateCollectionStep,
+  verifyCollectionStepCompleteness
 } from './utils';
-import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
-import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { initialProgressConfig, stepMap } from './constants';
 
 import './styles.scss';
 
@@ -60,6 +66,10 @@ const SeedlotRegistrationForm = () => {
   const seedlotNumber = useParams().seedlot ?? '';
 
   const [formStep, setFormStep] = useState<number>(0);
+  const [
+    progressStatus,
+    setProgressStatus
+  ] = useState<ProgressIndicatorConfig>(initialProgressConfig);
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
@@ -105,7 +115,6 @@ const SeedlotRegistrationForm = () => {
     extractionStorageStep: initInvalidationObj()
   });
 
-  // Can't find a good way to specify the type of stepData
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
     const newData = { ...allStepData };
     newData[stepName] = stepData;
@@ -137,9 +146,38 @@ const SeedlotRegistrationForm = () => {
     console.log(allStepData);
   };
 
+  /**
+   * Update the progress indicator status
+   */
+  const updateProgressStatus = (currentStepNum: number) => {
+    const clonedStatus = structuredClone(progressStatus);
+    const currentStepName = stepMap[currentStepNum];
+
+    // Set the current step's current val to true, and everything else false
+    clonedStatus[currentStepName].isCurrent = true;
+    const stepNames = Object.keys(clonedStatus) as Array<keyof ProgressIndicatorConfig>;
+    stepNames.filter((stepName: keyof ProgressIndicatorConfig) => stepName !== currentStepName)
+      .forEach((nonCurrentStepName) => {
+        clonedStatus[nonCurrentStepName].isCurrent = false;
+      });
+
+    // Set invalid or complete status for Collection Step
+    if (currentStepName !== 'collection') {
+      const isCollectionInvalid = validateCollectionStep(allStepData.collectionStep);
+      clonedStatus.collection.isInvalid = isCollectionInvalid;
+      if (!isCollectionInvalid) {
+        const isCollectionComplete = verifyCollectionStepCompleteness(allStepData.collectionStep);
+        clonedStatus.collection.isComplete = isCollectionComplete;
+      }
+    }
+
+    setProgressStatus(clonedStatus);
+  };
+
   const setStep = (delta: number) => {
     logState();
     const newStep = formStep + delta;
+    updateProgressStatus(newStep);
     setFormStep(newStep);
   };
 
@@ -171,7 +209,6 @@ const SeedlotRegistrationForm = () => {
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
-            // invalidateObj={allInvalidationObj.collectionStep}
           />
         );
       // Ownership
@@ -194,8 +231,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency}
-            collectorCode={allStepData.collectionStep.locationCode}
+            collectorAgency={allStepData.collectionStep.collectorAgency.value}
+            collectorCode={allStepData.collectionStep.locationCode.value}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />
@@ -262,9 +299,10 @@ const SeedlotRegistrationForm = () => {
         <Row>
           <Column className="seedlot-registration-progress" sm={4} md={8} lg={16} xlg={16}>
             <SeedlotRegistrationProgress
-              currentIndex={formStep}
+              progressStatus={progressStatus}
               className="seedlot-registration-steps"
               interactFunction={(e: number) => {
+                updateProgressStatus(e);
                 setFormStep(e);
               }}
             />

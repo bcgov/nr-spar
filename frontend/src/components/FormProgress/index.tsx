@@ -8,6 +8,7 @@ import { DocumentBlank } from '@carbon/icons-react';
 
 import Subtitle from '../Subtitle';
 import SeedlotRegistrationProgress from '../SeedlotRegistrationProgress';
+import { initialProgressConfig } from '../../views/Seedlot/SeedlotRegistrationForm/constants';
 
 import './styles.scss';
 
@@ -26,7 +27,7 @@ const FormProgress = ({ seedlotNumber }: FormProgressProps) => {
         <Subtitle text="Where you are in the registration process" />
       </div>
       <div className="steps-box">
-        <SeedlotRegistrationProgress currentIndex={5} />
+        <SeedlotRegistrationProgress progressStatus={initialProgressConfig} />
       </div>
       <div>
         <Button
