@@ -165,7 +165,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Cypress CI
-        uses: bcgov-nr/action-test-and-analyse@v1.0.0
+        uses: bcgov-nr/action-test-and-analyse@v1.1.0
         with:
           node_version: "18.16.0"
           commands: |

@@ -22,5 +22,5 @@ RUN caddy fmt --overwrite /etc/caddy/Caddyfile
 
 # User, port and healthcheck
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost:3000
+HEALTHCHECK CMD curl -f http://localhost:3000
 USER 1001
