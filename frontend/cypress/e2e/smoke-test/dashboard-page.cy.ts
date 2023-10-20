@@ -1,5 +1,6 @@
 import { NavigationLabels } from '../../utils/labels';
 import prefix from '../../../src/styles/classPrefix';
+import { HALF_SECOND, ONE_SECOND } from '../../constants';
 
 describe('Dashboard page test', () => {
   let dashboardPageData: {
@@ -141,6 +142,8 @@ describe('Dashboard page test', () => {
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Delete shortcut')
       .click();
+    cy.get('.fav-card-main')
+      .should('have.length', 1);
   });
 
   it('check if delete create a class seedlot favourite card is working', () => {
@@ -151,6 +154,8 @@ describe('Dashboard page test', () => {
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Delete shortcut')
       .click();
+    cy.get('.fav-card-main-highlighted')
+      .should('have.length', 0);
   });
 
   it('check if delete my seedlots favourite card is working', () => {
@@ -162,6 +167,8 @@ describe('Dashboard page test', () => {
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Delete shortcut')
       .click();
+    cy.get('.fav-card-main')
+      .should('have.length', 0);
   });
 
   it('check if the empty section is correctly appearing', () => {
