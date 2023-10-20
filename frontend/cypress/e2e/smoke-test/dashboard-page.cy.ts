@@ -133,8 +133,8 @@ describe('Dashboard page test', () => {
       .should('contain.text', 'Create A class seedlot');
   });
 
-  it('check if delete seedlots favourite card is working', () => {
-    // Delete Seedlots card
+  it('check if delete my seedlots favourite card is working', () => {
+    // Delete My Seedlots card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
@@ -158,8 +158,8 @@ describe('Dashboard page test', () => {
       .should('have.length', 0);
   });
 
-  it('check if delete my seedlots favourite card is working', () => {
-    // Delete my seedlots card
+  it('check if delete seedlots favourite card is working', () => {
+    // Delete Seedlots card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
