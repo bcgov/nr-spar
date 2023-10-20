@@ -14,7 +14,7 @@ describe('Dashboard page test', () => {
       dashboardPageData = fData;
     });
     cy.login();
-    cy.visit('/dashboard');
+    cy.visit('/');
     cy.url().should('contains', '/dashboard');
   });
 
@@ -108,7 +108,8 @@ describe('Dashboard page test', () => {
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content:first`)
+    cy.get(`.${prefix}--overflow-menu-options__option-content`)
+      .contains('Highlight shortcut')
       .click();
 
     // Check if the Seedlots card is unique and highlighted
@@ -121,7 +122,8 @@ describe('Dashboard page test', () => {
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content:first`)
+    cy.get(`.${prefix}--overflow-menu-options__option-content`)
+      .contains('Highlight shortcut')
       .click();
 
     // Check if the Create A Class Seedlot card is unique and highlighted
@@ -136,7 +138,8 @@ describe('Dashboard page test', () => {
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content:last`)
+    cy.get(`.${prefix}--overflow-menu-options__option-content`)
+      .contains('Delete shortcut')
       .click();
   });
 
@@ -145,7 +148,8 @@ describe('Dashboard page test', () => {
     cy.get('.fav-card-main-highlighted')
       .find('.fav-card-overflow')
       .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content:last`)
+    cy.get(`.${prefix}--overflow-menu-options__option-content`)
+      .contains('Delete shortcut')
       .click();
   });
 
@@ -155,7 +159,8 @@ describe('Dashboard page test', () => {
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content:last`)
+    cy.get(`.${prefix}--overflow-menu-options__option-content`)
+      .contains('Delete shortcut')
       .click();
   });
 
