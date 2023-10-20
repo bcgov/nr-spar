@@ -194,7 +194,6 @@ public class SeedlotEndpoint {
    * @return A {@link Seedlot} with all the current information for the seedlot.
    */
   @GetMapping(path = "/{seedlotNumber}")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch a single seedlot information",
       description = """
