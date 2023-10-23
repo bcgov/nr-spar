@@ -51,6 +51,8 @@ class SeedlotEndpointTest {
 
   private final WebApplicationContext webApplicationContext;
 
+  private static final String USER_ID = "dev-123456789abcdef@idir";
+
   SeedlotEndpointTest(WebApplicationContext webApplicationContext) {
     this.webApplicationContext = webApplicationContext;
   }
@@ -219,10 +221,12 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(userSeedlots);
+    String url = String.format("/api/seedlots/users/%s", USER_ID);
+
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(userSeedlots);
 
     mockMvc
-        .perform(get("/api/seedlots/search-seedlots/USERID").accept(MediaType.APPLICATION_JSON))
+        .perform(get(url).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
   }
@@ -235,11 +239,14 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(userSeedlots);
+
+    String url = String.format("/api/seedlots/users/%s?page={page}", USER_ID);
+    int page = 1;
 
     mockMvc
         .perform(
-            get("/api/seedlots/search-seedlots/USERID?page={page}", 1)
+            get(url, page)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
@@ -254,11 +261,14 @@ class SeedlotEndpointTest {
     userSeedlots.add(seedlotEntity);
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots("USERID", 1, 2)).thenReturn(userSeedlots);
+    String url = String.format("/api/seedlots/users/%s?page=1&size={size}", USER_ID);
+    int pageSize = 2;
+
+    when(seedlotService.getUserSeedlots(USER_ID, 1, pageSize)).thenReturn(userSeedlots);
 
     mockMvc
         .perform(
-            get("/api/seedlots/search-seedlots/USERID?page=1&size={size}", 2)
+            get(url, pageSize)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2))
@@ -268,10 +278,12 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("getSingleSeedlotInfoNotFoundNoPageTest")
   void getSingleSeedlotInfoNotFoundNoPageTest() throws Exception {
-    when(seedlotService.getUserSeedlots("USERID", 1, 10)).thenReturn(List.of());
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(List.of());
+
+    String url = String.format("/api/seedlots/users/%s", USER_ID);
 
     mockMvc
-        .perform(get("/api/seedlots/search-seedlots/USERID").accept(MediaType.APPLICATION_JSON))
+        .perform(get(url).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(0))
         .andReturn();
