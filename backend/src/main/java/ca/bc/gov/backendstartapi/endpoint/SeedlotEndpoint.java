@@ -204,15 +204,13 @@ public class SeedlotEndpoint {
       summary = "Fetch seedlots registered by a given user.",
       description = "Returns a paginated list containing the seedlots",
       responses = {
-        @ApiResponse(responseCode = "200", description = "The Seedlots were successfully found"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "A list of found Seedlots or an empty list"),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(
-            responseCode = "404",
-            description = "No seedlots found for this user",
-            content = @Content(schema = @Schema(hidden = true)))
+            content = @Content(schema = @Schema(implementation = Void.class)))
       })
   public List<Seedlot> getUserSeedlots(
       @PathVariable
