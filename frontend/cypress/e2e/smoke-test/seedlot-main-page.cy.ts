@@ -15,6 +15,7 @@ describe('Seedlot Main page test', () => {
 
     cy.login();
     cy.visit('/seedlots');
+    cy.get('#bceid-login-btn').click();
     cy.url().should('contains', '/seedlots');
   });
 
