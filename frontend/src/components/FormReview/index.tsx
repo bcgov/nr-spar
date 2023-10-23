@@ -20,6 +20,7 @@ import InterimStorage from '../SeedlotRegistrationSteps/InterimStep';
 import CollectionStep from '../SeedlotRegistrationSteps/CollectionStep';
 import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import { OrchardForm } from '../SeedlotRegistrationSteps/OrchardStep/definitions';
+import { initCollectionState } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
 
 const mockFormData = [
   {
@@ -114,18 +115,7 @@ const ownershipMock = {
   }
 };
 
-const collectionMock = {
-  useDefaultAgencyInfo: true,
-  collectorAgency: 'Strong Seeds Orchard - SSO',
-  locationCode: '32',
-  startDate: '2023/01/04',
-  endDate: '2023/01/22',
-  numberOfContainers: '2',
-  volumePerContainers: '2',
-  volumeOfCones: '4',
-  selectedCollectionCodes: [],
-  comments: 'Example of additional comments about the seedlot'
-};
+const collectionMock = initCollectionState(defaultAgency, defaultCode);
 
 const extractionMock = {
   extractoryUseTSC: true,
