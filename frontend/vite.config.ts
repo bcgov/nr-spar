@@ -9,23 +9,23 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     define: {} as any,
     plugins: [
       {
-          name: 'build-html',
-          apply: 'build',
-          transformIndexHtml: (html) => {
-            return {
-              html,
-              tags: [
-                {
-                  tag: 'script',
-                  attrs: {
-                    src: '/env.js'
-                  },
-                  injectTo: 'head'
-                }
-              ]
-            }
+        name: 'build-html',
+        apply: 'build',
+        transformIndexHtml: (html) => {
+          return {
+            html,
+            tags: [
+              {
+                tag: 'script',
+                attrs: {
+                  src: '/env.js'
+                },
+                injectTo: 'head'
+              }
+            ]
           }
-        },
+        }
+      },
       react(),
       istanbul({
         extension: ['.ts', '.tsx'],

@@ -1,6 +1,5 @@
 import { NavigationLabels } from '../../utils/labels';
 import prefix from '../../../src/styles/classPrefix';
-import { HALF_SECOND, ONE_SECOND } from '../../constants';
 
 describe('Dashboard page test', () => {
   let dashboardPageData: {
@@ -16,7 +15,6 @@ describe('Dashboard page test', () => {
     });
     cy.login();
     cy.visit('/');
-    cy.get('#bceid-login-btn').click();
     cy.url().should('contains', '/dashboard');
   });
 

@@ -57,7 +57,6 @@ describe('Login page test', () => {
   it('log in with BCeID and validate user role', () => {
     cy.login();
     cy.visit('/dashboard');
-    cy.get('#bceid-login-btn').click();
     cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
@@ -67,7 +66,6 @@ describe('Login page test', () => {
   it('log in with BCeID and validate user information', () => {
     cy.login();
     cy.visit('/dashboard');
-    cy.get('#bceid-login-btn').click();
     cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();

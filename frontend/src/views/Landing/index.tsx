@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import {
   Button,
@@ -6,32 +6,16 @@ import {
   Column
 } from '@carbon/react';
 import { Login } from '@carbon/icons-react';
-import { useNavigate } from 'react-router-dom';
 
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/seeding.png';
 import LoginProviders from '../../types/LoginProviders';
 
 import './styles.scss';
-import { AuthContext } from '../../contexts/AuthContext';
-import { GO_TO_PAGE_KEY } from '../../shared-constants/shared-constants';
+import AuthContext from '../../contexts/AuthContext';
 
 const Landing = () => {
-  const { signed, signIn, isCurrentAuthUser } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkForAuth = async () => {
-      await isCurrentAuthUser();
-    };
-
-    if (signed) {
-      const page = localStorage.getItem(GO_TO_PAGE_KEY) ?? '/dashboard';
-      navigate(page);
-    } else {
-      checkForAuth();
-    }
-  }, [signed]);
+  const { signIn } = useContext(AuthContext);
 
   return (
     <Grid fullWidth className="landing-grid">

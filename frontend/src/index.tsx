@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { ClassPrefix } from '@carbon/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemePreference } from './utils/ThemePreference';
@@ -44,7 +45,9 @@ root.render(
       <ClassPrefix prefix={prefix}>
         <ThemePreference>
           <QueryClientProvider client={queryClient}>
-            <App />
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
             {
               isDevEnv && <ReactQueryDevtools initialIsOpen={false} />
             }

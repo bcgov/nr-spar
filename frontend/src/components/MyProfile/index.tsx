@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -6,7 +6,7 @@ import {
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
-import { AuthContext } from '../../contexts/AuthContext';
+import AuthContext from '../../contexts/AuthContext';
 
 import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
@@ -43,14 +43,6 @@ const MyProfile = () => {
 
   const navigate = useNavigate();
 
-  const goOut = (): void => {
-    if (theme === 'g100') {
-      changeTheme();
-    }
-    
-    signOut();
-  };
-
   const changeTheme = () => {
     if (theme === 'g10') {
       setTheme('g100');
@@ -60,6 +52,13 @@ const MyProfile = () => {
       setTheme('g10');
       localStorage.setItem('mode', 'light');
     }
+  };
+
+  const goOut = (): void => {
+    if (theme === 'g100') {
+      changeTheme();
+    }
+    signOut();
   };
 
   useEffect(() => {
