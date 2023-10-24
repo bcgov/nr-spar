@@ -22,7 +22,7 @@ const Landing = () => {
 
   useEffect(() => {
     const checkForAuth = async () => {
-      const is = await isCurrentAuthUser();
+      await isCurrentAuthUser();
     };
 
     if (signed) {
