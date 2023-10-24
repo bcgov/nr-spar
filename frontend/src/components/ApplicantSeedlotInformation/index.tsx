@@ -5,7 +5,7 @@ import { Edit } from '@carbon/icons-react';
 
 import Subtitle from '../Subtitle';
 
-import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
+import SeedlotRegistrationObj from '../../types/SeedlotRegistrationTypes';
 
 import './styles.scss';
 

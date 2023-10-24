@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, UseQueryResult, useMutation } from '@tanstack/react-query';
 
@@ -21,14 +21,11 @@ import validator from 'validator';
 import Subtitle from '../Subtitle';
 import InputErrorText from '../InputErrorText';
 
-import getForestClientNumber from '../../utils/StringUtils';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 
-import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
+import { SeedlotRegFormType } from '../../types/SeedlotRegistrationTypes';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 
-import api from '../../api-service/api';
-import ApiConfig from '../../api-service/ApiConfig';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 import getForestClientLocation from '../../api-service/forestClientsAPI';
@@ -37,9 +34,10 @@ import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 
 import ComboBoxPropsType from './definitions';
 import {
-  applicantAgencyFieldProps,
-  speciesFieldProps,
-  pageTexts
+  applicantAgencyFieldConfig,
+  speciesFieldConfig,
+  pageTexts,
+  InitialSeedlotFormData
 } from './constants';
 
 import './styles.scss';
@@ -47,47 +45,27 @@ import './styles.scss';
 const ApplicantInformationForm = () => {
   const navigate = useNavigate();
 
-  const seedlotData: SeedlotRegistrationObj = {
-    seedlotNumber: 0,
-    applicant: {
-      name: '',
-      number: '',
-      email: ''
-    },
-    species: {
-      label: '',
-      code: '',
-      description: ''
-    },
-    source: 'tested',
-    registered: true,
-    collectedBC: true
-  };
-
-  const agencyInputRef = useRef<HTMLInputElement>(null);
-  const numberInputRef = useRef<HTMLInputElement>(null);
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const speciesInputRef = useRef<HTMLButtonElement>(null);
-
-  const [responseBody, setResponseBody] = useState<SeedlotRegistrationObj>(seedlotData);
-  const [isLocationCodeInvalid, setIsLocationCodeInvalid] = useState<boolean>(false);
-  const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
-  const [isSpeciesInvalid, setIsSpeciesInvalid] = useState<boolean>(false);
-  const [forestClientNumber, setForestClientNumber] = useState<string>('');
+  const [formData, setFormData] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
   const [locationCodeHelper, setLocationCodeHelper] = useState<string>(
     pageTexts.locCodeInput.helperTextDisabled
   );
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
-    setIsLocationCodeInvalid(isInvalid);
+    setFormData((prevData) => ({
+      ...prevData,
+      locationCode: {
+        ...prevData.locationCode,
+        isInvalid
+      }
+    }));
     setLocationCodeHelper(pageTexts.locCodeInput.helperTextEnabled);
   };
 
   const validateLocationCodeMutation = useMutation({
-    mutationFn: (queryParams:string[]) => getForestClientLocation(
-      queryParams[0],
-      queryParams[1]
+    mutationFn: (queryParams: string[]) => getForestClientLocation(
+      queryParams[0], // Client Number
+      queryParams[1] // Location Code
     ),
     onError: () => {
       setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationForSelectedAgency);
@@ -106,181 +84,145 @@ const ApplicantInformationForm = () => {
     queryFn: () => getVegCodes(true)
   });
 
-  const locationCodeChangeHandler = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { value } = event.target;
-    setResponseBody({
-      ...responseBody,
-      applicant: {
-        ...responseBody.applicant,
-        number: (value.slice(0, LOCATION_CODE_LIMIT))
-      }
-    });
-  };
-
-  const validateLocationCode = () => {
-    let applicantNumber = responseBody.applicant.number;
-    const isInRange = validator.isInt(applicantNumber, { min: 0, max: 99 });
+  const handleLocationCodeBlur = (clientNumber: string, locationCode: string) => {
+    const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+    const formattedCode = (isInRange && locationCode.length === 1)
+      ? locationCode.padStart(2, '0')
+      : locationCode;
 
     // Adding this check to add an extra 0 on the left, for cases where
     // the user types values between 0 and 9
-    if (isInRange && applicantNumber.length === 1) {
-      applicantNumber = applicantNumber.padStart(2, '0');
-      setResponseBody({
-        ...responseBody,
-        applicant: {
-          ...responseBody.applicant,
-          number: applicantNumber
+    if (isInRange) {
+      setFormData((prevResBody) => ({
+        ...prevResBody,
+        locationCode: {
+          ...prevResBody.locationCode,
+          value: formattedCode,
+          isInvalid: !isInRange
         }
-      });
+      }));
     }
 
     if (!isInRange) {
       setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationValue);
-      setIsLocationCodeInvalid(true);
       return;
     }
 
-    if (forestClientNumber) {
-      validateLocationCodeMutation.mutate([forestClientNumber, applicantNumber]);
-      setIsLocationCodeInvalid(false);
-      setLocationCodeHelper('');
+    if (clientNumber && locationCode) {
+      validateLocationCodeMutation.mutate([clientNumber, formattedCode]);
     }
   };
 
-  const inputChangeHandlerApplicant = (
-    event: React.ChangeEvent<HTMLInputElement>
+  /**
+   * Handle changes for location code.
+   */
+  const handleLocationCode = (
+    value: string
   ) => {
-    const { name, value } = event.target;
-    setResponseBody({
-      ...responseBody,
-      applicant: {
-        ...responseBody.applicant,
-        [name]: value
+    setFormData((prevResBody) => ({
+      ...prevResBody,
+      locationCode: {
+        ...prevResBody.locationCode,
+        value: value.slice(0, LOCATION_CODE_LIMIT)
       }
-    });
+    }));
   };
 
-  const comboBoxChangeHandler = (event: ComboBoxEvent, isApplicantAgency: boolean) => {
+  /**
+   * Handle combobox changes for agency and species.
+   */
+  const handleComboBox = (event: ComboBoxEvent, isApplicantAgency: boolean) => {
     const { selectedItem } = event;
-    if (isApplicantAgency) {
-      setResponseBody({
-        ...responseBody,
-        applicant: {
-          ...responseBody.applicant,
-          name: selectedItem,
-          number: selectedItem ? responseBody.applicant.number : ''
+    const inputName: keyof SeedlotRegFormType = isApplicantAgency ? 'client' : 'species';
+    setFormData((prevData) => ({
+      ...prevData,
+      [inputName]: {
+        ...prevData[inputName],
+        value: selectedItem?.code ? selectedItem : {
+          code: '',
+          label: '',
+          description: ''
         }
-      });
-      if (!selectedItem) {
-        setIsLocationCodeInvalid(false);
       }
-      setForestClientNumber(selectedItem ? getForestClientNumber(selectedItem) : '');
-      setLocationCodeHelper(
-        selectedItem
-          ? pageTexts.locCodeInput.helperTextEnabled
-          : pageTexts.locCodeInput.helperTextDisabled
-      );
-    } else {
-      setResponseBody({
-        ...responseBody,
-        species: selectedItem
-      });
+    }));
+
+    if (isApplicantAgency && selectedItem?.code && formData.locationCode.value) {
+      validateLocationCodeMutation.mutate([selectedItem.code, formData.locationCode.value]);
     }
   };
 
-  const inputChangeHandlerRadio = (event: string) => {
-    const value = event;
-    setResponseBody({
-      ...responseBody,
-      source: value
-    });
+  const handleSource = (value: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      sourceCode: {
+        ...prevData.sourceCode,
+        value
+      }
+    }));
   };
 
-  const inputChangeHandlerCheckboxes = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = event.target;
-    setResponseBody({
-      ...responseBody,
-      [name]: checked
-    });
+  const handleEmail = (value: string) => {
+    const isEmailInvalid = !validator.isEmail(value);
+    setFormData((prevData) => ({
+      ...prevData,
+      email: {
+        ...prevData.email,
+        value,
+        isInvalid: isEmailInvalid
+      }
+    }));
   };
 
-  const validateApplicantEmail = () => {
-    if (validator.isEmail(responseBody.applicant.email)) {
-      setIsEmailInvalid(false);
-    } else {
-      setIsEmailInvalid(true);
-    }
+  const handleCheckBox = (inputName: keyof SeedlotRegFormType, checked: boolean) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [inputName]: checked
+    }));
   };
 
   const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    if (isLocationCodeInvalid) {
-      numberInputRef.current?.focus();
-    } else if (isEmailInvalid) {
-      emailInputRef.current?.focus();
-    } else if (!responseBody.species.label) {
-      setIsSpeciesInvalid(true);
-      speciesInputRef.current?.focus();
-    } else {
-      const url = ApiConfig.aClassSeedlot;
-      api.post(url, responseBody)
-        .then((response) => {
-          navigate(`/seedlots/successfully-created/${response.data.seedlotNumber}`);
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(`Error: ${error}`);
-        });
-    }
+    console.log(formData);
   };
 
   const displayCombobox = (
     query: UseQueryResult,
     propsValues: ComboBoxPropsType,
     isApplicantComboBox = false
-  ) => {
-    const { status, fetchStatus, isSuccess } = query;
-    const fetchError = status === 'error';
-
-    if (fetchStatus === 'fetching') {
-      return (
+  ) => (
+    query.isFetching
+      ? (
         <Column sm={4} md={2} lg={isApplicantComboBox ? 5 : 10}>
           <TextInputSkeleton />
         </Column>
-      );
-    }
-    return (
-      <Column sm={4} md={2} lg={isApplicantComboBox ? 5 : 10}>
-        {/* For now the default selected item will not be set,
+      )
+      : (
+        <Column sm={4} md={2} lg={isApplicantComboBox ? 5 : 10}>
+          {/* For now the default selected item will not be set,
             we need the information from each user to set the
             correct one */}
-        <ComboBox
-          className={propsValues.className}
-          id={propsValues.id}
-          ref={isApplicantComboBox ? agencyInputRef : speciesInputRef}
-          items={isSuccess ? query.data : []}
-          shouldFilterItem={
-            ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+          <ComboBox
+            id={isApplicantComboBox ? formData.client.id : formData.species.id}
+            items={query.isSuccess ? query.data : []}
+            shouldFilterItem={
+              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+            }
+            placeholder={propsValues.placeholder}
+            titleText={propsValues.titleText}
+            onChange={(e: ComboBoxEvent) => handleComboBox(e, isApplicantComboBox)}
+            invalid={isApplicantComboBox ? formData.client.isInvalid : formData.species.isInvalid}
+            invalidText={propsValues.invalidText}
+            helperText={query.isError ? '' : propsValues.helperText}
+            disabled={query.isError}
+          />
+          {
+            query.isError
+              ? <InputErrorText description={`An error occurred ${query.error}`} />
+              : null
           }
-          placeholder={propsValues.placeholder}
-          titleText={propsValues.titleText}
-          onChange={(e: ComboBoxEvent) => comboBoxChangeHandler(e, isApplicantComboBox)}
-          invalid={!isApplicantComboBox && isSpeciesInvalid}
-          invalidText={propsValues.invalidText}
-          helperText={fetchError ? '' : propsValues.helperText}
-          disabled={fetchError}
-        />
-        {
-          fetchError
-            ? <InputErrorText description="An error occurred" />
-            : null
-        }
-      </Column>
-    );
-  };
+        </Column>
+      )
+  );
 
   return (
     <div className="applicant-information-form">
@@ -293,23 +235,30 @@ const ApplicantInformationForm = () => {
         </Row>
         <Row className="agency-information">
           {
-            displayCombobox(applicantAgencyQuery, applicantAgencyFieldProps, true)
+            displayCombobox(applicantAgencyQuery, applicantAgencyFieldConfig, true)
           }
           <Column sm={4} md={2} lg={5}>
             <TextInput
               className="agency-number-wrapper-class"
               id="agency-number-input"
               name="number"
-              ref={numberInputRef}
               type="number"
-              value={responseBody.applicant.number}
+              value={formData.locationCode.value}
               labelText="Applicant agency number"
-              invalid={isLocationCodeInvalid}
-              placeholder={!forestClientNumber ? '' : '00'}
+              invalid={formData.locationCode.isInvalid}
+              placeholder={!formData.client.value?.code ? '' : '00'}
               invalidText={invalidLocationMessage}
-              disabled={!forestClientNumber}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => locationCodeChangeHandler(e)}
-              onBlur={() => validateLocationCode()}
+              disabled={!formData.client.value?.code}
+              onChange={
+                (
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) => handleLocationCode(e.target.value)
+              }
+              onBlur={
+                (
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) => handleLocationCodeBlur(formData.client.value?.code, e.target.value)
+              }
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
               helperText={locationCodeHelper}
             />
@@ -325,14 +274,12 @@ const ApplicantInformationForm = () => {
             <TextInput
               id="appliccant-email-input"
               name="email"
-              ref={emailInputRef}
               type="email"
               labelText="Applicant email address"
               helperText="The Tree Seed Centre will uses it to communicate with the applicant"
-              invalid={isEmailInvalid}
+              invalid={formData.email.isInvalid}
               invalidText="Please enter a valid email"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerApplicant(e)}
-              onBlur={() => validateApplicantEmail()}
+              onBlur={(e: React.ChangeEvent<HTMLInputElement>) => handleEmail(e.target.value)}
             />
           </Column>
         </Row>
@@ -342,9 +289,9 @@ const ApplicantInformationForm = () => {
             <Subtitle text="Enter the initial information about this seedlot" />
           </Column>
         </Row>
-        <Row className="seedlot-species-combobox">
+        <Row className="seedlot-species-row">
           {
-            displayCombobox(vegCodeQuery, speciesFieldProps)
+            displayCombobox(vegCodeQuery, speciesFieldConfig)
           }
         </Row>
         <Row className="class-source-radio">
@@ -354,7 +301,7 @@ const ApplicantInformationForm = () => {
               name="class-source-radiogroup"
               orientation="vertical"
               defaultSelected="tested"
-              onChange={(e: string) => inputChangeHandlerRadio(e)}
+              onChange={(e: string) => handleSource(e)}
             >
               <RadioButton
                 id="tested-radio"
@@ -381,9 +328,9 @@ const ApplicantInformationForm = () => {
                 id="registered-tree-seed-center"
                 name="registered"
                 labelText="Yes, to be registered with the Tree Seed Centre"
-                defaultChecked
+                checked={formData.willBeRegistered}
                 onChange={
-                  (e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerCheckboxes(e)
+                  (e: React.ChangeEvent<HTMLInputElement>) => handleCheckBox('willBeRegistered', e.target.checked)
                 }
               />
             </CheckboxGroup>
@@ -396,9 +343,9 @@ const ApplicantInformationForm = () => {
                 id="collected-bc"
                 name="collectedBC"
                 labelText="Yes, collected from a location within B.C."
-                defaultChecked
+                checked={formData.isBcSource}
                 onChange={
-                  (e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerCheckboxes(e)
+                  (e: React.ChangeEvent<HTMLInputElement>) => handleCheckBox('isBcSource', e.target.checked)
                 }
               />
             </CheckboxGroup>

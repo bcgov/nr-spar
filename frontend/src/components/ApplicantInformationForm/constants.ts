@@ -1,3 +1,4 @@
+import { SeedlotRegFormType } from '../../types/SeedlotRegistrationTypes';
 import ComboBoxPropsType from './definitions';
 
 export const pageTexts = {
@@ -9,20 +10,54 @@ export const pageTexts = {
   }
 };
 
-export const applicantAgencyFieldProps: ComboBoxPropsType = {
-  id: 'applicant-info-combobox',
-  className: '',
+export const applicantAgencyFieldConfig: ComboBoxPropsType = {
   placeholder: 'Select an agency...',
   titleText: 'Applicant agency name',
   invalidText: '',
   helperText: 'You can enter your agency number, name or acronym'
 };
 
-export const speciesFieldProps: ComboBoxPropsType = {
-  id: 'seedlot-species-combobox',
-  className: 'applicant-info-combobox-species',
+export const speciesFieldConfig: ComboBoxPropsType = {
   placeholder: 'Enter or choose an species for the seedlot',
   titleText: 'Seedlot species',
   invalidText: 'Please select a species',
   helperText: ''
+};
+
+export const InitialSeedlotFormData: SeedlotRegFormType = {
+  client: {
+    id: 'applicant-info-combobox',
+    isInvalid: false,
+    value: {
+      code: '',
+      label: '',
+      description: ''
+    }
+  },
+  locationCode: {
+    id: 'agency-number-input',
+    isInvalid: false,
+    value: ''
+  },
+  email: {
+    id: 'appliccant-email-input',
+    isInvalid: false,
+    value: ''
+  },
+  species: {
+    id: 'seedlot-species-combobox',
+    isInvalid: false,
+    value: {
+      code: '',
+      label: '',
+      description: ''
+    }
+  },
+  sourceCode: {
+    id: '',
+    isInvalid: false,
+    value: 'tested'
+  },
+  willBeRegistered: true,
+  isBcSource: true
 };

@@ -27,11 +27,6 @@ type SingleInvalidObj = {
   optInvalidText?: string
 }
 
-export type FormInputType = {
-  id: string;
-  isInvalid: boolean;
-}
-
 export type FormInvalidationObj = {
   [key: string]: SingleInvalidObj;
 }
