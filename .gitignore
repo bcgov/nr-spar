@@ -112,8 +112,11 @@ frontend/cypress/screenshots
 frontend/cypress/downloads
 frontend/cypress-coverage
 *.cer
+jssecacerts
 InstallCert.class
 InstallCert$SavingTrustManager.class
+*.der
+*.pem
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
