@@ -27,6 +27,11 @@ type SingleInvalidObj = {
   optInvalidText?: string
 }
 
+export type FormInputType = {
+  id: string;
+  isInvalid: boolean;
+}
+
 export type FormInvalidationObj = {
   [key: string]: SingleInvalidObj;
 }
@@ -41,4 +46,23 @@ export type AllStepInvalidationObj = {
   ownershipStep: OwnershipInvalidObj,
   orchardStep: FormInvalidationObj,
   extractionStorageStep: FormInvalidationObj
+}
+
+type ProgressStepStatus = {
+  isComplete: boolean;
+  isCurrent: boolean;
+  isInvalid: boolean;
+}
+
+export type ProgressIndicatorConfig = {
+  collection: ProgressStepStatus;
+  ownership: ProgressStepStatus;
+  interim: ProgressStepStatus;
+  orchard: ProgressStepStatus;
+  parent: ProgressStepStatus;
+  extraction: ProgressStepStatus;
+}
+
+export type StepMap = {
+  [key: number]: keyof ProgressIndicatorConfig;
 }

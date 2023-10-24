@@ -9,6 +9,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemePreference } from './utils/ThemePreference';
 import { env } from './env';
 import makeServer from './mock-server/server';
+import prefix from './styles/classPrefix';
 
 const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
 
@@ -39,7 +40,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <AuthProvider>
     <React.StrictMode>
-      <ClassPrefix prefix="bx">
+      <ClassPrefix prefix={prefix}>
         <ThemePreference>
           <QueryClientProvider client={queryClient}>
             <App />

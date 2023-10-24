@@ -1,4 +1,4 @@
-@use '@bcgov-nr/nr-fsa-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 @use '@carbon/type';
 
 .ownership-header {
@@ -32,6 +32,10 @@ svg.#{vars.$bcgov-prefix}--accordion__arrow {
 
 .ownership-form-container {
   margin-top: 1.25rem;
+
+  ul.#{vars.$bcgov-prefix}--accordion .#{vars.$bcgov-prefix}--accordion__title {
+    padding: 1rem;
+  }
 
   .single-accordion-item {
     margin-bottom: 1rem;

@@ -10,6 +10,7 @@ import {
   RadioButtonGroup,
   RadioButton,
   Checkbox,
+  CheckboxGroup,
   Button,
   TextInputSkeleton
 } from '@carbon/react';
@@ -380,32 +381,30 @@ const OrchardStep = ({
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
-            <label htmlFor="seedlot-produced" className="bcgov--label">
-              {orchardStepText.gameteSection.controlledCross.label}
-            </label>
-            <Checkbox
-              id="seedlot-produced"
-              name="controlledCross"
-              labelText={orchardStepText.gameteSection.controlledCross.checkbox}
-              defaultChecked={state.controlledCross}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
-              readOnly={readOnly}
-            />
+            <CheckboxGroup legendText={orchardStepText.gameteSection.controlledCross.label}>
+              <Checkbox
+                id="seedlot-produced"
+                name="controlledCross"
+                labelText={orchardStepText.gameteSection.controlledCross.checkbox}
+                defaultChecked={state.controlledCross}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
+                readOnly={readOnly}
+              />
+            </CheckboxGroup>
           </Column>
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
-            <label htmlFor="bio-processes" className="bcgov--label">
-              {orchardStepText.gameteSection.biotechProcess.label}
-            </label>
-            <Checkbox
-              id="bio-processes"
-              name="biotechProcess"
-              labelText={orchardStepText.gameteSection.biotechProcess.checkbox}
-              defaultChecked={state.biotechProcess}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
-              readOnly={readOnly}
-            />
+            <CheckboxGroup legendText={orchardStepText.gameteSection.biotechProcess.label}>
+              <Checkbox
+                id="bio-processes"
+                name="biotechProcess"
+                labelText={orchardStepText.gameteSection.biotechProcess.checkbox}
+                defaultChecked={state.biotechProcess}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
+                readOnly={readOnly}
+              />
+            </CheckboxGroup>
           </Column>
         </Row>
         <Row className="seedlot-orchard-title-row">
@@ -416,17 +415,16 @@ const OrchardStep = ({
         </Row>
         <Row className="seedlot-orchard-field">
           <Column sm={4} md={8} lg={16}>
-            <label htmlFor="pollen-contamination" className="bcgov--label">
-              {orchardStepText.pollenSection.noPollenContamination.label}
-            </label>
-            <Checkbox
-              id="pollen-contamination"
-              name="noPollenContamination"
-              labelText={orchardStepText.pollenSection.noPollenContamination.checkbox}
-              defaultChecked={state.noPollenContamination}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
-              readOnly={readOnly}
-            />
+            <CheckboxGroup legendText={orchardStepText.pollenSection.noPollenContamination.label}>
+              <Checkbox
+                id="pollen-contamination"
+                name="noPollenContamination"
+                labelText={orchardStepText.pollenSection.noPollenContamination.checkbox}
+                defaultChecked={state.noPollenContamination}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => checkboxesHandler(event)}
+                readOnly={readOnly}
+              />
+            </CheckboxGroup>
           </Column>
         </Row>
         {
@@ -473,16 +471,17 @@ const OrchardStep = ({
                 </Row>
                 <Row className="pollen-methodology-checkbox">
                   <Column sm={4} md={8} lg={16}>
-                    <label htmlFor="pollen-methodology" className="bcgov--label">
-                      {orchardStepText.pollenSection.pollenMethodology.label}
-                    </label>
-                    <Checkbox
-                      id="pollen-methodology"
-                      name="pollenMethodology"
-                      labelText={orchardStepText.pollenSection.pollenMethodology.checkbox}
-                      defaultChecked={state.pollenMethodology}
-                      readOnly
-                    />
+                    <CheckboxGroup
+                      legendText={orchardStepText.pollenSection.pollenMethodology.label}
+                    >
+                      <Checkbox
+                        id="pollen-methodology"
+                        name="pollenMethodology"
+                        labelText={orchardStepText.pollenSection.pollenMethodology.checkbox}
+                        defaultChecked={state.pollenMethodology}
+                        readOnly
+                      />
+                    </CheckboxGroup>
                   </Column>
                 </Row>
               </>
