@@ -5,8 +5,8 @@ import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import Landing from '../../views/Landing';
 import '@testing-library/jest-dom';
-import { describe, it, expect, vi } from 'vitest';
-import { AuthContext } from '../../contexts/AuthContext';
+import { describe, it, expect } from 'vitest';
+import AuthContext from '../../contexts/AuthContext';
 import authContextMock from '../__mocks__/authContextMock';
 
 describe('Landing component test', () => {

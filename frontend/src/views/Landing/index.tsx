@@ -34,7 +34,7 @@ const Landing = () => {
         <p data-testid="landing-desc" className="landing-desc">
           Register and store your seed and meet your annual
           reforestation needs using
-          <span className="spar-span"> SPAR</span>
+          <span className="spar-span">{' SPAR'}</span>
         </p>
 
         {/* Login buttons */}
