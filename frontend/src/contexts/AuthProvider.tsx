@@ -123,24 +123,19 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const signOut = (): void => {
-    try {
-      Auth.signOut()
-        .then(() => {
-          localStorage.removeItem(FAM_LOGIN_USER);
-          setSigned(false);
-          setUser(null);
-          setProvider('');
-          setToken('');
-          if (intervalInstance) {
-            console.log('stopping refresh token');
-            clearInterval(intervalInstance);
-            setIntervalInstance(null);
-          }
-        }).catch(console.warn);
-      
-    } catch (e) {
-      console.warn(e);
-    }
+    Auth.signOut()
+      .then(() => {
+        localStorage.removeItem(FAM_LOGIN_USER);
+        setSigned(false);
+        setUser(null);
+        setProvider('');
+        setToken('');
+        if (intervalInstance) {
+          console.log('stopping refresh token');
+          clearInterval(intervalInstance);
+          setIntervalInstance(null);
+        }
+      }).catch((err) => console.warn(err));
   };
 
   const refreshTokenPvt = async () => {
