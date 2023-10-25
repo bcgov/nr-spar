@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods for handling Seedlots in the database. */
@@ -123,10 +124,7 @@ public class SeedlotService {
    * @param pageSize the size of the page
    * @return a list of the user's seedlots
    */
-  public List<Seedlot> getUserSeedlots(
-      String userId,
-      int pageNumber,
-      int pageSize) {
+  public List<Seedlot> getUserSeedlots(String userId, int pageNumber, int pageSize) {
     if (pageNumber == 0) {
       pageNumber = 1;
     }
@@ -134,10 +132,9 @@ public class SeedlotService {
       pageSize = 10;
     }
 
-    Pageable sortedPageable = PageRequest.of(
-        pageNumber,
-        pageSize,
-        Sort.by("AuditInformation_UpdateTimestamp"));
+    Pageable sortedPageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(Direction.DESC, "AuditInformation_UpdateTimestamp"));
     return seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable);
   }
 
@@ -151,8 +148,7 @@ public class SeedlotService {
   public Optional<Seedlot> getSingleSeedlotInfo(String seedlotNumber) {
     log.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
-    Optional<Seedlot> seedlotInfo =
-        seedlotRepository.findById(seedlotNumber);
+    Optional<Seedlot> seedlotInfo = seedlotRepository.findById(seedlotNumber);
 
     if (seedlotInfo.isEmpty()) {
       log.error("Nothing found for seedlot number: {}", seedlotNumber);
