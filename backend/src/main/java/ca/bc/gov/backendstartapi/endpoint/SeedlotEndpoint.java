@@ -194,7 +194,6 @@ public class SeedlotEndpoint {
    * @return A {@link List} of {@link Seedlot} populated or empty
    */
   @GetMapping("/users/{userId}")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch all seedlots registered by a given user.",
       description = "Returns a paginated list containing the seedlots",
