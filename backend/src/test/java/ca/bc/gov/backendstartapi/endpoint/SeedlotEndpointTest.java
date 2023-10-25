@@ -19,6 +19,8 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,6 +50,8 @@ class SeedlotEndpointTest {
   @MockBean SeedlotService seedlotService;
 
   private final WebApplicationContext webApplicationContext;
+
+  private static final String USER_ID = "dev-123456789abcdef@idir";
 
   SeedlotEndpointTest(WebApplicationContext webApplicationContext) {
     this.webApplicationContext = webApplicationContext;
@@ -210,6 +214,82 @@ class SeedlotEndpointTest {
   }
 
   @Test
+  @DisplayName("getUserSeedlotInfoTestDefaultPagination")
+  @WithMockUser(roles = "user_read")
+  void getUserSeedlotInfoTestDefaultPagination() throws Exception {
+    Seedlot seedlotEntity = new Seedlot("0000000");
+    List<Seedlot> userSeedlots = new ArrayList<>();
+    userSeedlots.add(seedlotEntity);
+
+    String url = String.format("/api/seedlots/users/%s", USER_ID);
+
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(userSeedlots);
+
+    mockMvc
+        .perform(get(url).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getUserSeedlotInfoTestChangePageNumber")
+  @WithMockUser(roles = "user_read")
+  void getUserSeedlotInfoTestChangePageNumber() throws Exception {
+    Seedlot seedlotEntity = new Seedlot("0000001");
+    List<Seedlot> userSeedlots = new ArrayList<>();
+    userSeedlots.add(seedlotEntity);
+
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(userSeedlots);
+
+    String url = String.format("/api/seedlots/users/%s?page={page}", USER_ID);
+    int page = 1;
+
+    mockMvc
+        .perform(
+            get(url, page)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getUserSeedlotInfoTestChangePageSize")
+  @WithMockUser(roles = "user_read")
+  void getUserSeedlotInfoTestChangePageSize() throws Exception {
+    Seedlot seedlotEntity = new Seedlot("0000002");
+    List<Seedlot> userSeedlots = new ArrayList<>();
+    userSeedlots.add(seedlotEntity);
+    userSeedlots.add(seedlotEntity);
+
+    String url = String.format("/api/seedlots/users/%s?page=1&size={size}", USER_ID);
+    int pageSize = 2;
+
+    when(seedlotService.getUserSeedlots(USER_ID, 1, pageSize)).thenReturn(userSeedlots);
+
+    mockMvc
+        .perform(
+            get(url, pageSize)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(2))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotInfoNotFoundNoPageTest")
+  void getSingleSeedlotInfoNotFoundNoPageTest() throws Exception {
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(List.of());
+
+    String url = String.format("/api/seedlots/users/%s", USER_ID);
+
+    mockMvc
+        .perform(get(url).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0))
+        .andReturn();
+  }
+
+  @Test
   @DisplayName("getSingleSeedlotInfoTest")
   @WithMockUser(roles = "user_read")
   void getSingleSeedlotInfoTest() throws Exception {
@@ -218,9 +298,7 @@ class SeedlotEndpointTest {
     when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(Optional.of(seedlotEntity));
 
     mockMvc
-        .perform(
-            get("/api/seedlots/0000000")
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
   }
@@ -231,8 +309,7 @@ class SeedlotEndpointTest {
     when(seedlotService.getSingleSeedlotInfo(any())).thenThrow(new SeedlotNotFoundException());
 
     mockMvc
-        .perform(get("/api/seedlots/0000000")
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isNotFound())
         .andReturn();
