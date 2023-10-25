@@ -53,7 +53,8 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
 
   // Extract the first name and last name from the displayName and remove unwanted part
   const displayName = decodedIdToken['custom:idp_display_name'] as string;
-  const [lastName, firstName] = findFindAndLastName(displayName, decodedIdToken['custom:idp_name']);
+  const provider = decodedIdToken['custom:idp_name'] as string;
+  const [firstName, lastName] = findFindAndLastName(displayName, provider.toUpperCase());
   const famUser: FamUser = {
     displayName: decodedIdToken['custom:idp_display_name'], // E.g: 'de Campos, Ricardo WLRS:EX'
     email: decodedIdToken.email,
@@ -123,19 +124,22 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
 
   const signOut = (): void => {
     try {
-      Auth.signOut();
-      localStorage.removeItem(FAM_LOGIN_USER);
-      setSigned(false);
-      setUser(null);
-      setProvider('');
-      setToken('');
-      if (intervalInstance) {
-        console.log('stopping refresh token');
-        clearInterval(intervalInstance);
-        setIntervalInstance(null);
-      }
+      Auth.signOut()
+        .then(() => {
+          localStorage.removeItem(FAM_LOGIN_USER);
+          setSigned(false);
+          setUser(null);
+          setProvider('');
+          setToken('');
+          if (intervalInstance) {
+            console.log('stopping refresh token');
+            clearInterval(intervalInstance);
+            setIntervalInstance(null);
+          }
+        }).catch(console.warn);
+      
     } catch (e) {
-      console.log(e);
+      console.warn(e);
     }
   };
 
@@ -149,7 +153,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   // 2 minutes
   const REFRESH_TIMER = 2 * 60 * 1000;
 
-  if (intervalInstance == null) {
+  if (intervalInstance == null && signed) {
     const instance = setInterval(() => {
       refreshTokenPvt()
         .then(() => {
