@@ -29,6 +29,7 @@ import ComboBoxEvent from '../../types/ComboBoxEvent';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 import getForestClientLocation from '../../api-service/forestClientsAPI';
+import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
 
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 
@@ -43,7 +44,7 @@ import {
 import './styles.scss';
 
 const ApplicantInformationForm = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [formData, setFormData] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
@@ -82,6 +83,11 @@ const ApplicantInformationForm = () => {
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
     queryFn: () => getVegCodes(true)
+  });
+
+  const seedlotSourcesQuery = useQuery({
+    queryKey: ['seedlot-sources'],
+    queryFn: () => getSeedlotSources()
   });
 
   const handleLocationCodeBlur = (clientNumber: string, locationCode: string) => {

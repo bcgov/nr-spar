@@ -74,7 +74,7 @@ class SeedlotServiceTest {
     when(seedlotStatusRepository.findById("PND")).thenReturn(Optional.of(statusEntity));
 
     SeedlotSourceEntity sourceEntity =
-        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE);
+        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
     when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.of(sourceEntity));
 
     Seedlot seedlot = new Seedlot("63000");
