@@ -10,8 +10,8 @@ export type SeedlotRegFormType = {
   email: FormInputType & { value: string };
   species: FormInputType & { value: MultiOptionsObj };
   sourceCode: FormInputType & { value: string };
-  willBeRegistered: boolean;
-  isBcSource: boolean;
+  willBeRegistered: FormInputType & { value: boolean };
+  isBcSource: FormInputType & { value: boolean };
 };
 
 /**

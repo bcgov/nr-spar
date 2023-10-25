@@ -3,6 +3,23 @@
 
 .applicant-information-form {
   margin-top: 1rem;
+
+  .error-row {
+    margin-bottom: 2rem;
+
+    button {
+      display: none;
+    }
+
+    #create-seedlot-error-banner {
+      max-width: none;
+      border-radius: 0.25rem;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__content{
+      flex-direction: column;
+    }
+  }
 }
 
 .applicant-information-form h2 {

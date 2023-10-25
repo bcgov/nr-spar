@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, UseQueryResult, useMutation } from '@tanstack/react-query';
 
@@ -13,23 +13,33 @@ import {
   Button,
   ComboBox,
   TextInputSkeleton,
-  InlineLoading
+  InlineLoading,
+  RadioButtonSkeleton,
+  ActionableNotification,
+  ToastNotification
 } from '@carbon/react';
 import { DocumentAdd } from '@carbon/icons-react';
 import validator from 'validator';
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 import Subtitle from '../Subtitle';
 import InputErrorText from '../InputErrorText';
 
+import { ErrToastOption } from '../../config/ToastifyConfig';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
+import focusById from '../../utils/FocusUtils';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 
-import { SeedlotRegFormType } from '../../types/SeedlotRegistrationTypes';
+import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../types/SeedlotRegistrationTypes';
+import SeedlotSourceType from '../../types/SeedlotSourceType';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 import getForestClientLocation from '../../api-service/forestClientsAPI';
 import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
+import { postSeedlot } from '../../api-service/seedlotAPI';
 
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 
@@ -40,6 +50,7 @@ import {
   pageTexts,
   InitialSeedlotFormData
 } from './constants';
+import { convertToPayload } from './utils';
 
 import './styles.scss';
 
@@ -52,14 +63,18 @@ const ApplicantInformationForm = () => {
     pageTexts.locCodeInput.helperTextDisabled
   );
 
-  const updateAfterLocValidation = (isInvalid: boolean) => {
+  const setInputValidation = (inputName: keyof SeedlotRegFormType, isInvalid: boolean) => (
     setFormData((prevData) => ({
       ...prevData,
-      locationCode: {
-        ...prevData.locationCode,
+      [inputName]: {
+        ...prevData[inputName],
         isInvalid
       }
-    }));
+    }))
+  );
+
+  const updateAfterLocValidation = (isInvalid: boolean) => {
+    setInputValidation('locationCode', isInvalid);
     setLocationCodeHelper(pageTexts.locCodeInput.helperTextEnabled);
   };
 
@@ -82,22 +97,50 @@ const ApplicantInformationForm = () => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true)
+    queryFn: () => getVegCodes(true),
+    staleTime: THREE_HOURS, // will not refetch for 3 hours
+    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
+
+  const setDefaultSource = (sources: SeedlotSourceType[]) => {
+    sources.forEach((source) => {
+      if (source.isDefault) {
+        setFormData((prevData) => ({
+          ...prevData,
+          sourceCode: {
+            ...prevData.sourceCode,
+            value: source.code
+          }
+        }));
+      }
+    });
+  };
 
   const seedlotSourcesQuery = useQuery({
     queryKey: ['seedlot-sources'],
-    queryFn: () => getSeedlotSources()
+    queryFn: () => getSeedlotSources(),
+    onSuccess: (sources) => setDefaultSource(sources),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
   });
+
+  /**
+   *  Default value is only set once upon query success, when cache data is used
+   *  we will need to set the default again here.
+   */
+  useEffect(() => {
+    if (seedlotSourcesQuery.isSuccess && !formData.sourceCode.value) {
+      setDefaultSource(seedlotSourcesQuery.data);
+    }
+  }, [seedlotSourcesQuery.isFetched]);
 
   const handleLocationCodeBlur = (clientNumber: string, locationCode: string) => {
     const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+    // Padding 0 in front of single digit code
     const formattedCode = (isInRange && locationCode.length === 1)
       ? locationCode.padStart(2, '0')
       : locationCode;
 
-    // Adding this check to add an extra 0 on the left, for cases where
-    // the user types values between 0 and 9
     if (isInRange) {
       setFormData((prevResBody) => ({
         ...prevResBody,
@@ -140,6 +183,7 @@ const ApplicantInformationForm = () => {
   const handleComboBox = (event: ComboBoxEvent, isApplicantAgency: boolean) => {
     const { selectedItem } = event;
     const inputName: keyof SeedlotRegFormType = isApplicantAgency ? 'client' : 'species';
+    const isInvalid = selectedItem === null;
     setFormData((prevData) => ({
       ...prevData,
       [inputName]: {
@@ -148,7 +192,8 @@ const ApplicantInformationForm = () => {
           code: '',
           label: '',
           description: ''
-        }
+        },
+        isInvalid
       }
     }));
 
@@ -182,13 +227,43 @@ const ApplicantInformationForm = () => {
   const handleCheckBox = (inputName: keyof SeedlotRegFormType, checked: boolean) => {
     setFormData((prevData) => ({
       ...prevData,
-      [inputName]: checked
+      [inputName]: {
+        ...prevData[inputName],
+        value: checked
+      }
     }));
   };
 
-  const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log(formData);
+  const seedlotMutation = useMutation({
+    mutationFn: (payload: SeedlotRegPayloadType) => postSeedlot(payload),
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ToastNotification
+          className="toastception"
+          lowContrast={false}
+          kind="error"
+          title="Creation failure"
+          subtitle={`Your application could not be created. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    },
+    onSuccess: (data) => console.log('aaa')
+  });
+
+  const renderSources = () => {
+    if (seedlotSourcesQuery.isSuccess) {
+      return seedlotSourcesQuery.data.map((source: SeedlotSourceType) => (
+        <RadioButton
+          key={source.code}
+          checked={formData.sourceCode.value === source.code}
+          id={`seedlot-source-radio-btn-${source.code.toLocaleLowerCase()}`}
+          labelText={source.description}
+          value={source.code}
+        />
+      ));
+    }
+    return <InputErrorText description="Could not retrieve seedlot sources." />
   };
 
   const displayCombobox = (
@@ -230,9 +305,72 @@ const ApplicantInformationForm = () => {
       )
   );
 
+  const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    // Validate client
+    if (formData.client.isInvalid || !formData.client.value.code) {
+      setInputValidation('client', true);
+      focusById(formData.client.id);
+      return;
+    }
+    // Vaidate location code
+    if (
+      formData.locationCode.isInvalid
+      || !formData.locationCode.value
+      || !validateLocationCodeMutation.isSuccess
+    ) {
+      setInputValidation('locationCode', true);
+      setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationValue);
+      focusById(formData.locationCode.id);
+      return;
+    }
+    // Validate email
+    if (formData.email.isInvalid || !formData.email.value) {
+      setInputValidation('email', true);
+      focusById(formData.email.id);
+      return;
+    }
+    // Validate species
+    if (formData.species.isInvalid || !formData.species.value.code) {
+      setInputValidation('species', true);
+      focusById(formData.species.id);
+      return;
+    }
+    // Source code, and the two booleans always have a default value so there's no need to check.
+
+    // Submit Seedlot.
+    const payload = convertToPayload(formData);
+    seedlotMutation.mutate(payload);
+  };
+
   return (
     <div className="applicant-information-form">
       <form onSubmit={validateAndSubmit}>
+        {
+          seedlotMutation.isError
+            ? (
+              <Row className="error-row">
+                <Column>
+                  <ActionableNotification
+                    id="create-seedlot-error-banner"
+                    kind="error"
+                    lowContrast
+                    title="Your application could not be created"
+                    inline
+                    actionButtonLabel=""
+                    onClose={() => false}
+                  >
+                    An error has occurred when trying to create your seedlot number.
+                    Please try submiting it again later.
+                    {' '}
+                    {`${seedlotMutation.error.code}: ${seedlotMutation.error.message}`}
+                  </ActionableNotification>
+                </Column>
+              </Row>
+            )
+            : null
+        }
         <Row className="applicant-agency-title">
           <Column lg={8}>
             <h2>Applicant agency</h2>
@@ -306,24 +444,15 @@ const ApplicantInformationForm = () => {
               legendText="Class A source"
               name="class-source-radiogroup"
               orientation="vertical"
-              defaultSelected="tested"
               onChange={(e: string) => handleSource(e)}
             >
-              <RadioButton
-                id="tested-radio"
-                labelText="Tested parent trees"
-                value="tested"
-              />
-              <RadioButton
-                id="untested-radio"
-                labelText="Untested parent trees"
-                value="untested"
-              />
-              <RadioButton
-                id="custom-radio"
-                labelText="Custom seedlot"
-                value="custom"
-              />
+              {
+                seedlotSourcesQuery.isFetching
+                  ? (
+                    <RadioButtonSkeleton />
+                  )
+                  : renderSources()
+              }
             </RadioButtonGroup>
           </Column>
         </Row>
@@ -334,7 +463,7 @@ const ApplicantInformationForm = () => {
                 id="registered-tree-seed-center"
                 name="registered"
                 labelText="Yes, to be registered with the Tree Seed Centre"
-                checked={formData.willBeRegistered}
+                checked={formData.willBeRegistered.value}
                 onChange={
                   (e: React.ChangeEvent<HTMLInputElement>) => handleCheckBox('willBeRegistered', e.target.checked)
                 }
@@ -349,7 +478,7 @@ const ApplicantInformationForm = () => {
                 id="collected-bc"
                 name="collectedBC"
                 labelText="Yes, collected from a location within B.C."
-                checked={formData.isBcSource}
+                checked={formData.isBcSource.value}
                 onChange={
                   (e: React.ChangeEvent<HTMLInputElement>) => handleCheckBox('isBcSource', e.target.checked)
                 }

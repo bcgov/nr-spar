@@ -55,6 +55,8 @@ const ApiConfig = {
 
   seedlotSources: `${serverHost}/api/seedlot-sources`,
 
+  seedlots: `${serverHost}/api/seedlots`,
+
   /**
    * ORACLE API
    */

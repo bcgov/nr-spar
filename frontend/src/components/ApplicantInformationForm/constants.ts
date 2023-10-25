@@ -13,7 +13,7 @@ export const pageTexts = {
 export const applicantAgencyFieldConfig: ComboBoxPropsType = {
   placeholder: 'Select an agency...',
   titleText: 'Applicant agency name',
-  invalidText: '',
+  invalidText: 'Please select an agency',
   helperText: 'You can enter your agency number, name or acronym'
 };
 
@@ -56,8 +56,16 @@ export const InitialSeedlotFormData: SeedlotRegFormType = {
   sourceCode: {
     id: '',
     isInvalid: false,
-    value: 'tested'
+    value: ''
   },
-  willBeRegistered: true,
-  isBcSource: true
+  willBeRegistered: {
+    id: '',
+    isInvalid: false,
+    value: true
+  },
+  isBcSource: {
+    id: '',
+    isInvalid: false,
+    value: true
+  }
 };
