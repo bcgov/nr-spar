@@ -192,21 +192,20 @@ public class SeedlotEndpoint {
   }
 
   /**
-   * Gets seedlots for a given user.
+   * Resource to fetch all seedlots to a given user id.
    *
-   * @param userId id of the user who created the {@link Seedlot}
-   * @return a list of {@link Seedlot}
-   * @throws ResponseStatusException if no data is found
+   * @param userId user identification to fetch seedlots to
+   * @return A {@link List} of {@link Seedlot} populated or empty
    */
   @GetMapping(path = "/users/{userId}")
   @PreAuthorize("hasRole('user_read')")
   @Operation(
-      summary = "Fetch seedlots registered by a given user.",
+      summary = "Fetch all seedlots registered by a given user.",
       description = "Returns a paginated list containing the seedlots",
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "A list of found Seedlots or an empty list"),
+            description = "A list containing found Seedlots or an empty list"),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
@@ -214,7 +213,11 @@ public class SeedlotEndpoint {
       })
   public List<Seedlot> getUserSeedlots(
       @PathVariable
-          @Parameter(name = "userId", in = ParameterIn.PATH, description = "Identifier of the user")
+          @Parameter(
+              name = "userId",
+              in = ParameterIn.PATH,
+              description = "User's identification",
+              example = "dev-abcdef123456@idir")
           String userId,
       @RequestParam(value = "page", required = false, defaultValue = "1") int page,
       @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
