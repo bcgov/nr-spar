@@ -18,6 +18,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -167,6 +168,48 @@ class SeedlotServiceTest {
   }
 
   @Test
+  @DisplayName("findSeedlotsByUserWithTwoSeedlots")
+  void getUserSeedlots_findsTwoSeedlots_shouldSucceed() {
+    String userId = "123456abcde@idir";
+
+    List<Seedlot> testList = List.of(new Seedlot("63001"), new Seedlot("63002"));
+
+    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(testList);
+
+    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(2, responseFromService.size());
+    Assertions.assertEquals("63001", responseFromService.get(0).getId());
+    Assertions.assertEquals("63002", responseFromService.get(1).getId());
+  }
+
+  @Test
+  @DisplayName("findSeedlotsByUserNoSeedlots")
+  void getUserSeedlots_noSeedlots_shouldSucceed() {
+    String userId = "userId";
+
+    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
+
+    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertTrue(responseFromService.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findSeedlotsByUserNoPageSize")
+  void getUserSeedlots_noPageSize_shouldSucceed() {
+    String userId = "userId";
+
+    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
+
+    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 0);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertTrue(responseFromService.isEmpty());
+  }
+
   @DisplayName("findSingleSeedlotSuccessTest")
   void findSingleSeedlotSuccessTest() {
     Seedlot seedlotEntity = new Seedlot("0000000");
