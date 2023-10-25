@@ -197,7 +197,7 @@ public class SeedlotEndpoint {
    * @param userId user identification to fetch seedlots to
    * @return A {@link List} of {@link Seedlot} populated or empty
    */
-  @GetMapping(path = "/users/{userId}")
+  @GetMapping("/users/{userId}")
   @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch all seedlots registered by a given user.",
