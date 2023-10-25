@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,7 +46,6 @@ public class GeneticWorthEndpoint {
    * @return A list of {@link GeneticWorthEntity}
    */
   @GetMapping(produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Retrieves all genetic worth",
       description = "Returns a list containing all genetic worth.")
@@ -93,7 +91,6 @@ public class GeneticWorthEndpoint {
    * @throws ResponseStatusException if the class doesn't exist
    */
   @GetMapping(path = "/{code}", produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch a genetic worth object by its code",
       description = "Returns the genetic worth identified by `code`, if there is one.",
@@ -123,7 +120,6 @@ public class GeneticWorthEndpoint {
    * @return A {@link GeneticWorthSummaryDto} containing all calculated values.
    */
   @PostMapping(path = "/calculate-all", consumes = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('user_write')")
   @Operation(
       summary = "Do the calculations of all Genetic Traits",
       description =

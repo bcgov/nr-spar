@@ -1,6 +1,5 @@
 import { NavigationLabels } from '../../utils/labels';
 import prefix from '../../../src/styles/classPrefix';
-import { HALF_SECOND, ONE_SECOND } from '../../constants';
 
 describe('Dashboard page test', () => {
   let dashboardPageData: {

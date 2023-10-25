@@ -3,12 +3,14 @@ package ca.bc.gov.backendstartapi.security;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,9 +22,11 @@ class UserAuthenticationHelperTest {
 
   private UserAuthenticationHelper userAuthenticationHelper;
 
+  @Mock HttpServletRequest request;
+
   @BeforeEach
   void setup() {
-    userAuthenticationHelper = new UserAuthenticationHelper();
+    userAuthenticationHelper = new UserAuthenticationHelper(request);
   }
 
   @Test
@@ -106,5 +110,21 @@ class UserAuthenticationHelperTest {
 
     Optional<UserInfo> userInfoOptional = userAuthenticationHelper.getUserInfo();
     Assertions.assertFalse(userInfoOptional.isPresent());
+  }
+
+  @Test
+  @DisplayName("getUserStringAuthenticationTest")
+  void getUserStringAuthenticationTest() {
+    Authentication authentication = mock(Authentication.class);
+    SecurityContext securityContext = mock(SecurityContext.class);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.isAuthenticated()).thenReturn(true);
+    when(authentication.getPrincipal()).thenReturn("simple-user-id");
+
+    Optional<UserInfo> userInfoOptional = userAuthenticationHelper.getUserInfo();
+    Assertions.assertTrue(userInfoOptional.isPresent());
+    Assertions.assertEquals("dev-generic-user", userInfoOptional.get().id());
   }
 }

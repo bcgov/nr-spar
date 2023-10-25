@@ -62,6 +62,7 @@ testing and deploying.
   - Context API
   - React Query
   - MirageJS
+  - FAM Authentication
 
 You can learn more about this service [looking its README](frontend/README.md)
 
@@ -111,22 +112,10 @@ docker-compose down --remove-orphans
 
 ⚠️ You may want to try one or more available back-end APIs. To do so, you can rely on Swagger UI, provided
 on both back-end services. Once the service is running, head to http://localhost:8090/swagger-ui/index.html.
-Also note that you'll need to unlock swagger, otherwhise you'll only see 401 responses. Follow the steps bellow
-to get a JWT token to your user.
+Also note that you'll need to unlock swagger, otherwhise you'll only see 401 responses. Steps on how to grab
+a token will be here in the future.
 
 ⚠️ Be awere the port may change due to docker parameters.
-
-**Getting a JWT token for SPAR services**
-
-- Head to [BC Gov Keycloak OIDC Playground page](https://bcgov.github.io/keycloak-example-apps/)
-- Expand the first dropdown *Keycloak OIDC Config* option
-- Update *Auth server* with: **https://test.loginproxy.gov.bc.ca/auth**
-- Keep *Realm* as is, **standard**
-- Update *Client id* with: **seed-planning-test-4296**
-- Hit **Upate**
-- Click the **Login** button
-- Hit **ID Token Raw** token
-- Optional: You can check your user's JWT token properties by checking the **Token Parsed** tab
 
 ## Getting help
 
