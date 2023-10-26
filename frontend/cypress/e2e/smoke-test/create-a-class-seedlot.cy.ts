@@ -33,7 +33,7 @@ describe('Create A Class Seedlot', () => {
         url: '**/api/seedlots'
       },
       {
-        statusCode: 200,
+        statusCode: 201,
         body: {
           seedlotNumber: '654321'
         }
