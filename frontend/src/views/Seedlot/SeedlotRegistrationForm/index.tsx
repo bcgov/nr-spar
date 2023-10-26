@@ -63,7 +63,7 @@ const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
-  const seedlotNumber = useParams().seedlot ?? '';
+  const seedlotNumber = useParams().seedlotNumber ?? '';
 
   const [formStep, setFormStep] = useState<number>(0);
   const [

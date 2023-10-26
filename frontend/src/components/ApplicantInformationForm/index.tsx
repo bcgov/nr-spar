@@ -55,7 +55,7 @@ import { convertToPayload } from './utils';
 import './styles.scss';
 
 const ApplicantInformationForm = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
@@ -83,8 +83,11 @@ const ApplicantInformationForm = () => {
       queryParams[0], // Client Number
       queryParams[1] // Location Code
     ),
-    onError: () => {
-      setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationForSelectedAgency);
+    onError: (err: AxiosError) => {
+      const errMsg = err.code === 'ERR_BAD_REQUEST'
+        ? pageTexts.locCodeInput.invalidLocationForSelectedAgency
+        : pageTexts.locCodeInput.cannotVerify;
+      setInvalidLocationMessage(errMsg);
       updateAfterLocValidation(true);
     },
     onSuccess: () => updateAfterLocValidation(false)
@@ -248,7 +251,10 @@ const ApplicantInformationForm = () => {
         ErrToastOption
       );
     },
-    onSuccess: (data) => console.log('aaa')
+    onSuccess: (res) => navigate({
+      pathname: '/seedlots/creation-success',
+      search: `?seedlotNumber=${res.data.seedlotNumber}&seedlotClass=A`
+    })
   });
 
   const renderSources = () => {
@@ -263,7 +269,7 @@ const ApplicantInformationForm = () => {
         />
       ));
     }
-    return <InputErrorText description="Could not retrieve seedlot sources." />
+    return <InputErrorText description="Could not retrieve seedlot sources." />;
   };
 
   const displayCombobox = (
