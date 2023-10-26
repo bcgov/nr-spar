@@ -202,6 +202,7 @@ jobs:
               -p BUILD=prod
               -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
+              -p KEYCLOAK_REALM_URL=https://loginproxy.gov.bc.ca/auth/realms/standard
           - name: fluentbit
             file: backend/openshift.fluentbit.yml
             overwrite: true
