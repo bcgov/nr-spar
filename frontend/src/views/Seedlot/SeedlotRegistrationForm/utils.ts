@@ -7,6 +7,8 @@ import {
 import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import ApplicantAgenciesItems from '../../../mock-server/fixtures/ApplicantAgenciesItems';
+import ApplicantAgencyType from '../../../types/ApplicantAgencyType';
 import {
   FormInvalidationObj, OwnershipInvalidObj, ParentTreeStepDataObj
 } from './definitions';
@@ -206,4 +208,28 @@ export const verifyCollectionStepCompleteness = (collectionData: CollectionForm)
     return false;
   }
   return true;
+};
+
+// TODO: delete this temp data generator
+
+export const getAgencies = (): string[] => {
+  const options: string[] = [];
+  ApplicantAgenciesItems.sort(
+    (a: ApplicantAgencyType, b: ApplicantAgencyType) => (a.clientName < b.clientName ? -1 : 1)
+  );
+  ApplicantAgenciesItems.forEach((agency: ApplicantAgencyType) => {
+    let clientName = agency.clientName
+      .toLowerCase()
+      .split(' ')
+      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    if (clientName.indexOf('-') > -1) {
+      clientName = clientName
+        .split('-')
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('-');
+    }
+    options.push(`${agency.clientNumber} - ${clientName} - ${agency.acronym}`);
+  });
+  return options;
 };
