@@ -47,7 +47,7 @@ const SeedlotCreatedFeedback = () => {
                   size="lg"
                   className="btn-scf"
                 >
-                  Seedlot details
+                  Continue registration
                 </Button>
               </Column>
             </Row>
