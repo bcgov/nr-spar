@@ -1,5 +1,6 @@
+import { FormInputType } from '../../../types/FormInputType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { FormInputType, FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export type CollectionForm = {
   useDefaultAgencyInfo: FormInputType & {

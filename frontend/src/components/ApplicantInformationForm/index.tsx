@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, UseQueryResult, useMutation } from '@tanstack/react-query';
 
@@ -13,84 +13,81 @@ import {
   Button,
   ComboBox,
   TextInputSkeleton,
-  InlineLoading
+  InlineLoading,
+  RadioButtonSkeleton,
+  ActionableNotification
 } from '@carbon/react';
 import { DocumentAdd } from '@carbon/icons-react';
 import validator from 'validator';
+import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 import Subtitle from '../Subtitle';
 import InputErrorText from '../InputErrorText';
 
-import getForestClientNumber from '../../utils/StringUtils';
+import { ErrToastOption } from '../../config/ToastifyConfig';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
+import focusById from '../../utils/FocusUtils';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 
-import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
+import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../types/SeedlotRegistrationTypes';
+import SeedlotSourceType from '../../types/SeedlotSourceType';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 
-import api from '../../api-service/api';
-import ApiConfig from '../../api-service/ApiConfig';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 import getForestClientLocation from '../../api-service/forestClientsAPI';
+import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
+import { postSeedlot } from '../../api-service/seedlotAPI';
 
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 
 import ComboBoxPropsType from './definitions';
 import {
-  applicantAgencyFieldProps,
-  speciesFieldProps,
-  pageTexts
+  applicantAgencyFieldConfig,
+  speciesFieldConfig,
+  pageTexts,
+  InitialSeedlotFormData
 } from './constants';
+import { convertToPayload } from './utils';
 
 import './styles.scss';
+import ErrorToast from '../Toast/ErrorToast';
 
 const ApplicantInformationForm = () => {
   const navigate = useNavigate();
 
-  const seedlotData: SeedlotRegistrationObj = {
-    seedlotNumber: 0,
-    applicant: {
-      name: '',
-      number: '',
-      email: ''
-    },
-    species: {
-      label: '',
-      code: '',
-      description: ''
-    },
-    source: 'tested',
-    registered: true,
-    collectedBC: true
-  };
-
-  const agencyInputRef = useRef<HTMLInputElement>(null);
-  const numberInputRef = useRef<HTMLInputElement>(null);
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const speciesInputRef = useRef<HTMLButtonElement>(null);
-
-  const [responseBody, setResponseBody] = useState<SeedlotRegistrationObj>(seedlotData);
-  const [isLocationCodeInvalid, setIsLocationCodeInvalid] = useState<boolean>(false);
-  const [isEmailInvalid, setIsEmailInvalid] = useState<boolean>(false);
-  const [isSpeciesInvalid, setIsSpeciesInvalid] = useState<boolean>(false);
-  const [forestClientNumber, setForestClientNumber] = useState<string>('');
+  const [formData, setFormData] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
   const [locationCodeHelper, setLocationCodeHelper] = useState<string>(
     pageTexts.locCodeInput.helperTextDisabled
   );
 
+  const setInputValidation = (inputName: keyof SeedlotRegFormType, isInvalid: boolean) => (
+    setFormData((prevData) => ({
+      ...prevData,
+      [inputName]: {
+        ...prevData[inputName],
+        isInvalid
+      }
+    }))
+  );
+
   const updateAfterLocValidation = (isInvalid: boolean) => {
-    setIsLocationCodeInvalid(isInvalid);
+    setInputValidation('locationCode', isInvalid);
     setLocationCodeHelper(pageTexts.locCodeInput.helperTextEnabled);
   };
 
   const validateLocationCodeMutation = useMutation({
-    mutationFn: (queryParams:string[]) => getForestClientLocation(
-      queryParams[0],
-      queryParams[1]
+    mutationFn: (queryParams: string[]) => getForestClientLocation(
+      queryParams[0], // Client Number
+      queryParams[1] // Location Code
     ),
-    onError: () => {
-      setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationForSelectedAgency);
+    onError: (err: AxiosError) => {
+      const errMsg = err.code === 'ERR_BAD_REQUEST'
+        ? pageTexts.locCodeInput.invalidLocationForSelectedAgency
+        : pageTexts.locCodeInput.cannotVerify;
+      setInvalidLocationMessage(errMsg);
       updateAfterLocValidation(true);
     },
     onSuccess: () => updateAfterLocValidation(false)
@@ -103,188 +100,280 @@ const ApplicantInformationForm = () => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true)
+    queryFn: () => getVegCodes(true),
+    staleTime: THREE_HOURS, // will not refetch for 3 hours
+    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
-  const locationCodeChangeHandler = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { value } = event.target;
-    setResponseBody({
-      ...responseBody,
-      applicant: {
-        ...responseBody.applicant,
-        number: (value.slice(0, LOCATION_CODE_LIMIT))
+  const setDefaultSource = (sources: SeedlotSourceType[]) => {
+    sources.forEach((source) => {
+      if (source.isDefault) {
+        setFormData((prevData) => ({
+          ...prevData,
+          sourceCode: {
+            ...prevData.sourceCode,
+            value: source.code
+          }
+        }));
       }
     });
   };
 
-  const validateLocationCode = () => {
-    let applicantNumber = responseBody.applicant.number;
-    const isInRange = validator.isInt(applicantNumber, { min: 0, max: 99 });
+  const seedlotSourcesQuery = useQuery({
+    queryKey: ['seedlot-sources'],
+    queryFn: () => getSeedlotSources(),
+    onSuccess: (sources) => setDefaultSource(sources),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
 
-    // Adding this check to add an extra 0 on the left, for cases where
-    // the user types values between 0 and 9
-    if (isInRange && applicantNumber.length === 1) {
-      applicantNumber = applicantNumber.padStart(2, '0');
-      setResponseBody({
-        ...responseBody,
-        applicant: {
-          ...responseBody.applicant,
-          number: applicantNumber
+  /**
+   *  Default value is only set once upon query success, when cache data is used
+   *  we will need to set the default again here.
+   */
+  useEffect(() => {
+    if (seedlotSourcesQuery.isSuccess && !formData.sourceCode.value) {
+      setDefaultSource(seedlotSourcesQuery.data);
+    }
+  }, [seedlotSourcesQuery.isFetched]);
+
+  const handleLocationCodeBlur = (clientNumber: string, locationCode: string) => {
+    const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+    // Padding 0 in front of single digit code
+    const formattedCode = (isInRange && locationCode.length === 1)
+      ? locationCode.padStart(2, '0')
+      : locationCode;
+
+    if (isInRange) {
+      setFormData((prevResBody) => ({
+        ...prevResBody,
+        locationCode: {
+          ...prevResBody.locationCode,
+          value: formattedCode,
+          isInvalid: false
         }
-      });
+      }));
     }
 
     if (!isInRange) {
       setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationValue);
-      setIsLocationCodeInvalid(true);
       return;
     }
 
-    if (forestClientNumber) {
-      validateLocationCodeMutation.mutate([forestClientNumber, applicantNumber]);
-      setIsLocationCodeInvalid(false);
-      setLocationCodeHelper('');
+    if (clientNumber && locationCode) {
+      validateLocationCodeMutation.mutate([clientNumber, formattedCode]);
     }
   };
 
-  const inputChangeHandlerApplicant = (
-    event: React.ChangeEvent<HTMLInputElement>
+  /**
+   * Handle changes for location code.
+   */
+  const handleLocationCode = (
+    value: string
   ) => {
-    const { name, value } = event.target;
-    setResponseBody({
-      ...responseBody,
-      applicant: {
-        ...responseBody.applicant,
-        [name]: value
+    setFormData((prevResBody) => ({
+      ...prevResBody,
+      locationCode: {
+        ...prevResBody.locationCode,
+        value: value.slice(0, LOCATION_CODE_LIMIT)
       }
-    });
+    }));
   };
 
-  const comboBoxChangeHandler = (event: ComboBoxEvent, isApplicantAgency: boolean) => {
+  /**
+   * Handle combobox changes for agency and species.
+   */
+  const handleComboBox = (event: ComboBoxEvent, isApplicantAgency: boolean) => {
     const { selectedItem } = event;
-    if (isApplicantAgency) {
-      setResponseBody({
-        ...responseBody,
-        applicant: {
-          ...responseBody.applicant,
-          name: selectedItem,
-          number: selectedItem ? responseBody.applicant.number : ''
-        }
-      });
-      if (!selectedItem) {
-        setIsLocationCodeInvalid(false);
+    const inputName: keyof SeedlotRegFormType = isApplicantAgency ? 'client' : 'species';
+    const isInvalid = selectedItem === null;
+    setFormData((prevData) => ({
+      ...prevData,
+      [inputName]: {
+        ...prevData[inputName],
+        value: selectedItem?.code ? selectedItem : {
+          code: '',
+          label: '',
+          description: ''
+        },
+        isInvalid
       }
-      setForestClientNumber(selectedItem ? getForestClientNumber(selectedItem) : '');
-      setLocationCodeHelper(
-        selectedItem
-          ? pageTexts.locCodeInput.helperTextEnabled
-          : pageTexts.locCodeInput.helperTextDisabled
+    }));
+
+    if (isApplicantAgency && selectedItem?.code && formData.locationCode.value) {
+      validateLocationCodeMutation.mutate([selectedItem.code, formData.locationCode.value]);
+    }
+  };
+
+  const handleSource = (value: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      sourceCode: {
+        ...prevData.sourceCode,
+        value
+      }
+    }));
+  };
+
+  const handleEmail = (value: string) => {
+    const isEmailInvalid = !validator.isEmail(value);
+    setFormData((prevData) => ({
+      ...prevData,
+      email: {
+        ...prevData.email,
+        value,
+        isInvalid: isEmailInvalid
+      }
+    }));
+  };
+
+  const handleCheckBox = (inputName: keyof SeedlotRegFormType, checked: boolean) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [inputName]: {
+        ...prevData[inputName],
+        value: checked
+      }
+    }));
+  };
+
+  const seedlotMutation = useMutation({
+    mutationFn: (payload: SeedlotRegPayloadType) => postSeedlot(payload),
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ErrorToast
+          title="Creation failure"
+          subtitle={`Your application could not be created. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
       );
-    } else {
-      setResponseBody({
-        ...responseBody,
-        species: selectedItem
-      });
+    },
+    onSuccess: (res) => navigate({
+      pathname: '/seedlots/creation-success',
+      search: `?seedlotNumber=${res.data.seedlotNumber}&seedlotClass=A`
+    })
+  });
+
+  const renderSources = () => {
+    if (seedlotSourcesQuery.isSuccess) {
+      return seedlotSourcesQuery.data.map((source: SeedlotSourceType) => (
+        <RadioButton
+          key={source.code}
+          checked={formData.sourceCode.value === source.code}
+          id={`seedlot-source-radio-btn-${source.code.toLocaleLowerCase()}`}
+          labelText={source.description}
+          value={source.code}
+        />
+      ));
     }
-  };
-
-  const inputChangeHandlerRadio = (event: string) => {
-    const value = event;
-    setResponseBody({
-      ...responseBody,
-      source: value
-    });
-  };
-
-  const inputChangeHandlerCheckboxes = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = event.target;
-    setResponseBody({
-      ...responseBody,
-      [name]: checked
-    });
-  };
-
-  const validateApplicantEmail = () => {
-    if (validator.isEmail(responseBody.applicant.email)) {
-      setIsEmailInvalid(false);
-    } else {
-      setIsEmailInvalid(true);
-    }
-  };
-
-  const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (isLocationCodeInvalid) {
-      numberInputRef.current?.focus();
-    } else if (isEmailInvalid) {
-      emailInputRef.current?.focus();
-    } else if (!responseBody.species.label) {
-      setIsSpeciesInvalid(true);
-      speciesInputRef.current?.focus();
-    } else {
-      const url = ApiConfig.aClassSeedlot;
-      api.post(url, responseBody)
-        .then((response) => {
-          navigate(`/seedlots/successfully-created/${response.data.seedlotNumber}`);
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(`Error: ${error}`);
-        });
-    }
+    return <InputErrorText description="Could not retrieve seedlot sources." />;
   };
 
   const displayCombobox = (
     query: UseQueryResult,
     propsValues: ComboBoxPropsType,
     isApplicantComboBox = false
-  ) => {
-    const { status, fetchStatus, isSuccess } = query;
-    const fetchError = status === 'error';
-
-    if (fetchStatus === 'fetching') {
-      return (
+  ) => (
+    query.isFetching
+      ? (
         <Column sm={4} md={2} lg={isApplicantComboBox ? 5 : 10}>
           <TextInputSkeleton />
         </Column>
-      );
-    }
-    return (
-      <Column sm={4} md={2} lg={isApplicantComboBox ? 5 : 10}>
-        {/* For now the default selected item will not be set,
+      )
+      : (
+        <Column sm={4} md={2} lg={isApplicantComboBox ? 5 : 10}>
+          {/* For now the default selected item will not be set,
             we need the information from each user to set the
             correct one */}
-        <ComboBox
-          className={propsValues.className}
-          id={propsValues.id}
-          ref={isApplicantComboBox ? agencyInputRef : speciesInputRef}
-          items={isSuccess ? query.data : []}
-          shouldFilterItem={
-            ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+          <ComboBox
+            id={isApplicantComboBox ? formData.client.id : formData.species.id}
+            items={query.isSuccess ? query.data : []}
+            shouldFilterItem={
+              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+            }
+            placeholder={propsValues.placeholder}
+            titleText={propsValues.titleText}
+            onChange={(e: ComboBoxEvent) => handleComboBox(e, isApplicantComboBox)}
+            invalid={isApplicantComboBox ? formData.client.isInvalid : formData.species.isInvalid}
+            invalidText={propsValues.invalidText}
+            helperText={query.isError ? '' : propsValues.helperText}
+            disabled={query.isError}
+          />
+          {
+            query.isError
+              ? <InputErrorText description={`An error occurred ${query.error}`} />
+              : null
           }
-          placeholder={propsValues.placeholder}
-          titleText={propsValues.titleText}
-          onChange={(e: ComboBoxEvent) => comboBoxChangeHandler(e, isApplicantComboBox)}
-          invalid={!isApplicantComboBox && isSpeciesInvalid}
-          invalidText={propsValues.invalidText}
-          helperText={fetchError ? '' : propsValues.helperText}
-          disabled={fetchError}
-        />
-        {
-          fetchError
-            ? <InputErrorText description="An error occurred" />
-            : null
-        }
-      </Column>
-    );
+        </Column>
+      )
+  );
+
+  const validateAndSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    // Validate client
+    if (formData.client.isInvalid || !formData.client.value.code) {
+      setInputValidation('client', true);
+      focusById(formData.client.id);
+      return;
+    }
+    // Vaidate location code
+    if (
+      formData.locationCode.isInvalid
+      || !formData.locationCode.value
+      || !validateLocationCodeMutation.isSuccess
+    ) {
+      setInputValidation('locationCode', true);
+      setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationValue);
+      focusById(formData.locationCode.id);
+      return;
+    }
+    // Validate email
+    if (formData.email.isInvalid || !formData.email.value) {
+      setInputValidation('email', true);
+      focusById(formData.email.id);
+      return;
+    }
+    // Validate species
+    if (formData.species.isInvalid || !formData.species.value.code) {
+      setInputValidation('species', true);
+      focusById(formData.species.id);
+      return;
+    }
+    // Source code, and the two booleans always have a default value so there's no need to check.
+
+    // Submit Seedlot.
+    const payload = convertToPayload(formData);
+    seedlotMutation.mutate(payload);
   };
 
   return (
     <div className="applicant-information-form">
       <form onSubmit={validateAndSubmit}>
+        {
+          seedlotMutation.isError
+            ? (
+              <Row className="error-row">
+                <Column>
+                  <ActionableNotification
+                    id="create-seedlot-error-banner"
+                    kind="error"
+                    lowContrast
+                    title="Your application could not be created"
+                    inline
+                    actionButtonLabel=""
+                    onClose={() => false}
+                  >
+                    An error has occurred when trying to create your seedlot number.
+                    Please try submiting it again later.
+                    {' '}
+                    {`${seedlotMutation.error.code}: ${seedlotMutation.error.message}`}
+                  </ActionableNotification>
+                </Column>
+              </Row>
+            )
+            : null
+        }
         <Row className="applicant-agency-title">
           <Column lg={8}>
             <h2>Applicant agency</h2>
@@ -293,23 +382,30 @@ const ApplicantInformationForm = () => {
         </Row>
         <Row className="agency-information">
           {
-            displayCombobox(applicantAgencyQuery, applicantAgencyFieldProps, true)
+            displayCombobox(applicantAgencyQuery, applicantAgencyFieldConfig, true)
           }
           <Column sm={4} md={2} lg={5}>
             <TextInput
               className="agency-number-wrapper-class"
               id="agency-number-input"
               name="number"
-              ref={numberInputRef}
               type="number"
-              value={responseBody.applicant.number}
+              value={formData.locationCode.value}
               labelText="Applicant agency number"
-              invalid={isLocationCodeInvalid}
-              placeholder={!forestClientNumber ? '' : '00'}
+              invalid={formData.locationCode.isInvalid}
+              placeholder={!formData.client.value?.code ? '' : '00'}
               invalidText={invalidLocationMessage}
-              disabled={!forestClientNumber}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => locationCodeChangeHandler(e)}
-              onBlur={() => validateLocationCode()}
+              disabled={!formData.client.value?.code}
+              onChange={
+                (
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) => handleLocationCode(e.target.value)
+              }
+              onBlur={
+                (
+                  e: React.ChangeEvent<HTMLInputElement>
+                ) => handleLocationCodeBlur(formData.client.value?.code, e.target.value)
+              }
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
               helperText={locationCodeHelper}
             />
@@ -325,14 +421,12 @@ const ApplicantInformationForm = () => {
             <TextInput
               id="appliccant-email-input"
               name="email"
-              ref={emailInputRef}
               type="email"
               labelText="Applicant email address"
               helperText="The Tree Seed Centre will uses it to communicate with the applicant"
-              invalid={isEmailInvalid}
+              invalid={formData.email.isInvalid}
               invalidText="Please enter a valid email"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerApplicant(e)}
-              onBlur={() => validateApplicantEmail()}
+              onBlur={(e: React.ChangeEvent<HTMLInputElement>) => handleEmail(e.target.value)}
             />
           </Column>
         </Row>
@@ -342,9 +436,9 @@ const ApplicantInformationForm = () => {
             <Subtitle text="Enter the initial information about this seedlot" />
           </Column>
         </Row>
-        <Row className="seedlot-species-combobox">
+        <Row className="seedlot-species-row">
           {
-            displayCombobox(vegCodeQuery, speciesFieldProps)
+            displayCombobox(vegCodeQuery, speciesFieldConfig)
           }
         </Row>
         <Row className="class-source-radio">
@@ -353,24 +447,15 @@ const ApplicantInformationForm = () => {
               legendText="Class A source"
               name="class-source-radiogroup"
               orientation="vertical"
-              defaultSelected="tested"
-              onChange={(e: string) => inputChangeHandlerRadio(e)}
+              onChange={(e: string) => handleSource(e)}
             >
-              <RadioButton
-                id="tested-radio"
-                labelText="Tested parent trees"
-                value="tested"
-              />
-              <RadioButton
-                id="untested-radio"
-                labelText="Untested parent trees"
-                value="untested"
-              />
-              <RadioButton
-                id="custom-radio"
-                labelText="Custom seedlot"
-                value="custom"
-              />
+              {
+                seedlotSourcesQuery.isFetching
+                  ? (
+                    <RadioButtonSkeleton />
+                  )
+                  : renderSources()
+              }
             </RadioButtonGroup>
           </Column>
         </Row>
@@ -381,9 +466,9 @@ const ApplicantInformationForm = () => {
                 id="registered-tree-seed-center"
                 name="registered"
                 labelText="Yes, to be registered with the Tree Seed Centre"
-                defaultChecked
+                checked={formData.willBeRegistered.value}
                 onChange={
-                  (e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerCheckboxes(e)
+                  (e: React.ChangeEvent<HTMLInputElement>) => handleCheckBox('willBeRegistered', e.target.checked)
                 }
               />
             </CheckboxGroup>
@@ -396,9 +481,9 @@ const ApplicantInformationForm = () => {
                 id="collected-bc"
                 name="collectedBC"
                 labelText="Yes, collected from a location within B.C."
-                defaultChecked
+                checked={formData.isBcSource.value}
                 onChange={
-                  (e: React.ChangeEvent<HTMLInputElement>) => inputChangeHandlerCheckboxes(e)
+                  (e: React.ChangeEvent<HTMLInputElement>) => handleCheckBox('isBcSource', e.target.checked)
                 }
               />
             </CheckboxGroup>

@@ -53,6 +53,10 @@ const ApiConfig = {
 
   geneticWorth: `${serverHost}/api/genetic-worth/calculate-all`,
 
+  seedlotSources: `${serverHost}/api/seedlot-sources`,
+
+  seedlots: `${serverHost}/api/seedlots`,
+
   /**
    * ORACLE API
    */

@@ -18,7 +18,7 @@ import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
-import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
+// import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -52,7 +52,8 @@ import {
   initParentTreeState,
   generateDefaultRows,
   validateCollectionStep,
-  verifyCollectionStepCompleteness
+  verifyCollectionStepCompleteness,
+  getAgencies
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
@@ -63,7 +64,7 @@ const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
-  const seedlotNumber = useParams().seedlot ?? '';
+  const seedlotNumber = useParams().seedlotNumber ?? '';
 
   const [formStep, setFormStep] = useState<number>(0);
   const [
@@ -104,7 +105,7 @@ const SeedlotRegistrationForm = () => {
 
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
-    queryFn: () => getApplicantAgenciesOptions()
+    queryFn: () => getAgencies()
   });
 
   const [allInvalidationObj, setAllInvalidationObj] = useState<AllStepInvalidationObj>({

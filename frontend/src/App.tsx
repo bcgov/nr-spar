@@ -3,7 +3,9 @@ import React from 'react';
 import {
   BrowserRouter, Routes, Route
 } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
+import 'react-toastify/dist/ReactToastify.css';
 import './styles/custom.scss';
 
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -29,78 +31,82 @@ const App: React.FC = () => {
   const { signed } = useAuth();
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/" element={<Layout />}>
-          <Route path="/silent-check-sso" element={<SilentCheckSso />} />
-          <Route path="/logout" element={<Logout />} />
+    <>
+      <ToastContainer />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<Layout />}>
+            <Route path="/silent-check-sso" element={<SilentCheckSso />} />
+            <Route path="/logout" element={<Logout />} />
 
-          <Route
-            path="/dashboard"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <Dashboard />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/dashboard"
+              element={(
+                <ProtectedRoute signed={signed}>
+                  <Dashboard />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <SeedlotDashboard />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots"
+              element={(
+                <ProtectedRoute signed={signed}>
+                  <SeedlotDashboard />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/register-a-class"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <CreateAClass />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots/register-a-class"
+              element={(
+                <ProtectedRoute signed={signed}>
+                  <CreateAClass />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/successfully-created/:seedlot"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <SeedlotCreatedFeedback />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots/creation-success"
+              element={(
+                <ProtectedRoute signed={signed}>
+                  <SeedlotCreatedFeedback />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/details/:seedlot"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <SeedlotDetails />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots/details/:seedlot"
+              element={(
+                <ProtectedRoute signed={signed}>
+                  <SeedlotDetails />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/registration/:seedlot"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <SeedlotRegistrationForm />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots/a-class-registration/:seedlotNumber"
+              element={(
+                <ProtectedRoute signed={signed}>
+                  <SeedlotRegistrationForm />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/my-seedlots"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <MySeedlots />
-              </ProtectedRoute>
-            )}
-          />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            <Route
+              path="/seedlots/my-seedlots"
+              element={(
+                <ProtectedRoute signed={signed}>
+                  <MySeedlots />
+                </ProtectedRoute>
+              )}
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </>
+
   );
 };
 
