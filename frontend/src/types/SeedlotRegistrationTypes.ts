@@ -1,3 +1,4 @@
+import ApplicantInfo from './ApplicantInfo';
 import { FormInputType } from './FormInputType';
 import MultiOptionsObj from './MultiOptionsObject';
 
@@ -26,4 +27,13 @@ export type SeedlotRegPayloadType = {
   toBeRegistrdInd: boolean;
   bcSourceInd: boolean;
   geneticClassCode: 'A' | 'B';
+}
+
+export type OldSeedlotRegistrationObj = {
+  seedlotNumber: number;
+  applicant: ApplicantInfo;
+  species: MultiOptionsObj;
+  source: string;
+  registered: boolean;
+  collectedBC: boolean;
 }

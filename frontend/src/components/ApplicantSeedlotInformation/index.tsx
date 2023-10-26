@@ -5,12 +5,12 @@ import { Edit } from '@carbon/icons-react';
 
 import Subtitle from '../Subtitle';
 
-import SeedlotRegistrationObj from '../../types/SeedlotRegistrationTypes';
+import { OldSeedlotRegistrationObj } from '../../types/SeedlotRegistrationTypes';
 
 import './styles.scss';
 
 interface ApplicantSeedlotInformationProps {
-  seedlotApplicantData: SeedlotRegistrationObj;
+  seedlotApplicantData: OldSeedlotRegistrationObj;
 }
 
 const ApplicantSeedlotInformation = (

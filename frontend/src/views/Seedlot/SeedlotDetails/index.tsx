@@ -15,7 +15,7 @@ import {
 } from '@carbon/react';
 
 import Seedlot from '../../../types/Seedlot';
-import SeedlotRegistration from '../../../types/SeedlotRegistrationTypes';
+import { OldSeedlotRegistrationObj } from '../../../types/SeedlotRegistrationTypes';
 
 import api from '../../../api-service/api';
 import ApiConfig from '../../../api-service/ApiConfig';
@@ -51,7 +51,7 @@ const manageOptions = [
 const SeedlotDetails = () => {
   const { seedlot } = useParams();
   const [seedlotData, setSeedlotData] = useState<Seedlot>();
-  const [seedlotApplicantData, setSeedlotApplicantData] = useState<SeedlotRegistration>();
+  const [seedlotApplicantData, setSeedlotApplicantData] = useState<OldSeedlotRegistrationObj>();
 
   const getSeedlotData = () => {
     if (seedlot) {
