@@ -57,64 +57,63 @@ testing and deploying.
 
 **SPAR Client**
 
-- React PWA
-  - TypeScript
-  - Context API
-  - React Query
-  - MirageJS
+- PWA - Progressive Web Application
+  - [React](https://react.dev/)
+  - [React Context](https://legacy.reactjs.org/docs/context.html)
+  - [React Query](https://tanstack.com/query/v3/)
+  - [TypeScript](https://www.typescriptlang.org/)
+  - [MirageJS](https://miragejs.com/)
+  - [Vitest](https://vitest.dev/)
+  - [Vite](https://vitejs.dev/)
+  - [Node 20](https://nodejs.org/download/release/v20.7.0/)
 
-You can learn more about this service [looking its README](frontend/README.md)
+You can learn more about it [by looking its README](frontend/README.md)
 
-**SPAR Back-end REST API - Postgres**
+**SPAR Back end - Postgres**
+- REST API
+  - [Java 17 with Spring Boot with GraalVM](https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html)
+  - [Spring Boot Web](https://spring.io/guides/gs/spring-boot/)
+  - [Apache Maven](https://maven.apache.org/)
+  - [Hibernate ORM](https://hibernate.org/orm/)
 
-- Java ecosystem
-  - Maven
-  - Open JDK 17
-  - Spring Web MVC Framework
-  - JPA and Hibernate Framework
+You can learn more about it [by looking its README](backend/README.md)
 
-You can learn more about this service [looking its README](backend/README.md)
+**SPAR Back end - Oracle THE**
+- REST API
+  - [Java 17](https://www.oracle.com/java/technologies/downloads/#java17)
+  - [Spring Boot Web](https://spring.io/guides/gs/spring-boot/)
+  - [Apache Maven](https://maven.apache.org/)
+  - [Hibernate ORM](https://hibernate.org/orm/)
+  - [Oracle JDBC](https://www.oracle.com/database/technologies/appdev/jdbc-downloads.html)
 
-**SPAR Back-end REST API - Oracle THE**
-
-- Java ecosystem
-  - Maven
-  - Open JDK 17
-  - Spring Web MVC Framework
-  - JPA and Hibernate Framework
-
-You can learn more about this service [looking its README](oracle-api/README.md)
+You can learn more about it [by looking its README](oracle-api/README.md)
 
 # Getting started
 
-Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
-from the project root directory, if it's one of the Java services. You **must** provide some environment
-variables for database access configuration, depending on what service you're trying to run. Please
-see each service README to learn more details.
+Once you have cloned this repository, you can get it running by typing at the 
+project root directory
 
-## Quick look
-
-But if all you want is to take a quick look at the running services and client, you can do it by using
-Docker Compose.
-
-Run with:
 ```sh
-docker-compose up --build -d
+docker compose up -d
 ```
 
-There should be four running services:
+⚠️ Be aware of the `FORESTCLIENTAPI_KEY` that's not provided in the 
+docker compose file. If you need that or want to have a fully working
+environment, get in touch with a team member to request this API KEY.
 
-You can clean and remove the containers with
-```sh
-docker-compose down --remove-orphans
-```
+If everything went well, you should be able to see three running
+services in the output of `docker ps`. You'll find:
 
-⚠️ You may want to try one or more available back-end APIs. To do so, you can rely on Swagger UI, provided
-on both back-end services. Once the service is running, head to http://localhost:8090/swagger-ui/index.html.
-Also note that you'll need to unlock swagger, otherwhise you'll only see 401 responses. Follow the steps bellow
+- SPAR Client - http://localhost:3000 
+- SPAR Back end Postgres - http://localhost:8090/swagger-ui/index.html
+- SPAR Postgres Database
+
+
+⚠️ In case you may want to try the back end API, you'll need to unlock 
+swagger, otherwhise you'll only see 401 responses. Follow the steps bellow
 to get a JWT token to your user.
 
-⚠️ Be awere the port may change due to docker parameters.
+⚠️ Note that users needs to have one of these roles: `user_read` and `user_write`.
 
 **Getting a JWT token for SPAR services**
 

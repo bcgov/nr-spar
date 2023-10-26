@@ -55,6 +55,9 @@ parameters:
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "2"
+  - name: ORACLEDB_KEYSTORE
+    description: Keystore location path
+    value: /usr/share/service/jssecacerts
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -127,6 +130,8 @@ objects:
                       key: oracle-password
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
+                - name: ORACLEDB_KEYSTORE
+                  value: ${ORACLEDB_KEYSTORE}
               ports:
                 - containerPort: 8090
                   protocol: TCP

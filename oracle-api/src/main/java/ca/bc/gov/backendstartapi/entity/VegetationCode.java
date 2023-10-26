@@ -14,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.NamedQuery;
 
 /**
  * Code used to identify various vegetation species, along with metadata.
@@ -29,18 +28,8 @@ import org.hibernate.annotations.NamedQuery;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString
-@NamedQuery(
-    name = VegetationCode.FIND_VALID_BY_CODE_OR_DESCRIPTION,
-    query =
-        "SELECT vc FROM VegetationCode vc "
-            + "WHERE (vc.id ILIKE :search OR vc.description ILIKE :search) "
-            + "AND CURRENT_DATE >= vc.effectiveDate AND CURRENT_DATE < vc.expiryDate "
-            + "ORDER BY vc.id")
 @Schema(description = "Code used to identify various vegetation species, along with metadata.")
 public class VegetationCode {
-
-  public static final String FIND_VALID_BY_CODE_OR_DESCRIPTION =
-      "VegetationCode.findValidByCodeOrDescription";
 
   /** The vegetation code itself. */
   @Id

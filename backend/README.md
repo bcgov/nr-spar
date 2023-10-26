@@ -1,4 +1,4 @@
-# SPAR Back-end REST API
+# SPAR Back end REST API
 
 This repository holds a set of policies, standards, guides, and pipelines to
 get started with a back-end API. Before writing your first line of code, please
@@ -24,76 +24,52 @@ Here you can find a comprehensive list of all languages and tools that are been 
 in this service. And also everything you need to get started, build locally, test
 and deploy it. 
 
-- Java ecosystem
-  - Maven
-  - Open JDK 17
-  - Spring Web MVC Framework
-  - JPA and Hibernate Framework
+- Java REST API
+  - [Apache Maven](https://maven.apache.org/)
+  - [Java 17](https://www.oracle.com/java/technologies/downloads/#java17)
+  - [Spring Boot Web](https://spring.io/guides/gs/spring-boot/)
+  - [Hibernate ORM](https://hibernate.org/orm/)
 - Testing
-  - JUnit 5
-  - Mockito and Mock MVC
-  - Automated tests with Postman and Newman
-- Database
-  - PostgreSQL
-  - Versioning with [Flyway](https://flywaydb.org/)
+  - [JUnit 5](https://junit.org/junit5/)
+  - [Mockito](https://site.mockito.org/)
+  - [Spring Mock MVC](https://docs.spring.io/spring-framework/reference/testing/spring-mvc-test-framework.html)
+  - [Automated tests with Postman and Newman](https://learning.postman.com/docs/collections/using-newman-cli/installing-running-newman/)
+- Relational Database
+  - [PostgreSQL](https://www.postgresql.org/) + [PostGIS](https://postgis.net/)
+  - [Flyway](https://flywaydb.org/)
 - DevOps
-  - Docker
-  - Docker Composer
-  - Sonar Cloud
-  - Deploy to OpenShift with GitHub Actions
+  - [Docker](https://www.docker.com/)
+  - [Docker Compose](https://docs.docker.com/compose/)
+  - [SonarCloud](https://docs.sonarcloud.io/)
+  - [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift)
+  - CI/CD with [GitHub Actions](https://docs.github.com/en/actions)
 - Tools (Recommendations)
-  - IntelliJ IDEA
-  - Postman
-  - DBeaver
+  - [IntelliJ IDEA](https://www.jetbrains.com/idea/) or [Microsoft Visual Studo Code](https://code.visualstudio.com/)
+  - [Postman](https://www.postman.com/)
+  - [DBeaver](https://dbeaver.io/)
 
 # Getting started
 
-Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
-from the project root directory. You **must** provide three environment variables for database
-access configuration:
+Once you have cloned this repository, can get it running on your computer by typing
+in the project root directory:
 
-Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
-the `status` property should have the value *UP*.
+```sh
+./mvnw spring-boot:run
+```
+
+⚠️ You'll need a PostgreSQL database running. Here's how you can get it up 
+and running with Docker and Docker Compose:
+
+Run (from the project root):
+```sh
+docker-compose up database -d
+```
+
+Then head to http://localhost:8090/actuator/health to check if the service was successfully launched:
+the first `status` property should have the value **UP**.
 
 Before writing your first line of code, and learn more about the checks, including
 tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
-
-## Quick look
-
-If all you want is to take a quick look at the running service, you can do it by using Docker Compose.
-
-Be aware of the required environment variables:
-
-```sh
-FORESTCLIENTAPI_KEY=[key-here]
-
-```
-
-✅ You can export all environment variables from a .env file with this command (On Linux):
-
-```sh
-export $(cat .env | xargs)
-```
-
-Run with (from the project root):
-```sh
-docker-compose up --build backend -d
-```
-
-⚠️ You'll need a PostgreSQL database running. Here's how you can get it up and running:
-
-Run with (from the project root):
-```sh
-docker-compose up --build database -d
-```
-
-Use this environment variables
-
-```sh
-POSTGRES_USER=postgres
-POSTGRES_DB=postgres
-POSTGRES_PASSWORD=default
-```
 
 ## Developing locally with Docker
 
@@ -107,7 +83,7 @@ the service will be restarted! Enjoy
 
 ## Debugging inside Docker
 
-This instruction is for VSCode. If you have another IDE, be aware that some
+This instruction is for **VSCode**. If you have another IDE, be aware that some
 steps may change.
 
 All you need to do is to click the "Run and Debug" button on VSCode, then
@@ -129,6 +105,16 @@ Make sure you have these settings:
 
 Now you can select `Debug (Attach)` in the dropdown input and hit run, 
 click the play button. 
+
+## Running Checks
+
+Here's how you can check if your changes looks good. This command
+will ensure your code compiles, all checkstyle pass and all tests
+pass.
+
+```sh
+./mvnw --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
+```
 
 ## Getting help
 

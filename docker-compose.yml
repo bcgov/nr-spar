@@ -29,6 +29,7 @@ services:
     environment:
       <<: *db-vars
     volumes: ["/pgdata"]
+    ports: ["5432:5432"]
     healthcheck:
       test: pg_isready -U postgres
       interval: 5s
@@ -94,3 +95,26 @@ services:
     user: root
     volumes: ["./frontend:/app"]
     working_dir: /app
+
+  oracle:
+    container_name: oracle
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SERVICE_NAME: ${SERVICE_NAME}
+      SERVER_PORT: "8091"
+      ORACLEDB_KEYSTORE: /app/jssecacerts
+      ORACLEDB_SECRET: changeit
+    profiles: ["oracle"]
+    network_mode: host
+    image: maven:3.9.3-eclipse-temurin-17
+    entrypoint: sh -c './startup.sh && mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5006"'
+    working_dir: /app
+    volumes: ["./oracle-api:/app"]
+    healthcheck:
+      test: curl -f http://localhost:8091/actuator/health | grep '"status":"UP"'
+      interval: 5s
+      timeout: 5s
+      retries: 5
