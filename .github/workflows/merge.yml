@@ -105,6 +105,7 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
+              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=test
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
@@ -223,6 +224,7 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
+              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=production
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
