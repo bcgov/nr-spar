@@ -1,11 +1,8 @@
-# SPAR Oracle API
+# SPAR Oracle REST API
 
 This repository holds a set of policies, standards, guides, and pipelines to
 get started with a back-end API. Before writing your first line of code, please
 take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
-
-Note: This repository was generated from [greenfield-template](https://github.com/bcgov/greenfield-template)
-and in case you're interested in the original README file, we still have it [here](README_template.md).
 
 ## Our Policy
 
@@ -21,72 +18,86 @@ your problem is someone else's problem. Let's figure it out together. So, ask
 a question using our channels. We have [our own Stackoverflow](https://stackoverflow.developer.gov.bc.ca/)
 and [our Rocket Chat](https://chat.developer.gov.bc.ca/) channel.
 
-## Stack
+# Stack
 
 Here you can find a comprehensive list of all languages and tools that are been used
 in this service. And also everything you need to get started, build locally, test
 and deploy it. 
 
-- Java ecosystem
-  - Maven
-  - Open JDK 17
-  - Spring Web MVC Framework
-  - JPA and Hibernate Framework
+- Java REST API
+  - [Apache Maven](https://maven.apache.org/)
+  - [Java 17](https://www.oracle.com/java/technologies/downloads/#java17)
+  - [Spring Boot Web](https://spring.io/guides/gs/spring-boot/)
+  - [Hibernate ORM](https://hibernate.org/orm/)
 - Testing
-  - JUnit 5
-  - Mockito and Mock MVC
-  - Automated tests with Postman and Newman
-- Database
-  - Remote Oracle with secure connection
-  - PostgreSQL
+  - [JUnit 5](https://junit.org/junit5/)
+  - [Mockito](https://site.mockito.org/)
+  - [Spring Mock MVC](https://docs.spring.io/spring-framework/reference/testing/spring-mvc-test-framework.html)
+  - [Automated tests with Postman and Newman](https://learning.postman.com/docs/collections/using-newman-cli/installing-running-newman/)
+- Relational Database
+  - Secure (Over TCP) Oracle connection through JDBC
 - DevOps
-  - Docker
-  - Docker Composer
-  - Sonar Cloud
-  - Deploy to OpenShift with GitHub Actions
+  - [Docker](https://www.docker.com/)
+  - [Docker Compose](https://docs.docker.com/compose/)
+  - [SonarCloud](https://docs.sonarcloud.io/)
+  - [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift)
+  - CI/CD with [GitHub Actions](https://docs.github.com/en/actions)
 - Tools (Recommendations)
-  - IntelliJ IDEA
-  - Postman
-  - DBeaver
+  - [IntelliJ IDEA](https://www.jetbrains.com/idea/) or [Microsoft Visual Studo Code](https://code.visualstudio.com/)
+  - [Postman](https://www.postman.com/)
+  - [DBeaver](https://dbeaver.io/)
 
 ## Getting started
 
-Once you have cloned this repository, can get it running by typing: `./mvnw spring-boot:run`
-from the project root directory. You **must** provide bellow environment variables:
+Once you have cloned this repository, can get it running on your computer by typing
+in the project root directory:
 
-Then head to http://localhost:8090/actuator/health to check if the system was successfully launched:
-the `status` property should have the value *UP*.
+```sh
+./mvnw spring-boot:run
+```
+
+⚠️ You'll be required to be connection in the BCGov VPN.
+
+Then head to http://localhost:8090/actuator/health to check if the service was successfully launched:
+the first `status` property should have the value **UP**.
 
 Before writing your first line of code, and learn more about the checks, including
 tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) guide.
 
-### Quick look
+## Developing locally with Docker
 
-But if all you want is to take a quick look on the running service, you can do it by
-using Docker and the Composer plugin.
-
-Note that you'll need these environment variables:
+Just run:
 ```sh
-DATABASE_USER=[user-here]
-DATABASE_PASSWORD=[password-here]
+docker compose --profile oracle up -d
 ```
 
-✅ You can export all environment variables from a .env file with this command (On Linux):
+If you need to change the code, no problem. Once you hit Ctrl+S keys
+the service will be restarted! Enjoy
 
-```sh
-export $(cat .env | xargs)
+## Debugging inside Docker
+
+This instruction is for **VSCode**. If you have another IDE, be aware that some
+steps may change.
+
+All you need to do is to click the "Run and Debug" button on VSCode, then
+click the small cog button, to open a new file called `launch.json`.
+Make sure you have these settings:
+
+```json
+"configurations": [
+  {
+    "type": "java",
+    "name": "Debug (Attach)",
+    "projectName": "OracleAPI",
+    "request": "attach",
+    "hostName": "127.0.0.1",
+    "port": 5006
+  },
+]
 ```
 
-Run with (from the project root):
-```sh
-docker-compose up --build oracle-api -d
-```
-
-If you're in Brazil, you'll need to provide the address of the DNS server to be used by the container in the environment
-variable `DNS_ADDRESS`: you can find the address of the DNS server you're using right now using
-[nslookup](https://en.wikipedia.org/wiki/Nslookup), for instance.
-
-You can then check the API documentation accessing `localhost:8090/swagger-ui.html`.
+Now you can select `Debug (Attach)` in the dropdown input and hit run, 
+click the play button. 
 
 ## Getting help
 

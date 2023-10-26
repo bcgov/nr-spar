@@ -219,7 +219,7 @@ public class SeedlotEndpoint {
               description = "User's identification",
               example = "dev-abcdef123456@idir")
           String userId,
-      @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+      @RequestParam(value = "page", required = false, defaultValue = "0") int page,
       @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
     return seedlotService.getUserSeedlots(userId, page, size);
   }
