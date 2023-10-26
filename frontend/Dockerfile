@@ -6,7 +6,8 @@ FROM node:18.18.0-bullseye-slim AS build
 WORKDIR /app
 COPY *.html *.json *.ts ./
 COPY ./src ./src
-RUN npm run build && \
+RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
+    npm run build && \
     rm -rf node_modules
 
 # Deploy container
