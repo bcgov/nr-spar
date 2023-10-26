@@ -25,6 +25,9 @@ public class SeedlotSourceEntity extends CodeDescriptionEntity {
   @Column(name = "default_source_ind", nullable = true)
   private Boolean isDefault;
 
+  /**
+   * Constructor for SeedlotSourceEntity.
+   */
   public SeedlotSourceEntity(
       String seedlotSourceCode,
       String description,
