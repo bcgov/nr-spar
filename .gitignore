@@ -115,6 +115,8 @@ frontend/cypress-coverage
 jssecacerts
 InstallCert.class
 InstallCert$SavingTrustManager.class
+*.der
+*.pem
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
