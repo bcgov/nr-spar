@@ -24,8 +24,7 @@
   <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${LOGS}/oracle-api.log</file>
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <Pattern>{%nopex"labels.project":"${applicationName}","service.environment":"${serviceEnv}","@timestamp":"%date{yyyy-MM-dd HH:mm:ss.SSS}","log.level":"%p","log.logger":"%logger{36}","message":"%replace(%msg){'\"','\\"'}","ecs.version":"${ecsVersion}","event.category":"web","event.dataset":"application.log.utc","event.ingested":"diagnostic","event.kind":"event","organization.id":"${sparTeamEmail}","organization.name":"TeamSPAR"}%n
-      </Pattern>
+      <Pattern>{%nopex"labels.project":"${applicationName}","service.environment":"${serviceEnv}","@timestamp":"%date{yyyy-MM-dd HH:mm:ss.SSS}","log.level":"%p","log.logger":"%logger{36}","message":"%replace(%msg){'\"','\\"'}","ecs.version":"${ecsVersion}","event.category":"web","event.dataset":"application.log.utc","event.ingested":"diagnostic","event.kind":"event","organization.id":"${sparTeamEmail}","organization.name":"TeamSPAR"}%n</Pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <!-- rollover daily and when the file reaches 10 MegaBytes -->
