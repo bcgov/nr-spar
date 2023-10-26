@@ -2,7 +2,7 @@ import ApplicantAgencyType from '../types/ApplicantAgencyType';
 import ApplicantAgenciesItems from '../mock-server/fixtures/ApplicantAgenciesItems';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 
-const getApplicantAgenciesOptions = (): MultiOptionsObj[] | string[] => {
+const getApplicantAgenciesOptions = (): MultiOptionsObj[] => {
   const options: MultiOptionsObj[] = [];
   ApplicantAgenciesItems.sort(
     (a: ApplicantAgencyType, b: ApplicantAgencyType) => (a.clientName < b.clientName ? -1 : 1)
