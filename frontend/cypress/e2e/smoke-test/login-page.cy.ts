@@ -1,4 +1,4 @@
-import { HALF_SECOND, FIVE_SECOND } from '../../constants';
+import { FIVE_SECONDS } from '../../constants';
 
 describe('Login page test', () => {
   let loginPageData: {
@@ -12,27 +12,40 @@ describe('Login page test', () => {
     cy.fixture('login-page').then((ttls) => {
       loginPageData = ttls;
     });
-    cy.visit('/');
-    cy.wait(HALF_SECOND);
   });
 
   it('login page is displayed and loads correctly', () => {
+    cy.visit('/');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
     cy.getByDataTest('landing-subtitle').should('have.text', loginPageData.subtitle);
     cy.getByDataTest('landing-desc').should('have.text', loginPageData.description);
   });
 
   it('navigate to the user form page IDIR', () => {
+    cy.visit('/');
     cy.getByDataTest('landing-button__idir').click();
-    cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
-      cy.get('#idirLogo', { timeout }).should('be.visible');
+    cy.url().then((url) => {
+      if (url.includes('.gov.bc.ca')) {
+        cy.get('#idirLogo', { timeout: 5000 }).should('be.visible');
+      } else {
+        cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECONDS } }, ({ timeout }) => {
+          cy.get('#idirLogo', { timeout }).should('be.visible');
+        });
+      }
     });
   });
 
   it('navigate to the user form page BCeID', () => {
+    cy.visit('/');
     cy.getByDataTest('landing-button__bceid').click();
-    cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECOND } }, ({ timeout }) => {
-      cy.get('#bceidLogo', { timeout }).should('be.visible');
+    cy.url().then((url) => {
+      if (url.includes('.gov.bc.ca')) {
+        cy.get('#bceidLogo', { timeout: 5000 }).should('be.visible');
+      } else {
+        cy.origin(Cypress.env('keycloakLoginUrl'), { args: { timeout: FIVE_SECONDS } }, ({ timeout }) => {
+          cy.get('#bceidLogo', { timeout }).should('be.visible');
+        });
+      }
     });
   });
 
@@ -43,7 +56,8 @@ describe('Login page test', () => {
 
   it('log in with BCeID and validate user role', () => {
     cy.login();
-    cy.visit('/');
+    cy.visit('/dashboard');
+    cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('IDIR: undefined');
@@ -51,7 +65,8 @@ describe('Login page test', () => {
 
   it('log in with BCeID and validate user information', () => {
     cy.login();
-    cy.visit('/');
+    cy.visit('/dashboard');
+    cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
     cy.get('.user-data').find('p').contains('NRS Load Test-3');

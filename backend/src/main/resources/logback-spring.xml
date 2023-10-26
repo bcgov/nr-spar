@@ -53,6 +53,14 @@
       <appender-ref ref="RollingFile" />
       <appender-ref ref="Console" />
     </root>
+    <root level="warn">
+      <appender-ref ref="RollingFile" />
+      <appender-ref ref="Console" />
+    </root>
+    <root level="error">
+      <appender-ref ref="RollingFile" />
+      <appender-ref ref="Console" />
+    </root>
     <!-- LOG "ca.bc.gov.backendstartapi*" at TRACE level -->
     <logger name="ca.bc.gov.backendstartapi" level="${loggingLevel}" additivity="false">
       <appender-ref ref="RollingFile" />

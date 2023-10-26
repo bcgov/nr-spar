@@ -3,11 +3,13 @@ import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimSte
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
-import { RowDataDictType, NotifCtrlType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 
 export type ParentTreeStepDataObj = {
   tableRowData: RowDataDictType,
-  notifCtrl: NotifCtrlType
+  allParentTreeData: AllParentTreeMap // Contains all parent tree numbers under a species
+  mixTabData: RowDataDictType, // table row data used exclusively for SMP mix tab
+  notifCtrl: NotifCtrlType,
 }
 
 export type AllStepData = {
@@ -25,6 +27,11 @@ type SingleInvalidObj = {
   optInvalidText?: string
 }
 
+export type FormInputType = {
+  id: string;
+  isInvalid: boolean;
+}
+
 export type FormInvalidationObj = {
   [key: string]: SingleInvalidObj;
 }
@@ -39,4 +46,23 @@ export type AllStepInvalidationObj = {
   ownershipStep: OwnershipInvalidObj,
   orchardStep: FormInvalidationObj,
   extractionStorageStep: FormInvalidationObj
+}
+
+type ProgressStepStatus = {
+  isComplete: boolean;
+  isCurrent: boolean;
+  isInvalid: boolean;
+}
+
+export type ProgressIndicatorConfig = {
+  collection: ProgressStepStatus;
+  ownership: ProgressStepStatus;
+  interim: ProgressStepStatus;
+  orchard: ProgressStepStatus;
+  parent: ProgressStepStatus;
+  extraction: ProgressStepStatus;
+}
+
+export type StepMap = {
+  [key: number]: keyof ProgressIndicatorConfig;
 }

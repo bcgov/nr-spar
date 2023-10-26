@@ -9,16 +9,22 @@ import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods for handling Seedlots in the database. */
@@ -108,5 +114,44 @@ public class SeedlotService {
 
     log.debug("Next class {} seedlot number: {}", seedlotNumber);
     return String.valueOf(seedlotNumber);
+  }
+
+  /**
+   * Retrieve a paginated list of seedlot for a given user.
+   *
+   * @param userId the id of the user to fetch the seedlots for
+   * @param pageNumber the page number for the paginated search
+   * @param pageSize the size of the page
+   * @return a list of the user's seedlots
+   */
+  public List<Seedlot> getUserSeedlots(String userId, int pageNumber, int pageSize) {
+    if (pageSize == 0) {
+      pageSize = 10;
+    }
+
+    Pageable sortedPageable =
+        PageRequest.of(
+            pageNumber, pageSize, Sort.by(Direction.DESC, "AuditInformation_UpdateTimestamp"));
+    return seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable);
+  }
+
+  /**
+   * Retrieve a single seedlot information.
+   *
+   * @param seedlotNumber the seedlot number of the seedlot to fetch the information
+   * @return A Seedlot entity.
+   * @throws SeedlotNotFoundException in case of errors.
+   */
+  public Optional<Seedlot> getSingleSeedlotInfo(String seedlotNumber) {
+    log.info("Retrieving information for Seedlot number {}", seedlotNumber);
+
+    Optional<Seedlot> seedlotInfo = seedlotRepository.findById(seedlotNumber);
+
+    if (seedlotInfo.isEmpty()) {
+      log.error("Nothing found for seedlot number: {}", seedlotNumber);
+      throw new SeedlotNotFoundException();
+    }
+
+    return seedlotInfo;
   }
 }

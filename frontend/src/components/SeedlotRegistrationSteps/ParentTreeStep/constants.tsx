@@ -8,6 +8,8 @@ import {
 
 export const DEFAULT_PAGE_SIZE = 40;
 
+export const DEFAULT_MIX_PAGE_SIZE = 20;
+
 export const DEFAULT_PAGE_NUMBER = 1;
 
 export const EMPTY_NUMBER_STRING = '';
@@ -98,7 +100,7 @@ const getPageText = () => ({
     tabDescription: getTabDescription('Calculation of SMP mix'),
     notificationSubtitle: getNotificationSubtitle('Calculation of SMP mix'),
     tableDescription: 'Enter the estimative volume of SMP mix used for each clone',
-    toggleName: 'Show clonal value',
+    toggleName: 'Show breeding value',
     toggleNameBottom: 'Show weighted value',
     cleanModalHeading: getCleanTableDesc('Calculation of SMP mix')
   },
@@ -157,6 +159,9 @@ export const rowTemplate: RowItem = {
   coneCount: '',
   pollenCount: '',
   smpSuccessPerc: '',
+  nonOrchardPollenContam: '',
+  volume: '',
+  proportion: '',
   ad: '',
   dfs: '',
   dfu: '',
@@ -168,15 +173,53 @@ export const rowTemplate: RowItem = {
   iws: '',
   wdu: '',
   wwd: '',
-  nonOrchardPollenContam: '',
+  w_ad: '',
+  w_dfs: '',
+  w_dfu: '',
+  w_dfw: '',
+  w_dsb: '',
+  w_dsc: '',
+  w_dsg: '',
+  w_gvo: '',
+  w_iws: '',
+  w_wdu: '',
+  w_wwd: '',
   meanDegLat: '',
   meanMinLat: '',
   meanDegLong: '',
   meanMinLong: '',
   meanElevation: '',
-  volume: '',
-  proportion: '',
-  isMixTab: false
+  isMixTab: false,
+  invalidObjs: {
+    parentTreeNumber: {
+      isInvalid: false,
+      invalidText: ''
+    },
+    coneCount: {
+      isInvalid: false,
+      invalidText: ''
+    },
+    pollenCount: {
+      isInvalid: false,
+      invalidText: ''
+    },
+    smpSuccessPerc: {
+      isInvalid: false,
+      invalidText: ''
+    },
+    nonOrchardPollenContam: {
+      isInvalid: false,
+      invalidText: ''
+    },
+    volume: {
+      isInvalid: false,
+      invalidText: ''
+    },
+    proportion: {
+      isInvalid: false,
+      invalidText: ''
+    }
+  }
 };
 
 export const headerTemplate: Array<HeaderObj> = [
@@ -215,6 +258,33 @@ export const headerTemplate: Array<HeaderObj> = [
     editable: true,
     isAnOption: false,
     availableInTabs: [undefined, 'successTab']
+  },
+  {
+    id: 'nonOrchardPollenContam',
+    name: 'Non-orchard pollen contam. (%)',
+    description: 'Non-orchard pollen contam. (%)',
+    enabled: true,
+    editable: true,
+    isAnOption: false,
+    availableInTabs: [undefined, 'successTab']
+  },
+  {
+    id: 'volume',
+    name: 'Volume (ml)',
+    description: 'Volume (ml)',
+    enabled: true,
+    editable: true,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'proportion',
+    name: 'Proportion',
+    description: 'Proportion',
+    enabled: true,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
   },
   {
     id: 'ad',
@@ -316,13 +386,103 @@ export const headerTemplate: Array<HeaderObj> = [
     availableInTabs: ['coneTab', 'successTab', 'mixTab']
   },
   {
-    id: 'nonOrchardPollenContam',
-    name: 'Non-orchard pollen contam. (%)',
-    description: 'Non-orchard pollen contam. (%)',
-    enabled: true,
-    editable: true,
+    id: 'w_ad',
+    name: 'Weighted AD',
+    description: 'Weighted animal browse resistance (deer)',
+    enabled: false,
+    editable: false,
     isAnOption: false,
-    availableInTabs: [undefined, 'successTab']
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_dfs',
+    name: 'Weighted DFS',
+    description: 'Weighted Disease resistance for Dothistroma needle blight',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_dfu',
+    name: 'Weighted DFU',
+    description: 'Weighted Disease resistance for Redcedar leaf blight',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_dfw',
+    name: 'Weighted DFW',
+    description: 'Weighted Disease resistance for Swiss needle cast',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_dsb',
+    name: 'Weighted DSB',
+    description: 'Weighted Disease resistance for white pine blister rust',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_dsc',
+    name: 'Weighted DSC',
+    description: 'Weighted Disease resistance for Commandra blister rust',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_dsg',
+    name: 'Weighted DSG',
+    description: 'Weighted Disease resistance Western gall rust',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_gvo',
+    name: 'Weighted GVO',
+    description: 'Weighted Volume growth',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_iws',
+    name: 'Weighted IWS',
+    description: 'Weighted Spruce terminal weevil',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_wdu',
+    name: 'Weighted WDU',
+    description: 'Weighted Wood durability',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
+  },
+  {
+    id: 'w_wwd',
+    name: 'Weighted WWD',
+    description: 'Weighted Wood quality',
+    enabled: false,
+    editable: false,
+    isAnOption: false,
+    availableInTabs: [undefined, undefined, 'mixTab']
   },
   {
     id: 'meanDegLat',
@@ -370,18 +530,9 @@ export const headerTemplate: Array<HeaderObj> = [
     availableInTabs: [undefined, 'successTab']
   },
   {
-    id: 'volume',
-    name: 'Volume (ml)',
-    description: 'Volume (ml)',
-    enabled: true,
-    editable: true,
-    isAnOption: false,
-    availableInTabs: [undefined, undefined, 'mixTab']
-  },
-  {
-    id: 'proportion',
-    name: 'Proportion',
-    description: 'Proportion',
+    id: 'actions',
+    name: 'Actions',
+    description: 'Actions',
     enabled: true,
     editable: false,
     isAnOption: false,
@@ -418,6 +569,20 @@ export const SummarySectionConfig = {
       },
       avgNonOrchardContam: {
         name: 'Average number of non-orchard pollen contam. (%)',
+        value: EMPTY_NUMBER_STRING
+      }
+    }
+  },
+  mixTab: {
+    title: 'Breeding value SMP mix used',
+    description: 'Check the breeding value of SMP mix used on parent',
+    infoItems: {
+      parentsOutside: {
+        name: 'Number of SMP parents from outside',
+        value: EMPTY_NUMBER_STRING
+      },
+      totalVolume: {
+        name: 'Total volume (ml)',
         value: EMPTY_NUMBER_STRING
       }
     }

@@ -52,7 +52,7 @@ jobs:
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-          triggers: ('common/' 'backend/' 'frontend/' 'oracle-api/')
+          triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
 
   builds:
     name: Builds
@@ -74,7 +74,7 @@ jobs:
           - package: oracle-api
             triggers: ('oracle-api/')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: bcgov-nr/action-builder-ghcr@v1.1.2
         with:
           package: ${{ matrix.package }}
@@ -95,7 +95,8 @@ jobs:
         include:
           - name: database
             file: database/openshift.deploy.yml
-            parameters: -p DB_PVC_SIZE=128Mi
+            parameters:
+              -p DB_PVC_SIZE=128Mi
             overwrite: false
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
           - name: backend
@@ -105,7 +106,6 @@ jobs:
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
-              -p ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
           - name: fluentbit
@@ -123,7 +123,7 @@ jobs:
               -p VITE_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-            triggers: ('common/' 'database/' 'backend/' 'frontend/')
+            triggers: ('common/' 'database/' 'backend/' 'oracle-api/' 'frontend/')
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -145,10 +145,54 @@ jobs:
           parameters:
             -p ZONE=${{ github.event.number }}
             -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:${{ github.event.number }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path}}
+
+  cypress-test-coverage:
+    name: Cypress Test and Coverage
+    needs: [deploys]
+    runs-on: ubuntu-22.04
+    env:
+      CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+      CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+      VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
+      VITE_KC_CLIENT_ID: seed-planning-test-4296
+      VITE_KC_REALM: standard
+      VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
+      VITE_NRSPARWEBAPP_VERSION: dev
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Cypress CI
+        uses: bcgov-nr/action-test-and-analyse@v1.1.0
+        with:
+          node_version: "18.16.0"
+          commands: |
+            npm i
+            npm run cy:ci
+          dir: frontend
+          sonar_args: >
+            -Dsonar.organization=bcgov-sonarcloud
+            -Dsonar.javascript.lcov.reportPaths=cypress-coverage/lcov.info
+            -Dsonar.projectKey=nr-spar_frontend
+            -Dsonar.sources=src/
+            -Dsonar.exclusions=src/**/__test__/**/*
+            -Dsonar.exclusions=src/mock-server/**/*
+            -Dsonar.test.inclusions=cypress/e2e/smoke-test/**/*
+          sonar_token: ${{ secrets.SONAR_FRONTEND }}
+      - name: Upload videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos-chrome
+          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/
+      - name: Upload coverage
+        uses: actions/upload-artifact@v3
+        if: success()
+        with:
+          name: cypress-coverage
+          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress-coverage
 
   # tests-api:
   #   name: API Tests
@@ -158,7 +202,7 @@ jobs:
   #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: 16
@@ -186,7 +230,7 @@ jobs:
   #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
   #   runs-on: ubuntu-22.04
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: 16
@@ -216,7 +260,7 @@ jobs:
   #   runs-on: ubuntu-22.04
   #   timeout-minutes: 10
   #   steps:
-  #     - uses: actions/checkout@v3
+  #     - uses: actions/checkout@v4
   #     - uses: actions/setup-node@v3
   #       with:
   #         node-version: "16"

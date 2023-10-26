@@ -12,6 +12,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: ORG_NAME
+    description: Organization name
+    value: bcgov
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -23,20 +29,14 @@ parameters:
   - name: CPU_LIMIT
     value: 115m
   - name: MEMORY_REQUEST
-    value: 50Mi
-  - name: MEMORY_LIMIT
     value: 150Mi
+  - name: MEMORY_LIMIT
+    value: 250Mi
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
     required: true
     value: 256Mi
-  - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
-    value: ghcr.io
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    required: true
 objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
@@ -64,7 +64,7 @@ objects:
         - name: ${IMAGE_TAG}
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${PROMOTE}
+            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}
           referencePolicy:
             type: Local
   - kind: DeploymentConfig
@@ -127,7 +127,7 @@ objects:
                 failureThreshold: 5
                 initialDelaySeconds: 10
                 periodSeconds: 15
-                timeoutSeconds: 1
+                timeoutSeconds: 10
               livenessProbe:
                 exec:
                   command:
@@ -139,7 +139,7 @@ objects:
                 failureThreshold: 5
                 initialDelaySeconds: 10
                 periodSeconds: 15
-                timeoutSeconds: 1
+                timeoutSeconds: 10
               env:
                 - name: POSTGRES_DB
                   valueFrom:

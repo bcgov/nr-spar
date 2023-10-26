@@ -1,9 +1,9 @@
-name: Merge to Main
+name: Merge
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [PR Closed]
+    types: [completed]
   workflow_dispatch:
 
 concurrency:
@@ -19,7 +19,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Initialize
         uses: github/codeql-action/init@v2
@@ -69,9 +69,7 @@ jobs:
 
   deploy-test:
     name: TEST Deployment
-    needs:
-      - codeql
-      - init-test
+    needs: [init-test]
     environment: test
     runs-on: ubuntu-22.04
     strategy:
@@ -87,7 +85,6 @@ jobs:
             verification_path: "actuator/health"
             parameters:
               -p BUILD=test
-              -p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=test
           - name: fluentbit
             file: common/openshift.fluentbit.yml
@@ -120,7 +117,6 @@ jobs:
           verification_path: "actuator/health"
           parameters:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             ${{ matrix.parameters }}
 
   # api-tests:
@@ -130,7 +126,7 @@ jobs:
     # runs-on: ubuntu-latest
     # steps:
     #   - name: Checkout
-    #     uses: actions/checkout@v3
+    #     uses: actions/checkout@v4
 
     #   - name: Install Node
     #     uses: actions/setup-node@v3
@@ -206,6 +202,7 @@ jobs:
               -p BUILD=prod
               -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
+              -p KEYCLOAK_REALM_URL=https://loginproxy.gov.bc.ca/auth/realms/standard
           - name: fluentbit
             file: common/openshift.fluentbit.yml
             overwrite: true
@@ -218,6 +215,7 @@ jobs:
               -p VITE_KC_URL=https://loginproxy.gov.bc.ca/auth
               -p VITE_KC_REALM=standard
               -p VITE_KC_CLIENT_ID=seed-planning-test-4296
+              -p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -237,7 +235,6 @@ jobs:
           verification_path: "actuator/health"
           parameters:
             -p ZONE=prod -p NAME=${{ github.event.repository.name }}
-            -p PROMOTE=${{ github.repository }}/${{ matrix.name }}:test
             ${{ matrix.parameters }}
 
   image-promotions:

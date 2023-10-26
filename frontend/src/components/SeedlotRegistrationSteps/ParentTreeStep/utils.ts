@@ -1,8 +1,7 @@
-import { AxiosResponse } from 'axios';
 import { OrchardObj } from '../OrchardStep/definitions';
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
-  HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType
+  HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType, MixUploadResponse
 } from './definitions';
 import { EMPTY_NUMBER_STRING, rowTemplate } from './constants';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
@@ -11,7 +10,8 @@ import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistratio
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
-import { GenWorthCalcPayload, GeneticTrait } from '../../../types/GeneticWorthTypes';
+import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
+import { isPtNumberInvalid, populateRowData } from './TableComponents/utils';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -124,6 +124,60 @@ export const calcSummaryItems = (
   }
 };
 
+const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
+  let sum = 0;
+  const insidePtNums = Object.keys(state.tableRowData);
+  const ptNumsInMixTab: string[] = [];
+  Object.values(state.mixTabData).forEach((row) => {
+    if (
+      row.parentTreeNumber?.length
+      && !row.invalidObjs.parentTreeNumber.isInvalid
+    ) {
+      ptNumsInMixTab.push(row.parentTreeNumber);
+    }
+  });
+
+  ptNumsInMixTab.forEach((ptNum) => {
+    if (!insidePtNums.includes(ptNum)) {
+      sum += 1;
+    }
+  });
+
+  return sum.toString();
+};
+
+export const calcMixTabInfoItems = (
+  disableOptions: boolean,
+  summaryConfig: Record<string, any>,
+  setSummaryConfig: Function,
+  applicableGenWorths: string[],
+  weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
+  setWeightedGwInfoItems: Function,
+  state: ParentTreeStepDataObj
+) => {
+  if (!disableOptions) {
+    const modifiedSummaryConfig = { ...summaryConfig };
+    const tableRows = Object.values(state.mixTabData);
+
+    // Calc number of SMP parents from outside
+    modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = getOutsideParentTreeNum(state);
+
+    // Total volume (ml)
+    modifiedSummaryConfig.mixTab.infoItems.totalVolume.value = calcSum(tableRows, 'volume');
+
+    setSummaryConfig(modifiedSummaryConfig);
+
+    // Calculate the sum of each weighted gw value
+    const modifiedWeightedGwInfoItems = { ...weightedGwInfoItems };
+    applicableGenWorths.forEach((gw) => {
+      const weightedId = `w_${gw}`;
+      const sumWeighted = calcSum(tableRows, weightedId);
+      modifiedWeightedGwInfoItems[gw].value = Number(sumWeighted).toFixed(3);
+    });
+    setWeightedGwInfoItems(modifiedWeightedGwInfoItems);
+  }
+};
+
 export const processParentTreeData = (
   data: ParentTreeGeneticQualityType[],
   state: ParentTreeStepDataObj,
@@ -134,9 +188,11 @@ export const processParentTreeData = (
   setStepData: Function
 ) => {
   const modifiedState = { ...state };
+  const clonedAllData = structuredClone(state.allParentTreeData);
   let clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
 
   data.forEach((parentTree) => {
+    Object.assign(clonedAllData, { [parentTree.parentTreeNumber]: parentTree });
     if (
       !Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)
       && orchardIds.includes(parentTree.orchardId)
@@ -157,6 +213,7 @@ export const processParentTreeData = (
   });
 
   modifiedState.tableRowData = clonedTableRowData;
+  modifiedState.allParentTreeData = clonedAllData;
   sliceTableRowData(
     Object.values(clonedTableRowData),
     currentPage,
@@ -203,7 +260,7 @@ export const applyValueToAll = (
 };
 
 export const fillCompostitionTables = (
-  res: AxiosResponse,
+  data: CompUploadResponse[],
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
   currentTab: keyof TabTypes,
@@ -215,7 +272,7 @@ export const fillCompostitionTables = (
   // Clean the table first
   const clonedState = cleanTable(state, headerConfig, currentTab, setStepData);
 
-  res.data.forEach((row: CompUploadResponse) => {
+  data.forEach((row: CompUploadResponse) => {
     const parentTreeNumber = row.parentTreeNumber.toString();
     if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
       // If the clone nubmer exist from user file then fill in the values
@@ -281,17 +338,29 @@ export const configHeaderOpt = (
   headerConfig: HeaderObj[],
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: Function,
-  setHeaderConfig: Function
+  setHeaderConfig: Function,
+  weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
+  setWeightedGwInfoItems: Function,
+  setApplicableGenWorths: Function
 ) => {
   const speciesHasGenWorth = Object.keys(geneticWorthDict);
   if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
     const availableOptions = geneticWorthDict[seedlotSpecies.code];
+    setApplicableGenWorths(availableOptions);
     const clonedHeaders = structuredClone(headerConfig);
     let clonedGwItems = structuredClone(genWorthInfoItems);
+    let clonedWeightedGwItems = structuredClone(weightedGwInfoItems);
     availableOptions.forEach((opt: string) => {
       const optionIndex = headerConfig.findIndex((header) => header.id === opt);
       // Enable option in the column customization
       clonedHeaders[optionIndex].isAnOption = true;
+
+      // Enable weighted option in mix tab
+      const weightedIndex = headerConfig.findIndex((header) => header.id === `w_${opt}`);
+      if (weightedIndex > -1) {
+        clonedHeaders[weightedIndex].isAnOption = true;
+      }
+
       // Add GW input to the corresponding info section
       const gwAbbrevName = String(clonedHeaders[optionIndex].id).toUpperCase();
       clonedGwItems = Object.assign(clonedGwItems, {
@@ -306,14 +375,22 @@ export const configHeaderOpt = (
           }
         ]
       });
+      // Add weighted GW info to mix tab info section
+      clonedWeightedGwItems = Object.assign(clonedWeightedGwItems, {
+        [clonedHeaders[optionIndex].id]: {
+          name: `SMP Breeding Value - ${gwAbbrevName}`,
+          value: EMPTY_NUMBER_STRING
+        }
+      });
     });
     setHeaderConfig(clonedHeaders);
     setGenWorthInfoItems(clonedGwItems);
+    setWeightedGwInfoItems(clonedWeightedGwItems);
   }
 };
 
 export const setInputChange = (
-  parentTreeNumber: string,
+  rowData: RowItem,
   colName: keyof RowItem,
   value: string,
   state: ParentTreeStepDataObj,
@@ -321,17 +398,26 @@ export const setInputChange = (
 ) => {
   // Using structuredClone so useEffect on state.tableRowData can be triggered
   const clonedState = structuredClone(state);
-  clonedState.tableRowData[parentTreeNumber][colName] = value;
+  if (rowData.isMixTab) {
+    clonedState.mixTabData[rowData.rowId][colName] = value;
+  } else {
+    clonedState.tableRowData[rowData.parentTreeNumber][colName] = value;
+  }
+
   setStepData(clonedState);
 };
 
-export const fillGwInfo = (
-  geneticTraits: GeneticTrait[],
+export const fillCalculatedInfo = (
+  data: CalcPayloadResType,
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
-  setGenWorthInfoItems: Function
+  setGenWorthInfoItems: Function,
+  popSizeAndDiversityConfig: Record<string, any>,
+  setPopSizeAndDiversityConfig: Function
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
+  const { geneticTraits, neValue }: CalcPayloadResType = data;
+  // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
     const traitIndex = geneticTraits.map((trait) => trait.traitCode).indexOf(upperCaseCode);
@@ -349,6 +435,11 @@ export const fillGwInfo = (
     }
   });
   setGenWorthInfoItems(tempGenWorthItems);
+
+  // Fill in Ne value
+  const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
+  newPopAndDiversityConfig.ne.value = neValue.toFixed(1);
+  setPopSizeAndDiversityConfig(newPopAndDiversityConfig);
 };
 
 export const generateGenWorthPayload = (
@@ -378,4 +469,88 @@ export const generateGenWorthPayload = (
   });
 
   return payload;
+};
+
+export const getMixRowTemplate = (): RowItem => {
+  const newRow = structuredClone(rowTemplate);
+  newRow.isMixTab = true;
+  newRow.rowId = '-1';
+  return newRow;
+};
+
+export const addNewMixRow = (state: ParentTreeStepDataObj, setStepData: Function) => {
+  const clonedState = structuredClone(state);
+  const mixTableData = clonedState.mixTabData;
+  let maxRowId = -1;
+  Object.values(mixTableData).forEach((row) => {
+    if (Number(row.rowId) > maxRowId) {
+      maxRowId = Number(row.rowId);
+    }
+  });
+  const newRow = getMixRowTemplate();
+  const newRowId = maxRowId + 1;
+  newRow.rowId = String(newRowId);
+  Object.assign(mixTableData, { [newRowId]: newRow });
+  clonedState.mixTabData = mixTableData;
+  setStepData(clonedState);
+};
+
+/**
+ * Update proportions and relavent weighted GW values.
+ */
+const updateCalculations = (
+  tableDataObj: RowDataDictType,
+  applicableGenWorths: string[]
+): RowDataDictType => {
+  const clonedTable = structuredClone(tableDataObj);
+  const tableRows = Object.values(clonedTable);
+
+  // Calculate sum
+  const sum = Number(calcSum(tableRows, 'volume'));
+
+  if (sum > 0) {
+    // Calculate proportion for each row
+    tableRows.forEach((row) => {
+      const { rowId, volume } = row;
+      const proportion = (Number(volume) / sum).toFixed(3);
+      clonedTable[rowId].proportion = proportion;
+      // Update relavent weighted gw
+      applicableGenWorths.forEach((gw) => {
+        clonedTable[rowId][`w_${gw}`] = (Number(clonedTable[rowId][gw]) * Number(proportion)).toFixed(3);
+      });
+    });
+  }
+  return clonedTable;
+};
+
+export const fillMixTable = (
+  data: MixUploadResponse[],
+  applicableGenWorths: string[],
+  state: ParentTreeStepDataObj,
+  setStepData: Function
+) => {
+  let newRows = {};
+  const clonedState = structuredClone(state);
+  data.forEach((row: MixUploadResponse, index: number) => {
+    let newRow = getMixRowTemplate();
+    const ptNumber = String(row.parentTreeNumber);
+    newRow.rowId = index;
+    newRow.parentTreeNumber = ptNumber;
+    newRow.volume = String(row.pollenVolume);
+
+    // Validate pt number
+    const isPtInvalid = isPtNumberInvalid(ptNumber, state.allParentTreeData);
+    newRow.invalidObjs.parentTreeNumber.isInvalid = isPtInvalid;
+
+    // Populate data such as gw value
+    if (!isPtInvalid) {
+      newRow = populateRowData(newRow, ptNumber, state);
+    }
+
+    Object.assign(newRows, { [newRow.rowId]: newRow });
+  });
+
+  newRows = updateCalculations(newRows, applicableGenWorths);
+  clonedState.mixTabData = newRows;
+  setStepData(clonedState);
 };

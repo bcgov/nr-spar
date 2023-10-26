@@ -12,6 +12,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: ORG_NAME
+    description: Organization name
+    value: bcgov
   - name: IMAGE_TAG
     description: Image tag to use
     value: latest
@@ -25,12 +31,6 @@ parameters:
     value: 300Mi
   - name: MEMORY_LIMIT
     value: 400Mi
-  - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
-    value: ghcr.io
-  - name: PROMOTE
-    description: Image (namespace/name:tag) to promote/import
-    value: bcgov/nr-spar/oracle-api:test
   - name: NR_SPAR_ORACLE_API_VERSION
     description: Current service API release version
     required: true
@@ -59,6 +59,9 @@ parameters:
     description: Oracle API environment for OpenSearch. # One of: development, test, production
     required: true
     value: development
+  - name: ORACLEDB_KEYSTORE
+    description: Keystore location path
+    value: /usr/share/service/jssecacerts
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -73,7 +76,7 @@ objects:
         - name: ${IMAGE_TAG}
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${PROMOTE}
+            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}
           referencePolicy:
             type: Local
   - apiVersion: v1
@@ -136,6 +139,8 @@ objects:
                       key: oracle-password
                 - name: KEYCLOAK_REALM_URL
                   value: ${KEYCLOAK_REALM_URL}
+                - name: ORACLEDB_KEYSTORE
+                  value: ${ORACLEDB_KEYSTORE}
               ports:
                 - containerPort: 8090
                   protocol: TCP

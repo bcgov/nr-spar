@@ -17,7 +17,7 @@ x-frontend: &frontend
     VITE_KC_CLIENT_ID: seed-planning-test-4296
     LOG_LEVEL: debug
   healthcheck:
-    test: wget --spider http://localhost:3000/index.html
+    test: timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/3000'
     interval: 10s
     timeout: 10s
     retries: 5
@@ -29,6 +29,7 @@ services:
     environment:
       <<: *db-vars
     volumes: ["/pgdata"]
+    ports: ["5432:5432"]
     healthcheck:
       test: pg_isready -U postgres
       interval: 5s
@@ -62,11 +63,12 @@ services:
 
   frontend:
     container_name: frontend
-    ports: ["3000:3000"]
     image: node:18-bullseye-slim
-    entrypoint: sh -c "npm i && npm run start"
+    ports: ["3000:3000"]
+    entrypoint: sh -c "npm i --no-update-notifier && npm run start"
     user: root
     volumes: ["./frontend:/app"]
+    working_dir: /app
     <<: *frontend
 
   caddy:
@@ -76,3 +78,43 @@ services:
     ports: ["3005:3000"]
     volumes: ["./frontend/Caddyfile:/etc/caddy/Caddyfile"]
     <<: *frontend
+
+  # Cypress image tag must match what's in frontend/package.json
+  cypress:
+    container_name: cypress
+    depends_on:
+      frontend:
+        condition: service_started
+    entrypoint: sh -c "npm run cy:run --no-update-notifier"
+    environment:
+      CYPRESS_baseUrl: http://frontend:3000
+      CYPRESS_USERNAME: LOAD-3-TEST
+      CYPRESS_PASSWORD: ${CYPRESS_PASSWORD}
+    image: cypress/included:12.17.4
+    profiles: ["cypress"]
+    user: root
+    volumes: ["./frontend:/app"]
+    working_dir: /app
+
+  oracle:
+    container_name: oracle
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SERVICE_NAME: ${SERVICE_NAME}
+      SERVER_PORT: "8091"
+      ORACLEDB_KEYSTORE: /app/jssecacerts
+      ORACLEDB_SECRET: changeit
+    profiles: ["oracle"]
+    network_mode: host
+    image: maven:3.9.3-eclipse-temurin-17
+    entrypoint: sh -c './startup.sh && mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5006"'
+    working_dir: /app
+    volumes: ["./oracle-api:/app"]
+    healthcheck:
+      test: curl -f http://localhost:8091/actuator/health | grep '"status":"UP"'
+      interval: 5s
+      timeout: 5s
+      retries: 5

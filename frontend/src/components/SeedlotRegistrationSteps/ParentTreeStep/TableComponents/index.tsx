@@ -1,17 +1,22 @@
 import React from 'react';
 import {
   OverflowMenuItem, Checkbox, TableBody, TableRow, Row, Column,
-  TableCell, TextInput, ActionableNotification, Pagination
+  TableCell, TextInput, ActionableNotification, Pagination, Button
 } from '@carbon/react';
+import { TrashCan } from '@carbon/icons-react';
 import { pageText, PageSizesConfig } from '../constants';
-import { HeaderObj, RowItem, TabTypes } from '../definitions';
+import {
+  HeaderObj, RowItem, TabTypes
+} from '../definitions';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { OrchardObj } from '../../OrchardStep/definitions';
 import PaginationChangeType from '../../../../types/PaginationChangeType';
 import blurOnEnter from '../../../../utils/KeyboardUtil';
+import { handlePagination } from '../../../../utils/PaginationUtils';
 import {
   applyValueToAll, setInputChange, toggleColumn, toggleNotification
 } from '../utils';
+import { deleteMixRow, handleInput } from './utils';
 
 import '../styles.scss';
 
@@ -21,7 +26,13 @@ export const renderColOptions = (
   setHeaderConfig: Function
 ) => {
   const toggleableCols = headerConfig
-    .filter((header) => header.isAnOption && header.availableInTabs.includes(currentTab));
+    .filter((header) => (header.isAnOption
+      && header.availableInTabs.includes(currentTab)
+      && !String(header.id).startsWith('w_') // id starts with w_ is only for smp mix table
+    ));
+
+  const smpWeightedCols = headerConfig
+    .filter((header) => header.isAnOption && String(header.id).startsWith('w_'));
 
   return (
     <>
@@ -51,13 +62,73 @@ export const renderColOptions = (
           />
         ))
       }
+      {
+        // This renders the 'Show weighted value' section
+        currentTab === 'mixTab'
+          ? (
+            <>
+              <OverflowMenuItem
+                wrapperClassName="toggle-category-name"
+                className="menu-item-label-text"
+                closeMenu={() => false}
+                itemText={pageText[currentTab].toggleNameBottom}
+              />
+              {
+                smpWeightedCols.map((header) => (
+                  <OverflowMenuItem
+                    key={header.id}
+                    closeMenu={() => false}
+                    onClick={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      toggleColumn(header.id, e.target.nodeName, headerConfig, setHeaderConfig);
+                    }}
+                    itemText={
+                      (
+                        <Checkbox
+                          checked={header.enabled}
+                          id={header.id}
+                          labelText={header.name}
+                        />
+                      )
+                    }
+                  />
+                ))
+              }
+            </>
+          )
+          : null
+      }
     </>
   );
+};
+
+/**
+ * Used to render cell that isn't a text input, e.g. delete button
+ */
+const renderNonInputCell = (
+  rowData: RowItem,
+  colName: keyof RowItem,
+  applicableGenWorths: string[],
+  state: ParentTreeStepDataObj,
+  setStepData: Function
+) => {
+  if (colName === 'actions') {
+    return (
+      <Button
+        kind="ghost"
+        hasIconOnly
+        renderIcon={TrashCan}
+        iconDescription="Delete this row"
+        onClick={() => deleteMixRow(rowData, applicableGenWorths, state, setStepData)}
+      />
+    );
+  }
+  return rowData[colName];
 };
 
 const renderTableCell = (
   rowData: RowItem,
   header: HeaderObj,
+  applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
 ) => {
@@ -76,7 +147,7 @@ const renderTableCell = (
               id={`${rowData.parentTreeNumber}-${rowData[header.id]}`}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setInputChange(
-                  rowData.parentTreeNumber,
+                  rowData,
                   header.id,
                   event.target.value,
                   state,
@@ -87,10 +158,21 @@ const renderTableCell = (
               onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
                 blurOnEnter(event);
               }}
+              onBlur={(event: React.ChangeEvent<HTMLInputElement>) => (
+                handleInput(
+                  rowData,
+                  event.target.value,
+                  header.id,
+                  applicableGenWorths,
+                  state,
+                  setStepData
+                )
+              )}
+              invalid={rowData.invalidObjs[header.id].isInvalid}
             />
           )
           : (
-            rowData[header.id]
+            renderNonInputCell(rowData, header.id, applicableGenWorths, state, setStepData)
           )
       }
     </TableCell>
@@ -100,12 +182,42 @@ const renderTableCell = (
 export const renderTableBody = (
   currentTab: keyof TabTypes,
   slicedRows: Array<RowItem>,
+  mixTabRows: Array<RowItem>,
   headerConfig: Array<HeaderObj>,
+  applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
 ) => {
   if (currentTab === 'mixTab') {
-    return null;
+    return (
+      <TableBody>
+        {
+          mixTabRows.map((rowData) => (
+            <TableRow key={rowData.rowId}>
+              {
+                headerConfig
+                  .filter((header) => (
+                    header.availableInTabs.includes(currentTab) && header.enabled
+                  ))
+                  .map((header) => {
+                    const clonedHeader = structuredClone(header);
+                    if (header.id === 'parentTreeNumber') {
+                      clonedHeader.editable = true;
+                    }
+                    return renderTableCell(
+                      rowData,
+                      clonedHeader,
+                      applicableGenWorths,
+                      state,
+                      setStepData
+                    );
+                  })
+              }
+            </TableRow>
+          ))
+        }
+      </TableBody>
+    );
   }
   return (
     <TableBody>
@@ -121,7 +233,7 @@ export const renderTableBody = (
                       header.availableInTabs.includes(currentTab) && header.enabled
                     ))
                     .map((header) => (
-                      renderTableCell(rowData, header, state, setStepData)
+                      renderTableCell(rowData, header, applicableGenWorths, state, setStepData)
                     ))
                 }
               </TableRow>
@@ -186,13 +298,37 @@ export const renderPagination = (
   currPageSize: number,
   setCurrentPage: Function,
   setCurrPageSize: Function,
-  handlePagination: Function,
-  setRows: Function
+  setRows: Function,
+  currMixPageSize: number,
+  setCurrMixPageSize: Function,
+  setCurrentMixPage: Function,
+  setSlicedMixRows: Function
 ) => {
-  if (currentTab === 'mixTab') {
-    return null;
-  }
   const tableData = Object.values(state.tableRowData);
+  const mixTableData = Object.values(state.mixTabData);
+  if (currentTab === 'mixTab') {
+    return (
+      <Pagination
+        pageSize={currMixPageSize}
+        pageSizes={PageSizesConfig}
+        itemsPerPageText=""
+        totalItems={mixTableData.length}
+        onChange={
+          (paginationObj: PaginationChangeType) => {
+            handlePagination(
+              paginationObj,
+              setCurrentMixPage,
+              setCurrMixPageSize,
+              mixTableData,
+              true,
+              'parentTreeNumber',
+              setSlicedMixRows
+            );
+          }
+        }
+      />
+    );
+  }
   return (
     <Pagination
       pageSize={currPageSize}
