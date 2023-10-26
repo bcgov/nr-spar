@@ -15,8 +15,7 @@ import {
   TextInputSkeleton,
   InlineLoading,
   RadioButtonSkeleton,
-  ActionableNotification,
-  ToastNotification
+  ActionableNotification
 } from '@carbon/react';
 import { DocumentAdd } from '@carbon/icons-react';
 import validator from 'validator';
@@ -53,6 +52,7 @@ import {
 import { convertToPayload } from './utils';
 
 import './styles.scss';
+import ErrorToast from '../Toast/ErrorToast';
 
 const ApplicantInformationForm = () => {
   const navigate = useNavigate();
@@ -241,10 +241,7 @@ const ApplicantInformationForm = () => {
     mutationFn: (payload: SeedlotRegPayloadType) => postSeedlot(payload),
     onError: (err: AxiosError) => {
       toast.error(
-        <ToastNotification
-          className="toastception"
-          lowContrast={false}
-          kind="error"
+        <ErrorToast
           title="Creation failure"
           subtitle={`Your application could not be created. Please try again later. ${err.code}: ${err.message}`}
         />,
