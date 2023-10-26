@@ -52,7 +52,7 @@ jobs:
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-          #triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
+          triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
 
   builds:
     name: Builds
@@ -66,13 +66,13 @@ jobs:
         package: [database, backend, frontend, oracle-api]
         include:
           - package: database
-            #triggers: ('database/')
+            triggers: ('database/')
           - package: backend
-            #triggers: ('backend/')
+            triggers: ('backend/')
           - package: frontend
-            #triggers: ('frontend/')
+            triggers: ('frontend/')
           - package: oracle-api
-            #triggers: ('oracle-api/')
+            triggers: ('oracle-api/')
     steps:
       - uses: actions/checkout@v4
       - uses: bcgov-nr/action-builder-ghcr@v1.1.2
@@ -98,7 +98,7 @@ jobs:
             parameters:
               -p DB_PVC_SIZE=128Mi
             overwrite: false
-            #triggers: ('common/' 'database/' 'backend/' 'frontend/')
+            triggers: ('common/' 'database/' 'backend/' 'frontend/')
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
@@ -106,12 +106,12 @@ jobs:
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
-            #triggers: ('common/' 'database/' 'backend/' 'frontend/')
+            triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
           - name: fluentbit
             file: backend/openshift.fluentbit.yml
             overwrite: true
-            #triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
+            triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -123,7 +123,7 @@ jobs:
               -p VITE_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-            #triggers: ('common/' 'database/' 'backend/' 'oracle-api/' 'frontend/')
+            triggers: ('common/' 'database/' 'backend/' 'oracle-api/' 'frontend/')
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -131,7 +131,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-            #triggers: ('common/' 'oracle-api/')
+            triggers: ('common/' 'oracle-api/')
             verification_path: "actuator/health"
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.1.1
