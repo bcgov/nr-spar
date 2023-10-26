@@ -150,7 +150,7 @@ const ApplicantInformationForm = () => {
         locationCode: {
           ...prevResBody.locationCode,
           value: formattedCode,
-          isInvalid: !isInRange
+          isInvalid: false
         }
       }));
     }
