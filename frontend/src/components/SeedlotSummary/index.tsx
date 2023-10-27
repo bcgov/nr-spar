@@ -4,7 +4,7 @@ import Subtitle from '../Subtitle';
 import StatusItem from '../StatusItem';
 import Participants from '../Participants';
 
-import Seedlot from '../../types/Seedlot';
+import Seedlot from '../../types/SeedlotType';
 
 import './styles.scss';
 

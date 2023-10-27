@@ -14,7 +14,7 @@ import {
   TabPanel
 } from '@carbon/react';
 
-import Seedlot from '../../../types/Seedlot';
+import Seedlot from '../../../types/SeedlotType';
 import { OldSeedlotRegistrationObj } from '../../../types/SeedlotRegistrationTypes';
 
 import api from '../../../api-service/api';

@@ -1,48 +1,74 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { Row, Column } from '@carbon/react';
+import { Row, Column, DataTableSkeleton } from '@carbon/react';
+import { useQuery } from '@tanstack/react-query';
+import { DateTime as luxon } from 'luxon';
 
 import SeedlotTable from '../SeedlotTable';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
+import { SeedlotType, SeedlotRowType } from '../../types/SeedlotType';
+import { useAuth } from '../../contexts/AuthContext';
+import { getSeedlotByUser } from '../../api-service/seedlotAPI';
+import { MONTH_DAY_YEAR } from '../../config/DateFormat';
 
-import api from '../../api-service/api';
-import ApiConfig from '../../api-service/ApiConfig';
-import Seedlot from '../../types/Seedlot';
-
-import './styles.scss';
 import recentSeedlotsText from './constants';
 
-const RecentSeedlots = () => {
-  const [seedlotsData, setSeedlotsData] = useState<Array<Seedlot>>([]);
+import './styles.scss';
 
-  const getSeedlotsData = () => {
-    const url = ApiConfig.seedlot;
-    api.get(url)
-      .then((response) => {
-        setSeedlotsData(response.data.seedlotData.reverse().slice(0, 9));
-      })
-      .catch((error) => {
-        // eslint-disable-next-line
-        console.error(`Error: ${error}`);
+const RecentSeedlots = () => {
+  const auth = useAuth();
+
+  const userId = auth.user?.userId ?? '';
+
+  const [seedlotData, setSeedlotData] = useState<SeedlotRowType[]>([]);
+
+  const convertToTableObjs = (seedlots: SeedlotType[]) => {
+    const converted: SeedlotRowType[] = [];
+
+    seedlots.forEach((seedlot) => {
+      converted.push({
+        seedlotNumber: seedlot.id,
+        seedlotClass: seedlot.geneticClass.geneticClassCode,
+        seedlotSpecies: seedlot.vegetationCode,
+        seedlotStatus: seedlot.seedlotStatus.description,
+        createdAt: luxon.fromISO(seedlot.auditInformation.entryTimestamp).toFormat(MONTH_DAY_YEAR),
+        lastUpdatedAt: luxon.fromISO(seedlot.auditInformation.updateTimestamp)
+          .toFormat(MONTH_DAY_YEAR),
+        approvedAt: seedlot.seedlotStatus.seedlotStatusCode === 'APP'
+          ? luxon.fromISO(seedlot.seedlotStatus.updateTimestamp).toFormat(MONTH_DAY_YEAR)
+          : '--'
       });
+    });
+
+    setSeedlotData(converted);
   };
 
-  useEffect(() => {
-    getSeedlotsData();
-  }, []);
+  const getAllSeedlotQuery = useQuery({
+    queryKey: ['seedlots', userId],
+    queryFn: () => getSeedlotByUser(userId),
+    onSuccess: (seedlots: SeedlotType[]) => convertToTableObjs(seedlots),
+    enabled: userId.length > 0,
+    refetchOnMount: true
+  });
 
-  const tableHeaders: string[] = [
-    'Seedlot number',
-    'Lot class',
-    'Lot species',
-    'Form step',
-    'Status',
-    'Participants',
-    'Created at',
-    'Last modified',
-    'Approved at'
-  ];
+  const renderTable = () => {
+    if (getAllSeedlotQuery.isSuccess && seedlotData.length > 0) {
+      return (
+        <SeedlotTable seedlots={seedlotData} />
+      );
+    }
+
+    return (
+      <div className="empty-recent-seedlots">
+        <EmptySection
+          pictogram={recentSeedlotsText.emptyPictogram}
+          title={recentSeedlotsText.emptyTitle}
+          description={recentSeedlotsText.emptyDescription}
+        />
+      </div>
+    );
+  };
 
   return (
     <Row className="recent-seedlots">
@@ -52,22 +78,9 @@ const RecentSeedlots = () => {
       </Column>
       <Column sm={4} className="recent-seedlots-table">
         {
-          seedlotsData.length !== 0
-            ? (
-              <SeedlotTable
-                elements={seedlotsData}
-                headers={tableHeaders}
-              />
-            )
-            : (
-              <div className="empty-recent-seedlots">
-                <EmptySection
-                  pictogram={recentSeedlotsText.emptyPictogram}
-                  title={recentSeedlotsText.emptyTitle}
-                  description={recentSeedlotsText.emptyDescription}
-                />
-              </div>
-            )
+          getAllSeedlotQuery.isFetching
+            ? <DataTableSkeleton showToolbar={false} />
+            : renderTable()
         }
       </Column>
     </Row>

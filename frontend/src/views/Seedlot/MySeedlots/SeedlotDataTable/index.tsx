@@ -17,7 +17,7 @@ import {
 
 import StatusItem from '../../../../components/StatusItem';
 import Participants from '../../../../components/Participants';
-import Seedlot from '../../../../types/Seedlot';
+import Seedlot from '../../../../types/SeedlotType';
 import { headerData } from '../constants';
 
 interface HeaderType {

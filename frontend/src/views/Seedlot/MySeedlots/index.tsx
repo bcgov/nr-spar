@@ -18,7 +18,7 @@ import { tableText } from './constants';
 
 import api from '../../../api-service/api';
 import ApiConfig from '../../../api-service/ApiConfig';
-import Seedlot from '../../../types/Seedlot';
+import Seedlot from '../../../types/SeedlotType';
 
 import './styles.scss';
 

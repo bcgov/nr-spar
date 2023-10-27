@@ -21,3 +21,8 @@ export const postFile = (
   formData.append('file', file);
   return api.post(url, formData, true);
 };
+
+export const getSeedlotByUser = (userId: string) => {
+  const url = `${ApiConfig.seedlots}/users/${userId}`;
+  return api.get(url).then((res) => res.data);
+};
