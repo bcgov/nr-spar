@@ -57,7 +57,7 @@ describe('Dashboard page test', () => {
     // Favourite A class Seedlot page
     cy.get('.seedlot-activities-cards')
       .find('.std-card-title')
-      .contains('Register an A class seedlot')
+      .contains('Register an A-class seedlot')
       .click();
     cy.get('.title-favourite')
       .find(`.${prefix}--popover-container`)
@@ -70,10 +70,10 @@ describe('Dashboard page test', () => {
     cy.get('.favourite-activities-cards')
       .find('.fav-card-content')
       .find('.fav-card-title-large')
-      .contains('Create A class seedlot')
+      .contains('Create A-class seedlot')
       .click();
 
-    cy.isPageTitle('Create A class seedlot');
+    cy.isPageTitle('Create A-class seedlot');
   });
 
   it('my Seedlots favourite activity is working properly', () => {
@@ -130,7 +130,7 @@ describe('Dashboard page test', () => {
     // Check if the Create A Class Seedlot card is unique and highlighted
     cy.get('.fav-card-main-highlighted')
       .should('have.length', 1)
-      .should('contain.text', 'Create A class seedlot');
+      .should('contain.text', 'Create A-class seedlot');
   });
 
   it('check if delete my seedlots favourite card is working', () => {
@@ -146,8 +146,8 @@ describe('Dashboard page test', () => {
       .should('have.length', 1);
   });
 
-  it('check if delete create a class seedlot favourite card is working', () => {
-    // Delete Create A Class Seedlot card
+  it('check if delete create A-class seedlot favourite card is working', () => {
+    // Delete Create A-Class Seedlot card
     cy.get('.fav-card-main-highlighted')
       .find('.fav-card-overflow')
       .click();

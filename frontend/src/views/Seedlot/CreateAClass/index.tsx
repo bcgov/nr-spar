@@ -24,8 +24,8 @@ const CreateAClass = () => {
         </Row>
         <Row>
           <PageTitle
-            title="Create A class seedlot"
-            subtitle="Register a new A class seedlot"
+            title="Create A-class seedlot"
+            subtitle="Register a new A-class seedlot"
             enableFavourite
             activity="registerAClass"
           />

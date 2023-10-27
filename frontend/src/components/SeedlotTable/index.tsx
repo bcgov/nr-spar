@@ -43,6 +43,7 @@ const SeedlotTable = ({ seedlots }: TableProps) => {
             <TableRow
               id={`seedlot-table-row-${seedlot.seedlotNumber}`}
               key={seedlot.seedlotNumber}
+              onClick={() => navigate(`/seedlots/details/${seedlot.seedlotNumber}`)}
             >
               {
                 HeaderConfig.map((header) => (

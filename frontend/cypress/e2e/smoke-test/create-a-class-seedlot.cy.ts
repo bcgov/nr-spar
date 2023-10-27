@@ -2,7 +2,7 @@ import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
 import { TYPE_DELAY } from '../../constants';
 
-describe('Create A Class Seedlot', () => {
+describe('Create A-Class Seedlot', () => {
   let data: {
     applicantAgency: { name: string; number: string; email: string; invalidEmail: string; };
     seedlotInformation: { species: string; };

@@ -4,16 +4,16 @@ import { Row, Column, DataTableSkeleton } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
 import { DateTime as luxon } from 'luxon';
 
-import SeedlotTable from '../SeedlotTable';
-import EmptySection from '../EmptySection';
-import Subtitle from '../Subtitle';
-import { SeedlotType, SeedlotRowType } from '../../types/SeedlotType';
-import { useAuth } from '../../contexts/AuthContext';
-import { getSeedlotByUser } from '../../api-service/seedlotAPI';
-import { MONTH_DAY_YEAR } from '../../config/DateFormat';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
-import getVegCodes from '../../api-service/vegetationCodeAPI';
-import VegCode from '../../types/VegetationCodeType';
+import SeedlotTable from '../../../../components/SeedlotTable';
+import EmptySection from '../../../../components/EmptySection';
+import Subtitle from '../../../../components/Subtitle';
+import { SeedlotType, SeedlotRowType } from '../../../../types/SeedlotType';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { getSeedlotByUser } from '../../../../api-service/seedlotAPI';
+import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
+import getVegCodes from '../../../../api-service/vegetationCodeAPI';
+import VegCode from '../../../../types/VegetationCodeType';
 
 import recentSeedlotsText from './constants';
 
@@ -27,7 +27,7 @@ const RecentSeedlots = () => {
   const [seedlotData, setSeedlotData] = useState<SeedlotRowType[]>([]);
 
   const vegCodeQuery = useQuery({
-    queryKey: ['vegetation-codes'],
+    queryKey: ['vegetation-codes-raw'],
     queryFn: () => getVegCodes(true, true),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted

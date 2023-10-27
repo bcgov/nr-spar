@@ -14,7 +14,7 @@ import {
   TabPanel
 } from '@carbon/react';
 
-import Seedlot from '../../../types/SeedlotType';
+import { SeedlotType } from '../../../types/SeedlotType';
 import { OldSeedlotRegistrationObj } from '../../../types/SeedlotRegistrationTypes';
 
 import api from '../../../api-service/api';
@@ -25,7 +25,6 @@ import SeedlotSummary from '../../../components/SeedlotSummary';
 import ApplicantSeedlotInformation from '../../../components/ApplicantSeedlotInformation';
 import FormProgress from '../../../components/FormProgress';
 import FormReview from '../../../components/FormReview';
-import SeedlotActivityHistory from '../../../components/SeedlotActivityHistory';
 
 import './styles.scss';
 
@@ -115,7 +114,6 @@ const SeedlotDetails = () => {
               <Tabs>
                 <TabList aria-label="List of tabs">
                   <Tab>Seedlot Details</Tab>
-                  <Tab>Activity history</Tab>
                 </TabList>
                 <TabPanels>
                   <TabPanel>
@@ -128,9 +126,6 @@ const SeedlotDetails = () => {
                       && <FormProgress seedlotNumber={seedlotData.number} />
                     }
                     <FormReview />
-                  </TabPanel>
-                  <TabPanel>
-                    <SeedlotActivityHistory />
                   </TabPanel>
                 </TabPanels>
               </Tabs>
