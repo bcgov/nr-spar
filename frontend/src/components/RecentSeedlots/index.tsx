@@ -11,6 +11,9 @@ import { SeedlotType, SeedlotRowType } from '../../types/SeedlotType';
 import { useAuth } from '../../contexts/AuthContext';
 import { getSeedlotByUser } from '../../api-service/seedlotAPI';
 import { MONTH_DAY_YEAR } from '../../config/DateFormat';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
+import getVegCodes from '../../api-service/vegetationCodeAPI';
+import VegCode from '../../types/VegetationCodeType';
 
 import recentSeedlotsText from './constants';
 
@@ -23,14 +26,32 @@ const RecentSeedlots = () => {
 
   const [seedlotData, setSeedlotData] = useState<SeedlotRowType[]>([]);
 
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes'],
+    queryFn: () => getVegCodes(true, true),
+    staleTime: THREE_HOURS, // will not refetch for 3 hours
+    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
+  });
+
+  const getSpeciesNameByCode = (code: string): string => {
+    const vegCodeData: VegCode[] = vegCodeQuery.data;
+    const filtered = vegCodeData.filter((veg) => veg.code === code);
+    if (filtered.length) {
+      const capped = filtered[0].description.charAt(0).toUpperCase()
+        + filtered[0].description.slice(1);
+      return `${code} - ${capped}`;
+    }
+    return code;
+  };
+
   const convertToTableObjs = (seedlots: SeedlotType[]) => {
     const converted: SeedlotRowType[] = [];
 
     seedlots.forEach((seedlot) => {
       converted.push({
         seedlotNumber: seedlot.id,
-        seedlotClass: seedlot.geneticClass.geneticClassCode,
-        seedlotSpecies: seedlot.vegetationCode,
+        seedlotClass: `${seedlot.geneticClass.geneticClassCode}-class`,
+        seedlotSpecies: getSpeciesNameByCode(seedlot.vegetationCode),
         seedlotStatus: seedlot.seedlotStatus.description,
         createdAt: luxon.fromISO(seedlot.auditInformation.entryTimestamp).toFormat(MONTH_DAY_YEAR),
         lastUpdatedAt: luxon.fromISO(seedlot.auditInformation.updateTimestamp)
@@ -41,6 +62,19 @@ const RecentSeedlots = () => {
       });
     });
 
+    // Show most recently updated first
+    converted.sort((a, b) => {
+      if (luxon.fromFormat(a.lastUpdatedAt, MONTH_DAY_YEAR)
+        < luxon.fromFormat(b.lastUpdatedAt, MONTH_DAY_YEAR)) {
+        return 1;
+      }
+      if (luxon.fromFormat(a.lastUpdatedAt, MONTH_DAY_YEAR)
+        > luxon.fromFormat(b.lastUpdatedAt, MONTH_DAY_YEAR)) {
+        return -1;
+      }
+      return 0;
+    });
+
     setSeedlotData(converted);
   };
 
@@ -48,7 +82,7 @@ const RecentSeedlots = () => {
     queryKey: ['seedlots', userId],
     queryFn: () => getSeedlotByUser(userId),
     onSuccess: (seedlots: SeedlotType[]) => convertToTableObjs(seedlots),
-    enabled: userId.length > 0,
+    enabled: userId.length > 0 && vegCodeQuery.isFetched,
     refetchOnMount: true
   });
 

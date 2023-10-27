@@ -7,5 +7,6 @@ export const StatusColourMap = {
   Expired: 'high-contrast',
   Incomplete: 'purple',
   Pending: 'gray',
-  Submitted: 'cyan'
+  Submitted: 'cyan',
+  Unkown: 'outline'
 };

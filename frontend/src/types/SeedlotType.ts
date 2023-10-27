@@ -1,4 +1,4 @@
-import { StatusColourMap } from "../components/StatusTag/definitions"
+import { StatusColourMap } from '../components/StatusTag/definitions';
 
 type EffectiveDateRange = {
   effectiveDate: string,
