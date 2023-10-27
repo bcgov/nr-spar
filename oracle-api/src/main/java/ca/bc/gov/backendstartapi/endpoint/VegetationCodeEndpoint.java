@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
  * Used for providing information related to {@link VegetationCode vegetation codes} via HTTP
  * requests.
  */
+@Slf4j
 @RestController
 @RequestMapping(path = "/api/vegetation-codes")
 @Validated
@@ -61,6 +63,7 @@ public class VegetationCodeEndpoint {
               in = ParameterIn.PATH,
               description = "Identifier of the vegetation code being sought.")
           String code) {
+    log.info("Fetching information to vegetation code: {}", code);
     var retrievalResult = vegetationCodeRepository.findByCode(code);
     return retrievalResult.orElseThrow(
         () ->
@@ -102,6 +105,7 @@ public class VegetationCodeEndpoint {
                       providing a value matches everything.""")
           String search,
       @Valid PaginationParameters paginationParameters) {
+    log.info("Fetching all valid vegetation code given the search term: {}", search);
     return vegetationCodeRepository.findValidByCodeOrDescription(
         search, paginationParameters.skip(), paginationParameters.perPage());
   }

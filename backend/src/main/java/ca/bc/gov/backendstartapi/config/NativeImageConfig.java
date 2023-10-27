@@ -8,7 +8,6 @@ import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportRuntimeHints;
 
 /** This class holds configurations for building Cloud Native images. */
 @Configuration
@@ -20,5 +19,4 @@ import org.springframework.context.annotation.ImportRuntimeHints;
   ConeAndPollenCount.class,
   SmpMixVolume.class,
 })
-@ImportRuntimeHints(value = {HttpServletRequestRuntimeHint.class})
 public class NativeImageConfig {}
