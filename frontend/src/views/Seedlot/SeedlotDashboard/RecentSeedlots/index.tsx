@@ -79,7 +79,7 @@ const RecentSeedlots = () => {
   };
 
   const getAllSeedlotQuery = useQuery({
-    queryKey: ['seedlots', userId],
+    queryKey: ['seedlots', 'users', userId],
     queryFn: () => getSeedlotByUser(userId),
     onSuccess: (seedlots: SeedlotType[]) => convertToTableObjs(seedlots),
     enabled: userId.length > 0 && vegCodeQuery.isFetched,

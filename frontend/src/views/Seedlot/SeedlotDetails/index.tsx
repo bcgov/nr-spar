@@ -27,6 +27,9 @@ import FormProgress from '../../../components/FormProgress';
 import FormReview from '../../../components/FormReview';
 
 import './styles.scss';
+import { useQuery } from '@tanstack/react-query';
+import { getSeedlotById } from '../../../api-service/seedlotAPI';
+import { AxiosError } from 'axios';
 
 const manageOptions = [
   {
@@ -48,30 +51,19 @@ const manageOptions = [
 ];
 
 const SeedlotDetails = () => {
-  const { seedlot } = useParams();
-  const [seedlotData, setSeedlotData] = useState<Seedlot>();
-  const [seedlotApplicantData, setSeedlotApplicantData] = useState<OldSeedlotRegistrationObj>();
-
-  const getSeedlotData = () => {
-    if (seedlot) {
-      const url = `${ApiConfig.seedlot}/${seedlot}`;
-      api.get(url)
-        .then((response) => {
-          if (response.data.seedlot && response.data.seedlotApplicantInfo) {
-            setSeedlotData(response.data.seedlot);
-            setSeedlotApplicantData(response.data.seedlotApplicantInfo);
-          }
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(`Error: ${error}`);
-        });
-    }
-  };
-
-  useEffect(() => getSeedlotData(), []);
-
   const navigate = useNavigate();
+  const { seedlotNumber } = useParams();
+
+  const seedlotQuery = useQuery({
+    queryKey: ['seedlots', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    onError: (err: AxiosError) => {
+      if (err.response?.status === 404) {
+        navigate('/404');
+      }
+    }
+  });
+
   return (
     <FlexGrid className="seedlot-details-page">
       <Row className="seedlot-details-breadcrumb">
@@ -84,10 +76,10 @@ const SeedlotDetails = () => {
         <Row className="seedlot-summary-title">
           <Column sm={4} md={6} lg={14} xlg={12}>
             {
-              seedlotData
+              seedlotQuery.isFetched
               && (
                 <PageTitle
-                  title={`Seedlot ${seedlotData.number}`}
+                  title={`Seedlot ${seedlotQuery.data?.id}`}
                   subtitle="Check and manage this seedlot"
                   enableFavourite
                 />
@@ -101,10 +93,10 @@ const SeedlotDetails = () => {
         <section title="Seedlot Summary">
           <Row className="seedlot-summary-content">
             <Column sm={4}>
-              {
+              {/* {
                 seedlotData
                 && <SeedlotSummary seedlotData={seedlotData} />
-              }
+              } */}
             </Column>
           </Row>
         </section>
@@ -117,14 +109,14 @@ const SeedlotDetails = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
-                    {
+                    {/* {
                       seedlotApplicantData
                       && <ApplicantSeedlotInformation seedlotApplicantData={seedlotApplicantData} />
                     }
                     {
                       seedlotData
                       && <FormProgress seedlotNumber={seedlotData.number} />
-                    }
+                    } */}
                     <FormReview />
                   </TabPanel>
                 </TabPanels>
