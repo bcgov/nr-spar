@@ -94,7 +94,7 @@ const SeedlotDetails = () => {
           <Row className="seedlot-summary-content">
             <Column sm={4}>
               {/* {
-                seedlotData
+                seedlotQuery.isFetched
                 && <SeedlotSummary seedlotData={seedlotData} />
               } */}
             </Column>
