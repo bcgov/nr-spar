@@ -10,14 +10,14 @@ import {
   TableCell
 } from '@carbon/react';
 
-import { SeedlotRowType } from '../../types/SeedlotType';
+import { SeedlotDisplayType } from '../../types/SeedlotType';
 
 import './styles.scss';
 import { HeaderConfig } from './constants';
 import StatusTag from '../StatusTag';
 
 interface TableProps {
-  seedlots: SeedlotRowType[];
+  seedlots: SeedlotDisplayType[];
 }
 
 const SeedlotTable = ({ seedlots }: TableProps) => {

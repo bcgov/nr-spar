@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
-  Button
+  Button, ProgressIndicatorSkeleton
 } from '@carbon/react';
 import { DocumentBlank } from '@carbon/icons-react';
 
@@ -13,11 +13,15 @@ import { initialProgressConfig } from '../../views/Seedlot/SeedlotRegistrationFo
 import './styles.scss';
 
 interface FormProgressProps {
-  seedlotNumber: number;
+  seedlotNumber?: string;
+  isFetching?: boolean;
 }
 
-const FormProgress = ({ seedlotNumber }: FormProgressProps) => {
+const FormProgress = ({ seedlotNumber, isFetching }: FormProgressProps) => {
   const navigate = useNavigate();
+  if (!seedlotNumber) {
+    return null;
+  }
   return (
     <div className="form-progress">
       <div className="form-progress-title-section">
@@ -27,7 +31,11 @@ const FormProgress = ({ seedlotNumber }: FormProgressProps) => {
         <Subtitle text="Where you are in the registration process" />
       </div>
       <div className="steps-box">
-        <SeedlotRegistrationProgress progressStatus={initialProgressConfig} />
+        {
+          isFetching
+            ? <ProgressIndicatorSkeleton />
+            : <SeedlotRegistrationProgress progressStatus={initialProgressConfig} />
+        }
       </div>
       <div>
         <Button
@@ -36,6 +44,7 @@ const FormProgress = ({ seedlotNumber }: FormProgressProps) => {
           className="btn-fp"
           renderIcon={DocumentBlank}
           onClick={() => navigate(`/seedlots/registration/${seedlotNumber}`)}
+          disabled={isFetching || !seedlotNumber}
         >
           Complete registration
         </Button>

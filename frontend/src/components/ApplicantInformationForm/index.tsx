@@ -36,7 +36,7 @@ import ComboBoxEvent from '../../types/ComboBoxEvent';
 
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
-import getForestClientLocation from '../../api-service/forestClientsAPI';
+import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
 import { postSeedlot } from '../../api-service/seedlotAPI';
 

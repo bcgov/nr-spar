@@ -1,70 +1,84 @@
 import React from 'react';
 
-import { Button } from '@carbon/react';
+import { Button, RadioButtonSkeleton } from '@carbon/react';
 import { Edit } from '@carbon/icons-react';
 
-import Subtitle from '../Subtitle';
-
-import { OldSeedlotRegistrationObj } from '../../types/SeedlotRegistrationTypes';
+import Subtitle from '../../../../components/Subtitle';
+import { SeedlotApplicantType } from '../../../../types/SeedlotType';
 
 import './styles.scss';
 
 interface ApplicantSeedlotInformationProps {
-  seedlotApplicantData: OldSeedlotRegistrationObj;
+  applicant?: SeedlotApplicantType;
+  isFetching: boolean;
 }
 
-const ApplicantSeedlotInformation = (
-  { seedlotApplicantData }: ApplicantSeedlotInformationProps
-) => (
-  <div className="applicant-seedlot-information">
-    <div className="applicant-seedlot-information-title-section">
-      <p className="applicant-seedlot-information-title">
-        Applicant and seedlot information
-      </p>
-      <Subtitle text="Check your seedlot initial information" />
-    </div>
-    {seedlotApplicantData && (
+const ApplicantInformation = (
+  { applicant, isFetching }: ApplicantSeedlotInformationProps
+) => {
+  const renderValue = (name: keyof SeedlotApplicantType) => {
+    if (isFetching) {
+      return <RadioButtonSkeleton />;
+    }
+    if (applicant) {
+      return (
+        <p className="applicant-seedlot-info-value">
+          {applicant[name]}
+        </p>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="applicant-seedlot-information">
+      <div className="applicant-seedlot-information-title-section">
+        <p className="applicant-seedlot-information-title">
+          Applicant and seedlot information
+        </p>
+        <Subtitle text="Check your seedlot initial information" />
+      </div>
       <div>
         <div className="applicant-seedlot-info-section">
           <div className="applicant-seedlot-agency-name">
             <p className="applicant-seedlot-info-label">
               Applicant agency name
             </p>
-            <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.applicant.name}
-            </p>
+            {
+              renderValue('agency')
+            }
           </div>
           <div className="applicant-seedlot-agency-number">
             <p className="applicant-seedlot-info-label">
               Applicant agency number
             </p>
-            <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.applicant.number}
-            </p>
+            {
+              renderValue('locationCode')
+            }
           </div>
           <div className="applicant-seedlot-agency-email">
             <p className="applicant-seedlot-info-label">
               Applicant email address
             </p>
-            <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.applicant.email}
-            </p>
+            {
+              renderValue('email')
+            }
           </div>
           <div className="applicant-seedlot-seedlot-species">
             <p className="applicant-seedlot-info-label">
               Seedlot species
             </p>
-            <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.species.label}
-            </p>
+            {
+              renderValue('species')
+            }
           </div>
           <div className="applicant-seedlot-class-a-source">
             <p className="applicant-seedlot-info-label">
               Class A source
             </p>
-            <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.source}
-            </p>
+            {
+              renderValue('source')
+            }
           </div>
         </div>
         <div className="applicant-seedlot-registered-collected">
@@ -72,19 +86,17 @@ const ApplicantSeedlotInformation = (
             <p className="applicant-seedlot-info-label">
               To be registered?
             </p>
-            <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.registered ? ('Yes, to be registered with the Tree Seed Centre')
-                : ('No')}
-            </p>
+            {
+              renderValue('willRegister')
+            }
           </div>
           <div className="applicant-seedlot-collected">
             <p className="applicant-seedlot-info-label">
               Collected from B.C. source?
             </p>
-            <p className="applicant-seedlot-info-value">
-              {seedlotApplicantData.collectedBC ? ('Yes, collected from a location within B.C.')
-                : ('No')}
-            </p>
+            {
+              renderValue('bcSource')
+            }
           </div>
         </div>
         <Button
@@ -96,8 +108,8 @@ const ApplicantSeedlotInformation = (
           Edit applicant
         </Button>
       </div>
-    )}
-  </div>
-);
+    </div>
+  );
+};
 
-export default ApplicantSeedlotInformation;
+export default ApplicantInformation;

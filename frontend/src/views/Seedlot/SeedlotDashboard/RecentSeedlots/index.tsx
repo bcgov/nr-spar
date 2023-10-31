@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 
 import { Row, Column, DataTableSkeleton } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
-import { DateTime as luxon } from 'luxon';
 
 import SeedlotTable from '../../../../components/SeedlotTable';
 import EmptySection from '../../../../components/EmptySection';
 import Subtitle from '../../../../components/Subtitle';
-import { SeedlotType, SeedlotRowType } from '../../../../types/SeedlotType';
+import { SeedlotType, SeedlotDisplayType } from '../../../../types/SeedlotType';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { getSeedlotByUser } from '../../../../api-service/seedlotAPI';
-import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import getVegCodes from '../../../../api-service/vegetationCodeAPI';
-import VegCode from '../../../../types/VegetationCodeType';
+import { covertRawToDisplayObjArray } from '../../../../utils/SeedlotUtils';
 
 import recentSeedlotsText from './constants';
 
@@ -24,7 +22,7 @@ const RecentSeedlots = () => {
 
   const userId = auth.user?.userId ?? '';
 
-  const [seedlotData, setSeedlotData] = useState<SeedlotRowType[]>([]);
+  const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes-raw'],
@@ -33,48 +31,8 @@ const RecentSeedlots = () => {
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
-  const getSpeciesNameByCode = (code: string): string => {
-    const vegCodeData: VegCode[] = vegCodeQuery.data;
-    const filtered = vegCodeData.filter((veg) => veg.code === code);
-    if (filtered.length) {
-      const capped = filtered[0].description.charAt(0).toUpperCase()
-        + filtered[0].description.slice(1);
-      return `${code} - ${capped}`;
-    }
-    return code;
-  };
-
   const convertToTableObjs = (seedlots: SeedlotType[]) => {
-    const converted: SeedlotRowType[] = [];
-
-    seedlots.forEach((seedlot) => {
-      converted.push({
-        seedlotNumber: seedlot.id,
-        seedlotClass: `${seedlot.geneticClass.geneticClassCode}-class`,
-        seedlotSpecies: getSpeciesNameByCode(seedlot.vegetationCode),
-        seedlotStatus: seedlot.seedlotStatus.description,
-        createdAt: luxon.fromISO(seedlot.auditInformation.entryTimestamp).toFormat(MONTH_DAY_YEAR),
-        lastUpdatedAt: luxon.fromISO(seedlot.auditInformation.updateTimestamp)
-          .toFormat(MONTH_DAY_YEAR),
-        approvedAt: seedlot.seedlotStatus.seedlotStatusCode === 'APP'
-          ? luxon.fromISO(seedlot.seedlotStatus.updateTimestamp).toFormat(MONTH_DAY_YEAR)
-          : '--'
-      });
-    });
-
-    // Show most recently updated first
-    converted.sort((a, b) => {
-      if (luxon.fromFormat(a.lastUpdatedAt, MONTH_DAY_YEAR)
-        < luxon.fromFormat(b.lastUpdatedAt, MONTH_DAY_YEAR)) {
-        return 1;
-      }
-      if (luxon.fromFormat(a.lastUpdatedAt, MONTH_DAY_YEAR)
-        > luxon.fromFormat(b.lastUpdatedAt, MONTH_DAY_YEAR)) {
-        return -1;
-      }
-      return 0;
-    });
-
+    const converted = covertRawToDisplayObjArray(seedlots, vegCodeQuery.data);
     setSeedlotData(converted);
   };
 

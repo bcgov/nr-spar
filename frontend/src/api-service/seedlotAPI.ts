@@ -3,11 +3,6 @@ import { SeedlotType } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
 
-export const getSeedlotInfo = (seedlotNumber: string) => {
-  const url = `${ApiConfig.seedlot}/${seedlotNumber}`;
-  return api.get(url).then((res) => res.data);
-};
-
 export const postSeedlot = (payload: SeedlotRegPayloadType) => {
   const url = ApiConfig.seedlots;
   return api.post(url, payload);

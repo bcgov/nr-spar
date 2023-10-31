@@ -20,9 +20,9 @@ type SeedlotStatus = {
 }
 
 /**
- * Used for seedlot table
+ * Used for seedlot table and detail page.
  */
-export type SeedlotRowType = {
+export type SeedlotDisplayType = {
   seedlotNumber: string,
   seedlotClass: string,
   seedlotSpecies: string,
@@ -30,6 +30,19 @@ export type SeedlotRowType = {
   createdAt: string,
   lastUpdatedAt: string,
   approvedAt: string
+}
+
+/**
+ * Used for seedlot applicant information
+ */
+export type SeedlotApplicantType = {
+  agency: string,
+  locationCode: string,
+  email: string,
+  species: string,
+  source: string,
+  willRegister: string,
+  bcSource: string
 }
 
 /**

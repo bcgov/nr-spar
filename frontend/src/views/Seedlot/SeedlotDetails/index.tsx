@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   FlexGrid,
@@ -14,22 +14,24 @@ import {
   TabPanel
 } from '@carbon/react';
 
-import { SeedlotType } from '../../../types/SeedlotType';
-import { OldSeedlotRegistrationObj } from '../../../types/SeedlotRegistrationTypes';
+import { QueriesOptions, useQueries, useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import { SeedlotApplicantType, SeedlotDisplayType, SeedlotType } from '../../../types/SeedlotType';
 
-import api from '../../../api-service/api';
-import ApiConfig from '../../../api-service/ApiConfig';
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
-import SeedlotSummary from '../../../components/SeedlotSummary';
-import ApplicantSeedlotInformation from '../../../components/ApplicantSeedlotInformation';
+import SeedlotSummary from './SeedlotSummary';
+import ApplicantInformation from './ApplicantInformation';
 import FormProgress from '../../../components/FormProgress';
 import FormReview from '../../../components/FormReview';
 
 import './styles.scss';
-import { useQuery } from '@tanstack/react-query';
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
-import { AxiosError } from 'axios';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import getVegCodes from '../../../api-service/vegetationCodeAPI';
+import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
+import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import { ForestClientType } from '../../../types/ForestClientType';
 
 const manageOptions = [
   {
@@ -53,16 +55,54 @@ const manageOptions = [
 const SeedlotDetails = () => {
   const navigate = useNavigate();
   const { seedlotNumber } = useParams();
+  const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
+  const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
+
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes-raw'],
+    queryFn: () => getVegCodes(true, true),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  const covertToDisplayObj = (seedlot: SeedlotType) => {
+    const converted = covertRawToDisplayObj(seedlot, vegCodeQuery.data);
+    setSeedlotData(converted);
+  };
 
   const seedlotQuery = useQuery({
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    enabled: vegCodeQuery.isFetched,
+    onSuccess: (seedlot: SeedlotType) => covertToDisplayObj(seedlot),
     onError: (err: AxiosError) => {
       if (err.response?.status === 404) {
         navigate('/404');
       }
     }
   });
+
+  const covertToClientObj = (client: ForestClientType) => {
+    if (seedlotQuery.data) {
+      const converted = convertToApplicantInfoObj(seedlotQuery.data, vegCodeQuery.data, client);
+      setApplicantData(converted);
+    }
+  };
+
+  // Using useQueries here because useQuery does not work properly
+  // with the dependency seedlotQuery.data
+  const forestClientQuery = useQueries({
+    queries: seedlotQuery.data
+      ? [{
+        queryKey: ['forest-clients', seedlotQuery.data.applicantClientNumber],
+        queryFn: () => getForestClientByNumber(seedlotQuery.data.applicantClientNumber),
+        onSuccess: (client: ForestClientType) => covertToClientObj(client),
+        enabled: seedlotQuery.isFetched,
+        staleTime: THREE_HOURS,
+        cacheTime: THREE_HALF_HOURS
+      }]
+      : [] as QueriesOptions<any>[]
+  })[0];
 
   return (
     <FlexGrid className="seedlot-details-page">
@@ -93,10 +133,7 @@ const SeedlotDetails = () => {
         <section title="Seedlot Summary">
           <Row className="seedlot-summary-content">
             <Column sm={4}>
-              {/* {
-                seedlotQuery.isFetched
-                && <SeedlotSummary seedlotData={seedlotData} />
-              } */}
+              <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
             </Column>
           </Row>
         </section>
@@ -109,14 +146,17 @@ const SeedlotDetails = () => {
                 </TabList>
                 <TabPanels>
                   <TabPanel>
-                    {/* {
-                      seedlotApplicantData
-                      && <ApplicantSeedlotInformation seedlotApplicantData={seedlotApplicantData} />
-                    }
-                    {
-                      seedlotData
-                      && <FormProgress seedlotNumber={seedlotData.number} />
-                    } */}
+
+                    <FormProgress
+                      seedlotNumber={String(seedlotNumber)}
+                      isFetching={seedlotQuery.isFetching}
+                    />
+
+                    <ApplicantInformation
+                      applicant={applicantData}
+                      isFetching={forestClientQuery?.isFetching}
+                    />
+
                     <FormReview />
                   </TabPanel>
                 </TabPanels>

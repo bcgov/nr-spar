@@ -16,9 +16,8 @@ import { ArrowRight } from '@carbon/icons-react';
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
-import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
-// import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
+import { getSeedlotById } from '../../../api-service/seedlotAPI';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -93,8 +92,8 @@ const SeedlotRegistrationForm = () => {
   });
 
   const seedlotInfoQuery = useQuery({
-    queryKey: ['seedlot', seedlotNumber],
-    queryFn: () => getSeedlotInfo(seedlotNumber),
+    queryKey: ['seedlots', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber),
     refetchOnWindowFocus: false
   });
 
@@ -190,8 +189,8 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
-    const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
-    const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
+    const defaultAgency = seedlotInfoQuery.data?.applicantClientNumber;
+    const defaultCode = seedlotInfoQuery.data?.applicantLocationCode;
     const agencyOptions = applicantAgencyQuery.data ? applicantAgencyQuery.data : [];
 
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
@@ -313,12 +312,12 @@ const SeedlotRegistrationForm = () => {
           <Column className="seedlot-registration-row" sm={4} md={8} lg={16} xlg={16}>
             {
               (
-                seedlotInfoQuery.isSuccess
-                && fundingSourcesQuery.isSuccess
-                && methodsOfPaymentQuery.isSuccess
-                && gameticMethodologyQuery.isSuccess
-                && coneCollectionMethodsQuery.isSuccess
-                && applicantAgencyQuery.isSuccess
+                seedlotInfoQuery.isFetched
+                && fundingSourcesQuery.isFetched
+                && methodsOfPaymentQuery.isFetched
+                && gameticMethodologyQuery.isFetched
+                && coneCollectionMethodsQuery.isFetched
+                && applicantAgencyQuery.isFetched
               )
                 ? renderStep()
                 : <Loading />

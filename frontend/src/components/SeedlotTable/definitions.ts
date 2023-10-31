@@ -1,6 +1,6 @@
-import { SeedlotRowType } from '../../types/SeedlotType';
+import { SeedlotDisplayType } from '../../types/SeedlotType';
 
 export type HeaderObj = {
-  id: keyof SeedlotRowType,
+  id: keyof SeedlotDisplayType,
   label: string
 };

@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { HeaderObj } from './definitions';
 
 export const HeaderConfig: HeaderObj[] = [

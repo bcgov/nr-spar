@@ -24,7 +24,7 @@ import {
   initLocationValidateObj
 } from './constants';
 
-import getForestClientLocation from '../../../api-service/forestClientsAPI';
+import { getForestClientLocation } from '../../../api-service/forestClientsAPI';
 
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
@@ -82,7 +82,7 @@ const ExtractionAndStorage = (
   };
 
   const validateLocationCodeMutation = useMutation({
-    mutationFn: (queryParams:string[]) => getForestClientLocation(
+    mutationFn: (queryParams: string[]) => getForestClientLocation(
       queryParams[0],
       queryParams[1]
     ),
