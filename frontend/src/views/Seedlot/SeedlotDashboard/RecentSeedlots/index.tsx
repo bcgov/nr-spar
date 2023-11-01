@@ -25,15 +25,17 @@ const RecentSeedlots = () => {
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
 
   const vegCodeQuery = useQuery({
-    queryKey: ['vegetation-codes-raw'],
-    queryFn: () => getVegCodes(true, true),
+    queryKey: ['vegetation-codes'],
+    queryFn: () => getVegCodes(true),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
   const convertToTableObjs = (seedlots: SeedlotType[]) => {
-    const converted = covertRawToDisplayObjArray(seedlots, vegCodeQuery.data);
-    setSeedlotData(converted);
+    if (vegCodeQuery.data) {
+      const converted = covertRawToDisplayObjArray(seedlots, vegCodeQuery.data);
+      setSeedlotData(converted);
+    }
   };
 
   const getAllSeedlotQuery = useQuery({
@@ -45,6 +47,28 @@ const RecentSeedlots = () => {
   });
 
   const renderTable = () => {
+    if (getAllSeedlotQuery.isError || vegCodeQuery.isError) {
+      return (
+        <div className="empty-recent-seedlots">
+          <EmptySection
+            icon={recentSeedlotsText.errorIcon}
+            title={recentSeedlotsText.errorTitle}
+            description={
+              (
+                <>
+                  {`${recentSeedlotsText.errorDescription}.`}
+                  <br />
+                  {getAllSeedlotQuery.isError ? `Seedlot Request: ${getAllSeedlotQuery.error}.` : null}
+                  <br />
+                  {vegCodeQuery.isError ? `VegCode Request: ${vegCodeQuery.error}` : null}
+                </>
+              )
+            }
+          />
+        </div>
+      );
+    }
+
     if (getAllSeedlotQuery.isSuccess && seedlotData.length > 0) {
       return (
         <SeedlotTable seedlots={seedlotData} />

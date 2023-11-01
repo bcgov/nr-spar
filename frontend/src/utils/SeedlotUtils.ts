@@ -1,19 +1,17 @@
 import { DateTime as luxon } from 'luxon';
 
 import { SeedlotApplicantType, SeedlotDisplayType, SeedlotType } from '../types/SeedlotType';
-import VegCode from '../types/VegetationCodeType';
 import { MONTH_DAY_YEAR } from '../config/DateFormat';
 import { ForestClientType } from '../types/ForestClientType';
+import MultiOptionsObj from '../types/MultiOptionsObject';
 
 /**
  * Generate a species label in the from of `{code} - {description}`.
  */
-const getSpeciesNameByCode = (code: string, vegCodeData: VegCode[]): string => {
+const getSpeciesNameByCode = (code: string, vegCodeData: MultiOptionsObj[]): string => {
   const filtered = vegCodeData.filter((veg) => veg.code === code);
   if (filtered.length) {
-    const capped = filtered[0].description.charAt(0).toUpperCase()
-      + filtered[0].description.slice(1);
-    return `${code} - ${capped}`;
+    return filtered[0].description;
   }
   return code;
 };
@@ -21,7 +19,7 @@ const getSpeciesNameByCode = (code: string, vegCodeData: VegCode[]): string => {
 /**
  * Covert the raw seedlot data into an object to be displayed on seedlot detail page.
  */
-export const covertRawToDisplayObj = (seedlot: SeedlotType, vegCodeData: VegCode[]) => ({
+export const covertRawToDisplayObj = (seedlot: SeedlotType, vegCodeData: MultiOptionsObj[]) => ({
   seedlotNumber: seedlot.id,
   seedlotClass: `${seedlot.geneticClass.geneticClassCode}-class`,
   seedlotSpecies: getSpeciesNameByCode(seedlot.vegetationCode, vegCodeData),
@@ -39,7 +37,7 @@ export const covertRawToDisplayObj = (seedlot: SeedlotType, vegCodeData: VegCode
  */
 export const covertRawToDisplayObjArray = (
   seedlots: SeedlotType[],
-  vegCodeData: VegCode[]
+  vegCodeData: MultiOptionsObj[]
 ): SeedlotDisplayType[] => {
   const converted: SeedlotDisplayType[] = [];
 
@@ -65,7 +63,7 @@ export const covertRawToDisplayObjArray = (
 
 export const convertToApplicantInfoObj = (
   seedlot: SeedlotType,
-  vegCodeData: VegCode[],
+  vegCodeData: MultiOptionsObj[],
   forestClient: ForestClientType
 ): SeedlotApplicantType => ({
   agency: `${forestClient.clientNumber} - ${forestClient.clientName} - ${forestClient.acronym}`,
@@ -73,10 +71,6 @@ export const convertToApplicantInfoObj = (
   email: seedlot.applicantEmailAddress,
   species: getSpeciesNameByCode(seedlot.vegetationCode, vegCodeData),
   source: seedlot.seedlotSource.description,
-  willRegister: seedlot.intendedForCrownLand
-    ? ('Yes, to be registered with the Tree Seed Centre')
-    : ('No'),
-  bcSource: seedlot.sourceInBc
-    ? ('Yes, collected from a location within B.C.')
-    : ('No')
+  willRegister: seedlot.intendedForCrownLand,
+  isBcSource: seedlot.sourceInBc
 });

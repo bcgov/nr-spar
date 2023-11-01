@@ -27,13 +27,9 @@ const codesToFilter: Array<string> = [
   'SPIRBET'
 ];
 
-const getVegCodes = (isAClass = false, useRawData = false) => {
+const getVegCodes = (isAClass = false) => {
   const url = ApiConfig.vegetationCode;
   return api.get(url).then((res) => {
-    // Return a list of veg code as it is from the backend
-    if (useRawData) {
-      return res.data;
-    }
     // Else return an array of objs for dropdown/combobox
     let vegCodeOptions: Array<MultiOptionsObj> = [];
     if (res.data) {

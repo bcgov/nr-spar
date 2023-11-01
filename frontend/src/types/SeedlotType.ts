@@ -41,8 +41,8 @@ export type SeedlotApplicantType = {
   email: string,
   species: string,
   source: string,
-  willRegister: string,
-  bcSource: string
+  willRegister: boolean,
+  isBcSource: boolean
 }
 
 /**

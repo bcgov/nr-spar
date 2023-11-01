@@ -2,53 +2,37 @@
 @use '@carbon/type';
 
 .applicant-seedlot-information {
-  height: 21.375rem;
+  height: fit-content;
   width: auto;
   background-color: var(--#{vars.$bcgov-prefix}-background);
   border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
   border-radius: 8px;
   padding: 2rem;
   margin-bottom: 2rem;
-}
 
-.applicant-seedlot-information-title {
-  @include type.type-style('heading-02');
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
 
-.applicant-seedlot-information-title-section {
-  height: 2.625rem;
-  margin-bottom: 2rem;
-}
+  .applicant-seedlot-information-row {
+    margin-bottom: 2rem;
 
-.applicant-seedlot-info-section {
-  display: flex;
-  margin-bottom: 2rem;
-}
+    .applicant-seedlot-information-title {
+      @include type.type-style('heading-02');
+      font-weight: 700;
+    }
+  }
 
-.applicant-seedlot-info-section > div {
-  margin-right: 3.5rem;
-}
+  .email-input {
+    input{
+      @include type.type-style('body-compact-01');
+      overflow: hidden;
+      color: var(--#{vars.$bcgov-prefix}--light-theme-link-link-primary, #005CB8);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-decoration-line: underline;
+      cursor: pointer;
+    }
+  }
 
-.applicant-seedlot-info-label {
-  @include type.type-style('label-01');
-  margin-bottom: 0.5rem;
-}
-
-p.applicant-seedlot-info-value {
-  @include type.type-style('body-compact-01');
-}
-
-.applicant-seedlot-registered-collected{
-  display: flex;
-  margin-bottom: 2rem;
-}
-
-.applicant-seedlot-registered-collected > div {
-  margin-right: 3.5rem;
-}
-
-.btn-edit {
-  width: 10.75rem;
+  .btn-edit {
+    width: fit-content;
+  }
 }

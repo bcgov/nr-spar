@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   Button, ProgressIndicatorSkeleton
 } from '@carbon/react';
-import { DocumentBlank } from '@carbon/icons-react';
+import { Edit } from '@carbon/icons-react';
 
-import Subtitle from '../Subtitle';
-import SeedlotRegistrationProgress from '../SeedlotRegistrationProgress';
-import { initialProgressConfig } from '../../views/Seedlot/SeedlotRegistrationForm/constants';
+import Subtitle from '../../../../components/Subtitle';
+import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
+import { initialProgressConfig } from '../../SeedlotRegistrationForm/constants';
 
 import './styles.scss';
 
@@ -42,11 +42,11 @@ const FormProgress = ({ seedlotNumber, isFetching }: FormProgressProps) => {
           kind="tertiary"
           size="md"
           className="btn-fp"
-          renderIcon={DocumentBlank}
-          onClick={() => navigate(`/seedlots/registration/${seedlotNumber}`)}
+          renderIcon={Edit}
+          onClick={() => navigate(`/seedlots/a-class-registration/${seedlotNumber}`)}
           disabled={isFetching || !seedlotNumber}
         >
-          Complete registration
+          Edit seedlot form
         </Button>
       </div>
     </div>

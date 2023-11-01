@@ -1,9 +1,11 @@
 import React from 'react';
 
-import { Button, RadioButtonSkeleton } from '@carbon/react';
+import {
+  Button, FlexGrid, Row,
+  Column, TextInput, TextInputSkeleton
+} from '@carbon/react';
 import { Edit } from '@carbon/icons-react';
 
-import Subtitle from '../../../../components/Subtitle';
 import { SeedlotApplicantType } from '../../../../types/SeedlotType';
 
 import './styles.scss';
@@ -16,99 +18,144 @@ interface ApplicantSeedlotInformationProps {
 const ApplicantInformation = (
   { applicant, isFetching }: ApplicantSeedlotInformationProps
 ) => {
-  const renderValue = (name: keyof SeedlotApplicantType) => {
-    if (isFetching) {
-      return <RadioButtonSkeleton />;
+  const triggerMailTo = () => {
+    if (applicant?.email) {
+      window.location.href = `mailto: ${applicant.email}`;
     }
-    if (applicant) {
-      return (
-        <p className="applicant-seedlot-info-value">
-          {applicant[name]}
-        </p>
-      );
-    }
-    return null;
   };
 
   return (
-    <div className="applicant-seedlot-information">
-      <div className="applicant-seedlot-information-title-section">
-        <p className="applicant-seedlot-information-title">
-          Applicant and seedlot information
-        </p>
-        <Subtitle text="Check your seedlot initial information" />
-      </div>
-      <div>
-        <div className="applicant-seedlot-info-section">
-          <div className="applicant-seedlot-agency-name">
-            <p className="applicant-seedlot-info-label">
-              Applicant agency name
-            </p>
-            {
-              renderValue('agency')
-            }
-          </div>
-          <div className="applicant-seedlot-agency-number">
-            <p className="applicant-seedlot-info-label">
-              Applicant agency number
-            </p>
-            {
-              renderValue('locationCode')
-            }
-          </div>
-          <div className="applicant-seedlot-agency-email">
-            <p className="applicant-seedlot-info-label">
-              Applicant email address
-            </p>
-            {
-              renderValue('email')
-            }
-          </div>
-          <div className="applicant-seedlot-seedlot-species">
-            <p className="applicant-seedlot-info-label">
-              Seedlot species
-            </p>
-            {
-              renderValue('species')
-            }
-          </div>
-          <div className="applicant-seedlot-class-a-source">
-            <p className="applicant-seedlot-info-label">
-              Class A source
-            </p>
-            {
-              renderValue('source')
-            }
-          </div>
-        </div>
-        <div className="applicant-seedlot-registered-collected">
-          <div className="applicant-seedlot-registered">
-            <p className="applicant-seedlot-info-label">
-              To be registered?
-            </p>
-            {
-              renderValue('willRegister')
-            }
-          </div>
-          <div className="applicant-seedlot-collected">
-            <p className="applicant-seedlot-info-label">
-              Collected from B.C. source?
-            </p>
-            {
-              renderValue('bcSource')
-            }
-          </div>
-        </div>
-        <Button
-          kind="tertiary"
-          size="md"
-          className="btn-edit"
-          renderIcon={Edit}
-        >
-          Edit applicant
-        </Button>
-      </div>
-    </div>
+    <FlexGrid className="applicant-seedlot-information">
+      <Row className="applicant-seedlot-information-row">
+        <Column>
+          <p className="applicant-seedlot-information-title">
+            Check your applicant and seedlot information
+          </p>
+        </Column>
+      </Row>
+      <Row className="applicant-seedlot-information-row">
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          {
+            isFetching
+              ? <TextInputSkeleton />
+              : (
+                <TextInput
+                  className="spar-display-only-input"
+                  readOnly
+                  id="seedlot-applicant-agency"
+                  labelText="Applicant agency"
+                  value={applicant?.agency ?? ''}
+                />
+              )
+          }
+        </Column>
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          {
+            isFetching
+              ? <TextInputSkeleton />
+              : (
+                <TextInput
+                  className="spar-display-only-input"
+                  readOnly
+                  id="seedlot-applicant-location-code"
+                  labelText="Applicant location code"
+                  value={applicant?.locationCode ?? ''}
+                />
+              )
+          }
+        </Column>
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          {
+            isFetching
+              ? <TextInputSkeleton />
+              : (
+                <TextInput
+                  className="spar-display-only-input email-input"
+                  readOnly
+                  id="seedlot-applicant-email"
+                  labelText="Email address"
+                  value={applicant?.email ?? ''}
+                  onClick={() => triggerMailTo()}
+                />
+              )
+          }
+        </Column>
+      </Row>
+      <Row className="applicant-seedlot-information-row">
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          {
+            isFetching
+              ? <TextInputSkeleton />
+              : (
+                <TextInput
+                  className="spar-display-only-input"
+                  readOnly
+                  id="seedlot-applicant-species"
+                  labelText="Seedlot species"
+                  value={applicant?.species ?? ''}
+                />
+              )
+          }
+        </Column>
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          {
+            isFetching
+              ? <TextInputSkeleton />
+              : (
+                <TextInput
+                  className="spar-display-only-input"
+                  readOnly
+                  id="seedlot-applicant-source"
+                  labelText="Specify A-class source"
+                  value={applicant?.source ?? ''}
+                />
+              )
+          }
+        </Column>
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          {
+            isFetching
+              ? <TextInputSkeleton />
+              : (
+                <TextInput
+                  className="spar-display-only-input"
+                  readOnly
+                  id="seedlot-applicant-to-be-registered"
+                  labelText="To be registered at the Tree Seed Centre?"
+                  value={(applicant?.willRegister ? 'Yes' : 'No') ?? ''}
+                />
+              )
+          }
+        </Column>
+        <Column sm={4} md={4} lg={4} xlg={4} max={4}>
+          {
+            isFetching
+              ? <TextInputSkeleton />
+              : (
+                <TextInput
+                  className="spar-display-only-input"
+                  readOnly
+                  id="seedlot-applicant-species"
+                  labelText="Collected from a location within B.C.?"
+                  value={(applicant?.isBcSource ? 'Yes' : 'No') ?? ''}
+                />
+              )
+          }
+        </Column>
+      </Row>
+      <Row>
+        <Column>
+          <Button
+            kind="tertiary"
+            size="md"
+            className="btn-edit"
+            renderIcon={Edit}
+          >
+            Edit applicant and seedlot
+          </Button>
+        </Column>
+      </Row>
+    </FlexGrid>
   );
 };
 

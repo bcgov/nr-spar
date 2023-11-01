@@ -22,7 +22,7 @@ import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
 import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
-import FormProgress from '../../../components/FormProgress';
+import FormProgress from './FormProgress';
 import FormReview from '../../../components/FormReview';
 
 import './styles.scss';
@@ -33,41 +33,47 @@ import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import { ForestClientType } from '../../../types/ForestClientType';
 
-const manageOptions = [
-  {
-    text: 'Edit seedlot applicant',
-    onClickFunction: () => null
-  },
-  {
-    text: 'Print seedlot',
-    onClickFunction: () => null
-  },
-  {
-    text: 'Duplicate seedlot',
-    onClickFunction: () => null
-  },
-  {
-    text: 'Delete seedlot',
-    onClickFunction: () => null
-  }
-];
-
 const SeedlotDetails = () => {
   const navigate = useNavigate();
   const { seedlotNumber } = useParams();
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
   const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
 
+  const manageOptions = [
+    {
+      text: 'Edit seedlot applicant',
+      onClickFunction: () => null,
+      disabled: true
+    },
+    {
+      text: 'Print seedlot',
+      onClickFunction: () => null,
+      disabled: true
+    },
+    {
+      text: 'Duplicate seedlot',
+      onClickFunction: () => null,
+      disabled: true
+    },
+    {
+      text: 'Delete seedlot',
+      onClickFunction: () => null,
+      disabled: true
+    }
+  ];
+
   const vegCodeQuery = useQuery({
-    queryKey: ['vegetation-codes-raw'],
-    queryFn: () => getVegCodes(true, true),
+    queryKey: ['vegetation-codes'],
+    queryFn: () => getVegCodes(true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
 
   const covertToDisplayObj = (seedlot: SeedlotType) => {
-    const converted = covertRawToDisplayObj(seedlot, vegCodeQuery.data);
-    setSeedlotData(converted);
+    if (vegCodeQuery.data) {
+      const converted = covertRawToDisplayObj(seedlot, vegCodeQuery.data);
+      setSeedlotData(converted);
+    }
   };
 
   const seedlotQuery = useQuery({
@@ -83,7 +89,7 @@ const SeedlotDetails = () => {
   });
 
   const covertToClientObj = (client: ForestClientType) => {
-    if (seedlotQuery.data) {
+    if (seedlotQuery.data && vegCodeQuery.data) {
       const converted = convertToApplicantInfoObj(seedlotQuery.data, vegCodeQuery.data, client);
       setApplicantData(converted);
     }
@@ -127,7 +133,12 @@ const SeedlotDetails = () => {
             }
           </Column>
           <Column sm={4} md={2} lg={2} xlg={4}>
-            <ComboButton title="Edit seedlot form" items={manageOptions} menuOptionsClass="edit-seedlot-form" />
+            <ComboButton
+              title="Edit seedlot form"
+              items={manageOptions}
+              menuOptionsClass="edit-seedlot-form"
+              titleBtnFunc={() => navigate(`/seedlots/a-class-registration/${seedlotNumber}`)}
+            />
           </Column>
         </Row>
         <section title="Seedlot Summary">
@@ -139,24 +150,21 @@ const SeedlotDetails = () => {
         </section>
         <section title="Seedlot Details">
           <Row className="seedlot-details-content">
-            <Column sm={4}>
+            <Column>
               <Tabs>
                 <TabList aria-label="List of tabs">
                   <Tab>Seedlot Details</Tab>
                 </TabList>
                 <TabPanels>
                   <TabPanel>
-
                     <FormProgress
-                      seedlotNumber={String(seedlotNumber)}
+                      seedlotNumber={seedlotNumber}
                       isFetching={seedlotQuery.isFetching}
                     />
-
                     <ApplicantInformation
                       applicant={applicantData}
                       isFetching={forestClientQuery?.isFetching}
                     />
-
                     <FormReview />
                   </TabPanel>
                 </TabPanels>
