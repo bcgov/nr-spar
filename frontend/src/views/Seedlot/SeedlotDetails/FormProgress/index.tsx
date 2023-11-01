@@ -26,7 +26,7 @@ const FormProgress = ({ seedlotNumber, isFetching }: FormProgressProps) => {
     <div className="form-progress">
       <div className="form-progress-title-section">
         <p className="form-progress-title">
-          Form progress
+          See where you are in the registration proces
         </p>
         <Subtitle text="Where you are in the registration process" />
       </div>

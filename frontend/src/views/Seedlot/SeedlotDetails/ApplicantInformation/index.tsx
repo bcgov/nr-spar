@@ -40,6 +40,7 @@ const ApplicantInformation = (
               ? <TextInputSkeleton />
               : (
                 <TextInput
+                  title=""
                   className="spar-display-only-input"
                   readOnly
                   id="seedlot-applicant-agency"
@@ -55,6 +56,7 @@ const ApplicantInformation = (
               ? <TextInputSkeleton />
               : (
                 <TextInput
+                  title=""
                   className="spar-display-only-input"
                   readOnly
                   id="seedlot-applicant-location-code"
@@ -70,6 +72,7 @@ const ApplicantInformation = (
               ? <TextInputSkeleton />
               : (
                 <TextInput
+                  title=""
                   className="spar-display-only-input email-input"
                   readOnly
                   id="seedlot-applicant-email"
@@ -88,6 +91,7 @@ const ApplicantInformation = (
               ? <TextInputSkeleton />
               : (
                 <TextInput
+                  title=""
                   className="spar-display-only-input"
                   readOnly
                   id="seedlot-applicant-species"
@@ -103,6 +107,7 @@ const ApplicantInformation = (
               ? <TextInputSkeleton />
               : (
                 <TextInput
+                  title=""
                   className="spar-display-only-input"
                   readOnly
                   id="seedlot-applicant-source"
@@ -118,6 +123,7 @@ const ApplicantInformation = (
               ? <TextInputSkeleton />
               : (
                 <TextInput
+                  title=""
                   className="spar-display-only-input"
                   readOnly
                   id="seedlot-applicant-to-be-registered"
@@ -133,6 +139,7 @@ const ApplicantInformation = (
               ? <TextInputSkeleton />
               : (
                 <TextInput
+                  title=""
                   className="spar-display-only-input"
                   readOnly
                   id="seedlot-applicant-species"

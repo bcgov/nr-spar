@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   FlexGrid,
@@ -14,7 +14,7 @@ import {
   TabPanel
 } from '@carbon/react';
 
-import { QueriesOptions, useQueries, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { SeedlotApplicantType, SeedlotDisplayType, SeedlotType } from '../../../types/SeedlotType';
 
@@ -31,7 +31,6 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
-import { ForestClientType } from '../../../types/ForestClientType';
 
 const SeedlotDetails = () => {
   const navigate = useNavigate();
@@ -69,8 +68,8 @@ const SeedlotDetails = () => {
     cacheTime: THREE_HALF_HOURS
   });
 
-  const covertToDisplayObj = (seedlot: SeedlotType) => {
-    if (vegCodeQuery.data) {
+  const covertToDisplayObj = (seedlot?: SeedlotType) => {
+    if (vegCodeQuery.data && seedlot) {
       const converted = covertRawToDisplayObj(seedlot, vegCodeQuery.data);
       setSeedlotData(converted);
     }
@@ -80,7 +79,6 @@ const SeedlotDetails = () => {
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
     enabled: vegCodeQuery.isFetched,
-    onSuccess: (seedlot: SeedlotType) => covertToDisplayObj(seedlot),
     onError: (err: AxiosError) => {
       if (err.response?.status === 404) {
         navigate('/404');
@@ -88,27 +86,36 @@ const SeedlotDetails = () => {
     }
   });
 
-  const covertToClientObj = (client: ForestClientType) => {
-    if (seedlotQuery.data && vegCodeQuery.data) {
-      const converted = convertToApplicantInfoObj(seedlotQuery.data, vegCodeQuery.data, client);
+  useEffect(() => {
+    if (seedlotQuery.isFetched) {
+      covertToDisplayObj(seedlotQuery.data);
+    }
+  }, [seedlotQuery.isFetched]);
+
+  const forestClientQuery = useQuery({
+    queryKey: ['forest-clients', seedlotQuery.data?.applicantClientNumber],
+    queryFn: () => getForestClientByNumber(seedlotQuery.data?.applicantClientNumber),
+    enabled: seedlotQuery.isFetched,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  const covertToClientObj = () => {
+    if (seedlotQuery.data && vegCodeQuery.data && forestClientQuery.data) {
+      const converted = convertToApplicantInfoObj(
+        seedlotQuery.data,
+        vegCodeQuery.data,
+        forestClientQuery.data
+      );
       setApplicantData(converted);
     }
   };
 
-  // Using useQueries here because useQuery does not work properly
-  // with the dependency seedlotQuery.data
-  const forestClientQuery = useQueries({
-    queries: seedlotQuery.data
-      ? [{
-        queryKey: ['forest-clients', seedlotQuery.data.applicantClientNumber],
-        queryFn: () => getForestClientByNumber(seedlotQuery.data.applicantClientNumber),
-        onSuccess: (client: ForestClientType) => covertToClientObj(client),
-        enabled: seedlotQuery.isFetched,
-        staleTime: THREE_HOURS,
-        cacheTime: THREE_HALF_HOURS
-      }]
-      : [] as QueriesOptions<any>[]
-  })[0];
+  useEffect(() => {
+    if (forestClientQuery.isFetched) {
+      covertToClientObj();
+    }
+  }, [forestClientQuery.isFetched]);
 
   return (
     <FlexGrid className="seedlot-details-page">
