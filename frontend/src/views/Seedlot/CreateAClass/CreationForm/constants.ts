@@ -1,4 +1,4 @@
-import { SeedlotRegFormType } from '../../types/SeedlotRegistrationTypes';
+import { SeedlotRegFormType } from '../../../../types/SeedlotRegistrationTypes';
 import ComboBoxPropsType from './definitions';
 
 export const pageTexts = {

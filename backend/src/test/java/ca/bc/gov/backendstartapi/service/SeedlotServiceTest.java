@@ -81,7 +81,7 @@ class SeedlotServiceTest {
     Seedlot seedlot = new Seedlot("63000");
     when(seedlotRepository.save(seedlot)).thenReturn(seedlot);
 
-    when(loggedUserService.getLoggedUserIdirOrBceId()).thenReturn("IDIR");
+    when(loggedUserService.getLoggedUserId()).thenReturn("imaveryhappyuserid@idir");
 
     GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
     when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));

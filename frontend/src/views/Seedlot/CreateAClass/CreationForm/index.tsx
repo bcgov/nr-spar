@@ -22,25 +22,25 @@ import validator from 'validator';
 import { toast } from 'react-toastify';
 import { AxiosError } from 'axios';
 
-import Subtitle from '../Subtitle';
-import InputErrorText from '../InputErrorText';
+import Subtitle from '../../../../components/Subtitle';
+import InputErrorText from '../../../../components/InputErrorText';
 
-import { ErrToastOption } from '../../config/ToastifyConfig';
-import { FilterObj, filterInput } from '../../utils/filterUtils';
-import focusById from '../../utils/FocusUtils';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
+import { ErrToastOption } from '../../../../config/ToastifyConfig';
+import { FilterObj, filterInput } from '../../../../utils/filterUtils';
+import focusById from '../../../../utils/FocusUtils';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 
-import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../types/SeedlotRegistrationTypes';
-import SeedlotSourceType from '../../types/SeedlotSourceType';
-import ComboBoxEvent from '../../types/ComboBoxEvent';
+import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../../../types/SeedlotRegistrationTypes';
+import SeedlotSourceType from '../../../../types/SeedlotSourceType';
+import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 
-import getVegCodes from '../../api-service/vegetationCodeAPI';
-import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
-import { getForestClientLocation } from '../../api-service/forestClientsAPI';
-import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
-import { postSeedlot } from '../../api-service/seedlotAPI';
-
-import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
+import getVegCodes from '../../../../api-service/vegetationCodeAPI';
+import getApplicantAgenciesOptions from '../../../../api-service/applicantAgenciesAPI';
+import { getForestClientLocation } from '../../../../api-service/forestClientsAPI';
+import getSeedlotSources from '../../../../api-service/SeedlotSourcesAPI';
+import { postSeedlot } from '../../../../api-service/seedlotAPI';
+import { LOCATION_CODE_LIMIT } from '../../../../shared-constants/shared-constants';
+import ErrorToast from '../../../../components/Toast/ErrorToast';
 
 import ComboBoxPropsType from './definitions';
 import {
@@ -52,9 +52,8 @@ import {
 import { convertToPayload } from './utils';
 
 import './styles.scss';
-import ErrorToast from '../Toast/ErrorToast';
 
-const ApplicantInformationForm = () => {
+const CreationForm = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
@@ -501,4 +500,4 @@ const ApplicantInformationForm = () => {
   );
 };
 
-export default ApplicantInformationForm;
+export default CreationForm;

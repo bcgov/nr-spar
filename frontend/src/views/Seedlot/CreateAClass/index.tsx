@@ -9,7 +9,7 @@ import {
 } from '@carbon/react';
 
 import PageTitle from '../../../components/PageTitle';
-import ApplicantInformationForm from '../../../components/ApplicantInformationForm';
+import CreationForm from './CreationForm';
 import './styles.scss';
 
 const CreateAClass = () => {
@@ -30,7 +30,7 @@ const CreateAClass = () => {
             activity="registerAClass"
           />
         </Row>
-        <ApplicantInformationForm />
+        <CreationForm />
       </Stack>
     </FlexGrid>
   );
