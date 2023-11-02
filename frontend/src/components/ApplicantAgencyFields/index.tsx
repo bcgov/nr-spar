@@ -14,12 +14,13 @@ import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { formatLocationCode } from '../SeedlotRegistrationSteps/CollectionStep/utils';
 
 import ApplicantAgencyFieldsProps from './definitions';
+import supportTexts from './constants';
 
 import './styles.scss';
 
 const ApplicantAgencyFields = ({
-  useDefault, agency, locationCode, fieldsTexts, agencyOptions, defaultAgency,
-  defaultCode, setAllValues, readOnly
+  useDefault, agency, locationCode, fieldsTexts, agencyOptions,
+  defaultAgency, defaultCode, setAllValues, readOnly
 }: ApplicantAgencyFieldsProps) => {
   const agencyClone = structuredClone(agency);
   const locationCodeClone = structuredClone(locationCode);
@@ -28,12 +29,12 @@ const ApplicantAgencyFields = ({
   const [forestClientNumber, setForestClientNumber] = useState<string>('');
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
   const [locationCodeHelperText, setLocationCodeHelperText] = useState<string>(
-    fieldsTexts.code.helperTextEnabled
+    supportTexts.locationCode.helperTextEnabled
   );
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
     locationCodeClone.isInvalid = isInvalid;
-    setLocationCodeHelperText(fieldsTexts.code.helperTextEnabled);
+    setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
     setAllValues(agencyClone, locationCodeClone, useDefaultClone);
   };
 
@@ -43,7 +44,7 @@ const ApplicantAgencyFields = ({
       queryParams[1]
     ),
     onError: () => {
-      setInvalidLocationMessage(fieldsTexts.code.invalidLocationForSelectedAgency);
+      setInvalidLocationMessage(supportTexts.locationCode.invalidLocationForSelectedAgency);
       updateAfterLocValidation(true);
     },
     onSuccess: () => updateAfterLocValidation(false)
@@ -52,8 +53,8 @@ const ApplicantAgencyFields = ({
   const handleDefaultCheckBox = (checked: boolean) => {
     setLocationCodeHelperText(
       checked
-        ? fieldsTexts.code.helperTextEnabled
-        : fieldsTexts.code.helperTextDisabled
+        ? supportTexts.locationCode.helperTextEnabled
+        : supportTexts.locationCode.helperTextDisabled
     );
 
     agencyClone.value = checked ? defaultAgency : '';
@@ -67,8 +68,8 @@ const ApplicantAgencyFields = ({
     setForestClientNumber(value ? getForestClientNumber(value) : '');
     setLocationCodeHelperText(
       value
-        ? fieldsTexts.code.helperTextEnabled
-        : fieldsTexts.code.helperTextDisabled
+        ? supportTexts.locationCode.helperTextEnabled
+        : supportTexts.locationCode.helperTextDisabled
     );
     agencyClone.value = value;
     locationCodeClone.value = value ? locationCodeClone.value : '';
@@ -79,7 +80,7 @@ const ApplicantAgencyFields = ({
     locationCodeClone.value = value.slice(0, LOCATION_CODE_LIMIT);
     const isInRange = validator.isInt(value, { min: 0, max: 99 });
     if (!isInRange) {
-      setInvalidLocationMessage(fieldsTexts.code.invalidText);
+      setInvalidLocationMessage(supportTexts.locationCode.invalidText);
       locationCodeClone.isInvalid = true;
     }
     setAllValues(agencyClone, locationCodeClone, useDefaultClone);
@@ -119,7 +120,7 @@ const ApplicantAgencyFields = ({
             name={fieldsTexts.collector.name}
             placeholder={fieldsTexts.collector.placeholder}
             titleText={fieldsTexts.collector.titleText}
-            helperText={fieldsTexts.collector.helperText}
+            helperText={supportTexts.agency.helperText}
             invalidText={fieldsTexts.collector.invalidText}
             items={agencyOptions}
             readOnly={useDefaultClone.value || readOnly}
@@ -139,7 +140,7 @@ const ApplicantAgencyFields = ({
             name={fieldsTexts.code.name}
             value={locationCodeClone.value}
             type="number"
-            placeholder={!forestClientNumber ? '' : fieldsTexts.code.placeholder}
+            placeholder={!forestClientNumber ? '' : supportTexts.locationCode.placeholder}
             labelText={fieldsTexts.code.label}
             helperText={locationCodeHelperText}
             invalid={locationCodeClone.isInvalid}
