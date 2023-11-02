@@ -6,7 +6,6 @@ import {
 } from '@carbon/react';
 import { Edit } from '@carbon/icons-react';
 
-import Subtitle from '../../../../components/Subtitle';
 import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
 import { initialProgressConfig } from '../../SeedlotRegistrationForm/constants';
 
@@ -26,9 +25,8 @@ const FormProgress = ({ seedlotNumber, isFetching }: FormProgressProps) => {
     <div className="form-progress">
       <div className="form-progress-title-section">
         <p className="form-progress-title">
-          See where you are in the registration proces
+          See where you are in the registration process
         </p>
-        <Subtitle text="Where you are in the registration process" />
       </div>
       <div className="steps-box">
         {

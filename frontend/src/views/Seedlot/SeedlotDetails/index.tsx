@@ -148,37 +148,36 @@ const SeedlotDetails = () => {
             />
           </Column>
         </Row>
-        <section title="Seedlot Summary">
-          <Row className="seedlot-summary-content">
-            <Column sm={4}>
-              <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
-            </Column>
-          </Row>
-        </section>
-        <section title="Seedlot Details">
-          <Row className="seedlot-details-content">
-            <Column>
-              <Tabs>
-                <TabList aria-label="List of tabs">
-                  <Tab>Seedlot Details</Tab>
-                </TabList>
-                <TabPanels>
-                  <TabPanel>
-                    <FormProgress
-                      seedlotNumber={seedlotNumber}
-                      isFetching={seedlotQuery.isFetching}
-                    />
-                    <ApplicantInformation
-                      applicant={applicantData}
-                      isFetching={forestClientQuery?.isFetching}
-                    />
-                    <FormReview />
-                  </TabPanel>
-                </TabPanels>
-              </Tabs>
-            </Column>
-          </Row>
-        </section>
+
+        <Row className="seedlot-summary-content">
+          <Column sm={4}>
+            <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
+          </Column>
+        </Row>
+
+        <Row className="seedlot-details-content">
+          <Column>
+            <Tabs>
+              <TabList aria-label="List of tabs">
+                <Tab>Seedlot Details</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <FormProgress
+                    seedlotNumber={seedlotNumber}
+                    isFetching={seedlotQuery.isFetching}
+                  />
+                  <ApplicantInformation
+                    applicant={applicantData}
+                    isFetching={forestClientQuery?.isFetching}
+                  />
+                  <FormReview />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </Column>
+        </Row>
+
       </Stack>
     </FlexGrid>
   );

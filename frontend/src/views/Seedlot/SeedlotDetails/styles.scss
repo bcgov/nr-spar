@@ -31,7 +31,8 @@
 
   .seedlot-details-content .#{vars.$bcgov-prefix}--tab-content {
     background-color: var(--#{vars.$bcgov-prefix}-layer-01);
-    padding: 1.75rem 2.5rem !important;
+    padding: 2.5rem !important;
+    margin-right: -2.5rem;
   }
 }
 

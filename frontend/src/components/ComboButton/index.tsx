@@ -5,7 +5,7 @@ import {
   OverflowMenu,
   OverflowMenuItem
 } from '@carbon/react';
-import { CaretDown } from '@carbon/icons-react';
+import { ChevronDown } from '@carbon/icons-react';
 
 import './styles.scss';
 
@@ -36,7 +36,7 @@ const ComboButton = ({
     >
       {title}
     </Button>
-    <OverflowMenu className="combo-options" menuOptionsClass={`${menuOptionsClass}`} renderIcon={CaretDown} aria-label={`${title} button options`} flipped>
+    <OverflowMenu className="combo-options" menuOptionsClass={`${menuOptionsClass}`} renderIcon={ChevronDown} aria-label={`${title} button options`} flipped>
       {
         items.map((item) => (
           <OverflowMenuItem

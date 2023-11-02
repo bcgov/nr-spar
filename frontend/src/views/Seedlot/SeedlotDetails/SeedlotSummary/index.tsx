@@ -35,7 +35,6 @@ const SeedlotSummary = ({ seedlot, isFetching }: SeedlotSummaryProps) => {
         <p className="seedlot-summary-title">
           Seedlot summary
         </p>
-        <Subtitle text="The main information of your seedlot" />
       </div>
       <div className="seedlot-summary-info-section">
         <div className="seedlot-summary-seedlot-number">
