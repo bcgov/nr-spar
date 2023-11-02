@@ -19,7 +19,7 @@ import supportTexts from './constants';
 import './styles.scss';
 
 const ApplicantAgencyFields = ({
-  useDefault, agency, locationCode, fieldsTexts, agencyOptions,
+  useDefault, agency, locationCode, fieldsProps, agencyOptions,
   defaultAgency, defaultCode, setAllValues, readOnly
 }: ApplicantAgencyFieldsProps) => {
   const agencyClone = structuredClone(agency);
@@ -103,8 +103,8 @@ const ApplicantAgencyFields = ({
         <Column sm={4} md={8} lg={16} xlg={16}>
           <Checkbox
             id={useDefaultClone.id}
-            name={fieldsTexts.checkbox.name}
-            labelText={fieldsTexts.checkbox.labelText}
+            name={fieldsProps.useDefaultCheckbox.name}
+            labelText={fieldsProps.useDefaultCheckbox.labelText}
             readOnly={readOnly}
             checked={useDefaultClone.value}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,11 +117,11 @@ const ApplicantAgencyFields = ({
         <Column sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
             id={agencyClone.id}
-            name={fieldsTexts.collector.name}
-            placeholder={fieldsTexts.collector.placeholder}
-            titleText={fieldsTexts.collector.titleText}
+            name={fieldsProps.agencyInput.name}
+            placeholder={supportTexts.agency.placeholder}
+            titleText={fieldsProps.agencyInput.labelText}
             helperText={supportTexts.agency.helperText}
-            invalidText={fieldsTexts.collector.invalidText}
+            invalidText={fieldsProps.agencyInput.invalidText}
             items={agencyOptions}
             readOnly={useDefaultClone.value || readOnly}
             selectedItem={agencyClone.value}
@@ -137,11 +137,11 @@ const ApplicantAgencyFields = ({
           <TextInput
             id={locationCodeClone.id}
             className="location-code-input"
-            name={fieldsTexts.code.name}
+            name={fieldsProps.locationCode.name}
             value={locationCodeClone.value}
             type="number"
             placeholder={!forestClientNumber ? '' : supportTexts.locationCode.placeholder}
-            labelText={fieldsTexts.code.label}
+            labelText={fieldsProps.locationCode.labelText}
             helperText={locationCodeHelperText}
             invalid={locationCodeClone.isInvalid}
             invalidText={invalidLocationMessage}

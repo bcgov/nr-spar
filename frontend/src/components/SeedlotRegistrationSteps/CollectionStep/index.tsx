@@ -18,7 +18,9 @@ import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
 import { FormInputType } from '../../../types/FormInputType';
 
-import { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig } from './constants';
+import {
+  DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
+} from './constants';
 import {
   CollectionStepProps,
   CollectionForm
@@ -142,7 +144,7 @@ const CollectionStep = (
         useDefault={state.useDefaultAgencyInfo}
         agency={state.collectorAgency}
         locationCode={state.locationCode}
-        fieldsTexts={fieldsConfig}
+        fieldsProps={agencyFieldsProps}
         agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
