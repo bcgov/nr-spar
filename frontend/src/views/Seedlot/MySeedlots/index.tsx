@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -16,32 +16,12 @@ import EmptySection from '../../../components/EmptySection';
 import SeedlotDataTable from './SeedlotDataTable';
 import { tableText } from './constants';
 
-import api from '../../../api-service/api';
-import ApiConfig from '../../../api-service/ApiConfig';
-import Seedlot from '../../../types/SeedlotType';
-
 import './styles.scss';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
 
-  const [seedlotsData, setSeedlotsData] = useState<Array<Seedlot>>([]);
-
-  const getSeedlotsData = () => {
-    const url = ApiConfig.seedlot;
-    api.get(url)
-      .then((response) => {
-        setSeedlotsData(response.data.seedlotData.reverse());
-      })
-      .catch((error) => {
-        // eslint-disable-next-line
-        console.error(`Error: ${error}`);
-      });
-  };
-
-  useEffect(() => {
-    getSeedlotsData();
-  }, []);
+  const [seedlotsData] = useState([]);
 
   return (
     <FlexGrid fullWidth className="my-seedlot-content">
