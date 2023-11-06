@@ -190,6 +190,15 @@
 
   </dependencies>
 
+  <!-- Exclude SnakeYaml for vulnerability -->
+  <!-- https://avd.aquasec.com/nvd/2022/cve-2022-1471/ -->
+  <exclusions>
+    <exclusion>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+    </exclusion>
+  </exclusions>
+
   <build>
     <plugins>
       

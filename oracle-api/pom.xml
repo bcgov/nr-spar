@@ -71,6 +71,7 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
@@ -137,6 +138,15 @@
 		</dependency>
 
 	</dependencies>
+
+  <!-- Exclude SnakeYaml for vulnerability -->
+  <!-- https://avd.aquasec.com/nvd/2022/cve-2022-1471/ -->
+  <exclusions>
+    <exclusion>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+    </exclusion>
+  </exclusions>
 
 	<build>
 		<plugins>
