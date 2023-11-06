@@ -193,6 +193,8 @@ objects:
                 initialDelaySeconds: 20
                 periodSeconds: 30
                 timeoutSeconds: 10
+              securityContext:
+                runAsUser: 12345
           volumes:
             - name: ${NAME}-${ZONE}-fluentbit-logs
               persistentVolumeClaim:
