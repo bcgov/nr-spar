@@ -72,6 +72,9 @@
     "start-server-and-test": "^2.0.1",
     "ts-node": "^10.9.1"
   },
+  "overrides": {
+    "postcss": "^8.4.31"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bcgov/nr-spar.git"
