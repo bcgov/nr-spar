@@ -57,13 +57,6 @@ const mockFormData = [
 
 const defaultCode = '16';
 const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
-const agencyOptions = [
-  '0032 - Strong Seeds Orchard - SSO',
-  '0035 - Weak Seeds Orchard - WSO',
-  '0038 - Okay Seeds Orchard - OSO',
-  '0041 - Great Seeds Orchard - GSO',
-  '0043 - Bad Seeds Orchard - BSO'
-];
 
 const orchardMock: OrchardForm = {
   orchards: [
@@ -171,7 +164,7 @@ const FormReview = () => {
                       state={allStepData.collectionStep}
                       defaultAgency={defaultAgency}
                       defaultCode={defaultCode}
-                      agencyOptions={agencyOptions}
+                      agencyOptions={[]}
                       collectionMethods={[]}
                       setStepData={() => { }}
                       readOnly
@@ -218,7 +211,7 @@ const FormReview = () => {
                       state={allStepData.interimStep}
                       collectorAgency={defaultAgency}
                       collectorCode={defaultCode}
-                      agencyOptions={agencyOptions}
+                      agencyOptions={[]}
                       setStepData={() => { }}
                       readOnly
                     />
@@ -285,7 +278,7 @@ const FormReview = () => {
                       state={allStepData.extractionStorageStep}
                       defaultAgency={defaultAgency}
                       defaultCode={defaultCode}
-                      agencyOptions={agencyOptions}
+                      agencyOptions={[]}
                       setStepData={() => { }}
                       readOnly
                     />
