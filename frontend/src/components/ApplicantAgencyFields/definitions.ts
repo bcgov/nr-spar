@@ -1,12 +1,13 @@
 import AgencyTextPropsType from '../../types/AgencyTextPropsType';
 import { FormInputType } from '../../types/FormInputType';
+import MultiOptionsObj from '../../types/MultiOptionsObject';
 
 interface ApplicantAgencyFieldsProps {
   useDefault: FormInputType & { value: boolean };
   agency: FormInputType & { value: string };
   locationCode: FormInputType & { value: string };
   fieldsProps: AgencyTextPropsType;
-  agencyOptions: string[];
+  agencyOptions: Array<MultiOptionsObj>;
   defaultAgency: string;
   defaultCode: string;
   setAllValues: Function;

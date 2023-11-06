@@ -21,7 +21,6 @@ import validator from 'validator';
 import Subtitle from '../Subtitle';
 import InputErrorText from '../InputErrorText';
 
-import getForestClientNumber from '../../utils/StringUtils';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 
 import SeedlotRegistrationObj from '../../types/SeedlotRegistrationObj';
@@ -169,14 +168,14 @@ const ApplicantInformationForm = () => {
         ...responseBody,
         applicant: {
           ...responseBody.applicant,
-          name: selectedItem,
-          number: selectedItem ? responseBody.applicant.number : ''
+          name: selectedItem?.label,
+          number: selectedItem?.code ? responseBody.applicant.number : ''
         }
       });
       if (!selectedItem) {
         setIsLocationCodeInvalid(false);
       }
-      setForestClientNumber(selectedItem ? getForestClientNumber(selectedItem) : '');
+      setForestClientNumber(selectedItem ? selectedItem.code : '');
       setLocationCodeHelper(
         selectedItem
           ? pageTexts.locCodeInput.helperTextEnabled

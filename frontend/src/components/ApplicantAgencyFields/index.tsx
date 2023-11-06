@@ -9,7 +9,7 @@ import getForestClientLocation from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
-import getForestClientNumber from '../../utils/StringUtils';
+import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { formatLocationCode } from '../SeedlotRegistrationSteps/CollectionStep/utils';
 
@@ -64,14 +64,14 @@ const ApplicantAgencyFields = ({
     setAllValues(agencyClone, locationCodeClone, useDefaultClone);
   };
 
-  const handleAgencyInput = (value: string) => {
-    setForestClientNumber(value ? getForestClientNumber(value) : '');
+  const handleAgencyInput = (value: MultiOptionsObj) => {
+    setForestClientNumber(value ? value.code : '');
     setLocationCodeHelperText(
       value
         ? supportTexts.locationCode.helperTextEnabled
         : supportTexts.locationCode.helperTextDisabled
     );
-    agencyClone.value = value;
+    agencyClone.value = value ? value.label : '';
     locationCodeClone.value = value ? locationCodeClone.value : '';
     setAllValues(agencyClone, locationCodeClone, useDefaultClone);
   };
