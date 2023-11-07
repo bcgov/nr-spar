@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -12,16 +12,18 @@ import {
 import { Add } from '@carbon/icons-react';
 
 import PageTitle from '../../../components/PageTitle';
-import EmptySection from '../../../components/EmptySection';
-import SeedlotDataTable from './SeedlotDataTable';
+import { useAuth } from '../../../contexts/AuthContext';
+import SeedlotTable from '../../../components/SeedlotTable';
+
 import { tableText } from './constants';
 
 import './styles.scss';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
+  const auth = useAuth();
 
-  const [seedlotsData] = useState([]);
+  const userId = auth.user?.userId ?? '';
 
   return (
     <FlexGrid fullWidth className="my-seedlot-content">
@@ -52,19 +54,7 @@ const MySeedlots = () => {
         </Column>
       </Row>
       <Row className="my-seedlot-data-table-row">
-        {
-          seedlotsData.length === 0
-            ? (
-              <div className="empty-seedlots">
-                <EmptySection
-                  pictogram={tableText.emptyPictogram}
-                  title={tableText.emptyTitle}
-                  description={tableText.emptyDescription}
-                />
-              </div>
-            )
-            : <SeedlotDataTable seedlots={seedlotsData} />
-        }
+        <SeedlotTable userId={userId} />
       </Row>
     </FlexGrid>
   );

@@ -30,3 +30,14 @@ export const HeaderConfig: HeaderObj[] = [
     label: 'Approved at'
   }
 ];
+
+export const TableText = {
+  emptyPictogram: 'Magnify',
+  emptyTitle: 'There is no seedlot to show yet!',
+  emptyDescription: 'Your recent seedlots will appear here once you generate one',
+  errorTitle: 'Network errors...',
+  errorDescription: 'Could not display seedlot data',
+  errorIcon: 'InProgressError',
+  unknownIcon: 'WatsonHealthImageAvailabilityUnavailable',
+  unknownTitle: 'Something went wrong...'
+};

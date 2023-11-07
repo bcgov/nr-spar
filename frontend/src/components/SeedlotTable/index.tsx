@@ -1,69 +1,122 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  Table,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableBody,
-  TableCell
-} from '@carbon/react';
+import { DataTableSkeleton } from '@carbon/react';
+import { useQuery } from '@tanstack/react-query';
 
-import { SeedlotDisplayType } from '../../types/SeedlotType';
+import EmptySection from '../EmptySection';
+import getVegCodes from '../../api-service/vegetationCodeAPI';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
+import { covertRawToDisplayObjArray } from '../../utils/SeedlotUtils';
+import { getSeedlotByUser } from '../../api-service/seedlotAPI';
+import { SeedlotDisplayType, SeedlotType } from '../../types/SeedlotType';
+
+import { TableText } from './constants';
+import renderTable from './Table';
 
 import './styles.scss';
-import { HeaderConfig } from './constants';
-import StatusTag from '../StatusTag';
 
 interface TableProps {
-  seedlots: SeedlotDisplayType[];
+  userId: string
 }
 
-const SeedlotTable = ({ seedlots }: TableProps) => {
+const SeedlotTable = ({ userId }: TableProps) => {
   const navigate = useNavigate();
 
+  const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
+
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes'],
+    queryFn: () => getVegCodes(true),
+    staleTime: THREE_HOURS, // will not refetch for 3 hours
+    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
+  });
+
+  const convertToTableObjs = (seedlots: SeedlotType[]) => {
+    if (vegCodeQuery.data) {
+      const converted = covertRawToDisplayObjArray(seedlots, vegCodeQuery.data);
+      setSeedlotData(converted);
+    }
+  };
+
+  const getAllSeedlotQuery = useQuery({
+    queryKey: ['seedlots', 'users', userId],
+    queryFn: () => getSeedlotByUser(userId),
+    enabled: userId.length > 0 && vegCodeQuery.isFetched,
+    refetchOnMount: true
+  });
+
+  useEffect(() => {
+    if (getAllSeedlotQuery.isFetched && getAllSeedlotQuery.data) {
+      convertToTableObjs(getAllSeedlotQuery.data);
+    }
+  }, [getAllSeedlotQuery.isFetched]);
+
+  /**
+   * Show skeleton while fetching.
+   */
+  if (getAllSeedlotQuery.isFetching || vegCodeQuery.isFetching) {
+    return <DataTableSkeleton showToolbar={false} />;
+  }
+
+  /**
+   * If either query resulted in an error, show it.
+   */
+  if (vegCodeQuery.isError || getAllSeedlotQuery.isError) {
+    return (
+      <div className="empty-recent-seedlots">
+        <EmptySection
+          icon={TableText.errorIcon}
+          title={TableText.errorTitle}
+          description={
+            (
+              <>
+                {`${TableText.errorDescription}.`}
+                <br />
+                {getAllSeedlotQuery.isError ? `Seedlot Request: ${getAllSeedlotQuery.error}.` : null}
+                <br />
+                {vegCodeQuery.isError ? `VegCode Request: ${vegCodeQuery.error}` : null}
+              </>
+            )
+          }
+        />
+      </div>
+    );
+  }
+
+  /**
+   * Display fetched data
+   */
+  if (getAllSeedlotQuery.isFetched && getAllSeedlotQuery.data?.length) {
+    return renderTable(seedlotData, navigate);
+  }
+
+  /**
+   * Fetched data successfully but it's empty.
+   */
+  if (getAllSeedlotQuery.isFetched && !getAllSeedlotQuery.data?.length) {
+    return (
+      <div className="empty-recent-seedlots">
+        <EmptySection
+          pictogram={TableText.emptyPictogram}
+          title={TableText.emptyTitle}
+          description={TableText.emptyDescription}
+        />
+      </div>
+    );
+  }
+
+  /**
+   * Default edge case handler
+   */
   return (
-    <Table size="lg" useZebraStyles={false} className="seedlots-table">
-      <TableHead>
-        <TableRow>
-          {HeaderConfig.map((header) => (
-            <TableHeader
-              key={header.id}
-              id={`seedlot-table-header-${header.id}`}
-            >
-              {header.label}
-            </TableHeader>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {
-          seedlots.map((seedlot) => (
-            <TableRow
-              id={`seedlot-table-row-${seedlot.seedlotNumber}`}
-              key={seedlot.seedlotNumber}
-              onClick={() => navigate(`/seedlots/details/${seedlot.seedlotNumber}`)}
-            >
-              {
-                HeaderConfig.map((header) => (
-                  <TableCell
-                    id={`seedlot-table-cell-${seedlot.seedlotNumber}-${header.id}`}
-                    key={header.id}
-                  >
-                    {
-                      header.id === 'seedlotStatus'
-                        ? <StatusTag type={seedlot.seedlotStatus} />
-                        : seedlot[header.id]
-                    }
-                  </TableCell>
-                ))
-              }
-            </TableRow>
-          ))
-        }
-      </TableBody>
-    </Table>
+    <div className="empty-recent-seedlots">
+      <EmptySection
+        icon={TableText.unknownIcon}
+        title={TableText.unknownTitle}
+        description={TableText.errorDescription}
+      />
+    </div>
   );
 };
 
