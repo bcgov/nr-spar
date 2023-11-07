@@ -30,7 +30,6 @@ const codesToFilter: Array<string> = [
 const getVegCodes = (isAClass = false) => {
   const url = ApiConfig.vegetationCode;
   return api.get(url).then((res) => {
-    // Else return an array of objs for dropdown/combobox
     let vegCodeOptions: Array<MultiOptionsObj> = [];
     if (res.data) {
       let filteredData = res.data

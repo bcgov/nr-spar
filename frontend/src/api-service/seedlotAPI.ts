@@ -20,7 +20,7 @@ export const postFile = (
 
 export const getSeedlotByUser = (userId: string) => {
   const url = `${ApiConfig.seedlots}/users/${userId}`;
-  return api.get(url).then((res) => res.data);
+  return api.get(url).then((res): SeedlotType[] => res.data);
 };
 
 export const getSeedlotById = (seedlotNumber: string) => {

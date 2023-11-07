@@ -6,7 +6,7 @@ import { ForestClientType } from '../types/ForestClientType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 
 /**
- * Generate a species label in the from of `{code} - {description}`.
+ * Generate a species label in the form of `{code} - {description}`.
  */
 const getSpeciesNameByCode = (code: string, vegCodeData: MultiOptionsObj[]): string => {
   const filtered = vegCodeData.filter((veg) => veg.code === code);
