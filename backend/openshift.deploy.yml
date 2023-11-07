@@ -194,7 +194,7 @@ objects:
                 periodSeconds: 30
                 timeoutSeconds: 10
               securityContext:
-                runAsUser: 12345
+                runAsUser: 1013640001
           volumes:
             - name: ${NAME}-${ZONE}-fluentbit-logs
               persistentVolumeClaim:
