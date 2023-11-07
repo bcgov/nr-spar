@@ -8,10 +8,11 @@ import validator from 'validator';
 import getForestClientLocation from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
-import { FilterObj, filterInput } from '../../utils/filterUtils';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { formatLocationCode } from '../SeedlotRegistrationSteps/CollectionStep/utils';
+import { FilterObj, filterInput } from '../../utils/filterUtils';
+import getForestClientNumber from '../../utils/StringUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
 import supportTexts from './constants';
@@ -26,8 +27,14 @@ const ApplicantAgencyFields = ({
   const locationCodeClone = structuredClone(locationCode);
   const useDefaultClone = structuredClone(useDefault);
 
-  const [forestClientNumber, setForestClientNumber] = useState<string>('');
-  const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
+  const [forestClientNumber, setForestClientNumber] = useState<string>(
+    agencyClone.value ? getForestClientNumber(agencyClone.value) : ''
+  );
+  const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
+    locationCodeClone.isInvalid && agencyClone.value
+      ? supportTexts.locationCode.invalidLocationForSelectedAgency
+      : supportTexts.locationCode.invalidText
+  );
   const [locationCodeHelperText, setLocationCodeHelperText] = useState<string>(
     supportTexts.locationCode.helperTextEnabled
   );
