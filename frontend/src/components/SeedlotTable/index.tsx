@@ -12,15 +12,16 @@ import { getSeedlotByUser } from '../../api-service/seedlotAPI';
 import { SeedlotDisplayType, SeedlotType } from '../../types/SeedlotType';
 
 import { TableText } from './constants';
-import renderTable from './Table';
+import SeedlotDataTable from './Table';
 
 import './styles.scss';
 
 interface TableProps {
-  userId: string
+  userId: string,
+  isSortable?: boolean
 }
 
-const SeedlotTable = ({ userId }: TableProps) => {
+const SeedlotTable = ({ userId, isSortable }: TableProps) => {
   const navigate = useNavigate();
 
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
@@ -88,7 +89,13 @@ const SeedlotTable = ({ userId }: TableProps) => {
    * Display fetched data
    */
   if (getAllSeedlotQuery.isFetched && getAllSeedlotQuery.data?.length) {
-    return renderTable(seedlotData, navigate);
+    return (
+      <SeedlotDataTable
+        seedlotData={seedlotData}
+        navigate={navigate}
+        isSortable={isSortable ?? false}
+      />
+    );
   }
 
   /**

@@ -54,7 +54,7 @@ const MySeedlots = () => {
         </Column>
       </Row>
       <Row className="my-seedlot-data-table-row">
-        <SeedlotTable userId={userId} />
+        <SeedlotTable userId={userId} isSortable />
       </Row>
     </FlexGrid>
   );
