@@ -3,7 +3,7 @@ FROM openjdk:17.0.2 AS build
 # Build
 WORKDIR /app
 COPY . ./
-RUN ./mvnw --no-transfer-progress --update-snapshots clean package -Dtests.skip=true -Dskip.unit.tests=true && \
+RUN ./mvnw --no-transfer-progress --update-snapshots clean package -Dtests.skip=true -Dskip.unit.tests=true -Dspring-boot.run.profiles=prod && \
     javac HealthCheck.java InstallCert.java
 
 FROM eclipse-temurin:17.0.8_7-jdk-jammy AS deploy

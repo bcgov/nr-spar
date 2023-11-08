@@ -109,7 +109,7 @@ jobs:
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
           - name: fluentbit
-            file: backend/openshift.fluentbit.yml
+            file: common/openshift.fluentbit.yml
             overwrite: true
             triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
           - name: frontend
