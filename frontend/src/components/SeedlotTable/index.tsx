@@ -49,10 +49,13 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
   });
 
   useEffect(() => {
-    if (getAllSeedlotQuery.isFetched && getAllSeedlotQuery.data) {
+    if (
+      (getAllSeedlotQuery.isFetched || getAllSeedlotQuery.isFetchedAfterMount)
+      && getAllSeedlotQuery.data
+    ) {
       convertToTableObjs(getAllSeedlotQuery.data.seedlots);
     }
-  }, [getAllSeedlotQuery.isFetched]);
+  }, [getAllSeedlotQuery.isFetched, getAllSeedlotQuery.isFetchedAfterMount]);
 
   /**
    * Show skeleton while fetching.
@@ -93,6 +96,7 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
     return (
       <SeedlotDataTable
         seedlotData={seedlotData}
+        totalCount={getAllSeedlotQuery.data.totalCount}
         navigate={navigate}
         isSortable={isSortable ?? false}
         showSearch={showSearch ?? false}
@@ -116,7 +120,7 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
   }
 
   /**
-   * Default edge case handler
+   * Default case handler
    */
   return (
     <div className="empty-recent-seedlots">

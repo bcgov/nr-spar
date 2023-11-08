@@ -13,9 +13,11 @@ import StatusTag from '../StatusTag';
 import { SeedlotDisplayType } from '../../types/SeedlotType';
 
 import { HeaderConfig } from './constants';
+import { sortByKey } from './utils';
 
 interface SeedlotDataTableProps {
   seedlotData: SeedlotDisplayType[],
+  totalCount: number,
   navigate: Function,
   isSortable: boolean,
   showSearch: boolean
@@ -24,6 +26,7 @@ interface SeedlotDataTableProps {
 const SeedlotDataTable = (
   {
     seedlotData,
+    totalCount,
     navigate,
     isSortable,
     showSearch
@@ -37,36 +40,6 @@ const SeedlotDataTable = (
   useEffect(() => {
     setProcessedData(seedlotData);
   }, [seedlotData]);
-
-  const sortByKey = (
-    dataToSort: SeedlotDisplayType[],
-    headerId: keyof SeedlotDisplayType | null,
-    direction: string
-  ) => {
-    if (headerId && direction === 'ASC') {
-      return dataToSort.sort((a, b) => {
-        if (a[headerId] > b[headerId]) {
-          return 1;
-        }
-        if (a[headerId] < b[headerId]) {
-          return -1;
-        }
-        return 0;
-      });
-    }
-    if (headerId && direction === 'DESC') {
-      return dataToSort.sort((a, b) => {
-        if (a[headerId] < b[headerId]) {
-          return 1;
-        }
-        if (a[headerId] > b[headerId]) {
-          return -1;
-        }
-        return 0;
-      });
-    }
-    return dataToSort;
-  };
 
   const handleSort = (headerId: keyof SeedlotDisplayType) => {
     let newDirection = 'NONE';
