@@ -39,12 +39,12 @@ const SeedlotDataTable = (
   }, [seedlotData]);
 
   const sortByKey = (
-    tableData: SeedlotDisplayType[],
+    dataToSort: SeedlotDisplayType[],
     headerId: keyof SeedlotDisplayType | null,
     direction: string
   ) => {
     if (headerId && direction === 'ASC') {
-      return tableData.sort((a, b) => {
+      return dataToSort.sort((a, b) => {
         if (a[headerId] > b[headerId]) {
           return 1;
         }
@@ -55,7 +55,7 @@ const SeedlotDataTable = (
       });
     }
     if (headerId && direction === 'DESC') {
-      return tableData.sort((a, b) => {
+      return dataToSort.sort((a, b) => {
         if (a[headerId] < b[headerId]) {
           return 1;
         }
@@ -65,7 +65,7 @@ const SeedlotDataTable = (
         return 0;
       });
     }
-    return seedlotData;
+    return dataToSort;
   };
 
   const handleSort = (headerId: keyof SeedlotDisplayType) => {
@@ -85,19 +85,26 @@ const SeedlotDataTable = (
   };
 
   const handleSearch = (searchValue: string) => {
+    if (!searchValue) {
+      setProcessedData(sortByKey(seedlotData, sortThisHeader, sortDirection));
+      return;
+    }
     const searchString = searchValue.toLowerCase();
-    setProcessedData(() => {
-      const filtered = seedlotData.filter((seedlot) => {
+    setProcessedData((prevData) => {
+      const filtered = prevData.filter((seedlot) => {
         const keys = Object.keys(seedlot) as (keyof SeedlotDisplayType)[];
-        let matched: boolean = false;
+        let hasMatch: boolean = false;
         keys.forEach((key) => {
           if (seedlot[key].toLowerCase().includes(searchString)) {
-            matched = true;
+            hasMatch = true;
           }
         });
-        return matched;
+        return hasMatch;
       });
-      return sortByKey(filtered, sortThisHeader, sortDirection);
+      if (filtered.length > 0) {
+        return sortByKey(filtered, sortThisHeader, sortDirection);
+      }
+      return filtered;
     });
   };
 
