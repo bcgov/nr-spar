@@ -221,36 +221,15 @@ const OwnershipStep = (
     setInvalidState(newValidObj);
   };
 
-  const setDefaultAgencyNCode = (checked: boolean, clearInputs?: boolean) => {
-    if (checked) {
-      handleInputChange(
-        DEFAULT_INDEX,
-        'ownerCode.value',
-        defaultCode,
-        'ownerAgency.value',
-        defaultAgency,
-        true,
-        checked
-      );
-      // setDisableInputs(true);
-    } else {
-      const code = clearInputs ? '' : state[DEFAULT_INDEX].ownerCode.value;
-      const agency = clearInputs ? '' : state[DEFAULT_INDEX].ownerAgency.value;
-      handleInputChange(
-        DEFAULT_INDEX,
-        'ownerCode.value',
-        code,
-        'ownerAgency.value',
-        agency,
-        true,
-        checked
-      );
-      // setDisableInputs(false);
-    }
-  };
-
   useEffect(() => {
-    setDefaultAgencyNCode(state[DEFAULT_INDEX].useDefaultAgencyInfo.value);
+    const useDefault = state[DEFAULT_INDEX].useDefaultAgencyInfo.value;
+    const agencyValue = useDefault ? defaultAgency : state[DEFAULT_INDEX].ownerAgency.value;
+    const codeValue = useDefault ? defaultCode : state[DEFAULT_INDEX].ownerCode.value;
+
+    const clonedState = structuredClone(state);
+    clonedState[DEFAULT_INDEX].ownerAgency.value = agencyValue;
+    clonedState[DEFAULT_INDEX].ownerCode.value = codeValue;
+    setStepData(clonedState);
   }, [defaultAgency, defaultCode]);
 
   const addRefs = (element: HTMLInputElement, id: number, name: string) => {
