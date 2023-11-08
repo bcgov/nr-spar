@@ -1,22 +1,25 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
-import ca.bc.gov.backendstartapi.implementation.VegetationCodeRepositoryImpl;
+import ca.bc.gov.backendstartapi.repository.VegetationCodeRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -27,7 +30,7 @@ class VegetationCodeEndpointTest {
 
   private MockMvc mockMvc;
 
-  @MockBean private VegetationCodeRepositoryImpl vegetationCodeRepository;
+  @MockBean private VegetationCodeRepository vegetationCodeRepository;
 
   private final WebApplicationContext webApplicationContext;
 
@@ -50,7 +53,7 @@ class VegetationCodeEndpointTest {
             LocalDate.of(2025, 1, 1),
             LocalDateTime.now());
 
-    given(vegetationCodeRepository.findByCode("C1")).willReturn(Optional.of(vc));
+    when(vegetationCodeRepository.findById("C1")).thenReturn(Optional.of(vc));
 
     mockMvc
         .perform(get("/api/vegetation-codes/C1").accept(MediaType.APPLICATION_JSON))
@@ -68,8 +71,8 @@ class VegetationCodeEndpointTest {
             LocalDate.of(2025, 1, 1),
             LocalDateTime.now());
 
-    given(vegetationCodeRepository.findByCode("C1")).willReturn(Optional.of(vc));
-    given(vegetationCodeRepository.findByCode("C2")).willReturn(Optional.empty());
+    when(vegetationCodeRepository.findById("C1")).thenReturn(Optional.of(vc));
+    when(vegetationCodeRepository.findById("C2")).thenReturn(Optional.empty());
 
     mockMvc
         .perform(
@@ -90,8 +93,9 @@ class VegetationCodeEndpointTest {
             LocalDate.of(2025, 1, 1),
             LocalDateTime.now());
 
-    given(vegetationCodeRepository.findValidByCodeOrDescription("1", 0, 20))
-        .willReturn(List.of(vc));
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<VegetationCode> vegPage = new PageImpl<VegetationCode>(List.of(vc));
+    when(vegetationCodeRepository.findByCodeOrDescription("1", pageable)).thenReturn(vegPage);
 
     mockMvc
         .perform(
@@ -104,8 +108,10 @@ class VegetationCodeEndpointTest {
 
   @Test
   void searchWithNoMatch() throws Exception {
-    given(vegetationCodeRepository.findValidByCodeOrDescription("1", 0, 20))
-        .willReturn(Collections.emptyList());
+    Pageable pageable = PageRequest.of(0, 20);
+    Page<VegetationCode> vegPage = new PageImpl<>(List.of());
+
+    when(vegetationCodeRepository.findByCodeOrDescription("1", pageable)).thenReturn(vegPage);
 
     mockMvc
         .perform(
@@ -118,16 +124,10 @@ class VegetationCodeEndpointTest {
 
   @Test
   void searchWithNegativePage() throws Exception {
-    VegetationCode vc =
-        new VegetationCode(
-            "C1",
-            "Code 1",
-            LocalDate.of(2020, 1, 1),
-            LocalDate.of(2025, 1, 1),
-            LocalDateTime.now());
+    Pageable pageable = PageRequest.of(0, 20);
 
-    given(vegetationCodeRepository.findValidByCodeOrDescription("1", -1, 20))
-        .willReturn(List.of(vc));
+    when(vegetationCodeRepository.findByCodeOrDescription("1", pageable))
+        .thenThrow(new RuntimeException("Invalid negatative page index"));
 
     mockMvc
         .perform(
@@ -147,7 +147,10 @@ class VegetationCodeEndpointTest {
             LocalDate.of(2025, 1, 1),
             LocalDateTime.now());
 
-    given(vegetationCodeRepository.findValidByCodeOrDescription("1", 0, 0)).willReturn(List.of(vc));
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<VegetationCode> vegPage = new PageImpl<VegetationCode>(List.of(vc));
+
+    when(vegetationCodeRepository.findByCodeOrDescription("1", pageable)).thenReturn(vegPage);
 
     mockMvc
         .perform(

@@ -125,9 +125,6 @@ public class SeedlotService {
    * @return a list of the user's seedlots
    */
   public List<Seedlot> getUserSeedlots(String userId, int pageNumber, int pageSize) {
-    if (pageNumber == 0) {
-      pageNumber = 1;
-    }
     if (pageSize == 0) {
       pageSize = 10;
     }
