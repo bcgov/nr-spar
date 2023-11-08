@@ -43,6 +43,7 @@ class UserAuthenticationHelperTest {
     builder.claim("custom:idp_display_name", "Baggings, Bilbo LWRS:EX");
     builder.claim("custom:idp_username", "BAGGINGS");
     builder.claim("custom:idp_name", "idir");
+    builder.claim("cognito:username", "abcdefg123465789@idir");
 
     when(authentication.getPrincipal()).thenReturn(builder.build());
 
@@ -50,10 +51,10 @@ class UserAuthenticationHelperTest {
     Assertions.assertTrue(userInfoOptional.isPresent());
 
     UserInfo userInfo = userInfoOptional.get();
-    Assertions.assertEquals("BAGGINGS", userInfo.id());
+    Assertions.assertEquals("abcdefg123465789@idir", userInfo.id());
     Assertions.assertEquals("Bilbo", userInfo.firstName());
     Assertions.assertEquals("Baggings", userInfo.lastName());
-    Assertions.assertEquals("", userInfo.email());
+    Assertions.assertEquals("bilbo.baggings@gov.bc.ca", userInfo.email());
     Assertions.assertEquals("Baggings, Bilbo LWRS:EX", userInfo.displayName());
     Assertions.assertEquals("BAGGINGS", userInfo.idirUsername());
     Assertions.assertEquals(IdentityProvider.IDIR, userInfo.identityProvider());
@@ -77,6 +78,7 @@ class UserAuthenticationHelperTest {
     builder.claim("custom:idp_display_name", "Lord Sauron of Mordor");
     builder.claim("custom:idp_username", "MORDOR-BCEID");
     builder.claim("custom:idp_name", "bceidbusiness");
+    builder.claim("cognito:username", "abcdefg123465789@bceid");
 
     when(authentication.getPrincipal()).thenReturn(builder.build());
 
@@ -84,10 +86,10 @@ class UserAuthenticationHelperTest {
     Assertions.assertTrue(userInfoOptional.isPresent());
 
     UserInfo userInfo = userInfoOptional.get();
-    Assertions.assertEquals("MORDOR-BCEID", userInfo.id());
+    Assertions.assertEquals("abcdefg123465789@bceid", userInfo.id());
     Assertions.assertEquals("Lord", userInfo.firstName());
     Assertions.assertEquals("Sauron of Mordor", userInfo.lastName());
-    Assertions.assertEquals("", userInfo.email());
+    Assertions.assertEquals("lord.sauron@mordor.middleearth", userInfo.email());
     Assertions.assertEquals("Lord Sauron of Mordor", userInfo.displayName());
     Assertions.assertEquals("MORDOR-BCEID", userInfo.businessName());
     Assertions.assertEquals(IdentityProvider.BUSINESS_BCEID, userInfo.identityProvider());

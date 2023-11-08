@@ -65,12 +65,15 @@ public class UserAuthenticationHelper {
           lastName = displayName.substring(indexFirstSpace).trim();
         }
 
+        // User id (@idir or @bceid)
+        String userId = jwtPrincipal.getClaimAsString("cognito:username");
+
         // Email will be empty, until next FAM release
-        String email = "";
+        String email = jwtPrincipal.getClaimAsString("email");
 
         UserInfo userInfo =
             new UserInfo(
-                idpUsername,
+                userId,
                 firstName,
                 lastName,
                 email,
