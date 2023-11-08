@@ -43,7 +43,7 @@ public class UserAuthenticationHelper {
         String firstName = "";
         String lastName = "";
 
-        // Usually only IDIR contains comma. E.g.: de Campos, Ricardo WLRS:EX
+        // Usually only IDIR contains comma.
         if (displayName.contains(",")) {
           String[] parts = displayName.split(",");
           firstName = parts[1].trim();
