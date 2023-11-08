@@ -14,7 +14,7 @@ import {
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
 
-import getForestClientLocation from '../../../../api-service/forestClientsAPI';
+import { getForestClientLocation } from '../../../../api-service/forestClientsAPI';
 
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
@@ -60,7 +60,7 @@ const SingleOwnerInfo = ({
   );
 
   const validateLocationCode = useMutation({
-    mutationFn: (queryParams:string[]) => getForestClientLocation(
+    mutationFn: (queryParams: string[]) => getForestClientLocation(
       queryParams[0],
       queryParams[1]
     ),
@@ -128,7 +128,7 @@ const SingleOwnerInfo = ({
                     }
                   })
                   : () => { }
-                }
+              }
               // We need to check if validationProp is here since deleting a Single Owner Form
               //    might delete the valid prop first and throwing an error
               invalid={validationProp.owner.isInvalid}

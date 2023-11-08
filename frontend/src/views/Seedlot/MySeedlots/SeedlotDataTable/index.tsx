@@ -17,7 +17,7 @@ import {
 
 import StatusItem from '../../../../components/StatusItem';
 import Participants from '../../../../components/Participants';
-import Seedlot from '../../../../types/Seedlot';
+import { SeedlotType } from '../../../../types/SeedlotType';
 import { headerData } from '../constants';
 
 interface HeaderType {
@@ -38,7 +38,7 @@ interface RowInterface {
 }
 
 interface SeedlotDataTableProps {
-  seedlots: Seedlot[]
+  seedlots: SeedlotType[]
 }
 
 const SeedlotDataTable = ({ seedlots }: SeedlotDataTableProps) => {

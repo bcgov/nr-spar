@@ -5,8 +5,8 @@ import {
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
-import 'react-toastify/dist/ReactToastify.css';
 import './styles/custom.scss';
+import 'react-toastify/dist/ReactToastify.css';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import { useAuth } from './contexts/AuthContext';
@@ -21,6 +21,7 @@ import CreateAClass from './views/Seedlot/CreateAClass';
 import SeedlotCreatedFeedback from './views/Seedlot/SeedlotCreatedFeedback';
 import MySeedlots from './views/Seedlot/MySeedlots';
 import SeedlotRegistrationForm from './views/Seedlot/SeedlotRegistrationForm';
+import FourOhFour from './views/FourOhFour';
 
 /**
  * Create an app structure conaining all the routes.
@@ -77,7 +78,7 @@ const App: React.FC = () => {
             />
 
             <Route
-              path="/seedlots/details/:seedlot"
+              path="/seedlots/details/:seedlotNumber"
               element={(
                 <ProtectedRoute signed={signed}>
                   <SeedlotDetails />
@@ -103,6 +104,7 @@ const App: React.FC = () => {
               )}
             />
           </Route>
+          <Route path="/404" element={<FourOhFour />} />
         </Routes>
       </BrowserRouter>
     </>

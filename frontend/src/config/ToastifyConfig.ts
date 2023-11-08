@@ -6,7 +6,6 @@
 import { ToastOptions, toast } from 'react-toastify';
 import { SEVEN_SECONDS } from './TimeUnits';
 
-// eslint-disable-next-line import/prefer-default-export
 export const ErrToastOption: ToastOptions = {
   position: toast.POSITION.TOP_RIGHT,
   icon: false,

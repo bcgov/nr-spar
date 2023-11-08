@@ -4,5 +4,5 @@ export enum NavigationLabels {
 }
 
 export enum SeedlotActivities {
-  RegisterAClass = 'Register an A class seedlot'
+  RegisterAClass = 'Register an A-class seedlot'
 }

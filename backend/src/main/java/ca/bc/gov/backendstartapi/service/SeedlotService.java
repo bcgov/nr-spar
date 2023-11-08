@@ -75,7 +75,7 @@ public class SeedlotService {
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
-    seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserIdirOrBceId()));
+    seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
 
     log.debug("Seedlot to insert: {}", seedlot);
 

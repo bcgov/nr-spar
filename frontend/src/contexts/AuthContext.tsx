@@ -10,7 +10,7 @@ import KeycloakUser from '../types/KeycloakUser';
 
 interface AuthContextData {
   signed: boolean;
-  user: KeycloakUser | {};
+  user: KeycloakUser | null;
   startKeycloak(): Promise<boolean>;
   login(options?: KeycloakLoginOptions): Promise<void>;
   logout(): Promise<void>;
@@ -29,7 +29,7 @@ interface Props {
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Props) => {
   const [signed, setSigned] = useState<boolean>(false);
-  const [user, setUser] = useState<KeycloakUser | {}>({});
+  const [user, setUser] = useState<KeycloakUser | null>(null);
 
   /**
    * Starts Keycloak instance.
@@ -55,7 +55,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     try {
       localStorage.clear();
       await KeycloakService.logout();
-      setUser({});
+      setUser(null);
       setSigned(false);
     } catch (e) {
       // eslint-disable-next-line no-console

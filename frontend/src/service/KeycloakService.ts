@@ -46,6 +46,7 @@ const getUser = (): KeycloakUser => {
   const idirUsername = keycloak.tokenParsed?.idir_username;
   const email = keycloak.tokenParsed?.email;
   const name = keycloak.tokenParsed?.name;
+  const userId = keycloak.tokenParsed?.preferred_username;
   const roles: string[] = getRoles();
 
   return {
@@ -55,7 +56,8 @@ const getUser = (): KeycloakUser => {
     firstName,
     idirUsername,
     name,
-    roles
+    roles,
+    userId
   };
 };
 

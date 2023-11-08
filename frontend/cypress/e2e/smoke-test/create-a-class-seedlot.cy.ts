@@ -2,7 +2,7 @@ import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
 import { TYPE_DELAY } from '../../constants';
 
-describe('Create A Class Seedlot', () => {
+describe('Create A-Class Seedlot', () => {
   let data: {
     applicantAgency: { name: string; number: string; email: string; invalidEmail: string; };
     seedlotInformation: { species: string; };
@@ -41,10 +41,10 @@ describe('Create A Class Seedlot', () => {
     ).as('submitSeedlot');
   });
 
-  it('should register a Class A Seedlot', () => {
+  it('should register an A-Class Seedlot', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
-    // Click on the register seedlot an A class seedlot card
+    // Click on the register seedlot an A-class seedlot card
     cy.get(SeedlotRegistrationSelectors.SeedlotActivitiesCardTitle)
       .contains(SeedlotActivities.RegisterAClass)
       .click();

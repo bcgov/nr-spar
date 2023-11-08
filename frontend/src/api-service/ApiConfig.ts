@@ -14,11 +14,7 @@ const ApiConfig = {
   /**
    * MOCK API
    */
-  applicantInfo: `${mockServerHost}/api/applicant-info`,
-
   aClassSeedlot: `${mockServerHost}/api/register-a-class`,
-
-  seedlot: `${mockServerHost}/api/seedlot`,
 
   seedlotOrchardStep: `${mockServerHost}/api/seedlot/orchard`,
 

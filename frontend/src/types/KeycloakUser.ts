@@ -6,6 +6,7 @@ type KeycloakUser = {
   idirUsername: string;
   name: string;
   roles: string[];
+  userId: string;
 };
 
 export default KeycloakUser;

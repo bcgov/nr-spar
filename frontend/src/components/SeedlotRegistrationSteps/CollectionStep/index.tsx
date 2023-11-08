@@ -18,7 +18,7 @@ import moment from 'moment';
 import validator from 'validator';
 
 import Subtitle from '../../Subtitle';
-import getForestClientLocation from '../../../api-service/forestClientsAPI';
+import { getForestClientLocation } from '../../../api-service/forestClientsAPI';
 import { filterInput, FilterObj } from '../../../utils/filterUtils';
 import getForestClientNumber from '../../../utils/StringUtils';
 import { LOCATION_CODE_LIMIT } from '../../../shared-constants/shared-constants';
