@@ -39,7 +39,7 @@ public class UserAuthenticationHelper {
 
         // User name
         String displayName =
-            jwtPrincipal.getClaimAsString("custom:idp_display_name"); // de Campos, Ricardo WLRS:EX
+            jwtPrincipal.getClaimAsString("custom:idp_display_name");
         String firstName = "";
         String lastName = "";
 
