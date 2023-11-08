@@ -50,7 +50,7 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
 
   useEffect(() => {
     if (getAllSeedlotQuery.isFetched && getAllSeedlotQuery.data) {
-      convertToTableObjs(getAllSeedlotQuery.data);
+      convertToTableObjs(getAllSeedlotQuery.data.seedlots);
     }
   }, [getAllSeedlotQuery.isFetched]);
 
@@ -89,7 +89,7 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
   /**
    * Display fetched data
    */
-  if (getAllSeedlotQuery.isFetched && getAllSeedlotQuery.data?.length) {
+  if (getAllSeedlotQuery.isFetched && getAllSeedlotQuery.data?.seedlots.length) {
     return (
       <SeedlotDataTable
         seedlotData={seedlotData}
@@ -103,7 +103,7 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
   /**
    * Fetched data successfully but it's empty.
    */
-  if (getAllSeedlotQuery.isFetched && !getAllSeedlotQuery.data?.length) {
+  if (getAllSeedlotQuery.isFetched && !getAllSeedlotQuery.data?.seedlots.length) {
     return (
       <div className="empty-recent-seedlots">
         <EmptySection
