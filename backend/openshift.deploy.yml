@@ -163,7 +163,7 @@ objects:
                 - name: DB_POOL_MAX_LIFETIME
                   value: ${DB_POOL_MAX_LIFETIME}
                 - name: AWS_COGNITO_ISSUER_URI
-                  value: AWS_COGNITO_ISSUER_URI
+                  value: ${AWS_COGNITO_ISSUER_URI}
               ports:
                 - containerPort: 8090
                   protocol: TCP

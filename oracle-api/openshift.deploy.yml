@@ -140,7 +140,7 @@ objects:
                 - name: ORACLEDB_KEYSTORE
                   value: ${ORACLEDB_KEYSTORE}
                 - name: AWS_COGNITO_ISSUER_URI
-                  value: AWS_COGNITO_ISSUER_URI
+                  value: ${AWS_COGNITO_ISSUER_URI}
               ports:
                 - containerPort: 8090
                   protocol: TCP
