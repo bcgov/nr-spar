@@ -41,3 +41,7 @@ export const TableText = {
   unknownIcon: 'WatsonHealthImageAvailabilityUnavailable',
   unknownTitle: 'Something went wrong...'
 };
+
+export const PageSizesConfig = [
+  10, 20, 30, 40, 50
+];

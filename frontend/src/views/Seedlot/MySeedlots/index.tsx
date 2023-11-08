@@ -30,7 +30,6 @@ const MySeedlots = () => {
       <Row className="my-seedlot-breadcrumb">
         <Breadcrumb>
           <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate('/seedlots/my-seedlots')}>My Seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Row className="my-seedlot-title">
@@ -55,7 +54,7 @@ const MySeedlots = () => {
         </Column>
       </Row>
       <Row className="my-seedlot-data-table-row">
-        <SeedlotTable userId={userId} isSortable showSearch />
+        <SeedlotTable userId={userId} isSortable showSearch showPagination defaultPageSize={20} />
       </Row>
     </FlexGrid>
   );

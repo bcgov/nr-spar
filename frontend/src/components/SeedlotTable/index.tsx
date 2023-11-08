@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { DataTableSkeleton } from '@carbon/react';
+import { DataTableSkeleton, Pagination } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
 
 import EmptySection from '../EmptySection';
@@ -10,22 +10,28 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { covertRawToDisplayObjArray } from '../../utils/SeedlotUtils';
 import { getSeedlotByUser } from '../../api-service/seedlotAPI';
 import { SeedlotDisplayType, SeedlotType } from '../../types/SeedlotType';
+import PaginationChangeType from '../../types/PaginationChangeType';
 
-import { TableText } from './constants';
+import { TableText, PageSizesConfig } from './constants';
+import { TableProps } from './definitions';
 import SeedlotDataTable from './Table';
 
 import './styles.scss';
 
-interface TableProps {
-  userId: string,
-  isSortable?: boolean
-  showSearch?: boolean
-}
-
-const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
+const SeedlotTable = (
+  {
+    userId,
+    isSortable,
+    showSearch,
+    showPagination,
+    defaultPageSize
+  }: TableProps
+) => {
   const navigate = useNavigate();
 
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
+  const [currPageNumber, setCurrPageNumber] = useState<number>(0);
+  const [currPageSize, setCurrPageSize] = useState<number>(defaultPageSize ?? 10);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -42,10 +48,10 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
   };
 
   const getAllSeedlotQuery = useQuery({
-    queryKey: ['seedlots', 'users', userId],
-    queryFn: () => getSeedlotByUser(userId),
+    queryKey: ['seedlots', 'users', userId, { pageNumber: currPageNumber, pageSize: currPageSize }],
+    queryFn: () => getSeedlotByUser(userId, currPageNumber, currPageSize),
     enabled: userId.length > 0 && vegCodeQuery.isFetched,
-    refetchOnMount: true
+    refetchOnMount: 'always'
   });
 
   useEffect(() => {
@@ -57,6 +63,26 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
     }
   }, [getAllSeedlotQuery.isFetched, getAllSeedlotQuery.isFetchedAfterMount]);
 
+  const handlePagination = (paginationObj: PaginationChangeType) => {
+    setCurrPageNumber(paginationObj.page - 1); // index starts at 0 on java.
+    setCurrPageSize(paginationObj.pageSize);
+    // getAllSeedlotQuery.refetch();
+  };
+
+  const tablePagination = () => (
+    <Pagination
+      page={currPageNumber + 1}
+      pageSize={currPageSize}
+      pageSizes={PageSizesConfig}
+      itemsPerPageText=""
+      totalItems={getAllSeedlotQuery.data?.totalCount ?? 0}
+      onChange={
+        (paginationObj: PaginationChangeType) => {
+          handlePagination(paginationObj);
+        }
+      }
+    />
+  );
   /**
    * Show skeleton while fetching.
    */
@@ -96,10 +122,11 @@ const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
     return (
       <SeedlotDataTable
         seedlotData={seedlotData}
-        totalCount={getAllSeedlotQuery.data.totalCount}
         navigate={navigate}
         isSortable={isSortable ?? false}
         showSearch={showSearch ?? false}
+        showPagination={showPagination ?? false}
+        tablePagination={tablePagination()}
       />
     );
   }

@@ -14,22 +14,16 @@ import { SeedlotDisplayType } from '../../types/SeedlotType';
 
 import { HeaderConfig } from './constants';
 import { sortByKey } from './utils';
-
-interface SeedlotDataTableProps {
-  seedlotData: SeedlotDisplayType[],
-  totalCount: number,
-  navigate: Function,
-  isSortable: boolean,
-  showSearch: boolean
-}
+import { SeedlotDataTableProps } from './definitions';
 
 const SeedlotDataTable = (
   {
     seedlotData,
-    totalCount,
     navigate,
     isSortable,
-    showSearch
+    showSearch,
+    showPagination,
+    tablePagination
   }: SeedlotDataTableProps
 ) => {
   const [sortThisHeader, setSortThisHeader] = useState<keyof SeedlotDisplayType | null>(null);
@@ -96,7 +90,7 @@ const SeedlotDataTable = (
           )
           : null
       }
-      <Table size="lg" useZebraStyles={false}>
+      <Table size="lg" useZebraStyles={false} className="seedlot-data-table">
         <TableHead>
           <TableRow>
             {
@@ -142,6 +136,11 @@ const SeedlotDataTable = (
           }
         </TableBody>
       </Table>
+      {
+        showPagination
+          ? tablePagination
+          : null
+      }
     </>
   );
 };

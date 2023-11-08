@@ -13,7 +13,7 @@
 
   .my-seedlot-title {
     justify-content: space-between;
-    margin-bottom: 3.25rem;
+    margin-bottom: 2rem;
   }
 
   .btn-my-seedlot {
@@ -31,5 +31,9 @@
 
   .#{vars.$bcgov-prefix}--data-table-container {
     width: 100%;
+  }
+
+  .my-seedlot-data-table-row {
+    margin: auto -2.5rem;
   }
 }
