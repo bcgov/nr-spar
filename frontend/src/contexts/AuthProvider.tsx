@@ -99,8 +99,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
 
     // axios token
     axios.defaults.headers.common = {
-      // Authorization: `Bearer ${token}`
-      'Temporary-User-Identification': famUser.axiosRequestUser
+      Authorization: `Bearer ${famUser.jwtToken}`
     };
   };
 

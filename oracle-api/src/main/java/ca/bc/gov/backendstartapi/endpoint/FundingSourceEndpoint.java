@@ -9,16 +9,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /** This class exposes funding sources resources API. */
+@Slf4j
 @RestController
 @RequestMapping("/api/funding-sources")
-@Tag(
-    name = "fundingSource",
-    description = "Resource to retrieve Funding Source to Owners Agencies")
+@Tag(name = "fundingSource", description = "Resource to retrieve Funding Source to Owners Agencies")
 public class FundingSourceEndpoint {
 
   private FundingSourceRepository fundingSourceRepository;
@@ -53,6 +53,7 @@ public class FundingSourceEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   public List<FundingSource> getAllValidFundingSources() {
+    log.info("Fetching all valid Funding Sources");
     return fundingSourceRepository.findAllValid();
   }
 }

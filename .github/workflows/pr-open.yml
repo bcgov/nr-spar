@@ -106,10 +106,11 @@ jobs:
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
           - name: fluentbit
-            file: backend/openshift.fluentbit.yml
+            file: common/openshift.fluentbit.yml
             overwrite: true
             triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
           - name: frontend
@@ -130,6 +131,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('common/' 'oracle-api/')
             verification_path: "actuator/health"
     steps:

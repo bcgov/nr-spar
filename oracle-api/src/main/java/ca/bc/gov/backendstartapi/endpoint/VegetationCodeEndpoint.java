@@ -13,6 +13,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
  * Used for providing information related to {@link VegetationCode vegetation codes} via HTTP
  * requests.
  */
+@Slf4j
 @RestController
 @RequestMapping(path = "/api/vegetation-codes")
 @Validated
@@ -61,7 +67,8 @@ public class VegetationCodeEndpoint {
               in = ParameterIn.PATH,
               description = "Identifier of the vegetation code being sought.")
           String code) {
-    var retrievalResult = vegetationCodeRepository.findByCode(code);
+    log.info("Fetching information to vegetation code: {}", code);
+    var retrievalResult = vegetationCodeRepository.findById(code);
     return retrievalResult.orElseThrow(
         () ->
             new ResponseStatusException(
@@ -102,7 +109,19 @@ public class VegetationCodeEndpoint {
                       providing a value matches everything.""")
           String search,
       @Valid PaginationParameters paginationParameters) {
-    return vegetationCodeRepository.findValidByCodeOrDescription(
-        search, paginationParameters.skip(), paginationParameters.perPage());
+    log.info(
+        "Fetching all valid vegetation code given the search term: {} with page index {} and page"
+            + " size {}",
+        search,
+        paginationParameters.page(),
+        paginationParameters.perPage());
+    Pageable pageable = PageRequest.of(paginationParameters.page(), paginationParameters.perPage());
+    search = "%" + search + "%";
+    Page<VegetationCode> vegetationPage =
+        vegetationCodeRepository.findByCodeOrDescription(search, pageable);
+    if (Objects.isNull(vegetationPage)) {
+      return List.of();
+    }
+    return vegetationPage.getContent();
   }
 }
