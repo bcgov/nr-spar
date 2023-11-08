@@ -69,6 +69,8 @@ jobs:
             triggers: ('database/')
           - package: backend
             triggers: ('backend/')
+            build_args: |
+              AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
           - package: frontend
             triggers: ('frontend/')
           - package: oracle-api
@@ -82,6 +84,7 @@ jobs:
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
+          build_args: ${{ matrix.build_args }}
 
   deploys:
     name: Deploys
