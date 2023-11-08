@@ -87,7 +87,7 @@ jobs:
               -p BUILD=test
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=test
           - name: fluentbit
-            file: backend/openshift.fluentbit.yml
+            file: common/openshift.fluentbit.yml
             overwrite: true
           - name: frontend
             file: frontend/openshift.deploy.yml
@@ -105,6 +105,7 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
+              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=test
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
@@ -204,7 +205,7 @@ jobs:
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
               -p KEYCLOAK_REALM_URL=https://loginproxy.gov.bc.ca/auth/realms/standard
           - name: fluentbit
-            file: backend/openshift.fluentbit.yml
+            file: common/openshift.fluentbit.yml
             overwrite: true
           - name: frontend
             file: frontend/openshift.deploy.yml
@@ -223,6 +224,7 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
+              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=production
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
         with:
