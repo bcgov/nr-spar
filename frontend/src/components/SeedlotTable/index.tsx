@@ -19,9 +19,10 @@ import './styles.scss';
 interface TableProps {
   userId: string,
   isSortable?: boolean
+  showSearch?: boolean
 }
 
-const SeedlotTable = ({ userId, isSortable }: TableProps) => {
+const SeedlotTable = ({ userId, isSortable, showSearch }: TableProps) => {
   const navigate = useNavigate();
 
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
@@ -94,6 +95,7 @@ const SeedlotTable = ({ userId, isSortable }: TableProps) => {
         seedlotData={seedlotData}
         navigate={navigate}
         isSortable={isSortable ?? false}
+        showSearch={showSearch ?? false}
       />
     );
   }

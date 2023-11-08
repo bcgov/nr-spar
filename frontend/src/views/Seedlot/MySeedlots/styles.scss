@@ -20,8 +20,16 @@
     float: right;
   }
 
-  .empty-seedlots{
+  .empty-seedlots {
     width: 100%;
     margin: 0 auto;
+  }
+
+  .#{vars.$bcgov-prefix}--data-table-content {
+    width: 100%;
+  }
+
+  .#{vars.$bcgov-prefix}--data-table-container {
+    width: 100%;
   }
 }
