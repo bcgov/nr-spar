@@ -54,7 +54,7 @@ describe('Login page test', () => {
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
-  it('should been able to log in with BCeID and validate user role', () => {
+  it('can log in with BCeID and validate user role', () => {
     cy.login();
     cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');
@@ -63,7 +63,7 @@ describe('Login page test', () => {
     cy.get('.user-data').find('p').contains('IDIR: undefined');
   });
 
-  it('should been able to log in with BCeID and validate user information', () => {
+  it('can log in with BCeID and validate user information', () => {
     cy.login();
     cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');

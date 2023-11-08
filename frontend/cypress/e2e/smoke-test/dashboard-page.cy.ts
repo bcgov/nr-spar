@@ -31,7 +31,7 @@ describe('Dashboard page test', () => {
       .should('have.text', dashboardPageData.secondSectionSubtitle);
   });
 
-  it('should have been able to favourite the seedlots page', () => {
+  it('should be able to favourite the seedlots page', () => {
     // Navigate to Seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
     // Favourite Seedlot page
@@ -49,7 +49,7 @@ describe('Dashboard page test', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
   });
 
-  it('should have been able to favourite the a class seedlot page', () => {
+  it('should be able to favourite the a class seedlot page', () => {
     // Navigate to Seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
 
@@ -75,7 +75,7 @@ describe('Dashboard page test', () => {
     cy.isPageTitle('Create A class seedlot');
   });
 
-  it('should have been able to favourite my seedlot page', () => {
+  it('should be able to favourite my seedlot page', () => {
     // Navigate to My seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.get('.seedlot-activities-cards')
@@ -102,7 +102,7 @@ describe('Dashboard page test', () => {
     cy.isPageTitle('My Seedlots');
   });
 
-  it('should have been able to highlight favourite cards at dashboard', () => {
+  it('should be able to highlight favourite cards at dashboard', () => {
   // Highlight Seedlots Card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
