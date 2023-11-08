@@ -1,7 +1,7 @@
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import {
-  ownerTemplate,
+  createOwnerTemplate,
   validTemplate as ownerInvalidTemplate
 } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
@@ -71,11 +71,10 @@ export const initOwnershipState = (
   defaultAgency: string,
   defaultCode: string
 ) => {
-  const initialOwnerState = { ...ownerTemplate };
-  initialOwnerState.id = 0;
-  initialOwnerState.ownerAgency = defaultAgency;
-  initialOwnerState.ownerCode = defaultCode;
-  initialOwnerState.ownerPortion = '100';
+  const initialOwnerState = createOwnerTemplate(0);
+  initialOwnerState.ownerAgency.value = defaultAgency;
+  initialOwnerState.ownerCode.value = defaultCode;
+  initialOwnerState.ownerPortion.value = '100';
   return initialOwnerState;
 };
 

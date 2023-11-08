@@ -6,13 +6,13 @@ import {
 
 import TitleAccordion from '../../TitleAccordion';
 import SingleOwnerInfo from './SingleOwnerInfo';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {
   StateReturnObj,
-  SingleOwnerForm,
   AccordionCtrlObj,
-  AccordionItemHeadClick
+  AccordionItemHeadClick,
+  OwnershipStepProps,
+  SingleOwnerForm
 } from './definitions';
 import {
   insertOwnerForm,
@@ -32,20 +32,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-
-interface OwnershipStepProps {
-  defaultAgency: string
-  defaultCode: string,
-  agencyOptions: Array<MultiOptionsObj>,
-  state: Array<SingleOwnerForm>,
-  setStepData: Function,
-  invalidState: OwnershipInvalidObj,
-  setInvalidState: Function,
-  readOnly?: boolean,
-  fundingSources: Array<MultiOptionsObj>,
-  methodsOfPayment: Array<MultiOptionsObj>
-}
 
 /*
   Component
@@ -64,7 +50,7 @@ const OwnershipStep = (
     methodsOfPayment
   }: OwnershipStepProps
 ) => {
-  const [disableInputs, setDisableInputs] = useState(true);
+  // const [disableInputs, setDisableInputs] = useState(true);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
 
@@ -166,7 +152,7 @@ const OwnershipStep = (
       if (setDefaultAgency) {
         // To set the correct value to the useDefaultAgencyInfo field, just
         // need to check the value that is being assigned
-        updatedArray[id].useDefaultAgencyInfo = checked || false;
+        updatedArray[id].useDefaultAgencyInfo.value = checked || false;
       }
     } else {
       updatedArray[id] = {
@@ -239,32 +225,32 @@ const OwnershipStep = (
     if (checked) {
       handleInputChange(
         DEFAULT_INDEX,
-        'ownerCode',
+        'ownerCode.value',
         defaultCode,
-        'ownerAgency',
+        'ownerAgency.value',
         defaultAgency,
         true,
         checked
       );
-      setDisableInputs(true);
+      // setDisableInputs(true);
     } else {
-      const code = clearInputs ? '' : state[DEFAULT_INDEX].ownerCode;
-      const agency = clearInputs ? '' : state[DEFAULT_INDEX].ownerAgency;
+      const code = clearInputs ? '' : state[DEFAULT_INDEX].ownerCode.value;
+      const agency = clearInputs ? '' : state[DEFAULT_INDEX].ownerAgency.value;
       handleInputChange(
         DEFAULT_INDEX,
-        'ownerCode',
+        'ownerCode.value',
         code,
-        'ownerAgency',
+        'ownerAgency.value',
         agency,
         true,
         checked
       );
-      setDisableInputs(false);
+      // setDisableInputs(false);
     }
   };
 
   useEffect(() => {
-    setDefaultAgencyNCode(state[DEFAULT_INDEX].useDefaultAgencyInfo);
+    setDefaultAgencyNCode(state[DEFAULT_INDEX].useDefaultAgencyInfo.value);
   }, [defaultAgency, defaultCode]);
 
   const addRefs = (element: HTMLInputElement, id: number, name: string) => {
@@ -317,19 +303,20 @@ const OwnershipStep = (
                 }
                 title={(
                   <TitleAccordion
-                    title={singleOwnerInfo.ownerAgency === ''
+                    title={singleOwnerInfo.ownerAgency.value === ''
                       ? 'Owner agency name'
-                      : getAgencyName(singleOwnerInfo.ownerAgency)}
-                    description={`${formatPortionPerc(singleOwnerInfo.ownerPortion)}% owner portion`}
+                      : getAgencyName(singleOwnerInfo.ownerAgency.value)}
+                    description={`${formatPortionPerc(singleOwnerInfo.ownerPortion.value)}% owner portion`}
                   />
                 )}
               >
                 <SingleOwnerInfo
                   ownerInfo={singleOwnerInfo}
                   agencyOptions={agencyOptions}
+                  defaultAgency={defaultAgency}
+                  defaultCode={defaultCode}
                   fundingSources={fundingSources}
                   methodsOfPayment={methodsOfPayment}
-                  disableInputs={disableInputs}
                   addRefs={(element: HTMLInputElement, name: string) => {
                     addRefs(element, singleOwnerInfo.id, name);
                   }}
@@ -339,12 +326,13 @@ const OwnershipStep = (
                       handleInputChange(singleOwnerInfo.id, name, value, optName, optValue);
                     }
                   }
-                  setDefaultAgencyNCode={
-                    (checked: boolean) => setDefaultAgencyNCode(checked, true)
-                  }
-                  useDefaultAgency={state[DEFAULT_INDEX].useDefaultAgencyInfo}
                   addAnOwner={addAnOwner}
                   deleteAnOwner={(id: number) => deleteAnOwner(id)}
+                  setState={(singleState: SingleOwnerForm, id: number) => {
+                    const arrayClone = structuredClone(state);
+                    arrayClone[id] = singleState;
+                    setStepData(arrayClone);
+                  }}
                   readOnly={readOnly}
                 />
               </AccordionItem>

@@ -129,7 +129,7 @@ const SeedlotRegistrationForm = () => {
       const defaultMethod = defaultMethodArr.length === 0 ? null : defaultMethodArr[0];
       if (!allStepData.ownershipStep[0].methodOfPayment) {
         const tempOwnershipData = structuredClone(allStepData.ownershipStep);
-        tempOwnershipData[0].methodOfPayment = defaultMethod;
+        tempOwnershipData[0].methodOfPayment.value = defaultMethod ? defaultMethod.label : '';
         setStepData('ownershipStep', tempOwnershipData);
       }
     }

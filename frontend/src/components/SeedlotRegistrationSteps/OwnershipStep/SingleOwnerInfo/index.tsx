@@ -1,80 +1,82 @@
-import React, { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import validator from 'validator';
+import React from 'react';
 import {
-  TextInput,
   NumberInput,
   FlexGrid,
   Column,
   ComboBox,
   Row,
-  Button,
-  Checkbox,
-  InlineLoading
+  Button
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
+import ApplicantAgencyFields from '../../../ApplicantAgencyFields';
 
-import getForestClientLocation from '../../../../api-service/forestClientsAPI';
-
+import { FormInputType } from '../../../../types/FormInputType';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import {
   SingleOwnerForm,
   NumStepperVal
 } from '../definitions';
-import { inputText, DEFAULT_INDEX } from '../constants';
+import { inputText, DEFAULT_INDEX, agencyFieldsProps } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/filterUtils';
 import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import CheckboxType from '../../../../types/CheckboxType';
 
 import './styles.scss';
 
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
-  disableInputs: boolean,
   handleInputChange: Function,
   addAnOwner: Function,
   deleteAnOwner: Function,
-  setDefaultAgencyNCode: Function,
-  useDefaultAgency: boolean,
   validationProp: FormInvalidationObj,
   agencyOptions: Array<MultiOptionsObj>,
+  defaultAgency: string,
+  defaultCode: string,
   fundingSources: Array<MultiOptionsObj>,
   methodsOfPayment: Array<MultiOptionsObj>,
   addRefs: Function,
+  setState: Function
   readOnly?: boolean,
 }
 
 const SingleOwnerInfo = ({
-  addRefs, ownerInfo, agencyOptions, fundingSources, methodsOfPayment, disableInputs,
-  validationProp, handleInputChange, addAnOwner, deleteAnOwner, setDefaultAgencyNCode,
-  useDefaultAgency, readOnly
+  addRefs, ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
+  methodsOfPayment, validationProp, handleInputChange, addAnOwner, deleteAnOwner,
+  setState, readOnly
 }: SingleOwnerInfoProps) => {
-  const [forestClientNumber, setForestClientNumber] = useState<string>('');
-  const [locCodeValidationFail, setLocCodeValidationFail] = useState<boolean>(false);
-  const [locationHelper, setLocationHelper] = useState<string>(
-    ownerInfo.id === DEFAULT_INDEX
-      ? inputText.code.helperTextEnabled
-      : inputText.code.helperTextDisabled
-  );
-
-  const validateLocationCode = useMutation({
-    mutationFn: (queryParams:string[]) => getForestClientLocation(
-      queryParams[0],
-      queryParams[1]
-    ),
-    onSuccess: () => {
-      setLocCodeValidationFail(false);
-    },
-    onError: () => {
-      setLocCodeValidationFail(true);
-    }
-  });
+  const setAgencyInfo = (
+    agencyData: FormInputType & { value: string },
+    locationCodeData: FormInputType & { value: string },
+    useDefaultData: FormInputType & { value: boolean }
+  ) => {
+    const clonedState = structuredClone(ownerInfo);
+    clonedState.ownerAgency = agencyData;
+    clonedState.ownerCode = locationCodeData;
+    clonedState.useDefaultAgencyInfo = useDefaultData;
+    setState(clonedState, ownerInfo.id);
+  };
 
   return (
     <div className="single-owner-info-container">
       <FlexGrid fullWidth>
-        {
+        <ApplicantAgencyFields
+          useDefault={ownerInfo.useDefaultAgencyInfo}
+          agency={ownerInfo.ownerAgency}
+          locationCode={ownerInfo.ownerCode}
+          fieldsProps={agencyFieldsProps}
+          agencyOptions={agencyOptions}
+          defaultAgency={defaultAgency}
+          defaultCode={defaultCode}
+          setAllValues={
+            (
+              agencyData: FormInputType & { value: string },
+              locationCodeData: FormInputType & { value: string },
+              useDefaultData: FormInputType & { value: boolean }
+            ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
+          }
+          readOnly={readOnly}
+        />
+        {/* {
           ownerInfo.id === DEFAULT_INDEX && (
             <Row>
               <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={16}>
@@ -188,15 +190,15 @@ const SingleOwnerInfo = ({
                 : null
             }
           </Column>
-        </Row>
+        </Row> */}
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
             <NumberInput
-              id={`single-owner-portion-${ownerInfo.id}`}
+              id={ownerInfo.ownerPortion.id}
               ref={(el: HTMLInputElement) => addRefs(el, 'ownerPortion')}
               name="ownerPortion"
               label={inputText.portion.label}
-              value={ownerInfo.ownerPortion}
+              value={ownerInfo.ownerPortion.value}
               step={10.00}
               max={100}
               min={0}
@@ -228,11 +230,11 @@ const SingleOwnerInfo = ({
             <div className="reserved-perc-container">
               <div className="reserved-surplus-input">
                 <NumberInput
-                  id={`single-owner-reserved-${ownerInfo.id}`}
+                  id={ownerInfo.reservedPerc.id}
                   ref={(el: HTMLInputElement) => addRefs(el, 'reservedPerc')}
                   name="reservedPerc"
                   label={inputText.reserved.label}
-                  value={ownerInfo.reservedPerc}
+                  value={ownerInfo.reservedPerc.value}
                   step={10}
                   max={100}
                   min={0}
@@ -258,11 +260,11 @@ const SingleOwnerInfo = ({
               </div>
               <div className="reserved-surplus-input">
                 <NumberInput
-                  id={`single-owner-surplus-${ownerInfo.id}`}
+                  id={ownerInfo.surplusPerc.id}
                   ref={(el: HTMLInputElement) => addRefs(el, 'surplusPerc')}
                   name="surplusPerc"
                   label={inputText.surplus.label}
-                  value={ownerInfo.surplusPerc}
+                  value={ownerInfo.surplusPerc.value}
                   step={10}
                   max={100}
                   min={0}
@@ -293,11 +295,11 @@ const SingleOwnerInfo = ({
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
             <ComboBox
               className="single-owner-combobox"
-              id={`owner-funding-source-${ownerInfo.id}`}
+              id={ownerInfo.fundingSource.id}
               ref={(el: HTMLInputElement) => addRefs(el, 'fundingSource')}
               name="fundingSource"
               items={fundingSources}
-              selectedItem={ownerInfo.fundingSource}
+              selectedItem={ownerInfo.fundingSource.value}
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }
@@ -313,11 +315,11 @@ const SingleOwnerInfo = ({
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
             <ComboBox
               className="single-owner-combobox"
-              id={`owner-method-of-payment-${ownerInfo.id}`}
+              id={ownerInfo.methodOfPayment.id}
               ref={(el: HTMLInputElement) => addRefs(el, 'methodOfPayment')}
               name="methodOfPayment"
               items={methodsOfPayment}
-              selectedItem={ownerInfo.methodOfPayment}
+              selectedItem={ownerInfo.methodOfPayment.value}
               shouldFilterItem={
                 ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
               }

@@ -1,6 +1,6 @@
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { inputText, ownerTemplate, validTemplate } from './constants';
+import { inputText, createOwnerTemplate, validTemplate } from './constants';
 
 import {
   SingleOwnerForm,
@@ -24,12 +24,11 @@ export const insertOwnerForm = (
   validationObj: OwnershipInvalidObj,
   methodsOfPayment: MultiOptionsObj[]
 ) => {
-  const newOwnerForm = structuredClone(ownerTemplate);
-  const newValidForm = { ...validTemplate };
   const newId = getNextId(ownershiptArray);
-  newOwnerForm.id = newId;
+  const newOwnerForm = structuredClone(createOwnerTemplate(newId));
+  const newValidForm = { ...validTemplate };
   const defaultPayment = methodsOfPayment.filter((method) => method.isDefault)[0] ?? null;
-  newOwnerForm.methodOfPayment = defaultPayment;
+  newOwnerForm.methodOfPayment.value = defaultPayment ? defaultPayment.label : '';
 
   return {
     newOwnerArr: [...ownershiptArray, newOwnerForm],
@@ -110,13 +109,13 @@ const validatePerc = (value: string): SingleInvalidObj => {
 };
 
 export const getValidKey = (name: string): string => {
-  if (name === 'ownerAgency') return 'owner';
-  if (name === 'ownerCode') return 'code';
-  if (name === 'ownerPortion') return 'portion';
-  if (name === 'reservedPerc') return 'reserved';
-  if (name === 'surplusPerc') return 'surplus';
-  if (name === 'fundingSource') return 'funding';
-  if (name === 'methodOfPayment') return 'payment';
+  if (name === 'ownerAgency' || name === 'ownerAgency.value') return 'owner';
+  if (name === 'ownerCode' || name === 'ownerCode.value') return 'code';
+  if (name === 'ownerPortion' || name === 'ownerPortion.value') return 'portion';
+  if (name === 'reservedPerc' || name === 'reservedPerc.value') return 'reserved';
+  if (name === 'surplusPerc' || name === 'surplusPerc.value') return 'surplus';
+  if (name === 'fundingSource' || name === 'fundingSource.value') return 'funding';
+  if (name === 'methodOfPayment' || name === 'methodOfPayment.value') return 'payment';
   throw new Error('Failed to get valid key');
 };
 
@@ -164,14 +163,14 @@ export const isInputInvalid = (name: string, value: string): SingleInvalidObj =>
   switch (name) {
     case 'ownerAgency':
       isInvalid = isInputEmpty(value);
-      invalidText = inputText.owner.invalidText;
+      invalidText = '';
       return {
         isInvalid,
         invalidText
       };
     case 'ownerCode':
       isInvalid = !twoDigitRegex.test(value);
-      invalidText = inputText.code.invalidTextValue;
+      invalidText = '';
       return {
         isInvalid,
         invalidText
