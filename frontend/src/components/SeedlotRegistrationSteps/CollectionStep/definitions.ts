@@ -3,10 +3,8 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export type CollectionForm = {
-  useDefaultAgencyInfo: FormInputType & {
-    value: boolean
-  },
-  collectorAgency: FormInputType & { value: string },
+  useDefaultAgencyInfo: FormInputType & { value: boolean },
+  collectorAgency: FormInputType & { value: MultiOptionsObj },
   locationCode: FormInputType & { value: string },
   startDate: FormInputType & { value: string },
   endDate: FormInputType & { value: string },
@@ -20,7 +18,7 @@ export type CollectionForm = {
 export interface CollectionStepProps {
   state: CollectionForm,
   setStepData: Function,
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string,
   agencyOptions: Array<MultiOptionsObj>,
   collectionMethods: Array<MultiOptionsObj>,

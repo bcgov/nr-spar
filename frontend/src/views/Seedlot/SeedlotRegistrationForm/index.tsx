@@ -37,6 +37,10 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+
+import getForestClientNumber from '../../../utils/StringUtils';
+
+import { emptyMultiOptionsObj } from '../../../shared-constants/shared-constants';
 import {
   AllStepData, AllStepInvalidationObj,
   FormInvalidationObj, ProgressIndicatorConfig
@@ -73,7 +77,7 @@ const SeedlotRegistrationForm = () => {
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
-    collectionStep: initCollectionState('', ''),
+    collectionStep: initCollectionState(emptyMultiOptionsObj, ''),
     interimStep: initInterimState('', ''),
     ownershipStep: [initOwnershipState('', '')],
     orchardStep: initOrchardState(),
@@ -193,6 +197,13 @@ const SeedlotRegistrationForm = () => {
     const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
     const agencyOptions = applicantAgencyQuery.data ? applicantAgencyQuery.data : [];
 
+    // Temporary solution while the correct API is not implemented
+    const defAgencyMultiOptionsObj: MultiOptionsObj = {
+      code: getForestClientNumber(defaultAgency),
+      label: defaultAgency,
+      description: ''
+    };
+
     const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
       code: '',
       label: '',
@@ -205,7 +216,7 @@ const SeedlotRegistrationForm = () => {
           <CollectionStep
             state={allStepData.collectionStep}
             setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
-            defaultAgency={defaultAgency}
+            defaultAgency={defAgencyMultiOptionsObj}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
@@ -231,7 +242,7 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency.value}
+            collectorAgency={allStepData.collectionStep.collectorAgency.value.label}
             collectorCode={allStepData.collectionStep.locationCode.value}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}

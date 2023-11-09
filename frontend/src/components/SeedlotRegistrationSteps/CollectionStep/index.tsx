@@ -17,6 +17,7 @@ import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
 import { FormInputType } from '../../../types/FormInputType';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -43,7 +44,7 @@ const CollectionStep = (
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
   const setAgencyInfo = (
-    valueAgency: FormInputType & { value: string },
+    valueAgency: FormInputType & { value: MultiOptionsObj },
     valueLocation: FormInputType & { value: string },
     valueUseDefault: FormInputType & { value: boolean }
   ) => {
@@ -150,7 +151,7 @@ const CollectionStep = (
         defaultCode={defaultCode}
         setAllValues={
           (
-            agencyData: FormInputType & { value: string },
+            agencyData: FormInputType & { value: MultiOptionsObj },
             locationCodeData: FormInputType & { value: string },
             useDefaultData: FormInputType & { value: boolean }
           ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
