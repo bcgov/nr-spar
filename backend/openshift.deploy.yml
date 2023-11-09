@@ -32,8 +32,6 @@ parameters:
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
-  - name: KEYCLOAK_REALM_URL
-    value: "https://test.loginproxy.gov.bc.ca/auth/realms/standard"
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
@@ -70,6 +68,9 @@ parameters:
   - name: DB_POOL_MAX_LIFETIME
     description: Maximum lifetime of a connection in the pool.
     value: "1800000"
+  - name: AWS_COGNITO_ISSUER_URI
+    description: AWS Cognito JWT Server URI
+    required: true
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -129,8 +130,6 @@ objects:
                   value: ${NR_SPAR_BACKEND_ENV_OPENSEARCH}
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
-                - name: KEYCLOAK_REALM_URL
-                  value: ${KEYCLOAK_REALM_URL}
                 - name: FORESTCLIENTAPI_ADDRESS
                   value: ${FORESTCLIENTAPI_ADDRESS}
                 - name: ORACLE_SERVER_URL
@@ -163,6 +162,8 @@ objects:
                   value: ${DB_POOL_IDLE_TIMEOUT}
                 - name: DB_POOL_MAX_LIFETIME
                   value: ${DB_POOL_MAX_LIFETIME}
+                - name: AWS_COGNITO_ISSUER_URI
+                  value: ${AWS_COGNITO_ISSUER_URI}
               ports:
                 - containerPort: 8090
                   protocol: TCP

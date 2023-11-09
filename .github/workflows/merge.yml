@@ -86,6 +86,7 @@ jobs:
             parameters:
               -p BUILD=test
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=test
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
           - name: fluentbit
             file: common/openshift.fluentbit.yml
             overwrite: true
@@ -95,9 +96,8 @@ jobs:
             parameters:
               -p VITE_SPAR_BUILD_VERSION=snapshot-test
               -p VITE_NRSPARWEBAPP_VERSION=test
-              -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-              -p VITE_KC_REALM=standard
-              -p VITE_KC_CLIENT_ID=seed-planning-test-4296
+              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
+              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -105,6 +105,7 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
               -p SERVICE_NAME=dbq01.nrs.bcgov
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=test
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4
@@ -146,9 +147,6 @@ jobs:
     #     run: |
     #       newman run test/postman/starting-api.postman_collection.json -e test/postman/starting-api.postman_environment.json \
     #         --env-var "releaseVer=test=${{ env.NR_SPAR_BACKEND_VERSION }}" \
-    #         --env-var "authServer=${{ secrets.KEYCLOAK_SERVER_REALM }}" \
-    #         --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_NAME }}" \
-    #         --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}" \
     #         --suppress-exit-code -r htmlextra --reporter-htmlextra-export testArtifacts/api-tests-report.html
 
     #   - name: Output the results
@@ -203,7 +201,7 @@ jobs:
               -p BUILD=prod
               -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
-              -p KEYCLOAK_REALM_URL=https://loginproxy.gov.bc.ca/auth/realms/standard
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
           - name: fluentbit
             file: common/openshift.fluentbit.yml
             overwrite: true
@@ -213,10 +211,9 @@ jobs:
             parameters:
               -p VITE_SPAR_BUILD_VERSION=snapshot-prod
               -p VITE_NRSPARWEBAPP_VERSION=prod
-              -p VITE_KC_URL=https://loginproxy.gov.bc.ca/auth
-              -p VITE_KC_REALM=standard
-              -p VITE_KC_CLIENT_ID=seed-planning-test-4296
               -p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
+              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
+              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -224,6 +221,7 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
               -p SERVICE_NAME=dbq01.nrs.bcgov
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=production
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v1.0.4

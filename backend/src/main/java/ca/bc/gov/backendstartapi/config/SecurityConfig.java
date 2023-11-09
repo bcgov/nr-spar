@@ -68,19 +68,10 @@ public class SecurityConfig {
     return converter;
   }
 
-  /**
-   * Parse the roles of a client from the JWT, if they're present; if not, subjects with service
-   * accounts are granted read and write permissions.
-   */
   private final Converter<Jwt, Collection<GrantedAuthority>> roleConverter =
       jwt -> {
         if (!jwt.getClaims().containsKey("client_roles")) {
-          String sub = String.valueOf(jwt.getClaims().get("sub"));
-          return (sub.startsWith("service-account-nr-fsa"))
-              ? List.of(
-                  new SimpleGrantedAuthority("ROLE_user_read"),
-                  new SimpleGrantedAuthority("ROLE_user_write"))
-              : List.of();
+          return List.of();
         }
         Object clientRolesObj = jwt.getClaims().get("client_roles");
         final List<String> realmAccess = new ArrayList<>();
