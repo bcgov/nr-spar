@@ -1,6 +1,5 @@
 import { NavigationLabels } from '../../utils/labels';
 import prefix from '../../../src/styles/classPrefix';
-import { HALF_SECOND, ONE_SECOND } from '../../constants';
 
 describe('Dashboard page test', () => {
   let dashboardPageData: {
@@ -19,7 +18,7 @@ describe('Dashboard page test', () => {
     cy.url().should('contains', '/dashboard');
   });
 
-  it('dashboard page is displayed and loads correctly', () => {
+  it('should load and display dashboard page correctly', () => {
     cy.isPageTitle(NavigationLabels.Dashboard);
     cy.get('.title-section')
       .find('.subtitle-section')
@@ -32,7 +31,7 @@ describe('Dashboard page test', () => {
       .should('have.text', dashboardPageData.secondSectionSubtitle);
   });
 
-  it('seedlots favourite activity is working properly', () => {
+  it('should be able to favourite the seedlots page', () => {
     // Navigate to Seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
     // Favourite Seedlot page
@@ -50,7 +49,7 @@ describe('Dashboard page test', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
   });
 
-  it('a class seedlot favourite activity is working properly', () => {
+  it('should be able to favourite the a class seedlot page', () => {
     // Navigate to Seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
 
@@ -76,7 +75,7 @@ describe('Dashboard page test', () => {
     cy.isPageTitle('Create A class seedlot');
   });
 
-  it('my Seedlots favourite activity is working properly', () => {
+  it('should be able to favourite my seedlot page', () => {
     // Navigate to My seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.get('.seedlot-activities-cards')
@@ -103,7 +102,7 @@ describe('Dashboard page test', () => {
     cy.isPageTitle('My Seedlots');
   });
 
-  it('highlight favourite activity is working', () => {
+  it('should be able to highlight favourite cards at dashboard', () => {
   // Highlight Seedlots Card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
@@ -133,7 +132,7 @@ describe('Dashboard page test', () => {
       .should('contain.text', 'Create A class seedlot');
   });
 
-  it('check if delete my seedlots favourite card is working', () => {
+  it('should delete my seedlots card from favourite activities', () => {
     // Delete My Seedlots card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
@@ -146,7 +145,7 @@ describe('Dashboard page test', () => {
       .should('have.length', 1);
   });
 
-  it('check if delete create a class seedlot favourite card is working', () => {
+  it('should delete a class seedlot card from favourite activities', () => {
     // Delete Create A Class Seedlot card
     cy.get('.fav-card-main-highlighted')
       .find('.fav-card-overflow')
@@ -158,7 +157,7 @@ describe('Dashboard page test', () => {
       .should('have.length', 0);
   });
 
-  it('check if delete seedlots favourite card is working', () => {
+  it('should delete seedlots card from favourite activities', () => {
     // Delete Seedlots card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
@@ -171,7 +170,7 @@ describe('Dashboard page test', () => {
       .should('have.length', 0);
   });
 
-  it('check if the empty section is correctly appearing', () => {
+  it('should display empty section', () => {
     cy.get('.empty-section-title')
       .should('contain.text', "You don't have any favourites to show yet!");
   });

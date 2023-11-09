@@ -14,14 +14,14 @@ describe('Login page test', () => {
     });
   });
 
-  it('login page is displayed and loads correctly', () => {
+  it('should load and display login page correctly', () => {
     cy.visit('/');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
     cy.getByDataTest('landing-subtitle').should('have.text', loginPageData.subtitle);
     cy.getByDataTest('landing-desc').should('have.text', loginPageData.description);
   });
 
-  it('navigate to the user form page IDIR', () => {
+  it('should navigate to the user form page IDIR', () => {
     cy.visit('/');
     cy.getByDataTest('landing-button__idir').click();
     cy.url().then((url) => {
@@ -35,7 +35,7 @@ describe('Login page test', () => {
     });
   });
 
-  it('navigate to the user form page BCeID', () => {
+  it('should navigate to the user form page BCeID', () => {
     cy.visit('/');
     cy.getByDataTest('landing-button__bceid').click();
     cy.url().then((url) => {
@@ -49,12 +49,12 @@ describe('Login page test', () => {
     });
   });
 
-  it('try to access system using a link without user connected', () => {
+  it('should try to access system using a link without user connected', () => {
     cy.visit('/dashboard');
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
-  it('log in with BCeID and validate user role', () => {
+  it('can log in with BCeID and validate user role', () => {
     cy.login();
     cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');
@@ -63,7 +63,7 @@ describe('Login page test', () => {
     cy.get('.user-data').find('p').contains('IDIR: undefined');
   });
 
-  it('log in with BCeID and validate user information', () => {
+  it('can log in with BCeID and validate user information', () => {
     cy.login();
     cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');
