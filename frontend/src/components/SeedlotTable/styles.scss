@@ -32,7 +32,11 @@
     border-left: none;
   }
 
-  .#{vars.$bcgov-prefix}--popover-container{
+  .#{vars.$bcgov-prefix}--pagination__right {
+    border-left: none;
+  }
+
+  .#{vars.$bcgov-prefix}--popover-container {
     display: flex;
     align-items: center;
   }
