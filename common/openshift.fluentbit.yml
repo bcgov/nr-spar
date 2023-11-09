@@ -24,7 +24,6 @@ parameters:
   - name: FLUENT_VERSION
     description: FluentBit version (docker tag). You may include a debug version.
     value: "2.1"
-  # Parameters for logging sidecar
   - name: LOGGING_CPU_LIMIT
     description: Limit Peak CPU per pod (in millicores ex. 1000m)
     displayName: CPU Limit
@@ -135,10 +134,16 @@ objects:
                     path: parsers.conf
                   - key: spar_filter_filters.conf
                     path: spar/filter/filters.conf
+                  - key: spar-oracle_filter_filters.conf
+                    path: spar-oracle/filter/filters.conf
                   - key: spar_input_inputs.conf
                     path: spar/input/inputs.conf
+                  - key: spar-oracle_input_inputs.conf
+                    path: spar-oracle/input/inputs.conf
                   - key: spar_parser_parsers.conf
                     path: spar/parser/parsers.conf
+                  - key: spar-oracle_parser_parsers.conf
+                    path: spar-oracle/parser/parsers.conf
                   - key: timestamp.lua
                     path: timestamp.lua
                 defaultMode: 0644
@@ -167,7 +172,7 @@ objects:
             Add agent.type fluentbit
             Add agent.version ${FLUENT_VERSION}
             Add agent.name ${AGENT_NAME}
-            Add ecs.version 8.4
+            Add ecs.version 8.9
             Rename event_sequence event.sequence
             Rename log_file_path log.file.path
 
@@ -196,7 +201,9 @@ objects:
             Parsers_File    parsers.conf
 
         @INCLUDE spar/input/inputs.conf
+        @INCLUDE spar-oracle/input/inputs.conf
         @INCLUDE spar/filter/filters.conf
+        @INCLUDE spar-oracle/filter/filters.conf
         @INCLUDE filters.conf
         @INCLUDE outputs.conf
 
@@ -297,6 +304,7 @@ objects:
       parsers.conf: |
         @INCLUDE generic_json_parsers.conf
         @INCLUDE spar/parser/parsers.conf
+        @INCLUDE spar-oracle/parser/parsers.conf
 
       spar_filter_filters.conf: |
         [FILTER]
@@ -313,6 +321,21 @@ objects:
             Add service.type postgres_api
             Add @metadata.keyAsPath true
 
+      spar-oracle_filter_filters.conf: |
+        [FILTER]
+            Name lua
+            Match spar-oracle.*
+            script ${FLUENT_CONF_HOME}/timestamp.lua
+            time_as_table True
+            call append_timestamp
+
+        [FILTER]
+            Name modify
+            Match spar-oracle.*
+            Add service.name spar_oracle_api
+            Add service.type oracle_api
+            Add @metadata.keyAsPath true
+
       spar_input_inputs.conf: |
         [INPUT]
             Name tail
@@ -326,9 +349,30 @@ objects:
             Read_from_Head True
             Refresh_Interval 15
 
+      spar-oracle_input_inputs.conf: |
+        [INPUT]
+            Name tail
+            Tag spar-oracle.log
+            Buffer_Max_Size 1024k
+            Parser spar-oracle.json
+            Path /logs/oracle-api.log
+            Path_Key log_file_path
+            Offset_Key event_sequence
+            DB /logs/fluent-bit-logs-oracle.db
+            Read_from_Head True
+            Refresh_Interval 15
+
       spar_parser_parsers.conf: |
         [PARSER]
             Name spar.json
+            Match *
+            Format json
+            Time_Key @timestamp
+            Time_Format %Y-%m-%d %H:%M:%S.%L
+
+      spar-oracle_parser_parsers.conf: |
+        [PARSER]
+            Name spar-oracle.json
             Match *
             Format json
             Time_Key @timestamp
