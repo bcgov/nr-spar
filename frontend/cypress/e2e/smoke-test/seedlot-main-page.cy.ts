@@ -18,7 +18,7 @@ describe('Seedlot Main page test', () => {
     cy.url().should('contains', '/seedlots');
   });
 
-  it('seedlot main page is displayed and loads correctly', () => {
+  it('should load and display seedlot main page correctly', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     cy.get('.title-section')
       .find('.subtitle-section')
