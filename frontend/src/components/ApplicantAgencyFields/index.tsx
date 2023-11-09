@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Row, Column, TextInput, Checkbox, ComboBox, InlineLoading
 } from '@carbon/react';
@@ -9,9 +9,10 @@ import getForestClientLocation from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
-import { LOCATION_CODE_LIMIT, emptyMultiOptionsObj } from '../../shared-constants/shared-constants';
+import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { formatLocationCode } from '../SeedlotRegistrationSteps/CollectionStep/utils';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
+import getForestClientNumber from '../../utils/StringUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
 import supportTexts from './constants';
@@ -26,9 +27,11 @@ const ApplicantAgencyFields = ({
   const locationCodeClone = structuredClone(locationCode);
   const useDefaultClone = structuredClone(useDefault);
 
-  const [forestClientNumber, setForestClientNumber] = useState<string>('');
+  const [forestClientNumber, setForestClientNumber] = useState<string>(
+    agencyClone.value ? getForestClientNumber(agencyClone.value) : ''
+  );
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
-    locationCodeClone.isInvalid && agencyClone.value.label
+    locationCodeClone.isInvalid && agencyClone.value
       ? supportTexts.locationCode.invalidLocationForSelectedAgency
       : supportTexts.locationCode.invalidText
   );
@@ -61,9 +64,8 @@ const ApplicantAgencyFields = ({
         : supportTexts.locationCode.helperTextDisabled
     );
 
-    agencyClone.value = checked ? defaultAgency : emptyMultiOptionsObj;
+    agencyClone.value = checked ? defaultAgency : '';
     locationCodeClone.value = checked ? defaultCode : '';
-    locationCodeClone.isInvalid = false;
     useDefaultClone.value = checked;
 
     setAllValues(agencyClone, locationCodeClone, useDefaultClone);
@@ -76,7 +78,7 @@ const ApplicantAgencyFields = ({
         ? supportTexts.locationCode.helperTextEnabled
         : supportTexts.locationCode.helperTextDisabled
     );
-    agencyClone.value = value || emptyMultiOptionsObj;
+    agencyClone.value = value ? value.label : '';
     locationCodeClone.value = value ? locationCodeClone.value : '';
     setAllValues(agencyClone, locationCodeClone, useDefaultClone);
   };
@@ -101,11 +103,6 @@ const ApplicantAgencyFields = ({
       setLocationCodeHelperText('');
     }
   };
-
-  useEffect(() => {
-    const initialForestClientNumber = agencyClone.value.code || '';
-    setForestClientNumber(initialForestClientNumber);
-  }, [useDefaultClone]);
 
   return (
     <div className="agency-information-section">

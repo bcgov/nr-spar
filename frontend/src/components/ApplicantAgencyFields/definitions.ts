@@ -4,11 +4,11 @@ import MultiOptionsObj from '../../types/MultiOptionsObject';
 
 interface ApplicantAgencyFieldsProps {
   useDefault: FormInputType & { value: boolean };
-  agency: FormInputType & { value: MultiOptionsObj };
+  agency: FormInputType & { value: string };
   locationCode: FormInputType & { value: string };
   fieldsProps: AgencyTextPropsType;
   agencyOptions: Array<MultiOptionsObj>;
-  defaultAgency: MultiOptionsObj;
+  defaultAgency: string;
   defaultCode: string;
   setAllValues: Function;
   readOnly?: boolean;

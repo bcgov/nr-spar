@@ -7,13 +7,12 @@ import {
 import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
   FormInvalidationObj, OwnershipInvalidObj, ParentTreeStepDataObj
 } from './definitions';
 
 export const initCollectionState = (
-  defaultAgency: MultiOptionsObj,
+  defaultAgency: string,
   defaultCode: string
 ) => ({
   useDefaultAgencyInfo: {
