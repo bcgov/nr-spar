@@ -20,3 +20,20 @@
     background: var(--#{vars.$bcgov-prefix}-layer-02);
   }
 }
+
+.seedlot-data-table-pagination {
+  border-top: none;
+
+  .#{vars.$bcgov-prefix}--select-input--inline__wrapper {
+    border-left: none;
+  }
+
+  .#{vars.$bcgov-prefix}--pagination__button {
+    border-left: none;
+  }
+
+  .#{vars.$bcgov-prefix}--popover-container{
+    display: flex;
+    align-items: center;
+  }
+}
