@@ -12,7 +12,7 @@ RUN ./mvnw package -Pnative -DskipTests -Dspring-boot.run.profiles=prod
 
 
 ### Deployer
-FROM gcr.io/distroless/java-base:nonroot AS deploy
+FROM debian:bookworm-slim AS deploy
 ARG PORT=8090
 
 # Copy
@@ -22,7 +22,7 @@ COPY --from=build /app/target/nr-spar-backend ./nr-spar-backend
 # User, port and health check
 USER 1001
 EXPOSE ${PORT}
-HEALTHCHECK CMD curl -f http://localhost:${PORT}/actuator/health | grep '"status":"UP"'
+HEALTHCHECK CMD timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/8090'
 
 # Startup
 ENTRYPOINT ["/app/nr-spar-backend"]

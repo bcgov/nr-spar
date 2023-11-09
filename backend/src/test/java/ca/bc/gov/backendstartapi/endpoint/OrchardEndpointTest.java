@@ -72,9 +72,7 @@ class OrchardEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andExpect(status().reason("No Parent Tree data for the given Orchard!"))
-        .andReturn()
-        .getResolvedException()
-        .getMessage();
+        .andReturn();
   }
 
   @Test
@@ -94,9 +92,7 @@ class OrchardEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andExpect(status().reason("No active SPU for the given Orchard ID!"))
-        .andReturn()
-        .getResolvedException()
-        .getMessage();
+        .andReturn();
   }
 
   @Test
@@ -200,8 +196,6 @@ class OrchardEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest())
         .andExpect(status().reason(errMsg))
-        .andReturn()
-        .getResolvedException()
-        .getMessage();
+        .andReturn();
   }
 }
