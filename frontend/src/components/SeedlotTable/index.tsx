@@ -66,7 +66,6 @@ const SeedlotTable = (
   const handlePagination = (paginationObj: PaginationChangeType) => {
     setCurrPageNumber(paginationObj.page - 1); // index starts at 0 on java.
     setCurrPageSize(paginationObj.pageSize);
-    // getAllSeedlotQuery.refetch();
   };
 
   const tablePagination = () => (
