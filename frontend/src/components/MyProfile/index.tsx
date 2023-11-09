@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -6,7 +6,7 @@ import {
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
-import KeycloakService from '../../service/KeycloakService';
+import AuthContext from '../../contexts/AuthContext';
 
 import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
@@ -14,6 +14,7 @@ import PanelSectionName from '../PanelSectionName';
 import { useThemePreference } from '../../utils/ThemePreference';
 
 import './style.scss';
+import LoginProviders from '../../types/LoginProviders';
 
 const accountOptions = [
   {
@@ -35,20 +36,12 @@ const accountOptions = [
 
 const MyProfile = () => {
   const { theme, setTheme } = useThemePreference();
-  const userData = KeycloakService.getUser();
+  const { user, signOut } = useContext(AuthContext);
 
   const [goToURL, setGoToURL] = useState<string>('');
   const [goTo, setGoTo] = useState<boolean>(false);
 
   const navigate = useNavigate();
-
-  const goOut = useCallback(() => {
-    if (theme === 'g100') {
-      setTheme('g10');
-      localStorage.setItem('mode', 'light');
-    }
-    navigate('/logout');
-  }, []);
 
   const changeTheme = () => {
     if (theme === 'g10') {
@@ -59,6 +52,13 @@ const MyProfile = () => {
       setTheme('g10');
       localStorage.setItem('mode', 'light');
     }
+  };
+
+  const goOut = (): void => {
+    if (theme === 'g100') {
+      changeTheme();
+    }
+    signOut();
   };
 
   useEffect(() => {
@@ -72,12 +72,17 @@ const MyProfile = () => {
     <>
       <div className="user-info-section">
         <div className="user-image">
-          <AvatarImage userName={`${userData.firstName} ${userData.lastName}`} size="large" />
+          <AvatarImage userName={`${user?.firstName} ${user?.lastName}`} size="large" />
         </div>
         <div className="user-data">
-          <p className="user-name">{`${userData.firstName} ${userData.lastName}`}</p>
-          <p>{`IDIR: ${userData.idirUsername}`}</p>
-          <p>{userData.email}</p>
+          <p className="user-name">{`${user?.firstName} ${user?.lastName}`}</p>
+          {user?.provider === LoginProviders.IDIR && (
+            <p>{`IDIR: ${user?.providerUsername}`}</p>
+          )}
+          {user?.provider === LoginProviders.BCEID_BUSINESS && (
+            <p>{`BCeID: ${user?.providerUsername}`}</p>
+          )}
+          <p>{user?.email}</p>
         </div>
       </div>
       <hr className="divisory" />
@@ -108,7 +113,7 @@ const MyProfile = () => {
           </SideNavLink>
           <SideNavLink
             renderIcon={Icons.UserFollow}
-            onClick={goOut}
+            onClick={() => { goOut(); }}
           >
             Sign out
           </SideNavLink>

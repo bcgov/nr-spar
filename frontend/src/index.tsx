@@ -1,14 +1,16 @@
+import './init';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ClassPrefix } from '@carbon/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { AuthProvider } from './contexts/AuthContext';
 import { ThemePreference } from './utils/ThemePreference';
 import { env } from './env';
 import makeServer from './mock-server/server';
+import AuthProvider from './contexts/AuthProvider';
 import prefix from './styles/classPrefix';
 
 const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
@@ -43,7 +45,9 @@ root.render(
       <ClassPrefix prefix={prefix}>
         <ThemePreference>
           <QueryClientProvider client={queryClient}>
-            <App />
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
             {
               isDevEnv && <ReactQueryDevtools initialIsOpen={false} />
             }

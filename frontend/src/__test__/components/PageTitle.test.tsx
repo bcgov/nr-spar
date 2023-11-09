@@ -4,14 +4,16 @@ import PageTitle from '../../components/PageTitle';
 import '@testing-library/jest-dom';
 import makeServer from '../../mock-server/server';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { describe, beforeAll, it, expect } from 'vitest';
 
 describe('the page title component', () => {
   beforeAll(() => {
     makeServer('jest-test');
   });
 
+  const qc = new QueryClient();
+
   it('should render correctly', () => {
-    const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
         <PageTitle title="Test title" subtitle="Test Subtitle" />
@@ -23,7 +25,6 @@ describe('the page title component', () => {
   });
 
   it('should render correctly with favourite option', () => {
-    const qc = new QueryClient();
     render(
       <QueryClientProvider client={qc}>
         <PageTitle

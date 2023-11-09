@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +33,6 @@ public class GameticMethodologyEndpoint {
    * @return A list of {@link GameticMethodologyDto}
    */
   @GetMapping
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Retrieves all male and female gametic methodologies",
       description =

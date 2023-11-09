@@ -18,7 +18,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +47,6 @@ public class FavouriteActivityEndpoint {
    * @return a {@link FavouriteActivityEntity} created
    */
   @PostMapping(consumes = "application/json", produces = "application/json")
-  @PreAuthorize("hasRole('user_write')")
   @Operation(
       summary = "Creates a Favourite Activity",
       description =
@@ -101,7 +99,6 @@ public class FavouriteActivityEndpoint {
    * @return a list of {@link FavouriteActivityEntity}
    */
   @GetMapping(produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Retrieves all users' favourite activities",
       description = "Retrieve all favourite activities bound to the logged user")
@@ -133,7 +130,6 @@ public class FavouriteActivityEndpoint {
    * @return the {@link FavouriteActivityEntity} updated
    */
   @PutMapping(value = "/{id}", consumes = "application/json", produces = "application/json")
-  @PreAuthorize("hasRole('user_write')")
   @Operation(
       summary = "Updates a Favourite Activity",
       description =
@@ -181,7 +177,6 @@ public class FavouriteActivityEndpoint {
    * @param id The id of the {@link FavouriteActivityEntity}
    */
   @DeleteMapping(value = "/{id}", produces = "application/json")
-  @PreAuthorize("hasRole('user_write')")
   @Operation(
       summary = "Delete a Favourite Activity",
       description =

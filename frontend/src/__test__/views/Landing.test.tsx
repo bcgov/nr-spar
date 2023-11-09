@@ -4,17 +4,19 @@ import { BrowserRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import Landing from '../../views/Landing';
-import { AuthProvider } from '../../contexts/AuthContext';
 import '@testing-library/jest-dom';
+import { describe, it, expect } from 'vitest';
+import AuthContext from '../../contexts/AuthContext';
+import authContextMock from '../__mocks__/authContextMock';
 
 describe('Landing component test', () => {
   it('should have the correct title', () => {
     const { getByTestId } = render(
-      <BrowserRouter>
-        <AuthProvider>
+      <AuthContext.Provider value={authContextMock}>
+        <BrowserRouter>
           <Landing />
-        </AuthProvider>
-      </BrowserRouter>
+        </BrowserRouter>
+      </AuthContext.Provider>
     );
 
     const content = {
@@ -36,11 +38,11 @@ describe('Landing component test', () => {
   it('should match the snapshot', () => {
     const landing = renderer
       .create(
-        <BrowserRouter>
-          <AuthProvider>
+        <AuthContext.Provider value={authContextMock}>
+          <BrowserRouter>
             <Landing />
-          </AuthProvider>
-        </BrowserRouter>
+          </BrowserRouter>
+        </AuthContext.Provider>
       ).toJSON();
 
     expect(landing).toMatchSnapshot();

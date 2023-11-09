@@ -1,15 +1,13 @@
 /* eslint-disable no-console */
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
-  BrowserRouter, Routes, Route
+  Routes, Route, Navigate, useNavigate
 } from 'react-router-dom';
 
 import './styles/custom.scss';
 
+import { Amplify } from 'aws-amplify';
 import ProtectedRoute from './routes/ProtectedRoute';
-import { useAuth } from './contexts/AuthContext';
-import SilentCheckSso from './components/SilentCheckSso';
-import Logout from './components/Logout';
 import Layout from './layout/PrivateLayout';
 import Landing from './views/Landing';
 import Dashboard from './views/Dashboard/dashboard';
@@ -19,6 +17,11 @@ import CreateAClass from './views/Seedlot/CreateAClass';
 import SeedlotCreatedFeedback from './views/Seedlot/SeedlotCreatedFeedback';
 import MySeedlots from './views/Seedlot/MySeedlots';
 import SeedlotRegistrationForm from './views/Seedlot/SeedlotRegistrationForm';
+import awsconfig from './aws-exports';
+import AuthContext from './contexts/AuthContext';
+import { SPAR_REDIRECT_PATH } from './shared-constants/shared-constants';
+
+Amplify.configure(awsconfig);
 
 /**
  * Create an app structure conaining all the routes.
@@ -26,81 +29,100 @@ import SeedlotRegistrationForm from './views/Seedlot/SeedlotRegistrationForm';
  * @returns {JSX.Element} instance of the app ready to use.
  */
 const App: React.FC = () => {
-  const { signed } = useAuth();
+  const { signed, isCurrentAuthUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    isCurrentAuthUser(window.location.pathname);
+  }, []);
+
+  useEffect(() => {
+    if (signed) {
+      const storedPath = localStorage.getItem(SPAR_REDIRECT_PATH);
+      if (storedPath) {
+        navigate(storedPath === '/' ? '/dashbaord' : storedPath);
+        localStorage.removeItem(SPAR_REDIRECT_PATH);
+      } else if (window.location.pathname === '/') {
+        navigate('/dashboard');
+      }
+    }
+  }, [signed]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/" element={<Layout />}>
-          <Route path="/silent-check-sso" element={<SilentCheckSso />} />
-          <Route path="/logout" element={<Logout />} />
 
-          <Route
-            path="/dashboard"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <Dashboard />
-              </ProtectedRoute>
-            )}
-          />
+    <Routes>
+      {
+        signed ? (
+          <Route path="/" element={<Layout />}>
+            <Route
+              path="/dashboard"
+              element={(
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <SeedlotDashboard />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots"
+              element={(
+                <ProtectedRoute>
+                  <SeedlotDashboard />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/register-a-class"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <CreateAClass />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots/register-a-class"
+              element={(
+                <ProtectedRoute>
+                  <CreateAClass />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/successfully-created/:seedlot"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <SeedlotCreatedFeedback />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots/successfully-created/:seedlot"
+              element={(
+                <ProtectedRoute>
+                  <SeedlotCreatedFeedback />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/details/:seedlot"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <SeedlotDetails />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots/details/:seedlot"
+              element={(
+                <ProtectedRoute>
+                  <SeedlotDetails />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/registration/:seedlot"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <SeedlotRegistrationForm />
-              </ProtectedRoute>
-            )}
-          />
+            <Route
+              path="/seedlots/registration/:seedlot"
+              element={(
+                <ProtectedRoute>
+                  <SeedlotRegistrationForm />
+                </ProtectedRoute>
+              )}
+            />
 
-          <Route
-            path="/seedlots/my-seedlots"
-            element={(
-              <ProtectedRoute signed={signed}>
-                <MySeedlots />
-              </ProtectedRoute>
-            )}
-          />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            <Route
+              path="/seedlots/my-seedlots"
+              element={(
+                <ProtectedRoute>
+                  <MySeedlots />
+                </ProtectedRoute>
+              )}
+            />
+
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Route>
+        )
+          : <Route path="*" element={<Landing />} />
+      }
+    </Routes>
   );
 };
 

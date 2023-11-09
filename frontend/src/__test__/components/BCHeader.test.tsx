@@ -3,18 +3,16 @@ import { BrowserRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import renderer from 'react-test-renderer';
 import BCHeader from '../../components/BCHeader';
-import { AuthProvider } from '../../contexts/AuthContext';
 import { ThemePreference } from '../../utils/ThemePreference';
+import { describe, it, expect } from 'vitest';
 
 describe('the Header component', () => {
   it('should have the correct title', () => {
     const { getByTestId } = render(
       <BrowserRouter>
-        <AuthProvider>
-          <ThemePreference>
-            <BCHeader />
-          </ThemePreference>
-        </AuthProvider>
+        <ThemePreference>
+          <BCHeader />
+        </ThemePreference>
       </BrowserRouter>
     );
 
@@ -25,9 +23,7 @@ describe('the Header component', () => {
     const tree = renderer
       .create(
         <BrowserRouter>
-          <AuthProvider>
-            <BCHeader />
-          </AuthProvider>
+          <BCHeader />
         </BrowserRouter>
       )
       .toJSON();

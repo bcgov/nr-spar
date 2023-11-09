@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +40,6 @@ public class GeneticClassEndpoint {
    * @return A list of {@link GeneticClassEntity}
    */
   @GetMapping(produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Retrieves all genetic class",
       description = "Returns a list containing all genetic class.")
@@ -87,7 +85,6 @@ public class GeneticClassEndpoint {
    * @throws ResponseStatusException if the class doesn't exist
    */
   @GetMapping(path = "/{code}", produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch a genetic class object by its code",
       description = "Returns the genetic class identified by `code`, if there is one.",

@@ -11,11 +11,11 @@ x-frontend: &frontend
       condition: service_started
   environment:
     VITE_SERVER_URL: http://localhost:8090
-    VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-    VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
-    VITE_KC_REALM: standard
-    VITE_KC_CLIENT_ID: seed-planning-test-4296
+    VITE_ORACLE_SERVER_URL: http://localhost:8091
     LOG_LEVEL: debug
+    VITE_USER_POOLS_ID: ca-central-1_t2HSZBHur
+    VITE_USER_POOLS_WEB_CLIENT_ID: 6jmscjfesregki1pvng2oiopc3
+    VITE_ZONE: TEST
   healthcheck:
     test: timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/3000'
     interval: 10s
@@ -44,11 +44,11 @@ services:
         condition: service_started
     environment:
       ALLOWED_ORIGINS: "http://localhost:*"
-      KEYCLOAK_REALM_URL: https://test.loginproxy.gov.bc.ca/auth/realms/standard
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
-      ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
+      ORACLE_SERVER_URL: http://localhost:8091
       POSTGRES_HOST: database
+      AWS_COGNITO_ISSUER_URI: "${AWS_COGNITO_ISSUER_URI}"
       <<: *db-vars
     ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.3-eclipse-temurin-17

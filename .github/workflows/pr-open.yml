@@ -106,6 +106,7 @@ jobs:
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ github.event.number }}
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
           - name: fluentbit
@@ -118,11 +119,10 @@ jobs:
             parameters:
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
               -p VITE_NRSPARWEBAPP_VERSION=dev
-              -p VITE_KC_URL=https://test.loginproxy.gov.bc.ca/auth
-              -p VITE_KC_REALM=standard
-              -p VITE_KC_CLIENT_ID=seed-planning-test-4296
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
+              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
+              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
             triggers: ('common/' 'database/' 'backend/' 'oracle-api/' 'frontend/')
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
@@ -131,6 +131,7 @@ jobs:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('common/' 'oracle-api/')
             verification_path: "actuator/health"
     steps:
@@ -157,11 +158,10 @@ jobs:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-      VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-test-oracle-api.apps.silver.devops.gov.bc.ca
-      VITE_KC_CLIENT_ID: seed-planning-test-4296
-      VITE_KC_REALM: standard
-      VITE_KC_URL: https://test.loginproxy.gov.bc.ca/auth
-      VITE_NRSPARWEBAPP_VERSION: dev
+      VITE_ORACLE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
+      VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
+      VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
+      VITE_ZONE: TEST
     steps:
       - uses: actions/checkout@v4
       - name: Run Cypress CI
@@ -177,7 +177,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=cypress-coverage/lcov.info
             -Dsonar.projectKey=nr-spar_frontend
             -Dsonar.sources=src/
-            -Dsonar.exclusions=src/**/__test__/**/*
+            -Dsonar.exclusions=src/__test__/**/*
             -Dsonar.exclusions=src/mock-server/**/*
             -Dsonar.test.inclusions=cypress/e2e/smoke-test/**/*
           sonar_token: ${{ secrets.SONAR_FRONTEND }}
@@ -218,9 +218,6 @@ jobs:
   #           -e oracle-api/test/postman/oracle-api.postman_environment.json \
   #           --env-var "apiAddr=${{ env.TARGET }}" \
   #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-  #           --env-var "authServer=${{ secrets.KEYCLOAK_SERVER_REALM }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_NAME }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
 
   # tests-backend:
   #   name: Backend Tests
@@ -245,10 +242,7 @@ jobs:
   #         newman run backend/test/postman/starting-api.postman_collection.json \
   #           -e backend/test/postman/starting-api.postman_environment.json \
   #           --env-var "apiAddr=${{ env.TARGET }}" \
-  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-  #           --env-var "authServer=${{ vars.KEYCLOAK_SERVER_REALM }}" \
-  #           --env-var "authClient=${{ vars.KC_SERVICE_ACCOUNT_NAME }}" \
-  #           --env-var "authClient=${{ secrets.KC_SERVICE_ACCOUNT_PASS }}"
+  #           --env-var "releaseVer=snapshot-${{ github.event.number }}"
 
   # tests-frontend:
   #   name: Frontend Tests

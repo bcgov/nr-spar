@@ -36,15 +36,14 @@ class UserAuthenticationHelperTest {
     when(authentication.isAuthenticated()).thenReturn(true);
 
     Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
-    builder.subject("bbaggins@idir");
+    builder.subject("BAGGINGS");
     builder.header("alg", "HS256");
     builder.header("typ", "JWT");
-    builder.claim("given_name", "Bilbo");
-    builder.claim("family_name", "Baggings");
     builder.claim("email", "bilbo.baggings@gov.bc.ca");
-    builder.claim("display_name", "Baggings, Bilbo LWRS:EX");
-    builder.claim("idir_username", "BAGGINGS");
-    builder.claim("identity_provider", "idir");
+    builder.claim("custom:idp_display_name", "Baggings, Bilbo LWRS:EX");
+    builder.claim("custom:idp_username", "BAGGINGS");
+    builder.claim("custom:idp_name", "idir");
+    builder.claim("cognito:username", "abcdefg123465789@idir");
 
     when(authentication.getPrincipal()).thenReturn(builder.build());
 
@@ -52,7 +51,7 @@ class UserAuthenticationHelperTest {
     Assertions.assertTrue(userInfoOptional.isPresent());
 
     UserInfo userInfo = userInfoOptional.get();
-    Assertions.assertEquals("bbaggins@idir", userInfo.id());
+    Assertions.assertEquals("abcdefg123465789@idir", userInfo.id());
     Assertions.assertEquals("Bilbo", userInfo.firstName());
     Assertions.assertEquals("Baggings", userInfo.lastName());
     Assertions.assertEquals("bilbo.baggings@gov.bc.ca", userInfo.email());
@@ -72,13 +71,14 @@ class UserAuthenticationHelperTest {
     when(authentication.isAuthenticated()).thenReturn(true);
 
     Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
-    builder.subject("mordor@bceid");
+    builder.subject("MORDOR-BCEID");
     builder.header("alg", "HS256");
     builder.header("typ", "JWT");
     builder.claim("email", "lord.sauron@mordor.middleearth");
-    builder.claim("display_name", "Sauron, Mordor LWRS:EX");
-    builder.claim("bceid_business_name", "Mordor LLC");
-    builder.claim("identity_provider", "bceidbusiness");
+    builder.claim("custom:idp_display_name", "Lord Sauron of Mordor");
+    builder.claim("custom:idp_username", "MORDOR-BCEID");
+    builder.claim("custom:idp_name", "bceidbusiness");
+    builder.claim("cognito:username", "abcdefg123465789@bceid");
 
     when(authentication.getPrincipal()).thenReturn(builder.build());
 
@@ -86,12 +86,12 @@ class UserAuthenticationHelperTest {
     Assertions.assertTrue(userInfoOptional.isPresent());
 
     UserInfo userInfo = userInfoOptional.get();
-    Assertions.assertEquals("mordor@bceid", userInfo.id());
-    Assertions.assertNull(userInfo.firstName());
-    Assertions.assertNull(userInfo.lastName());
+    Assertions.assertEquals("abcdefg123465789@bceid", userInfo.id());
+    Assertions.assertEquals("Lord", userInfo.firstName());
+    Assertions.assertEquals("Sauron of Mordor", userInfo.lastName());
     Assertions.assertEquals("lord.sauron@mordor.middleearth", userInfo.email());
-    Assertions.assertEquals("Sauron, Mordor LWRS:EX", userInfo.displayName());
-    Assertions.assertEquals("Mordor LLC", userInfo.businessName());
+    Assertions.assertEquals("Lord Sauron of Mordor", userInfo.displayName());
+    Assertions.assertEquals("MORDOR-BCEID", userInfo.businessName());
     Assertions.assertEquals(IdentityProvider.BUSINESS_BCEID, userInfo.identityProvider());
   }
 

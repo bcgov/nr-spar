@@ -11,7 +11,8 @@
   "globals": {
     "JSX": true,
     "RequestInit": true,
-    "BodyInit": true
+    "BodyInit": true,
+    "NodeJS": true
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {

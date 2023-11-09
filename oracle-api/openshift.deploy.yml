@@ -46,9 +46,6 @@ parameters:
   - name: SERVICE_NAME
     description: The database's name
     value: dbq01.nrs.bcgov
-  - name: KEYCLOAK_REALM_URL
-    description: Keycloak realm address
-    value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "1"
@@ -62,6 +59,9 @@ parameters:
   - name: ORACLEDB_KEYSTORE
     description: Keystore location path
     value: /usr/share/service/jssecacerts
+  - name: AWS_COGNITO_ISSUER_URI
+    description: AWS Cognito JWT Server URI
+    required: true
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -137,10 +137,10 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-password
-                - name: KEYCLOAK_REALM_URL
-                  value: ${KEYCLOAK_REALM_URL}
                 - name: ORACLEDB_KEYSTORE
                   value: ${ORACLEDB_KEYSTORE}
+                - name: AWS_COGNITO_ISSUER_URI
+                  value: ${AWS_COGNITO_ISSUER_URI}
               ports:
                 - containerPort: 8090
                   protocol: TCP

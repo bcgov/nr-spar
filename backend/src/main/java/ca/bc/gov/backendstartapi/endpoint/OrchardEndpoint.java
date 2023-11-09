@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,7 +43,6 @@ public class OrchardEndpoint {
    * @throws ResponseStatusException if no data is found
    */
   @GetMapping(path = "/{orchardId}/parent-tree-genetic-quality")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch the parent tree contribution data to an Orchard.",
       description = "Returns all parent tree contribution table given an Orchard ID and SPU ID.",
@@ -74,7 +72,6 @@ public class OrchardEndpoint {
    * @throws ResponseStatusException if no data is found
    */
   @GetMapping(path = "/vegetation-code/{vegCode}")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch a list of orchard based on the provided vegCode",
       description =
@@ -105,7 +102,6 @@ public class OrchardEndpoint {
    * @return A list of {@link ParentTreeDto}
    */
   @GetMapping(path = "/parent-trees/vegetation-codes/{vegCode}", produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Retrieves all parent trees under a species (VegCode)",
       description = "Returns a list containing all parent trees under a species (VegCode).")

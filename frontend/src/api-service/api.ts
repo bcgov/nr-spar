@@ -1,11 +1,7 @@
 import axios from 'axios';
-import KeycloakService from '../service/KeycloakService';
 
 const getHeader = (useMultipart = false) => {
-  const token = KeycloakService.getToken();
-  let headers = {
-    Authorization: `Bearer ${token}`
-  };
+  let headers = {};
   if (useMultipart) {
     headers = Object.assign(headers, { 'content-type': 'multipart/form-data' });
   }

@@ -3,7 +3,7 @@
 
 import '@cypress/code-coverage/support';
 import {
-  HALF_SECOND, THREE_SECONDS, TYPE_DELAY
+  HALF_SECOND, TYPE_DELAY
 } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
 
@@ -24,8 +24,6 @@ Cypress.Commands.add('login', () => {
       cy.clearAllLocalStorage();
       cy.clearAllSessionStorage();
       cy.visit('/');
-      // We have to wait here because page might reload again, causing the login to fail
-      cy.wait(THREE_SECONDS);
       cy.getByDataTest('landing-button__bceid').click();
       cy.url().then((url) => {
         if (url.includes('.gov.bc.ca')) {
@@ -39,7 +37,7 @@ Cypress.Commands.add('login', () => {
           cy.get('input[name=btnSubmit]').click();
         } else {
           cy.origin(
-            Cypress.env('keycloakLoginUrl'),
+            Cypress.env('loginUrl'),
             { args: config },
             (
               {
@@ -58,15 +56,11 @@ Cypress.Commands.add('login', () => {
           );
         }
       });
-      cy.getCookies().then((cookies) => {
-        cookies.forEach((cookie) => {
-          cy.log(cookie.name, cookie.domain, '\n');
-        });
-      });
+      cy.url().should('contains', '/dashboard');
     },
     {
       validate: () => {
-        cy.getCookie('SMSESSION', { domain: '.gov.bc.ca' }).should('exist');
+        assert.exists(localStorage.getItem('famLoginUser'));
       },
       cacheAcrossSpecs: true
     }

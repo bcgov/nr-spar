@@ -23,13 +23,13 @@
 		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
 		X-Content-Type-Options "nosniff"
 		Strict-Transport-Security "max-age=31536000"
-		Content-Security-Policy "base-uri 'self'; connect-src 'self' https://*.gov.bc.ca {$VITE_SERVER_URL}; default-src 'self'; font-src 'self' https://1.www.s81c.com/; frame-src 'self' https://*.gov.bc.ca; img-src 'self'; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'unsafe-inline' 'report-sample' 'self'; style-src 'report-sample' 'self'; worker-src 'none';"
+		Content-Security-Policy "base-uri 'self'; connect-src 'self' https://*.gov.bc.ca {$VITE_AWS_DOMAIN} {$VITE_SERVER_URL}; default-src 'self'; font-src 'self' https://1.www.s81c.com/; frame-src 'self' https://*.gov.bc.ca; img-src 'self'; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'unsafe-inline' 'report-sample' 'self'; style-src 'report-sample' 'self'; worker-src 'none';"
 		Referrer-Policy "same-origin"
 	}
 
 	handle /env.js {
 		header Content-Type "text/javascript"
-		respond `window.config = {"VITE_KC_URL":"{$VITE_KC_URL}","VITE_KC_REALM":"standard","VITE_KC_CLIENT_ID":"seed-planning-test-4296","VITE_NRSPARWEBAPP_VERSION":"{$VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}"};`
+		respond `window.config = {"VITE_NRSPARWEBAPP_VERSION":"{$VITE_NRSPARWEBAPP_VERSION}","VITE_SERVER_URL":"{$VITE_SERVER_URL}","VITE_ORACLE_SERVER_URL":"{$VITE_ORACLE_SERVER_URL}","VITE_USER_POOLS_ID":"{$VITE_USER_POOLS_ID}","VITE_USER_POOLS_WEB_CLIENT_ID":"{$VITE_USER_POOLS_WEB_CLIENT_ID}","VITE_ZONE":"{$VITE_ZONE}"};`
 	}
 
 	handle_path /* {

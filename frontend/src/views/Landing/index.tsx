@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import {
   Button,
@@ -6,46 +6,16 @@ import {
   Column
 } from '@carbon/react';
 import { Login } from '@carbon/icons-react';
-import { KeycloakLoginOptions } from 'keycloak-js';
-import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../../contexts/AuthContext';
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/seeding.png';
-
 import LoginProviders from '../../types/LoginProviders';
 
 import './styles.scss';
-
-import getUrlQueryParam from '../../utils/UrlUtils';
+import AuthContext from '../../contexts/AuthContext';
 
 const Landing = () => {
-  const { startKeycloak, login, signed } = useAuth();
-  const navigate = useNavigate();
-  const homePage = '/dashboard';
-
-  const handleLogin = (provider: LoginProviders) => {
-    if (signed) {
-      navigate(getUrlQueryParam(window.location, 'page') || homePage);
-      return;
-    }
-
-    const idpHint = provider;
-    const loginOptions: KeycloakLoginOptions = {
-      redirectUri: `${window.location.origin}${homePage}`,
-      idpHint
-    };
-
-    login(loginOptions);
-  };
-
-  useEffect(() => {
-    if (signed) {
-      navigate(getUrlQueryParam(window.location, 'page') || homePage);
-    } else {
-      startKeycloak();
-    }
-  }, [signed]);
+  const { signIn } = useContext(AuthContext);
 
   return (
     <Grid fullWidth className="landing-grid">
@@ -64,12 +34,12 @@ const Landing = () => {
         <p data-testid="landing-desc" className="landing-desc">
           Register and store your seed and meet your annual
           reforestation needs using
-          <span className="spar-span"> SPAR</span>
+          <span className="spar-span">{' SPAR'}</span>
         </p>
 
         {/* Login buttons */}
         <Button
-          onClick={() => { handleLogin(LoginProviders.IDIR); }}
+          onClick={() => { signIn(LoginProviders.IDIR); }}
           size="md"
           renderIcon={Login}
           data-testid="landing-button__idir"
@@ -80,7 +50,7 @@ const Landing = () => {
 
         <Button
           kind="tertiary"
-          onClick={() => { handleLogin(LoginProviders.BCEID_BUSINESS); }}
+          onClick={() => { signIn(LoginProviders.BCEID_BUSINESS); }}
           size="md"
           renderIcon={Login}
           data-testid="landing-button__bceid"
