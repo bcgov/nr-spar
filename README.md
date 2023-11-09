@@ -63,6 +63,7 @@ testing and deploying.
   - [React Query](https://tanstack.com/query/v3/)
   - [TypeScript](https://www.typescriptlang.org/)
   - [MirageJS](https://miragejs.com/)
+  - [FAM Authentication](https://github.com/bcgov/nr-forests-access-management)
   - [Vitest](https://vitest.dev/)
   - [Vite](https://vitejs.dev/)
   - [Node 20](https://nodejs.org/download/release/v20.7.0/)
@@ -114,18 +115,6 @@ swagger, otherwhise you'll only see 401 responses. Follow the steps bellow
 to get a JWT token to your user.
 
 ⚠️ Note that users needs to have one of these roles: `user_read` and `user_write`.
-
-**Getting a JWT token for SPAR services**
-
-- Head to [BC Gov Keycloak OIDC Playground page](https://bcgov.github.io/keycloak-example-apps/)
-- Expand the first dropdown *Keycloak OIDC Config* option
-- Update *Auth server* with: **https://test.loginproxy.gov.bc.ca/auth**
-- Keep *Realm* as is, **standard**
-- Update *Client id* with: **seed-planning-test-4296**
-- Hit **Upate**
-- Click the **Login** button
-- Hit **ID Token Raw** token
-- Optional: You can check your user's JWT token properties by checking the **Token Parsed** tab
 
 ## Getting help
 

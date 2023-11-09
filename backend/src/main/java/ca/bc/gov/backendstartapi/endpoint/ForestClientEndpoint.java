@@ -16,7 +16,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +44,6 @@ public class ForestClientEndpoint {
    * @return the forest with client number or acronym {@code identifier}, if one exists
    */
   @GetMapping(path = "/{identifier}")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch a ForestClient",
       description =
@@ -82,7 +80,6 @@ public class ForestClientEndpoint {
    * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
   @GetMapping(path = "/{clientNumber}/locations")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch up to the 10 first locations of the ForestClient.",
       description =
@@ -114,7 +111,6 @@ public class ForestClientEndpoint {
    * @return {@link ForestClientLocationDto} containing the client's location data
    */
   @GetMapping(path = "/{clientNumber}/location/{locationCode}")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch the location of the ForestClient.",
       description =

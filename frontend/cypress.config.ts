@@ -10,7 +10,7 @@ export default defineConfig({
     viewportHeight: 720,
     experimentalWebKitSupport: true,
     env: {
-      keycloakLoginUrl: 'https://logontest7.gov.bc.ca'
+      loginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
       '**/login-page.cy.ts',
