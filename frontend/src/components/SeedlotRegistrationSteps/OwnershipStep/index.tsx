@@ -37,7 +37,7 @@ import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationF
 interface OwnershipStepProps {
   defaultAgency: string
   defaultCode: string,
-  agencyOptions: Array<string>,
+  agencyOptions: Array<MultiOptionsObj>,
   state: Array<SingleOwnerForm>,
   setStepData: Function,
   invalidState: OwnershipInvalidObj,

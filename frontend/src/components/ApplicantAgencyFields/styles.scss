@@ -1,0 +1,19 @@
+@use '@carbon/type';
+
+.agency-information-section {
+  .agency-information-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .location-code-input {
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    #agency-number-input {
+      @include type.type-style('code-02');
+    }
+  }
+}

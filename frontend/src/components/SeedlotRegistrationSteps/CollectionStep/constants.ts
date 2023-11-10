@@ -1,31 +1,29 @@
+import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
+
 export const DATE_FORMAT = 'Y/m/d';
 export const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
 export const MAX_INPUT_DECIMAL = 9999.999;
+
+export const agencyFieldsProps: AgencyTextPropsType = {
+  useDefaultCheckbox: {
+    name: 'applicant',
+    labelText: 'Use applicant agency as collector agency'
+  },
+  agencyInput: {
+    name: 'collectorAgency',
+    labelText: 'Cone Collector agency',
+    invalidText: 'Please choose a valid collector agency, filter with agency number, name or acronym'
+  },
+  locationCode: {
+    name: 'locationCode',
+    labelText: 'Cone Collector location code'
+  }
+};
 
 export const fieldsConfig = {
   titleSection: {
     title: 'Collector agency',
     subtitle: 'Enter the collector agency information'
-  },
-  checkbox: {
-    name: 'applicant',
-    labelText: 'Use applicant agency as collector agency'
-  },
-  collector: {
-    name: 'collectorAgency',
-    placeholder: 'Enter or choose your agency',
-    titleText: 'Cone Collector agency',
-    helperText: 'You can enter the agency number, name or acronym',
-    invalidText: 'Please choose a valid collector agency, filter with agency number, name or acronym'
-  },
-  code: {
-    name: 'locationCode',
-    placeholder: 'Example: 00',
-    label: 'Cone Collector location code',
-    helperTextDisabled: 'Please select a cone collector agency before setting the location code',
-    helperTextEnabled: '2-digit code that identifies the address of operated office or division',
-    invalidLocationForSelectedAgency: 'This location code is not valid for the selected agency, please enter a valid one or change the agency',
-    invalidText: 'Please enter a valid 2-digit code that identifies the address of operated office or division'
   },
   collectionTitle: {
     title: 'Collection information',
