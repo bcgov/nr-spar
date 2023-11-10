@@ -1,35 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { useMutation } from '@tanstack/react-query';
 import {
   FlexGrid,
   Column,
   Row,
   NumberInput,
-  ComboBox,
   CheckboxGroup,
   Checkbox,
   DatePickerInput,
   DatePicker,
-  TextArea,
-  TextInput,
-  InlineLoading
+  TextArea
 } from '@carbon/react';
 import moment from 'moment';
 import validator from 'validator';
 
 import Subtitle from '../../Subtitle';
-import getForestClientLocation from '../../../api-service/forestClientsAPI';
-import { filterInput, FilterObj } from '../../../utils/filterUtils';
-import getForestClientNumber from '../../../utils/StringUtils';
-import { LOCATION_CODE_LIMIT } from '../../../shared-constants/shared-constants';
-import ComboBoxEvent from '../../../types/ComboBoxEvent';
+import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
-import { DATE_FORMAT, MOMENT_DATE_FORMAT, fieldsConfig } from './constants';
+import { FormInputType } from '../../../types/FormInputType';
+
+import {
+  DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
+} from './constants';
 import {
   CollectionStepProps,
   CollectionForm
 } from './definitions';
-import { calcVolume, formatLocationCode, isNumNotInRange } from './utils';
+import { calcVolume, isNumNotInRange } from './utils';
 
 import './styles.scss';
 
@@ -45,30 +41,18 @@ const CollectionStep = (
   }: CollectionStepProps
 ) => {
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
-  const [forestClientNumber, setForestClientNumber] = useState<string>('');
-  const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>('');
-  const [locationCodeHelperText, setLocationCodeHelperText] = useState<string>(
-    fieldsConfig.code.helperTextEnabled
-  );
 
-  const updateAfterLocValidation = (isInvalid: boolean) => {
+  const setAgencyInfo = (
+    valueAgency: FormInputType & { value: string },
+    valueLocation: FormInputType & { value: string },
+    valueUseDefault: FormInputType & { value: boolean }
+  ) => {
     const clonedState = structuredClone(state);
-    clonedState.locationCode.isInvalid = isInvalid;
-    setLocationCodeHelperText(fieldsConfig.code.helperTextEnabled);
+    clonedState.collectorAgency = valueAgency;
+    clonedState.locationCode = valueLocation;
+    clonedState.useDefaultAgencyInfo = valueUseDefault;
     setStepData(clonedState);
   };
-
-  const validateLocationCodeMutation = useMutation({
-    mutationFn: (queryParams: string[]) => getForestClientLocation(
-      queryParams[0],
-      queryParams[1]
-    ),
-    onError: () => {
-      setInvalidLocationMessage(fieldsConfig.code.invalidLocationForSelectedAgency);
-      updateAfterLocValidation(true);
-    },
-    onSuccess: () => updateAfterLocValidation(false)
-  });
 
   useEffect(() => {
     const useDefault = state.useDefaultAgencyInfo.value;
@@ -80,55 +64,6 @@ const CollectionStep = (
     clonedState.locationCode.value = codeValue;
     setStepData(clonedState);
   }, [defaultAgency, defaultCode]);
-
-  const handleDefaultCheckBox = (checked: boolean) => {
-    setLocationCodeHelperText(
-      checked
-        ? fieldsConfig.code.helperTextEnabled
-        : fieldsConfig.code.helperTextDisabled
-    );
-    const clonedState = structuredClone(state);
-    clonedState.collectorAgency.value = checked ? defaultAgency : '';
-    clonedState.locationCode.value = checked ? defaultCode : '';
-    clonedState.useDefaultAgencyInfo.value = checked;
-    setStepData(clonedState);
-  };
-
-  const handleCollectorInput = (value: string) => {
-    setForestClientNumber(value ? getForestClientNumber(value) : '');
-    setLocationCodeHelperText(
-      value
-        ? fieldsConfig.code.helperTextEnabled
-        : fieldsConfig.code.helperTextDisabled
-    );
-    const clonedState = structuredClone(state);
-    clonedState.collectorAgency.value = value;
-    clonedState.locationCode.value = value ? state.locationCode.value : '';
-    setStepData(clonedState);
-  };
-
-  const handleLocationCodeChange = (value: string) => {
-    const clonedState = structuredClone(state);
-    clonedState.locationCode.value = value.slice(0, LOCATION_CODE_LIMIT);
-    const isInRange = validator.isInt(value, { min: 0, max: 99 });
-    if (!isInRange) {
-      setInvalidLocationMessage(fieldsConfig.code.invalidText);
-      clonedState.locationCode.isInvalid = true;
-    }
-    setStepData(clonedState);
-  };
-
-  const handleLocationCodeBlur = (value: string) => {
-    const formattedCode = value.length ? formatLocationCode(value) : '';
-    if (formattedCode === '') return;
-    const clonedState = structuredClone(state);
-    clonedState.locationCode.value = formattedCode;
-    setStepData(clonedState);
-    if (forestClientNumber) {
-      validateLocationCodeMutation.mutate([forestClientNumber, formattedCode]);
-      setLocationCodeHelperText('');
-    }
-  };
 
   const handleDateChange = (isStartDate: boolean, value: string) => {
     const clonedState = structuredClone(state);
@@ -205,69 +140,23 @@ const CollectionStep = (
           <Subtitle text={fieldsConfig.titleSection.subtitle} />
         </Column>
       </Row>
-      <Row className="collection-step-row">
-        <Column sm={4} md={8} lg={16} xlg={16}>
-          <Checkbox
-            id={state.useDefaultAgencyInfo.id}
-            name={fieldsConfig.checkbox.name}
-            labelText={fieldsConfig.checkbox.labelText}
-            readOnly={readOnly}
-            checked={state.useDefaultAgencyInfo.value}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleDefaultCheckBox(e.target.checked);
-            }}
-          />
-        </Column>
-      </Row>
-      <Row className="collection-step-row">
-        <Column sm={4} md={4} lg={8} xlg={6}>
-          <ComboBox
-            id={state.collectorAgency.id}
-            name={fieldsConfig.collector.name}
-            placeholder={fieldsConfig.collector.placeholder}
-            titleText={fieldsConfig.collector.titleText}
-            helperText={fieldsConfig.collector.helperText}
-            invalidText={fieldsConfig.collector.invalidText}
-            items={agencyOptions}
-            readOnly={state.useDefaultAgencyInfo.value || readOnly}
-            selectedItem={state.collectorAgency.value}
-            onChange={(e: ComboBoxEvent) => handleCollectorInput(e.selectedItem)}
-            invalid={state.collectorAgency.isInvalid}
-            shouldFilterItem={
-              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-            }
-            size="md"
-          />
-        </Column>
-        <Column sm={4} md={4} lg={8} xlg={6}>
-          <TextInput
-            id={state.locationCode.id}
-            className="cone-collector-location-code"
-            name={fieldsConfig.code.name}
-            value={state.locationCode.value}
-            type="number"
-            placeholder={!forestClientNumber ? '' : fieldsConfig.code.placeholder}
-            labelText={fieldsConfig.code.label}
-            helperText={locationCodeHelperText}
-            invalid={state.locationCode.isInvalid}
-            invalidText={invalidLocationMessage}
-            readOnly={state.useDefaultAgencyInfo.value || readOnly}
-            disabled={!forestClientNumber}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleLocationCodeChange(e.target.value);
-            }}
-            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleLocationCodeBlur(e.target.value);
-            }}
-          />
-          {
-            validateLocationCodeMutation.isLoading
-              ? <InlineLoading description="Validating..." />
-              : null
-          }
-        </Column>
-      </Row>
+      <ApplicantAgencyFields
+        useDefault={state.useDefaultAgencyInfo}
+        agency={state.collectorAgency}
+        locationCode={state.locationCode}
+        fieldsProps={agencyFieldsProps}
+        agencyOptions={agencyOptions}
+        defaultAgency={defaultAgency}
+        defaultCode={defaultCode}
+        setAllValues={
+          (
+            agencyData: FormInputType & { value: string },
+            locationCodeData: FormInputType & { value: string },
+            useDefaultData: FormInputType & { value: boolean }
+          ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
+        }
+        readOnly={readOnly}
+      />
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>
           <h2>{fieldsConfig.collectionTitle.title}</h2>

@@ -28,6 +28,7 @@ import getForestClientLocation from '../../../api-service/forestClientsAPI';
 
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import { FilterObj, filterInput } from '../../../utils/filterUtils';
 import getForestClientNumber from '../../../utils/StringUtils';
@@ -44,7 +45,7 @@ interface ExtractionAndStorageProps {
   setStepData: Function,
   defaultAgency: string,
   defaultCode: string,
-  agencyOptions: Array<string>,
+  agencyOptions: Array<MultiOptionsObj>,
   readOnly?: boolean
 }
 
@@ -286,7 +287,14 @@ const ExtractionAndStorage = (
             name="extractory-agency"
             helperText={inputText.extractor.helperText}
             readOnly={readOnly ?? state.extractoryUseTSC}
-            onChange={(e: ComboBoxEvent) => { handleFormInput('extractoryAgency', e.selectedItem); }}
+            onChange={(e: ComboBoxEvent) => {
+              handleFormInput(
+                'extractoryAgency',
+                e.selectedItem
+                  ? e.selectedItem.label
+                  : ''
+              );
+            }}
             selectedItem={state.extractoryAgency}
             shouldFilterItem={
               ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
@@ -432,7 +440,14 @@ const ExtractionAndStorage = (
             ref={storageNameInputRef}
             name="seed-storage-agency"
             helperText={inputText.storage.helperText}
-            onChange={(e: ComboBoxEvent) => handleFormInput('seedStorageAgency', e.selectedItem)}
+            onChange={(e: ComboBoxEvent) => {
+              handleFormInput(
+                'seedStorageAgency',
+                e.selectedItem
+                  ? e.selectedItem.label
+                  : ''
+              );
+            }}
             selectedItem={state.seedStorageAgency}
             shouldFilterItem={
               ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
