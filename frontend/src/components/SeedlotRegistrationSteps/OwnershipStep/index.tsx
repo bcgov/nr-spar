@@ -32,7 +32,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-
 /*
   Component
 */

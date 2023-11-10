@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.security;
 
 import java.util.Arrays;
 import java.util.Optional;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 /** Enumeration of the identity providers our application works with. */
 enum IdentityProvider {
@@ -16,14 +15,14 @@ enum IdentityProvider {
   }
 
   /**
-   * Extract the identity provider from a {@link Jwt}.
+   * Extract the identity provider from a Jwt.
    *
    * @param token a JSON web token to extract the provider from
    * @return the identity provider, if one is found
    */
-  public static Optional<IdentityProvider> fromClaim(Jwt token) {
+  public static Optional<IdentityProvider> fromClaim(String provider) {
     return Arrays.stream(values())
-        .filter(provider -> provider.claimName.equals(token.getClaimAsString("identity_provider")))
+        .filter(enumValue -> enumValue.claimName.equals(provider))
         .findFirst();
   }
 }

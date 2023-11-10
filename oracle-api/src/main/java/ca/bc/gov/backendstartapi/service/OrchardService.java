@@ -57,7 +57,7 @@ public class OrchardService {
    * @return Optional of {@link OrchardLotTypeDescriptionDto}
    */
   public Optional<OrchardLotTypeDescriptionDto> findNotRetiredOrchardValidLotType(String id) {
-    log.info("Find valid not retired Orchard by id: {}", id);
+    log.info("Finding valid not retired Orchard by id: {}", id);
     Optional<Orchard> orchard = orchardRepository.findNotRetiredById(id);
 
     if (orchard.isPresent()) {
@@ -90,11 +90,15 @@ public class OrchardService {
    */
   public Optional<OrchardParentTreeDto> findParentTreeGeneticQualityData(
       String orchardId, Long spuId) {
+    log.info(
+        "Finding Orchard Parent Tree and Genetic Quality data for orchard: {} and spuId: {}",
+        orchardId,
+        spuId);
 
     long starting = Instant.now().toEpochMilli();
     Optional<Orchard> orchard = orchardRepository.findById(orchardId);
     long endingOne = Instant.now().toEpochMilli();
-    log.info("Time elapsed querying orchard by id: {}", endingOne - starting);
+    log.debug("Time elapsed querying orchard by id: {}", endingOne - starting);
 
     if (orchard.isEmpty()) {
       return Optional.empty();
@@ -107,13 +111,13 @@ public class OrchardService {
     orchardParentTreeDto.setSeedPlanningUnitId(spuId);
 
     long endingTwo = Instant.now().toEpochMilli();
-    log.info("Time elapsed creating basic OrchardParentTreeDto: {}", endingTwo - endingOne);
+    log.debug("Time elapsed creating basic OrchardParentTreeDto: {}", endingTwo - endingOne);
 
     // Orchard x Parent Tree
     orchardParentTreeDto.setParentTrees(findAllParentTree(orchard.get().getId(), spuId, endingTwo));
 
     long ending = Instant.now().toEpochMilli();
-    log.info("Time elapsed final: {}", ending - starting);
+    log.debug("Time elapsed final: {}", ending - starting);
     return Optional.of(orchardParentTreeDto);
   }
 
@@ -124,6 +128,7 @@ public class OrchardService {
    * @return {@link Optional} of a {@link List} of {@link OrchardParentTreeDto}
    */
   public Optional<List<OrchardLotTypeDescriptionDto>> findNotRetOrchardsByVegCode(String vegCode) {
+    log.info("Finding not retired Orchard by VegCode: {}", vegCode);
 
     List<OrchardLotTypeDescriptionDto> resultList = new ArrayList<>();
 
@@ -155,6 +160,7 @@ public class OrchardService {
   /** Find all parent trees under a vegCode. */
   public List<SameSpeciesTreeDto> findParentTreesWithVegCode(
       String vegCode, Map<String, String> orchardSpuMap) {
+    log.info("Finding all parent trees under VegCode: {}", vegCode);
 
     // Step 1: Get all the parent trees under a species
     List<ParentTreeProj> parentTrees = parentTreeRepository.findAllParentTreeWithVegCode(vegCode);
@@ -231,23 +237,24 @@ public class OrchardService {
     List<ParentTreeOrchard> parentTreeOrchards =
         parentTreeOrchardRepository.findByIdOrchardId(orchardId);
     long endingThree = Instant.now().toEpochMilli();
-    log.info("Time elapsed querying all parent tree to the orchard: {}", endingThree - milli);
+    log.debug("Time elapsed querying all parent tree to the orchard: {}", endingThree - milli);
 
     List<Long> parentTreeIdList = new ArrayList<>();
     parentTreeOrchards.forEach(pto -> parentTreeIdList.add(pto.getId().getParentTreeId()));
 
     long endingFour = Instant.now().toEpochMilli();
-    log.info("Time elapsed mapping all parent tree orchard ids: {}", endingFour - endingThree);
+    log.debug("Time elapsed mapping all parent tree orchard ids: {}", endingFour - endingThree);
 
     List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllIn(parentTreeIdList);
 
     long endingFive = Instant.now().toEpochMilli();
-    log.info("Time elapsed finding all parent tree (select in): {}", endingFive - endingFour);
+    log.debug("Time elapsed finding all parent tree (select in): {}", endingFive - endingFour);
 
     List<ParentTreeGeneticQualityDto> qualityDtoList =
         findAllParentTreeGeneticQualities(spuId, parentTreeIdList);
     long endingSeven = Instant.now().toEpochMilli();
-    log.info("Time elapsed querying all parent tree genetic quality: {}", endingSeven - endingFive);
+    log.debug(
+        "Time elapsed querying all parent tree genetic quality: {}", endingSeven - endingFive);
 
     List<ParentTreeGeneticInfoDto> parentTreeDtoList =
         parentTreeList.stream()
@@ -263,7 +270,7 @@ public class OrchardService {
             .toList();
 
     long endingEight = Instant.now().toEpochMilli();
-    log.info("Time elapsed creating ParentTreeDto list: {}", endingEight - endingSeven);
+    log.debug("Time elapsed creating ParentTreeDto list: {}", endingEight - endingSeven);
     return parentTreeDtoList;
   }
 

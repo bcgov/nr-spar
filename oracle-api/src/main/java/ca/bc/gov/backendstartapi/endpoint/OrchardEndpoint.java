@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,7 +52,6 @@ public class OrchardEndpoint {
    * @throws ResponseStatusException if the Orchard doesn't exist
    */
   @GetMapping(path = "/{id}", produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch an orchard by its identifier",
       description = "Returns the orchard identified by `id`, if there is one.",
@@ -89,7 +87,6 @@ public class OrchardEndpoint {
   @GetMapping(
       path = "/parent-tree-genetic-quality/{orchardId}/{spuId}",
       produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch the parent tree contribution data to an Orchard.",
       description = "Returns all parent tree contribution table given an Orchard ID and SPU ID.",
@@ -134,7 +131,6 @@ public class OrchardEndpoint {
    * @throws ResponseStatusException if error occurs
    */
   @GetMapping(path = "/vegetation-code/{vegCode}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('user_read')")
   @Operation(
       summary = "Fetch the orchards with the provided vegCode.",
       description =
@@ -172,7 +168,6 @@ public class OrchardEndpoint {
       path = "/parent-trees/vegetation-codes/{vegCode}",
       consumes = "application/json",
       produces = "application/json")
-  @PreAuthorize("hasRole('user_read')")
   public ResponseEntity<List<SameSpeciesTreeDto>> findParentTreesWithVegCode(
       @PathVariable("vegCode")
           @Parameter(description = "The vegetation code of an orchard.")
