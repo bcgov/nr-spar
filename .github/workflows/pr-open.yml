@@ -167,7 +167,7 @@ jobs:
       - name: Run Cypress CI
         uses: bcgov-nr/action-test-and-analyse@v1.1.0
         with:
-          node_version: "18.16.0"
+          node_version: "18"
           commands: |
             npm i
             npm run cy:ci
