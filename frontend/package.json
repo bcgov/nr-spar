@@ -73,6 +73,9 @@
     "ts-node": "^10.9.1"
   },
   "overrides": {
+    "wait-on": {
+      "axios": "^1.6.0"
+    },
     "postcss": "^8.4.31"
   },
   "repository": {
