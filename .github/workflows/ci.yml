@@ -37,7 +37,7 @@ jobs:
             -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_${{ matrix.dir }}
             -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
             -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/response/**,**/*$*Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
-          sonar_project_token: ${{ secrets[matrix.token] }}
+          sonar_token: ${{ secrets[matrix.token] }}
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
