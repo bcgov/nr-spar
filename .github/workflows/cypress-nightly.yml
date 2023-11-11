@@ -12,7 +12,7 @@ env:
 
 jobs:
   e2e-chrome:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: E2E on Chrome
     steps:
       - name: Checkout
@@ -41,7 +41,7 @@ jobs:
           path: cypress/videos
   
   e2e-firefox:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container:
       image: cypress/included:11.2.0
       options: --user 1001
