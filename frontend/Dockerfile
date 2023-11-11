@@ -1,6 +1,6 @@
 # Build static files
 # Node Bullseye has npm
-FROM node:18.18.0-bullseye-slim AS build
+FROM node:18.18.2-bullseye-slim AS build
 ENV NODE_OPTIONS "--max-old-space-size=3072"
 
 # Build
