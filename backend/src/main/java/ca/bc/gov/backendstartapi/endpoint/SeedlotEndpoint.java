@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
@@ -225,7 +226,7 @@ public class SeedlotEndpoint {
    * @param seedlotNumber the seedlot number to fetch the info for
    * @return A {@link Seedlot} with all the current information for the seedlot.
    */
-  @GetMapping(path = "/{seedlotNumber}")
+  @GetMapping("/{seedlotNumber}")
   @Operation(
       summary = "Fetch a single seedlot information",
       description =
@@ -253,5 +254,10 @@ public class SeedlotEndpoint {
           @PathVariable
           String seedlotNumber) {
     return seedlotService.getSingleSeedlotInfo(seedlotNumber);
+  }
+
+  @PostMapping("/form-submission")
+  public ResponseEntity<SeedlotCreateResponseDto> seedlotFormSubmission(@RequestBody SeedlotFormSubmissionDto form) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(null);
   }
 }
