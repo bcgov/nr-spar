@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   NumberInput,
   FlexGrid,
@@ -13,6 +13,9 @@ import ApplicantAgencyFields from '../../../ApplicantAgencyFields';
 import { FormInputType } from '../../../../types/FormInputType';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
+
+import { validatePerc } from '../utils';
+
 import {
   SingleOwnerForm,
   NumStepperVal
@@ -35,6 +38,7 @@ interface SingleOwnerInfoProps {
   fundingSources: Array<MultiOptionsObj>,
   methodsOfPayment: Array<MultiOptionsObj>,
   addRefs: Function,
+  checkPortionSum: Function,
   setState: Function
   readOnly?: boolean,
 }
@@ -42,8 +46,10 @@ interface SingleOwnerInfoProps {
 const SingleOwnerInfo = ({
   addRefs, ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
   methodsOfPayment, validationProp, handleInputChange, addAnOwner, deleteAnOwner,
-  setState, readOnly
+  checkPortionSum, setState, readOnly
 }: SingleOwnerInfoProps) => {
+  const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>('');
+
   const setAgencyInfo = (
     agencyData: FormInputType & { value: string },
     locationCodeData: FormInputType & { value: string },
@@ -54,6 +60,25 @@ const SingleOwnerInfo = ({
     clonedState.ownerCode = locationCodeData;
     clonedState.useDefaultAgencyInfo = useDefaultData;
     setState(clonedState, ownerInfo.id);
+  };
+
+  const handleOwnerPortion = (value: string) => {
+    const clonedState = structuredClone(ownerInfo);
+    clonedState.ownerPortion.value = value;
+    // First validate the format of what is set on the value and
+    // get the correct error message
+    const { isInvalid, invalidText } = validatePerc(value);
+    clonedState.ownerPortion.isInvalid = isInvalid;
+    if (isInvalid) {
+      setOwnerPortionInvalidText(invalidText);
+      setState(clonedState, ownerInfo.id);
+    } else {
+      // Now, check the total sum of the owner portions, the sum must
+      // not be over 100%. Due the need to check and validate other fields
+      // other than this owner, the state will be set under this function
+      const isSumInvalid = checkPortionSum(clonedState, ownerInfo.id);
+      setOwnerPortionInvalidText(isSumInvalid ? inputText.portion.invalidText : '');
+    }
   };
 
   return (
@@ -206,11 +231,11 @@ const SingleOwnerInfo = ({
                 // The guard is needed here because onClick also trigger the onChange method
                 // but it does not pass in any value
                 if (e?.target?.name && e?.target?.value) {
-                  handleInputChange(e.target.name, e.target.value);
+                  handleOwnerPortion(e.target.value);
                 }
               }}
-              invalid={validationProp.portion.isInvalid}
-              invalidText={validationProp.portion.invalidText}
+              invalid={ownerInfo.ownerPortion.isInvalid}
+              invalidText={ownerPortionInvalidText}
               onClick={
                 (
                   _e: React.MouseEvent<HTMLButtonElement>,
@@ -219,7 +244,7 @@ const SingleOwnerInfo = ({
                   // A guard is needed here because any click on the input will emit a
                   //   click event, not necessarily the + - buttons
                   if (target?.value) {
-                    handleInputChange('ownerPortion', String(target.value));
+                    handleOwnerPortion(String(target.value));
                   }
                 }
               }

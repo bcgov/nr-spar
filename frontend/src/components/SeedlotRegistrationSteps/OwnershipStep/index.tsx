@@ -27,8 +27,7 @@ import {
 } from './utils';
 import {
   DEFAULT_INDEX,
-  MAX_OWNERS,
-  inputText
+  MAX_OWNERS
 } from './constants';
 
 import './styles.scss';
@@ -56,15 +55,11 @@ const OwnershipStep = (
   const refControl = useRef<any>({});
 
   const setPortionsValid = (isInvalid: boolean) => {
-    const updatedArray = { ...invalidState };
-    const keys = Object.keys(updatedArray);
-    for (let i = 0; i < keys.length; i += 1) {
-      updatedArray[Number(keys[i])].portion = {
-        isInvalid,
-        invalidText: inputText.portion.invalidText
-      };
+    const clonedArray = structuredClone(state);
+    for (let i = 0; i < clonedArray.length; i += 1) {
+      clonedArray[i].ownerPortion.isInvalid = isInvalid;
     }
-    setInvalidState(updatedArray);
+    setStepData(clonedArray);
   };
 
   const setValidation = (
@@ -246,6 +241,14 @@ const OwnershipStep = (
     setAccordionControls(newAccCtrls);
   };
 
+  const checkPortionSum = (updatedEntry: SingleOwnerForm, entryId: number) => {
+    const clonedState = structuredClone(state);
+    clonedState[entryId] = updatedEntry;
+    const portionsInvalid = !arePortionsValid(clonedState);
+    setPortionsValid(portionsInvalid);
+    return portionsInvalid;
+  };
+
   return (
     <div>
       {(!readOnly) && (
@@ -311,6 +314,11 @@ const OwnershipStep = (
                     arrayClone[id] = singleState;
                     setStepData(arrayClone);
                   }}
+                  checkPortionSum={
+                    (updatedEntry: SingleOwnerForm, entryId: number) => {
+                      checkPortionSum(updatedEntry, entryId);
+                    }
+                  }
                   readOnly={readOnly}
                 />
               </AccordionItem>

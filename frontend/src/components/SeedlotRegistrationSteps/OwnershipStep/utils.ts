@@ -92,7 +92,7 @@ const isDecimalValid = (value: string): boolean => {
   return true;
 };
 
-const validatePerc = (value: string): SingleInvalidObj => {
+export const validatePerc = (value: string): SingleInvalidObj => {
   let invalidText = inputText.twoDecimal;
   let isInvalid = !isDecimalValid(value);
   if (!isInvalid) {
@@ -203,9 +203,9 @@ export const isInputInvalid = (name: string, value: string): SingleInvalidObj =>
   }
 };
 
-export const arePortionsValid = (ownershiptArray: Array<SingleOwnerForm>): boolean => {
+export const arePortionsValid = (ownershipArray: Array<SingleOwnerForm>): boolean => {
   let sum = 0;
-  ownershiptArray.forEach((obj) => {
+  ownershipArray.forEach((obj) => {
     sum += Number(obj.ownerPortion);
   });
   return Number(sum.toFixed(2)) === 100;
