@@ -3,6 +3,8 @@ import { Tag } from '@carbon/react';
 
 import ACTIVITY_STATUS from '../../enums/ActivityStatus';
 
+import './styles.scss';
+
 const statusClass = (param: number) => {
   switch (param) {
     case 1:
@@ -31,7 +33,7 @@ interface StatusProps {
 }
 
 const StatusItem = ({ status }: StatusProps) => (
-  <Tag type={`${statusClass(status)}`}>
+  <Tag className="status-item" type={`${statusClass(status)}`}>
     {Object.values(ACTIVITY_STATUS)[status]}
   </Tag>
 );
