@@ -15,6 +15,12 @@
   margin: auto;
 }
 
+.#{vars.$bcgov-prefix}--date-picker {
+  span {
+    width: 100%;
+  }
+}
+
 @media only screen and (max-width: 1055px) {
   .main-container {
     padding-top: 5rem;
