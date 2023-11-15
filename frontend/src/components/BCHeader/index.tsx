@@ -142,7 +142,7 @@ const BCHeader = () => {
             <div className="side-nav-top">
               {
                 navItems.map((category) => (
-                  <>
+                  <div key={category.name}>
                     <SideNavLink className="side-nav-category-name">
                       {category.name}
                     </SideNavLink>
@@ -159,7 +159,7 @@ const BCHeader = () => {
                         </SideNavLink>
                       ))
                     }
-                  </>
+                  </div>
                 ))
               }
             </div>
