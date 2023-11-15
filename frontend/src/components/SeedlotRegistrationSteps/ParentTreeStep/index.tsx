@@ -16,7 +16,6 @@ import { getAllParentTrees } from '../../../api-service/orchardAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
-import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { postFile } from '../../../api-service/seedlotAPI';
 import postForCalculation from '../../../api-service/geneticWorthAPI';
@@ -165,25 +164,20 @@ const ParentTreeStep = (
     queryFn: () => (
       getAllParentTrees(seedlotSpecies.code)
     ),
-    onSuccess: (data: ParentTreeGeneticQualityType[]) => processParentTreeData(
-      data,
-      state,
-      orchardsData.map((o) => o.selectedItem?.code),
-      currentPage,
-      currPageSize,
-      setSlicedRows,
-      setStepData
-    ),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
-  // Re-populate table if it is emptied by users and data is cached
+  /**
+   * Populate table when data is first fetched
+   * Re-populate table if it is emptied by users and data is cached
+   */
   useEffect(() => {
     const disabled = processOrchards(orchards).length === 0;
     if (
       !disabled
       && Object.keys(state.tableRowData).length === 0
+      && allParentTreeQuery.isFetched
       && allParentTreeQuery.data
     ) {
       processParentTreeData(
@@ -196,7 +190,7 @@ const ParentTreeStep = (
         setStepData
       );
     }
-  }, [state.tableRowData]);
+  }, [state.tableRowData, allParentTreeQuery.isFetched]);
 
   useEffect(() => configHeaderOpt(
     geneticWorthDict,

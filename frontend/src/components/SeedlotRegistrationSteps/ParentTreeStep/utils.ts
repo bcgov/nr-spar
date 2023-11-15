@@ -1,17 +1,20 @@
-import { OrchardObj } from '../OrchardStep/definitions';
-import {
-  RowItem, InfoSectionConfigType, RowDataDictType,
-  HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType, MixUploadResponse
-} from './definitions';
-import { EMPTY_NUMBER_STRING, rowTemplate } from './constants';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
+import { generateDefaultRows } from '../../../views/Seedlot/SeedlotRegistrationForm/utils';
 import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
+
 import { isPtNumberInvalid, populateRowData } from './TableComponents/utils';
+import { OrchardObj } from '../OrchardStep/definitions';
+
+import {
+  RowItem, InfoSectionConfigType, RowDataDictType,
+  HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType, MixUploadResponse
+} from './definitions';
+import { EMPTY_NUMBER_STRING, rowTemplate } from './constants';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -230,17 +233,21 @@ export const cleanTable = (
   headerConfig: HeaderObj[],
   currentTab: keyof TabTypes,
   setStepData: Function
-) => {
+): ParentTreeStepDataObj => {
   const clonedState = structuredClone(state);
-  const fieldsToClean = headerConfig
-    .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
-    .map((header) => header.id);
-  const parentTreeNumbers = Object.keys(clonedState.tableRowData);
-  parentTreeNumbers.forEach((parentTreeNumber) => {
-    fieldsToClean.forEach((field) => {
-      clonedState.tableRowData[parentTreeNumber][field] = '';
+  if (currentTab === 'mixTab') {
+    clonedState.mixTabData = generateDefaultRows();
+  } else {
+    const fieldsToClean = headerConfig
+      .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
+      .map((header) => header.id);
+    const parentTreeNumbers = Object.keys(clonedState.tableRowData);
+    parentTreeNumbers.forEach((parentTreeNumber) => {
+      fieldsToClean.forEach((field) => {
+        clonedState.tableRowData[parentTreeNumber][field] = '';
+      });
     });
-  });
+  }
   setStepData(clonedState);
   return clonedState;
 };

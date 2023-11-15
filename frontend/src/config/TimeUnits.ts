@@ -5,6 +5,8 @@ export const SEVEN_SECONDS = 7 * ONE_SECOND;
 
 export const ONE_MINUTE = 60 * ONE_SECOND;
 
+export const TWO_MINUTE = 2 * ONE_MINUTE;
+
 export const ONE_HOUR = 60 * ONE_MINUTE;
 
 export const THREE_HOURS = 3 * ONE_HOUR;

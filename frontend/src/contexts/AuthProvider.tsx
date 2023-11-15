@@ -11,6 +11,7 @@ import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
 import AuthContext from './AuthContext';
 import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
+import { TWO_MINUTE } from '../config/TimeUnits';
 
 interface Props {
   children: React.ReactNode;
@@ -145,7 +146,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   // 2 minutes
-  const REFRESH_TIMER = 2 * 60 * 1000;
+  const REFRESH_TIMER = TWO_MINUTE;
 
   if (intervalInstance == null && signed) {
     const instance = setInterval(() => {
