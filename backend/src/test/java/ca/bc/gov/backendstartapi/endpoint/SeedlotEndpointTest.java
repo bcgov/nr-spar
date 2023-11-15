@@ -28,6 +28,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -221,9 +223,11 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
+
     String url = String.format("/api/seedlots/users/%s", USER_ID);
 
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
 
     mockMvc
         .perform(get(url).accept(MediaType.APPLICATION_JSON))
@@ -239,15 +243,14 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(userSeedlots);
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
 
     String url = String.format("/api/seedlots/users/%s?page={page}", USER_ID);
     int page = 1;
 
     mockMvc
-        .perform(
-            get(url, page)
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(get(url, page).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
   }
@@ -264,12 +267,11 @@ class SeedlotEndpointTest {
     String url = String.format("/api/seedlots/users/%s?page=1&size={size}", USER_ID);
     int pageSize = 2;
 
-    when(seedlotService.getUserSeedlots(USER_ID, 1, pageSize)).thenReturn(userSeedlots);
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
+    when(seedlotService.getUserSeedlots(USER_ID, 1, pageSize)).thenReturn(pagedResult);
 
     mockMvc
-        .perform(
-            get(url, pageSize)
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(get(url, pageSize).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2))
         .andReturn();
@@ -278,7 +280,9 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("getSingleSeedlotInfoNotFoundNoPageTest")
   void getSingleSeedlotInfoNotFoundNoPageTest() throws Exception {
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(List.of());
+
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(List.of()));
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
 
     String url = String.format("/api/seedlots/users/%s", USER_ID);
 

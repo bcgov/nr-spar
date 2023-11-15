@@ -108,3 +108,8 @@ export type SeedlotType = {
   },
   revisionCount: number
 }
+
+export type SeedlotsReturnType = {
+  seedlots: SeedlotType[],
+  totalCount: number
+}

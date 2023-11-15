@@ -41,7 +41,7 @@ const SeedlotCreatedFeedback = () => {
                 <Button
                   onClick={() => {
                     if (seedlotClass === 'A') {
-                      navigate(`seedlots/a-class-registration/${seedlotNumber}`);
+                      navigate(`/seedlots/a-class-registration/${seedlotNumber}`);
                     }
                   }}
                   size="lg"

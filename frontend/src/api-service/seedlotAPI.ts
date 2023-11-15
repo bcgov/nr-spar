@@ -1,5 +1,5 @@
 import { SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
-import { SeedlotType } from '../types/SeedlotType';
+import { SeedlotType, SeedlotsReturnType } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
 
@@ -18,9 +18,14 @@ export const postFile = (
   return api.post(url, formData, true);
 };
 
-export const getSeedlotByUser = (userId: string) => {
-  const url = `${ApiConfig.seedlots}/users/${userId}`;
-  return api.get(url).then((res): SeedlotType[] => res.data);
+export const getSeedlotByUser = (userId: string, pageNumber: number, pageSize: number) => {
+  const url = `${ApiConfig.seedlots}/users/${userId}?page=${pageNumber}&size=${pageSize}`;
+  return api.get(url).then((res): SeedlotsReturnType => (
+    {
+      seedlots: res.data,
+      totalCount: Number(res.headers['x-total-count'])
+    }
+  ));
 };
 
 export const getSeedlotById = (seedlotNumber: string) => {
