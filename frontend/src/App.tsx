@@ -63,7 +63,7 @@ const App: React.FC = () => {
                 <Route
                   path="/dashboard"
                   element={(
-                    <ProtectedRoute signed={signed}>
+                    <ProtectedRoute>
                       <Dashboard />
                     </ProtectedRoute>
                   )}
@@ -72,7 +72,7 @@ const App: React.FC = () => {
                 <Route
                   path="/seedlots"
                   element={(
-                    <ProtectedRoute signed={signed}>
+                    <ProtectedRoute>
                       <SeedlotDashboard />
                     </ProtectedRoute>
                   )}
@@ -81,7 +81,7 @@ const App: React.FC = () => {
                 <Route
                   path="/seedlots/register-a-class"
                   element={(
-                    <ProtectedRoute signed={signed}>
+                    <ProtectedRoute>
                       <CreateAClass />
                     </ProtectedRoute>
                   )}
@@ -90,7 +90,7 @@ const App: React.FC = () => {
                 <Route
                   path="/seedlots/creation-success"
                   element={(
-                    <ProtectedRoute signed={signed}>
+                    <ProtectedRoute>
                       <SeedlotCreatedFeedback />
                     </ProtectedRoute>
                   )}
@@ -99,7 +99,7 @@ const App: React.FC = () => {
                 <Route
                   path="/seedlots/details/:seedlotNumber"
                   element={(
-                    <ProtectedRoute signed={signed}>
+                    <ProtectedRoute>
                       <SeedlotDetails />
                     </ProtectedRoute>
                   )}
@@ -108,7 +108,7 @@ const App: React.FC = () => {
                 <Route
                   path="/seedlots/a-class-registration/:seedlotNumber"
                   element={(
-                    <ProtectedRoute signed={signed}>
+                    <ProtectedRoute>
                       <SeedlotRegistrationForm />
                     </ProtectedRoute>
                   )}
@@ -117,7 +117,7 @@ const App: React.FC = () => {
                 <Route
                   path="/seedlots/my-seedlots"
                   element={(
-                    <ProtectedRoute signed={signed}>
+                    <ProtectedRoute>
                       <MySeedlots />
                     </ProtectedRoute>
                   )}
