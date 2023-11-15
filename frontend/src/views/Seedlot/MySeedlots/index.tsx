@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -12,7 +12,7 @@ import {
 import { Add } from '@carbon/icons-react';
 
 import PageTitle from '../../../components/PageTitle';
-import { useAuth } from '../../../contexts/AuthContext';
+import AuthContext from '../../../contexts/AuthContext';
 import SeedlotTable from '../../../components/SeedlotTable';
 
 import { tableText } from './constants';
@@ -21,9 +21,9 @@ import './styles.scss';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
-  const auth = useAuth();
+  const { user } = useContext(AuthContext);
 
-  const userId = auth.user?.userId ?? '';
+  const userId = user?.userId ?? '';
 
   return (
     <FlexGrid fullWidth className="my-seedlot-content">

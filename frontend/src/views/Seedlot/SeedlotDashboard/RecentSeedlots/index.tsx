@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { Row, Column } from '@carbon/react';
 
-import { useAuth } from '../../../../contexts/AuthContext';
+import AuthContext from '../../../../contexts/AuthContext';
 import SeedlotTable from '../../../../components/SeedlotTable';
 import Subtitle from '../../../../components/Subtitle';
 
@@ -11,9 +11,9 @@ import recentSeedlotsText from './constants';
 import './styles.scss';
 
 const RecentSeedlots = () => {
-  const auth = useAuth();
+  const { user } = useContext(AuthContext);
 
-  const userId = auth.user?.userId ?? '';
+  const userId = user?.userId ?? '';
 
   return (
     <Row className="recent-seedlots">

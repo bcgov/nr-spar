@@ -66,7 +66,7 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
     provider: decodedIdToken['custom:idp_name'].toLocaleUpperCase(),
     jwtToken: authToken.getIdToken().getJwtToken(),
     refreshToken: authToken.getRefreshToken().getToken(),
-    axiosRequestUser: decodedAccessToken.username, // E.g: 'dev-idir_***@idir'
+    userId: decodedAccessToken.username, // E.g: 'dev-idir_***@idir'
     tokenExpiration: authToken.getIdToken().getExpiration()
   };
 
@@ -109,7 +109,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       updateUserFamSession(famUser);
       setUser(famUser);
       setProvider(famUser.provider);
-      setToken(famUser.axiosRequestUser);
+      setToken(famUser.userId);
     }
   };
 
