@@ -20,7 +20,8 @@ import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAP
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
-import { getAllAgencies, getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
@@ -129,7 +130,7 @@ const SeedlotRegistrationForm = () => {
 
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
-    queryFn: () => getAllAgencies()
+    queryFn: () => getApplicantAgenciesOptions()
   });
 
   const [allInvalidationObj, setAllInvalidationObj] = useState<AllStepInvalidationObj>({

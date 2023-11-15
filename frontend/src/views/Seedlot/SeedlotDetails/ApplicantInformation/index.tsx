@@ -142,7 +142,7 @@ const ApplicantInformation = (
                   title=""
                   className="spar-display-only-input"
                   readOnly
-                  id="seedlot-applicant-species"
+                  id="seedlot-applicant-within-bc"
                   labelText="Collected from a location within B.C.?"
                   value={(applicant?.isBcSource ? 'Yes' : 'No') ?? ''}
                 />
