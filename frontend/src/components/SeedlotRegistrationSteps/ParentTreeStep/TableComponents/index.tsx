@@ -141,6 +141,7 @@ const renderTableCell = (
             <TextInput
               labelText=""
               hideLabel
+              invalidText=""
               type="number"
               placeholder="Add value"
               value={rowData[header.id]}
