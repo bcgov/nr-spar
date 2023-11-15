@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import {
@@ -25,17 +25,16 @@ import {
   VERSION,
   clearPanelState,
   componentTexts,
-  listItems
+  navItems,
+  supportItems
 } from './constants';
-import { ListItems, ListItem, RightPanelType } from './definitions';
+import { RightPanelType } from './definitions';
 
 import './styles.scss';
 
 const BCHeader = () => {
   const [rightPanel, setRightPanel] = useState<RightPanelType>(clearPanelState);
   const [overlay, setOverlay] = useState<boolean>(false);
-  const [goToURL, setGoToURL] = useState<string>('');
-  const [goTo, setGoTo] = useState<boolean>(false);
 
   const handleRightPanel = (panel: string) => {
     // Using clearPanelState here so that it cleans all other
@@ -63,12 +62,6 @@ const BCHeader = () => {
   };
 
   const navigate = useNavigate();
-  useEffect(() => {
-    if (goTo) {
-      setGoTo(false);
-      navigate(goToURL);
-    }
-  }, [goTo]);
 
   return (
     <HeaderContainer
@@ -146,33 +139,44 @@ const BCHeader = () => {
             aria-label={componentTexts.sideMenuAriaLabel}
             inert={undefined}
           >
-            <SideNavItems>
-              {listItems.map((item: ListItems) => (
-                <div key={item.name} className={`${item.name.toLocaleLowerCase()}-section`}>
-                  <PanelSectionName title={item.name} key={item.name} />
-                  {item.items.map((subItem: ListItem) => {
-                    const IconComponent = Icons[subItem.icon];
-                    return (
+            {
+              navItems.map((category) => (
+                <SideNavItems key={category.name}>
+                  <SideNavLink className="side-nav-category-name">
+                    {category.name}
+                  </SideNavLink>
+                  {
+                    category.items.map((navItem) => (
                       <SideNavLink
-                        key={subItem.name}
-                        className={subItem.disabled ? 'disabled-menu-option' : ''}
-                        renderIcon={IconComponent || ''}
-                        onClick={() => {
-                          if (!subItem.disabled) {
-                            setGoToURL(subItem.link);
-                            setGoTo(true);
-                          }
-                        }}
-                        isActive={window.location.pathname === subItem.link}
+                        key={navItem.name}
+                        className={navItem.disabled ? 'disabled-side-nav-option' : ''}
+                        renderIcon={Icons[navItem.icon]}
+                        isActive={window.location.pathname === navItem.link}
+                        onClick={navItem.disabled ? null : () => navigate(navItem.link)}
                       >
-                        {subItem.name}
+                        {navItem.name}
                       </SideNavLink>
-                    );
-                  })}
-                </div>
-              ))}
-              <PanelSectionName title={VERSION} />
-            </SideNavItems>
+                    ))
+                  }
+                </SideNavItems>
+              ))
+            }
+            <SideNavLink className="side-nav-category-name">
+              {supportItems.name}
+            </SideNavLink>
+            {
+              supportItems.items.map((supportItem) => (
+                <SideNavLink
+                  key={supportItem.name}
+                  renderIcon={Icons[supportItem.icon]}
+                  className={supportItem.disabled ? 'disabled-side-nav-option' : ''}
+                  onClick={supportItem.disabled ? null : () => navigate(supportItem.link)}
+                >
+                  {supportItem.name}
+                </SideNavLink>
+              ))
+            }
+            <PanelSectionName title={VERSION} />
           </SideNav>
         </Header>
       )}
