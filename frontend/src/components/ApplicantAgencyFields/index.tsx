@@ -66,6 +66,8 @@ const ApplicantAgencyFields = ({
 
     agencyClone.value = checked ? defaultAgency : '';
     locationCodeClone.value = checked ? defaultCode : '';
+    agencyClone.isInvalid = false;
+    locationCodeClone.isInvalid = false;
     useDefaultClone.value = checked;
 
     setAllValues(agencyClone, locationCodeClone, useDefaultClone);

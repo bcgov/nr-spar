@@ -28,7 +28,6 @@ import './styles.scss';
 
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
-  handleInputChange: Function,
   addAnOwner: Function,
   deleteAnOwner: Function,
   validationProp: FormInvalidationObj,
@@ -45,10 +44,12 @@ interface SingleOwnerInfoProps {
 
 const SingleOwnerInfo = ({
   addRefs, ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
-  methodsOfPayment, validationProp, handleInputChange, addAnOwner, deleteAnOwner,
+  methodsOfPayment, validationProp, addAnOwner, deleteAnOwner,
   checkPortionSum, setState, readOnly
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>('');
+  const [reservedInvalidText, setReservedInvalidText] = useState<string>('');
+  const [surplusInvalidText, setSurplusPortionInvalidText] = useState<string>('');
 
   const setAgencyInfo = (
     agencyData: FormInputType & { value: string },
@@ -81,6 +82,56 @@ const SingleOwnerInfo = ({
     }
   };
 
+  // These fields are codependent, so they can be handled in a single
+  // function
+  const handleReservedAndSurplus = (field: string, value: string) => {
+    const clonedState = structuredClone(ownerInfo);
+    const isReserved = field === 'reservedPerc';
+
+    // First validate the format of what is set on the value and
+    // get the correct error message
+    const { isInvalid, invalidText } = validatePerc(value);
+    if (isReserved) {
+      clonedState.reservedPerc.value = value;
+      clonedState.reservedPerc.isInvalid = isInvalid;
+      setReservedInvalidText(invalidText);
+    } else {
+      clonedState.surplusPerc.value = value;
+      clonedState.surplusPerc.isInvalid = isInvalid;
+      setSurplusPortionInvalidText(invalidText);
+    }
+
+    if (!isInvalid) {
+      let otherValue = String((100 - Number(value)).toFixed(2));
+
+      // If the other value is an int then show a whole number
+      if (Number(otherValue) % 1 === 0) {
+        otherValue = Number(otherValue).toFixed(0);
+      }
+
+      // Set the other value
+      if (isReserved) {
+        clonedState.surplusPerc.value = otherValue;
+      } else {
+        clonedState.reservedPerc.value = otherValue;
+      }
+    }
+
+    setState(clonedState, ownerInfo.id);
+  };
+
+  const handleFundingSource = (selectedOption: MultiOptionsObj) => {
+    const clonedState = structuredClone(ownerInfo);
+    clonedState.fundingSource.value = selectedOption;
+    setState(clonedState, ownerInfo.id);
+  };
+
+  const handleMethodOfPayment = (selectedOption: MultiOptionsObj) => {
+    const clonedState = structuredClone(ownerInfo);
+    clonedState.methodOfPayment.value = selectedOption;
+    setState(clonedState, ownerInfo.id);
+  };
+
   return (
     <div className="single-owner-info-container">
       <FlexGrid fullWidth>
@@ -101,121 +152,6 @@ const SingleOwnerInfo = ({
           }
           readOnly={readOnly}
         />
-        {/* {
-          ownerInfo.id === DEFAULT_INDEX && (
-            <Row>
-              <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={16}>
-                <Checkbox
-                  labelText={inputText.checkbox.labelText}
-                  id="default-agency-code-checkbox"
-                  checked={useDefaultAgency}
-                  onChange={
-                    (_event: React.ChangeEvent<HTMLInputElement>, { checked }: CheckboxType) => {
-                      setLocationHelper(
-                        checked
-                          ? inputText.code.helperTextEnabled
-                          : inputText.code.helperTextDisabled
-                      );
-                      setDefaultAgencyNCode(checked);
-                    }
-                  }
-                  readOnly={readOnly}
-                />
-              </Column>
-            </Row>
-          )
-        }
-        <Row>
-          <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            <ComboBox
-              className="single-owner-combobox"
-              id={`owner-agency-${ownerInfo.id}`}
-              ref={(el: HTMLInputElement) => addRefs(el, 'ownerAgency')}
-              disabled={ownerInfo.id === DEFAULT_INDEX ? disableInputs : false}
-              name="ownerAgency"
-              items={agencyOptions}
-              selectedItem={ownerInfo.ownerAgency}
-              shouldFilterItem={
-                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-              }
-              placeholder={inputText.owner.placeholder}
-              titleText={inputText.owner.titleText}
-              helperText={inputText.owner.helperText}
-              onChange={
-                !readOnly
-                  ? ((e: ComboBoxEvent) => {
-                    const { selectedItem } = e;
-
-                    setForestClientNumber(selectedItem ? selectedItem.code : '');
-                    setLocationHelper(inputText.code.helperTextEnabled);
-                    if (selectedItem) {
-                      handleInputChange('ownerAgency', selectedItem.label);
-                    } else {
-                      setLocCodeValidationFail(false);
-                      handleInputChange('ownerAgency', '', 'ownerCode', '');
-                    }
-                  })
-                  : () => { }
-                }
-              // We need to check if validationProp is here since deleting a Single Owner Form
-              //    might delete the valid prop first and throwing an error
-              invalid={validationProp.owner.isInvalid}
-              invalidText={inputText.owner.invalidText}
-              readOnly={readOnly}
-            />
-          </Column>
-          <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            <TextInput
-              className="owner-code-text-input"
-              name="ownerCode"
-              id={`single-owner-code-${ownerInfo.id}`}
-              ref={(el: HTMLInputElement) => addRefs(el, 'ownerCode')}
-              disabled={
-                ownerInfo.id === DEFAULT_INDEX
-                  ? disableInputs || !forestClientNumber
-                  : !forestClientNumber
-              }
-              placeholder={!forestClientNumber ? '' : inputText.code.placeholder}
-              type="number"
-              maxCount={2}
-              value={ownerInfo.ownerCode}
-              labelText={inputText.code.labelText}
-              helperText={locationHelper}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                handleInputChange(e.target.name, e.target.value);
-              }}
-              invalid={
-                validationProp.code.isInvalid || locCodeValidationFail
-              }
-              invalidText={
-                locCodeValidationFail
-                  ? inputText.code.invalidLocationForSelectedAgency
-                  : inputText.code.invalidTextValue
-              }
-              onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                if (!e.target.readOnly) {
-                  let locationCode = e.target.value;
-                  setLocationHelper('');
-                  const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
-
-                  // Adding this check to add an extra 0 on the left, for cases where
-                  // the user types values between 0 and 9
-                  if (isInRange && locationCode.length === 1) {
-                    locationCode = locationCode.padStart(2, '0');
-                    handleInputChange('ownerCode', locationCode);
-                  }
-                  validateLocationCode.mutate([forestClientNumber, locationCode]);
-                }
-              }}
-              readOnly={readOnly}
-            />
-            {
-              validateLocationCode.isLoading
-                ? <InlineLoading description="Validating..." />
-                : null
-            }
-          </Column>
-        </Row> */}
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
             <NumberInput
@@ -265,18 +201,18 @@ const SingleOwnerInfo = ({
                   min={0}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     if (e?.target?.name && e?.target?.value) {
-                      handleInputChange(e.target.name, e.target.value);
+                      handleReservedAndSurplus(e.target.name, e.target.value);
                     }
                   }}
-                  invalid={validationProp.reserved.isInvalid}
-                  invalidText={validationProp.reserved.invalidText}
+                  invalid={ownerInfo.reservedPerc.isInvalid}
+                  invalidText={reservedInvalidText}
                   onClick={
                     (
                       _e: React.MouseEvent<HTMLButtonElement>,
                       target: NumStepperVal | undefined
                     ) => {
                       if (target?.value) {
-                        handleInputChange('reservedPerc', String(target.value));
+                        handleReservedAndSurplus('reservedPerc', String(target.value));
                       }
                     }
                   }
@@ -295,18 +231,18 @@ const SingleOwnerInfo = ({
                   min={0}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     if (e?.target?.name && e?.target?.value) {
-                      handleInputChange(e.target.name, e.target.value);
+                      handleReservedAndSurplus(e.target.name, e.target.value);
                     }
                   }}
-                  invalid={validationProp.surplus.isInvalid}
-                  invalidText={validationProp.surplus.invalidText}
+                  invalid={ownerInfo.surplusPerc.isInvalid}
+                  invalidText={surplusInvalidText}
                   onClick={
                     (
                       _e: React.MouseEvent<HTMLButtonElement>,
                       target: NumStepperVal | undefined
                     ) => {
                       if (target?.value) {
-                        handleInputChange('surplusPerc', String(target.value));
+                        handleReservedAndSurplus('surplusPerc', String(target.value));
                       }
                     }
                   }
@@ -331,7 +267,7 @@ const SingleOwnerInfo = ({
               placeholder={inputText.funding.placeholder}
               titleText={inputText.funding.titleText}
               direction="top"
-              onChange={(e: ComboBoxEvent) => handleInputChange('fundingSource', e.selectedItem)}
+              onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
               invalid={validationProp.funding.isInvalid}
               invalidText={validationProp.funding.invalidText}
               readOnly={readOnly}
@@ -351,7 +287,7 @@ const SingleOwnerInfo = ({
               placeholder={inputText.payment.placeholder}
               titleText={inputText.payment.titleText}
               direction="top"
-              onChange={(e: ComboBoxEvent) => handleInputChange('methodOfPayment', e.selectedItem)}
+              onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
               invalid={validationProp.payment.isInvalid}
               invalidText={validationProp.payment.invalidText}
               readOnly={readOnly}

@@ -37,6 +37,9 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+
+import { emptyMultiOptObj } from '../../../shared-constants/shared-constants';
+
 import {
   AllStepData, AllStepInvalidationObj,
   FormInvalidationObj, ProgressIndicatorConfig
@@ -126,10 +129,10 @@ const SeedlotRegistrationForm = () => {
     queryFn: getMethodsOfPayment,
     onSuccess: (dataArr: MultiOptionsObj[]) => {
       const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
-      const defaultMethod = defaultMethodArr.length === 0 ? null : defaultMethodArr[0];
+      const defaultMethod = defaultMethodArr.length === 0 ? emptyMultiOptObj : defaultMethodArr[0];
       if (!allStepData.ownershipStep[0].methodOfPayment) {
         const tempOwnershipData = structuredClone(allStepData.ownershipStep);
-        tempOwnershipData[0].methodOfPayment.value = defaultMethod ? defaultMethod.label : '';
+        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
         setStepData('ownershipStep', tempOwnershipData);
       }
     }

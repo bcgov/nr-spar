@@ -19,8 +19,8 @@ export type SingleOwnerForm = {
   ownerPortion: FormInputType & { value: string },
   reservedPerc: FormInputType & { value: string },
   surplusPerc: FormInputType & { value: string },
-  fundingSource: FormInputType & { value: string },
-  methodOfPayment: FormInputType & { value: string }
+  fundingSource: FormInputType & { value: MultiOptionsObj },
+  methodOfPayment: FormInputType & { value: MultiOptionsObj }
 }
 
 export type SingleInvalidObj = {

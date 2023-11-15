@@ -28,7 +28,7 @@ export const insertOwnerForm = (
   const newOwnerForm = structuredClone(createOwnerTemplate(newId));
   const newValidForm = { ...validTemplate };
   const defaultPayment = methodsOfPayment.filter((method) => method.isDefault)[0] ?? null;
-  newOwnerForm.methodOfPayment.value = defaultPayment ? defaultPayment.label : '';
+  newOwnerForm.methodOfPayment.value = defaultPayment;
 
   return {
     newOwnerArr: [...ownershiptArray, newOwnerForm],
