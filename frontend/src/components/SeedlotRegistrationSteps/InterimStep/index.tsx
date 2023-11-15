@@ -25,6 +25,7 @@ import { FilterObj, filterInput } from '../../../utils/filterUtils';
 import getForestClientNumber from '../../../utils/StringUtils';
 import { LOCATION_CODE_LIMIT } from '../../../shared-constants/shared-constants';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import InterimForm from './definitions';
 import pageTexts from './constants';
 
@@ -37,7 +38,7 @@ interface InterimStorageStepProps {
   setStepData: Function,
   collectorAgency: string,
   collectorCode: string,
-  agencyOptions: Array<string>,
+  agencyOptions: Array<MultiOptionsObj>,
   readOnly?: boolean
 }
 
@@ -282,7 +283,14 @@ const InterimStorage = (
             ref={nameInputRef}
             name="name"
             helperText="You can enter the agency number, name or acronym"
-            onChange={(e: ComboBoxEvent) => { handleFormInput('agencyName', e.selectedItem); }}
+            onChange={(e: ComboBoxEvent) => {
+              handleFormInput(
+                'agencyName',
+                e.selectedItem
+                  ? e.selectedItem.label
+                  : ''
+              );
+            }}
             selectedItem={state.agencyName}
             shouldFilterItem={
               ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })

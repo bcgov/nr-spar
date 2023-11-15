@@ -46,18 +46,22 @@ parameters:
   - name: SERVICE_NAME
     description: The database's name
     value: dbq01.nrs.bcgov
-  - name: KEYCLOAK_REALM_URL
-    description: Keycloak realm address
-    value: https://test.loginproxy.gov.bc.ca/auth/realms/standard
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "1"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "2"
+  - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
+    description: Oracle API environment for OpenSearch. # One of: development, test, production
+    required: true
+    value: development
   - name: ORACLEDB_KEYSTORE
     description: Keystore location path
     value: /usr/share/service/jssecacerts
+  - name: AWS_COGNITO_ISSUER_URI
+    description: AWS Cognito JWT Server URI
+    required: true
 objects:
   - apiVersion: v1
     kind: ImageStream
@@ -107,9 +111,14 @@ objects:
             - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
               imagePullPolicy: Always
               name: ${NAME}
+              volumeMounts:
+                - name: ${NAME}-${ZONE}-fluentbit-logs
+                  mountPath: /logs
               env:
                 - name: NR_SPAR_ORACLE_API_VERSION
                   value: ${NR_SPAR_ORACLE_API_VERSION}
+                - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
+                  value: ${NR_SPAR_ORACLE_API_ENV_OPENSEARCH}
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
                 - name: DATABASE_HOST
@@ -128,10 +137,10 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-password
-                - name: KEYCLOAK_REALM_URL
-                  value: ${KEYCLOAK_REALM_URL}
                 - name: ORACLEDB_KEYSTORE
                   value: ${ORACLEDB_KEYSTORE}
+                - name: AWS_COGNITO_ISSUER_URI
+                  value: ${AWS_COGNITO_ISSUER_URI}
               ports:
                 - containerPort: 8090
                   protocol: TCP
@@ -160,6 +169,10 @@ objects:
                 initialDelaySeconds: 120
                 periodSeconds: 30
                 timeoutSeconds: 10
+          volumes:
+            - name: ${NAME}-${ZONE}-fluentbit-logs
+              persistentVolumeClaim:
+                claimName: ${NAME}-${ZONE}-fluentbit-logs
   - apiVersion: v1
     kind: Service
     metadata:

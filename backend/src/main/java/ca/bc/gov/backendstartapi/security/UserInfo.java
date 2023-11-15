@@ -6,9 +6,8 @@ import java.util.Set;
 import lombok.NonNull;
 
 /**
- * This record represents a user logged and his information from a decoded JWT. To learn more about
- * the attributes and see reference list, you can see here: <a
- * href="https://github.com/bcgov/sso-keycloak/blob/dev/docs/migration-guide.md">IDP Attributes</a>.
+ * This record represents a user logged and his information from a decoded JWT. Be aware that
+ * very soon this class will get updated with FAM properties.
  *
  * @param id the user's identifier. Read from the JWT {@code sub} property. E.g.: {@code
  *     123456789...45689@idir}

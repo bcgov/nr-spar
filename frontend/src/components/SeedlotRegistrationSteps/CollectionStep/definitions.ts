@@ -22,7 +22,7 @@ export interface CollectionStepProps {
   setStepData: Function,
   defaultAgency: string,
   defaultCode: string,
-  agencyOptions: Array<string>,
+  agencyOptions: Array<MultiOptionsObj>,
   collectionMethods: Array<MultiOptionsObj>,
   readOnly?: boolean,
   invalidateObj?: FormInvalidationObj

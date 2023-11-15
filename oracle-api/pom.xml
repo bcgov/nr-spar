@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.4</version>
+		<version>3.1.5</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ca.bc.gov</groupId>
@@ -53,6 +53,9 @@
 		</profile>
 		<profile>
 			<id>dev</id>
+			<properties>
+        <build.profile.id>dev</build.profile.id>
+      </properties>
 		</profile>
 		<profile>
 			<id>integration-test</id>
@@ -69,6 +72,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+        <!-- Exclude SnakeYaml for vulnerability -->
+        <!-- https://avd.aquasec.com/nvd/2022/cve-2022-1471/ -->
+        <exclusions>
+          <exclusion>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+          </exclusion>
+        </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -150,13 +161,16 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<profiles>
+            <profile>dev</profile>
+          </profiles>
 				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.2.2</version>
 				<executions>
 					<execution>
 						<id>integration-tests</id>
@@ -179,7 +193,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.2.2</version>
 				<configuration>
 					<argLine>@{argLine} -Xmx1024m</argLine>
 					<skipTests>${skip.unit.tests}</skipTests>
@@ -192,7 +206,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.10</version>
+				<version>0.8.11</version>
 				<configuration>
 					<skip>${jacoco.skip}</skip>
 					<excludes>
@@ -298,7 +312,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.6.2</version>
 				<configuration>
 					<source>17</source>
 					<doctitle>Javadoc Documentation for ${project.name} ${project.version}</doctitle>
@@ -309,7 +323,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.4.1</version>
 				<executions>
 					<execution>
 						<id>default-cli</id>
@@ -349,12 +363,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.1</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>10.12.2</version>
+						<version>10.12.5</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -401,7 +415,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.31</version>
+				<version>9.37.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

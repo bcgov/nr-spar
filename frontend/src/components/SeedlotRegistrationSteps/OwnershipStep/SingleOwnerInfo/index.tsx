@@ -24,7 +24,6 @@ import {
 } from '../definitions';
 import { inputText, DEFAULT_INDEX } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/filterUtils';
-import getForestClientNumber from '../../../../utils/StringUtils';
 import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import CheckboxType from '../../../../types/CheckboxType';
 
@@ -39,7 +38,7 @@ interface SingleOwnerInfoProps {
   setDefaultAgencyNCode: Function,
   useDefaultAgency: boolean,
   validationProp: FormInvalidationObj,
-  agencyOptions: Array<string>,
+  agencyOptions: Array<MultiOptionsObj>,
   fundingSources: Array<MultiOptionsObj>,
   methodsOfPayment: Array<MultiOptionsObj>,
   addRefs: Function,
@@ -118,13 +117,15 @@ const SingleOwnerInfo = ({
               onChange={
                 !readOnly
                   ? ((e: ComboBoxEvent) => {
-                    setForestClientNumber(e.selectedItem ? getForestClientNumber(e.selectedItem) : '');
+                    const { selectedItem } = e;
+
+                    setForestClientNumber(selectedItem ? selectedItem.code : '');
                     setLocationHelper(inputText.code.helperTextEnabled);
-                    if (e.selectedItem) {
-                      handleInputChange('ownerAgency', e.selectedItem);
+                    if (selectedItem) {
+                      handleInputChange('ownerAgency', selectedItem.label);
                     } else {
                       setLocCodeValidationFail(false);
-                      handleInputChange('ownerAgency', e.selectedItem, 'ownerCode', '');
+                      handleInputChange('ownerAgency', '', 'ownerCode', '');
                     }
                   })
                   : () => { }

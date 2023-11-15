@@ -1,5 +1,6 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 @use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@carbon/type';
 
 .spar-header {
   overflow: hidden;
@@ -19,16 +20,9 @@
     font-weight: bold;
   }
 
-  .#{vars.$bcgov-prefix}--side-nav__items {
-    display: flex;
-    flex-direction: column;
-  }
+  .disabled-side-nav-option {
+    cursor: not-allowed;
 
-  .support-section {
-    margin-top: auto;
-  }
-
-  .disabled-menu-option {
     span {
       color: var(--#{vars.$bcgov-prefix}-text-disabled);
     }
@@ -38,12 +32,21 @@
     }
 
     &:hover,
-    &:hover > span {
+    &:hover>span {
       background-color: unset !important;
       // Unset doesn't work on 'color' because the inherited value is not the
       // disabled text color, so setting it directly to the wanted value
       color: var(--#{vars.$bcgov-prefix}-text-disabled) !important;
     }
+  }
+
+  .side-nav-category-name {
+    @include type.type-style('label-01');
+    pointer-events: none;
+  }
+
+  .#{vars.$bcgov-prefix}--side-nav__item{
+    list-style: none;
   }
 
   button.#{vars.$bcgov-prefix}--header__action {
@@ -57,12 +60,12 @@
 
   .#{vars.$bcgov-prefix}--header__global .#{vars.$bcgov-prefix}--btn--icon-only.#{vars.$bcgov-prefix}--header__action svg,
   button.#{vars.$bcgov-prefix}--header__action svg {
-    fill: var(--#{vars.$bcgov-prefix}-icon-on-color) ;
+    fill: var(--#{vars.$bcgov-prefix}-icon-on-color);
   }
 
-  button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg,
-  .#{vars.$bcgov-prefix}--popover-container button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active > svg {
-    fill: var(--#{vars.$bcgov-prefix}-icon-primary) ;
+  button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active>svg,
+  .#{vars.$bcgov-prefix}--popover-container button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__action--active>svg {
+    fill: var(--#{vars.$bcgov-prefix}-icon-primary);
   }
 
   button.#{vars.$bcgov-prefix}--header__action.#{vars.$bcgov-prefix}--header__menu-trigger:focus {
@@ -102,6 +105,7 @@
   /* This rule is specific for the right panel only, it should fill the whole viewport
     when the screen hits the panel size or smaller */
   @media only screen and (max-width: 400px) {
+
     .#{vars.$bcgov-prefix}--header-panel--expanded.notifications-panel,
     .#{vars.$bcgov-prefix}--header-panel--expanded.profile-panel {
       width: 100vw;
