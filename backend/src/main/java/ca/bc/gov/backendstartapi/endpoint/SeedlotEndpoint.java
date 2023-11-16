@@ -1,9 +1,11 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
+import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
@@ -31,6 +33,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -253,5 +256,65 @@ public class SeedlotEndpoint {
           @PathVariable
           String seedlotNumber) {
     return seedlotService.getSingleSeedlotInfo(seedlotNumber);
+  }
+
+  private final SeedlotRepository seedlotRepository;
+
+  /**
+   * Created a new Seedlot in the system.
+   *
+   * @param patchDto A {@link SeedlotApplicationPatchDto} containig all required field to get a new
+   *     registration started.
+   * @return A {@link Seedlot} with all updated values.
+   */
+  @PatchMapping(
+      consumes = MimeTypeUtils.APPLICATION_JSON_VALUE,
+      path = "/{seedlotNumber}/applicantion-info")
+  @Operation(
+      summary = "Updates a seedlot's applicant email and other fields",
+      description =
+          """
+          Updates a seedlot's applicant email, source_code, to_be_registered_ind and bc_source_ind
+          """)
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "The Seedlot entity was successfully updated"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "One or more fields has invalid values.",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema =
+                        @Schema(
+                            oneOf = {
+                              ValidationExceptionResponse.class,
+                              DefaultSpringExceptionResponse.class
+                            }))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public ResponseEntity<Seedlot> patchApplicantAndSeedlotInfo(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber,
+      @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "Body containing minimum required fields to create a seedlot",
+              required = true)
+          @RequestBody
+          @Valid
+          SeedlotApplicationPatchDto patchDto) {
+
+    Optional<Seedlot> testSeedlot = seedlotRepository.findById(seedlotNumber);
+    return ResponseEntity.ok().body(testSeedlot.get());
   }
 }
