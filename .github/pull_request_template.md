@@ -16,9 +16,6 @@ Closes #(issue)
 - [ ] 👀 Eyeball
 - [ ] 🤖 Added tests
 
-
-
-
 <!-- Sections below are optional, uncomment them to add related info -->
 
 <!-- ## Are there any post-deployment tasks we need to perform? -->
