@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Accordion,
-  AccordionItem
+  AccordionItem,
+  Button
 } from '@carbon/react';
+import { Add } from '@carbon/icons-react';
 
 import TitleAccordion from '../../TitleAccordion';
 import SingleOwnerInfo from './SingleOwnerInfo';
@@ -160,7 +162,6 @@ const OwnershipStep = (
                   addRefs={(element: HTMLInputElement, name: string) => {
                     addRefs(element, singleOwnerInfo.id, name);
                   }}
-                  addAnOwner={addAnOwner}
                   deleteAnOwner={(id: number) => deleteAnOwner(id)}
                   setState={(singleState: SingleOwnerForm, id: number) => {
                     const arrayClone = structuredClone(state);
@@ -176,6 +177,15 @@ const OwnershipStep = (
             ))
           }
         </Accordion>
+        <Button
+          kind="tertiary"
+          size="md"
+          className="owner-add-btn"
+          renderIcon={Add}
+          onClick={addAnOwner}
+        >
+          Add owner
+        </Button>
       </div>
     </div>
   );

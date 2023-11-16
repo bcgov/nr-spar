@@ -7,7 +7,7 @@ import {
   Row,
   Button
 } from '@carbon/react';
-import { Add, TrashCan } from '@carbon/icons-react';
+import { TrashCan } from '@carbon/icons-react';
 import ApplicantAgencyFields from '../../../ApplicantAgencyFields';
 
 import { FormInputType } from '../../../../types/FormInputType';
@@ -27,7 +27,6 @@ import './styles.scss';
 
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
-  addAnOwner: Function,
   deleteAnOwner: Function,
   agencyOptions: Array<MultiOptionsObj>,
   defaultAgency: string,
@@ -42,7 +41,7 @@ interface SingleOwnerInfoProps {
 
 const SingleOwnerInfo = ({
   addRefs, ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
-  methodsOfPayment, addAnOwner, deleteAnOwner, checkPortionSum, setState, readOnly
+  methodsOfPayment, deleteAnOwner, checkPortionSum, setState, readOnly
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>('');
   const [reservedInvalidText, setReservedInvalidText] = useState<string>('');
@@ -295,19 +294,8 @@ const SingleOwnerInfo = ({
         {(!readOnly) && (
           <Row>
             {
-              ownerInfo.id === DEFAULT_INDEX
+              ownerInfo.id !== DEFAULT_INDEX
                 ? (
-                  <Button
-                    kind="tertiary"
-                    size="md"
-                    className="owner-mod-btn"
-                    renderIcon={Add}
-                    onClick={addAnOwner}
-                  >
-                    Add owner
-                  </Button>
-                )
-                : (
                   <Button
                     kind="danger--tertiary"
                     size="md"
@@ -318,6 +306,7 @@ const SingleOwnerInfo = ({
                     Delete owner
                   </Button>
                 )
+                : null
             }
           </Row>
         )}
