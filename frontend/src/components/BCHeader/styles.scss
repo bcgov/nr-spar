@@ -45,7 +45,16 @@
     pointer-events: none;
   }
 
-  .#{vars.$bcgov-prefix}--side-nav__item{
+  .spar-side-nav {
+    justify-content: space-between;
+    overflow-y: auto;
+
+    .side-nav-top {
+      padding-top: 1rem;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--side-nav__item {
     list-style: none;
   }
 
