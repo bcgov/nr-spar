@@ -2,11 +2,22 @@
 Closes #(issue)
 
 ### Changelog
-#### Front-end
+#### New
 -
 
-#### Back-end
+#### Changed
 -
+
+#### Removed
+-
+
+### How was this tested?
+- [ ] 🧠 Not needed
+- [ ] 👀 Eyeball
+- [ ] 🤖 Added tests
+
+
+
 
 <!-- Sections below are optional, uncomment them to add related info -->
 
