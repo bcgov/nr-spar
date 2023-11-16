@@ -1,3 +1,4 @@
+import { emptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
 import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { SingleOwnerForm } from './definitions';
@@ -82,12 +83,12 @@ export const createOwnerTemplate = (newId: number): SingleOwnerForm => ({
   },
   fundingSource: {
     id: `ownership-funding-source-${newId}`,
-    value: '',
+    value: emptyMultiOptObj,
     isInvalid: false
   },
   methodOfPayment: {
     id: `ownership-method-payment-${newId}`,
-    value: '',
+    value: emptyMultiOptObj,
     isInvalid: false
   }
 });

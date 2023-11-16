@@ -56,7 +56,6 @@ export interface OwnershipStepProps {
   state: Array<SingleOwnerForm>,
   setStepData: Function,
   invalidState: OwnershipInvalidObj,
-  setInvalidState: Function,
   readOnly?: boolean,
   fundingSources: Array<MultiOptionsObj>,
   methodsOfPayment: Array<MultiOptionsObj>

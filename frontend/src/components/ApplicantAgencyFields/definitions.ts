@@ -11,6 +11,7 @@ interface ApplicantAgencyFieldsProps {
   defaultAgency: string;
   defaultCode: string;
   setAllValues: Function;
+  showDefaultCheckbox?: boolean;
   readOnly?: boolean;
 }
 

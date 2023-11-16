@@ -1,6 +1,6 @@
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { inputText, createOwnerTemplate, validTemplate } from './constants';
+import { inputText, createOwnerTemplate } from './constants';
 
 import {
   SingleOwnerForm,
@@ -20,23 +20,19 @@ const getNextId = (currentArray: Array<SingleOwnerForm>): number => {
 };
 
 export const insertOwnerForm = (
-  ownershiptArray: Array<SingleOwnerForm>,
-  validationObj: OwnershipInvalidObj,
+  ownershipArray: Array<SingleOwnerForm>,
   methodsOfPayment: MultiOptionsObj[]
 ) => {
-  const newId = getNextId(ownershiptArray);
-  const newOwnerForm = structuredClone(createOwnerTemplate(newId));
-  const newValidForm = { ...validTemplate };
+  const clonedArray = structuredClone(ownershipArray);
+  const newId = getNextId(ownershipArray);
+  const newOwnerForm = createOwnerTemplate(newId);
+
   const defaultPayment = methodsOfPayment.filter((method) => method.isDefault)[0] ?? null;
   newOwnerForm.methodOfPayment.value = defaultPayment;
 
-  return {
-    newOwnerArr: [...ownershiptArray, newOwnerForm],
-    newValidObj: {
-      ...validationObj,
-      [newId]: newValidForm
-    }
-  };
+  clonedArray.push(newOwnerForm);
+
+  return clonedArray;
 };
 
 export const deleteOwnerForm = (
@@ -206,7 +202,7 @@ export const isInputInvalid = (name: string, value: string): SingleInvalidObj =>
 export const arePortionsValid = (ownershipArray: Array<SingleOwnerForm>): boolean => {
   let sum = 0;
   ownershipArray.forEach((obj) => {
-    sum += Number(obj.ownerPortion);
+    sum += Number(obj.ownerPortion.value);
   });
   return Number(sum.toFixed(2)) === 100;
 };

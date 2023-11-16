@@ -22,7 +22,6 @@ import {
 } from '../definitions';
 import { inputText, DEFAULT_INDEX, agencyFieldsProps } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/filterUtils';
-import { FormInvalidationObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 import './styles.scss';
 
@@ -30,7 +29,6 @@ interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
   addAnOwner: Function,
   deleteAnOwner: Function,
-  validationProp: FormInvalidationObj,
   agencyOptions: Array<MultiOptionsObj>,
   defaultAgency: string,
   defaultCode: string,
@@ -38,14 +36,13 @@ interface SingleOwnerInfoProps {
   methodsOfPayment: Array<MultiOptionsObj>,
   addRefs: Function,
   checkPortionSum: Function,
-  setState: Function
-  readOnly?: boolean,
+  setState: Function,
+  readOnly?: boolean
 }
 
 const SingleOwnerInfo = ({
   addRefs, ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
-  methodsOfPayment, validationProp, addAnOwner, deleteAnOwner,
-  checkPortionSum, setState, readOnly
+  methodsOfPayment, addAnOwner, deleteAnOwner, checkPortionSum, setState, readOnly
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>('');
   const [reservedInvalidText, setReservedInvalidText] = useState<string>('');
@@ -150,6 +147,7 @@ const SingleOwnerInfo = ({
               useDefaultData: FormInputType & { value: boolean }
             ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
           }
+          showDefaultCheckbox={ownerInfo.id === DEFAULT_INDEX}
           readOnly={readOnly}
         />
         <Row>
@@ -268,8 +266,8 @@ const SingleOwnerInfo = ({
               titleText={inputText.funding.titleText}
               direction="top"
               onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
-              invalid={validationProp.funding.isInvalid}
-              invalidText={validationProp.funding.invalidText}
+              invalid={ownerInfo.fundingSource.isInvalid}
+              invalidText={inputText.funding.invalidText}
               readOnly={readOnly}
             />
           </Column>
@@ -288,8 +286,8 @@ const SingleOwnerInfo = ({
               titleText={inputText.payment.titleText}
               direction="top"
               onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
-              invalid={validationProp.payment.isInvalid}
-              invalidText={validationProp.payment.invalidText}
+              invalid={ownerInfo.methodOfPayment.isInvalid}
+              invalidText={inputText.payment.invalidText}
               readOnly={readOnly}
             />
           </Column>

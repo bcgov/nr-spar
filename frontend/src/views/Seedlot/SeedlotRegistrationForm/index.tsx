@@ -42,7 +42,7 @@ import { emptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
 import {
   AllStepData, AllStepInvalidationObj,
-  FormInvalidationObj, ProgressIndicatorConfig
+  ProgressIndicatorConfig
 } from './definitions';
 import {
   initCollectionState,
@@ -110,7 +110,7 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getApplicantAgenciesOptions()
   });
 
-  const [allInvalidationObj, setAllInvalidationObj] = useState<AllStepInvalidationObj>({
+  const [allInvalidationObj] = useState<AllStepInvalidationObj>({
     collectionStep: initInvalidationObj(),
     interimStep: initInvalidationObj(),
     ownershipStep: initOwnerShipInvalidState(),
@@ -137,12 +137,6 @@ const SeedlotRegistrationForm = () => {
       }
     }
   });
-
-  const setInvalidState = (stepName: keyof AllStepInvalidationObj, stepInvalidData: any) => {
-    const newObj = { ...allInvalidationObj };
-    newObj[stepName] = stepInvalidData;
-    setAllInvalidationObj(newObj);
-  };
 
   const logState = () => {
     // eslint-disable-next-line no-console
@@ -226,7 +220,6 @@ const SeedlotRegistrationForm = () => {
             fundingSources={getMultiOptList(fundingSourcesQuery.data)}
             methodsOfPayment={methodsOfPaymentQuery.data ?? []}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
-            setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
         );
       // Interim Storage

@@ -21,7 +21,7 @@ import './styles.scss';
 
 const ApplicantAgencyFields = ({
   useDefault, agency, locationCode, fieldsProps, agencyOptions,
-  defaultAgency, defaultCode, setAllValues, readOnly
+  defaultAgency, defaultCode, setAllValues, showDefaultCheckbox = true, readOnly
 }: ApplicantAgencyFieldsProps) => {
   const agencyClone = structuredClone(agency);
   const locationCodeClone = structuredClone(locationCode);
@@ -108,20 +108,26 @@ const ApplicantAgencyFields = ({
 
   return (
     <div className="agency-information-section">
-      <Row className="agency-information-row">
-        <Column sm={4} md={8} lg={16} xlg={16}>
-          <Checkbox
-            id={useDefaultClone.id}
-            name={fieldsProps.useDefaultCheckbox.name}
-            labelText={fieldsProps.useDefaultCheckbox.labelText}
-            readOnly={readOnly}
-            checked={useDefaultClone.value}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleDefaultCheckBox(e.target.checked);
-            }}
-          />
-        </Column>
-      </Row>
+      {
+        showDefaultCheckbox
+          ? (
+            <Row className="agency-information-row">
+              <Column sm={4} md={8} lg={16} xlg={16}>
+                <Checkbox
+                  id={useDefaultClone.id}
+                  name={fieldsProps.useDefaultCheckbox.name}
+                  labelText={fieldsProps.useDefaultCheckbox.labelText}
+                  readOnly={readOnly}
+                  checked={useDefaultClone.value}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleDefaultCheckBox(e.target.checked);
+                  }}
+                />
+              </Column>
+            </Row>
+          )
+          : null
+      }
       <Row className="agency-information-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
@@ -132,7 +138,7 @@ const ApplicantAgencyFields = ({
             helperText={supportTexts.agency.helperText}
             invalidText={fieldsProps.agencyInput.invalidText}
             items={agencyOptions}
-            readOnly={useDefaultClone.value || readOnly}
+            readOnly={!showDefaultCheckbox ? false : useDefaultClone.value || readOnly}
             selectedItem={agencyClone.value}
             onChange={(e: ComboBoxEvent) => handleAgencyInput(e.selectedItem)}
             invalid={agencyClone.isInvalid}
@@ -154,7 +160,7 @@ const ApplicantAgencyFields = ({
             helperText={locationCodeHelperText}
             invalid={locationCodeClone.isInvalid}
             invalidText={invalidLocationMessage}
-            readOnly={useDefaultClone.value || readOnly}
+            readOnly={!showDefaultCheckbox ? false : useDefaultClone.value || readOnly}
             disabled={!forestClientNumber}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleLocationCodeChange(e.target.value);
