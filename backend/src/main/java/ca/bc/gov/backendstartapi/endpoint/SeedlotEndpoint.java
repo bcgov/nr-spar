@@ -5,7 +5,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
-import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
@@ -24,7 +23,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -246,7 +244,7 @@ public class SeedlotEndpoint {
             responseCode = "404",
             description = "Could not find information for the given seedlot number")
       })
-  public Optional<Seedlot> getSingleSeedlotInfo(
+  public Seedlot getSingleSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -258,10 +256,8 @@ public class SeedlotEndpoint {
     return seedlotService.getSingleSeedlotInfo(seedlotNumber);
   }
 
-  private final SeedlotRepository seedlotRepository;
-
   /**
-   * Created a new Seedlot in the system.
+   * PATCH an entry on the Seedlot table.
    *
    * @param patchDto A {@link SeedlotApplicationPatchDto} containig all required field to get a new
    *     registration started.
@@ -314,7 +310,8 @@ public class SeedlotEndpoint {
           @Valid
           SeedlotApplicationPatchDto patchDto) {
 
-    Optional<Seedlot> testSeedlot = seedlotRepository.findById(seedlotNumber);
-    return ResponseEntity.ok().body(testSeedlot.get());
+    Seedlot patchedSeedlot = seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
+
+    return ResponseEntity.ok().body(patchedSeedlot);
   }
 }
