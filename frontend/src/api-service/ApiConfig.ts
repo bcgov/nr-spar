@@ -14,11 +14,7 @@ const ApiConfig = {
   /**
    * MOCK API
    */
-  applicantInfo: `${mockServerHost}/api/applicant-info`,
-
   aClassSeedlot: `${mockServerHost}/api/register-a-class`,
-
-  seedlot: `${mockServerHost}/api/seedlot`,
 
   seedlotOrchardStep: `${mockServerHost}/api/seedlot/orchard`,
 
@@ -52,6 +48,10 @@ const ApiConfig = {
   forestClient: `${serverHost}/api/forest-clients`,
 
   geneticWorth: `${serverHost}/api/genetic-worth/calculate-all`,
+
+  seedlotSources: `${serverHost}/api/seedlot-sources`,
+
+  seedlots: `${serverHost}/api/seedlots`,
 
   /**
    * ORACLE API

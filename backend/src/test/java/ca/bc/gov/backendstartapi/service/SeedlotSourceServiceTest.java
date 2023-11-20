@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -39,15 +40,15 @@ class SeedlotSourceServiceTest {
     var expiredDateRange = new EffectiveDateRange(effectiveDate, expiredDate);
 
     SeedlotSourceEntity firstEntity =
-        new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange);
+        new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange, null);
     seedlotSourceRepository.saveAndFlush(firstEntity);
     SeedlotSourceEntity secondEntity =
-        new SeedlotSourceEntity("TPT", "Tested Parent Trees", effectiveDateRange);
+        new SeedlotSourceEntity("TPT", "Tested Parent Trees", effectiveDateRange, true);
     seedlotSourceRepository.saveAndFlush(secondEntity);
 
     // This entity should not appear in the result list
     SeedlotSourceEntity expiredEntity =
-        new SeedlotSourceEntity("V", "V for Vendetta", expiredDateRange);
+        new SeedlotSourceEntity("V", "V for Vendetta", expiredDateRange, null);
     seedlotSourceRepository.saveAndFlush(expiredEntity);
 
     List<SeedlotSourceEntity> testEntityList =
@@ -74,7 +75,7 @@ class SeedlotSourceServiceTest {
           }
         };
 
-    List<CodeDescriptionDto> resultList = seedlotSourceService.getAllSeedlotSource();
+    List<SeedlotSourceDto> resultList = seedlotSourceService.getAllSeedlotSource();
 
     Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());

@@ -9,7 +9,7 @@ import {
 } from '@carbon/react';
 
 import PageTitle from '../../../components/PageTitle';
-import ApplicantInformationForm from '../../../components/ApplicantInformationForm';
+import CreationForm from './CreationForm';
 import './styles.scss';
 
 const CreateAClass = () => {
@@ -24,13 +24,13 @@ const CreateAClass = () => {
         </Row>
         <Row>
           <PageTitle
-            title="Create A class seedlot"
-            subtitle="Register a new A class seedlot"
+            title="Create A-class seedlot"
+            subtitle="Register a new A-class seedlot"
             enableFavourite
             activity="registerAClass"
           />
         </Row>
-        <ApplicantInformationForm />
+        <CreationForm />
       </Stack>
     </FlexGrid>
   );

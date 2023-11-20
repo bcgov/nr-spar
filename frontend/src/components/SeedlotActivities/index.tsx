@@ -11,7 +11,7 @@ const SeedlotActivities = () => {
     {
       id: '1',
       image: 'Agriculture',
-      header: 'Register an A class seedlot',
+      header: 'Register an A-class seedlot',
       description:
         'Register a seedlot which has been collected in an orchard from parent trees',
       link: '/seedlots/register-a-class',
@@ -23,7 +23,7 @@ const SeedlotActivities = () => {
     {
       id: '2',
       image: 'Farm_01',
-      header: 'Register a B class seedlot',
+      header: 'Register a B-class seedlot',
       description:
         'Register a seedlot which has been collected from a natural stand',
       link: '#',

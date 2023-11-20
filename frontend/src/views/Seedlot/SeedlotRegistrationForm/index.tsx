@@ -12,13 +12,17 @@ import {
   Grid
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
+import { AxiosError } from 'axios';
 
 import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
-import { getSeedlotInfo } from '../../../api-service/seedlotAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
+import { getSeedlotById } from '../../../api-service/seedlotAPI';
+import getVegCodes from '../../../api-service/vegetationCodeAPI';
+import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -52,7 +56,8 @@ import {
   initParentTreeState,
   generateDefaultRows,
   validateCollectionStep,
-  verifyCollectionStepCompleteness
+  verifyCollectionStepCompleteness,
+  getSpeciesOptionByCode
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
@@ -63,7 +68,7 @@ const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
-  const seedlotNumber = useParams().seedlot ?? '';
+  const { seedlotNumber } = useParams();
 
   const [formStep, setFormStep] = useState<number>(0);
   const [
@@ -91,10 +96,31 @@ const SeedlotRegistrationForm = () => {
     queryFn: getConeCollectionMethod
   });
 
-  const seedlotInfoQuery = useQuery({
-    queryKey: ['seedlot', seedlotNumber],
-    queryFn: () => getSeedlotInfo(seedlotNumber),
+  const vegCodeQuery = useQuery({
+    queryKey: ['vegetation-codes'],
+    queryFn: () => getVegCodes(true),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  const seedlotQuery = useQuery({
+    queryKey: ['seedlots', seedlotNumber],
+    queryFn: () => getSeedlotById(seedlotNumber ?? ''),
+    onError: (err: AxiosError) => {
+      if (err.response?.status === 404) {
+        navigate('/404');
+      }
+    },
+    enabled: vegCodeQuery.isFetched,
     refetchOnWindowFocus: false
+  });
+
+  const forestClientQuery = useQuery({
+    queryKey: ['forest-clients', seedlotQuery.data?.applicantClientNumber],
+    queryFn: () => getForestClientByNumber(seedlotQuery.data?.applicantClientNumber),
+    enabled: seedlotQuery.isFetched,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
   });
 
   const gameticMethodologyQuery = useQuery({
@@ -189,15 +215,17 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
-    const defaultAgency = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.name;
-    const defaultCode = seedlotInfoQuery.data.seedlotApplicantInfo.applicant.number;
+    // Will need to convert this into a multiOption obj
+    const defaultAgency = `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`;
+
+    const defaultCode = seedlotQuery.data?.applicantLocationCode ?? '';
     const agencyOptions = applicantAgencyQuery.data ? applicantAgencyQuery.data : [];
 
-    const seedlotSpecies = seedlotInfoQuery.data.seedlot?.lot_species ?? {
-      code: '',
-      label: '',
-      Description: ''
-    };
+    const seedlotSpecies = getSpeciesOptionByCode(
+      seedlotQuery.data?.vegetationCode,
+      vegCodeQuery.data
+    );
+
     switch (formStep) {
       // Collection
       case 0:
@@ -312,12 +340,14 @@ const SeedlotRegistrationForm = () => {
           <Column className="seedlot-registration-row" sm={4} md={8} lg={16} xlg={16}>
             {
               (
-                seedlotInfoQuery.isSuccess
-                && fundingSourcesQuery.isSuccess
-                && methodsOfPaymentQuery.isSuccess
-                && gameticMethodologyQuery.isSuccess
-                && coneCollectionMethodsQuery.isSuccess
-                && applicantAgencyQuery.isSuccess
+                vegCodeQuery.isFetched
+                && seedlotQuery.isFetched
+                && forestClientQuery.isFetched
+                && fundingSourcesQuery.isFetched
+                && methodsOfPaymentQuery.isFetched
+                && gameticMethodologyQuery.isFetched
+                && coneCollectionMethodsQuery.isFetched
+                && applicantAgencyQuery.isFetched
               )
                 ? renderStep()
                 : <Loading />

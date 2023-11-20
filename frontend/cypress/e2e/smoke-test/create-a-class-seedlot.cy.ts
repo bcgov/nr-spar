@@ -2,7 +2,7 @@ import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
 import { TYPE_DELAY } from '../../constants';
 
-describe('Create A Class Seedlot', () => {
+describe('Create A-Class Seedlot', () => {
   let data: {
     applicantAgency: { name: string; number: string; email: string; invalidEmail: string; };
     seedlotInformation: { species: string; };
@@ -16,12 +16,35 @@ describe('Create A Class Seedlot', () => {
     cy.login();
     cy.visit('/seedlots');
     cy.url().should('contains', '/seedlots');
+
+    cy.intercept(
+      {
+        method: 'GET',
+        url: '**/api/forest-clients/**'
+      },
+      {
+        statusCode: 200
+      }
+    ).as('verifyLocationCode');
+
+    cy.intercept(
+      {
+        method: 'POST',
+        url: '**/api/seedlots'
+      },
+      {
+        statusCode: 201,
+        body: {
+          seedlotNumber: '654321'
+        }
+      }
+    ).as('submitSeedlot');
   });
 
-  it('should register a Class A Seedlot', () => {
+  it('should register an A-Class Seedlot', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
-    // Click on the register seedlot an A class seedlot card
+    // Click on the register seedlot an A-class seedlot card
     cy.get(SeedlotRegistrationSelectors.SeedlotActivitiesCardTitle)
       .contains(SeedlotActivities.RegisterAClass)
       .click();
@@ -55,33 +78,33 @@ describe('Create A Class Seedlot', () => {
       .scrollIntoView()
       .click();
     // Check checkbox behavior when Tested parent tree selected
-    cy.get('#tested-radio')
+    cy.get('#seedlot-source-radio-btn-tpt')
       .should('be.checked');
-    cy.get('#untested-radio')
+    cy.get('#seedlot-source-radio-btn-upt')
       .should('not.be.checked');
-    cy.get('#custom-radio')
+    cy.get('#seedlot-source-radio-btn-cus')
       .should('not.be.checked');
     // Check checkbox behavior when Custom seedlot selected
-    cy.get('#custom-radio')
+    cy.get('#seedlot-source-radio-btn-cus')
       .siblings('.bx--radio-button__label')
       .find('.bx--radio-button__appearance')
       .click();
-    cy.get('#tested-radio')
+    cy.get('#seedlot-source-radio-btn-tpt')
       .should('not.be.checked');
-    cy.get('#untested-radio')
+    cy.get('#seedlot-source-radio-btn-upt')
       .should('not.be.checked');
-    cy.get('#custom-radio')
+    cy.get('#seedlot-source-radio-btn-cus')
       .should('be.checked');
     // Check checkbox behavior when Untested parent tree selected
-    cy.get('#untested-radio')
+    cy.get('#seedlot-source-radio-btn-upt')
       .siblings('.bx--radio-button__label')
       .find('.bx--radio-button__appearance')
       .click();
-    cy.get('#tested-radio')
+    cy.get('#seedlot-source-radio-btn-tpt')
       .should('not.be.checked');
-    cy.get('#untested-radio')
+    cy.get('#seedlot-source-radio-btn-upt')
       .should('be.checked');
-    cy.get('#custom-radio')
+    cy.get('#seedlot-source-radio-btn-cus')
       .should('not.be.checked');
     // To be registered? should be checked by default
     cy.get('#registered-tree-seed-center')
@@ -93,13 +116,8 @@ describe('Create A Class Seedlot', () => {
     cy.get('.save-button')
       .find('button')
       .click();
-    // To-do Validate seedlot id
-    cy.get('.scf-info-container')
-      .find('h2')
-      .contains(/^Your A class seedlot [0-9]/);
-    cy.contains('button', "Go back to seedlot's main screen")
-      .click();
-    cy.get('.bx--data-table-content').contains(data.seedlotInformation.species);
+    cy.url().should('contains', '/creation-success');
+    cy.get('h1').contains('654321');
   });
 });
 

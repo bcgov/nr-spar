@@ -19,7 +19,7 @@ import {
 
 import Subtitle from '../../Subtitle';
 
-import getForestClientLocation from '../../../api-service/forestClientsAPI';
+import { getForestClientLocation } from '../../../api-service/forestClientsAPI';
 
 import { FilterObj, filterInput } from '../../../utils/filterUtils';
 import getForestClientNumber from '../../../utils/StringUtils';
@@ -88,7 +88,7 @@ const InterimStorage = (
   };
 
   const validateLocationCodeMutation = useMutation({
-    mutationFn: (queryParams:string[]) => getForestClientLocation(
+    mutationFn: (queryParams: string[]) => getForestClientLocation(
       queryParams[0],
       queryParams[1]
     ),

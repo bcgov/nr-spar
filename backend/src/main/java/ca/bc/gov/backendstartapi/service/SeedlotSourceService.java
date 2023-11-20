@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,15 +18,18 @@ public class SeedlotSourceService {
   }
 
   /** Fetch all valid seedlot source from the repository. */
-  public List<CodeDescriptionDto> getAllSeedlotSource() {
+  public List<SeedlotSourceDto> getAllSeedlotSource() {
     log.info("Fetching all seedlot source");
-    List<CodeDescriptionDto> resultList = new ArrayList<>();
+    List<SeedlotSourceDto> resultList = new ArrayList<>();
     seedlotSourceRepository.findAll().stream()
         .filter(method -> method.isValid())
         .forEach(
             method -> {
-              CodeDescriptionDto methodToAdd =
-                  new CodeDescriptionDto(method.getSeedlotSourceCode(), method.getDescription());
+              SeedlotSourceDto methodToAdd =
+                  new SeedlotSourceDto(
+                      method.getSeedlotSourceCode(),
+                      method.getDescription(),
+                      method.getIsDefault());
               resultList.add(methodToAdd);
             });
 

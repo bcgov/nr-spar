@@ -1,0 +1,45 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.seedlot-summary {
+  width: auto;
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.seedlot-summary-title {
+  @include type.type-style('heading-02');
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.seedlot-summary-title-section {
+  margin-bottom: 2rem;
+}
+
+.seedlot-summary-info-section {
+  display: flex;
+}
+
+.seedlot-summary-info-section > div {
+  margin-right: 3.5rem;
+}
+
+.seedlot-summary-info-label {
+  @include type.type-style('label-01');
+  margin-bottom: 0.5rem;
+}
+
+.seedlot-summary-seedlot-status > .seedlot-summary-info-value div.#{vars.$bcgov-prefix}--tag {
+  margin: 0;
+}
+
+.seedlot-summary-seedlot-status > .seedlot-summary-info-label,
+.seedlot-summary-seedlot-participants > .seedlot-summary-info-label {
+  margin-bottom: 0.25rem;
+}
+
+p.seedlot-summary-info-value {
+  @include type.type-style('body-compact-01');
+}

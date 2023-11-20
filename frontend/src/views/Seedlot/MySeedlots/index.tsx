@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -12,36 +12,18 @@ import {
 import { Add } from '@carbon/icons-react';
 
 import PageTitle from '../../../components/PageTitle';
-import EmptySection from '../../../components/EmptySection';
-import SeedlotDataTable from './SeedlotDataTable';
-import { tableText } from './constants';
+import AuthContext from '../../../contexts/AuthContext';
+import SeedlotTable from '../../../components/SeedlotTable';
 
-import api from '../../../api-service/api';
-import ApiConfig from '../../../api-service/ApiConfig';
-import Seedlot from '../../../types/Seedlot';
+import { tableText } from './constants';
 
 import './styles.scss';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
-  const [seedlotsData, setSeedlotsData] = useState<Array<Seedlot>>([]);
-
-  const getSeedlotsData = () => {
-    const url = ApiConfig.seedlot;
-    api.get(url)
-      .then((response) => {
-        setSeedlotsData(response.data.seedlotData.reverse());
-      })
-      .catch((error) => {
-        // eslint-disable-next-line
-        console.error(`Error: ${error}`);
-      });
-  };
-
-  useEffect(() => {
-    getSeedlotsData();
-  }, []);
+  const userId = user?.userId ?? '';
 
   return (
     <FlexGrid fullWidth className="my-seedlot-content">
@@ -72,19 +54,7 @@ const MySeedlots = () => {
         </Column>
       </Row>
       <Row className="my-seedlot-data-table-row">
-        {
-          seedlotsData.length === 0
-            ? (
-              <div className="empty-seedlots">
-                <EmptySection
-                  pictogram={tableText.emptyPictogram}
-                  title={tableText.emptyTitle}
-                  description={tableText.emptyDescription}
-                />
-              </div>
-            )
-            : <SeedlotDataTable seedlots={seedlotsData} />
-        }
+        <SeedlotTable userId={userId} isSortable showSearch showPagination defaultPageSize={20} />
       </Row>
     </FlexGrid>
   );

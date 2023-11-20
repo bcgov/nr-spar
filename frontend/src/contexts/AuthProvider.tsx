@@ -11,6 +11,7 @@ import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
 import AuthContext from './AuthContext';
 import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
+import { TWO_MINUTE } from '../config/TimeUnits';
 
 interface Props {
   children: React.ReactNode;
@@ -44,8 +45,8 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
  * you can take a look on the attribute mapping reference at:
  * https://github.com/bcgov/nr-forests-access-management/wiki/OIDC-Attribute-Mapping
  *
- * @param authToken The CognitoUserSession to be parsed.
- * @returns The FamUser object
+ * @param {CognitoUserSession} authToken CognitoUserSession to be parsed.
+ * @returns {FamUser} The FamUser object
  */
 const parseToken = (authToken: CognitoUserSession): FamUser => {
   const decodedIdToken = authToken.getIdToken().decodePayload();
@@ -53,20 +54,22 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
 
   // Extract the first name and last name from the displayName and remove unwanted part
   const displayName = decodedIdToken['custom:idp_display_name'] as string;
-  const provider = decodedIdToken['custom:idp_name'] as string;
-  const [firstName, lastName] = findFindAndLastName(displayName, provider.toUpperCase());
+  const idpProvider = (decodedIdToken['custom:idp_name'] as string).toUpperCase();
+  const idpUsername = (decodedIdToken['custom:idp_username'] as string).toUpperCase();
+  const [firstName, lastName] = findFindAndLastName(displayName, idpProvider);
+
   const famUser: FamUser = {
     displayName: decodedIdToken['custom:idp_display_name'], // E.g: 'de Campos, Ricardo WLRS:EX'
     email: decodedIdToken.email,
     lastName,
     firstName,
-    providerUsername: decodedIdToken['custom:idp_username'], // E.g: RDECAMPO
+    providerUsername: idpUsername, // E.g: RDECAMPO
     name: `${firstName} ${lastName}`,
     roles: decodedAccessToken['cognito:groups'],
     provider: decodedIdToken['custom:idp_name'].toLocaleUpperCase(),
     jwtToken: authToken.getIdToken().getJwtToken(),
     refreshToken: authToken.getRefreshToken().getToken(),
-    axiosRequestUser: decodedAccessToken.username, // E.g: 'dev-idir_***@idir'
+    userId: `${idpProvider}@${idpUsername}`, // E.g: 'IDIR@GROOT'
     tokenExpiration: authToken.getIdToken().getExpiration()
   };
 
@@ -109,7 +112,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       updateUserFamSession(famUser);
       setUser(famUser);
       setProvider(famUser.provider);
-      setToken(famUser.axiosRequestUser);
+      setToken(famUser.userId);
     }
   };
 
@@ -122,9 +125,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const signOut = (): void => {
+    localStorage.removeItem(FAM_LOGIN_USER);
     Auth.signOut()
       .then(() => {
-        localStorage.removeItem(FAM_LOGIN_USER);
         setSigned(false);
         setUser(null);
         setProvider('');
@@ -145,7 +148,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   // 2 minutes
-  const REFRESH_TIMER = 2 * 60 * 1000;
+  const REFRESH_TIMER = TWO_MINUTE;
 
   if (intervalInstance == null && signed) {
     const instance = setInterval(() => {

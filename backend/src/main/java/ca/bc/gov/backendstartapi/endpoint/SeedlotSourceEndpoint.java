@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.service.SeedlotSourceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,14 +61,21 @@ public class SeedlotSourceEndpoint {
                               @Schema(
                                   type = "string",
                                   description = "Name of a seedlot source",
-                                  example = "Custom Lot"))
+                                  example = "Custom Lot")),
+                      @SchemaProperty(
+                          name = "isDefault",
+                          schema =
+                              @Schema(
+                                  type = "boolean",
+                                  description = "Indicates if this option is default",
+                                  example = "true"))
                     })),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<CodeDescriptionDto> getAllSeedlotSource() {
+  public List<SeedlotSourceDto> getAllSeedlotSource() {
     return seedlotSourceService.getAllSeedlotSource();
   }
 }

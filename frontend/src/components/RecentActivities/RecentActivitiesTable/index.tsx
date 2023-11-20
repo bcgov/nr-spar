@@ -12,7 +12,7 @@ import {
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
-import StatusItem from '../../StatusItem';
+import StatusTag from '../../StatusTag';
 
 import formatDate from '../../../utils/DateUtils';
 
@@ -45,7 +45,7 @@ const RecentActivitiesTable = ({
       case 'status':
         return (
           <TableCell key={mapKey} className="activities-table-cell">
-            <StatusItem status={obj[key]} />
+            <StatusTag type={obj[key]} />
           </TableCell>
         );
       case 'createdAt':

@@ -22,9 +22,19 @@ public class SeedlotSourceEntity extends CodeDescriptionEntity {
   @Column(name = "seedlot_source_code", length = 3)
   private String seedlotSourceCode;
 
+  @Column(name = "default_source_ind", nullable = true)
+  private Boolean isDefault;
+
+  /**
+   * Constructor for SeedlotSourceEntity.
+   */
   public SeedlotSourceEntity(
-      String seedlotSourceCode, String description, EffectiveDateRange effectiveDateRange) {
+      String seedlotSourceCode,
+      String description,
+      EffectiveDateRange effectiveDateRange,
+      Boolean isDefault) {
     super(description, effectiveDateRange);
     this.seedlotSourceCode = seedlotSourceCode;
+    this.isDefault = isDefault;
   }
 }

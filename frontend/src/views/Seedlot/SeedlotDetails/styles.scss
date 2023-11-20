@@ -15,7 +15,7 @@
     cursor: pointer;
   }
 
-  .seedlot-summary-title .combo-button-wrapper{
+  .seedlot-summary-title .combo-button-wrapper {
     text-align: right;
   }
 
@@ -31,14 +31,22 @@
 
   .seedlot-details-content .#{vars.$bcgov-prefix}--tab-content {
     background-color: var(--#{vars.$bcgov-prefix}-layer-01);
-    padding: 1.75rem 2.5rem !important;
+    padding: 2.5rem !important;
+    margin-right: -2.5rem;
+  }
+}
+
+
+.edit-seedlot-form {
+  width: fit-content;
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options {
+    width: fit-content;
+    max-width: none;
   }
 
-  .edit-seedlot-form {
-    width: 11.75rem;
-  }
-
-  .edit-seedlot-form .#{vars.$bcgov-prefix}--overflow-menu-options__btn {
-    max-width: 100%;
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn {
+    width: fit-content;
+    max-width: none;
   }
 }

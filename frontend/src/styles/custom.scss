@@ -7,17 +7,13 @@
 
 @use '@bcgov-nr/nr-theme/style-sheets/carbon-components-overrides.scss';
 
-@use '@carbon/type/scss/_font-family.scss' with (
-  $font-families: types.$type-family,
-  $font-weights: types.$font-weights
-);
+@use '@carbon/type/scss/_font-family.scss' with ($font-families: types.$type-family,
+  $font-weights: types.$font-weights);
 
 // Set the correct light theme
 @use '@carbon/react/scss/themes';
-@use '@carbon/react/scss/theme' with (
-  $fallback: themes.$white,
-  $theme: (light.$light-theme)
-);
+@use '@carbon/react/scss/theme' with ($fallback: themes.$white,
+  $theme: (light.$light-theme));
 
 // Buttons, tags and notifications components tokens doesn't work properly
 // when setting directly on the theme, so we override the tokens directly
@@ -345,4 +341,19 @@
   @include theme.add-component-tokens($tag-tokens);
   @include theme.add-component-tokens($notification-tokens);
   @include react.theme(light.$light-theme);
+}
+
+.toastception {
+  width: 100%;
+}
+
+.Toastify__toast-body {
+  padding: 0;
+}
+
+.spar-display-only-input {
+  input {
+    padding: 0;
+    border-bottom: none;
+  }
 }
