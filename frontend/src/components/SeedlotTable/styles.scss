@@ -1,16 +1,43 @@
-.seedlots-table {
-  a {
-    color: inherit;
-    text-decoration: inherit
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.seedlot-data-table {
+  width: 100%;
+
+  thead th {
+    background: var(--#{vars.$bcgov-prefix}-layer-01);
+    background-blend-mode: multiply;
+    border-top: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+    border-bottom: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
   }
 
-  tbody tr {
-    cursor: pointer;
+  thead button {
+    background-color: transparent;
+    border-top: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+    border-bottom: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
+  }
+
+  tbody td {
+    background: var(--#{vars.$bcgov-prefix}-layer-02);
   }
 }
 
-@media only screen and (max-width: 672px) {
-  .seedlot-table {
-    width: 56.25rem;
+.seedlot-data-table-pagination {
+  border-top: none;
+
+  .#{vars.$bcgov-prefix}--select-input--inline__wrapper {
+    border-left: none;
+  }
+
+  .#{vars.$bcgov-prefix}--pagination__button {
+    border-left: none;
+  }
+
+  .#{vars.$bcgov-prefix}--pagination__right {
+    border-left: none;
+  }
+
+  .#{vars.$bcgov-prefix}--popover-container {
+    display: flex;
+    align-items: center;
   }
 }

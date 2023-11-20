@@ -7,7 +7,7 @@ import {
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotActivities from '../../../components/SeedlotActivities';
-import RecentSeedlots from '../../../components/RecentSeedlots';
+import RecentSeedlots from './RecentSeedlots';
 
 import './styles.scss';
 

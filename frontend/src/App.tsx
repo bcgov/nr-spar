@@ -3,8 +3,10 @@ import React, { useContext, useEffect } from 'react';
 import {
   Routes, Route, Navigate, useNavigate
 } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 
 import './styles/custom.scss';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { Amplify } from 'aws-amplify';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -17,6 +19,8 @@ import CreateAClass from './views/Seedlot/CreateAClass';
 import SeedlotCreatedFeedback from './views/Seedlot/SeedlotCreatedFeedback';
 import MySeedlots from './views/Seedlot/MySeedlots';
 import SeedlotRegistrationForm from './views/Seedlot/SeedlotRegistrationForm';
+import FourOhFour from './views/FourOhFour';
+
 import awsconfig from './aws-exports';
 import AuthContext from './contexts/AuthContext';
 import { SPAR_REDIRECT_PATH } from './shared-constants/shared-constants';
@@ -49,80 +53,85 @@ const App: React.FC = () => {
   }, [signed]);
 
   return (
+    <>
+      <ToastContainer />
+      <Routes>
+        {
+          signed ? (
+            <>
+              <Route path="/" element={<Layout />}>
+                <Route
+                  path="/dashboard"
+                  element={(
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  )}
+                />
 
-    <Routes>
-      {
-        signed ? (
-          <Route path="/" element={<Layout />}>
-            <Route
-              path="/dashboard"
-              element={(
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              )}
-            />
+                <Route
+                  path="/seedlots"
+                  element={(
+                    <ProtectedRoute>
+                      <SeedlotDashboard />
+                    </ProtectedRoute>
+                  )}
+                />
 
-            <Route
-              path="/seedlots"
-              element={(
-                <ProtectedRoute>
-                  <SeedlotDashboard />
-                </ProtectedRoute>
-              )}
-            />
+                <Route
+                  path="/seedlots/register-a-class"
+                  element={(
+                    <ProtectedRoute>
+                      <CreateAClass />
+                    </ProtectedRoute>
+                  )}
+                />
 
-            <Route
-              path="/seedlots/register-a-class"
-              element={(
-                <ProtectedRoute>
-                  <CreateAClass />
-                </ProtectedRoute>
-              )}
-            />
+                <Route
+                  path="/seedlots/creation-success"
+                  element={(
+                    <ProtectedRoute>
+                      <SeedlotCreatedFeedback />
+                    </ProtectedRoute>
+                  )}
+                />
 
-            <Route
-              path="/seedlots/successfully-created/:seedlot"
-              element={(
-                <ProtectedRoute>
-                  <SeedlotCreatedFeedback />
-                </ProtectedRoute>
-              )}
-            />
+                <Route
+                  path="/seedlots/details/:seedlotNumber"
+                  element={(
+                    <ProtectedRoute>
+                      <SeedlotDetails />
+                    </ProtectedRoute>
+                  )}
+                />
 
-            <Route
-              path="/seedlots/details/:seedlot"
-              element={(
-                <ProtectedRoute>
-                  <SeedlotDetails />
-                </ProtectedRoute>
-              )}
-            />
+                <Route
+                  path="/seedlots/a-class-registration/:seedlotNumber"
+                  element={(
+                    <ProtectedRoute>
+                      <SeedlotRegistrationForm />
+                    </ProtectedRoute>
+                  )}
+                />
 
-            <Route
-              path="/seedlots/registration/:seedlot"
-              element={(
-                <ProtectedRoute>
-                  <SeedlotRegistrationForm />
-                </ProtectedRoute>
-              )}
-            />
+                <Route
+                  path="/seedlots/my-seedlots"
+                  element={(
+                    <ProtectedRoute>
+                      <MySeedlots />
+                    </ProtectedRoute>
+                  )}
+                />
 
-            <Route
-              path="/seedlots/my-seedlots"
-              element={(
-                <ProtectedRoute>
-                  <MySeedlots />
-                </ProtectedRoute>
-              )}
-            />
-
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Route>
-        )
-          : <Route path="*" element={<Landing />} />
-      }
-    </Routes>
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Route>
+              <Route path="/404" element={<FourOhFour />} />
+            </>
+          )
+            : <Route path="*" element={<Landing />} />
+        }
+      </Routes>
+    </>
   );
 };
 

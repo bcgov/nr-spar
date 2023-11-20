@@ -9,7 +9,7 @@ type FamUser = {
   provider: string;
   jwtToken: string;
   refreshToken: string;
-  axiosRequestUser: string;
+  userId: string;
   tokenExpiration: number;
 }
 

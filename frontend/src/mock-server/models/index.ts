@@ -4,9 +4,6 @@ import { ModelDefinition } from 'miragejs/-types';
 
 import { FavActivityType } from '../../types/FavActivityTypes';
 import GeneticClassesType from '../../types/GeneticClasses';
-import ApplicantInfo from '../../types/ApplicantInfo';
-import SeedlotRegistration from '../../types/SeedlotRegistrationObj';
-import Seedlot from '../../types/Seedlot';
 import CollectionInformation from '../../types/CollectionInformation';
 import CollectorAgency from '../../types/CollectorAgency';
 import { MockSeedlotOrchard, OrchardType } from '../../types/SeedlotTypes/SeedlotOrchard';
@@ -17,10 +14,6 @@ import RegisterOwnerArray from '../../types/SeedlotTypes/OwnershipTypes';
 
 const FavouriteModel: ModelDefinition<FavActivityType> = Model.extend({});
 const GeneticClassesModel: ModelDefinition<GeneticClassesType> = Model.extend({});
-const ApplicantInfoModel: ModelDefinition<ApplicantInfo> = Model.extend({});
-const SeedlotRegistrationModel: ModelDefinition<SeedlotRegistration> = Model.extend({});
-const SeedlotInfoModel: ModelDefinition<SeedlotRegistration> = Model.extend({});
-const SeedlotModel: ModelDefinition<Seedlot> = Model.extend({});
 const CollectionInformationModel: ModelDefinition<CollectionInformation> = Model.extend({});
 const CollectorAgencyModel: ModelDefinition<CollectorAgency> = Model.extend({});
 const OrchardModel: ModelDefinition<OrchardType> = Model.extend({});
@@ -33,10 +26,6 @@ const RegisterOwnerModel: ModelDefinition<RegisterOwnerArray> = Model.extend({})
 const models = {
   favourites: FavouriteModel,
   geneticClasses: GeneticClassesModel,
-  applicantInfo: ApplicantInfoModel,
-  seedlotRegistration: SeedlotRegistrationModel,
-  seedlotInfos: SeedlotInfoModel,
-  seedlotData: SeedlotModel,
   collectionInformation: CollectionInformationModel,
   collectorAgency: CollectorAgencyModel,
   orchards: OrchardModel,

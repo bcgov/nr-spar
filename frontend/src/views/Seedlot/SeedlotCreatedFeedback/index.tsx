@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   FlexGrid,
   Column,
@@ -11,7 +11,10 @@ import './styles.scss';
 
 const SeedlotCreatedFeedback = () => {
   const navigate = useNavigate();
-  const seedlotNumber = useParams().seedlot;
+  const [searchParams] = useSearchParams();
+
+  const seedlotNumber = searchParams.get('seedlotNumber');
+  const seedlotClass = searchParams.get('seedlotClass');
 
   return (
     <FlexGrid fullWidth className="seedlot-created-feedback-page">
@@ -23,30 +26,28 @@ const SeedlotCreatedFeedback = () => {
           <FlexGrid>
             <Row>
               <Column>
-                <h1> A class seedlot created! </h1>
-              </Column>
-            </Row>
-            <Row>
-              <Column>
-                <h2>
-                  Your A class seedlot
+                <h1>
+                  {seedlotClass}
+                  -class
                   {' '}
                   {seedlotNumber}
                   {' '}
-                  has been created with success!
-                  Now you can access the seedlot&apos;s detail screen,
-                  create another one or go back to the seedlot&apos;s main screen.
-                </h2>
+                  seedlot created
+                </h1>
               </Column>
             </Row>
             <Row className="navigate-btn">
               <Column sm={4} md={4} lg={12} xlg={10} max={8}>
                 <Button
-                  onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}
+                  onClick={() => {
+                    if (seedlotClass === 'A') {
+                      navigate(`/seedlots/a-class-registration/${seedlotNumber}`);
+                    }
+                  }}
                   size="lg"
                   className="btn-scf"
                 >
-                  Go to seedlot&apos;s detail screen
+                  Continue registration
                 </Button>
               </Column>
             </Row>
@@ -54,11 +55,30 @@ const SeedlotCreatedFeedback = () => {
               <Column sm={4} md={4} lg={12} xlg={10} max={8}>
                 <Button
                   kind="tertiary"
-                  onClick={() => navigate('/seedlots/register-a-class')}
+                  onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}
                   size="lg"
                   className="btn-scf"
                 >
-                  Create another A class seedlot
+                  Seedlot details
+                </Button>
+              </Column>
+            </Row>
+            <Row>
+              <Column sm={4} md={4} lg={12} xlg={10} max={8}>
+                <Button
+                  kind="tertiary"
+                  onClick={() => {
+                    if (seedlotClass === 'A') {
+                      navigate('/seedlots/register-a-class');
+                    }
+                  }}
+                  size="lg"
+                  className="btn-scf"
+                >
+                  Create another
+                  {' '}
+                  {seedlotClass}
+                  -class seedlot
                 </Button>
               </Column>
             </Row>
@@ -70,7 +90,7 @@ const SeedlotCreatedFeedback = () => {
                   size="lg"
                   className="btn-scf"
                 >
-                  Go back to seedlot&apos;s main screen
+                  Seedlot&apos;s main screen
                 </Button>
               </Column>
             </Row>
