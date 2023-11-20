@@ -7,6 +7,7 @@ import {
 import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
   FormInvalidationObj, OwnershipInvalidObj, ParentTreeStepDataObj
 } from './definitions';
@@ -206,4 +207,24 @@ export const verifyCollectionStepCompleteness = (collectionData: CollectionForm)
     return false;
   }
   return true;
+};
+
+export const getSpeciesOptionByCode = (
+  vegCode?: string,
+  options?: MultiOptionsObj[]
+): MultiOptionsObj => {
+  const template = {
+    code: '',
+    label: '',
+    description: ''
+  };
+
+  if (!vegCode || !options) {
+    return template;
+  }
+
+  const filtered = options.filter((opt) => opt.code === vegCode);
+  return filtered.length > 0
+    ? filtered[0]
+    : template;
 };

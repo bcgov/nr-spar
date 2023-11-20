@@ -16,11 +16,11 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -75,7 +75,7 @@ public class SeedlotService {
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
-    seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserIdirOrBceId()));
+    seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
 
     log.debug("Seedlot to insert: {}", seedlot);
 
@@ -124,7 +124,7 @@ public class SeedlotService {
    * @param pageSize the size of the page
    * @return a list of the user's seedlots
    */
-  public List<Seedlot> getUserSeedlots(String userId, int pageNumber, int pageSize) {
+  public Optional<Page<Seedlot>> getUserSeedlots(String userId, int pageNumber, int pageSize) {
     if (pageSize == 0) {
       pageSize = 10;
     }
@@ -132,7 +132,8 @@ public class SeedlotService {
     Pageable sortedPageable =
         PageRequest.of(
             pageNumber, pageSize, Sort.by(Direction.DESC, "AuditInformation_UpdateTimestamp"));
-    return seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable);
+    return Optional.of(
+        seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable));
   }
 
   /**
