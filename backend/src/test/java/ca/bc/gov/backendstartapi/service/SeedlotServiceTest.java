@@ -1,6 +1,8 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
@@ -26,6 +28,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -75,13 +79,13 @@ class SeedlotServiceTest {
     when(seedlotStatusRepository.findById("PND")).thenReturn(Optional.of(statusEntity));
 
     SeedlotSourceEntity sourceEntity =
-        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE);
+        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
     when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.of(sourceEntity));
 
     Seedlot seedlot = new Seedlot("63000");
     when(seedlotRepository.save(seedlot)).thenReturn(seedlot);
 
-    when(loggedUserService.getLoggedUserIdirOrBceId()).thenReturn("IDIR");
+    when(loggedUserService.getLoggedUserId()).thenReturn("imaveryhappyuserid@idir");
 
     GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
     when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
@@ -174,9 +178,13 @@ class SeedlotServiceTest {
 
     List<Seedlot> testList = List.of(new Seedlot("63001"), new Seedlot("63002"));
 
-    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(testList);
+    Page<Seedlot> pagedResult = new PageImpl<>(testList);
 
-    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
+    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+        .thenReturn(pagedResult);
+
+    List<Seedlot> responseFromService =
+        seedlotService.getUserSeedlots(userId, 0, 10).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(2, responseFromService.size());
@@ -189,9 +197,12 @@ class SeedlotServiceTest {
   void getUserSeedlots_noSeedlots_shouldSucceed() {
     String userId = "userId";
 
-    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
+    Page<Seedlot> pagedResult = new PageImpl<>(List.of());
+    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+        .thenReturn(pagedResult);
 
-    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
+    List<Seedlot> responseFromService =
+        seedlotService.getUserSeedlots(userId, 0, 10).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertTrue(responseFromService.isEmpty());
@@ -202,9 +213,12 @@ class SeedlotServiceTest {
   void getUserSeedlots_noPageSize_shouldSucceed() {
     String userId = "userId";
 
-    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
+    Page<Seedlot> pagedResult = new PageImpl<>(List.of());
+    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+        .thenReturn(pagedResult);
 
-    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 0);
+    List<Seedlot> responseFromService =
+        seedlotService.getUserSeedlots(userId, 0, 0).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertTrue(responseFromService.isEmpty());
