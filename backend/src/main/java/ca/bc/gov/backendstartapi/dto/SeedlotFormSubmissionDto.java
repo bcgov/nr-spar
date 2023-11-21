@@ -8,7 +8,7 @@ import lombok.Setter;
 public class SeedlotFormSubmissionDto {
 
   SeedlotFormCollectionDto seedlotFormCollectionDto;
-  String seedlotFormOwnershipDto; // step 2
+  SeedlotFormOwnershipDto seedlotFormOwnershipDto;
   String seedlotFormInterimDto; // step 3
   String seedlotFormOrchardDto; // step 4
   String seedlotFormParentTreeSmpDto; // step 5
