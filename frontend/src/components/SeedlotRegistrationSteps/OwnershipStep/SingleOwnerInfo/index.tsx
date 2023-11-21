@@ -43,7 +43,9 @@ const SingleOwnerInfo = ({
   addRefs, ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
   methodsOfPayment, deleteAnOwner, checkPortionSum, setState, readOnly
 }: SingleOwnerInfoProps) => {
-  const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>('');
+  const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>(
+    inputText.portion.invalidText
+  );
   const [reservedInvalidText, setReservedInvalidText] = useState<string>('');
   const [surplusInvalidText, setSurplusPortionInvalidText] = useState<string>('');
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Row, Column, TextInput, Checkbox, ComboBox, InlineLoading
 } from '@carbon/react';
@@ -9,6 +9,7 @@ import getForestClientLocation from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
+import { FormInputType } from '../../types/FormInputType';
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { formatLocationCode } from '../SeedlotRegistrationSteps/CollectionStep/utils';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
@@ -20,12 +21,18 @@ import supportTexts from './constants';
 import './styles.scss';
 
 const ApplicantAgencyFields = ({
-  useDefault, agency, locationCode, fieldsProps, agencyOptions,
-  defaultAgency, defaultCode, setAllValues, showDefaultCheckbox = true, readOnly
+  useDefault, agency, locationCode, fieldsProps, agencyOptions, defaultAgency,
+  defaultCode, setAllValues, showDefaultCheckbox = true, readOnly
 }: ApplicantAgencyFieldsProps) => {
-  const agencyClone = structuredClone(agency);
-  const locationCodeClone = structuredClone(locationCode);
-  const useDefaultClone = structuredClone(useDefault);
+  const [agencyClone, setAgencyClone] = useState<FormInputType & {value: string}>(agency);
+  const [locationCodeClone, setLocationCodeClone] = useState<FormInputType & {value: string}>(
+    locationCode
+  );
+  const [useDefaultClone, setUseDefaultClone] = useState<FormInputType & {value: boolean}>(
+    useDefault
+  );
+
+  const [shouldUpdateValues, setShouldUpdateValues] = useState<boolean>(false);
 
   const [forestClientNumber, setForestClientNumber] = useState<string>(
     agencyClone.value ? getForestClientNumber(agencyClone.value) : ''
@@ -40,9 +47,12 @@ const ApplicantAgencyFields = ({
   );
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
-    locationCodeClone.isInvalid = isInvalid;
+    setLocationCodeClone({
+      ...locationCodeClone,
+      isInvalid
+    });
     setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+    setShouldUpdateValues(true);
   };
 
   const validateLocationCodeMutation = useMutation({
@@ -64,13 +74,22 @@ const ApplicantAgencyFields = ({
         : supportTexts.locationCode.helperTextDisabled
     );
 
-    agencyClone.value = checked ? defaultAgency : '';
-    locationCodeClone.value = checked ? defaultCode : '';
-    agencyClone.isInvalid = false;
-    locationCodeClone.isInvalid = false;
-    useDefaultClone.value = checked;
+    setAgencyClone({
+      ...agencyClone,
+      value: checked ? defaultAgency : '',
+      isInvalid: false
+    });
+    setLocationCodeClone({
+      ...locationCodeClone,
+      value: checked ? defaultCode : '',
+      isInvalid: false
+    });
+    setUseDefaultClone({
+      ...useDefaultClone,
+      value: checked
+    });
 
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+    setShouldUpdateValues(true);
   };
 
   const handleAgencyInput = (value: MultiOptionsObj) => {
@@ -80,31 +99,52 @@ const ApplicantAgencyFields = ({
         ? supportTexts.locationCode.helperTextEnabled
         : supportTexts.locationCode.helperTextDisabled
     );
-    agencyClone.value = value ? value.label : '';
-    locationCodeClone.value = value ? locationCodeClone.value : '';
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+    setAgencyClone({
+      ...agencyClone,
+      value: value ? value.label : ''
+    });
+    setLocationCodeClone({
+      ...locationCodeClone,
+      value: value ? locationCodeClone.value : ''
+    });
+    setShouldUpdateValues(true);
   };
 
   const handleLocationCodeChange = (value: string) => {
-    locationCodeClone.value = value.slice(0, LOCATION_CODE_LIMIT);
+    const locationCodeUpdated = { ...locationCodeClone };
+    locationCodeUpdated.value = value.slice(0, LOCATION_CODE_LIMIT);
     const isInRange = validator.isInt(value, { min: 0, max: 99 });
     if (!isInRange) {
       setInvalidLocationMessage(supportTexts.locationCode.invalidText);
-      locationCodeClone.isInvalid = true;
+      locationCodeUpdated.isInvalid = true;
     }
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+    setLocationCodeClone(locationCodeUpdated);
   };
 
   const handleLocationCodeBlur = (value: string) => {
     const formattedCode = value.length ? formatLocationCode(value) : '';
     if (formattedCode === '') return;
-    locationCodeClone.value = formattedCode;
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
     if (forestClientNumber) {
       validateLocationCodeMutation.mutate([forestClientNumber, formattedCode]);
       setLocationCodeHelperText('');
     }
+    setLocationCodeClone({
+      ...locationCodeClone,
+      value: formattedCode
+    });
+    setShouldUpdateValues(true);
   };
+
+  useEffect(() => {
+    if (shouldUpdateValues) {
+      setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+    } else {
+      setAgencyClone(agency);
+      setLocationCodeClone(locationCode);
+      setUseDefaultClone(useDefault);
+    }
+    setShouldUpdateValues(false);
+  }, [useDefault, agency, locationCode, shouldUpdateValues]);
 
   return (
     <div className="agency-information-section">
@@ -138,7 +178,7 @@ const ApplicantAgencyFields = ({
             helperText={supportTexts.agency.helperText}
             invalidText={fieldsProps.agencyInput.invalidText}
             items={agencyOptions}
-            readOnly={!showDefaultCheckbox ? false : useDefaultClone.value || readOnly}
+            readOnly={(showDefaultCheckbox ? useDefaultClone.value : false) || readOnly}
             selectedItem={agencyClone.value}
             onChange={(e: ComboBoxEvent) => handleAgencyInput(e.selectedItem)}
             invalid={agencyClone.isInvalid}
@@ -160,14 +200,15 @@ const ApplicantAgencyFields = ({
             helperText={locationCodeHelperText}
             invalid={locationCodeClone.isInvalid}
             invalidText={invalidLocationMessage}
-            readOnly={!showDefaultCheckbox ? false : useDefaultClone.value || readOnly}
+            readOnly={(showDefaultCheckbox ? useDefaultClone.value : false) || readOnly}
             disabled={!forestClientNumber}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleLocationCodeChange(e.target.value);
             }}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (!e.target.readOnly) {
+              if (!e.target.readOnly
+                  && locationCode.value !== e.target.value) {
                 handleLocationCodeBlur(e.target.value);
               }
             }}
