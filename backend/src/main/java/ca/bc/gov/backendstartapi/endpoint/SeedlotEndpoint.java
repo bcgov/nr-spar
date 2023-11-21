@@ -256,8 +256,48 @@ public class SeedlotEndpoint {
     return seedlotService.getSingleSeedlotInfo(seedlotNumber);
   }
 
-  @PostMapping("/form-submission")
-  public ResponseEntity<SeedlotCreateResponseDto> seedlotFormSubmission(@RequestBody SeedlotFormSubmissionDto form) {
+  /**
+   * Saves the Seedlot submit form once submitted on step 6.
+   *
+   * @param form A {@link SeedlotFormSubmissionDto} containing all the form information
+   * @return A {@link SeedlotCreateResponseDto} containing the seedlot number and status
+   */
+  @PostMapping("/{seedlotNumber}/form-submission")
+  @Operation(
+      summary = "Saves the Seedlot submit form",
+      description =
+          "This API is responsible for receiving the entire seedlot form, once submitted.")
+  @ApiResponses(
+    value = {
+      @ApiResponse(responseCode = "201", description = "Successfully saved."),
+      @ApiResponse(
+            responseCode = "400",
+            description = "One or more fields has invalid values.",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema =
+                        @Schema(
+                            oneOf = {
+                              ValidationExceptionResponse.class,
+                              DefaultSpringExceptionResponse.class
+                            }))),
+      @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+    }
+  )
+  public ResponseEntity<SeedlotCreateResponseDto> seedlotFormSubmission(
+    @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber,
+      @RequestBody SeedlotFormSubmissionDto form) {
     return ResponseEntity.status(HttpStatus.CREATED).body(null);
   }
 }

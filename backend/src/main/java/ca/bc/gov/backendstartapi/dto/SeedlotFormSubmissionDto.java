@@ -7,6 +7,10 @@ import lombok.Setter;
 @Setter
 public class SeedlotFormSubmissionDto {
 
-  String seedlotNumber;
-  // add fields here
+  seedlotFormCollectionDto seedlotFormCollectionDto;
+  String seedlotFormOwnershipDto; // step 2
+  String seedlotFormInterimDto; // step 3
+  String seedlotFormOrchardDto; // step 4
+  String seedlotFormParentTreeSmpDto; // step 5
+  String seedlotFormExtractionStorageDto; // step 6
 }
