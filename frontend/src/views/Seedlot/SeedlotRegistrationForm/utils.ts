@@ -4,6 +4,7 @@ import {
   createOwnerTemplate,
   validTemplate as ownerInvalidTemplate
 } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
+import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
@@ -176,8 +177,25 @@ export const validateCollectionStep = (collectionData: CollectionForm): boolean 
 };
 
 /**
- * Verify if the collection step is compelete
- * Return true if it's compelte, false otherwise
+ * Validate Ownership Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateOwnershipStep = (ownershipData: Array<SingleOwnerForm>): boolean => {
+  let isInvalid = false;
+  const ownershipKeys = Object.keys(ownershipData[0]) as Array<keyof SingleOwnerForm>;
+  ownershipData.forEach((owner) => {
+    ownershipKeys.forEach((key) => {
+      if (key !== 'id' && owner[key].isInvalid) {
+        isInvalid = true;
+      }
+    });
+  });
+  return isInvalid;
+};
+
+/**
+ * Verify if the collection step is complete
+ * Return true if it's complete, false otherwise
  */
 export const verifyCollectionStepCompleteness = (collectionData: CollectionForm): boolean => {
   if (!collectionData.collectorAgency.value.length) {
@@ -203,6 +221,26 @@ export const verifyCollectionStepCompleteness = (collectionData: CollectionForm)
   }
   if (!collectionData.selectedCollectionCodes.value.length) {
     return false;
+  }
+  return true;
+};
+
+/**
+ * Verify if the ownership step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwnerForm>): boolean => {
+  for (let i = 0; i < ownershipData.length; i += 1) {
+    if (!ownershipData[i].ownerAgency.value.length
+        || !ownershipData[i].ownerCode.value.length
+        || !ownershipData[i].ownerPortion.value.length
+        || !ownershipData[i].reservedPerc.value.length
+        || !ownershipData[i].surplusPerc.value.length
+        || !ownershipData[i].fundingSource.value.code
+        || !ownershipData[i].methodOfPayment.value.code
+    ) {
+      return false;
+    }
   }
   return true;
 };

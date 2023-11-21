@@ -55,7 +55,9 @@ import {
   initParentTreeState,
   generateDefaultRows,
   validateCollectionStep,
-  verifyCollectionStepCompleteness
+  verifyCollectionStepCompleteness,
+  validateOwnershipStep,
+  verifyOwnershipStepCompleteness
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
@@ -165,6 +167,16 @@ const SeedlotRegistrationForm = () => {
       if (!isCollectionInvalid) {
         const isCollectionComplete = verifyCollectionStepCompleteness(allStepData.collectionStep);
         clonedStatus.collection.isComplete = isCollectionComplete;
+      }
+    }
+
+    // Set invalid or complete status for Ownership Step
+    if (currentStepName !== 'ownership') {
+      const isOwnershipInvalid = validateOwnershipStep(allStepData.ownershipStep);
+      clonedStatus.ownership.isInvalid = isOwnershipInvalid;
+      if (!isOwnershipInvalid) {
+        const isOwnershipComplete = verifyOwnershipStepCompleteness(allStepData.ownershipStep);
+        clonedStatus.ownership.isComplete = isOwnershipComplete;
       }
     }
 
