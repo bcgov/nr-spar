@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Schema(description = "Seedlot collection information. Form step 1")
-public record seedlotFormCollectionDto(
+public record SeedlotFormCollectionDto(
     @Schema(
             description =
                 """
