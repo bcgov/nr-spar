@@ -186,6 +186,11 @@ const ApplicantAgencyFields = ({
               ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
             }
             size="md"
+            onClick={(event: React.MouseEvent<HTMLInputElement>) => {
+              if (useDefaultClone.value || readOnly) {
+                event.preventDefault();
+              }
+            }}
           />
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
