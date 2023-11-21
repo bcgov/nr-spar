@@ -237,8 +237,8 @@ export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwner
         || !ownershipData[i].ownerPortion.value.length
         || !ownershipData[i].reservedPerc.value.length
         || !ownershipData[i].surplusPerc.value.length
-        || !ownershipData[i].fundingSource.value.code
-        || !ownershipData[i].methodOfPayment.value.code
+        || !(ownershipData[i].fundingSource.value && ownershipData[i].fundingSource.value.code)
+        || !(ownershipData[i].methodOfPayment.value && ownershipData[i].methodOfPayment.value.code)
     ) {
       return false;
     }
