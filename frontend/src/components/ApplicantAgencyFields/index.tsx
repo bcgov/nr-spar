@@ -123,16 +123,16 @@ const ApplicantAgencyFields = ({
 
   const handleLocationCodeBlur = (value: string) => {
     const formattedCode = value.length ? formatLocationCode(value) : '';
-    if (formattedCode === '') return;
-    if (forestClientNumber) {
-      validateLocationCodeMutation.mutate([forestClientNumber, formattedCode]);
-      setLocationCodeHelperText('');
-    }
     setLocationCodeClone({
       ...locationCodeClone,
       value: formattedCode
     });
     setShouldUpdateValues(true);
+    if (formattedCode === '') return;
+    if (forestClientNumber) {
+      setLocationCodeHelperText('');
+      validateLocationCodeMutation.mutate([forestClientNumber, formattedCode]);
+    }
   };
 
   useEffect(() => {

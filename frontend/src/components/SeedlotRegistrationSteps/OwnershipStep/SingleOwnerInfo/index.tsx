@@ -75,8 +75,8 @@ const SingleOwnerInfo = ({
       // Now, check the total sum of the owner portions, the sum must
       // not be over 100%. Due the need to check and validate other fields
       // other than this owner, the state will be set under this function
-      const isSumInvalid = checkPortionSum(clonedState, ownerInfo.id);
-      setOwnerPortionInvalidText(isSumInvalid ? inputText.portion.invalidText : '');
+      checkPortionSum(clonedState, ownerInfo.id);
+      setOwnerPortionInvalidText(inputText.portion.invalidText);
     }
   };
 

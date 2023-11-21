@@ -107,7 +107,6 @@ const OwnershipStep = (
     clonedState[entryId] = updatedEntry;
     const portionsInvalid = !arePortionsValid(clonedState);
     setPortionsValid(clonedState, portionsInvalid);
-    return portionsInvalid;
   };
 
   return (
