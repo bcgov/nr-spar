@@ -10,7 +10,6 @@ import {
   HeaderGlobalAction,
   HeaderPanel,
   SideNav,
-  SideNavItems,
   SideNavLink
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
@@ -138,45 +137,50 @@ const BCHeader = () => {
             expanded={isSideNavExpanded}
             aria-label={componentTexts.sideMenuAriaLabel}
             inert={undefined}
+            className="spar-side-nav"
           >
-            {
-              navItems.map((category) => (
-                <SideNavItems key={category.name}>
-                  <SideNavLink className="side-nav-category-name">
-                    {category.name}
+            <div className="side-nav-top">
+              {
+                navItems.map((category) => (
+                  <div key={category.name}>
+                    <SideNavLink className="side-nav-category-name">
+                      {category.name}
+                    </SideNavLink>
+                    {
+                      category.items.map((navItem) => (
+                        <SideNavLink
+                          key={navItem.name}
+                          className={navItem.disabled ? 'disabled-side-nav-option' : ''}
+                          renderIcon={Icons[navItem.icon]}
+                          isActive={window.location.pathname === navItem.link}
+                          onClick={navItem.disabled ? null : () => navigate(navItem.link)}
+                        >
+                          {navItem.name}
+                        </SideNavLink>
+                      ))
+                    }
+                  </div>
+                ))
+              }
+            </div>
+            <div>
+              <SideNavLink className="side-nav-category-name">
+                {supportItems.name}
+              </SideNavLink>
+              {
+                supportItems.items.map((supportItem) => (
+                  <SideNavLink
+                    key={supportItem.name}
+                    renderIcon={Icons[supportItem.icon]}
+                    className={supportItem.disabled ? 'disabled-side-nav-option' : ''}
+                    onClick={supportItem.disabled ? null : () => navigate(supportItem.link)}
+                  >
+                    {supportItem.name}
                   </SideNavLink>
-                  {
-                    category.items.map((navItem) => (
-                      <SideNavLink
-                        key={navItem.name}
-                        className={navItem.disabled ? 'disabled-side-nav-option' : ''}
-                        renderIcon={Icons[navItem.icon]}
-                        isActive={window.location.pathname === navItem.link}
-                        onClick={navItem.disabled ? null : () => navigate(navItem.link)}
-                      >
-                        {navItem.name}
-                      </SideNavLink>
-                    ))
-                  }
-                </SideNavItems>
-              ))
-            }
-            <SideNavLink className="side-nav-category-name">
-              {supportItems.name}
-            </SideNavLink>
-            {
-              supportItems.items.map((supportItem) => (
-                <SideNavLink
-                  key={supportItem.name}
-                  renderIcon={Icons[supportItem.icon]}
-                  className={supportItem.disabled ? 'disabled-side-nav-option' : ''}
-                  onClick={supportItem.disabled ? null : () => navigate(supportItem.link)}
-                >
-                  {supportItem.name}
-                </SideNavLink>
-              ))
-            }
-            <PanelSectionName title={VERSION} />
+                ))
+              }
+              <PanelSectionName title={VERSION} />
+            </div>
           </SideNav>
         </Header>
       )}

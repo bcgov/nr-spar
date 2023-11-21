@@ -2,7 +2,9 @@
 @use '@carbon/type';
 
 .seedlot-created-feedback-page {
-  height:max-content;
+  width: 80%;
+  margin: 0 auto;
+  padding-top: 10%;
 
   .scf-pictogram {
     width: 100%;
@@ -26,7 +28,7 @@
       color: var(--#{vars.$bcgov-prefix}-text-secondary)
     }
 
-    .navigate-btn{
+    .navigate-btn {
       padding-top: 2rem;
     }
   }

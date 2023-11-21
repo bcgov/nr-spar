@@ -13,11 +13,20 @@
 
   .my-seedlot-title {
     justify-content: space-between;
-    margin-bottom: 3.25rem;
+    margin-bottom: 2rem;
   }
 
   .btn-my-seedlot {
     float: right;
+  }
+
+  .empty-seedlots {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .#{vars.$bcgov-prefix}--data-table-content {
+    width: 100%;
   }
 
   .#{vars.$bcgov-prefix}--data-table-container {
@@ -25,28 +34,6 @@
   }
 
   .my-seedlot-data-table-row {
-    margin: 0 -2rem;
-  }
-
-  .#{vars.$bcgov-prefix}--table-sort {
-    background-color: var(--#{vars.$bcgov-prefix}-layer-01);
-  }
-
-  .#{vars.$bcgov-prefix}--search-input {
-    border-bottom: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-01)
-  }
-
-  .#{vars.$bcgov-prefix}--data-table tr {
-    cursor: pointer;
-  }
-
-  .#{vars.$bcgov-prefix}--pagination__button,
-  .#{vars.$bcgov-prefix}--btn--ghost.#{vars.$bcgov-prefix}--pagination__button {
-    height: 3rem;
-  }
-
-  .empty-seedlots{
-    width: 100%;
-    margin: 0 auto;
+    margin: auto -2.5rem;
   }
 }

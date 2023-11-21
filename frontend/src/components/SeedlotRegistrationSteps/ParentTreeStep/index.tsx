@@ -25,6 +25,7 @@ import EmptySection from '../../EmptySection';
 import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
 import { recordValues } from '../../../utils/RecordUtils';
 import { GenWorthCalcPayload } from '../../../types/GeneticWorthTypes';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import {
   renderColOptions, renderTableBody, renderNotification,
   renderDefaultInputs, renderPagination
@@ -163,8 +164,8 @@ const ParentTreeStep = (
     queryFn: () => (
       getAllParentTrees(seedlotSpecies.code)
     ),
-    staleTime: 3 * (60 * 60 * 1000), // will not refetch for 3 hours
-    cacheTime: 3.5 * (60 * 60 * 1000) // data is cached 3.5 hours then deleted
+    staleTime: THREE_HOURS, // will not refetch for 3 hours
+    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });
 
   /**
