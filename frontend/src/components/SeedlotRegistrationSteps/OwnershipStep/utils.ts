@@ -7,8 +7,6 @@ import {
   SingleInvalidObj
 } from './definitions';
 
-const twoDigitRegex = /^\d{2}$/;
-
 const getNextId = (currentArray: Array<SingleOwnerForm>): number => {
   let max = -1;
   currentArray.forEach((obj) => {
@@ -104,101 +102,6 @@ export const validatePerc = (value: string): SingleInvalidObj => {
   return { isInvalid, invalidText };
 };
 
-export const getValidKey = (name: string): string => {
-  if (name === 'ownerAgency' || name === 'ownerAgency.value') return 'owner';
-  if (name === 'ownerCode' || name === 'ownerCode.value') return 'code';
-  if (name === 'ownerPortion' || name === 'ownerPortion.value') return 'portion';
-  if (name === 'reservedPerc' || name === 'reservedPerc.value') return 'reserved';
-  if (name === 'surplusPerc' || name === 'surplusPerc.value') return 'surplus';
-  if (name === 'fundingSource' || name === 'fundingSource.value') return 'funding';
-  if (name === 'methodOfPayment' || name === 'methodOfPayment.value') return 'payment';
-  throw new Error('Failed to get valid key');
-};
-
-// The sum of reserved and surplus should be 100, if one is changed, auto calc the other one
-export const calcResvOrSurp = (
-  index: number,
-  field: string,
-  value: string,
-  currentArray: Array<SingleOwnerForm>
-) => {
-  const theOtherName = field === 'reservedPerc' ? 'surplusPerc' : 'reservedPerc';
-  let theOtherValue = String((100 - Number(value)).toFixed(2));
-  // If the other value is an int then show a whole number
-  if (Number(theOtherValue) % 1 === 0) {
-    theOtherValue = Number(theOtherValue).toFixed(0);
-  }
-  const newArr = [...currentArray];
-  newArr[index] = {
-    ...newArr[index],
-    [theOtherName]: theOtherValue
-  };
-  // Validate the other value after recalculation
-  const { isInvalid, invalidText } = validatePerc(theOtherValue);
-  const validKey = getValidKey(theOtherName);
-  return {
-    newArr,
-    isInvalid,
-    invalidText,
-    validKey
-  };
-};
-
-export const skipForInvalidLength = (name: string, value: string): boolean => {
-  if (name === 'ownerCode' && value.length > 2) {
-    return true;
-  }
-  return false;
-};
-
-const isInputEmpty = (value: string | number | MultiOptionsObj | null) => !value;
-
-export const isInputInvalid = (name: string, value: string): SingleInvalidObj => {
-  let isInvalid = false;
-  let invalidText = '';
-  switch (name) {
-    case 'ownerAgency':
-      isInvalid = isInputEmpty(value);
-      invalidText = '';
-      return {
-        isInvalid,
-        invalidText
-      };
-    case 'ownerCode':
-      isInvalid = !twoDigitRegex.test(value);
-      invalidText = '';
-      return {
-        isInvalid,
-        invalidText
-      };
-    case 'ownerPortion':
-      return validatePerc(value);
-    case 'reservedPerc':
-      return validatePerc(value);
-    case 'surplusPerc':
-      return validatePerc(value);
-    case 'fundingSource':
-      isInvalid = isInputEmpty(value);
-      invalidText = inputText.funding.invalidText;
-      return {
-        isInvalid,
-        invalidText
-      };
-    case 'methodOfPayment':
-      isInvalid = isInputEmpty(value);
-      invalidText = inputText.payment.invalidText;
-      return {
-        isInvalid,
-        invalidText
-      };
-    default:
-      return {
-        isInvalid: false,
-        invalidText: ''
-      };
-  }
-};
-
 export const arePortionsValid = (ownershipArray: Array<SingleOwnerForm>): boolean => {
   let sum = 0;
   ownershipArray.forEach((obj) => {
@@ -206,11 +109,3 @@ export const arePortionsValid = (ownershipArray: Array<SingleOwnerForm>): boolea
   });
   return Number(sum.toFixed(2)) === 100;
 };
-
-export type AllValidObj = {
-  allValid: boolean,
-  invalidId: number,
-  invalidField: string,
-  invalidValue: string,
-  ownerOk: boolean
-}
