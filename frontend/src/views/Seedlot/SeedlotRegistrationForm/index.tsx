@@ -158,7 +158,7 @@ const SeedlotRegistrationForm = () => {
     onSuccess: (dataArr: MultiOptionsObj[]) => {
       const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
       const defaultMethod = defaultMethodArr.length === 0 ? emptyMultiOptObj : defaultMethodArr[0];
-      if (!allStepData.ownershipStep[0].methodOfPayment) {
+      if (!allStepData.ownershipStep[0].methodOfPayment.value.code) {
         const tempOwnershipData = structuredClone(allStepData.ownershipStep);
         tempOwnershipData[0].methodOfPayment.value = defaultMethod;
         setStepData('ownershipStep', tempOwnershipData);

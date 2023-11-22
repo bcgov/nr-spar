@@ -34,16 +34,14 @@ const ApplicantAgencyFields = ({
 
   const [shouldUpdateValues, setShouldUpdateValues] = useState<boolean>(false);
 
-  const [forestClientNumber, setForestClientNumber] = useState<string>(
-    agencyClone.value ? getForestClientNumber(agencyClone.value) : ''
-  );
+  const [forestClientNumber, setForestClientNumber] = useState<string>('');
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCodeClone.isInvalid && agencyClone.value
       ? supportTexts.locationCode.invalidLocationForSelectedAgency
       : supportTexts.locationCode.invalidText
   );
   const [locationCodeHelperText, setLocationCodeHelperText] = useState<string>(
-    supportTexts.locationCode.helperTextEnabled
+    supportTexts.locationCode.helperTextDisabled
   );
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
@@ -142,6 +140,7 @@ const ApplicantAgencyFields = ({
       setAgencyClone(agency);
       setLocationCodeClone(locationCode);
       setUseDefaultClone(useDefault);
+      setForestClientNumber(agency.value ? getForestClientNumber(agencyClone.value) : '');
     }
     setShouldUpdateValues(false);
   }, [useDefault, agency, locationCode, shouldUpdateValues]);
