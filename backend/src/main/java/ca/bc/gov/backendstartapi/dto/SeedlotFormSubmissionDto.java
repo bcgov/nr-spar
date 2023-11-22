@@ -9,7 +9,7 @@ public class SeedlotFormSubmissionDto {
 
   SeedlotFormCollectionDto seedlotFormCollectionDto;
   SeedlotFormOwnershipDto seedlotFormOwnershipDto;
-  String seedlotFormInterimDto; // step 3
+  SeedlotFormInterimDto seedlotFormInterimDto;
   String seedlotFormOrchardDto; // step 4
   String seedlotFormParentTreeSmpDto; // step 5
   String seedlotFormExtractionStorageDto; // step 6
