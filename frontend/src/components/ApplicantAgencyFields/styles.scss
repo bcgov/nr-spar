@@ -22,6 +22,14 @@
     }
   }
 
+  .bx--combo-box {
+    li, 
+    .bx--list-box__menu-item__option {
+      white-space: normal;
+      block-size: auto;
+    }
+  }
+
 
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
     input[type=number] {
@@ -37,7 +45,7 @@
 
   .location-code-input {
     padding-top: 0.1rem;
-    
+
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
       -webkit-appearance: none;
