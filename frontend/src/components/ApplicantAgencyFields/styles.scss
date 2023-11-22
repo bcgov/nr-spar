@@ -9,7 +9,9 @@
   .#{vars.$bcgov-prefix}--combo-box--readonly {
     border-block-end: 0;
 
-    input {
+    input[role=combobox] {
+      background-color: transparent;
+      padding-inline-end: 0;
       --bx-layout-density-padding-inline-local: 0;
       border-block-end: 0;
     }
@@ -20,8 +22,10 @@
     }
   }
 
+
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
-    input {
+    input[type=number] {
+      background-color: transparent;
       --bx-layout-density-padding-inline-local: 0;
       border-block-end: 0;
     }
@@ -32,6 +36,8 @@
   }
 
   .location-code-input {
+    padding-top: 0.1rem;
+    
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
       -webkit-appearance: none;

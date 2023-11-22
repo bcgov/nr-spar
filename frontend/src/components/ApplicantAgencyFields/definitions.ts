@@ -12,6 +12,7 @@ interface ApplicantAgencyFieldsProps {
   defaultCode: string;
   setAllValues: Function;
   showDefaultCheckbox?: boolean;
+  inputsColSize?: number;
   readOnly?: boolean;
 }
 

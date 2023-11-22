@@ -22,7 +22,7 @@ import './styles.scss';
 
 const ApplicantAgencyFields = ({
   useDefault, agency, locationCode, fieldsProps, agencyOptions, defaultAgency,
-  defaultCode, setAllValues, showDefaultCheckbox = true, readOnly
+  defaultCode, setAllValues, showDefaultCheckbox = true, inputsColSize = 6, readOnly
 }: ApplicantAgencyFieldsProps) => {
   const [agencyClone, setAgencyClone] = useState<FormInputType & {value: string}>(agency);
   const [locationCodeClone, setLocationCodeClone] = useState<FormInputType & {value: string}>(
@@ -169,7 +169,7 @@ const ApplicantAgencyFields = ({
           : null
       }
       <Row className="agency-information-row">
-        <Column sm={4} md={4} lg={8} xlg={6}>
+        <Column sm={4} md={4} lg={inputsColSize} xlg={inputsColSize}>
           <ComboBox
             id={agencyClone.id}
             name={fieldsProps.agencyInput.name}
@@ -193,7 +193,7 @@ const ApplicantAgencyFields = ({
             }}
           />
         </Column>
-        <Column sm={4} md={4} lg={8} xlg={6}>
+        <Column sm={4} md={4} lg={inputsColSize} xlg={inputsColSize}>
           <TextInput
             id={locationCodeClone.id}
             className="location-code-input"

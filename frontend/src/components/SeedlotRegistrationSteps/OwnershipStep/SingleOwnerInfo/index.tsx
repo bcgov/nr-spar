@@ -49,6 +49,8 @@ const SingleOwnerInfo = ({
   const [reservedInvalidText, setReservedInvalidText] = useState<string>('');
   const [surplusInvalidText, setSurplusPortionInvalidText] = useState<string>('');
 
+  const colsClass = ownerInfo.id === DEFAULT_INDEX ? 'default-owner-col' : 'other-owners-col';
+
   const setAgencyInfo = (
     agencyData: FormInputType & { value: string },
     locationCodeData: FormInputType & { value: string },
@@ -133,33 +135,36 @@ const SingleOwnerInfo = ({
   return (
     <div className="single-owner-info-container">
       <FlexGrid fullWidth>
-        <ApplicantAgencyFields
-          useDefault={ownerInfo.useDefaultAgencyInfo}
-          agency={ownerInfo.ownerAgency}
-          locationCode={ownerInfo.ownerCode}
-          fieldsProps={agencyFieldsProps}
-          agencyOptions={agencyOptions}
-          defaultAgency={defaultAgency}
-          defaultCode={defaultCode}
-          setAllValues={
-            (
-              agencyData: FormInputType & { value: string },
-              locationCodeData: FormInputType & { value: string },
-              useDefaultData: FormInputType & { value: boolean }
-            ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
-          }
-          showDefaultCheckbox={ownerInfo.id === DEFAULT_INDEX}
-          readOnly={readOnly}
-        />
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
+            <ApplicantAgencyFields
+              useDefault={ownerInfo.useDefaultAgencyInfo}
+              agency={ownerInfo.ownerAgency}
+              locationCode={ownerInfo.ownerCode}
+              fieldsProps={agencyFieldsProps}
+              agencyOptions={agencyOptions}
+              defaultAgency={defaultAgency}
+              defaultCode={defaultCode}
+              setAllValues={
+                (
+                  agencyData: FormInputType & { value: string },
+                  locationCodeData: FormInputType & { value: string },
+                  useDefaultData: FormInputType & { value: boolean }
+                ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
+              }
+              showDefaultCheckbox={ownerInfo.id === DEFAULT_INDEX}
+              inputsColSize={8}
+              readOnly={readOnly}
+            />
+          </Column>
+          <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
             <NumberInput
               id={ownerInfo.ownerPortion.id}
               ref={(el: HTMLInputElement) => addRefs(el, 'ownerPortion')}
               name="ownerPortion"
               label={inputText.portion.label}
               value={ownerInfo.ownerPortion.value}
-              step={10.00}
+              hideSteppers
               max={100}
               min={0}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,7 +191,7 @@ const SingleOwnerInfo = ({
               readOnly={readOnly}
             />
           </Column>
-          <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
+          <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
             <div className="reserved-perc-container">
               <div className="reserved-surplus-input">
                 <NumberInput
@@ -195,7 +200,7 @@ const SingleOwnerInfo = ({
                   name="reservedPerc"
                   label={inputText.reserved.label}
                   value={ownerInfo.reservedPerc.value}
-                  step={10}
+                  hideSteppers
                   max={100}
                   min={0}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,7 +230,7 @@ const SingleOwnerInfo = ({
                   name="surplusPerc"
                   label={inputText.surplus.label}
                   value={ownerInfo.surplusPerc.value}
-                  step={10}
+                  hideSteppers
                   max={100}
                   min={0}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
