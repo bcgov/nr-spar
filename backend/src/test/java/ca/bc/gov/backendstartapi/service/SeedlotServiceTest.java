@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -291,5 +292,32 @@ class SeedlotServiceTest {
         () -> {
           seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
         });
+  }
+
+  @Test
+  @DisplayName("patchSeedlotSuccessTest")
+  void patchSeedlotSuccessTest() {
+    String seedlotNumber = "123456";
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", true, false);
+
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(testSeedlot));
+
+    when(seedlotSourceRepository.findById(testDto.seedlotSourceCode()))
+        .thenReturn(Optional.of(new SeedlotSourceEntity("CUS", "custom", DATE_RANGE, false)));
+
+    // Returns the seedlot that's about to be saved os we can compare the object.
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+
+    Seedlot patchedSeedlot = seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+
+    assertEquals(testDto.applicantEmailAddress(), patchedSeedlot.getApplicantEmailAddress());
+    assertEquals(
+        testDto.seedlotSourceCode(), patchedSeedlot.getSeedlotSource().getSeedlotSourceCode());
+    assertEquals(testDto.toBeRegistrdInd(), patchedSeedlot.getIntendedForCrownLand());
+    assertEquals(testDto.bcSourceInd(), patchedSeedlot.getSourceInBc());
   }
 }

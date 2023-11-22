@@ -276,7 +276,7 @@ public class SeedlotEndpoint {
    */
   @PatchMapping(
       consumes = MimeTypeUtils.APPLICATION_JSON_VALUE,
-      path = "/{seedlotNumber}/applicantion-info")
+      path = "/{seedlotNumber}/application-info")
   @Operation(
       summary = "Updates a seedlot's applicant email and other fields",
       description =
