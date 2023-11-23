@@ -198,7 +198,7 @@ public class SeedlotService {
 
     seedlotInfo.setSourceInBc(patchDto.bcSourceInd());
 
-    // To be registered indicator
+    // The field intendedForCrownLand == to be registered indicator.
     seedlotInfo.setIntendedForCrownLand(patchDto.toBeRegistrdInd());
 
     return seedlotRepository.save(seedlotInfo);
