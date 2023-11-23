@@ -12,5 +12,5 @@ public class SeedlotFormSubmissionDto {
   SeedlotFormInterimDto seedlotFormInterimDto;
   SeedlotFormOrchardDto seedlotFormOrchardDto;
   String seedlotFormParentTreeSmpDto; // step 5
-  String seedlotFormExtractionStorageDto; // step 6
+  SeedlotFormExtractionDto seedlotFormExtractionDto;
 }
