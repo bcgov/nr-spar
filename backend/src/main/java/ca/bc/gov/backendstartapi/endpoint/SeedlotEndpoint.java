@@ -305,7 +305,7 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public ResponseEntity<Seedlot> patchApplicantAndSeedlotInfo(
+  public Seedlot patchApplicantAndSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -321,8 +321,6 @@ public class SeedlotEndpoint {
           @Valid
           SeedlotApplicationPatchDto patchDto) {
 
-    Seedlot patchedSeedlot = seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
-
-    return ResponseEntity.ok().body(patchedSeedlot);
+    return seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
   }
 }
