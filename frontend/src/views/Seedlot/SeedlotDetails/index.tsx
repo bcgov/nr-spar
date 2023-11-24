@@ -41,8 +41,8 @@ const SeedlotDetails = () => {
   const manageOptions = [
     {
       text: 'Edit seedlot applicant',
-      onClickFunction: () => null,
-      disabled: true
+      onClickFunction: () => navigate(`/seedlots/edit-a-class-application/${seedlotNumber}`),
+      disabled: false
     },
     {
       text: 'Print seedlot',
@@ -168,6 +168,7 @@ const SeedlotDetails = () => {
                     isFetching={seedlotQuery.isFetching}
                   />
                   <ApplicantInformation
+                    seedlotNumber={seedlotNumber}
                     applicant={applicantData}
                     isFetching={forestClientQuery?.isFetching}
                   />

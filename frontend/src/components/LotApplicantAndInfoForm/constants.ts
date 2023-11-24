@@ -1,5 +1,5 @@
-import { SeedlotRegFormType } from '../../../../types/SeedlotRegistrationTypes';
-import ComboBoxPropsType from './definitions';
+import { SeedlotRegFormType } from '../../types/SeedlotRegistrationTypes';
+import { ComboBoxPropsType } from './definitions';
 
 export const pageTexts = {
   locCodeInput: {
