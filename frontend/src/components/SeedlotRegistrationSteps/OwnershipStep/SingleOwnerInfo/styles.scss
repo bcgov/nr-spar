@@ -69,6 +69,10 @@
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
+
+    input[type=number] {
+      min-inline-size: auto;
+    }
   }
 
   .reserved-surplus-input {
