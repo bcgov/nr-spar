@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   FlexGrid,
   Column,
@@ -47,25 +47,11 @@ const CollectionStep = (
     agency: FormInputType & { value: MultiOptionsObj },
     locationCode: FormInputType & { value: string }
   ) => {
-    console.log(agency.value.description);
-    console.log(locationCode.value);
     const clonedState = structuredClone(state);
     clonedState.collectorAgency = agency;
     clonedState.locationCode = locationCode;
     setStepData(clonedState);
   };
-
-  // TODO: SOmething wrong here
-  useEffect(() => {
-    const useDefault = state.useDefaultAgencyInfo.value;
-    const agencyValue = useDefault ? defaultAgency : state.collectorAgency.value;
-    const codeValue = useDefault ? defaultCode : state.locationCode.value;
-
-    const clonedState = structuredClone(state);
-    clonedState.collectorAgency.value = agencyValue;
-    clonedState.locationCode.value = codeValue;
-    setStepData(clonedState);
-  }, [defaultAgency, defaultCode]);
 
   const handleDateChange = (isStartDate: boolean, value: string) => {
     const clonedState = structuredClone(state);

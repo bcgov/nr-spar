@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -115,6 +115,23 @@ const SeedlotRegistrationForm = () => {
     refetchOnWindowFocus: false
   });
 
+  const setDefaultAgencyAndCode = (agency: MultiOptionsObj, locationCode: string) => {
+    setAllStepData((prevData) => ({
+      ...prevData,
+      collectionStep: {
+        ...prevData.collectionStep,
+        collectorAgency: {
+          ...prevData.collectionStep.collectorAgency,
+          value: agency
+        },
+        locationCode: {
+          ...prevData.collectionStep.locationCode,
+          value: locationCode
+        }
+      }
+    }));
+  };
+
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', seedlotQuery.data?.applicantClientNumber],
     queryFn: () => getForestClientByNumber(seedlotQuery.data?.applicantClientNumber),
@@ -122,6 +139,20 @@ const SeedlotRegistrationForm = () => {
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
+
+  const getDefaultAgencyObj = (): MultiOptionsObj => ({
+    code: forestClientQuery.data?.clientNumber ?? '',
+    description: forestClientQuery.data?.clientName ?? '',
+    label: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`
+  });
+
+  const getDefaultLocationCode = (): string => (seedlotQuery.data?.applicantLocationCode ?? '');
+
+  useEffect(() => {
+    if (forestClientQuery.isFetched) {
+      setDefaultAgencyAndCode(getDefaultAgencyObj(), getDefaultLocationCode());
+    }
+  }, [forestClientQuery.isFetched]);
 
   const gameticMethodologyQuery = useQuery({
     queryKey: ['gametic-methodologies'],
@@ -219,13 +250,9 @@ const SeedlotRegistrationForm = () => {
     // Will need to replace with the multiOption obj below
     const defaultAgency = `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`;
 
-    const defaultAgencyObj: MultiOptionsObj = {
-      code: forestClientQuery.data?.clientNumber ?? '',
-      description: forestClientQuery.data?.clientName ?? '',
-      label: defaultAgency
-    };
+    const defaultAgencyObj = getDefaultAgencyObj();
+    const defaultCode = getDefaultLocationCode();
 
-    const defaultCode = seedlotQuery.data?.applicantLocationCode ?? '';
     const agencyOptions = applicantAgencyQuery.data ?? [];
 
     const seedlotSpecies = getSpeciesOptionByCode(
