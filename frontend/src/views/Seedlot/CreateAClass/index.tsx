@@ -22,7 +22,7 @@ const CreateAClass = () => {
             <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
           </Breadcrumb>
         </Row>
-        <Row>
+        <Row className="page-title-row">
           <PageTitle
             title="Create A-class seedlot"
             subtitle="Register a new A-class seedlot"
@@ -31,7 +31,7 @@ const CreateAClass = () => {
           />
         </Row>
         <Row>
-          <LotApplicantAndInfoForm isSeedlot isEdit />
+          <LotApplicantAndInfoForm isSeedlot isEdit={false} />
         </Row>
       </Stack>
     </FlexGrid>

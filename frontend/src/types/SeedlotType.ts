@@ -113,3 +113,8 @@ export type SeedlotsReturnType = {
   seedlots: SeedlotType[],
   totalCount: number
 }
+
+export type SeedlotCreateResponseType = {
+  seedlotNumber: string,
+  seedlotStatusCode: string
+}

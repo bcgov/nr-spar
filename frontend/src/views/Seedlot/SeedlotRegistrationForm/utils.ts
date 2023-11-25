@@ -13,7 +13,7 @@ import {
 } from './definitions';
 
 export const initCollectionState = (
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string
 ) => ({
   useDefaultAgencyInfo: {

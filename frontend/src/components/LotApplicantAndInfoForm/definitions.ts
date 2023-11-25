@@ -1,5 +1,8 @@
 import React from 'react';
-import { SeedlotRegFormType } from '../../types/SeedlotRegistrationTypes';
+import { UseMutateFunction } from '@tanstack/react-query';
+import { AxiosError, AxiosResponse } from 'axios';
+
+import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../types/SeedlotRegistrationTypes';
 
 export type ComboBoxPropsType = {
   placeholder: string;
@@ -15,6 +18,12 @@ export type FormProps = {
 }
 
 export type SeedlotInformationProps = {
-  formData: SeedlotRegFormType,
-  setFormData: React.Dispatch<React.SetStateAction<SeedlotRegFormType>>
+  seedlotFormData: SeedlotRegFormType,
+  setSeedlotFormData: React.Dispatch<React.SetStateAction<SeedlotRegFormType>>,
+  isEdit: boolean,
+  seedlotMutationFunc: UseMutateFunction<
+    AxiosResponse<any, any>,
+    AxiosError<unknown, any>,
+    SeedlotRegPayloadType, unknown
+  >
 }

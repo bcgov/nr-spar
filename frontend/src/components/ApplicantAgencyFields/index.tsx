@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Row, Column, TextInput, Checkbox, ComboBox, InlineLoading
+  Row, Column, TextInput, Checkbox, ComboBox, InlineLoading, FlexGrid
 } from '@carbon/react';
 import { useMutation } from '@tanstack/react-query';
 import validator from 'validator';
@@ -12,7 +12,6 @@ import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { formatLocationCode } from '../SeedlotRegistrationSteps/CollectionStep/utils';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
-import getForestClientNumber from '../../utils/StringUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
 import supportTexts from './constants';
@@ -20,29 +19,28 @@ import supportTexts from './constants';
 import './styles.scss';
 
 const ApplicantAgencyFields = ({
-  useDefault, agency, locationCode, fieldsProps, agencyOptions,
-  defaultAgency, defaultCode, setAllValues, readOnly
+  checkboxId, agency, locationCode, fieldsProps, agencyOptions,
+  defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox
 }: ApplicantAgencyFieldsProps) => {
-  const agencyClone = structuredClone(agency);
-  const locationCodeClone = structuredClone(locationCode);
-  const useDefaultClone = structuredClone(useDefault);
+  const [isDefault, setIsDefault] = useState<boolean>(true);
 
-  const [forestClientNumber, setForestClientNumber] = useState<string>(
-    agencyClone.value ? getForestClientNumber(agencyClone.value) : ''
-  );
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
-    locationCodeClone.isInvalid && agencyClone.value
+    locationCode.isInvalid && agency.value
       ? supportTexts.locationCode.invalidLocationForSelectedAgency
       : supportTexts.locationCode.invalidText
   );
+
   const [locationCodeHelperText, setLocationCodeHelperText] = useState<string>(
     supportTexts.locationCode.helperTextEnabled
   );
 
   const updateAfterLocValidation = (isInvalid: boolean) => {
-    locationCodeClone.isInvalid = isInvalid;
+    const updatedLocationCode = {
+      ...locationCode,
+      isInvalid
+    };
     setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+    setAgencyAndCode(agency, updatedLocationCode);
   };
 
   const validateLocationCodeMutation = useMutation({
@@ -58,82 +56,110 @@ const ApplicantAgencyFields = ({
   });
 
   const handleDefaultCheckBox = (checked: boolean) => {
+    console.log('handleDefaultCheckBox');
     setLocationCodeHelperText(
       checked
         ? supportTexts.locationCode.helperTextEnabled
         : supportTexts.locationCode.helperTextDisabled
     );
 
-    agencyClone.value = checked ? defaultAgency : '';
-    locationCodeClone.value = checked ? defaultCode : '';
-    useDefaultClone.value = checked;
+    const updatedAgency = {
+      ...agency,
+      value: checked ? defaultAgency : { code: '', label: '', description: '' }
+    };
 
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+    const updatedLocationCode = {
+      ...locationCode,
+      value: checked ? defaultCode : ''
+    };
+
+    setIsDefault(checked);
+
+    setAgencyAndCode(updatedAgency, updatedLocationCode);
   };
 
   const handleAgencyInput = (value: MultiOptionsObj) => {
-    setForestClientNumber(value ? value.code : '');
+    console.log('handleAgencyInput');
     setLocationCodeHelperText(
       value
         ? supportTexts.locationCode.helperTextEnabled
         : supportTexts.locationCode.helperTextDisabled
     );
-    agencyClone.value = value ? value.label : '';
-    locationCodeClone.value = value ? locationCodeClone.value : '';
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+
+    const updatedAgency = {
+      ...agency,
+      value: value ?? { code: '', label: '', description: '' }
+    };
+
+    const updatedLocationCode = {
+      ...locationCode,
+      value: value ? locationCode.value : ''
+    };
+
+    setAgencyAndCode(updatedAgency, updatedLocationCode);
   };
 
   const handleLocationCodeChange = (value: string) => {
-    locationCodeClone.value = value.slice(0, LOCATION_CODE_LIMIT);
+    const updatedValue = value.slice(0, LOCATION_CODE_LIMIT);
     const isInRange = validator.isInt(value, { min: 0, max: 99 });
+    let updatedIsInvalid = locationCode.isInvalid;
     if (!isInRange) {
       setInvalidLocationMessage(supportTexts.locationCode.invalidText);
-      locationCodeClone.isInvalid = true;
+      updatedIsInvalid = true;
     }
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
+
+    const updatedLocationCode = {
+      ...locationCode,
+      value: updatedValue,
+      isInvalid: updatedIsInvalid
+    };
+
+    setAgencyAndCode(agency, updatedLocationCode);
   };
 
   const handleLocationCodeBlur = (value: string) => {
     const formattedCode = value.length ? formatLocationCode(value) : '';
     if (formattedCode === '') return;
-    locationCodeClone.value = formattedCode;
-    setAllValues(agencyClone, locationCodeClone, useDefaultClone);
-    if (forestClientNumber) {
-      validateLocationCodeMutation.mutate([forestClientNumber, formattedCode]);
-      setLocationCodeHelperText('');
-    }
+    validateLocationCodeMutation.mutate([agency.value.code, formattedCode]);
+    setLocationCodeHelperText('');
   };
 
   return (
-    <div className="agency-information-section">
-      <Row className="agency-information-row">
-        <Column sm={4} md={8} lg={16} xlg={16}>
-          <Checkbox
-            id={useDefaultClone.id}
-            name={fieldsProps.useDefaultCheckbox.name}
-            labelText={fieldsProps.useDefaultCheckbox.labelText}
-            readOnly={readOnly}
-            checked={useDefaultClone.value}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleDefaultCheckBox(e.target.checked);
-            }}
-          />
-        </Column>
-      </Row>
+    <FlexGrid className="agency-information-section">
+      {
+        showCheckbox
+          ? (
+            <Row className="agency-information-row">
+              <Column sm={4} md={8} lg={16} xlg={16}>
+                <Checkbox
+                  id={checkboxId}
+                  name={fieldsProps.useDefaultCheckbox.name}
+                  labelText={fieldsProps.useDefaultCheckbox.labelText}
+                  readOnly={readOnly}
+                  checked={isDefault}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleDefaultCheckBox(e.target.checked);
+                  }}
+                />
+              </Column>
+            </Row>
+          )
+          : null
+      }
       <Row className="agency-information-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
-            id={agencyClone.id}
+            id={agency.id}
             name={fieldsProps.agencyInput.name}
             placeholder={supportTexts.agency.placeholder}
             titleText={fieldsProps.agencyInput.labelText}
             helperText={supportTexts.agency.helperText}
             invalidText={fieldsProps.agencyInput.invalidText}
             items={agencyOptions}
-            readOnly={useDefaultClone.value || readOnly}
-            selectedItem={agencyClone.value}
+            readOnly={isDefault || readOnly}
+            selectedItem={agency.value}
             onChange={(e: ComboBoxEvent) => handleAgencyInput(e.selectedItem)}
-            invalid={agencyClone.isInvalid}
+            invalid={agency.isInvalid}
             shouldFilterItem={
               ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
             }
@@ -142,18 +168,18 @@ const ApplicantAgencyFields = ({
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
           <TextInput
-            id={locationCodeClone.id}
+            id={locationCode.id}
             className="location-code-input"
             name={fieldsProps.locationCode.name}
-            value={locationCodeClone.value}
+            value={locationCode.value}
             type="number"
-            placeholder={!forestClientNumber ? '' : supportTexts.locationCode.placeholder}
+            placeholder={!agency.value.code ? '' : supportTexts.locationCode.placeholder}
             labelText={fieldsProps.locationCode.labelText}
             helperText={locationCodeHelperText}
-            invalid={locationCodeClone.isInvalid}
+            invalid={locationCode.isInvalid}
             invalidText={invalidLocationMessage}
-            readOnly={useDefaultClone.value || readOnly}
-            disabled={!forestClientNumber}
+            readOnly={isDefault || readOnly}
+            disabled={!agency.value.code}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleLocationCodeChange(e.target.value);
             }}
@@ -171,7 +197,7 @@ const ApplicantAgencyFields = ({
           }
         </Column>
       </Row>
-    </div>
+    </FlexGrid>
   );
 };
 

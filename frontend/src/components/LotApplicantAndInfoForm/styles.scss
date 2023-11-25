@@ -2,6 +2,11 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .applicant-information-form {
+  h2 {
+    @include type.type-style('heading-03');
+    margin-bottom: 0.5rem;
+  }
+
   .error-row {
     margin-bottom: 2rem;
 
@@ -18,14 +23,13 @@
       flex-direction: column;
     }
   }
+
+  .submit-button {
+    width: 100%;
+  }
 }
 
-.applicant-information-form h2 {
-  @include type.type-style('heading-03');
-  margin-bottom: 0.5rem;
-}
-
-.applicant-agency-title,
+.applicant-information-form .applicant-agency-title,
 .seedlot-information-title {
   margin-bottom: 2.5rem;
 }
@@ -44,13 +48,11 @@
 }
 
 .agency-email,
-.collected-checkbox,
-.save-button {
+.collected-checkbox {
   margin-bottom: 3rem;
 }
 
 .agency-number-wrapper-class {
-
   input::-webkit-outer-spin-button,
   input::-webkit-inner-spin-button {
     -webkit-appearance: none;

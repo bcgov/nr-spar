@@ -78,7 +78,7 @@ const SeedlotRegistrationForm = () => {
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
-    collectionStep: initCollectionState('', ''),
+    collectionStep: initCollectionState({ code: '', label: '', description: '' }, ''),
     interimStep: initInterimState('', ''),
     ownershipStep: [initOwnershipState('', '')],
     orchardStep: initOrchardState(),
@@ -142,9 +142,10 @@ const SeedlotRegistrationForm = () => {
   });
 
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
-    const newData = { ...allStepData };
-    newData[stepName] = stepData;
-    setAllStepData(newData);
+    setAllStepData((prevData) => ({
+      ...prevData,
+      [stepName]: stepData
+    }));
   };
 
   const methodsOfPaymentQuery = useQuery({
@@ -215,11 +216,17 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
-    // Will need to convert this into a multiOption obj
+    // Will need to replace with the multiOption obj below
     const defaultAgency = `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`;
 
+    const defaultAgencyObj: MultiOptionsObj = {
+      code: forestClientQuery.data?.clientNumber ?? '',
+      description: forestClientQuery.data?.clientName ?? '',
+      label: defaultAgency
+    };
+
     const defaultCode = seedlotQuery.data?.applicantLocationCode ?? '';
-    const agencyOptions = applicantAgencyQuery.data ? applicantAgencyQuery.data : [];
+    const agencyOptions = applicantAgencyQuery.data ?? [];
 
     const seedlotSpecies = getSpeciesOptionByCode(
       seedlotQuery.data?.vegetationCode,
@@ -233,7 +240,7 @@ const SeedlotRegistrationForm = () => {
           <CollectionStep
             state={allStepData.collectionStep}
             setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
-            defaultAgency={defaultAgency}
+            defaultAgency={defaultAgencyObj}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
@@ -259,7 +266,7 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency.value}
+            collectorAgency={allStepData.collectionStep.collectorAgency.value.label}
             collectorCode={allStepData.collectionStep.locationCode.value}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}

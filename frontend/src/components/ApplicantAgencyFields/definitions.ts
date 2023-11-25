@@ -3,14 +3,15 @@ import { FormInputType } from '../../types/FormInputType';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 
 interface ApplicantAgencyFieldsProps {
-  useDefault: FormInputType & { value: boolean };
-  agency: FormInputType & { value: string };
+  checkboxId: string
+  agency: FormInputType & { value: MultiOptionsObj };
   locationCode: FormInputType & { value: string };
   fieldsProps: AgencyTextPropsType;
   agencyOptions: Array<MultiOptionsObj>;
-  defaultAgency: string;
+  defaultAgency: MultiOptionsObj;
   defaultCode: string;
-  setAllValues: Function;
+  setAgencyAndCode: Function;
+  showCheckbox?: boolean;
   readOnly?: boolean;
 }
 

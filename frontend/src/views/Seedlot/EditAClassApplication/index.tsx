@@ -16,7 +16,7 @@ const EditAClassApplication = () => {
   return (
     <FlexGrid className="create-a-class-seedlot-page">
       <Row>
-        <LotApplicantAndInfoForm />
+        <LotApplicantAndInfoForm isEdit isSeedlot />
       </Row>
     </FlexGrid>
   );
