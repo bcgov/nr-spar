@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
@@ -26,12 +27,16 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -195,6 +200,7 @@ public class SeedlotEndpoint {
    * @return A {@link List} of {@link Seedlot} populated or empty
    */
   @GetMapping("/users/{userId}")
+  @CrossOrigin(exposedHeaders = "X-TOTAL-COUNT")
   @Operation(
       summary = "Fetch all seedlots registered by a given user.",
       description = "Returns a paginated list containing the seedlots",
@@ -207,7 +213,7 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<Seedlot> getUserSeedlots(
+  public ResponseEntity<List<Seedlot>> getUserSeedlots(
       @PathVariable
           @Parameter(
               name = "userId",
@@ -217,7 +223,13 @@ public class SeedlotEndpoint {
           String userId,
       @RequestParam(value = "page", required = false, defaultValue = "0") int page,
       @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-    return seedlotService.getUserSeedlots(userId, page, size);
+    Optional<Page<Seedlot>> optionalResult = seedlotService.getUserSeedlots(userId, page, size);
+    List<Seedlot> result = optionalResult.isEmpty() ? List.of() : optionalResult.get().getContent();
+    String totalCount =
+        optionalResult.isEmpty() ? "0" : String.valueOf(optionalResult.get().getTotalElements());
+    HttpHeaders responseHeaders = new HttpHeaders();
+    responseHeaders.set("X-TOTAL-COUNT", totalCount);
+    return ResponseEntity.ok().headers(responseHeaders).body(result);
   }
 
   /**
@@ -244,7 +256,7 @@ public class SeedlotEndpoint {
             responseCode = "404",
             description = "Could not find information for the given seedlot number")
       })
-  public Optional<Seedlot> getSingleSeedlotInfo(
+  public Seedlot getSingleSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -255,6 +267,64 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
     return seedlotService.getSingleSeedlotInfo(seedlotNumber);
   }
+
+  /**
+   * PATCH an entry on the Seedlot table.
+   *
+   * @param patchDto A {@link SeedlotApplicationPatchDto} containig all required field to get a new
+   *     registration started.
+   * @return A {@link Seedlot} with all updated values.
+   */
+  @PatchMapping(
+      consumes = MimeTypeUtils.APPLICATION_JSON_VALUE,
+      path = "/{seedlotNumber}/application-info")
+  @Operation(
+      summary = "Updates a seedlot's applicant email and other fields",
+      description =
+          """
+          Updates a seedlot's applicant email, source_code, to_be_registered_ind and bc_source_ind
+          """)
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "The Seedlot entity was successfully updated"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "One or more fields has invalid values.",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema =
+                        @Schema(
+                            oneOf = {
+                              ValidationExceptionResponse.class,
+                              DefaultSpringExceptionResponse.class
+                            }))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public Seedlot patchApplicantAndSeedlotInfo(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber,
+      @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "Body containing minimum required fields to create a seedlot",
+              required = true)
+          @RequestBody
+          @Valid
+          SeedlotApplicationPatchDto patchDto) {
+
+    return seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
+  }
+
 
   /**
    * Saves the Seedlot submit form once submitted on step 6.

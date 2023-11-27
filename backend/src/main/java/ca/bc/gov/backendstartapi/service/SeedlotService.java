@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
+import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
@@ -10,17 +11,18 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -75,7 +77,7 @@ public class SeedlotService {
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
-    seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserIdirOrBceId()));
+    seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
 
     log.debug("Seedlot to insert: {}", seedlot);
 
@@ -124,7 +126,7 @@ public class SeedlotService {
    * @param pageSize the size of the page
    * @return a list of the user's seedlots
    */
-  public List<Seedlot> getUserSeedlots(String userId, int pageNumber, int pageSize) {
+  public Optional<Page<Seedlot>> getUserSeedlots(String userId, int pageNumber, int pageSize) {
     if (pageSize == 0) {
       pageSize = 10;
     }
@@ -132,7 +134,8 @@ public class SeedlotService {
     Pageable sortedPageable =
         PageRequest.of(
             pageNumber, pageSize, Sort.by(Direction.DESC, "AuditInformation_UpdateTimestamp"));
-    return seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable);
+    return Optional.of(
+        seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable));
   }
 
   /**
@@ -142,16 +145,62 @@ public class SeedlotService {
    * @return A Seedlot entity.
    * @throws SeedlotNotFoundException in case of errors.
    */
-  public Optional<Seedlot> getSingleSeedlotInfo(String seedlotNumber) {
+  public Seedlot getSingleSeedlotInfo(String seedlotNumber) {
     log.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
-    Optional<Seedlot> seedlotInfo = seedlotRepository.findById(seedlotNumber);
-
-    if (seedlotInfo.isEmpty()) {
-      log.error("Nothing found for seedlot number: {}", seedlotNumber);
-      throw new SeedlotNotFoundException();
-    }
+    Seedlot seedlotInfo =
+        seedlotRepository
+            .findById(seedlotNumber)
+            .orElseThrow(
+                () -> {
+                  log.error("Nothing found for seedlot number: {}", seedlotNumber);
+                  return new SeedlotNotFoundException();
+                });
 
     return seedlotInfo;
+  }
+
+  /**
+   * Update an entry in the Seedlot table.
+   *
+   * @param seedlotNumber the seedlot number of the seedlot to fetch the information
+   * @return A Seedlot entity.
+   * @throws SeedlotNotFoundException in case of seedlot not found error.
+   * @throws SeedlotSourceNotFoundException in case of seedlot source not found error.
+   */
+  public Seedlot patchApplicantionInfo(String seedlotNumber, SeedlotApplicationPatchDto patchDto) {
+    log.info("Patching seedlot entry for seedlot number {}", seedlotNumber);
+
+    Seedlot seedlotInfo =
+        seedlotRepository
+            .findById(seedlotNumber)
+            .orElseThrow(
+                () -> {
+                  log.error("Nothing found for seedlot number: {}", seedlotNumber);
+                  return new SeedlotNotFoundException();
+                });
+
+    seedlotInfo.setApplicantEmailAddress(patchDto.applicantEmailAddress());
+
+    SeedlotSourceEntity updatedSource =
+        seedlotSourceRepository
+            .findById(patchDto.seedlotSourceCode())
+            .orElseThrow(
+                () -> {
+                  log.error(
+                      "Seedlot source not found while patching in patchApplicantionInfo for seedlot"
+                          + " number: {}",
+                      seedlotNumber);
+                  return new SeedlotSourceNotFoundException();
+                });
+
+    seedlotInfo.setSeedlotSource(updatedSource);
+
+    seedlotInfo.setSourceInBc(patchDto.bcSourceInd());
+
+    // The field intendedForCrownLand == to be registered indicator.
+    seedlotInfo.setIntendedForCrownLand(patchDto.toBeRegistrdInd());
+
+    return seedlotRepository.save(seedlotInfo);
   }
 }

@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -16,6 +17,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -28,6 +30,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -52,6 +56,16 @@ class SeedlotEndpointTest {
   private final WebApplicationContext webApplicationContext;
 
   private static final String USER_ID = "dev-123456789abcdef@idir";
+
+  private static final String TEST_PATCH_SEEDLOT_JSON =
+      """
+            {
+                "applicantEmailAddress": "groot@wood.com",
+                "seedlotSourceCode": "CUS",
+                "toBeRegistrdInd": true,
+                "bcSourceInd": false
+            }
+        """;
 
   SeedlotEndpointTest(WebApplicationContext webApplicationContext) {
     this.webApplicationContext = webApplicationContext;
@@ -221,9 +235,11 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
+
     String url = String.format("/api/seedlots/users/%s", USER_ID);
 
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(userSeedlots);
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
 
     mockMvc
         .perform(get(url).accept(MediaType.APPLICATION_JSON))
@@ -239,15 +255,14 @@ class SeedlotEndpointTest {
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(userSeedlots);
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
 
     String url = String.format("/api/seedlots/users/%s?page={page}", USER_ID);
     int page = 1;
 
     mockMvc
-        .perform(
-            get(url, page)
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(get(url, page).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
   }
@@ -264,12 +279,11 @@ class SeedlotEndpointTest {
     String url = String.format("/api/seedlots/users/%s?page=1&size={size}", USER_ID);
     int pageSize = 2;
 
-    when(seedlotService.getUserSeedlots(USER_ID, 1, pageSize)).thenReturn(userSeedlots);
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
+    when(seedlotService.getUserSeedlots(USER_ID, 1, pageSize)).thenReturn(pagedResult);
 
     mockMvc
-        .perform(
-            get(url, pageSize)
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(get(url, pageSize).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2))
         .andReturn();
@@ -278,7 +292,9 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("getSingleSeedlotInfoNotFoundNoPageTest")
   void getSingleSeedlotInfoNotFoundNoPageTest() throws Exception {
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(List.of());
+
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(List.of()));
+    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
 
     String url = String.format("/api/seedlots/users/%s", USER_ID);
 
@@ -295,7 +311,7 @@ class SeedlotEndpointTest {
   void getSingleSeedlotInfoTest() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000000");
 
-    when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(Optional.of(seedlotEntity));
+    when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(seedlotEntity);
 
     mockMvc
         .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
@@ -312,6 +328,62 @@ class SeedlotEndpointTest {
         .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("patchSeedlotApplicationBadSourceTest")
+  void patchSeedlotApplicationBadSourceTest() throws Exception {
+    when(seedlotService.patchApplicantionInfo(any(), any()))
+        .thenThrow(new SeedlotSourceNotFoundException());
+
+    mockMvc
+        .perform(
+            patch("/api/seedlots/0000000/application-info")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(TEST_PATCH_SEEDLOT_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("patchSeedlotApplicationBadIdTest")
+  void patchSeedlotApplicationBadIdTest() throws Exception {
+    when(seedlotService.patchApplicantionInfo(any(), any()))
+        .thenThrow(new SeedlotNotFoundException());
+
+    mockMvc
+        .perform(
+            patch("/api/seedlots/0000000/application-info")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(TEST_PATCH_SEEDLOT_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("patchSeedlotApplicationSuccessTest")
+  void patchSeedlotApplicationSuccessTest() throws Exception {
+    String seedlotNumber = "555888";
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+
+    when(seedlotService.patchApplicantionInfo(any(), any())).thenReturn(testSeedlot);
+
+    String path = String.format("/api/seedlots/%s/application-info", seedlotNumber);
+
+    mockMvc
+        .perform(
+            patch(path)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(TEST_PATCH_SEEDLOT_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(testSeedlot.getId()))
         .andReturn();
   }
 }

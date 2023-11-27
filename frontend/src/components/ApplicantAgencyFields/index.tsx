@@ -5,7 +5,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import validator from 'validator';
 
-import getForestClientLocation from '../../api-service/forestClientsAPI';
+import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';

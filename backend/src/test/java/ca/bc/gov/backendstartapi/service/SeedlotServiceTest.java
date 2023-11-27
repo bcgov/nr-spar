@@ -1,8 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
@@ -12,6 +16,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -26,6 +31,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -75,13 +82,13 @@ class SeedlotServiceTest {
     when(seedlotStatusRepository.findById("PND")).thenReturn(Optional.of(statusEntity));
 
     SeedlotSourceEntity sourceEntity =
-        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE);
+        new SeedlotSourceEntity("TPT", "Tested Parent Trees", DATE_RANGE, null);
     when(seedlotSourceRepository.findById("TPT")).thenReturn(Optional.of(sourceEntity));
 
     Seedlot seedlot = new Seedlot("63000");
     when(seedlotRepository.save(seedlot)).thenReturn(seedlot);
 
-    when(loggedUserService.getLoggedUserIdirOrBceId()).thenReturn("IDIR");
+    when(loggedUserService.getLoggedUserId()).thenReturn("imaveryhappyuserid@idir");
 
     GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
     when(geneticClassRepository.findById("A")).thenReturn(Optional.of(classEntity));
@@ -174,9 +181,13 @@ class SeedlotServiceTest {
 
     List<Seedlot> testList = List.of(new Seedlot("63001"), new Seedlot("63002"));
 
-    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(testList);
+    Page<Seedlot> pagedResult = new PageImpl<>(testList);
 
-    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
+    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+        .thenReturn(pagedResult);
+
+    List<Seedlot> responseFromService =
+        seedlotService.getUserSeedlots(userId, 0, 10).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(2, responseFromService.size());
@@ -189,9 +200,12 @@ class SeedlotServiceTest {
   void getUserSeedlots_noSeedlots_shouldSucceed() {
     String userId = "userId";
 
-    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
+    Page<Seedlot> pagedResult = new PageImpl<>(List.of());
+    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+        .thenReturn(pagedResult);
 
-    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 10);
+    List<Seedlot> responseFromService =
+        seedlotService.getUserSeedlots(userId, 0, 10).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertTrue(responseFromService.isEmpty());
@@ -202,9 +216,12 @@ class SeedlotServiceTest {
   void getUserSeedlots_noPageSize_shouldSucceed() {
     String userId = "userId";
 
-    when(seedlotService.getUserSeedlots(userId, 0, 10)).thenReturn(List.of());
+    Page<Seedlot> pagedResult = new PageImpl<>(List.of());
+    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+        .thenReturn(pagedResult);
 
-    List<Seedlot> responseFromService = seedlotService.getUserSeedlots(userId, 0, 0);
+    List<Seedlot> responseFromService =
+        seedlotService.getUserSeedlots(userId, 0, 0).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertTrue(responseFromService.isEmpty());
@@ -216,7 +233,7 @@ class SeedlotServiceTest {
 
     when(seedlotRepository.findById("0000000")).thenReturn(Optional.of(seedlotEntity));
 
-    Optional<Seedlot> responseFromService = seedlotService.getSingleSeedlotInfo("0000000");
+    Seedlot responseFromService = seedlotService.getSingleSeedlotInfo("0000000");
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(Optional.of(seedlotEntity), responseFromService);
@@ -237,5 +254,70 @@ class SeedlotServiceTest {
             });
 
     Assertions.assertEquals(SEEDLOT_NOT_FOUND_STR, exc.getMessage());
+  }
+
+  @Test
+  @DisplayName("patchSeedlotFailByIdTest")
+  void patchSeedlotFailByIdTest() {
+    String seedlotNumber = "123456";
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", false, false);
+
+    Assertions.assertThrows(
+        SeedlotNotFoundException.class,
+        () -> {
+          seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+        });
+  }
+
+  @Test
+  @DisplayName("patchSeedlotFailBySourceTest")
+  void patchSeedlotFailBySourceTest() {
+    String seedlotNumber = "123456";
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false);
+
+    when(seedlotRepository.findById(seedlotNumber))
+        .thenReturn(Optional.of(new Seedlot(seedlotNumber)));
+
+    when(seedlotSourceRepository.findById(testDto.seedlotSourceCode()))
+        .thenReturn(Optional.empty());
+
+    Assertions.assertThrows(
+        SeedlotSourceNotFoundException.class,
+        () -> {
+          seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+        });
+  }
+
+  @Test
+  @DisplayName("patchSeedlotSuccessTest")
+  void patchSeedlotSuccessTest() {
+    String seedlotNumber = "123456";
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", true, false);
+
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(testSeedlot));
+
+    when(seedlotSourceRepository.findById(testDto.seedlotSourceCode()))
+        .thenReturn(Optional.of(new SeedlotSourceEntity("CUS", "custom", DATE_RANGE, false)));
+
+    // Returns the seedlot that's about to be saved os we can compare the object.
+    when(seedlotRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+
+    Seedlot patchedSeedlot = seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+
+    assertEquals(testDto.applicantEmailAddress(), patchedSeedlot.getApplicantEmailAddress());
+    assertEquals(
+        testDto.seedlotSourceCode(), patchedSeedlot.getSeedlotSource().getSeedlotSourceCode());
+    assertEquals(testDto.toBeRegistrdInd(), patchedSeedlot.getIntendedForCrownLand());
+    assertEquals(testDto.bcSourceInd(), patchedSeedlot.getSourceInBc());
   }
 }

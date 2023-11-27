@@ -141,10 +141,11 @@ const renderTableCell = (
             <TextInput
               labelText=""
               hideLabel
+              invalidText=""
               type="number"
               placeholder="Add value"
               value={rowData[header.id]}
-              id={`${rowData.parentTreeNumber}-${rowData[header.id]}`}
+              id={`${rowData.parentTreeNumber === '' ? rowData.rowId : rowData.parentTreeNumber}-${header.id}`}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setInputChange(
                   rowData,

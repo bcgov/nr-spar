@@ -9,7 +9,7 @@ export const clearPanelState = {
   myProfile: false
 };
 
-export const listItems = [
+export const navItems = [
   {
     name: 'Main activities',
     items: [
@@ -91,19 +91,20 @@ export const listItems = [
         disabled: true
       }
     ]
-  },
-  {
-    name: 'Support',
-    items: [
-      {
-        name: 'Need help?',
-        icon: 'Help',
-        link: '#',
-        disabled: true
-      }
-    ]
   }
 ];
+
+export const supportItems = {
+  name: 'Support',
+  items: [
+    {
+      name: 'Need help?',
+      icon: 'Help',
+      link: '#',
+      disabled: true
+    }
+  ]
+};
 
 export const componentTexts = {
   headerTitle: 'SPAR',

@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.service.SeedlotSourceService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -37,9 +37,9 @@ class SeedlotSourceEndpointTest {
   @WithMockUser(roles = "user_read")
   void getAllSeedlotSource() throws Exception {
 
-    CodeDescriptionDto firstMethod = new CodeDescriptionDto("CUS", "Custom Lot");
-    CodeDescriptionDto secondMethod = new CodeDescriptionDto("TPT", "Tested Parent Trees");
-    CodeDescriptionDto thirdMethod = new CodeDescriptionDto("UPT", "Untested Parent Trees");
+    SeedlotSourceDto firstMethod = new SeedlotSourceDto("CUS", "Custom Lot", null);
+    SeedlotSourceDto secondMethod = new SeedlotSourceDto("TPT", "Tested Parent Trees", true);
+    SeedlotSourceDto thirdMethod = new SeedlotSourceDto("UPT", "Untested Parent Trees", null);
 
     when(seedlotSourceService.getAllSeedlotSource())
         .thenReturn(List.of(firstMethod, secondMethod, thirdMethod));
