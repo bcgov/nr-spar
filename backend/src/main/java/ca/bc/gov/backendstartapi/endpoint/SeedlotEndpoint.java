@@ -325,7 +325,6 @@ public class SeedlotEndpoint {
     return seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
   }
 
-
   /**
    * Saves the Seedlot submit form once submitted on step 6.
    *
@@ -338,9 +337,9 @@ public class SeedlotEndpoint {
       description =
           "This API is responsible for receiving the entire seedlot form, once submitted.")
   @ApiResponses(
-    value = {
-      @ApiResponse(responseCode = "201", description = "Successfully saved."),
-      @ApiResponse(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successfully saved."),
+        @ApiResponse(
             responseCode = "400",
             description = "One or more fields has invalid values.",
             content =
@@ -352,14 +351,13 @@ public class SeedlotEndpoint {
                               ValidationExceptionResponse.class,
                               DefaultSpringExceptionResponse.class
                             }))),
-      @ApiResponse(
+        @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
-    }
-  )
-  public ResponseEntity<SeedlotCreateResponseDto> seedlotFormSubmission(
-    @Parameter(
+      })
+  public ResponseEntity<SeedlotCreateResponseDto> submitSeedlotForm(
+      @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
               description = "Seedlot ID",
@@ -368,6 +366,7 @@ public class SeedlotEndpoint {
           @PathVariable
           String seedlotNumber,
       @RequestBody SeedlotFormSubmissionDto form) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    SeedlotCreateResponseDto createDto = seedlotService.submitSeedlotForm(seedlotNumber, form);
+    return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 }

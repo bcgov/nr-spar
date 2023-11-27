@@ -4,6 +4,12 @@ import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
@@ -202,5 +208,46 @@ public class SeedlotService {
     seedlotInfo.setIntendedForCrownLand(patchDto.toBeRegistrdInd());
 
     return seedlotRepository.save(seedlotInfo);
+  }
+
+  public SeedlotCreateResponseDto submitSeedlotForm(String seedlotNumber, SeedlotFormSubmissionDto form) {
+    Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
+    if (seedlotEntity.isEmpty()) {
+      // throw error
+    }
+
+    Seedlot seedlot = seedlotEntity.get();
+
+    // Step 1
+    SeedlotFormCollectionDto formStep1 = form.getSeedlotFormCollectionDto();
+    seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
+    seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());
+    seedlot.setCollectionStartDate(formStep1.collectionStartDate());
+    seedlot.setCollectionEndDate(formStep1.collectionEndDate());
+    seedlot.setNumberOfContainers(formStep1.noOfContainers());
+    seedlot.setContainerVolume(formStep1.volPerContainer());
+    seedlot.setTotalConeVolume(formStep1.clctnVolume());
+    seedlot.setComment(formStep1.seedlotComment());
+
+    // cone collection methods
+    for (String method : formStep1.coneCollectionMethodCodes()) {
+      //
+    }
+
+    // Step 2
+    SeedlotFormOwnershipDto formStep2 = form.getSeedlotFormOwnershipDto();
+
+    // Step 3
+    SeedlotFormInterimDto formStep3 = form.getSeedlotFormInterimDto();
+
+    // Step 4
+    SeedlotFormOrchardDto formStep4 = form.getSeedlotFormOrchardDto();
+
+    // Step 5
+
+    // Step 6
+    SeedlotFormExtractionDto formStep6 = form.getSeedlotFormExtractionDto();
+
+    return null;
   }
 }
