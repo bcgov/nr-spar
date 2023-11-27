@@ -82,8 +82,8 @@ comment on column spar.seedlot.area_of_use_comment is 'Comments on Seedlot area 
 
 create table spar.seedlot_seed_plan_zone (
 	seedlot_number 			varchar(5) not null, 
-	seed_plan_zone_code 	varchar(3) not null, 
-	entry_userid 			varchar(30) not null, 
+	seed_plan_zone_code varchar(3) not null, 
+	entry_userid 			  varchar(30) not null, 
 	entry_timestamp 		timestamp not null,
 	update_userid 			varchar(30) not null,
 	update_timestamp 		timestamp not null,
