@@ -12,7 +12,7 @@
     input[role=combobox] {
       background-color: transparent;
       padding-inline-end: 0;
-      --bx-layout-density-padding-inline-local: 0;
+      --#{vars.$bcgov-prefix}-layout-density-padding-inline-local: 0;
       border-block-end: 0;
     }
 
@@ -22,9 +22,9 @@
     }
   }
 
-  .bx--combo-box {
-    li, 
-    .bx--list-box__menu-item__option {
+  .#{vars.$bcgov-prefix}--combo-box {
+    li,
+    .#{vars.$bcgov-prefix}--list-box__menu-item__option {
       white-space: normal;
       block-size: auto;
     }
