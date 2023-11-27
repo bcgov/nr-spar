@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 
 /** The repository for {@link Seedlot Seedlots}. */
 public interface SeedlotRepository extends JpaRepository<Seedlot, String> {
-
   @Query(
       """
       select max(cast(s.id as int))

@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -16,6 +17,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -54,6 +56,16 @@ class SeedlotEndpointTest {
   private final WebApplicationContext webApplicationContext;
 
   private static final String USER_ID = "dev-123456789abcdef@idir";
+
+  private static final String TEST_PATCH_SEEDLOT_JSON =
+      """
+            {
+                "applicantEmailAddress": "groot@wood.com",
+                "seedlotSourceCode": "CUS",
+                "toBeRegistrdInd": true,
+                "bcSourceInd": false
+            }
+        """;
 
   SeedlotEndpointTest(WebApplicationContext webApplicationContext) {
     this.webApplicationContext = webApplicationContext;
@@ -299,7 +311,7 @@ class SeedlotEndpointTest {
   void getSingleSeedlotInfoTest() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000000");
 
-    when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(Optional.of(seedlotEntity));
+    when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(seedlotEntity);
 
     mockMvc
         .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
@@ -316,6 +328,62 @@ class SeedlotEndpointTest {
         .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("patchSeedlotApplicationBadSourceTest")
+  void patchSeedlotApplicationBadSourceTest() throws Exception {
+    when(seedlotService.patchApplicantionInfo(any(), any()))
+        .thenThrow(new SeedlotSourceNotFoundException());
+
+    mockMvc
+        .perform(
+            patch("/api/seedlots/0000000/application-info")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(TEST_PATCH_SEEDLOT_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("patchSeedlotApplicationBadIdTest")
+  void patchSeedlotApplicationBadIdTest() throws Exception {
+    when(seedlotService.patchApplicantionInfo(any(), any()))
+        .thenThrow(new SeedlotNotFoundException());
+
+    mockMvc
+        .perform(
+            patch("/api/seedlots/0000000/application-info")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(TEST_PATCH_SEEDLOT_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("patchSeedlotApplicationSuccessTest")
+  void patchSeedlotApplicationSuccessTest() throws Exception {
+    String seedlotNumber = "555888";
+    Seedlot testSeedlot = new Seedlot(seedlotNumber);
+
+    when(seedlotService.patchApplicantionInfo(any(), any())).thenReturn(testSeedlot);
+
+    String path = String.format("/api/seedlots/%s/application-info", seedlotNumber);
+
+    mockMvc
+        .perform(
+            patch(path)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(TEST_PATCH_SEEDLOT_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(testSeedlot.getId()))
         .andReturn();
   }
 }

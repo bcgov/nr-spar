@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
+import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
@@ -10,6 +11,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -143,16 +145,62 @@ public class SeedlotService {
    * @return A Seedlot entity.
    * @throws SeedlotNotFoundException in case of errors.
    */
-  public Optional<Seedlot> getSingleSeedlotInfo(String seedlotNumber) {
+  public Seedlot getSingleSeedlotInfo(String seedlotNumber) {
     log.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
-    Optional<Seedlot> seedlotInfo = seedlotRepository.findById(seedlotNumber);
-
-    if (seedlotInfo.isEmpty()) {
-      log.error("Nothing found for seedlot number: {}", seedlotNumber);
-      throw new SeedlotNotFoundException();
-    }
+    Seedlot seedlotInfo =
+        seedlotRepository
+            .findById(seedlotNumber)
+            .orElseThrow(
+                () -> {
+                  log.error("Nothing found for seedlot number: {}", seedlotNumber);
+                  return new SeedlotNotFoundException();
+                });
 
     return seedlotInfo;
+  }
+
+  /**
+   * Update an entry in the Seedlot table.
+   *
+   * @param seedlotNumber the seedlot number of the seedlot to fetch the information
+   * @return A Seedlot entity.
+   * @throws SeedlotNotFoundException in case of seedlot not found error.
+   * @throws SeedlotSourceNotFoundException in case of seedlot source not found error.
+   */
+  public Seedlot patchApplicantionInfo(String seedlotNumber, SeedlotApplicationPatchDto patchDto) {
+    log.info("Patching seedlot entry for seedlot number {}", seedlotNumber);
+
+    Seedlot seedlotInfo =
+        seedlotRepository
+            .findById(seedlotNumber)
+            .orElseThrow(
+                () -> {
+                  log.error("Nothing found for seedlot number: {}", seedlotNumber);
+                  return new SeedlotNotFoundException();
+                });
+
+    seedlotInfo.setApplicantEmailAddress(patchDto.applicantEmailAddress());
+
+    SeedlotSourceEntity updatedSource =
+        seedlotSourceRepository
+            .findById(patchDto.seedlotSourceCode())
+            .orElseThrow(
+                () -> {
+                  log.error(
+                      "Seedlot source not found while patching in patchApplicantionInfo for seedlot"
+                          + " number: {}",
+                      seedlotNumber);
+                  return new SeedlotSourceNotFoundException();
+                });
+
+    seedlotInfo.setSeedlotSource(updatedSource);
+
+    seedlotInfo.setSourceInBc(patchDto.bcSourceInd());
+
+    // The field intendedForCrownLand == to be registered indicator.
+    seedlotInfo.setIntendedForCrownLand(patchDto.toBeRegistrdInd());
+
+    return seedlotRepository.save(seedlotInfo);
   }
 }
