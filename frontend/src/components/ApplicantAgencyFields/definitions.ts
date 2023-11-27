@@ -1,11 +1,12 @@
 import AgencyTextPropsType from '../../types/AgencyTextPropsType';
-import { FormInputType } from '../../types/FormInputType';
+import { OptionsInputType, StringInputType } from '../../types/FormInputType';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 
 interface ApplicantAgencyFieldsProps {
-  checkboxId: string
-  agency: FormInputType & { value: MultiOptionsObj };
-  locationCode: FormInputType & { value: string };
+  checkboxId: string;
+  isDefault: boolean;
+  agency: OptionsInputType;
+  locationCode: StringInputType;
   fieldsProps: AgencyTextPropsType;
   agencyOptions: Array<MultiOptionsObj>;
   defaultAgency: MultiOptionsObj;

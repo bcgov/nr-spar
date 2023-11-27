@@ -7,6 +7,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 
 import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
+
 import './styles.scss';
 
 const EditAClassApplication = () => {

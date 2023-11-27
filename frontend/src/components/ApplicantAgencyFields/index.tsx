@@ -10,20 +10,18 @@ import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
-import { formatLocationCode } from '../SeedlotRegistrationSteps/CollectionStep/utils';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
 import supportTexts from './constants';
+import { formatLocationCode } from './utils';
 
 import './styles.scss';
 
 const ApplicantAgencyFields = ({
-  checkboxId, agency, locationCode, fieldsProps, agencyOptions,
+  checkboxId, isDefault, agency, locationCode, fieldsProps, agencyOptions,
   defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox
 }: ApplicantAgencyFieldsProps) => {
-  const [isDefault, setIsDefault] = useState<boolean>(true);
-
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCode.isInvalid && agency.value
       ? supportTexts.locationCode.invalidLocationForSelectedAgency
@@ -40,7 +38,7 @@ const ApplicantAgencyFields = ({
       isInvalid
     };
     setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
-    setAgencyAndCode(agency, updatedLocationCode);
+    setAgencyAndCode(isDefault, agency, updatedLocationCode);
   };
 
   const validateLocationCodeMutation = useMutation({
@@ -56,7 +54,6 @@ const ApplicantAgencyFields = ({
   });
 
   const handleDefaultCheckBox = (checked: boolean) => {
-    console.log('handleDefaultCheckBox');
     setLocationCodeHelperText(
       checked
         ? supportTexts.locationCode.helperTextEnabled
@@ -73,13 +70,10 @@ const ApplicantAgencyFields = ({
       value: checked ? defaultCode : ''
     };
 
-    setIsDefault(checked);
-
-    setAgencyAndCode(updatedAgency, updatedLocationCode);
+    setAgencyAndCode(checked, updatedAgency, updatedLocationCode);
   };
 
   const handleAgencyInput = (value: MultiOptionsObj) => {
-    console.log('handleAgencyInput');
     setLocationCodeHelperText(
       value
         ? supportTexts.locationCode.helperTextEnabled
@@ -96,13 +90,16 @@ const ApplicantAgencyFields = ({
       value: value ? locationCode.value : ''
     };
 
-    setAgencyAndCode(updatedAgency, updatedLocationCode);
+    setAgencyAndCode(isDefault, updatedAgency, updatedLocationCode);
   };
 
   const handleLocationCodeChange = (value: string) => {
     const updatedValue = value.slice(0, LOCATION_CODE_LIMIT);
+
     const isInRange = validator.isInt(value, { min: 0, max: 99 });
+
     let updatedIsInvalid = locationCode.isInvalid;
+
     if (!isInRange) {
       setInvalidLocationMessage(supportTexts.locationCode.invalidText);
       updatedIsInvalid = true;
@@ -114,14 +111,23 @@ const ApplicantAgencyFields = ({
       isInvalid: updatedIsInvalid
     };
 
-    setAgencyAndCode(agency, updatedLocationCode);
+    setAgencyAndCode(isDefault, agency, updatedLocationCode);
   };
 
   const handleLocationCodeBlur = (value: string) => {
     const formattedCode = value.length ? formatLocationCode(value) : '';
+
+    const updatedLocationCode = {
+      ...locationCode,
+      value: formattedCode
+    };
+
+    setAgencyAndCode(isDefault, agency, updatedLocationCode);
+
     if (formattedCode === '') return;
-    validateLocationCodeMutation.mutate([agency.value.code, formattedCode]);
+
     setLocationCodeHelperText('');
+    validateLocationCodeMutation.mutate([agency.value.code, formattedCode]);
   };
 
   return (

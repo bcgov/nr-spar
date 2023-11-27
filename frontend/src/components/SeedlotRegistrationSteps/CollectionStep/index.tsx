@@ -16,7 +16,7 @@ import validator from 'validator';
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
-import { FormInputType } from '../../../types/FormInputType';
+import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -28,7 +28,6 @@ import {
 import { calcVolume, isNumNotInRange } from './utils';
 
 import './styles.scss';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 const CollectionStep = (
   {
@@ -44,10 +43,12 @@ const CollectionStep = (
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
   const setAgencyAndCode = (
-    agency: FormInputType & { value: MultiOptionsObj },
-    locationCode: FormInputType & { value: string }
+    isDefault: boolean,
+    agency: OptionsInputType,
+    locationCode: StringInputType
   ) => {
     const clonedState = structuredClone(state);
+    clonedState.useDefaultAgencyInfo.value = isDefault;
     clonedState.collectorAgency = agency;
     clonedState.locationCode = locationCode;
     setStepData(clonedState);
@@ -130,6 +131,7 @@ const CollectionStep = (
       </Row>
       <ApplicantAgencyFields
         showCheckbox
+        isDefault={state.useDefaultAgencyInfo.value}
         checkboxId="collection-step-default-checkbox"
         agency={state.collectorAgency}
         locationCode={state.locationCode}
@@ -139,9 +141,10 @@ const CollectionStep = (
         defaultCode={defaultCode}
         setAgencyAndCode={
           (
-            agency: FormInputType & { value: MultiOptionsObj },
-            locationCode: FormInputType & { value: string }
-          ) => setAgencyAndCode(agency, locationCode)
+            isDefault: boolean,
+            agency: OptionsInputType,
+            locationCode: StringInputType
+          ) => setAgencyAndCode(isDefault, agency, locationCode)
         }
         readOnly={readOnly}
       />
