@@ -71,11 +71,6 @@ public record SeedlotFormCollectionDto(
         String seedlotComment,
     @Schema(
             description = "The collection methods in which the cones of a Seedlot were collected.",
-            example = "[\"1\", \"2\"]")
+            example = "[1, 2]")
         @NotNull
-        List<String> coneCollectionMethodCodes,
-    @Schema(
-            description = "Defines the user's preference regarding the default collector agency",
-            example = "true")
-        @NotNull
-        Boolean useDefaultAgencyInfo) {}
+        List<Integer> coneCollectionMethodCodes) {}

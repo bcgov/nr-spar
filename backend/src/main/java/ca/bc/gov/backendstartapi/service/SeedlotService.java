@@ -10,20 +10,32 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +62,14 @@ public class SeedlotService {
   private final GeneticClassRepository geneticClassRepository;
 
   private final LoggedUserService loggedUserService;
+
+  private final SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
+
+  private final ConeCollectionMethodRepository coneCollectionMethodRepository;
+
+  private final SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
+
+  private final MethodOfPaymentRepository methodOfPaymentRepository;
 
   /**
    * Creates a Seedlot in the database.
@@ -210,16 +230,40 @@ public class SeedlotService {
     return seedlotRepository.save(seedlotInfo);
   }
 
-  public SeedlotCreateResponseDto submitSeedlotForm(String seedlotNumber, SeedlotFormSubmissionDto form) {
+  public SeedlotCreateResponseDto submitSeedlotForm(
+      String seedlotNumber, SeedlotFormSubmissionDto form) {
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     if (seedlotEntity.isEmpty()) {
-      // throw error
+      // throw seedlot not found - 404
     }
 
     Seedlot seedlot = seedlotEntity.get();
 
-    // Step 1
-    SeedlotFormCollectionDto formStep1 = form.getSeedlotFormCollectionDto();
+    /*
+     * Merging entities script:
+     * 1. Finds all for that seedlot
+     * 2. Iterate over the result list
+     * 3. Keep existing entities
+     * 4. Remove the ones not present in the request body
+     * 5. Add new ones
+     */
+
+    saveSeedlotFormStep1(seedlotEntity.get(), form.getSeedlotFormCollectionDto());
+    saveSeedlotFormStep2(seedlotEntity.get(), form.getSeedlotFormOwnershipDtoList());
+    saveSeedlotFormStep3(seedlotEntity.get(), form.getSeedlotFormInterimDto());
+    saveSeedlotFormStep4(seedlotEntity.get(), form.getSeedlotFormOrchardDto());
+    saveSeedlotFormStep5(seedlotEntity.get(), form.getSeedlotFormParentTreeSmpDto());
+    saveSeedlotFormStep6(seedlotEntity.get(), form.getSeedlotFormExtractionDto());
+
+    log.info("Saving seedlot entity for seedlot number {}", seedlotNumber);
+    seedlotRepository.save(seedlot);
+
+    return null;
+  }
+
+  private Seedlot saveSeedlotFormStep1(Seedlot seedlot, SeedlotFormCollectionDto formStep1) {
+    log.info("Saving Seedlot form step 1");
+
     seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
     seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());
     seedlot.setCollectionStartDate(formStep1.collectionStartDate());
@@ -229,25 +273,130 @@ public class SeedlotService {
     seedlot.setTotalConeVolume(formStep1.clctnVolume());
     seedlot.setComment(formStep1.seedlotComment());
 
-    // cone collection methods
-    for (String method : formStep1.coneCollectionMethodCodes()) {
-      //
+    // Script
+    List<SeedlotCollectionMethod> seedlotCollectionList =
+        seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
+
+    if (!seedlotCollectionList.isEmpty()) {
+      List<Integer> existingMethodList = new ArrayList<>();
+      Map<Integer, SeedlotCollectionMethod> collectionMethodMap = new HashMap<>();
+      for (SeedlotCollectionMethod collectionMethod : seedlotCollectionList) {
+        existingMethodList.add(
+            collectionMethod.getConeCollectionMethod().getConeCollectionMethodCode());
+        collectionMethodMap.put(
+            collectionMethod.getConeCollectionMethod().getConeCollectionMethodCode(),
+            collectionMethod);
+      }
+
+      List<Integer> methodCodesToInsert = new ArrayList<>();
+
+      for (Integer formMethodCode : formStep1.coneCollectionMethodCodes()) {
+        if (existingMethodList.contains(formMethodCode)) {
+          // remove form the list, the one that last will be removed
+          existingMethodList.remove(formMethodCode);
+        } else {
+          methodCodesToInsert.add(formMethodCode);
+        }
+      }
+
+      // Remove possible leftovers
+      log.info("{} collection method code(s) to remove.", existingMethodList.size());
+      for (Integer methdCodeToRemove : existingMethodList) {
+        seedlotCollectionMethodRepository.delete(collectionMethodMap.get(methdCodeToRemove));
+      }
+
+      // Insert new ones
+      addSeedlotCollectionMethod(seedlot, methodCodesToInsert);
+
+      return seedlot;
     }
 
-    // Step 2
-    SeedlotFormOwnershipDto formStep2 = form.getSeedlotFormOwnershipDto();
+    log.info("No previous seedlot collection methods for seedlot {}", seedlot.getId());
 
+    addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());
+
+    return seedlot;
+  }
+
+  private void addSeedlotCollectionMethod(Seedlot seedlot, List<Integer> methods) {
+    log.info(
+        "Creating {} seedlot collection method(s) for seedlot {}", methods.size(), seedlot.getId());
+    for (Integer methodCode : methods) {
+      Optional<ConeCollectionMethodEntity> coneCollectionEntity =
+          coneCollectionMethodRepository.findById(methodCode);
+      if (coneCollectionEntity.isEmpty()) {
+        // throw error bad request - 400
+      }
+
+      SeedlotCollectionMethod methodEntity =
+          new SeedlotCollectionMethod(seedlot, coneCollectionEntity.get());
+      methodEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());
+      seedlotCollectionMethodRepository.save(methodEntity);
+    }
+  }
+
+  // to be finished
+  private Seedlot saveSeedlotFormStep2(
+      Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List) {
+    log.info("Saving Seedlot form step 2");
+    List<SeedlotOwnerQuantity> ownerQuantityList =
+        seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlot.getId());
+    log.info("{} seedlot collection method(s) to remove!", ownerQuantityList.size());
+    for (SeedlotOwnerQuantity ownerQuantity : ownerQuantityList) {
+      seedlotOwnerQuantityRepository.delete(ownerQuantity);
+    }
+
+    log.info("Recreating {} seedlot owner quantity(ies)", formStep2List.size());
+    
+    for (SeedlotFormOwnershipDto ownershipDto : formStep2List) {
+      SeedlotOwnerQuantity ownerQuantityEntity =
+          new SeedlotOwnerQuantity(
+              seedlot, ownershipDto.ownerClientNumber(), ownershipDto.ownerLocnCode());
+
+      ownerQuantityEntity.setOriginalPercentageOwned(ownershipDto.originalPctOwned());
+      ownerQuantityEntity.setOriginalPercentageReserved(ownershipDto.originalPctRsrvd());
+      ownerQuantityEntity.setOriginalPercentageSurplus(ownershipDto.originalPctSrpls());
+      ownerQuantityEntity.setFundingSourceCode(ownershipDto.sparFundSrceCode());
+      ownerQuantityEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());
+
+      // Payment method
+      Optional<MethodOfPaymentEntity> paymentEntity =
+          methodOfPaymentRepository.findById(ownershipDto.methodOfPaymentCode());
+      if (paymentEntity.isEmpty()) {
+        // throw error bad request
+      }
+    }
+
+    return seedlot;
+  }
+
+  private Seedlot saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
     // Step 3
-    SeedlotFormInterimDto formStep3 = form.getSeedlotFormInterimDto();
+    log.info("Saving Seedlot form step 3");
+    // intermStrgClientNumber
+    // intermStrgLocnCode
+    // intermStrgStDate
+    // intermStrgEndDate
+    // intermStrgLocn
+    // intermFacilityCode
+    return seedlot;
+  }
 
+  private Seedlot saveSeedlotFormStep4(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
     // Step 4
-    SeedlotFormOrchardDto formStep4 = form.getSeedlotFormOrchardDto();
+    log.info("Saving Seedlot form step 4");
+    return seedlot;
+  }
 
+  private Seedlot saveSeedlotFormStep5(Seedlot seedlot, String seedlotFormParentTreeSmpDto) {
     // Step 5
+    log.info("Saving Seedlot form step 5");
+    return seedlot;
+  }
 
+  private Seedlot saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
     // Step 6
-    SeedlotFormExtractionDto formStep6 = form.getSeedlotFormExtractionDto();
-
-    return null;
+    log.info("Saving Seedlot form step 6");
+    return seedlot;
   }
 }

@@ -59,9 +59,4 @@ public record SeedlotFormOwnershipDto(
             description = "A code which represents the source funds for payment of the request.",
             example = "ITC")
         @NotNull
-        String sparFundSrceCode,
-    @Schema(
-            description = "Defines the usage of the Applicant Agency as Owner Agency",
-            example = "true")
-        @NotNull
-        Boolean useApplicantAgencyAsOwner) {}
+        String sparFundSrceCode) {}

@@ -1,5 +1,7 @@
 package ca.bc.gov.backendstartapi.dto;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,7 +10,7 @@ import lombok.Setter;
 public class SeedlotFormSubmissionDto {
 
   SeedlotFormCollectionDto seedlotFormCollectionDto;
-  SeedlotFormOwnershipDto seedlotFormOwnershipDto;
+  List<SeedlotFormOwnershipDto> seedlotFormOwnershipDtoList;
   SeedlotFormInterimDto seedlotFormInterimDto;
   SeedlotFormOrchardDto seedlotFormOrchardDto;
   String seedlotFormParentTreeSmpDto; // step 5

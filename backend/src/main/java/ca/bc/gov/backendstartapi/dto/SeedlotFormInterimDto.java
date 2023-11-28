@@ -58,9 +58,4 @@ public record SeedlotFormInterimDto(
               """,
             example = "OCV")
         @NotNull
-        String intermFacilityCode,
-    @Schema(
-            description = "Defines the usage of the Applicant Agency as Interim Agency",
-            example = "true")
-        @NotNull
-        Boolean useCollectorAgencyAsInterim) {}
+        String intermFacilityCode) {}
