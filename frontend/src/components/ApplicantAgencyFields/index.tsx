@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Row, Column, TextInput, Checkbox, ComboBox, InlineLoading, FlexGrid
+  Row, Column, TextInput, Checkbox,
+  ComboBox, InlineLoading, FlexGrid
 } from '@carbon/react';
 import { useMutation } from '@tanstack/react-query';
 import validator from 'validator';
@@ -155,11 +156,11 @@ const ApplicantAgencyFields = ({
       <Row className="agency-information-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
+            className={readOnly ? 'spar-read-only-combobox' : null}
             id={agency.id}
-            name={fieldsProps.agencyInput.name}
             placeholder={supportTexts.agency.placeholder}
-            titleText={fieldsProps.agencyInput.labelText}
-            helperText={supportTexts.agency.helperText}
+            titleText={fieldsProps.agencyInput.titleText}
+            helperText={readOnly ? null : supportTexts.agency.helperText}
             invalidText={fieldsProps.agencyInput.invalidText}
             items={agencyOptions}
             readOnly={isDefault || readOnly}
@@ -174,14 +175,14 @@ const ApplicantAgencyFields = ({
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
           <TextInput
+            className={readOnly ? 'spar-display-only-input' : 'location-code-input'}
             id={locationCode.id}
-            className="location-code-input"
             name={fieldsProps.locationCode.name}
             value={locationCode.value}
             type="number"
             placeholder={!agency.value.code ? '' : supportTexts.locationCode.placeholder}
             labelText={fieldsProps.locationCode.labelText}
-            helperText={locationCodeHelperText}
+            helperText={readOnly ? null : locationCodeHelperText}
             invalid={locationCode.isInvalid}
             invalidText={invalidLocationMessage}
             readOnly={isDefault || readOnly}

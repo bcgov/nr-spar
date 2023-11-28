@@ -9,9 +9,9 @@ interface ApplicantAgencyFieldsProps {
   locationCode: StringInputType;
   fieldsProps: AgencyTextPropsType;
   agencyOptions: Array<MultiOptionsObj>;
-  defaultAgency: MultiOptionsObj;
-  defaultCode: string;
   setAgencyAndCode: Function;
+  defaultAgency?: MultiOptionsObj;
+  defaultCode?: string;
   showCheckbox?: boolean;
   readOnly?: boolean;
 }

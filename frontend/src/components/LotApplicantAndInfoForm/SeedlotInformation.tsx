@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import {
-  Button,
   Row,
   Column,
   ComboBox,
@@ -11,7 +10,6 @@ import {
   RadioButtonSkeleton,
   TextInputSkeleton
 } from '@carbon/react';
-import { DocumentAdd, Save } from '@carbon/icons-react';
 import { useQuery } from '@tanstack/react-query';
 
 import { SeedlotRegFormType } from '../../types/SeedlotRegistrationTypes';
@@ -26,15 +24,12 @@ import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import { speciesFieldConfig } from './constants';
-import focusById from '../../utils/FocusUtils';
-import { convertToPayload } from './utils';
 
 const SeedlotInformation = (
   {
     seedlotFormData,
     setSeedlotFormData,
-    isEdit,
-    seedlotMutationFunc
+    isEdit
   }: SeedlotInformationProps
 ) => {
   const vegCodeQuery = useQuery({
@@ -131,94 +126,48 @@ const SeedlotInformation = (
     }));
   };
 
-  const setInputValidation = (inputName: keyof SeedlotRegFormType, isInvalid: boolean) => (
-    setSeedlotFormData((prevData) => ({
-      ...prevData,
-      [inputName]: {
-        ...prevData[inputName],
-        isInvalid
-      }
-    }))
-  );
-
-  const validateAndSubmitCreation = () => {
-    // Validate client
-    if (seedlotFormData.client.isInvalid || !seedlotFormData.client.value.code) {
-      setInputValidation('client', true);
-      focusById(seedlotFormData.client.id);
-      return;
-    }
-    // Vaidate location code
-    if (
-      seedlotFormData.locationCode.isInvalid
-      || !seedlotFormData.locationCode.value
-      // || !validateLocationCodeMutation.isSuccess
-    ) {
-      setInputValidation('locationCode', true);
-      // setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationValue);
-      focusById(seedlotFormData.locationCode.id);
-      return;
-    }
-    // Validate email
-    if (seedlotFormData.email.isInvalid || !seedlotFormData.email.value) {
-      setInputValidation('email', true);
-      focusById(seedlotFormData.email.id);
-      return;
-    }
-    // Validate species
-    if (seedlotFormData.species.isInvalid || !seedlotFormData.species.value.code) {
-      setInputValidation('species', true);
-      focusById(seedlotFormData.species.id);
-      return;
-    }
-    // Source code, and the two booleans always have a default value so there's no need to check.
-
-    // Submit Seedlot.
-    const payload = convertToPayload(seedlotFormData);
-    seedlotMutationFunc(payload);
-  };
-
   return (
     <>
-      <Row className="seedlot-information-title">
+      <Row className="section-title">
         <Column lg={8}>
           <h2>Seedlot information</h2>
           <Subtitle text="Enter the initial information about this seedlot" />
         </Column>
       </Row>
-      <Row className="seedlot-species-row">
-        {
-          vegCodeQuery.isFetching
-            ? (
-              <Column sm={4} md={2} lg={10}>
-                <TextInputSkeleton />
-              </Column>
-            )
-            : (
-              <Column sm={4} md={2} lg={10}>
-                <ComboBox
-                  id={seedlotFormData.species.id}
-                  items={vegCodeQuery.isFetched ? vegCodeQuery.data : []}
-                  shouldFilterItem={
-                    ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+      <Row className="form-row">
+        <Column sm={4} md={8} lg={16} xlg={12}>
+          {
+            vegCodeQuery.isFetching
+              ? <TextInputSkeleton />
+              : (
+                <>
+                  <ComboBox
+                    className={isEdit ? 'spar-read-only-combobox' : null}
+                    id={seedlotFormData.species.id}
+                    items={isEdit ? [] : vegCodeQuery.data ?? []}
+                    shouldFilterItem={
+                      ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                    }
+                    selectedItem={seedlotFormData.species.value}
+                    placeholder={speciesFieldConfig.placeholder}
+                    titleText={isEdit ? 'Seedlot species' : speciesFieldConfig.titleText}
+                    onChange={(e: ComboBoxEvent) => handleSpeciesChage(e)}
+                    invalid={seedlotFormData.species.isInvalid}
+                    invalidText={speciesFieldConfig.invalidText}
+                    helperText={vegCodeQuery.isError ? '' : speciesFieldConfig.helperText}
+                    readOnly={isEdit}
+                  />
+                  {
+                    vegCodeQuery.isError
+                      ? <InputErrorText description={`An error occurred ${vegCodeQuery.error}`} />
+                      : null
                   }
-                  placeholder={speciesFieldConfig.placeholder}
-                  titleText={speciesFieldConfig.titleText}
-                  onChange={(e: ComboBoxEvent) => handleSpeciesChage(e)}
-                  invalid={seedlotFormData.species.isInvalid}
-                  invalidText={speciesFieldConfig.invalidText}
-                  helperText={vegCodeQuery.isError ? '' : speciesFieldConfig.helperText}
-                />
-                {
-                  vegCodeQuery.isError
-                    ? <InputErrorText description={`An error occurred ${vegCodeQuery.error}`} />
-                    : null
-                }
-              </Column>
-            )
-        }
+                </>
+              )
+          }
+        </Column>
       </Row>
-      <Row className="class-source-radio">
+      <Row className="form-row">
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
             legendText="Class A source"
@@ -228,15 +177,13 @@ const SeedlotInformation = (
           >
             {
               seedlotSourcesQuery.isFetching
-                ? (
-                  <RadioButtonSkeleton />
-                )
+                ? <RadioButtonSkeleton />
                 : renderSources()
             }
           </RadioButtonGroup>
         </Column>
       </Row>
-      <Row className="registered-checkbox">
+      <Row className="form-row">
         <Column sm={4} md={8} lg={16}>
           <CheckboxGroup legendText="To be registered?">
             <Checkbox
@@ -251,7 +198,7 @@ const SeedlotInformation = (
           </CheckboxGroup>
         </Column>
       </Row>
-      <Row className="collected-checkbox">
+      <Row className="form-row">
         <Column sm={4} md={8} lg={16}>
           <CheckboxGroup legendText="Collected from B.C. source?">
             <Checkbox
@@ -264,21 +211,6 @@ const SeedlotInformation = (
               }
             />
           </CheckboxGroup>
-        </Column>
-      </Row>
-      <Row>
-        <Column lg={8}>
-          <Button
-            className="submit-button"
-            renderIcon={isEdit ? Save : DocumentAdd}
-            onClick={() => validateAndSubmitCreation()}
-          >
-            {
-              isEdit
-                ? 'Save edit'
-                : 'Create seedlot number'
-            }
-          </Button>
         </Column>
       </Row>
     </>

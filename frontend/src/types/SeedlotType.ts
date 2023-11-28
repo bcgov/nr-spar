@@ -58,6 +58,7 @@ export type SeedlotType = {
   vegetationCode: string,
   geneticClass: GeneticClass,
   seedlotSource: {
+    seedlotSourceCode: string,
     description: string,
     isDefault: boolean
   },
