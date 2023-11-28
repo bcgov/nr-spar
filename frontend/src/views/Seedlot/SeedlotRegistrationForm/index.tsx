@@ -140,8 +140,8 @@ const SeedlotRegistrationForm = () => {
 
   const [allInvalidationObj] = useState<AllStepInvalidationObj>({
     collectionStep: initInvalidationObj(),
-    interimStep: initInvalidationObj(),
     ownershipStep: initOwnerShipInvalidState(),
+    interimStep: initInvalidationObj(),
     orchardStep: initInvalidationObj(),
     extractionStorageStep: initInvalidationObj()
   });

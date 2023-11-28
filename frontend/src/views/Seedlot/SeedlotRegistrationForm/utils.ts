@@ -84,13 +84,41 @@ export const initInterimState = (
   defaultAgency: string,
   defaultCode: string
 ) => ({
-  useCollectorAgencyInfo: true,
-  agencyName: defaultAgency,
-  locationCode: defaultCode,
-  startDate: '',
-  endDate: '',
-  storageLocation: '',
-  facilityType: 'OCV'
+  useCollectorAgencyInfo: {
+    id: 'interim-use-collection-agency',
+    value: true,
+    isInvalid: false
+  },
+  agencyName: {
+    id: 'interim-agency',
+    value: defaultAgency,
+    isInvalid: false
+  },
+  locationCode: {
+    id: 'interim-location-code',
+    value: defaultCode,
+    isInvalid: false
+  },
+  startDate: {
+    id: 'interim-start-date',
+    value: '',
+    isInvalid: false
+  },
+  endDate: {
+    id: 'interim-end-date',
+    value: '',
+    isInvalid: false
+  },
+  storageLocation: {
+    id: 'interim-storage-location',
+    value: '',
+    isInvalid: false
+  },
+  facilityType: {
+    id: 'interim-facility-type',
+    value: 'OCV',
+    isInvalid: false
+  }
 });
 
 export const initOrchardState = (): OrchardForm => (
