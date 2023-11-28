@@ -108,7 +108,7 @@ const LotApplicantAndInfoForm = ({
       <Row className="agency-email-row">
         <Column sm={4} md={8} lg={16} xlg={12}>
           <TextInput
-            id="appliccant-email-input"
+            id={seedlotFormData?.email.id}
             name="email"
             type="email"
             labelText="Applicant email address"

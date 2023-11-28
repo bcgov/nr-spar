@@ -26,3 +26,10 @@ export type SeedlotRegPayloadType = {
   bcSourceInd: boolean;
   geneticClassCode: 'A' | 'B';
 }
+
+export type SeedlotPatchPayloadType = {
+  applicantEmailAddress: string,
+  seedlotSourceCode: string,
+  toBeRegistrdInd: boolean,
+  bcSourceInd: boolean
+}

@@ -60,15 +60,15 @@ describe('Create A-Class Seedlot', () => {
       .clear()
       .type(data.applicantAgency.number, { delay: TYPE_DELAY });
     // Enter an invalid email address
-    cy.get('#appliccant-email-input')
+    cy.get('#applicant-email-input')
       .clear()
       .type(data.applicantAgency.invalidEmail, { delay: TYPE_DELAY });
     cy.get('#agency-number-input')
       .click();
-    cy.get('#appliccant-email-input-error-msg')
+    cy.get('#applicant-email-input-error-msg')
       .should('be.visible');
     // Enter the applicant email address
-    cy.get('#appliccant-email-input')
+    cy.get('#applicant-email-input')
       .clear()
       .type(data.applicantAgency.email, { delay: TYPE_DELAY });
     // Enter the seedlot species, wait for species data to load

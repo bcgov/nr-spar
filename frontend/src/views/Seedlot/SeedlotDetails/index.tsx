@@ -79,6 +79,7 @@ const SeedlotDetails = () => {
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
     enabled: vegCodeQuery.isFetched,
+    refetchOnMount: true,
     onError: (err: AxiosError) => {
       if (err.response?.status === 404) {
         navigate('/404');
@@ -87,10 +88,10 @@ const SeedlotDetails = () => {
   });
 
   useEffect(() => {
-    if (seedlotQuery.isFetched) {
+    if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount) {
       covertToDisplayObj(seedlotQuery.data);
     }
-  }, [seedlotQuery.isFetched]);
+  }, [seedlotQuery.isFetched, seedlotQuery.isFetchedAfterMount]);
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', seedlotQuery.data?.applicantClientNumber],
@@ -112,10 +113,10 @@ const SeedlotDetails = () => {
   };
 
   useEffect(() => {
-    if (forestClientQuery.isFetched) {
+    if (forestClientQuery.isFetched && seedlotQuery.isFetchedAfterMount) {
       covertToClientObj();
     }
-  }, [forestClientQuery.isFetched]);
+  }, [forestClientQuery.isFetched, seedlotQuery.isFetchedAfterMount]);
 
   return (
     <FlexGrid className="seedlot-details-page">

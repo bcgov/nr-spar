@@ -77,7 +77,7 @@ const SeedlotInformation = (
         <RadioButton
           key={source.code}
           checked={seedlotFormData.sourceCode.value === source.code}
-          id={`seedlot-source-radio-btn-${source.code.toLocaleLowerCase()}`}
+          id={seedlotFormData.sourceCode.id}
           labelText={source.description}
           value={source.code}
         />

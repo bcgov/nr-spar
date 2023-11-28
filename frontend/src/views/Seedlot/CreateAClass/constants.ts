@@ -16,7 +16,7 @@ export const InitialSeedlotFormData: SeedlotRegFormType = {
     value: ''
   },
   email: {
-    id: 'appliccant-email-input',
+    id: 'applicant-email-input',
     isInvalid: false,
     value: ''
   },
