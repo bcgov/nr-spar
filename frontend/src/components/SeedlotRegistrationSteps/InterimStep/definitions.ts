@@ -6,7 +6,6 @@ export type InterimForm = {
   locationCode: FormInputType & { value: string },
   startDate: FormInputType & { value: string },
   endDate: FormInputType & { value: string },
-  storageLocation: FormInputType & { value: string },
   facilityType: FormInputType & { value: string },
 }
 

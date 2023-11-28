@@ -95,12 +95,6 @@ const InterimStorage = (
       clonedState.startDate.isInvalid = isInvalid;
       clonedState.endDate.isInvalid = isInvalid;
     }
-    if (name === 'storageLocation') {
-      if (clonedState.storageLocation.value.length >= 55) {
-        isInvalid = true;
-      }
-      clonedState.storageLocation.isInvalid = isInvalid;
-    }
     if (name === 'facilityType') {
       if (clonedState.facilityType.value.length >= 50) {
         isInvalid = true;
@@ -121,7 +115,6 @@ const InterimStorage = (
     validateInput(name);
   };
 
-  const storageLocationInputRef = useRef<HTMLInputElement>(null);
   const storageFacilityTypeInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -221,26 +214,6 @@ const InterimStorage = (
               readOnly={readOnly}
             />
           </DatePicker>
-        </Column>
-      </Row>
-      <Row className="interim-storage-row">
-        <Column sm={4} md={4} lg={16} xlg={12}>
-          <TextInput
-            id="storage-location-input"
-            name="location"
-            ref={storageLocationInputRef}
-            type="text"
-            value={state.storageLocation.value}
-            labelText="Storage location"
-            placeholder="Enter the location were the cones were stored"
-            helperText="Enter a short name or description of the location where the cones are being temporarily stored"
-            invalid={state.storageLocation.isInvalid}
-            invalidText="Storage location lenght should be <= 55"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleFormInput('storageLocation', e.target.value);
-            }}
-            readOnly={readOnly}
-          />
         </Column>
       </Row>
       <Row className="storage-type-radio">
