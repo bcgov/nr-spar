@@ -264,7 +264,7 @@ public class SeedlotService {
 
   // Form Step 1 - OK
   private void saveSeedlotFormStep1(Seedlot seedlot, SeedlotFormCollectionDto formStep1) {
-    log.info("Saving Seedlot form step 1");
+    log.info("Saving Seedlot form step 1 for seedlot {}", seedlot.getId());
 
     seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
     seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());
@@ -322,6 +322,7 @@ public class SeedlotService {
   private void addSeedlotCollectionMethod(Seedlot seedlot, List<Integer> methods) {
     log.info(
         "Creating {} seedlot collection method(s) for seedlot {}", methods.size(), seedlot.getId());
+
     for (Integer methodCode : methods) {
       Optional<ConeCollectionMethodEntity> coneCollectionEntity =
           coneCollectionMethodRepository.findById(methodCode);
@@ -338,7 +339,7 @@ public class SeedlotService {
 
   // Form Step 2 - OK
   private void saveSeedlotFormStep2(Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List) {
-    log.info("Saving Seedlot form step 2");
+    log.info("Saving Seedlot form step 2 for seedlot {}", seedlot.getId());
     List<SeedlotOwnerQuantity> ownerQuantityList =
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlot.getId());
 
@@ -394,6 +395,11 @@ public class SeedlotService {
   // Form Step 2 related
   private SeedlotOwnerQuantity createSeedlotOwnerQuantityFromDto(
       Seedlot seedlot, SeedlotFormOwnershipDto ownershipDto) {
+    log.info(
+        "Creating seedlot owner {} for seedlot {}",
+        ownershipDto.ownerClientNumber(),
+        seedlot.getId());
+
     SeedlotOwnerQuantity ownerQuantityEntity =
         new SeedlotOwnerQuantity(
             seedlot, ownershipDto.ownerClientNumber(), ownershipDto.ownerLocnCode());
@@ -413,16 +419,16 @@ public class SeedlotService {
     return ownerQuantityEntity;
   }
 
-  private Seedlot saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
-    // Step 3
-    log.info("Saving Seedlot form step 3");
-    // intermStrgClientNumber
-    // intermStrgLocnCode
-    // intermStrgStDate
-    // intermStrgEndDate
-    // intermStrgLocn
-    // intermFacilityCode
-    return seedlot;
+  // Form Step 3 - OK
+  private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
+    log.info("Saving Seedlot form step 3 for seedlot {}", seedlot.getId());
+
+    seedlot.setInterimStorageClientNumber(formStep3.intermStrgClientNumber());
+    seedlot.setInterimStorageLocationCode(formStep3.intermStrgLocnCode());
+    seedlot.setInterimStorageStartDate(formStep3.intermStrgStDate());
+    seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
+    // intermStrgLocn - will be added when PR 685 get merged
+    seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
   }
 
   private Seedlot saveSeedlotFormStep4(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {

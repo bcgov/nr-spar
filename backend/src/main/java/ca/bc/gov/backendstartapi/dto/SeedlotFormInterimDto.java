@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record SeedlotFormInterimDto(
     @Schema(
@@ -32,7 +32,7 @@ public record SeedlotFormInterimDto(
               """,
             example = "2023/12/20")
         @NotNull
-        LocalDate intermStrgStDate,
+        LocalDateTime intermStrgStDate,
     @Schema(
             description =
                 """
@@ -41,7 +41,7 @@ public record SeedlotFormInterimDto(
               """,
             example = "2023/12/21")
         @NotNull
-        LocalDate intermStrgEndDate,
+        LocalDateTime intermStrgEndDate,
     @Schema(
             description =
                 """
