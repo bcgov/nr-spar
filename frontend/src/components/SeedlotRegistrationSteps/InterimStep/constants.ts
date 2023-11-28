@@ -21,25 +21,17 @@ export const agencyFieldsProps: AgencyTextPropsType = {
 export const pageTexts = {
   interimTitleSection: {
     title: 'Interim agency',
-    subtitle: 'Enter the interim agency information here, or skip to the interim storage information below. Only one of the two sections needs to be completed.'
-  },
-  storageTitleSection: {
-    title: 'Storage information',
-    subtitle: 'Enter the interim storage information here, or skip to the interim agency information above. Only one of the two sections needs to be completed.'
+    subtitle: 'Enter the interim agency and storage information'
   },
   storageDate: {
-    labelTextStart: 'Storage start date (optional)',
-    labelTextEnd: 'Storage end date (optional)',
+    labelTextStart: 'Storage start date',
+    labelTextEnd: 'Storage end date',
     placeholder: 'yyyy/mm/dd',
     helperText: 'year/month/day',
     invalidText: 'Please enter a valid date'
   },
-  storageLocation: {
-    labelText: 'Storage location',
-    helperText: 'Enter a short name or description of the location where the cones are being temporarily stored'
-  },
   storageFacility: {
-    labelText: 'Storage facility type (optional)',
+    labelText: 'Storage facility type',
     outsideLabel: 'Outside covered - OCV',
     outsideValue: 'OCV',
     ventilatedLabel: 'Ventilated room - VRM',

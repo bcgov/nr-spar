@@ -163,12 +163,6 @@ const InterimStorage = (
         }
         readOnly={readOnly}
       />
-      <Row className="interim-title-row">
-        <Column sm={4} md={8} lg={16}>
-          <h2>{pageTexts.storageTitleSection.title}</h2>
-          <Subtitle text={pageTexts.storageTitleSection.subtitle} />
-        </Column>
-      </Row>
       <Row className="interim-storage-row">
         <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
