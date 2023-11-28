@@ -18,6 +18,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOwnerQuantityId;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
@@ -27,6 +28,7 @@ import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -71,6 +73,8 @@ public class SeedlotService {
   private final SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
 
   private final MethodOfPaymentRepository methodOfPaymentRepository;
+
+  private final SeedlotOrchardRepository seedlotOrchardRepository;
 
   /**
    * Creates a Seedlot in the database.
@@ -231,6 +235,7 @@ public class SeedlotService {
     return seedlotRepository.save(seedlotInfo);
   }
 
+  @Transactional
   public SeedlotCreateResponseDto submitSeedlotForm(
       String seedlotNumber, SeedlotFormSubmissionDto form) {
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
@@ -431,21 +436,103 @@ public class SeedlotService {
     seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
   }
 
-  private Seedlot saveSeedlotFormStep4(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
-    // Step 4
-    log.info("Saving Seedlot form step 4");
-    return seedlot;
+  // Form Step 4 - OK
+  private void saveSeedlotFormStep4(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
+    log.info("Saving Seedlot form step 4 for seedlot {}", seedlot.getId());
+
+    saveSeedlotOrchards(seedlot, formStep4);
+    
+    seedlot.setFemaleGameticContributionMethod(formStep4.femaleGameticMthdCode());
+    seedlot.setMaleGameticContributionMethod(formStep4.maleGameticMthdCode());
+    seedlot.setProducedThroughControlledCross(formStep4.controlledCrossInd());
+    seedlot.setProducedWithBiotechnologicalProcesses(formStep4.biotechProcessesInd());
+    seedlot.setPollenContaminationPresentInOrchard(formStep4.pollenContaminationInd());
+    seedlot.setPollenContaminationPercentage(formStep4.pollenContaminationPct());
+    seedlot.setPollenContaminantBreedingValue(formStep4.contaminantPollenBv());
+    seedlot.setPollenContaminationMethodCode(formStep4.pollenContaminationMthdCode());
   }
 
-  private Seedlot saveSeedlotFormStep5(Seedlot seedlot, String seedlotFormParentTreeSmpDto) {
-    // Step 5
-    log.info("Saving Seedlot form step 5");
-    return seedlot;
+  // Form Step 4 related
+  private void saveSeedlotOrchards(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
+    log.info(
+        "Creating {} orchard(s) for seedlot {}", formStep4.orchardsId().size(), seedlot.getId());
+
+    // orchardsId - list of orchards
+    int orchardsLen = formStep4.orchardsId().size();
+    if (orchardsLen > 1 && formStep4.primaryOrchardId().isBlank()) {
+      // throw bad request - 400
+    }
+    
+    String primaryOrchardId =
+        formStep4.primaryOrchardId().isBlank()
+            ? formStep4.orchardsId().get(0)
+            : formStep4.primaryOrchardId();
+
+    List<SeedlotOrchard> seedlotOrchards =
+        seedlotOrchardRepository.findAllBySeelot_id(seedlot.getId());
+
+    if (!seedlotOrchards.isEmpty()) {
+      List<String> existingSeedlotOrchardList = new ArrayList<>();
+      Map<String, SeedlotOrchard> orchardMap = new HashMap<>();
+      for (SeedlotOrchard seedlotOrchard : seedlotOrchards) {
+        existingSeedlotOrchardList.add(seedlotOrchard.getOrchard());
+        orchardMap.put(seedlotOrchard.getOrchard(), seedlotOrchard);
+      }
+
+      List<String> seedlotOrchardIdToInsert = new ArrayList<>();
+
+      for (String formOrchardId : formStep4.orchardsId()) {
+        if (existingSeedlotOrchardList.contains(formOrchardId)) {
+          // remove form the list, the one that last will be removed
+          existingSeedlotOrchardList.remove(formOrchardId);
+        } else {
+          seedlotOrchardIdToInsert.add(formOrchardId);
+        }
+      }
+
+      // Remove possible leftovers
+      log.info("{} seedlot orchards to remove.", existingSeedlotOrchardList.size());
+      for (String orchardId : existingSeedlotOrchardList) {
+        seedlotOrchardRepository.delete(orchardMap.get(orchardId));
+      }
+
+      // Insert new ones
+      saveSeedlotOrchards(seedlot, seedlotOrchardIdToInsert, primaryOrchardId);
+
+      return;
+    }
+
+    // just insert
+    saveSeedlotOrchards(seedlot, formStep4.orchardsId(), primaryOrchardId);
   }
 
-  private Seedlot saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
-    // Step 6
-    log.info("Saving Seedlot form step 6");
-    return seedlot;
+  // Form Step 4 related
+  private void saveSeedlotOrchards(Seedlot seedlot, List<String> orchardIdList, String primaryId) {
+    for (String orchardId : orchardIdList) {
+      SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, orchardId);
+      seedlotOrchard.setPrimary(orchardId.equals(primaryId));
+      seedlotOrchard.setAuditInformation(loggedUserService.createAuditCurrentUser());
+      seedlotOrchardRepository.save(seedlotOrchard);
+    }
+  }
+
+  // Form Step 5 - PENDING
+  private void saveSeedlotFormStep5(Seedlot seedlot, String seedlotFormParentTreeSmpDto) {
+    log.info("Saving Seedlot form step 5 for seedlot {}", seedlot.getId());
+  }
+
+  // Form Step 6 - OK
+  private void saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
+    log.info("Saving Seedlot form step 6 for seedlot {}", seedlot.getId());
+
+    seedlot.setExtractionClientNumber(formStep6.extractoryClientNumber());
+    seedlot.setExtractionLocationCode(formStep6.extractoryLocnCode());
+    seedlot.setExtractionStartDate(formStep6.extractionStDate());
+    seedlot.setExtractionEndDate(formStep6.extractionEndDate());
+    
+    seedlot.setStorageClientNumber(formStep6.storageClientNumber());
+    seedlot.setStorageLocationCode(formStep6.storageLocnCode());
+    seedlot.setTemporaryStorageStartDate(formStep6.temporaryStrgStartDate());
+    seedlot.setTemporaryStorageEndDate(formStep6.temporaryStrgEndDate());
   }
 }

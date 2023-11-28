@@ -59,9 +59,9 @@ public record SeedlotFormOrchardDto(
                 """
               The proportion of contaminant pollen present in the seed Orchard. (Optional)
               """,
-            example = "22.5",
+            example = "22",
             nullable = true)
-        BigDecimal pollenContaminationPct,
+        Integer pollenContaminationPct,
     @Schema(
             description = "The estimated Breeding Value of the contaminant pollen in an Orchard.",
             example = "45.6",

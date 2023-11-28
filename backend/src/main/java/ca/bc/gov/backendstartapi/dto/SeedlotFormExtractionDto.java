@@ -2,14 +2,9 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record SeedlotFormExtractionDto(
-    @Schema(
-            description = "Defines the usage of the Tree Seed Center as Extratory Agency",
-            example = "true")
-        @NotNull
-        Boolean extractoryAgencyIsTsc,
     @Schema(
             description =
                 """
@@ -36,7 +31,7 @@ public record SeedlotFormExtractionDto(
               """,
             example = "2023/11/23",
             nullable = true)
-        LocalDate extractionStDate,
+        LocalDateTime extractionStDate,
     @Schema(
             description =
                 """
@@ -45,12 +40,7 @@ public record SeedlotFormExtractionDto(
               """,
             example = "2023/11/23",
             nullable = true)
-        LocalDate extractionEndDate,
-    @Schema(
-            description = "Defines the usage of the Tree Seed Center as Storage Agency",
-            example = "true")
-        @NotNull
-        Boolean storageAgencyIsTsc,
+        LocalDateTime extractionEndDate,
     @Schema(
             description =
                 """
@@ -73,9 +63,9 @@ public record SeedlotFormExtractionDto(
             description = "Commencement date of temporary Seedlot storage.",
             example = "2023/11/23",
             nullable = true)
-        LocalDate temporaryStrgStartDate,
+        LocalDateTime temporaryStrgStartDate,
     @Schema(
             description = "End date of Seedlot temporary storage.",
             example = "2023/11/23",
             nullable = true)
-        LocalDate temporaryStrgEndDate) {}
+        LocalDateTime temporaryStrgEndDate) {}
