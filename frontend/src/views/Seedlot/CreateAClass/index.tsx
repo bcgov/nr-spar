@@ -20,12 +20,12 @@ import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../../types/Seedlo
 import { postSeedlot } from '../../../api-service/seedlotAPI';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
+import focusById from '../../../utils/FocusUtils';
 
 import { InitialSeedlotFormData } from './constants';
+import { convertToPayload } from './utils';
 
 import './styles.scss';
-import focusById from '../../../utils/FocusUtils';
-import { convertToPayload } from './utils';
 
 const CreateAClass = () => {
   const navigate = useNavigate();
