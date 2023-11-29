@@ -72,10 +72,8 @@ const CreateAClass = () => {
     if (
       seedlotFormData.locationCode.isInvalid
       || !seedlotFormData.locationCode.value
-      // || !validateLocationCodeMutation.isSuccess
     ) {
       setInputValidation('locationCode', true);
-      // setInvalidLocationMessage(pageTexts.locCodeInput.invalidLocationValue);
       focusById(seedlotFormData.locationCode.id);
       return;
     }
