@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Accordion,
   AccordionItem,
@@ -22,10 +22,7 @@ import {
   formatPortionPerc,
   arePortionsValid
 } from './utils';
-import {
-  DEFAULT_INDEX,
-  MAX_OWNERS
-} from './constants';
+import { MAX_OWNERS } from './constants';
 
 import './styles.scss';
 
@@ -73,17 +70,6 @@ const OwnershipStep = (
     const portionsInvalid = !arePortionsValid(newOwnerArr);
     setPortionsValid(newOwnerArr, portionsInvalid);
   };
-
-  useEffect(() => {
-    const useDefault = state[DEFAULT_INDEX].useDefaultAgencyInfo.value;
-    const agencyValue = useDefault ? defaultAgency : state[DEFAULT_INDEX].ownerAgency.value;
-    const codeValue = useDefault ? defaultCode : state[DEFAULT_INDEX].ownerCode.value;
-
-    const clonedState = structuredClone(state);
-    clonedState[DEFAULT_INDEX].ownerAgency.value = agencyValue;
-    clonedState[DEFAULT_INDEX].ownerCode.value = codeValue;
-    setStepData(clonedState);
-  }, [defaultAgency, defaultCode]);
 
   const toggleAccordion = (id: number, isOpen: boolean) => {
     const newAccCtrls = { ...accordionControls };
