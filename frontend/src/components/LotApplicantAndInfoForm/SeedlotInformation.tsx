@@ -75,6 +75,7 @@ const SeedlotInformation = (
     if (seedlotSourcesQuery.isFetched) {
       return seedlotSourcesQuery.data.map((source: SeedlotSourceType) => (
         <RadioButton
+          id={`seedlot-source-radio-btn-${source.code.toLowerCase()}`}
           key={source.code}
           checked={seedlotFormData.sourceCode.value === source.code}
           labelText={source.description}
@@ -187,11 +188,13 @@ const SeedlotInformation = (
             onChange={(checkedString: string) => handleBoolRadioGroup('willBeRegistered', checkedString === 'Yes')}
           >
             <RadioButton
+              id="register-w-tsc-yes"
               checked={seedlotFormData.willBeRegistered.value}
               labelText="Yes"
               value="Yes"
             />
             <RadioButton
+              id="register-w-tsc-no"
               checked={!seedlotFormData.willBeRegistered.value}
               labelText="No"
               value="No"
@@ -208,11 +211,13 @@ const SeedlotInformation = (
             onChange={(checkedString: string) => handleBoolRadioGroup('isBcSource', checkedString === 'Yes')}
           >
             <RadioButton
+              id="collected-within-bc-yes"
               checked={seedlotFormData.isBcSource.value}
               labelText="Yes"
               value="Yes"
             />
             <RadioButton
+              id="collected-within-bc-no"
               checked={!seedlotFormData.isBcSource.value}
               labelText="No"
               value="No"
