@@ -20,7 +20,7 @@ import InterimStorage from '../SeedlotRegistrationSteps/InterimStep';
 import CollectionStep from '../SeedlotRegistrationSteps/CollectionStep';
 import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import { OrchardForm } from '../SeedlotRegistrationSteps/OrchardStep/definitions';
-import { initCollectionState } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
+import { initCollectionState, initOwnershipState } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
 
 const mockFormData = [
   {
@@ -88,25 +88,7 @@ const interimStorageMock = {
   facilityType: 'VRM'
 };
 
-const ownershipMock = {
-  id: 0,
-  useDefaultAgencyInfo: true,
-  ownerAgency: '0032 - Strong Seeds Orchard - SSO',
-  ownerCode: '32',
-  ownerPortion: '100',
-  reservedPerc: '100',
-  surplusPerc: '0',
-  fundingSource: {
-    code: 'LFP',
-    description: 'Licensee Funded Program',
-    label: 'LFP - Licensee Funded Program'
-  },
-  methodOfPayment: {
-    code: 'ITC',
-    description: 'Invoice to client address',
-    label: 'ITC - Invoice to client address'
-  }
-};
+const ownershipMock = initOwnershipState(defaultAgency, defaultCode);
 
 const collectionMock = initCollectionState(defaultAgency, defaultCode);
 

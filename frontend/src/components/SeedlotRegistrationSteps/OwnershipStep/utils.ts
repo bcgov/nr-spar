@@ -1,13 +1,11 @@
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { inputText, ownerTemplate, validTemplate } from './constants';
+import { inputText, createOwnerTemplate } from './constants';
 
 import {
   SingleOwnerForm,
   SingleInvalidObj
 } from './definitions';
-
-const twoDigitRegex = /^\d{2}$/;
 
 const getNextId = (currentArray: Array<SingleOwnerForm>): number => {
   let max = -1;
@@ -20,24 +18,19 @@ const getNextId = (currentArray: Array<SingleOwnerForm>): number => {
 };
 
 export const insertOwnerForm = (
-  ownershiptArray: Array<SingleOwnerForm>,
-  validationObj: OwnershipInvalidObj,
+  ownershipArray: Array<SingleOwnerForm>,
   methodsOfPayment: MultiOptionsObj[]
 ) => {
-  const newOwnerForm = structuredClone(ownerTemplate);
-  const newValidForm = { ...validTemplate };
-  const newId = getNextId(ownershiptArray);
-  newOwnerForm.id = newId;
-  const defaultPayment = methodsOfPayment.filter((method) => method.isDefault)[0] ?? null;
-  newOwnerForm.methodOfPayment = defaultPayment;
+  const clonedArray = structuredClone(ownershipArray);
+  const newId = getNextId(ownershipArray);
+  const newOwnerForm = createOwnerTemplate(newId);
 
-  return {
-    newOwnerArr: [...ownershiptArray, newOwnerForm],
-    newValidObj: {
-      ...validationObj,
-      [newId]: newValidForm
-    }
-  };
+  const defaultPayment = methodsOfPayment.filter((method) => method.isDefault)[0] ?? null;
+  newOwnerForm.methodOfPayment.value = defaultPayment;
+
+  clonedArray.push(newOwnerForm);
+
+  return clonedArray;
 };
 
 export const deleteOwnerForm = (
@@ -93,7 +86,7 @@ const isDecimalValid = (value: string): boolean => {
   return true;
 };
 
-const validatePerc = (value: string): SingleInvalidObj => {
+export const validatePerc = (value: string): SingleInvalidObj => {
   let invalidText = inputText.twoDecimal;
   let isInvalid = !isDecimalValid(value);
   if (!isInvalid) {
@@ -109,113 +102,10 @@ const validatePerc = (value: string): SingleInvalidObj => {
   return { isInvalid, invalidText };
 };
 
-export const getValidKey = (name: string): string => {
-  if (name === 'ownerAgency') return 'owner';
-  if (name === 'ownerCode') return 'code';
-  if (name === 'ownerPortion') return 'portion';
-  if (name === 'reservedPerc') return 'reserved';
-  if (name === 'surplusPerc') return 'surplus';
-  if (name === 'fundingSource') return 'funding';
-  if (name === 'methodOfPayment') return 'payment';
-  throw new Error('Failed to get valid key');
-};
-
-// The sum of reserved and surplus should be 100, if one is changed, auto calc the other one
-export const calcResvOrSurp = (
-  index: number,
-  field: string,
-  value: string,
-  currentArray: Array<SingleOwnerForm>
-) => {
-  const theOtherName = field === 'reservedPerc' ? 'surplusPerc' : 'reservedPerc';
-  let theOtherValue = String((100 - Number(value)).toFixed(2));
-  // If the other value is an int then show a whole number
-  if (Number(theOtherValue) % 1 === 0) {
-    theOtherValue = Number(theOtherValue).toFixed(0);
-  }
-  const newArr = [...currentArray];
-  newArr[index] = {
-    ...newArr[index],
-    [theOtherName]: theOtherValue
-  };
-  // Validate the other value after recalculation
-  const { isInvalid, invalidText } = validatePerc(theOtherValue);
-  const validKey = getValidKey(theOtherName);
-  return {
-    newArr,
-    isInvalid,
-    invalidText,
-    validKey
-  };
-};
-
-export const skipForInvalidLength = (name: string, value: string): boolean => {
-  if (name === 'ownerCode' && value.length > 2) {
-    return true;
-  }
-  return false;
-};
-
-const isInputEmpty = (value: string | number | MultiOptionsObj | null) => !value;
-
-export const isInputInvalid = (name: string, value: string): SingleInvalidObj => {
-  let isInvalid = false;
-  let invalidText = '';
-  switch (name) {
-    case 'ownerAgency':
-      isInvalid = isInputEmpty(value);
-      invalidText = inputText.owner.invalidText;
-      return {
-        isInvalid,
-        invalidText
-      };
-    case 'ownerCode':
-      isInvalid = !twoDigitRegex.test(value);
-      invalidText = inputText.code.invalidTextValue;
-      return {
-        isInvalid,
-        invalidText
-      };
-    case 'ownerPortion':
-      return validatePerc(value);
-    case 'reservedPerc':
-      return validatePerc(value);
-    case 'surplusPerc':
-      return validatePerc(value);
-    case 'fundingSource':
-      isInvalid = isInputEmpty(value);
-      invalidText = inputText.funding.invalidText;
-      return {
-        isInvalid,
-        invalidText
-      };
-    case 'methodOfPayment':
-      isInvalid = isInputEmpty(value);
-      invalidText = inputText.payment.invalidText;
-      return {
-        isInvalid,
-        invalidText
-      };
-    default:
-      return {
-        isInvalid: false,
-        invalidText: ''
-      };
-  }
-};
-
-export const arePortionsValid = (ownershiptArray: Array<SingleOwnerForm>): boolean => {
+export const arePortionsValid = (ownershipArray: Array<SingleOwnerForm>): boolean => {
   let sum = 0;
-  ownershiptArray.forEach((obj) => {
-    sum += Number(obj.ownerPortion);
+  ownershipArray.forEach((obj) => {
+    sum += Number(obj.ownerPortion.value);
   });
   return Number(sum.toFixed(2)) === 100;
 };
-
-export type AllValidObj = {
-  allValid: boolean,
-  invalidId: number,
-  invalidField: string,
-  invalidValue: string,
-  ownerOk: boolean
-}

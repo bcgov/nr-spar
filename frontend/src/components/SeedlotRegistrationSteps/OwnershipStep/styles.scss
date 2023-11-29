@@ -43,6 +43,11 @@ svg.#{vars.$bcgov-prefix}--accordion__arrow {
     border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
   }
 
+  .owner-add-btn {
+    margin-top: 1.75rem;
+    margin-bottom: 3rem;
+  }
+
   // Accordian item title styling
   .item-section {
     .item-title-section {

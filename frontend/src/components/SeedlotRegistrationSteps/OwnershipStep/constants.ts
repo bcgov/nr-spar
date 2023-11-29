@@ -1,3 +1,5 @@
+import { emptyMultiOptObj } from '../../../shared-constants/shared-constants';
+import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
 import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { SingleOwnerForm } from './definitions';
 
@@ -5,24 +7,23 @@ export const DEFAULT_INDEX = 0;
 
 export const MAX_OWNERS = 100;
 
-export const inputText = {
-  checkbox: {
+export const agencyFieldsProps: AgencyTextPropsType = {
+  useDefaultCheckbox: {
+    name: 'useDefaultOwner',
     labelText: 'Use applicant agency as owner agency'
   },
-  owner: {
-    placeholder: 'Enter or choose your agency',
-    titleText: 'Owner agency',
-    helperText: 'You can enter the agency number, name or acronym',
+  agencyInput: {
+    name: 'ownerAgency',
+    labelText: 'Owner agency',
     invalidText: 'Please choose a valid owner agency, filter with agency number, name or acronym'
   },
-  code: {
-    placeholder: 'Example: 00',
-    labelText: 'Owner location code',
-    helperTextEnabled: '2-digit code that identifies the address of operated office or division',
-    helperTextDisabled: 'Please select an owner agency before setting the location code',
-    invalidTextValue: 'Please enter a valid 2-digit code that identifies the address of operated office or division',
-    invalidLocationForSelectedAgency: 'This owner location code is not valid for the selected agency, please enter a valid one or change the agency'
-  },
+  locationCode: {
+    name: 'ownerLocationCode',
+    labelText: 'Owner location code'
+  }
+};
+
+export const inputText = {
   portion: {
     label: 'Owner portion (%)',
     invalidText: 'The sum of all owner portions should add up to 100'
@@ -48,31 +49,58 @@ export const inputText = {
   twoDecimal: 'Value can have up to 2 decimal places'
 };
 
-export const ownerTemplate: SingleOwnerForm = {
-  id: -1,
-  useDefaultAgencyInfo: true,
-  ownerAgency: '',
-  ownerCode: '',
-  ownerPortion: '0.00',
-  reservedPerc: '100.00',
-  surplusPerc: '0.00',
-  fundingSource: {
-    label: '',
-    code: '',
-    description: ''
+export const createOwnerTemplate = (newId: number): SingleOwnerForm => ({
+  id: newId,
+  useDefaultAgencyInfo: {
+    id: 'ownership-use-default-agency',
+    value: true,
+    isInvalid: false
   },
-  methodOfPayment: null
-};
+  ownerAgency: {
+    id: `ownership-agency-${newId}`,
+    value: '',
+    isInvalid: false
+  },
+  ownerCode: {
+    id: `ownership-location-code-${newId}`,
+    value: '',
+    isInvalid: false
+  },
+  ownerPortion: {
+    id: `ownership-portion-${newId}`,
+    value: '0.00',
+    isInvalid: false
+  },
+  reservedPerc: {
+    id: `ownership-reserved-${newId}`,
+    value: '100.00',
+    isInvalid: false
+  },
+  surplusPerc: {
+    id: `ownership-surplus-${newId}`,
+    value: '0.00',
+    isInvalid: false
+  },
+  fundingSource: {
+    id: `ownership-funding-source-${newId}`,
+    value: emptyMultiOptObj,
+    isInvalid: false
+  },
+  methodOfPayment: {
+    id: `ownership-method-payment-${newId}`,
+    value: emptyMultiOptObj,
+    isInvalid: false
+  }
+});
 
 export const validTemplate: FormInvalidationObj = {
   owner: {
     isInvalid: false,
-    invalidText: inputText.owner.invalidText
+    invalidText: agencyFieldsProps.agencyInput.invalidText
   },
   code: {
     isInvalid: false,
-    invalidText: inputText.code.invalidTextValue,
-    optInvalidText: inputText.code.invalidLocationForSelectedAgency
+    invalidText: ''
   },
   portion: {
     isInvalid: false,
