@@ -5,8 +5,6 @@ import {
   ComboBox,
   RadioButton,
   RadioButtonGroup,
-  Checkbox,
-  CheckboxGroup,
   RadioButtonSkeleton,
   TextInputSkeleton
 } from '@carbon/react';
@@ -77,7 +75,6 @@ const SeedlotInformation = (
         <RadioButton
           key={source.code}
           checked={seedlotFormData.sourceCode.value === source.code}
-          id={seedlotFormData.sourceCode.id}
           labelText={source.description}
           value={source.code}
         />
@@ -86,7 +83,7 @@ const SeedlotInformation = (
     return <InputErrorText description="Could not retrieve seedlot sources." />;
   };
 
-  const handleCheckBox = (inputName: keyof SeedlotRegFormType, checked: boolean) => {
+  const handleBoolRadioGroup = (inputName: keyof SeedlotRegFormType, checked: boolean) => {
     setSeedlotFormData((prevData) => ({
       ...prevData,
       [inputName]: {
@@ -170,7 +167,7 @@ const SeedlotInformation = (
       <Row className="form-row">
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
-            legendText="Class A source"
+            legendText="Specify A-class source"
             name="class-source-radiogroup"
             orientation="vertical"
             onChange={(e: string) => handleSource(e)}
@@ -185,32 +182,44 @@ const SeedlotInformation = (
       </Row>
       <Row className="form-row">
         <Column sm={4} md={8} lg={16}>
-          <CheckboxGroup legendText="To be registered?">
-            <Checkbox
-              id="registered-tree-seed-center"
-              name="registered"
-              labelText="Yes, to be registered with the Tree Seed Centre"
+          <RadioButtonGroup
+            name="will-be-registered-radiogroup"
+            legendText="To be registered at the Tree Seed Centre?"
+            orientation="vertical"
+            onChange={(checkedString: string) => handleBoolRadioGroup('willBeRegistered', checkedString === 'Yes')}
+          >
+            <RadioButton
               checked={seedlotFormData.willBeRegistered.value}
-              onChange={
-                (e: React.ChangeEvent<HTMLInputElement>) => handleCheckBox('willBeRegistered', e.target.checked)
-              }
+              labelText="Yes"
+              value="Yes"
             />
-          </CheckboxGroup>
+            <RadioButton
+              checked={!seedlotFormData.willBeRegistered.value}
+              labelText="No"
+              value="No"
+            />
+          </RadioButtonGroup>
         </Column>
       </Row>
       <Row className="form-row">
         <Column sm={4} md={8} lg={16}>
-          <CheckboxGroup legendText="Collected from B.C. source?">
-            <Checkbox
-              id="collected-bc"
-              name="collectedBC"
-              labelText="Yes, collected from a location within B.C."
+          <RadioButtonGroup
+            name="collected-within-bc-radiogroup"
+            legendText="Collected from a location within B.C.?"
+            orientation="vertical"
+            onChange={(checkedString: string) => handleBoolRadioGroup('isBcSource', checkedString === 'Yes')}
+          >
+            <RadioButton
               checked={seedlotFormData.isBcSource.value}
-              onChange={
-                (e: React.ChangeEvent<HTMLInputElement>) => handleCheckBox('isBcSource', e.target.checked)
-              }
+              labelText="Yes"
+              value="Yes"
             />
-          </CheckboxGroup>
+            <RadioButton
+              checked={!seedlotFormData.isBcSource.value}
+              labelText="No"
+              value="No"
+            />
+          </RadioButtonGroup>
         </Column>
       </Row>
     </>

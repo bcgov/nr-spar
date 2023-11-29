@@ -83,7 +83,8 @@ const ApplicantAgencyFields = ({
 
     const updatedAgency = {
       ...agency,
-      value: value ?? { code: '', label: '', description: '' }
+      value: value ?? { code: '', label: '', description: '' },
+      isInvalid: false
     };
 
     const updatedLocationCode = {
@@ -120,7 +121,8 @@ const ApplicantAgencyFields = ({
 
     const updatedLocationCode = {
       ...locationCode,
-      value: formattedCode
+      value: formattedCode,
+      isInValid: true
     };
 
     setAgencyAndCode(isDefault, agency, updatedLocationCode);
