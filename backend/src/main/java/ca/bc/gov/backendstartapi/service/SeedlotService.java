@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
+import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
@@ -16,6 +17,7 @@ import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
@@ -33,9 +35,9 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
-import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeGeneticQualityRepository;
@@ -90,7 +92,9 @@ public class SeedlotService {
 
   private final SeedlotParentTreeGeneticQualityRepository seedlotParentTreeGeneticQualityRepository;
 
-  private final GeneticWorthRepository geneticWorthRepository;
+  private final SeedlotGeneticWorthRepository seedlotGeneticWorthRepository;
+
+  private final GeneticWorthEntityDao geneticWorthEntityDao;
 
   /**
    * Creates a Seedlot in the database.
@@ -540,7 +544,7 @@ public class SeedlotService {
     saveSeedlotParentTree(seedlot, seedlotFormParentTreeDtoList);
     saveSeedlotPtGenQlty(seedlot, seedlotFormParentTreeDtoList);
     saveSeedlotGenWorth(seedlot, seedlotFormParentTreeDtoList);
-    // saveSmpMix();
+    // saveSmpMix(); -- keep going on these 3 methods
     // saveSmpMixGenQlty();
     // saveSeedlotPtSmpMix();
   }
@@ -686,8 +690,6 @@ public class SeedlotService {
         sTreesSaved.stream()
             .collect(Collectors.toMap(SeedlotParentTree::getId, Function.identity()));
 
-    Map<String, GeneticWorthEntity> genWorthMap = Map.of();
-
     List<SeedlotParentTreeGeneticQuality> seedlotPtToInsert = List.of();
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotPtGenQltyToInsert) {
       SeedlotParentTreeId sTreeId =
@@ -700,16 +702,11 @@ public class SeedlotService {
       for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
           seedlotPtFormDto.parentTreeGeneticQualities()) {
 
-        // If it's not there, fetches from database and saves into the map
-        if (!genWorthMap.containsKey(seedlotGenQltyDto.geneticWorthCode())) {
-          Optional<GeneticWorthEntity> genWorthEntDb =
-              geneticWorthRepository.findById(seedlotGenQltyDto.geneticWorthCode());
-          if (genWorthEntDb.isEmpty()) {
-            // throw 400 - genetic worth not stored in the database
-          }
-          genWorthMap.put(seedlotGenQltyDto.geneticWorthCode(), genWorthEntDb.get());
-        }
-        GeneticWorthEntity genWorthEnt = genWorthMap.get(seedlotGenQltyDto.geneticWorthCode());
+        GeneticWorthEntity genWorthEnt =
+            geneticWorthEntityDao
+                .getGeneticWorthEntity(seedlotGenQltyDto.geneticWorthCode())
+                .orElseThrow();
+
         SeedlotParentTreeGeneticQuality sQuality =
             new SeedlotParentTreeGeneticQuality(
                 sTree,
@@ -725,16 +722,74 @@ public class SeedlotService {
     seedlotParentTreeGeneticQualityRepository.saveAll(seedlotPtToInsert);
   }
 
-  // Keep going from here ...
+  // Form Step 5 Seedlot Genetic Worth related
   private void saveSeedlotGenWorth(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+
+    List<SeedlotGeneticWorth> sGeneticWorths =
+        seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlot.getId());
+
+    List<ParentTreeGeneticQualityDto> genWorthCodeToInsert = List.of();
+
+    if (!sGeneticWorths.isEmpty()) {
+      List<String> existingSeedlotGenWorthCodes = List.of();
+      for (SeedlotGeneticWorth seedlotGenWorthDto : sGeneticWorths) {
+        existingSeedlotGenWorthCodes.add(seedlotGenWorthDto.getGeneticWorthCode());
+      }
+
+      for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
+        for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
+            seedlotPtFormDto.parentTreeGeneticQualities()) {
+          if (existingSeedlotGenWorthCodes.contains(seedlotGenQltyDto.geneticWorthCode())) {
+            existingSeedlotGenWorthCodes.remove(seedlotGenQltyDto.geneticWorthCode());
+          } else {
+            genWorthCodeToInsert.add(seedlotGenQltyDto);
+          }
+        }
+      }
+
+      Map<String, SeedlotGeneticWorth> sGenWorthMap =
+          sGeneticWorths.stream()
+              .collect(
+                  Collectors.toMap(SeedlotGeneticWorth::getGeneticWorthCode, Function.identity()));
+
+      // Remove possible leftovers
+      log.info("{} seedlot genetic worth code(s) to remove.", existingSeedlotGenWorthCodes.size());
+      for (String genWorthCode : existingSeedlotGenWorthCodes) {
+        seedlotGeneticWorthRepository.delete(sGenWorthMap.get(genWorthCode));
+      }
+
+      // Insert new ones
+      addSeedlotGeneticWorth(seedlot, genWorthCodeToInsert);
+
+      return;
+    }
+
+    log.info("No previous seedlot genetic worths for seedlot {}", seedlot.getId());
+
+    for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
+      genWorthCodeToInsert.addAll(seedlotPtFormDto.parentTreeGeneticQualities());
+    }
+    addSeedlotGeneticWorth(seedlot, genWorthCodeToInsert);
+  }
+
+  // Form Step 5 Seedlot Genetic Worth related
+  private void addSeedlotGeneticWorth(
+      Seedlot seedlot, List<ParentTreeGeneticQualityDto> genWorthCodeToInsert) {
     // seedlot_genetic_worth table
-    /*
-    * seedlot_number        varchar(5) not null,
-     genetic_worth_code    varchar(3) not null,
-     genetic_quality_value decimal(4, 1) not null,
-     + audit
-    */
+    List<SeedlotGeneticWorth> seedlotGeneticWorths = List.of();
+    for (ParentTreeGeneticQualityDto pDto : genWorthCodeToInsert) {
+
+      GeneticWorthEntity gEntity =
+          geneticWorthEntityDao.getGeneticWorthEntity(pDto.geneticWorthCode()).orElseThrow();
+      SeedlotGeneticWorth sGeneticWorth =
+          new SeedlotGeneticWorth(seedlot, gEntity, loggedUserService.createAuditCurrentUser());
+      sGeneticWorth.setGeneticQualityValue(pDto.geneticQualityValue());
+
+      seedlotGeneticWorths.add(sGeneticWorth);
+    }
+
+    seedlotGeneticWorthRepository.saveAll(seedlotGeneticWorths);
   }
 
   // Form Step 6 - OK

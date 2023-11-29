@@ -54,4 +54,13 @@ public class SeedlotGeneticWorth {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
+  /**
+   * Gets the genetic worth code.
+   *
+   * @return The {@link GeneticWorthEntity} code.
+   */
+  public String getGeneticWorthCode() {
+    return geneticWorth.getGeneticWorthCode();
+  }
 }
