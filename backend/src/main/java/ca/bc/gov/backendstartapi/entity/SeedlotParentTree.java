@@ -41,6 +41,7 @@ public class SeedlotParentTree {
   @Column(name = "parent_tree_id", nullable = false)
   @NonNull
   private Integer parentTreeId;
+
   // endregion
 
   @Column(name = "cone_count", precision = 20, scale = 10, nullable = false)
@@ -63,4 +64,14 @@ public class SeedlotParentTree {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
+  /**
+   * Creates an instance of {@link SeedlotParentTreeId} containing: the seedlot id (seedlot number)
+   * and the parent tree id.
+   *
+   * @return A {@link SeedlotParentTreeId}
+   */
+  public SeedlotParentTreeId getId() {
+    return new SeedlotParentTreeId(seedlot.getId(), parentTreeId);
+  }
 }

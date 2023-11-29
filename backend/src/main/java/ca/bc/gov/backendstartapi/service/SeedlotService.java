@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -13,11 +14,15 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
+import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeGeneticQualityId;
+import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
@@ -28,22 +33,24 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -80,6 +87,10 @@ public class SeedlotService {
   private final SeedlotOrchardRepository seedlotOrchardRepository;
 
   private final SeedlotParentTreeRepository seedlotParentTreeRepository;
+
+  private final SeedlotParentTreeGeneticQualityRepository seedlotParentTreeGeneticQualityRepository;
+
+  private final GeneticWorthRepository geneticWorthRepository;
 
   /**
    * Creates a Seedlot in the database.
@@ -290,8 +301,8 @@ public class SeedlotService {
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!seedlotCollectionList.isEmpty()) {
-      List<Integer> existingMethodList = new ArrayList<>();
-      Map<Integer, SeedlotCollectionMethod> collectionMethodMap = new HashMap<>();
+      List<Integer> existingMethodList = List.of();
+      Map<Integer, SeedlotCollectionMethod> collectionMethodMap = Map.of();
       for (SeedlotCollectionMethod collectionMethod : seedlotCollectionList) {
         existingMethodList.add(
             collectionMethod.getConeCollectionMethod().getConeCollectionMethodCode());
@@ -300,7 +311,7 @@ public class SeedlotService {
             collectionMethod);
       }
 
-      List<Integer> methodCodesToInsert = new ArrayList<>();
+      List<Integer> methodCodesToInsert = List.of();
 
       for (Integer formMethodCode : formStep1.coneCollectionMethodCodes()) {
         if (existingMethodList.contains(formMethodCode)) {
@@ -353,11 +364,11 @@ public class SeedlotService {
     List<SeedlotOwnerQuantity> ownerQuantityList =
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlot.getId());
 
-    List<SeedlotOwnerQuantity> ownerQuantityToInsert = new ArrayList<>();
+    List<SeedlotOwnerQuantity> ownerQuantityToInsert = List.of();
 
     if (!ownerQuantityList.isEmpty()) {
-      List<SeedlotOwnerQuantityId> existingOwnerQtyIdList = new ArrayList<>();
-      Map<SeedlotOwnerQuantityId, SeedlotOwnerQuantity> ownerQuantityMap = new HashMap<>();
+      List<SeedlotOwnerQuantityId> existingOwnerQtyIdList = List.of();
+      Map<SeedlotOwnerQuantityId, SeedlotOwnerQuantity> ownerQuantityMap = Map.of();
       for (SeedlotOwnerQuantity ownerQuantity : ownerQuantityList) {
         existingOwnerQtyIdList.add(ownerQuantity.getId());
         ownerQuantityMap.put(ownerQuantity.getId(), ownerQuantity);
@@ -446,7 +457,7 @@ public class SeedlotService {
     log.info("Saving Seedlot form step 4 for seedlot {}", seedlot.getId());
 
     saveSeedlotOrchards(seedlot, formStep4);
-    
+
     seedlot.setFemaleGameticContributionMethod(formStep4.femaleGameticMthdCode());
     seedlot.setMaleGameticContributionMethod(formStep4.maleGameticMthdCode());
     seedlot.setProducedThroughControlledCross(formStep4.controlledCrossInd());
@@ -467,7 +478,7 @@ public class SeedlotService {
     if (orchardsLen > 1 && formStep4.primaryOrchardId().isBlank()) {
       // throw bad request - 400
     }
-    
+
     String primaryOrchardId =
         formStep4.primaryOrchardId().isBlank()
             ? formStep4.orchardsId().get(0)
@@ -477,14 +488,14 @@ public class SeedlotService {
         seedlotOrchardRepository.findAllBySeelot_id(seedlot.getId());
 
     if (!seedlotOrchards.isEmpty()) {
-      List<String> existingSeedlotOrchardList = new ArrayList<>();
-      Map<String, SeedlotOrchard> orchardMap = new HashMap<>();
+      List<String> existingSeedlotOrchardList = List.of();
+      Map<String, SeedlotOrchard> orchardMap = Map.of();
       for (SeedlotOrchard seedlotOrchard : seedlotOrchards) {
         existingSeedlotOrchardList.add(seedlotOrchard.getOrchard());
         orchardMap.put(seedlotOrchard.getOrchard(), seedlotOrchard);
       }
 
-      List<String> seedlotOrchardIdToInsert = new ArrayList<>();
+      List<String> seedlotOrchardIdToInsert = List.of();
 
       for (String formOrchardId : formStep4.orchardsId()) {
         if (existingSeedlotOrchardList.contains(formOrchardId)) {
@@ -522,27 +533,33 @@ public class SeedlotService {
   }
 
   // Form Step 5 - WIP
-  private void saveSeedlotFormStep5(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+  private void saveSeedlotFormStep5(
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info("Saving Seedlot form step 5 for seedlot {}", seedlot.getId());
 
     saveSeedlotParentTree(seedlot, seedlotFormParentTreeDtoList);
     saveSeedlotPtGenQlty(seedlot, seedlotFormParentTreeDtoList);
     saveSeedlotGenWorth(seedlot, seedlotFormParentTreeDtoList);
+    // saveSmpMix();
+    // saveSmpMixGenQlty();
+    // saveSeedlotPtSmpMix();
   }
 
-  // Form Step 5 related
-  private void saveSeedlotParentTree(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
-    List<SeedlotParentTree> seedlotParentTreeList = seedlotParentTreeRepository.findAllBySeedlot_id(seedlot.getId());
+  // Form Step 5 SeedlotParent related
+  private void saveSeedlotParentTree(
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+    List<SeedlotParentTree> seedlotParentTreeList =
+        seedlotParentTreeRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!seedlotParentTreeList.isEmpty()) {
-      List<Integer> existingSeedlotPtIdList = new ArrayList<>();
-      Map<Integer, SeedlotParentTree> seedlotPtMap = new HashMap<>();
+      List<Integer> existingSeedlotPtIdList = List.of();
+      Map<Integer, SeedlotParentTree> seedlotPtMap = Map.of();
       for (SeedlotParentTree seedlotPt : seedlotParentTreeList) {
         existingSeedlotPtIdList.add(seedlotPt.getParentTreeId());
         seedlotPtMap.put(seedlotPt.getParentTreeId(), seedlotPt);
       }
 
-      List<SeedlotFormParentTreeSmpDto> seedlotPtListToInsert = new ArrayList<>();
+      List<SeedlotFormParentTreeSmpDto> seedlotPtListToInsert = List.of();
 
       for (SeedlotFormParentTreeSmpDto formParentTree : seedlotFormParentTreeDtoList) {
         if (existingSeedlotPtIdList.contains(formParentTree.parentTreeId())) {
@@ -570,51 +587,156 @@ public class SeedlotService {
     addSeedlotParentTree(seedlot, seedlotFormParentTreeDtoList);
   }
 
-  // Form Step 5 related
-  private void addSeedlotParentTree(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtDtoList) {
-    List<SeedlotParentTree> seedlotPtListToInsert = new ArrayList<>();
+  // Form Step 5 Seedlot Parent Tree related
+  private void addSeedlotParentTree(
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtDtoList) {
+    List<SeedlotParentTree> seedlotPtListToInsert = List.of();
 
     for (SeedlotFormParentTreeSmpDto seedlotPtDto : seedlotPtDtoList) {
-      SeedlotParentTree seedlotParentTree = new SeedlotParentTree(
-        seedlot,
-        seedlotPtDto.parentTreeId(),
-        seedlotPtDto.coneCount(),
-        seedlotPtDto.pollenCount(),
-        loggedUserService.createAuditCurrentUser());
-      seedlotParentTree.setSmpSuccessPercentage(seedlotPtDto.smpSuccessPerc().intValue());
-      seedlotParentTree.setNonOrchardPollenContaminationCount(seedlotPtDto.nonOrchardPollenContam().intValue());
+      SeedlotParentTree seedlotParentTree =
+          new SeedlotParentTree(
+              seedlot,
+              seedlotPtDto.parentTreeId(),
+              seedlotPtDto.coneCount(),
+              seedlotPtDto.pollenPount(),
+              loggedUserService.createAuditCurrentUser());
+      seedlotParentTree.setSmpSuccessPercentage(seedlotPtDto.smpSuccessPct());
+      seedlotParentTree.setNonOrchardPollenContaminationCount(
+          seedlotPtDto.nonOrchardPollenContamPct());
       seedlotPtListToInsert.add(seedlotParentTree);
     }
 
     seedlotParentTreeRepository.saveAll(seedlotPtListToInsert);
   }
 
-  // Keep going from here ...
-  private void saveSeedlotPtGenQlty(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
-    // seedlot_parent_tree_gen_qlty table
-    /*
-     * seedlot_number        varchar(5) not null,
-    parent_tree_id        int not null,
-    genetic_type_code     varchar(2) not null,
-    genetic_worth_code    varchar(3) not null,
-    genetic_quality_value decimal(4, 1) not null,
-    estimated_ind         boolean,
-    untested_ind          boolean,
-    + audit
-     */
+  // Form Step 5 Seedlot Parent Tree Genetic Quality related
+  private void saveSeedlotPtGenQlty(
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+    List<SeedlotParentTreeGeneticQuality> seedlotPtGenQltyList =
+        seedlotParentTreeGeneticQualityRepository.findAllBySeedlotParentTree_Seedlot_id(
+            seedlot.getId());
+
+    if (!seedlotPtGenQltyList.isEmpty()) {
+      List<SeedlotParentTreeGeneticQualityId> existingSeedlotPtGenQltyIdList = List.of();
+      for (SeedlotParentTreeGeneticQuality seedlotPtGenQlty : seedlotPtGenQltyList) {
+        existingSeedlotPtGenQltyIdList.add(seedlotPtGenQlty.getId());
+      }
+
+      List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert = List.of();
+
+      for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
+        for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
+            seedlotPtFormDto.parentTreeGeneticQualities()) {
+          SeedlotParentTreeId seedlotParentTreeId =
+              new SeedlotParentTreeId(seedlot.getId(), seedlotPtFormDto.parentTreeId());
+
+          SeedlotParentTreeGeneticQualityId seedlotPtGenQltyId =
+              new SeedlotParentTreeGeneticQualityId(
+                  seedlotParentTreeId,
+                  seedlotGenQltyDto.geneticTypeCode(),
+                  seedlotGenQltyDto.geneticWorthCode());
+
+          if (existingSeedlotPtGenQltyIdList.contains(seedlotPtGenQltyId)) {
+            // remove form the list, the one that last will be removed
+            existingSeedlotPtGenQltyIdList.remove(seedlotPtGenQltyId);
+          } else {
+            seedlotPtGenQltyToInsert.add(seedlotPtFormDto);
+          }
+        }
+      }
+
+      // Remove possible leftovers
+      log.info(
+          "{} seedlot parent trees genetic quality to remove.",
+          existingSeedlotPtGenQltyIdList.size());
+      for (SeedlotParentTreeGeneticQualityId seedlotPtGenQlty : existingSeedlotPtGenQltyIdList) {
+        seedlotParentTreeGeneticQualityRepository.deleteById(seedlotPtGenQlty);
+      }
+
+      // Insert new ones
+      addSeedlotParentTreeGenQlty(seedlot, seedlotPtGenQltyToInsert);
+
+      return;
+    }
+
+    log.info("No previous seedlot parent trees genetic quality for seedlot {}", seedlot.getId());
+
+    addSeedlotParentTreeGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
 
-  // Also keep going from here ...
-  private void saveSeedlotGenWorth(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+  // Form Step 5 Seedlot Parent Tree Genetic Quality related
+  private void addSeedlotParentTreeGenQlty(
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert) {
+    List<SeedlotParentTree> sTrees = List.of();
+
+    for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotPtGenQltyToInsert) {
+      SeedlotParentTree sParentTree =
+          new SeedlotParentTree(
+              seedlot,
+              seedlotPtFormDto.parentTreeId(),
+              seedlotPtFormDto.coneCount(),
+              seedlotPtFormDto.pollenPount(),
+              loggedUserService.createAuditCurrentUser());
+      sTrees.add(sParentTree);
+    }
+
+    List<SeedlotParentTree> sTreesSaved = seedlotParentTreeRepository.saveAll(sTrees);
+
+    Map<SeedlotParentTreeId, SeedlotParentTree> sTreeMap =
+        sTreesSaved.stream()
+            .collect(Collectors.toMap(SeedlotParentTree::getId, Function.identity()));
+
+    Map<String, GeneticWorthEntity> genWorthMap = Map.of();
+
+    List<SeedlotParentTreeGeneticQuality> seedlotPtToInsert = List.of();
+    for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotPtGenQltyToInsert) {
+      SeedlotParentTreeId sTreeId =
+          new SeedlotParentTreeId(seedlot.getId(), seedlotPtFormDto.parentTreeId());
+      SeedlotParentTree sTree = sTreeMap.get(sTreeId);
+      if (Objects.isNull(sTree)) {
+        // throw error = trying to fetch seedlot parent tree not stored
+      }
+
+      for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
+          seedlotPtFormDto.parentTreeGeneticQualities()) {
+
+        // If it's not there, fetches from database and saves into the map
+        if (!genWorthMap.containsKey(seedlotGenQltyDto.geneticWorthCode())) {
+          Optional<GeneticWorthEntity> genWorthEntDb =
+              geneticWorthRepository.findById(seedlotGenQltyDto.geneticWorthCode());
+          if (genWorthEntDb.isEmpty()) {
+            // throw 400 - genetic worth not stored in the database
+          }
+          genWorthMap.put(seedlotGenQltyDto.geneticWorthCode(), genWorthEntDb.get());
+        }
+        GeneticWorthEntity genWorthEnt = genWorthMap.get(seedlotGenQltyDto.geneticWorthCode());
+        SeedlotParentTreeGeneticQuality sQuality =
+            new SeedlotParentTreeGeneticQuality(
+                sTree,
+                seedlotGenQltyDto.geneticTypeCode(),
+                genWorthEnt,
+                seedlotGenQltyDto.geneticQualityValue(),
+                loggedUserService.createAuditCurrentUser());
+
+        seedlotPtToInsert.add(sQuality);
+      }
+    }
+
+    seedlotParentTreeGeneticQualityRepository.saveAll(seedlotPtToInsert);
+  }
+
+  // Keep going from here ...
+  private void saveSeedlotGenWorth(
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     // seedlot_genetic_worth table
     /*
-     * seedlot_number        varchar(5) not null,
-      genetic_worth_code    varchar(3) not null,
-      genetic_quality_value decimal(4, 1) not null,
-      + audit
-     */
+    * seedlot_number        varchar(5) not null,
+     genetic_worth_code    varchar(3) not null,
+     genetic_quality_value decimal(4, 1) not null,
+     + audit
+    */
   }
-  
+
   // Form Step 6 - OK
   private void saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
     log.info("Saving Seedlot form step 6 for seedlot {}", seedlot.getId());
@@ -623,7 +745,7 @@ public class SeedlotService {
     seedlot.setExtractionLocationCode(formStep6.extractoryLocnCode());
     seedlot.setExtractionStartDate(formStep6.extractionStDate());
     seedlot.setExtractionEndDate(formStep6.extractionEndDate());
-    
+
     seedlot.setStorageClientNumber(formStep6.storageClientNumber());
     seedlot.setStorageLocationCode(formStep6.storageLocnCode());
     seedlot.setTemporaryStorageStartDate(formStep6.temporaryStrgStartDate());
