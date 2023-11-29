@@ -1,3 +1,4 @@
+import { EmptyMultiOptObj } from '../../shared-constants/shared-constants';
 import AgencyTextPropsType from '../../types/AgencyTextPropsType';
 import { OptionsInputType, StringInputType } from '../../types/FormInputType';
 import { ComboBoxPropsType } from './definitions';
@@ -25,5 +26,5 @@ export const speciesFieldConfig: ComboBoxPropsType = {
 };
 
 // Template data for vegLot:
-export const vegLotAgency: OptionsInputType = { id: '', isInvalid: false, value: { code: '', description: '', label: '' } };
+export const vegLotAgency: OptionsInputType = { id: '', isInvalid: false, value: EmptyMultiOptObj };
 export const vegLotLocationCode: StringInputType = { id: '', isInvalid: false, value: '' };

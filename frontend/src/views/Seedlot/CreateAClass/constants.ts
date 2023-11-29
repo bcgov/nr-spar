@@ -1,14 +1,11 @@
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 
 export const InitialSeedlotFormData: SeedlotRegFormType = {
   client: {
     id: 'applicant-info-combobox',
     isInvalid: false,
-    value: {
-      code: '',
-      label: '',
-      description: ''
-    }
+    value: EmptyMultiOptObj
   },
   locationCode: {
     id: 'agency-number-input',
@@ -23,11 +20,7 @@ export const InitialSeedlotFormData: SeedlotRegFormType = {
   species: {
     id: 'seedlot-species-combobox',
     isInvalid: false,
-    value: {
-      code: '',
-      label: '',
-      description: ''
-    }
+    value: EmptyMultiOptObj
   },
   sourceCode: {
     id: '',

@@ -21,6 +21,8 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
+import { EmptyMultiOptObj } from '../../shared-constants/shared-constants';
+
 import { speciesFieldConfig } from './constants';
 
 const SeedlotInformation = (
@@ -113,11 +115,7 @@ const SeedlotInformation = (
       ...prevData,
       species: {
         ...prevData.species,
-        value: selectedItem?.code ? selectedItem : {
-          code: '',
-          label: '',
-          description: ''
-        },
+        value: selectedItem?.code ? selectedItem : EmptyMultiOptObj,
         isInvalid
       }
     }));

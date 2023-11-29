@@ -12,7 +12,7 @@ import validator from 'validator';
 import Subtitle from '../Subtitle';
 import ApplicantAgencyFields from '../ApplicantAgencyFields';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
-import { OptionsInputType, StringInputType } from '../../types/FormInputType';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../types/FormInputType';
 
 import SeedlotInformation from './SeedlotInformation';
 import { FormProps } from './definitions';
@@ -86,7 +86,7 @@ const LotApplicantAndInfoForm = ({
       </Row>
       <ApplicantAgencyFields
         showCheckbox={false}
-        isDefault={false}
+        isDefault={{ id: '', isInvalid: false, value: false }}
         checkboxId="lot-information-default-checkbox"
         agency={isSeedlot && seedlotFormData ? seedlotFormData.client : vegLotAgency}
         locationCode={
@@ -98,12 +98,13 @@ const LotApplicantAndInfoForm = ({
         agencyOptions={isEdit ? [] : applicantAgencyQuery.data ?? []}
         setAgencyAndCode={
           (
-            _isDefault: boolean,
+            _isDefault: BooleanInputType,
             agency: OptionsInputType,
             locationCode: StringInputType
           ) => setAgencyAndCode(agency, locationCode)
         }
         readOnly={isEdit}
+        maxInputColSize={6}
       />
       <Row className="agency-email-row">
         <Column sm={4} md={8} lg={16} xlg={12}>

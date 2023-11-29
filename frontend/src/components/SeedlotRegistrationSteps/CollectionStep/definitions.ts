@@ -5,7 +5,6 @@ import {
   StringInputType
 } from '../../../types/FormInputType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
 export type CollectionForm = {
   useDefaultAgencyInfo: BooleanInputType,
@@ -28,7 +27,6 @@ export interface CollectionStepProps {
   agencyOptions: Array<MultiOptionsObj>,
   collectionMethods: Array<MultiOptionsObj>,
   readOnly?: boolean,
-  invalidateObj?: FormInvalidationObj
 }
 
 export type FormValidation = {

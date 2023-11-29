@@ -1,10 +1,10 @@
 import AgencyTextPropsType from '../../types/AgencyTextPropsType';
-import { OptionsInputType, StringInputType } from '../../types/FormInputType';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../types/FormInputType';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 
 interface ApplicantAgencyFieldsProps {
   checkboxId: string;
-  isDefault: boolean;
+  isDefault: BooleanInputType;
   agency: OptionsInputType;
   locationCode: StringInputType;
   fieldsProps: AgencyTextPropsType;
@@ -14,6 +14,7 @@ interface ApplicantAgencyFieldsProps {
   defaultCode?: string;
   showCheckbox?: boolean;
   readOnly?: boolean;
+  maxInputColSize?: number;
 }
 
 export default ApplicantAgencyFieldsProps;

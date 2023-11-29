@@ -10,7 +10,7 @@ import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
-import { LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
+import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { FilterObj, filterInput } from '../../utils/filterUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
@@ -21,7 +21,7 @@ import './styles.scss';
 
 const ApplicantAgencyFields = ({
   checkboxId, isDefault, agency, locationCode, fieldsProps, agencyOptions,
-  defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox
+  defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize
 }: ApplicantAgencyFieldsProps) => {
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCode.isInvalid && agency.value
@@ -63,7 +63,7 @@ const ApplicantAgencyFields = ({
 
     const updatedAgency = {
       ...agency,
-      value: checked ? defaultAgency : { code: '', label: '', description: '' }
+      value: checked ? defaultAgency : EmptyMultiOptObj
     };
 
     const updatedLocationCode = {
@@ -71,7 +71,12 @@ const ApplicantAgencyFields = ({
       value: checked ? defaultCode : ''
     };
 
-    setAgencyAndCode(checked, updatedAgency, updatedLocationCode);
+    const updatedIsDefault = {
+      ...isDefault,
+      value: checked
+    };
+
+    setAgencyAndCode(updatedIsDefault, updatedAgency, updatedLocationCode);
   };
 
   const handleAgencyInput = (value: MultiOptionsObj) => {
@@ -83,7 +88,7 @@ const ApplicantAgencyFields = ({
 
     const updatedAgency = {
       ...agency,
-      value: value ?? { code: '', label: '', description: '' },
+      value: value ?? EmptyMultiOptObj,
       isInvalid: false
     };
 
@@ -145,7 +150,7 @@ const ApplicantAgencyFields = ({
                   name={fieldsProps.useDefaultCheckbox.name}
                   labelText={fieldsProps.useDefaultCheckbox.labelText}
                   readOnly={readOnly}
-                  checked={isDefault}
+                  checked={isDefault.value}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleDefaultCheckBox(e.target.checked);
                   }}
@@ -156,16 +161,16 @@ const ApplicantAgencyFields = ({
           : null
       }
       <Row className="agency-information-row">
-        <Column sm={4} md={4} lg={8} xlg={6}>
+        <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
           <ComboBox
-            className={readOnly ? 'spar-read-only-combobox' : null}
+            className="agency-combo-box"
             id={agency.id}
             placeholder={supportTexts.agency.placeholder}
             titleText={fieldsProps.agencyInput.titleText}
             helperText={readOnly ? null : supportTexts.agency.helperText}
             invalidText={fieldsProps.agencyInput.invalidText}
             items={agencyOptions}
-            readOnly={isDefault || readOnly}
+            readOnly={isDefault.value || readOnly}
             selectedItem={agency.value}
             onChange={(e: ComboBoxEvent) => handleAgencyInput(e.selectedItem)}
             invalid={agency.isInvalid}
@@ -175,7 +180,7 @@ const ApplicantAgencyFields = ({
             size="md"
           />
         </Column>
-        <Column sm={4} md={4} lg={8} xlg={6}>
+        <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
           <TextInput
             className={readOnly ? 'spar-display-only-input' : 'location-code-input'}
             id={locationCode.id}
@@ -184,10 +189,10 @@ const ApplicantAgencyFields = ({
             type="number"
             placeholder={!agency.value.code ? '' : supportTexts.locationCode.placeholder}
             labelText={fieldsProps.locationCode.labelText}
-            helperText={readOnly ? null : locationCodeHelperText}
+            helperText={(readOnly || isDefault.value) ? null : locationCodeHelperText}
             invalid={locationCode.isInvalid}
             invalidText={invalidLocationMessage}
-            readOnly={isDefault || readOnly}
+            readOnly={isDefault.value || readOnly}
             disabled={!agency.value.code}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleLocationCodeChange(e.target.value);

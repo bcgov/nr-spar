@@ -16,7 +16,7 @@ import validator from 'validator';
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
-import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -43,12 +43,12 @@ const CollectionStep = (
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
   const setAgencyAndCode = (
-    isDefault: boolean,
+    isDefault: BooleanInputType,
     agency: OptionsInputType,
     locationCode: StringInputType
   ) => {
     const clonedState = structuredClone(state);
-    clonedState.useDefaultAgencyInfo.value = isDefault;
+    clonedState.useDefaultAgencyInfo = isDefault;
     clonedState.collectorAgency = agency;
     clonedState.locationCode = locationCode;
     setStepData(clonedState);
@@ -131,7 +131,7 @@ const CollectionStep = (
       </Row>
       <ApplicantAgencyFields
         showCheckbox
-        isDefault={state.useDefaultAgencyInfo.value}
+        isDefault={state.useDefaultAgencyInfo}
         checkboxId="collection-step-default-checkbox"
         agency={state.collectorAgency}
         locationCode={state.locationCode}
@@ -141,12 +141,13 @@ const CollectionStep = (
         defaultCode={defaultCode}
         setAgencyAndCode={
           (
-            isDefault: boolean,
+            isDefault: BooleanInputType,
             agency: OptionsInputType,
             locationCode: StringInputType
           ) => setAgencyAndCode(isDefault, agency, locationCode)
         }
         readOnly={readOnly}
+        maxInputColSize={6}
       />
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>

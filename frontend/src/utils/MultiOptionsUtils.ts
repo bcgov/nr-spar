@@ -1,10 +1,7 @@
+import { EmptyMultiOptObj } from '../shared-constants/shared-constants';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 
-const multiOptionsItem: MultiOptionsObj = {
-  label: '',
-  code: '',
-  description: ''
-};
+const multiOptionsItem: MultiOptionsObj = EmptyMultiOptObj;
 
 const capFirstChar = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 const uncapFirstChar = (str: string) => str.charAt(0).toLowerCase() + str.slice(1);

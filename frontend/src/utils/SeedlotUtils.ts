@@ -4,6 +4,7 @@ import { SeedlotApplicantType, SeedlotDisplayType, SeedlotType } from '../types/
 import { MONTH_DAY_YEAR } from '../config/DateFormat';
 import { ForestClientType } from '../types/ForestClientType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
+import { EmptyMultiOptObj } from '../shared-constants/shared-constants';
 
 /**
  * Generate a species label in the form of `{code} - {description}`.
@@ -24,7 +25,7 @@ export const getSpeciesOptionByCode = (
   vegCodeData: MultiOptionsObj[]
 ): MultiOptionsObj => {
   const filtered = vegCodeData.filter((veg) => veg.code === code);
-  return filtered[0] ?? { code: '', description: '', label: '' };
+  return filtered[0] ?? EmptyMultiOptObj;
 };
 
 /**
