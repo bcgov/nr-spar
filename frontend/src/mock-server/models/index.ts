@@ -10,7 +10,6 @@ import { MockSeedlotOrchard, OrchardType } from '../../types/SeedlotTypes/Seedlo
 import InterimAgencyInfo from '../../types/InterimAgencyInfo';
 import StorageInfo from '../../types/StorageInfo';
 import InterimStorageRegistration from '../../types/InterimStorageRegistration';
-import RegisterOwnerArray from '../../types/SeedlotTypes/OwnershipTypes';
 
 const FavouriteModel: ModelDefinition<FavActivityType> = Model.extend({});
 const GeneticClassesModel: ModelDefinition<GeneticClassesType> = Model.extend({});
@@ -21,7 +20,6 @@ const SeedlotOrchardModel: ModelDefinition<MockSeedlotOrchard> = Model.extend({}
 const InterimAgencyInfoModel: ModelDefinition<InterimAgencyInfo> = Model.extend({});
 const StorageInfoModel: ModelDefinition<StorageInfo> = Model.extend({});
 const InterimRegistrationModel: ModelDefinition<InterimStorageRegistration> = Model.extend({});
-const RegisterOwnerModel: ModelDefinition<RegisterOwnerArray> = Model.extend({});
 
 const models = {
   favourites: FavouriteModel,
@@ -32,8 +30,7 @@ const models = {
   seedlotOrchard: SeedlotOrchardModel,
   interimAgencyInfo: InterimAgencyInfoModel,
   storageInfo: StorageInfoModel,
-  interimStorageRegistration: InterimRegistrationModel,
-  registerOwnerData: RegisterOwnerModel
+  interimStorageRegistration: InterimRegistrationModel
 };
 
 export default models;
