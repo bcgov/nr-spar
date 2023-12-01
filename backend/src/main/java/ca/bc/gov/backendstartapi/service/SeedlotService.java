@@ -22,9 +22,11 @@ import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.SmpMix;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeGeneticQualityId;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
+import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
@@ -45,6 +47,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
+import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -93,6 +96,8 @@ public class SeedlotService {
   private final SeedlotParentTreeGeneticQualityRepository seedlotParentTreeGeneticQualityRepository;
 
   private final SeedlotGeneticWorthRepository seedlotGeneticWorthRepository;
+
+  private final SmpMixRepository smpMixRepository;
 
   private final GeneticWorthEntityDao geneticWorthEntityDao;
 
@@ -544,9 +549,9 @@ public class SeedlotService {
     saveSeedlotParentTree(seedlot, seedlotFormParentTreeDtoList);
     saveSeedlotPtGenQlty(seedlot, seedlotFormParentTreeDtoList);
     saveSeedlotGenWorth(seedlot, seedlotFormParentTreeDtoList);
-    // saveSmpMix(); -- keep going on these 3 methods
-    // saveSmpMixGenQlty();
-    // saveSeedlotPtSmpMix();
+    saveSmpMix(seedlot, seedlotFormParentTreeDtoList);
+    saveSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList);
+    saveSeedlotPtSmpMix(seedlot, seedlotFormParentTreeDtoList);
   }
 
   // Form Step 5 SeedlotParent related
@@ -790,6 +795,67 @@ public class SeedlotService {
     }
 
     seedlotGeneticWorthRepository.saveAll(seedlotGeneticWorths);
+  }
+
+  // Form Step 5 SMP Mix - stopped here
+  private void saveSmpMix(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+    List<SmpMix> smpMixs = smpMixRepository.findAllBySeedlot_id(seedlot.getId());
+
+    if (!smpMixs.isEmpty()) {
+      
+      Map<Integer, SmpMix> smpMixMap = smpMixs
+          .stream()
+          .collect(Collectors.toMap(SmpMix::getParentTreeId, Function.identity()));
+
+      List<Integer> existingParentTreeIds = smpMixs
+          .stream()
+          .map(SmpMix::getParentTreeId)
+          .collect(Collectors.toList());
+
+      List<Integer> parentTreeIdsToInsert = List.of();
+
+      for (SeedlotFormParentTreeSmpDto formDto : seedlotFormParentTreeDtoList) {
+        if (existingParentTreeIds.contains(formDto.parentTreeId())) {
+          existingParentTreeIds.remove(formDto.parentTreeId());
+        } else {
+          parentTreeIdsToInsert.add(formDto.parentTreeId());
+        }
+      }
+
+      // Remove possible leftovers
+      log.info("{} SMP Mix records to remove.", existingParentTreeIds.size());
+      List<SmpMixId> smpMixIdsToRemove = List.of();
+      for (Integer parentTreeId : existingParentTreeIds) {
+        SmpMixId smpMixId = new SmpMixId(seedlot.getId(), parentTreeId);
+        smpMixIdsToRemove.add(smpMixId);
+      }
+
+      if (!smpMixIdsToRemove.isEmpty()) {
+        smpMixRepository.deleteAllById(smpMixIdsToRemove);
+      }
+
+      // Insert new ones
+      //addSeedlotCollectionMethod(seedlot, methodCodesToInsert);
+
+      return;
+    }
+
+    // add new
+    log.info("No previous SMP Mix records for seedlot {}", seedlot.getId());
+
+    //addSeedlotCollectionMethod(seedlot, methodCodesToInsert);
+  }
+
+  private void addSmpMix(Seedlot seedlot) {
+    //
+  }
+
+  private void saveSmpMixGenQlty(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+    //
+  }
+
+  private void saveSeedlotPtSmpMix(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+    //
   }
 
   // Form Step 6 - OK
