@@ -6,7 +6,8 @@ export type InterimForm = {
   locationCode: FormInputType & { value: string },
   startDate: FormInputType & { value: string },
   endDate: FormInputType & { value: string },
-  facilityType: FormInputType & { value: string },
+  facilityType: FormInputType & { value: string }
+  facilityOtherType: FormInputType & { value: string }
 }
 
 export default InterimForm;

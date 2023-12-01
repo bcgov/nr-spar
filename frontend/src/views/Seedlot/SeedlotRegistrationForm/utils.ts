@@ -100,23 +100,23 @@ export const initInterimState = (
     isInvalid: false
   },
   startDate: {
-    id: 'interim-start-date',
+    id: 'storage-start-date',
     value: '',
     isInvalid: false
   },
   endDate: {
-    id: 'interim-end-date',
-    value: '',
-    isInvalid: false
-  },
-  storageLocation: {
-    id: 'interim-storage-location',
+    id: 'storage-end-date',
     value: '',
     isInvalid: false
   },
   facilityType: {
-    id: 'interim-facility-type',
+    id: 'storage-facility-type',
     value: 'OCV',
+    isInvalid: false
+  },
+  facilityOtherType: {
+    id: 'storage-other-type-input',
+    value: '',
     isInvalid: false
   }
 });

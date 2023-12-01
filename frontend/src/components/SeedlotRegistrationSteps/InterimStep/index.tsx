@@ -41,7 +41,7 @@ const InterimStorage = (
     readOnly
   }: InterimStorageStepProps
 ) => {
-  const [otherRadioChecked, setOtherChecked] = useState(false);
+  const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
 
   const setAgencyInfo = (
     agencyData: FormInputType & { value: string },
@@ -58,7 +58,7 @@ const InterimStorage = (
   // This function validates changes on both start and end dates
   // of the storage information
   const validateStorageDates = (curState: InterimForm) => {
-    // Have both start and end dates
+    // Check if the start date is set before the end date
     if (curState.startDate.value !== '' && curState.endDate.value !== '') {
       return moment(curState.endDate.value, 'YYYY/MM/DD')
         .isBefore(moment(curState.startDate.value, 'YYYY/MM/DD'));
@@ -75,44 +75,34 @@ const InterimStorage = (
     }
 
     const isInvalid = validateStorageDates(clonedState);
-
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
+    setStepData(clonedState);
+  };
+
+  const handleFacilityType = (selected: string) => {
+    const clonedState = structuredClone(state);
+    clonedState.facilityType.value = selected;
+
+    if (selected === 'OTH') {
+      // Display the 'Other' text field
+      setOtherChecked(true);
+    } else if (otherChecked) {
+      // Set value back to false otherwise
+      setOtherChecked(false);
+    }
 
     setStepData(clonedState);
   };
 
-  const validateInput = (name: string) => {
+  const handleOtherFacilityTypeInput = (facilityType: string) => {
     const clonedState = structuredClone(state);
-    let isInvalid = false;
+    clonedState.facilityOtherType.value = facilityType;
 
-    if (name === 'startDate' || name === 'endDate') {
-      // Have both start and end dates
-      if (clonedState.startDate.value !== '' && clonedState.endDate.value !== '') {
-        isInvalid = moment(clonedState.endDate.value, 'YYYY/MM/DD')
-          .isBefore(moment(clonedState.startDate.value, 'YYYY/MM/DD'));
-      }
-      clonedState.startDate.isInvalid = isInvalid;
-      clonedState.endDate.isInvalid = isInvalid;
+    if (facilityType.length >= 50) {
+      clonedState.facilityOtherType.isInvalid = true;
     }
-    if (name === 'facilityType') {
-      if (clonedState.facilityType.value.length >= 50) {
-        isInvalid = true;
-      }
-      clonedState.facilityType.isInvalid = isInvalid;
-    }
-  };
-
-  const handleFormInput = (
-    name: keyof InterimForm,
-    value: string
-  ) => {
-    const newState = {
-      ...state,
-      [name]: value
-    };
-    setStepData(newState);
-    validateInput(name);
+    setStepData(clonedState);
   };
 
   const storageFacilityTypeInputRef = useRef<HTMLInputElement>(null);
@@ -127,16 +117,6 @@ const InterimStorage = (
     clonedState.locationCode.value = code;
     setStepData(clonedState);
   }, [collectorAgency, collectorCode]);
-
-  const inputChangeHandlerRadio = (selected: string) => {
-    if (selected === 'OTH') {
-      setOtherChecked(true);
-      handleFormInput('facilityType', 'OTH');
-    } else {
-      setOtherChecked(false);
-      handleFormInput('facilityType', selected);
-    }
-  };
 
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
@@ -213,53 +193,57 @@ const InterimStorage = (
       <Row className="storage-type-radio">
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
-            legendText="Storage facility type"
+            legendText={pageTexts.storageFacility.labelText}
             name="storage-type-radiogroup"
             orientation="vertical"
             defaultSelected={state.facilityType.value}
-            onChange={(e: string) => inputChangeHandlerRadio(e)}
+            onChange={(e: string) => handleFacilityType(e)}
             readOnly={readOnly}
           >
             <RadioButton
               id="outside-radio"
-              labelText="Outside covered - OCV"
-              value="OCV"
+              labelText={pageTexts.storageFacility.outsideLabel}
+              value={pageTexts.storageFacility.outsideValue}
             />
             <RadioButton
               id="ventilated-radio"
-              labelText="Ventilated room - VRM"
-              value="VRM"
+              labelText={pageTexts.storageFacility.ventilatedLabel}
+              value={pageTexts.storageFacility.ventilatedValue}
             />
             <RadioButton
               id="reefer-radio"
-              labelText="Reefer - RFR"
-              value="RFR"
+              labelText={pageTexts.storageFacility.reeferLabel}
+              value={pageTexts.storageFacility.reeferValue}
             />
             <RadioButton
               id="other-radio"
-              labelText="Other - OTH"
-              value="OTH"
+              labelText={pageTexts.storageFacility.otherLabel}
+              value={pageTexts.storageFacility.otherValue}
             />
           </RadioButtonGroup>
         </Column>
         {
-          otherRadioChecked && (
-            <Column className="storage-facility-type" sm={4} md={4} lg={16} xlg={12}>
-              <TextInput
-                id="storage-facility-type-input"
-                name="storage-facility"
-                type="text"
-                ref={storageFacilityTypeInputRef}
-                labelText="Storage facility type"
-                placeholder="Enter the storage facility type"
-                helperText="Describe the new storage facility used"
-                invalid={state.facilityType.isInvalid}
-                invalidText="Storage facility type lenght should be <= 50"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFormInput('facilityType', e.target.value)}
-                readOnly={readOnly}
-              />
-            </Column>
-          )
+          otherChecked
+            ? (
+              <Column className="storage-facility-type" sm={4} md={4} lg={16} xlg={12}>
+                <TextInput
+                  id={state.facilityOtherType.id}
+                  name="storage-facility"
+                  value={state.facilityOtherType.value}
+                  ref={storageFacilityTypeInputRef}
+                  labelText={pageTexts.storageFacility.labelText}
+                  placeholder={pageTexts.storageFacility.otherInput.placeholder}
+                  helperText={pageTexts.storageFacility.otherInput.helperText}
+                  invalid={state.facilityOtherType.isInvalid}
+                  invalidText={pageTexts.storageFacility.otherInput.invalidText}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    handleOtherFacilityTypeInput(e.target.value);
+                  }}
+                  readOnly={readOnly}
+                />
+              </Column>
+            )
+            : null
         }
       </Row>
     </FlexGrid>

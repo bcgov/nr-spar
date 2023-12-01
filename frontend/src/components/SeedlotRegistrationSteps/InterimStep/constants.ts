@@ -39,6 +39,11 @@ export const pageTexts = {
     reeferLabel: 'Reefer - RFR',
     reeferValue: 'RFR',
     otherLabel: 'Other - OTH',
-    otherValue: 'OTH'
+    otherValue: 'OTH',
+    otherInput: {
+      placeholder: 'Enter the storage facility type',
+      helperText: 'Describe the new storage facility used',
+      invalidText: 'Storage facility type lenght should be <= 50'
+    }
   }
 };
