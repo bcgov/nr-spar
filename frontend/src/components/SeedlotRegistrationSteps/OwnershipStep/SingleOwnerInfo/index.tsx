@@ -10,7 +10,7 @@ import {
 import { TrashCan } from '@carbon/icons-react';
 import ApplicantAgencyFields from '../../../ApplicantAgencyFields';
 
-import { FormInputType } from '../../../../types/FormInputType';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../../types/FormInputType';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 
@@ -29,18 +29,17 @@ interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
   deleteAnOwner: Function,
   agencyOptions: Array<MultiOptionsObj>,
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string,
   fundingSources: Array<MultiOptionsObj>,
   methodsOfPayment: Array<MultiOptionsObj>,
-  addRefs: Function,
   checkPortionSum: Function,
   setState: Function,
   readOnly?: boolean
 }
 
 const SingleOwnerInfo = ({
-  addRefs, ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
+  ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
   methodsOfPayment, deleteAnOwner, checkPortionSum, setState, readOnly
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>(
@@ -51,15 +50,15 @@ const SingleOwnerInfo = ({
 
   const colsClass = ownerInfo.id === DEFAULT_INDEX ? 'default-owner-col' : 'other-owners-col';
 
-  const setAgencyInfo = (
-    agencyData: FormInputType & { value: string },
-    locationCodeData: FormInputType & { value: string },
-    useDefaultData: FormInputType & { value: boolean }
+  const setAgencyAndCode = (
+    isDefault: BooleanInputType,
+    agency: OptionsInputType,
+    locationCode: StringInputType
   ) => {
     const clonedState = structuredClone(ownerInfo);
-    clonedState.ownerAgency = agencyData;
-    clonedState.ownerCode = locationCodeData;
-    clonedState.useDefaultAgencyInfo = useDefaultData;
+    clonedState.ownerAgency = agency;
+    clonedState.ownerCode = locationCode;
+    clonedState.useDefaultAgencyInfo = isDefault;
     setState(clonedState, ownerInfo.id);
   };
 
@@ -138,29 +137,28 @@ const SingleOwnerInfo = ({
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
             <ApplicantAgencyFields
-              useDefault={ownerInfo.useDefaultAgencyInfo}
+              checkboxId={ownerInfo.id === DEFAULT_INDEX ? 'default-owner-checkbox' : ''}
+              isDefault={ownerInfo.useDefaultAgencyInfo}
               agency={ownerInfo.ownerAgency}
               locationCode={ownerInfo.ownerCode}
               fieldsProps={agencyFieldsProps}
               agencyOptions={agencyOptions}
               defaultAgency={defaultAgency}
               defaultCode={defaultCode}
-              setAllValues={
+              setAgencyAndCode={
                 (
-                  agencyData: FormInputType & { value: string },
-                  locationCodeData: FormInputType & { value: string },
-                  useDefaultData: FormInputType & { value: boolean }
-                ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
+                  isDefault: BooleanInputType,
+                  agency: OptionsInputType,
+                  locationCode: StringInputType
+                ) => setAgencyAndCode(isDefault, agency, locationCode)
               }
-              showDefaultCheckbox={ownerInfo.id === DEFAULT_INDEX}
-              inputsColSize={8}
-              readOnly={readOnly}
+              showCheckbox={ownerInfo.id === DEFAULT_INDEX}
+              readOnly={readOnly ?? false}
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
             <NumberInput
               id={ownerInfo.ownerPortion.id}
-              ref={(el: HTMLInputElement) => addRefs(el, 'ownerPortion')}
               name="ownerPortion"
               label={inputText.portion.label}
               value={ownerInfo.ownerPortion.value}
@@ -196,7 +194,6 @@ const SingleOwnerInfo = ({
               <div className="reserved-surplus-input">
                 <NumberInput
                   id={ownerInfo.reservedPerc.id}
-                  ref={(el: HTMLInputElement) => addRefs(el, 'reservedPerc')}
                   name="reservedPerc"
                   label={inputText.reserved.label}
                   value={ownerInfo.reservedPerc.value}
@@ -226,7 +223,6 @@ const SingleOwnerInfo = ({
               <div className="reserved-surplus-input">
                 <NumberInput
                   id={ownerInfo.surplusPerc.id}
-                  ref={(el: HTMLInputElement) => addRefs(el, 'surplusPerc')}
                   name="surplusPerc"
                   label={inputText.surplus.label}
                   value={ownerInfo.surplusPerc.value}
@@ -261,7 +257,6 @@ const SingleOwnerInfo = ({
             <ComboBox
               className="single-owner-combobox"
               id={ownerInfo.fundingSource.id}
-              ref={(el: HTMLInputElement) => addRefs(el, 'fundingSource')}
               name="fundingSource"
               items={fundingSources}
               selectedItem={ownerInfo.fundingSource.value}
@@ -281,7 +276,6 @@ const SingleOwnerInfo = ({
             <ComboBox
               className="single-owner-combobox"
               id={ownerInfo.methodOfPayment.id}
-              ref={(el: HTMLInputElement) => addRefs(el, 'methodOfPayment')}
               name="methodOfPayment"
               items={methodsOfPayment}
               selectedItem={ownerInfo.methodOfPayment.value}

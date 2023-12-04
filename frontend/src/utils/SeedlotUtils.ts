@@ -4,16 +4,28 @@ import { SeedlotApplicantType, SeedlotDisplayType, SeedlotType } from '../types/
 import { MONTH_DAY_YEAR } from '../config/DateFormat';
 import { ForestClientType } from '../types/ForestClientType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
+import { EmptyMultiOptObj } from '../shared-constants/shared-constants';
 
 /**
  * Generate a species label in the form of `{code} - {description}`.
  */
-const getSpeciesNameByCode = (code: string, vegCodeData: MultiOptionsObj[]): string => {
+export const getSpeciesLabelByCode = (code: string, vegCodeData: MultiOptionsObj[]): string => {
   const filtered = vegCodeData.filter((veg) => veg.code === code);
   if (filtered.length) {
-    return filtered[0].description;
+    return filtered[0].label;
   }
   return code;
+};
+
+/**
+ * Finds a species MultiOptionsObj by code.
+ */
+export const getSpeciesOptionByCode = (
+  code: string,
+  vegCodeData: MultiOptionsObj[]
+): MultiOptionsObj => {
+  const filtered = vegCodeData.filter((veg) => veg.code === code);
+  return filtered[0] ?? EmptyMultiOptObj;
 };
 
 /**
@@ -22,7 +34,7 @@ const getSpeciesNameByCode = (code: string, vegCodeData: MultiOptionsObj[]): str
 export const covertRawToDisplayObj = (seedlot: SeedlotType, vegCodeData: MultiOptionsObj[]) => ({
   seedlotNumber: seedlot.id,
   seedlotClass: `${seedlot.geneticClass.geneticClassCode}-class`,
-  seedlotSpecies: getSpeciesNameByCode(seedlot.vegetationCode, vegCodeData),
+  seedlotSpecies: getSpeciesLabelByCode(seedlot.vegetationCode, vegCodeData),
   seedlotStatus: seedlot.seedlotStatus.description,
   createdAt: luxon.fromISO(seedlot.auditInformation.entryTimestamp).toFormat(MONTH_DAY_YEAR),
   lastUpdatedAt: luxon.fromISO(seedlot.auditInformation.updateTimestamp)
@@ -69,7 +81,7 @@ export const convertToApplicantInfoObj = (
   agency: `${forestClient.clientNumber} - ${forestClient.clientName} - ${forestClient.acronym}`,
   locationCode: seedlot.applicantLocationCode,
   email: seedlot.applicantEmailAddress,
-  species: getSpeciesNameByCode(seedlot.vegetationCode, vegCodeData),
+  species: getSpeciesLabelByCode(seedlot.vegetationCode, vegCodeData),
   source: seedlot.seedlotSource.description,
   willRegister: seedlot.intendedForCrownLand,
   isBcSource: seedlot.sourceInBc

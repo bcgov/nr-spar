@@ -1,4 +1,5 @@
 @use 'sass:map';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 @use '@carbon/themes/scss/utilities';
 @use '@bcgov-nr/nr-theme/design-tokens/light-theme.scss' as light;
 @use '@bcgov-nr/nr-theme/design-tokens/dark-theme.scss' as dark;
@@ -355,5 +356,24 @@
   input {
     padding: 0;
     border-bottom: none;
+  }
+}
+
+.spar-read-only-combobox {
+  input {
+    border: none;
+  }
+
+  .#{vars.$bcgov-prefix}--list-box__field .#{vars.$bcgov-prefix}--text-input {
+    padding: 0;
+    border: none;
+  }
+
+  .#{vars.$bcgov-prefix}--list-box {
+    border: none;
+  }
+
+  button {
+    display: none;
   }
 }

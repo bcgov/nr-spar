@@ -1,4 +1,4 @@
-import { SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
+import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
 import { SeedlotType, SeedlotsReturnType } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
@@ -31,4 +31,12 @@ export const getSeedlotByUser = (userId: string, pageNumber: number, pageSize: n
 export const getSeedlotById = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}`;
   return api.get(url).then((res): SeedlotType => res.data);
+};
+
+export const patchSeedlotApplicationInfo = (
+  seedlotNumber: string,
+  payload: SeedlotPatchPayloadType
+) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/application-info`;
+  return api.patch(url, payload);
 };

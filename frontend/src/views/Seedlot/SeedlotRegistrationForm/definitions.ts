@@ -21,28 +21,6 @@ export type AllStepData = {
   extractionStorageStep: ExtractionStorage
 }
 
-type SingleInvalidObj = {
-  isInvalid: boolean,
-  invalidText: string,
-  optInvalidText?: string
-}
-
-export type FormInvalidationObj = {
-  [key: string]: SingleInvalidObj;
-}
-
-export type OwnershipInvalidObj = {
-  [id: number]: FormInvalidationObj;
-}
-
-export type AllStepInvalidationObj = {
-  collectionStep: FormInvalidationObj,
-  interimStep: FormInvalidationObj,
-  ownershipStep: OwnershipInvalidObj,
-  orchardStep: FormInvalidationObj,
-  extractionStorageStep: FormInvalidationObj
-}
-
 type ProgressStepStatus = {
   isComplete: boolean;
   isCurrent: boolean;

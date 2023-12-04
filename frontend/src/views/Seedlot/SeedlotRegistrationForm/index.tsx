@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -42,20 +42,15 @@ import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptions
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
-import { emptyMultiOptObj } from '../../../shared-constants/shared-constants';
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
-import {
-  AllStepData, AllStepInvalidationObj,
-  ProgressIndicatorConfig
-} from './definitions';
+import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import {
   initCollectionState,
   initInterimState,
   initOrchardState,
   initOwnershipState,
   initExtractionStorageState,
-  initInvalidationObj,
-  initOwnerShipInvalidState,
   initParentTreeState,
   generateDefaultRows,
   validateCollectionStep,
@@ -83,9 +78,9 @@ const SeedlotRegistrationForm = () => {
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
-    collectionStep: initCollectionState('', ''),
+    collectionStep: initCollectionState(EmptyMultiOptObj, ''),
     interimStep: initInterimState('', ''),
-    ownershipStep: [initOwnershipState('', '')],
+    ownershipStep: [initOwnershipState(EmptyMultiOptObj, '')],
     orchardStep: initOrchardState(),
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
@@ -120,6 +115,34 @@ const SeedlotRegistrationForm = () => {
     refetchOnWindowFocus: false
   });
 
+  const setDefaultAgencyAndCode = (agency: MultiOptionsObj, locationCode: string) => {
+    setAllStepData((prevData) => ({
+      ...prevData,
+      collectionStep: {
+        ...prevData.collectionStep,
+        collectorAgency: {
+          ...prevData.collectionStep.collectorAgency,
+          value: agency
+        },
+        locationCode: {
+          ...prevData.collectionStep.locationCode,
+          value: locationCode
+        }
+      },
+      ownershipStep: prevData.ownershipStep.map((singleOwner) => ({
+        ...singleOwner,
+        ownerAgency: {
+          ...singleOwner.ownerAgency,
+          value: agency
+        },
+        ownerCode: {
+          ...singleOwner.ownerCode,
+          value: locationCode
+        }
+      }))
+    }));
+  };
+
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', seedlotQuery.data?.applicantClientNumber],
     queryFn: () => getForestClientByNumber(seedlotQuery.data?.applicantClientNumber),
@@ -127,6 +150,20 @@ const SeedlotRegistrationForm = () => {
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
+
+  const getDefaultAgencyObj = (): MultiOptionsObj => ({
+    code: forestClientQuery.data?.clientNumber ?? '',
+    description: forestClientQuery.data?.clientName ?? '',
+    label: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`
+  });
+
+  const getDefaultLocationCode = (): string => (seedlotQuery.data?.applicantLocationCode ?? '');
+
+  useEffect(() => {
+    if (forestClientQuery.isFetched) {
+      setDefaultAgencyAndCode(getDefaultAgencyObj(), getDefaultLocationCode());
+    }
+  }, [forestClientQuery.isFetched]);
 
   const gameticMethodologyQuery = useQuery({
     queryKey: ['gametic-methodologies'],
@@ -138,18 +175,11 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getApplicantAgenciesOptions()
   });
 
-  const [allInvalidationObj] = useState<AllStepInvalidationObj>({
-    collectionStep: initInvalidationObj(),
-    interimStep: initInvalidationObj(),
-    ownershipStep: initOwnerShipInvalidState(),
-    orchardStep: initInvalidationObj(),
-    extractionStorageStep: initInvalidationObj()
-  });
-
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
-    const newData = { ...allStepData };
-    newData[stepName] = stepData;
-    setAllStepData(newData);
+    setAllStepData((prevData) => ({
+      ...prevData,
+      [stepName]: stepData
+    }));
   };
 
   const methodsOfPaymentQuery = useQuery({
@@ -157,7 +187,7 @@ const SeedlotRegistrationForm = () => {
     queryFn: getMethodsOfPayment,
     onSuccess: (dataArr: MultiOptionsObj[]) => {
       const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
-      const defaultMethod = defaultMethodArr.length === 0 ? emptyMultiOptObj : defaultMethodArr[0];
+      const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
       if (!allStepData.ownershipStep[0].methodOfPayment.value.code) {
         const tempOwnershipData = structuredClone(allStepData.ownershipStep);
         tempOwnershipData[0].methodOfPayment.value = defaultMethod;
@@ -224,11 +254,10 @@ const SeedlotRegistrationForm = () => {
   };
 
   const renderStep = () => {
-    // Will need to convert this into a multiOption obj
-    const defaultAgency = `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`;
+    const defaultAgencyObj = getDefaultAgencyObj();
+    const defaultCode = getDefaultLocationCode();
 
-    const defaultCode = seedlotQuery.data?.applicantLocationCode ?? '';
-    const agencyOptions = applicantAgencyQuery.data ? applicantAgencyQuery.data : [];
+    const agencyOptions = applicantAgencyQuery.data ?? [];
 
     const seedlotSpecies = getSpeciesOptionByCode(
       seedlotQuery.data?.vegetationCode,
@@ -242,7 +271,7 @@ const SeedlotRegistrationForm = () => {
           <CollectionStep
             state={allStepData.collectionStep}
             setStepData={(data: CollectionForm) => setStepData('collectionStep', data)}
-            defaultAgency={defaultAgency}
+            defaultAgency={defaultAgencyObj}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
@@ -253,8 +282,7 @@ const SeedlotRegistrationForm = () => {
         return (
           <OwnershipStep
             state={allStepData.ownershipStep}
-            invalidState={allInvalidationObj.ownershipStep}
-            defaultAgency={defaultAgency}
+            defaultAgency={defaultAgencyObj}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
             fundingSources={getMultiOptList(fundingSourcesQuery.data)}
@@ -267,7 +295,7 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency.value}
+            collectorAgency={allStepData.collectionStep.collectorAgency.value.label}
             collectorCode={allStepData.collectionStep.locationCode.value}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}

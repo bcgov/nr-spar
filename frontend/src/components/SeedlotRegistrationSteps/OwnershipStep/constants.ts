@@ -1,6 +1,5 @@
-import { emptyMultiOptObj } from '../../../shared-constants/shared-constants';
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
-import { FormInvalidationObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { SingleOwnerForm } from './definitions';
 
 export const DEFAULT_INDEX = 0;
@@ -13,8 +12,7 @@ export const agencyFieldsProps: AgencyTextPropsType = {
     labelText: 'Use applicant agency as owner agency'
   },
   agencyInput: {
-    name: 'ownerAgency',
-    labelText: 'Owner agency',
+    titleText: 'Owner agency',
     invalidText: 'Please choose a valid owner agency, filter with agency number, name or acronym'
   },
   locationCode: {
@@ -53,12 +51,12 @@ export const createOwnerTemplate = (newId: number): SingleOwnerForm => ({
   id: newId,
   useDefaultAgencyInfo: {
     id: 'ownership-use-default-agency',
-    value: true,
+    value: newId === DEFAULT_INDEX,
     isInvalid: false
   },
   ownerAgency: {
     id: `ownership-agency-${newId}`,
-    value: '',
+    value: EmptyMultiOptObj,
     isInvalid: false
   },
   ownerCode: {
@@ -83,43 +81,12 @@ export const createOwnerTemplate = (newId: number): SingleOwnerForm => ({
   },
   fundingSource: {
     id: `ownership-funding-source-${newId}`,
-    value: emptyMultiOptObj,
+    value: EmptyMultiOptObj,
     isInvalid: false
   },
   methodOfPayment: {
     id: `ownership-method-payment-${newId}`,
-    value: emptyMultiOptObj,
+    value: EmptyMultiOptObj,
     isInvalid: false
   }
 });
-
-export const validTemplate: FormInvalidationObj = {
-  owner: {
-    isInvalid: false,
-    invalidText: agencyFieldsProps.agencyInput.invalidText
-  },
-  code: {
-    isInvalid: false,
-    invalidText: ''
-  },
-  portion: {
-    isInvalid: false,
-    invalidText: inputText.portion.invalidText
-  },
-  reserved: {
-    isInvalid: false,
-    invalidText: ''
-  },
-  surplus: {
-    isInvalid: false,
-    invalidText: ''
-  },
-  funding: {
-    isInvalid: false,
-    invalidText: inputText.funding.invalidText
-  },
-  payment: {
-    isInvalid: false,
-    invalidText: inputText.payment.invalidText
-  }
-};

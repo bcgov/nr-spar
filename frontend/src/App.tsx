@@ -20,6 +20,7 @@ import SeedlotCreatedFeedback from './views/Seedlot/SeedlotCreatedFeedback';
 import MySeedlots from './views/Seedlot/MySeedlots';
 import SeedlotRegistrationForm from './views/Seedlot/SeedlotRegistrationForm';
 import FourOhFour from './views/FourOhFour';
+import EditAClassApplication from './views/Seedlot/EditAClassApplication';
 
 import awsconfig from './aws-exports';
 import AuthContext from './contexts/AuthContext';
@@ -110,6 +111,15 @@ const App: React.FC = () => {
                   element={(
                     <ProtectedRoute>
                       <SeedlotRegistrationForm />
+                    </ProtectedRoute>
+                  )}
+                />
+
+                <Route
+                  path="/seedlots/edit-a-class-application/:seedlotNumber"
+                  element={(
+                    <ProtectedRoute>
+                      <EditAClassApplication />
                     </ProtectedRoute>
                   )}
                 />

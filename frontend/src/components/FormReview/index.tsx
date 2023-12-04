@@ -57,6 +57,11 @@ const mockFormData = [
 
 const defaultCode = '16';
 const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
+const defaultAgencyObj = {
+  code: '0032',
+  description: 'Strong Seeds Orchard',
+  label: defaultAgency
+};
 
 const orchardMock: OrchardForm = {
   orchards: [
@@ -88,9 +93,9 @@ const interimStorageMock = {
   facilityType: 'VRM'
 };
 
-const ownershipMock = initOwnershipState(defaultAgency, defaultCode);
+const ownershipMock = initOwnershipState(defaultAgencyObj, defaultCode);
 
-const collectionMock = initCollectionState(defaultAgency, defaultCode);
+const collectionMock = initCollectionState(defaultAgencyObj, defaultCode);
 
 const extractionMock = {
   extractoryUseTSC: true,
@@ -144,7 +149,7 @@ const FormReview = () => {
                   <div className="form-item">
                     <CollectionStep
                       state={allStepData.collectionStep}
-                      defaultAgency={defaultAgency}
+                      defaultAgency={defaultAgencyObj}
                       defaultCode={defaultCode}
                       agencyOptions={[]}
                       collectionMethods={[]}

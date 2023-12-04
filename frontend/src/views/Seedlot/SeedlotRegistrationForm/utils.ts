@@ -1,20 +1,18 @@
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
-import {
-  createOwnerTemplate,
-  validTemplate as ownerInvalidTemplate
-} from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
+import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
-  FormInvalidationObj, OwnershipInvalidObj, ParentTreeStepDataObj
+  ParentTreeStepDataObj
 } from './definitions';
 
 export const initCollectionState = (
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string
 ) => ({
   useDefaultAgencyInfo: {
@@ -70,7 +68,7 @@ export const initCollectionState = (
 });
 
 export const initOwnershipState = (
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string
 ) => {
   const initialOwnerState = createOwnerTemplate(0);
@@ -149,19 +147,6 @@ export const initExtractionStorageState = (
     seedStorageEndDate: ''
   }
 );
-
-export const initInvalidationObj = () => {
-  const returnObj: FormInvalidationObj = {};
-  return returnObj;
-};
-
-export const initOwnerShipInvalidState = (): OwnershipInvalidObj => {
-  const initialOwnerInvalidState = { ...ownerInvalidTemplate };
-  return {
-    0: initialOwnerInvalidState
-  };
-};
-
 /**
  * Validate Collection Step.
  * Return true if it's Invalid, false otherwise.
@@ -232,7 +217,7 @@ export const verifyCollectionStepCompleteness = (collectionData: CollectionForm)
  */
 export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwnerForm>): boolean => {
   for (let i = 0; i < ownershipData.length; i += 1) {
-    if (!ownershipData[i].ownerAgency.value.length
+    if (!ownershipData[i].ownerAgency.value.code.length
         || !ownershipData[i].ownerCode.value.length
         || !ownershipData[i].ownerPortion.value.length
         || !ownershipData[i].reservedPerc.value.length
@@ -250,18 +235,12 @@ export const getSpeciesOptionByCode = (
   vegCode?: string,
   options?: MultiOptionsObj[]
 ): MultiOptionsObj => {
-  const template = {
-    code: '',
-    label: '',
-    description: ''
-  };
-
   if (!vegCode || !options) {
-    return template;
+    return EmptyMultiOptObj;
   }
 
   const filtered = options.filter((opt) => opt.code === vegCode);
   return filtered.length > 0
     ? filtered[0]
-    : template;
+    : EmptyMultiOptObj;
 };

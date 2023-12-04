@@ -1,17 +1,16 @@
-import { FormInputType } from './FormInputType';
-import MultiOptionsObj from './MultiOptionsObject';
+import { BooleanInputType, OptionsInputType, StringInputType } from './FormInputType';
 
 /**
  * The form data obj used in seedlot creation.
  */
 export type SeedlotRegFormType = {
-  client: FormInputType & { value: MultiOptionsObj };
-  locationCode: FormInputType & { value: string };
-  email: FormInputType & { value: string };
-  species: FormInputType & { value: MultiOptionsObj };
-  sourceCode: FormInputType & { value: string };
-  willBeRegistered: FormInputType & { value: boolean };
-  isBcSource: FormInputType & { value: boolean };
+  client: OptionsInputType;
+  locationCode: StringInputType;
+  email: StringInputType;
+  species: OptionsInputType;
+  sourceCode: StringInputType;
+  willBeRegistered: BooleanInputType;
+  isBcSource: BooleanInputType;
 };
 
 /**
@@ -26,4 +25,11 @@ export type SeedlotRegPayloadType = {
   toBeRegistrdInd: boolean;
   bcSourceInd: boolean;
   geneticClassCode: 'A' | 'B';
+}
+
+export type SeedlotPatchPayloadType = {
+  applicantEmailAddress: string,
+  seedlotSourceCode: string,
+  toBeRegistrdInd: boolean,
+  bcSourceInd: boolean
 }

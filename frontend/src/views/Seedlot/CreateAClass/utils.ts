@@ -1,4 +1,4 @@
-import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../../../types/SeedlotRegistrationTypes';
+import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../../types/SeedlotRegistrationTypes';
 
 export const convertToPayload = (formData: SeedlotRegFormType): SeedlotRegPayloadType => ({
   applicantClientNumber: formData.client.value.code,
