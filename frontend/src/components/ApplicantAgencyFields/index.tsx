@@ -199,7 +199,10 @@ const ApplicantAgencyFields = ({
             }}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (!e.target.readOnly) {
+              if (
+                !e.target.readOnly
+                && locationCode.value !== e.target.value
+              ) {
                 handleLocationCodeBlur(e.target.value);
               }
             }}
