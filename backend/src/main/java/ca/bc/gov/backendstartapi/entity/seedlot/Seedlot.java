@@ -119,6 +119,9 @@ public class Seedlot implements Serializable {
   @Column(name = "interm_facility_code", length = 3)
   private String interimStorageFacilityCode;
 
+  @Column(name = "interm_strg_locn", length = 55)
+  private String interimStorageLocationDescription;
+
   // endregion
 
   // region Orchard
@@ -159,12 +162,6 @@ public class Seedlot implements Serializable {
   @Column(name = "effective_pop_size", precision = 5, scale = 1)
   private BigDecimal effectivePopulationSize;
 
-  @Column(name = "tested_parent_tree_cont_pct", precision = 6, scale = 2)
-  private BigDecimal testedParentTreeContributionPercentage;
-
-  @Column(name = "coancestry", precision = 20, scale = 10)
-  private BigDecimal coancestry;
-
   @Column(name = "smp_parents_outside")
   private Integer parentsOutsideTheOrchardUsedInSmp;
 
@@ -186,16 +183,16 @@ public class Seedlot implements Serializable {
   @Column(name = "extraction_end_date")
   private LocalDateTime extractionEndDate;
 
-  @Column(name = "storage_client_number", length = 8)
+  @Column(name = "temporary_strg_client_number", length = 8)
   private String storageClientNumber;
 
-  @Column(name = "storage_locn_code", length = 2)
+  @Column(name = "temporary_strg_locn_code", length = 2)
   private String storageLocationCode;
 
-  @Column(name = "temporary_storage_start_date")
+  @Column(name = "temporary_strg_start_date")
   private LocalDateTime temporaryStorageStartDate;
 
-  @Column(name = "temporary_storage_end_date")
+  @Column(name = "temporary_strg_end_date")
   private LocalDateTime temporaryStorageEndDate;
 
   // endregion
