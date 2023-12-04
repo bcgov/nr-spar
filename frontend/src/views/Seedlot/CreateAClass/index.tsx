@@ -68,7 +68,7 @@ const CreateAClass = () => {
       focusById(seedlotFormData.client.id);
       return;
     }
-    // Vaidate location code
+    // Validate location code
     if (
       seedlotFormData.locationCode.isInvalid
       || !seedlotFormData.locationCode.value
