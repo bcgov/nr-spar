@@ -87,8 +87,6 @@ abstract class SeedlotEntityRelationalTest {
     seedlot.setTotalParentTrees(10);
     seedlot.setSmpSuccessPercentage(70);
     seedlot.setEffectivePopulationSize(new BigDecimal(300));
-    seedlot.setTestedParentTreeContributionPercentage(new BigDecimal(80));
-    seedlot.setCoancestry(new BigDecimal(30));
     seedlot.setParentsOutsideTheOrchardUsedInSmp(20);
     seedlot.setNonOrchardPollenContaminationPercentage(50);
 
