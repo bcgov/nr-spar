@@ -58,6 +58,7 @@ export type SeedlotType = {
   vegetationCode: string,
   geneticClass: GeneticClass,
   seedlotSource: {
+    seedlotSourceCode: string,
     description: string,
     isDefault: boolean
   },
@@ -112,4 +113,9 @@ export type SeedlotType = {
 export type SeedlotsReturnType = {
   seedlots: SeedlotType[],
   totalCount: number
+}
+
+export type SeedlotCreateResponseType = {
+  seedlotNumber: string,
+  seedlotStatusCode: string
 }

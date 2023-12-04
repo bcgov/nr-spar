@@ -22,7 +22,7 @@ const getApplicantAgenciesOptions = (): MultiOptionsObj[] => {
     const newAgency: MultiOptionsObj = {
       code: agency.clientNumber,
       label: `${agency.clientNumber} - ${clientName} - ${agency.acronym}`,
-      description: ''
+      description: clientName
     };
     options.push(newAgency);
   });

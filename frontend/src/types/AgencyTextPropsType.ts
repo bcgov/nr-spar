@@ -4,8 +4,7 @@ type AgencyTextPropsType = {
     labelText: string
   },
   agencyInput: {
-    name: string,
-    labelText: string,
+    titleText: string,
     invalidText: string
   },
   locationCode: {
