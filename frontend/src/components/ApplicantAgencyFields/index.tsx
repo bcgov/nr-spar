@@ -170,9 +170,14 @@ const ApplicantAgencyFields = ({
             placeholder={supportTexts.agency.placeholder}
             titleText={fieldsProps.agencyInput.titleText}
             helperText={readOnly ? null : supportTexts.agency.helperText}
-            invalidText={fieldsProps.agencyInput.invalidText}
+            invalidText={(isDefault.value && agency.value.code !== '')
+              ? fieldsProps.agencyInput.invalidText
+              : supportTexts.agency.invalidTextInterimSpecific}
             items={agencyOptions}
             readOnly={isDefault.value || readOnly}
+            // If the value set is empty, the field continues
+            // interactive on read only mode, so we disable it instead
+            disabled={(isDefault.value && agency.value.code === '')}
             selectedItem={agency.value}
             onChange={(e: ComboBoxEvent) => handleAgencyInput(e.selectedItem)}
             invalid={agency.isInvalid}
@@ -193,18 +198,17 @@ const ApplicantAgencyFields = ({
             labelText={fieldsProps.locationCode.labelText}
             helperText={(readOnly || isDefault.value) ? null : locationCodeHelperText}
             invalid={locationCode.isInvalid}
-            invalidText={invalidLocationMessage}
-            readOnly={isDefault.value || readOnly}
+            invalidText={(isDefault.value && locationCode.value === '')
+              ? supportTexts.locationCode.invalidTextInterimSpecific
+              : invalidLocationMessage}
+            readOnly={(isDefault.value && locationCode.value !== '') || readOnly}
             disabled={!agency.value.code || (isDefault.value && locationCode.value === '')}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleLocationCodeChange(e.target.value);
             }}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (
-                !e.target.readOnly
-                && locationCode.value !== e.target.value
-              ) {
+              if (!e.target.readOnly) {
                 handleLocationCodeBlur(e.target.value);
               }
             }}

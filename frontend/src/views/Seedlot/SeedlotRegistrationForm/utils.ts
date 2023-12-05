@@ -80,7 +80,7 @@ export const initOwnershipState = (
 };
 
 export const initInterimState = (
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string
 ) => ({
   useCollectorAgencyInfo: {

@@ -8,8 +8,7 @@ export const agencyFieldsProps: AgencyTextPropsType = {
     labelText: 'Use applicant collector agency as interim storage agency'
   },
   agencyInput: {
-    name: 'interimAgency',
-    labelText: 'Interim agency',
+    titleText: 'Interim agency',
     invalidText: 'Please choose a valid interim agency, filter with agency number, name or acronym'
   },
   locationCode: {

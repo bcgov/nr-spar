@@ -1,13 +1,13 @@
-import { FormInputType } from '../../../types/FormInputType';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 type InterimForm = {
-  useCollectorAgencyInfo: FormInputType & { value: boolean },
-  agencyName: FormInputType & { value: string },
-  locationCode: FormInputType & { value: string },
-  startDate: FormInputType & { value: string },
-  endDate: FormInputType & { value: string },
-  facilityType: FormInputType & { value: string }
-  facilityOtherType: FormInputType & { value: string }
+  useCollectorAgencyInfo: BooleanInputType,
+  agencyName: OptionsInputType,
+  locationCode: StringInputType,
+  startDate: StringInputType,
+  endDate: StringInputType,
+  facilityType: StringInputType,
+  facilityOtherType: StringInputType
 }
 
 export default InterimForm;

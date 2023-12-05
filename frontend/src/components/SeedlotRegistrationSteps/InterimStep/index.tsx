@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 
 import {
@@ -16,7 +16,7 @@ import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { FormInputType } from '../../../types/FormInputType';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import InterimForm from './definitions';
 import { DATE_FORMAT, agencyFieldsProps, pageTexts } from './constants';
 
@@ -25,8 +25,8 @@ import './styles.scss';
 interface InterimStorageStepProps {
   state: InterimForm,
   setStepData: Function,
-  collectorAgency: FormInputType & { value: string },
-  collectorCode: FormInputType & { value: string },
+  collectorAgency: OptionsInputType,
+  collectorCode: StringInputType,
   agencyOptions: Array<MultiOptionsObj>,
   readOnly?: boolean
 }
@@ -43,10 +43,10 @@ const InterimStorage = (
 ) => {
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
 
-  const setAgencyInfo = (
-    agencyData: FormInputType & { value: string },
-    locationCodeData: FormInputType & { value: string },
-    useDefaultData: FormInputType & { value: boolean }
+  const setAgencyAndCode = (
+    agencyData: OptionsInputType,
+    locationCodeData: StringInputType,
+    useDefaultData: BooleanInputType
   ) => {
     const clonedState = structuredClone(state);
     clonedState.agencyName = agencyData;
@@ -105,6 +105,17 @@ const InterimStorage = (
     setStepData(clonedState);
   };
 
+  useEffect(() => {
+    if (state.useCollectorAgencyInfo
+        && collectorAgency.value.code
+        && collectorCode.value) {
+      const clonedState = structuredClone(state);
+      clonedState.agencyName = collectorAgency;
+      clonedState.locationCode = collectorCode;
+      setStepData(clonedState);
+    }
+  }, []);
+
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
       <Row className="interim-title-row">
@@ -114,21 +125,22 @@ const InterimStorage = (
         </Column>
       </Row>
       <ApplicantAgencyFields
-        useDefault={state.useCollectorAgencyInfo}
+        showCheckbox
+        checkboxId={state.useCollectorAgencyInfo.id}
+        isDefault={state.useCollectorAgencyInfo}
         agency={state.agencyName}
         locationCode={state.locationCode}
         fieldsProps={agencyFieldsProps}
         agencyOptions={agencyOptions}
         defaultAgency={collectorAgency.value}
         defaultCode={collectorCode.value}
-        setAllValues={
-          (
-            agencyData: FormInputType & { value: string },
-            locationCodeData: FormInputType & { value: string },
-            useDefaultData: FormInputType & { value: boolean }
-          ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
-        }
+        setAgencyAndCode={(
+          isDefault: BooleanInputType,
+          agency: OptionsInputType,
+          locationCode: StringInputType
+        ) => setAgencyAndCode(agency, locationCode, isDefault)}
         readOnly={readOnly}
+        maxInputColSize={6}
       />
       <Row className="interim-storage-row">
         <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>

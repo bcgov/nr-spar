@@ -84,7 +84,7 @@ const collectionMock = initCollectionState(defaultAgencyObj, defaultCode);
 
 const ownershipMock = initOwnershipState(defaultAgencyObj, defaultCode);
 
-const interimStorageMock = initInterimState(defaultAgency, defaultCode);
+const interimStorageMock = initInterimState(defaultAgencyObj, defaultCode);
 
 const extractionMock = {
   extractoryUseTSC: true,
@@ -185,16 +185,8 @@ const FormReview = () => {
                   <div className="form-item">
                     <InterimStorage
                       state={allStepData.interimStep}
-                      collectorAgency={{
-                        id: '',
-                        value: defaultAgency,
-                        isInvalid: false
-                      }}
-                      collectorCode={{
-                        id: '',
-                        value: defaultCode,
-                        isInvalid: false
-                      }}
+                      collectorAgency={allStepData.collectionStep.collectorAgency}
+                      collectorCode={allStepData.collectionStep.locationCode}
                       agencyOptions={[]}
                       setStepData={() => { }}
                       readOnly

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -81,8 +82,8 @@ const SeedlotRegistrationForm = () => {
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>({
     collectionStep: initCollectionState(EmptyMultiOptObj, ''),
-    interimStep: initInterimState('', ''),
     ownershipStep: [initOwnershipState(EmptyMultiOptObj, '')],
+    interimStep: initInterimState(EmptyMultiOptObj, ''),
     orchardStep: initOrchardState(),
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
@@ -184,10 +185,10 @@ const SeedlotRegistrationForm = () => {
     // necessary, also reflecting the invalid values
     if (stepName === 'collectionStep'
         && allStepData.interimStep.useCollectorAgencyInfo.value
-        && (allStepData.collectionStep.collectorAgency.value !== stepData.collectorAgency.value
-            || allStepData.collectionStep.locationCode.value !== stepData.locationCode.value)) {
+        && (allStepData.collectionStep.collectorAgency.value.code !== stepData.collectorAgency.value.code
+        || allStepData.collectionStep.locationCode.value !== stepData.locationCode.value)) {
       newData.interimStep.agencyName.value = stepData.collectorAgency.value;
-      newData.interimStep.agencyName.isInvalid = stepData.collectorAgency.value.length
+      newData.interimStep.agencyName.isInvalid = stepData.collectorAgency.value.code.length
         ? stepData.collectorAgency.isInvalid
         : true;
       newData.interimStep.locationCode.value = stepData.locationCode.value;
@@ -322,16 +323,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={{
-              id: '',
-              value: allStepData.collectionStep.collectorAgency.value.label,
-              isInvalid: false
-            }}
-            collectorCode={{
-              id: '',
-              value: allStepData.collectionStep.locationCode.value,
-              isInvalid: false
-            }}
+            collectorAgency={allStepData.collectionStep.collectorAgency}
+            collectorCode={allStepData.collectionStep.locationCode}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />
