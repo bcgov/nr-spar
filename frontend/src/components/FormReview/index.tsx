@@ -71,16 +71,37 @@ const orchardMock: OrchardForm = {
         code: '123',
         description: 'Strong seeds orchard',
         label: '123 - Strong seeds orchard'
-      }
+      },
+      isInvalid: false
     }
   ],
-  femaleGametic: 'F1 - Visual estimate',
-  maleGametic: 'M2',
-  controlledCross: true,
-  biotechProcess: true,
-  noPollenContamination: true,
-  breedingPercentage: '100',
-  pollenMethodology: false
+  femaleGametic: {
+    id: 'female-gametic-option-review',
+    isInvalid: false,
+    value: {
+      code: 'F1',
+      description: 'Visual estimate',
+      label: 'F1 - Visual estimate'
+    }
+  },
+  maleGametic: {
+    id: 'male-gametic-option-review',
+    isInvalid: false,
+    value: {
+      code: 'M2',
+      description: 'Pollen volume estimate by partial survey',
+      label: 'M2 - Pollen volume estimate by partial survey'
+    }
+  },
+  isControlledCross: true,
+  hasBiotechProcess: true,
+  hasPollenContamination: true,
+  breedingPercentage: {
+    id: 'form-review-orchard-breeding-perc',
+    isInvalid: false,
+    value: '100'
+  },
+  isRegional: true
 };
 
 const interimStorageMock = {
