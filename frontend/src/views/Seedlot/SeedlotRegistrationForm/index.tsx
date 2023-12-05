@@ -41,9 +41,12 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+
+import { emptyMultiOptObj } from '../../../shared-constants/shared-constants';
+
 import {
   AllStepData, AllStepInvalidationObj,
-  FormInvalidationObj, ProgressIndicatorConfig
+  ProgressIndicatorConfig
 } from './definitions';
 import {
   initCollectionState,
@@ -57,6 +60,8 @@ import {
   generateDefaultRows,
   validateCollectionStep,
   verifyCollectionStepCompleteness,
+  validateOwnershipStep,
+  verifyOwnershipStepCompleteness,
   getSpeciesOptionByCode
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
@@ -133,7 +138,7 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getApplicantAgenciesOptions()
   });
 
-  const [allInvalidationObj, setAllInvalidationObj] = useState<AllStepInvalidationObj>({
+  const [allInvalidationObj] = useState<AllStepInvalidationObj>({
     collectionStep: initInvalidationObj(),
     interimStep: initInvalidationObj(),
     ownershipStep: initOwnerShipInvalidState(),
@@ -152,20 +157,14 @@ const SeedlotRegistrationForm = () => {
     queryFn: getMethodsOfPayment,
     onSuccess: (dataArr: MultiOptionsObj[]) => {
       const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
-      const defaultMethod = defaultMethodArr.length === 0 ? null : defaultMethodArr[0];
-      if (!allStepData.ownershipStep[0].methodOfPayment) {
+      const defaultMethod = defaultMethodArr.length === 0 ? emptyMultiOptObj : defaultMethodArr[0];
+      if (!allStepData.ownershipStep[0].methodOfPayment.value.code) {
         const tempOwnershipData = structuredClone(allStepData.ownershipStep);
-        tempOwnershipData[0].methodOfPayment = defaultMethod;
+        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
         setStepData('ownershipStep', tempOwnershipData);
       }
     }
   });
-
-  const setInvalidState = (stepName: keyof AllStepInvalidationObj, stepInvalidData: any) => {
-    const newObj = { ...allInvalidationObj };
-    newObj[stepName] = stepInvalidData;
-    setAllInvalidationObj(newObj);
-  };
 
   const logState = () => {
     // eslint-disable-next-line no-console
@@ -194,6 +193,16 @@ const SeedlotRegistrationForm = () => {
       if (!isCollectionInvalid) {
         const isCollectionComplete = verifyCollectionStepCompleteness(allStepData.collectionStep);
         clonedStatus.collection.isComplete = isCollectionComplete;
+      }
+    }
+
+    // Set invalid or complete status for Ownership Step
+    if (currentStepName !== 'ownership') {
+      const isOwnershipInvalid = validateOwnershipStep(allStepData.ownershipStep);
+      clonedStatus.ownership.isInvalid = isOwnershipInvalid;
+      if (!isOwnershipInvalid) {
+        const isOwnershipComplete = verifyOwnershipStepCompleteness(allStepData.ownershipStep);
+        clonedStatus.ownership.isComplete = isOwnershipComplete;
       }
     }
 
@@ -251,7 +260,6 @@ const SeedlotRegistrationForm = () => {
             fundingSources={getMultiOptList(fundingSourcesQuery.data)}
             methodsOfPayment={methodsOfPaymentQuery.data ?? []}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
-            setInvalidState={(obj: Array<FormInvalidationObj>) => setInvalidState('ownershipStep', obj)}
           />
         );
       // Interim Storage
