@@ -2,6 +2,9 @@
 @use '@carbon/type';
 
 .agency-information-section {
+  padding: 0;
+  width: 100%;
+
   .agency-information-row {
     margin-bottom: 1.5rem;
   }
@@ -12,12 +15,12 @@
     input[role=combobox] {
       background-color: transparent;
       padding-inline-end: 0;
-      --bx-layout-density-padding-inline-local: 0;
+      --#{vars.$bcgov-prefix}-layout-density-padding-inline-local: 0;
       border-block-end: 0;
     }
 
     button,
-    & + .#{vars.$bcgov-prefix}--form__helper-text {
+    &+.#{vars.$bcgov-prefix}--form__helper-text {
       display: none;
     }
 
@@ -26,9 +29,15 @@
     }
   }
 
-  .bx--combo-box {
+
+  .#{vars.$bcgov-prefix}--text-input:disabled {
+    border-block-end: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle);
+  }
+
+  .#{vars.$bcgov-prefix}--combo-box {
+
     li,
-    .bx--list-box__menu-item__option {
+    .#{vars.$bcgov-prefix}--list-box__menu-item__option {
       white-space: normal;
       block-size: auto;
     }
@@ -38,12 +47,8 @@
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
     input[type=number] {
       background-color: transparent;
-      --bx-layout-density-padding-inline-local: 0;
+      padding: 0;
       border-block-end: 0;
-    }
-
-    .#{vars.$bcgov-prefix}--form__helper-text {
-      display: none;
     }
   }
 

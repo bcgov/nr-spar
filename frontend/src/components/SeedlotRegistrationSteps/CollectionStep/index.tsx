@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   FlexGrid,
   Column,
@@ -16,7 +16,7 @@ import validator from 'validator';
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
-import { FormInputType } from '../../../types/FormInputType';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -42,28 +42,17 @@ const CollectionStep = (
 ) => {
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
-  const setAgencyInfo = (
-    valueAgency: FormInputType & { value: string },
-    valueLocation: FormInputType & { value: string },
-    valueUseDefault: FormInputType & { value: boolean }
+  const setAgencyAndCode = (
+    isDefault: BooleanInputType,
+    agency: OptionsInputType,
+    locationCode: StringInputType
   ) => {
     const clonedState = structuredClone(state);
-    clonedState.collectorAgency = valueAgency;
-    clonedState.locationCode = valueLocation;
-    clonedState.useDefaultAgencyInfo = valueUseDefault;
+    clonedState.useDefaultAgencyInfo = isDefault;
+    clonedState.collectorAgency = agency;
+    clonedState.locationCode = locationCode;
     setStepData(clonedState);
   };
-
-  useEffect(() => {
-    const useDefault = state.useDefaultAgencyInfo.value;
-    const agencyValue = useDefault ? defaultAgency : state.collectorAgency.value;
-    const codeValue = useDefault ? defaultCode : state.locationCode.value;
-
-    const clonedState = structuredClone(state);
-    clonedState.collectorAgency.value = agencyValue;
-    clonedState.locationCode.value = codeValue;
-    setStepData(clonedState);
-  }, [defaultAgency, defaultCode]);
 
   const handleDateChange = (isStartDate: boolean, value: string) => {
     const clonedState = structuredClone(state);
@@ -141,21 +130,24 @@ const CollectionStep = (
         </Column>
       </Row>
       <ApplicantAgencyFields
-        useDefault={state.useDefaultAgencyInfo}
+        showCheckbox
+        isDefault={state.useDefaultAgencyInfo}
+        checkboxId="collection-step-default-checkbox"
         agency={state.collectorAgency}
         locationCode={state.locationCode}
         fieldsProps={agencyFieldsProps}
         agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
-        setAllValues={
+        setAgencyAndCode={
           (
-            agencyData: FormInputType & { value: string },
-            locationCodeData: FormInputType & { value: string },
-            useDefaultData: FormInputType & { value: boolean }
-          ) => setAgencyInfo(agencyData, locationCodeData, useDefaultData)
+            isDefault: BooleanInputType,
+            agency: OptionsInputType,
+            locationCode: StringInputType
+          ) => setAgencyAndCode(isDefault, agency, locationCode)
         }
         readOnly={readOnly}
+        maxInputColSize={6}
       />
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>

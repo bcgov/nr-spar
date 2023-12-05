@@ -15,13 +15,9 @@ import InterimStorage from '../SeedlotRegistrationSteps/InterimStep';
 import CollectionStep from '../SeedlotRegistrationSteps/CollectionStep';
 import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import { OrchardForm } from '../SeedlotRegistrationSteps/OrchardStep/definitions';
-
+import { initCollectionState, initOwnershipState, initInterimState } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
 import { AllStepData } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { initCollectionState, initInterimState, initOwnershipState } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
-
 import formReviewText from './constants';
-
-import './styles.scss';
 
 const mockFormData = [
   {
@@ -58,6 +54,11 @@ const mockFormData = [
 
 const defaultCode = '16';
 const defaultAgency = '0032 - Strong Seeds Orchard - SSO';
+const defaultAgencyObj = {
+  code: '0032',
+  description: 'Strong Seeds Orchard',
+  label: defaultAgency
+};
 
 const orchardMock: OrchardForm = {
   orchards: [
@@ -79,9 +80,9 @@ const orchardMock: OrchardForm = {
   pollenMethodology: false
 };
 
-const collectionMock = initCollectionState(defaultAgency, defaultCode);
+const collectionMock = initCollectionState(defaultAgencyObj, defaultCode);
 
-const ownershipMock = initOwnershipState(defaultAgency, defaultCode);
+const ownershipMock = initOwnershipState(defaultAgencyObj, defaultCode);
 
 const interimStorageMock = initInterimState(defaultAgency, defaultCode);
 
@@ -137,7 +138,7 @@ const FormReview = () => {
                   <div className="form-item">
                     <CollectionStep
                       state={allStepData.collectionStep}
-                      defaultAgency={defaultAgency}
+                      defaultAgency={defaultAgencyObj}
                       defaultCode={defaultCode}
                       agencyOptions={[]}
                       collectionMethods={[]}
@@ -184,8 +185,16 @@ const FormReview = () => {
                   <div className="form-item">
                     <InterimStorage
                       state={allStepData.interimStep}
-                      collectorAgency={defaultAgency}
-                      collectorCode={defaultCode}
+                      collectorAgency={{
+                        id: '',
+                        value: defaultAgency,
+                        isInvalid: false
+                      }}
+                      collectorCode={{
+                        id: '',
+                        value: defaultCode,
+                        isInvalid: false
+                      }}
                       agencyOptions={[]}
                       setStepData={() => { }}
                       readOnly

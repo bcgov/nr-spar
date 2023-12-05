@@ -5,24 +5,27 @@ import {
   Column, TextInput, TextInputSkeleton
 } from '@carbon/react';
 import { Edit } from '@carbon/icons-react';
+import { useNavigate } from 'react-router-dom';
 
 import { SeedlotApplicantType } from '../../../../types/SeedlotType';
 
 import './styles.scss';
 
 interface ApplicantSeedlotInformationProps {
+  seedlotNumber?: string;
   applicant?: SeedlotApplicantType;
   isFetching: boolean;
 }
 
 const ApplicantInformation = (
-  { applicant, isFetching }: ApplicantSeedlotInformationProps
+  { seedlotNumber, applicant, isFetching }: ApplicantSeedlotInformationProps
 ) => {
   const triggerMailTo = () => {
     if (applicant?.email) {
       window.location.href = `mailto: ${applicant.email}`;
     }
   };
+  const navigate = useNavigate();
 
   return (
     <FlexGrid className="applicant-seedlot-information">
@@ -157,6 +160,7 @@ const ApplicantInformation = (
             size="md"
             className="btn-edit"
             renderIcon={Edit}
+            onClick={() => navigate(`/seedlots/edit-a-class-application/${seedlotNumber}`)}
           >
             Edit applicant and seedlot
           </Button>

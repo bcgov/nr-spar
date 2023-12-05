@@ -10,8 +10,7 @@ export const agencyFieldsProps: AgencyTextPropsType = {
     labelText: 'Use applicant agency as collector agency'
   },
   agencyInput: {
-    name: 'collectorAgency',
-    labelText: 'Cone Collector agency',
+    titleText: 'Cone Collector agency',
     invalidText: 'Please choose a valid collector agency, filter with agency number, name or acronym'
   },
   locationCode: {

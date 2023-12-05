@@ -16,29 +16,6 @@ describe('Create A-Class Seedlot', () => {
     cy.login();
     cy.visit('/seedlots');
     cy.url().should('contains', '/seedlots');
-
-    cy.intercept(
-      {
-        method: 'GET',
-        url: '**/api/forest-clients/**'
-      },
-      {
-        statusCode: 200
-      }
-    ).as('verifyLocationCode');
-
-    cy.intercept(
-      {
-        method: 'POST',
-        url: '**/api/seedlots'
-      },
-      {
-        statusCode: 201,
-        body: {
-          seedlotNumber: '654321'
-        }
-      }
-    ).as('submitSeedlot');
   });
 
   it('should register an A-Class Seedlot', () => {
@@ -60,15 +37,15 @@ describe('Create A-Class Seedlot', () => {
       .clear()
       .type(data.applicantAgency.number, { delay: TYPE_DELAY });
     // Enter an invalid email address
-    cy.get('#appliccant-email-input')
+    cy.get('#applicant-email-input')
       .clear()
       .type(data.applicantAgency.invalidEmail, { delay: TYPE_DELAY });
     cy.get('#agency-number-input')
       .click();
-    cy.get('#appliccant-email-input-error-msg')
+    cy.get('#applicant-email-input-error-msg')
       .should('be.visible');
     // Enter the applicant email address
-    cy.get('#appliccant-email-input')
+    cy.get('#applicant-email-input')
       .clear()
       .type(data.applicantAgency.email, { delay: TYPE_DELAY });
     // Enter the seedlot species, wait for species data to load
@@ -107,14 +84,13 @@ describe('Create A-Class Seedlot', () => {
     cy.get('#seedlot-source-radio-btn-cus')
       .should('not.be.checked');
     // To be registered? should be checked by default
-    cy.get('#registered-tree-seed-center')
+    cy.get('#register-w-tsc-yes')
       .should('be.checked');
-    // To be registeredCollected from B.C. source? should be checked by default// as
-    cy.get('#collected-bc')
+    // Collected within bc? "Yes" should be checked by default
+    cy.get('#collected-within-bc-yes')
       .should('be.checked');
     // Click on button Create seedlot number
-    cy.get('.save-button')
-      .find('button')
+    cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
     cy.get('h1').contains('654321');
