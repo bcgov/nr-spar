@@ -19,6 +19,8 @@ import { initCollectionState, initOwnershipState, initInterimState } from '../..
 import { AllStepData } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import formReviewText from './constants';
 
+import './styles.scss';
+
 const mockFormData = [
   {
     id: 0,
