@@ -10,12 +10,10 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
-import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
@@ -31,17 +29,11 @@ import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixGeneticQualityId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
-import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
-import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOwnerQuantityId;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
-import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeSmpMixRepository;
@@ -87,9 +79,7 @@ public class SeedlotService {
 
   private final SeedlotOwnerQuantityService seedlotOwnerQuantityService;
 
-  private final MethodOfPaymentRepository methodOfPaymentRepository;
-
-  private final SeedlotOrchardRepository seedlotOrchardRepository;
+  private final SeedlotOrchardService seedlotOrchardService;
 
   private final SeedlotParentTreeRepository seedlotParentTreeRepository;
 
@@ -265,7 +255,8 @@ public class SeedlotService {
   }
 
   @Transactional
-  public SeedlotCreateResponseDto submitSeedlotForm(String seedlotNumber, SeedlotFormSubmissionDto form) {
+  public SeedlotCreateResponseDto submitSeedlotForm(
+      String seedlotNumber, SeedlotFormSubmissionDto form) {
     log.info("Seedlot number {} submitted for saving!", seedlotNumber);
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
@@ -280,7 +271,8 @@ public class SeedlotService {
      */
 
     saveSeedlotFormStep1(seedlotEntity.get(), form.getSeedlotFormCollectionDto());
-    seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlotNumber, form.getSeedlotFormOwnershipDtoList());
+    seedlotOwnerQuantityService.saveSeedlotFormStep2(
+        seedlotNumber, form.getSeedlotFormOwnershipDtoList());
     saveSeedlotFormStep3(seedlotEntity.get(), form.getSeedlotFormInterimDto());
     saveSeedlotFormStep4(seedlotEntity.get(), form.getSeedlotFormOrchardDto());
     saveSeedlotFormStep5(seedlotEntity.get(), form.getSeedlotFormParentTreeSmpDtoList());
@@ -305,11 +297,10 @@ public class SeedlotService {
     seedlot.setComment(formStep1.seedlotComment());
 
     seedlotCollectionMethodService.saveSeedlotFormStep1(seedlot.getId(), formStep1);
-  }  
+  }
 
-  // Form Step 3 - OK
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
-    log.info("Saving Seedlot form step 3 for seedlot {}", seedlot.getId());
+    log.info("Saving Seedlot form step 3 for seedlot number {}", seedlot.getId());
 
     seedlot.setInterimStorageClientNumber(formStep3.intermStrgClientNumber());
     seedlot.setInterimStorageLocationCode(formStep3.intermStrgLocnCode());
@@ -319,11 +310,10 @@ public class SeedlotService {
     seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
   }
 
-  // Form Step 4 - OK
   private void saveSeedlotFormStep4(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
-    log.info("Saving Seedlot form step 4 for seedlot {}", seedlot.getId());
+    log.info("Saving Seedlot form step 4 for seedlot number {}", seedlot.getId());
 
-    saveSeedlotOrchards(seedlot, formStep4);
+    seedlotOrchardService.saveSeedlotOrchards(seedlot.getId(), formStep4);
 
     seedlot.setFemaleGameticContributionMethod(formStep4.femaleGameticMthdCode());
     seedlot.setMaleGameticContributionMethod(formStep4.maleGameticMthdCode());
@@ -335,75 +325,7 @@ public class SeedlotService {
     seedlot.setPollenContaminationMethodCode(formStep4.pollenContaminationMthdCode());
   }
 
-  // Form Step 4 related
-  private void saveSeedlotOrchards(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
-    log.info(
-        "Creating {} orchard(s) for seedlot {}", formStep4.orchardsId().size(), seedlot.getId());
-
-    // orchardsId - list of orchards
-    int orchardsLen = formStep4.orchardsId().size();
-    if (orchardsLen > 1 && formStep4.primaryOrchardId().isBlank()) {
-      // throw bad request - 400
-    }
-
-    String primaryOrchardId =
-        formStep4.primaryOrchardId().isBlank()
-            ? formStep4.orchardsId().get(0)
-            : formStep4.primaryOrchardId();
-
-    List<SeedlotOrchard> seedlotOrchards =
-        seedlotOrchardRepository.findAllBySeelot_id(seedlot.getId());
-
-    if (!seedlotOrchards.isEmpty()) {
-      List<String> existingSeedlotOrchardList =
-          seedlotOrchards.stream().map(SeedlotOrchard::getOrchard).collect(Collectors.toList());
-
-      Map<String, SeedlotOrchard> orchardMap =
-          seedlotOrchards.stream()
-              .collect(Collectors.toMap(SeedlotOrchard::getOrchard, Function.identity()));
-
-      List<String> seedlotOrchardIdToInsert = List.of();
-
-      for (String formOrchardId : formStep4.orchardsId()) {
-        if (existingSeedlotOrchardList.contains(formOrchardId)) {
-          // remove form the list, the one that last will be removed
-          existingSeedlotOrchardList.remove(formOrchardId);
-        } else {
-          seedlotOrchardIdToInsert.add(formOrchardId);
-        }
-      }
-
-      // Remove possible leftovers
-      log.info("{} seedlot orchards to remove.", existingSeedlotOrchardList.size());
-      for (String orchardId : existingSeedlotOrchardList) {
-        seedlotOrchardRepository.delete(orchardMap.get(orchardId));
-      }
-
-      // Insert new ones
-      saveSeedlotOrchards(seedlot, seedlotOrchardIdToInsert, primaryOrchardId);
-
-      return;
-    }
-
-    // just insert
-    saveSeedlotOrchards(seedlot, formStep4.orchardsId(), primaryOrchardId);
-  }
-
-  // Form Step 4 related
-  private void saveSeedlotOrchards(Seedlot seedlot, List<String> orchardIdList, String primaryId) {
-    List<SeedlotOrchard> seedlotOrchards = List.of();
-
-    for (String orchardId : orchardIdList) {
-      SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, orchardId);
-      seedlotOrchard.setPrimary(orchardId.equals(primaryId));
-      seedlotOrchard.setAuditInformation(loggedUserService.createAuditCurrentUser());
-      seedlotOrchards.add(seedlotOrchard);
-    }
-
-    seedlotOrchardRepository.saveAll(seedlotOrchards);
-  }
-
-  // Form Step 5 - WIP
+  // Form Step 5 - keep going from here
   private void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info("Saving Seedlot form step 5 for seedlot {}", seedlot.getId());
