@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class ConeCollectionMethodService {
 
   /** Fetch all valid cone cllection method from the repository. */
   public List<CodeDescriptionDto> getAllConeCollectionMethods() {
-    log.info("Fetching Cone Collection Methods");
+    log.info("Fetching all Cone Collection Methods for CodeDescriptionDto");
     List<CodeDescriptionDto> resultList = new ArrayList<>();
     coneCollectionMethodRepository.findAll().stream()
         .filter(method -> method.isValid())
@@ -34,5 +35,15 @@ public class ConeCollectionMethodService {
             });
 
     return resultList;
+  }
+
+  /**
+   * Fetches all valid Cone Collection methods returning the list of entities.
+   *
+   * @return A {@link List} of {@link ConeCollectionMethodEntity}
+   */
+  public List<ConeCollectionMethodEntity> getAllValidConeCollectionMethods() {
+    log.info("Fetching all Cone Collection Methods for ConeCollectionMethodEntity");
+    return coneCollectionMethodRepository.findAll().stream().filter(x -> x.isValid()).toList();
   }
 }
