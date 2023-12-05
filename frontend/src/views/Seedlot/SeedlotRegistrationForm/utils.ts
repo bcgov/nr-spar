@@ -96,16 +96,29 @@ export const initOrchardState = (): OrchardForm => (
     orchards: [
       {
         inputId: 0,
-        selectedItem: null
+        selectedItem: null,
+        isInvalid: false
       }
     ],
-    femaleGametic: '',
-    maleGametic: '',
-    controlledCross: true,
-    biotechProcess: true,
-    noPollenContamination: true,
-    breedingPercentage: '0',
-    pollenMethodology: true
+    femaleGametic: {
+      id: 'orchard-female-gametic',
+      value: EmptyMultiOptObj,
+      isInvalid: false
+    },
+    maleGametic: {
+      id: 'orchard-male-gametic',
+      value: EmptyMultiOptObj,
+      isInvalid: false
+    },
+    isControlledCross: false,
+    hasBiotechProcess: false,
+    hasPollenContamination: false,
+    breedingPercentage: {
+      id: 'orchard-breading-perc',
+      value: '0',
+      isInvalid: false
+    },
+    isRegional: true
   }
 );
 
@@ -184,7 +197,7 @@ export const validateOwnershipStep = (ownershipData: Array<SingleOwnerForm>): bo
  * Return true if it's complete, false otherwise
  */
 export const verifyCollectionStepCompleteness = (collectionData: CollectionForm): boolean => {
-  if (!collectionData.collectorAgency.value.length) {
+  if (!collectionData.collectorAgency.value.code.length) {
     return false;
   }
   if (!collectionData.locationCode.value.length) {
@@ -218,12 +231,12 @@ export const verifyCollectionStepCompleteness = (collectionData: CollectionForm)
 export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwnerForm>): boolean => {
   for (let i = 0; i < ownershipData.length; i += 1) {
     if (!ownershipData[i].ownerAgency.value.code.length
-        || !ownershipData[i].ownerCode.value.length
-        || !ownershipData[i].ownerPortion.value.length
-        || !ownershipData[i].reservedPerc.value.length
-        || !ownershipData[i].surplusPerc.value.length
-        || !(ownershipData[i].fundingSource.value && ownershipData[i].fundingSource.value.code)
-        || !(ownershipData[i].methodOfPayment.value && ownershipData[i].methodOfPayment.value.code)
+      || !ownershipData[i].ownerCode.value.length
+      || !ownershipData[i].ownerPortion.value.length
+      || !ownershipData[i].reservedPerc.value.length
+      || !ownershipData[i].surplusPerc.value.length
+      || !(ownershipData[i].fundingSource.value && ownershipData[i].fundingSource.value.code)
+      || !(ownershipData[i].methodOfPayment.value && ownershipData[i].methodOfPayment.value.code)
     ) {
       return false;
     }
@@ -243,4 +256,52 @@ export const getSpeciesOptionByCode = (
   return filtered.length > 0
     ? filtered[0]
     : EmptyMultiOptObj;
+};
+
+/**
+ * Validate Orchard Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateOrchardStep = (orchardStepData: OrchardForm): boolean => {
+  let isInvalid = false;
+
+  if (
+    orchardStepData.femaleGametic.isInvalid
+    || orchardStepData.maleGametic.isInvalid
+    || orchardStepData.breedingPercentage.isInvalid
+  ) {
+    isInvalid = true;
+  }
+
+  // Booleans are either true or false so there's no need to check them.
+
+  return isInvalid;
+};
+
+/**
+ * Verify if the orchard step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boolean => {
+  let isComplete = false;
+
+  orchardStepData.orchards.forEach((orchard) => {
+    // if one of the orchard object is populated then it's complete for this field
+    if (orchard.selectedItem?.code) {
+      isComplete = true;
+    }
+  });
+
+  if (!isComplete) {
+    return isComplete;
+  }
+
+  if (
+    !orchardStepData.femaleGametic.value.code.length
+    || !orchardStepData.maleGametic.value.code.length
+  ) {
+    isComplete = false;
+  }
+
+  return isComplete;
 };

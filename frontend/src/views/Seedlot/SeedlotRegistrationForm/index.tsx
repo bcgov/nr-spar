@@ -57,7 +57,9 @@ import {
   verifyCollectionStepCompleteness,
   validateOwnershipStep,
   verifyOwnershipStepCompleteness,
-  getSpeciesOptionByCode
+  getSpeciesOptionByCode,
+  validateOrchardStep,
+  verifyOrchardStepCompleteness
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
@@ -204,9 +206,10 @@ const SeedlotRegistrationForm = () => {
   /**
    * Update the progress indicator status
    */
-  const updateProgressStatus = (currentStepNum: number) => {
+  const updateProgressStatus = (currentStepNum: number, prevStepNum: number) => {
     const clonedStatus = structuredClone(progressStatus);
     const currentStepName = stepMap[currentStepNum];
+    const prevStepName = stepMap[prevStepNum];
 
     // Set the current step's current val to true, and everything else false
     clonedStatus[currentStepName].isCurrent = true;
@@ -217,7 +220,7 @@ const SeedlotRegistrationForm = () => {
       });
 
     // Set invalid or complete status for Collection Step
-    if (currentStepName !== 'collection') {
+    if (currentStepName !== 'collection' && prevStepName === 'collection') {
       const isCollectionInvalid = validateCollectionStep(allStepData.collectionStep);
       clonedStatus.collection.isInvalid = isCollectionInvalid;
       if (!isCollectionInvalid) {
@@ -227,7 +230,7 @@ const SeedlotRegistrationForm = () => {
     }
 
     // Set invalid or complete status for Ownership Step
-    if (currentStepName !== 'ownership') {
+    if (currentStepName !== 'ownership' && prevStepName === 'ownership') {
       const isOwnershipInvalid = validateOwnershipStep(allStepData.ownershipStep);
       clonedStatus.ownership.isInvalid = isOwnershipInvalid;
       if (!isOwnershipInvalid) {
@@ -236,13 +239,24 @@ const SeedlotRegistrationForm = () => {
       }
     }
 
+    // Set invalid or complete status for Orchard Step
+    if (currentStepName !== 'orchard' && prevStepName === 'orchard') {
+      const isOrchardInvalid = validateOrchardStep(allStepData.orchardStep);
+      clonedStatus.orchard.isInvalid = isOrchardInvalid;
+      if (!isOrchardInvalid) {
+        const isOrchardComplete = verifyOrchardStepCompleteness(allStepData.orchardStep);
+        clonedStatus.orchard.isComplete = isOrchardComplete;
+      }
+    }
+
     setProgressStatus(clonedStatus);
   };
 
   const setStep = (delta: number) => {
     logState();
-    const newStep = formStep + delta;
-    updateProgressStatus(newStep);
+    const prevStep = formStep;
+    const newStep = prevStep + delta;
+    updateProgressStatus(newStep, prevStep);
     setFormStep(newStep);
   };
 
@@ -366,7 +380,7 @@ const SeedlotRegistrationForm = () => {
               progressStatus={progressStatus}
               className="seedlot-registration-steps"
               interactFunction={(e: number) => {
-                updateProgressStatus(e);
+                updateProgressStatus(e, formStep);
                 setFormStep(e);
               }}
             />
