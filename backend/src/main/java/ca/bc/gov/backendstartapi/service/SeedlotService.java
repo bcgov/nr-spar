@@ -13,7 +13,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
-import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
@@ -32,17 +31,14 @@ import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixGeneticQualityId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOwnerQuantityId;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
-import ca.bc.gov.backendstartapi.repository.ConeCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
@@ -89,7 +85,7 @@ public class SeedlotService {
 
   private final SeedlotCollectionMethodService seedlotCollectionMethodService;
 
-  private final SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
+  private final SeedlotOwnerQuantityService seedlotOwnerQuantityService;
 
   private final MethodOfPaymentRepository methodOfPaymentRepository;
 
@@ -284,7 +280,7 @@ public class SeedlotService {
      */
 
     saveSeedlotFormStep1(seedlotEntity.get(), form.getSeedlotFormCollectionDto());
-    saveSeedlotFormStep2(seedlotEntity.get(), form.getSeedlotFormOwnershipDtoList());
+    seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlotNumber, form.getSeedlotFormOwnershipDtoList());
     saveSeedlotFormStep3(seedlotEntity.get(), form.getSeedlotFormInterimDto());
     saveSeedlotFormStep4(seedlotEntity.get(), form.getSeedlotFormOrchardDto());
     saveSeedlotFormStep5(seedlotEntity.get(), form.getSeedlotFormParentTreeSmpDtoList());
@@ -296,7 +292,6 @@ public class SeedlotService {
     return null;
   }
 
-  // Form Step 1 - OKK
   private void saveSeedlotFormStep1(Seedlot seedlot, SeedlotFormCollectionDto formStep1) {
     log.info("Saving Seedlot form step 1 for seedlot number {}", seedlot.getId());
 
@@ -310,85 +305,7 @@ public class SeedlotService {
     seedlot.setComment(formStep1.seedlotComment());
 
     seedlotCollectionMethodService.saveSeedlotFormStep1(seedlot.getId(), formStep1);
-  }
-
-  // Form Step 2 - OK
-  private void saveSeedlotFormStep2(Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List) {
-    log.info("Saving Seedlot form step 2 for seedlot {}", seedlot.getId());
-    List<SeedlotOwnerQuantity> ownerQuantityList =
-        seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlot.getId());
-
-    List<SeedlotOwnerQuantity> ownerQuantityToInsert = List.of();
-
-    if (!ownerQuantityList.isEmpty()) {
-      List<SeedlotOwnerQuantityId> existingOwnerQtyIdList =
-          ownerQuantityList.stream().map(x -> x.getId()).collect(Collectors.toList());
-
-      for (SeedlotFormOwnershipDto ownershipDto : formStep2List) {
-        SeedlotOwnerQuantityId ownerId =
-            new SeedlotOwnerQuantityId(
-                seedlot.getId(), ownershipDto.ownerClientNumber(), ownershipDto.ownerLocnCode());
-
-        if (existingOwnerQtyIdList.contains(ownerId)) {
-          // remove form the list, the one that last will be removed
-          existingOwnerQtyIdList.remove(ownerId);
-        } else {
-          SeedlotOwnerQuantity ownerQuantityEntity =
-              createSeedlotOwnerQuantityFromDto(seedlot, ownershipDto);
-          ownerQuantityToInsert.add(ownerQuantityEntity);
-        }
-      }
-
-      // Remove possible leftovers
-      log.info("{} ownership quantity(ies) to remove.", existingOwnerQtyIdList.size());
-      for (SeedlotOwnerQuantityId ownerId : existingOwnerQtyIdList) {
-        seedlotOwnerQuantityRepository.deleteById(ownerId);
-      }
-
-      // Insert new ones
-      seedlotOwnerQuantityRepository.saveAll(ownerQuantityToInsert);
-
-      return;
-    }
-
-    // just insert if no previous, all new
-    log.info("No previous seedlot owner quantities for seedlot {}", seedlot.getId());
-
-    for (SeedlotFormOwnershipDto ownershipDto : formStep2List) {
-      SeedlotOwnerQuantity ownerQuantityEntity =
-          createSeedlotOwnerQuantityFromDto(seedlot, ownershipDto);
-      ownerQuantityToInsert.add(ownerQuantityEntity);
-    }
-
-    seedlotOwnerQuantityRepository.saveAll(ownerQuantityToInsert);
-  }
-
-  // Form Step 2 related
-  private SeedlotOwnerQuantity createSeedlotOwnerQuantityFromDto(
-      Seedlot seedlot, SeedlotFormOwnershipDto ownershipDto) {
-    log.info(
-        "Creating seedlot owner {} for seedlot {}",
-        ownershipDto.ownerClientNumber(),
-        seedlot.getId());
-
-    SeedlotOwnerQuantity ownerQuantityEntity =
-        new SeedlotOwnerQuantity(
-            seedlot, ownershipDto.ownerClientNumber(), ownershipDto.ownerLocnCode());
-    ownerQuantityEntity.setOriginalPercentageOwned(ownershipDto.originalPctOwned());
-    ownerQuantityEntity.setOriginalPercentageReserved(ownershipDto.originalPctRsrvd());
-    ownerQuantityEntity.setOriginalPercentageSurplus(ownershipDto.originalPctSrpls());
-    ownerQuantityEntity.setFundingSourceCode(ownershipDto.sparFundSrceCode());
-    ownerQuantityEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());
-
-    // Payment method
-    Optional<MethodOfPaymentEntity> paymentEntity =
-        methodOfPaymentRepository.findById(ownershipDto.methodOfPaymentCode());
-    if (paymentEntity.isEmpty()) {
-      // throw error bad request
-    }
-    ownerQuantityEntity.setMethodOfPayment(paymentEntity.get());
-    return ownerQuantityEntity;
-  }
+  }  
 
   // Form Step 3 - OK
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {

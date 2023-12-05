@@ -34,6 +34,8 @@ public class SeedlotCollectionMethodService {
   private final SeedlotEntityDao seedlotEntityDao;
 
   public void saveSeedlotFormStep1(String seedlotNumber, SeedlotFormCollectionDto formStep1) {
+    log.info("Saving Seedlot form step 1 for seedlot number {}", seedlotNumber);
+
     List<SeedlotCollectionMethod> seedlotCollectionList =
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotNumber);
 
