@@ -75,12 +75,12 @@ const ApplicantAgencyFields = ({
     setAgencyClone({
       ...agencyClone,
       value: checked ? defaultAgency : '',
-      isInvalid: false
+      isInvalid: !!(checked && defaultAgency === '')
     });
     setLocationCodeClone({
       ...locationCodeClone,
       value: checked ? defaultCode : '',
-      isInvalid: false
+      isInvalid: !!(checked && defaultCode === '')
     });
     setUseDefaultClone({
       ...useDefaultClone,
@@ -204,8 +204,8 @@ const ApplicantAgencyFields = ({
             helperText={locationCodeHelperText}
             invalid={locationCodeClone.isInvalid}
             invalidText={invalidLocationMessage}
-            readOnly={(showDefaultCheckbox ? useDefaultClone.value : false) || readOnly}
-            disabled={!forestClientNumber}
+            readOnly={(useDefaultClone.value && !(locationCode.value === '')) || readOnly}
+            disabled={!forestClientNumber || (useDefaultClone.value && locationCode.value === '')}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleLocationCodeChange(e.target.value);
             }}

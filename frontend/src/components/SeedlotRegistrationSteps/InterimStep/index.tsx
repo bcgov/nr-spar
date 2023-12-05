@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 
 import {
@@ -25,8 +25,8 @@ import './styles.scss';
 interface InterimStorageStepProps {
   state: InterimForm,
   setStepData: Function,
-  collectorAgency: string,
-  collectorCode: string,
+  collectorAgency: FormInputType & { value: string },
+  collectorCode: FormInputType & { value: string },
   agencyOptions: Array<MultiOptionsObj>,
   readOnly?: boolean
 }
@@ -105,19 +105,6 @@ const InterimStorage = (
     setStepData(clonedState);
   };
 
-  const storageFacilityTypeInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const useDefault = state.useCollectorAgencyInfo.value;
-    const agency = useDefault ? collectorAgency : state.agencyName.value;
-    const code = useDefault ? collectorCode : state.locationCode.value;
-
-    const clonedState = structuredClone(state);
-    clonedState.agencyName.value = agency;
-    clonedState.locationCode.value = code;
-    setStepData(clonedState);
-  }, [collectorAgency, collectorCode]);
-
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
       <Row className="interim-title-row">
@@ -132,8 +119,8 @@ const InterimStorage = (
         locationCode={state.locationCode}
         fieldsProps={agencyFieldsProps}
         agencyOptions={agencyOptions}
-        defaultAgency={collectorAgency}
-        defaultCode={collectorCode}
+        defaultAgency={collectorAgency.value}
+        defaultCode={collectorCode.value}
         setAllValues={
           (
             agencyData: FormInputType & { value: string },
@@ -230,7 +217,6 @@ const InterimStorage = (
                   id={state.facilityOtherType.id}
                   name="storage-facility"
                   value={state.facilityOtherType.value}
-                  ref={storageFacilityTypeInputRef}
                   labelText={pageTexts.storageFacility.labelText}
                   placeholder={pageTexts.storageFacility.otherInput.placeholder}
                   helperText={pageTexts.storageFacility.otherInput.helperText}

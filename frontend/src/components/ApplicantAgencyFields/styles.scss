@@ -20,10 +20,14 @@
     & + .#{vars.$bcgov-prefix}--form__helper-text {
       display: none;
     }
+
+    &.#{vars.$bcgov-prefix}--list-box--invalid input[role=combobox].#{vars.$bcgov-prefix}--text-input {
+      outline-offset: 0;
+    }
   }
 
   .bx--combo-box {
-    li, 
+    li,
     .bx--list-box__menu-item__option {
       white-space: normal;
       block-size: auto;

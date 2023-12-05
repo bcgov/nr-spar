@@ -62,7 +62,9 @@ import {
   verifyCollectionStepCompleteness,
   validateOwnershipStep,
   verifyOwnershipStepCompleteness,
-  getSpeciesOptionByCode
+  getSpeciesOptionByCode,
+  validateInterimStep,
+  verifyInterimStepCompleteness
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
@@ -148,6 +150,22 @@ const SeedlotRegistrationForm = () => {
 
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
     const newData = { ...allStepData };
+    // This check guarantee that every change on the collectors
+    // agency also changes the values on the interim agency, when
+    // necessary, also reflecting the invalid values
+    if (stepName === 'collectionStep'
+        && allStepData.interimStep.useCollectorAgencyInfo.value
+        && (allStepData.collectionStep.collectorAgency.value !== stepData.collectorAgency.value
+            || allStepData.collectionStep.locationCode.value !== stepData.locationCode.value)) {
+      newData.interimStep.agencyName.value = stepData.collectorAgency.value;
+      newData.interimStep.agencyName.isInvalid = stepData.collectorAgency.value.length
+        ? stepData.collectorAgency.isInvalid
+        : true;
+      newData.interimStep.locationCode.value = stepData.locationCode.value;
+      newData.interimStep.locationCode.isInvalid = stepData.locationCode.value.length
+        ? stepData.locationCode.isInvalid
+        : true;
+    }
     newData[stepName] = stepData;
     setAllStepData(newData);
   };
@@ -203,6 +221,16 @@ const SeedlotRegistrationForm = () => {
       if (!isOwnershipInvalid) {
         const isOwnershipComplete = verifyOwnershipStepCompleteness(allStepData.ownershipStep);
         clonedStatus.ownership.isComplete = isOwnershipComplete;
+      }
+    }
+
+    // Set invalid or complete status for Interim Step
+    if (currentStepName !== 'interim') {
+      const isInterimInvalid = validateInterimStep(allStepData.interimStep);
+      clonedStatus.interim.isInvalid = isInterimInvalid;
+      if (!isInterimInvalid) {
+        const isInterimComplete = verifyInterimStepCompleteness(allStepData.interimStep);
+        clonedStatus.ownership.isComplete = isInterimComplete;
       }
     }
 
@@ -267,8 +295,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency.value}
-            collectorCode={allStepData.collectionStep.locationCode.value}
+            collectorAgency={allStepData.collectionStep.collectorAgency}
+            collectorCode={allStepData.collectionStep.locationCode}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />

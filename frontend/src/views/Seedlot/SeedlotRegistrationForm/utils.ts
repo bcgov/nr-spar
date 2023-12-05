@@ -1,4 +1,5 @@
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
+import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import {
   createOwnerTemplate,
@@ -192,7 +193,7 @@ export const initOwnerShipInvalidState = (): OwnershipInvalidObj => {
 
 /**
  * Validate Collection Step.
- * Return true if it's Invalid, false otherwise.
+ * Return true if it's invalid, false otherwise.
  */
 export const validateCollectionStep = (collectionData: CollectionForm): boolean => {
   let isInvalid = false;
@@ -207,7 +208,7 @@ export const validateCollectionStep = (collectionData: CollectionForm): boolean 
 
 /**
  * Validate Ownership Step.
- * Return true if it's Invalid, false otherwise.
+ * Return true if it's invalid, false otherwise.
  */
 export const validateOwnershipStep = (ownershipData: Array<SingleOwnerForm>): boolean => {
   let isInvalid = false;
@@ -218,6 +219,21 @@ export const validateOwnershipStep = (ownershipData: Array<SingleOwnerForm>): bo
         isInvalid = true;
       }
     });
+  });
+  return isInvalid;
+};
+
+/**
+ * Validate Interim Step.
+ * Return true if it's invalid, false otherwise.
+ */
+export const validateInterimStep = (interimData: InterimForm): boolean => {
+  let isInvalid = false;
+  const interimKeys = Object.keys(interimData) as Array<keyof InterimForm>;
+  interimKeys.forEach((key) => {
+    if (interimData[key].isInvalid) {
+      isInvalid = true;
+    }
   });
   return isInvalid;
 };
@@ -270,6 +286,23 @@ export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwner
     ) {
       return false;
     }
+  }
+  return true;
+};
+
+/**
+ * Verify if the interim step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyInterimStepCompleteness = (interimData: InterimForm): boolean => {
+  if (!interimData.agencyName.value.length
+      || !interimData.locationCode.value.length
+      || !interimData.startDate.value.length
+      || !interimData.endDate.value.length
+      || !interimData.facilityType.value.length
+      || (interimData.facilityType.value === 'OTH' && !interimData.facilityOtherType.value.length)
+  ) {
+    return false;
   }
   return true;
 };
