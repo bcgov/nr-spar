@@ -40,7 +40,7 @@ public class SeedlotOrchardService {
     }
 
     List<SeedlotOrchard> seedlotOrchards =
-        seedlotOrchardRepository.findAllBySeelot_id(seedlotNumber);
+        seedlotOrchardRepository.findAllBySeedlot_id(seedlotNumber);
 
     if (!seedlotOrchards.isEmpty()) {
       List<String> existingSeedlotOrchardList =

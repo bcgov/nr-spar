@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /** The repository for {@link SeedlotOrchard SeedlotOrchards}. */
 public interface SeedlotOrchardRepository extends JpaRepository<SeedlotOrchard, SeedlotOrchardId> {
 
-  List<SeedlotOrchard> findAllBySeelot_id(String seedlotNumber);
+  List<SeedlotOrchard> findAllBySeedlot_id(String seedlotNumber);
 }

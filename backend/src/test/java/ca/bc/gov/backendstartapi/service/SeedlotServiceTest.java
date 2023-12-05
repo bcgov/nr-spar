@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -18,9 +19,15 @@ import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeGeneticQualityRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeSmpMixRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
+import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
+import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.time.LocalDate;
 import java.util.List;
@@ -48,6 +55,26 @@ class SeedlotServiceTest {
 
   @Mock LoggedUserService loggedUserService;
 
+  @Mock SeedlotCollectionMethodService seedlotCollectionMethodService;
+
+  @Mock SeedlotOwnerQuantityService seedlotOwnerQuantityService;
+
+  @Mock SeedlotOrchardService seedlotOrchardService;
+
+  @Mock SeedlotParentTreeRepository seedlotParentTreeRepository;
+
+  @Mock SeedlotParentTreeGeneticQualityRepository seedlotParentTreeGeneticQualityRepository;
+
+  @Mock SeedlotGeneticWorthRepository seedlotGeneticWorthRepository;
+
+  @Mock SmpMixRepository smpMixRepository;
+
+  @Mock SmpMixGeneticQualityRepository smpMixGeneticQualityRepository;
+
+  @Mock SeedlotParentTreeSmpMixRepository seedlotParentTreeSmpMixRepository;
+
+  @Mock GeneticWorthEntityDao geneticWorthEntityDao;
+
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
@@ -70,7 +97,17 @@ class SeedlotServiceTest {
             seedlotSourceRepository,
             seedlotStatusRepository,
             geneticClassRepository,
-            loggedUserService);
+            loggedUserService,
+            seedlotCollectionMethodService,
+            seedlotOwnerQuantityService,
+            seedlotOrchardService,
+            seedlotParentTreeRepository,
+            seedlotParentTreeGeneticQualityRepository,
+            seedlotGeneticWorthRepository,
+            smpMixRepository,
+            smpMixGeneticQualityRepository,
+            seedlotParentTreeSmpMixRepository,
+            geneticWorthEntityDao);
   }
 
   @Test
