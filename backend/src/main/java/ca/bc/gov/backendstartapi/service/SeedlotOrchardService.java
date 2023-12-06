@@ -1,14 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dao.SeedlotEntityDao;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOrchardId;
-import ca.bc.gov.backendstartapi.exception.NoPrimaryOrchardException;
-import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,24 +21,24 @@ public class SeedlotOrchardService {
 
   private final LoggedUserService loggedUserService;
 
-  private final SeedlotEntityDao seedlotEntityDao;
+  public void saveSeedlotFormStep4(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
+    log.info("Saving Seedlot Form Step 4-Orchard for seedlot number {}", seedlot.getId());
 
-  public void saveSeedlotOrchards(String seedlotNumber, SeedlotFormOrchardDto formStep4) {
+    seedlot.setFemaleGameticContributionMethod(formStep4.femaleGameticMthdCode());
+    seedlot.setMaleGameticContributionMethod(formStep4.maleGameticMthdCode());
+    seedlot.setProducedThroughControlledCross(formStep4.controlledCrossInd());
+    seedlot.setProducedWithBiotechnologicalProcesses(formStep4.biotechProcessesInd());
+    seedlot.setPollenContaminationPresentInOrchard(formStep4.pollenContaminationInd());
+    seedlot.setPollenContaminationPercentage(formStep4.pollenContaminationPct());
+    seedlot.setPollenContaminantBreedingValue(formStep4.contaminantPollenBv());
+    seedlot.setPollenContaminationMethodCode(formStep4.pollenContaminationMthdCode());
+
     int orchardsLen = formStep4.orchardsId().size();
     log.info(
-        "Saving {} SeedlotOrchard record(s) for seedlot number {}", orchardsLen, seedlotNumber);
-
-    String primaryOrchardId =
-        formStep4.primaryOrchardId().isBlank()
-            ? formStep4.orchardsId().get(0)
-            : formStep4.primaryOrchardId();
-
-    if (primaryOrchardId.isBlank()) {
-      throw new NoPrimaryOrchardException();
-    }
+        "Saving {} SeedlotOrchard record(s) for seedlot number {}", orchardsLen, seedlot.getId());
 
     List<SeedlotOrchard> seedlotOrchards =
-        seedlotOrchardRepository.findAllBySeedlot_id(seedlotNumber);
+        seedlotOrchardRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!seedlotOrchards.isEmpty()) {
       List<String> existingSeedlotOrchardList =
@@ -61,11 +59,11 @@ public class SeedlotOrchardService {
       log.info(
           "{} record(s) in the SeedlotOrchard table to remove for seedlot number {}",
           existingSeedlotOrchardList.size(),
-          seedlotNumber);
+          seedlot.getId());
       List<SeedlotOrchardId> soiList = List.of();
       existingSeedlotOrchardList.forEach(
           orchardId -> {
-            soiList.add(new SeedlotOrchardId(seedlotNumber, orchardId));
+            soiList.add(new SeedlotOrchardId(seedlot.getId(), orchardId));
           });
 
       if (!soiList.isEmpty()) {
@@ -73,25 +71,20 @@ public class SeedlotOrchardService {
       }
 
       // Insert new ones
-      saveSeedlotOrchards(seedlotNumber, seedlotOrchardIdToInsert, primaryOrchardId);
+      saveSeedlotOrchards(seedlot, seedlotOrchardIdToInsert);
 
       return;
     }
 
-    log.info("No previous records on SeedlotOrchard table for seedlot number {}", seedlotNumber);
+    log.info("No previous records on SeedlotOrchard table for seedlot number {}", seedlot.getId());
 
-    saveSeedlotOrchards(seedlotNumber, formStep4.orchardsId(), primaryOrchardId);
+    saveSeedlotOrchards(seedlot, formStep4.orchardsId());
   }
 
-  private void saveSeedlotOrchards(
-      String seedlotNumber, List<String> orchardIdList, String primaryId) {
-    Seedlot seedlot =
-        seedlotEntityDao.getSeedlot(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
-
-    List<SeedlotOrchard> seedlotOrchards = List.of();
+  private void saveSeedlotOrchards(Seedlot seedlot, List<String> orchardIdList) {
+    List<SeedlotOrchard> seedlotOrchards = new ArrayList<>();
     for (String orchardId : orchardIdList) {
       SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, orchardId);
-      seedlotOrchard.setPrimary(orchardId.equals(primaryId));
       seedlotOrchard.setAuditInformation(loggedUserService.createAuditCurrentUser());
       seedlotOrchards.add(seedlotOrchard);
     }

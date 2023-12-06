@@ -1,15 +1,14 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dao.SeedlotEntityDao;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodId;
 import ca.bc.gov.backendstartapi.exception.ConeCollectionMethodNotFoundException;
-import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,13 +30,20 @@ public class SeedlotCollectionMethodService {
 
   private final LoggedUserService loggedUserService;
 
-  private final SeedlotEntityDao seedlotEntityDao;
+  public void saveSeedlotFormStep1(Seedlot seedlot, SeedlotFormCollectionDto formStep1) {
+    log.info("Saving Seedlot Form Step 1-Collection for seedlot number {}", seedlot.getId());
 
-  public void saveSeedlotFormStep1(String seedlotNumber, SeedlotFormCollectionDto formStep1) {
-    log.info("Saving Seedlot form step 1 for seedlot number {}", seedlotNumber);
+    seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
+    seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());
+    seedlot.setCollectionStartDate(formStep1.collectionStartDate());
+    seedlot.setCollectionEndDate(formStep1.collectionEndDate());
+    seedlot.setNumberOfContainers(formStep1.noOfContainers());
+    seedlot.setContainerVolume(formStep1.volPerContainer());
+    seedlot.setTotalConeVolume(formStep1.clctnVolume());
+    seedlot.setComment(formStep1.seedlotComment());
 
     List<SeedlotCollectionMethod> seedlotCollectionList =
-        seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotNumber);
+        seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!seedlotCollectionList.isEmpty()) {
       List<Integer> existingMethodList =
@@ -60,11 +66,11 @@ public class SeedlotCollectionMethodService {
       log.info(
           "{} record(s) in the SeedlotCollectionMethod table to remove for seedlot number {}",
           existingMethodList.size(),
-          seedlotNumber);
+          seedlot.getId());
 
       List<SeedlotCollectionMethodId> scmIdList = List.of();
       for (Integer methdCodeToRemove : existingMethodList) {
-        scmIdList.add(new SeedlotCollectionMethodId(seedlotNumber, methdCodeToRemove));
+        scmIdList.add(new SeedlotCollectionMethodId(seedlot.getId(), methdCodeToRemove));
       }
 
       if (!scmIdList.isEmpty()) {
@@ -72,16 +78,16 @@ public class SeedlotCollectionMethodService {
       }
 
       // Insert new ones
-      addSeedlotCollectionMethod(seedlotNumber, methodCodesToInsert);
+      addSeedlotCollectionMethod(seedlot, methodCodesToInsert);
 
       return;
     }
 
     log.info(
         "No previous records on SeedlotCollectionMethod table for seedlot number {}",
-        seedlotNumber);
+        seedlot.getId());
 
-    addSeedlotCollectionMethod(seedlotNumber, formStep1.coneCollectionMethodCodes());
+    addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());
   }
 
   /**
@@ -90,11 +96,11 @@ public class SeedlotCollectionMethodService {
    * @param seedlotNumber The seedlot number to be saved
    * @param methods List of Collection methods to be saved
    */
-  private void addSeedlotCollectionMethod(String seedlotNumber, List<Integer> methods) {
+  private void addSeedlotCollectionMethod(Seedlot seedlot, List<Integer> methods) {
     log.info(
-        "Creating {} records in the SeedlotCollectionMethod table for seedlot number {}",
+        "Creating {} record(s) in the SeedlotCollectionMethod table for seedlot number {}",
         methods.size(),
-        seedlotNumber);
+        seedlot.getId());
 
     // Map of Cone Collection Methots
     Map<Integer, ConeCollectionMethodEntity> ccmeMap =
@@ -103,7 +109,7 @@ public class SeedlotCollectionMethodService {
                 Collectors.toMap(
                     ConeCollectionMethodEntity::getConeCollectionMethodCode, Function.identity()));
 
-    List<SeedlotCollectionMethod> scmList = List.of();
+    List<SeedlotCollectionMethod> scmList = new ArrayList<>();
 
     for (Integer methodCode : methods) {
       ConeCollectionMethodEntity coneCollectionEntity = ccmeMap.get(methodCode);
@@ -111,11 +117,9 @@ public class SeedlotCollectionMethodService {
         throw new ConeCollectionMethodNotFoundException();
       }
 
-      Seedlot seedlot =
-          seedlotEntityDao.getSeedlot(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
-
-      SeedlotCollectionMethod methodEntity =
-          new SeedlotCollectionMethod(seedlot, coneCollectionEntity);
+      SeedlotCollectionMethod methodEntity = new SeedlotCollectionMethod();
+      methodEntity.setSeedlot(seedlot);
+      methodEntity.setConeCollectionMethod(coneCollectionEntity);
       methodEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());
 
       scmList.add(methodEntity);

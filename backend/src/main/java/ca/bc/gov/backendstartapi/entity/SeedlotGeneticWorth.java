@@ -51,9 +51,6 @@ public class SeedlotGeneticWorth {
   @Column(name = "tested_parent_tree_cont_pct", precision = 6, scale = 2)
   private BigDecimal testedParentTreeContributionPercentage;
 
-  @Column(name = "estimated_ind")
-  Boolean estimated;
-
   @Embedded @NonNull private AuditInformation auditInformation;
 
   @Column(name = "revision_count", nullable = false)

@@ -1,14 +1,13 @@
 package ca.bc.gov.backendstartapi.dao;
 
-import java.util.Map;
-import java.util.Optional;
-
-import org.springframework.stereotype.Component;
-
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
@@ -16,8 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 public class GeneticWorthEntityDao {
 
   private final GeneticWorthRepository geneticWorthRepository;
-  
-  private Map<String, GeneticWorthEntity> map = Map.of();
+
+  private Map<String, GeneticWorthEntity> map = new HashMap<>();
 
   public Optional<GeneticWorthEntity> getGeneticWorthEntity(String geneticWorthCode) {
     if (map.containsKey(geneticWorthCode)) {

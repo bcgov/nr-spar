@@ -52,7 +52,7 @@ public record SeedlotFormOwnershipDto(
                 A code which represents the method of payment for services where payment is
                 required.
                 """,
-            example = "BCT")
+            example = "CLA")
         @NotNull
         String methodOfPaymentCode,
     @Schema(

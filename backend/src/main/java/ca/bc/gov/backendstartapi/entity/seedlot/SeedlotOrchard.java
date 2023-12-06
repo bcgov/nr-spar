@@ -41,9 +41,6 @@ public class SeedlotOrchard {
   private String orchard;
   // endregion
 
-  @Column(name = "primary_ind", nullable = false)
-  private boolean primary;
-
   @Embedded private AuditInformation auditInformation;
 
   @Column(name = "revision_count", nullable = false)

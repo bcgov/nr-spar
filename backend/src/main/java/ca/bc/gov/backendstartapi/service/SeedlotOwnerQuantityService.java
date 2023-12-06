@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.exception.MethodOfPaymentNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +35,7 @@ public class SeedlotOwnerQuantityService {
 
   public void saveSeedlotFormStep2(
       String seedlotNumber, List<SeedlotFormOwnershipDto> formStep2List) {
-    log.info("Saving Seedlot form step 2 for seedlot number {}", seedlotNumber);
+    log.info("Saving Seedlot Form Step 2-Ownership for seedlot number {}", seedlotNumber);
 
     List<SeedlotOwnerQuantity> soqList =
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotNumber);
@@ -91,7 +92,7 @@ public class SeedlotOwnerQuantityService {
                 Collectors.toMap(
                     MethodOfPaymentEntity::getMethodOfPaymentCode, Function.identity()));
 
-    List<SeedlotOwnerQuantity> soqList = List.of();
+    List<SeedlotOwnerQuantity> soqList = new ArrayList<>();
     for (SeedlotFormOwnershipDto ownershipDto : sfodList) {
       SeedlotOwnerQuantity ownerQuantityEntity =
           new SeedlotOwnerQuantity(
