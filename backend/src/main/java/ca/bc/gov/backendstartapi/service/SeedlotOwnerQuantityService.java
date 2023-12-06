@@ -67,6 +67,7 @@ public class SeedlotOwnerQuantityService {
 
       if (!existingOwnerQtyIdList.isEmpty()) {
         seedlotOwnerQuantityRepository.deleteAllById(existingOwnerQtyIdList);
+        seedlotOwnerQuantityRepository.flush();
       }
 
       // Insert new ones
@@ -112,6 +113,6 @@ public class SeedlotOwnerQuantityService {
       soqList.add(ownerQuantityEntity);
     }
 
-    seedlotOwnerQuantityRepository.saveAll(soqList);
+    seedlotOwnerQuantityRepository.saveAllAndFlush(soqList);
   }
 }

@@ -68,6 +68,7 @@ public class SeedlotOrchardService {
 
       if (!soiList.isEmpty()) {
         seedlotOrchardRepository.deleteAllById(soiList);
+        seedlotOrchardRepository.flush();
       }
 
       // Insert new ones
@@ -89,6 +90,6 @@ public class SeedlotOrchardService {
       seedlotOrchards.add(seedlotOrchard);
     }
 
-    seedlotOrchardRepository.saveAll(seedlotOrchards);
+    seedlotOrchardRepository.saveAllAndFlush(seedlotOrchards);
   }
 }

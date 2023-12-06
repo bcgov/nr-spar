@@ -75,6 +75,7 @@ public class SmpMixGeneticQualityService {
           existingSmpMixGenQltyIdList.size());
       if (!existingSmpMixGenQltyIdList.isEmpty()) {
         smpMixGeneticQualityRepository.deleteAllByIdInBatch(existingSmpMixGenQltyIdList);
+        smpMixGeneticQualityRepository.flush();
       }
 
       // Insert new ones
@@ -123,6 +124,6 @@ public class SmpMixGeneticQualityService {
       }
     }
 
-    smpMixGeneticQualityRepository.saveAll(smpMixGenQltys);
+    smpMixGeneticQualityRepository.saveAllAndFlush(smpMixGenQltys);
   }
 }

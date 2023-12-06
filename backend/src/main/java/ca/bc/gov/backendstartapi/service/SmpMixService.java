@@ -60,6 +60,7 @@ public class SmpMixService {
 
       if (!smpMixIdsToRemove.isEmpty()) {
         smpMixRepository.deleteAllById(smpMixIdsToRemove);
+        smpMixRepository.flush();
       }
 
       // Insert new ones
@@ -89,7 +90,7 @@ public class SmpMixService {
       smpMixs.add(smpMix);
     }
 
-    smpMixRepository.saveAll(smpMixs);
+    smpMixRepository.saveAllAndFlush(smpMixs);
   }
 
   /**

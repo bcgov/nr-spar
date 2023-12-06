@@ -75,6 +75,7 @@ public class SeedlotCollectionMethodService {
 
       if (!scmIdList.isEmpty()) {
         seedlotCollectionMethodRepository.deleteAllById(scmIdList);
+        seedlotCollectionMethodRepository.flush();
       }
 
       // Insert new ones
@@ -125,6 +126,6 @@ public class SeedlotCollectionMethodService {
       scmList.add(methodEntity);
     }
 
-    seedlotCollectionMethodRepository.saveAll(scmList);
+    seedlotCollectionMethodRepository.saveAllAndFlush(scmList);
   }
 }

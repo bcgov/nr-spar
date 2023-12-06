@@ -77,6 +77,7 @@ public class SeedlotParentTreeSmpMixService {
           seedlot.getId());
       if (!sptsmExistingList.isEmpty()) {
         seedlotParentTreeSmpMixRepository.deleteAllByIdInBatch(sptsmExistingList);
+        seedlotParentTreeSmpMixRepository.flush();
       }
 
       // Insert new ones
@@ -123,6 +124,6 @@ public class SeedlotParentTreeSmpMixService {
       }
     }
 
-    seedlotParentTreeSmpMixRepository.saveAll(sptsmToInsertList);
+    seedlotParentTreeSmpMixRepository.saveAllAndFlush(sptsmToInsertList);
   }
 }

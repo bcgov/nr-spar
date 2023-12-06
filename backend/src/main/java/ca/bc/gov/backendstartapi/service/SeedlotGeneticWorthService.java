@@ -67,6 +67,7 @@ public class SeedlotGeneticWorthService {
       }
       if (!sgwiList.isEmpty()) {
         seedlotGeneticWorthRepository.deleteAllByIdInBatch(sgwiList);
+        seedlotGeneticWorthRepository.flush();
       }
 
       // Insert new ones
@@ -97,6 +98,6 @@ public class SeedlotGeneticWorthService {
       seedlotGeneticWorths.add(sGeneticWorth);
     }
 
-    seedlotGeneticWorthRepository.saveAll(seedlotGeneticWorths);
+    seedlotGeneticWorthRepository.saveAllAndFlush(seedlotGeneticWorths);
   }
 }

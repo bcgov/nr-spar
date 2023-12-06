@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /** The contribution of each tree to a seedlot. */
 @Entity
@@ -28,6 +29,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Getter
 @Setter
+@ToString
 public class SeedlotParentTree {
 
   // region Identifier

@@ -81,8 +81,9 @@ public class SeedlotParentTreeGeneticQualityService {
               + " {}",
           existingSeedlotPtGenQltyIdList.size(),
           seedlot.getId());
-      for (SeedlotParentTreeGeneticQualityId seedlotPtGenQlty : existingSeedlotPtGenQltyIdList) {
-        seedlotParentTreeGeneticQualityRepository.deleteById(seedlotPtGenQlty);
+      if (!existingSeedlotPtGenQltyIdList.isEmpty()) {
+        seedlotParentTreeGeneticQualityRepository.deleteAllByIdInBatch(existingSeedlotPtGenQltyIdList);
+        seedlotParentTreeGeneticQualityRepository.flush();
       }
 
       // Insert new ones
@@ -100,12 +101,9 @@ public class SeedlotParentTreeGeneticQualityService {
 
   private void addSeedlotParentTreeGenQlty(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert) {
-    log.info("About to create map...");
     Map<SeedlotParentTreeId, SeedlotParentTree> sTreeMap =
         seedlotParentTreeService.getAllSeedlotParentTree(seedlot.getId()).stream()
             .collect(Collectors.toMap(SeedlotParentTree::getId, Function.identity()));
-
-    log.info("Map created size {}", sTreeMap.size());
 
     List<SeedlotParentTreeGeneticQuality> seedlotPtToInsert = new ArrayList<>();
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotPtGenQltyToInsert) {
@@ -139,6 +137,6 @@ public class SeedlotParentTreeGeneticQualityService {
       }
     }
 
-    seedlotParentTreeGeneticQualityRepository.saveAll(seedlotPtToInsert);
+    seedlotParentTreeGeneticQualityRepository.saveAllAndFlush(seedlotPtToInsert);
   }
 }

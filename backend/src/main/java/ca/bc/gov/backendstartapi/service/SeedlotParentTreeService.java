@@ -70,6 +70,7 @@ public class SeedlotParentTreeService {
       }
       if (!sptiList.isEmpty()) {
         seedlotParentTreeRepository.deleteAllByIdInBatch(sptiList);
+        seedlotParentTreeRepository.flush();
       }
 
       // Insert new ones
@@ -101,6 +102,6 @@ public class SeedlotParentTreeService {
       seedlotPtListToInsert.add(seedlotParentTree);
     }
 
-    seedlotParentTreeRepository.saveAll(seedlotPtListToInsert);
+    seedlotParentTreeRepository.saveAllAndFlush(seedlotPtListToInsert);
   }
 }
