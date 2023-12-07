@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Accordion,
   AccordionItem,
@@ -19,14 +19,10 @@ import {
 import {
   insertOwnerForm,
   deleteOwnerForm,
-  getAgencyName,
   formatPortionPerc,
   arePortionsValid
 } from './utils';
-import {
-  DEFAULT_INDEX,
-  MAX_OWNERS
-} from './constants';
+import { MAX_OWNERS } from './constants';
 
 import './styles.scss';
 
@@ -37,7 +33,6 @@ const OwnershipStep = (
   {
     state,
     setStepData,
-    invalidState,
     defaultCode,
     defaultAgency,
     agencyOptions,
@@ -70,30 +65,10 @@ const OwnershipStep = (
   const deleteAnOwner = (id: number) => {
     const {
       newOwnerArr
-    }: StateReturnObj = deleteOwnerForm(id, state, invalidState);
+    }: StateReturnObj = deleteOwnerForm(id, state);
     delete refControl.current[id];
     const portionsInvalid = !arePortionsValid(newOwnerArr);
     setPortionsValid(newOwnerArr, portionsInvalid);
-  };
-
-  useEffect(() => {
-    const useDefault = state[DEFAULT_INDEX].useDefaultAgencyInfo.value;
-    const agencyValue = useDefault ? defaultAgency : state[DEFAULT_INDEX].ownerAgency.value;
-    const codeValue = useDefault ? defaultCode : state[DEFAULT_INDEX].ownerCode.value;
-
-    const clonedState = structuredClone(state);
-    clonedState[DEFAULT_INDEX].ownerAgency.value = agencyValue;
-    clonedState[DEFAULT_INDEX].ownerCode.value = codeValue;
-    setStepData(clonedState);
-  }, [defaultAgency, defaultCode]);
-
-  const addRefs = (element: HTMLInputElement, id: number, name: string) => {
-    if (element !== null) {
-      refControl.current[id] = {
-        ...refControl.current[id],
-        [name]: element
-      };
-    }
   };
 
   const toggleAccordion = (id: number, isOpen: boolean) => {
@@ -144,9 +119,9 @@ const OwnershipStep = (
                 }
                 title={(
                   <TitleAccordion
-                    title={singleOwnerInfo.ownerAgency.value === ''
+                    title={singleOwnerInfo.ownerAgency.value.label === ''
                       ? 'Owner agency name'
-                      : getAgencyName(singleOwnerInfo.ownerAgency.value)}
+                      : singleOwnerInfo.ownerAgency.value.description}
                     description={`${formatPortionPerc(singleOwnerInfo.ownerPortion.value)}% owner portion`}
                   />
                 )}
@@ -158,9 +133,6 @@ const OwnershipStep = (
                   defaultCode={defaultCode}
                   fundingSources={fundingSources}
                   methodsOfPayment={methodsOfPayment}
-                  addRefs={(element: HTMLInputElement, name: string) => {
-                    addRefs(element, singleOwnerInfo.id, name);
-                  }}
                   deleteAnOwner={(id: number) => deleteAnOwner(id)}
                   setState={(singleState: SingleOwnerForm, id: number) => {
                     const arrayClone = structuredClone(state);

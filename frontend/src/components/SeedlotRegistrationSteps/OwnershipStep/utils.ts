@@ -1,5 +1,4 @@
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { OwnershipInvalidObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { inputText, createOwnerTemplate } from './constants';
 
 import {
@@ -35,35 +34,17 @@ export const insertOwnerForm = (
 
 export const deleteOwnerForm = (
   id: number,
-  ownershiptArray: Array<SingleOwnerForm>,
-  validationObj: OwnershipInvalidObj
+  ownershiptArray: Array<SingleOwnerForm>
 ) => {
   if (id === 0) {
     return {
-      newOwnerArr: ownershiptArray,
-      newValidObj: validationObj
+      newOwnerArr: ownershiptArray
     };
   }
   const newOwnerArray = ownershiptArray.filter((obj) => obj.id !== id);
-  const newValidObj = { ...validationObj };
-  delete newValidObj[id];
   return {
-    newOwnerArr: newOwnerArray,
-    newValidObj
+    newOwnerArr: newOwnerArray
   };
-};
-
-// Assume the fullString is in the form of '0032 - Strong Seeds Orchard - SSO'
-// Returns the middle string, e.g. 'Strong Seeds Orchard'
-export const getAgencyName = (fullString: string | null): string => {
-  if (fullString === null || !fullString.includes('-')) {
-    return 'Owner agency name';
-  }
-  const splitArr = fullString.split(' - ');
-  if (splitArr.length === 3) {
-    return splitArr[1];
-  }
-  return '';
 };
 
 export const formatPortionPerc = (value: string): string => {
