@@ -46,7 +46,8 @@ public class SeedlotParentTreeService {
         seedlotParentTreeRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!sptList.isEmpty()) {
-      List<Integer> sptExistingList = sptList.stream().map(e -> e.getParentTreeId()).toList();
+      List<Integer> sptExistingList =
+          new ArrayList<>(sptList.stream().map(e -> e.getParentTreeId()).toList());
 
       List<SeedlotFormParentTreeSmpDto> sptInsertList = new ArrayList<>();
 
@@ -93,6 +94,7 @@ public class SeedlotParentTreeService {
           new SeedlotParentTree(
               seedlot,
               seedlotPtDto.parentTreeId(),
+              seedlotPtDto.parentTreeNumber(),
               seedlotPtDto.coneCount(),
               seedlotPtDto.pollenPount(),
               loggedUserService.createAuditCurrentUser());

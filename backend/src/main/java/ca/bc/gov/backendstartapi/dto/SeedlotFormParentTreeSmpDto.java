@@ -6,6 +6,7 @@ import java.util.List;
 public record SeedlotFormParentTreeSmpDto(
   String seedlotNumber,
   Integer parentTreeId,
+  String parentTreeNumber,
   BigDecimal coneCount,
   BigDecimal pollenPount,
   Integer smpSuccessPct,

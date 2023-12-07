@@ -44,6 +44,10 @@ public class SeedlotParentTree {
   @NonNull
   private Integer parentTreeId;
 
+  @Column(name = "parent_tree_number", nullable = false)
+  @NonNull
+  private String parentTreeNumber;
+
   // endregion
 
   @Column(name = "cone_count", precision = 20, scale = 10, nullable = false)

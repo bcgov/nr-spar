@@ -333,7 +333,7 @@ public class SeedlotEndpoint {
    */
   @PostMapping("/{seedlotNumber}/form-submission")
   @Operation(
-      summary = "Saves the Seedlot submit form",
+      summary = "Saves the Seedlot form when submitted",
       description =
           "This API is responsible for receiving the entire seedlot form, once submitted.")
   @ApiResponses(

@@ -82,6 +82,7 @@ public class SmpMixService {
           new SmpMix(
               seedlot,
               formDto.parentTreeId(),
+              formDto.parentTreeNumber(),
               formDto.amountOfMaterial(),
               formDto.proportion(),
               loggedUserService.createAuditCurrentUser(),

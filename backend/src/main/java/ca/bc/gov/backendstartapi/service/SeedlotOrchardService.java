@@ -42,7 +42,7 @@ public class SeedlotOrchardService {
 
     if (!seedlotOrchards.isEmpty()) {
       List<String> existingSeedlotOrchardList =
-          seedlotOrchards.stream().map(SeedlotOrchard::getOrchard).toList();
+          new ArrayList<>(seedlotOrchards.stream().map(SeedlotOrchard::getOrchard).toList());
 
       List<String> seedlotOrchardIdToInsert = List.of();
 

@@ -43,7 +43,7 @@ public class SeedlotGeneticWorthService {
 
     if (!sgwList.isEmpty()) {
       List<String> sgwExistingList =
-          sgwList.stream().map(SeedlotGeneticWorth::getGeneticWorthCode).toList();
+          new ArrayList<>(sgwList.stream().map(SeedlotGeneticWorth::getGeneticWorthCode).toList());
 
       for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
         for (ParentTreeGeneticQualityDto seedlotGenQltyDto :

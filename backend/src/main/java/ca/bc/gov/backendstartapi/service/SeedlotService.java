@@ -16,6 +16,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -67,6 +68,8 @@ public class SeedlotService {
   private final SmpMixGeneticQualityService smpMixGeneticQualityService;
 
   private final SeedlotParentTreeSmpMixService seedlotParentTreeSmpMixService;
+
+  private final SeedlotStatusService seedlotStatusService;
 
   /**
    * Creates a Seedlot in the database.
@@ -243,19 +246,28 @@ public class SeedlotService {
      * 5. Add new ones
      */
 
-    seedlotCollectionMethodService.saveSeedlotFormStep1(
-        seedlot, form.getSeedlotFormCollectionDto());
-    seedlotOwnerQuantityService.saveSeedlotFormStep2(
-        seedlotNumber, form.getSeedlotFormOwnershipDtoList());
-    saveSeedlotFormStep3(seedlotEntity.get(), form.getSeedlotFormInterimDto());
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.getSeedlotFormOrchardDto());
-    saveSeedlotFormStep5(seedlotEntity.get(), form.getSeedlotFormParentTreeSmpDtoList());
-    saveSeedlotFormStep6(seedlotEntity.get(), form.getSeedlotFormExtractionDto());
+    seedlotCollectionMethodService.saveSeedlotFormStep1(seedlot, form.seedlotFormCollectionDto());
+    seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlotNumber, form.seedlotFormOwnershipDtoList());
+    saveSeedlotFormStep3(seedlot, form.seedlotFormInterimDto());
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto());
+    saveSeedlotFormStep5(seedlot, form.seedlotFormParentTreeSmpDtoList());
+    saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
+
+    String submittedStatus = "SUB";
+    setSeedlotStatus(seedlot, submittedStatus);
 
     log.info("Saving Seedlot Entity for Seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
 
-    return null;
+    return new SeedlotCreateResponseDto(seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  private void setSeedlotStatus(Seedlot seedlot, String newStatus) {
+    Optional<SeedlotStatusEntity> sseOptional = seedlotStatusService.getValidSeedlotStatus(newStatus);
+    if (sseOptional.isEmpty()) {
+      throw new SeedlotStatusNotFoundException();
+    }
+    seedlot.setSeedlotStatus(sseOptional.get());
   }
 
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
@@ -269,7 +281,6 @@ public class SeedlotService {
     seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
   }
 
-  // Form Step 5 - keep going from here
   private void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info(
@@ -284,7 +295,6 @@ public class SeedlotService {
     seedlotParentTreeSmpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
   }
 
-  // Form Step 6 - OK
   private void saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
     log.info(
         "Saving Seedlot Form Step 6-Extraction Storage for seedlot number {}", seedlot.getId());
