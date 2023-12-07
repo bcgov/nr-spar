@@ -20,14 +20,6 @@ public record SeedlotFormOrchardDto(
     @Schema(
             description =
                 """
-              The primary unique number (key) Orchard ID. Optional.
-              """,
-            example = "125",
-            nullable = true)
-        String primaryOrchardId,
-    @Schema(
-            description =
-                """
               Code that describes the female gametic contribution method code for a Seedlot.
               """,
             example = "F3")

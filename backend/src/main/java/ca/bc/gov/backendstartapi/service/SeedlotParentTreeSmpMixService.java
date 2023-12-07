@@ -9,6 +9,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeSmpMixRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
@@ -105,7 +106,7 @@ public class SeedlotParentTreeSmpMixService {
           seedlotPtFormDto.parentTreeGeneticQualities()) {
         SeedlotParentTree sptEntity = sptMap.get(seedlotPtFormDto.parentTreeId());
         if (Objects.isNull(sptEntity)) {
-          // throw error
+          throw new SeedlotParentTreeNotFoundException();
         }
 
         GeneticWorthEntity gwe =
