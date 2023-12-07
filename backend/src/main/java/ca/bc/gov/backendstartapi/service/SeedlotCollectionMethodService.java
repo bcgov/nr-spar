@@ -26,7 +26,7 @@ public class SeedlotCollectionMethodService {
 
   private final SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
 
-  private final ConeCollectionMethodService collectionMethodService;
+  private final ConeCollectionMethodService coneCollectionMethodService;
 
   private final LoggedUserService loggedUserService;
 
@@ -111,7 +111,7 @@ public class SeedlotCollectionMethodService {
 
     // Map of Cone Collection Methots
     Map<Integer, ConeCollectionMethodEntity> ccmeMap =
-        collectionMethodService.getAllValidConeCollectionMethods().stream()
+        coneCollectionMethodService.getAllValidConeCollectionMethods().stream()
             .collect(
                 Collectors.toMap(
                     ConeCollectionMethodEntity::getConeCollectionMethodCode, Function.identity()));
