@@ -66,6 +66,8 @@ class SeedlotServiceTest {
 
   @Mock SeedlotParentTreeSmpMixService seedlotParentTreeSmpMixService;
 
+  @Mock SeedlotStatusService seedlotStatusService;
+
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
@@ -97,7 +99,8 @@ class SeedlotServiceTest {
             seedlotGeneticWorthService,
             smpMixService,
             smpMixGeneticQualityService,
-            seedlotParentTreeSmpMixService);
+            seedlotParentTreeSmpMixService,
+            seedlotStatusService);
   }
 
   @Test

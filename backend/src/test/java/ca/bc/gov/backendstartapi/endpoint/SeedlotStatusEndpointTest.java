@@ -41,7 +41,7 @@ class SeedlotStatusEndpointTest {
     CodeDescriptionDto secondMethod = new CodeDescriptionDto("CAN", "Cancelled");
     CodeDescriptionDto thirdMethod = new CodeDescriptionDto("COM", "Complete");
 
-    when(seedlotStatusService.getAllSeedlotStatus())
+    when(seedlotStatusService.getAllValidSeedlotStatusDto())
         .thenReturn(List.of(firstMethod, secondMethod, thirdMethod));
 
     mockMvc
