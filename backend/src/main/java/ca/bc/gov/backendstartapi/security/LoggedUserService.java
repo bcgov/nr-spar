@@ -93,8 +93,8 @@ public class LoggedUserService {
   }
 
   /**
-   * Creates a new instance of {@link AuditInformation} with current logged 
-   *     user id.
+   * Creates a new instance of {@link AuditInformation} with current logged user id.
+   *
    * @return a {@link AuditInformation}
    */
   public AuditInformation createAuditCurrentUser() {

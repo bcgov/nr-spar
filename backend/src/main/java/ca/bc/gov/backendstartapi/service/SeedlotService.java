@@ -230,6 +230,13 @@ public class SeedlotService {
     return seedlotRepository.save(seedlotInfo);
   }
 
+  /**
+   * Saved the entire {@link Seedlot} form with all steps.
+   *
+   * @param seedlotNumber The Seedlot identification
+   * @param form The {@link SeedlotFormSubmissionDto} containing all form fields
+   * @return A {@link SeedlotCreateResponseDto} with the seedlot number and status
+   */
   @Transactional
   public SeedlotCreateResponseDto submitSeedlotForm(
       String seedlotNumber, SeedlotFormSubmissionDto form) {
@@ -247,7 +254,7 @@ public class SeedlotService {
      */
 
     seedlotCollectionMethodService.saveSeedlotFormStep1(seedlot, form.seedlotFormCollectionDto());
-    seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlotNumber, form.seedlotFormOwnershipDtoList());
+    seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, form.seedlotFormOwnershipDtoList());
     saveSeedlotFormStep3(seedlot, form.seedlotFormInterimDto());
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto());
     saveSeedlotFormStep5(seedlot, form.seedlotFormParentTreeSmpDtoList());
@@ -259,11 +266,13 @@ public class SeedlotService {
     log.info("Saving Seedlot Entity for Seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
 
-    return new SeedlotCreateResponseDto(seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
+    return new SeedlotCreateResponseDto(
+        seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
   }
 
   private void setSeedlotStatus(Seedlot seedlot, String newStatus) {
-    Optional<SeedlotStatusEntity> sseOptional = seedlotStatusService.getValidSeedlotStatus(newStatus);
+    Optional<SeedlotStatusEntity> sseOptional =
+        seedlotStatusService.getValidSeedlotStatus(newStatus);
     if (sseOptional.isEmpty()) {
       throw new SeedlotStatusNotFoundException();
     }

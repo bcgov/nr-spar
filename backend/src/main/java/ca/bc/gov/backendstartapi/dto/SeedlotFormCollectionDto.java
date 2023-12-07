@@ -6,12 +6,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/** This record represents the seedlot form step 1. */
 @Schema(description = "Seedlot collection information. Form step 1")
 public record SeedlotFormCollectionDto(
     @Schema(
             description =
                 """
-                A sequentially assigned number which uniquely identifies a Ministry client (collection).
+                A sequentially assigned number which uniquely identifies a Ministry client
+                (collection).
                 """,
             example = "00012797")
         @NotNull
@@ -19,9 +21,9 @@ public record SeedlotFormCollectionDto(
     @Schema(
             description =
                 """
-                A code to uniquely identify, within each client (collection), the addresses of different
-                divisions or locations at which the client operates. The location code is sequentially
-                assigned starting with \"00\" for the client's permanent address.
+                A code to uniquely identify, within each client (collection), the addresses of
+                different divisions or locations at which the client operates. The location code is
+                sequentially assigned starting with \"00\" for the client's permanent address.
                 """,
             example = "02")
         @NotNull

@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
+/** This record represents the seedlot form step 4. */
+@Schema(description = "Seedlot orchard information. Form step 4")
 public record SeedlotFormOrchardDto(
     @Schema(
             description =

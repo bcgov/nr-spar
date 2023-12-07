@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/** This class holds methods for handling the {@link SeedlotOrchard} entity. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,12 @@ public class SeedlotOrchardService {
 
   private final LoggedUserService loggedUserService;
 
+  /**
+   * Saves all {link @SeedlotOrchard} from the Seedlot Form Registration step 4.
+   *
+   * @param seedlot The {@link Seedlot} related
+   * @param formStep4 The {@link SeedlotFormOrchardDto} to be saved
+   */
   public void saveSeedlotFormStep4(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
     log.info("Saving Seedlot Form Step 4-Orchard for seedlot number {}", seedlot.getId());
 

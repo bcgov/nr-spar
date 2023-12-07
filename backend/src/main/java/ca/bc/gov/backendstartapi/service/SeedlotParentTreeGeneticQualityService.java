@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/** This class holds methods for handling the {@link SeedlotParentTreeGeneticQuality} entity. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -82,7 +83,8 @@ public class SeedlotParentTreeGeneticQualityService {
           existingSeedlotPtGenQltyIdList.size(),
           seedlot.getId());
       if (!existingSeedlotPtGenQltyIdList.isEmpty()) {
-        seedlotParentTreeGeneticQualityRepository.deleteAllByIdInBatch(existingSeedlotPtGenQltyIdList);
+        seedlotParentTreeGeneticQualityRepository.deleteAllByIdInBatch(
+            existingSeedlotPtGenQltyIdList);
         seedlotParentTreeGeneticQualityRepository.flush();
       }
 
@@ -101,16 +103,16 @@ public class SeedlotParentTreeGeneticQualityService {
 
   private void addSeedlotParentTreeGenQlty(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert) {
-    Map<SeedlotParentTreeId, SeedlotParentTree> sTreeMap =
+    Map<SeedlotParentTreeId, SeedlotParentTree> sptMap =
         seedlotParentTreeService.getAllSeedlotParentTree(seedlot.getId()).stream()
             .collect(Collectors.toMap(SeedlotParentTree::getId, Function.identity()));
 
     List<SeedlotParentTreeGeneticQuality> seedlotPtToInsert = new ArrayList<>();
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotPtGenQltyToInsert) {
-      SeedlotParentTreeId sTreeId =
+      SeedlotParentTreeId sptId =
           new SeedlotParentTreeId(seedlot.getId(), seedlotPtFormDto.parentTreeId());
-      SeedlotParentTree sTree = sTreeMap.get(sTreeId);
-      if (Objects.isNull(sTree)) {
+      SeedlotParentTree spt = sptMap.get(sptId);
+      if (Objects.isNull(spt)) {
         // throw error = trying to fetch seedlot parent tree not stored
       }
 
@@ -122,18 +124,18 @@ public class SeedlotParentTreeGeneticQualityService {
                 .getGeneticWorthEntity(seedlotGenQltyDto.geneticWorthCode())
                 .orElseThrow();
 
-        SeedlotParentTreeGeneticQuality sQuality =
+        SeedlotParentTreeGeneticQuality sptgq =
             new SeedlotParentTreeGeneticQuality(
-                sTree,
+                spt,
                 seedlotGenQltyDto.geneticTypeCode(),
                 genWorthEnt,
                 seedlotGenQltyDto.geneticQualityValue(),
                 loggedUserService.createAuditCurrentUser());
 
-        sQuality.setQualityValueEstimated(Boolean.FALSE);
-        sQuality.setParentTreeUntested(Boolean.FALSE);
+        sptgq.setQualityValueEstimated(Boolean.FALSE);
+        sptgq.setParentTreeUntested(Boolean.FALSE);
 
-        seedlotPtToInsert.add(sQuality);
+        seedlotPtToInsert.add(sptgq);
       }
     }
 

@@ -30,6 +30,12 @@ public class SeedlotCollectionMethodService {
 
   private final LoggedUserService loggedUserService;
 
+  /**
+   * Saves a SeedlotParentTree from the Seedlot Form Registration step 1.
+   *
+   * @param seedlot The {@link Seedlot} related
+   * @param formStep1 The {@link SeedlotFormCollectionDto} to be saved
+   */
   public void saveSeedlotFormStep1(Seedlot seedlot, SeedlotFormCollectionDto formStep1) {
     log.info("Saving Seedlot Form Step 1-Collection for seedlot number {}", seedlot.getId());
 

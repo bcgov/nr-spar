@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+/** This record represents the seedlot form step 3. */
+@Schema(description = "Seedlot interim information. Form step 3")
 public record SeedlotFormInterimDto(
     @Schema(
             description =
@@ -54,7 +56,8 @@ public record SeedlotFormInterimDto(
     @Schema(
             description =
                 """
-              A code which represents the type of facility where the seed was stored during interim storage.
+              A code which represents the type of facility where the seed was stored during interim
+              storage.
               """,
             example = "OCV")
         @NotNull

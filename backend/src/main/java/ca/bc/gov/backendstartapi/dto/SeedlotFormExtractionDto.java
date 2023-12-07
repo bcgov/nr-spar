@@ -4,11 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+/** This record represents the seedlot form step 6. */
+@Schema(description = "Seedlot extration and storage information. Form step 6")
 public record SeedlotFormExtractionDto(
     @Schema(
             description =
                 """
-              A sequentially assigned number which uniquely identifies a Ministry client (extractory).
+              A sequentially assigned number which uniquely identifies a Ministry client
+              (extractory).
               """,
             example = "00012797")
         @NotNull

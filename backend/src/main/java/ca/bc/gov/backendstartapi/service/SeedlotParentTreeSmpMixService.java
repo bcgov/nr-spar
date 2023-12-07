@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/** This class holds methods for handling the {@link SeedlotParentTreeSmpMix} entity. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -107,7 +108,7 @@ public class SeedlotParentTreeSmpMixService {
           // throw error
         }
 
-        GeneticWorthEntity gEntity =
+        GeneticWorthEntity gwe =
             geneticWorthEntityDao
                 .getGeneticWorthEntity(seedlotGenQltyDto.geneticWorthCode())
                 .orElseThrow();
@@ -116,7 +117,7 @@ public class SeedlotParentTreeSmpMixService {
             new SeedlotParentTreeSmpMix(
                 sptEntity,
                 seedlotGenQltyDto.geneticTypeCode(),
-                gEntity,
+                gwe,
                 seedlotGenQltyDto.geneticQualityValue(),
                 loggedUserService.createAuditCurrentUser());
 

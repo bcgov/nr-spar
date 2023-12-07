@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+/** This class holds methods for storing a {@link GeneticWorthEntity} in memory. */
 @RequiredArgsConstructor
 @Component
 @Slf4j
@@ -18,6 +19,13 @@ public class GeneticWorthEntityDao {
 
   private Map<String, GeneticWorthEntity> map = new HashMap<>();
 
+  /**
+   * Gets a {@link GeneticWorthEntity} from memory, if it's not there, will fetch from the database
+   * and save it.
+   *
+   * @param geneticWorthCode The genetic worth code to be fetched.
+   * @return An Optional of the {@link GeneticWorthEntity}
+   */
   public Optional<GeneticWorthEntity> getGeneticWorthEntity(String geneticWorthCode) {
     if (map.containsKey(geneticWorthCode)) {
       return Optional.of(map.get(geneticWorthCode));

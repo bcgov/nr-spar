@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/** This class holds methods for handling the {@link SeedlotGeneticWorth} entity. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -87,15 +88,15 @@ public class SeedlotGeneticWorthService {
   private void addSeedlotGeneticWorth(
       Seedlot seedlot, List<ParentTreeGeneticQualityDto> genWorthCodeToInsert) {
     List<SeedlotGeneticWorth> seedlotGeneticWorths = new ArrayList<>();
-    for (ParentTreeGeneticQualityDto pDto : genWorthCodeToInsert) {
+    for (ParentTreeGeneticQualityDto ptgqDto : genWorthCodeToInsert) {
 
-      GeneticWorthEntity gEntity =
-          geneticWorthEntityDao.getGeneticWorthEntity(pDto.geneticWorthCode()).orElseThrow();
-      SeedlotGeneticWorth sGeneticWorth =
-          new SeedlotGeneticWorth(seedlot, gEntity, loggedUserService.createAuditCurrentUser());
-      sGeneticWorth.setGeneticQualityValue(pDto.geneticQualityValue());
+      GeneticWorthEntity gwEntity =
+          geneticWorthEntityDao.getGeneticWorthEntity(ptgqDto.geneticWorthCode()).orElseThrow();
 
-      seedlotGeneticWorths.add(sGeneticWorth);
+      SeedlotGeneticWorth sgw =
+          new SeedlotGeneticWorth(seedlot, gwEntity, loggedUserService.createAuditCurrentUser());
+      sgw.setGeneticQualityValue(ptgqDto.geneticQualityValue());
+      seedlotGeneticWorths.add(sgw);
     }
 
     seedlotGeneticWorthRepository.saveAllAndFlush(seedlotGeneticWorths);

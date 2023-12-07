@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/** This class holds methods for handling the {@link SmpMixGeneticQuality} entity. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -105,7 +106,7 @@ public class SmpMixGeneticQualityService {
           // throw error smp mix not found!
         }
 
-        GeneticWorthEntity gEntity =
+        GeneticWorthEntity gwe =
             geneticWorthEntityDao
                 .getGeneticWorthEntity(seedlotGenQltyDto.geneticWorthCode())
                 .orElseThrow();
@@ -114,7 +115,7 @@ public class SmpMixGeneticQualityService {
             new SmpMixGeneticQuality(
                 smpMix,
                 seedlotGenQltyDto.geneticTypeCode(),
-                gEntity,
+                gwe,
                 seedlotGenQltyDto.geneticQualityValue(),
                 Boolean.FALSE,
                 loggedUserService.createAuditCurrentUser(),

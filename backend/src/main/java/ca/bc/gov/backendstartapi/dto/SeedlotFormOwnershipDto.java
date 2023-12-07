@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
+/** This record represents the seedlot form step 2. */
+@Schema(description = "Seedlot ownership information. Form step 2")
 public record SeedlotFormOwnershipDto(
     @Schema(
             description =
