@@ -551,10 +551,57 @@ class SeedlotServiceTest {
     doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any());
 
     SeedlotStatusEntity ssEntity = new SeedlotStatusEntity();
+    ssEntity.setSeedlotStatusCode("SUB");
     when(seedlotStatusService.getValidSeedlotStatus(any())).thenReturn(Optional.of(ssEntity));
 
-    SeedlotCreateResponseDto scDto = seedlotService.submitSeedlotForm("5432", mockSeedlotFormDto());
+    SeedlotFormSubmissionDto mockedForm = mockSeedlotFormDto();
+    SeedlotCreateResponseDto scDto = seedlotService.submitSeedlotForm("5432", mockedForm);
 
     Assertions.assertNotNull(scDto);
+    Assertions.assertEquals("5432", scDto.seedlotNumber());
+    Assertions.assertEquals("SUB", scDto.seedlotStatusCode());
+
+    Assertions.assertEquals(
+        mockedForm.seedlotFormInterimDto().intermStrgClientNumber(),
+        seedlot.getInterimStorageClientNumber());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormInterimDto().intermStrgLocnCode(),
+        seedlot.getInterimStorageLocationCode());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormInterimDto().intermStrgStDate(),
+        seedlot.getInterimStorageStartDate());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormInterimDto().intermStrgEndDate(),
+        seedlot.getInterimStorageEndDate());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormInterimDto().intermStrgLocn(),
+        seedlot.getInterimStorageLocationDescription());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormInterimDto().intermFacilityCode(),
+        seedlot.getInterimStorageFacilityCode());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormExtractionDto().extractoryClientNumber(),
+        seedlot.getExtractionClientNumber());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormExtractionDto().extractoryLocnCode(),
+        seedlot.getExtractionLocationCode());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormExtractionDto().extractionStDate(),
+        seedlot.getExtractionStartDate());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormExtractionDto().extractionEndDate(),
+        seedlot.getExtractionEndDate());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormExtractionDto().storageClientNumber(),
+        seedlot.getStorageClientNumber());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormExtractionDto().storageLocnCode(),
+        seedlot.getStorageLocationCode());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormExtractionDto().temporaryStrgStartDate(),
+        seedlot.getTemporaryStorageStartDate());
+    Assertions.assertEquals(
+        mockedForm.seedlotFormExtractionDto().temporaryStrgEndDate(),
+        seedlot.getTemporaryStorageEndDate());
   }
 }
