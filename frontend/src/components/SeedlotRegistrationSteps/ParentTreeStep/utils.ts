@@ -182,7 +182,7 @@ export const calcMixTabInfoItems = (
   }
 };
 
-const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
+export const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
   const newRow = structuredClone(row);
   Object.keys(newRow).forEach((key) => {
     const rowKey = key as keyof RowItem;

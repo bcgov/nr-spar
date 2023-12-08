@@ -2,10 +2,18 @@ import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistra
 import {
   AllParentTreeMap, RowDataDictType, RowItem, StrTypeRowItem
 } from '../definitions';
-import { getMixRowTemplate, calcSum } from '../utils';
+import { getMixRowTemplate, calcSum, populateStrInputId } from '../utils';
 
 export const isPtNumberInvalid = (ptNumber: string, allParentTreeData: AllParentTreeMap) => (
   !Object.keys(allParentTreeData).includes(ptNumber)
+);
+
+const isPtNumberDuplicate = (rowId: string, ptNumber: string, mixTabData: RowDataDictType) => (
+  Object.values(mixTabData)
+    .filter((row) => (
+      row.parentTreeNumber.value === ptNumber
+      && row.rowId !== rowId
+    )).length > 0
 );
 
 export const populateRowData = (
@@ -24,8 +32,9 @@ export const populateRowData = (
 };
 
 const cleanRowData = (rowId: string, ptNumber?: string): RowItem => {
-  const newRow = getMixRowTemplate();
+  let newRow = getMixRowTemplate();
   newRow.rowId = rowId;
+  newRow = populateStrInputId(rowId, newRow);
   if (ptNumber) {
     newRow.parentTreeNumber.value = ptNumber;
   }
@@ -94,9 +103,11 @@ export const handleInput = (
   let mixTabData = { ...clonedState.mixTabData };
   const tableRowData = { ...clonedState.tableRowData };
   let isInvalid = false;
+  let isDuplicate = false;
   if (colName === 'parentTreeNumber') {
     if (inputValue.length !== 0) {
       isInvalid = isPtNumberInvalid(inputValue, state.allParentTreeData);
+      isDuplicate = isPtNumberDuplicate(rowData.rowId, inputValue, state.mixTabData);
       if (!isInvalid) {
         const populatedRow = populateRowData(rowData, inputValue, state);
         mixTabData[rowData.rowId] = populatedRow;
@@ -117,11 +128,10 @@ export const handleInput = (
   }
 
   if (rowData.isMixTab) {
-    mixTabData[rowData.rowId][colName].isInvalid = isInvalid;
+    mixTabData[rowData.rowId][colName].isInvalid = isInvalid || isDuplicate;
   } else {
     tableRowData[rowData.parentTreeNumber.value][colName].isInvalid = isInvalid;
   }
-
   clonedState.mixTabData = mixTabData;
   clonedState.tableRowData = tableRowData;
   setStepData(clonedState);

@@ -175,6 +175,19 @@
     .#{vars.$bcgov-prefix}--text-input {
       padding: 0 1rem;
     }
+
+    .input-error-tooltip {
+      width: 100%;
+
+      .#{vars.$bcgov-prefix}--tooltip-trigger__wrapper {
+        width: 100%;
+      }
+
+      .#{vars.$bcgov-prefix}--form-requirement{
+        display: none;
+      }
+    }
+
   }
 
   .#{vars.$bcgov-prefix}--overflow-menu__wrapper .#{vars.$bcgov-prefix}--btn--disabled {

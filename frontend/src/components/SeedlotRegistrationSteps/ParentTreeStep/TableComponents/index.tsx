@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   OverflowMenuItem, Checkbox, TableBody, TableRow, Row, Column,
-  TableCell, TextInput, ActionableNotification, Pagination, Button
+  TableCell, TextInput, ActionableNotification, Pagination, Button, Tooltip
 } from '@carbon/react';
 import { TrashCan } from '@carbon/icons-react';
 import { pageText, PageSizesConfig } from '../constants';
@@ -104,25 +104,77 @@ export const renderColOptions = (
 /**
  * Used to render cell that isn't a text input, e.g. delete button
  */
-const renderNonInputCell = (
+const renderDeleteActionBtn = (
   rowData: RowItem,
   colName: HeaderObjId,
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
+) => (
+  <Button
+    kind="ghost"
+    hasIconOnly
+    renderIcon={TrashCan}
+    iconDescription="Delete this row"
+    onClick={() => deleteMixRow(rowData, applicableGenWorths, state, setStepData)}
+  />
+);
+
+/**
+ * This function will wrap the input with a tooltip if it's invalid
+ */
+const renderEditableCell = (
+  rowData: RowItem,
+  header: HeaderObj,
+  applicableGenWorths: string[],
+  state: ParentTreeStepDataObj,
+  setStepData: Function
 ) => {
-  if (colName === 'actions') {
+  const headerId = header.id as keyof StrTypeRowItem;
+  const textInput = (
+    <TextInput
+      labelText=""
+      hideLabel
+      invalidText=""
+      type="number"
+      placeholder="Add value"
+      value={rowData[headerId].value}
+      id={`${rowData[headerId].id}-input`}
+      onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+        setInputChange(
+          rowData,
+          headerId,
+          event.target.value,
+          state,
+          setStepData
+        );
+      }}
+      onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+      onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
+        blurOnEnter(event);
+      }}
+      onBlur={(event: React.ChangeEvent<HTMLInputElement>) => (
+        handleInput(
+          rowData,
+          event.target.value,
+          headerId,
+          applicableGenWorths,
+          state,
+          setStepData
+        )
+      )}
+      invalid={rowData[headerId].isInvalid}
+    />
+  );
+
+  if (rowData[headerId].isInvalid) {
     return (
-      <Button
-        kind="ghost"
-        hasIconOnly
-        renderIcon={TrashCan}
-        iconDescription="Delete this row"
-        onClick={() => deleteMixRow(rowData, applicableGenWorths, state, setStepData)}
-      />
+      <Tooltip className="input-error-tooltip" label={rowData[headerId].errMsg ?? ''} align="bottom">
+        {textInput}
+      </Tooltip>
     );
   }
-  return rowData[colName as keyof StrTypeRowItem].value;
+  return textInput;
 };
 
 const renderTableCell = (
@@ -133,59 +185,29 @@ const renderTableCell = (
   setStepData: Function
 ) => {
   const className = header.editable ? 'td-no-padding' : null;
-  const headerIdRowKey = header.id as keyof StrTypeRowItem;
-  let cellId = '';
-  const idPrefix = rowData.isMixTab ? rowData.rowId : rowData.parentTreeNumber;
   if (header.id === 'actions') {
-    cellId = `${idPrefix}-actions`;
-  } else {
-    cellId = rowData[headerIdRowKey].id;
+    return (
+      <TableCell key={`${header.id}-${rowData.rowId}`} className={className} id={`${rowData.rowId}-action-btn-del`}>
+        {
+          renderDeleteActionBtn(rowData, header.id, applicableGenWorths, state, setStepData)
+        }
+      </TableCell>
+    );
   }
-  return (
-    <TableCell key={header.id} className={className} id={cellId}>
-      {
-        header.editable
-          ? (
-            <TextInput
-              labelText=""
-              hideLabel
-              invalidText=""
-              type="number"
-              placeholder="Add value"
-              value={rowData[headerIdRowKey].value}
-              id={`${cellId}-input`}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setInputChange(
-                  rowData,
-                  headerIdRowKey,
-                  event.target.value,
-                  state,
-                  setStepData
-                );
-              }}
-              onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-              onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
-                blurOnEnter(event);
-              }}
-              onBlur={(event: React.ChangeEvent<HTMLInputElement>) => (
-                handleInput(
-                  rowData,
-                  event.target.value,
-                  headerIdRowKey,
-                  applicableGenWorths,
-                  state,
-                  setStepData
-                )
-              )}
-              invalid={rowData[headerIdRowKey].isInvalid}
-            />
-          )
-          : (
-            renderNonInputCell(rowData, header.id, applicableGenWorths, state, setStepData)
-          )
-      }
-    </TableCell>
-  );
+  if (header.id !== 'isMixTab' && header.id !== 'rowId') {
+    return (
+      <TableCell key={header.id} className={className} id={rowData[header.id].id}>
+        {
+          header.editable
+            ? renderEditableCell(rowData, header, applicableGenWorths, state, setStepData)
+            : (
+              rowData[header.id as keyof StrTypeRowItem].value
+            )
+        }
+      </TableCell>
+    );
+  }
+  return null;
 };
 
 export const renderTableBody = (
