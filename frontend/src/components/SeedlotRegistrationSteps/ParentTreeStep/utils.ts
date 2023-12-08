@@ -88,9 +88,6 @@ export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem):
   tableRows.forEach((row) => {
     // add if the value is not null
     if (row[field].value) {
-      if (field.startsWith('gvo')) {
-        console.log(row[field].value);
-      }
       sum += Number(row[field].value);
     }
   });
