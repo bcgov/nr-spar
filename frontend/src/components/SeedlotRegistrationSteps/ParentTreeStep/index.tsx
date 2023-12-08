@@ -68,7 +68,7 @@ const ParentTreeStep = (
   }: ParentTreeStepProps
 ) => {
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
-  const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
+  const [currentTab, setCurrentTab] = useState<TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
     structuredClone(headerTemplate)
   );

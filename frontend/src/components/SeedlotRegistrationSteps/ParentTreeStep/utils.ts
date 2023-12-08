@@ -267,7 +267,7 @@ export const generateDefaultRows = (numOfRows: number): RowDataDictType => {
 export const cleanTable = (
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   setStepData: Function
 ): ParentTreeStepDataObj => {
   const clonedState = structuredClone(state);
@@ -306,7 +306,7 @@ export const fillCompostitionTables = (
   data: CompUploadResponse[],
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   setStepData: Function
 ) => {
   // Store parent tree numbers that does not exist in the orchards
@@ -341,7 +341,7 @@ export const fillCompostitionTables = (
 export const toggleNotification = (
   notifType: string,
   state: ParentTreeStepDataObj,
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   setStepData: Function
 ) => {
   const modifiedState = { ...state };

@@ -2,11 +2,7 @@ import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 
-export type TabTypes = {
-  coneTab: 'coneTab',
-  successTab: 'successTab',
-  mixTab: 'mixTab'
-};
+export type TabTypes = 'coneTab' | 'successTab' | 'mixTab';
 
 export type StrTypeRowItem = {
   parentTreeNumber: StringInputType,

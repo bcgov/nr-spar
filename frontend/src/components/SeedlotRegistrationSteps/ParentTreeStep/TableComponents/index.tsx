@@ -22,7 +22,7 @@ import '../styles.scss';
 
 export const renderColOptions = (
   headerConfig: Array<HeaderObj>,
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   setHeaderConfig: Function
 ) => {
   const toggleableCols = headerConfig
@@ -211,7 +211,7 @@ const renderTableCell = (
 };
 
 export const renderTableBody = (
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   slicedRows: Array<RowItem>,
   mixTabRows: Array<RowItem>,
   headerConfig: Array<HeaderObj>,
@@ -277,7 +277,7 @@ export const renderTableBody = (
 
 export const renderNotification = (
   state: ParentTreeStepDataObj,
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   orchardsData: Array<OrchardObj>,
   setStepData: Function
 ) => {
@@ -325,7 +325,7 @@ export const renderNotification = (
 
 export const renderPagination = (
   state: ParentTreeStepDataObj,
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   currPageSize: number,
   setCurrentPage: Function,
   setCurrPageSize: Function,
