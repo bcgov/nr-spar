@@ -91,7 +91,6 @@ export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem):
       sum += Number(row[field].value);
     }
   });
-  // console.log('sum', sum, 'name', field);
   return sum.toString();
 };
 
