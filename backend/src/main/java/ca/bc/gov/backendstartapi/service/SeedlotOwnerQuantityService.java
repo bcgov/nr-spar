@@ -35,8 +35,9 @@ public class SeedlotOwnerQuantityService {
    *
    * @param seedlot The {@link Seedlot} related
    * @param formStep2List A List of {@link SeedlotFormOwnershipDto}
+   * @return A list of {@link SeedlotOwnerQuantity} created, if any
    */
-  public void saveSeedlotFormStep2(Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List) {
+  public List<SeedlotOwnerQuantity> saveSeedlotFormStep2(Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List) {
     log.info("Saving Seedlot Form Step 2-Ownership for seedlot number {}", seedlot.getId());
 
     List<SeedlotOwnerQuantity> soqList =
@@ -46,7 +47,7 @@ public class SeedlotOwnerQuantityService {
       List<SeedlotOwnerQuantityId> existingOwnerQtyIdList =
           soqList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
-      List<SeedlotFormOwnershipDto> sfodToInsertList = List.of();
+      List<SeedlotFormOwnershipDto> sfodToInsertList = new ArrayList<>();
 
       for (SeedlotFormOwnershipDto ownershipDto : formStep2List) {
         SeedlotOwnerQuantityId soqId =
@@ -63,7 +64,7 @@ public class SeedlotOwnerQuantityService {
 
       // Remove possible leftovers
       log.info(
-          "{} record(s) in the SeedlotOwerQuantity table to remove for seedlot number {}",
+          "{} leftover record(s) in the SeedlotOwerQuantity table to remove for seedlot number {}",
           existingOwnerQtyIdList.size(),
           seedlot.getId());
 
@@ -73,19 +74,29 @@ public class SeedlotOwnerQuantityService {
       }
 
       // Insert new ones
-      addSeedlotOwnerQuantityFromForm(seedlot, sfodToInsertList);
-
-      return;
+      return addSeedlotOwnerQuantityFromForm(seedlot, sfodToInsertList);
     }
 
     log.info(
         "No previous records on SeedlotOwnerQuantity table for seedlot number {}", seedlot.getId());
 
-    addSeedlotOwnerQuantityFromForm(seedlot, formStep2List);
+    return addSeedlotOwnerQuantityFromForm(seedlot, formStep2List);
   }
 
-  private void addSeedlotOwnerQuantityFromForm(
+  private List<SeedlotOwnerQuantity> addSeedlotOwnerQuantityFromForm(
       Seedlot seedlot, List<SeedlotFormOwnershipDto> sfodList) {
+    if (sfodList.isEmpty()) {
+      log.info(
+          "No new records to be inserted in the SeedlotOwnerQuantity table for seedlot number {}",
+          seedlot.getId());
+      return List.of();
+    }
+
+    log.info(
+        "{} record(s) to be inserted in the SeedlotOwnerQuantity table for seedlot number {}",
+        sfodList.size(),
+        seedlot.getId());
+
     Map<String, MethodOfPaymentEntity> mopeMap =
         methodOfPaymentService.getAllValidMethodOfPayments().stream()
             .collect(
@@ -112,6 +123,6 @@ public class SeedlotOwnerQuantityService {
       soqList.add(ownerQuantityEntity);
     }
 
-    seedlotOwnerQuantityRepository.saveAllAndFlush(soqList);
+    return seedlotOwnerQuantityRepository.saveAllAndFlush(soqList);
   }
 }

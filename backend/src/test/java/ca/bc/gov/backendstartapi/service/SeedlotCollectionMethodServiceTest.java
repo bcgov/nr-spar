@@ -104,7 +104,6 @@ class SeedlotCollectionMethodServiceTest {
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    // call again, like an update, containing 2 collection methods
     SeedlotFormCollectionDto formDto = createFormDto(1, 2);
     seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto);
 
@@ -121,7 +120,7 @@ class SeedlotCollectionMethodServiceTest {
   }
 
   @Test
-  @DisplayName("Save Seedlot Collection Method two already existing")
+  @DisplayName("Save Seedlot Collection Method with two already existing")
   void saveSeedlotFormStep1_updateSeedlotEqual_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
 
@@ -144,7 +143,6 @@ class SeedlotCollectionMethodServiceTest {
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    // call again, like an update, containing 2 collection methods
     SeedlotFormCollectionDto formDto = createFormDto(1, 2);
     seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto);
 
@@ -159,7 +157,7 @@ class SeedlotCollectionMethodServiceTest {
   }
 
   @Test
-  @DisplayName("Save Seedlot Collection Method one method removed")
+  @DisplayName("Save Seedlot Collection Method with one method removed")
   void saveSeedlotFormStep1_updateSeedlotRemove_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
 
@@ -182,7 +180,6 @@ class SeedlotCollectionMethodServiceTest {
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    // call again, like an update, containing 2 collection methods
     SeedlotFormCollectionDto formDto = createFormDto();
     seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto);
 

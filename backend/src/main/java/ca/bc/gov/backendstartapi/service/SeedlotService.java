@@ -263,7 +263,7 @@ public class SeedlotService {
     String submittedStatus = "SUB";
     setSeedlotStatus(seedlot, submittedStatus);
 
-    log.info("Saving Seedlot Entity for Seedlot number {}", seedlotNumber);
+    log.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
 
     return new SeedlotCreateResponseDto(
