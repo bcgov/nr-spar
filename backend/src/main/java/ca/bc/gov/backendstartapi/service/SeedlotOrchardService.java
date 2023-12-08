@@ -50,7 +50,7 @@ public class SeedlotOrchardService {
 
     if (!seedlotOrchards.isEmpty()) {
       log.info(
-          "{} previous records on SeedlotOrchard table for seedlot number {}",
+          "{} previous records on the SeedlotOrchard table for seedlot number {}",
           seedlotOrchards.size(),
           seedlot.getId());
 
@@ -70,7 +70,7 @@ public class SeedlotOrchardService {
 
       // Remove possible leftovers
       log.info(
-          "{} leftover record(s) in the SeedlotOrchard table to remove for seedlot number {}",
+          "{} leftover record(s) on the SeedlotOrchard table to remove for seedlot number {}",
           existingSeedlotOrchardList.size(),
           seedlot.getId());
       List<SeedlotOrchardId> soiList = new ArrayList<>();
@@ -90,7 +90,8 @@ public class SeedlotOrchardService {
       return;
     }
 
-    log.info("No previous records on SeedlotOrchard table for seedlot number {}", seedlot.getId());
+    log.info(
+        "No previous records on the SeedlotOrchard table for seedlot number {}", seedlot.getId());
 
     saveSeedlotOrchards(seedlot, formStep4.orchardsId());
   }
@@ -98,13 +99,13 @@ public class SeedlotOrchardService {
   private void saveSeedlotOrchards(Seedlot seedlot, List<String> orchardIdList) {
     if (orchardIdList.isEmpty()) {
       log.info(
-          "No new records to be inserted in the SeedlotOrchard table for seedlot number {}",
+          "No new records to be inserted on the SeedlotOrchard table for seedlot number {}",
           seedlot.getId());
       return;
     }
 
     log.info(
-        "{} record(s) to be inserted in the SeedlotOrchard table for seedlot number {}",
+        "{} record(s) to be inserted on the SeedlotOrchard table for seedlot number {}",
         orchardIdList.size(),
         seedlot.getId());
 

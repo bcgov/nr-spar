@@ -47,6 +47,11 @@ public class SeedlotParentTreeService {
         seedlotParentTreeRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!sptList.isEmpty()) {
+      log.info(
+          "{} previous records on the SeedlotParentTree table for seedlot number {}",
+          sptList.size(),
+          seedlot.getId());
+
       List<Integer> sptExistingList =
           new ArrayList<>(sptList.stream().map(e -> e.getParentTreeId()).toList());
 
@@ -63,9 +68,10 @@ public class SeedlotParentTreeService {
 
       // Remove possible leftovers
       log.info(
-          "{} SeedlotParentTrees record(s) to remove for seedlot number {}",
+          "{} leftover record(s) on the SeedlotParentTree table to remove for seedlot number {}",
           sptExistingList.size(),
           seedlot.getId());
+
       List<SeedlotParentTreeId> sptiList = new ArrayList<>();
       for (Integer parentTreeId : sptExistingList) {
         sptiList.add(new SeedlotParentTreeId(seedlot.getId(), parentTreeId));
@@ -81,13 +87,27 @@ public class SeedlotParentTreeService {
       return;
     }
 
-    log.info("No previous SeedlotParentTree records for seedlot number {}", seedlot.getId());
+    log.info(
+        "No previous records on the SeedlotParentTree table for seedlot number {}",
+        seedlot.getId());
 
     addSeedlotParentTree(seedlot, seedlotFormParentTreeDtoList);
   }
 
   private void addSeedlotParentTree(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtDtoList) {
+    if (seedlotPtDtoList.isEmpty()) {
+      log.info(
+          "No new records to be inserted on the SeedlotParentTree table for seedlot number {}",
+          seedlot.getId());
+      return;
+    }
+
+    log.info(
+        "{} record(s) to be inserted on the SeedlotParentTree table for seedlot number {}",
+        seedlotPtDtoList.size(),
+        seedlot.getId());
+
     List<SeedlotParentTree> seedlotPtListToInsert = new ArrayList<>();
 
     for (SeedlotFormParentTreeSmpDto seedlotPtDto : seedlotPtDtoList) {

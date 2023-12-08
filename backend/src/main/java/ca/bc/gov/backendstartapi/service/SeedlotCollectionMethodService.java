@@ -58,7 +58,7 @@ public class SeedlotCollectionMethodService {
 
     if (!seedlotCollectionList.isEmpty()) {
       log.info(
-          "{} previous records on SeedlotCollectionMethod table for seedlot number {}",
+          "{} previous records on the SeedlotCollectionMethod table for seedlot number {}",
           seedlotCollectionList.size(),
           seedlot.getId());
 
@@ -80,7 +80,7 @@ public class SeedlotCollectionMethodService {
 
       // Remove possible leftovers
       log.info(
-          "{} leftover record(s) in the SeedlotCollectionMethod table to remove for seedlot number"
+          "{} leftover record(s) on the SeedlotCollectionMethod table to remove for seedlot number"
               + " {}",
           existingMethodList.size(),
           seedlot.getId());
@@ -102,7 +102,7 @@ public class SeedlotCollectionMethodService {
     }
 
     log.info(
-        "No previous records on SeedlotCollectionMethod table for seedlot number {}",
+        "No previous records on the SeedlotCollectionMethod table for seedlot number {}",
         seedlot.getId());
 
     addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());
@@ -117,14 +117,14 @@ public class SeedlotCollectionMethodService {
   private void addSeedlotCollectionMethod(Seedlot seedlot, List<Integer> methods) {
     if (methods.isEmpty()) {
       log.info(
-          "No new records to be inserted in the SeedlotCollectionMethod table for seedlot number"
+          "No new records to be inserted on the SeedlotCollectionMethod table for seedlot number"
               + " {}",
           seedlot.getId());
       return;
     }
 
     log.info(
-        "{} record(s) to be inserted in the SeedlotCollectionMethod table for seedlot number {}",
+        "{} record(s) to be inserted on the SeedlotCollectionMethod table for seedlot number {}",
         methods.size(),
         seedlot.getId());
 

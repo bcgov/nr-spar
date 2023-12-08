@@ -51,7 +51,7 @@ public class SeedlotOwnerQuantityService {
 
     if (!soqList.isEmpty()) {
       log.info(
-          "{} previous records on SeedlotOwerQuantity table for seedlot number {}",
+          "{} previous records on the SeedlotOwerQuantity table for seedlot number {}",
           soqList.size(),
           seedlot.getId());
 
@@ -75,7 +75,7 @@ public class SeedlotOwnerQuantityService {
 
       // Remove possible leftovers
       log.info(
-          "{} leftover record(s) in the SeedlotOwerQuantity table to remove for seedlot number {}",
+          "{} leftover record(s) on the SeedlotOwerQuantity table to remove for seedlot number {}",
           existingOwnerQtyIdList.size(),
           seedlot.getId());
 
@@ -98,13 +98,13 @@ public class SeedlotOwnerQuantityService {
       Seedlot seedlot, List<SeedlotFormOwnershipDto> sfodList) {
     if (sfodList.isEmpty()) {
       log.info(
-          "No new records to be inserted in the SeedlotOwnerQuantity table for seedlot number {}",
+          "No new records to be inserted on the SeedlotOwnerQuantity table for seedlot number {}",
           seedlot.getId());
       return List.of();
     }
 
     log.info(
-        "{} record(s) to be inserted in the SeedlotOwnerQuantity table for seedlot number {}",
+        "{} record(s) to be inserted on the SeedlotOwnerQuantity table for seedlot number {}",
         sfodList.size(),
         seedlot.getId());
 

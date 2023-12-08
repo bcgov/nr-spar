@@ -51,6 +51,11 @@ public class SeedlotParentTreeGeneticQualityService {
             seedlot.getId());
 
     if (!sptgqList.isEmpty()) {
+      log.info(
+          "{} previous records on the SeedlotParentTreeGeneticQuality table for seedlot number {}",
+          sptgqList.size(),
+          seedlot.getId());
+
       List<SeedlotParentTreeGeneticQualityId> existingSeedlotPtGenQltyIdList =
           sptgqList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
@@ -79,8 +84,8 @@ public class SeedlotParentTreeGeneticQualityService {
 
       // Remove possible leftovers
       log.info(
-          "{} record(s) in the SeedlotParentTreeGeneticQuality table to remove for seedlot number"
-              + " {}",
+          "{} leftover record(s) on SeedlotParentTreeGeneticQuality table to remove for seedlot"
+              + " number {}",
           existingSeedlotPtGenQltyIdList.size(),
           seedlot.getId());
       if (!existingSeedlotPtGenQltyIdList.isEmpty()) {
@@ -104,6 +109,20 @@ public class SeedlotParentTreeGeneticQualityService {
 
   private void addSeedlotParentTreeGenQlty(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert) {
+    if (seedlotPtGenQltyToInsert.isEmpty()) {
+      log.info(
+          "No new records to be inserted on the SeedlotParentTreeGeneticQuality table for seedlot"
+              + " number {}",
+          seedlot.getId());
+      return;
+    }
+
+    log.info(
+        "{} record(s) to be inserted on the SeedlotParentTreeGeneticQuality table for seedlot"
+            + " number {}",
+        seedlotPtGenQltyToInsert.size(),
+        seedlot.getId());
+
     Map<SeedlotParentTreeId, SeedlotParentTree> sptMap =
         seedlotParentTreeService.getAllSeedlotParentTree(seedlot.getId()).stream()
             .collect(Collectors.toMap(SeedlotParentTree::getId, Function.identity()));

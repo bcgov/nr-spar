@@ -49,6 +49,11 @@ public class SeedlotParentTreeSmpMixService {
         seedlotParentTreeSmpMixRepository.findAllBySeedlotParentTree_Seedlot_id(seedlot.getId());
 
     if (!sptsmList.isEmpty()) {
+      log.info(
+          "{} previous records on the SeedlotParentTreeSmpMix table for seedlot number {}",
+          sptsmList.size(),
+          seedlot.getId());
+
       List<SeedlotParentTreeSmpMixId> sptsmExistingList =
           sptsmList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
@@ -74,9 +79,11 @@ public class SeedlotParentTreeSmpMixService {
 
       // Remove possible leftovers
       log.info(
-          "{} record(s) in the SeedlotParentTreeSmpMix table to remove for seedlot number {}",
+          "{} leftover record(s) on the SeedlotParentTreeSmpMix table to remove for seedlot number"
+              + " {}",
           sptsmExistingList.size(),
           seedlot.getId());
+
       if (!sptsmExistingList.isEmpty()) {
         seedlotParentTreeSmpMixRepository.deleteAllByIdInBatch(sptsmExistingList);
         seedlotParentTreeSmpMixRepository.flush();
@@ -88,7 +95,9 @@ public class SeedlotParentTreeSmpMixService {
       return;
     }
 
-    log.info("No previous SeedlotParentTreeSmpMix records for seedlot number {}", seedlot.getId());
+    log.info(
+        "No previous records on the SeedlotParentTreeSmpMix table for seedlot number {}",
+        seedlot.getId());
 
     addSeedlotPtSmpMix(seedlot, seedlotFormParentTreeDtoList);
   }
@@ -96,6 +105,19 @@ public class SeedlotParentTreeSmpMixService {
   // Form Step 5 Seedlot Parent Tree SMP Fix related
   private void addSeedlotPtSmpMix(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+    if (seedlotFormParentTreeDtoList.isEmpty()) {
+      log.info(
+          "No new records to be inserted on the SeedlotParentTreeSmpMix table for seedlot number"
+              + " {}",
+          seedlot.getId());
+      return;
+    }
+
+    log.info(
+        "{} record(s) to be inserted on the SeedlotParentTreeSmpMix table for seedlot number {}",
+        seedlotFormParentTreeDtoList.size(),
+        seedlot.getId());
+
     Map<Integer, SeedlotParentTree> sptMap =
         seedlotParentTreeService.getAllSeedlotParentTree(seedlot.getId()).stream()
             .collect(Collectors.toMap(SeedlotParentTree::getParentTreeId, Function.identity()));

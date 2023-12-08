@@ -43,6 +43,11 @@ public class SeedlotGeneticWorthService {
     List<ParentTreeGeneticQualityDto> sgwInsertList = new ArrayList<>();
 
     if (!sgwList.isEmpty()) {
+      log.info(
+          "{} previous records on the SeedlotGeneticWorth table for seedlot number {}",
+          sgwList.size(),
+          seedlot.getId());
+
       List<String> sgwExistingList =
           new ArrayList<>(sgwList.stream().map(SeedlotGeneticWorth::getGeneticWorthCode).toList());
 
@@ -59,9 +64,10 @@ public class SeedlotGeneticWorthService {
 
       // Remove possible leftovers
       log.info(
-          "{} SeedlotgeneticWorth record(s) to remove for seedlot number {}",
+          "{} leftover record(s) on the SeedlotGeneticWorth table to remove for seedlot number {}",
           sgwExistingList.size(),
           seedlot.getId());
+
       List<SeedlotGeneticWorthId> sgwiList = new ArrayList<>();
       for (String genWorthCode : sgwExistingList) {
         sgwiList.add(new SeedlotGeneticWorthId(seedlot.getId(), genWorthCode));
@@ -77,7 +83,9 @@ public class SeedlotGeneticWorthService {
       return;
     }
 
-    log.info("No previous SeedlotGeneticWorth records for seedlot number {}", seedlot.getId());
+    log.info(
+        "No previous records on the SeedlotGeneticWorth table for seedlot number {}",
+        seedlot.getId());
 
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
       sgwInsertList.addAll(seedlotPtFormDto.parentTreeGeneticQualities());
@@ -87,6 +95,18 @@ public class SeedlotGeneticWorthService {
 
   private void addSeedlotGeneticWorth(
       Seedlot seedlot, List<ParentTreeGeneticQualityDto> genWorthCodeToInsert) {
+    if (genWorthCodeToInsert.isEmpty()) {
+      log.info(
+          "No new records to be inserted on the SeedlotGeneticWorth table for seedlot number {}",
+          seedlot.getId());
+      return;
+    }
+
+    log.info(
+        "{} record(s) to be inserted on the SeedlotGeneticWorth table for seedlot number {}",
+        genWorthCodeToInsert.size(),
+        seedlot.getId());
+
     List<SeedlotGeneticWorth> seedlotGeneticWorths = new ArrayList<>();
     for (ParentTreeGeneticQualityDto ptgqDto : genWorthCodeToInsert) {
 

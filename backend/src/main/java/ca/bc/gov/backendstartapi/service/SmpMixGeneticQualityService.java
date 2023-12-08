@@ -49,6 +49,11 @@ public class SmpMixGeneticQualityService {
         smpMixGeneticQualityRepository.findAllBySmpMix_Seedlot_id(seedlot.getId());
 
     if (!smpMixGenQltyList.isEmpty()) {
+      log.info(
+          "{} previous records on the SmpMixGeneticQuality table for seedlot number {}",
+          smpMixGenQltyList.size(),
+          seedlot.getId());
+
       List<SmpMixGeneticQualityId> existingSmpMixGenQltyIdList =
           smpMixGenQltyList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
@@ -73,8 +78,10 @@ public class SmpMixGeneticQualityService {
 
       // Remove possible leftovers
       log.info(
-          "{} SmpMixGeneticQuality record(s) to remove for seedlot number {}",
-          existingSmpMixGenQltyIdList.size());
+          "{} leftover record(s) on the SmpMixGeneticQuality table to remove for seedlot number {}",
+          existingSmpMixGenQltyIdList.size(),
+          seedlot.getId());
+
       if (!existingSmpMixGenQltyIdList.isEmpty()) {
         smpMixGeneticQualityRepository.deleteAllByIdInBatch(existingSmpMixGenQltyIdList);
         smpMixGeneticQualityRepository.flush();
@@ -86,7 +93,9 @@ public class SmpMixGeneticQualityService {
       return;
     }
 
-    log.info("No previous SmpMixGeneticQuality records for seedlot number {}", seedlot.getId());
+    log.info(
+        "No previous records on the SmpMixGeneticQuality table for seedlot number {}",
+        seedlot.getId());
 
     addSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
@@ -94,6 +103,18 @@ public class SmpMixGeneticQualityService {
   // Form Step 5 SMP Mix Genetic Quality related
   private void addSmpMixGenQlty(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+    if (seedlotFormParentTreeDtoList.isEmpty()) {
+      log.info(
+          "No new records to be inserted on the SmpMixGeneticQuality table for seedlot number {}",
+          seedlot.getId());
+      return;
+    }
+
+    log.info(
+        "{} record(s) to be inserted on the SmpMixGeneticQuality table for seedlot number {}",
+        seedlotFormParentTreeDtoList.size(),
+        seedlot.getId());
+
     Map<Integer, SmpMix> smMap =
         smpMixService.getAllBySeedlotNumber(seedlot.getId()).stream()
             .collect(Collectors.toMap(SmpMix::getParentTreeId, Function.identity()));

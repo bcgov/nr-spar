@@ -35,6 +35,11 @@ public class SmpMixService {
     List<SmpMix> smpMixs = smpMixRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!smpMixs.isEmpty()) {
+      log.info(
+          "{} previous records on the SmpMix table for seedlot number {}",
+          smpMixs.size(),
+          seedlot.getId());
+
       List<Integer> existingParentTreeIds =
           smpMixs.stream().map(SmpMix::getParentTreeId).collect(Collectors.toList());
 
@@ -50,9 +55,10 @@ public class SmpMixService {
 
       // Remove possible leftovers
       log.info(
-          "{} SmpMix record(s) to remove for seedlot number {}",
+          "{} leftover record(s) on the SmpMix table to remove for seedlot number {}",
           existingParentTreeIds.size(),
           seedlot.getId());
+
       List<SmpMixId> smpMixIdsToRemove = new ArrayList<>();
       for (Integer parentTreeId : existingParentTreeIds) {
         SmpMixId smpMixId = new SmpMixId(seedlot.getId(), parentTreeId);
@@ -70,12 +76,24 @@ public class SmpMixService {
       return;
     }
 
-    log.info("No previous SmpMix records for seedlot number {}", seedlot.getId());
+    log.info("No previous records on the SmpMix table for seedlot number {}", seedlot.getId());
 
     addSmpMix(seedlot, seedlotFormParentTreeDtoList);
   }
 
   private void addSmpMix(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> formDtos) {
+    if (formDtos.isEmpty()) {
+      log.info(
+          "No new records to be inserted on the SmpMix table for seedlot number {}",
+          seedlot.getId());
+      return;
+    }
+
+    log.info(
+        "{} record(s) to be inserted on the SmpMix table for seedlot number {}",
+        formDtos.size(),
+        seedlot.getId());
+
     List<SmpMix> smpMixs = new ArrayList<>();
 
     for (SeedlotFormParentTreeSmpDto formDto : formDtos) {
