@@ -494,7 +494,7 @@ class SeedlotServiceTest {
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
     doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any());
-    doNothing().when(seedlotOwnerQuantityService).saveSeedlotFormStep2(any(), any());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any())).thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any());
     doNothing().when(seedlotParentTreeService).saveSeedlotFormStep5(any(), any());
 
@@ -516,7 +516,7 @@ class SeedlotServiceTest {
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
     doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any());
-    doNothing().when(seedlotOwnerQuantityService).saveSeedlotFormStep2(any(), any());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any())).thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any());
     doNothing().when(seedlotParentTreeService).saveSeedlotFormStep5(any(), any());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
@@ -541,7 +541,7 @@ class SeedlotServiceTest {
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
     doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any());
-    doNothing().when(seedlotOwnerQuantityService).saveSeedlotFormStep2(any(), any());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any())).thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any());
     doNothing().when(seedlotParentTreeService).saveSeedlotFormStep5(any(), any());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
