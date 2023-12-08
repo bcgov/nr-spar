@@ -67,7 +67,6 @@ class SeedlotOwnerQuantityServiceTest {
   @Test
   @DisplayName("Save Seedlot Owner Quantity first submmit")
   void saveSeedlotFormStep2_firstSubmit_shouldSucceed() {
-    Seedlot seedlot = new Seedlot("54321");
     when(seedlotOwnerQuantityRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
 
     MethodOfPaymentEntity mope = new MethodOfPaymentEntity();
@@ -77,6 +76,7 @@ class SeedlotOwnerQuantityServiceTest {
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
+    Seedlot seedlot = new Seedlot("54321");
     SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "02");
     when(seedlotOwnerQuantityRepository.saveAllAndFlush(any())).thenReturn(List.of(soq));
 

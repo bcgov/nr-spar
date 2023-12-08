@@ -37,13 +37,24 @@ public class SeedlotOwnerQuantityService {
    * @param formStep2List A List of {@link SeedlotFormOwnershipDto}
    * @return A list of {@link SeedlotOwnerQuantity} created, if any
    */
-  public List<SeedlotOwnerQuantity> saveSeedlotFormStep2(Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List) {
+  public List<SeedlotOwnerQuantity> saveSeedlotFormStep2(
+      Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List) {
     log.info("Saving Seedlot Form Step 2-Ownership for seedlot number {}", seedlot.getId());
+
+    log.info(
+        "Received {} SeedlotOwerQuantity record(s) for seedlot number {}",
+        formStep2List.size(),
+        seedlot.getId());
 
     List<SeedlotOwnerQuantity> soqList =
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!soqList.isEmpty()) {
+      log.info(
+          "{} previous records on SeedlotOwerQuantity table for seedlot number {}",
+          soqList.size(),
+          seedlot.getId());
+
       List<SeedlotOwnerQuantityId> existingOwnerQtyIdList =
           soqList.stream().map(x -> x.getId()).collect(Collectors.toList());
 

@@ -40,18 +40,24 @@ public class SeedlotOrchardService {
     seedlot.setPollenContaminantBreedingValue(formStep4.contaminantPollenBv());
     seedlot.setPollenContaminationMethodCode(formStep4.pollenContaminationMthdCode());
 
-    int orchardsLen = formStep4.orchardsId().size();
     log.info(
-        "Saving {} SeedlotOrchard record(s) for seedlot number {}", orchardsLen, seedlot.getId());
+        "Received {} SeedlotOrchard record(s) for seedlot number {}",
+        formStep4.orchardsId().size(),
+        seedlot.getId());
 
     List<SeedlotOrchard> seedlotOrchards =
         seedlotOrchardRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!seedlotOrchards.isEmpty()) {
+      log.info(
+          "{} previous records on SeedlotOrchard table for seedlot number {}",
+          seedlotOrchards.size(),
+          seedlot.getId());
+
       List<String> existingSeedlotOrchardList =
           new ArrayList<>(seedlotOrchards.stream().map(SeedlotOrchard::getOrchard).toList());
 
-      List<String> seedlotOrchardIdToInsert = List.of();
+      List<String> seedlotOrchardIdToInsert = new ArrayList<>();
 
       for (String formOrchardId : formStep4.orchardsId()) {
         if (existingSeedlotOrchardList.contains(formOrchardId)) {
@@ -64,10 +70,10 @@ public class SeedlotOrchardService {
 
       // Remove possible leftovers
       log.info(
-          "{} record(s) in the SeedlotOrchard table to remove for seedlot number {}",
+          "{} leftover record(s) in the SeedlotOrchard table to remove for seedlot number {}",
           existingSeedlotOrchardList.size(),
           seedlot.getId());
-      List<SeedlotOrchardId> soiList = List.of();
+      List<SeedlotOrchardId> soiList = new ArrayList<>();
       existingSeedlotOrchardList.forEach(
           orchardId -> {
             soiList.add(new SeedlotOrchardId(seedlot.getId(), orchardId));
@@ -90,6 +96,18 @@ public class SeedlotOrchardService {
   }
 
   private void saveSeedlotOrchards(Seedlot seedlot, List<String> orchardIdList) {
+    if (orchardIdList.isEmpty()) {
+      log.info(
+          "No new records to be inserted in the SeedlotOrchard table for seedlot number {}",
+          seedlot.getId());
+      return;
+    }
+
+    log.info(
+        "{} record(s) to be inserted in the SeedlotOrchard table for seedlot number {}",
+        orchardIdList.size(),
+        seedlot.getId());
+
     List<SeedlotOrchard> seedlotOrchards = new ArrayList<>();
     for (String orchardId : orchardIdList) {
       SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, orchardId);

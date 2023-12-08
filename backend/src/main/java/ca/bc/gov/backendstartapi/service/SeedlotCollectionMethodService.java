@@ -48,10 +48,20 @@ public class SeedlotCollectionMethodService {
     seedlot.setTotalConeVolume(formStep1.clctnVolume());
     seedlot.setComment(formStep1.seedlotComment());
 
+    log.info(
+        "Received {} SeedlotCollectionMethod record(s) for seedlot number {}",
+        formStep1.coneCollectionMethodCodes().size(),
+        seedlot.getId());
+
     List<SeedlotCollectionMethod> seedlotCollectionList =
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!seedlotCollectionList.isEmpty()) {
+      log.info(
+          "{} previous records on SeedlotCollectionMethod table for seedlot number {}",
+          seedlotCollectionList.size(),
+          seedlot.getId());
+
       List<Integer> existingMethodList =
           seedlotCollectionList.stream()
               .map(x -> x.getConeCollectionMethod().getConeCollectionMethodCode())

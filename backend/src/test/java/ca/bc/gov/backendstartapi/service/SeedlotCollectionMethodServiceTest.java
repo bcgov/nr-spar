@@ -56,9 +56,6 @@ class SeedlotCollectionMethodServiceTest {
   @Test
   @DisplayName("Save Seedlot Collection Method first submmit")
   void saveSeedlotFormStep1_firstSubmit_shouldSucceed() {
-    Seedlot seedlot = new Seedlot("54321");
-    SeedlotFormCollectionDto formDto = createFormDto(1);
-
     when(seedlotCollectionMethodRepository.findAllBySeedlot_id(any())).thenReturn(List.of());
 
     ConeCollectionMethodEntity ccme = new ConeCollectionMethodEntity();
@@ -70,6 +67,8 @@ class SeedlotCollectionMethodServiceTest {
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
+    Seedlot seedlot = new Seedlot("54321");
+    SeedlotFormCollectionDto formDto = createFormDto(1);
     seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto);
 
     Assertions.assertNotNull(seedlot);
