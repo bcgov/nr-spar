@@ -1,3 +1,4 @@
+import validator from 'validator';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import {
   AllParentTreeMap, RowDataDictType, RowItem, StrTypeRowItem
@@ -90,6 +91,32 @@ const calculateSmpRow = (
   return clonedData;
 };
 
+const isConeCountInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: 0, max: 10000 })
+);
+
+const isPollenCountInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: 0, max: 10000 })
+);
+
+/**
+ * SMP success on parent (%)
+ */
+const isSmpSuccInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: 0, max: 100 })
+);
+
+/**
+ * Non-orchard pollen contam. (%)
+ */
+const isNonOrchardContamInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: 0, max: 100 })
+);
+
+const isVolumeInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: 0, max: 10000 })
+);
+
 // Validate and populate inputs
 export const handleInput = (
   rowData: RowItem,
@@ -104,6 +131,7 @@ export const handleInput = (
   const tableRowData = { ...clonedState.tableRowData };
   let isInvalid = false;
   let isDuplicate = false;
+  let errMsg = '';
   if (colName === 'parentTreeNumber') {
     if (inputValue.length !== 0) {
       isInvalid = isPtNumberInvalid(inputValue, state.allParentTreeData);
@@ -123,14 +151,50 @@ export const handleInput = (
       mixTabData[rowData.rowId] = cleanRowData(rowData.rowId);
     }
   }
-  if (colName === 'volume') {
-    mixTabData = calculateSmpRow(inputValue, rowData, state.mixTabData, applicableGenWorths);
+
+  if (colName === 'coneCount') {
+    isInvalid = isConeCountInvalid(inputValue);
+    if (isInvalid) {
+      errMsg = 'Bad cone';
+    }
   }
 
+  if (colName === 'pollenCount') {
+    isInvalid = isPollenCountInvalid(inputValue);
+    if (isInvalid) {
+      errMsg = 'Bad pollen';
+    }
+  }
+
+  if (colName === 'smpSuccessPerc') {
+    isInvalid = isSmpSuccInvalid(inputValue);
+    if (isInvalid) {
+      errMsg = 'Bad smp';
+    }
+  }
+
+  if (colName === 'nonOrchardPollenContam') {
+    isInvalid = isNonOrchardContamInvalid(inputValue);
+    if (isInvalid) {
+      errMsg = 'Bad contam';
+    }
+  }
+
+  if (colName === 'volume') {
+    mixTabData = calculateSmpRow(inputValue, rowData, state.mixTabData, applicableGenWorths);
+    isInvalid = isVolumeInvalid(inputValue);
+    if (isInvalid) {
+      errMsg = 'Bad volume';
+    }
+  }
+
+  // Set isInvalid and errMsg
   if (rowData.isMixTab) {
     mixTabData[rowData.rowId][colName].isInvalid = isInvalid || isDuplicate;
+    mixTabData[rowData.rowId][colName].errMsg = errMsg;
   } else {
     tableRowData[rowData.parentTreeNumber.value][colName].isInvalid = isInvalid;
+    tableRowData[rowData.parentTreeNumber.value][colName].errMsg = errMsg;
   }
   clonedState.mixTabData = mixTabData;
   clonedState.tableRowData = tableRowData;
