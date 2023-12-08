@@ -10,6 +10,8 @@ export const DEFAULT_PAGE_SIZE = 40;
 
 export const DEFAULT_MIX_PAGE_SIZE = 20;
 
+export const DEFAULT_MIX_PAGE_ROWS = 20;
+
 export const DEFAULT_PAGE_NUMBER = 1;
 
 export const EMPTY_NUMBER_STRING = '';
@@ -155,71 +157,178 @@ export const geneticWorthDict: GeneticWorthDictType = {
 };
 
 export const rowTemplate: RowItem = {
-  parentTreeNumber: '',
-  coneCount: '',
-  pollenCount: '',
-  smpSuccessPerc: '',
-  nonOrchardPollenContam: '',
-  volume: '',
-  proportion: '',
-  ad: '',
-  dfs: '',
-  dfu: '',
-  dfw: '',
-  dsb: '',
-  dsc: '',
-  dsg: '',
-  gvo: '',
-  iws: '',
-  wdu: '',
-  wwd: '',
-  w_ad: '',
-  w_dfs: '',
-  w_dfu: '',
-  w_dfw: '',
-  w_dsb: '',
-  w_dsc: '',
-  w_dsg: '',
-  w_gvo: '',
-  w_iws: '',
-  w_wdu: '',
-  w_wwd: '',
-  meanDegLat: '',
-  meanMinLat: '',
-  meanDegLong: '',
-  meanMinLong: '',
-  meanElevation: '',
-  isMixTab: false,
-  invalidObjs: {
-    parentTreeNumber: {
-      isInvalid: false,
-      invalidText: ''
-    },
-    coneCount: {
-      isInvalid: false,
-      invalidText: ''
-    },
-    pollenCount: {
-      isInvalid: false,
-      invalidText: ''
-    },
-    smpSuccessPerc: {
-      isInvalid: false,
-      invalidText: ''
-    },
-    nonOrchardPollenContam: {
-      isInvalid: false,
-      invalidText: ''
-    },
-    volume: {
-      isInvalid: false,
-      invalidText: ''
-    },
-    proportion: {
-      isInvalid: false,
-      invalidText: ''
-    }
-  }
+  rowId: '',
+  parentTreeNumber: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  coneCount: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  pollenCount: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  smpSuccessPerc: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  nonOrchardPollenContam: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  volume: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  proportion: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  ad: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  dfs: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  dfu: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  dfw: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  dsb: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  dsc: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  dsg: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  gvo: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  iws: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  wdu: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  wwd: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_ad: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_dfs: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_dfu: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_dfw: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_dsb: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_dsc: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_dsg: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_gvo: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_iws: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_wdu: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_wwd: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  meanDegLat: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  meanMinLat: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  meanDegLong: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  meanMinLong: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  meanElevation: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  isMixTab: false
 };
 
 export const headerTemplate: Array<HeaderObj> = [

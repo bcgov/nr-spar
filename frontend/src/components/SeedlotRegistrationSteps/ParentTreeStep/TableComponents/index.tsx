@@ -6,7 +6,7 @@ import {
 import { TrashCan } from '@carbon/icons-react';
 import { pageText, PageSizesConfig } from '../constants';
 import {
-  HeaderObj, RowItem, TabTypes
+  HeaderObj, HeaderObjId, RowItem, StrTypeRowItem, TabTypes
 } from '../definitions';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { OrchardObj } from '../../OrchardStep/definitions';
@@ -106,7 +106,7 @@ export const renderColOptions = (
  */
 const renderNonInputCell = (
   rowData: RowItem,
-  colName: keyof RowItem,
+  colName: HeaderObjId,
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
@@ -122,7 +122,7 @@ const renderNonInputCell = (
       />
     );
   }
-  return rowData[colName];
+  return rowData[colName as keyof StrTypeRowItem].value;
 };
 
 const renderTableCell = (
@@ -133,8 +133,16 @@ const renderTableCell = (
   setStepData: Function
 ) => {
   const className = header.editable ? 'td-no-padding' : null;
+  const headerIdRowKey = header.id as keyof StrTypeRowItem;
+  let cellId = '';
+  const idPrefix = rowData.isMixTab ? rowData.rowId : rowData.parentTreeNumber;
+  if (header.id === 'actions') {
+    cellId = `${idPrefix}-actions`;
+  } else {
+    cellId = rowData[headerIdRowKey].id;
+  }
   return (
-    <TableCell key={header.id} className={className}>
+    <TableCell key={header.id} className={className} id={cellId}>
       {
         header.editable
           ? (
@@ -144,12 +152,12 @@ const renderTableCell = (
               invalidText=""
               type="number"
               placeholder="Add value"
-              value={rowData[header.id]}
-              id={`${rowData.parentTreeNumber === '' ? rowData.rowId : rowData.parentTreeNumber}-${header.id}`}
+              value={rowData[headerIdRowKey].value}
+              id={`${cellId}-input`}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 setInputChange(
                   rowData,
-                  header.id,
+                  headerIdRowKey,
                   event.target.value,
                   state,
                   setStepData
@@ -163,13 +171,13 @@ const renderTableCell = (
                 handleInput(
                   rowData,
                   event.target.value,
-                  header.id,
+                  headerIdRowKey,
                   applicableGenWorths,
                   state,
                   setStepData
                 )
               )}
-              invalid={rowData.invalidObjs[header.id].isInvalid}
+              invalid={rowData[headerIdRowKey].isInvalid}
             />
           )
           : (
@@ -227,7 +235,7 @@ export const renderTableBody = (
           rowData.isMixTab
             ? null
             : (
-              <TableRow key={rowData.parentTreeNumber}>
+              <TableRow key={rowData.parentTreeNumber.value}>
                 {
                   headerConfig
                     .filter((header) => (

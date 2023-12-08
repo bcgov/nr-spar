@@ -80,7 +80,7 @@ const ParentTreeStep = (
   const [currMixPageSize, setCurrMixPageSize] = useState<number>(DEFAULT_MIX_PAGE_SIZE);
   const [currentMixPage, setCurrentMixPage] = useState<number>(DEFAULT_PAGE_NUMBER);
   const [slicedMixRows, setSlicedMixRows] = useState<Array<RowItem>>(
-    sortAndSliceRows(Object.values(state.mixTabData), currentMixPage, currMixPageSize, true, 'parentTreeNumber')
+    () => sortAndSliceRows(Object.values(state.mixTabData), currentMixPage, currMixPageSize, true, 'parentTreeNumber')
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
   const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
@@ -89,11 +89,13 @@ const ParentTreeStep = (
   const [
     genWorthInfoItems,
     setGenWorthInfoItems
-  ] = useState<Record<keyof RowItem, InfoDisplayObj[]>>({});
+  ] = useState<Record<keyof RowItem, InfoDisplayObj[]>>(
+    {} as Record<keyof RowItem, InfoDisplayObj[]>
+  );
   const [
     weightedGwInfoItems,
     setWeightedGwInfoItems
-  ] = useState<Record<keyof RowItem, InfoDisplayObj>>({});
+  ] = useState<Record<keyof RowItem, InfoDisplayObj>>({} as Record<keyof RowItem, InfoDisplayObj>);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
   const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));

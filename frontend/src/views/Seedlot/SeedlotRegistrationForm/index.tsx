@@ -52,7 +52,6 @@ import {
   initOwnershipState,
   initExtractionStorageState,
   initParentTreeState,
-  generateDefaultRows,
   validateCollectionStep,
   verifyCollectionStepCompleteness,
   validateOwnershipStep,
@@ -62,6 +61,8 @@ import {
 import { initialProgressConfig, stepMap } from './constants';
 
 import './styles.scss';
+import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
 const defaultExtStorCode = '00';
 const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
@@ -77,14 +78,14 @@ const SeedlotRegistrationForm = () => {
   ] = useState<ProgressIndicatorConfig>(initialProgressConfig);
 
   // Initialize all step's state here
-  const [allStepData, setAllStepData] = useState<AllStepData>({
+  const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
     collectionStep: initCollectionState(EmptyMultiOptObj, ''),
     interimStep: initInterimState('', ''),
     ownershipStep: [initOwnershipState(EmptyMultiOptObj, '')],
     orchardStep: initOrchardState(),
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
-  });
+  }));
 
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
@@ -249,7 +250,7 @@ const SeedlotRegistrationForm = () => {
   const cleanParentTables = () => {
     const clonedState = { ...allStepData };
     clonedState.parentTreeStep.tableRowData = {};
-    clonedState.parentTreeStep.mixTabData = generateDefaultRows();
+    clonedState.parentTreeStep.mixTabData = generateDefaultRows(DEFAULT_MIX_PAGE_ROWS);
     setAllStepData(clonedState);
   };
 
