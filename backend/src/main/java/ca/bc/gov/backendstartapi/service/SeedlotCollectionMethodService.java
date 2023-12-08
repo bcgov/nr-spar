@@ -57,7 +57,7 @@ public class SeedlotCollectionMethodService {
               .map(x -> x.getConeCollectionMethod().getConeCollectionMethodCode())
               .collect(Collectors.toList());
 
-      List<Integer> methodCodesToInsert = List.of();
+      List<Integer> methodCodesToInsert = new ArrayList<>();
 
       for (Integer formMethodCode : formStep1.coneCollectionMethodCodes()) {
         if (existingMethodList.contains(formMethodCode)) {
@@ -70,11 +70,12 @@ public class SeedlotCollectionMethodService {
 
       // Remove possible leftovers
       log.info(
-          "{} record(s) in the SeedlotCollectionMethod table to remove for seedlot number {}",
+          "{} leftover record(s) in the SeedlotCollectionMethod table to remove for seedlot number"
+              + " {}",
           existingMethodList.size(),
           seedlot.getId());
 
-      List<SeedlotCollectionMethodId> scmIdList = List.of();
+      List<SeedlotCollectionMethodId> scmIdList = new ArrayList<>();
       for (Integer methdCodeToRemove : existingMethodList) {
         scmIdList.add(new SeedlotCollectionMethodId(seedlot.getId(), methdCodeToRemove));
       }
@@ -104,8 +105,16 @@ public class SeedlotCollectionMethodService {
    * @param methods List of Collection methods to be saved
    */
   private void addSeedlotCollectionMethod(Seedlot seedlot, List<Integer> methods) {
+    if (methods.isEmpty()) {
+      log.info(
+          "No new records to be inserted in the SeedlotCollectionMethod table for seedlot number"
+              + " {}",
+          seedlot.getId());
+      return;
+    }
+
     log.info(
-        "Creating {} record(s) in the SeedlotCollectionMethod table for seedlot number {}",
+        "{} record(s) to be inserted in the SeedlotCollectionMethod table for seedlot number {}",
         methods.size(),
         seedlot.getId());
 

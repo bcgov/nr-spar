@@ -1,12 +1,14 @@
 package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
@@ -31,7 +33,7 @@ class SeedlotCollectionMethodServiceTest {
 
   private SeedlotCollectionMethodService seedCollectionMethodService;
 
-  private SeedlotFormCollectionDto createFormDto() {
+  private SeedlotFormCollectionDto createFormDto(Integer... methods) {
     return new SeedlotFormCollectionDto(
         "00012797",
         "02",
@@ -41,7 +43,7 @@ class SeedlotCollectionMethodServiceTest {
         new BigDecimal("4"),
         new BigDecimal("8"),
         "seedlot comment",
-        List.of(1));
+        List.of(methods));
   }
 
   @BeforeEach
@@ -55,7 +57,7 @@ class SeedlotCollectionMethodServiceTest {
   @DisplayName("Save Seedlot Collection Method first submmit")
   void saveSeedlotFormStep1_firstSubmit_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
-    SeedlotFormCollectionDto formDto = createFormDto();
+    SeedlotFormCollectionDto formDto = createFormDto(1);
 
     when(seedlotCollectionMethodRepository.findAllBySeedlot_id(any())).thenReturn(List.of());
 
@@ -80,18 +82,117 @@ class SeedlotCollectionMethodServiceTest {
     Assertions.assertEquals(formDto.seedlotComment(), seedlot.getComment());
   }
 
-  // update - add one
+  @Test
+  @DisplayName("Save Seedlot Collection Method with one new method")
   void saveSeedlotFormStep1_updateSeedlotAdd_shouldSucceed() {
-    //
+    Seedlot seedlot = new Seedlot("54321");
+
+    ConeCollectionMethodEntity ccme1 = new ConeCollectionMethodEntity();
+    ccme1.setConeCollectionMethodCode(1);
+
+    SeedlotCollectionMethod scm = new SeedlotCollectionMethod(seedlot, ccme1);
+    when(seedlotCollectionMethodRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(scm));
+
+    ConeCollectionMethodEntity ccme2 = new ConeCollectionMethodEntity();
+    ccme2.setConeCollectionMethodCode(2);
+
+    when(coneCollectionMethodService.getAllValidConeCollectionMethods())
+        .thenReturn(List.of(ccme1, ccme2));
+
+    AuditInformation audit = new AuditInformation("userId");
+    when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
+
+    when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
+
+    // call again, like an update, containing 2 collection methods
+    SeedlotFormCollectionDto formDto = createFormDto(1, 2);
+    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto);
+
+    Assertions.assertNotNull(seedlot);
+    Assertions.assertEquals(formDto.collectionClientNumber(), seedlot.getCollectionClientNumber());
+    Assertions.assertEquals(formDto.collectionLocnCode(), seedlot.getCollectionLocationCode());
+    Assertions.assertEquals(formDto.collectionStartDate(), seedlot.getCollectionStartDate());
+    Assertions.assertEquals(formDto.collectionEndDate(), seedlot.getCollectionEndDate());
+    Assertions.assertEquals(formDto.volPerContainer(), seedlot.getContainerVolume());
+    Assertions.assertEquals(formDto.clctnVolume(), seedlot.getTotalConeVolume());
+    Assertions.assertEquals(formDto.seedlotComment(), seedlot.getComment());
+
+    verify(seedlotCollectionMethodRepository).saveAllAndFlush(any());
   }
 
-  // update - equal
+  @Test
+  @DisplayName("Save Seedlot Collection Method two already existing")
   void saveSeedlotFormStep1_updateSeedlotEqual_shouldSucceed() {
-    //
+    Seedlot seedlot = new Seedlot("54321");
+
+    ConeCollectionMethodEntity ccme1 = new ConeCollectionMethodEntity();
+    ccme1.setConeCollectionMethodCode(1);
+
+    ConeCollectionMethodEntity ccme2 = new ConeCollectionMethodEntity();
+    ccme2.setConeCollectionMethodCode(2);
+
+    SeedlotCollectionMethod scm = new SeedlotCollectionMethod(seedlot, ccme1);
+    SeedlotCollectionMethod scm2 = new SeedlotCollectionMethod(seedlot, ccme2);
+    when(seedlotCollectionMethodRepository.findAllBySeedlot_id("54321"))
+        .thenReturn(List.of(scm, scm2));
+
+    when(coneCollectionMethodService.getAllValidConeCollectionMethods())
+        .thenReturn(List.of(ccme1, ccme2));
+
+    AuditInformation audit = new AuditInformation("userId");
+    when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
+
+    when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
+
+    // call again, like an update, containing 2 collection methods
+    SeedlotFormCollectionDto formDto = createFormDto(1, 2);
+    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto);
+
+    Assertions.assertNotNull(seedlot);
+    Assertions.assertEquals(formDto.collectionClientNumber(), seedlot.getCollectionClientNumber());
+    Assertions.assertEquals(formDto.collectionLocnCode(), seedlot.getCollectionLocationCode());
+    Assertions.assertEquals(formDto.collectionStartDate(), seedlot.getCollectionStartDate());
+    Assertions.assertEquals(formDto.collectionEndDate(), seedlot.getCollectionEndDate());
+    Assertions.assertEquals(formDto.volPerContainer(), seedlot.getContainerVolume());
+    Assertions.assertEquals(formDto.clctnVolume(), seedlot.getTotalConeVolume());
+    Assertions.assertEquals(formDto.seedlotComment(), seedlot.getComment());
   }
 
-  // update - remove one
+  @Test
+  @DisplayName("Save Seedlot Collection Method one method removed")
   void saveSeedlotFormStep1_updateSeedlotRemove_shouldSucceed() {
-    //
+    Seedlot seedlot = new Seedlot("54321");
+
+    ConeCollectionMethodEntity ccme1 = new ConeCollectionMethodEntity();
+    ccme1.setConeCollectionMethodCode(1);
+
+    ConeCollectionMethodEntity ccme2 = new ConeCollectionMethodEntity();
+    ccme2.setConeCollectionMethodCode(2);
+
+    SeedlotCollectionMethod scm = new SeedlotCollectionMethod(seedlot, ccme1);
+    SeedlotCollectionMethod scm2 = new SeedlotCollectionMethod(seedlot, ccme2);
+    when(seedlotCollectionMethodRepository.findAllBySeedlot_id("54321"))
+        .thenReturn(List.of(scm, scm2));
+
+    when(coneCollectionMethodService.getAllValidConeCollectionMethods())
+        .thenReturn(List.of(ccme1, ccme2));
+
+    AuditInformation audit = new AuditInformation("userId");
+    when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
+
+    when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
+
+    // call again, like an update, containing 2 collection methods
+    SeedlotFormCollectionDto formDto = createFormDto();
+    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto);
+
+    Assertions.assertNotNull(seedlot);
+    Assertions.assertEquals(formDto.collectionClientNumber(), seedlot.getCollectionClientNumber());
+    Assertions.assertEquals(formDto.collectionLocnCode(), seedlot.getCollectionLocationCode());
+    Assertions.assertEquals(formDto.collectionStartDate(), seedlot.getCollectionStartDate());
+    Assertions.assertEquals(formDto.collectionEndDate(), seedlot.getCollectionEndDate());
+    Assertions.assertEquals(formDto.volPerContainer(), seedlot.getContainerVolume());
+    Assertions.assertEquals(formDto.clctnVolume(), seedlot.getTotalConeVolume());
+    Assertions.assertEquals(formDto.seedlotComment(), seedlot.getComment());
   }
 }
