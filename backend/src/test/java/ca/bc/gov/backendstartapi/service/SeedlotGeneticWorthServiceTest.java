@@ -65,8 +65,6 @@ class SeedlotGeneticWorthServiceTest {
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
-    SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
-
     Seedlot seedlot = new Seedlot("54321");
     GeneticWorthEntity gw = new GeneticWorthEntity();
     gw.setGeneticWorthCode("GVO");
@@ -75,6 +73,8 @@ class SeedlotGeneticWorthServiceTest {
 
     SeedlotGeneticWorth sgw = new SeedlotGeneticWorth(seedlot, gw, audit);
     when(seedlotGeneticWorthRepository.saveAllAndFlush(any())).thenReturn(List.of(sgw));
+
+    SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
 
     List<SeedlotGeneticWorth> list =
         seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, List.of(formStep5));
