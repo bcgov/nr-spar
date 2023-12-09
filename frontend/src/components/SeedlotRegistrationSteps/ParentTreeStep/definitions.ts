@@ -1,6 +1,6 @@
+import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
-import { SingleInvalidObj } from '../OwnershipStep/definitions';
 
 export type TabTypes = {
   coneTab: 'coneTab',
@@ -8,49 +8,51 @@ export type TabTypes = {
   mixTab: 'mixTab'
 };
 
-type InvalidObjs = {
-  [key: string]: SingleInvalidObj
-};
+export type StrTypeRowItem = {
+  parentTreeNumber: StringInputType,
+  coneCount: StringInputType,
+  pollenCount: StringInputType,
+  smpSuccessPerc: StringInputType,
+  nonOrchardPollenContam: StringInputType,
+  volume: StringInputType,
+  proportion: StringInputType,
+  ad: StringInputType,
+  dfs: StringInputType,
+  dfu: StringInputType,
+  dfw: StringInputType,
+  dsb: StringInputType,
+  dsc: StringInputType,
+  gvo: StringInputType,
+  wdu: StringInputType,
+  wwd: StringInputType,
+  dsg: StringInputType,
+  iws: StringInputType,
+  w_ad: StringInputType,
+  w_dfs: StringInputType,
+  w_dfu: StringInputType,
+  w_dfw: StringInputType,
+  w_dsb: StringInputType,
+  w_dsc: StringInputType,
+  w_gvo: StringInputType,
+  w_wdu: StringInputType,
+  w_wwd: StringInputType,
+  w_dsg: StringInputType,
+  w_iws: StringInputType,
+  meanDegLat: StringInputType,
+  meanMinLat: StringInputType,
+  meanDegLong: StringInputType,
+  meanMinLong: StringInputType,
+  meanElevation: StringInputType,
+}
 
-export type RowItem = {
-  [key: string]: any,
-  parentTreeNumber: string,
-  coneCount: string | null,
-  pollenCount: string | null,
-  smpSuccessPerc: string | null,
-  nonOrchardPollenContam: string | null,
-  volume: string | null,
-  proportion: string | null,
-  ad: string | null,
-  dfs: string | null,
-  dfu: string | null,
-  dfw: string | null,
-  dsb: string | null,
-  dsc: string | null,
-  gvo: string | null,
-  wdu: string | null,
-  wwd: string | null,
-  dsg: string | null,
-  iws: string | null,
-  w_ad: string | null,
-  w_dfs: string | null,
-  w_dfu: string | null,
-  w_dfw: string | null,
-  w_dsb: string | null,
-  w_dsc: string | null,
-  w_gvo: string | null,
-  w_wdu: string | null,
-  w_wwd: string | null,
-  w_dsg: string | null,
-  w_iws: string | null,
-  meanDegLat: string | null,
-  meanMinLat: string | null,
-  meanDegLong: string | null,
-  meanMinLong: string | null,
-  meanElevation: string | null,
-  isMixTab: boolean,
-  invalidObjs: InvalidObjs
-};
+export type PrimitiveRowItem = {
+  rowId: string
+  isMixTab: boolean
+}
+
+export type RowItem = PrimitiveRowItem & StrTypeRowItem;
+
+export type HeaderObjId = keyof RowItem | 'actions';
 
 /**
  * id: referencing the property's name
@@ -61,7 +63,7 @@ export type RowItem = {
  * availableInTabs: this header item can be seen in one or more of these tabs
  */
 export type HeaderObj = {
-  id: keyof RowItem,
+  id: HeaderObjId,
   name: string,
   description: string,
   enabled: boolean,

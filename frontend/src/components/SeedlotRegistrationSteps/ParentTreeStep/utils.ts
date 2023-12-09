@@ -4,7 +4,6 @@ import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistratio
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
-import { generateDefaultRows } from '../../../views/Seedlot/SeedlotRegistrationForm/utils';
 import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
 
 import { isPtNumberInvalid, populateRowData } from './TableComponents/utils';
@@ -12,9 +11,10 @@ import { OrchardObj } from '../OrchardStep/definitions';
 
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
-  HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType, MixUploadResponse
+  HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType,
+  MixUploadResponse, HeaderObjId, StrTypeRowItem
 } from './definitions';
-import { EMPTY_NUMBER_STRING, rowTemplate } from './constants';
+import { DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate } from './constants';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -58,13 +58,13 @@ export const combineObjectValues = (objs: Array<InfoSectionConfigType>): Array<I
   return combined;
 };
 
-const calcAverage = (tableRows: Array<RowItem>, field: string): string => {
+const calcAverage = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): string => {
   let sum = 0;
   let total = tableRows.length;
   tableRows.forEach((row) => {
     // add if the value is not null
-    if (row[field]) {
-      sum += Number(row[field]);
+    if (row[field].value) {
+      sum += Number(row[field].value);
     } else {
       total -= 1;
     }
@@ -82,13 +82,13 @@ const calcAverage = (tableRows: Array<RowItem>, field: string): string => {
   return average;
 };
 
-const calcSum = (tableRows: Array<RowItem>, field: string): string => {
+export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): string => {
   let sum = 0;
 
   tableRows.forEach((row) => {
     // add if the value is not null
-    if (row[field]) {
-      sum += Number(row[field]);
+    if (row[field].value) {
+      sum += Number(row[field].value);
     }
   });
   return sum.toString();
@@ -133,10 +133,10 @@ const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
   const ptNumsInMixTab: string[] = [];
   Object.values(state.mixTabData).forEach((row) => {
     if (
-      row.parentTreeNumber?.length
-      && !row.invalidObjs.parentTreeNumber.isInvalid
+      row.parentTreeNumber?.value.length
+      && !row.parentTreeNumber.isInvalid
     ) {
-      ptNumsInMixTab.push(row.parentTreeNumber);
+      ptNumsInMixTab.push(row.parentTreeNumber.value);
     }
   });
 
@@ -173,12 +173,25 @@ export const calcMixTabInfoItems = (
     // Calculate the sum of each weighted gw value
     const modifiedWeightedGwInfoItems = { ...weightedGwInfoItems };
     applicableGenWorths.forEach((gw) => {
-      const weightedId = `w_${gw}`;
+      const weightedId = `w_${gw}` as keyof StrTypeRowItem;
       const sumWeighted = calcSum(tableRows, weightedId);
-      modifiedWeightedGwInfoItems[gw].value = Number(sumWeighted).toFixed(3);
+      modifiedWeightedGwInfoItems[(gw as keyof StrTypeRowItem)]
+        .value = Number(sumWeighted).toFixed(3);
     });
     setWeightedGwInfoItems(modifiedWeightedGwInfoItems);
   }
+};
+
+const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
+  const newRow = structuredClone(row);
+  Object.keys(newRow).forEach((key) => {
+    const rowKey = key as keyof RowItem;
+    if (rowKey !== 'isMixTab' && rowKey !== 'rowId') {
+      newRow[rowKey].id = `${idPrefix}-${rowKey}-value`;
+    }
+  });
+
+  return newRow;
 };
 
 export const processParentTreeData = (
@@ -201,16 +214,18 @@ export const processParentTreeData = (
       && orchardIds.includes(parentTree.orchardId)
     ) {
       const newRowData: RowItem = structuredClone(rowTemplate);
-      newRowData.parentTreeNumber = parentTree.parentTreeNumber;
+      newRowData.parentTreeNumber.value = parentTree.parentTreeNumber;
       // Assign genetic worth values
       parentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
-        const genWorthName = singleGenWorthObj.geneticWorthCode.toLowerCase();
+        const genWorthName = singleGenWorthObj.geneticWorthCode
+          .toLowerCase() as keyof StrTypeRowItem;
+
         if (Object.prototype.hasOwnProperty.call(newRowData, genWorthName)) {
-          newRowData[genWorthName] = singleGenWorthObj.geneticQualityValue;
+          newRowData[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
         }
       });
       clonedTableRowData = Object.assign(clonedTableRowData, {
-        [parentTree.parentTreeNumber]: newRowData
+        [parentTree.parentTreeNumber]: populateStrInputId(parentTree.parentTreeNumber, newRowData)
       });
     }
   });
@@ -228,6 +243,27 @@ export const processParentTreeData = (
   setStepData(modifiedState);
 };
 
+export const getMixRowTemplate = (): RowItem => {
+  const newRow = structuredClone(rowTemplate);
+  newRow.isMixTab = true;
+  newRow.rowId = '-1';
+  return newRow;
+};
+
+/**
+ * Generate x number of default rows to be used in the SMP mix tab
+ */
+export const generateDefaultRows = (numOfRows: number): RowDataDictType => {
+  const generated = {};
+  for (let i = 0; i < numOfRows; i += 1) {
+    const newRow = getMixRowTemplate();
+    const stringIndex = String(i);
+    newRow.rowId = stringIndex;
+    Object.assign(generated, { [stringIndex]: populateStrInputId(stringIndex, newRow) });
+  }
+  return generated;
+};
+
 export const cleanTable = (
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
@@ -236,7 +272,7 @@ export const cleanTable = (
 ): ParentTreeStepDataObj => {
   const clonedState = structuredClone(state);
   if (currentTab === 'mixTab') {
-    clonedState.mixTabData = generateDefaultRows();
+    clonedState.mixTabData = generateDefaultRows(DEFAULT_MIX_PAGE_ROWS);
   } else {
     const fieldsToClean = headerConfig
       .filter((header) => header.editable && header.availableInTabs.includes(currentTab))
@@ -244,7 +280,7 @@ export const cleanTable = (
     const parentTreeNumbers = Object.keys(clonedState.tableRowData);
     parentTreeNumbers.forEach((parentTreeNumber) => {
       fieldsToClean.forEach((field) => {
-        clonedState.tableRowData[parentTreeNumber][field] = '';
+        clonedState.tableRowData[parentTreeNumber][field as keyof StrTypeRowItem].value = '';
       });
     });
   }
@@ -253,7 +289,7 @@ export const cleanTable = (
 };
 
 export const applyValueToAll = (
-  field: keyof RowItem,
+  field: keyof StrTypeRowItem,
   value: string,
   state: ParentTreeStepDataObj,
   setStepData: Function
@@ -261,7 +297,7 @@ export const applyValueToAll = (
   const clonedState = structuredClone(state);
   const parentTreeNumbers = Object.keys(clonedState.tableRowData);
   parentTreeNumbers.forEach((number) => {
-    clonedState.tableRowData[number][field] = value;
+    clonedState.tableRowData[number][field].value = value;
   });
   setStepData(clonedState);
 };
@@ -283,11 +319,11 @@ export const fillCompostitionTables = (
     const parentTreeNumber = row.parentTreeNumber.toString();
     if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
       // If the clone nubmer exist from user file then fill in the values
-      clonedState.tableRowData[parentTreeNumber].coneCount = row.coneCount.toString();
-      clonedState.tableRowData[parentTreeNumber].pollenCount = row.pollenCount.toString();
-      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc = row.smpSuccess.toString();
+      clonedState.tableRowData[parentTreeNumber].coneCount.value = row.coneCount.toString();
+      clonedState.tableRowData[parentTreeNumber].pollenCount.value = row.pollenCount.toString();
+      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.value = row.smpSuccess.toString();
       clonedState.tableRowData[parentTreeNumber]
-        .nonOrchardPollenContam = row.pollenContamination.toString();
+        .nonOrchardPollenContam.value = row.pollenContamination.toString();
     } else {
       invalidParentTreeNumbers.push(parentTreeNumber);
     }
@@ -319,7 +355,7 @@ export const toggleNotification = (
 };
 
 export const toggleColumn = (
-  colName: keyof RowItem,
+  colName: HeaderObjId,
   nodeName: string,
   headerConfig: HeaderObj[],
   setHeaderConfig: Function
@@ -398,7 +434,7 @@ export const configHeaderOpt = (
 
 export const setInputChange = (
   rowData: RowItem,
-  colName: keyof RowItem,
+  colName: keyof StrTypeRowItem,
   value: string,
   state: ParentTreeStepDataObj,
   setStepData: Function
@@ -406,9 +442,9 @@ export const setInputChange = (
   // Using structuredClone so useEffect on state.tableRowData can be triggered
   const clonedState = structuredClone(state);
   if (rowData.isMixTab) {
-    clonedState.mixTabData[rowData.rowId][colName] = value;
-  } else {
-    clonedState.tableRowData[rowData.parentTreeNumber][colName] = value;
+    clonedState.mixTabData[rowData.rowId][colName].value = value;
+  } else if (!rowData.isMixTab) {
+    clonedState.tableRowData[rowData.parentTreeNumber.value][colName].value = value;
   }
 
   setStepData(clonedState);
@@ -460,29 +496,22 @@ export const generateGenWorthPayload = (
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code];
   rows.forEach((row) => {
     const newPayloadItem: GenWorthCalcPayload = {
-      parentTreeNumber: row.parentTreeNumber,
-      coneCount: Number(row.coneCount),
-      pollenCount: Number(row.pollenCount),
+      parentTreeNumber: row.parentTreeNumber.value,
+      coneCount: Number(row.coneCount.value),
+      pollenCount: Number(row.pollenCount.value),
       geneticTraits: []
     };
     // Populate geneticTraits array
     genWorthTypes.forEach((gwType) => {
       newPayloadItem.geneticTraits.push({
         traitCode: gwType,
-        traitValue: Number(row[gwType])
+        traitValue: Number(row[gwType as keyof StrTypeRowItem].value)
       });
     });
     payload.push(newPayloadItem);
   });
 
   return payload;
-};
-
-export const getMixRowTemplate = (): RowItem => {
-  const newRow = structuredClone(rowTemplate);
-  newRow.isMixTab = true;
-  newRow.rowId = '-1';
-  return newRow;
 };
 
 export const addNewMixRow = (state: ParentTreeStepDataObj, setStepData: Function) => {
@@ -495,9 +524,9 @@ export const addNewMixRow = (state: ParentTreeStepDataObj, setStepData: Function
     }
   });
   const newRow = getMixRowTemplate();
-  const newRowId = maxRowId + 1;
-  newRow.rowId = String(newRowId);
-  Object.assign(mixTableData, { [newRowId]: newRow });
+  const newRowId = String(maxRowId + 1);
+  newRow.rowId = newRowId;
+  Object.assign(mixTableData, { [newRowId]: populateStrInputId(newRowId, newRow) });
   clonedState.mixTabData = mixTableData;
   setStepData(clonedState);
 };
@@ -518,13 +547,19 @@ const updateCalculations = (
   if (sum > 0) {
     // Calculate proportion for each row
     tableRows.forEach((row) => {
-      const { rowId, volume } = row;
-      const proportion = (Number(volume) / sum).toFixed(3);
-      clonedTable[rowId].proportion = proportion;
-      // Update relavent weighted gw
-      applicableGenWorths.forEach((gw) => {
-        clonedTable[rowId][`w_${gw}`] = (Number(clonedTable[rowId][gw]) * Number(proportion)).toFixed(3);
-      });
+      if (row.rowId) {
+        const { rowId, volume } = row;
+        const proportion = (Number(volume.value) / sum).toFixed(3);
+        clonedTable[rowId].proportion.value = proportion;
+        // Update relavent weighted gw
+        applicableGenWorths.forEach((gw) => {
+          const gwColName = gw as keyof StrTypeRowItem;
+          const weightedColName = `w_${gw}` as keyof StrTypeRowItem;
+          clonedTable[rowId][weightedColName]
+            .value = (Number(clonedTable[rowId][gwColName].value) * Number(proportion))
+              .toFixed(3);
+        });
+      }
     });
   }
   return clonedTable;
@@ -541,20 +576,20 @@ export const fillMixTable = (
   data.forEach((row: MixUploadResponse, index: number) => {
     let newRow = getMixRowTemplate();
     const ptNumber = String(row.parentTreeNumber);
-    newRow.rowId = index;
-    newRow.parentTreeNumber = ptNumber;
-    newRow.volume = String(row.pollenVolume);
+    newRow.rowId = String(index);
+    newRow.parentTreeNumber.value = ptNumber;
+    newRow.volume.value = String(row.pollenVolume);
 
     // Validate pt number
     const isPtInvalid = isPtNumberInvalid(ptNumber, state.allParentTreeData);
-    newRow.invalidObjs.parentTreeNumber.isInvalid = isPtInvalid;
+    newRow.parentTreeNumber.isInvalid = isPtInvalid;
 
     // Populate data such as gw value
     if (!isPtInvalid) {
       newRow = populateRowData(newRow, ptNumber, state);
     }
 
-    Object.assign(newRows, { [newRow.rowId]: newRow });
+    Object.assign(newRows, { [newRow.rowId]: populateStrInputId(newRow.rowId, newRow) });
   });
 
   newRows = updateCalculations(newRows, applicableGenWorths);
