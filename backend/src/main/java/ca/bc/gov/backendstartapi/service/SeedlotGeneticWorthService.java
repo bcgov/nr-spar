@@ -33,7 +33,7 @@ public class SeedlotGeneticWorthService {
    * @param seedlot The {@link Seedlot} related
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
-  public void saveSeedlotFormStep5(
+  public List<SeedlotGeneticWorth> saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info("Saving SeedlotGeneticWorth for seedlot number {}", seedlot.getId());
 
@@ -78,9 +78,7 @@ public class SeedlotGeneticWorthService {
       }
 
       // Insert new ones
-      addSeedlotGeneticWorth(seedlot, sgwInsertList);
-
-      return;
+      return addSeedlotGeneticWorth(seedlot, sgwInsertList);
     }
 
     log.info(
@@ -90,16 +88,17 @@ public class SeedlotGeneticWorthService {
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
       sgwInsertList.addAll(seedlotPtFormDto.parentTreeGeneticQualities());
     }
-    addSeedlotGeneticWorth(seedlot, sgwInsertList);
+
+    return addSeedlotGeneticWorth(seedlot, sgwInsertList);
   }
 
-  private void addSeedlotGeneticWorth(
+  private List<SeedlotGeneticWorth> addSeedlotGeneticWorth(
       Seedlot seedlot, List<ParentTreeGeneticQualityDto> genWorthCodeToInsert) {
     if (genWorthCodeToInsert.isEmpty()) {
       log.info(
           "No new records to be inserted on the SeedlotGeneticWorth table for seedlot number {}",
           seedlot.getId());
-      return;
+      return List.of();
     }
 
     log.info(
@@ -119,6 +118,6 @@ public class SeedlotGeneticWorthService {
       seedlotGeneticWorths.add(sgw);
     }
 
-    seedlotGeneticWorthRepository.saveAllAndFlush(seedlotGeneticWorths);
+    return seedlotGeneticWorthRepository.saveAllAndFlush(seedlotGeneticWorths);
   }
 }
