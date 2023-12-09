@@ -496,7 +496,7 @@ class SeedlotServiceTest {
     doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any());
     when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any())).thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any());
-    doNothing().when(seedlotParentTreeService).saveSeedlotFormStep5(any(), any());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
 
     doThrow(new SeedlotParentTreeNotFoundException())
         .when(seedlotParentTreeGeneticQualityService)
@@ -518,7 +518,7 @@ class SeedlotServiceTest {
     doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any());
     when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any())).thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any());
-    doNothing().when(seedlotParentTreeService).saveSeedlotFormStep5(any(), any());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
     doNothing().when(seedlotGeneticWorthService).saveSeedlotFormStep5(any(), any());
     doNothing().when(smpMixService).saveSeedlotFormStep5(any(), any());
@@ -543,7 +543,7 @@ class SeedlotServiceTest {
     doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any());
     when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any())).thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any());
-    doNothing().when(seedlotParentTreeService).saveSeedlotFormStep5(any(), any());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
     doNothing().when(seedlotGeneticWorthService).saveSeedlotFormStep5(any(), any());
     doNothing().when(smpMixService).saveSeedlotFormStep5(any(), any());

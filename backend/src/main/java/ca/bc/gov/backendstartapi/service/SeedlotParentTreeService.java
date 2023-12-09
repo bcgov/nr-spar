@@ -39,7 +39,7 @@ public class SeedlotParentTreeService {
    * @param seedlot The {@link Seedlot} related
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
-  public void saveSeedlotFormStep5(
+  public List<SeedlotParentTree> saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info("Saving SeedlotParentTree for seedlot number {}", seedlot.getId());
 
@@ -82,25 +82,23 @@ public class SeedlotParentTreeService {
       }
 
       // Insert new ones
-      addSeedlotParentTree(seedlot, sptInsertList);
-
-      return;
+      return addSeedlotParentTree(seedlot, sptInsertList);
     }
 
     log.info(
         "No previous records on the SeedlotParentTree table for seedlot number {}",
         seedlot.getId());
 
-    addSeedlotParentTree(seedlot, seedlotFormParentTreeDtoList);
+    return addSeedlotParentTree(seedlot, seedlotFormParentTreeDtoList);
   }
 
-  private void addSeedlotParentTree(
+  private List<SeedlotParentTree> addSeedlotParentTree(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtDtoList) {
     if (seedlotPtDtoList.isEmpty()) {
       log.info(
           "No new records to be inserted on the SeedlotParentTree table for seedlot number {}",
           seedlot.getId());
-      return;
+      return List.of();
     }
 
     log.info(
@@ -125,6 +123,6 @@ public class SeedlotParentTreeService {
       seedlotPtListToInsert.add(seedlotParentTree);
     }
 
-    seedlotParentTreeRepository.saveAllAndFlush(seedlotPtListToInsert);
+    return seedlotParentTreeRepository.saveAllAndFlush(seedlotPtListToInsert);
   }
 }
