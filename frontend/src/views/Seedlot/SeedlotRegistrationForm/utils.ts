@@ -2,9 +2,8 @@ import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/Col
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
-import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { DEFAULT_MIX_PAGE_ROWS, notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
@@ -122,26 +121,15 @@ export const initOrchardState = (): OrchardForm => (
   }
 );
 
-// Generate 20 default rows to be used in the SMP mix tab in Parent Tree step
-export const generateDefaultRows = (): RowDataDictType => {
-  const generated = {};
-  for (let i = 0; i < 20; i += 1) {
-    const newRow = getMixRowTemplate();
-    const stringIndex = String(i);
-    newRow.rowId = stringIndex;
-    Object.assign(generated, { [stringIndex]: newRow });
-  }
-  return generated;
-};
-
-export const initParentTreeState = (): ParentTreeStepDataObj => (
-  {
+export const initParentTreeState = (): ParentTreeStepDataObj => {
+  const defaultRows = generateDefaultRows(DEFAULT_MIX_PAGE_ROWS);
+  return {
     tableRowData: {},
-    mixTabData: generateDefaultRows(),
+    mixTabData: defaultRows,
     notifCtrl: structuredClone(notificationCtrlObj),
     allParentTreeData: {}
-  }
-);
+  };
+};
 
 export const initExtractionStorageState = (
   defaultAgency: string,
