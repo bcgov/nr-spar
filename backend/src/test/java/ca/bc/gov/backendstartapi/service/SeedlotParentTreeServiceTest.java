@@ -110,7 +110,7 @@ class SeedlotParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("Save Seedlot Orchard with one method removed")
+  @DisplayName("Save Seedlot Parent Tree with one method removed")
   void saveSeedlotFormStep4_updateSeedlotRemove_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
     SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);

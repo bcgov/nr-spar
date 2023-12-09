@@ -29,7 +29,7 @@ public class SmpMixService {
    * @param seedlot The {@link Seedlot} related
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
-  public void saveSeedlotFormStep5(
+  public List<SmpMix> saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info("Saving SmpMix for seedlot number {}", seedlot.getId());
     List<SmpMix> smpMixs = smpMixRepository.findAllBySeedlot_id(seedlot.getId());
@@ -71,22 +71,20 @@ public class SmpMixService {
       }
 
       // Insert new ones
-      addSmpMix(seedlot, parentTreeIdsToInsert);
-
-      return;
+      return addSmpMix(seedlot, parentTreeIdsToInsert);
     }
 
     log.info("No previous records on the SmpMix table for seedlot number {}", seedlot.getId());
 
-    addSmpMix(seedlot, seedlotFormParentTreeDtoList);
+    return addSmpMix(seedlot, seedlotFormParentTreeDtoList);
   }
 
-  private void addSmpMix(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> formDtos) {
+  private List<SmpMix> addSmpMix(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> formDtos) {
     if (formDtos.isEmpty()) {
       log.info(
           "No new records to be inserted on the SmpMix table for seedlot number {}",
           seedlot.getId());
-      return;
+      return List.of();
     }
 
     log.info(
@@ -110,7 +108,7 @@ public class SmpMixService {
       smpMixs.add(smpMix);
     }
 
-    smpMixRepository.saveAllAndFlush(smpMixs);
+    return smpMixRepository.saveAllAndFlush(smpMixs);
   }
 
   /**
