@@ -64,13 +64,13 @@ const ApplicantAgencyFields = ({
     const updatedAgency = {
       ...agency,
       value: checked ? defaultAgency : EmptyMultiOptObj,
-      isInvalid: !!(checked && defaultAgency?.label === '')
+      isInvalid: checked && defaultAgency?.label === ''
     };
 
     const updatedLocationCode = {
       ...locationCode,
       value: checked ? defaultCode : '',
-      isInvalid: !!(checked && defaultCode === '')
+      isInvalid: checked && defaultCode === ''
     };
 
     const updatedIsDefault = {
