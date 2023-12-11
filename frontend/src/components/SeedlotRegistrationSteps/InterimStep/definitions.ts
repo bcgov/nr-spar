@@ -1,11 +1,13 @@
-export type InterimForm = {
-  useCollectorAgencyInfo: boolean,
-  agencyName: string,
-  locationCode: string,
-  startDate: string,
-  endDate: string,
-  storageLocation: string,
-  facilityType: string,
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
+
+type InterimForm = {
+  useCollectorAgencyInfo: BooleanInputType,
+  agencyName: OptionsInputType,
+  locationCode: StringInputType,
+  startDate: StringInputType,
+  endDate: StringInputType,
+  facilityType: StringInputType,
+  facilityOtherType: StringInputType
 }
 
 export default InterimForm;

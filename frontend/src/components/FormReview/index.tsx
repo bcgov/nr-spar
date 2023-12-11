@@ -10,17 +10,16 @@ import { Edit } from '@carbon/icons-react';
 import Subtitle from '../Subtitle';
 import TitleAccordion from '../TitleAccordion';
 import EmptySection from '../EmptySection';
-
-import { AllStepData } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import formReviewText from './constants';
-
-import './styles.scss';
 import OrchardStep from '../SeedlotRegistrationSteps/OrchardStep';
 import InterimStorage from '../SeedlotRegistrationSteps/InterimStep';
 import CollectionStep from '../SeedlotRegistrationSteps/CollectionStep';
 import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import { OrchardForm } from '../SeedlotRegistrationSteps/OrchardStep/definitions';
-import { initCollectionState, initOwnershipState } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
+import { initCollectionState, initOwnershipState, initInterimState } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
+import { AllStepData } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import formReviewText from './constants';
+
+import './styles.scss';
 
 const mockFormData = [
   {
@@ -83,19 +82,11 @@ const orchardMock: OrchardForm = {
   pollenMethodology: false
 };
 
-const interimStorageMock = {
-  useCollectorAgencyInfo: true,
-  agencyName: 'Strong Seeds Orchard - SSO',
-  locationCode: '32',
-  startDate: '2023/01/04',
-  endDate: '2023/01/26',
-  storageLocation: 'Strong Seeds Seed Orchard Company',
-  facilityType: 'VRM'
-};
+const collectionMock = initCollectionState(defaultAgencyObj, defaultCode);
 
 const ownershipMock = initOwnershipState(defaultAgencyObj, defaultCode);
 
-const collectionMock = initCollectionState(defaultAgencyObj, defaultCode);
+const interimStorageMock = initInterimState(defaultAgencyObj, defaultCode);
 
 const extractionMock = {
   extractoryUseTSC: true,
@@ -196,8 +187,8 @@ const FormReview = () => {
                   <div className="form-item">
                     <InterimStorage
                       state={allStepData.interimStep}
-                      collectorAgency={defaultAgency}
-                      collectorCode={defaultCode}
+                      collectorAgency={allStepData.collectionStep.collectorAgency}
+                      collectorCode={allStepData.collectionStep.locationCode}
                       agencyOptions={[]}
                       setStepData={() => { }}
                       readOnly

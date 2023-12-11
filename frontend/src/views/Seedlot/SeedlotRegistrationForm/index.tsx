@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -52,11 +53,13 @@ import {
   initOwnershipState,
   initExtractionStorageState,
   initParentTreeState,
+  getSpeciesOptionByCode,
   validateCollectionStep,
   verifyCollectionStepCompleteness,
   validateOwnershipStep,
   verifyOwnershipStepCompleteness,
-  getSpeciesOptionByCode
+  validateInterimStep,
+  verifyInterimStepCompleteness
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
@@ -80,8 +83,8 @@ const SeedlotRegistrationForm = () => {
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
     collectionStep: initCollectionState(EmptyMultiOptObj, ''),
-    interimStep: initInterimState('', ''),
     ownershipStep: [initOwnershipState(EmptyMultiOptObj, '')],
+    interimStep: initInterimState(EmptyMultiOptObj, ''),
     orchardStep: initOrchardState(),
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
@@ -140,7 +143,18 @@ const SeedlotRegistrationForm = () => {
           ...singleOwner.ownerCode,
           value: locationCode
         }
-      }))
+      })),
+      interimStep: {
+        ...prevData.interimStep,
+        agencyName: {
+          ...prevData.interimStep.agencyName,
+          value: agency
+        },
+        locationCode: {
+          ...prevData.interimStep.locationCode,
+          value: locationCode
+        }
+      }
     }));
   };
 
@@ -177,10 +191,25 @@ const SeedlotRegistrationForm = () => {
   });
 
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
-    setAllStepData((prevData) => ({
-      ...prevData,
-      [stepName]: stepData
-    }));
+    const newData = { ...allStepData };
+    // This check guarantee that every change on the collectors
+    // agency also changes the values on the interim agency, when
+    // necessary, also reflecting the invalid values
+    if (stepName === 'collectionStep'
+        && allStepData.interimStep.useCollectorAgencyInfo.value
+        && (allStepData.collectionStep.collectorAgency.value.code !== stepData.collectorAgency.value.code
+        || allStepData.collectionStep.locationCode.value !== stepData.locationCode.value)) {
+      newData.interimStep.agencyName.value = stepData.collectorAgency.value;
+      newData.interimStep.agencyName.isInvalid = stepData.collectorAgency.value.code.length
+        ? stepData.collectorAgency.isInvalid
+        : true;
+      newData.interimStep.locationCode.value = stepData.locationCode.value;
+      newData.interimStep.locationCode.isInvalid = stepData.locationCode.value.length
+        ? stepData.locationCode.isInvalid
+        : true;
+    }
+    newData[stepName] = stepData;
+    setAllStepData(newData);
   };
 
   const methodsOfPaymentQuery = useQuery({
@@ -234,6 +263,16 @@ const SeedlotRegistrationForm = () => {
       if (!isOwnershipInvalid) {
         const isOwnershipComplete = verifyOwnershipStepCompleteness(allStepData.ownershipStep);
         clonedStatus.ownership.isComplete = isOwnershipComplete;
+      }
+    }
+
+    // Set invalid or complete status for Interim Step
+    if (currentStepName !== 'interim') {
+      const isInterimInvalid = validateInterimStep(allStepData.interimStep);
+      clonedStatus.interim.isInvalid = isInterimInvalid;
+      if (!isInterimInvalid) {
+        const isInterimComplete = verifyInterimStepCompleteness(allStepData.interimStep);
+        clonedStatus.interim.isComplete = isInterimComplete;
       }
     }
 
@@ -296,8 +335,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency.value.label}
-            collectorCode={allStepData.collectionStep.locationCode.value}
+            collectorAgency={allStepData.collectionStep.collectorAgency}
+            collectorCode={allStepData.collectionStep.locationCode}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />

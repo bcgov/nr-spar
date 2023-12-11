@@ -4,7 +4,6 @@
 .interim-agency-storage-form {
   h2 {
     @include type.type-style('heading-03');
-    margin-bottom: 0.25rem;
   }
 
   &.#{vars.$bcgov-prefix}--grid {
@@ -27,6 +26,7 @@
   }
 
   .interim-storage-row {
+    padding-top: 0.5rem;
     margin-bottom: 2rem;
   }
 
