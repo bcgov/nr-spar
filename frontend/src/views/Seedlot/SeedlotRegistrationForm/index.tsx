@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -52,18 +53,21 @@ import {
   initOwnershipState,
   initExtractionStorageState,
   initParentTreeState,
-  generateDefaultRows,
+  getSpeciesOptionByCode,
   validateCollectionStep,
   verifyCollectionStepCompleteness,
   validateOwnershipStep,
   verifyOwnershipStepCompleteness,
-  getSpeciesOptionByCode,
+  validateInterimStep,
+  verifyInterimStepCompleteness,
   validateOrchardStep,
   verifyOrchardStepCompleteness
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
 import './styles.scss';
+import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
 const defaultExtStorCode = '00';
 const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
@@ -79,14 +83,14 @@ const SeedlotRegistrationForm = () => {
   ] = useState<ProgressIndicatorConfig>(initialProgressConfig);
 
   // Initialize all step's state here
-  const [allStepData, setAllStepData] = useState<AllStepData>({
+  const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
     collectionStep: initCollectionState(EmptyMultiOptObj, ''),
-    interimStep: initInterimState('', ''),
     ownershipStep: [initOwnershipState(EmptyMultiOptObj, '')],
+    interimStep: initInterimState(EmptyMultiOptObj, ''),
     orchardStep: initOrchardState(),
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
-  });
+  }));
 
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
@@ -141,7 +145,18 @@ const SeedlotRegistrationForm = () => {
           ...singleOwner.ownerCode,
           value: locationCode
         }
-      }))
+      })),
+      interimStep: {
+        ...prevData.interimStep,
+        agencyName: {
+          ...prevData.interimStep.agencyName,
+          value: agency
+        },
+        locationCode: {
+          ...prevData.interimStep.locationCode,
+          value: locationCode
+        }
+      }
     }));
   };
 
@@ -178,10 +193,25 @@ const SeedlotRegistrationForm = () => {
   });
 
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
-    setAllStepData((prevData) => ({
-      ...prevData,
-      [stepName]: stepData
-    }));
+    const newData = { ...allStepData };
+    // This check guarantee that every change on the collectors
+    // agency also changes the values on the interim agency, when
+    // necessary, also reflecting the invalid values
+    if (stepName === 'collectionStep'
+      && allStepData.interimStep.useCollectorAgencyInfo.value
+      && (allStepData.collectionStep.collectorAgency.value.code !== stepData.collectorAgency.value.code
+        || allStepData.collectionStep.locationCode.value !== stepData.locationCode.value)) {
+      newData.interimStep.agencyName.value = stepData.collectorAgency.value;
+      newData.interimStep.agencyName.isInvalid = stepData.collectorAgency.value.code.length
+        ? stepData.collectorAgency.isInvalid
+        : true;
+      newData.interimStep.locationCode.value = stepData.locationCode.value;
+      newData.interimStep.locationCode.isInvalid = stepData.locationCode.value.length
+        ? stepData.locationCode.isInvalid
+        : true;
+    }
+    newData[stepName] = stepData;
+    setAllStepData(newData);
   };
 
   const methodsOfPaymentQuery = useQuery({
@@ -239,6 +269,16 @@ const SeedlotRegistrationForm = () => {
       }
     }
 
+    // Set invalid or complete status for Interim Step
+    if (currentStepName !== 'interim' && prevStepName === 'interim') {
+      const isInterimInvalid = validateInterimStep(allStepData.interimStep);
+      clonedStatus.interim.isInvalid = isInterimInvalid;
+      if (!isInterimInvalid) {
+        const isInterimComplete = verifyInterimStepCompleteness(allStepData.interimStep);
+        clonedStatus.interim.isComplete = isInterimComplete;
+      }
+    }
+
     // Set invalid or complete status for Orchard Step
     if (currentStepName !== 'orchard' && prevStepName === 'orchard') {
       const isOrchardInvalid = validateOrchardStep(allStepData.orchardStep);
@@ -263,7 +303,7 @@ const SeedlotRegistrationForm = () => {
   const cleanParentTables = () => {
     const clonedState = { ...allStepData };
     clonedState.parentTreeStep.tableRowData = {};
-    clonedState.parentTreeStep.mixTabData = generateDefaultRows();
+    clonedState.parentTreeStep.mixTabData = generateDefaultRows(DEFAULT_MIX_PAGE_ROWS);
     setAllStepData(clonedState);
   };
 
@@ -309,8 +349,8 @@ const SeedlotRegistrationForm = () => {
         return (
           <InterimStorage
             state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency.value.label}
-            collectorCode={allStepData.collectionStep.locationCode.value}
+            collectorAgency={allStepData.collectionStep.collectorAgency}
+            collectorCode={allStepData.collectionStep.locationCode}
             agencyOptions={agencyOptions}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />

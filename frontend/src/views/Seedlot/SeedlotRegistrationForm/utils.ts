@@ -1,10 +1,10 @@
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
+import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import { notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import { RowDataDictType } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
-import { getMixRowTemplate } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { DEFAULT_MIX_PAGE_ROWS, notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
@@ -79,16 +79,44 @@ export const initOwnershipState = (
 };
 
 export const initInterimState = (
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string
 ) => ({
-  useCollectorAgencyInfo: true,
-  agencyName: defaultAgency,
-  locationCode: defaultCode,
-  startDate: '',
-  endDate: '',
-  storageLocation: '',
-  facilityType: 'OCV'
+  useCollectorAgencyInfo: {
+    id: 'interim-use-collection-agency',
+    value: true,
+    isInvalid: false
+  },
+  agencyName: {
+    id: 'interim-agency',
+    value: defaultAgency,
+    isInvalid: false
+  },
+  locationCode: {
+    id: 'interim-location-code',
+    value: defaultCode,
+    isInvalid: false
+  },
+  startDate: {
+    id: 'storage-start-date',
+    value: '',
+    isInvalid: false
+  },
+  endDate: {
+    id: 'storage-end-date',
+    value: '',
+    isInvalid: false
+  },
+  facilityType: {
+    id: 'storage-facility-type',
+    value: 'OCV',
+    isInvalid: false
+  },
+  facilityOtherType: {
+    id: 'storage-other-type-input',
+    value: '',
+    isInvalid: false
+  }
 });
 
 export const initOrchardState = (): OrchardForm => (
@@ -122,26 +150,15 @@ export const initOrchardState = (): OrchardForm => (
   }
 );
 
-// Generate 20 default rows to be used in the SMP mix tab in Parent Tree step
-export const generateDefaultRows = (): RowDataDictType => {
-  const generated = {};
-  for (let i = 0; i < 20; i += 1) {
-    const newRow = getMixRowTemplate();
-    const stringIndex = String(i);
-    newRow.rowId = stringIndex;
-    Object.assign(generated, { [stringIndex]: newRow });
-  }
-  return generated;
-};
-
-export const initParentTreeState = (): ParentTreeStepDataObj => (
-  {
+export const initParentTreeState = (): ParentTreeStepDataObj => {
+  const defaultRows = generateDefaultRows(DEFAULT_MIX_PAGE_ROWS);
+  return {
     tableRowData: {},
-    mixTabData: generateDefaultRows(),
+    mixTabData: defaultRows,
     notifCtrl: structuredClone(notificationCtrlObj),
     allParentTreeData: {}
-  }
-);
+  };
+};
 
 export const initExtractionStorageState = (
   defaultAgency: string,
@@ -162,7 +179,7 @@ export const initExtractionStorageState = (
 );
 /**
  * Validate Collection Step.
- * Return true if it's Invalid, false otherwise.
+ * Return true if it's invalid, false otherwise.
  */
 export const validateCollectionStep = (collectionData: CollectionForm): boolean => {
   let isInvalid = false;
@@ -177,7 +194,7 @@ export const validateCollectionStep = (collectionData: CollectionForm): boolean 
 
 /**
  * Validate Ownership Step.
- * Return true if it's Invalid, false otherwise.
+ * Return true if it's invalid, false otherwise.
  */
 export const validateOwnershipStep = (ownershipData: Array<SingleOwnerForm>): boolean => {
   let isInvalid = false;
@@ -188,6 +205,21 @@ export const validateOwnershipStep = (ownershipData: Array<SingleOwnerForm>): bo
         isInvalid = true;
       }
     });
+  });
+  return isInvalid;
+};
+
+/**
+ * Validate Interim Step.
+ * Return true if it's invalid, false otherwise.
+ */
+export const validateInterimStep = (interimData: InterimForm): boolean => {
+  let isInvalid = false;
+  const interimKeys = Object.keys(interimData) as Array<keyof InterimForm>;
+  interimKeys.forEach((key) => {
+    if (interimData[key].isInvalid) {
+      isInvalid = true;
+    }
   });
   return isInvalid;
 };
@@ -240,6 +272,23 @@ export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwner
     ) {
       return false;
     }
+  }
+  return true;
+};
+
+/**
+ * Verify if the interim step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyInterimStepCompleteness = (interimData: InterimForm): boolean => {
+  if (!interimData.agencyName.value.code.length
+      || !interimData.locationCode.value.length
+      || !interimData.startDate.value.length
+      || !interimData.endDate.value.length
+      || !interimData.facilityType.value.length
+      || (interimData.facilityType.value === 'OTH' && !interimData.facilityOtherType.value.length)
+  ) {
+    return false;
   }
   return true;
 };
