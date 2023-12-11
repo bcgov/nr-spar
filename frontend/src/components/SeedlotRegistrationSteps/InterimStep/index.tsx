@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 
 import {
@@ -104,17 +104,6 @@ const InterimStorage = (
     }
     setStepData(clonedState);
   };
-
-  useEffect(() => {
-    if (state.useCollectorAgencyInfo
-        && collectorAgency.value.code
-        && collectorCode.value) {
-      const clonedState = structuredClone(state);
-      clonedState.agencyName = collectorAgency;
-      clonedState.locationCode = collectorCode;
-      setStepData(clonedState);
-    }
-  }, []);
 
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>

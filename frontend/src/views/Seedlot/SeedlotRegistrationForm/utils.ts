@@ -268,7 +268,7 @@ export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwner
  * Return true if it's complete, false otherwise
  */
 export const verifyInterimStepCompleteness = (interimData: InterimForm): boolean => {
-  if (!interimData.agencyName.value.length
+  if (!interimData.agencyName.value.code.length
       || !interimData.locationCode.value.length
       || !interimData.startDate.value.length
       || !interimData.endDate.value.length

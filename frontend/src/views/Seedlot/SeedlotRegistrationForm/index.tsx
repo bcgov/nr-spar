@@ -143,7 +143,18 @@ const SeedlotRegistrationForm = () => {
           ...singleOwner.ownerCode,
           value: locationCode
         }
-      }))
+      })),
+      interimStep: {
+        ...prevData.interimStep,
+        agencyName: {
+          ...prevData.interimStep.agencyName,
+          value: agency
+        },
+        locationCode: {
+          ...prevData.interimStep.locationCode,
+          value: locationCode
+        }
+      }
     }));
   };
 
@@ -261,7 +272,7 @@ const SeedlotRegistrationForm = () => {
       clonedStatus.interim.isInvalid = isInterimInvalid;
       if (!isInterimInvalid) {
         const isInterimComplete = verifyInterimStepCompleteness(allStepData.interimStep);
-        clonedStatus.ownership.isComplete = isInterimComplete;
+        clonedStatus.interim.isComplete = isInterimComplete;
       }
     }
 
