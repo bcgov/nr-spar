@@ -92,15 +92,31 @@ const orchardMock: OrchardForm = {
       label: 'M2 - Pollen volume estimate by partial survey'
     }
   },
-  isControlledCross: true,
-  hasBiotechProcess: true,
-  hasPollenContamination: true,
+  isControlledCross: {
+    id: 'form-review-is-controlled-cross',
+    value: true,
+    isInvalid: false
+  },
+  hasBiotechProcess: {
+    id: 'form-review-has-biotech',
+    value: true,
+    isInvalid: false
+  },
+  hasPollenContamination: {
+    id: 'form-review-has-pollen-contam',
+    value: true,
+    isInvalid: false
+  },
   breedingPercentage: {
     id: 'form-review-orchard-breeding-perc',
     isInvalid: false,
     value: '100'
   },
-  isRegional: true
+  isRegional: {
+    id: 'form-review-is-regional',
+    value: true,
+    isInvalid: false
+  }
 };
 
 const collectionMock = initCollectionState(defaultAgencyObj, defaultCode);
