@@ -1,7 +1,3 @@
-// We can have hundreds of rows to check potentially on every render,
-// it's nice to have performance in mind here, hence the disabling.
-/* eslint-disable no-labels */
-/* eslint-disable no-restricted-syntax */
 import React, { useState, useEffect } from 'react';
 import { Column, Row, ActionableNotification } from '@carbon/react';
 
