@@ -16,6 +16,26 @@ export const DEFAULT_PAGE_NUMBER = 1;
 
 export const EMPTY_NUMBER_STRING = '';
 
+export const VOLUME_MIN = 0;
+
+export const VOLUME_MAX = 10000;
+
+export const NON_ORCHARD_CONTAM_MIN = 0;
+
+export const NON_ORCHARD_CONTAM_MAX = 100;
+
+export const SMP_SUCCESS_PERC_MIN = 0;
+
+export const SMP_SUCCESS_PERC_MAX = 100;
+
+export const POLLEN_COUNT_MIN = 0;
+
+export const POLLEN_COUNT_MAX = 1000;
+
+export const CONE_COUNT_MIN = 0;
+
+export const CONE_COUNT_MAX = 1000;
+
 export const getDownloadUrl = (tabType: string) => {
   if (tabType === 'Calculation of SMP mix' || tabType === 'mixTab') {
     return '/downloads/SMP_Mix_Volume_template.csv';

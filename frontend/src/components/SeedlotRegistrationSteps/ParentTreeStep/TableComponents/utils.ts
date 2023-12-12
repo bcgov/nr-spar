@@ -4,6 +4,11 @@ import {
   AllParentTreeMap, RowDataDictType, RowItem, StrTypeRowItem
 } from '../definitions';
 import { getMixRowTemplate, calcSum, populateStrInputId } from '../utils';
+import {
+  CONE_COUNT_MAX, CONE_COUNT_MIN, NON_ORCHARD_CONTAM_MAX,
+  NON_ORCHARD_CONTAM_MIN, POLLEN_COUNT_MAX, POLLEN_COUNT_MIN,
+  SMP_SUCCESS_PERC_MAX, SMP_SUCCESS_PERC_MIN, VOLUME_MAX, VOLUME_MIN
+} from '../constants';
 
 export const isPtNumberInvalid = (ptNumber: string, allParentTreeData: AllParentTreeMap) => (
   !Object.keys(allParentTreeData).includes(ptNumber)
@@ -91,30 +96,50 @@ const calculateSmpRow = (
   return clonedData;
 };
 
-const isConeCountInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: 0, max: 10000 })
+export const isConeCountInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: CONE_COUNT_MIN, max: CONE_COUNT_MAX })
 );
 
-const isPollenCountInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: 0, max: 10000 })
+export const getConeCountErrMsg = (value: string): string => (
+  `"${value}" is an invalid entry. Please provide a valid cone count value between ${CONE_COUNT_MIN} and ${CONE_COUNT_MAX}.`
+);
+
+export const isPollenCountInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: POLLEN_COUNT_MIN, max: POLLEN_COUNT_MAX })
+);
+
+export const getPollenCountErrMsg = (value: string): string => (
+  `"${value}" is an invalid entry. Please provide a valid pollen count value between ${POLLEN_COUNT_MIN} and ${POLLEN_COUNT_MAX}.`
 );
 
 /**
  * SMP success on parent (%)
  */
-const isSmpSuccInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: 0, max: 100 })
+export const isSmpSuccInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: SMP_SUCCESS_PERC_MIN, max: SMP_SUCCESS_PERC_MAX })
+);
+
+export const getSmpSuccErrMsg = (value: string): string => (
+  `"${value}" is an invalid entry. Please provide a valid SMP success on parent (%) value between ${SMP_SUCCESS_PERC_MIN} and ${SMP_SUCCESS_PERC_MAX}.`
 );
 
 /**
  * Non-orchard pollen contam. (%)
  */
-const isNonOrchardContamInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: 0, max: 100 })
+export const isNonOrchardContamInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: NON_ORCHARD_CONTAM_MIN, max: NON_ORCHARD_CONTAM_MAX })
 );
 
-const isVolumeInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: 0, max: 10000 })
+export const getNonOrchardContamErrMsg = (value: string): string => (
+  `"${value}" is an invalid entry. Please provide a valid Non-orchard pollen contam. (%) value between ${NON_ORCHARD_CONTAM_MIN} and ${NON_ORCHARD_CONTAM_MAX}.`
+);
+
+export const isVolumeInvalid = (value: string): boolean => (
+  !validator.isInt(value, { min: VOLUME_MIN, max: VOLUME_MAX })
+);
+
+export const getVolumeErrMsg = (value: string): string => (
+  `"${value}" is an invalid entry. Please provide a valid volume value between ${VOLUME_MIN} and ${VOLUME_MAX}.`
 );
 
 // Validate and populate inputs
@@ -155,28 +180,28 @@ export const handleInput = (
   if (colName === 'coneCount') {
     isInvalid = isConeCountInvalid(inputValue);
     if (isInvalid) {
-      errMsg = 'Bad cone';
+      errMsg = getConeCountErrMsg(inputValue);
     }
   }
 
   if (colName === 'pollenCount') {
     isInvalid = isPollenCountInvalid(inputValue);
     if (isInvalid) {
-      errMsg = 'Bad pollen';
+      errMsg = getPollenCountErrMsg(inputValue);
     }
   }
 
   if (colName === 'smpSuccessPerc') {
     isInvalid = isSmpSuccInvalid(inputValue);
     if (isInvalid) {
-      errMsg = 'Bad smp';
+      errMsg = getSmpSuccErrMsg(inputValue);
     }
   }
 
   if (colName === 'nonOrchardPollenContam') {
     isInvalid = isNonOrchardContamInvalid(inputValue);
     if (isInvalid) {
-      errMsg = 'Bad contam';
+      errMsg = getNonOrchardContamErrMsg(inputValue);
     }
   }
 
@@ -184,7 +209,7 @@ export const handleInput = (
     mixTabData = calculateSmpRow(inputValue, rowData, state.mixTabData, applicableGenWorths);
     isInvalid = isVolumeInvalid(inputValue);
     if (isInvalid) {
-      errMsg = 'Bad volume';
+      errMsg = getVolumeErrMsg(inputValue);
     }
   }
 

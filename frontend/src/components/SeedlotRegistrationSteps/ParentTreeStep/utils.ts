@@ -6,7 +6,13 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
 import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
 
-import { isPtNumberInvalid, populateRowData } from './TableComponents/utils';
+import {
+  getConeCountErrMsg, getNonOrchardContamErrMsg, getPollenCountErrMsg,
+  getSmpSuccErrMsg, getVolumeErrMsg, isConeCountInvalid,
+  isNonOrchardContamInvalid, isPollenCountInvalid,
+  isPtNumberInvalid, isSmpSuccInvalid, isVolumeInvalid,
+  populateRowData
+} from './TableComponents/utils';
 import { OrchardObj } from '../OrchardStep/definitions';
 
 import {
@@ -317,13 +323,40 @@ export const fillCompostitionTables = (
 
   data.forEach((row: CompUploadResponse) => {
     const parentTreeNumber = row.parentTreeNumber.toString();
+    // If the clone nubmer exist from user file then fill in the values
     if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
-      // If the clone nubmer exist from user file then fill in the values
-      clonedState.tableRowData[parentTreeNumber].coneCount.value = row.coneCount.toString();
-      clonedState.tableRowData[parentTreeNumber].pollenCount.value = row.pollenCount.toString();
-      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.value = row.smpSuccess.toString();
-      clonedState.tableRowData[parentTreeNumber]
-        .nonOrchardPollenContam.value = row.pollenContamination.toString();
+      // Cone count
+      const coneCountValue = row.coneCount.toString();
+      let isInvalid = isConeCountInvalid(coneCountValue);
+      clonedState.tableRowData[parentTreeNumber].coneCount.value = coneCountValue;
+      clonedState.tableRowData[parentTreeNumber].coneCount.isInvalid = isInvalid;
+      clonedState.tableRowData[parentTreeNumber].coneCount
+        .errMsg = isInvalid ? getConeCountErrMsg(coneCountValue) : '';
+
+      // Pollen count
+      const pollenCountValue = row.pollenCount.toString();
+      isInvalid = isPollenCountInvalid(pollenCountValue);
+      clonedState.tableRowData[parentTreeNumber].pollenCount.value = pollenCountValue;
+      clonedState.tableRowData[parentTreeNumber].pollenCount.isInvalid = isInvalid;
+      clonedState.tableRowData[parentTreeNumber].pollenCount
+        .errMsg = isInvalid ? getPollenCountErrMsg(pollenCountValue) : '';
+
+      // SMP Success percentage
+      const smpSuccessValue = row.smpSuccess.toString();
+      isInvalid = isSmpSuccInvalid(smpSuccessValue);
+      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.value = smpSuccessValue;
+      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.isInvalid = isInvalid;
+      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc
+        .errMsg = isInvalid ? getSmpSuccErrMsg(smpSuccessValue) : '';
+
+      // Non orchard pollen contamination percentage
+      const nonOrchardContamValue = row.pollenContamination.toString();
+      isInvalid = isNonOrchardContamInvalid(nonOrchardContamValue);
+      clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam
+        .value = nonOrchardContamValue;
+      clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam.isInvalid = isInvalid;
+      clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam
+        .errMsg = isInvalid ? getNonOrchardContamErrMsg(nonOrchardContamValue) : '';
     } else {
       invalidParentTreeNumbers.push(parentTreeNumber);
     }
@@ -579,6 +612,8 @@ export const fillMixTable = (
     newRow.rowId = String(index);
     newRow.parentTreeNumber.value = ptNumber;
     newRow.volume.value = String(row.pollenVolume);
+    newRow.volume.isInvalid = isVolumeInvalid(newRow.volume.value);
+    newRow.volume.errMsg = newRow.volume.isInvalid ? getVolumeErrMsg(newRow.volume.value) : '';
 
     // Validate pt number
     const isPtInvalid = isPtNumberInvalid(ptNumber, state.allParentTreeData);
