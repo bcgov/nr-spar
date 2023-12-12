@@ -21,7 +21,7 @@ import {
   inputText,
   DATE_FORMAT,
   storageAgencyFields,
-  extratorAgencyFields
+  extractorAgencyFields
 } from './constants';
 
 import './styles.scss';
@@ -155,9 +155,9 @@ const ExtractionAndStorage = (
         isDefault={state.extractionUseTSC}
         agency={state.extractionAgency}
         locationCode={state.extractionLocationCode}
-        fieldsProps={extratorAgencyFields}
+        fieldsProps={extractorAgencyFields}
         agencyOptions={agencyOptions}
-        defaultAgency={defaultAgency.value}
+        defaultAgency={defaultAgency}
         defaultCode={defaultCode}
         setAgencyAndCode={(
           isDefault: BooleanInputType,
@@ -186,7 +186,7 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={state.extractionStartDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.extractionUseTSC}
+              disabled={state.extractionUseTSC.value}
             />
           </DatePicker>
         </Column>
@@ -238,7 +238,7 @@ const ExtractionAndStorage = (
         locationCode={state.seedStorageLocationCode}
         fieldsProps={storageAgencyFields}
         agencyOptions={agencyOptions}
-        defaultAgency={defaultAgency.value}
+        defaultAgency={defaultAgency}
         defaultCode={defaultCode}
         setAgencyAndCode={(
           isDefault: BooleanInputType,
@@ -267,7 +267,7 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={state.seedStorageStartDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.seedStorageUseTSC}
+              disabled={state.seedStorageUseTSC.value}
             />
           </DatePicker>
         </Column>
@@ -289,7 +289,7 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={state.seedStorageEndDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.seedStorageUseTSC}
+              disabled={state.seedStorageUseTSC.value}
             />
           </DatePicker>
         </Column>
