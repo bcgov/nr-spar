@@ -760,3 +760,10 @@ export const getEmptySectionDescription = (setStep: Function) => (
     Please, fill the orchard ID to complete the cone and pollen table.
   </span>
 );
+
+/**
+ * Used in the erro notification box;
+ */
+export const invalidPTNumberMsg = 'One or more of the parent tree numbers entered are invalid because these numbers might not exist within your orchard composition.';
+
+export const errNotifEndMsg = 'Please review your entries and remember to check all pages.';

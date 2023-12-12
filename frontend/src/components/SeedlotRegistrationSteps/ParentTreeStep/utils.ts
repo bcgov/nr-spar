@@ -302,8 +302,12 @@ export const applyValueToAll = (
 ) => {
   const clonedState = structuredClone(state);
   const parentTreeNumbers = Object.keys(clonedState.tableRowData);
+  const isInvalid = field === 'smpSuccessPerc' ? isSmpSuccInvalid(value) : isNonOrchardContamInvalid(value);
+  const errMsg = field === 'smpSuccessPerc' ? getSmpSuccErrMsg(value) : getNonOrchardContamErrMsg(value);
   parentTreeNumbers.forEach((number) => {
     clonedState.tableRowData[number][field].value = value;
+    clonedState.tableRowData[number][field].isInvalid = isInvalid;
+    clonedState.tableRowData[number][field].errMsg = errMsg;
   });
   setStepData(clonedState);
 };

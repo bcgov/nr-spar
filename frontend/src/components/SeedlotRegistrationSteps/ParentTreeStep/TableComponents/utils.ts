@@ -1,5 +1,7 @@
 import validator from 'validator';
+
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+
 import {
   AllParentTreeMap, RowDataDictType, RowItem, StrTypeRowItem
 } from '../definitions';
@@ -96,6 +98,10 @@ const calculateSmpRow = (
   return clonedData;
 };
 
+const getPTNumberErrMsg = (value: string): string => (
+  `"${value}" is an invalid parent tree number. Please provide a valid parent tree number and review the number you have entered.`
+);
+
 export const isConeCountInvalid = (value: string): boolean => (
   !validator.isInt(value, { min: CONE_COUNT_MIN, max: CONE_COUNT_MAX })
 );
@@ -171,6 +177,7 @@ export const handleInput = (
         );
         const rowVolume = Number(rowData.volume).toString();
         mixTabData = calculateSmpRow(rowVolume, rowData, mixTabData, applicableGenWorths);
+        errMsg = getPTNumberErrMsg(inputValue);
       }
     } else {
       mixTabData[rowData.rowId] = cleanRowData(rowData.rowId);

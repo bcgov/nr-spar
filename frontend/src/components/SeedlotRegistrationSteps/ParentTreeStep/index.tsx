@@ -13,10 +13,8 @@ import {
   View, Settings, Upload, Renew, Add
 } from '@carbon/icons-react';
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
-import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { postFile } from '../../../api-service/seedlotAPI';
 import postForCalculation from '../../../api-service/geneticWorthAPI';
 import CheckboxType from '../../../types/CheckboxType';
@@ -39,7 +37,7 @@ import {
   PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
 } from './constants';
 import {
-  TabTypes, HeaderObj, RowItem
+  TabTypes, HeaderObj, RowItem, ParentTreeStepProps
 } from './definitions';
 import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
@@ -49,14 +47,7 @@ import {
 } from './utils';
 
 import './styles.scss';
-
-interface ParentTreeStepProps {
-  seedlotSpecies: MultiOptionsObj
-  state: ParentTreeStepDataObj;
-  setStep: Function
-  setStepData: Function;
-  orchards: Array<OrchardObj>;
-}
+import InputErrorNotification from './InputErrorNotification';
 
 const ParentTreeStep = (
   {
@@ -280,6 +271,7 @@ const ParentTreeStep = (
                   }
                 </Column>
               </Row>
+              <InputErrorNotification state={state} headerConfig={headerConfig} />
               {
                 currentTab === 'successTab'
                   ? (
