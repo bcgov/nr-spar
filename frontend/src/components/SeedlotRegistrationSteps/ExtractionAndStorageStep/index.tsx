@@ -26,7 +26,7 @@ import {
 
 import { getForestClientLocation } from '../../../api-service/forestClientsAPI';
 
-import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
+import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
@@ -41,9 +41,9 @@ import {
 import './styles.scss';
 
 interface ExtractionAndStorageProps {
-  state: ExtractionStorage,
+  state: ExtractionStorageForm,
   setStepData: Function,
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string,
   agencyOptions: Array<MultiOptionsObj>,
   readOnly?: boolean
@@ -96,7 +96,7 @@ const ExtractionAndStorage = (
     section: string
   ) => {
     let locationCode = event.target.value;
-    const stepDataField = section === 'extractorFields' ? 'extractoryLocationCode' : 'seedStorageLocationCode';
+    const stepDataField = section === 'extractorFields' ? 'extractionLocationCode' : 'seedStorageLocationCode';
     const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
 
     // Adding this check to add an extra 0 on the left, for cases where
@@ -139,11 +139,11 @@ const ExtractionAndStorage = (
     }
   };
 
-  const validateInput = (name: string, value: string | boolean) => {
+  const validateInput = (name: string, value: string | boolean | MultiOptionsObj) => {
     const newValidObj = { ...validationObj };
     let isInvalid = false;
     switch (name) {
-      case 'extractoryAgency':
+      case 'extractionAgency':
         if (!value) {
           newValidObj.isExtractorCodeInvalid = isInvalid;
         }
@@ -156,9 +156,9 @@ const ExtractionAndStorage = (
       case 'extractionStartDate':
       case 'extractionEndDate':
         // Have both start and end dates
-        if (state.extractionStartDate !== '' && state.extractionEndDate !== '') {
-          isInvalid = moment(state.extractionEndDate, 'YYYY/MM/DD')
-            .isBefore(moment(state.extractionStartDate, 'YYYY/MM/DD'));
+        if (state.extractionStartDate.value !== '' && state.extractionEndDate.value !== '') {
+          isInvalid = moment(state.extractionEndDate.value, 'YYYY/MM/DD')
+            .isBefore(moment(state.extractionStartDate.value, 'YYYY/MM/DD'));
         }
         newValidObj.isExtractorStartDateInvalid = isInvalid;
         newValidObj.isExtractorEndDateInvalid = isInvalid;
@@ -166,9 +166,9 @@ const ExtractionAndStorage = (
       case 'seedStorageStartDate':
       case 'seedStorageEndDate':
         // Have both start and end dates
-        if (state.seedStorageStartDate !== '' && state.seedStorageEndDate !== '') {
-          isInvalid = moment(state.seedStorageEndDate, 'YYYY/MM/DD')
-            .isBefore(moment(state.seedStorageStartDate, 'YYYY/MM/DD'));
+        if (state.seedStorageStartDate.value !== '' && state.seedStorageEndDate.value !== '') {
+          isInvalid = moment(state.seedStorageEndDate.value, 'YYYY/MM/DD')
+            .isBefore(moment(state.seedStorageStartDate.value, 'YYYY/MM/DD'));
         }
         newValidObj.isStorageStartDateInvalid = isInvalid;
         newValidObj.isStorageEndDateInvalid = isInvalid;
@@ -185,9 +185,9 @@ const ExtractionAndStorage = (
   const storageNumberInputRef = useRef<HTMLInputElement>(null);
 
   const handleFormInput = (
-    name: keyof ExtractionStorage,
-    value: string | boolean,
-    optName?: keyof ExtractionStorage,
+    name: keyof ExtractionStorageForm,
+    value: string | boolean | MultiOptionsObj,
+    optName?: keyof ExtractionStorageForm,
     optValue?: string | boolean,
     tscAgency?: string,
     checked?: boolean
@@ -207,9 +207,9 @@ const ExtractionAndStorage = (
       }
 
       setStepData(newState);
-    } else if (name === 'extractoryAgency' || name === 'seedStorageAgency') {
-      const section = name === 'extractoryAgency' ? 'extractorFields' : 'storageFields';
-      const stepDataField = section === 'extractorFields' ? 'extractoryLocationCode' : 'seedStorageLocationCode';
+    } else if (name === 'extractionAgency' || name === 'seedStorageAgency') {
+      const section = name === 'extractionAgency' ? 'extractorFields' : 'storageFields';
+      const stepDataField = section === 'extractorFields' ? 'extractionLocationCode' : 'seedStorageLocationCode';
       setLocValidationObj({
         ...locValidationObj,
         [section]: {
@@ -240,20 +240,20 @@ const ExtractionAndStorage = (
   };
 
   return (
-    <FlexGrid className="extractory-and-storage-form" fullWidth>
+    <FlexGrid className="extraction-and-storage-form" fullWidth>
       <Row className="extraction-information-title">
         <Column sm={4} md={8} lg={16}>
           <h2>{inputText.extractionTitle.titleText}</h2>
           <Subtitle text={inputText.extractionTitle.subtitleText} />
         </Column>
       </Row>
-      <Row className="extractory-agency-tsc-checkbox-row">
+      <Row className="extraction-agency-tsc-checkbox-row">
         <Column sm={4} md={8} lg={16}>
           <Checkbox
-            id="extractory-agency-tsc-checkbox"
-            name="extractory-agency-tsc"
+            id="extraction-agency-tsc-checkbox"
+            name="extraction-agency-tsc"
             labelText={inputText.extractorCheckbox.labelText}
-            checked={state.extractoryUseTSC}
+            checked={state.extractionUseTSC}
             readOnly={readOnly}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               const { checked } = e.target;
@@ -268,11 +268,11 @@ const ExtractionAndStorage = (
                 }
               });
               handleFormInput(
-                'extractoryAgency',
+                'extractionAgency',
                 checked ? defaultAgency : '',
-                'extractoryLocationCode',
+                'extractionLocationCode',
                 checked ? defaultCode : '',
-                'extractoryUseTSC',
+                'extractionUseTSC',
                 checked
               );
             }}
@@ -282,20 +282,20 @@ const ExtractionAndStorage = (
       <Row className="extractor-agency-row">
         <Column className="extractor-agency-col" sm={4} md={4} lg={8} xlg={6}>
           <ComboBox
-            id="extractory-agency-combobox"
+            id="extraction-agency-combobox"
             ref={extractorNameInputRef}
-            name="extractory-agency"
+            name="extraction-agency"
             helperText={inputText.extractor.helperText}
-            readOnly={readOnly ?? state.extractoryUseTSC}
+            readOnly={readOnly ?? state.extractionUseTSC}
             onChange={(e: ComboBoxEvent) => {
               handleFormInput(
-                'extractoryAgency',
+                'extractionAgency',
                 e.selectedItem
                   ? e.selectedItem.label
                   : ''
               );
             }}
-            selectedItem={state.extractoryAgency}
+            selectedItem={state.extractionAgency}
             shouldFilterItem={
               ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
             }
@@ -307,11 +307,11 @@ const ExtractionAndStorage = (
         </Column>
         <Column className="extractor-agency-col" sm={4} md={4} lg={8} xlg={6}>
           <TextInput
-            id="extractory-agency-location-code-input"
-            className="extractory-agency-location-code"
-            name="extractory-agency-location-code"
+            id="extraction-agency-location-code-input"
+            className="extraction-agency-location-code"
+            name="extraction-agency-location-code"
             ref={extractorNumberInputRef}
-            value={state.extractoryLocationCode}
+            value={state.extractionLocationCode}
             type="number"
             placeholder={!locValidationObj.extractorFields.forestClientNumber ? '' : 'Example: 00'}
             labelText={inputText.extractorCode.labelText}
@@ -319,9 +319,9 @@ const ExtractionAndStorage = (
             invalid={validationObj.isExtractorCodeInvalid}
             invalidText={locValidationObj.extractorFields.invalidLocationMessage}
             disabled={!locValidationObj.extractorFields.forestClientNumber}
-            readOnly={readOnly ?? state.extractoryUseTSC}
+            readOnly={readOnly ?? state.extractionUseTSC}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleFormInput('extractoryLocationCode', e.target.value);
+              handleFormInput('extractionLocationCode', e.target.value);
             }}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -357,7 +357,7 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={validationObj.isExtractorStartDateInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.extractoryUseTSC}
+              disabled={state.extractionUseTSC}
             />
           </DatePicker>
         </Column>
@@ -379,12 +379,12 @@ const ExtractionAndStorage = (
               placeholder={inputText.date.placeholder}
               invalid={validationObj.isExtractorEndDateInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.extractoryUseTSC}
+              disabled={state.extractionUseTSC}
             />
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.extractoryUseTSC && !readOnly && isExtractorHintOpen && (
+          {state.extractionUseTSC && !readOnly && isExtractorHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"

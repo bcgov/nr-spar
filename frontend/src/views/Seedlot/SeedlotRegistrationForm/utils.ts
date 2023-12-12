@@ -7,6 +7,7 @@ import { DEFAULT_MIX_PAGE_ROWS, notificationCtrlObj } from '../../../components/
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import {
   ParentTreeStepDataObj
 } from './definitions';
@@ -148,22 +149,63 @@ export const initParentTreeState = (): ParentTreeStepDataObj => {
 };
 
 export const initExtractionStorageState = (
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string
-) => (
+): ExtractionStorageForm => (
   {
-    extractoryUseTSC: true,
-    extractoryAgency: defaultAgency,
-    extractoryLocationCode: defaultCode,
-    extractionStartDate: '',
-    extractionEndDate: '',
-    seedStorageUseTSC: true,
-    seedStorageAgency: defaultAgency,
-    seedStorageLocationCode: defaultCode,
-    seedStorageStartDate: '',
-    seedStorageEndDate: ''
+    extractionUseTSC: {
+      id: 'ext-agency-tsc-checkbox',
+      value: true,
+      isInvalid: false
+    },
+    extractionAgency: {
+      id: 'ext-agency-combobox',
+      value: defaultAgency,
+      isInvalid: false
+    },
+    extractionLocationCode: {
+      id: 'ext-location-code',
+      value: defaultCode,
+      isInvalid: false
+    },
+    extractionStartDate: {
+      id: 'ext-start-date',
+      value: '',
+      isInvalid: false
+    },
+    extractionEndDate: {
+      id: 'ext-end-date',
+      value: '',
+      isInvalid: false
+    },
+    seedStorageUseTSC: {
+      id: 'str-agency-tsc-checkbox',
+      value: true,
+      isInvalid: false
+    },
+    seedStorageAgency: {
+      id: 'str-agency-combobox',
+      value: defaultAgency,
+      isInvalid: false
+    },
+    seedStorageLocationCode: {
+      id: 'str-location-code',
+      value: defaultCode,
+      isInvalid: false
+    },
+    seedStorageStartDate: {
+      id: 'str-start-date',
+      value: '',
+      isInvalid: false
+    },
+    seedStorageEndDate: {
+      id: 'str-end-date',
+      value: '',
+      isInvalid: false
+    }
   }
 );
+
 /**
  * Validate Collection Step.
  * Return true if it's invalid, false otherwise.
