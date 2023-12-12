@@ -19,10 +19,10 @@ import {
   initCollectionState, initOwnershipState, initInterimState, initExtractionStorageState
 } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
 import { AllStepData } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { tscAgencyObj, tscLocationCode } from '../../views/Seedlot/SeedlotRegistrationForm/constants';
 import formReviewText from './constants';
 
 import './styles.scss';
-import { tscAgencyObj, tscLocationCode } from '../../views/Seedlot/SeedlotRegistrationForm/constants';
 
 const mockFormData = [
   {
