@@ -61,7 +61,9 @@ import {
   validateInterimStep,
   verifyInterimStepCompleteness,
   validateOrchardStep,
-  verifyOrchardStepCompleteness
+  verifyOrchardStepCompleteness,
+  validateExtractionStep,
+  verifyExtractionStepCompleteness
 } from './utils';
 import {
   initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
@@ -285,6 +287,16 @@ const SeedlotRegistrationForm = () => {
       if (!isOrchardInvalid) {
         const isOrchardComplete = verifyOrchardStepCompleteness(allStepData.orchardStep);
         clonedStatus.orchard.isComplete = isOrchardComplete;
+      }
+    }
+
+    // Set invalid or complete status for Extraction and Storage Step
+    if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
+      const isExtractionInvalid = validateExtractionStep(allStepData.extractionStorageStep);
+      clonedStatus.extraction.isInvalid = isExtractionInvalid;
+      if (!isExtractionInvalid) {
+        const isExtractionComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
+        clonedStatus.extraction.isComplete = isExtractionComplete;
       }
     }
 

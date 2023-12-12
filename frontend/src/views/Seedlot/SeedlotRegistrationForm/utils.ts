@@ -385,7 +385,6 @@ export const validateOrchardStep = (orchardStepData: OrchardForm): boolean => {
   }
 
   // Booleans are either true or false so there's no need to check them.
-
   return isInvalid;
 };
 
@@ -415,4 +414,43 @@ export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boo
   }
 
   return isComplete;
+};
+
+/**
+ * Validate Extraction and Storage Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateExtractionStep = (extractionStepData: ExtractionStorageForm): boolean => {
+  let isInvalid = false;
+  if (
+    extractionStepData.extraction.agency.isInvalid
+    || extractionStepData.extraction.locationCode.isInvalid
+    || extractionStepData.extraction.startDate.isInvalid
+    || extractionStepData.extraction.endDate.isInvalid
+    || extractionStepData.seedStorage.agency.isInvalid
+    || extractionStepData.seedStorage.locationCode.isInvalid
+    || extractionStepData.seedStorage.startDate.isInvalid
+    || extractionStepData.seedStorage.endDate.isInvalid
+  ) {
+    isInvalid = true;
+  }
+
+  return isInvalid;
+};
+
+/**
+ * Verify if the extraction and storage step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyExtractionStepCompleteness = (
+  extractionStepData: ExtractionStorageForm
+): boolean => {
+  if (!extractionStepData.extraction.agency.value.code.length
+    || !extractionStepData.extraction.locationCode.value.length
+    || !extractionStepData.seedStorage.agency.value.code.length
+    || !extractionStepData.seedStorage.locationCode.value.length
+  ) {
+    return false;
+  }
+  return true;
 };
