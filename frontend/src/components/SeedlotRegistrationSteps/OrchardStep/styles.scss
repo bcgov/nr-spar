@@ -2,41 +2,37 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .seedlot-orchard-step-form {
-  .#{vars.$bcgov-prefix}--text-input-wrapper--readonly .#{vars.$bcgov-prefix}--text-input{
+  padding: 0;
+
+
+  h2 {
+    @include type.type-style('heading-03');
+    margin-bottom: 0.5rem;
+  }
+
+  .#{vars.$bcgov-prefix}--text-input-wrapper--readonly .#{vars.$bcgov-prefix}--text-input {
     border: none;
     cursor: default;
     padding-left: 0;
   }
-}
 
-.seedlot-orchard-step-form h2 {
-  @include type.type-style('heading-03');
-  margin-bottom: 0.5rem;
-}
+  .gametic-combobox {
+    input::placeholder {
+      color: var(--#{vars.$bcgov-prefix}-text-primary);
+      opacity: 1;
+    }
+  }
 
-.seedlot-orchard-title-row {
-  margin-bottom: 2.5rem;
-}
+  .orchard-row {
+    margin-bottom: 2rem;
+  }
 
-.seedlot-orchard-field {
-  margin-bottom: 2rem;
-}
+  .seedlot-orchard-title-row {
+    margin-bottom: 2.5rem;
+  }
 
-.seedlot-orchard-add-orchard,
-.pollen-methodology-checkbox {
-  margin-bottom: 3rem;
-}
-
-#female-gametic-combobox{
-  border-bottom: none;
-}
-
-#female-gametic-combobox::placeholder {
-  color: var(--#{vars.$bcgov-prefix}-text-primary);
-  opacity: 1;
-}
-
-.male-gametic-invalid .#{vars.$bcgov-prefix}--radio-button+.#{vars.$bcgov-prefix}--radio-button__label .#{vars.$bcgov-prefix}--radio-button__appearance {
-  outline: 2px solid var(--#{vars.$bcgov-prefix}-support-error);
-  outline-offset: 1.5px;
+  .seedlot-orchard-add-orchard,
+  .pollen-methodology-checkbox {
+    margin-bottom: 3rem;
+  }
 }

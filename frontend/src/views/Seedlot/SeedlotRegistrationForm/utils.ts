@@ -124,16 +124,45 @@ export const initOrchardState = (): OrchardForm => (
     orchards: [
       {
         inputId: 0,
-        selectedItem: null
+        selectedItem: null,
+        isInvalid: false
       }
     ],
-    femaleGametic: '',
-    maleGametic: '',
-    controlledCross: true,
-    biotechProcess: true,
-    noPollenContamination: true,
-    breedingPercentage: '0',
-    pollenMethodology: true
+    femaleGametic: {
+      id: 'orchard-female-gametic',
+      value: EmptyMultiOptObj,
+      isInvalid: false
+    },
+    maleGametic: {
+      id: 'orchard-male-gametic',
+      value: EmptyMultiOptObj,
+      isInvalid: false
+    },
+    isControlledCross: {
+      id: 'orchard-is-controlled-cross',
+      value: false,
+      isInvalid: false
+    },
+    hasBiotechProcess: {
+      id: 'orchard-has-biotech-process',
+      value: false,
+      isInvalid: false
+    },
+    hasPollenContamination: {
+      id: 'orchard-has-pollen-contamination',
+      value: false,
+      isInvalid: false
+    },
+    breedingPercentage: {
+      id: 'orchard-breading-perc',
+      value: '0',
+      isInvalid: false
+    },
+    isRegional: {
+      id: 'orchard-is-regional',
+      value: true,
+      isInvalid: false
+    }
   }
 );
 
@@ -216,7 +245,7 @@ export const validateInterimStep = (interimData: InterimForm): boolean => {
  * Return true if it's complete, false otherwise
  */
 export const verifyCollectionStepCompleteness = (collectionData: CollectionForm): boolean => {
-  if (!collectionData.collectorAgency.value.length) {
+  if (!collectionData.collectorAgency.value.code.length) {
     return false;
   }
   if (!collectionData.locationCode.value.length) {
@@ -292,4 +321,52 @@ export const getSpeciesOptionByCode = (
   return filtered.length > 0
     ? filtered[0]
     : EmptyMultiOptObj;
+};
+
+/**
+ * Validate Orchard Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateOrchardStep = (orchardStepData: OrchardForm): boolean => {
+  let isInvalid = false;
+
+  if (
+    orchardStepData.femaleGametic.isInvalid
+    || orchardStepData.maleGametic.isInvalid
+    || orchardStepData.breedingPercentage.isInvalid
+  ) {
+    isInvalid = true;
+  }
+
+  // Booleans are either true or false so there's no need to check them.
+
+  return isInvalid;
+};
+
+/**
+ * Verify if the orchard step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boolean => {
+  let isComplete = false;
+
+  orchardStepData.orchards.forEach((orchard) => {
+    // if one of the orchard object is populated then it's complete for this field
+    if (orchard.selectedItem?.code) {
+      isComplete = true;
+    }
+  });
+
+  if (!isComplete) {
+    return isComplete;
+  }
+
+  if (
+    !orchardStepData.femaleGametic.value.code.length
+    || !orchardStepData.maleGametic.value.code.length
+  ) {
+    isComplete = false;
+  }
+
+  return isComplete;
 };

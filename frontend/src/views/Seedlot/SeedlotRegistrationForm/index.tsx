@@ -59,7 +59,9 @@ import {
   validateOwnershipStep,
   verifyOwnershipStepCompleteness,
   validateInterimStep,
-  verifyInterimStepCompleteness
+  verifyInterimStepCompleteness,
+  validateOrchardStep,
+  verifyOrchardStepCompleteness
 } from './utils';
 import { initialProgressConfig, stepMap } from './constants';
 
@@ -196,8 +198,8 @@ const SeedlotRegistrationForm = () => {
     // agency also changes the values on the interim agency, when
     // necessary, also reflecting the invalid values
     if (stepName === 'collectionStep'
-        && allStepData.interimStep.useCollectorAgencyInfo.value
-        && (allStepData.collectionStep.collectorAgency.value.code !== stepData.collectorAgency.value.code
+      && allStepData.interimStep.useCollectorAgencyInfo.value
+      && (allStepData.collectionStep.collectorAgency.value.code !== stepData.collectorAgency.value.code
         || allStepData.collectionStep.locationCode.value !== stepData.locationCode.value)) {
       newData.interimStep.agencyName.value = stepData.collectorAgency.value;
       newData.interimStep.agencyName.isInvalid = stepData.collectorAgency.value.code.length
@@ -234,9 +236,10 @@ const SeedlotRegistrationForm = () => {
   /**
    * Update the progress indicator status
    */
-  const updateProgressStatus = (currentStepNum: number) => {
+  const updateProgressStatus = (currentStepNum: number, prevStepNum: number) => {
     const clonedStatus = structuredClone(progressStatus);
     const currentStepName = stepMap[currentStepNum];
+    const prevStepName = stepMap[prevStepNum];
 
     // Set the current step's current val to true, and everything else false
     clonedStatus[currentStepName].isCurrent = true;
@@ -247,7 +250,7 @@ const SeedlotRegistrationForm = () => {
       });
 
     // Set invalid or complete status for Collection Step
-    if (currentStepName !== 'collection') {
+    if (currentStepName !== 'collection' && prevStepName === 'collection') {
       const isCollectionInvalid = validateCollectionStep(allStepData.collectionStep);
       clonedStatus.collection.isInvalid = isCollectionInvalid;
       if (!isCollectionInvalid) {
@@ -257,7 +260,7 @@ const SeedlotRegistrationForm = () => {
     }
 
     // Set invalid or complete status for Ownership Step
-    if (currentStepName !== 'ownership') {
+    if (currentStepName !== 'ownership' && prevStepName === 'ownership') {
       const isOwnershipInvalid = validateOwnershipStep(allStepData.ownershipStep);
       clonedStatus.ownership.isInvalid = isOwnershipInvalid;
       if (!isOwnershipInvalid) {
@@ -267,7 +270,7 @@ const SeedlotRegistrationForm = () => {
     }
 
     // Set invalid or complete status for Interim Step
-    if (currentStepName !== 'interim') {
+    if (currentStepName !== 'interim' && prevStepName === 'interim') {
       const isInterimInvalid = validateInterimStep(allStepData.interimStep);
       clonedStatus.interim.isInvalid = isInterimInvalid;
       if (!isInterimInvalid) {
@@ -276,13 +279,24 @@ const SeedlotRegistrationForm = () => {
       }
     }
 
+    // Set invalid or complete status for Orchard Step
+    if (currentStepName !== 'orchard' && prevStepName === 'orchard') {
+      const isOrchardInvalid = validateOrchardStep(allStepData.orchardStep);
+      clonedStatus.orchard.isInvalid = isOrchardInvalid;
+      if (!isOrchardInvalid) {
+        const isOrchardComplete = verifyOrchardStepCompleteness(allStepData.orchardStep);
+        clonedStatus.orchard.isComplete = isOrchardComplete;
+      }
+    }
+
     setProgressStatus(clonedStatus);
   };
 
   const setStep = (delta: number) => {
     logState();
-    const newStep = formStep + delta;
-    updateProgressStatus(newStep);
+    const prevStep = formStep;
+    const newStep = prevStep + delta;
+    updateProgressStatus(newStep, prevStep);
     setFormStep(newStep);
   };
 
@@ -406,7 +420,7 @@ const SeedlotRegistrationForm = () => {
               progressStatus={progressStatus}
               className="seedlot-registration-steps"
               interactFunction={(e: number) => {
-                updateProgressStatus(e);
+                updateProgressStatus(e, formStep);
                 setFormStep(e);
               }}
             />
