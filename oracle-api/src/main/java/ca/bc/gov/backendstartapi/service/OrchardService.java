@@ -183,8 +183,11 @@ public class OrchardService {
     fillGenInfoForEachTree(resultList);
 
     // Step 4 filter with orchard spu map
+    // The first filter makes sure that the tree has a valid orchard id that exist in the
+    // orchard-spu table
     resultList =
         resultList.stream()
+            .filter(treeDto -> orchardSpuMap.containsKey(treeDto.getOrchardId()))
             .filter(
                 treeDto ->
                     treeDto

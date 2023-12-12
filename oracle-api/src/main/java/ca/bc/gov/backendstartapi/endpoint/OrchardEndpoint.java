@@ -181,7 +181,7 @@ public class OrchardEndpoint {
     try {
       return ResponseEntity.ok(orchardService.findParentTreesWithVegCode(vegCode, orchardSpuMap));
     } catch (Exception e) {
-      log.error("Orchard endpoint error from findParentTreesWithVegCode: %s", e.getMessage());
+      log.error("Orchard endpoint error from findParentTreesWithVegCode: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }

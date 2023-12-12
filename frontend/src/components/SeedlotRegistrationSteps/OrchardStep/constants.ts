@@ -1,8 +1,11 @@
+import { OrchardObj } from './definitions';
+
 export const MAX_ORCHARDS = 2;
 
-export const initialStagedOrchard = {
+export const initialStagedOrchard: OrchardObj = {
   inputId: -1,
-  selectedItem: null
+  selectedItem: null,
+  isInvalid: false
 };
 
 export const orchardStepText = {
@@ -20,7 +23,7 @@ export const orchardStepText = {
       optLabel: 'Orchard name (optional)'
     },
     buttons: {
-      add: 'Add orchard',
+      add: 'Add additional orchard',
       delete: 'Delete additional orchard'
     }
   },
@@ -34,7 +37,9 @@ export const orchardStepText = {
       invalid: 'Please select an option'
     },
     maleGametic: {
-      label: 'Male gametic contribution methodology'
+      label: 'Male gametic contribution methodology',
+      placeholder: 'Choose a male contribution method',
+      invalid: 'Please select an option'
     },
     controlledCross: {
       label: 'Was the seedlot produced through controlled crosses?',
@@ -48,12 +53,12 @@ export const orchardStepText = {
   pollenSection: {
     title: 'Pollen information',
     subtitle: 'Enter the pollen contaminant information',
-    noPollenContamination: {
-      label: 'Was pollen contamination present?',
+    pollenContamination: {
+      label: 'Was pollen contamination present in the seed orchard?',
       checkbox: 'No, there was no pollen contamination present in the seed orchard'
     },
     breedingPercentage: {
-      label: 'Contaminant pollen breeding value (optional)',
+      label: 'Contaminant pollen breeding percentage (optional) (%)',
       helper: 'If contaminant pollen was present and the contaminant pollen has a breeding value',
       invalid: 'Please enter a valid value between 0 and 100'
     },
