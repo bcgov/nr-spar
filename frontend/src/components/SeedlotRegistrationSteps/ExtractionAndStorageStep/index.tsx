@@ -173,14 +173,14 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionStartDate"
             dateFormat={DATE_FORMAT}
-            value={state.extractionStartDate}
+            value={state.extractionStartDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleFormInput('extractionStartDate', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id="extraction-start-date-input"
+              id={state.extractionStartDate.id}
               labelText={inputText.date.extraction.labelText.start}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
@@ -195,25 +195,25 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionEndDate"
             dateFormat={DATE_FORMAT}
-            value={state.extractionEndDate}
+            value={state.extractionEndDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleFormInput('extractionEndDate', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id="extraction-end-date-input"
+              id={state.extractionEndDate.id}
               labelText={inputText.date.extraction.labelText.end}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
               invalid={state.extractionEndDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.extractionUseTSC}
+              disabled={state.extractionUseTSC.value}
             />
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.extractionUseTSC && !readOnly && isExtractorHintOpen && (
+          {state.extractionUseTSC.value && !readOnly && isExtractorHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"
@@ -254,14 +254,14 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageStartDate"
             dateFormat={DATE_FORMAT}
-            value={state.seedStorageStartDate}
+            value={state.seedStorageStartDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleFormInput('seedStorageStartDate', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id="storage-start-date-input"
+              id={state.seedStorageStartDate.id}
               labelText={inputText.date.storage.labelText.start}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
@@ -276,14 +276,14 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageEndDate"
             dateFormat={DATE_FORMAT}
-            value={state.seedStorageEndDate}
+            value={state.seedStorageEndDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleFormInput('seedStorageEndDate', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id="storage-end-date-input"
+              id={state.seedStorageEndDate.id}
               labelText={inputText.date.storage.labelText.end}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
@@ -294,7 +294,7 @@ const ExtractionAndStorage = (
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.seedStorageUseTSC && !readOnly && isStorageHintOpen && (
+          {state.seedStorageUseTSC.value && !readOnly && isStorageHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"
