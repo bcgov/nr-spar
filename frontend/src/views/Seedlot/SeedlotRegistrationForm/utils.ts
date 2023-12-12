@@ -153,55 +153,59 @@ export const initExtractionStorageState = (
   defaultCode: string
 ): ExtractionStorageForm => (
   {
-    extractionUseTSC: {
-      id: 'ext-agency-tsc-checkbox',
-      value: true,
-      isInvalid: false
+    extraction: {
+      useTSC: {
+        id: 'ext-agency-tsc-checkbox',
+        value: true,
+        isInvalid: false
+      },
+      agency: {
+        id: 'ext-agency-combobox',
+        value: defaultAgency,
+        isInvalid: false
+      },
+      locationCode: {
+        id: 'ext-location-code',
+        value: defaultCode,
+        isInvalid: false
+      },
+      startDate: {
+        id: 'ext-start-date',
+        value: '',
+        isInvalid: false
+      },
+      endDate: {
+        id: 'ext-end-date',
+        value: '',
+        isInvalid: false
+      }
     },
-    extractionAgency: {
-      id: 'ext-agency-combobox',
-      value: defaultAgency,
-      isInvalid: false
-    },
-    extractionLocationCode: {
-      id: 'ext-location-code',
-      value: defaultCode,
-      isInvalid: false
-    },
-    extractionStartDate: {
-      id: 'ext-start-date',
-      value: '',
-      isInvalid: false
-    },
-    extractionEndDate: {
-      id: 'ext-end-date',
-      value: '',
-      isInvalid: false
-    },
-    seedStorageUseTSC: {
-      id: 'str-agency-tsc-checkbox',
-      value: true,
-      isInvalid: false
-    },
-    seedStorageAgency: {
-      id: 'str-agency-combobox',
-      value: defaultAgency,
-      isInvalid: false
-    },
-    seedStorageLocationCode: {
-      id: 'str-location-code',
-      value: defaultCode,
-      isInvalid: false
-    },
-    seedStorageStartDate: {
-      id: 'str-start-date',
-      value: '',
-      isInvalid: false
-    },
-    seedStorageEndDate: {
-      id: 'str-end-date',
-      value: '',
-      isInvalid: false
+    seedStorage: {
+      useTSC: {
+        id: 'str-agency-tsc-checkbox',
+        value: true,
+        isInvalid: false
+      },
+      agency: {
+        id: 'str-agency-combobox',
+        value: defaultAgency,
+        isInvalid: false
+      },
+      locationCode: {
+        id: 'str-location-code',
+        value: defaultCode,
+        isInvalid: false
+      },
+      startDate: {
+        id: 'str-start-date',
+        value: '',
+        isInvalid: false
+      },
+      endDate: {
+        id: 'str-end-date',
+        value: '',
+        isInvalid: false
+      }
     }
   }
 );

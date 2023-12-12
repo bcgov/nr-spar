@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import moment from 'moment';
+import moment from 'moment';
 
 import {
   Column,
@@ -45,100 +45,52 @@ const ExtractionAndStorage = (
     readOnly
   }: ExtractionAndStorageProps
 ) => {
+  const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
+  const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
+
   const setAgencyAndCode = (
     isDefault: BooleanInputType,
     agency: OptionsInputType,
     locationCode: StringInputType,
-    isExtraction: boolean
+    extractionOrStorage: ('extraction' | 'seedStorage')
   ) => {
     const clonedState = structuredClone(state);
-    if (isExtraction) {
-      clonedState.extractionUseTSC = isDefault;
-      clonedState.extractionAgency = agency;
-      clonedState.extractionLocationCode = locationCode;
-    } else {
-      clonedState.seedStorageUseTSC = isDefault;
-      clonedState.seedStorageAgency = agency;
-      clonedState.seedStorageLocationCode = locationCode;
-    }
+    clonedState[extractionOrStorage].useTSC = isDefault;
+    clonedState[extractionOrStorage].agency = agency;
+    clonedState[extractionOrStorage].locationCode = locationCode;
+
     setStepData(clonedState);
   };
 
-  const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
-  const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
+  // This function validates changes on both start and end dates
+  const validateStorageDates = (curState: ExtractionStorageForm, extractionOrStorage: ('extraction' | 'seedStorage')) => {
+    const startDate = curState[extractionOrStorage].startDate.value;
+    const endDate = curState[extractionOrStorage].endDate.value;
 
-  const validateInput = (name: string, value: string | boolean | MultiOptionsObj) => {
-    // let isInvalid = false;
-    switch (name) {
-      case 'extractionAgency':
-        if (!value) {
-          // newValidObj.isExtractorCodeInvalid = isInvalid;
-        }
-        break;
-      case 'seedStorageAgency':
-        if (!value) {
-          // newValidObj.isStorageCodeInvalid = isInvalid;
-        }
-        break;
-      case 'extractionStartDate':
-      case 'extractionEndDate':
-        // Have both start and end dates
-        if (state.extractionStartDate.value !== '' && state.extractionEndDate.value !== '') {
-          // isInvalid = moment(state.extractionEndDate.value, 'YYYY/MM/DD')
-          //   .isBefore(moment(state.extractionStartDate.value, 'YYYY/MM/DD'));
-        }
-        // newValidObj.isExtractorStartDateInvalid = isInvalid;
-        // newValidObj.isExtractorEndDateInvalid = isInvalid;
-        break;
-      case 'seedStorageStartDate':
-      case 'seedStorageEndDate':
-        // Have both start and end dates
-        if (state.seedStorageStartDate.value !== '' && state.seedStorageEndDate.value !== '') {
-          // isInvalid = moment(state.seedStorageEndDate.value, 'YYYY/MM/DD')
-          //   .isBefore(moment(state.seedStorageStartDate.value, 'YYYY/MM/DD'));
-        }
-        // newValidObj.isStorageStartDateInvalid = isInvalid;
-        // newValidObj.isStorageEndDateInvalid = isInvalid;
-        break;
-      default:
-        break;
+    // Check if the start date is set before the end date
+    if (startDate !== '' && endDate !== '') {
+      return moment(endDate, 'YYYY/MM/DD')
+        .isBefore(moment(startDate, 'YYYY/MM/DD'));
     }
+    return false;
   };
 
-  const handleFormInput = (
-    name: keyof ExtractionStorageForm,
-    value: string | boolean | MultiOptionsObj,
-    optName?: keyof ExtractionStorageForm,
-    optValue?: string | boolean,
-    tscAgency?: string,
-    checked?: boolean
+  const handleDates = (
+    isStart: boolean,
+    extractionOrStorage: ('extraction' | 'seedStorage'),
+    stringDate: string
   ) => {
-    if (optName && optName !== name) {
-      let newState = {
-        ...state,
-        [name]: value,
-        [optName]: optValue
-      };
-
-      if (tscAgency) {
-        newState = {
-          ...newState,
-          [tscAgency]: checked
-        };
-      }
-
-      setStepData(newState);
+    const clonedState = structuredClone(state);
+    if (isStart) {
+      clonedState[extractionOrStorage].startDate.value = stringDate;
     } else {
-      setStepData({
-        ...state,
-        [name]: value
-      });
+      clonedState[extractionOrStorage].endDate.value = stringDate;
     }
 
-    validateInput(name, value);
-    if (optName && optValue) {
-      validateInput(optName, optValue);
-    }
+    const isInvalid = validateStorageDates(clonedState, extractionOrStorage);
+    clonedState[extractionOrStorage].startDate.isInvalid = isInvalid;
+    clonedState[extractionOrStorage].endDate.isInvalid = isInvalid;
+    setStepData(clonedState);
   };
 
   return (
@@ -151,10 +103,10 @@ const ExtractionAndStorage = (
       </Row>
       <ApplicantAgencyFields
         showCheckbox
-        checkboxId={state.extractionUseTSC.id}
-        isDefault={state.extractionUseTSC}
-        agency={state.extractionAgency}
-        locationCode={state.extractionLocationCode}
+        checkboxId={state.extraction.useTSC.id}
+        isDefault={state.extraction.useTSC}
+        agency={state.extraction.agency}
+        locationCode={state.extraction.locationCode}
         fieldsProps={extractorAgencyFields}
         agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
@@ -163,7 +115,7 @@ const ExtractionAndStorage = (
           isDefault: BooleanInputType,
           agency: OptionsInputType,
           locationCode: StringInputType
-        ) => setAgencyAndCode(isDefault, agency, locationCode, true)}
+        ) => setAgencyAndCode(isDefault, agency, locationCode, 'extraction')}
         readOnly={readOnly}
         maxInputColSize={6}
       />
@@ -173,20 +125,20 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionStartDate"
             dateFormat={DATE_FORMAT}
-            value={state.extractionStartDate.value}
+            value={state.extraction.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput('extractionStartDate', selectedDate);
+              handleDates(true, 'extraction', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id={state.extractionStartDate.id}
+              id={state.extraction.startDate.id}
               labelText={inputText.date.extraction.labelText.start}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
-              invalid={state.extractionStartDate.isInvalid}
+              invalid={state.extraction.startDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.extractionUseTSC.value}
+              disabled={state.extraction.useTSC.value}
             />
           </DatePicker>
         </Column>
@@ -195,25 +147,25 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionEndDate"
             dateFormat={DATE_FORMAT}
-            value={state.extractionEndDate.value}
+            value={state.extraction.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput('extractionEndDate', selectedDate);
+              handleDates(false, 'extraction', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id={state.extractionEndDate.id}
+              id={state.extraction.endDate.id}
               labelText={inputText.date.extraction.labelText.end}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
-              invalid={state.extractionEndDate.isInvalid}
+              invalid={state.extraction.endDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.extractionUseTSC.value}
+              disabled={state.extraction.useTSC.value}
             />
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.extractionUseTSC.value && !readOnly && isExtractorHintOpen && (
+          {state.extraction.useTSC.value && !readOnly && isExtractorHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"
@@ -232,10 +184,10 @@ const ExtractionAndStorage = (
       </Row>
       <ApplicantAgencyFields
         showCheckbox
-        checkboxId={state.seedStorageUseTSC.id}
-        isDefault={state.seedStorageUseTSC}
-        agency={state.seedStorageAgency}
-        locationCode={state.seedStorageLocationCode}
+        checkboxId={state.seedStorage.useTSC.id}
+        isDefault={state.seedStorage.useTSC}
+        agency={state.seedStorage.agency}
+        locationCode={state.seedStorage.locationCode}
         fieldsProps={storageAgencyFields}
         agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
@@ -244,7 +196,7 @@ const ExtractionAndStorage = (
           isDefault: BooleanInputType,
           agency: OptionsInputType,
           locationCode: StringInputType
-        ) => setAgencyAndCode(isDefault, agency, locationCode, false)}
+        ) => setAgencyAndCode(isDefault, agency, locationCode, 'seedStorage')}
         readOnly={readOnly}
         maxInputColSize={6}
       />
@@ -254,20 +206,20 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageStartDate"
             dateFormat={DATE_FORMAT}
-            value={state.seedStorageStartDate.value}
+            value={state.seedStorage.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput('seedStorageStartDate', selectedDate);
+              handleDates(true, 'seedStorage', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id={state.seedStorageStartDate.id}
+              id={state.seedStorage.startDate.id}
               labelText={inputText.date.storage.labelText.start}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
-              invalid={state.seedStorageStartDate.isInvalid}
+              invalid={state.seedStorage.startDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.seedStorageUseTSC.value}
+              disabled={state.seedStorage.useTSC.value}
             />
           </DatePicker>
         </Column>
@@ -276,25 +228,25 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageEndDate"
             dateFormat={DATE_FORMAT}
-            value={state.seedStorageEndDate.value}
+            value={state.seedStorage.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput('seedStorageEndDate', selectedDate);
+              handleDates(false, 'seedStorage', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id={state.seedStorageEndDate.id}
+              id={state.seedStorage.endDate.id}
               labelText={inputText.date.storage.labelText.end}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
-              invalid={state.seedStorageEndDate.isInvalid}
+              invalid={state.seedStorage.endDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.seedStorageUseTSC.value}
+              disabled={state.seedStorage.useTSC.value}
             />
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.seedStorageUseTSC.value && !readOnly && isStorageHintOpen && (
+          {state.seedStorage.useTSC.value && !readOnly && isStorageHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"

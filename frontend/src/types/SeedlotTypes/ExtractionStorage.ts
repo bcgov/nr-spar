@@ -1,16 +1,20 @@
 import { BooleanInputType, StringInputType, OptionsInputType } from '../FormInputType';
 
 type ExtractionStorageForm = {
-  extractionUseTSC: BooleanInputType;
-  extractionAgency: OptionsInputType;
-  extractionLocationCode: StringInputType;
-  extractionStartDate: StringInputType;
-  extractionEndDate: StringInputType;
-  seedStorageUseTSC: BooleanInputType;
-  seedStorageAgency: OptionsInputType;
-  seedStorageLocationCode: StringInputType;
-  seedStorageStartDate: StringInputType;
-  seedStorageEndDate: StringInputType;
+  extraction: {
+    useTSC: BooleanInputType;
+    agency: OptionsInputType;
+    locationCode: StringInputType;
+    startDate: StringInputType;
+    endDate: StringInputType;
+  },
+  seedStorage: {
+    useTSC: BooleanInputType;
+    agency: OptionsInputType;
+    locationCode: StringInputType;
+    startDate: StringInputType;
+    endDate: StringInputType;
+  }
 };
 
 export default ExtractionStorageForm;
