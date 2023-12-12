@@ -1,4 +1,4 @@
-import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 // Not using the FormInputType here because it has the inputId field.
@@ -14,9 +14,9 @@ export type OrchardForm = {
   orchards: Array<OrchardObj>,
   femaleGametic: OptionsInputType,
   maleGametic: OptionsInputType,
-  isControlledCross: boolean,
-  hasBiotechProcess: boolean,
-  hasPollenContamination: boolean,
+  isControlledCross: BooleanInputType,
+  hasBiotechProcess: BooleanInputType,
+  hasPollenContamination: BooleanInputType,
   breedingPercentage: StringInputType,
-  isRegional: boolean
+  isRegional: BooleanInputType
 }

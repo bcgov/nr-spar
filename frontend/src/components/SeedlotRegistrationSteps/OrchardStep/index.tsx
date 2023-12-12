@@ -99,7 +99,7 @@ const OrchardStep = ({
     checked: boolean
   ) => {
     const clonedState = structuredClone(state);
-    clonedState[field] = checked;
+    clonedState[field].value = checked;
     setStepData(clonedState);
   };
 
@@ -308,7 +308,7 @@ const OrchardStep = ({
         <Column sm={4} md={8} lg={16} xlg={12} max={10}>
           <ComboBox
             className="gametic-combobox"
-            id="female-gametic-combobox"
+            id={state.femaleGametic.id}
             name="femaleGametic"
             items={femaleGameticOptions}
             shouldFilterItem={
@@ -328,7 +328,7 @@ const OrchardStep = ({
         <Column sm={4} md={8} lg={16} xlg={12} max={10}>
           <ComboBox
             className="gametic-combobox"
-            id="male-gametic-combobox"
+            id={state.maleGametic.id}
             name="maleGametic"
             items={maleGameticOptions}
             shouldFilterItem={
@@ -347,6 +347,7 @@ const OrchardStep = ({
       <Row className="orchard-row">
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
+            id={state.isControlledCross.id}
             legendText={orchardStepText.gameteSection.controlledCross.label}
             name="controlled-cross-radio-btn-group"
             orientation="vertical"
@@ -355,13 +356,13 @@ const OrchardStep = ({
           >
             <RadioButton
               id="controlled-cross-yes"
-              checked={state.isControlledCross}
+              checked={state.isControlledCross.value}
               labelText="Yes"
               value="Yes"
             />
             <RadioButton
               id="controlled-cross-no"
-              checked={!state.isControlledCross}
+              checked={!state.isControlledCross.value}
               labelText="No"
               value="No"
             />
@@ -371,6 +372,7 @@ const OrchardStep = ({
       <Row className="orchard-row">
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
+            id={state.hasBiotechProcess.id}
             legendText={orchardStepText.gameteSection.biotechProcess.label}
             name="biotech-radio-btn-group"
             orientation="vertical"
@@ -379,13 +381,13 @@ const OrchardStep = ({
           >
             <RadioButton
               id="biotech-yes"
-              checked={state.hasBiotechProcess}
+              checked={state.hasBiotechProcess.value}
               labelText="Yes"
               value="Yes"
             />
             <RadioButton
               id="biotech-no"
-              checked={!state.hasBiotechProcess}
+              checked={!state.hasBiotechProcess.value}
               labelText="No"
               value="No"
             />
@@ -401,6 +403,7 @@ const OrchardStep = ({
       <Row className="orchard-row">
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
+            id={state.hasPollenContamination.id}
             legendText={orchardStepText.pollenSection.pollenContamination.label}
             name="pollen-contam-radio-btn-group"
             orientation="vertical"
@@ -409,13 +412,13 @@ const OrchardStep = ({
           >
             <RadioButton
               id="pollen-contam-yes"
-              checked={state.hasPollenContamination}
+              checked={state.hasPollenContamination.value}
               labelText="Yes"
               value="Yes"
             />
             <RadioButton
               id="pollen-contam-no"
-              checked={!state.hasPollenContamination}
+              checked={!state.hasPollenContamination.value}
               labelText="No"
               value="No"
             />
@@ -423,13 +426,13 @@ const OrchardStep = ({
         </Column>
       </Row>
       {
-        state.hasPollenContamination
+        state.hasPollenContamination.value
           ? (
             <>
               <Row className="orchard-row">
                 <Column sm={4} md={8} lg={16} xlg={12}>
                   <NumberInput
-                    id="pollen-percentage-number-input"
+                    id={state.breedingPercentage.id}
                     name="breedingPercentage"
                     value={state.breedingPercentage.value}
                     step={10}
@@ -469,10 +472,10 @@ const OrchardStep = ({
                     legendText={orchardStepText.pollenSection.pollenMethodology.label}
                   >
                     <Checkbox
-                      id="pollen-methodology"
+                      id={state.isRegional.id}
                       name="pollenMethodology"
                       labelText={orchardStepText.pollenSection.pollenMethodology.checkbox}
-                      checked={state.isRegional}
+                      checked={state.isRegional.value}
                       readOnly
                     />
                   </CheckboxGroup>

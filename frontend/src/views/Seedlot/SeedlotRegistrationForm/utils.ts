@@ -138,15 +138,31 @@ export const initOrchardState = (): OrchardForm => (
       value: EmptyMultiOptObj,
       isInvalid: false
     },
-    isControlledCross: false,
-    hasBiotechProcess: false,
-    hasPollenContamination: false,
+    isControlledCross: {
+      id: 'orchard-is-controlled-cross',
+      value: false,
+      isInvalid: false
+    },
+    hasBiotechProcess: {
+      id: 'orchard-has-biotech-process',
+      value: false,
+      isInvalid: false
+    },
+    hasPollenContamination: {
+      id: 'orchard-has-pollen-contamination',
+      value: false,
+      isInvalid: false
+    },
     breedingPercentage: {
       id: 'orchard-breading-perc',
       value: '0',
       isInvalid: false
     },
-    isRegional: true
+    isRegional: {
+      id: 'orchard-is-regional',
+      value: true,
+      isInvalid: false
+    }
   }
 );
 
