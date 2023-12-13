@@ -1,3 +1,4 @@
+import React from 'react';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
@@ -11,7 +12,7 @@ import {
   getSmpSuccErrMsg, getVolumeErrMsg, isConeCountInvalid,
   isNonOrchardContamInvalid, isPollenCountInvalid,
   isPtNumberInvalid, isSmpSuccInvalid, isVolumeInvalid,
-  populateRowData
+  populateRowData, getPTNumberErrMsg
 } from './TableComponents/utils';
 import { OrchardObj } from '../OrchardStep/definitions';
 
@@ -317,7 +318,8 @@ export const fillCompostitionTables = (
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
   currentTab: TabTypes,
-  setStepData: Function
+  setStepData: Function,
+  setInvalidPTNumbers: React.Dispatch<React.SetStateAction<string[]>>
 ) => {
   // Store parent tree numbers that does not exist in the orchards
   const invalidParentTreeNumbers: Array<string> = [];
@@ -368,11 +370,7 @@ export const fillCompostitionTables = (
 
   setStepData(clonedState);
 
-  if (invalidParentTreeNumbers.length > 0) {
-    // A temporary solution to let users know they have invalid clone numbers
-    // eslint-disable-next-line no-alert
-    alert(`The following clone numbers cannot be found: ${invalidParentTreeNumbers}`);
-  }
+  setInvalidPTNumbers(invalidParentTreeNumbers.sort((a, b) => Number(a) - Number(b)));
 };
 
 export const toggleNotification = (
@@ -622,7 +620,7 @@ export const fillMixTable = (
     // Validate pt number
     const isPtInvalid = isPtNumberInvalid(ptNumber, state.allParentTreeData);
     newRow.parentTreeNumber.isInvalid = isPtInvalid;
-
+    newRow.parentTreeNumber.errMsg = isPtInvalid ? getPTNumberErrMsg(ptNumber) : '';
     // Populate data such as gw value
     if (!isPtInvalid) {
       newRow = populateRowData(newRow, ptNumber, state);

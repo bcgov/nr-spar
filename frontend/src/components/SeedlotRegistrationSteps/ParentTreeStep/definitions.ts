@@ -1,3 +1,4 @@
+import React from 'react';
 import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
@@ -128,4 +129,9 @@ export type AllParentTreeMap = {
 export type InputErrorNotifProps = {
   state: ParentTreeStepDataObj;
   headerConfig: HeaderObj[];
+}
+
+export type UploadWarnNotifProps = {
+  invalidPTNumbers: string[],
+  setInvalidPTNumbers: React.Dispatch<React.SetStateAction<string[]>>
 }

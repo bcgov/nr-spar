@@ -98,12 +98,12 @@ const calculateSmpRow = (
   return clonedData;
 };
 
-const getPTNumberErrMsg = (value: string): string => (
+export const getPTNumberErrMsg = (value: string): string => (
   `"${value}" is an invalid parent tree number. Please provide a valid parent tree number and review the number you have entered.`
 );
 
 export const isConeCountInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: CONE_COUNT_MIN, max: CONE_COUNT_MAX })
+  value === '' ? false : !validator.isInt(value, { min: CONE_COUNT_MIN, max: CONE_COUNT_MAX })
 );
 
 export const getConeCountErrMsg = (value: string): string => (
@@ -111,7 +111,7 @@ export const getConeCountErrMsg = (value: string): string => (
 );
 
 export const isPollenCountInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: POLLEN_COUNT_MIN, max: POLLEN_COUNT_MAX })
+  value === '' ? false : !validator.isInt(value, { min: POLLEN_COUNT_MIN, max: POLLEN_COUNT_MAX })
 );
 
 export const getPollenCountErrMsg = (value: string): string => (
@@ -122,7 +122,7 @@ export const getPollenCountErrMsg = (value: string): string => (
  * SMP success on parent (%)
  */
 export const isSmpSuccInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: SMP_SUCCESS_PERC_MIN, max: SMP_SUCCESS_PERC_MAX })
+  value === '' ? false : !validator.isInt(value, { min: SMP_SUCCESS_PERC_MIN, max: SMP_SUCCESS_PERC_MAX })
 );
 
 export const getSmpSuccErrMsg = (value: string): string => (
@@ -133,7 +133,7 @@ export const getSmpSuccErrMsg = (value: string): string => (
  * Non-orchard pollen contam. (%)
  */
 export const isNonOrchardContamInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: NON_ORCHARD_CONTAM_MIN, max: NON_ORCHARD_CONTAM_MAX })
+  value === '' ? false : !validator.isInt(value, { min: NON_ORCHARD_CONTAM_MIN, max: NON_ORCHARD_CONTAM_MAX })
 );
 
 export const getNonOrchardContamErrMsg = (value: string): string => (
@@ -141,7 +141,7 @@ export const getNonOrchardContamErrMsg = (value: string): string => (
 );
 
 export const isVolumeInvalid = (value: string): boolean => (
-  !validator.isInt(value, { min: VOLUME_MIN, max: VOLUME_MAX })
+  value === '' ? false : !validator.isInt(value, { min: VOLUME_MIN, max: VOLUME_MAX })
 );
 
 export const getVolumeErrMsg = (value: string): string => (

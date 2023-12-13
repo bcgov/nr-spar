@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Column, Row, ActionableNotification } from '@carbon/react';
 
 import { InputErrorNotifProps, RowItem, StrTypeRowItem } from './definitions';
-import { errNotifEndMsg, invalidPTNumberMsg } from './constants';
+import { pageText } from './constants';
 
 const InputErrorNotification = (
   { state, headerConfig }: InputErrorNotifProps
@@ -55,7 +55,7 @@ const InputErrorNotification = (
 
       if (invalidFields.length === 1) {
         if (invalidFields[0] === 'parentTreeNumber') {
-          generatedSubTitle = invalidPTNumberMsg;
+          generatedSubTitle = pageText.invalidPTNumberMsg;
         } else {
           generatedSubTitle = `${prefix}${getHeaderName(invalidFields[0])}${suffix}`;
         }
@@ -68,7 +68,7 @@ const InputErrorNotification = (
                 <li key={field}>
                   {
                     field === 'parentTreeNumber'
-                      ? invalidPTNumberMsg
+                      ? pageText.invalidPTNumberMsg
                       : `${prefix}${getHeaderName(field)}${suffix}`
                   }
                 </li>
@@ -82,7 +82,8 @@ const InputErrorNotification = (
         <span>
           {generatedSubTitle}
           <br />
-          {errNotifEndMsg}
+          <br />
+          {pageText.errNotifEndMsg}
         </span>
       );
     };

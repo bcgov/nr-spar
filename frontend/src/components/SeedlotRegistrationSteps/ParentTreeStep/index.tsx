@@ -48,6 +48,7 @@ import {
 
 import './styles.scss';
 import InputErrorNotification from './InputErrorNotification';
+import UploadWarnNotification from './UploadWarnNotification';
 
 const ParentTreeStep = (
   {
@@ -95,6 +96,9 @@ const ParentTreeStep = (
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
   const [applicableGenWorths, setApplicableGenWorths] = useState<string[]>([]);
+  // Array that stores invalid p.t. numbers uploaded from users from composition tabs
+  const [invalidPTNumbers, setInvalidPTNumbers] = useState<string[]>([]);
+
   const emptySectionDescription = getEmptySectionDescription(setStep);
 
   // Link reference to trigger click event
@@ -202,7 +206,14 @@ const ParentTreeStep = (
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillCompostitionTables(res.data, state, headerConfig, currentTab, setStepData);
+      fillCompostitionTables(
+        res.data,
+        state,
+        headerConfig,
+        currentTab,
+        setStepData,
+        setInvalidPTNumbers
+      );
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -272,6 +283,10 @@ const ParentTreeStep = (
                 </Column>
               </Row>
               <InputErrorNotification state={state} headerConfig={headerConfig} />
+              <UploadWarnNotification
+                invalidPTNumbers={invalidPTNumbers}
+                setInvalidPTNumbers={setInvalidPTNumbers}
+              />
               {
                 currentTab === 'successTab'
                   ? (
@@ -366,7 +381,7 @@ const ParentTreeStep = (
                           kind="primary"
                           renderIcon={Upload}
                           onClick={() => setIsUploadOpen(true)}
-                          disabled={disableOptions}
+                          disabled={disableOptions || !allParentTreeQuery.isFetched}
                         >
                           Upload from file
                         </Button>

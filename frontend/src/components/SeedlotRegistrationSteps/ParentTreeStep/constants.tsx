@@ -36,6 +36,8 @@ export const CONE_COUNT_MIN = 0;
 
 export const CONE_COUNT_MAX = 1000;
 
+export const MAX_VISIBLE_PT_NUMBERS = 10;
+
 export const getDownloadUrl = (tabType: string) => {
   if (tabType === 'Calculation of SMP mix' || tabType === 'mixTab') {
     return '/downloads/SMP_Mix_Volume_template.csv';
@@ -141,6 +143,14 @@ const getPageText = () => ({
   },
   emptySection: {
     title: 'Nothing to show yet!'
+  },
+  invalidPTNumberMsg: 'One or more of the parent tree numbers entered are invalid because these numbers might not exist within your orchard composition.',
+  errNotifEndMsg: 'Please review your entries and remember to check all pages.',
+  warnNotification: {
+    title: 'Invalid parent tree number detected',
+    subtitlePartOne: 'The uploaded file contains one or more parent tree numbers that are not part of your orchard composition. '
+      + 'As a result, the corresponding information for that parent tree number has not been added to the table. '
+      + 'Please ensure that the parent tree numbers in your uploaded file match the ones present in your orchard composition.'
   }
 });
 
@@ -760,10 +770,3 @@ export const getEmptySectionDescription = (setStep: Function) => (
     Please, fill the orchard ID to complete the cone and pollen table.
   </span>
 );
-
-/**
- * Used in the erro notification box;
- */
-export const invalidPTNumberMsg = 'One or more of the parent tree numbers entered are invalid because these numbers might not exist within your orchard composition.';
-
-export const errNotifEndMsg = 'Please review your entries and remember to check all pages.';
