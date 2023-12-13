@@ -23,6 +23,10 @@
     &+.#{vars.$bcgov-prefix}--form__helper-text {
       display: none;
     }
+
+    &.#{vars.$bcgov-prefix}--list-box--invalid input[role=combobox].#{vars.$bcgov-prefix}--text-input {
+      outline-offset: 0;
+    }
   }
 
 
