@@ -135,3 +135,12 @@ export type UploadWarnNotifProps = {
   invalidPTNumbers: string[],
   setInvalidPTNumbers: React.Dispatch<React.SetStateAction<string[]>>
 }
+
+export type EditableCellProps = {
+  rowData: RowItem,
+  header: HeaderObj,
+  applicableGenWorths: string[],
+  state: ParentTreeStepDataObj,
+  setStepData: Function,
+  seedlotSpecies: MultiOptionsObj
+};

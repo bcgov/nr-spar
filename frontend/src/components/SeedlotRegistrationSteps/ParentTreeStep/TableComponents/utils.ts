@@ -1,4 +1,5 @@
 import validator from 'validator';
+import BigNumber from 'bignumber.js';
 
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 
@@ -7,10 +8,11 @@ import {
 } from '../definitions';
 import { getMixRowTemplate, calcSum, populateStrInputId } from '../utils';
 import {
-  CONE_COUNT_MAX, CONE_COUNT_MIN, NON_ORCHARD_CONTAM_MAX,
+  CONE_COUNT_MAX, CONE_COUNT_MIN, MAX_DECIMAL_DIGITS, NON_ORCHARD_CONTAM_MAX,
   NON_ORCHARD_CONTAM_MIN, POLLEN_COUNT_MAX, POLLEN_COUNT_MIN,
-  SMP_SUCCESS_PERC_MAX, SMP_SUCCESS_PERC_MIN, VOLUME_MAX, VOLUME_MIN
+  SMP_SUCCESS_PERC_MAX, SMP_SUCCESS_PERC_MAX_PW, SMP_SUCCESS_PERC_MIN, VOLUME_MAX, VOLUME_MIN
 } from '../constants';
+import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 
 export const isPtNumberInvalid = (ptNumber: string, allParentTreeData: AllParentTreeMap) => (
   !Object.keys(allParentTreeData).includes(ptNumber)
@@ -59,6 +61,9 @@ const calculateSmpRow = (
   applicableGenWorths: string[]
 ): RowDataDictType => {
   const clonedData = structuredClone(mixTabData);
+  if (clonedData[rowData.rowId]) {
+    clonedData[rowData.rowId].volume.value = volume;
+  }
 
   const tableRows = Object.values(clonedData);
   // Calculate volume sum
@@ -102,27 +107,51 @@ export const getPTNumberErrMsg = (value: string): string => (
   `"${value}" is an invalid parent tree number. Please provide a valid parent tree number and review the number you have entered.`
 );
 
-export const isConeCountInvalid = (value: string): boolean => (
-  value === '' ? false : !validator.isInt(value, { min: CONE_COUNT_MIN, max: CONE_COUNT_MAX })
+/**
+ * A float validator, the validator.isFloat() cannot handle high precision comparing.
+ */
+const isFloatWithinRange = (value: string, min: string, max: string): boolean => (
+  new BigNumber(value).greaterThanOrEqualTo(min)
+  && new BigNumber(value).lessThanOrEqualTo(max)
 );
+
+export const isConeCountInvalid = (value: string): boolean => {
+  if (!value) {
+    return false;
+  }
+  let isValid = isFloatWithinRange(value, CONE_COUNT_MIN, CONE_COUNT_MAX);
+  if (isValid) {
+    isValid = validator.isDecimal(value, { decimal_digits: `0,${MAX_DECIMAL_DIGITS}` });
+  }
+  return !isValid;
+};
 
 export const getConeCountErrMsg = (value: string): string => (
-  `"${value}" is an invalid entry. Please provide a valid cone count value between ${CONE_COUNT_MIN} and ${CONE_COUNT_MAX}.`
+  `"${value}" is an invalid entry. Please provide a valid cone count value between ${CONE_COUNT_MIN} and ${CONE_COUNT_MAX}, up to 10 decimal places.`
 );
 
-export const isPollenCountInvalid = (value: string): boolean => (
-  value === '' ? false : !validator.isInt(value, { min: POLLEN_COUNT_MIN, max: POLLEN_COUNT_MAX })
-);
+export const isPollenCountInvalid = (value: string): boolean => {
+  if (!value) {
+    return false;
+  }
+  let isValid = isFloatWithinRange(value, POLLEN_COUNT_MIN, POLLEN_COUNT_MAX);
+  if (isValid) {
+    isValid = validator.isDecimal(value, { decimal_digits: `0,${MAX_DECIMAL_DIGITS}` });
+  }
+  return !isValid;
+};
 
 export const getPollenCountErrMsg = (value: string): string => (
-  `"${value}" is an invalid entry. Please provide a valid pollen count value between ${POLLEN_COUNT_MIN} and ${POLLEN_COUNT_MAX}.`
+  `"${value}" is an invalid entry. Please provide a valid pollen count value between ${POLLEN_COUNT_MIN} and ${POLLEN_COUNT_MAX}, up to 10 decimal places.`
 );
 
 /**
  * SMP success on parent (%)
+ * isPw = an indicator for whether the species is Western White Pine
+ * this species has can have a 100% max value.
  */
-export const isSmpSuccInvalid = (value: string): boolean => (
-  value === '' ? false : !validator.isInt(value, { min: SMP_SUCCESS_PERC_MIN, max: SMP_SUCCESS_PERC_MAX })
+export const isSmpSuccInvalid = (value: string, isPw: boolean): boolean => (
+  value === '' ? false : !validator.isInt(value, { min: SMP_SUCCESS_PERC_MIN, max: isPw ? SMP_SUCCESS_PERC_MAX_PW : SMP_SUCCESS_PERC_MAX })
 );
 
 export const getSmpSuccErrMsg = (value: string): string => (
@@ -145,7 +174,7 @@ export const isVolumeInvalid = (value: string): boolean => (
 );
 
 export const getVolumeErrMsg = (value: string): string => (
-  `"${value}" is an invalid entry. Please provide a valid volume value between ${VOLUME_MIN} and ${VOLUME_MAX}.`
+  `"${value}" is an invalid entry. Please provide a valid integer volume value between ${VOLUME_MIN} and ${VOLUME_MAX}.`
 );
 
 // Validate and populate inputs
@@ -155,7 +184,8 @@ export const handleInput = (
   colName: keyof StrTypeRowItem,
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  seedlotSpecies: MultiOptionsObj
 ) => {
   const clonedState = structuredClone(state);
   let mixTabData = { ...clonedState.mixTabData };
@@ -170,13 +200,13 @@ export const handleInput = (
       if (!isInvalid) {
         const populatedRow = populateRowData(rowData, inputValue, state);
         mixTabData[rowData.rowId] = populatedRow;
+        const rowVolume = populatedRow.volume.value;
+        mixTabData = calculateSmpRow(rowVolume, rowData, mixTabData, applicableGenWorths);
       } else {
         mixTabData[rowData.rowId] = cleanRowData(
           rowData.rowId,
           rowData.parentTreeNumber.value
         );
-        const rowVolume = Number(rowData.volume).toString();
-        mixTabData = calculateSmpRow(rowVolume, rowData, mixTabData, applicableGenWorths);
         errMsg = getPTNumberErrMsg(inputValue);
       }
     } else {
@@ -199,7 +229,7 @@ export const handleInput = (
   }
 
   if (colName === 'smpSuccessPerc') {
-    isInvalid = isSmpSuccInvalid(inputValue);
+    isInvalid = isSmpSuccInvalid(inputValue, seedlotSpecies.code === 'PW');
     if (isInvalid) {
       errMsg = getSmpSuccErrMsg(inputValue);
     }
@@ -222,9 +252,11 @@ export const handleInput = (
 
   // Set isInvalid and errMsg
   if (rowData.isMixTab) {
+    mixTabData[rowData.rowId][colName].value = inputValue;
     mixTabData[rowData.rowId][colName].isInvalid = isInvalid || isDuplicate;
     mixTabData[rowData.rowId][colName].errMsg = errMsg;
   } else {
+    tableRowData[rowData.parentTreeNumber.value][colName].value = inputValue;
     tableRowData[rowData.parentTreeNumber.value][colName].isInvalid = isInvalid;
     tableRowData[rowData.parentTreeNumber.value][colName].errMsg = errMsg;
   }
@@ -242,7 +274,7 @@ export const deleteMixRow = (
   const clonedState = structuredClone(state);
   const mixTabData = { ...clonedState.mixTabData };
   delete mixTabData[rowData.rowId];
-  const volume = rowData.volume === null ? '0' : rowData.volume.value;
+  const volume = rowData.volume.value === null ? '0' : rowData.volume.value;
   clonedState.mixTabData = calculateSmpRow(volume, rowData, mixTabData, applicableGenWorths);
   setStepData(clonedState);
 };

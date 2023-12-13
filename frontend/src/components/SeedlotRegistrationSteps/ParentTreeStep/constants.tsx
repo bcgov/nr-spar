@@ -18,23 +18,27 @@ export const EMPTY_NUMBER_STRING = '';
 
 export const VOLUME_MIN = 0;
 
-export const VOLUME_MAX = 10000;
+export const VOLUME_MAX = 999999;
 
 export const NON_ORCHARD_CONTAM_MIN = 0;
 
 export const NON_ORCHARD_CONTAM_MAX = 100;
 
-export const SMP_SUCCESS_PERC_MIN = 0;
+export const SMP_SUCCESS_PERC_MIN = 1;
 
-export const SMP_SUCCESS_PERC_MAX = 100;
+export const SMP_SUCCESS_PERC_MAX = 25;
 
-export const POLLEN_COUNT_MIN = 0;
+export const SMP_SUCCESS_PERC_MAX_PW = 100;
 
-export const POLLEN_COUNT_MAX = 1000;
+export const POLLEN_COUNT_MIN = '0';
 
-export const CONE_COUNT_MIN = 0;
+export const POLLEN_COUNT_MAX = '9999999999.9999999999';
 
-export const CONE_COUNT_MAX = 1000;
+export const CONE_COUNT_MIN = '0';
+
+export const CONE_COUNT_MAX = '9999999999.9999999999';
+
+export const MAX_DECIMAL_DIGITS = 10;
 
 export const MAX_VISIBLE_PT_NUMBERS = 10;
 

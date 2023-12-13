@@ -212,7 +212,8 @@ const ParentTreeStep = (
         headerConfig,
         currentTab,
         setStepData,
-        setInvalidPTNumbers
+        setInvalidPTNumbers,
+        seedlotSpecies
       );
     },
     onError: (err: AxiosError) => {
@@ -310,7 +311,12 @@ const ParentTreeStep = (
                         </Column>
                       </Row>
                       {
-                        renderDefaultInputs(isSMPDefaultValChecked, state, setStepData)
+                        renderDefaultInputs(
+                          isSMPDefaultValChecked,
+                          state,
+                          setStepData,
+                          seedlotSpecies
+                        )
                       }
                     </>
                   )
@@ -430,7 +436,8 @@ const ParentTreeStep = (
                                   headerConfig,
                                   applicableGenWorths,
                                   state,
-                                  setStepData
+                                  setStepData,
+                                  seedlotSpecies
                                 )
                             }
                           </Table>

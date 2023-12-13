@@ -84,6 +84,12 @@
       margin-block-start: 0.0625rem;
     }
   }
+
+  .ghost-button-underlined{
+    padding: 0;
+    min-height: fit-content;
+    text-decoration: underline;
+  }
 }
 
 .parent-tree-tab-container {

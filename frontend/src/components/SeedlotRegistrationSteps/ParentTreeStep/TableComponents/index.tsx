@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   OverflowMenuItem, Checkbox, TableBody, TableRow, Row, Column,
   TableCell, TextInput, ActionableNotification, Pagination, Button, Tooltip
@@ -6,7 +6,8 @@ import {
 import { TrashCan } from '@carbon/icons-react';
 import { pageText, PageSizesConfig } from '../constants';
 import {
-  HeaderObj, HeaderObjId, RowItem, StrTypeRowItem, TabTypes
+  EditableCellProps,
+  HeaderObj, RowItem, StrTypeRowItem, TabTypes
 } from '../definitions';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { OrchardObj } from '../../OrchardStep/definitions';
@@ -14,11 +15,12 @@ import PaginationChangeType from '../../../../types/PaginationChangeType';
 import blurOnEnter from '../../../../utils/KeyboardUtil';
 import { handlePagination } from '../../../../utils/PaginationUtils';
 import {
-  applyValueToAll, setInputChange, toggleColumn, toggleNotification
+  applyValueToAll, toggleColumn, toggleNotification
 } from '../utils';
 import { deleteMixRow, handleInput } from './utils';
 
 import '../styles.scss';
+import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 
 export const renderColOptions = (
   headerConfig: Array<HeaderObj>,
@@ -106,7 +108,6 @@ export const renderColOptions = (
  */
 const renderDeleteActionBtn = (
   rowData: RowItem,
-  colName: HeaderObjId,
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function
@@ -123,46 +124,48 @@ const renderDeleteActionBtn = (
 /**
  * This function will wrap the input with a tooltip if it's invalid
  */
-const renderEditableCell = (
-  rowData: RowItem,
-  header: HeaderObj,
-  applicableGenWorths: string[],
-  state: ParentTreeStepDataObj,
-  setStepData: Function
-) => {
+const EditableCell = ({
+  rowData,
+  header,
+  applicableGenWorths,
+  state,
+  setStepData,
+  seedlotSpecies
+}: EditableCellProps) => {
   const headerId = header.id as keyof StrTypeRowItem;
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.value = rowData[headerId].value;
+    }
+  }, [rowData]);
+
   const textInput = (
     <TextInput
+      ref={ref}
       labelText=""
       hideLabel
       invalidText=""
       type="number"
       placeholder="Add value"
-      value={rowData[headerId].value}
+      defaultValue={rowData[headerId].value}
       id={`${rowData[headerId].id}-input`}
-      onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-        setInputChange(
-          rowData,
-          headerId,
-          event.target.value,
-          state,
-          setStepData
-        );
-      }}
       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
       onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
         blurOnEnter(event);
       }}
-      onBlur={(event: React.ChangeEvent<HTMLInputElement>) => (
+      onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
         handleInput(
           rowData,
           event.target.value,
           headerId,
           applicableGenWorths,
           state,
-          setStepData
-        )
-      )}
+          setStepData,
+          seedlotSpecies
+        );
+      }}
       invalid={rowData[headerId].isInvalid}
     />
   );
@@ -182,14 +185,15 @@ const renderTableCell = (
   header: HeaderObj,
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  seedlotSpecies: MultiOptionsObj
 ) => {
   const className = header.editable ? 'td-no-padding' : null;
   if (header.id === 'actions') {
     return (
       <TableCell key={`${header.id}-${rowData.rowId}`} className={className} id={`${rowData.rowId}-action-btn-del`}>
         {
-          renderDeleteActionBtn(rowData, header.id, applicableGenWorths, state, setStepData)
+          renderDeleteActionBtn(rowData, applicableGenWorths, state, setStepData)
         }
       </TableCell>
     );
@@ -199,7 +203,16 @@ const renderTableCell = (
       <TableCell key={header.id} className={className} id={rowData[header.id].id}>
         {
           header.editable
-            ? renderEditableCell(rowData, header, applicableGenWorths, state, setStepData)
+            ? (
+              <EditableCell
+                rowData={rowData}
+                header={header}
+                applicableGenWorths={applicableGenWorths}
+                state={state}
+                setStepData={setStepData}
+                seedlotSpecies={seedlotSpecies}
+              />
+            )
             : (
               rowData[header.id as keyof StrTypeRowItem].value
             )
@@ -217,7 +230,8 @@ export const renderTableBody = (
   headerConfig: Array<HeaderObj>,
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  seedlotSpecies: MultiOptionsObj
 ) => {
   if (currentTab === 'mixTab') {
     return (
@@ -240,7 +254,8 @@ export const renderTableBody = (
                       clonedHeader,
                       applicableGenWorths,
                       state,
-                      setStepData
+                      setStepData,
+                      seedlotSpecies
                     );
                   })
               }
@@ -264,7 +279,14 @@ export const renderTableBody = (
                       header.availableInTabs.includes(currentTab) && header.enabled
                     ))
                     .map((header) => (
-                      renderTableCell(rowData, header, applicableGenWorths, state, setStepData)
+                      renderTableCell(
+                        rowData,
+                        header,
+                        applicableGenWorths,
+                        state,
+                        setStepData,
+                        seedlotSpecies
+                      )
                     ))
                 }
               </TableRow>
@@ -293,6 +315,9 @@ export const renderNotification = (
           toggleNotification('info', state, currentTab, setStepData);
           return false;
         }}
+        hasFocus={false}
+        // Without this blur the page will keep focusing on the close button
+        onClick={(e: any) => e.target.blur()}
       >
         <span className="notification-subtitle">
           {pageText[currentTab].notificationSubtitle}
@@ -386,7 +411,8 @@ export const renderPagination = (
 export const renderDefaultInputs = (
   isSMPDefaultValChecked: boolean,
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  seedlotSpecies: MultiOptionsObj
 ) => {
   if (isSMPDefaultValChecked) {
     return (
@@ -397,7 +423,7 @@ export const renderDefaultInputs = (
             type="number"
             labelText={pageText.successTab.smpInputLabel}
             onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
-              applyValueToAll('smpSuccessPerc', event.target.value, state, setStepData);
+              applyValueToAll('smpSuccessPerc', event.target.value, state, setStepData, seedlotSpecies);
             }}
             onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
               blurOnEnter(event);
@@ -410,7 +436,7 @@ export const renderDefaultInputs = (
             type="number"
             labelText={pageText.successTab.pollenCotamInputLabel}
             onBlur={(event: React.ChangeEvent<HTMLInputElement>) => {
-              applyValueToAll('nonOrchardPollenContam', event.target.value, state, setStepData);
+              applyValueToAll('nonOrchardPollenContam', event.target.value, state, setStepData, seedlotSpecies);
             }}
             onKeyUp={(event: React.KeyboardEvent<HTMLElement>) => {
               blurOnEnter(event);

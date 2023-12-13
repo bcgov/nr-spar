@@ -131,6 +131,7 @@ const InputErrorNotification = (
             hideCloseButton
             title={title}
             subtitle={subtitle}
+            hasFocus={false}
           />
         </Column>
       </Row>

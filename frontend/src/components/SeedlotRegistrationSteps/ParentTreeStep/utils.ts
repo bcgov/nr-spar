@@ -299,11 +299,12 @@ export const applyValueToAll = (
   field: keyof StrTypeRowItem,
   value: string,
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  seedlotSpecies: MultiOptionsObj
 ) => {
   const clonedState = structuredClone(state);
   const parentTreeNumbers = Object.keys(clonedState.tableRowData);
-  const isInvalid = field === 'smpSuccessPerc' ? isSmpSuccInvalid(value) : isNonOrchardContamInvalid(value);
+  const isInvalid = field === 'smpSuccessPerc' ? isSmpSuccInvalid(value, seedlotSpecies.code === 'PW') : isNonOrchardContamInvalid(value);
   const errMsg = field === 'smpSuccessPerc' ? getSmpSuccErrMsg(value) : getNonOrchardContamErrMsg(value);
   parentTreeNumbers.forEach((number) => {
     clonedState.tableRowData[number][field].value = value;
@@ -319,7 +320,8 @@ export const fillCompostitionTables = (
   headerConfig: HeaderObj[],
   currentTab: TabTypes,
   setStepData: Function,
-  setInvalidPTNumbers: React.Dispatch<React.SetStateAction<string[]>>
+  setInvalidPTNumbers: React.Dispatch<React.SetStateAction<string[]>>,
+  seedlotSpecies: MultiOptionsObj
 ) => {
   // Store parent tree numbers that does not exist in the orchards
   const invalidParentTreeNumbers: Array<string> = [];
@@ -349,7 +351,7 @@ export const fillCompostitionTables = (
 
       // SMP Success percentage
       const smpSuccessValue = row.smpSuccess.toString();
-      isInvalid = isSmpSuccInvalid(smpSuccessValue);
+      isInvalid = isSmpSuccInvalid(smpSuccessValue, seedlotSpecies.code === 'PW');
       clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.value = smpSuccessValue;
       clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.isInvalid = isInvalid;
       clonedState.tableRowData[parentTreeNumber].smpSuccessPerc
@@ -465,24 +467,6 @@ export const configHeaderOpt = (
     setGenWorthInfoItems(clonedGwItems);
     setWeightedGwInfoItems(clonedWeightedGwItems);
   }
-};
-
-export const setInputChange = (
-  rowData: RowItem,
-  colName: keyof StrTypeRowItem,
-  value: string,
-  state: ParentTreeStepDataObj,
-  setStepData: Function
-) => {
-  // Using structuredClone so useEffect on state.tableRowData can be triggered
-  const clonedState = structuredClone(state);
-  if (rowData.isMixTab) {
-    clonedState.mixTabData[rowData.rowId][colName].value = value;
-  } else if (!rowData.isMixTab) {
-    clonedState.tableRowData[rowData.parentTreeNumber.value][colName].value = value;
-  }
-
-  setStepData(clonedState);
 };
 
 export const fillCalculatedInfo = (
