@@ -3,7 +3,7 @@ import { ProgressIndicatorConfig, StepMap } from './definitions';
 export const initialProgressConfig: ProgressIndicatorConfig = {
   collection: {
     isComplete: false,
-    isCurrent: true,
+    isCurrent: false,
     isInvalid: false
   },
   ownership: {

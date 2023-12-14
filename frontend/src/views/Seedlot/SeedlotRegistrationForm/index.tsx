@@ -47,6 +47,7 @@ import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
 import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import {
+  initProgressBar,
   initCollectionState,
   initInterimState,
   initOrchardState,
@@ -86,7 +87,7 @@ const SeedlotRegistrationForm = () => {
   const [
     progressStatus,
     setProgressStatus
-  ] = useState<ProgressIndicatorConfig>(initialProgressConfig);
+  ] = useState<ProgressIndicatorConfig>(initProgressBar(formStep, initialProgressConfig));
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
