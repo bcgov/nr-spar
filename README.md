@@ -1,4 +1,6 @@
 # nr-spar-data-sync
+[![Lifecycle:Maturing](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](<https://github.com/bcgov/nr-spar-data-sync/blob/main/README.md>)
+
 Engine to sync data for SPAR application (from Postgres to Oracle). The application extracts, transforms, and loads data based on a few parameters/configurations.
 
 ## Running the application
