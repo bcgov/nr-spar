@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -75,8 +75,14 @@ const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
   const { seedlotNumber } = useParams();
+  const [searchParams] = useSearchParams();
+  const stepParam = searchParams.get('step');
 
-  const [formStep, setFormStep] = useState<number>(0);
+  const [formStep, setFormStep] = useState<number>(
+    stepParam
+      ? (parseInt(stepParam, 10) - 1)
+      : 0
+  );
   const [
     progressStatus,
     setProgressStatus

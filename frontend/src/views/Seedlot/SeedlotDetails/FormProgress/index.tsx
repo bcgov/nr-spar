@@ -18,9 +18,11 @@ interface FormProgressProps {
 
 const FormProgress = ({ seedlotNumber, isFetching }: FormProgressProps) => {
   const navigate = useNavigate();
+
   if (!seedlotNumber) {
     return null;
   }
+
   return (
     <div className="form-progress">
       <div className="form-progress-title-section">
@@ -32,7 +34,16 @@ const FormProgress = ({ seedlotNumber, isFetching }: FormProgressProps) => {
         {
           isFetching
             ? <ProgressIndicatorSkeleton />
-            : <SeedlotRegistrationProgress progressStatus={initialProgressConfig} />
+            : (
+              <SeedlotRegistrationProgress
+                progressStatus={initialProgressConfig}
+                interactFunction={(e: number) => {
+                  // Add 1 to the number to make it comply with
+                  // the step numbers shown to the user
+                  navigate(`/seedlots/a-class-registration/${seedlotNumber}?step=${e + 1}`);
+                }}
+              />
+            )
         }
       </div>
       <div>
