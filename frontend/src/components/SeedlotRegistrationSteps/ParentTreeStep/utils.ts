@@ -1,4 +1,6 @@
 import React from 'react';
+import BigNumber from 'bignumber.js';
+
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
@@ -90,14 +92,15 @@ const calcAverage = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): st
 };
 
 export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): string => {
-  let sum = 0;
+  let sum = new BigNumber(0);
 
   tableRows.forEach((row) => {
     // add if the value is not null
     if (row[field].value) {
-      sum += Number(row[field].value);
+      sum = sum.add(new BigNumber(row[field].value));
     }
   });
+
   return sum.toString();
 };
 
@@ -288,6 +291,7 @@ export const cleanTable = (
     parentTreeNumbers.forEach((parentTreeNumber) => {
       fieldsToClean.forEach((field) => {
         clonedState.tableRowData[parentTreeNumber][field as keyof StrTypeRowItem].value = '';
+        clonedState.tableRowData[parentTreeNumber][field as keyof StrTypeRowItem].isInvalid = false;
       });
     });
   }
