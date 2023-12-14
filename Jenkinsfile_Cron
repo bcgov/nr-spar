@@ -1,0 +1,45 @@
+pipeline {
+    agent any 
+    stages {
+         stage('checkout') {
+             steps{
+                bat 'IF NOT EXIST nr-spar-data-sync mkdir nr-spar-data-sync'
+                bat 'cd nr-spar-data-sync'
+                bat 'ECHO %cd%'
+                checkout([$class: 'GitSCM', branches: [[name: "main"]], extensions: [], userRemoteConfigs: [[url: 'https://github.com/bcgov/nr-spar-data-sync']]])
+             }     
+         }
+		 stage('python-exists') {
+             steps{
+                bat 'python --version' 
+             }     
+         }
+         stage('pip-update') {
+             steps{
+                bat 'python -m pip install --upgrade pip'
+             }     
+         }
+         stage('venv-plus-requirements-install') {
+             steps{
+                bat 'ECHO %cd%'
+				bat 'IF EXIST vev rmdir /s /q vev'
+                bat 'python -m venv --clear vev'
+             }     
+         }
+		 stage('execute-data-sync') {
+             steps{
+                 withCredentials([usernamePassword(credentialsId: 'IDTESTE_SPAR', passwordVariable: 'Psw_Test', usernameVariable: 'Usr_teste')]) {
+                    bat '''
+                        source ve/bin/activate
+					    python -m pip install -r ./requirements.txt --cache-dir ./data
+                        cd src
+                        REM ECHO %Usr_teste%
+                        REM ECHO %Psw_Test%
+                        python main.py
+                    '''             
+                 }
+                 
+             }     
+         }
+    }
+}
