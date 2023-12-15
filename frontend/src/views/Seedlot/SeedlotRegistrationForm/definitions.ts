@@ -1,7 +1,7 @@
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
+import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 
@@ -18,7 +18,7 @@ export type AllStepData = {
   ownershipStep: Array<SingleOwnerForm>,
   orchardStep: OrchardForm,
   parentTreeStep: ParentTreeStepDataObj,
-  extractionStorageStep: ExtractionStorage
+  extractionStorageStep: ExtractionStorageForm
 }
 
 type ProgressStepStatus = {

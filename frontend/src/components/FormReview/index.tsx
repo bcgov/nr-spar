@@ -15,8 +15,11 @@ import InterimStorage from '../SeedlotRegistrationSteps/InterimStep';
 import CollectionStep from '../SeedlotRegistrationSteps/CollectionStep';
 import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import { OrchardForm } from '../SeedlotRegistrationSteps/OrchardStep/definitions';
-import { initCollectionState, initOwnershipState, initInterimState } from '../../views/Seedlot/SeedlotRegistrationForm/utils';
+import {
+  initCollectionState, initOwnershipState, initInterimState, initExtractionStorageState
+} from '../../views/Seedlot/SeedlotRegistrationForm/utils';
 import { AllStepData } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { tscAgencyObj, tscLocationCode } from '../../views/Seedlot/SeedlotRegistrationForm/constants';
 import formReviewText from './constants';
 
 import './styles.scss';
@@ -125,18 +128,7 @@ const ownershipMock = initOwnershipState(defaultAgencyObj, defaultCode);
 
 const interimStorageMock = initInterimState(defaultAgencyObj, defaultCode);
 
-const extractionMock = {
-  extractoryUseTSC: true,
-  extractoryAgency: 'Yellow point lodge LTD.',
-  extractoryLocationCode: '00',
-  extractionStartDate: '2023/01/20',
-  extractionEndDate: '2023/03/18',
-  seedStorageUseTSC: true,
-  seedStorageAgency: 'Yellow point lodge LTD.',
-  seedStorageLocationCode: '00',
-  seedStorageStartDate: '2023/01/20',
-  seedStorageEndDate: '2023/03/18'
-};
+const extractionMock = initExtractionStorageState(tscAgencyObj, tscLocationCode);
 
 const FormReview = () => {
   const [allStepData] = useState<AllStepData>({
@@ -291,8 +283,8 @@ const FormReview = () => {
                   <div className="form-item">
                     <ExtractionAndStorage
                       state={allStepData.extractionStorageStep}
-                      defaultAgency={defaultAgency}
-                      defaultCode={defaultCode}
+                      defaultAgency={tscAgencyObj}
+                      defaultCode={tscLocationCode}
                       agencyOptions={[]}
                       setStepData={() => { }}
                       readOnly

@@ -377,3 +377,7 @@
     display: none;
   }
 }
+
+label.#{vars.$bcgov-prefix}--label--disabled {
+  color: var(--#{vars.$bcgov-prefix}-text-disabled, #939395);
+}
