@@ -427,6 +427,7 @@ const SeedlotRegistrationForm = () => {
               progressStatus={progressStatus}
               className="seedlot-registration-steps"
               interactFunction={(e: number) => {
+                window.history.replaceState(null, '', `?step=${(e + 1).toString()}`);
                 updateProgressStatus(e, formStep);
                 setFormStep(e);
               }}
