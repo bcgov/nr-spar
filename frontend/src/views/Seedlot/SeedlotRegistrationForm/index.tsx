@@ -40,7 +40,7 @@ import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/Ow
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
-import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
+import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
@@ -62,16 +62,17 @@ import {
   validateInterimStep,
   verifyInterimStepCompleteness,
   validateOrchardStep,
-  verifyOrchardStepCompleteness
+  verifyOrchardStepCompleteness,
+  validateExtractionStep,
+  verifyExtractionStepCompleteness
 } from './utils';
-import { initialProgressConfig, stepMap } from './constants';
+import {
+  initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
+} from './constants';
 
 import './styles.scss';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-
-const defaultExtStorCode = '00';
-const defaultExtStorAgency = '12797 - Tree Seed Centre - MOF';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ const SeedlotRegistrationForm = () => {
     interimStep: initInterimState(EmptyMultiOptObj, ''),
     orchardStep: initOrchardState(),
     parentTreeStep: initParentTreeState(),
-    extractionStorageStep: initExtractionStorageState(defaultExtStorAgency, defaultExtStorCode)
+    extractionStorageStep: initExtractionStorageState(tscAgencyObj, tscLocationCode)
   }));
 
   const fundingSourcesQuery = useQuery({
@@ -296,6 +297,16 @@ const SeedlotRegistrationForm = () => {
       }
     }
 
+    // Set invalid or complete status for Extraction and Storage Step
+    if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
+      const isExtractionInvalid = validateExtractionStep(allStepData.extractionStorageStep);
+      clonedStatus.extraction.isInvalid = isExtractionInvalid;
+      if (!isExtractionInvalid) {
+        const isExtractionComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
+        clonedStatus.extraction.isComplete = isExtractionComplete;
+      }
+    }
+
     setProgressStatus(clonedStatus);
   };
 
@@ -390,10 +401,10 @@ const SeedlotRegistrationForm = () => {
         return (
           <ExtractionAndStorage
             state={allStepData.extractionStorageStep}
-            defaultAgency={defaultExtStorAgency}
-            defaultCode={defaultExtStorCode}
+            defaultAgency={tscAgencyObj}
+            defaultCode={tscLocationCode}
             agencyOptions={agencyOptions}
-            setStepData={(data: ExtractionStorage) => setStepData('extractionStorageStep', data)}
+            setStepData={(data: ExtractionStorageForm) => setStepData('extractionStorageStep', data)}
           />
         );
       default:

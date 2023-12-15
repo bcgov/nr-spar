@@ -1,3 +1,4 @@
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { ProgressIndicatorConfig, StepMap } from './definitions';
 
 export const initialProgressConfig: ProgressIndicatorConfig = {
@@ -41,3 +42,11 @@ export const stepMap: StepMap = {
   4: 'parent',
   5: 'extraction'
 };
+
+export const tscAgencyObj: MultiOptionsObj = {
+  code: '00012797',
+  label: 'Tree Seed Centre',
+  description: '00012797 - Tree Seed Centre - MOF'
+};
+
+export const tscLocationCode = '00';
