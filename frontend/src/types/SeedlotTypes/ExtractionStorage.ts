@@ -1,14 +1,20 @@
-type ExtractionStorage = {
-  extractoryUseTSC: boolean;
-  extractoryAgency: string;
-  extractoryLocationCode: string;
-  extractionStartDate: string;
-  extractionEndDate: string;
-  seedStorageUseTSC: boolean;
-  seedStorageAgency: string;
-  seedStorageLocationCode: string;
-  seedStorageStartDate: string;
-  seedStorageEndDate: string;
+import { BooleanInputType, StringInputType, OptionsInputType } from '../FormInputType';
+
+type ExtractionStorageForm = {
+  extraction: {
+    useTSC: BooleanInputType;
+    agency: OptionsInputType;
+    locationCode: StringInputType;
+    startDate: StringInputType;
+    endDate: StringInputType;
+  },
+  seedStorage: {
+    useTSC: BooleanInputType;
+    agency: OptionsInputType;
+    locationCode: StringInputType;
+    startDate: StringInputType;
+    endDate: StringInputType;
+  }
 };
 
-export default ExtractionStorage;
+export default ExtractionStorageForm;

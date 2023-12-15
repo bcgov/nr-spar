@@ -1,49 +1,35 @@
-import React, { useState, useRef } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import React, { useState } from 'react';
 import moment from 'moment';
-import validator from 'validator';
 
 import {
-  Checkbox,
   Column,
-  ComboBox,
   DatePicker,
   DatePickerInput,
   FlexGrid,
   InlineNotification,
-  Row,
-  TextInput,
-  InlineLoading
+  Row
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
+import ApplicantAgencyFields from '../../ApplicantAgencyFields';
+
+import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 import {
   inputText,
   DATE_FORMAT,
-  initLocationValidateObj
+  storageAgencyFields,
+  extractorAgencyFields
 } from './constants';
-
-import { getForestClientLocation } from '../../../api-service/forestClientsAPI';
-
-import ExtractionStorage from '../../../types/SeedlotTypes/ExtractionStorage';
-import ComboBoxEvent from '../../../types/ComboBoxEvent';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
-
-import { FilterObj, filterInput } from '../../../utils/filterUtils';
-import getForestClientNumber from '../../../utils/StringUtils';
-import {
-  FormValidation,
-  initialValidationObj,
-  ValidateLocationType
-} from './definitions';
 
 import './styles.scss';
 
 interface ExtractionAndStorageProps {
-  state: ExtractionStorage,
+  state: ExtractionStorageForm,
   setStepData: Function,
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string,
   agencyOptions: Array<MultiOptionsObj>,
   readOnly?: boolean
@@ -59,305 +45,100 @@ const ExtractionAndStorage = (
     readOnly
   }: ExtractionAndStorageProps
 ) => {
-  const [validationObj, setValidationObj] = useState<FormValidation>(initialValidationObj);
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
-  const [currentSection, setCurrentSection] = useState<string>('');
-  const [locValidationObj, setLocValidationObj] = useState<ValidateLocationType>(
-    initLocationValidateObj
-  );
 
-  const updateAfterLocValidation = (isInvalid: boolean) => {
-    setValidationObj({
-      ...validationObj,
-      [currentSection === 'extractorFields' ? 'isExtractorCodeInvalid' : 'isStorageCodeInvalid']: isInvalid
-    });
-    setLocValidationObj({
-      ...locValidationObj,
-      [currentSection]: {
-        ...locValidationObj[currentSection],
-        locationCodeHelper: inputText.extractorCode.helperTextEnabled,
-        invalidLocationMessage: isInvalid ? inputText.extractorCode.invalidLocationForSelectedAgency : ''
-      }
-    });
-  };
-
-  const validateLocationCodeMutation = useMutation({
-    mutationFn: (queryParams: string[]) => getForestClientLocation(
-      queryParams[0],
-      queryParams[1]
-    ),
-    onError: () => updateAfterLocValidation(true),
-    onSuccess: () => updateAfterLocValidation(false)
-  });
-
-  const validateLocationCode = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    section: string
+  const setAgencyAndCode = (
+    isDefault: BooleanInputType,
+    agency: OptionsInputType,
+    locationCode: StringInputType,
+    extractionOrStorage: ('extraction' | 'seedStorage')
   ) => {
-    let locationCode = event.target.value;
-    const stepDataField = section === 'extractorFields' ? 'extractoryLocationCode' : 'seedStorageLocationCode';
-    const isInRange = validator.isInt(locationCode, { min: 0, max: 99 });
+    const clonedState = structuredClone(state);
+    clonedState[extractionOrStorage].useTSC = isDefault;
+    clonedState[extractionOrStorage].agency = agency;
+    clonedState[extractionOrStorage].locationCode = locationCode;
 
-    // Adding this check to add an extra 0 on the left, for cases where
-    // the user types values between 0 and 9
-    if (isInRange && locationCode.length === 1) {
-      locationCode = locationCode.padStart(2, '0');
-      setStepData({
-        ...state,
-        [stepDataField]: locationCode
-      });
-    }
-
-    if (!isInRange) {
-      setLocValidationObj({
-        ...locValidationObj,
-        [section]: {
-          ...locValidationObj[section],
-          invalidLocationMessage: inputText.extractorCode.invalidLocationValue
-        }
-      });
-      setValidationObj({
-        ...validationObj,
-        [section === 'extractorFields' ? 'isExtractorCodeInvalid' : 'isStorageCodeInvalid']: true
-      });
-    } else if (locValidationObj[section].forestClientNumber) {
-      validateLocationCodeMutation.mutate(
-        [locValidationObj[section].forestClientNumber, locationCode]
-      );
-      setLocValidationObj({
-        ...locValidationObj,
-        [section]: {
-          ...locValidationObj[section],
-          locationCodeHelper: ''
-        }
-      });
-      setValidationObj({
-        ...validationObj,
-        [section === 'extractorFields' ? 'isExtractorCodeInvalid' : 'isStorageCodeInvalid']: false
-      });
-    }
+    setStepData(clonedState);
   };
 
-  const validateInput = (name: string, value: string | boolean) => {
-    const newValidObj = { ...validationObj };
-    let isInvalid = false;
-    switch (name) {
-      case 'extractoryAgency':
-        if (!value) {
-          newValidObj.isExtractorCodeInvalid = isInvalid;
-        }
-        break;
-      case 'seedStorageAgency':
-        if (!value) {
-          newValidObj.isStorageCodeInvalid = isInvalid;
-        }
-        break;
-      case 'extractionStartDate':
-      case 'extractionEndDate':
-        // Have both start and end dates
-        if (state.extractionStartDate !== '' && state.extractionEndDate !== '') {
-          isInvalid = moment(state.extractionEndDate, 'YYYY/MM/DD')
-            .isBefore(moment(state.extractionStartDate, 'YYYY/MM/DD'));
-        }
-        newValidObj.isExtractorStartDateInvalid = isInvalid;
-        newValidObj.isExtractorEndDateInvalid = isInvalid;
-        break;
-      case 'seedStorageStartDate':
-      case 'seedStorageEndDate':
-        // Have both start and end dates
-        if (state.seedStorageStartDate !== '' && state.seedStorageEndDate !== '') {
-          isInvalid = moment(state.seedStorageEndDate, 'YYYY/MM/DD')
-            .isBefore(moment(state.seedStorageStartDate, 'YYYY/MM/DD'));
-        }
-        newValidObj.isStorageStartDateInvalid = isInvalid;
-        newValidObj.isStorageEndDateInvalid = isInvalid;
-        break;
-      default:
-        break;
+  // This function validates changes on both start and end dates
+  const validateStorageDates = (curState: ExtractionStorageForm, extractionOrStorage: ('extraction' | 'seedStorage')) => {
+    const startDate = curState[extractionOrStorage].startDate.value;
+    const endDate = curState[extractionOrStorage].endDate.value;
+
+    // Check if the start date is set before the end date
+    if (startDate !== '' && endDate !== '') {
+      return moment(endDate, 'YYYY/MM/DD')
+        .isBefore(moment(startDate, 'YYYY/MM/DD'));
     }
-    setValidationObj(newValidObj);
+    return false;
   };
 
-  const extractorNameInputRef = useRef<HTMLInputElement>(null);
-  const extractorNumberInputRef = useRef<HTMLInputElement>(null);
-  const storageNameInputRef = useRef<HTMLInputElement>(null);
-  const storageNumberInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFormInput = (
-    name: keyof ExtractionStorage,
-    value: string | boolean,
-    optName?: keyof ExtractionStorage,
-    optValue?: string | boolean,
-    tscAgency?: string,
-    checked?: boolean
+  const handleDates = (
+    isStart: boolean,
+    extractionOrStorage: ('extraction' | 'seedStorage'),
+    stringDate: string
   ) => {
-    if (optName && optName !== name) {
-      let newState = {
-        ...state,
-        [name]: value,
-        [optName]: optValue
-      };
-
-      if (tscAgency) {
-        newState = {
-          ...newState,
-          [tscAgency]: checked
-        };
-      }
-
-      setStepData(newState);
-    } else if (name === 'extractoryAgency' || name === 'seedStorageAgency') {
-      const section = name === 'extractoryAgency' ? 'extractorFields' : 'storageFields';
-      const stepDataField = section === 'extractorFields' ? 'extractoryLocationCode' : 'seedStorageLocationCode';
-      setLocValidationObj({
-        ...locValidationObj,
-        [section]: {
-          ...locValidationObj[section],
-          forestClientNumber: value ? getForestClientNumber(value as string) : '',
-          locationCodeHelper:
-            value
-              ? inputText.extractorCode.helperTextEnabled
-              : inputText.extractorCode.helperTextDisabled
-        }
-      });
-      setStepData({
-        ...state,
-        [name]: value,
-        [stepDataField]: value ? state[stepDataField] : ''
-      });
+    const clonedState = structuredClone(state);
+    if (isStart) {
+      clonedState[extractionOrStorage].startDate.value = stringDate;
     } else {
-      setStepData({
-        ...state,
-        [name]: value
-      });
+      clonedState[extractionOrStorage].endDate.value = stringDate;
     }
 
-    validateInput(name, value);
-    if (optName && optValue) {
-      validateInput(optName, optValue);
-    }
+    const isInvalid = validateStorageDates(clonedState, extractionOrStorage);
+    clonedState[extractionOrStorage].startDate.isInvalid = isInvalid;
+    clonedState[extractionOrStorage].endDate.isInvalid = isInvalid;
+    setStepData(clonedState);
   };
 
   return (
-    <FlexGrid className="extractory-and-storage-form" fullWidth>
+    <FlexGrid className="extraction-and-storage-form" fullWidth>
       <Row className="extraction-information-title">
         <Column sm={4} md={8} lg={16}>
           <h2>{inputText.extractionTitle.titleText}</h2>
           <Subtitle text={inputText.extractionTitle.subtitleText} />
         </Column>
       </Row>
-      <Row className="extractory-agency-tsc-checkbox-row">
-        <Column sm={4} md={8} lg={16}>
-          <Checkbox
-            id="extractory-agency-tsc-checkbox"
-            name="extractory-agency-tsc"
-            labelText={inputText.extractorCheckbox.labelText}
-            checked={state.extractoryUseTSC}
-            readOnly={readOnly}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const { checked } = e.target;
-              setLocValidationObj({
-                ...locValidationObj,
-                extractorFields: {
-                  ...locValidationObj.extractorFields,
-                  locationCodeHelper:
-                    !checked
-                      ? inputText.extractorCode.helperTextDisabled
-                      : inputText.extractorCode.helperTextEnabled
-                }
-              });
-              handleFormInput(
-                'extractoryAgency',
-                checked ? defaultAgency : '',
-                'extractoryLocationCode',
-                checked ? defaultCode : '',
-                'extractoryUseTSC',
-                checked
-              );
-            }}
-          />
-        </Column>
-      </Row>
-      <Row className="extractor-agency-row">
-        <Column className="extractor-agency-col" sm={4} md={4} lg={8} xlg={6}>
-          <ComboBox
-            id="extractory-agency-combobox"
-            ref={extractorNameInputRef}
-            name="extractory-agency"
-            helperText={inputText.extractor.helperText}
-            readOnly={readOnly ?? state.extractoryUseTSC}
-            onChange={(e: ComboBoxEvent) => {
-              handleFormInput(
-                'extractoryAgency',
-                e.selectedItem
-                  ? e.selectedItem.label
-                  : ''
-              );
-            }}
-            selectedItem={state.extractoryAgency}
-            shouldFilterItem={
-              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-            }
-            titleText={inputText.extractor.titleText}
-            placeholder={inputText.extractor.placeholder}
-            items={agencyOptions}
-            invalid={validationObj.isExtractorNameInvalid}
-          />
-        </Column>
-        <Column className="extractor-agency-col" sm={4} md={4} lg={8} xlg={6}>
-          <TextInput
-            id="extractory-agency-location-code-input"
-            className="extractory-agency-location-code"
-            name="extractory-agency-location-code"
-            ref={extractorNumberInputRef}
-            value={state.extractoryLocationCode}
-            type="number"
-            placeholder={!locValidationObj.extractorFields.forestClientNumber ? '' : 'Example: 00'}
-            labelText={inputText.extractorCode.labelText}
-            helperText={locValidationObj.extractorFields.locationCodeHelper}
-            invalid={validationObj.isExtractorCodeInvalid}
-            invalidText={locValidationObj.extractorFields.invalidLocationMessage}
-            disabled={!locValidationObj.extractorFields.forestClientNumber}
-            readOnly={readOnly ?? state.extractoryUseTSC}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleFormInput('extractoryLocationCode', e.target.value);
-            }}
-            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (!e.target.readOnly) {
-                setCurrentSection('extractorFields');
-                validateLocationCode(e, 'extractorFields');
-              }
-            }}
-          />
-          {
-            validateLocationCodeMutation.isLoading && currentSection === 'extractorFields'
-              ? <InlineLoading description="Validating..." />
-              : null
-          }
-        </Column>
-      </Row>
+      <ApplicantAgencyFields
+        showCheckbox
+        checkboxId={state.extraction.useTSC.id}
+        isDefault={state.extraction.useTSC}
+        agency={state.extraction.agency}
+        locationCode={state.extraction.locationCode}
+        fieldsProps={extractorAgencyFields}
+        agencyOptions={agencyOptions}
+        defaultAgency={defaultAgency}
+        defaultCode={defaultCode}
+        setAgencyAndCode={(
+          isDefault: BooleanInputType,
+          agency: OptionsInputType,
+          locationCode: StringInputType
+        ) => setAgencyAndCode(isDefault, agency, locationCode, 'extraction')}
+        readOnly={readOnly}
+        maxInputColSize={6}
+      />
       <Row className="extraction-date-row">
         <Column className="extraction-start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
             datePickerType="single"
             name="extractionStartDate"
             dateFormat={DATE_FORMAT}
-            value={state.extractionStartDate}
+            value={state.extraction.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput('extractionStartDate', selectedDate);
+              handleDates(true, 'extraction', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id="extraction-start-date-input"
+              id={state.extraction.startDate.id}
               labelText={inputText.date.extraction.labelText.start}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
-              invalid={validationObj.isExtractorStartDateInvalid}
+              invalid={state.extraction.startDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.extractoryUseTSC}
+              disabled={state.extraction.useTSC.value}
             />
           </DatePicker>
         </Column>
@@ -366,25 +147,25 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionEndDate"
             dateFormat={DATE_FORMAT}
-            value={state.extractionEndDate}
+            value={state.extraction.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput('extractionEndDate', selectedDate);
+              handleDates(false, 'extraction', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id="extraction-end-date-input"
+              id={state.extraction.endDate.id}
               labelText={inputText.date.extraction.labelText.end}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
-              invalid={validationObj.isExtractorEndDateInvalid}
+              invalid={state.extraction.endDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.extractoryUseTSC}
+              disabled={state.extraction.useTSC.value}
             />
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.extractoryUseTSC && !readOnly && isExtractorHintOpen && (
+          {state.extraction.useTSC.value && !readOnly && isExtractorHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"
@@ -401,117 +182,44 @@ const ExtractionAndStorage = (
           <Subtitle text={inputText.storageTitle.subtitleText} />
         </Column>
       </Row>
-      <Row className="seed-storage-agency-tsc-checkbox-row">
-        <Column sm={4} md={8} lg={16}>
-          <Checkbox
-            id="seed-storage-agency-tsc-checkbox"
-            name="seed-storage-agency-tsc"
-            labelText={inputText.storageCheckbox.labelText}
-            checked={state.seedStorageUseTSC}
-            readOnly={readOnly}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const { checked } = e.target;
-              setLocValidationObj({
-                ...locValidationObj,
-                storageFields: {
-                  ...locValidationObj.storageFields,
-                  locationCodeHelper:
-                    !checked
-                      ? inputText.storageCode.helperTextDisabled
-                      : inputText.storageCode.helperTextEnabled
-                }
-              });
-              handleFormInput(
-                'seedStorageAgency',
-                checked ? defaultAgency : '',
-                'seedStorageLocationCode',
-                checked ? defaultCode : '',
-                'seedStorageUseTSC',
-                checked
-              );
-            }}
-          />
-        </Column>
-      </Row>
-      <Row className="seed-storage-agency-row">
-        <Column className="seed-storage-agency-col" sm={4} md={4} lg={8} xlg={6}>
-          <ComboBox
-            id="seed-storage-agency-combobox"
-            ref={storageNameInputRef}
-            name="seed-storage-agency"
-            helperText={inputText.storage.helperText}
-            onChange={(e: ComboBoxEvent) => {
-              handleFormInput(
-                'seedStorageAgency',
-                e.selectedItem
-                  ? e.selectedItem.label
-                  : ''
-              );
-            }}
-            selectedItem={state.seedStorageAgency}
-            shouldFilterItem={
-              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-            }
-            titleText={inputText.storage.titleText}
-            placeholder={inputText.storage.placeholder}
-            readOnly={state.seedStorageUseTSC}
-            items={agencyOptions}
-            invalid={validationObj.isStorageNameInvalid}
-          />
-        </Column>
-        <Column className="seed-storage-location-code-col" sm={4} md={4} lg={8} xlg={6}>
-          <TextInput
-            id="seed-storage-location-code-input"
-            className="storage-agency-location-code"
-            name="seed-storage-location-code"
-            ref={storageNumberInputRef}
-            value={state.seedStorageLocationCode}
-            type="number"
-            placeholder={!locValidationObj.storageFields.forestClientNumber ? '' : 'Example: 00'}
-            labelText={inputText.storageCode.labelText}
-            helperText={locValidationObj.storageFields.locationCodeHelper}
-            invalid={validationObj.isStorageCodeInvalid}
-            invalidText={locValidationObj.storageFields.invalidLocationMessage}
-            disabled={!locValidationObj.storageFields.forestClientNumber}
-            readOnly={readOnly || state.seedStorageUseTSC}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleFormInput('seedStorageLocationCode', e.target.value);
-            }}
-            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (!e.target.readOnly) {
-                setCurrentSection('storageFields');
-                validateLocationCode(e, 'storageFields');
-              }
-            }}
-          />
-          {
-            validateLocationCodeMutation.isLoading && currentSection === 'storageFields'
-              ? <InlineLoading description="Validating..." />
-              : null
-          }
-        </Column>
-      </Row>
+      <ApplicantAgencyFields
+        showCheckbox
+        checkboxId={state.seedStorage.useTSC.id}
+        isDefault={state.seedStorage.useTSC}
+        agency={state.seedStorage.agency}
+        locationCode={state.seedStorage.locationCode}
+        fieldsProps={storageAgencyFields}
+        agencyOptions={agencyOptions}
+        defaultAgency={defaultAgency}
+        defaultCode={defaultCode}
+        setAgencyAndCode={(
+          isDefault: BooleanInputType,
+          agency: OptionsInputType,
+          locationCode: StringInputType
+        ) => setAgencyAndCode(isDefault, agency, locationCode, 'seedStorage')}
+        readOnly={readOnly}
+        maxInputColSize={6}
+      />
       <Row className="storage-date-row">
         <Column className="storage-start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
             datePickerType="single"
             name="storageStartDate"
             dateFormat={DATE_FORMAT}
-            value={state.seedStorageStartDate}
+            value={state.seedStorage.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput('seedStorageStartDate', selectedDate);
+              handleDates(true, 'seedStorage', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id="storage-start-date-input"
+              id={state.seedStorage.startDate.id}
               labelText={inputText.date.storage.labelText.start}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
-              invalid={validationObj.isStorageStartDateInvalid}
+              invalid={state.seedStorage.startDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.seedStorageUseTSC}
+              disabled={state.seedStorage.useTSC.value}
             />
           </DatePicker>
         </Column>
@@ -520,25 +228,25 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageEndDate"
             dateFormat={DATE_FORMAT}
-            value={state.seedStorageEndDate}
+            value={state.seedStorage.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleFormInput('seedStorageEndDate', selectedDate);
+              handleDates(false, 'seedStorage', selectedDate);
             }}
             readOnly={readOnly}
           >
             <DatePickerInput
-              id="storage-end-date-input"
+              id={state.seedStorage.endDate.id}
               labelText={inputText.date.storage.labelText.end}
               helperText={inputText.date.helperText}
               placeholder={inputText.date.placeholder}
-              invalid={validationObj.isStorageEndDateInvalid}
+              invalid={state.seedStorage.endDate.isInvalid}
               invalidText={inputText.date.invalidText}
-              disabled={state.seedStorageUseTSC}
+              disabled={state.seedStorage.useTSC.value}
             />
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.seedStorageUseTSC && !readOnly && isStorageHintOpen && (
+          {state.seedStorage.useTSC.value && !readOnly && isStorageHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"
