@@ -248,16 +248,21 @@ public class SeedlotService {
      * Merging entities script:
      * 1. Finds all for that seedlot
      * 2. Iterate over the result list
-     * 3. Keep existing entities
-     * 4. Remove the ones not present in the request body
+     * 3. Remove all existing entries except the seedlot row in the seedlot table
      * 5. Add new ones
      */
 
+    // Collection step 1
     seedlotCollectionMethodService.saveSeedlotFormStep1(seedlot, form.seedlotFormCollectionDto());
+    // Owner step 2
     seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, form.seedlotFormOwnershipDtoList());
+    // Interim Step 3
     saveSeedlotFormStep3(seedlot, form.seedlotFormInterimDto());
+    // Orchard Step 4
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto());
+    // Parent Tree Step 5
     saveSeedlotFormStep5(seedlot, form.seedlotFormParentTreeSmpDtoList());
+    // Extraction Step 6
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
 
     String submittedStatus = "SUB";
