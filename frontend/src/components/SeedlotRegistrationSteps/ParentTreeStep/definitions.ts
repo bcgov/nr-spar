@@ -1,12 +1,20 @@
+import React from 'react';
 import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
+import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { OrchardObj } from '../OrchardStep/definitions';
 
-export type TabTypes = {
-  coneTab: 'coneTab',
-  successTab: 'successTab',
-  mixTab: 'mixTab'
-};
+export type ParentTreeStepProps = {
+  seedlotSpecies: MultiOptionsObj
+  state: ParentTreeStepDataObj;
+  setStep: Function
+  setStepData: Function;
+  orchards: Array<OrchardObj>;
+}
+
+export type TabTypes = 'coneTab' | 'successTab' | 'mixTab';
 
 export type StrTypeRowItem = {
   parentTreeNumber: StringInputType,
@@ -117,3 +125,22 @@ export type MixUploadResponse = {
 export type AllParentTreeMap = {
   [key: string]: ParentTreeGeneticQualityType
 }
+
+export type InputErrorNotifProps = {
+  state: ParentTreeStepDataObj;
+  headerConfig: HeaderObj[];
+}
+
+export type UploadWarnNotifProps = {
+  invalidPTNumbers: string[],
+  setInvalidPTNumbers: React.Dispatch<React.SetStateAction<string[]>>
+}
+
+export type EditableCellProps = {
+  rowData: RowItem,
+  header: HeaderObj,
+  applicableGenWorths: string[],
+  state: ParentTreeStepDataObj,
+  setStepData: Function,
+  seedlotSpecies: MultiOptionsObj
+};

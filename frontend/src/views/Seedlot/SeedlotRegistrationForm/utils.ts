@@ -1,12 +1,15 @@
+import BigNumber from 'bignumber.js';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import { DEFAULT_MIX_PAGE_ROWS, notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { DEFAULT_MIX_PAGE_ROWS, MAX_DECIMAL_DIGITS, notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import { calcSum, generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import {
   ParentTreeStepDataObj
 } from './definitions';
@@ -177,22 +180,67 @@ export const initParentTreeState = (): ParentTreeStepDataObj => {
 };
 
 export const initExtractionStorageState = (
-  defaultAgency: string,
+  defaultAgency: MultiOptionsObj,
   defaultCode: string
-) => (
+): ExtractionStorageForm => (
   {
-    extractoryUseTSC: true,
-    extractoryAgency: defaultAgency,
-    extractoryLocationCode: defaultCode,
-    extractionStartDate: '',
-    extractionEndDate: '',
-    seedStorageUseTSC: true,
-    seedStorageAgency: defaultAgency,
-    seedStorageLocationCode: defaultCode,
-    seedStorageStartDate: '',
-    seedStorageEndDate: ''
+    extraction: {
+      useTSC: {
+        id: 'ext-agency-tsc-checkbox',
+        value: true,
+        isInvalid: false
+      },
+      agency: {
+        id: 'ext-agency-combobox',
+        value: defaultAgency,
+        isInvalid: false
+      },
+      locationCode: {
+        id: 'ext-location-code',
+        value: defaultCode,
+        isInvalid: false
+      },
+      startDate: {
+        id: 'ext-start-date',
+        value: '',
+        isInvalid: false
+      },
+      endDate: {
+        id: 'ext-end-date',
+        value: '',
+        isInvalid: false
+      }
+    },
+    seedStorage: {
+      useTSC: {
+        id: 'str-agency-tsc-checkbox',
+        value: true,
+        isInvalid: false
+      },
+      agency: {
+        id: 'str-agency-combobox',
+        value: defaultAgency,
+        isInvalid: false
+      },
+      locationCode: {
+        id: 'str-location-code',
+        value: defaultCode,
+        isInvalid: false
+      },
+      startDate: {
+        id: 'str-start-date',
+        value: '',
+        isInvalid: false
+      },
+      endDate: {
+        id: 'str-end-date',
+        value: '',
+        isInvalid: false
+      }
+    }
   }
 );
+
 /**
  * Validate Collection Step.
  * Return true if it's invalid, false otherwise.
@@ -298,11 +346,11 @@ export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwner
  */
 export const verifyInterimStepCompleteness = (interimData: InterimForm): boolean => {
   if (!interimData.agencyName.value.code.length
-      || !interimData.locationCode.value.length
-      || !interimData.startDate.value.length
-      || !interimData.endDate.value.length
-      || !interimData.facilityType.value.length
-      || (interimData.facilityType.value === 'OTH' && !interimData.facilityOtherType.value.length)
+    || !interimData.locationCode.value.length
+    || !interimData.startDate.value.length
+    || !interimData.endDate.value.length
+    || !interimData.facilityType.value.length
+    || (interimData.facilityType.value === 'OTH' && !interimData.facilityOtherType.value.length)
   ) {
     return false;
   }
@@ -339,7 +387,6 @@ export const validateOrchardStep = (orchardStepData: OrchardForm): boolean => {
   }
 
   // Booleans are either true or false so there's no need to check them.
-
   return isInvalid;
 };
 
@@ -367,6 +414,99 @@ export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boo
   ) {
     isComplete = false;
   }
+
+  return isComplete;
+};
+
+/**
+ * Validate Extraction and Storage Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateExtractionStep = (extractionStepData: ExtractionStorageForm): boolean => {
+  let isInvalid = false;
+  if (
+    extractionStepData.extraction.agency.isInvalid
+    || extractionStepData.extraction.locationCode.isInvalid
+    || extractionStepData.extraction.startDate.isInvalid
+    || extractionStepData.extraction.endDate.isInvalid
+    || extractionStepData.seedStorage.agency.isInvalid
+    || extractionStepData.seedStorage.locationCode.isInvalid
+    || extractionStepData.seedStorage.startDate.isInvalid
+    || extractionStepData.seedStorage.endDate.isInvalid
+  ) {
+    isInvalid = true;
+  }
+
+  return isInvalid;
+};
+
+/**
+ * Verify if the extraction and storage step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyExtractionStepCompleteness = (
+  extractionStepData: ExtractionStorageForm
+): boolean => {
+  if (!extractionStepData.extraction.agency.value.code.length
+    || !extractionStepData.extraction.locationCode.value.length
+    || !extractionStepData.seedStorage.agency.value.code.length
+    || !extractionStepData.seedStorage.locationCode.value.length
+  ) {
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Validate Parent tree Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateParentStep = (parentStepData: ParentTreeStepDataObj): boolean => {
+  let isInvalid = false;
+  // Possible invalid data are contained in tableRowData and mixTabData
+  const { tableRowData, mixTabData } = parentStepData;
+  // Combine the two data objects
+  const combinedData = Object.values(tableRowData).concat(Object.values(mixTabData));
+
+  // validate only if it has data
+  if (combinedData.length > 0) {
+    const rowKeys = Object.keys(combinedData[0]) as (keyof RowItem)[];
+    // If any value is invalid, stop and return true;
+    const proceed = true;
+    const stop = false;
+    combinedData.every((row) => {
+      for (let i = 0; i < rowKeys.length; i += 1) {
+        const key = rowKeys[i];
+        if (key !== 'isMixTab' && key !== 'rowId') {
+          if (row[key].isInvalid) {
+            isInvalid = true;
+            return stop;
+          }
+        }
+      }
+      return proceed;
+    });
+  }
+
+  return isInvalid;
+};
+
+/**
+ * Verify if the parent step is complete
+ * Return true if it's complete, false otherwise.
+ * For this step, as long as there is at least 0.0000000001 (10 dec places) cone then it's complete.
+ */
+export const verifyParentStepCompleteness = (parentStepData: ParentTreeStepDataObj): boolean => {
+  const { tableRowData } = parentStepData;
+
+  const tableRows = Object.values(tableRowData);
+
+  const sum = new BigNumber(calcSum(tableRows, 'coneCount'));
+
+  // Max digits is 10, so the smallest possible value is 0.0000000001
+  const smallestNumPossible = new BigNumber(1 / (10 ** MAX_DECIMAL_DIGITS));
+
+  const isComplete = sum.gte(smallestNumPossible);
 
   return isComplete;
 };
