@@ -1,3 +1,6 @@
+import React from 'react';
+import BigNumber from 'bignumber.js';
+
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
@@ -6,7 +9,13 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
 import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
 
-import { isPtNumberInvalid, populateRowData } from './TableComponents/utils';
+import {
+  getConeCountErrMsg, getNonOrchardContamErrMsg, getPollenCountErrMsg,
+  getSmpSuccErrMsg, getVolumeErrMsg, isConeCountInvalid,
+  isNonOrchardContamInvalid, isPollenCountInvalid,
+  isPtNumberInvalid, isSmpSuccInvalid, isVolumeInvalid,
+  populateRowData, getPTNumberErrMsg
+} from './TableComponents/utils';
 import { OrchardObj } from '../OrchardStep/definitions';
 
 import {
@@ -83,14 +92,15 @@ const calcAverage = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): st
 };
 
 export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): string => {
-  let sum = 0;
+  let sum = new BigNumber(0);
 
   tableRows.forEach((row) => {
     // add if the value is not null
     if (row[field].value) {
-      sum += Number(row[field].value);
+      sum = sum.add(new BigNumber(row[field].value));
     }
   });
+
   return sum.toString();
 };
 
@@ -182,7 +192,7 @@ export const calcMixTabInfoItems = (
   }
 };
 
-const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
+export const populateStrInputId = (idPrefix: string, row: RowItem): RowItem => {
   const newRow = structuredClone(row);
   Object.keys(newRow).forEach((key) => {
     const rowKey = key as keyof RowItem;
@@ -267,7 +277,7 @@ export const generateDefaultRows = (numOfRows: number): RowDataDictType => {
 export const cleanTable = (
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   setStepData: Function
 ): ParentTreeStepDataObj => {
   const clonedState = structuredClone(state);
@@ -281,6 +291,7 @@ export const cleanTable = (
     parentTreeNumbers.forEach((parentTreeNumber) => {
       fieldsToClean.forEach((field) => {
         clonedState.tableRowData[parentTreeNumber][field as keyof StrTypeRowItem].value = '';
+        clonedState.tableRowData[parentTreeNumber][field as keyof StrTypeRowItem].isInvalid = false;
       });
     });
   }
@@ -292,12 +303,17 @@ export const applyValueToAll = (
   field: keyof StrTypeRowItem,
   value: string,
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  seedlotSpecies: MultiOptionsObj
 ) => {
   const clonedState = structuredClone(state);
   const parentTreeNumbers = Object.keys(clonedState.tableRowData);
+  const isInvalid = field === 'smpSuccessPerc' ? isSmpSuccInvalid(value, seedlotSpecies.code === 'PW') : isNonOrchardContamInvalid(value);
+  const errMsg = field === 'smpSuccessPerc' ? getSmpSuccErrMsg(value) : getNonOrchardContamErrMsg(value);
   parentTreeNumbers.forEach((number) => {
     clonedState.tableRowData[number][field].value = value;
+    clonedState.tableRowData[number][field].isInvalid = isInvalid;
+    clonedState.tableRowData[number][field].errMsg = errMsg;
   });
   setStepData(clonedState);
 };
@@ -306,8 +322,10 @@ export const fillCompostitionTables = (
   data: CompUploadResponse[],
   state: ParentTreeStepDataObj,
   headerConfig: HeaderObj[],
-  currentTab: keyof TabTypes,
-  setStepData: Function
+  currentTab: TabTypes,
+  setStepData: Function,
+  setInvalidPTNumbers: React.Dispatch<React.SetStateAction<string[]>>,
+  seedlotSpecies: MultiOptionsObj
 ) => {
   // Store parent tree numbers that does not exist in the orchards
   const invalidParentTreeNumbers: Array<string> = [];
@@ -317,13 +335,40 @@ export const fillCompostitionTables = (
 
   data.forEach((row: CompUploadResponse) => {
     const parentTreeNumber = row.parentTreeNumber.toString();
+    // If the clone nubmer exist from user file then fill in the values
     if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
-      // If the clone nubmer exist from user file then fill in the values
-      clonedState.tableRowData[parentTreeNumber].coneCount.value = row.coneCount.toString();
-      clonedState.tableRowData[parentTreeNumber].pollenCount.value = row.pollenCount.toString();
-      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.value = row.smpSuccess.toString();
-      clonedState.tableRowData[parentTreeNumber]
-        .nonOrchardPollenContam.value = row.pollenContamination.toString();
+      // Cone count
+      const coneCountValue = row.coneCount.toString();
+      let isInvalid = isConeCountInvalid(coneCountValue);
+      clonedState.tableRowData[parentTreeNumber].coneCount.value = coneCountValue;
+      clonedState.tableRowData[parentTreeNumber].coneCount.isInvalid = isInvalid;
+      clonedState.tableRowData[parentTreeNumber].coneCount
+        .errMsg = isInvalid ? getConeCountErrMsg(coneCountValue) : '';
+
+      // Pollen count
+      const pollenCountValue = row.pollenCount.toString();
+      isInvalid = isPollenCountInvalid(pollenCountValue);
+      clonedState.tableRowData[parentTreeNumber].pollenCount.value = pollenCountValue;
+      clonedState.tableRowData[parentTreeNumber].pollenCount.isInvalid = isInvalid;
+      clonedState.tableRowData[parentTreeNumber].pollenCount
+        .errMsg = isInvalid ? getPollenCountErrMsg(pollenCountValue) : '';
+
+      // SMP Success percentage
+      const smpSuccessValue = row.smpSuccess.toString();
+      isInvalid = isSmpSuccInvalid(smpSuccessValue, seedlotSpecies.code === 'PW');
+      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.value = smpSuccessValue;
+      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.isInvalid = isInvalid;
+      clonedState.tableRowData[parentTreeNumber].smpSuccessPerc
+        .errMsg = isInvalid ? getSmpSuccErrMsg(smpSuccessValue) : '';
+
+      // Non orchard pollen contamination percentage
+      const nonOrchardContamValue = row.pollenContamination.toString();
+      isInvalid = isNonOrchardContamInvalid(nonOrchardContamValue);
+      clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam
+        .value = nonOrchardContamValue;
+      clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam.isInvalid = isInvalid;
+      clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam
+        .errMsg = isInvalid ? getNonOrchardContamErrMsg(nonOrchardContamValue) : '';
     } else {
       invalidParentTreeNumbers.push(parentTreeNumber);
     }
@@ -331,17 +376,13 @@ export const fillCompostitionTables = (
 
   setStepData(clonedState);
 
-  if (invalidParentTreeNumbers.length > 0) {
-    // A temporary solution to let users know they have invalid clone numbers
-    // eslint-disable-next-line no-alert
-    alert(`The following clone numbers cannot be found: ${invalidParentTreeNumbers}`);
-  }
+  setInvalidPTNumbers(invalidParentTreeNumbers.sort((a, b) => Number(a) - Number(b)));
 };
 
 export const toggleNotification = (
   notifType: string,
   state: ParentTreeStepDataObj,
-  currentTab: keyof TabTypes,
+  currentTab: TabTypes,
   setStepData: Function
 ) => {
   const modifiedState = { ...state };
@@ -430,24 +471,6 @@ export const configHeaderOpt = (
     setGenWorthInfoItems(clonedGwItems);
     setWeightedGwInfoItems(clonedWeightedGwItems);
   }
-};
-
-export const setInputChange = (
-  rowData: RowItem,
-  colName: keyof StrTypeRowItem,
-  value: string,
-  state: ParentTreeStepDataObj,
-  setStepData: Function
-) => {
-  // Using structuredClone so useEffect on state.tableRowData can be triggered
-  const clonedState = structuredClone(state);
-  if (rowData.isMixTab) {
-    clonedState.mixTabData[rowData.rowId][colName].value = value;
-  } else if (!rowData.isMixTab) {
-    clonedState.tableRowData[rowData.parentTreeNumber.value][colName].value = value;
-  }
-
-  setStepData(clonedState);
 };
 
 export const fillCalculatedInfo = (
@@ -579,11 +602,13 @@ export const fillMixTable = (
     newRow.rowId = String(index);
     newRow.parentTreeNumber.value = ptNumber;
     newRow.volume.value = String(row.pollenVolume);
+    newRow.volume.isInvalid = isVolumeInvalid(newRow.volume.value);
+    newRow.volume.errMsg = newRow.volume.isInvalid ? getVolumeErrMsg(newRow.volume.value) : '';
 
     // Validate pt number
     const isPtInvalid = isPtNumberInvalid(ptNumber, state.allParentTreeData);
     newRow.parentTreeNumber.isInvalid = isPtInvalid;
-
+    newRow.parentTreeNumber.errMsg = isPtInvalid ? getPTNumberErrMsg(ptNumber) : '';
     // Populate data such as gw value
     if (!isPtInvalid) {
       newRow = populateRowData(newRow, ptNumber, state);

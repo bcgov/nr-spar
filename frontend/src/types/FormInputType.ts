@@ -3,6 +3,7 @@ import MultiOptionsObj from './MultiOptionsObject';
 export type FormInputType = {
   id: string;
   isInvalid: boolean;
+  errMsg?: string;
 };
 
 export type OptionsInputType = FormInputType & { value: MultiOptionsObj };
