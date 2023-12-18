@@ -16,6 +16,32 @@ export const DEFAULT_PAGE_NUMBER = 1;
 
 export const EMPTY_NUMBER_STRING = '';
 
+export const VOLUME_MIN = 0;
+
+export const VOLUME_MAX = 999999;
+
+export const NON_ORCHARD_CONTAM_MIN = 0;
+
+export const NON_ORCHARD_CONTAM_MAX = 100;
+
+export const SMP_SUCCESS_PERC_MIN = 1;
+
+export const SMP_SUCCESS_PERC_MAX = 25;
+
+export const SMP_SUCCESS_PERC_MAX_PW = 100;
+
+export const POLLEN_COUNT_MIN = '0';
+
+export const POLLEN_COUNT_MAX = '9999999999.9999999999';
+
+export const CONE_COUNT_MIN = '0';
+
+export const CONE_COUNT_MAX = '9999999999.9999999999';
+
+export const MAX_DECIMAL_DIGITS = 10;
+
+export const MAX_VISIBLE_PT_NUMBERS = 10;
+
 export const getDownloadUrl = (tabType: string) => {
   if (tabType === 'Calculation of SMP mix' || tabType === 'mixTab') {
     return '/downloads/SMP_Mix_Volume_template.csv';
@@ -121,6 +147,14 @@ const getPageText = () => ({
   },
   emptySection: {
     title: 'Nothing to show yet!'
+  },
+  invalidPTNumberMsg: 'One or more of the parent tree numbers entered are invalid because these numbers might not exist within your orchard composition.',
+  errNotifEndMsg: 'Please review your entries and remember to check all pages.',
+  warnNotification: {
+    title: 'Invalid parent tree number detected',
+    subtitlePartOne: 'The uploaded file contains one or more parent tree numbers that are not part of your orchard composition. '
+      + 'As a result, the corresponding information for that parent tree number has not been added to the table. '
+      + 'Please ensure that the parent tree numbers in your uploaded file match the ones present in your orchard composition.'
   }
 });
 

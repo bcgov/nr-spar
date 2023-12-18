@@ -1,10 +1,12 @@
+import BigNumber from 'bignumber.js';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import { DEFAULT_MIX_PAGE_ROWS, notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { DEFAULT_MIX_PAGE_ROWS, MAX_DECIMAL_DIGITS, notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import { calcSum, generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
@@ -344,11 +346,11 @@ export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwner
  */
 export const verifyInterimStepCompleteness = (interimData: InterimForm): boolean => {
   if (!interimData.agencyName.value.code.length
-      || !interimData.locationCode.value.length
-      || !interimData.startDate.value.length
-      || !interimData.endDate.value.length
-      || !interimData.facilityType.value.length
-      || (interimData.facilityType.value === 'OTH' && !interimData.facilityOtherType.value.length)
+    || !interimData.locationCode.value.length
+    || !interimData.startDate.value.length
+    || !interimData.endDate.value.length
+    || !interimData.facilityType.value.length
+    || (interimData.facilityType.value === 'OTH' && !interimData.facilityOtherType.value.length)
   ) {
     return false;
   }
@@ -453,4 +455,58 @@ export const verifyExtractionStepCompleteness = (
     return false;
   }
   return true;
+};
+
+/**
+ * Validate Parent tree Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateParentStep = (parentStepData: ParentTreeStepDataObj): boolean => {
+  let isInvalid = false;
+  // Possible invalid data are contained in tableRowData and mixTabData
+  const { tableRowData, mixTabData } = parentStepData;
+  // Combine the two data objects
+  const combinedData = Object.values(tableRowData).concat(Object.values(mixTabData));
+
+  // validate only if it has data
+  if (combinedData.length > 0) {
+    const rowKeys = Object.keys(combinedData[0]) as (keyof RowItem)[];
+    // If any value is invalid, stop and return true;
+    const proceed = true;
+    const stop = false;
+    combinedData.every((row) => {
+      for (let i = 0; i < rowKeys.length; i += 1) {
+        const key = rowKeys[i];
+        if (key !== 'isMixTab' && key !== 'rowId') {
+          if (row[key].isInvalid) {
+            isInvalid = true;
+            return stop;
+          }
+        }
+      }
+      return proceed;
+    });
+  }
+
+  return isInvalid;
+};
+
+/**
+ * Verify if the parent step is complete
+ * Return true if it's complete, false otherwise.
+ * For this step, as long as there is at least 0.0000000001 (10 dec places) cone then it's complete.
+ */
+export const verifyParentStepCompleteness = (parentStepData: ParentTreeStepDataObj): boolean => {
+  const { tableRowData } = parentStepData;
+
+  const tableRows = Object.values(tableRowData);
+
+  const sum = new BigNumber(calcSum(tableRows, 'coneCount'));
+
+  // Max digits is 10, so the smallest possible value is 0.0000000001
+  const smallestNumPossible = new BigNumber(1 / (10 ** MAX_DECIMAL_DIGITS));
+
+  const isComplete = sum.gte(smallestNumPossible);
+
+  return isComplete;
 };

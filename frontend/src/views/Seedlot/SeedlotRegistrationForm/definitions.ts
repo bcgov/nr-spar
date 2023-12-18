@@ -6,7 +6,7 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 
 export type ParentTreeStepDataObj = {
-  tableRowData: RowDataDictType,
+  tableRowData: RowDataDictType, // able row data used in Cone & Pollen and the SMP Success tabs
   allParentTreeData: AllParentTreeMap // Contains all parent tree numbers under a species
   mixTabData: RowDataDictType, // table row data used exclusively for SMP mix tab
   notifCtrl: NotifCtrlType,

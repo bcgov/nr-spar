@@ -13,10 +13,8 @@ import {
   View, Settings, Upload, Renew, Add
 } from '@carbon/icons-react';
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
-import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { postFile } from '../../../api-service/seedlotAPI';
 import postForCalculation from '../../../api-service/geneticWorthAPI';
 import CheckboxType from '../../../types/CheckboxType';
@@ -39,7 +37,7 @@ import {
   PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
 } from './constants';
 import {
-  TabTypes, HeaderObj, RowItem
+  TabTypes, HeaderObj, RowItem, ParentTreeStepProps
 } from './definitions';
 import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
@@ -49,14 +47,8 @@ import {
 } from './utils';
 
 import './styles.scss';
-
-interface ParentTreeStepProps {
-  seedlotSpecies: MultiOptionsObj
-  state: ParentTreeStepDataObj;
-  setStep: Function
-  setStepData: Function;
-  orchards: Array<OrchardObj>;
-}
+import InputErrorNotification from './InputErrorNotification';
+import UploadWarnNotification from './UploadWarnNotification';
 
 const ParentTreeStep = (
   {
@@ -68,7 +60,7 @@ const ParentTreeStep = (
   }: ParentTreeStepProps
 ) => {
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
-  const [currentTab, setCurrentTab] = useState<keyof TabTypes>('coneTab');
+  const [currentTab, setCurrentTab] = useState<TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
     structuredClone(headerTemplate)
   );
@@ -104,6 +96,9 @@ const ParentTreeStep = (
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
   const [applicableGenWorths, setApplicableGenWorths] = useState<string[]>([]);
+  // Array that stores invalid p.t. numbers uploaded from users from composition tabs
+  const [invalidPTNumbers, setInvalidPTNumbers] = useState<string[]>([]);
+
   const emptySectionDescription = getEmptySectionDescription(setStep);
 
   // Link reference to trigger click event
@@ -211,7 +206,15 @@ const ParentTreeStep = (
     onSuccess: (res) => {
       resetFileUploadConfig();
       setIsUploadOpen(false);
-      fillCompostitionTables(res.data, state, headerConfig, currentTab, setStepData);
+      fillCompostitionTables(
+        res.data,
+        state,
+        headerConfig,
+        currentTab,
+        setStepData,
+        setInvalidPTNumbers,
+        seedlotSpecies
+      );
     },
     onError: (err: AxiosError) => {
       const msg = (err.response as AxiosResponse).data.message;
@@ -280,6 +283,11 @@ const ParentTreeStep = (
                   }
                 </Column>
               </Row>
+              <InputErrorNotification state={state} headerConfig={headerConfig} />
+              <UploadWarnNotification
+                invalidPTNumbers={invalidPTNumbers}
+                setInvalidPTNumbers={setInvalidPTNumbers}
+              />
               {
                 currentTab === 'successTab'
                   ? (
@@ -303,7 +311,12 @@ const ParentTreeStep = (
                         </Column>
                       </Row>
                       {
-                        renderDefaultInputs(isSMPDefaultValChecked, state, setStepData)
+                        renderDefaultInputs(
+                          isSMPDefaultValChecked,
+                          state,
+                          setStepData,
+                          seedlotSpecies
+                        )
                       }
                     </>
                   )
@@ -374,7 +387,7 @@ const ParentTreeStep = (
                           kind="primary"
                           renderIcon={Upload}
                           onClick={() => setIsUploadOpen(true)}
-                          disabled={disableOptions}
+                          disabled={disableOptions || !allParentTreeQuery.isFetched}
                         >
                           Upload from file
                         </Button>
@@ -423,7 +436,8 @@ const ParentTreeStep = (
                                   headerConfig,
                                   applicableGenWorths,
                                   state,
-                                  setStepData
+                                  setStepData,
+                                  seedlotSpecies
                                 )
                             }
                           </Table>

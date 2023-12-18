@@ -63,7 +63,9 @@ import {
   validateOrchardStep,
   verifyOrchardStepCompleteness,
   validateExtractionStep,
-  verifyExtractionStepCompleteness
+  verifyExtractionStepCompleteness,
+  validateParentStep,
+  verifyParentStepCompleteness
 } from './utils';
 import {
   initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
@@ -300,6 +302,16 @@ const SeedlotRegistrationForm = () => {
       }
     }
 
+    // Set invalid or complete status for Parent Tree Step
+    if (currentStepName !== 'parent' && prevStepName === 'parent') {
+      const isParentInvalid = validateParentStep(allStepData.parentTreeStep);
+      clonedStatus.parent.isInvalid = isParentInvalid;
+      if (!isParentInvalid) {
+        const isParentComplete = verifyParentStepCompleteness(allStepData.parentTreeStep);
+        clonedStatus.parent.isComplete = isParentComplete;
+      }
+    }
+
     setProgressStatus(clonedStatus);
   };
 
@@ -316,6 +328,14 @@ const SeedlotRegistrationForm = () => {
     clonedState.parentTreeStep.tableRowData = {};
     clonedState.parentTreeStep.mixTabData = generateDefaultRows(DEFAULT_MIX_PAGE_ROWS);
     setAllStepData(clonedState);
+    setProgressStatus((prev) => ({
+      ...prev,
+      parent: {
+        ...prev.parent,
+        isComplete: false,
+        isInvalid: false
+      }
+    }));
   };
 
   const renderStep = () => {
