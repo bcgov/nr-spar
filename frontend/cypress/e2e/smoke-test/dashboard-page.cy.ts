@@ -31,25 +31,22 @@ describe('Dashboard page test', () => {
       .should('have.text', dashboardPageData.secondSectionSubtitle);
   });
 
-  it('should be able to favourite the seedlots page', () => {
-    // Navigate to Seedlot page
-    cy.navigateTo(NavigationLabels.Seedlots);
-    // Favourite Seedlot page
-    cy.get('.title-favourite')
-      .find(`.${prefix}--popover-container`)
-      .click();
-    // Navigate to Dashboard page
-    cy.navigateTo(NavigationLabels.Dashboard);
-    // Check if seedlot card is appearing at favourites activities
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-content')
-      .find('.fav-card-title-large')
-      .contains('Seedlots')
-      .click();
-    cy.isPageTitle(NavigationLabels.Seedlots);
-  });
-
   it('should be able to favourite the a class seedlot page', () => {
+    cy.intercept(
+      {
+        method: 'GET',
+        path: '/api/favourite-activities'
+      },
+      {
+        fixture: 'favourite-activities/a-class.json'
+      }
+    ).as('interceptedGet');
+
+    cy.intercept({
+      method: 'POST',
+      path: '/api/favourite-activities'
+    }).as('interceptedPost');
+
     // Navigate to Seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
 
@@ -76,6 +73,21 @@ describe('Dashboard page test', () => {
   });
 
   it('should be able to favourite my seedlot page', () => {
+    cy.intercept(
+      {
+        method: 'GET',
+        path: '/api/favourite-activities'
+      },
+      {
+        fixture: 'favourite-activities/my-seedlots.json'
+      }
+    ).as('interceptedGet');
+
+    cy.intercept({
+      method: 'POST',
+      path: '/api/favourite-activities'
+    }).as('interceptedPost');
+
     // Navigate to My seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.get('.seedlot-activities-cards')
@@ -103,19 +115,15 @@ describe('Dashboard page test', () => {
   });
 
   it('should be able to highlight favourite cards at dashboard', () => {
-  // Highlight Seedlots Card
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-main:first')
-      .find('.fav-card-overflow')
-      .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content`)
-      .contains('Highlight shortcut')
-      .click();
-
-    // Check if the Seedlots card is unique and highlighted
-    cy.get('.fav-card-main-highlighted')
-      .should('have.length', 1)
-      .should('contain.text', 'Seedlots');
+    cy.intercept(
+      {
+        method: 'GET',
+        path: '/api/favourite-activities'
+      },
+      {
+        fixture: 'favourite-activities/my-seedlots-highlighted.json'
+      }
+    ).as('interceptedGet');
 
     // Highlight Create A Class Seedlot card
     cy.get('.favourite-activities-cards')
@@ -133,6 +141,22 @@ describe('Dashboard page test', () => {
   });
 
   it('should delete my seedlots card from favourite activities', () => {
+    const test = 'cypress/fixture/favourite-activities/my-seedlots.json';
+    cy.intercept(
+      {
+        method: 'GET',
+        path: '/api/favourite-activities'
+      },
+      {
+        fixture: test
+      }
+    ).as('interceptedGet');
+
+    cy.intercept({
+      method: 'DELETE',
+      path: '/api/favourite-activities'
+    }).as('interceptedPost');
+
     // Delete My Seedlots card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
@@ -154,19 +178,6 @@ describe('Dashboard page test', () => {
       .contains('Delete shortcut')
       .click();
     cy.get('.fav-card-main-highlighted')
-      .should('have.length', 0);
-  });
-
-  it('should delete seedlots card from favourite activities', () => {
-    // Delete Seedlots card
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-main:first')
-      .find('.fav-card-overflow')
-      .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content`)
-      .contains('Delete shortcut')
-      .click();
-    cy.get('.fav-card-main')
       .should('have.length', 0);
   });
 

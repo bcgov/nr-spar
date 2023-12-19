@@ -1,0 +1,14 @@
+[
+    {
+        "id": 238,
+        "userId": "IDIR@TEST",
+        "activity": "registerAClass",
+        "highlighted": true
+    },
+    {
+        "id": 239,
+        "userId": "IDIR@TEST",
+        "activity": "mySeedlots",
+        "highlighted": false
+    }
+]
