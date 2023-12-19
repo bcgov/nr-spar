@@ -80,6 +80,7 @@ const getNotificationSubtitle = (tabType: string) => {
         className="notification-link"
         to={getDownloadUrl(tabType)}
         target="_blank"
+        download
       >
         {`Download ${downloadName} template`}
       </Link>
