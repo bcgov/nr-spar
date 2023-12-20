@@ -88,7 +88,7 @@ const SeedlotRegistrationForm = () => {
   const [
     progressStatus,
     setProgressStatus
-  ] = useState<ProgressIndicatorConfig>(initProgressBar(formStep, initialProgressConfig));
+  ] = useState<ProgressIndicatorConfig>(() => initProgressBar(formStep, initialProgressConfig));
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
