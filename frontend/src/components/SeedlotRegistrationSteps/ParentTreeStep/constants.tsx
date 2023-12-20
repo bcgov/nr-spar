@@ -77,10 +77,15 @@ const getNotificationSubtitle = (tabType: string) => {
         + "do use the SPAR's spreadsheet template. "
       }
       <Link
+        type="text/csv"
         className="notification-link"
         to={getDownloadUrl(tabType)}
         target="_blank"
-        download
+        download={
+          (tabType === 'Calculation of SMP mix' || tabType === 'mixTab')
+            ? 'SMP_Mix_Volume_template.csv'
+            : 'Seedlot_composition_template.csv'
+        }
       >
         {`Download ${downloadName} template`}
       </Link>
