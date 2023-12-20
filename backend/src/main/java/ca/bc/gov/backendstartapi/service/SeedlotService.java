@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
@@ -291,8 +292,17 @@ public class SeedlotService {
     seedlot.setInterimStorageLocationCode(formStep3.intermStrgLocnCode());
     seedlot.setInterimStorageStartDate(formStep3.intermStrgStDate());
     seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
-    seedlot.setInterimStorageLocationDescription(formStep3.intermStrgLocn());
     seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
+    // If the facility type is Other, then a description is required.
+    if (formStep3.intermFacilityCode() == "OTH") {
+      if (formStep3.intermOtherFacilityDesc() == null
+          || formStep3.intermOtherFacilityDesc().isEmpty()) {
+        throw new SeedlotFormValidationException(
+            "Invalid interim step data: Storage facility type description is needed for facility"
+                + " type 'Other'. ");
+      }
+      seedlot.setInterimStorageOtherFacilityDesc(formStep3.intermOtherFacilityDesc());
+    }
   }
 
   private void saveSeedlotFormStep5(

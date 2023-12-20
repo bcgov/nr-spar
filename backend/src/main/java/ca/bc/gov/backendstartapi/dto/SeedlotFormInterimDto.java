@@ -45,14 +45,12 @@ public record SeedlotFormInterimDto(
         @NotNull
         LocalDateTime intermStrgEndDate,
     @Schema(
-            description =
-                """
-              The location where the tree seed was stored during interim storage. Can be used if
-              users did not enter a registered client data. Optional field
+            description = """
+                  Description of the storage facility type when 'Other' option is chosen.
               """,
-            example = "Some location",
+            example = "Mini fridge",
             nullable = true)
-        String intermStrgLocn,
+        String intermOtherFacilityDesc,
     @Schema(
             description =
                 """
