@@ -10,9 +10,27 @@ import { calcSum, generateDefaultRows } from '../../../components/SeedlotRegistr
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
+
+import { stepMap } from './constants';
 import {
-  ParentTreeStepDataObj
+  ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
+
+export const initProgressBar = (
+  currentStep: number,
+  initialProgressConfig: ProgressIndicatorConfig
+): ProgressIndicatorConfig => {
+  const progressConfig = structuredClone(initialProgressConfig);
+
+  Object.keys(stepMap).forEach((key: string) => {
+    const numKey = parseInt(key, 10);
+    if (numKey === currentStep) {
+      progressConfig[stepMap[numKey]].isCurrent = true;
+    }
+  });
+
+  return progressConfig;
+};
 
 export const initCollectionState = (
   defaultAgency: MultiOptionsObj,
