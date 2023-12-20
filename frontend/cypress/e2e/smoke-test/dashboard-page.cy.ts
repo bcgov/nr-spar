@@ -35,7 +35,7 @@ describe('Dashboard page test', () => {
     cy.intercept(
       {
         method: 'GET',
-        path: '/api/favourite-activities'
+        path: '**/api/favourite-activities'
       },
       {
         fixture: 'favourite-activities/a-class.json'
@@ -44,7 +44,7 @@ describe('Dashboard page test', () => {
 
     cy.intercept({
       method: 'POST',
-      path: '/api/favourite-activities'
+      path: '**/api/favourite-activities'
     }).as('interceptedPost');
 
     // Navigate to Seedlot page
@@ -76,7 +76,7 @@ describe('Dashboard page test', () => {
     cy.intercept(
       {
         method: 'GET',
-        path: '/api/favourite-activities'
+        path: '**/api/favourite-activities'
       },
       {
         fixture: 'favourite-activities/my-seedlots.json'
@@ -85,7 +85,7 @@ describe('Dashboard page test', () => {
 
     cy.intercept({
       method: 'POST',
-      path: '/api/favourite-activities'
+      path: '**/api/favourite-activities'
     }).as('interceptedPost');
 
     // Navigate to My seedlot page
@@ -118,7 +118,7 @@ describe('Dashboard page test', () => {
     cy.intercept(
       {
         method: 'GET',
-        path: '/api/favourite-activities'
+        path: '**/api/favourite-activities'
       },
       {
         fixture: 'favourite-activities/my-seedlots-highlighted.json'
@@ -141,20 +141,19 @@ describe('Dashboard page test', () => {
   });
 
   it('should delete my seedlots card from favourite activities', () => {
-    const test = 'cypress/fixture/favourite-activities/my-seedlots.json';
     cy.intercept(
       {
         method: 'GET',
-        path: '/api/favourite-activities'
+        path: '**/api/favourite-activities'
       },
       {
-        fixture: test
+        fixture: 'favourite-activities/my-seedlots.json'
       }
     ).as('interceptedGet');
 
     cy.intercept({
       method: 'DELETE',
-      path: '/api/favourite-activities'
+      path: '**/api/favourite-activities'
     }).as('interceptedPost');
 
     // Delete My Seedlots card
