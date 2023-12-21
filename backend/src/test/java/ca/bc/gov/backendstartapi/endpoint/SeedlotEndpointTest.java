@@ -19,6 +19,7 @@ import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -53,6 +54,8 @@ class SeedlotEndpointTest {
   @MockBean ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
 
   @MockBean SeedlotService seedlotService;
+
+  @MockBean SaveSeedlotFormService saveSeedlotFormService;
 
   private final WebApplicationContext webApplicationContext;
 

@@ -27,7 +27,7 @@ public class AuditInformation implements Serializable {
   @Column(name = "entry_userid", length = 30, nullable = false, updatable = false)
   private String entryUserId;
 
-  @Column(name = "entry_timestamp", nullable = false, updatable = false)
+  @Column(name = "entry_timestamp", nullable = true, updatable = false)
   private LocalDateTime entryTimestamp;
 
   /** User who last updated this registry. */
@@ -36,7 +36,7 @@ public class AuditInformation implements Serializable {
   @Column(name = "update_userid", length = 30, nullable = false)
   private String updateUserId;
 
-  @Column(name = "update_timestamp", nullable = false)
+  @Column(name = "update_timestamp", nullable = true)
   private LocalDateTime updateTimestamp;
 
   public AuditInformation(@NonNull String userId) {

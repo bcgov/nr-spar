@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.SaveAClassSeedlotFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -8,6 +9,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -61,6 +63,8 @@ public class SeedlotEndpoint {
   private final SmpCalculationCsvTableParser smpCalculationTableParser;
 
   private final SeedlotService seedlotService;
+
+  private final SaveSeedlotFormService saveSeedlotFormService;
 
   /**
    * Parse the CSV table in {@code file} and return the data stored in it.
@@ -370,5 +374,41 @@ public class SeedlotEndpoint {
       @RequestBody SeedlotFormSubmissionDto form) {
     SeedlotCreateResponseDto createDto = seedlotService.submitSeedlotForm(seedlotNumber, form);
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
+  }
+
+  /**
+   * Saves the Seedlot submit form once submitted on step 6.
+   *
+   * @param form A {@link SeedlotFormSubmissionDto} containing all the form information
+   * @return A {@link SeedlotCreateResponseDto} containing the seedlot number and status
+   */
+  @PutMapping("{seedlotNumber}/a-class-form-save")
+  @Operation(
+      summary = "Save the progress of a a-class reg form.",
+      description =
+          "This endpoint saves the progress of an A-class registration form, it is NOT to be used"
+              + " for form submission.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successfully saved."),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public ResponseEntity<Void> saveAClassFormProgress(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot Number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber,
+      @RequestBody SaveAClassSeedlotFormDto data) {
+
+    saveSeedlotFormService.saveAClassForm(seedlotNumber, data);
+
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }
