@@ -473,7 +473,7 @@ class SeedlotEndpointTest {
 
     mockMvc
         .perform(
-            put("/api/seedlots/{seedlotNumber}/form-submission", 123)
+            put("/api/seedlots/{seedlotNumber}/a-class-form-submission", 123)
                 .with(csrf().asHeader())
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -491,7 +491,7 @@ class SeedlotEndpointTest {
 
     mockMvc
         .perform(
-            put("/api/seedlots/{seedlotNumber}/form-submission", 123)
+            put("/api/seedlots/{seedlotNumber}/a-class-form-submission", 123)
                 .with(csrf().asHeader())
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
