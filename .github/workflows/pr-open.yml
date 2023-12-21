@@ -9,11 +9,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # This job is needed for FAM
+  setup:
+    name: Reset the deployment number
+    runs-on: ubuntu-22.04
+    outputs:
+      zone: ${{ steps.calculate.outputs.zone }}
+    steps:
+      - name: Calculate the deployment number
+        id: calculate
+        run: |
+          echo "zone=$((${{ github.event.number }} % 50))" >> $GITHUB_OUTPUT
   init:
     name: Initialize
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+      PREFIX: ${{ github.event.repository.name }}-${{ needs.setup.outputs.zone }}
+      ZONE: ${{ needs.setup.outputs.zone }}
     runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
@@ -43,7 +55,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=${{ github.event.number }}
+            -p ZONE=${{ env.ZONE }}
             -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
@@ -57,10 +69,13 @@ jobs:
   builds:
     name: Builds
     needs:
+      - setup
       - init
     runs-on: ubuntu-22.04
     permissions:
       packages: write
+    env:
+      ZONE: ${{ needs.setup.outputs.zone }}
     strategy:
       matrix:
         package: [database, backend, frontend, oracle-api]
@@ -78,7 +93,7 @@ jobs:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.0
         with:
           package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
+          tag: ${{ env.ZONE }}
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
@@ -86,9 +101,12 @@ jobs:
   deploys:
     name: Deploys
     needs:
+      - setup
       - builds
       - init
     runs-on: ubuntu-22.04
+    env:
+      ZONE: ${{ needs.setup.outputs.zone }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
@@ -105,7 +123,7 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-              -p BUILD=snapshot-${{ github.event.number }}
+              -p BUILD=snapshot-${{ env.ZONE }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
@@ -117,7 +135,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
+              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ env.ZONE }}
               -p VITE_NRSPARWEBAPP_VERSION=dev
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
@@ -128,7 +146,7 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ env.ZONE }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
@@ -144,7 +162,7 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
-            -p ZONE=${{ github.event.number }}
+            -p ZONE=${{ env.ZONE }}
             -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
@@ -157,7 +175,7 @@ jobs:
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ needs.setup.outputs.zone }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
@@ -193,81 +211,3 @@ jobs:
         with:
           name: cypress-coverage
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress-coverage
-
-  # tests-api:
-  #   name: API Tests
-  #   needs:
-  #     - deploys
-  #   env:
-  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16
-  #     - run: |
-  #         # Install newman
-  #         npm install -g newman
-  #         npm install -g newman-reporter-htmlextra
-  #         mkdir -p testArtifacts
-
-  #     - run: |
-  #         # Run Postman Collection
-  #         newman run oracle-api/test/postman/oracle-api.postman_collection.json \
-  #           -e oracle-api/test/postman/oracle-api.postman_environment.json \
-  #           --env-var "apiAddr=${{ env.TARGET }}" \
-  #           --env-var "releaseVer=snapshot-${{ github.event.number }}" \
-
-  # tests-backend:
-  #   name: Backend Tests
-  #   needs:
-  #     - deploys
-  #   env:
-  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 16
-  #     - run: |
-  #         # Install newman
-  #         npm install -g newman
-  #         npm install -g newman-reporter-htmlextra
-  #         mkdir -p testArtifacts
-
-  #     - run: |
-  #         # Run Postman Collection
-  #         newman run backend/test/postman/starting-api.postman_collection.json \
-  #           -e backend/test/postman/starting-api.postman_environment.json \
-  #           --env-var "apiAddr=${{ env.TARGET }}" \
-  #           --env-var "releaseVer=snapshot-${{ github.event.number }}"
-
-  # tests-frontend:
-  #   name: Frontend Tests
-  #   env:
-  #     TARGET: ${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-  #   needs:
-  #     - deploys
-  #   continue-on-error: true
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: 10
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: "16"
-  #         cache: "npm"
-  #         cache-dependency-path: frontend/package-lock.json
-  #     - name: Install dependencies
-  #       run: |
-  #         cd frontend
-  #         npm ci
-
-  #     - name: Cypress run
-  #       uses: cypress-io/github-action@v5
-  #       with:
-  #         config: baseUrl=https://${{ env.TARGET }}
-  #         install: false
-  #         working-directory: frontend
