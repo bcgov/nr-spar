@@ -109,7 +109,6 @@ public class SeedlotService {
     log.debug("Seedlot to insert: {}", seedlot);
 
     seedlotRepository.save(seedlot);
-    seedlotRepository.flush();
 
     log.info("New seedlot saved with success!");
 
@@ -294,9 +293,13 @@ public class SeedlotService {
     seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
     seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
     // If the facility type is Other, then a description is required.
-    if (formStep3.intermFacilityCode() == "OTH") {
+    log.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
+    log.info("FACILITY TYPE Desc", formStep3.intermOtherFacilityDesc());
+    if (formStep3.intermFacilityCode().equals("OTH")) {
+      log.info("equal to OTH");
       if (formStep3.intermOtherFacilityDesc() == null
           || formStep3.intermOtherFacilityDesc().isEmpty()) {
+        log.info("hererererere");
         throw new SeedlotFormValidationException(
             "Invalid interim step data: Storage facility type description is needed for facility"
                 + " type 'Other'. ");
@@ -311,9 +314,11 @@ public class SeedlotService {
         "Saving Seedlot Form Step 5-Parent Tree SMP Mix for seedlot number {}", seedlot.getId());
 
     seedlotParentTreeService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+    log.info("well well well");
     seedlotParentTreeGeneticQualityService.saveSeedlotFormStep5(
         seedlot, seedlotFormParentTreeDtoList);
     seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+
     smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
     smpMixGeneticQualityService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
     seedlotParentTreeSmpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);

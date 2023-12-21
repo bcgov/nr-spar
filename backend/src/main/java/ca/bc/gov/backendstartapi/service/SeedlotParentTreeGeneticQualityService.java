@@ -6,7 +6,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
-import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeGeneticQualityId;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
@@ -45,64 +44,6 @@ public class SeedlotParentTreeGeneticQualityService {
   public void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info("Saving SeedlotParentTreeGeneticQuality for seedlot number {}", seedlot.getId());
-
-    List<SeedlotParentTreeGeneticQuality> sptgqList =
-        seedlotParentTreeGeneticQualityRepository.findAllBySeedlotParentTree_Seedlot_id(
-            seedlot.getId());
-
-    if (!sptgqList.isEmpty()) {
-      log.info(
-          "{} previous records on the SeedlotParentTreeGeneticQuality table for seedlot number {}",
-          sptgqList.size(),
-          seedlot.getId());
-
-      List<SeedlotParentTreeGeneticQualityId> existingSeedlotPtGenQltyIdList =
-          sptgqList.stream().map(x -> x.getId()).collect(Collectors.toList());
-
-      List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert = new ArrayList<>();
-
-      for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
-        for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
-            seedlotPtFormDto.parentTreeGeneticQualities()) {
-          SeedlotParentTreeId seedlotParentTreeId =
-              new SeedlotParentTreeId(seedlot.getId(), seedlotPtFormDto.parentTreeId());
-
-          SeedlotParentTreeGeneticQualityId seedlotPtGenQltyId =
-              new SeedlotParentTreeGeneticQualityId(
-                  seedlotParentTreeId,
-                  seedlotGenQltyDto.geneticTypeCode(),
-                  seedlotGenQltyDto.geneticWorthCode());
-
-          if (existingSeedlotPtGenQltyIdList.contains(seedlotPtGenQltyId)) {
-            // remove form the list, the one that last will be removed
-            existingSeedlotPtGenQltyIdList.remove(seedlotPtGenQltyId);
-          } else {
-            seedlotPtGenQltyToInsert.add(seedlotPtFormDto);
-          }
-        }
-      }
-
-      // Remove possible leftovers
-      log.info(
-          "{} leftover record(s) on SeedlotParentTreeGeneticQuality table to remove for seedlot"
-              + " number {}",
-          existingSeedlotPtGenQltyIdList.size(),
-          seedlot.getId());
-      if (!existingSeedlotPtGenQltyIdList.isEmpty()) {
-        seedlotParentTreeGeneticQualityRepository.deleteAllByIdInBatch(
-            existingSeedlotPtGenQltyIdList);
-        seedlotParentTreeGeneticQualityRepository.flush();
-      }
-
-      // Insert new ones
-      addSeedlotParentTreeGenQlty(seedlot, seedlotPtGenQltyToInsert);
-
-      return;
-    }
-
-    log.info(
-        "No previous SeedlotParentTreeGeneticQuality records for seedlot number {}",
-        seedlot.getId());
 
     addSeedlotParentTreeGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
@@ -159,6 +100,6 @@ public class SeedlotParentTreeGeneticQualityService {
       }
     }
 
-    seedlotParentTreeGeneticQualityRepository.saveAllAndFlush(seedlotPtToInsert);
+    seedlotParentTreeGeneticQualityRepository.saveAll(seedlotPtToInsert);
   }
 }

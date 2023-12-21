@@ -6,8 +6,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
-import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
-import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeSmpMixRepository;
@@ -45,59 +43,6 @@ public class SeedlotParentTreeSmpMixService {
   public void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info("Saving SeedlotParentTreeSmpMix for seedlot number {}", seedlot.getId());
-    List<SeedlotParentTreeSmpMix> sptsmList =
-        seedlotParentTreeSmpMixRepository.findAllBySeedlotParentTree_Seedlot_id(seedlot.getId());
-
-    if (!sptsmList.isEmpty()) {
-      log.info(
-          "{} previous records on the SeedlotParentTreeSmpMix table for seedlot number {}",
-          sptsmList.size(),
-          seedlot.getId());
-
-      List<SeedlotParentTreeSmpMixId> sptsmExistingList =
-          sptsmList.stream().map(x -> x.getId()).collect(Collectors.toList());
-
-      List<SeedlotFormParentTreeSmpDto> sptsmToInsertList = new ArrayList<>();
-
-      for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
-        for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
-            seedlotPtFormDto.parentTreeGeneticQualities()) {
-          SeedlotParentTreeId sptId =
-              new SeedlotParentTreeId(seedlot.getId(), seedlotPtFormDto.parentTreeId());
-          SeedlotParentTreeSmpMixId sptsmId =
-              new SeedlotParentTreeSmpMixId(
-                  sptId, seedlotGenQltyDto.geneticTypeCode(), seedlotGenQltyDto.geneticWorthCode());
-
-          if (sptsmExistingList.contains(sptsmId)) {
-            // remove form the list, the one that last will be removed
-            sptsmExistingList.remove(sptsmId);
-          } else {
-            sptsmToInsertList.add(seedlotPtFormDto);
-          }
-        }
-      }
-
-      // Remove possible leftovers
-      log.info(
-          "{} leftover record(s) on the SeedlotParentTreeSmpMix table to remove for seedlot number"
-              + " {}",
-          sptsmExistingList.size(),
-          seedlot.getId());
-
-      if (!sptsmExistingList.isEmpty()) {
-        seedlotParentTreeSmpMixRepository.deleteAllByIdInBatch(sptsmExistingList);
-        seedlotParentTreeSmpMixRepository.flush();
-      }
-
-      // Insert new ones
-      addSeedlotPtSmpMix(seedlot, sptsmToInsertList);
-
-      return;
-    }
-
-    log.info(
-        "No previous records on the SeedlotParentTreeSmpMix table for seedlot number {}",
-        seedlot.getId());
 
     addSeedlotPtSmpMix(seedlot, seedlotFormParentTreeDtoList);
   }
@@ -148,6 +93,6 @@ public class SeedlotParentTreeSmpMixService {
       }
     }
 
-    seedlotParentTreeSmpMixRepository.saveAllAndFlush(sptsmToInsertList);
+    seedlotParentTreeSmpMixRepository.saveAll(sptsmToInsertList);
   }
 }

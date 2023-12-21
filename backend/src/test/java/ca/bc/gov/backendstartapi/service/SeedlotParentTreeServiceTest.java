@@ -8,7 +8,11 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeSmpMixRepository;
+import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
+import ca.bc.gov.backendstartapi.repository.SmpMixRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,6 +30,14 @@ class SeedlotParentTreeServiceTest {
   @Mock SeedlotParentTreeRepository seedlotParentTreeRepository;
 
   @Mock LoggedUserService loggedUserService;
+
+  @Mock SeedlotParentTreeGeneticQualityRepository seedlotParentTreeGeneticQualityRepository;
+
+  @Mock SeedlotParentTreeSmpMixRepository seedlotParentTreeSmpMixRepository;
+
+  @Mock SmpMixGeneticQualityRepository smpMixGeneticQualityRepository;
+
+  @Mock SmpMixRepository smpMixRepository;
 
   private SeedlotParentTreeService seedlotParentTreeService;
 
@@ -48,7 +60,13 @@ class SeedlotParentTreeServiceTest {
   @BeforeEach
   void setup() {
     seedlotParentTreeService =
-        new SeedlotParentTreeService(seedlotParentTreeRepository, loggedUserService);
+        new SeedlotParentTreeService(
+            seedlotParentTreeRepository,
+            seedlotParentTreeGeneticQualityRepository,
+            seedlotParentTreeSmpMixRepository,
+            smpMixGeneticQualityRepository,
+            smpMixRepository,
+            loggedUserService);
   }
 
   @Test

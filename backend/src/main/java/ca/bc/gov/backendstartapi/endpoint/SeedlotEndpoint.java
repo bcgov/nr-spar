@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -331,11 +332,12 @@ public class SeedlotEndpoint {
    * @param form A {@link SeedlotFormSubmissionDto} containing all the form information
    * @return A {@link SeedlotCreateResponseDto} containing the seedlot number and status
    */
-  @PostMapping("/{seedlotNumber}/form-submission")
+  @PutMapping("/{seedlotNumber}/form-submission")
   @Operation(
-      summary = "Saves the Seedlot form when submitted",
+      summary = "Saves the Seedlot form when submitted or edited",
       description =
-          "This API is responsible for receiving the entire seedlot form, once submitted.")
+          "This API is responsible for receiving the entire seedlot form, once submitted or"
+              + " edited.")
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "201", description = "Successfully saved."),

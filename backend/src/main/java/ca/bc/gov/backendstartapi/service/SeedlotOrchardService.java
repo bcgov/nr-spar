@@ -50,48 +50,21 @@ public class SeedlotOrchardService {
 
     if (!seedlotOrchards.isEmpty()) {
       log.info(
-          "{} previous records on the SeedlotOrchard table for seedlot number {}",
+          "deleting {} previous records on the SeedlotOrchard table for seedlot number {}",
           seedlotOrchards.size(),
           seedlot.getId());
 
       List<String> existingSeedlotOrchardList =
           new ArrayList<>(seedlotOrchards.stream().map(SeedlotOrchard::getOrchard).toList());
 
-      List<String> seedlotOrchardIdToInsert = new ArrayList<>();
-
-      for (String formOrchardId : formStep4.orchardsId()) {
-        if (existingSeedlotOrchardList.contains(formOrchardId)) {
-          // remove form the list, the one that last will be removed
-          existingSeedlotOrchardList.remove(formOrchardId);
-        } else {
-          seedlotOrchardIdToInsert.add(formOrchardId);
-        }
-      }
-
-      // Remove possible leftovers
-      log.info(
-          "{} leftover record(s) on the SeedlotOrchard table to remove for seedlot number {}",
-          existingSeedlotOrchardList.size(),
-          seedlot.getId());
-      List<SeedlotOrchardId> soiList = new ArrayList<>();
+      List<SeedlotOrchardId> idsToDelete = new ArrayList<>();
       existingSeedlotOrchardList.forEach(
           orchardId -> {
-            soiList.add(new SeedlotOrchardId(seedlot.getId(), orchardId));
+            idsToDelete.add(new SeedlotOrchardId(seedlot.getId(), orchardId));
           });
 
-      if (!soiList.isEmpty()) {
-        seedlotOrchardRepository.deleteAllById(soiList);
-        seedlotOrchardRepository.flush();
-      }
-
-      // Insert new ones
-      saveSeedlotOrchards(seedlot, seedlotOrchardIdToInsert);
-
-      return;
+      seedlotOrchardRepository.deleteAllById(idsToDelete);
     }
-
-    log.info(
-        "No previous records on the SeedlotOrchard table for seedlot number {}", seedlot.getId());
 
     saveSeedlotOrchards(seedlot, formStep4.orchardsId());
   }
@@ -116,6 +89,6 @@ public class SeedlotOrchardService {
       seedlotOrchards.add(seedlotOrchard);
     }
 
-    seedlotOrchardRepository.saveAllAndFlush(seedlotOrchards);
+    seedlotOrchardRepository.saveAll(seedlotOrchards);
   }
 }

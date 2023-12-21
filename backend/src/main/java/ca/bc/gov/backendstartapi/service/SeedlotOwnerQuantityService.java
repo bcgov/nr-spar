@@ -51,45 +51,16 @@ public class SeedlotOwnerQuantityService {
 
     if (!soqList.isEmpty()) {
       log.info(
-          "{} previous records on the SeedlotOwerQuantity table for seedlot number {}",
+          "Deleting {} previous records on the SeedlotOwerQuantity table for seedlot number {}",
           soqList.size(),
           seedlot.getId());
 
-      List<SeedlotOwnerQuantityId> existingOwnerQtyIdList =
+      List<SeedlotOwnerQuantityId> idsToDelete =
           soqList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
-      List<SeedlotFormOwnershipDto> sfodToInsertList = new ArrayList<>();
 
-      for (SeedlotFormOwnershipDto ownershipDto : formStep2List) {
-        SeedlotOwnerQuantityId soqId =
-            new SeedlotOwnerQuantityId(
-                seedlot.getId(), ownershipDto.ownerClientNumber(), ownershipDto.ownerLocnCode());
-
-        if (existingOwnerQtyIdList.contains(soqId)) {
-          // remove form the list, the one that last will be removed
-          existingOwnerQtyIdList.remove(soqId);
-        } else {
-          sfodToInsertList.add(ownershipDto);
-        }
-      }
-
-      // Remove possible leftovers
-      log.info(
-          "{} leftover record(s) on the SeedlotOwerQuantity table to remove for seedlot number {}",
-          existingOwnerQtyIdList.size(),
-          seedlot.getId());
-
-      if (!existingOwnerQtyIdList.isEmpty()) {
-        seedlotOwnerQuantityRepository.deleteAllById(existingOwnerQtyIdList);
-        seedlotOwnerQuantityRepository.flush();
-      }
-
-      // Insert new ones
-      return addSeedlotOwnerQuantityFromForm(seedlot, sfodToInsertList);
+      seedlotOwnerQuantityRepository.deleteAllById(idsToDelete);
     }
-
-    log.info(
-        "No previous records on SeedlotOwnerQuantity table for seedlot number {}", seedlot.getId());
 
     return addSeedlotOwnerQuantityFromForm(seedlot, formStep2List);
   }
@@ -134,6 +105,6 @@ public class SeedlotOwnerQuantityService {
       soqList.add(ownerQuantityEntity);
     }
 
-    return seedlotOwnerQuantityRepository.saveAllAndFlush(soqList);
+    return seedlotOwnerQuantityRepository.saveAll(soqList);
   }
 }

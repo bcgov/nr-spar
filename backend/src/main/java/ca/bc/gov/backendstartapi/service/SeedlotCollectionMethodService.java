@@ -58,52 +58,21 @@ public class SeedlotCollectionMethodService {
 
     if (!seedlotCollectionList.isEmpty()) {
       log.info(
-          "{} previous records on the SeedlotCollectionMethod table for seedlot number {}",
+          "Deleting {} previous records on the SeedlotCollectionMethod table for seedlot number {}",
           seedlotCollectionList.size(),
           seedlot.getId());
 
-      List<Integer> existingMethodList =
-          seedlotCollectionList.stream()
-              .map(x -> x.getConeCollectionMethod().getConeCollectionMethodCode())
-              .collect(Collectors.toList());
+      List<SeedlotCollectionMethodId> idsToDelete = new ArrayList<>();
 
-      List<Integer> methodCodesToInsert = new ArrayList<>();
-
-      for (Integer formMethodCode : formStep1.coneCollectionMethodCodes()) {
-        if (existingMethodList.contains(formMethodCode)) {
-          // remove form the list, the one that last will be removed
-          existingMethodList.remove(formMethodCode);
-        } else {
-          methodCodesToInsert.add(formMethodCode);
-        }
+      for (SeedlotCollectionMethod methdCodeToRemove : seedlotCollectionList) {
+        idsToDelete.add(
+            new SeedlotCollectionMethodId(
+                seedlot.getId(),
+                methdCodeToRemove.getConeCollectionMethod().getConeCollectionMethodCode()));
       }
 
-      // Remove possible leftovers
-      log.info(
-          "{} leftover record(s) on the SeedlotCollectionMethod table to remove for seedlot number"
-              + " {}",
-          existingMethodList.size(),
-          seedlot.getId());
-
-      List<SeedlotCollectionMethodId> scmIdList = new ArrayList<>();
-      for (Integer methdCodeToRemove : existingMethodList) {
-        scmIdList.add(new SeedlotCollectionMethodId(seedlot.getId(), methdCodeToRemove));
-      }
-
-      if (!scmIdList.isEmpty()) {
-        seedlotCollectionMethodRepository.deleteAllById(scmIdList);
-        seedlotCollectionMethodRepository.flush();
-      }
-
-      // Insert new ones
-      addSeedlotCollectionMethod(seedlot, methodCodesToInsert);
-
-      return;
+      seedlotCollectionMethodRepository.deleteAllById(idsToDelete);
     }
-
-    log.info(
-        "No previous records on the SeedlotCollectionMethod table for seedlot number {}",
-        seedlot.getId());
 
     addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());
   }
@@ -151,6 +120,6 @@ public class SeedlotCollectionMethodService {
       scmList.add(methodEntity);
     }
 
-    seedlotCollectionMethodRepository.saveAllAndFlush(scmList);
+    seedlotCollectionMethodRepository.saveAll(scmList);
   }
 }

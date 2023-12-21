@@ -6,8 +6,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
 import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
-import ca.bc.gov.backendstartapi.entity.idclass.SmpMixGeneticQualityId;
-import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
@@ -45,57 +43,6 @@ public class SmpMixGeneticQualityService {
   public void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     log.info("Saving SmpMixGeneticQuality for seedlot number {}", seedlot.getId());
-    List<SmpMixGeneticQuality> smpMixGenQltyList =
-        smpMixGeneticQualityRepository.findAllBySmpMix_Seedlot_id(seedlot.getId());
-
-    if (!smpMixGenQltyList.isEmpty()) {
-      log.info(
-          "{} previous records on the SmpMixGeneticQuality table for seedlot number {}",
-          smpMixGenQltyList.size(),
-          seedlot.getId());
-
-      List<SmpMixGeneticQualityId> existingSmpMixGenQltyIdList =
-          smpMixGenQltyList.stream().map(x -> x.getId()).collect(Collectors.toList());
-
-      List<SeedlotFormParentTreeSmpDto> smpMixGenQltyToInsert = new ArrayList<>();
-
-      for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
-        for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
-            seedlotPtFormDto.parentTreeGeneticQualities()) {
-          SmpMixId mixId = new SmpMixId(seedlot.getId(), seedlotPtFormDto.parentTreeId());
-          SmpMixGeneticQualityId smpMixGenId =
-              new SmpMixGeneticQualityId(
-                  mixId, seedlotGenQltyDto.geneticTypeCode(), seedlotGenQltyDto.geneticWorthCode());
-
-          if (existingSmpMixGenQltyIdList.contains(smpMixGenId)) {
-            // remove form the list, the one that last will be removed
-            existingSmpMixGenQltyIdList.remove(smpMixGenId);
-          } else {
-            smpMixGenQltyToInsert.add(seedlotPtFormDto);
-          }
-        }
-      }
-
-      // Remove possible leftovers
-      log.info(
-          "{} leftover record(s) on the SmpMixGeneticQuality table to remove for seedlot number {}",
-          existingSmpMixGenQltyIdList.size(),
-          seedlot.getId());
-
-      if (!existingSmpMixGenQltyIdList.isEmpty()) {
-        smpMixGeneticQualityRepository.deleteAllByIdInBatch(existingSmpMixGenQltyIdList);
-        smpMixGeneticQualityRepository.flush();
-      }
-
-      // Insert new ones
-      addSmpMixGenQlty(seedlot, smpMixGenQltyToInsert);
-
-      return;
-    }
-
-    log.info(
-        "No previous records on the SmpMixGeneticQuality table for seedlot number {}",
-        seedlot.getId());
 
     addSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
@@ -147,6 +94,6 @@ public class SmpMixGeneticQualityService {
       }
     }
 
-    smpMixGeneticQualityRepository.saveAllAndFlush(smpMixGenQltys);
+    smpMixGeneticQualityRepository.saveAll(smpMixGenQltys);
   }
 }

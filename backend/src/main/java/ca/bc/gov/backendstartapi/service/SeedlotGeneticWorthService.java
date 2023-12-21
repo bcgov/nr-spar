@@ -44,46 +44,20 @@ public class SeedlotGeneticWorthService {
 
     if (!sgwList.isEmpty()) {
       log.info(
-          "{} previous records on the SeedlotGeneticWorth table for seedlot number {}",
+          "Deleting {} previous records on the SeedlotGeneticWorth table for seedlot number {}",
           sgwList.size(),
           seedlot.getId());
 
       List<String> sgwExistingList =
           new ArrayList<>(sgwList.stream().map(SeedlotGeneticWorth::getGeneticWorthCode).toList());
 
-      for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
-        for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
-            seedlotPtFormDto.parentTreeGeneticQualities()) {
-          if (sgwExistingList.contains(seedlotGenQltyDto.geneticWorthCode())) {
-            sgwExistingList.remove(seedlotGenQltyDto.geneticWorthCode());
-          } else {
-            sgwInsertList.add(seedlotGenQltyDto);
-          }
-        }
-      }
-
-      // Remove possible leftovers
-      log.info(
-          "{} leftover record(s) on the SeedlotGeneticWorth table to remove for seedlot number {}",
-          sgwExistingList.size(),
-          seedlot.getId());
-
       List<SeedlotGeneticWorthId> sgwiList = new ArrayList<>();
       for (String genWorthCode : sgwExistingList) {
         sgwiList.add(new SeedlotGeneticWorthId(seedlot.getId(), genWorthCode));
       }
-      if (!sgwiList.isEmpty()) {
-        seedlotGeneticWorthRepository.deleteAllByIdInBatch(sgwiList);
-        seedlotGeneticWorthRepository.flush();
-      }
 
-      // Insert new ones
-      return addSeedlotGeneticWorth(seedlot, sgwInsertList);
+      seedlotGeneticWorthRepository.deleteAllById(sgwiList);
     }
-
-    log.info(
-        "No previous records on the SeedlotGeneticWorth table for seedlot number {}",
-        seedlot.getId());
 
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
       sgwInsertList.addAll(seedlotPtFormDto.parentTreeGeneticQualities());
@@ -118,6 +92,6 @@ public class SeedlotGeneticWorthService {
       seedlotGeneticWorths.add(sgw);
     }
 
-    return seedlotGeneticWorthRepository.saveAllAndFlush(seedlotGeneticWorths);
+    return seedlotGeneticWorthRepository.saveAll(seedlotGeneticWorths);
   }
 }
