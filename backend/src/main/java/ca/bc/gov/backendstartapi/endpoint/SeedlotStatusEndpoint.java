@@ -68,6 +68,6 @@ public class SeedlotStatusEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   public List<CodeDescriptionDto> getAllSeedlotStatus() {
-    return seedlotStatusService.getAllSeedlotStatus();
+    return seedlotStatusService.getAllValidSeedlotStatusDto();
   }
 }

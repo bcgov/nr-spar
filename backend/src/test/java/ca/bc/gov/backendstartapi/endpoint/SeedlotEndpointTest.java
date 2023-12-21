@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -66,6 +67,84 @@ class SeedlotEndpointTest {
                 "bcSourceInd": false
             }
         """;
+
+  private static final String WHOLE_SEEDLOT_FORM_JSON =
+      """
+      {
+      "seedlotFormCollectionDto": {
+        "collectionClientNumber": "00012797",
+        "collectionLocnCode": "02",
+        "collectionStartDate": "2023-12-06T00:00:00Z",
+        "collectionEndDate": "2023-12-06T00:00:00Z",
+        "noOfContainers": 2,
+        "volPerContainer": 4,
+        "clctnVolume": 8,
+        "seedlotComment": "Any comment",
+        "coneCollectionMethodCodes": [1, 2]
+      },
+      "seedlotFormOwnershipDtoList": [
+        {
+          "ownerClientNumber": "00012797",
+          "ownerLocnCode": "02",
+          "originalPctOwned": 100,
+          "originalPctRsrvd": 100,
+          "originalPctSrpls": 5,
+          "methodOfPaymentCode": "CLA",
+          "sparFundSrceCode": "ITC"
+        }
+      ],
+      "seedlotFormInterimDto": {
+        "intermStrgClientNumber": "00012797",
+        "intermStrgLocnCode": "01",
+        "intermStrgStDate": "2023-12-06T00:00:00Z",
+        "intermStrgEndDate": "2023-12-06T00:00:00Z",
+        "intermStrgLocn": "Some location",
+        "intermFacilityCode": "OCV"
+      },
+      "seedlotFormOrchardDto": {
+        "orchardsId": ["405"],
+        "primaryOrchardId": "",
+        "femaleGameticMthdCode": "F3",
+        "maleGameticMthdCode": "M3",
+        "controlledCrossInd": false,
+        "biotechProcessesInd": true,
+        "pollenContaminationInd": false,
+        "pollenContaminationPct": 22,
+        "contaminantPollenBv": 45.6,
+        "pollenContaminationMthdCode": "true"
+      },
+      "seedlotFormParentTreeSmpDtoList": [
+        {
+          "seedlotNumber": "87",
+          "parentTreeId": 4023,
+          "parentTreeNumber": "87",
+          "coneCount": 1,
+          "pollenPount": 5,
+          "smpSuccessPct": 6,
+          "nonOrchardPollenContamPct": 2,
+          "amountOfMaterial": 50,
+          "proportion": 100,
+          "parentTreeGeneticQualities": [
+            {
+              "geneticTypeCode": "BV",
+              "geneticWorthCode": "GVO",
+              "geneticQualityValue": 18
+            }
+          ]
+        }
+      ],
+      "seedlotFormExtractionDto": {
+        "extractoryClientNumber": "00012797",
+        "extractoryLocnCode": "01",
+        "extractionStDate": "2023-12-06T00:00:00Z",
+        "extractionEndDate": "2023-12-06T00:00:00Z",
+        "storageClientNumber": "00012797",
+        "storageLocnCode": "01",
+        "temporaryStrgStartDate": "2023-12-06T00:00:00Z",
+        "temporaryStrgEndDate": "2023-12-06T00:00:00Z"
+      }
+    }
+      """;
 
   SeedlotEndpointTest(WebApplicationContext webApplicationContext) {
     this.webApplicationContext = webApplicationContext;
@@ -384,6 +463,42 @@ class SeedlotEndpointTest {
                 .content(TEST_PATCH_SEEDLOT_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(testSeedlot.getId()))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form submitted with not found seedlot")
+  void submitSeedlotForm_notFoundSeedlot_shouldThrowException() throws Exception {
+    when(seedlotService.submitSeedlotForm(any(), any())).thenThrow(new SeedlotNotFoundException());
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/form-submission", 123)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(WHOLE_SEEDLOT_FORM_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot Form subbmited with success")
+  void submitSeedlotForm_happyPath_shouldSucceed() throws Exception {
+    SeedlotCreateResponseDto createResponseDto = new SeedlotCreateResponseDto("123", "PND");
+
+    when(seedlotService.submitSeedlotForm(any(), any())).thenReturn(createResponseDto);
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/form-submission", 123)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(WHOLE_SEEDLOT_FORM_JSON))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.seedlotNumber").value("123"))
+        .andExpect(jsonPath("$.seedlotStatusCode").value("PND"))
         .andReturn();
   }
 }

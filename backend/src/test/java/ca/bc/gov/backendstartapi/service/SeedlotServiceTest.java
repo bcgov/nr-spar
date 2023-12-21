@@ -48,6 +48,26 @@ class SeedlotServiceTest {
 
   @Mock LoggedUserService loggedUserService;
 
+  @Mock SeedlotCollectionMethodService seedlotCollectionMethodService;
+
+  @Mock SeedlotOwnerQuantityService seedlotOwnerQuantityService;
+
+  @Mock SeedlotOrchardService seedlotOrchardService;
+
+  @Mock SeedlotParentTreeService seedlotParentTreeService;
+
+  @Mock SeedlotParentTreeGeneticQualityService seedlotParentTreeGeneticQualityService;
+
+  @Mock SeedlotGeneticWorthService seedlotGeneticWorthService;
+
+  @Mock SmpMixService smpMixService;
+
+  @Mock SmpMixGeneticQualityService smpMixGeneticQualityService;
+
+  @Mock SeedlotParentTreeSmpMixService seedlotParentTreeSmpMixService;
+
+  @Mock SeedlotStatusService seedlotStatusService;
+
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
@@ -70,7 +90,17 @@ class SeedlotServiceTest {
             seedlotSourceRepository,
             seedlotStatusRepository,
             geneticClassRepository,
-            loggedUserService);
+            loggedUserService,
+            seedlotCollectionMethodService,
+            seedlotOwnerQuantityService,
+            seedlotOrchardService,
+            seedlotParentTreeService,
+            seedlotParentTreeGeneticQualityService,
+            seedlotGeneticWorthService,
+            smpMixService,
+            smpMixGeneticQualityService,
+            seedlotParentTreeSmpMixService,
+            seedlotStatusService);
   }
 
   @Test

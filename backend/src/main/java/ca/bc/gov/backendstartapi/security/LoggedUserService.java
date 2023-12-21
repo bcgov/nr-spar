@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.security;
 
+import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.exception.UserNotFoundException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -89,5 +90,14 @@ public class LoggedUserService {
         return "";
       }
     }
+  }
+
+  /**
+   * Creates a new instance of {@link AuditInformation} with current logged user id.
+   *
+   * @return a {@link AuditInformation}
+   */
+  public AuditInformation createAuditCurrentUser() {
+    return new AuditInformation(getLoggedUserId());
   }
 }

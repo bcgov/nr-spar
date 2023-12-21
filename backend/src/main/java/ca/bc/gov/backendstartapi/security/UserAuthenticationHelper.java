@@ -38,8 +38,7 @@ public class UserAuthenticationHelper {
         String idpUsername = jwtPrincipal.getClaimAsString("custom:idp_username");
 
         // User name
-        String displayName =
-            jwtPrincipal.getClaimAsString("custom:idp_display_name");
+        String displayName = jwtPrincipal.getClaimAsString("custom:idp_display_name");
         String firstName = "";
         String lastName = "";
 

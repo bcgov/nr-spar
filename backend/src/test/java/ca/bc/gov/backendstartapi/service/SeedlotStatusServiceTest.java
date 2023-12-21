@@ -74,7 +74,7 @@ class SeedlotStatusServiceTest {
           }
         };
 
-    List<CodeDescriptionDto> resultList = seedlotStatusService.getAllSeedlotStatus();
+    List<CodeDescriptionDto> resultList = seedlotStatusService.getAllValidSeedlotStatusDto();
 
     Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());

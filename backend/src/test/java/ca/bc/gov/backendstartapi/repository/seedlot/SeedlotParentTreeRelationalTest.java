@@ -39,7 +39,7 @@ class SeedlotParentTreeRelationalTest extends SeedlotEntityRelationalTest {
     var seedlot = createSeedlot("00000");
     var seedlotParentTree =
         new SeedlotParentTree(
-            seedlot, 1, new BigDecimal(10), new BigDecimal(10), new AuditInformation("user1"));
+            seedlot, 1, "1", new BigDecimal(10), new BigDecimal(10), new AuditInformation("user1"));
     seedlotParentTree.setSmpSuccessPercentage(1);
     seedlotParentTree.setNonOrchardPollenContaminationCount(1);
 

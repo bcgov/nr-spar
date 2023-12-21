@@ -45,6 +45,9 @@ public class SmpMix {
   private int parentTreeId;
   // endregion
 
+  @Column(name = "parent_tree_number", nullable = false)
+  private String parentTreeNumber;
+
   @Column(name = "amount_of_material", nullable = false)
   private int amountOfMaterial;
 

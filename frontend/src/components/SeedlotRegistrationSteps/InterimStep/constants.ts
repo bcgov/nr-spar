@@ -2,6 +2,8 @@ import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
 
 export const DATE_FORMAT = 'Y/m/d';
 
+export const MAX_FACILITY_DESC_CHAR = 50;
+
 export const agencyFieldsProps: AgencyTextPropsType = {
   useDefaultCheckbox: {
     name: 'useCollectorAgency',
@@ -42,7 +44,7 @@ export const pageTexts = {
     otherInput: {
       placeholder: 'Enter the storage facility type',
       helperText: 'Describe the new storage facility used',
-      invalidText: 'Storage facility type lenght should be <= 50'
+      invalidText: `Storage facility type length should be <= ${MAX_FACILITY_DESC_CHAR}.`
     }
   }
 };

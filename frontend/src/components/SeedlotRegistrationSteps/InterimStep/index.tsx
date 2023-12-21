@@ -18,7 +18,9 @@ import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import InterimForm from './definitions';
-import { DATE_FORMAT, agencyFieldsProps, pageTexts } from './constants';
+import {
+  DATE_FORMAT, MAX_FACILITY_DESC_CHAR, agencyFieldsProps, pageTexts
+} from './constants';
 
 import './styles.scss';
 
@@ -99,9 +101,8 @@ const InterimStorage = (
     const clonedState = structuredClone(state);
     clonedState.facilityOtherType.value = facilityType;
 
-    if (facilityType.length >= 50) {
-      clonedState.facilityOtherType.isInvalid = true;
-    }
+    clonedState.facilityOtherType.isInvalid = facilityType.length > 50;
+
     setStepData(clonedState);
   };
 
@@ -217,16 +218,18 @@ const InterimStorage = (
                 <TextInput
                   id={state.facilityOtherType.id}
                   name="storage-facility"
-                  value={state.facilityOtherType.value}
+                  defaultValue={state.facilityOtherType.value}
                   labelText={pageTexts.storageFacility.labelText}
                   placeholder={pageTexts.storageFacility.otherInput.placeholder}
                   helperText={pageTexts.storageFacility.otherInput.helperText}
                   invalid={state.facilityOtherType.isInvalid}
                   invalidText={pageTexts.storageFacility.otherInput.invalidText}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleOtherFacilityTypeInput(e.target.value);
                   }}
                   readOnly={readOnly}
+                  enableCounter
+                  maxCount={MAX_FACILITY_DESC_CHAR}
                 />
               </Column>
             )

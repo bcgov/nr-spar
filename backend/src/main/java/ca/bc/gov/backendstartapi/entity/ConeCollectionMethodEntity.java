@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /** Entity for the list of cone collection method. */
 @Entity
@@ -15,6 +16,7 @@ import lombok.Setter;
 @Table(name = "cone_collection_method_list")
 @Getter
 @Setter
+@ToString
 public class ConeCollectionMethodEntity extends CodeDescriptionEntity {
   @Id
   @Column(name = "cone_collection_method_code")

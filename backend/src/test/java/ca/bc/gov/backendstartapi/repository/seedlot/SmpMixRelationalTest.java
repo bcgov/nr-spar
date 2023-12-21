@@ -37,7 +37,7 @@ class SmpMixRelationalTest extends SeedlotEntityRelationalTest {
   @Test
   void create() {
     var seedlot = createSeedlot("00000");
-    var smpMix = new SmpMix(seedlot, 1, 1, null, new AuditInformation("user1"), 0);
+    var smpMix = new SmpMix(seedlot, 1, "1", 1, null, new AuditInformation("user1"), 0);
     smpMix.setProportion(new BigDecimal(10));
 
     repository.saveAndFlush(smpMix);
