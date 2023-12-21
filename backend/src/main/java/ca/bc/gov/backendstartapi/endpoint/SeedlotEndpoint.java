@@ -332,7 +332,7 @@ public class SeedlotEndpoint {
    * @param form A {@link SeedlotFormSubmissionDto} containing all the form information
    * @return A {@link SeedlotCreateResponseDto} containing the seedlot number and status
    */
-  @PutMapping("/{seedlotNumber}/form-submission")
+  @PutMapping("/{seedlotNumber}/a-class-form-submission")
   @Operation(
       summary = "Saves the Seedlot form when submitted or edited",
       description =
