@@ -18,7 +18,8 @@ const SeedlotRegistrationProgress = ({
   interactFunction
 }: SeedlotRegistrationProgressProps) => (
   <ProgressIndicator
-    currentIndex={-1} // Needs to feed it a -1 value otherwise step 1 will stuck at current
+    // Needs to feed it a -1 value otherwise step 1 will stuck at current
+    currentIndex={-1}
     className={className}
     spaceEqually
     onChange={interactFunction ?? null}
