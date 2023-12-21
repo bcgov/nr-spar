@@ -115,7 +115,7 @@ class SeedlotCollectionMethodServiceTest {
     Assertions.assertEquals(formDto.clctnVolume(), seedlot.getTotalConeVolume());
     Assertions.assertEquals(formDto.seedlotComment(), seedlot.getComment());
 
-    verify(seedlotCollectionMethodRepository).saveAllAndFlush(any());
+    verify(seedlotCollectionMethodRepository).saveAll(any());
   }
 
   @Test

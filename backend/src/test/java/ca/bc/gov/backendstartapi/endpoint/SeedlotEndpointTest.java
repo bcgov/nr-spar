@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -472,7 +473,7 @@ class SeedlotEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/seedlots/{seedlotNumber}/form-submission", 123)
+            put("/api/seedlots/{seedlotNumber}/form-submission", 123)
                 .with(csrf().asHeader())
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -490,7 +491,7 @@ class SeedlotEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/seedlots/{seedlotNumber}/form-submission", 123)
+            put("/api/seedlots/{seedlotNumber}/form-submission", 123)
                 .with(csrf().asHeader())
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
