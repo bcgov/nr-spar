@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -237,7 +239,7 @@ public class SeedlotEndpoint {
    * @param seedlotNumber the seedlot number to fetch the info for
    * @return A {@link Seedlot} with all the current information for the seedlot.
    */
-  @GetMapping(path = "/{seedlotNumber}")
+  @GetMapping("/{seedlotNumber}")
   @Operation(
       summary = "Fetch a single seedlot information",
       description =
@@ -322,5 +324,51 @@ public class SeedlotEndpoint {
           SeedlotApplicationPatchDto patchDto) {
 
     return seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
+  }
+
+  /**
+   * Saves the Seedlot submit form once submitted on step 6.
+   *
+   * @param form A {@link SeedlotFormSubmissionDto} containing all the form information
+   * @return A {@link SeedlotCreateResponseDto} containing the seedlot number and status
+   */
+  @PutMapping("/{seedlotNumber}/form-submission")
+  @Operation(
+      summary = "Saves the Seedlot form when submitted or edited",
+      description =
+          "This API is responsible for receiving the entire seedlot form, once submitted or"
+              + " edited.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "201", description = "Successfully saved."),
+        @ApiResponse(
+            responseCode = "400",
+            description = "One or more fields has invalid values.",
+            content =
+                @Content(
+                    mediaType = "application/json",
+                    schema =
+                        @Schema(
+                            oneOf = {
+                              ValidationExceptionResponse.class,
+                              DefaultSpringExceptionResponse.class
+                            }))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public ResponseEntity<SeedlotCreateResponseDto> submitSeedlotForm(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber,
+      @RequestBody SeedlotFormSubmissionDto form) {
+    SeedlotCreateResponseDto createDto = seedlotService.submitSeedlotForm(seedlotNumber, form);
+    return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 }

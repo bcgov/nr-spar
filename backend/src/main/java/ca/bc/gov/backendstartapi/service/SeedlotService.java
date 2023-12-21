@@ -4,20 +4,27 @@ import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +51,26 @@ public class SeedlotService {
   private final GeneticClassRepository geneticClassRepository;
 
   private final LoggedUserService loggedUserService;
+
+  private final SeedlotCollectionMethodService seedlotCollectionMethodService;
+
+  private final SeedlotOwnerQuantityService seedlotOwnerQuantityService;
+
+  private final SeedlotOrchardService seedlotOrchardService;
+
+  private final SeedlotParentTreeService seedlotParentTreeService;
+
+  private final SeedlotParentTreeGeneticQualityService seedlotParentTreeGeneticQualityService;
+
+  private final SeedlotGeneticWorthService seedlotGeneticWorthService;
+
+  private final SmpMixService smpMixService;
+
+  private final SmpMixGeneticQualityService smpMixGeneticQualityService;
+
+  private final SeedlotParentTreeSmpMixService seedlotParentTreeSmpMixService;
+
+  private final SeedlotStatusService seedlotStatusService;
 
   /**
    * Creates a Seedlot in the database.
@@ -82,7 +109,6 @@ public class SeedlotService {
     log.debug("Seedlot to insert: {}", seedlot);
 
     seedlotRepository.save(seedlot);
-    seedlotRepository.flush();
 
     log.info("New seedlot saved with success!");
 
@@ -202,5 +228,112 @@ public class SeedlotService {
     seedlotInfo.setIntendedForCrownLand(patchDto.toBeRegistrdInd());
 
     return seedlotRepository.save(seedlotInfo);
+  }
+
+  /**
+   * Saved the entire {@link Seedlot} form with all steps.
+   *
+   * @param seedlotNumber The Seedlot identification
+   * @param form The {@link SeedlotFormSubmissionDto} containing all form fields
+   * @return A {@link SeedlotCreateResponseDto} with the seedlot number and status
+   */
+  @Transactional
+  public SeedlotCreateResponseDto submitSeedlotForm(
+      String seedlotNumber, SeedlotFormSubmissionDto form) {
+    log.info("Seedlot number {} submitted for saving!", seedlotNumber);
+    Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
+    Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
+
+    /*
+     * Merging entities script:
+     * 1. Finds all for that seedlot
+     * 2. Iterate over the result list
+     * 3. Remove all existing entries except the seedlot row in the seedlot table
+     * 5. Add new ones
+     */
+
+    // Collection step 1
+    seedlotCollectionMethodService.saveSeedlotFormStep1(seedlot, form.seedlotFormCollectionDto());
+    // Owner step 2
+    seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, form.seedlotFormOwnershipDtoList());
+    // Interim Step 3
+    saveSeedlotFormStep3(seedlot, form.seedlotFormInterimDto());
+    // Orchard Step 4
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto());
+    // Parent Tree Step 5
+    saveSeedlotFormStep5(seedlot, form.seedlotFormParentTreeSmpDtoList());
+    // Extraction Step 6
+    saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
+
+    String submittedStatus = "SUB";
+    setSeedlotStatus(seedlot, submittedStatus);
+
+    log.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
+    seedlotRepository.save(seedlot);
+
+    return new SeedlotCreateResponseDto(
+        seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  private void setSeedlotStatus(Seedlot seedlot, String newStatus) {
+    Optional<SeedlotStatusEntity> sseOptional =
+        seedlotStatusService.getValidSeedlotStatus(newStatus);
+    if (sseOptional.isEmpty()) {
+      throw new SeedlotStatusNotFoundException();
+    }
+    seedlot.setSeedlotStatus(sseOptional.get());
+  }
+
+  private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
+    log.info("Saving Seedlot Form Step 3-Interim Storage for seedlot number {}", seedlot.getId());
+
+    seedlot.setInterimStorageClientNumber(formStep3.intermStrgClientNumber());
+    seedlot.setInterimStorageLocationCode(formStep3.intermStrgLocnCode());
+    seedlot.setInterimStorageStartDate(formStep3.intermStrgStDate());
+    seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
+    seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
+    // If the facility type is Other, then a description is required.
+    log.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
+    log.info("FACILITY TYPE Desc", formStep3.intermOtherFacilityDesc());
+    if (formStep3.intermFacilityCode().equals("OTH")) {
+      log.info("equal to OTH");
+      if (formStep3.intermOtherFacilityDesc() == null
+          || formStep3.intermOtherFacilityDesc().isEmpty()) {
+        throw new SeedlotFormValidationException(
+            "Invalid interim step data: Storage facility type description is needed for facility"
+                + " type 'Other'. ");
+      }
+      seedlot.setInterimStorageOtherFacilityDesc(formStep3.intermOtherFacilityDesc());
+    }
+  }
+
+  private void saveSeedlotFormStep5(
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+    log.info(
+        "Saving Seedlot Form Step 5-Parent Tree SMP Mix for seedlot number {}", seedlot.getId());
+
+    seedlotParentTreeService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+    seedlotParentTreeGeneticQualityService.saveSeedlotFormStep5(
+        seedlot, seedlotFormParentTreeDtoList);
+    seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+
+    smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+    smpMixGeneticQualityService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+    seedlotParentTreeSmpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+  }
+
+  private void saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
+    log.info(
+        "Saving Seedlot Form Step 6-Extraction Storage for seedlot number {}", seedlot.getId());
+
+    seedlot.setExtractionClientNumber(formStep6.extractoryClientNumber());
+    seedlot.setExtractionLocationCode(formStep6.extractoryLocnCode());
+    seedlot.setExtractionStartDate(formStep6.extractionStDate());
+    seedlot.setExtractionEndDate(formStep6.extractionEndDate());
+
+    seedlot.setStorageClientNumber(formStep6.storageClientNumber());
+    seedlot.setStorageLocationCode(formStep6.storageLocnCode());
+    seedlot.setTemporaryStorageStartDate(formStep6.temporaryStrgStartDate());
+    seedlot.setTemporaryStorageEndDate(formStep6.temporaryStrgEndDate());
   }
 }

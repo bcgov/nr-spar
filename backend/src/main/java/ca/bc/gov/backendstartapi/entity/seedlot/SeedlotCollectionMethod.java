@@ -13,10 +13,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.ToString;
 
 /** The method used for the collection of a lot of seeds. */
 @Entity
@@ -25,6 +27,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class SeedlotCollectionMethod {
   // region Identifier
   @Id
@@ -41,8 +45,8 @@ public class SeedlotCollectionMethod {
 
   // endregion
 
-  @Column(name = "cone_collection_method_desc", length = 400)
-  private String coneCollectionMethodDescription;
+  @Column(name = "cone_collection_method_other_desc", length = 50)
+  private String coneCollectionMethodOtherDescription;
 
   @Embedded private AuditInformation auditInformation;
 

@@ -66,4 +66,15 @@ public class SeedlotParentTreeGeneticQuality {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
+  /**
+   * Creates an instance of {@link SeedlotParentTreeGeneticQualityId} containing: the seedlot parent
+   * tree id, the genetic type code and the genetic worth code.
+   *
+   * @return A {@link SeedlotParentTreeGeneticQualityId}
+   */
+  public SeedlotParentTreeGeneticQualityId getId() {
+    return new SeedlotParentTreeGeneticQualityId(
+        seedlotParentTree.getId(), geneticTypeCode, geneticWorth.getGeneticWorthCode());
+  }
 }

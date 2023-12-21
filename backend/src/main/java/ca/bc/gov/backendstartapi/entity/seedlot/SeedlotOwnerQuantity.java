@@ -71,4 +71,14 @@ public class SeedlotOwnerQuantity {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
+  /**
+   * Returns the SeedlotOwnerQuantity id, fields: seedlot number, owner cliend code, and owner
+   * client location.
+   *
+   * @return a {@link SeedlotOwnerQuantityId}
+   */
+  public SeedlotOwnerQuantityId getId() {
+    return new SeedlotOwnerQuantityId(seedlot.getId(), ownerClientNumber, ownerLocationCode);
+  }
 }

@@ -120,7 +120,7 @@ public class Seedlot implements Serializable {
   private String interimStorageFacilityCode;
 
   @Column(name = "interm_strg_locn", length = 55)
-  private String interimStorageLocationDescription;
+  private String interimStorageOtherFacilityDesc;
 
   // endregion
 

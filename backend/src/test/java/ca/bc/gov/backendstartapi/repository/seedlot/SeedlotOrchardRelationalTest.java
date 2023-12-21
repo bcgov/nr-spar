@@ -37,7 +37,6 @@ class SeedlotOrchardRelationalTest extends SeedlotEntityRelationalTest {
   void create() {
     var seedlot = createSeedlot("00000");
     var seedlotOrchard = new SeedlotOrchard(seedlot, "ABC");
-    seedlotOrchard.setPrimary(true);
     seedlotOrchard.setAuditInformation(new AuditInformation("user1"));
 
     repository.saveAndFlush(seedlotOrchard);

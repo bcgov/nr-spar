@@ -9,8 +9,8 @@ import lombok.NonNull;
  * This record represents a user logged and his information from a decoded JWT. Be aware that
  * very soon this class will get updated with FAM properties.
  *
- * @param id the user's identifier. Read from the JWT {@code sub} property. E.g.: {@code
- *     123456789...45689@idir}
+ * @param id the user's identifier. Decoded from the JWT token. E.g.: {@code
+ *     idir@username} or {@code bceidbusiness@username}
  * @param firstName the user's first name. Read from the JWT {@code given_name} claim. Present only
  *     when the identity is provided by {@link IdentityProvider#IDIR IDIR}
  * @param lastName The user's last name. Read from the JWT {@code family_name} claim. Present only

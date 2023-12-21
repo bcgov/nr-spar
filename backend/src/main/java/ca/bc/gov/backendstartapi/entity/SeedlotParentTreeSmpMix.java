@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.entity;
 
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
+import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -63,4 +64,15 @@ public class SeedlotParentTreeSmpMix {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
+  /**
+   * Gets the {@link SeedlotParentTreeSmpMix} id class containing the {@link SeedlotParentTreeId},
+   * the geneticTypeCode and the geneticWorth.
+   *
+   * @return A {@link SeedlotParentTreeSmpMixId}
+   */
+  public SeedlotParentTreeSmpMixId getId() {
+    return new SeedlotParentTreeSmpMixId(
+        seedlotParentTree.getId(), geneticTypeCode, geneticWorth.getGeneticWorthCode());
+  }
 }

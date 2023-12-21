@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.entity;
 
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixGeneticQualityId;
+import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -63,4 +64,15 @@ public class SmpMixGeneticQuality {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
+  /**
+   * Gets the {@link SmpMixGeneticQualityId} id containing the {@link SmpMixId}, the geneticTypeCode
+   * and the geneticWorth.
+   *
+   * @return A {@link SmpMixGeneticQualityId}
+   */
+  public SmpMixGeneticQualityId getId() {
+    SmpMixId mixId = new SmpMixId(smpMix.getSeedlot().getId(), smpMix.getParentTreeId());
+    return new SmpMixGeneticQualityId(mixId, geneticTypeCode, geneticWorth.getGeneticWorthCode());
+  }
 }
