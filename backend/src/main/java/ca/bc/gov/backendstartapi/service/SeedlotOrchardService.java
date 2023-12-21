@@ -50,7 +50,7 @@ public class SeedlotOrchardService {
 
     if (!seedlotOrchards.isEmpty()) {
       log.info(
-          "deleting {} previous records on the SeedlotOrchard table for seedlot number {}",
+          "Deleting {} previous records on the SeedlotOrchard table for seedlot number {}",
           seedlotOrchards.size(),
           seedlot.getId());
 
