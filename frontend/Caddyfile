@@ -36,5 +36,17 @@
 		try_files {path} {path}/ {file} /index.html
 	}
 
+	route /Seedlot_composition_template.csv {
+		uri strip_prefix /Seedlot_composition_template.csv
+		header Content-Type text/csv
+		file_server /public/downloads/Seedlot_composition_template.csv
+	}
+
+	route /SMP_Mix_Volume_template.csv {
+		uri strip_prefix /SMP_Mix_Volume_template.csv
+		header Content-Type text/csv
+		file_server /public/downloads/SMP_Mix_Volume_template.csv
+	}
+
 	file_server
 }
