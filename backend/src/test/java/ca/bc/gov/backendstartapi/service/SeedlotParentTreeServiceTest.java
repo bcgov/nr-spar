@@ -88,7 +88,7 @@ class SeedlotParentTreeServiceTest {
             formStep5.coneCount(),
             formStep5.pollenPount(),
             audit);
-    when(seedlotParentTreeRepository.saveAllAndFlush(any())).thenReturn(List.of(spt));
+    when(seedlotParentTreeRepository.saveAll(any())).thenReturn(List.of(spt));
 
     List<SeedlotParentTree> list =
         seedlotParentTreeService.saveSeedlotFormStep5(seedlot, List.of(formStep5));
@@ -116,7 +116,7 @@ class SeedlotParentTreeServiceTest {
 
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
-    when(seedlotParentTreeRepository.saveAllAndFlush(any())).thenReturn(List.of(spt));
+    when(seedlotParentTreeRepository.saveAll(any())).thenReturn(List.of(spt));
 
     SeedlotFormParentTreeSmpDto formStep5Two = createFormDto(4024);
 
@@ -146,7 +146,7 @@ class SeedlotParentTreeServiceTest {
 
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
-    when(seedlotParentTreeRepository.saveAllAndFlush(any())).thenReturn(List.of(spt));
+    when(seedlotParentTreeRepository.saveAll(any())).thenReturn(List.of(spt));
 
     SeedlotFormParentTreeSmpDto formStep5Two = createFormDto(4024);
 

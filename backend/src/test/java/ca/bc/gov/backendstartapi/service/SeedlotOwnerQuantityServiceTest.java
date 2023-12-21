@@ -78,7 +78,7 @@ class SeedlotOwnerQuantityServiceTest {
 
     Seedlot seedlot = new Seedlot("54321");
     SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "02");
-    when(seedlotOwnerQuantityRepository.saveAllAndFlush(any())).thenReturn(List.of(soq));
+    when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq));
 
     List<SeedlotOwnerQuantity> soqList =
         seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(1));
@@ -106,7 +106,7 @@ class SeedlotOwnerQuantityServiceTest {
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     SeedlotOwnerQuantity soq2 = new SeedlotOwnerQuantity(seedlot, "00012797", "02");
-    when(seedlotOwnerQuantityRepository.saveAllAndFlush(any())).thenReturn(List.of(soq, soq2));
+    when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq, soq2));
 
     List<SeedlotOwnerQuantity> soqList =
         seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(2));
@@ -135,12 +135,12 @@ class SeedlotOwnerQuantityServiceTest {
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
-    when(seedlotOwnerQuantityRepository.saveAllAndFlush(any())).thenReturn(List.of(soq, soq2));
+    when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq, soq2));
 
     List<SeedlotOwnerQuantity> soqList =
         seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(2));
 
-    Assertions.assertTrue(soqList.isEmpty());
+    Assertions.assertFalse(soqList.isEmpty());
   }
 
   @Test
@@ -163,11 +163,11 @@ class SeedlotOwnerQuantityServiceTest {
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
-    when(seedlotOwnerQuantityRepository.saveAllAndFlush(any())).thenReturn(List.of(soq));
+    when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq));
 
     List<SeedlotOwnerQuantity> soqList =
         seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(1));
 
-    Assertions.assertTrue(soqList.isEmpty());
+    Assertions.assertTrue(soqList.size() == 1);
   }
 }

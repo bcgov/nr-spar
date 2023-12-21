@@ -72,7 +72,7 @@ class SeedlotGeneticWorthServiceTest {
     when(geneticWorthEntityDao.getGeneticWorthEntity("GVO")).thenReturn(Optional.of(gw));
 
     SeedlotGeneticWorth sgw = new SeedlotGeneticWorth(seedlot, gw, audit);
-    when(seedlotGeneticWorthRepository.saveAllAndFlush(any())).thenReturn(List.of(sgw));
+    when(seedlotGeneticWorthRepository.saveAll(any())).thenReturn(List.of(sgw));
 
     SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
 

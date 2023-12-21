@@ -70,7 +70,7 @@ class SmpMixServiceTest {
             formStep5.proportion(),
             audit,
             0);
-    when(smpMixRepository.saveAllAndFlush(any())).thenReturn(List.of(smpMix));
+    when(smpMixRepository.saveAll(any())).thenReturn(List.of(smpMix));
 
     List<SmpMix> list = smpMixService.saveSeedlotFormStep5(seedlot, List.of(formStep5));
 
@@ -96,7 +96,7 @@ class SmpMixServiceTest {
 
     when(smpMixRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(smpMix));
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
-    when(smpMixRepository.saveAllAndFlush(any())).thenReturn(List.of(smpMix));
+    when(smpMixRepository.saveAll(any())).thenReturn(List.of(smpMix));
 
     List<SmpMix> list = smpMixService.saveSeedlotFormStep5(seedlot, List.of(createFormDto(4024)));
 
