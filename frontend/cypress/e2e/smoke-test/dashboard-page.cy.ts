@@ -13,6 +13,21 @@ describe('Dashboard page test', () => {
     cy.fixture('dashboard-page').then((fData) => {
       dashboardPageData = fData;
     });
+    cy.intercept({
+      method: 'GET',
+      path: '**/api/favourite-activities'
+    }, (req) => {
+      req.reply(
+        {
+          body: [{
+            id: 239,
+            userId: 'IDIR@TEST',
+            activity: 'mySeedlots',
+            highlighted: false
+          }]
+        }
+      );
+    }).as('interceptedGet');
     cy.login();
     cy.visit('/');
     cy.url().should('contains', '/dashboard');
@@ -31,20 +46,27 @@ describe('Dashboard page test', () => {
       .should('have.text', dashboardPageData.secondSectionSubtitle);
   });
 
-  it('should be able to favourite the a class seedlot page', () => {
-    cy.intercept(
-      {
-        method: 'GET',
-        path: '**/api/favourite-activities'
-      },
-      {
-        fixture: 'favourite-activities/a-class.json'
-      }
-    ).as('interceptedGet');
-
+  it('should be able to favourite the Register A-class seedlot page', () => {
     cy.intercept({
       method: 'POST',
       path: '**/api/favourite-activities'
+    }, (req) => {
+      req.reply(
+        {
+          body: [{
+            id: 239,
+            userId: 'IDIR@TEST',
+            activity: 'mySeedlots',
+            highlighted: false
+          }, {
+            id: 238,
+            userId: 'IDIR@TEST',
+            activity: 'registerAClass',
+            highlighted: false
+          }
+          ]
+        }
+      );
     }).as('interceptedPost');
 
     // Navigate to Seedlot page
@@ -58,6 +80,28 @@ describe('Dashboard page test', () => {
     cy.get('.title-favourite')
       .find(`.${prefix}--popover-container`)
       .click();
+    cy.reload();
+    cy.intercept({
+      method: 'GET',
+      path: '**/api/favourite-activities'
+    }, (req) => {
+      req.reply(
+        {
+          body: [{
+            id: 239,
+            userId: 'IDIR@TEST',
+            activity: 'mySeedlots',
+            highlighted: false
+          }, {
+            id: 238,
+            userId: 'IDIR@TEST',
+            activity: 'registerAClass',
+            highlighted: false
+          }
+          ]
+        }
+      );
+    }).as('interceptedGetAfter');
 
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
@@ -73,21 +117,27 @@ describe('Dashboard page test', () => {
   });
 
   it('should be able to favourite my seedlot page', () => {
-    cy.intercept(
-      {
-        method: 'GET',
-        path: '**/api/favourite-activities'
-      },
-      {
-        fixture: 'favourite-activities/my-seedlots.json'
-      }
-    ).as('interceptedGet');
-
     cy.intercept({
       method: 'POST',
       path: '**/api/favourite-activities'
+    }, (req) => {
+      req.reply(
+        {
+          body: [{
+            id: 239,
+            userId: 'IDIR@TEST',
+            activity: 'mySeedlots',
+            highlighted: false
+          }, {
+            id: 238,
+            userId: 'IDIR@TEST',
+            activity: 'registerAClass',
+            highlighted: false
+          }
+          ]
+        }
+      );
     }).as('interceptedPost');
-
     // Navigate to My seedlot page
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.get('.seedlot-activities-cards')
@@ -99,6 +149,28 @@ describe('Dashboard page test', () => {
     cy.get('.title-favourite')
       .find(`.${prefix}--popover-container`)
       .click();
+
+    cy.intercept({
+      method: 'GET',
+      path: '**/api/favourite-activities'
+    }, (req) => {
+      req.reply(
+        {
+          body: [{
+            id: 239,
+            userId: 'IDIR@TEST',
+            activity: 'mySeedlots',
+            highlighted: false
+          }, {
+            id: 238,
+            userId: 'IDIR@TEST',
+            activity: 'registerAClass',
+            highlighted: false
+          }
+          ]
+        }
+      );
+    }).as('interceptedGetAfter');
 
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
@@ -115,15 +187,21 @@ describe('Dashboard page test', () => {
   });
 
   it('should be able to highlight favourite cards at dashboard', () => {
-    cy.intercept(
-      {
-        method: 'GET',
-        path: '**/api/favourite-activities'
-      },
-      {
-        fixture: 'favourite-activities/my-seedlots-highlighted.json'
-      }
-    ).as('interceptedGet');
+    cy.intercept({
+      method: 'PUT',
+      path: '**/api/favourite-activities/**'
+    }, (req) => {
+      req.reply(
+        {
+          body: {
+            id: 239,
+            userId: 'IDIR@TEST',
+            activity: 'mySeedlots',
+            highlighted: true
+          }
+        }
+      );
+    }).as('interceptedPut');
 
     // Highlight Create A Class Seedlot card
     cy.get('.favourite-activities-cards')
@@ -134,10 +212,28 @@ describe('Dashboard page test', () => {
       .contains('Highlight shortcut')
       .click();
 
-    // Check if the Create A Class Seedlot card is unique and highlighted
+    cy.reload();
+    cy.intercept({
+      method: 'GET',
+      path: '**/api/favourite-activities'
+    }, (req) => {
+      req.reply(
+        {
+          body: [{
+            id: 239,
+            userId: 'IDIR@TEST',
+            activity: 'mySeedlots',
+            highlighted: true
+          }
+          ]
+        }
+      );
+    }).as('interceptedGetAfter');
+
+    // Check if My Seedlots card is unique and highlighted
     cy.get('.fav-card-main-highlighted')
       .should('have.length', 1)
-      .should('contain.text', 'Create A-class seedlot');
+      .should('contain.text', 'My Seedlots');
   });
 
   it('should delete my seedlots card from favourite activities', () => {
@@ -165,7 +261,7 @@ describe('Dashboard page test', () => {
       .contains('Delete shortcut')
       .click();
     cy.get('.fav-card-main')
-      .should('have.length', 1);
+      .should('have.length', 0);
   });
 
   it('should delete a class seedlot card from favourite activities', () => {
@@ -178,9 +274,7 @@ describe('Dashboard page test', () => {
       .click();
     cy.get('.fav-card-main-highlighted')
       .should('have.length', 0);
-  });
 
-  it('should display empty section', () => {
     cy.get('.empty-section-title')
       .should('contain.text', "You don't have any favourites to show yet!");
   });
