@@ -119,3 +119,85 @@ export type SeedlotCreateResponseType = {
   seedlotNumber: string,
   seedlotStatusCode: string
 }
+
+type CollectionFormSubmitType = {
+  collectionClientNumber: string,
+  collectionLocnCode: string,
+  collectionStartDate: string,
+  collectionEndDate: string,
+  noOfContainers: number,
+  volPerContainer: number,
+  clctnVolume: number,
+  seedlotComment: string,
+  coneCollectionMethodCodes: Array<number>
+}
+
+type SingleOwnerFormSubmitType = {
+  ownerClientNumber: string,
+  ownerLocnCode: string,
+  originalPctOwned: number,
+  originalPctRsrvd: number,
+  originalPctSrpls: number,
+  methodOfPaymentCode: string,
+  sparFundSrceCode: string
+}
+
+type InterimFormSubmitType = {
+  intermStrgClientNumber: string,
+  intermStrgLocnCode: string,
+  intermStrgStDate: string,
+  intermStrgEndDate: string,
+  intermOtherFacilityDesc: string,
+  intermFacilityCode: string
+}
+
+type OrchardFormSubmitType = {
+  orchardsId: Array<string>,
+  femaleGameticMthdCode: string,
+  maleGameticMthdCode: string,
+  controlledCrossInd: boolean,
+  biotechProcessesInd: boolean,
+  pollenContaminationInd: boolean,
+  pollenContaminationPct: number,
+  contaminantPollenBv: number,
+  pollenContaminationMthdCode: string
+}
+
+type ParentTreeGeneticQualitiesType = {
+  geneticTypeCode: string,
+  geneticWorthCode: string,
+  geneticQualityValue: number
+}
+
+type ParentTreeFormSubmitType = {
+  seedlotNumber: string,
+  parentTreeId: number,
+  parentTreeNumber: string,
+  coneCount: number,
+  pollenPount: number,
+  smpSuccessPct: number,
+  nonOrchardPollenContamPct: number,
+  amountOfMaterial: number,
+  proportion: number,
+  parentTreeGeneticQualities: Array<ParentTreeGeneticQualitiesType>
+}
+
+type ExtractionFormSubmitType = {
+  extractoryClientNumber: string,
+  extractoryLocnCode: string,
+  extractionStDate: string,
+  extractionEndDate: string,
+  storageClientNumber: string,
+  storageLocnCode: string,
+  temporaryStrgStartDate: string,
+  temporaryStrgEndDate: string
+}
+
+export type SeedlotAClassSubmitType = {
+  seedlotFormCollectionDto: CollectionFormSubmitType,
+  seedlotFormOwnershipDtoList: Array<SingleOwnerFormSubmitType>,
+  seedlotFormInterimDto: InterimFormSubmitType,
+  seedlotFormOrchardDto: OrchardFormSubmitType,
+  seedlotFormParentTreeSmpDtoList: Array<ParentTreeFormSubmitType>,
+  seedlotFormExtractionDto: ExtractionFormSubmitType
+}
