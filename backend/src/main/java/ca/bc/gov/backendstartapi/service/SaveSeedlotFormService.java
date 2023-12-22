@@ -3,39 +3,36 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.dto.SaveAClassSeedlotFormDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotAClassSaveEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.repository.SeedlotAClassSaveRepository;
+import ca.bc.gov.backendstartapi.repository.SaveAClassSeedlotFormRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import com.nimbusds.jose.shaded.gson.Gson;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods to handle seedlot registration form saving requests. */
 @Service
-@Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("unchecked")
 public class SaveSeedlotFormService {
 
-  private final SeedlotAClassSaveRepository seedlotAClassSaveRepository;
+  private final SaveAClassSeedlotFormRepository saveAClassSeedlotFormRepository;
   private final SeedlotRepository seedlotRepository;
   private final LoggedUserService loggedUserService;
 
   public void saveAClassForm(String seedlotNumber, SaveAClassSeedlotFormDto data) {
-
-    log.info("SaveAClassSeedlotFormDto: {}", data.allStepData().toJSONString());
 
     Seedlot relatedSeedlot = seedlotRepository.findById(seedlotNumber).orElseThrow();
 
     SeedlotAClassSaveEntity entityToSave =
         new SeedlotAClassSaveEntity(
             relatedSeedlot,
-            data.allStepData(),
-            data.progressStatus(),
-            loggedUserService.createAuditCurrentUser(),
-            0);
+            new Gson().fromJson(data.allStepData().toString(), Map.class),
+            new Gson().fromJson(data.progressStatus().toString(), Map.class),
+            loggedUserService.createAuditCurrentUser());
 
-    seedlotAClassSaveRepository.saveAndFlush  (entityToSave);
-
+    saveAClassSeedlotFormRepository.save(entityToSave);
     return;
   }
 }

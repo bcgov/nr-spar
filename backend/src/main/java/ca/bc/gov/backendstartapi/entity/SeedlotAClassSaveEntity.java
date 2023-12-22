@@ -11,12 +11,14 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import net.minidev.json.JSONObject;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** Quantification of a given genetic quality in a seedlot. */
 @Entity
@@ -34,10 +36,12 @@ public class SeedlotAClassSaveEntity {
   private Seedlot seedlot;
 
   @Column(name = "all_step_data", columnDefinition = "jsonb")
-  private JSONObject allStepData;
+  @JdbcTypeCode(SqlTypes.JSON)
+  private Map<String, Object> allStepData;
 
   @Column(name = "progress_status", columnDefinition = "jsonb")
-  private JSONObject progressStatus;
+  @JdbcTypeCode(SqlTypes.JSON)
+  private Map<String, Object> progressStatus;
 
   @Embedded @NonNull private AuditInformation auditInformation;
 
@@ -48,15 +52,13 @@ public class SeedlotAClassSaveEntity {
 
   public SeedlotAClassSaveEntity(
       Seedlot seedlot,
-      JSONObject allStepData,
-      JSONObject progressStatus,
-      AuditInformation auditInformation,
-      int revisionCount) {
+      Map<String, Object> allStepData,
+      Map<String, Object> progressStatus,
+      AuditInformation auditInformation) {
     this.seedlotNumber = seedlot.getId();
     this.seedlot = seedlot;
     this.allStepData = allStepData;
     this.progressStatus = progressStatus;
     this.auditInformation = auditInformation;
-    this.revisionCount = revisionCount;
   }
 }

@@ -4,5 +4,5 @@ import ca.bc.gov.backendstartapi.entity.SeedlotAClassSaveEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Repository for {@link SeedlotAClassSaveEntity}. */
-public interface SeedlotAClassSaveRepository
+public interface SaveAClassSeedlotFormRepository
     extends JpaRepository<SeedlotAClassSaveEntity, String> {}
