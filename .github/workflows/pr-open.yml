@@ -12,19 +12,19 @@ jobs:
   init:
     name: Initialize
     outputs:
-      zone: ${{ steps.fam_pr_number.outputs.zone }}
+      tag: ${{ steps.tag.outputs.tag }}
+    runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
-    runs-on: ubuntu-22.04
     steps:
-      - name: Replace PR Number for FAM
-        id: fam_pr_number
-        run: echo "zone=$(( ${{ github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
+      - name: Get PR Number Mod 50
+        id: tag
+        run: echo "tag=$(( ${{ github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
 
       - name: PR Greeting
         env:
           DOMAIN: apps.silver.devops.gov.bc.ca
-          PREFIX: ${{ github.event.repository.name }}-${{ steps.fam_pr_number.outputs.zone }}
+          PREFIX: ${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}
         uses: bcgov-nr/action-pr-description-add@v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -49,8 +49,8 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=${{ env.ZONE }}
-            -p NAME=${{ steps.fam_pr_number.outputs.zone }}
+            -p ZONE=${{ steps.tag.outputs.tag }}
+            -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
@@ -83,7 +83,7 @@ jobs:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.0
         with:
           package: ${{ matrix.package }}
-          tag: ${{ needs.init.outputs.zone }}
+          tag: ${{ needs.init.outputs.tag }}
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
@@ -108,7 +108,7 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-              -p BUILD=snapshot-${{ needs.init.outputs.zone }}
+              -p BUILD=snapshot-${{ needs.init.outputs.tag }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
@@ -120,7 +120,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ needs.init.outputs.zone }}
+              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ needs.init.outputs.tag }}
               -p VITE_NRSPARWEBAPP_VERSION=dev
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
@@ -131,7 +131,7 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ needs.init.outputs.zone }}
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ needs.init.outputs.tag }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
@@ -147,7 +147,7 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
-            -p ZONE=${{ needs.init.outputs.zone }}
+            -p ZONE=${{ needs.init.outputs.tag }}
             -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
@@ -155,12 +155,12 @@ jobs:
 
   cypress-test-coverage:
     name: Cypress Test and Coverage
-    needs: [init, deploys]
+    needs: [deploys, init]
     runs-on: ubuntu-22.04
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ needs.init.outputs.zone }}-backend.apps.silver.devops.gov.bc.ca
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ needs.init.outputs.tag }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
