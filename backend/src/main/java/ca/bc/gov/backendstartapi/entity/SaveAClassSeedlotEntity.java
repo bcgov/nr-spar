@@ -26,7 +26,7 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
 @Setter
-public class SeedlotAClassSaveEntity {
+public class SaveAClassSeedlotEntity {
   @Id
   @Column(name = "seedlot_number")
   private String seedlotNumber;
@@ -50,7 +50,7 @@ public class SeedlotAClassSaveEntity {
   @Setter(AccessLevel.NONE)
   private int revisionCount;
 
-  public SeedlotAClassSaveEntity(
+  public SaveAClassSeedlotEntity(
       Seedlot seedlot,
       Map<String, Object> allStepData,
       Map<String, Object> progressStatus,
