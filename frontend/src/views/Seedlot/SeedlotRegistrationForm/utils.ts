@@ -437,45 +437,6 @@ export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boo
 };
 
 /**
- * Validate Extraction and Storage Step.
- * Return true if it's Invalid, false otherwise.
- */
-export const validateExtractionStep = (extractionStepData: ExtractionStorageForm): boolean => {
-  let isInvalid = false;
-  if (
-    extractionStepData.extraction.agency.isInvalid
-    || extractionStepData.extraction.locationCode.isInvalid
-    || extractionStepData.extraction.startDate.isInvalid
-    || extractionStepData.extraction.endDate.isInvalid
-    || extractionStepData.seedStorage.agency.isInvalid
-    || extractionStepData.seedStorage.locationCode.isInvalid
-    || extractionStepData.seedStorage.startDate.isInvalid
-    || extractionStepData.seedStorage.endDate.isInvalid
-  ) {
-    isInvalid = true;
-  }
-
-  return isInvalid;
-};
-
-/**
- * Verify if the extraction and storage step is complete
- * Return true if it's complete, false otherwise
- */
-export const verifyExtractionStepCompleteness = (
-  extractionStepData: ExtractionStorageForm
-): boolean => {
-  if (!extractionStepData.extraction.agency.value.code.length
-    || !extractionStepData.extraction.locationCode.value.length
-    || !extractionStepData.seedStorage.agency.value.code.length
-    || !extractionStepData.seedStorage.locationCode.value.length
-  ) {
-    return false;
-  }
-  return true;
-};
-
-/**
  * Validate Parent tree Step.
  * Return true if it's Invalid, false otherwise.
  */
@@ -527,4 +488,58 @@ export const verifyParentStepCompleteness = (parentStepData: ParentTreeStepDataO
   const isComplete = sum.gte(smallestNumPossible);
 
   return isComplete;
+};
+
+/**
+ * Validate Extraction and Storage Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateExtractionStep = (extractionStepData: ExtractionStorageForm): boolean => {
+  let isInvalid = false;
+  if (
+    extractionStepData.extraction.agency.isInvalid
+    || extractionStepData.extraction.locationCode.isInvalid
+    || extractionStepData.extraction.startDate.isInvalid
+    || extractionStepData.extraction.endDate.isInvalid
+    || extractionStepData.seedStorage.agency.isInvalid
+    || extractionStepData.seedStorage.locationCode.isInvalid
+    || extractionStepData.seedStorage.startDate.isInvalid
+    || extractionStepData.seedStorage.endDate.isInvalid
+  ) {
+    isInvalid = true;
+  }
+
+  return isInvalid;
+};
+
+/**
+ * Verify if the extraction and storage step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyExtractionStepCompleteness = (
+  extractionStepData: ExtractionStorageForm
+): boolean => {
+  if (!extractionStepData.extraction.agency.value.code.length
+    || !extractionStepData.extraction.locationCode.value.length
+    || !extractionStepData.seedStorage.agency.value.code.length
+    || !extractionStepData.seedStorage.locationCode.value.length
+  ) {
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Check if all steps are completed
+ */
+export const checkAllStepsCompletion = (status: ProgressIndicatorConfig) => {
+  let allStepsComplete = true;
+
+  Object.keys(status).forEach((key: string) => {
+    if (!status[key as keyof ProgressIndicatorConfig].isComplete) {
+      allStepsComplete = false;
+    }
+  });
+
+  return allStepsComplete;
 };

@@ -66,7 +66,8 @@ import {
   validateExtractionStep,
   verifyExtractionStepCompleteness,
   validateParentStep,
-  verifyParentStepCompleteness
+  verifyParentStepCompleteness,
+  checkAllStepsCompletion
 } from './utils';
 import {
   initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
@@ -299,16 +300,6 @@ const SeedlotRegistrationForm = () => {
       }
     }
 
-    // Set invalid or complete status for Extraction and Storage Step
-    if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
-      const isExtractionInvalid = validateExtractionStep(allStepData.extractionStorageStep);
-      clonedStatus.extraction.isInvalid = isExtractionInvalid;
-      if (!isExtractionInvalid) {
-        const isExtractionComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
-        clonedStatus.extraction.isComplete = isExtractionComplete;
-      }
-    }
-
     // Set invalid or complete status for Parent Tree Step
     if (currentStepName !== 'parent' && prevStepName === 'parent') {
       const isParentInvalid = validateParentStep(allStepData.parentTreeStep);
@@ -316,6 +307,16 @@ const SeedlotRegistrationForm = () => {
       if (!isParentInvalid) {
         const isParentComplete = verifyParentStepCompleteness(allStepData.parentTreeStep);
         clonedStatus.parent.isComplete = isParentComplete;
+      }
+    }
+
+    // Set invalid or complete status for Extraction and Storage Step
+    if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
+      const isExtractionInvalid = validateExtractionStep(allStepData.extractionStorageStep);
+      clonedStatus.extraction.isInvalid = isExtractionInvalid;
+      if (!isExtractionInvalid) {
+        const isExtractionComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
+        clonedStatus.extraction.isComplete = isExtractionComplete;
       }
     }
 
@@ -526,7 +527,11 @@ const SeedlotRegistrationForm = () => {
                     </Button>
                   )
                   : (
-                    <SubmitModal btnText="Submit Registration" renderIconName="CheckmarkOutline" />
+                    <SubmitModal
+                      btnText="Submit Registration"
+                      renderIconName="CheckmarkOutline"
+                      disableBtn={!checkAllStepsCompletion(progressStatus)}
+                    />
                   )
               }
             </Column>

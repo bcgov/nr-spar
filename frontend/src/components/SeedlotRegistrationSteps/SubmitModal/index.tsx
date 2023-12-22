@@ -13,12 +13,14 @@ import './styles.scss';
 type SubmitModalProps = {
   btnText: string;
   renderIconName?: string;
+  disableBtn: boolean;
 }
 
 const SubmitModal = (
   {
     btnText,
-    renderIconName
+    renderIconName,
+    disableBtn
   }: SubmitModalProps
 ) => (
   <ModalStateManager
@@ -27,6 +29,7 @@ const SubmitModal = (
         className="submit-modal-btn"
         onClick={() => setOpen(true)}
         renderIcon={renderIconName ? Icons[renderIconName] : null}
+        disabled={disableBtn}
       >
         {btnText}
       </Button>
