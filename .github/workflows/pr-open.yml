@@ -9,28 +9,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # This job is needed for FAM
-  setup:
-    name: Reset the deployment number
-    runs-on: ubuntu-22.04
-    outputs:
-      zone: ${{ steps.calculate.outputs.zone }}
-    steps:
-      - name: Calculate the deployment number
-        id: calculate
-        run: |
-          echo "zone=$((${{ github.event.number }} % 50))" >> $GITHUB_OUTPUT
   init:
     name: Initialize
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ needs.setup.outputs.zone }}
-      ZONE: ${{ needs.setup.outputs.zone }}
-    runs-on: ubuntu-22.04
+    outputs:
+      zone: ${{ steps.fam_pr_number.outputs.zone }}
     permissions:
       pull-requests: write
+    runs-on: ubuntu-22.04
     steps:
+      - name: Replace PR Number for FAM
+        id: fam_pr_number
+        run: echo "zone=$(( ${{ github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
+
       - name: PR Greeting
+        env:
+          DOMAIN: apps.silver.devops.gov.bc.ca
+          PREFIX: ${{ github.event.repository.name }}-${{ steps.fam_pr_number.outputs.zone }}
         uses: bcgov-nr/action-pr-description-add@v1.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -56,7 +50,7 @@ jobs:
           overwrite: false
           parameters:
             -p ZONE=${{ env.ZONE }}
-            -p NAME=${{ github.event.repository.name }}
+            -p NAME=${{ steps.fam_pr_number.outputs.zone }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
@@ -68,14 +62,10 @@ jobs:
 
   builds:
     name: Builds
-    needs:
-      - setup
-      - init
+    needs: [init]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
-    env:
-      ZONE: ${{ needs.setup.outputs.zone }}
     strategy:
       matrix:
         package: [database, backend, frontend, oracle-api]
@@ -93,20 +83,15 @@ jobs:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.0
         with:
           package: ${{ matrix.package }}
-          tag: ${{ env.ZONE }}
+          tag: ${{ needs.init.outputs.zone }}
           tag_fallback: test
           token: ${{ secrets.GITHUB_TOKEN }}
           triggers: ${{ matrix.triggers }}
 
   deploys:
     name: Deploys
-    needs:
-      - setup
-      - builds
-      - init
+    needs: [builds, init]
     runs-on: ubuntu-22.04
-    env:
-      ZONE: ${{ needs.setup.outputs.zone }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
@@ -123,7 +108,7 @@ jobs:
             parameters:
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
-              -p BUILD=snapshot-${{ env.ZONE }}
+              -p BUILD=snapshot-${{ needs.init.outputs.zone }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
@@ -135,7 +120,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ env.ZONE }}
+              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ needs.init.outputs.zone }}
               -p VITE_NRSPARWEBAPP_VERSION=dev
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
@@ -146,7 +131,7 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ env.ZONE }}
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ needs.init.outputs.zone }}
               -p MIN_REPLICAS=1
               -p MAX_REPLICAS=1
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
@@ -162,7 +147,7 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
-            -p ZONE=${{ env.ZONE }}
+            -p ZONE=${{ needs.init.outputs.zone }}
             -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
@@ -170,12 +155,12 @@ jobs:
 
   cypress-test-coverage:
     name: Cypress Test and Coverage
-    needs: [deploys]
+    needs: [init, deploys]
     runs-on: ubuntu-22.04
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ needs.setup.outputs.zone }}-backend.apps.silver.devops.gov.bc.ca
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ needs.init.outputs.zone }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
