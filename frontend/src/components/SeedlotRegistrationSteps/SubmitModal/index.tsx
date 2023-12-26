@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Checkbox,
   Button,
@@ -37,6 +37,8 @@ const SubmitModal = (
     seedlotNumber
   }: SubmitModalProps
 ) => {
+  const [declareTrue, setDeclareTrue] = useState<boolean>(false);
+
   const convertToAClasPayload = (): SeedlotAClassSubmitType => ({
     seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
     seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
@@ -76,12 +78,17 @@ const SubmitModal = (
             const payload = convertToAClasPayload();
             console.log(payload);
           }}
+          primaryButtonDisabled={!declareTrue}
         >
           <p>{inputText.modal.helperText}</p>
           <Checkbox
             id="declaration-modal-checkbox"
             name="declaration-modal"
             labelText={inputText.modal.checkboxLabelText}
+            checked={declareTrue}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setDeclareTrue(e.target.checked);
+            }}
           />
           <ToastNotification
             lowContrast
