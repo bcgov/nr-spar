@@ -7,7 +7,7 @@ import {
 
 import History from '../../types/History';
 
-import formatDate from '../../utils/DateUtils';
+import { formatDate } from '../../utils/DateUtils';
 import statusClass from '../../utils/HistoryStatus';
 
 import './styles.scss';

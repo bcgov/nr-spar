@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import formatDate from '../../utils/DateUtils';
+import { formatDate } from '../../utils/DateUtils';
 
 describe('Date Utils test', () => {
   it('should return formatted date', () => {

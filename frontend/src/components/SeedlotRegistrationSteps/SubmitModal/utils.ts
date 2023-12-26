@@ -4,6 +4,7 @@ import {
   ParentTreeFormSubmitType, SingleOwnerFormSubmitType, ExtractionFormSubmitType
 } from '../../../types/SeedlotType';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
+import { dateStringToISO } from '../../../utils/DateUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { CollectionForm } from '../CollectionStep/definitions';
 import InterimForm from '../InterimStep/definitions';
@@ -15,8 +16,8 @@ import { calcAverage, processOrchards } from '../ParentTreeStep/utils';
 export const convertCollection = (collectionData: CollectionForm): CollectionFormSubmitType => ({
   collectionClientNumber: collectionData.collectorAgency.value.code,
   collectionLocnCode: collectionData.locationCode.value,
-  collectionStartDate: collectionData.startDate.value,
-  collectionEndDate: collectionData.endDate.value,
+  collectionStartDate: dateStringToISO(collectionData.startDate.value),
+  collectionEndDate: dateStringToISO(collectionData.endDate.value),
   noOfContainers: +collectionData.numberOfContainers.value,
   volPerContainer: +collectionData.volumePerContainers.value,
   clctnVolume: +collectionData.volumeOfCones.value,
@@ -39,8 +40,8 @@ export const convertOwnership = (ownershipData: Array<SingleOwnerForm>): Array<S
 export const convertInterim = (interimData: InterimForm): InterimFormSubmitType => ({
   intermStrgClientNumber: interimData.agencyName.value.code,
   intermStrgLocnCode: interimData.locationCode.value,
-  intermStrgStDate: interimData.startDate.value,
-  intermStrgEndDate: interimData.endDate.value,
+  intermStrgStDate: dateStringToISO(interimData.startDate.value),
+  intermStrgEndDate: dateStringToISO(interimData.endDate.value),
   intermOtherFacilityDesc: interimData.facilityOtherType.value,
   intermFacilityCode: interimData.facilityType.value
 });
@@ -91,10 +92,10 @@ export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlot
 export const convertExtraction = (extractionData: ExtractionStorageForm): ExtractionFormSubmitType => ({
   extractoryClientNumber: extractionData.extraction.agency.value.code,
   extractoryLocnCode: extractionData.extraction.locationCode.value,
-  extractionStDate: extractionData.extraction.startDate.value,
-  extractionEndDate: extractionData.extraction.endDate.value,
+  extractionStDate: dateStringToISO(extractionData.extraction.startDate.value),
+  extractionEndDate: dateStringToISO(extractionData.extraction.endDate.value),
   storageClientNumber: extractionData.seedStorage.agency.value.code,
   storageLocnCode: extractionData.seedStorage.locationCode.value,
-  temporaryStrgStartDate: extractionData.seedStorage.startDate.value,
-  temporaryStrgEndDate: extractionData.seedStorage.endDate.value
+  temporaryStrgStartDate: dateStringToISO(extractionData.seedStorage.startDate.value),
+  temporaryStrgEndDate: dateStringToISO(extractionData.seedStorage.endDate.value)
 });
