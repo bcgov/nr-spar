@@ -67,7 +67,7 @@ export const combineObjectValues = (objs: Array<InfoSectionConfigType>): Array<I
   return combined;
 };
 
-const calcAverage = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): string => {
+export const calcAverage = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): string => {
   let sum = 0;
   let total = tableRows.length;
   tableRows.forEach((row) => {

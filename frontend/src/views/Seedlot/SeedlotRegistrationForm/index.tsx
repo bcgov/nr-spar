@@ -42,6 +42,8 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
@@ -74,8 +76,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
-import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -531,6 +531,8 @@ const SeedlotRegistrationForm = () => {
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
                       disableBtn={!checkAllStepsCompletion(progressStatus)}
+                      allStepData={allStepData}
+                      seedlotNumber={seedlotNumber || ''}
                     />
                   )
               }

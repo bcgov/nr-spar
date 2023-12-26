@@ -1,4 +1,5 @@
 import { StatusColourMap } from '../components/StatusTag/definitions';
+import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
 
 type EffectiveDateRange = {
   effectiveDate: string,
@@ -120,7 +121,7 @@ export type SeedlotCreateResponseType = {
   seedlotStatusCode: string
 }
 
-type CollectionFormSubmitType = {
+export type CollectionFormSubmitType = {
   collectionClientNumber: string,
   collectionLocnCode: string,
   collectionStartDate: string,
@@ -132,7 +133,7 @@ type CollectionFormSubmitType = {
   coneCollectionMethodCodes: Array<number>
 }
 
-type SingleOwnerFormSubmitType = {
+export type SingleOwnerFormSubmitType = {
   ownerClientNumber: string,
   ownerLocnCode: string,
   originalPctOwned: number,
@@ -142,7 +143,7 @@ type SingleOwnerFormSubmitType = {
   sparFundSrceCode: string
 }
 
-type InterimFormSubmitType = {
+export type InterimFormSubmitType = {
   intermStrgClientNumber: string,
   intermStrgLocnCode: string,
   intermStrgStDate: string,
@@ -151,7 +152,7 @@ type InterimFormSubmitType = {
   intermFacilityCode: string
 }
 
-type OrchardFormSubmitType = {
+export type OrchardFormSubmitType = {
   orchardsId: Array<string>,
   femaleGameticMthdCode: string,
   maleGameticMthdCode: string,
@@ -163,13 +164,7 @@ type OrchardFormSubmitType = {
   pollenContaminationMthdCode: string
 }
 
-type ParentTreeGeneticQualitiesType = {
-  geneticTypeCode: string,
-  geneticWorthCode: string,
-  geneticQualityValue: number
-}
-
-type ParentTreeFormSubmitType = {
+export type ParentTreeFormSubmitType = {
   seedlotNumber: string,
   parentTreeId: number,
   parentTreeNumber: string,
@@ -179,10 +174,10 @@ type ParentTreeFormSubmitType = {
   nonOrchardPollenContamPct: number,
   amountOfMaterial: number,
   proportion: number,
-  parentTreeGeneticQualities: Array<ParentTreeGeneticQualitiesType>
+  parentTreeGeneticQualities: Array<SingleParentTreeGeneticObj>
 }
 
-type ExtractionFormSubmitType = {
+export type ExtractionFormSubmitType = {
   extractoryClientNumber: string,
   extractoryLocnCode: string,
   extractionStDate: string,
