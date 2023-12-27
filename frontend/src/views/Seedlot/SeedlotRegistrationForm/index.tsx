@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
   Row,
@@ -10,7 +10,8 @@ import {
   BreadcrumbItem,
   Button,
   Loading,
-  Grid
+  Grid,
+  InlineNotification
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
@@ -19,7 +20,7 @@ import getFundingSources from '../../../api-service/fundingSorucesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
-import { getSeedlotById } from '../../../api-service/seedlotAPI';
+import { getSeedlotById, putAClassSeedlot } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
@@ -42,10 +43,12 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
+import ResponseErrorType from '../../../types/ResponseErrorType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
-import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
+import { EmptyMultiOptObj, EmptyResponseError } from '../../../shared-constants/shared-constants';
 
 import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import {
@@ -69,7 +72,13 @@ import {
   verifyExtractionStepCompleteness,
   validateParentStep,
   verifyParentStepCompleteness,
-  checkAllStepsCompletion
+  checkAllStepsCompletion,
+  convertCollection,
+  convertExtraction,
+  convertInterim,
+  convertOrchard,
+  convertOwnership,
+  convertParentTree
 } from './utils';
 import {
   initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
@@ -92,6 +101,8 @@ const SeedlotRegistrationForm = () => {
     progressStatus,
     setProgressStatus
   ] = useState<ProgressIndicatorConfig>(() => initProgressBar(formStep, initialProgressConfig));
+
+  const [errorSubmitting, setErrorSubmitting] = useState<ResponseErrorType>(EmptyResponseError);
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
@@ -433,6 +444,35 @@ const SeedlotRegistrationForm = () => {
     }
   };
 
+  const getSeedlotPayload = (): SeedlotAClassSubmitType => ({
+    seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
+    seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
+    seedlotFormInterimDto: convertInterim(allStepData.interimStep),
+    seedlotFormOrchardDto: convertOrchard(
+      allStepData.orchardStep,
+      allStepData.parentTreeStep.tableRowData
+    ),
+    seedlotFormParentTreeSmpDtoList: convertParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
+    seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
+  });
+
+  const submitSeedlot = useMutation({
+    mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
+    onSuccess: () => {
+      navigate({
+        pathname: `/seedlots/details/${seedlotNumber}`,
+        search: '?seedlotStatus=SUB'
+      });
+    },
+    onError: (err: AxiosError) => {
+      setErrorSubmitting({
+        errOccured: true,
+        code: err.code ?? 'Unknown Error Code',
+        message: err.message
+      });
+    }
+  });
+
   return (
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
@@ -466,6 +506,22 @@ const SeedlotRegistrationForm = () => {
             />
           </Column>
         </Row>
+        {
+          errorSubmitting.errOccured
+            ? (
+              <Row>
+                <Column sm={4} md={8} lg={16} xlg={16}>
+                  <InlineNotification
+                    lowContrast
+                    kind="error"
+                    title="Submission failure!"
+                    subtitle={`${errorSubmitting.message} (Error code ${errorSubmitting.code})`}
+                  />
+                </Column>
+              </Row>
+            )
+            : null
+        }
         <Row>
           <Column className="seedlot-registration-row" sm={4} md={8} lg={16} xlg={16}>
             {
@@ -478,6 +534,7 @@ const SeedlotRegistrationForm = () => {
                 && gameticMethodologyQuery.isFetched
                 && coneCollectionMethodsQuery.isFetched
                 && applicantAgencyQuery.isFetched
+                && !submitSeedlot.isLoading
               )
                 ? renderStep()
                 : <Loading />
@@ -531,8 +588,9 @@ const SeedlotRegistrationForm = () => {
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
                       disableBtn={!checkAllStepsCompletion(progressStatus)}
-                      allStepData={allStepData}
-                      seedlotNumber={seedlotNumber || ''}
+                      submitFn={() => {
+                        submitSeedlot.mutate(getSeedlotPayload());
+                      }}
                     />
                   )
               }

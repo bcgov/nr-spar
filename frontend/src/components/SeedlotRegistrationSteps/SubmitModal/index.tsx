@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-// import { useNavigate } from 'react-router-dom';
 import {
   Checkbox,
   Button,
@@ -11,14 +9,6 @@ import * as Icons from '@carbon/icons-react';
 
 import ModalStateManager from '../../ModalStateManager';
 
-import { AllStepData } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
-import { putAClassSeedlot } from '../../../api-service/seedlotAPI';
-
-import {
-  convertCollection, convertInterim, convertOrchard,
-  convertOwnership, convertParentTree, convertExtraction
-} from './utils';
 import inputText from './constants';
 
 import './styles.scss';
@@ -27,8 +17,7 @@ type SubmitModalProps = {
   btnText: string;
   renderIconName?: string;
   disableBtn: boolean;
-  allStepData: AllStepData;
-  seedlotNumber: string;
+  submitFn: Function;
 }
 
 const SubmitModal = (
@@ -36,37 +25,10 @@ const SubmitModal = (
     btnText,
     renderIconName,
     disableBtn,
-    allStepData,
-    seedlotNumber
+    submitFn
   }: SubmitModalProps
 ) => {
-  // const navigate = useNavigate();
   const [declareTrue, setDeclareTrue] = useState<boolean>(false);
-
-  const payload: SeedlotAClassSubmitType = {
-    seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
-    seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
-    seedlotFormInterimDto: convertInterim(allStepData.interimStep),
-    seedlotFormOrchardDto: convertOrchard(
-      allStepData.orchardStep,
-      allStepData.parentTreeStep.tableRowData
-    ),
-    seedlotFormParentTreeSmpDtoList: convertParentTree(allStepData.parentTreeStep, seedlotNumber),
-    seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
-  };
-
-  const submitSeedlot = useMutation({
-    mutationFn: () => putAClassSeedlot(seedlotNumber, payload),
-    onSuccess: () => {
-      // eslint-disable-next-line no-alert
-      window.alert('Something is right');
-      // navigate(`/seedlots/details/${seedlotNumber}`);
-    },
-    onError: () => {
-      // eslint-disable-next-line no-alert
-      window.alert('Something is wrong');
-    }
-  });
 
   return (
     <ModalStateManager
@@ -92,7 +54,8 @@ const SubmitModal = (
           open={open}
           onRequestClose={() => setOpen(false)}
           onRequestSubmit={() => {
-            submitSeedlot.mutate();
+            setOpen(false);
+            submitFn();
           }}
           primaryButtonDisabled={!declareTrue}
         >
