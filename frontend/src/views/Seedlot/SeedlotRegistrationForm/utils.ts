@@ -556,7 +556,7 @@ export const checkAllStepsCompletion = (status: ProgressIndicatorConfig) => {
 export const convertCollection = (collectionData: CollectionForm): CollectionFormSubmitType => ({
   collectionClientNumber: collectionData.collectorAgency.value.code,
   collectionLocnCode: collectionData.locationCode.value,
-  collectionStartDate: collectionData.startDate.value,
+  collectionStartDate: dateStringToISO(collectionData.startDate.value),
   collectionEndDate: dateStringToISO(collectionData.endDate.value),
   noOfContainers: +collectionData.numberOfContainers.value,
   volPerContainer: +collectionData.volumePerContainers.value,
