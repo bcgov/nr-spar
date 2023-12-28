@@ -60,6 +60,10 @@ const BCHeader = () => {
     });
   };
 
+  const handleClosePanel = () => {
+    if (rightPanel.notifications === true) { closeRightPanel('notifications'); } else { closeRightPanel('myProfile'); }
+  };
+
   const navigate = useNavigate();
 
   return (
@@ -69,6 +73,9 @@ const BCHeader = () => {
           aria-label={componentTexts.completeTitle}
           className="spar-header"
           data-testid="header"
+          onClick={
+                isSideNavExpanded === true ? onClickSideNavExpand : null
+              }
         >
           <SkipToContent />
           <HeaderMenuButton
@@ -129,7 +136,17 @@ const BCHeader = () => {
           </HeaderPanel>
           {
             overlay
-              ? <div className="overlay-element" />
+              ? (
+                <div
+                  className="overlay-element"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="close right panel"
+                  onKeyDown={handleClosePanel}
+                  onClick={handleClosePanel}
+
+                />
+              )
               : null
           }
           <SideNav
@@ -138,6 +155,9 @@ const BCHeader = () => {
             aria-label={componentTexts.sideMenuAriaLabel}
             inert={undefined}
             className="spar-side-nav"
+            onClick={
+                isSideNavExpanded === true ? onClickSideNavExpand : null
+              }
           >
             <div className="side-nav-top">
               {
