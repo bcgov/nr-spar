@@ -47,6 +47,7 @@ import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
 import ResponseErrorType from '../../../types/ResponseErrorType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import createErrorMessage from '../../../utils/ErrorHandlingUtils';
 
 import { EmptyMultiOptObj, EmptyResponseError } from '../../../shared-constants/shared-constants';
 
@@ -85,7 +86,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import createErrorMessage from '../../../utils/ErrorHandlingUtils';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -104,6 +104,7 @@ const SeedlotRegistrationForm = () => {
   ] = useState<ProgressIndicatorConfig>(() => initProgressBar(formStep, initialProgressConfig));
 
   const [errorSubmitting, setErrorSubmitting] = useState<ResponseErrorType>(EmptyResponseError);
+  const [allStepCompleted, setAllStepCompleted] = useState<boolean>(false);
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
@@ -470,6 +471,11 @@ const SeedlotRegistrationForm = () => {
     }
   });
 
+  useEffect(() => {
+    const completionStatus = checkAllStepsCompletion(progressStatus, verifyExtractionStepCompleteness(allStepData.extractionStorageStep));
+    setAllStepCompleted(completionStatus);
+  }, [progressStatus, allStepData.extractionStorageStep]);
+
   return (
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
@@ -584,7 +590,7 @@ const SeedlotRegistrationForm = () => {
                     <SubmitModal
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
-                      disableBtn={!checkAllStepsCompletion(progressStatus)}
+                      disableBtn={!allStepCompleted}
                       submitFn={() => {
                         submitSeedlot.mutate(getSeedlotPayload());
                       }}
