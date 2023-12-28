@@ -12,5 +12,6 @@ export const EmptyMultiOptObj: MultiOptionsObj = {
 export const EmptyResponseError: ResponseErrorType = {
   errOccured: false,
   code: '',
-  message: ''
+  title: '',
+  description: ''
 };

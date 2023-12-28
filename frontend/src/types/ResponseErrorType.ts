@@ -1,7 +1,8 @@
 type ResponseErrorType = {
   errOccured: boolean;
   code: string;
-  message: string;
+  title: string;
+  description: string;
 };
 
 export default ResponseErrorType;

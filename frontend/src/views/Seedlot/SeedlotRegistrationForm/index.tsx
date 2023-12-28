@@ -85,6 +85,7 @@ import {
 } from './constants';
 
 import './styles.scss';
+import createErrorMessage from '../../../utils/ErrorHandlingUtils';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -465,11 +466,7 @@ const SeedlotRegistrationForm = () => {
       });
     },
     onError: (err: AxiosError) => {
-      setErrorSubmitting({
-        errOccured: true,
-        code: err.code ?? 'Unknown Error Code',
-        message: err.message
-      });
+      setErrorSubmitting(createErrorMessage(err));
     }
   });
 
@@ -514,8 +511,8 @@ const SeedlotRegistrationForm = () => {
                   <InlineNotification
                     lowContrast
                     kind="error"
-                    title="Submission failure!"
-                    subtitle={`${errorSubmitting.message} (Error code ${errorSubmitting.code})`}
+                    title={errorSubmitting.title}
+                    subtitle={errorSubmitting.description}
                   />
                 </Column>
               </Row>
