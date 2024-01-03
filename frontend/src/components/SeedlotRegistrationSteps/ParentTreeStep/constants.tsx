@@ -6,6 +6,9 @@ import {
   InfoSectionConfigType, FileConfigType
 } from './definitions';
 
+import SeedlotCsvTemplate from '../../../assets/csv/Seedlot_composition_template.csv?url';
+import SmpMixCsvTemplate from '../../../assets/csv/SMP_Mix_Volume_template.csv?url';
+
 export const DEFAULT_PAGE_SIZE = 40;
 
 export const DEFAULT_MIX_PAGE_SIZE = 20;
@@ -44,9 +47,9 @@ export const MAX_VISIBLE_PT_NUMBERS = 10;
 
 export const getDownloadUrl = (tabType: string) => {
   if (tabType === 'Calculation of SMP mix' || tabType === 'mixTab') {
-    return '/downloads/SMP_Mix_Volume_template.csv';
+    return SmpMixCsvTemplate;
   }
-  return '/downloads/Seedlot_composition_template.csv';
+  return SeedlotCsvTemplate;
 };
 
 const getTabDescription = (tabType: string) => (
