@@ -132,7 +132,6 @@ const App: React.FC = () => {
                     </ProtectedRoute>
                   )}
                 />
-                <Route path="/downloads/*" />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Route>
               <Route path="/404" element={<FourOhFour />} />
