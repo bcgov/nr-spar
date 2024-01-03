@@ -7,6 +7,7 @@ ENV NODE_OPTIONS "--max-old-space-size=3072"
 WORKDIR /app
 COPY *.html *.json *.ts ./
 COPY ./src ./src
+COPY ./public ./public
 RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
     npm run build && \
     rm -rf node_modules
@@ -14,7 +15,7 @@ RUN npm ci --ignore-scripts --no-update-notifier --omit=dev && \
 # Deploy container
 # Caddy serves static files
 FROM caddy:2.7.5-alpine
-RUN apk add --no-cache ca-certificates curl
+RUN apk add --no-cache ca-certificates curl bash
 
 # Copy files and run formatting
 COPY --from=build /app/build/ /app/dist
