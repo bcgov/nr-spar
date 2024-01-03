@@ -30,6 +30,7 @@ interface InterimStorageStepProps {
   collectorAgency: OptionsInputType,
   collectorCode: StringInputType,
   agencyOptions: Array<MultiOptionsObj>,
+  facilityTypes: Array<MultiOptionsObj>,
   readOnly?: boolean
 }
 
@@ -40,6 +41,7 @@ const InterimStorage = (
     collectorAgency,
     collectorCode,
     agencyOptions,
+    facilityTypes,
     readOnly
   }: InterimStorageStepProps
 ) => {
@@ -105,6 +107,15 @@ const InterimStorage = (
 
     setStepData(clonedState);
   };
+
+  const renderFacilityTypes = () => facilityTypes.map((type: MultiOptionsObj) => (
+    <RadioButton
+      id={`facility-type-radio-btn-${type.code.toLowerCase()}`}
+      key={type.code}
+      labelText={type.label}
+      value={type.code}
+    />
+  ));
 
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
@@ -189,26 +200,9 @@ const InterimStorage = (
             onChange={(e: string) => handleFacilityType(e)}
             readOnly={readOnly}
           >
-            <RadioButton
-              id="outside-radio"
-              labelText={pageTexts.storageFacility.outsideLabel}
-              value={pageTexts.storageFacility.outsideValue}
-            />
-            <RadioButton
-              id="ventilated-radio"
-              labelText={pageTexts.storageFacility.ventilatedLabel}
-              value={pageTexts.storageFacility.ventilatedValue}
-            />
-            <RadioButton
-              id="reefer-radio"
-              labelText={pageTexts.storageFacility.reeferLabel}
-              value={pageTexts.storageFacility.reeferValue}
-            />
-            <RadioButton
-              id="other-radio"
-              labelText={pageTexts.storageFacility.otherLabel}
-              value={pageTexts.storageFacility.otherValue}
-            />
+            {
+              renderFacilityTypes()
+            }
           </RadioButtonGroup>
         </Column>
         {

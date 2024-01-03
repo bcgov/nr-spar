@@ -15,7 +15,7 @@ import {
 import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
 
-import getFundingSources from '../../../api-service/fundingSorucesAPI';
+import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
@@ -23,6 +23,7 @@ import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
+import getFacilityTypes from '../../../api-service/facilityTypesAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
@@ -101,6 +102,12 @@ const SeedlotRegistrationForm = () => {
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(tscAgencyObj, tscLocationCode)
   }));
+
+  const facilityTypesQuery = useQuery({
+    queryKey: ['facility-types'],
+    queryFn: getFacilityTypes,
+    select: (data: any) => getMultiOptList(data)
+  });
 
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
@@ -390,6 +397,7 @@ const SeedlotRegistrationForm = () => {
             collectorAgency={allStepData.collectionStep.collectorAgency}
             collectorCode={allStepData.collectionStep.locationCode}
             agencyOptions={agencyOptions}
+            facilityTypes={facilityTypesQuery.data ?? []}
             setStepData={(data: InterimForm) => setStepData('interimStep', data)}
           />
         );
@@ -477,6 +485,7 @@ const SeedlotRegistrationForm = () => {
                 && gameticMethodologyQuery.isFetched
                 && coneCollectionMethodsQuery.isFetched
                 && applicantAgencyQuery.isFetched
+                && facilityTypesQuery.isFetched
               )
                 ? renderStep()
                 : <Loading />
