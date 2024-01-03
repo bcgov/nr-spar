@@ -108,14 +108,20 @@ const InterimStorage = (
     setStepData(clonedState);
   };
 
-  const renderFacilityTypes = () => facilityTypes.map((type: MultiOptionsObj) => (
-    <RadioButton
-      id={`facility-type-radio-btn-${type.code.toLowerCase()}`}
-      key={type.code}
-      labelText={type.label}
-      value={type.code}
-    />
-  ));
+  const renderFacilityTypes = () => {
+    // Change order of the array to set the
+    // OTH value on the last position
+    const otherType = facilityTypes.filter((types: MultiOptionsObj) => types.code === 'OTH');
+    facilityTypes.push(facilityTypes.splice(facilityTypes.indexOf(otherType[0]), 1)[0]);
+    facilityTypes.map((type: MultiOptionsObj) => (
+      <RadioButton
+        id={`facility-type-radio-btn-${type.code.toLowerCase()}`}
+        key={type.code}
+        labelText={type.label}
+        value={type.code}
+      />
+    ));
+  };
 
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
