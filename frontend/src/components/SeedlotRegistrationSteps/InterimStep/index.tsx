@@ -113,7 +113,8 @@ const InterimStorage = (
     // OTH value on the last position
     const otherType = facilityTypes.filter((types: MultiOptionsObj) => types.code === 'OTH');
     facilityTypes.push(facilityTypes.splice(facilityTypes.indexOf(otherType[0]), 1)[0]);
-    facilityTypes.map((type: MultiOptionsObj) => (
+
+    return facilityTypes.map((type: MultiOptionsObj) => (
       <RadioButton
         id={`facility-type-radio-btn-${type.code.toLowerCase()}`}
         key={type.code}
