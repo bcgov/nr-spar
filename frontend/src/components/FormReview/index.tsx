@@ -219,6 +219,7 @@ const FormReview = () => {
                       collectorAgency={allStepData.collectionStep.collectorAgency}
                       collectorCode={allStepData.collectionStep.locationCode}
                       agencyOptions={[]}
+                      facilityTypes={[]}
                       setStepData={() => { }}
                       readOnly
                     />
