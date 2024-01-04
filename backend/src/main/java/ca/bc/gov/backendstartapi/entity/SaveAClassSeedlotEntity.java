@@ -22,7 +22,7 @@ import org.hibernate.type.SqlTypes;
 
 /** Quantification of a given genetic quality in a seedlot. */
 @Entity
-@Table(name = "seedlot_registration_a_class_save")
+@Table(name = "seedlot_registration_a_class_save", schema = "spar")
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
 @Setter
