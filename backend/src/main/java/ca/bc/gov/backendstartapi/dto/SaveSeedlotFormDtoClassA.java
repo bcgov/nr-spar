@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = """
         A DTO for saving A-class registration form.
         """)
-public record SaveAClassSeedlotFormDto(
+public record SaveSeedlotFormDtoClassA(
     @Schema(
             description = "The JSON object that is used in the state on the front-end.",
             example = "any json object")

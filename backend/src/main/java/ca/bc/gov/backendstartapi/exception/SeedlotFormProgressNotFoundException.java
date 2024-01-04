@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 @ResponseStatus(value = HttpStatus.NOT_FOUND)
 public class SeedlotFormProgressNotFoundException extends ResponseStatusException {
 
+  /** Constructor. */
   public SeedlotFormProgressNotFoundException() {
     super(
         HttpStatus.NOT_FOUND,

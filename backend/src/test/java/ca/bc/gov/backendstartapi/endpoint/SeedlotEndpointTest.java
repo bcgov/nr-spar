@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.SaveAClassSeedlotFormDto;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
@@ -522,7 +522,7 @@ class SeedlotEndpointTest {
   void saveSeedlotFormProgress_notFoundSeedlot_shouldThrowException() throws Exception {
     doThrow(new SeedlotNotFoundException())
         .when(saveSeedlotFormService)
-        .saveAClassForm(any(), any());
+        .saveFormClassA(any(), any());
 
     mockMvc
         .perform(
@@ -538,7 +538,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Save seedlot form progress should Succeed")
   void saveSeedlotFormProgress_notFoundSeedlot_shouldSucceed() throws Exception {
-    doNothing().when(saveSeedlotFormService).saveAClassForm(any(), any());
+    doNothing().when(saveSeedlotFormService).saveFormClassA(any(), any());
 
     mockMvc
         .perform(
@@ -554,7 +554,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Get seedlot form progress but not found")
   void getSeedlotFormProgress_notFound_shouldThrowException() throws Exception {
-    when(saveSeedlotFormService.getAClassForm(any()))
+    when(saveSeedlotFormService.getFormClassA(any()))
         .thenThrow(new SeedlotFormProgressNotFoundException());
 
     mockMvc
@@ -569,8 +569,8 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Get seedlot form progress should succeed")
   void getSeedlotFormProgress_shouldSucceed() throws Exception {
-    when(saveSeedlotFormService.getAClassForm(any()))
-        .thenReturn(new SaveAClassSeedlotFormDto(null, null));
+    when(saveSeedlotFormService.getFormClassA(any()))
+        .thenReturn(new SaveSeedlotFormDtoClassA(null, null));
 
     mockMvc
         .perform(
@@ -584,7 +584,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Get seedlot form progress status but not found")
   void getSeedlotFormProgressStatus_notFound_shouldThrowException() throws Exception {
-    when(saveSeedlotFormService.getAClassFormStatus(any()))
+    when(saveSeedlotFormService.getFormStatusClassA(any()))
         .thenThrow(new SeedlotFormProgressNotFoundException());
 
     mockMvc
@@ -599,7 +599,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Get seedlot form progress status should succeed")
   void getSeedlotFormProgressStatus_shouldSucceed() throws Exception {
-    when(saveSeedlotFormService.getAClassFormStatus(any())).thenReturn(null);
+    when(saveSeedlotFormService.getFormStatusClassA(any())).thenReturn(null);
 
     mockMvc
         .perform(

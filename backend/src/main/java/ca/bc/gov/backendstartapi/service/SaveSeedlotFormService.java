@@ -1,12 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
-import ca.bc.gov.backendstartapi.dto.SaveAClassSeedlotFormDto;
-import ca.bc.gov.backendstartapi.entity.SaveAClassSeedlotEntity;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.JsonParsingException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
-import ca.bc.gov.backendstartapi.repository.SaveAClassSeedlotFormRepository;
+import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,28 +24,29 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings("unchecked")
 public class SaveSeedlotFormService {
 
-  private final SaveAClassSeedlotFormRepository saveAClassSeedlotFormRepository;
+  private final SaveSeedlotProgressRepositoryClassA saveSeedlotProgressRepositoryClassA;
   private final SeedlotRepository seedlotRepository;
   private final LoggedUserService loggedUserService;
 
-  public void saveAClassForm(String seedlotNumber, SaveAClassSeedlotFormDto data) {
+  /** Saves the {@link SaveSeedlotFormDtoClassA} to table. */
+  public void saveFormClassA(String seedlotNumber, SaveSeedlotFormDtoClassA data) {
 
     Seedlot relatedSeedlot =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
-    Optional<SaveAClassSeedlotEntity> optionalEntityToSave =
-        saveAClassSeedlotFormRepository.findById(seedlotNumber);
+    Optional<SaveSeedlotProgressEntityClassA> optionalEntityToSave =
+        saveSeedlotProgressRepositoryClassA.findById(seedlotNumber);
 
     Map<String, Object> parsedAllStepData =
         new Gson().fromJson(data.allStepData().toString(), Map.class);
     Map<String, Object> parsedProgressStatus =
         new Gson().fromJson(data.progressStatus().toString(), Map.class);
 
-    SaveAClassSeedlotEntity entityToSave;
+    SaveSeedlotProgressEntityClassA entityToSave;
     // If an entity exist then update the values, otherwise make a new entity.
     if (optionalEntityToSave.isEmpty()) {
       entityToSave =
-          new SaveAClassSeedlotEntity(
+          new SaveSeedlotProgressEntityClassA(
               relatedSeedlot,
               parsedAllStepData,
               parsedProgressStatus,
@@ -56,27 +57,32 @@ public class SaveSeedlotFormService {
       entityToSave.setProgressStatus(parsedProgressStatus);
     }
 
-    saveAClassSeedlotFormRepository.save(entityToSave);
+    saveSeedlotProgressRepositoryClassA.save(entityToSave);
     return;
   }
 
-  public SaveAClassSeedlotFormDto getAClassForm(String seedlotNumber) {
+  /**
+   * Retreives a {@link SaveSeedlotProgressEntityClassA} then convert it to {@link
+   * SaveSeedlotFormDtoClassA} upon return.
+   */
+  public SaveSeedlotFormDtoClassA getFormClassA(String seedlotNumber) {
     ObjectMapper mapper = new ObjectMapper();
-    return saveAClassSeedlotFormRepository
+    return saveSeedlotProgressRepositoryClassA
         .findById(seedlotNumber)
         .map(
             savedEntity ->
-                new SaveAClassSeedlotFormDto(
+                new SaveSeedlotFormDtoClassA(
                     mapper.convertValue(savedEntity.getAllStepData(), JsonNode.class),
                     mapper.convertValue(savedEntity.getProgressStatus(), JsonNode.class)))
         .orElseThrow(SeedlotFormProgressNotFoundException::new);
   }
 
-  public JsonNode getAClassFormStatus(String seedlotNumber) {
+  /** Retrieves the progress_status column then return it as a json object. */
+  public JsonNode getFormStatusClassA(String seedlotNumber) {
     ObjectMapper mapper = new ObjectMapper();
 
     Object progressStatus =
-        saveAClassSeedlotFormRepository
+        saveSeedlotProgressRepositoryClassA
             .getStatusById(seedlotNumber)
             .orElseThrow(SeedlotFormProgressNotFoundException::new);
 

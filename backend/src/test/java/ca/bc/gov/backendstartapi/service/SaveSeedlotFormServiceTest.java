@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.SaveAClassSeedlotFormDto;
-import ca.bc.gov.backendstartapi.entity.SaveAClassSeedlotEntity;
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.repository.SaveAClassSeedlotFormRepository;
+import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 @ExtendWith(SpringExtension.class)
 class SaveSeedlotFormServiceTest {
 
-  @Mock SaveAClassSeedlotFormRepository saveAClassSeedlotFormRepository;
+  @Mock SaveSeedlotProgressRepositoryClassA saveSeedlotProgressRepositoryClassA;
   @Mock SeedlotRepository seedlotRepository;
   @Mock LoggedUserService loggedUserService;
 
@@ -39,7 +39,7 @@ class SaveSeedlotFormServiceTest {
   void setup() {
     saveSeedlotFormService =
         new SaveSeedlotFormService(
-            saveAClassSeedlotFormRepository, seedlotRepository, loggedUserService);
+            saveSeedlotProgressRepositoryClassA, seedlotRepository, loggedUserService);
   }
 
   @Test
@@ -51,12 +51,12 @@ class SaveSeedlotFormServiceTest {
 
     JsonNode progressStatus = new ObjectMapper().readTree("{ \"f2\" : \"v2\" } ");
 
-    SaveAClassSeedlotFormDto saveDto = new SaveAClassSeedlotFormDto(allStepData, progressStatus);
+    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus);
 
     ResponseStatusException expectedException =
         assertThrows(
             ResponseStatusException.class,
-            () -> saveSeedlotFormService.saveAClassForm(SEEDLOT_NUMBER, saveDto));
+            () -> saveSeedlotFormService.saveFormClassA(SEEDLOT_NUMBER, saveDto));
 
     assertEquals(HttpStatus.NOT_FOUND, expectedException.getStatusCode());
   }
@@ -68,28 +68,28 @@ class SaveSeedlotFormServiceTest {
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
 
-    when(saveAClassSeedlotFormRepository.save(any()))
-        .thenReturn(new SaveAClassSeedlotEntity(testSeedlot, null, null, null));
+    when(saveSeedlotProgressRepositoryClassA.save(any()))
+        .thenReturn(new SaveSeedlotProgressEntityClassA(testSeedlot, null, null, null));
 
     JsonNode allStepData = new ObjectMapper().readTree("{ \"f1\" : \"v1\" } ");
 
     JsonNode progressStatus = new ObjectMapper().readTree("{ \"f2\" : \"v2\" } ");
 
-    SaveAClassSeedlotFormDto saveDto = new SaveAClassSeedlotFormDto(allStepData, progressStatus);
+    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus);
 
     // Testing a void function, if there is no error then it means success.
-    assertDoesNotThrow(() -> saveSeedlotFormService.saveAClassForm(SEEDLOT_NUMBER, saveDto));
+    assertDoesNotThrow(() -> saveSeedlotFormService.saveFormClassA(SEEDLOT_NUMBER, saveDto));
   }
 
   @Test
   @DisplayName("Get seedlot progress with non-existing seedlot number should fail.")
   void getSeedlotProgress_noSeedlotNumber_shouldFail() throws Exception {
-    when(saveAClassSeedlotFormRepository.findById(any())).thenReturn(Optional.empty());
+    when(saveSeedlotProgressRepositoryClassA.findById(any())).thenReturn(Optional.empty());
 
     ResponseStatusException expectedException =
         assertThrows(
             ResponseStatusException.class,
-            () -> saveSeedlotFormService.getAClassForm(SEEDLOT_NUMBER));
+            () -> saveSeedlotFormService.getFormClassA(SEEDLOT_NUMBER));
 
     assertEquals(HttpStatus.NOT_FOUND, expectedException.getStatusCode());
   }
@@ -101,10 +101,11 @@ class SaveSeedlotFormServiceTest {
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
 
-    when(saveAClassSeedlotFormRepository.findById(any()))
-        .thenReturn(Optional.of(new SaveAClassSeedlotEntity(testSeedlot, null, null, null)));
+    when(saveSeedlotProgressRepositoryClassA.findById(any()))
+        .thenReturn(
+            Optional.of(new SaveSeedlotProgressEntityClassA(testSeedlot, null, null, null)));
 
-    SaveAClassSeedlotFormDto retrievedDto = saveSeedlotFormService.getAClassForm(SEEDLOT_NUMBER);
+    SaveSeedlotFormDtoClassA retrievedDto = saveSeedlotFormService.getFormClassA(SEEDLOT_NUMBER);
 
     assertEquals("null", retrievedDto.allStepData().toString());
   }
@@ -112,12 +113,12 @@ class SaveSeedlotFormServiceTest {
   @Test
   @DisplayName("Get seedlot progress status with non-existing seedlot number should fail.")
   void getSeedlotProgressStatus_noSeedlotNumber_shouldFail() throws Exception {
-    when(saveAClassSeedlotFormRepository.findById(any())).thenReturn(Optional.empty());
+    when(saveSeedlotProgressRepositoryClassA.findById(any())).thenReturn(Optional.empty());
 
     ResponseStatusException expectedException =
         assertThrows(
             ResponseStatusException.class,
-            () -> saveSeedlotFormService.getAClassFormStatus(SEEDLOT_NUMBER));
+            () -> saveSeedlotFormService.getFormStatusClassA(SEEDLOT_NUMBER));
 
     assertEquals(HttpStatus.NOT_FOUND, expectedException.getStatusCode());
   }
@@ -131,10 +132,10 @@ class SaveSeedlotFormServiceTest {
 
     String progressStatus = "{ \"f2\" : \"v2\" } ";
 
-    when(saveAClassSeedlotFormRepository.getStatusById(any()))
+    when(saveSeedlotProgressRepositoryClassA.getStatusById(any()))
         .thenReturn(Optional.of(progressStatus));
 
-    JsonNode retrievedDto = saveSeedlotFormService.getAClassFormStatus(SEEDLOT_NUMBER);
+    JsonNode retrievedDto = saveSeedlotFormService.getFormStatusClassA(SEEDLOT_NUMBER);
 
     assertEquals("v2", retrievedDto.get("f2").asText());
   }
