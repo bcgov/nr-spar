@@ -385,7 +385,7 @@ public class SeedlotEndpoint {
    */
   @PutMapping("{seedlotNumber}/a-class-form-progress")
   @Operation(
-      summary = "Save the progress of a a-class reg form.",
+      summary = "Save the progress of an a-class reg form.",
       description =
           "This endpoint saves the progress of an A-class registration form, it is NOT to be used"
               + " for form submission.")
@@ -416,7 +416,7 @@ public class SeedlotEndpoint {
   /** Retrieves the saved Seedlot reg form. */
   @GetMapping("{seedlotNumber}/a-class-form-progress")
   @Operation(
-      summary = "Retrieve the progress and data of a a-class reg form.",
+      summary = "Retrieve the progress and data of an a-class reg form.",
       description = "This endpoint retrieves the progress of an A-class registration form")
   @ApiResponses(
       value = {
@@ -446,7 +446,7 @@ public class SeedlotEndpoint {
   /** Retreive only the progress_status column from the form progress table. */
   @GetMapping("{seedlotNumber}/a-class-form-progress/status")
   @Operation(
-      summary = "Retrieve the progress status of a a-class reg form.",
+      summary = "Retrieve the progress status of an a-class reg form.",
       description =
           "This endpoint retrieves the progress status only of an A-class registration form")
   @ApiResponses(
