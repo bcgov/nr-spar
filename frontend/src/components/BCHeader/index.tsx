@@ -61,21 +61,34 @@ const BCHeader = () => {
   };
 
   const handleClosePanel = () => {
-    if (rightPanel.notifications === true) { closeRightPanel('notifications'); } else { closeRightPanel('myProfile'); }
+    if (rightPanel.notifications) {
+      closeRightPanel('notifications');
+    } else { closeRightPanel('myProfile'); }
+  };
+
+  const onKeyDownFunction = (event:any) => {
+    if (event.keyCode === 13) {
+      handleClosePanel();
+    } else if (event.keyCode === 27) {
+      handleClosePanel();
+    }
   };
 
   const navigate = useNavigate();
 
+  interface HearderContainerProps {
+  isSideNavExpanded: boolean,
+  onClickSideNavExpand: Function
+}
+
   return (
     <HeaderContainer
-      render={({ isSideNavExpanded, onClickSideNavExpand }: any) => (
+      render={({ isSideNavExpanded, onClickSideNavExpand }: HearderContainerProps) => (
         <Header
           aria-label={componentTexts.completeTitle}
           className="spar-header"
           data-testid="header"
-          onClick={
-                isSideNavExpanded === true ? onClickSideNavExpand : null
-              }
+          onClick={isSideNavExpanded === true ? onClickSideNavExpand : null}
         >
           <SkipToContent />
           <HeaderMenuButton
@@ -142,9 +155,8 @@ const BCHeader = () => {
                   role="button"
                   tabIndex={0}
                   aria-label="close right panel"
-                  onKeyDown={handleClosePanel}
+                  onKeyDown={onKeyDownFunction}
                   onClick={handleClosePanel}
-
                 />
               )
               : null
