@@ -67,9 +67,7 @@ const BCHeader = () => {
   };
 
   const onKeyDownFunction = (event:any) => {
-    if (event.keyCode === 13) {
-      handleClosePanel();
-    } else if (event.keyCode === 27) {
+    if (event.key === 'Enter' || event.key === 'Escape') {
       handleClosePanel();
     }
   };
