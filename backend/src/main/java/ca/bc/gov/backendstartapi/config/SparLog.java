@@ -8,10 +8,9 @@ import org.slf4j.LoggerFactory;
 /** This class represents the Logging class for SPAR. */
 public class SparLog {
 
-  private static final Logger logger = LoggerFactory.getLogger(getClassName());
-
-  private static String getClassName() {
-    return Thread.currentThread().getStackTrace()[2].getClassName();
+  private static Logger getLogger() {
+    String name = Thread.currentThread().getStackTrace()[3].getClassName();
+    return LoggerFactory.getLogger(name);
   }
 
   private static String prepareMessage(String message) {
@@ -34,9 +33,10 @@ public class SparLog {
    */
   public static void info(String message, Object... args) {
     if (isThrowable(args)) {
-      logger.info(prepareMessage(message), args[0]);
+      getLogger().info(prepareMessage(message), args[0]);
+    } else {
+      getLogger().info(prepareMessage(message), args);
     }
-    logger.info(prepareMessage(message), args);
   }
 
   /**
@@ -47,9 +47,10 @@ public class SparLog {
    */
   public static void warn(String message, Object... args) {
     if (isThrowable(args)) {
-      logger.warn(prepareMessage(message), args[0]);
+      getLogger().warn(prepareMessage(message), args[0]);
+    } else {
+      getLogger().warn(prepareMessage(message), args);
     }
-    logger.warn(prepareMessage(message), args);
   }
 
   /**
@@ -60,9 +61,10 @@ public class SparLog {
    */
   public static void error(String message, Object... args) {
     if (isThrowable(args)) {
-      logger.error(prepareMessage(message), args[0]);
+      getLogger().error(prepareMessage(message), args[0]);
+    } else {
+      getLogger().error(prepareMessage(message), args);
     }
-    logger.error(prepareMessage(message), args);
   }
 
   /**
@@ -73,8 +75,9 @@ public class SparLog {
    */
   public static void debug(String message, Object... args) {
     if (isThrowable(args)) {
-      logger.debug(prepareMessage(message), args[0]);
+      getLogger().debug(prepareMessage(message), args[0]);
+    } else {
+      getLogger().debug(prepareMessage(message), args);
     }
-    logger.debug(prepareMessage(message), args);
   }
 }
