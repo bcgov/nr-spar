@@ -86,10 +86,6 @@ public class FavouriteActivityService {
     String userId = loggedUserService.getLoggedUserId();
 
     log.info("Updating activity {} to user {}", id, userId);
-    Optional<FavouriteActivityEntity> activityEntity = favouriteActivityRepository.findById(id);
-    if (activityEntity.isEmpty()) {
-      throw new InvalidActivityException();
-    }
 
     // If the received activity is hilighted, update all other activities
     // for this user with not highlighted, keeping only one activity
@@ -98,10 +94,10 @@ public class FavouriteActivityService {
       favouriteActivityRepository.removeAllHighlightedByUser(userId);
     }
 
-    FavouriteActivityEntity entity =
-        activityEntity
-            .get()
-            .withHighlighted(updateDto.highlighted());
+    FavouriteActivityEntity activityEntity =
+        favouriteActivityRepository.findById(id).orElseThrow(InvalidActivityException::new);
+
+    FavouriteActivityEntity entity = activityEntity.withHighlighted(updateDto.highlighted());
 
     return favouriteActivityRepository.save(entity);
   }
