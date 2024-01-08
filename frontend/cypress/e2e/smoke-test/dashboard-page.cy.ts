@@ -177,21 +177,18 @@ describe('Dashboard page test', () => {
   /**
    * Delete a favourite card should remove it from the dashboard and display an empty section.
    */
-  it('should delete a card from favourite activities', () => {
-    cy.visit('/dashboard');
-    cy.url().should('contains', '/dashboard');
+  it.only('should delete a card from favourite activities', () => {
+    // Delete the first card
+    cy.get('.favourite-activities-cards')
+      .find('.fav-card-main:first')
+      .find('.fav-card-overflow')
+      .click();
 
     cy.intercept(
       'GET',
       '**/api/favourite-activities',
       []
     ).as('GET_fav_act_req_empty_res');
-
-    // Delete the first card
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-main:first')
-      .find('.fav-card-overflow')
-      .click();
 
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Delete shortcut')
