@@ -56,8 +56,8 @@ export const fieldsConfig = {
     name: 'volumeOfCones',
     labelText: 'Volume of Cones (HI)',
     invalidText: 'Number has more than 3 decimals',
-    helperText: 'This value should be the "Volume per container" X "Number of containers".',
-    warnText: 'The total volume of cones does not equal, please note that this value should be the "Volume per container" x "Number of containers"'
+    helperText: 'This value must be the "Volume per container" X "Number of containers".',
+    warnText: 'The total volume of cones does not equal, please note that this value must be the "Volume per container" x "Number of containers"'
   },
   collectionMethodOptionsLabel: 'Collection methods (Select at least one method used to collect the cones)',
   collectionMethod: {
