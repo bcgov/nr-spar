@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
@@ -12,13 +13,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods to handle Orchards requests. */
 @Service
-@Slf4j
 public class OrchardService {
 
   private ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;
@@ -72,7 +71,7 @@ public class OrchardService {
    * @return An {@link Optional} of {@link OrchardSpuDto}
    */
   public OrchardSpuDto findParentTreeGeneticQualityData(String orchardId) {
-    log.info("Fetching Parent Tree data for Orchard ID: {}", orchardId);
+    SparLog.info("Fetching Parent Tree data for Orchard ID: {}", orchardId);
 
     List<ActiveOrchardSpuEntity> spuList = findSpuIdByOrchard(orchardId);
     if (spuList.isEmpty()) {
@@ -80,12 +79,12 @@ public class OrchardService {
     }
 
     int spuId = spuList.get(0).getSeedPlanningUnitId();
-    log.info("Found SPU Id {} for Orchard Id {}", spuId, orchardId);
+    SparLog.info("Found SPU Id {} for Orchard Id {}", spuId, orchardId);
 
     Optional<OrchardSpuDto> parentTreeDto =
         oracleApiProvider.findOrchardParentTreeGeneticQualityData(orchardId, spuId);
 
-    log.info("Finished fetching Parent Tree data for Orchard ID: {}", orchardId);
+    SparLog.info("Finished fetching Parent Tree data for Orchard ID: {}", orchardId);
 
     return parentTreeDto.orElseThrow(NoParentTreeDataException::new);
   }
