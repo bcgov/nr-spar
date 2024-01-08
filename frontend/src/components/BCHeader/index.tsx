@@ -66,7 +66,7 @@ const BCHeader = () => {
     } else { closeRightPanel('myProfile'); }
   };
 
-  const onKeyDownFunction = (event:any) => {
+  const onKeyDownFunction = (event: any) => {
     if (event.key === 'Enter' || event.key === 'Escape') {
       handleClosePanel();
     }
@@ -81,7 +81,7 @@ const BCHeader = () => {
           aria-label={componentTexts.completeTitle}
           className="spar-header"
           data-testid="header"
-          onClick={isSideNavExpanded === true ? onClickSideNavExpand : null}
+          onClick={isSideNavExpanded ? onClickSideNavExpand : null}
         >
           <SkipToContent />
           <HeaderMenuButton
@@ -160,9 +160,7 @@ const BCHeader = () => {
             aria-label={componentTexts.sideMenuAriaLabel}
             inert={undefined}
             className="spar-side-nav"
-            onClick={
-                isSideNavExpanded === true ? onClickSideNavExpand : null
-              }
+            onClick={isSideNavExpanded ? onClickSideNavExpand : null}
           >
             <div className="side-nav-top">
               {
