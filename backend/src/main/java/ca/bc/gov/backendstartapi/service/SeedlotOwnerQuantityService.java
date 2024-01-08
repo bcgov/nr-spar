@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -15,11 +16,9 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class holds methods for handling the {@link SeedlotOwnerQuantity} entity. */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeedlotOwnerQuantityService {
@@ -39,9 +38,9 @@ public class SeedlotOwnerQuantityService {
    */
   public List<SeedlotOwnerQuantity> saveSeedlotFormStep2(
       Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List) {
-    log.info("Saving Seedlot Form Step 2-Ownership for seedlot number {}", seedlot.getId());
+    SparLog.info("Saving Seedlot Form Step 2-Ownership for seedlot number {}", seedlot.getId());
 
-    log.info(
+    SparLog.info(
         "Received {} SeedlotOwerQuantity record(s) for seedlot number {}",
         formStep2List.size(),
         seedlot.getId());
@@ -50,14 +49,13 @@ public class SeedlotOwnerQuantityService {
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!soqList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "Deleting {} previous records on the SeedlotOwerQuantity table for seedlot number {}",
           soqList.size(),
           seedlot.getId());
 
       List<SeedlotOwnerQuantityId> idsToDelete =
           soqList.stream().map(x -> x.getId()).collect(Collectors.toList());
-
 
       seedlotOwnerQuantityRepository.deleteAllById(idsToDelete);
     }
@@ -68,13 +66,13 @@ public class SeedlotOwnerQuantityService {
   private List<SeedlotOwnerQuantity> addSeedlotOwnerQuantityFromForm(
       Seedlot seedlot, List<SeedlotFormOwnershipDto> sfodList) {
     if (sfodList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "No new records to be inserted on the SeedlotOwnerQuantity table for seedlot number {}",
           seedlot.getId());
       return List.of();
     }
 
-    log.info(
+    SparLog.info(
         "{} record(s) to be inserted on the SeedlotOwnerQuantity table for seedlot number {}",
         sfodList.size(),
         seedlot.getId());

@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
@@ -18,11 +19,9 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class holds methods for handling the {@link SeedlotParentTreeGeneticQuality} entity. */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeedlotParentTreeGeneticQualityService {
@@ -43,7 +42,7 @@ public class SeedlotParentTreeGeneticQualityService {
    */
   public void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
-    log.info("Saving SeedlotParentTreeGeneticQuality for seedlot number {}", seedlot.getId());
+    SparLog.info("Saving SeedlotParentTreeGeneticQuality for seedlot number {}", seedlot.getId());
 
     addSeedlotParentTreeGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
@@ -51,14 +50,14 @@ public class SeedlotParentTreeGeneticQualityService {
   private void addSeedlotParentTreeGenQlty(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert) {
     if (seedlotPtGenQltyToInsert.isEmpty()) {
-      log.info(
+      SparLog.info(
           "No new records to be inserted on the SeedlotParentTreeGeneticQuality table for seedlot"
               + " number {}",
           seedlot.getId());
       return;
     }
 
-    log.info(
+    SparLog.info(
         "{} record(s) to be inserted on the SeedlotParentTreeGeneticQuality table for seedlot"
             + " number {}",
         seedlotPtGenQltyToInsert.size(),

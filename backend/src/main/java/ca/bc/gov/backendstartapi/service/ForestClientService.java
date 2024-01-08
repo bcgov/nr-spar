@@ -1,18 +1,17 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import java.util.List;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 /** Service to deal with {@link ForestClientDto ForestClients}. */
 @Service
-@Slf4j
 public class ForestClientService {
 
   @Qualifier("forestClientApi")
@@ -29,10 +28,11 @@ public class ForestClientService {
    * @return the ForestClient with client number or acronym {@code identifier}, if one exists
    */
   public Optional<ForestClientDto> fetchClient(String identifier) {
+    SparLog.info("Fetching a Forest Client by its number {}", identifier);
     try {
       return forestClientApiProvider.fetchClientByIdentifier(identifier);
     } catch (HttpClientErrorException.NotFound e) {
-      log.info(String.format("Client %s not found", identifier), e);
+      SparLog.info(String.format("Client %s not found", identifier), e);
       return Optional.empty();
     }
   }
@@ -44,6 +44,7 @@ public class ForestClientService {
    * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
   public List<ForestClientLocationDto> fetchClientLocations(String clientNumber) {
+    SparLog.info("Fetching up to 10 first Forest Clients by its number {}", clientNumber);
     return forestClientApiProvider.fetchLocationsByClientNumber(clientNumber);
   }
 
@@ -55,8 +56,11 @@ public class ForestClientService {
    * @return {@link ForestClientLocationDto} containing the client's location data
    */
   public ForestClientLocationDto fetchSingleClientLocation(
-      String clientNumber,
-      String locationCode) {
+      String clientNumber, String locationCode) {
+    SparLog.info(
+        "Fetching a single ForestClient location for clientNumber {} and locationCode {}",
+        clientNumber,
+        locationCode);
     return forestClientApiProvider.fetchSingleClientLocation(clientNumber, locationCode);
   }
 }

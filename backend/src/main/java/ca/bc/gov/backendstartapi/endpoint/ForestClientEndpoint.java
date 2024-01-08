@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -27,7 +27,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 @RestController
 @RequestMapping(path = "/api/forest-clients", produces = MediaType.APPLICATION_JSON_VALUE)
 @Validated
-@Slf4j
 @Tag(name = "ForestClient", description = "The many agencies that work with the ministry.")
 public class ForestClientEndpoint {
 
@@ -68,7 +67,7 @@ public class ForestClientEndpoint {
       var response = forestClientService.fetchClient(identifier).map(Serializable.class::cast);
       return ResponseEntity.of(response);
     } catch (HttpStatusCodeException e) {
-      log.warn("External error while retrieving ForestClient " + identifier, e);
+      SparLog.warn("External error while retrieving ForestClient " + identifier, e);
       return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
     }
   }
@@ -87,8 +86,7 @@ public class ForestClientEndpoint {
               Returns a list up to the 10 first locations associated with the ForestClient,
               identified by it's number.""",
       responses = {
-        @ApiResponse(
-            responseCode = "200"),
+        @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   public List<ForestClientLocationDto> fetchClientLocations(
@@ -118,8 +116,7 @@ public class ForestClientEndpoint {
               Returns a single location associated with the ForestClient, identified
               by it's number and location code""",
       responses = {
-        @ApiResponse(
-            responseCode = "200"),
+        @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   public ForestClientLocationDto fetchSingleClientLocation(
@@ -134,8 +131,7 @@ public class ForestClientEndpoint {
           @Parameter(
               name = "locationCode",
               in = ParameterIn.PATH,
-              description = "Number that identify the location."
-          )
+              description = "Number that identify the location.")
           String locationCode) {
     return forestClientService.fetchSingleClientLocation(clientNumber, locationCode);
   }

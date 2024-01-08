@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
@@ -12,11 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class contains all routines and database access to a list of genetic worth. */
-@Slf4j
 @Service
 public class GeneticWorthService {
   private GeneticWorthRepository geneticWorthRepository;
@@ -27,7 +26,7 @@ public class GeneticWorthService {
 
   /** Fetch all valid genetic worth from the repository. */
   public List<CodeDescriptionDto> getAllGeneticWorth() {
-    log.info("Fetching all genetic worth");
+    SparLog.info("Fetching all genetic worth");
     List<CodeDescriptionDto> resultList = new ArrayList<>();
 
     geneticWorthRepository.findAll().stream()
@@ -44,7 +43,7 @@ public class GeneticWorthService {
 
   /** Fetch a genetic worth from the repository by code. */
   public CodeDescriptionDto getGeneticWorthByCode(String code) {
-    log.info("Fetching genetic worth with code %s", code);
+    SparLog.info("Fetching genetic worth with code %s", code);
 
     return geneticWorthRepository
         .findById(code)
@@ -66,8 +65,7 @@ public class GeneticWorthService {
     BigDecimal minimumTreshold = new BigDecimal("0.7");
     BigDecimal neValue = calculateNe(traitsDto);
 
-    GeneticWorthSummaryDto summaryDto =
-        new GeneticWorthSummaryDto(new ArrayList<>(), neValue);
+    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(new ArrayList<>(), neValue);
 
     // Iterate over all traits
     List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();
@@ -77,7 +75,7 @@ public class GeneticWorthService {
       BigDecimal percentage = checkGeneticTraitTreshold(traitsDto, trait);
 
       if (percentage.compareTo(minimumTreshold) >= 0) {
-        log.info("Calculating Genetic Worth for {} trait", trait.code());
+        SparLog.info("Calculating Genetic Worth for {} trait", trait.code());
         calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);
       }
 
@@ -106,16 +104,16 @@ public class GeneticWorthService {
       BigDecimal piSquare = pi.multiply(pi);
 
       piSquareSum = piSquareSum.add(piSquare);
-      log.debug("calculateNe - piSquareSum {}", piSquareSum);
+      SparLog.debug("calculateNe - piSquareSum {}", piSquareSum);
     }
 
     if (piSquareSum.compareTo(BigDecimal.ZERO) == 0) {
-      log.debug("calculateNe - piSquareSum is zero!");
+      SparLog.debug("calculateNe - piSquareSum is zero!");
       return BigDecimal.ZERO;
     }
 
     BigDecimal neValue = BigDecimal.ONE.divide(piSquareSum, 10, RoundingMode.HALF_UP);
-    log.debug("calculateNe - neValue {}", neValue);
+    SparLog.debug("calculateNe - neValue {}", neValue);
     return neValue;
   }
 
@@ -156,14 +154,14 @@ public class GeneticWorthService {
    */
   private BigDecimal checkGeneticTraitTreshold(
       List<GeneticWorthTraitsRequestDto> traitsDto, CodeDescriptionDto trait) {
-    log.debug("Checking genetic trait treshold for {} trait", trait);
+    SparLog.debug("Checking genetic trait treshold for {} trait", trait);
 
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
     BigDecimal femaleConeSum = reduceConeCount(traitsDto);
     BigDecimal sumPi = BigDecimal.ZERO;
 
-    log.debug("femaleConeSum {}", femaleConeSum);
-    log.debug("malePollenSum {}", malePollenSum);
+    SparLog.debug("femaleConeSum {}", femaleConeSum);
+    SparLog.debug("malePollenSum {}", malePollenSum);
 
     for (GeneticWorthTraitsRequestDto traitFor : traitsDto) {
       BigDecimal traitBreedingValue = getTraitValue(traitFor, trait);
@@ -174,7 +172,7 @@ public class GeneticWorthService {
       }
     }
 
-    log.debug("Finished checking Genetic Trait treshold for {} trait with: {}%", trait, sumPi);
+    SparLog.debug("Finished checking Genetic Trait treshold for {} trait with: {}%", trait, sumPi);
 
     return sumPi;
   }

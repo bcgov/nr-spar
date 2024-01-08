@@ -1,16 +1,15 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.MethodOfPaymentDto;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
 import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class contains all routines and database access to a list of method of payment. */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MethodOfPaymentService {
@@ -19,7 +18,7 @@ public class MethodOfPaymentService {
 
   /** Fetch all valid method of payment from the repository. */
   public List<MethodOfPaymentDto> getAllMethodOfPayment() {
-    log.info("Fetching all method of payment for MethodOfPaymentDto");
+    SparLog.info("Fetching all method of payment for MethodOfPaymentDto");
     List<MethodOfPaymentDto> resultList = new ArrayList<>();
     getAllValidMethodOfPayments()
         .forEach(
@@ -41,7 +40,7 @@ public class MethodOfPaymentService {
    * @return A List of {@link MethodOfPaymentEntity}
    */
   public List<MethodOfPaymentEntity> getAllValidMethodOfPayments() {
-    log.info("Fetching all method of payment for MethodOfPaymentEntity");
+    SparLog.info("Fetching all method of payment for MethodOfPaymentEntity");
     return methodOfPaymentRepository.findAll().stream().filter(x -> x.isValid()).toList();
   }
 }

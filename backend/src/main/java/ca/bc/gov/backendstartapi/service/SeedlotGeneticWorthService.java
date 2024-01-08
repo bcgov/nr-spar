@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
@@ -12,11 +13,9 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class holds methods for handling the {@link SeedlotGeneticWorth} entity. */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeedlotGeneticWorthService {
@@ -35,7 +34,7 @@ public class SeedlotGeneticWorthService {
    */
   public List<SeedlotGeneticWorth> saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
-    log.info("Saving SeedlotGeneticWorth for seedlot number {}", seedlot.getId());
+    SparLog.info("Saving SeedlotGeneticWorth for seedlot number {}", seedlot.getId());
 
     List<SeedlotGeneticWorth> sgwList =
         seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlot.getId());
@@ -43,7 +42,7 @@ public class SeedlotGeneticWorthService {
     List<ParentTreeGeneticQualityDto> sgwInsertList = new ArrayList<>();
 
     if (!sgwList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "Deleting {} previous records on the SeedlotGeneticWorth table for seedlot number {}",
           sgwList.size(),
           seedlot.getId());
@@ -69,13 +68,13 @@ public class SeedlotGeneticWorthService {
   private List<SeedlotGeneticWorth> addSeedlotGeneticWorth(
       Seedlot seedlot, List<ParentTreeGeneticQualityDto> genWorthCodeToInsert) {
     if (genWorthCodeToInsert.isEmpty()) {
-      log.info(
+      SparLog.info(
           "No new records to be inserted on the SeedlotGeneticWorth table for seedlot number {}",
           seedlot.getId());
       return List.of();
     }
 
-    log.info(
+    SparLog.info(
         "{} record(s) to be inserted on the SeedlotGeneticWorth table for seedlot number {}",
         genWorthCodeToInsert.size(),
         seedlot.getId());

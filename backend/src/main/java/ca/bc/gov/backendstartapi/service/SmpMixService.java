@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -8,11 +9,9 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class holds methods for handling the {@link SmpMix} entity. */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SmpMixService {
@@ -29,20 +28,20 @@ public class SmpMixService {
    */
   public List<SmpMix> saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
-    log.info("Saving SmpMix for seedlot number {}", seedlot.getId());
+    SparLog.info("Saving SmpMix for seedlot number {}", seedlot.getId());
 
     return addSmpMix(seedlot, seedlotFormParentTreeDtoList);
   }
 
   private List<SmpMix> addSmpMix(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> formDtos) {
     if (formDtos.isEmpty()) {
-      log.info(
+      SparLog.info(
           "No new records to be inserted on the SmpMix table for seedlot number {}",
           seedlot.getId());
       return List.of();
     }
 
-    log.info(
+    SparLog.info(
         "{} record(s) to be inserted on the SmpMix table for seedlot number {}",
         formDtos.size(),
         seedlot.getId());

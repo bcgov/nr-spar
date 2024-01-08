@@ -1,17 +1,16 @@
 package ca.bc.gov.backendstartapi.security;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 /** This class contains helper methods to retrieved authenticated user. */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserAuthenticationHelper {
@@ -89,7 +88,7 @@ public class UserAuthenticationHelper {
       }
     }
 
-    log.info("User not authenticated!");
+    SparLog.info("User not authenticated!");
     return Optional.empty();
   }
 }

@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +39,6 @@ import org.springframework.stereotype.Service;
 /** This class contains methods for handling Seedlots in the database. */
 @RequiredArgsConstructor
 @Service
-@Slf4j
 public class SeedlotService {
 
   private final SeedlotRepository seedlotRepository;
@@ -81,7 +80,7 @@ public class SeedlotService {
    */
   @Transactional
   public SeedlotCreateResponseDto createSeedlot(SeedlotCreateDto createDto) {
-    log.info("Create Seedlot started.");
+    SparLog.info("Create Seedlot started.");
 
     Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
 
@@ -106,11 +105,11 @@ public class SeedlotService {
     seedlot.setSourceInBc(createDto.bcSourceInd());
     seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
 
-    log.debug("Seedlot to insert: {}", seedlot);
+    SparLog.debug("Seedlot to insert: {}", seedlot);
 
     seedlotRepository.save(seedlot);
 
-    log.info("New seedlot saved with success!");
+    SparLog.info("New seedlot saved with success!");
 
     return new SeedlotCreateResponseDto(
         seedlot.getId(), seedlot.getSeedlotStatus().getSeedlotStatusCode());
@@ -123,10 +122,10 @@ public class SeedlotService {
    * @throws InvalidSeedlotRequestException in case of errors.
    */
   private String nextSeedlotNumber(Character seedlotClassCode) {
-    log.info("Retrieving the next class {} Seedlot number", seedlotClassCode);
+    SparLog.info("Retrieving the next class {} Seedlot number", seedlotClassCode);
 
     if (seedlotClassCode.equals('B')) {
-      log.error("Class B Seedlots not implemented yet!");
+      SparLog.error("Class B Seedlots not implemented yet!");
       throw new InvalidSeedlotRequestException();
     }
 
@@ -140,7 +139,7 @@ public class SeedlotService {
 
     seedlotNumber += 1;
 
-    log.debug("Next class {} seedlot number: {}", seedlotNumber);
+    SparLog.debug("Next class {} seedlot number: {}", seedlotNumber);
     return String.valueOf(seedlotNumber);
   }
 
@@ -172,14 +171,14 @@ public class SeedlotService {
    * @throws SeedlotNotFoundException in case of errors.
    */
   public Seedlot getSingleSeedlotInfo(String seedlotNumber) {
-    log.info("Retrieving information for Seedlot number {}", seedlotNumber);
+    SparLog.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
     Seedlot seedlotInfo =
         seedlotRepository
             .findById(seedlotNumber)
             .orElseThrow(
                 () -> {
-                  log.error("Nothing found for seedlot number: {}", seedlotNumber);
+                  SparLog.error("Nothing found for seedlot number: {}", seedlotNumber);
                   return new SeedlotNotFoundException();
                 });
 
@@ -195,14 +194,14 @@ public class SeedlotService {
    * @throws SeedlotSourceNotFoundException in case of seedlot source not found error.
    */
   public Seedlot patchApplicantionInfo(String seedlotNumber, SeedlotApplicationPatchDto patchDto) {
-    log.info("Patching seedlot entry for seedlot number {}", seedlotNumber);
+    SparLog.info("Patching seedlot entry for seedlot number {}", seedlotNumber);
 
     Seedlot seedlotInfo =
         seedlotRepository
             .findById(seedlotNumber)
             .orElseThrow(
                 () -> {
-                  log.error("Nothing found for seedlot number: {}", seedlotNumber);
+                  SparLog.error("Nothing found for seedlot number: {}", seedlotNumber);
                   return new SeedlotNotFoundException();
                 });
 
@@ -213,7 +212,7 @@ public class SeedlotService {
             .findById(patchDto.seedlotSourceCode())
             .orElseThrow(
                 () -> {
-                  log.error(
+                  SparLog.error(
                       "Seedlot source not found while patching in patchApplicantionInfo for seedlot"
                           + " number: {}",
                       seedlotNumber);
@@ -240,7 +239,7 @@ public class SeedlotService {
   @Transactional
   public SeedlotCreateResponseDto submitSeedlotForm(
       String seedlotNumber, SeedlotFormSubmissionDto form) {
-    log.info("Seedlot number {} submitted for saving!", seedlotNumber);
+    SparLog.info("Seedlot number {} submitted for saving!", seedlotNumber);
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
 
@@ -268,7 +267,7 @@ public class SeedlotService {
     String submittedStatus = "SUB";
     setSeedlotStatus(seedlot, submittedStatus);
 
-    log.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
+    SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
 
     return new SeedlotCreateResponseDto(
@@ -285,7 +284,8 @@ public class SeedlotService {
   }
 
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
-    log.info("Saving Seedlot Form Step 3-Interim Storage for seedlot number {}", seedlot.getId());
+    SparLog.info(
+        "Saving Seedlot Form Step 3-Interim Storage for seedlot number {}", seedlot.getId());
 
     seedlot.setInterimStorageClientNumber(formStep3.intermStrgClientNumber());
     seedlot.setInterimStorageLocationCode(formStep3.intermStrgLocnCode());
@@ -293,10 +293,10 @@ public class SeedlotService {
     seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
     seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
     // If the facility type is Other, then a description is required.
-    log.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
-    log.info("FACILITY TYPE Desc", formStep3.intermOtherFacilityDesc());
+    SparLog.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
+    SparLog.info("FACILITY TYPE Desc", formStep3.intermOtherFacilityDesc());
     if (formStep3.intermFacilityCode().equals("OTH")) {
-      log.info("equal to OTH");
+      SparLog.info("equal to OTH");
       if (formStep3.intermOtherFacilityDesc() == null
           || formStep3.intermOtherFacilityDesc().isEmpty()) {
         throw new SeedlotFormValidationException(
@@ -309,7 +309,7 @@ public class SeedlotService {
 
   private void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
-    log.info(
+    SparLog.info(
         "Saving Seedlot Form Step 5-Parent Tree SMP Mix for seedlot number {}", seedlot.getId());
 
     seedlotParentTreeService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
@@ -323,7 +323,7 @@ public class SeedlotService {
   }
 
   private void saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
-    log.info(
+    SparLog.info(
         "Saving Seedlot Form Step 6-Extraction Storage for seedlot number {}", seedlot.getId());
 
     seedlot.setExtractionClientNumber(formStep6.extractoryClientNumber());

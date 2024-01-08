@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.FavouriteActivityCreateDto;
 import ca.bc.gov.backendstartapi.dto.FavouriteActivityUpdateDto;
 import ca.bc.gov.backendstartapi.entity.FavouriteActivityEntity;
@@ -11,11 +12,9 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class contains all routines and database access to a users' favorite activity. */
-@Slf4j
 @Service
 public class FavouriteActivityService {
 
@@ -44,7 +43,7 @@ public class FavouriteActivityService {
    */
   public FavouriteActivityEntity createUserActivity(FavouriteActivityCreateDto activityDto) {
     String userId = loggedUserService.getLoggedUserId();
-    log.info("Creating activity {} to user {}", activityDto.activity(), userId);
+    SparLog.info("Creating activity {} to user {}", activityDto.activity(), userId);
 
     if (Objects.isNull(activityDto.activity()) || activityDto.activity().isBlank()) {
       throw new InvalidActivityException();
@@ -52,7 +51,7 @@ public class FavouriteActivityService {
 
     List<FavouriteActivityEntity> userFavList = favouriteActivityRepository.findAllByUserId(userId);
     if (userFavList.stream().anyMatch(ac -> ac.getActivity().equals(activityDto.activity()))) {
-      log.info("Activity {} already exists to user {}!", activityDto.activity(), userId);
+      SparLog.info("Activity {} already exists to user {}!", activityDto.activity(), userId);
       throw new FavoriteActivityExistsToUser();
     }
 
@@ -69,7 +68,7 @@ public class FavouriteActivityService {
    */
   public List<FavouriteActivityEntity> getAllUserFavoriteActivities() {
     String userId = loggedUserService.getLoggedUserId();
-    log.info("Retrieving all favorite activities to user {}", userId);
+    SparLog.info("Retrieving all favorite activities to user {}", userId);
     return favouriteActivityRepository.findAllByUserId(userId);
   }
 
@@ -85,7 +84,7 @@ public class FavouriteActivityService {
   public FavouriteActivityEntity updateUserActivity(Long id, FavouriteActivityUpdateDto updateDto) {
     String userId = loggedUserService.getLoggedUserId();
 
-    log.info("Updating activity {} to user {}", id, userId);
+    SparLog.info("Updating activity {} to user {}", id, userId);
     Optional<FavouriteActivityEntity> activityEntity = favouriteActivityRepository.findById(id);
     if (activityEntity.isEmpty()) {
       throw new InvalidActivityException();
@@ -98,10 +97,7 @@ public class FavouriteActivityService {
       favouriteActivityRepository.removeAllHighlightedByUser(userId);
     }
 
-    FavouriteActivityEntity entity =
-        activityEntity
-            .get()
-            .withHighlighted(updateDto.highlighted());
+    FavouriteActivityEntity entity = activityEntity.get().withHighlighted(updateDto.highlighted());
 
     return favouriteActivityRepository.save(entity);
   }
@@ -114,7 +110,7 @@ public class FavouriteActivityService {
   public void deleteUserActivity(Long id) {
     String userId = loggedUserService.getLoggedUserId();
 
-    log.info("Deleting activity {} to user {}", id, userId);
+    SparLog.info("Deleting activity {} to user {}", id, userId);
     Optional<FavouriteActivityEntity> activityEntity = favouriteActivityRepository.findById(id);
     if (activityEntity.isEmpty()) {
       throw new InvalidActivityException();

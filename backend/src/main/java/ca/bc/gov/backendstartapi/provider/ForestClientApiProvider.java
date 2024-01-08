@@ -1,13 +1,13 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -22,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 /** Makes HTTP requests to the Forest Client API server. */
-@Slf4j
 @Component
 @Qualifier("forestClientApi")
 public class ForestClientApiProvider implements Provider {
@@ -61,7 +60,7 @@ public class ForestClientApiProvider implements Provider {
 
   private Optional<ForestClientDto> fetchClientByNumber(String number) {
     String apiUrl = String.format("%s/clients/findByClientNumber/{number}", rootUri);
-    log.info("Starting {} request to {}", PROVIDER, apiUrl);
+    SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
       ResponseEntity<ForestClientDto> response =
@@ -72,10 +71,12 @@ public class ForestClientApiProvider implements Provider {
               ForestClientDto.class,
               createParamsMap("number", number));
 
-      log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByNumber");
+      SparLog.info(
+          "Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByNumber");
       return Optional.of(response.getBody());
     } catch (HttpClientErrorException httpExc) {
-      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      SparLog.error(
+          "Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return Optional.empty();
@@ -83,7 +84,7 @@ public class ForestClientApiProvider implements Provider {
 
   private Optional<ForestClientDto> fetchClientByAcronym(String acronym) {
     String apiUrl = String.format("%s/clients/findByAcronym?acronym={acronym}", rootUri);
-    log.info("Starting {} request to {}", PROVIDER, apiUrl);
+    SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
       ResponseEntity<List<ForestClientDto>> response =
@@ -95,19 +96,21 @@ public class ForestClientApiProvider implements Provider {
               createParamsMap("acronym", acronym));
 
       List<ForestClientDto> dtoList = response.getBody();
-      
+
       if (dtoList == null) {
         return Optional.empty();
       }
 
       if (dtoList.size() > 1) {
-        log.warn("More than one client found for acronym {}", acronym);
+        SparLog.warn("More than one client found for acronym {}", acronym);
       }
 
-      log.info("Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByAcronym");
+      SparLog.info(
+          "Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByAcronym");
       return dtoList.stream().findFirst();
     } catch (HttpClientErrorException httpExc) {
-      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      SparLog.error(
+          "Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return Optional.empty();
@@ -122,7 +125,7 @@ public class ForestClientApiProvider implements Provider {
   @Override
   public List<ForestClientLocationDto> fetchLocationsByClientNumber(String clientNumber) {
     String apiUrl = String.format("%s/clients/{clientNumber}/locations", rootUri);
-    log.info("Starting {} request to {}", PROVIDER, apiUrl);
+    SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
       ResponseEntity<List<ForestClientLocationDto>> response =
@@ -133,13 +136,14 @@ public class ForestClientApiProvider implements Provider {
               new ParameterizedTypeReference<List<ForestClientLocationDto>>() {},
               createParamsMap("clientNumber", clientNumber));
 
-      log.info(
+      SparLog.info(
           "Finished {} request for function {} - 200 OK!",
           PROVIDER,
           "fetchLocationsByClientNumber");
       return response.getBody();
     } catch (HttpClientErrorException httpExc) {
-      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      SparLog.error(
+          "Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return List.of();
@@ -154,10 +158,9 @@ public class ForestClientApiProvider implements Provider {
    */
   @Override
   public ForestClientLocationDto fetchSingleClientLocation(
-      String clientNumber,
-      String locationCode) {
+      String clientNumber, String locationCode) {
     String apiUrl = String.format("%s/clients/{clientNumber}/locations/{locationCode}", rootUri);
-    log.info("Starting {} request to {}", PROVIDER, apiUrl);
+    SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
       ResponseEntity<ForestClientLocationDto> response =
@@ -168,13 +171,12 @@ public class ForestClientApiProvider implements Provider {
               new ParameterizedTypeReference<ForestClientLocationDto>() {},
               createParamsMap("clientNumber", clientNumber, "locationCode", locationCode));
 
-      log.info(
-          "Finished {} request for function {} - 200 OK!",
-          PROVIDER,
-          "fetchSingleClientLocation");
+      SparLog.info(
+          "Finished {} request for function {} - 200 OK!", PROVIDER, "fetchSingleClientLocation");
       return response.getBody();
     } catch (HttpClientErrorException httpExc) {
-      log.error("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      SparLog.error(
+          "Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
       throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage(), httpExc);
     }
   }

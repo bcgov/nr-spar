@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
@@ -17,11 +18,9 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class holds methods for handling the {@link SmpMixGeneticQuality} entity. */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SmpMixGeneticQualityService {
@@ -42,7 +41,7 @@ public class SmpMixGeneticQualityService {
    */
   public void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
-    log.info("Saving SmpMixGeneticQuality for seedlot number {}", seedlot.getId());
+    SparLog.info("Saving SmpMixGeneticQuality for seedlot number {}", seedlot.getId());
 
     addSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
@@ -51,13 +50,13 @@ public class SmpMixGeneticQualityService {
   private void addSmpMixGenQlty(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     if (seedlotFormParentTreeDtoList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "No new records to be inserted on the SmpMixGeneticQuality table for seedlot number {}",
           seedlot.getId());
       return;
     }
 
-    log.info(
+    SparLog.info(
         "{} record(s) to be inserted on the SmpMixGeneticQuality table for seedlot number {}",
         seedlotFormParentTreeDtoList.size(),
         seedlot.getId());

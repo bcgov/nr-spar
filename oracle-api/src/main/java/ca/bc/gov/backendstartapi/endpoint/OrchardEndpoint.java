@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
@@ -17,7 +18,6 @@ import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +35,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(
     name = "orchard",
     description = "A location where class A seed or class A cuttings are produced.")
-@Slf4j
 public class OrchardEndpoint {
 
   private OrchardService orchardService;
@@ -147,7 +146,7 @@ public class OrchardEndpoint {
   public List<OrchardLotTypeDescriptionDto> getOrchardsByVegCode(
       @PathVariable("vegCode") @Parameter(description = "The vegetation code of an orchard.")
           String vegCode) {
-    log.info("Received GET request for orchards with vegCode: " + vegCode);
+    SparLog.info("Received GET request for orchards with vegCode: " + vegCode);
     return orchardService
         .findNotRetOrchardsByVegCode(vegCode)
         .orElseThrow(
@@ -181,7 +180,7 @@ public class OrchardEndpoint {
     try {
       return ResponseEntity.ok(orchardService.findParentTreesWithVegCode(vegCode, orchardSpuMap));
     } catch (Exception e) {
-      log.error("Orchard endpoint error from findParentTreesWithVegCode: {}", e.getMessage());
+      SparLog.error("Orchard endpoint error from findParentTreesWithVegCode: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
