@@ -107,6 +107,12 @@ describe('Dashboard page test', () => {
     cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');
 
+    // Highlight Seedlots Dashboard Card
+    cy.get('.favourite-activities-cards')
+      .find('.fav-card-main:first')
+      .find('.fav-card-overflow')
+      .click();
+
     cy.intercept(
       'GET',
       '**/api/favourite-activities',
@@ -126,11 +132,6 @@ describe('Dashboard page test', () => {
       ]
     ).as('GET_fav_act_req_after_highlight');
 
-    // Highlight Seedlots Dashboard Card
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-main:first')
-      .find('.fav-card-overflow')
-      .click();
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Highlight shortcut')
       .click();
@@ -177,7 +178,7 @@ describe('Dashboard page test', () => {
   /**
    * Delete a favourite card should remove it from the dashboard and display an empty section.
    */
-  it.only('should delete a card from favourite activities', () => {
+  it('should delete a card from favourite activities', () => {
     // Delete the first card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
