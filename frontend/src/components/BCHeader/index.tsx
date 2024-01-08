@@ -27,7 +27,7 @@ import {
   navItems,
   supportItems
 } from './constants';
-import { RightPanelType } from './definitions';
+import { RightPanelType, HearderContainerProps } from './definitions';
 
 import './styles.scss';
 
@@ -73,11 +73,6 @@ const BCHeader = () => {
   };
 
   const navigate = useNavigate();
-
-  interface HearderContainerProps {
-  isSideNavExpanded: boolean,
-  onClickSideNavExpand: Function
-}
 
   return (
     <HeaderContainer
