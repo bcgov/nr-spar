@@ -45,17 +45,17 @@ export const fieldsConfig = {
   numberOfContainers: {
     name: 'numberOfContainers',
     labelText: 'Number of Containers',
-    invalidText: 'Number has more than 3 decimals or bigger than 9,999.999'
+    invalidText: 'Invalid entry. Number must be between 0 and 10,000 and up to 3 decimal places.'
   },
   volumePerContainers: {
     name: 'volumePerContainers',
     labelText: 'Volume per Containers (HI)',
-    invalidText: 'Number has more than 3 decimals or bigger than 9,999.999'
+    invalidText: 'Invalid entry. Number must be between 0 and 10,000 and up to 3 decimal places.'
   },
   volumeOfCones: {
     name: 'volumeOfCones',
     labelText: 'Volume of Cones (HI)',
-    invalidText: 'Number has more than 3 decimals',
+    invalidText: 'Number has more than 3 decimals.',
     helperText: 'This value must be the "Volume per container" X "Number of containers".',
     warnText: 'The total volume of cones does not equal, please note that this value must be the "Volume per container" x "Number of containers"'
   },
