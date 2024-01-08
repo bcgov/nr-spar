@@ -178,6 +178,9 @@ describe('Dashboard page test', () => {
    * Delete a favourite card should remove it from the dashboard and display an empty section.
    */
   it('should delete a card from favourite activities', () => {
+    cy.visit('/dashboard');
+    cy.url().should('contains', '/dashboard');
+
     cy.intercept(
       'GET',
       '**/api/favourite-activities',
