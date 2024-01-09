@@ -1,15 +1,16 @@
 package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -24,7 +25,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 /** This class contains methods for fetching data from Oracle REST API. */
-@Slf4j
 @Component
 @Qualifier("oracleApi")
 public class OracleApiProvider implements Provider {
@@ -62,7 +62,7 @@ public class OracleApiProvider implements Provider {
     String apiUrl =
         String.format("%s/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}", rootUri);
 
-    log.info("Starting {} request to {}", PROVIDER, apiUrl);
+    SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
       ResponseEntity<OrchardSpuDto> response =
@@ -73,10 +73,11 @@ public class OracleApiProvider implements Provider {
               OrchardSpuDto.class,
               createParamsMap("orchardId", orchardId, "spuId", String.valueOf(spuId)));
 
-      log.info("Finished {} request - 200 OK!", PROVIDER);
+      SparLog.info("Finished {} request - 200 OK!", PROVIDER);
       return Optional.of(response.getBody());
     } catch (HttpClientErrorException httpExc) {
-      log.info("Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      SparLog.error(
+          "Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
     }
 
     return Optional.empty();
@@ -92,7 +93,7 @@ public class OracleApiProvider implements Provider {
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
     String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/{vegCode}", rootUri);
 
-    log.info("Starting {} - {} request to {}", PROVIDER, "findOrchardsByVegCode", oracleApiUrl);
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "findOrchardsByVegCode", oracleApiUrl);
 
     try {
       ResponseEntity<List<OrchardDto>> orchardsResult =
@@ -102,10 +103,10 @@ public class OracleApiProvider implements Provider {
               new HttpEntity<>(addHttpHeaders()),
               new ParameterizedTypeReference<List<OrchardDto>>() {},
               createParamsMap("vegCode", vegCode));
-      log.info("GET orchards by vegCode from oracle - Success response!");
+      SparLog.info("GET orchards by vegCode from oracle - Success response!");
       return orchardsResult.getBody();
     } catch (HttpClientErrorException httpExc) {
-      log.error(
+      SparLog.error(
           "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
     }
 
@@ -124,7 +125,8 @@ public class OracleApiProvider implements Provider {
     String oracleApiUrl =
         String.format("%s/api/orchards/parent-trees/vegetation-codes/{vegCode}", rootUri);
 
-    log.info("Starting {} - {} request to {}", PROVIDER, "findParentTreesByVegCode", oracleApiUrl);
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "findParentTreesByVegCode", oracleApiUrl);
 
     HttpEntity<Map<String, String>> requestEntity =
         new HttpEntity<>(orchardSpuMap, addHttpHeaders());
@@ -139,12 +141,12 @@ public class OracleApiProvider implements Provider {
               createParamsMap("vegCode", vegCode));
       List<SameSpeciesTreeDto> list = parentTreesResult.getBody();
       int size = list == null ? 0 : list.size();
-      log.info(
+      SparLog.info(
           "POST spu to oracle to get parent trees with vegCode - Success response with size: {}!",
           size);
       return list;
     } catch (HttpClientErrorException httpExc) {
-      log.error(
+      SparLog.error(
           "POST spu to oracle to get parent trees with vegCode - Response code error: {}, {}",
           httpExc.getStatusCode(),
           httpExc.getMessage());
@@ -165,6 +167,10 @@ public class OracleApiProvider implements Provider {
 
     String[] authorization = addAuthorizationHeader();
     headers.set(authorization[0], authorization[1]);
+
+    // For distributed log tracing
+    String correlationId = RequestCorrelation.getId();
+    headers.set(RequestCorrelation.CORRELATION_ID_HEADER, correlationId);
 
     return headers;
   }
