@@ -61,7 +61,7 @@
     "eslint": "^8.39.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-plugin-cypress": "^2.13.2",
-    "eslint-plugin-import": "2.29.0",
+    "eslint-plugin-import": "2.29.1",
     "eslint-plugin-jsdoc": "^48.0.0",
     "eslint-plugin-jsx-a11y": "6.8.0",
     "eslint-plugin-n": "^16.0.0",
