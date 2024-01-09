@@ -27,14 +27,14 @@ jobs:
           CYPRESS_PASSWORD: ${{ secrets.BCEID_PASSWORD }}
       
       - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots-chrome
           path: cypress/screenshots
       
       - name: Upload videos
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-videos-chrome
@@ -57,14 +57,14 @@ jobs:
           CYPRESS_PASSWORD: ${{ secrets.BCEID_PASSWORD }}
       
       - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots-firefox
           path: cypress/screenshots
       
       - name: Upload videos
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-videos-firefox
@@ -86,14 +86,14 @@ jobs:
           CYPRESS_PASSWORD: ${{ secrets.BCEID_PASSWORD }}
       
       - name: Upload screenshots on failure
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots-edge
           path: cypress/screenshots
       
       - name: Upload videos
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-videos-edge
