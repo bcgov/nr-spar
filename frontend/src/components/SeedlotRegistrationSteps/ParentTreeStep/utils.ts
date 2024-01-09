@@ -343,7 +343,7 @@ export const fillCompostitionTables = (
       clonedState.tableRowData[parentTreeNumber].coneCount.value = coneCountValue;
       clonedState.tableRowData[parentTreeNumber].coneCount.isInvalid = isInvalid;
       clonedState.tableRowData[parentTreeNumber].coneCount
-        .errMsg = isInvalid ? getConeCountErrMsg(coneCountValue) : '';
+        .errMsg = isInvalid ? getConeCountErrMsg() : '';
 
       // Pollen count
       const pollenCountValue = row.pollenCount.toString();
@@ -351,7 +351,7 @@ export const fillCompostitionTables = (
       clonedState.tableRowData[parentTreeNumber].pollenCount.value = pollenCountValue;
       clonedState.tableRowData[parentTreeNumber].pollenCount.isInvalid = isInvalid;
       clonedState.tableRowData[parentTreeNumber].pollenCount
-        .errMsg = isInvalid ? getPollenCountErrMsg(pollenCountValue) : '';
+        .errMsg = isInvalid ? getPollenCountErrMsg() : '';
 
       // SMP Success percentage
       const smpSuccessValue = row.smpSuccess.toString();

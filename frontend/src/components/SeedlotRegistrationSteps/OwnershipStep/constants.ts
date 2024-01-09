@@ -24,7 +24,7 @@ export const agencyFieldsProps: AgencyTextPropsType = {
 export const inputText = {
   portion: {
     label: 'Owner portion (%)',
-    invalidText: 'The sum of all owner portions should add up to 100'
+    invalidText: 'The sum of all owner portions must add up to 100'
   },
   reserved: {
     label: 'Reserved (%)'

@@ -126,8 +126,8 @@ export const isConeCountInvalid = (value: string): boolean => {
   return !isValid;
 };
 
-export const getConeCountErrMsg = (value: string): string => (
-  `"${value}" is an invalid entry. Please provide a valid cone count value between ${CONE_COUNT_MIN} and ${CONE_COUNT_MAX}, up to 10 decimal places.`
+export const getConeCountErrMsg = (): string => (
+  `Invalid entry. Value must be between ${CONE_COUNT_MIN} and ${CONE_COUNT_MAX} and up to 10 decimal places.`
 );
 
 export const isPollenCountInvalid = (value: string): boolean => {
@@ -141,8 +141,8 @@ export const isPollenCountInvalid = (value: string): boolean => {
   return !isValid;
 };
 
-export const getPollenCountErrMsg = (value: string): string => (
-  `"${value}" is an invalid entry. Please provide a valid pollen count value between ${POLLEN_COUNT_MIN} and ${POLLEN_COUNT_MAX}, up to 10 decimal places.`
+export const getPollenCountErrMsg = (): string => (
+  `Invalid entry. Value must be between ${POLLEN_COUNT_MIN} and ${POLLEN_COUNT_MAX} and up to 10 decimal places.`
 );
 
 /**
@@ -217,14 +217,14 @@ export const handleInput = (
   if (colName === 'coneCount') {
     isInvalid = isConeCountInvalid(inputValue);
     if (isInvalid) {
-      errMsg = getConeCountErrMsg(inputValue);
+      errMsg = getConeCountErrMsg();
     }
   }
 
   if (colName === 'pollenCount') {
     isInvalid = isPollenCountInvalid(inputValue);
     if (isInvalid) {
-      errMsg = getPollenCountErrMsg(inputValue);
+      errMsg = getPollenCountErrMsg();
     }
   }
 
