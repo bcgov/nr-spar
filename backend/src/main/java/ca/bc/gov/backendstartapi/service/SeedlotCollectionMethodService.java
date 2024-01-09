@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -15,11 +16,9 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods for handling the relation between Seedlots and CollectionMethods. */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeedlotCollectionMethodService {
@@ -37,7 +36,7 @@ public class SeedlotCollectionMethodService {
    * @param formStep1 The {@link SeedlotFormCollectionDto} to be saved
    */
   public void saveSeedlotFormStep1(Seedlot seedlot, SeedlotFormCollectionDto formStep1) {
-    log.info("Saving Seedlot Form Step 1-Collection for seedlot number {}", seedlot.getId());
+    SparLog.info("Saving Seedlot Form Step 1-Collection for seedlot number {}", seedlot.getId());
 
     seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
     seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());
@@ -48,7 +47,7 @@ public class SeedlotCollectionMethodService {
     seedlot.setTotalConeVolume(formStep1.clctnVolume());
     seedlot.setComment(formStep1.seedlotComment());
 
-    log.info(
+    SparLog.info(
         "Received {} SeedlotCollectionMethod record(s) for seedlot number {}",
         formStep1.coneCollectionMethodCodes().size(),
         seedlot.getId());
@@ -57,7 +56,7 @@ public class SeedlotCollectionMethodService {
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!seedlotCollectionList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "Deleting {} previous records on the SeedlotCollectionMethod table for seedlot number {}",
           seedlotCollectionList.size(),
           seedlot.getId());
@@ -85,14 +84,14 @@ public class SeedlotCollectionMethodService {
    */
   private void addSeedlotCollectionMethod(Seedlot seedlot, List<Integer> methods) {
     if (methods.isEmpty()) {
-      log.info(
+      SparLog.info(
           "No new records to be inserted on the SeedlotCollectionMethod table for seedlot number"
               + " {}",
           seedlot.getId());
       return;
     }
 
-    log.info(
+    SparLog.info(
         "{} record(s) to be inserted on the SeedlotCollectionMethod table for seedlot number {}",
         methods.size(),
         seedlot.getId());
