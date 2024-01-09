@@ -38,7 +38,7 @@
     "react-router-dom": "^6.3.0",
     "react-test-renderer": "^18.2.0",
     "react-toastify": "^9.1.3",
-    "sass": "1.69.5",
+    "sass": "1.69.6",
     "ts-jest": "^29.1.0",
     "typescript": "^5.1.3",
     "validator": "^13.9.0",
