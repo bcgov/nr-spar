@@ -12,7 +12,7 @@ export enum GenWorthCodeEnum {
   WWD = 'wwd'
 }
 
-type SingleParentTreeGeneticObj = {
+export type SingleParentTreeGeneticObj = {
   geneticTypeCode: string;
   geneticWorthCode: keyof typeof GenWorthCodeEnum;
   geneticQualityValue: number;
