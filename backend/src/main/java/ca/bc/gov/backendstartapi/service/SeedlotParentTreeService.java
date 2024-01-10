@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
@@ -22,11 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** This class holds methods for handling the {@link SeedlotParentTree} entity. */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeedlotParentTreeService {
@@ -50,7 +49,7 @@ public class SeedlotParentTreeService {
    * @return A list of {@link SeedlotParentTree}
    */
   public List<SeedlotParentTree> getAllSeedlotParentTree(String seedlotNumber) {
-    log.info("Get All SeedlotPrentTree for seedlot number {}", seedlotNumber);
+    SparLog.info("Get All SeedlotPrentTree for seedlot number {}", seedlotNumber);
     return seedlotParentTreeRepository.findAllBySeedlot_id(seedlotNumber);
   }
 
@@ -62,7 +61,7 @@ public class SeedlotParentTreeService {
    */
   public List<SeedlotParentTree> saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
-    log.info("Saving SeedlotParentTree for seedlot number {}", seedlot.getId());
+    SparLog.info("Saving SeedlotParentTree for seedlot number {}", seedlot.getId());
 
     List<SeedlotParentTreeGeneticQuality> sptgqList =
         seedlotParentTreeGeneticQualityRepository.findAllBySeedlotParentTree_Seedlot_id(
@@ -70,7 +69,7 @@ public class SeedlotParentTreeService {
 
     // Delete Foreign Keys Dependencies in SeedlotParentTreeGeneticQuality
     if (!sptgqList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "Deleting {} previous records on the SeedlotParentTreeGeneticQuality table for seedlot"
               + " number {}",
           sptgqList.size(),
@@ -79,8 +78,7 @@ public class SeedlotParentTreeService {
       List<SeedlotParentTreeGeneticQualityId> existingSeedlotPtGenQltyIdList =
           sptgqList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
-      seedlotParentTreeGeneticQualityRepository.deleteAllById(
-          existingSeedlotPtGenQltyIdList);
+      seedlotParentTreeGeneticQualityRepository.deleteAllById(existingSeedlotPtGenQltyIdList);
     }
 
     // Delete Foreign Keys Dependencies in SmpMixGeneticQuality
@@ -88,7 +86,7 @@ public class SeedlotParentTreeService {
         smpMixGeneticQualityRepository.findAllBySmpMix_Seedlot_id(seedlot.getId());
 
     if (!smpMixGenQltyList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "Deleting {} previous records on the SmpMixGeneticQuality table for seedlot number {}",
           smpMixGenQltyList.size(),
           seedlot.getId());
@@ -103,7 +101,7 @@ public class SeedlotParentTreeService {
     List<SmpMix> smpMixs = smpMixRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!smpMixs.isEmpty()) {
-      log.info(
+      SparLog.info(
           "Deleting {} previous records on the SmpMix table for seedlot number {}",
           smpMixs.size(),
           seedlot.getId());
@@ -125,7 +123,7 @@ public class SeedlotParentTreeService {
         seedlotParentTreeSmpMixRepository.findAllBySeedlotParentTree_Seedlot_id(seedlot.getId());
 
     if (!sptsmList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "Deleting {} previous records on the SeedlotParentTreeSmpMix table for seedlot number {}",
           sptsmList.size(),
           seedlot.getId());
@@ -140,7 +138,7 @@ public class SeedlotParentTreeService {
         seedlotParentTreeRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (!sptList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "Deleting {} previous records on the SeedlotParentTree table for seedlot number {}",
           sptList.size(),
           seedlot.getId());
@@ -162,13 +160,13 @@ public class SeedlotParentTreeService {
   private List<SeedlotParentTree> addSeedlotParentTree(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtDtoList) {
     if (seedlotPtDtoList.isEmpty()) {
-      log.info(
+      SparLog.info(
           "No new records to be inserted on the SeedlotParentTree table for seedlot number {}",
           seedlot.getId());
       return List.of();
     }
 
-    log.info(
+    SparLog.info(
         "{} record(s) to be inserted on the SeedlotParentTree table for seedlot number {}",
         seedlotPtDtoList.size(),
         seedlot.getId());
@@ -192,7 +190,7 @@ public class SeedlotParentTreeService {
       seedlotPtListToInsert.add(seedlotParentTree);
     }
 
-    log.info(
+    SparLog.info(
         "3. seedlotParentTreeRepository size: {}", seedlotParentTreeRepository.findAll().size());
 
     return seedlotParentTreeRepository.saveAll(seedlotPtListToInsert);
