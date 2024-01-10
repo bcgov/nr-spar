@@ -6,7 +6,9 @@ import {
   InfoSectionConfigType, FileConfigType
 } from './definitions';
 
+// eslint-disable-next-line import/no-unresolved
 import SeedlotCsvTemplate from '../../../assets/csv/Seedlot_composition_template.csv?url';
+// eslint-disable-next-line import/no-unresolved
 import SmpMixCsvTemplate from '../../../assets/csv/SMP_Mix_Volume_template.csv?url';
 
 export const DEFAULT_PAGE_SIZE = 40;
@@ -27,7 +29,7 @@ export const NON_ORCHARD_CONTAM_MIN = 0;
 
 export const NON_ORCHARD_CONTAM_MAX = 100;
 
-export const SMP_SUCCESS_PERC_MIN = 1;
+export const SMP_SUCCESS_PERC_MIN = 0;
 
 export const SMP_SUCCESS_PERC_MAX = 25;
 
@@ -35,11 +37,11 @@ export const SMP_SUCCESS_PERC_MAX_PW = 100;
 
 export const POLLEN_COUNT_MIN = '0';
 
-export const POLLEN_COUNT_MAX = '9999999999.9999999999';
+export const POLLEN_COUNT_MAX = '10000000000';
 
 export const CONE_COUNT_MIN = '0';
 
-export const CONE_COUNT_MAX = '9999999999.9999999999';
+export const CONE_COUNT_MAX = '10000000000';
 
 export const MAX_DECIMAL_DIGITS = 10;
 
