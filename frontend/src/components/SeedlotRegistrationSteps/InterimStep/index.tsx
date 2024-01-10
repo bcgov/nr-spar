@@ -25,9 +25,9 @@ import InterimForm from './definitions';
 import {
   DATE_FORMAT, MAX_FACILITY_DESC_CHAR, agencyFieldsProps, pageTexts
 } from './constants';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import './styles.scss';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 interface InterimStorageStepProps {
   state: InterimForm,
