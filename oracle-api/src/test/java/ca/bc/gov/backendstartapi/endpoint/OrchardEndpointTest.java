@@ -258,11 +258,10 @@ class OrchardEndpointTest {
   @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeErrorTest() throws Exception {
     String vegCode = "FDI";
-    String errMsg = "Oracle database has been defeated by postgres.";
 
     Map<String, String> testMap = new HashMap<>();
     when(orchardService.findParentTreesWithVegCode(vegCode, testMap))
-        .thenThrow(new DataRetrievalFailureException(errMsg));
+        .thenThrow(new DataRetrievalFailureException(""));
 
     mockMvc
         .perform(
@@ -273,8 +272,6 @@ class OrchardEndpointTest {
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError())
-        .andReturn()
-        .getResolvedException()
-        .getMessage();
+        .andReturn();
   }
 }

@@ -15,7 +15,7 @@ import {
 import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
 
-import getFundingSources from '../../../api-service/fundingSorucesAPI';
+import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
