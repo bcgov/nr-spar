@@ -2,6 +2,8 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -13,12 +15,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
@@ -53,6 +58,8 @@ class SeedlotEndpointTest {
   @MockBean ConeAndPollenCountCsvTableParser coneAndPollenCountCsvTableParser;
 
   @MockBean SeedlotService seedlotService;
+
+  @MockBean SaveSeedlotFormService saveSeedlotFormService;
 
   private final WebApplicationContext webApplicationContext;
 
@@ -144,6 +151,14 @@ class SeedlotEndpointTest {
         "temporaryStrgEndDate": "2023-12-06T00:00:00Z"
       }
     }
+      """;
+
+  private static final String SEEDLOT_FORM_PROGRESS_JSON =
+      """
+        {
+          "allStepData": {},
+          "progressStatus": {}
+        }
       """;
 
   SeedlotEndpointTest(WebApplicationContext webApplicationContext) {
@@ -499,6 +514,99 @@ class SeedlotEndpointTest {
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.seedlotNumber").value("123"))
         .andExpect(jsonPath("$.seedlotStatusCode").value("PND"))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Save seedlot form progress but seedlot not found")
+  void saveSeedlotFormProgress_notFoundSeedlot_shouldThrowException() throws Exception {
+    doThrow(new SeedlotNotFoundException())
+        .when(saveSeedlotFormService)
+        .saveFormClassA(any(), any());
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-form-progress", "12345")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(SEEDLOT_FORM_PROGRESS_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Save seedlot form progress should Succeed")
+  void saveSeedlotFormProgress_notFoundSeedlot_shouldSucceed() throws Exception {
+    doNothing().when(saveSeedlotFormService).saveFormClassA(any(), any());
+
+    mockMvc
+        .perform(
+            put("/api/seedlots/{seedlotNumber}/a-class-form-progress", "12345")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(SEEDLOT_FORM_PROGRESS_JSON))
+        .andExpect(status().isNoContent())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get seedlot form progress but not found")
+  void getSeedlotFormProgress_notFound_shouldThrowException() throws Exception {
+    when(saveSeedlotFormService.getFormClassA(any()))
+        .thenThrow(new SeedlotFormProgressNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/a-class-form-progress", "12345")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get seedlot form progress should succeed")
+  void getSeedlotFormProgress_shouldSucceed() throws Exception {
+    when(saveSeedlotFormService.getFormClassA(any()))
+        .thenReturn(new SaveSeedlotFormDtoClassA(null, null));
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/a-class-form-progress", "12345")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get seedlot form progress status but not found")
+  void getSeedlotFormProgressStatus_notFound_shouldThrowException() throws Exception {
+    when(saveSeedlotFormService.getFormStatusClassA(any()))
+        .thenThrow(new SeedlotFormProgressNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/a-class-form-progress/status", "12345")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Get seedlot form progress status should succeed")
+  void getSeedlotFormProgressStatus_shouldSucceed() throws Exception {
+    when(saveSeedlotFormService.getFormStatusClassA(any())).thenReturn(null);
+
+    mockMvc
+        .perform(
+            get("/api/seedlots/{seedlotNumber}/a-class-form-progress/status", "12345")
+                .header("Content-Type", MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
         .andReturn();
   }
 }

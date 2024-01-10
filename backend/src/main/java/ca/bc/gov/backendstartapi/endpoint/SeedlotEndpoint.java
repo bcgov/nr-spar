@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -8,11 +9,13 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
 import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -61,6 +64,8 @@ public class SeedlotEndpoint {
   private final SmpCalculationCsvTableParser smpCalculationTableParser;
 
   private final SeedlotService seedlotService;
+
+  private final SaveSeedlotFormService saveSeedlotFormService;
 
   /**
    * Parse the CSV table in {@code file} and return the data stored in it.
@@ -370,5 +375,102 @@ public class SeedlotEndpoint {
       @RequestBody SeedlotFormSubmissionDto form) {
     SeedlotCreateResponseDto createDto = seedlotService.submitSeedlotForm(seedlotNumber, form);
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
+  }
+
+  /**
+   * Saves the Seedlot reg form progress.
+   *
+   * @param data A {@link SaveSeedlotFormDtoClassA} containing all the form information
+   * @return 204 on success.
+   */
+  @PutMapping("{seedlotNumber}/a-class-form-progress")
+  @Operation(
+      summary = "Save the progress of an a-class reg form.",
+      description =
+          "This endpoint saves the progress of an A-class registration form, it is NOT to be used"
+              + " for form submission.")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "204", description = "Successfully saved or updated."),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public ResponseEntity<Void> saveFormProgressClassA(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot Number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber,
+      @RequestBody SaveSeedlotFormDtoClassA data) {
+
+    saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
+
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /** Retrieves the saved Seedlot reg form. */
+  @GetMapping("{seedlotNumber}/a-class-form-progress")
+  @Operation(
+      summary = "Retrieve the progress and data of an a-class reg form.",
+      description = "This endpoint retrieves the progress of an A-class registration form")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot form progress not found",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public SaveSeedlotFormDtoClassA getFormProgressClassA(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot Number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber) {
+
+    return saveSeedlotFormService.getFormClassA(seedlotNumber);
+  }
+
+  /** Retreive only the progress_status column from the form progress table. */
+  @GetMapping("{seedlotNumber}/a-class-form-progress/status")
+  @Operation(
+      summary = "Retrieve the progress status of an a-class reg form.",
+      description =
+          "This endpoint retrieves the progress status only of an A-class registration form")
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot form progress not found",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public JsonNode getFormProgressStatusClassA(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot Number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber) {
+
+    return saveSeedlotFormService.getFormStatusClassA(seedlotNumber);
   }
 }
