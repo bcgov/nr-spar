@@ -28,7 +28,7 @@ jobs:
           languages: java,javascript
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "temurin"
@@ -116,7 +116,7 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
-          verification_path: "actuator/health"
+          verification_path: ${{ matrix.verification_path }}
           parameters:
             -p ZONE=test -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
@@ -232,7 +232,7 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
-          verification_path: "actuator/health"
+          verification_path: ${{ matrix.verification_path }}
           parameters:
             -p ZONE=prod -p NAME=${{ github.event.repository.name }}
             ${{ matrix.parameters }}
