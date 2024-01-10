@@ -28,14 +28,3 @@ export interface CollectionStepProps {
   collectionMethods: Array<MultiOptionsObj>,
   readOnly?: boolean,
 }
-
-export type FormValidation = {
-  isNameInvalid: boolean,
-  isLocationCodeInvalid: boolean,
-  isStartDateInvalid: boolean,
-  isEndDateInvalid: boolean,
-  isNumberOfContainersInvalid: boolean,
-  isVolumePerContainersInvalid: boolean,
-  isVolumeOfConesInvalid: boolean,
-  isCollectionMethodsInvalid: boolean,
-}

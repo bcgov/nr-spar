@@ -14,8 +14,6 @@ const ApiConfig = {
   /**
    * MOCK API
    */
-  aClassSeedlot: `${mockServerHost}/api/register-a-class`,
-
   seedlotOrchardStep: `${mockServerHost}/api/seedlot/orchard`,
 
   recentActivities: `${mockServerHost}/api/recent-activities`,
@@ -59,6 +57,8 @@ const ApiConfig = {
   vegetationCode: `${oracleServerHost}/api/vegetation-codes?page=0&perPage=500`,
 
   fundingSource: `${oracleServerHost}/api/funding-sources`,
+
+  facilityTypes: `${oracleServerHost}/api/facility-types`,
 
   oracleOrchards: `${oracleServerHost}/api/orchards`
 };
