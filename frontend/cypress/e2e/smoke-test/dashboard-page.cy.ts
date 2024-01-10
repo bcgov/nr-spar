@@ -1,3 +1,5 @@
+/* eslint-disable func-names */
+/* eslint-disable prefer-arrow-callback */
 import { NavigationLabels } from '../../utils/labels';
 import prefix from '../../../src/styles/classPrefix';
 
@@ -8,11 +10,15 @@ describe('Dashboard page test', () => {
     secondSectionSubtitle: string,
   };
 
-  beforeEach(() => {
+  beforeEach(function () {
     // Loading test data
     cy.fixture('dashboard-page').then((fData) => {
       dashboardPageData = fData;
     });
+    cy.fixture('favourite-activities').as('favActRes')
+      .then((favActRes) => {
+        this.favActRes = favActRes;
+      });
 
     cy.login();
     cy.visit('/');
@@ -38,7 +44,7 @@ describe('Dashboard page test', () => {
   /**
    * Click on the heart icon should favourite the seedlots dashboard page.
    */
-  it('should be able to favourite the Seedlots Dashboard page', () => {
+  it('should be able to favourite the Seedlots Dashboard page', function () {
     // Navigate to Seedlots page
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.url().should('contains', '/seedlots');
@@ -46,20 +52,7 @@ describe('Dashboard page test', () => {
     cy.intercept(
       'GET',
       '**/api/favourite-activities',
-      [
-        {
-          id: 239,
-          userId: 'IDIR@TEST',
-          activity: 'registerAClass',
-          highlighted: false
-        },
-        {
-          id: 240,
-          userId: 'IDIR@TEST',
-          activity: 'seedlots',
-          highlighted: false
-        }
-      ]
+      this.favActRes.after_favourite
     ).as('GET_fav_act_req_after_click');
 
     // Favourite Seedlots page
@@ -83,24 +76,11 @@ describe('Dashboard page test', () => {
   /**
    * Highlight a favourite card should make it appear highlighted.
    */
-  it('should be able to highlight favourite cards at dashboard', () => {
+  it('should be able to highlight favourite cards at dashboard', function () {
     cy.intercept(
       'GET',
       '**/api/favourite-activities',
-      [
-        {
-          id: 239,
-          userId: 'IDIR@TEST',
-          activity: 'registerAClass',
-          highlighted: false
-        },
-        {
-          id: 240,
-          userId: 'IDIR@TEST',
-          activity: 'seedlots',
-          highlighted: false
-        }
-      ]
+      this.favActRes.before_highlight
     ).as('GET_fav_act_req_before_highlight');
 
     // Load the page with the data returned from the intercept above.
@@ -116,20 +96,7 @@ describe('Dashboard page test', () => {
     cy.intercept(
       'GET',
       '**/api/favourite-activities',
-      [
-        {
-          id: 239,
-          userId: 'IDIR@TEST',
-          activity: 'registerAClass',
-          highlighted: false
-        },
-        {
-          id: 240,
-          userId: 'IDIR@TEST',
-          activity: 'seedlots',
-          highlighted: true
-        }
-      ]
+      this.favActRes.after_highlight
     ).as('GET_fav_act_req_after_highlight');
 
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
@@ -144,20 +111,7 @@ describe('Dashboard page test', () => {
     cy.intercept(
       'GET',
       '**/api/favourite-activities',
-      [
-        {
-          id: 239,
-          userId: 'IDIR@TEST',
-          activity: 'registerAClass',
-          highlighted: true
-        },
-        {
-          id: 240,
-          userId: 'IDIR@TEST',
-          activity: 'seedlots',
-          highlighted: false
-        }
-      ]
+      this.favActRes.after_highlight_2
     ).as('GET_fav_act_req_after_highlight_2');
 
     // Highlight Create A Class Seedlot card
