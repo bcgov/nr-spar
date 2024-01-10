@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -30,6 +31,7 @@ public class SaveSeedlotFormService {
 
   /** Saves the {@link SaveSeedlotFormDtoClassA} to table. */
   public void saveFormClassA(String seedlotNumber, SaveSeedlotFormDtoClassA data) {
+    SparLog.info("Saving A-Class seedlot progress for seedlot number: {} ...", seedlotNumber);
 
     Seedlot relatedSeedlot =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
@@ -66,6 +68,7 @@ public class SaveSeedlotFormService {
    * SaveSeedlotFormDtoClassA} upon return.
    */
   public SaveSeedlotFormDtoClassA getFormClassA(String seedlotNumber) {
+    SparLog.info("Retrieving A-class seedlot progress for seedlot number: {} ...", seedlotNumber);
     ObjectMapper mapper = new ObjectMapper();
     return saveSeedlotProgressRepositoryClassA
         .findById(seedlotNumber)
@@ -79,6 +82,8 @@ public class SaveSeedlotFormService {
 
   /** Retrieves the progress_status column then return it as a json object. */
   public JsonNode getFormStatusClassA(String seedlotNumber) {
+    SparLog.info(
+        "Retrieving A-class seedlot progress status for seedlot number: {} ...", seedlotNumber);
     ObjectMapper mapper = new ObjectMapper();
 
     Object progressStatus =
