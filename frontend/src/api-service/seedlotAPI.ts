@@ -1,7 +1,12 @@
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
-import { SeedlotType, SeedlotsReturnType } from '../types/SeedlotType';
+import { SeedlotAClassSubmitType, SeedlotType, SeedlotsReturnType } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
+
+export const putAClassSeedlot = (seedlotNumber: string, payload: SeedlotAClassSubmitType) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-submission`;
+  return api.put(url, payload);
+};
 
 export const postSeedlot = (payload: SeedlotRegPayloadType) => {
   const url = ApiConfig.seedlots;

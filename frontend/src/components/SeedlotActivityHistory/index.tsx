@@ -7,7 +7,7 @@ import {
 
 import Subtitle from '../Subtitle';
 
-import formatDate from '../../utils/DateUtils';
+import { formatDate } from '../../utils/DateUtils';
 import statusClass from '../../utils/HistoryStatus';
 
 import './styles.scss';

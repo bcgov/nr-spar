@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   FlexGrid,
   Row,
@@ -11,7 +11,8 @@ import {
   TabList,
   Tab,
   TabPanels,
-  TabPanel
+  TabPanel,
+  InlineNotification
 } from '@carbon/react';
 
 import { useQuery } from '@tanstack/react-query';
@@ -35,8 +36,11 @@ import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 const SeedlotDetails = () => {
   const navigate = useNavigate();
   const { seedlotNumber } = useParams();
+  const [searchParams] = useSearchParams();
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
   const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
+
+  const isSubmitSuccess = searchParams.get('isSubmitSuccess') === 'true';
 
   const manageOptions = [
     {
@@ -164,6 +168,19 @@ const SeedlotDetails = () => {
               </TabList>
               <TabPanels>
                 <TabPanel>
+                  {
+                    isSubmitSuccess
+                      ? (
+                        <InlineNotification
+                          className="seedlot-submitted-notification"
+                          lowContrast
+                          kind="success"
+                          title="Submitted:"
+                          subtitle="Your seedlot registration was submitted with success and is now under review by the TSC"
+                        />
+                      )
+                      : null
+                  }
                   <FormProgress
                     seedlotNumber={seedlotNumber}
                     isFetching={seedlotQuery.isFetching}

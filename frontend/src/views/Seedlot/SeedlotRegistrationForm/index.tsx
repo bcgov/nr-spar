@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
   Row,
@@ -10,7 +10,8 @@ import {
   BreadcrumbItem,
   Button,
   Loading,
-  Grid
+  Grid,
+  InlineNotification
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
@@ -19,7 +20,7 @@ import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
-import { getSeedlotById } from '../../../api-service/seedlotAPI';
+import { getSeedlotById, putAClassSeedlot } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
@@ -42,8 +43,13 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
+import ResponseErrorType from '../../../types/ResponseErrorType';
+import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import createErrorMessage from '../../../utils/ErrorHandlingUtils';
 
-import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
+import { EmptyMultiOptObj, EmptyResponseError } from '../../../shared-constants/shared-constants';
 
 import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import {
@@ -66,15 +72,20 @@ import {
   validateExtractionStep,
   verifyExtractionStepCompleteness,
   validateParentStep,
-  verifyParentStepCompleteness
+  verifyParentStepCompleteness,
+  checkAllStepsCompletion,
+  convertCollection,
+  convertExtraction,
+  convertInterim,
+  convertOrchard,
+  convertOwnership,
+  convertParentTree
 } from './utils';
 import {
   initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
 } from './constants';
 
 import './styles.scss';
-import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
-import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -91,6 +102,9 @@ const SeedlotRegistrationForm = () => {
     progressStatus,
     setProgressStatus
   ] = useState<ProgressIndicatorConfig>(() => initProgressBar(formStep, initialProgressConfig));
+
+  const [errorSubmitting, setErrorSubmitting] = useState<ResponseErrorType>(EmptyResponseError);
+  const [allStepCompleted, setAllStepCompleted] = useState<boolean>(false);
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
@@ -299,16 +313,6 @@ const SeedlotRegistrationForm = () => {
       }
     }
 
-    // Set invalid or complete status for Extraction and Storage Step
-    if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
-      const isExtractionInvalid = validateExtractionStep(allStepData.extractionStorageStep);
-      clonedStatus.extraction.isInvalid = isExtractionInvalid;
-      if (!isExtractionInvalid) {
-        const isExtractionComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
-        clonedStatus.extraction.isComplete = isExtractionComplete;
-      }
-    }
-
     // Set invalid or complete status for Parent Tree Step
     if (currentStepName !== 'parent' && prevStepName === 'parent') {
       const isParentInvalid = validateParentStep(allStepData.parentTreeStep);
@@ -316,6 +320,16 @@ const SeedlotRegistrationForm = () => {
       if (!isParentInvalid) {
         const isParentComplete = verifyParentStepCompleteness(allStepData.parentTreeStep);
         clonedStatus.parent.isComplete = isParentComplete;
+      }
+    }
+
+    // Set invalid or complete status for Extraction and Storage Step
+    if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
+      const isExtractionInvalid = validateExtractionStep(allStepData.extractionStorageStep);
+      clonedStatus.extraction.isInvalid = isExtractionInvalid;
+      if (!isExtractionInvalid) {
+        const isExtractionComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
+        clonedStatus.extraction.isComplete = isExtractionComplete;
       }
     }
 
@@ -432,6 +446,36 @@ const SeedlotRegistrationForm = () => {
     }
   };
 
+  const getSeedlotPayload = (): SeedlotAClassSubmitType => ({
+    seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
+    seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
+    seedlotFormInterimDto: convertInterim(allStepData.interimStep),
+    seedlotFormOrchardDto: convertOrchard(
+      allStepData.orchardStep,
+      allStepData.parentTreeStep.tableRowData
+    ),
+    seedlotFormParentTreeSmpDtoList: convertParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
+    seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
+  });
+
+  const submitSeedlot = useMutation({
+    mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
+    onSuccess: () => {
+      navigate({
+        pathname: `/seedlots/details/${seedlotNumber}`,
+        search: '?isSubmitSuccess=true'
+      });
+    },
+    onError: (err: AxiosError) => {
+      setErrorSubmitting(createErrorMessage(err));
+    }
+  });
+
+  useEffect(() => {
+    const completionStatus = checkAllStepsCompletion(progressStatus, verifyExtractionStepCompleteness(allStepData.extractionStorageStep));
+    setAllStepCompleted(completionStatus);
+  }, [progressStatus, allStepData.extractionStorageStep]);
+
   return (
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
@@ -465,6 +509,22 @@ const SeedlotRegistrationForm = () => {
             />
           </Column>
         </Row>
+        {
+          errorSubmitting.errOccured
+            ? (
+              <Row>
+                <Column sm={4} md={8} lg={16} xlg={16}>
+                  <InlineNotification
+                    lowContrast
+                    kind="error"
+                    title={errorSubmitting.title}
+                    subtitle={errorSubmitting.description}
+                  />
+                </Column>
+              </Row>
+            )
+            : null
+        }
         <Row>
           <Column className="seedlot-registration-row" sm={4} md={8} lg={16} xlg={16}>
             {
@@ -477,6 +537,7 @@ const SeedlotRegistrationForm = () => {
                 && gameticMethodologyQuery.isFetched
                 && coneCollectionMethodsQuery.isFetched
                 && applicantAgencyQuery.isFetched
+                && !submitSeedlot.isLoading
               )
                 ? renderStep()
                 : <Loading />
@@ -526,7 +587,14 @@ const SeedlotRegistrationForm = () => {
                     </Button>
                   )
                   : (
-                    <SubmitModal btnText="Submit Registration" renderIconName="CheckmarkOutline" />
+                    <SubmitModal
+                      btnText="Submit Registration"
+                      renderIconName="CheckmarkOutline"
+                      disableBtn={!allStepCompleted}
+                      submitFn={() => {
+                        submitSeedlot.mutate(getSeedlotPayload());
+                      }}
+                    />
                   )
               }
             </Column>

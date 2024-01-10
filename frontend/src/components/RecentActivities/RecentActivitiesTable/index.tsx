@@ -14,7 +14,7 @@ import * as Icons from '@carbon/icons-react';
 
 import StatusTag from '../../StatusTag';
 
-import formatDate from '../../../utils/DateUtils';
+import { formatDate } from '../../../utils/DateUtils';
 
 import ActivityIcons from '../../../enums/ActivityIcons';
 import FilesAndDocsIcons from '../../../enums/FilesAndDocsIcons';

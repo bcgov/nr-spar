@@ -1,15 +1,24 @@
+/* eslint-disable max-len */
 import BigNumber from 'bignumber.js';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
-import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
+import { OrchardForm, OrchardObj } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { DEFAULT_MIX_PAGE_ROWS, MAX_DECIMAL_DIGITS, notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import { RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
-import { calcSum, generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
+import { RowDataDictType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import {
+  calcAverage, calcSum, generateDefaultRows,
+  processOrchards
+} from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
+import {
+  CollectionFormSubmitType, ExtractionFormSubmitType, InterimFormSubmitType,
+  OrchardFormSubmitType, ParentTreeFormSubmitType, SingleOwnerFormSubmitType
+} from '../../../types/SeedlotType';
+import { dateStringToISO } from '../../../utils/DateUtils';
 
 import { stepMap } from './constants';
 import {
@@ -437,45 +446,6 @@ export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boo
 };
 
 /**
- * Validate Extraction and Storage Step.
- * Return true if it's Invalid, false otherwise.
- */
-export const validateExtractionStep = (extractionStepData: ExtractionStorageForm): boolean => {
-  let isInvalid = false;
-  if (
-    extractionStepData.extraction.agency.isInvalid
-    || extractionStepData.extraction.locationCode.isInvalid
-    || extractionStepData.extraction.startDate.isInvalid
-    || extractionStepData.extraction.endDate.isInvalid
-    || extractionStepData.seedStorage.agency.isInvalid
-    || extractionStepData.seedStorage.locationCode.isInvalid
-    || extractionStepData.seedStorage.startDate.isInvalid
-    || extractionStepData.seedStorage.endDate.isInvalid
-  ) {
-    isInvalid = true;
-  }
-
-  return isInvalid;
-};
-
-/**
- * Verify if the extraction and storage step is complete
- * Return true if it's complete, false otherwise
- */
-export const verifyExtractionStepCompleteness = (
-  extractionStepData: ExtractionStorageForm
-): boolean => {
-  if (!extractionStepData.extraction.agency.value.code.length
-    || !extractionStepData.extraction.locationCode.value.length
-    || !extractionStepData.seedStorage.agency.value.code.length
-    || !extractionStepData.seedStorage.locationCode.value.length
-  ) {
-    return false;
-  }
-  return true;
-};
-
-/**
  * Validate Parent tree Step.
  * Return true if it's Invalid, false otherwise.
  */
@@ -528,3 +498,148 @@ export const verifyParentStepCompleteness = (parentStepData: ParentTreeStepDataO
 
   return isComplete;
 };
+
+/**
+ * Validate Extraction and Storage Step.
+ * Return true if it's Invalid, false otherwise.
+ */
+export const validateExtractionStep = (extractionStepData: ExtractionStorageForm): boolean => {
+  let isInvalid = false;
+  if (
+    extractionStepData.extraction.agency.isInvalid
+    || extractionStepData.extraction.locationCode.isInvalid
+    || extractionStepData.extraction.startDate.isInvalid
+    || extractionStepData.extraction.endDate.isInvalid
+    || extractionStepData.seedStorage.agency.isInvalid
+    || extractionStepData.seedStorage.locationCode.isInvalid
+    || extractionStepData.seedStorage.startDate.isInvalid
+    || extractionStepData.seedStorage.endDate.isInvalid
+  ) {
+    isInvalid = true;
+  }
+
+  return isInvalid;
+};
+
+/**
+ * Verify if the extraction and storage step is complete
+ * Return true if it's complete, false otherwise
+ */
+export const verifyExtractionStepCompleteness = (
+  extractionStepData: ExtractionStorageForm
+): boolean => {
+  if (!extractionStepData.extraction.agency.value.code.length
+    || !extractionStepData.extraction.locationCode.value.length
+    || !extractionStepData.seedStorage.agency.value.code.length
+    || !extractionStepData.seedStorage.locationCode.value.length
+  ) {
+    return false;
+  }
+  return true;
+};
+
+/**
+ * Check if all steps are completed
+ */
+export const checkAllStepsCompletion = (status: ProgressIndicatorConfig, extractionCompleteness: boolean) => {
+  let allStepsComplete = true;
+
+  Object.keys(status).forEach((key: string) => {
+    // We need to check the completeness of the last step, since
+    // the initial value of the form is already in complete, but we only
+    // update the progress indicator when leaving the step
+    if ((!status[key as keyof ProgressIndicatorConfig].isComplete && key !== 'extraction')
+        || !extractionCompleteness) {
+      allStepsComplete = false;
+    }
+  });
+
+  return allStepsComplete;
+};
+
+export const convertCollection = (collectionData: CollectionForm): CollectionFormSubmitType => ({
+  collectionClientNumber: collectionData.collectorAgency.value.code,
+  collectionLocnCode: collectionData.locationCode.value,
+  collectionStartDate: dateStringToISO(collectionData.startDate.value),
+  collectionEndDate: dateStringToISO(collectionData.endDate.value),
+  noOfContainers: +collectionData.numberOfContainers.value,
+  volPerContainer: +collectionData.volumePerContainers.value,
+  clctnVolume: +collectionData.volumeOfCones.value,
+  seedlotComment: collectionData.comments.value,
+  coneCollectionMethodCodes: collectionData.selectedCollectionCodes.value.map((code) => parseInt(code, 10))
+});
+
+export const convertOwnership = (ownershipData: Array<SingleOwnerForm>): Array<SingleOwnerFormSubmitType> => (
+  ownershipData.map((owner: SingleOwnerForm) => ({
+    ownerClientNumber: owner.ownerAgency.value.code,
+    ownerLocnCode: owner.ownerCode.value,
+    originalPctOwned: +owner.ownerPortion.value,
+    originalPctRsrvd: +owner.reservedPerc.value,
+    originalPctSrpls: +owner.surplusPerc.value,
+    methodOfPaymentCode: owner.methodOfPayment.value.code,
+    sparFundSrceCode: owner.fundingSource.value.code
+  }))
+);
+
+export const convertInterim = (interimData: InterimForm): InterimFormSubmitType => ({
+  intermStrgClientNumber: interimData.agencyName.value.code,
+  intermStrgLocnCode: interimData.locationCode.value,
+  intermStrgStDate: dateStringToISO(interimData.startDate.value),
+  intermStrgEndDate: dateStringToISO(interimData.endDate.value),
+  intermOtherFacilityDesc: interimData.facilityOtherType.value,
+  intermFacilityCode: interimData.facilityType.value
+});
+
+export const convertOrchard = (orchardData: OrchardForm, parentTreeRows: RowDataDictType): OrchardFormSubmitType => ({
+  // This is a way of dealing with duplicated orchards
+  // and make sure the value is not null
+  orchardsId: processOrchards(orchardData.orchards).map((orchard: OrchardObj) => {
+    if (orchard.selectedItem) {
+      return orchard.selectedItem.code;
+    }
+    return '';
+  }),
+  femaleGameticMthdCode: orchardData.femaleGametic.value.code,
+  maleGameticMthdCode: orchardData.maleGametic.value.code,
+  controlledCrossInd: orchardData.isControlledCross.value,
+  biotechProcessesInd: orchardData.hasBiotechProcess.value,
+  pollenContaminationInd: orchardData.hasPollenContamination.value,
+  pollenContaminationPct: +calcAverage(Object.values(parentTreeRows), 'nonOrchardPollenContam'),
+  contaminantPollenBv: +orchardData.breedingPercentage.value,
+  // This is a fixed field (for now at least) with the regional code,
+  // so the methodology code is always set to 'REG'
+  pollenContaminationMthdCode: 'REG'
+});
+
+export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlotNumber: string): Array<ParentTreeFormSubmitType> => {
+  const parentTreePayload: Array<ParentTreeFormSubmitType> = [];
+
+  // Each key is a parent tree number
+  Object.keys(parentTreeData.tableRowData).forEach((key: string) => {
+    parentTreePayload.push({
+      seedlotNumber,
+      parentTreeId: parentTreeData.allParentTreeData[key].parentTreeId,
+      parentTreeNumber: parentTreeData.allParentTreeData[key].parentTreeNumber,
+      coneCount: +parentTreeData.tableRowData[key].coneCount.value,
+      pollenPount: +parentTreeData.tableRowData[key].pollenCount.value,
+      smpSuccessPct: +parentTreeData.tableRowData[key].smpSuccessPerc.value,
+      nonOrchardPollenContamPct: +parentTreeData.tableRowData[key].nonOrchardPollenContam.value,
+      amountOfMaterial: +parentTreeData.tableRowData[key].volume.value,
+      proportion: +parentTreeData.tableRowData[key].proportion.value,
+      parentTreeGeneticQualities: parentTreeData.allParentTreeData[key].parentTreeGeneticQualities
+    });
+  });
+
+  return parentTreePayload;
+};
+
+export const convertExtraction = (extractionData: ExtractionStorageForm): ExtractionFormSubmitType => ({
+  extractoryClientNumber: extractionData.extraction.agency.value.code,
+  extractoryLocnCode: extractionData.extraction.locationCode.value,
+  extractionStDate: dateStringToISO(extractionData.extraction.startDate.value),
+  extractionEndDate: dateStringToISO(extractionData.extraction.endDate.value),
+  storageClientNumber: extractionData.seedStorage.agency.value.code,
+  storageLocnCode: extractionData.seedStorage.locationCode.value,
+  temporaryStrgStartDate: dateStringToISO(extractionData.seedStorage.startDate.value),
+  temporaryStrgEndDate: dateStringToISO(extractionData.seedStorage.endDate.value)
+});

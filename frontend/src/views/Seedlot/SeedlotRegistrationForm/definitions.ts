@@ -9,7 +9,7 @@ export type ParentTreeStepDataObj = {
   tableRowData: RowDataDictType, // able row data used in Cone & Pollen and the SMP Success tabs
   allParentTreeData: AllParentTreeMap // Contains all parent tree numbers under a species
   mixTabData: RowDataDictType, // table row data used exclusively for SMP mix tab
-  notifCtrl: NotifCtrlType,
+  notifCtrl: NotifCtrlType
 }
 
 export type AllStepData = {

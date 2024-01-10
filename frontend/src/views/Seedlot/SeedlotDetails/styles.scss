@@ -34,6 +34,15 @@
     padding: 2.5rem !important;
     margin-right: -2.5rem;
   }
+
+  .seedlot-submitted-notification {
+    margin-bottom: 2rem;
+    max-inline-size: none;
+
+    .#{vars.$bcgov-prefix}--inline-notification__title {
+      font-weight: bold;
+    }
+  }
 }
 
 

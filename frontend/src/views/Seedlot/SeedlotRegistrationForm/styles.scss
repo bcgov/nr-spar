@@ -20,15 +20,29 @@
     margin-bottom: 4rem;
   }
 
-  .seedlot-registration-button-row{
+  .seedlot-registration-button-row {
     .back-next-btn {
       width: 100%;
       max-width: none;
     }
 
-    .#{vars.$bcgov-prefix}--css-grid{
+    .#{vars.$bcgov-prefix}--css-grid {
       margin-left: 0;
       padding-left: 1rem;
     }
   }
+
+  .#{vars.$bcgov-prefix}--inline-notification {
+    margin-bottom: 1.5rem;
+    max-inline-size: none;
+
+    .#{vars.$bcgov-prefix}--inline-notification__text-wrapper {
+      flex-direction: column;
+    }
+
+    .#{vars.$bcgov-prefix}--inline-notification__title {
+      font-weight: bold;
+    }
+  }
+
 }
