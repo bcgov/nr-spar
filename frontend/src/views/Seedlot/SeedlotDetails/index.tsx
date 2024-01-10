@@ -40,7 +40,7 @@ const SeedlotDetails = () => {
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
   const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
 
-  const isSubmitSuccess = searchParams.get('isSubmitSuccess');
+  const isSubmitSuccess = searchParams.get('isSubmitSuccess') === 'true';
 
   const manageOptions = [
     {
