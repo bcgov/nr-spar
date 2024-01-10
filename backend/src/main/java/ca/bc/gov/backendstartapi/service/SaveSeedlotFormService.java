@@ -54,6 +54,9 @@ public class SaveSeedlotFormService {
               parsedProgressStatus,
               loggedUserService.createAuditCurrentUser());
     } else {
+      SparLog.info(
+          "A-class seedlot progress for seedlot number {} exists, replacing with new values ...",
+          seedlotNumber);
       entityToSave = optionalEntityToSave.get();
       entityToSave.setAllStepData(parsedAllStepData);
       entityToSave.setProgressStatus(parsedProgressStatus);
