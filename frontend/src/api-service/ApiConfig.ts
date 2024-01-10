@@ -58,6 +58,8 @@ const ApiConfig = {
 
   fundingSource: `${oracleServerHost}/api/funding-sources`,
 
+  facilityTypes: `${oracleServerHost}/api/facility-types`,
+
   oracleOrchards: `${oracleServerHost}/api/orchards`
 };
 
