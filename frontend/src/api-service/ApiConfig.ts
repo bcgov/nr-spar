@@ -14,8 +14,6 @@ const ApiConfig = {
   /**
    * MOCK API
    */
-  aClassSeedlot: `${mockServerHost}/api/register-a-class`,
-
   seedlotOrchardStep: `${mockServerHost}/api/seedlot/orchard`,
 
   recentActivities: `${mockServerHost}/api/recent-activities`,

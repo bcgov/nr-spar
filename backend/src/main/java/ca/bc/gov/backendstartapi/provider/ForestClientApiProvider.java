@@ -4,13 +4,19 @@ import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
+import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
+import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,6 +43,8 @@ public class ForestClientApiProvider implements Provider {
 
   private static final String PROVIDER = "ForestClient API";
 
+  @Autowired private Environment environment;
+
   ForestClientApiProvider(ProvidersConfig providersConfig, RestTemplateBuilder templateBuilder) {
     this.providersConfig = providersConfig;
     this.restTemplate = templateBuilder.build();
@@ -62,6 +70,10 @@ public class ForestClientApiProvider implements Provider {
     String apiUrl = String.format("%s/clients/findByClientNumber/{number}", rootUri);
     SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
+    if (shouldMock()) {
+      return Optional.of(mockForestClientDto(number));
+    }
+
     try {
       ResponseEntity<ForestClientDto> response =
           restTemplate.exchange(
@@ -85,6 +97,10 @@ public class ForestClientApiProvider implements Provider {
   private Optional<ForestClientDto> fetchClientByAcronym(String acronym) {
     String apiUrl = String.format("%s/clients/findByAcronym?acronym={acronym}", rootUri);
     SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
+
+    if (shouldMock()) {
+      return Optional.of(mockForestClientDto(acronym));
+    }
 
     try {
       ResponseEntity<List<ForestClientDto>> response =
@@ -127,6 +143,10 @@ public class ForestClientApiProvider implements Provider {
     String apiUrl = String.format("%s/clients/{clientNumber}/locations", rootUri);
     SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
+    if (shouldMock()) {
+      return List.of(mockForestClientLocationDto(clientNumber, "99"));
+    }
+
     try {
       ResponseEntity<List<ForestClientLocationDto>> response =
           restTemplate.exchange(
@@ -162,6 +182,10 @@ public class ForestClientApiProvider implements Provider {
     String apiUrl = String.format("%s/clients/{clientNumber}/locations/{locationCode}", rootUri);
     SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
+    if (shouldMock()) {
+      return mockForestClientLocationDto(clientNumber, locationCode);
+    }
+
     try {
       ResponseEntity<ForestClientLocationDto> response =
           restTemplate.exchange(
@@ -196,5 +220,59 @@ public class ForestClientApiProvider implements Provider {
     headers.set(authorization[0], authorization[1]);
 
     return headers;
+  }
+
+  /**
+   * Checks if the response should be mocked. To enable it, register an environment variable called
+   * BYPASS_FOREST_CLIENT and give it: Y. Note that is only possible to mock if this is not a prod
+   * environment.
+   *
+   * @return a boolean. True if should mock, false otherwise.
+   */
+  private boolean shouldMock() {
+    if (Arrays.stream(environment.getActiveProfiles())
+        .anyMatch(env -> !env.equalsIgnoreCase("prod"))) {
+      String byPass = System.getenv("BYPASS_FOREST_CLIENT");
+      boolean shouldMockValue = "Y".equals(byPass);
+      SparLog.info("Should mock ForestClient API request: {}", shouldMockValue);
+      return shouldMockValue;
+    }
+    return false;
+  }
+
+  private ForestClientDto mockForestClientDto(String number) {
+    return new ForestClientDto(
+        number,
+        "name",
+        "firstName",
+        "legalMiddleName",
+        ForestClientStatusEnum.ACT,
+        ForestClientTypeEnum.A,
+        "acronym");
+  }
+
+  private ForestClientLocationDto mockForestClientLocationDto(String number, String location) {
+    SparLog.info("Mocking ForestClientLocationDto for dev,testing,VPN purposes.");
+    return new ForestClientLocationDto(
+        number,
+        location,
+        "locationName",
+        "company",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ForestClientExpiredEnum.N,
+        ForestClientExpiredEnum.Y,
+        "",
+        "");
   }
 }
