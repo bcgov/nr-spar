@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
 
 import {
@@ -9,12 +10,15 @@ import {
   RadioButtonGroup,
   Row,
   TextInput,
-  FlexGrid
+  FlexGrid,
+  RadioButtonSkeleton
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
+import getFacilityTypes from '../../../api-service/facilityTypesAPI';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import InterimForm from './definitions';
@@ -30,7 +34,6 @@ interface InterimStorageStepProps {
   collectorAgency: OptionsInputType,
   collectorCode: StringInputType,
   agencyOptions: Array<MultiOptionsObj>,
-  facilityTypes: Array<MultiOptionsObj>,
   readOnly?: boolean
 }
 
@@ -41,7 +44,6 @@ const InterimStorage = (
     collectorAgency,
     collectorCode,
     agencyOptions,
-    facilityTypes,
     readOnly
   }: InterimStorageStepProps
 ) => {
@@ -108,20 +110,32 @@ const InterimStorage = (
     setStepData(clonedState);
   };
 
-  const renderFacilityTypes = () => {
-    // Change order of the array to set the
-    // OTH value on the last position
-    const otherType = facilityTypes.filter((types: MultiOptionsObj) => types.code === 'OTH');
-    facilityTypes.push(facilityTypes.splice(facilityTypes.indexOf(otherType[0]), 1)[0]);
+  const facilityTypesQuery = useQuery({
+    queryKey: ['facility-types'],
+    queryFn: getFacilityTypes,
+    select: (data: any) => getMultiOptList(data)
+  });
 
-    return facilityTypes.map((type: MultiOptionsObj) => (
-      <RadioButton
-        id={`facility-type-radio-btn-${type.code.toLowerCase()}`}
-        key={type.code}
-        labelText={type.label}
-        value={type.code}
-      />
-    ));
+  const renderFacilityTypes = (facilityTypes: Array<MultiOptionsObj>) => {
+    // Safety check if there are no facility types set
+    if (facilityTypes.length) {
+      // Change order of the array to set the
+      // OTH value on the last position
+      const otherType = facilityTypes.filter((types: MultiOptionsObj) => types.code === 'OTH');
+      if (otherType.length) {
+        facilityTypes.push(facilityTypes.splice(facilityTypes.indexOf(otherType[0]), 1)[0]);
+      }
+
+      return facilityTypes.map((type: MultiOptionsObj) => (
+        <RadioButton
+          id={`facility-type-radio-btn-${type.code.toLowerCase()}`}
+          key={type.code}
+          labelText={type.label}
+          value={type.code}
+        />
+      ));
+    }
+    return null;
   };
 
   return (
@@ -208,7 +222,16 @@ const InterimStorage = (
             readOnly={readOnly}
           >
             {
-              renderFacilityTypes()
+              facilityTypesQuery.isFetched
+                ? renderFacilityTypes(facilityTypesQuery.data ?? [])
+                : (
+                  <>
+                    <RadioButtonSkeleton />
+                    <RadioButtonSkeleton />
+                    <RadioButtonSkeleton />
+                    <RadioButtonSkeleton />
+                  </>
+                )
             }
           </RadioButtonGroup>
         </Column>
