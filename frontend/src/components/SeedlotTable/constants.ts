@@ -32,7 +32,7 @@ export const HeaderConfig: HeaderObj[] = [
 ];
 
 export const TableText = {
-  emptyPictogram: 'Magnify',
+  emptyPictogram: 'Cafe',
   emptyTitle: 'There is no seedlot to show yet!',
   emptyDescription: 'Your recent seedlots will appear here once you generate one',
   errorTitle: 'Network errors...',
