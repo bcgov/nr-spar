@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.entity.FacilityTypes;
 import ca.bc.gov.backendstartapi.repository.FacilityTypesRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,9 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/facility-types")
 @Tag(name = "facilityTypes", description = "Resource to retrieve Facility Types for Interim Agencies")
@@ -58,7 +58,7 @@ public class FacilityTypesEndpoint {
     }
   )
    public List<FacilityTypes> getAllValidFacilityTypes() {
-    log.info("Fetching all valid facility types");
+    SparLog.info("Fetching all valid facility types");
     return facilityTypesRepository.findAllValid();
   }
 }
