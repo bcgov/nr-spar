@@ -27,6 +27,7 @@ import {
 } from './constants';
 
 import './styles.scss';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 interface InterimStorageStepProps {
   state: InterimForm,
@@ -113,7 +114,9 @@ const InterimStorage = (
   const facilityTypesQuery = useQuery({
     queryKey: ['facility-types'],
     queryFn: getFacilityTypes,
-    select: (data: any) => getMultiOptList(data)
+    select: (data: any) => getMultiOptList(data),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
   });
 
   const renderFacilityTypes = (facilityTypes: Array<MultiOptionsObj>) => {
@@ -222,9 +225,8 @@ const InterimStorage = (
             readOnly={readOnly}
           >
             {
-              facilityTypesQuery.isFetched
-                ? renderFacilityTypes(facilityTypesQuery.data ?? [])
-                : (
+              facilityTypesQuery.isFetching
+                ? (
                   <>
                     <RadioButtonSkeleton />
                     <RadioButtonSkeleton />
@@ -232,6 +234,7 @@ const InterimStorage = (
                     <RadioButtonSkeleton />
                   </>
                 )
+                : renderFacilityTypes(facilityTypesQuery.data ?? [])
             }
           </RadioButtonGroup>
         </Column>
