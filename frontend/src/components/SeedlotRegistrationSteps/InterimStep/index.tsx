@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
 
 import {
@@ -9,18 +10,22 @@ import {
   RadioButtonGroup,
   Row,
   TextInput,
-  FlexGrid
+  FlexGrid,
+  RadioButtonSkeleton
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
+import getFacilityTypes from '../../../api-service/facilityTypesAPI';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import InterimForm from './definitions';
 import {
   DATE_FORMAT, MAX_FACILITY_DESC_CHAR, agencyFieldsProps, pageTexts
 } from './constants';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import './styles.scss';
 
@@ -106,6 +111,36 @@ const InterimStorage = (
     setStepData(clonedState);
   };
 
+  const facilityTypesQuery = useQuery({
+    queryKey: ['facility-types'],
+    queryFn: getFacilityTypes,
+    select: (data: any) => getMultiOptList(data),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  const renderFacilityTypes = (facilityTypes: Array<MultiOptionsObj>) => {
+    // Safety check if there are no facility types set
+    if (facilityTypes.length) {
+      // Change order of the array to set the
+      // OTH value on the last position
+      const otherType = facilityTypes.filter((types: MultiOptionsObj) => types.code === 'OTH');
+      if (otherType.length) {
+        facilityTypes.push(facilityTypes.splice(facilityTypes.indexOf(otherType[0]), 1)[0]);
+      }
+
+      return facilityTypes.map((type: MultiOptionsObj) => (
+        <RadioButton
+          id={`facility-type-radio-btn-${type.code.toLowerCase()}`}
+          key={type.code}
+          labelText={type.label}
+          value={type.code}
+        />
+      ));
+    }
+    return null;
+  };
+
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
       <Row className="interim-title-row">
@@ -189,26 +224,18 @@ const InterimStorage = (
             onChange={(e: string) => handleFacilityType(e)}
             readOnly={readOnly}
           >
-            <RadioButton
-              id="outside-radio"
-              labelText={pageTexts.storageFacility.outsideLabel}
-              value={pageTexts.storageFacility.outsideValue}
-            />
-            <RadioButton
-              id="ventilated-radio"
-              labelText={pageTexts.storageFacility.ventilatedLabel}
-              value={pageTexts.storageFacility.ventilatedValue}
-            />
-            <RadioButton
-              id="reefer-radio"
-              labelText={pageTexts.storageFacility.reeferLabel}
-              value={pageTexts.storageFacility.reeferValue}
-            />
-            <RadioButton
-              id="other-radio"
-              labelText={pageTexts.storageFacility.otherLabel}
-              value={pageTexts.storageFacility.otherValue}
-            />
+            {
+              facilityTypesQuery.isFetching
+                ? (
+                  <>
+                    <RadioButtonSkeleton />
+                    <RadioButtonSkeleton />
+                    <RadioButtonSkeleton />
+                    <RadioButtonSkeleton />
+                  </>
+                )
+                : renderFacilityTypes(facilityTypesQuery.data ?? [])
+            }
           </RadioButtonGroup>
         </Column>
         {
