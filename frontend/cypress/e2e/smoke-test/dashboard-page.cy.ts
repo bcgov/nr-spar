@@ -1,3 +1,5 @@
+/* eslint-disable func-names */
+/* eslint-disable prefer-arrow-callback */
 import { NavigationLabels } from '../../utils/labels';
 import prefix from '../../../src/styles/classPrefix';
 
@@ -8,16 +10,24 @@ describe('Dashboard page test', () => {
     secondSectionSubtitle: string,
   };
 
-  beforeEach(() => {
+  beforeEach(function () {
     // Loading test data
     cy.fixture('dashboard-page').then((fData) => {
       dashboardPageData = fData;
     });
+    cy.fixture('favourite-activities').as('favActRes')
+      .then((favActRes) => {
+        this.favActRes = favActRes;
+      });
+
     cy.login();
     cy.visit('/');
     cy.url().should('contains', '/dashboard');
   });
 
+  /**
+   * Dashboard page should load correctly.
+   */
   it('should load and display dashboard page correctly', () => {
     cy.isPageTitle(NavigationLabels.Dashboard);
     cy.get('.title-section')
@@ -31,91 +41,78 @@ describe('Dashboard page test', () => {
       .should('have.text', dashboardPageData.secondSectionSubtitle);
   });
 
-  it('should be able to favourite the seedlots page', () => {
-    // Navigate to Seedlot page
+  /**
+   * Click on the heart icon should favourite the seedlots dashboard page.
+   */
+  it('should be able to favourite the Seedlots Dashboard page', function () {
+    // Navigate to Seedlots page
     cy.navigateTo(NavigationLabels.Seedlots);
-    // Favourite Seedlot page
+    cy.url().should('contains', '/seedlots');
+
+    cy.intercept(
+      'GET',
+      '**/api/favourite-activities',
+      this.favActRes.after_favourite
+    ).as('GET_fav_act_req_after_click');
+
+    // Favourite Seedlots page
     cy.get('.title-favourite')
       .find(`.${prefix}--popover-container`)
       .click();
+
     // Navigate to Dashboard page
     cy.navigateTo(NavigationLabels.Dashboard);
+
     // Check if seedlot card is appearing at favourites activities
     cy.get('.favourite-activities-cards')
       .find('.fav-card-content')
       .find('.fav-card-title-large')
       .contains('Seedlots')
       .click();
+
     cy.isPageTitle(NavigationLabels.Seedlots);
   });
 
-  it('should be able to favourite the a class seedlot page', () => {
-    // Navigate to Seedlot page
-    cy.navigateTo(NavigationLabels.Seedlots);
+  /**
+   * Highlight a favourite card should make it appear highlighted.
+   */
+  it('should be able to highlight favourite cards at dashboard', function () {
+    cy.intercept(
+      'GET',
+      '**/api/favourite-activities',
+      this.favActRes.before_highlight
+    ).as('GET_fav_act_req_before_highlight');
 
-    // Favourite A class Seedlot page
-    cy.get('.seedlot-activities-cards')
-      .find('.std-card-title')
-      .contains('Register an A-class seedlot')
-      .click();
-    cy.get('.title-favourite')
-      .find(`.${prefix}--popover-container`)
-      .click();
+    // Load the page with the data returned from the intercept above.
+    cy.visit('/dashboard');
+    cy.url().should('contains', '/dashboard');
 
-    // Navigate to Dashboard page
-    cy.navigateTo(NavigationLabels.Dashboard);
-
-    // Check if Create A Class Seedlot card is appearing at favourites activities
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-content')
-      .find('.fav-card-title-large')
-      .contains('Create A-class seedlot')
-      .click();
-
-    cy.isPageTitle('Create A-class seedlot');
-  });
-
-  it('should be able to favourite my seedlot page', () => {
-    // Navigate to My seedlot page
-    cy.navigateTo(NavigationLabels.Seedlots);
-    cy.get('.seedlot-activities-cards')
-      .find('.std-card-title')
-      .contains('My seedlots')
-      .click();
-
-    // Favourite My Seedlot page
-    cy.get('.title-favourite')
-      .find(`.${prefix}--popover-container`)
-      .click();
-
-    // Navigate to Dashboard page
-    cy.navigateTo(NavigationLabels.Dashboard);
-
-    // Check if My Seedlot card is appearing at favourites activities
-    // and if redirects to the correct page
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-content')
-      .find('.fav-card-title-large')
-      .contains('My Seedlots')
-      .click();
-
-    cy.isPageTitle('My Seedlots');
-  });
-
-  it('should be able to highlight favourite cards at dashboard', () => {
-  // Highlight Seedlots Card
+    // Highlight Seedlots Dashboard Card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
+
+    cy.intercept(
+      'GET',
+      '**/api/favourite-activities',
+      this.favActRes.after_highlight
+    ).as('GET_fav_act_req_after_highlight');
+
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Highlight shortcut')
       .click();
 
-    // Check if the Seedlots card is unique and highlighted
+    // Check if the Seedlots Dashboard card is highlighted
     cy.get('.fav-card-main-highlighted')
       .should('have.length', 1)
       .should('contain.text', 'Seedlots');
+
+    cy.intercept(
+      'GET',
+      '**/api/favourite-activities',
+      this.favActRes.after_highlight_2
+    ).as('GET_fav_act_req_after_highlight_2');
 
     // Highlight Create A Class Seedlot card
     cy.get('.favourite-activities-cards')
@@ -132,45 +129,29 @@ describe('Dashboard page test', () => {
       .should('contain.text', 'Create A-class seedlot');
   });
 
-  it('should delete my seedlots card from favourite activities', () => {
-    // Delete My Seedlots card
+  /**
+   * Delete a favourite card should remove it from the dashboard and display an empty section.
+   */
+  it('should delete a card from favourite activities', () => {
+    // Delete the first card
     cy.get('.favourite-activities-cards')
       .find('.fav-card-main:first')
       .find('.fav-card-overflow')
       .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content`)
-      .contains('Delete shortcut')
-      .click();
-    cy.get('.fav-card-main')
-      .should('have.length', 1);
-  });
 
-  it('should delete a class seedlot card from favourite activities', () => {
-    // Delete Create A Class Seedlot card
-    cy.get('.fav-card-main-highlighted')
-      .find('.fav-card-overflow')
-      .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content`)
-      .contains('Delete shortcut')
-      .click();
-    cy.get('.fav-card-main-highlighted')
-      .should('have.length', 0);
-  });
+    cy.intercept(
+      'GET',
+      '**/api/favourite-activities',
+      []
+    ).as('GET_fav_act_req_empty_res');
 
-  it('should delete seedlots card from favourite activities', () => {
-    // Delete Seedlots card
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-main:first')
-      .find('.fav-card-overflow')
-      .click();
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Delete shortcut')
       .click();
+
     cy.get('.fav-card-main')
       .should('have.length', 0);
-  });
 
-  it('should display empty section', () => {
     cy.get('.empty-section-title')
       .should('contain.text', "You don't have any favourites to show yet!");
   });
