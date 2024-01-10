@@ -6,7 +6,7 @@ import * as Icons from '@carbon/icons-react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FavActivityType } from '../../../types/FavActivityTypes';
-import { putFavAct, deleteFavAct } from '../../../api-service/favouriteActivitiesAPI';
+import { patchFavAct, deleteFavAct } from '../../../api-service/favouriteActivitiesAPI';
 import './styles.scss';
 
 interface FavouriteCardProps {
@@ -24,7 +24,7 @@ const FavouriteCard = ({
   const queryClient = useQueryClient();
 
   const highlightFavAct = useMutation({
-    mutationFn: () => putFavAct('highlighted', favObject),
+    mutationFn: () => patchFavAct('highlighted', favObject),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: favActQueryKey });
     }

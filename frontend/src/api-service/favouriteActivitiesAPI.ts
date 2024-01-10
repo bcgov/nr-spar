@@ -41,13 +41,13 @@ export const postFavAct = (newAct: FavActivityPostType) => {
   return api.post(url, newAct);
 };
 
-export const putFavAct = (field: string, activity: FavActivityType) => {
+export const patchFavAct = (field: string, activity: FavActivityType) => {
   const url = `${ApiConfig.favouriteActivities}/${activity.id}`;
   const modifiedAct = { ...activity };
   if (field === 'highlighted') {
     modifiedAct.highlighted = !modifiedAct.highlighted;
   }
-  return api.put(url, modifiedAct);
+  return api.patch(url, modifiedAct);
 };
 
 export const deleteFavAct = (id: number) => {
