@@ -463,7 +463,7 @@ const SeedlotRegistrationForm = () => {
     onSuccess: () => {
       navigate({
         pathname: `/seedlots/details/${seedlotNumber}`,
-        search: '?seedlotStatus=SUB'
+        search: '?submitStatus=SUB'
       });
     },
     onError: (err: AxiosError) => {

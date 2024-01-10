@@ -40,7 +40,7 @@ const SeedlotDetails = () => {
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
   const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
 
-  const seedlotStatus = searchParams.get('seedlotStatus');
+  const submitStatus = searchParams.get('submitStatus');
 
   const manageOptions = [
     {
@@ -169,7 +169,7 @@ const SeedlotDetails = () => {
               <TabPanels>
                 <TabPanel>
                   {
-                    seedlotStatus === 'SUB'
+                    submitStatus === 'SUB'
                       ? (
                         <InlineNotification
                           className="seedlot-submitted-notification"
