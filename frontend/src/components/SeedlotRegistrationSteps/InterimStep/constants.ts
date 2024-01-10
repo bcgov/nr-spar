@@ -44,7 +44,7 @@ export const pageTexts = {
     otherInput: {
       placeholder: 'Enter the storage facility type',
       helperText: 'Describe the new storage facility used',
-      invalidText: `Storage facility type length should be <= ${MAX_FACILITY_DESC_CHAR}.`
+      invalidText: `Storage facility type length must be <= ${MAX_FACILITY_DESC_CHAR}.`
     }
   }
 };
