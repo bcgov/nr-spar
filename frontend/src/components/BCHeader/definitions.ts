@@ -13,3 +13,8 @@ export type ListItems = {
 export type RightPanelType = {
   [panel: string]: boolean;
 };
+
+export interface HearderContainerProps {
+  isSideNavExpanded: boolean,
+  onClickSideNavExpand: Function
+}

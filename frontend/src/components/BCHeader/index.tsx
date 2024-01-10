@@ -27,7 +27,7 @@ import {
   navItems,
   supportItems
 } from './constants';
-import { RightPanelType } from './definitions';
+import { RightPanelType, HearderContainerProps } from './definitions';
 
 import './styles.scss';
 
@@ -60,15 +60,28 @@ const BCHeader = () => {
     });
   };
 
+  const handleClosePanel = () => {
+    if (rightPanel.notifications) {
+      closeRightPanel('notifications');
+    } else { closeRightPanel('myProfile'); }
+  };
+
+  const onKeyDownFunction = (event: any) => {
+    if (event.key === 'Enter' || event.key === 'Escape') {
+      handleClosePanel();
+    }
+  };
+
   const navigate = useNavigate();
 
   return (
     <HeaderContainer
-      render={({ isSideNavExpanded, onClickSideNavExpand }: any) => (
+      render={({ isSideNavExpanded, onClickSideNavExpand }: HearderContainerProps) => (
         <Header
           aria-label={componentTexts.completeTitle}
           className="spar-header"
           data-testid="header"
+          onClick={isSideNavExpanded ? onClickSideNavExpand : null}
         >
           <SkipToContent />
           <HeaderMenuButton
@@ -129,7 +142,16 @@ const BCHeader = () => {
           </HeaderPanel>
           {
             overlay
-              ? <div className="overlay-element" />
+              ? (
+                <div
+                  className="overlay-element"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="close right panel"
+                  onKeyDown={onKeyDownFunction}
+                  onClick={handleClosePanel}
+                />
+              )
               : null
           }
           <SideNav
@@ -138,6 +160,7 @@ const BCHeader = () => {
             aria-label={componentTexts.sideMenuAriaLabel}
             inert={undefined}
             className="spar-side-nav"
+            onClick={isSideNavExpanded ? onClickSideNavExpand : null}
           >
             <div className="side-nav-top">
               {
