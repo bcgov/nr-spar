@@ -1,5 +1,4 @@
 import React from 'react';
-import BigNumber from 'bignumber.js';
 
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
@@ -92,12 +91,12 @@ export const calcAverage = (tableRows: Array<RowItem>, field: keyof StrTypeRowIt
 };
 
 export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): string => {
-  let sum = new BigNumber(0);
+  let sum = BigInt('0');
 
   tableRows.forEach((row) => {
     // add if the value is not null
     if (row[field].value) {
-      sum = sum.add(new BigNumber(row[field].value));
+      sum += BigInt(row[field].value);
     }
   });
 

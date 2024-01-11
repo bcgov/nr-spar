@@ -111,8 +111,8 @@ export const getPTNumberErrMsg = (value: string): string => (
  * A float validator, the validator.isFloat() cannot handle high precision comparing.
  */
 const isFloatWithinRange = (value: string, min: string, max: string): boolean => (
-  new BigNumber(value).greaterThanOrEqualTo(min)
-  && new BigNumber(value).lessThanOrEqualTo(max)
+  new BigNumber(value).isGreaterThanOrEqualTo(min)
+  && new BigNumber(value).isLessThanOrEqualTo(max)
 );
 
 export const isConeCountInvalid = (value: string): boolean => {
