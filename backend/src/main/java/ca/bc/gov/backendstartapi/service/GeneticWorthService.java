@@ -72,7 +72,7 @@ public class GeneticWorthService {
 
     for (CodeDescriptionDto trait : geneticWorths) {
       BigDecimal calculatedValue = null;
-      BigDecimal percentage = checkGeneticTraitTreshold(traitsDto, trait);
+      BigDecimal percentage = calcGeneticTraitTreshold(traitsDto, trait);
 
       if (percentage.compareTo(minimumTreshold) >= 0) {
         SparLog.info("Calculating Genetic Worth for {} trait", trait.code());
@@ -145,16 +145,17 @@ public class GeneticWorthService {
   }
 
   /**
-   * Check if a given trait mets the minimum of 70% of parent tree contribution.
+   * Calculate the threshold of a genetic trait. To be used to check if a given trait mets the
+   * minimum of 70% of parent tree contribution.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
    * @param trait A {@link GeneticWorth} with the trait that should be considered.
-   * @return A BigDecimal representing the trait treshold.
+   * @return A BigDecimal representing the trait treshold. TODO: PROBLEM
    */
-  private BigDecimal checkGeneticTraitTreshold(
+  private BigDecimal calcGeneticTraitTreshold(
       List<GeneticWorthTraitsRequestDto> traitsDto, CodeDescriptionDto trait) {
-    SparLog.debug("Checking genetic trait treshold for {} trait", trait);
+    SparLog.debug("Checking genetic trait threshold for {} trait", trait);
 
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
     BigDecimal femaleConeSum = reduceConeCount(traitsDto);
@@ -215,7 +216,10 @@ public class GeneticWorthService {
         coneSum.compareTo(bigZero) == 0
             ? bigZero
             : coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);
-    return mi.add(fi).divide(new BigDecimal("2"), 10, RoundingMode.HALF_UP);
+
+    BigDecimal calculatedPi = mi.add(fi).divide(new BigDecimal("2"), 10, RoundingMode.HALF_UP);
+
+    return calculatedPi;
   }
 
   /**
