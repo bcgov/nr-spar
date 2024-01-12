@@ -14,12 +14,15 @@ import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotRegistrationForm from '../views/Seedlot/SeedlotRegistrationForm';
 
 const routes: Array<RoutesType> = [
+  // Ensures that root paths get redirected to
+  // dashboard, when user is logged in
   {
-    path: PathConstants.HOME,
+    path: PathConstants.ROOT,
     element: (
       <Navigate to={PathConstants.DASHBOARD} replace />
     )
   },
+  // Same for the login path
   {
     path: PathConstants.LOGIN,
     element: (

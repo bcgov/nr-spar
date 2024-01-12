@@ -3,7 +3,7 @@ import { RouteNames } from './definitions';
 const PathConstants: RouteNames = {
   ALL_ROUTES: '*',
   LOGIN: '/login',
-  HOME: '/',
+  ROOT: '/',
   DASHBOARD: '/dashboard',
   SEEDLOTS: '/seedlots',
   SEEDLOTS_A_CLASS_CREATION: '/seedlots/register-a-class',
