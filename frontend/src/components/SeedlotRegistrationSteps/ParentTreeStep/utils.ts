@@ -96,7 +96,7 @@ export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem):
   tableRows.forEach((row) => {
     // add if the value is not null
     if (row[field].value) {
-      sum += BigInt(row[field].value);
+      sum += BigInt(parseInt(row[field].value, 10));
     }
   });
 
