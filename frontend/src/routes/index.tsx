@@ -1,4 +1,5 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 
 import { RoutesType } from './definitions';
 import PathConstants from './pathConstants';
@@ -13,6 +14,18 @@ import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotRegistrationForm from '../views/Seedlot/SeedlotRegistrationForm';
 
 const routes: Array<RoutesType> = [
+  {
+    path: PathConstants.HOME,
+    element: (
+      <Navigate to={PathConstants.DASHBOARD} replace />
+    )
+  },
+  {
+    path: PathConstants.LOGIN,
+    element: (
+      <Navigate to={PathConstants.DASHBOARD} replace />
+    )
+  },
   {
     path: PathConstants.DASHBOARD,
     element: (

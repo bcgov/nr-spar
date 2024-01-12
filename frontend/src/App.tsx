@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import {
-  createBrowserRouter, Navigate, RouterProvider
+  createBrowserRouter, RouterProvider
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
@@ -17,7 +17,7 @@ import AuthContext from './contexts/AuthContext';
 import routes from './routes';
 import PathConstants from './routes/pathConstants';
 import FourOhFour from './views/FourOhFour';
-// import ProtectedRoute from './routes/ProtectedRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 Amplify.configure(awsconfig);
 
@@ -28,12 +28,11 @@ Amplify.configure(awsconfig);
  */
 const App: React.FC = () => {
   const { signed, isCurrentAuthUser } = useContext(AuthContext);
-  console.log(signed);
   // const navigate = useNavigate();
 
   useEffect(() => {
     isCurrentAuthUser(window.location.pathname);
-  }, [signed]);
+  }, []);
 
   // useEffect(() => {
   //   if (signed) {
@@ -50,7 +49,7 @@ const App: React.FC = () => {
   const router = createBrowserRouter([
     {
       path: PathConstants.HOME,
-      element: <Navigate to={signed ? PathConstants.DASHBOARD : PathConstants.LOGIN} replace />,
+      element: <ProtectedRoute />,
       children: [
         {
           element: <Layout />,
@@ -59,19 +58,22 @@ const App: React.FC = () => {
       ]
     },
     {
-      path: PathConstants.LOGIN,
-      element: <Landing />
-    },
-    {
       path: PathConstants.ALL_ROUTES,
       element: <FourOhFour />
+    }
+  ]);
+
+  const notSignedRouter = createBrowserRouter([
+    {
+      path: PathConstants.ALL_ROUTES,
+      element: <Landing />
     }
   ]);
 
   return (
     <>
       <ToastContainer />
-      <RouterProvider router={router} />
+      <RouterProvider router={signed ? router : notSignedRouter} />
     </>
   );
 };
