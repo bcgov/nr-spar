@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,9 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 /** This class exposes resources to handle all genetic class codes. */
 @RestController
 @RequestMapping(path = "/api/genetic-classes", produces = "application/json")
-@Tag(
-    name = "GeneticClasses",
-    description = "Resources to handle all genetic classes")
+@Tag(name = "GeneticClasses", description = "Resources to handle all genetic classes")
 public class GeneticClassEndpoint {
 
   private GeneticClassService geneticClassService;
@@ -101,7 +100,9 @@ public class GeneticClassEndpoint {
           @Parameter(
               name = "code",
               in = ParameterIn.PATH,
+              required = true,
               description = "Identifier of the genetic class.")
+          @NonNull
           String code) {
     return geneticClassService.getGeneticClassByCode(code);
   }
