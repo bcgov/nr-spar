@@ -45,7 +45,8 @@ public class GeneticClassService {
     gceOptional.ifPresent(entity -> SparLog.info("Genetic class {} found.", code));
 
     return gceOptional
-        .map(CodeDescriptionDto::fromEntity)
+        .map(
+            entity -> new CodeDescriptionDto(entity.getGeneticClassCode(), entity.getDescription()))
         .orElseThrow(NoGeneticWorthException::new);
   }
 }

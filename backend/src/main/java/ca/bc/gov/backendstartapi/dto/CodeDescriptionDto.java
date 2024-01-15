@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.dto;
 
-import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -15,15 +14,4 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record CodeDescriptionDto(
     @Schema(description = "The Code that represent a data object", example = "1") String code,
     @Schema(description = "The description/value of the data object", example = "Squirrel cache")
-        String description) {
-  
-  /**
-   * Creates a {@link CodeDescriptionDto} from a {@link GeneticClassEntity} instance.
-   *
-   * @param entity The GeneticClassEntity instance
-   * @return A CodeDescriptionDto
-   */
-  public static CodeDescriptionDto fromEntity(GeneticClassEntity entity) {
-    return new CodeDescriptionDto(entity.getGeneticClassCode(), entity.getDescription());
-  }
-}
+        String description) {}
