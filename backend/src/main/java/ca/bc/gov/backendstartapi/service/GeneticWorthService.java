@@ -217,7 +217,15 @@ public class GeneticWorthService {
             ? bigZero
             : coneCount.divide(coneSum, 10, RoundingMode.HALF_UP);
 
-    BigDecimal calculatedPi = mi.add(fi).divide(new BigDecimal("2"), 10, RoundingMode.HALF_UP);
+    BigDecimal calculatedPi = BigDecimal.ZERO;
+
+    if (mi.compareTo(bigZero) == 0 && fi.compareTo(bigZero) != 0) {
+      // if mi is 0 but fi is not 0, then return fi without calculting the average.
+      calculatedPi = fi;
+    } else if (mi.compareTo(bigZero) != 0 && fi.compareTo(bigZero) == 0) {
+      // if fi is 0 but mi is not 0, then return mi without calculting the average.
+      calculatedPi = mi;
+    } else calculatedPi = mi.add(fi).divide(new BigDecimal("2"), 10, RoundingMode.HALF_UP);
 
     return calculatedPi;
   }
