@@ -14,7 +14,7 @@ import {
   InlineNotification,
   InlineLoading
 } from '@carbon/react';
-import { ArrowRight, CheckmarkOutline, ErrorOutline } from '@carbon/icons-react';
+import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
@@ -26,7 +26,7 @@ import { getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress } from '../.
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
-import { FIVE_SECONDS, THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { THREE_HALF_HOURS, THREE_HOURS, THREE_SECONDS } from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -108,7 +108,8 @@ const SeedlotRegistrationForm = () => {
   const [errorSubmitting, setErrorSubmitting] = useState<ResponseErrorType>(EmptyResponseError);
   const [allStepCompleted, setAllStepCompleted] = useState<boolean>(false);
   const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(DateTime.now().toISO());
-  const [saveBtnIcon, setSaveBtnIcon] = useState<React.ReactNode>(null);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [saveDescription, setSaveDescription] = useState<string>('Save changes');
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
@@ -345,6 +346,7 @@ const SeedlotRegistrationForm = () => {
     const prevStep = formStep;
     const newStep = prevStep + delta;
     updateProgressStatus(newStep, prevStep);
+    window.history.replaceState(null, '', `?step=${newStep + 1}`);
     setFormStep(newStep);
   };
 
@@ -478,7 +480,7 @@ const SeedlotRegistrationForm = () => {
   useEffect(() => {
     const completionStatus = checkAllStepsCompletion(progressStatus, verifyExtractionStepCompleteness(allStepData.extractionStorageStep));
     setAllStepCompleted(completionStatus);
-  }, [progressStatus, allStepData.extractionStorageStep]);
+  }, [progressStatus, allStepData.extractionStorageStep, formStep]);
 
   const saveProgress = useMutation({
     mutationFn: () => putAClassSeedlotProgress(
@@ -490,29 +492,23 @@ const SeedlotRegistrationForm = () => {
     ),
     onSuccess: () => {
       setLastSaveTimestamp(DateTime.now().toISO());
+      setSaveStatus('finished');
+      setSaveDescription('Changes saved!');
+      setTimeout(() => {
+        setSaveStatus(null);
+        setSaveDescription('Save changes');
+      }, THREE_SECONDS);
     },
     onError: (err: AxiosError) => {
-      console.warn(`hahah ${err.code}`);
+      setSaveStatus('error');
+      setSaveDescription(`Save changes failed ${err.response?.status}`);
     }
   });
 
-  // const AutoSaveSubtitle = () => {
-
-  // };
-
-  // eslint-disable-next-line arrow-body-style
-  const renderSaveBtnIcon = () => {
-    // if (saveProgress.isLoading) {
-    //   return InlineLoading;
-    // }
-    // if (saveProgress.isSuccess) {
-    //   return CheckmarkOutline;
-    // }
-    // if (saveProgress.isError) {
-    //   return ErrorOutline;
-    // }
-    // return null;
-    return InlineLoading;
+  const handleSaveBtn = () => {
+    setSaveStatus('active');
+    setSaveDescription('Saving ...');
+    saveProgress.mutate();
   };
 
   return (
@@ -533,7 +529,7 @@ const SeedlotRegistrationForm = () => {
               title="Seedlot Registration"
               subtitle={(
                 <div>
-                  <span>{`Seedlot ${seedlotNumber}`}</span    >
+                  <span>{`Seedlot ${seedlotNumber}`}</span>
                   <div>
                     haha
                   </div>
@@ -548,9 +544,8 @@ const SeedlotRegistrationForm = () => {
               progressStatus={progressStatus}
               className="seedlot-registration-steps"
               interactFunction={(e: number) => {
-                window.history.replaceState(null, '', `?step=${(e + 1).toString()}`);
                 updateProgressStatus(e, formStep);
-                setFormStep(e);
+                setStep((e - formStep));
               }}
             />
           </Column>
@@ -623,22 +618,10 @@ const SeedlotRegistrationForm = () => {
                 kind="secondary"
                 size="lg"
                 className="form-action-btn"
-                onClick={() => saveProgress.mutate()}
-                renderIcon={() => {
-                  let status = 'inactive';
-                  if (saveProgress.isLoading) {
-                    status = 'active';
-                  }
-                  if (saveProgress.isSuccess) {
-                    status = 'finished';
-                  }
-                  if (saveProgress.isError) {
-                    status = 'error';
-                  }
-                  return <InlineLoading status={status} successDelay={FIVE_SECONDS} />;
-                }}
+                onClick={() => handleSaveBtn()}
+                disabled={saveProgress.isLoading}
               >
-                Save changes
+                <InlineLoading status={saveStatus} description={saveDescription} />
               </Button>
             </Column>
             <Column sm={4} md={3} lg={3} xlg={4}>

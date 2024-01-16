@@ -24,6 +24,15 @@
     .form-action-btn {
       width: 100%;
       max-width: none;
+
+      .#{vars.$bcgov-prefix}--inline-loading {
+        min-block-size: 0;
+
+        .#{vars.$bcgov-prefix}--inline-loading__text {
+          @include type.type-style('body-compact-01');
+          color: var(--#{vars.$bcgov-prefix}-text-on-color);
+        }
+      }
     }
 
     .#{vars.$bcgov-prefix}--css-grid {
