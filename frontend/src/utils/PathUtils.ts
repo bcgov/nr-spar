@@ -10,3 +10,8 @@ export const getStoredPath = () => {
   }
   return PathConstants.DASHBOARD;
 };
+
+// Split on the ':' character, since it is where
+// the param will be mapped to, by definition,
+// and append the param value
+export const addParamToPath = (path: string, param: string): string => `${path.split(':')[0]}${param}`;
