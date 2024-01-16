@@ -17,7 +17,6 @@ import routes from './routes';
 import PathConstants from './routes/pathConstants';
 import FourOhFour from './views/FourOhFour';
 import ProtectedRoute from './routes/ProtectedRoute';
-import { protectedRouteLoader } from './routes/utils';
 
 Amplify.configure(awsconfig);
 
@@ -40,7 +39,6 @@ const App: React.FC = () => {
       children: [
         {
           element: <Layout />,
-          loader: () => protectedRouteLoader(signed),
           children: routes
         }
       ]

@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 
 import { RoutesType } from './definitions';
 import PathConstants from './pathConstants';
+import { getStoredPath } from '../utils/PathUtils';
 
 import Dashboard from '../views/Dashboard/dashboard';
 import SeedlotDashboard from '../views/Seedlot/SeedlotDashboard';
@@ -19,7 +20,7 @@ const routes: Array<RoutesType> = [
   {
     path: PathConstants.ROOT,
     element: (
-      <Navigate to={PathConstants.DASHBOARD} replace />
+      <Navigate to={getStoredPath() || PathConstants.DASHBOARD} replace />
     )
   },
   // Same for the login path
