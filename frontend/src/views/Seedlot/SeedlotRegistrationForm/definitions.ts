@@ -21,7 +21,7 @@ export type AllStepData = {
   extractionStorageStep: ExtractionStorageForm
 }
 
-type ProgressStepStatus = {
+export type ProgressStepStatus = {
   isComplete: boolean;
   isCurrent: boolean;
   isInvalid: boolean;
