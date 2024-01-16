@@ -8,6 +8,8 @@ import { Edit } from '@carbon/icons-react';
 
 import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
 import { initialProgressConfig } from '../../SeedlotRegistrationForm/constants';
+import PathConstants from '../../../../routes/pathConstants';
+import { addParamToPath } from '../../../../utils/PathUtils';
 
 import './styles.scss';
 
@@ -40,7 +42,7 @@ const FormProgress = ({ seedlotNumber, isFetching }: FormProgressProps) => {
                 interactFunction={(e: number) => {
                   // Add 1 to the number to make it comply with
                   // the step numbers shown to the user
-                  navigate(`/seedlots/a-class-registration/${seedlotNumber}?step=${e + 1}`);
+                  navigate(`${addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=${e + 1}`);
                 }}
               />
             )
@@ -52,7 +54,7 @@ const FormProgress = ({ seedlotNumber, isFetching }: FormProgressProps) => {
           size="md"
           className="btn-fp"
           renderIcon={Edit}
-          onClick={() => navigate(`/seedlots/a-class-registration/${seedlotNumber}`)}
+          onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
           disabled={isFetching || !seedlotNumber}
         >
           Edit seedlot form

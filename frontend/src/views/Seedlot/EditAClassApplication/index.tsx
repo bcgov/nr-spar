@@ -25,6 +25,7 @@ import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
+import PathConstants from '../../../routes/pathConstants';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import { ForestClientType } from '../../../types/ForestClientType';
@@ -34,6 +35,7 @@ import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
 
 import './styles.scss';
+import { addParamToPath } from '../../../utils/PathUtils';
 
 const EditAClassApplication = () => {
   const navigate = useNavigate();
@@ -62,7 +64,7 @@ const EditAClassApplication = () => {
       seedlotQuery.status === 'error'
       && (seedlotQuery.error as AxiosError).response?.status === 404
     ) {
-      navigate('/404');
+      navigate(PathConstants.FOUR_OH_FOUR);
     }
   }, [seedlotQuery.status]);
 
@@ -105,7 +107,7 @@ const EditAClassApplication = () => {
     mutationFn: (
       payload: SeedlotPatchPayloadType
     ) => patchSeedlotApplicationInfo(seedlotNumber ?? '', payload),
-    onSuccess: () => navigate(`/seedlots/details/${seedlotNumber}`),
+    onSuccess: () => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')),
     onError: (err: AxiosError) => {
       toast.error(
         <ErrorToast
@@ -152,9 +154,15 @@ const EditAClassApplication = () => {
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate('/seedlots/my-seedlots')}>My seedlots</BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>
+            Seedlots
+          </BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>
+            My seedlots
+          </BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}>
+            {`Seedlot ${seedlotNumber}`}
+          </BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Row className="title-row">

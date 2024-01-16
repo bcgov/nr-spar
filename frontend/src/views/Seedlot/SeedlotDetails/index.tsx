@@ -26,12 +26,15 @@ import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
 import FormReview from '../../../components/FormReview';
 
-import './styles.scss';
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import PathConstants from '../../../routes/pathConstants';
+import { addParamToPath } from '../../../utils/PathUtils';
+
+import './styles.scss';
 
 const SeedlotDetails = () => {
   const navigate = useNavigate();
@@ -45,7 +48,7 @@ const SeedlotDetails = () => {
   const manageOptions = [
     {
       text: 'Edit seedlot applicant',
-      onClickFunction: () => navigate(`/seedlots/edit-a-class-application/${seedlotNumber}`),
+      onClickFunction: () => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')),
       disabled: false
     },
     {
@@ -126,8 +129,12 @@ const SeedlotDetails = () => {
     <FlexGrid className="seedlot-details-page">
       <Row className="seedlot-details-breadcrumb">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate('/seedlots/my-seedlots')}>My seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>
+            Seedlots
+          </BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>
+            My seedlots
+          </BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Stack gap={6}>
@@ -149,7 +156,7 @@ const SeedlotDetails = () => {
               title="Edit seedlot form"
               items={manageOptions}
               menuOptionsClass="edit-seedlot-form"
-              titleBtnFunc={() => navigate(`/seedlots/a-class-registration/${seedlotNumber}`)}
+              titleBtnFunc={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
             />
           </Column>
         </Row>

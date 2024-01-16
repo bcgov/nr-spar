@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PathConstants from '../../routes/pathConstants';
+
 import mysteryImg from '../../assets/img/404-mystery.png';
 
 import './styles.scss';
@@ -12,11 +14,11 @@ const FourOhFour = () => {
 
   const links: linkType[] = [
     {
-      href: '/dashboard',
+      href: PathConstants.DASHBOARD,
       text: 'Dashboard'
     },
     {
-      href: '/seedlots',
+      href: PathConstants.SEEDLOTS,
       text: 'Seedlots'
     }
   ];

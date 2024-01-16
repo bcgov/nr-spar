@@ -12,6 +12,7 @@ import LoginProviders from '../types/LoginProviders';
 import AuthContext from './AuthContext';
 import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
 import { TWO_MINUTE } from '../config/TimeUnits';
+import PathConstants from '../routes/pathConstants';
 
 interface Props {
   children: React.ReactNode;
@@ -141,7 +142,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const refreshTokenPvt = async () => {
-    const famUser = await fetchFamCurrentSession('/');
+    const famUser = await fetchFamCurrentSession(PathConstants.ROOT);
     if (famUser) {
       updateUserFamSession(famUser);
     }
