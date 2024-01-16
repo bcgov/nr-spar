@@ -11,20 +11,22 @@ import {
   Button,
   Loading,
   Grid,
-  InlineNotification
+  InlineNotification,
+  InlineLoading
 } from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
+import { ArrowRight, CheckmarkOutline, ErrorOutline } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
+import { DateTime } from 'luxon';
 
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
-import { getSeedlotById, putAClassSeedlot } from '../../../api-service/seedlotAPI';
+import { getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { FIVE_SECONDS, THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -105,6 +107,8 @@ const SeedlotRegistrationForm = () => {
 
   const [errorSubmitting, setErrorSubmitting] = useState<ResponseErrorType>(EmptyResponseError);
   const [allStepCompleted, setAllStepCompleted] = useState<boolean>(false);
+  const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(DateTime.now().toISO());
+  const [saveBtnIcon, setSaveBtnIcon] = useState<React.ReactNode>(null);
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
@@ -476,6 +480,41 @@ const SeedlotRegistrationForm = () => {
     setAllStepCompleted(completionStatus);
   }, [progressStatus, allStepData.extractionStorageStep]);
 
+  const saveProgress = useMutation({
+    mutationFn: () => putAClassSeedlotProgress(
+      seedlotNumber ?? '',
+      {
+        allStepData,
+        progressStatus
+      }
+    ),
+    onSuccess: () => {
+      setLastSaveTimestamp(DateTime.now().toISO());
+    },
+    onError: (err: AxiosError) => {
+      console.warn(`hahah ${err.code}`);
+    }
+  });
+
+  // const AutoSaveSubtitle = () => {
+
+  // };
+
+  // eslint-disable-next-line arrow-body-style
+  const renderSaveBtnIcon = () => {
+    // if (saveProgress.isLoading) {
+    //   return InlineLoading;
+    // }
+    // if (saveProgress.isSuccess) {
+    //   return CheckmarkOutline;
+    // }
+    // if (saveProgress.isError) {
+    //   return ErrorOutline;
+    // }
+    // return null;
+    return InlineLoading;
+  };
+
   return (
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
@@ -492,7 +531,14 @@ const SeedlotRegistrationForm = () => {
           <Column className="seedlot-registration-title" sm={4} md={8} lg={16} xlg={16}>
             <PageTitle
               title="Seedlot Registration"
-              subtitle={`Seedlot ${seedlotNumber}`}
+              subtitle={(
+                <div>
+                  <span>{`Seedlot ${seedlotNumber}`}</span    >
+                  <div>
+                    haha
+                  </div>
+                </div>
+              )}
             />
           </Column>
         </Row>
@@ -553,7 +599,7 @@ const SeedlotRegistrationForm = () => {
                     <Button
                       kind="secondary"
                       size="lg"
-                      className="back-next-btn"
+                      className="form-action-btn"
                       onClick={() => setStep(-1)}
                     >
                       Back
@@ -563,7 +609,7 @@ const SeedlotRegistrationForm = () => {
                     <Button
                       kind="secondary"
                       size="lg"
-                      className="back-next-btn"
+                      className="form-action-btn"
                       onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}
                     >
                       Cancel
@@ -573,13 +619,36 @@ const SeedlotRegistrationForm = () => {
               }
             </Column>
             <Column sm={4} md={3} lg={3} xlg={4}>
+              <Button
+                kind="secondary"
+                size="lg"
+                className="form-action-btn"
+                onClick={() => saveProgress.mutate()}
+                renderIcon={() => {
+                  let status = 'inactive';
+                  if (saveProgress.isLoading) {
+                    status = 'active';
+                  }
+                  if (saveProgress.isSuccess) {
+                    status = 'finished';
+                  }
+                  if (saveProgress.isError) {
+                    status = 'error';
+                  }
+                  return <InlineLoading status={status} successDelay={FIVE_SECONDS} />;
+                }}
+              >
+                Save changes
+              </Button>
+            </Column>
+            <Column sm={4} md={3} lg={3} xlg={4}>
               {
                 formStep !== 5
                   ? (
                     <Button
                       kind="primary"
                       size="lg"
-                      className="back-next-btn"
+                      className="form-action-btn"
                       onClick={() => setStep(1)}
                       renderIcon={ArrowRight}
                     >

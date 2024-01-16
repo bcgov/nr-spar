@@ -1,4 +1,5 @@
 import { StatusColourMap } from '../components/StatusTag/definitions';
+import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/SeedlotRegistrationForm/definitions';
 import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
 
 type EffectiveDateRange = {
@@ -196,3 +197,8 @@ export type SeedlotAClassSubmitType = {
   seedlotFormParentTreeSmpDtoList: Array<ParentTreeFormSubmitType>,
   seedlotFormExtractionDto: ExtractionFormSubmitType
 }
+
+export type SeedlotProgressPayloadType = {
+  allStepData: AllStepData,
+  progressStatus: ProgressIndicatorConfig
+};
