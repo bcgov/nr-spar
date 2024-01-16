@@ -1,3 +1,4 @@
+import PathConstants from '../routes/pathConstants';
 import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
 
 export const getStoredPath = () => {
@@ -5,6 +6,7 @@ export const getStoredPath = () => {
   storedPath = localStorage.getItem(SPAR_REDIRECT_PATH);
   if (storedPath) {
     localStorage.removeItem(SPAR_REDIRECT_PATH);
+    return storedPath === PathConstants.ROOT ? PathConstants.DASHBOARD : storedPath;
   }
-  return storedPath;
+  return PathConstants.DASHBOARD;
 };

@@ -20,7 +20,7 @@ const routes: Array<RoutesType> = [
   {
     path: PathConstants.ROOT,
     element: (
-      <Navigate to={getStoredPath() || PathConstants.DASHBOARD} replace />
+      <Navigate to={getStoredPath()} replace />
     )
   },
   // Same for the login path
