@@ -1,6 +1,6 @@
 import React from 'react';
-import BigNumber from 'bignumber.js';
 
+import BigNumber from 'bignumber.js';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
@@ -92,12 +92,12 @@ export const calcAverage = (tableRows: Array<RowItem>, field: keyof StrTypeRowIt
 };
 
 export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem): string => {
-  let sum = new BigNumber(0);
+  let sum = new BigNumber('0');
 
   tableRows.forEach((row) => {
     // add if the value is not null
     if (row[field].value) {
-      sum = sum.add(new BigNumber(row[field].value));
+      sum = sum.plus(row[field].value);
     }
   });
 
