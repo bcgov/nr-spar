@@ -53,7 +53,7 @@ public class GeneticWorthService {
   }
 
   /**
-   * Does the calculation for each genetic trait. PS: if the treshold of 70% of contribution from
+   * Does the calculation for each genetic trait. PS: if the threshold of 70% of contribution from
    * the parent tree is not met, the trait value will not be shown.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
@@ -62,7 +62,7 @@ public class GeneticWorthService {
    */
   public GeneticWorthSummaryDto calculateGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
-    BigDecimal minimumTreshold = new BigDecimal("0.7");
+    BigDecimal minimumThreshold = new BigDecimal("0.7");
     BigDecimal neValue = calculateNe(traitsDto);
 
     GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(new ArrayList<>(), neValue);
@@ -72,9 +72,9 @@ public class GeneticWorthService {
 
     for (CodeDescriptionDto trait : geneticWorths) {
       BigDecimal calculatedValue = null;
-      BigDecimal percentage = calcGeneticTraitTreshold(traitsDto, trait);
+      BigDecimal percentage = calcGeneticTraitThreshold(traitsDto, trait);
 
-      if (percentage.compareTo(minimumTreshold) >= 0) {
+      if (percentage.compareTo(minimumThreshold) >= 0) {
         SparLog.info("Calculating Genetic Worth for {} trait", trait.code());
         calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);
       }
@@ -119,7 +119,7 @@ public class GeneticWorthService {
 
   /**
    * Do the calculations for each Genetic Worth trait. Note that in the case the parent tree does
-   * not attend the 70% treshold weight, the value for this trait will be zero.
+   * not attend the 70% threshold weight, the value for this trait will be zero.
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values.
@@ -151,9 +151,9 @@ public class GeneticWorthService {
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
    * @param trait A {@link GeneticWorth} with the trait that should be considered.
-   * @return A BigDecimal representing the trait treshold. TODO: PROBLEM
+   * @return A BigDecimal representing the trait threshold.
    */
-  private BigDecimal calcGeneticTraitTreshold(
+  private BigDecimal calcGeneticTraitThreshold(
       List<GeneticWorthTraitsRequestDto> traitsDto, CodeDescriptionDto trait) {
     SparLog.debug("Checking genetic trait threshold for {} trait", trait);
 
@@ -173,7 +173,7 @@ public class GeneticWorthService {
       }
     }
 
-    SparLog.debug("Finished checking Genetic Trait treshold for {} trait with: {}%", trait, sumPi);
+    SparLog.debug("Finished checking Genetic Trait threshold for {} trait with: {}%", trait, sumPi);
 
     return sumPi;
   }
