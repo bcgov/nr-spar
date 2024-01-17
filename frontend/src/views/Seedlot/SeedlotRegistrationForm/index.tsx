@@ -14,7 +14,8 @@ import {
   Loading,
   Grid,
   InlineNotification,
-  InlineLoading
+  InlineLoading,
+  Tooltip
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
@@ -116,6 +117,7 @@ const SeedlotRegistrationForm = () => {
   const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(DateTime.now().toISO());
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [saveDescription, setSaveDescription] = useState<string>('Save changes');
+  const [autoSaveText, setAutoSaveText] = useState<string>('All changes saved');
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
@@ -477,6 +479,10 @@ const SeedlotRegistrationForm = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const AutoSaveTooltip = () => {
+    const toolTipLabel = '';
+  };
+
   const renderStep = () => {
     const defaultAgencyObj = getDefaultAgencyObj();
     const defaultCode = getDefaultLocationCode();
@@ -581,11 +587,16 @@ const SeedlotRegistrationForm = () => {
             <PageTitle
               title="Seedlot Registration"
               subtitle={(
-                <div>
-                  <span>{`Seedlot ${seedlotNumber}`}</span>
-                  <div>
-                    haha
-                  </div>
+                <div className="seedlot-form-subtitle">
+                  <span>
+                    {`Seedlot ${seedlotNumber}`}
+                    &nbsp;
+                    -
+                    &nbsp;
+                  </span>
+                  <Tooltip align="bottom" label="asdoiafiafjafojafsoiasf">
+                    <Button><p>{autoSaveText}</p></Button>
+                  </Tooltip>
                 </div>
               )}
             />

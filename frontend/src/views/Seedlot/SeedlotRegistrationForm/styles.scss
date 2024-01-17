@@ -5,6 +5,25 @@
 
   .seedlot-registration-title {
     padding: 0;
+
+    .seedlot-form-subtitle {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      button {
+        padding: 0;
+        height: auto;
+        min-height: 0;
+        background: transparent;
+        border: none;
+      }
+
+      p {
+        @include type.type-style('body-01');
+        color: var(--#{vars.$bcgov-prefix}-text-secondary);
+        text-decoration: underline dotted var(--#{vars.$bcgov-prefix}-border-interactive);
+      }
+    }
   }
 
   .seedlot-registration-progress {
