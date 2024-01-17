@@ -175,6 +175,7 @@ const CollectionStep = (
               invalid={state.startDate.isInvalid}
               invalidText={fieldsConfig.startDate.invalidText}
               size="md"
+              autocomplete="off"
             />
           </DatePicker>
         </Column>
@@ -198,6 +199,7 @@ const CollectionStep = (
               invalid={state.endDate.isInvalid}
               invalidText={fieldsConfig.endDate.invalidText}
               size="md"
+              autocomplete="off"
             />
           </DatePicker>
         </Column>
