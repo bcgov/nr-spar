@@ -21,6 +21,7 @@ import { postSeedlot } from '../../../api-service/seedlotAPI';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import focusById from '../../../utils/FocusUtils';
+import PathConstants from '../../../routes/pathConstants';
 
 import { InitialSeedlotFormData } from './constants';
 import { convertToPayload } from './utils';
@@ -46,7 +47,7 @@ const CreateAClass = () => {
       );
     },
     onSuccess: (res) => navigate({
-      pathname: '/seedlots/creation-success',
+      pathname: PathConstants.SEEDLOT_CREATION_SUCCESS,
       search: `?seedlotNumber=${res.data.seedlotNumber}&seedlotClass=A`
     })
   });
@@ -100,7 +101,7 @@ const CreateAClass = () => {
     <FlexGrid className="create-a-class-seedlot-page">
       <Row className="create-a-class-seedlot-breadcrumb">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>Seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Row className="page-title-row">
