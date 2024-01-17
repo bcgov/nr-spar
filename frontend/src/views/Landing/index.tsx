@@ -1,76 +1,84 @@
 import React, { useContext } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import {
   Button,
   Grid,
-  Column
+  Column,
+  Loading
 } from '@carbon/react';
 import { Login } from '@carbon/icons-react';
 
 import BCGovLogo from '../../components/BCGovLogo';
 import Seeding from '../../assets/img/seeding.png';
 import LoginProviders from '../../types/LoginProviders';
+import AuthContext from '../../contexts/AuthContext';
 
 import './styles.scss';
-import AuthContext from '../../contexts/AuthContext';
 
 const Landing = () => {
   const { signIn } = useContext(AuthContext);
+  const [searchParams] = useSearchParams();
 
-  return (
-    <Grid fullWidth className="landing-grid">
-      {/* First - Column */}
-      <Column sm={4} md={5} lg={10}>
-        {/* Logo */}
-        <BCGovLogo />
+  const loginCode = searchParams.get('code');
 
-        {/* Welcome - Title and Subtitle */}
-        <h1 data-testid="landing-title" className="landing-title">Welcome to SPAR</h1>
-        <h2 data-testid="landing-subtitle" className="landing-subtitle">
-          Seed Planning and Registry Application
-        </h2>
+  if (!loginCode) {
+    return (
+      <Grid fullWidth className="landing-grid">
+        {/* First - Column */}
+        <Column sm={4} md={5} lg={10}>
+          {/* Logo */}
+          <BCGovLogo />
 
-        {/* Description */}
-        <p data-testid="landing-desc" className="landing-desc">
-          Register and store your seed and meet your annual
-          reforestation needs using
-          <span className="spar-span">{' SPAR'}</span>
-        </p>
+          {/* Welcome - Title and Subtitle */}
+          <h1 data-testid="landing-title" className="landing-title">Welcome to SPAR</h1>
+          <h2 data-testid="landing-subtitle" className="landing-subtitle">
+            Seed Planning and Registry Application
+          </h2>
 
-        {/* Login buttons */}
-        <Button
-          onClick={() => { signIn(LoginProviders.IDIR); }}
-          size="md"
-          renderIcon={Login}
-          data-testid="landing-button__idir"
-          className="btn-landing"
-        >
-          Login with IDIR
-        </Button>
+          {/* Description */}
+          <p data-testid="landing-desc" className="landing-desc">
+            Register and store your seed and meet your annual
+            reforestation needs using
+            <span className="spar-span">{' SPAR'}</span>
+          </p>
 
-        <Button
-          kind="tertiary"
-          onClick={() => { signIn(LoginProviders.BCEID_BUSINESS); }}
-          size="md"
-          renderIcon={Login}
-          data-testid="landing-button__bceid"
-          className="btn-landing"
-          id="bceid-login-btn"
-        >
-          Login with Business BCeID
-        </Button>
-      </Column>
+          {/* Login buttons */}
+          <Button
+            onClick={() => { signIn(LoginProviders.IDIR); }}
+            size="md"
+            renderIcon={Login}
+            data-testid="landing-button__idir"
+            className="btn-landing"
+          >
+            Login with IDIR
+          </Button>
 
-      {/* Second - Column */}
-      <Column className="seeding-img-column" sm={4} md={3} lg={6}>
-        <img
-          src={Seeding}
-          alt="Small green seedling on the dirt and watered"
-          className="seeding-img"
-        />
-      </Column>
-    </Grid>
-  );
+          <Button
+            kind="tertiary"
+            onClick={() => { signIn(LoginProviders.BCEID_BUSINESS); }}
+            size="md"
+            renderIcon={Login}
+            data-testid="landing-button__bceid"
+            className="btn-landing"
+            id="bceid-login-btn"
+          >
+            Login with Business BCeID
+          </Button>
+        </Column>
+
+        {/* Second - Column */}
+        <Column className="seeding-img-column" sm={4} md={3} lg={6}>
+          <img
+            src={Seeding}
+            alt="Small green seedling on the dirt and watered"
+            className="seeding-img"
+          />
+        </Column>
+      </Grid>
+    );
+  }
+  return <Loading />;
 };
 
 export default Landing;

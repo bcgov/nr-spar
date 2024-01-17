@@ -48,6 +48,8 @@ import ResponseErrorType from '../../../types/ResponseErrorType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import createErrorMessage from '../../../utils/ErrorHandlingUtils';
+import { addParamToPath } from '../../../utils/PathUtils';
+import PathConstants from '../../../routes/pathConstants';
 
 import { EmptyMultiOptObj, EmptyResponseError } from '../../../shared-constants/shared-constants';
 
@@ -138,7 +140,7 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
     onError: (err: AxiosError) => {
       if (err.response?.status === 404) {
-        navigate('/404');
+        navigate(PathConstants.FOUR_OH_FOUR);
       }
     },
     enabled: vegCodeQuery.isFetched,
@@ -462,7 +464,7 @@ const SeedlotRegistrationForm = () => {
     mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
     onSuccess: () => {
       navigate({
-        pathname: `/seedlots/details/${seedlotNumber}`,
+        pathname: addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''),
         search: '?isSubmitSuccess=true'
       });
     },
@@ -482,9 +484,9 @@ const SeedlotRegistrationForm = () => {
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
             <Breadcrumb>
-              <BreadcrumbItem onClick={() => navigate('/seedlots')}>Seedlots</BreadcrumbItem>
-              <BreadcrumbItem onClick={() => navigate('/seedlots/my-seedlots')}>My seedlots</BreadcrumbItem>
-              <BreadcrumbItem onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>Seedlots</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>My seedlots</BreadcrumbItem>
+              <BreadcrumbItem onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
             </Breadcrumb>
           </Column>
         </Row>
@@ -564,7 +566,7 @@ const SeedlotRegistrationForm = () => {
                       kind="secondary"
                       size="lg"
                       className="back-next-btn"
-                      onClick={() => navigate(`/seedlots/details/${seedlotNumber}`)}
+                      onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}
                     >
                       Cancel
                     </Button>

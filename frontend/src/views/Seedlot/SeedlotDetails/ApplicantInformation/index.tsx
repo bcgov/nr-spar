@@ -8,6 +8,8 @@ import { Edit } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
 
 import { SeedlotApplicantType } from '../../../../types/SeedlotType';
+import { addParamToPath } from '../../../../utils/PathUtils';
+import PathConstants from '../../../../routes/pathConstants';
 
 import './styles.scss';
 
@@ -160,7 +162,7 @@ const ApplicantInformation = (
             size="md"
             className="btn-edit"
             renderIcon={Edit}
-            onClick={() => navigate(`/seedlots/edit-a-class-application/${seedlotNumber}`)}
+            onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? ''))}
           >
             Edit applicant and seedlot
           </Button>
