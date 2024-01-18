@@ -52,3 +52,10 @@ export const tscAgencyObj: MultiOptionsObj = {
 };
 
 export const tscLocationCode = '00';
+
+export const smartSaveText = {
+  loading: 'Saving...',
+  error: 'Save changes failed',
+  idle: 'Save changes',
+  success: 'Changes saved!'
+};

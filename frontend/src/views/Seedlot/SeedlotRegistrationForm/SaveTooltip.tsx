@@ -13,10 +13,11 @@ import { DateTime } from 'luxon';
 import { ONE_SECOND } from '../../../config/TimeUnits';
 
 import { SaveTooltipProps } from './definitions';
+import { smartSaveText } from './constants';
 
 const SaveTooltipLabel = (
   {
-    handleSaveBtn, saveStatus, saveDescription, isSaving, lastSaveTimestamp
+    handleSaveBtn, saveStatus, saveDescription, mutationStatus, lastSaveTimestamp
   }: SaveTooltipProps
 ) => {
   const getTimeDiffString = (timeStamp: string): string => DateTime.fromISO(timeStamp).diffNow('minutes').get('minutes').toFixed(0)
@@ -45,19 +46,19 @@ const SaveTooltipLabel = (
 
   useEffect(() => {
     let prompt = `Saved ${lastSaveTimeDiff} min ago`;
-    if (isSaving) {
-      prompt = 'Saving...';
+    if (mutationStatus === 'loading') {
+      prompt = smartSaveText.loading;
     }
-    if (saveStatus === 'error') {
-      prompt = saveDescription;
+    if (mutationStatus === 'error') {
+      prompt = smartSaveText.error;
     }
     setAutosavePrompt(prompt);
-  }, [lastSaveTimeDiff, lastSaveTimestamp, isSaving, saveStatus]);
+  }, [lastSaveTimeDiff, lastSaveTimestamp, mutationStatus, saveStatus]);
 
   return (
     <Toggletip align="bottom" className="save-toggletip">
       <ToggletipButton className="save-toggletip-btn" label="autosave info">
-        <p className={saveStatus === 'error' ? 'save-error-p' : undefined}>{autsavePrompt}</p>
+        <p className={mutationStatus === 'error' ? 'save-error-p' : undefined}>{autsavePrompt}</p>
       </ToggletipButton>
       <ToggletipContent className="save-toggletip-content">
         <p>
@@ -76,7 +77,7 @@ const SaveTooltipLabel = (
             kind="primary"
             size="sm"
             onClick={() => handleSaveBtn()}
-            disabled={isSaving}
+            disabled={mutationStatus === 'loading'}
             renderIcon={Save}
           >
             <InlineLoading status={saveStatus} description={saveDescription} />

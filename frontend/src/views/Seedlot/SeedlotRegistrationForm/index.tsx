@@ -29,7 +29,7 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 import {
-  TEN_SECONDS, THREE_HALF_HOURS, THREE_HOURS, THREE_SECONDS
+  TEN_SECONDS, THREE_HALF_HOURS, THREE_HOURS, FIVE_SECONDS
 } from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
@@ -92,7 +92,7 @@ import {
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE,
-  initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
+  initialProgressConfig, smartSaveText, stepMap, tscAgencyObj, tscLocationCode
 } from './constants';
 
 import './styles.scss';
@@ -443,22 +443,24 @@ const SeedlotRegistrationForm = () => {
       numOfEdit.current = 0;
       setLastSaveTimestamp(DateTime.now().toISO());
       setSaveStatus('finished');
-      setSaveDescription('Changes saved!');
-      setTimeout(() => {
-        setSaveStatus(null);
-        setSaveDescription('Save changes');
-      }, THREE_SECONDS);
+      setSaveDescription(smartSaveText.success);
     },
     onError: () => {
       setSaveStatus('error');
-      setSaveDescription('Save changes failed');
+      setSaveDescription(smartSaveText.error);
+    },
+    onSettled: () => {
+      setTimeout(() => {
+        setSaveStatus(null);
+        setSaveDescription(smartSaveText.idle);
+      }, FIVE_SECONDS);
     },
     retry: 0
   });
 
   const handleSaveBtn = () => {
     setSaveStatus('active');
-    setSaveDescription('Saving...');
+    setSaveDescription(smartSaveText.loading);
     if (!saveProgress.isLoading) {
       saveProgress.mutate();
     }
@@ -611,7 +613,7 @@ const SeedlotRegistrationForm = () => {
                     handleSaveBtn={handleSaveBtn}
                     saveStatus={saveStatus}
                     saveDescription={saveDescription}
-                    isSaving={saveProgress.isLoading}
+                    mutationStatus={saveProgress.status}
                     lastSaveTimestamp={lastSaveTimestamp}
                   />
                 </div>

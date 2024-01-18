@@ -43,7 +43,7 @@ export type StepMap = {
 export type SaveTooltipProps = {
   saveStatus: string | null;
   saveDescription: string;
-  isSaving: boolean;
+  mutationStatus: 'idle' | 'loading' | 'success' | 'error';
   lastSaveTimestamp: string;
   handleSaveBtn: Function;
 }
