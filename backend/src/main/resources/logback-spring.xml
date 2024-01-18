@@ -47,7 +47,7 @@
   </springProfile>
 
   <springProfile name="default,prod,native">
-    <!-- LOG everything at INFO level -->
+    <!-- LOG everything at WARN level -->
     <root level="warn">
       <appender-ref ref="RollingFile" />
       <appender-ref ref="Console" />
