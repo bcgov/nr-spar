@@ -46,9 +46,11 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
             description = "A list of all the codes and their descriptions.")
       })
   default ResponseEntity<List<DescribedEnumDto<E>>> fetchAll() {
+    String simpleName = enumClass().getSimpleName();
+    SparLog.info("Fetching all codes and descriptions for {} class", simpleName);
     var valueDtos =
         Arrays.stream(enumClass().getEnumConstants()).map(DescribedEnumDto::new).toList();
-    SparLog.info("Fetching all codes and descriptions for {} class", enumClass().getSimpleName());
+    SparLog.info("{} records found for class {}", valueDtos.size(), simpleName);
     return ResponseEntity.ok(valueDtos);
   }
 
@@ -78,11 +80,12 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
             .dropWhile(v -> !v.name().equals(code))
             .findFirst()
             .map(DescribedEnumDto::new);
+    String simpleName = enumClass().getSimpleName();
     valueDto.ifPresent(
         values ->
-            SparLog.info("Code and description for class {} found", enumClass().getSimpleName()));
+            SparLog.info("Record for code {} found in class {}", code, simpleName));
     if (valueDto.isEmpty()) {
-      SparLog.warn("Code and description for class {} not found");
+      SparLog.warn("Record for code {} not found in class {}", code, simpleName);
     }
     return ResponseEntity.of(valueDto);
   }

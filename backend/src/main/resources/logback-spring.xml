@@ -48,15 +48,7 @@
 
   <springProfile name="default,prod,native">
     <!-- LOG everything at INFO level -->
-    <root level="info">
-      <appender-ref ref="RollingFile" />
-      <appender-ref ref="Console" />
-    </root>
     <root level="warn">
-      <appender-ref ref="RollingFile" />
-      <appender-ref ref="Console" />
-    </root>
-    <root level="error">
       <appender-ref ref="RollingFile" />
       <appender-ref ref="Console" />
     </root>
