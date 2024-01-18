@@ -6,6 +6,8 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import validator from 'validator';
 
+import ClientSearchModal from './ClientSearchModal';
+
 import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
@@ -218,6 +220,15 @@ const ApplicantAgencyFields = ({
               ? <InlineLoading description="Validating..." />
               : null
           }
+        </Column>
+      </Row>
+      <Row className="applicant-client-search-row">
+        <Column sm={4} md={4} lg={16} xlg={16}>
+          <p>
+            If you don&apos;t remember the agency information you can
+            {' '}
+            <ClientSearchModal linkText="open the client search" modalLabel="Register A-Class Seedlot" />
+          </p>
         </Column>
       </Row>
     </FlexGrid>

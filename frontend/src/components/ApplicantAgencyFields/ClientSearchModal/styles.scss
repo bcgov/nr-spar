@@ -1,0 +1,29 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.client-search-modal {
+  .client-search-grid {
+    padding-inline: 0;
+
+    p.client-modal-description {
+      font-size: 0.875rem;
+      padding-inline-end: calc(15% - 2rem);
+      margin-bottom: 1.5rem;
+    }
+
+    .client-search-row > div:nth-child(-n + 2) {
+      padding-inline-end: 0;
+    }
+
+    .client-search-button {
+      width: 100%;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--modal-footer {
+    block-size: 3rem;
+
+    button {
+      block-size: 0;
+    }
+  }
+}
