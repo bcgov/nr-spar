@@ -48,7 +48,7 @@ services:
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       POSTGRES_HOST: database
-      AWS_COGNITO_ISSUER_URI: "${AWS_COGNITO_ISSUER_URI}"
+      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
       <<: *db-vars
     ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.6-eclipse-temurin-17
@@ -107,6 +107,7 @@ services:
       SERVER_PORT: "8091"
       ORACLEDB_KEYSTORE: /app/jssecacerts
       ORACLEDB_SECRET: changeit
+      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
     profiles: ["oracle"]
     network_mode: host
     image: maven:3.9.6-eclipse-temurin-17
