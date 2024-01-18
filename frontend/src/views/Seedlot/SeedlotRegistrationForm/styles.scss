@@ -10,18 +10,44 @@
       display: flex;
       flex-direction: row;
       align-items: center;
-      button {
-        padding: 0;
-        height: auto;
-        min-height: 0;
-        background: transparent;
-        border: none;
-      }
+    }
+  }
+
+  .save-toggletip {
+    .save-toggletip-btn {
+      padding: 0;
+      height: auto;
+      min-height: 0;
+      background: transparent;
+      border: none;
 
       p {
         @include type.type-style('body-01');
         color: var(--#{vars.$bcgov-prefix}-text-secondary);
         text-decoration: underline dotted var(--#{vars.$bcgov-prefix}-border-interactive);
+      }
+    }
+
+    .save-toggletip-content {
+      .save-toggletip-save-btn {
+        width: 100%;
+
+        .#{vars.$bcgov-prefix}--inline-loading {
+          min-block-size: 0;
+
+          .#{vars.$bcgov-prefix}--inline-loading__text {
+            @include type.type-style('body-compact-01');
+            color: var(--#{vars.$bcgov-prefix}-text-on-color);
+          }
+        }
+
+        .#{vars.$bcgov-prefix}--inline-loading__checkmark-container {
+          fill: white;
+        }
+
+        .#{vars.$bcgov-prefix}--inline-loading--error {
+          fill: white;
+        }
       }
     }
   }
@@ -51,6 +77,14 @@
           @include type.type-style('body-compact-01');
           color: var(--#{vars.$bcgov-prefix}-text-on-color);
         }
+      }
+
+      .#{vars.$bcgov-prefix}--inline-loading__checkmark-container {
+        fill: white;
+      }
+
+      .#{vars.$bcgov-prefix}--inline-loading--error {
+        fill: white;
       }
     }
 

@@ -434,7 +434,7 @@ const OrchardStep = ({
                   <NumberInput
                     id={state.breedingPercentage.id}
                     name="breedingPercentage"
-                    value={state.breedingPercentage.value}
+                    defaultValue={state.breedingPercentage.value}
                     step={10}
                     disableWheel
                     type="number"
@@ -442,11 +442,6 @@ const OrchardStep = ({
                     helperText={orchardStepText.pollenSection.breedingPercentage.helper}
                     invalid={state.breedingPercentage.isInvalid}
                     invalidText={orchardStepText.pollenSection.breedingPercentage.invalid}
-                    onChange={(e: React.ChangeEvent) => {
-                      if (e.target.matches('input')) {
-                        setAndValidateBreedPerc((e.target as HTMLInputElement).value, true);
-                      }
-                    }}
                     onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setAndValidateBreedPerc(e.target.value, false);
                     }}

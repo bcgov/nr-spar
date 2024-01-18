@@ -14,8 +14,7 @@ import {
   Loading,
   Grid,
   InlineNotification,
-  InlineLoading,
-  Tooltip
+  InlineLoading
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
@@ -29,7 +28,9 @@ import { getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress } from '../.
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
-import { TEN_SECONDS, THREE_HALF_HOURS, THREE_HOURS, THREE_SECONDS } from '../../../config/TimeUnits';
+import {
+  TEN_SECONDS, THREE_HALF_HOURS, THREE_HOURS, THREE_SECONDS
+} from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -58,6 +59,7 @@ import PathConstants from '../../../routes/pathConstants';
 
 import { EmptyMultiOptObj, EmptyResponseError } from '../../../shared-constants/shared-constants';
 
+import SaveTooltipLabel from './SaveTooltip';
 import { AllStepData, ProgressIndicatorConfig, ProgressStepStatus } from './definitions';
 import {
   initProgressBar,
@@ -89,6 +91,7 @@ import {
   convertParentTree
 } from './utils';
 import {
+  MAX_EDIT_BEFORE_SAVE,
   initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
 } from './constants';
 
@@ -114,10 +117,10 @@ const SeedlotRegistrationForm = () => {
 
   const [errorSubmitting, setErrorSubmitting] = useState<ResponseErrorType>(EmptyResponseError);
   const [allStepCompleted, setAllStepCompleted] = useState<boolean>(false);
-  const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(DateTime.now().toISO());
+  const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(() => DateTime.now().toISO());
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [saveDescription, setSaveDescription] = useState<string>('Save changes');
-  const [autoSaveText, setAutoSaveText] = useState<string>('All changes saved');
+  const numOfEdit = useRef(0);
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
@@ -195,6 +198,7 @@ const SeedlotRegistrationForm = () => {
         }
       }
     }));
+    numOfEdit.current += 1;
   };
 
   const forestClientQuery = useQuery({
@@ -249,6 +253,7 @@ const SeedlotRegistrationForm = () => {
     }
     newData[stepName] = stepData;
     setAllStepData(newData);
+    numOfEdit.current += 1;
   };
 
   const methodsOfPaymentQuery = useQuery({
@@ -272,7 +277,6 @@ const SeedlotRegistrationForm = () => {
 
   const updateStepStatus = (stepName: keyof ProgressIndicatorConfig): ProgressStepStatus => {
     const clonedStepStatus = structuredClone(progressStatus[stepName]);
-    clonedStepStatus.isCurrent = false;
     if (stepName === 'collection') {
       clonedStepStatus.isInvalid = validateCollectionStep(allStepData.collectionStep);
       if (!clonedStepStatus.isInvalid) {
@@ -384,6 +388,7 @@ const SeedlotRegistrationForm = () => {
         isInvalid: false
       }
     }));
+    numOfEdit.current += 1;
   };
 
   const getSeedlotPayload = (): SeedlotAClassSubmitType => ({
@@ -435,6 +440,7 @@ const SeedlotRegistrationForm = () => {
       }
     ),
     onSuccess: () => {
+      numOfEdit.current = 0;
       setLastSaveTimestamp(DateTime.now().toISO());
       setSaveStatus('finished');
       setSaveDescription('Changes saved!');
@@ -443,16 +449,19 @@ const SeedlotRegistrationForm = () => {
         setSaveDescription('Save changes');
       }, THREE_SECONDS);
     },
-    onError: (err: AxiosError) => {
+    onError: () => {
       setSaveStatus('error');
-      setSaveDescription(`Save changes failed ${err.response?.status}`);
-    }
+      setSaveDescription('Save changes failed');
+    },
+    retry: 0
   });
 
   const handleSaveBtn = () => {
     setSaveStatus('active');
-    setSaveDescription('Saving ...');
-    saveProgress.mutate();
+    setSaveDescription('Saving...');
+    if (!saveProgress.isLoading) {
+      saveProgress.mutate();
+    }
   };
 
   const location = useLocation();
@@ -472,16 +481,20 @@ const SeedlotRegistrationForm = () => {
    * For auto save on interval.
    */
   useEffect(() => {
+    if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE) {
+      if (!saveProgress.isLoading) {
+        saveProgress.mutate();
+      }
+    }
+
     const interval = setInterval(() => {
-      console.log('Logs every 10 seconds');
+      if (numOfEdit.current > 0 && !saveProgress.isLoading) {
+        saveProgress.mutate();
+      }
     }, TEN_SECONDS);
 
     return () => clearInterval(interval);
-  }, []);
-
-  const AutoSaveTooltip = () => {
-    const toolTipLabel = '';
-  };
+  }, [numOfEdit.current]);
 
   const renderStep = () => {
     const defaultAgencyObj = getDefaultAgencyObj();
@@ -594,9 +607,13 @@ const SeedlotRegistrationForm = () => {
                     -
                     &nbsp;
                   </span>
-                  <Tooltip align="bottom" label="asdoiafiafjafojafsoiasf">
-                    <Button><p>{autoSaveText}</p></Button>
-                  </Tooltip>
+                  <SaveTooltipLabel
+                    handleSaveBtn={handleSaveBtn}
+                    saveStatus={saveStatus}
+                    saveDescription={saveDescription}
+                    isSaving={saveProgress.isLoading}
+                    lastSaveTimestamp={lastSaveTimestamp}
+                  />
                 </div>
               )}
             />

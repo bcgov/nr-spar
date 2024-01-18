@@ -1,6 +1,8 @@
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { ProgressIndicatorConfig, StepMap } from './definitions';
 
+export const MAX_EDIT_BEFORE_SAVE = 5;
+
 export const initialProgressConfig: ProgressIndicatorConfig = {
   collection: {
     isComplete: false,

@@ -39,3 +39,11 @@ export type ProgressIndicatorConfig = {
 export type StepMap = {
   [key: number]: keyof ProgressIndicatorConfig;
 }
+
+export type SaveTooltipProps = {
+  saveStatus: string | null;
+  saveDescription: string;
+  isSaving: boolean;
+  lastSaveTimestamp: string;
+  handleSaveBtn: Function;
+}
