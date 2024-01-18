@@ -1,8 +1,8 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
-import { ForestClientType } from '../types/ForestClientType';
+import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import ApplicantAgenciesItems from '../mock-server/fixtures/ApplicantAgenciesItems';
-import ApplicantAgencyType from '../types/ApplicantAgencyType';
+import ForestClientType from '../types/ForestClientTypes/ForestClientType';
 
 export const getForestClientLocation = (clientNumber: string, locationCode: string) => {
   const url = `${ApiConfig.forestClient}/${clientNumber}/location/${locationCode}`;
@@ -17,9 +17,9 @@ export const getForestClientByNumber = (clientNumber?: string) => {
 export const getAllAgencies = (): string[] => {
   const options: string[] = [];
   ApplicantAgenciesItems.sort(
-    (a: ApplicantAgencyType, b: ApplicantAgencyType) => (a.clientName < b.clientName ? -1 : 1)
+    (a: ForestClientType, b: ForestClientType) => (a.clientName < b.clientName ? -1 : 1)
   );
-  ApplicantAgenciesItems.forEach((agency: ApplicantAgencyType) => {
+  ApplicantAgenciesItems.forEach((agency: ForestClientType) => {
     let clientName = agency.clientName
       .toLowerCase()
       .split(' ')

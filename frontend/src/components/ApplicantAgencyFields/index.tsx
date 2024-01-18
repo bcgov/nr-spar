@@ -13,7 +13,7 @@ import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
-import { FilterObj, filterInput } from '../../utils/filterUtils';
+import { FilterObj, filterInput } from '../../utils/FilterUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
 import supportTexts from './constants';

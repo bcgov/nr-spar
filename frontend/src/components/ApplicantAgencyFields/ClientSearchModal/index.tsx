@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Modal,
@@ -9,15 +9,19 @@ import {
   Column,
   TextInput,
   Dropdown,
-  Button
+  Button,
+  Pagination
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
 
 import ModalStateManager from '../../ModalStateManager';
-import EmptySection from '../../EmptySection';
+import ClientSearchTable from '../../ClientSearchTable';
+// import EmptySection from '../../EmptySection';
+
+import PaginationChangeType from '../../../types/PaginationChangeType';
 
 import { ClientSearchModalProps, LaunchModal } from './definitions';
-import { clientSearchOptions, getEmptySectionDescription } from './constants';
+import { clientSearchOptions, forestClientMockData } from './constants';
 
 import './styles.scss';
 
@@ -28,6 +32,29 @@ const ClientSearchModal = (
   }: ClientSearchModalProps
 ) => {
   const navigate = useNavigate();
+  const [currPageNumber, setCurrPageNumber] = useState<number>(0);
+  const [currPageSize, setCurrPageSize] = useState<number>(10);
+
+  const handlePagination = (paginationObj: PaginationChangeType) => {
+    setCurrPageNumber(paginationObj.page - 1); // index starts at 0 on java.
+    setCurrPageSize(paginationObj.pageSize);
+  };
+
+  const tablePagination = () => (
+    <Pagination
+      className="seedlot-data-table-pagination"
+      page={currPageNumber + 1}
+      pageSize={currPageSize}
+      pageSizes={[10, 20, 30, 40, 50]}
+      itemsPerPageText=""
+      totalItems={forestClientMockData.length ?? 0}
+      onChange={
+        (paginationObj: PaginationChangeType) => {
+          handlePagination(paginationObj);
+        }
+      }
+    />
+  );
 
   return (
     <ModalStateManager
@@ -100,11 +127,16 @@ const ClientSearchModal = (
             </Row>
             <Row>
               <Column sm={4} md={4} lg={16} xlg={16}>
-                <EmptySection
+                <ClientSearchTable
+                  clientData={forestClientMockData}
+                  showPagination
+                  tablePagination={tablePagination()}
+                />
+                {/* <EmptySection
                   pictogram="Summit"
                   title="Nothing to show yet!"
                   description={getEmptySectionDescription()}
-                />
+                /> */}
               </Column>
             </Row>
           </FlexGrid>

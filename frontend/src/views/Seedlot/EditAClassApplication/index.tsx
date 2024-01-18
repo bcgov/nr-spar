@@ -28,7 +28,7 @@ import focusById from '../../../utils/FocusUtils';
 import PathConstants from '../../../routes/pathConstants';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
-import { ForestClientType } from '../../../types/ForestClientType';
+import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';

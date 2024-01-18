@@ -19,7 +19,7 @@ import InputErrorText from '../InputErrorText';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
-import { FilterObj, filterInput } from '../../utils/filterUtils';
+import { FilterObj, filterInput } from '../../utils/FilterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import { EmptyMultiOptObj } from '../../shared-constants/shared-constants';
 
