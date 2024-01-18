@@ -56,7 +56,9 @@ const SaveTooltipLabel = (
 
   return (
     <Toggletip align="bottom" className="save-toggletip">
-      <ToggletipButton className="save-toggletip-btn" label="autosave info"><p>{autsavePrompt}</p></ToggletipButton>
+      <ToggletipButton className="save-toggletip-btn" label="autosave info">
+        <p className={saveStatus === 'error' ? 'save-error-p' : undefined}>{autsavePrompt}</p>
+      </ToggletipButton>
       <ToggletipContent className="save-toggletip-content">
         <p>
           Changes you make are saved periodically.

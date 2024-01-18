@@ -26,6 +26,10 @@
         color: var(--#{vars.$bcgov-prefix}-text-secondary);
         text-decoration: underline dotted var(--#{vars.$bcgov-prefix}-border-interactive);
       }
+
+      .save-error-p {
+        color: var(--#{vars.$bcgov-prefix}-text-error);
+      }
     }
 
     .save-toggletip-content {
