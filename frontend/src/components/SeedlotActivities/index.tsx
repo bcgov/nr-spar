@@ -4,6 +4,8 @@ import { Row } from '@carbon/react';
 
 import StandardCard from '../Card/StandardCard';
 
+import PathConstants from '../../routes/pathConstants';
+
 import './styles.scss';
 
 const SeedlotActivities = () => {
@@ -14,7 +16,7 @@ const SeedlotActivities = () => {
       header: 'Register an A-class seedlot',
       description:
         'Register a seedlot which has been collected in an orchard from parent trees',
-      link: '/seedlots/register-a-class',
+      link: PathConstants.SEEDLOTS_A_CLASS_CREATION,
       highlighted: false,
       isEmpty: false,
       emptyTitle: '',
@@ -38,7 +40,7 @@ const SeedlotActivities = () => {
       header: 'My seedlots',
       description:
         'Consult and manage your own seedlots',
-      link: '/seedlots/my-seedlots',
+      link: PathConstants.MY_SEEDLOTS,
       highlighted: false,
       isEmpty: false,
       emptyTitle: '',
