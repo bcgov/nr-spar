@@ -57,5 +57,6 @@ export const smartSaveText = {
   loading: 'Saving...',
   error: 'Save changes failed',
   idle: 'Save changes',
-  success: 'Changes saved!'
+  success: 'Changes saved!',
+  suggestion: 'Your recent changes could not be saved. Please try saving the form manually to keep all of your changes.'
 };

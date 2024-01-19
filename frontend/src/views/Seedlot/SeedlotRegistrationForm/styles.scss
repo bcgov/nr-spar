@@ -111,4 +111,50 @@
     }
   }
 
+  .save-error-actionable-notification {
+    width: 100%;
+    max-width: none;
+    margin-bottom: 3rem;
+
+    .#{vars.$bcgov-prefix}--actionable-notification__content {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__details {
+      align-items: center;
+
+      svg {
+        margin: 0 0.8125rem 0 0;
+      }
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification {
+      width: 100%;
+      max-width: none;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__text-wrapper {
+      padding: 0.9375rem 0;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__button-wrapper {
+      align-items: center;
+      flex-direction: row;
+
+      .bx--actionable-notification__action-button{
+        right: 3rem;
+      }
+
+      button{
+        border: none;
+        margin: 0;
+      }
+      button:hover{
+        background: inherit;
+        border: inherit;
+        color: var(--#{vars.$bcgov-prefix}-button-tertiary);
+      }
+    }
+  }
 }

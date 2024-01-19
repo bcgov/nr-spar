@@ -14,7 +14,8 @@ import {
   Loading,
   Grid,
   InlineNotification,
-  InlineLoading
+  InlineLoading,
+  ActionableNotification
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
@@ -50,14 +51,12 @@ import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptions
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
-import ResponseErrorType from '../../../types/ResponseErrorType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import createErrorMessage from '../../../utils/ErrorHandlingUtils';
 import { addParamToPath } from '../../../utils/PathUtils';
 import PathConstants from '../../../routes/pathConstants';
 
-import { EmptyMultiOptObj, EmptyResponseError } from '../../../shared-constants/shared-constants';
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
 import SaveTooltipLabel from './SaveTooltip';
 import { AllStepData, ProgressIndicatorConfig, ProgressStepStatus } from './definitions';
@@ -88,7 +87,8 @@ import {
   convertInterim,
   convertOrchard,
   convertOwnership,
-  convertParentTree
+  convertParentTree,
+  getSeedlotSubmitErrDescription
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE,
@@ -115,7 +115,6 @@ const SeedlotRegistrationForm = () => {
     setProgressStatus
   ] = useState<ProgressIndicatorConfig>(() => initProgressBar(formStep, initialProgressConfig));
 
-  const [errorSubmitting, setErrorSubmitting] = useState<ResponseErrorType>(EmptyResponseError);
   const [allStepCompleted, setAllStepCompleted] = useState<boolean>(false);
   const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(() => DateTime.now().toISO());
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
@@ -411,9 +410,7 @@ const SeedlotRegistrationForm = () => {
         search: '?isSubmitSuccess=true'
       });
     },
-    onError: (err: AxiosError) => {
-      setErrorSubmitting(createErrorMessage(err));
-    }
+    retry: 0
   });
 
   useEffect(() => {
@@ -589,7 +586,7 @@ const SeedlotRegistrationForm = () => {
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
         <Row>
-          <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
+          <Column className="seedlot-registration-breadcrumb">
             <Breadcrumb>
               <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>Seedlots</BreadcrumbItem>
               <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>My seedlots</BreadcrumbItem>
@@ -598,7 +595,7 @@ const SeedlotRegistrationForm = () => {
           </Column>
         </Row>
         <Row>
-          <Column className="seedlot-registration-title" sm={4} md={8} lg={16} xlg={16}>
+          <Column className="seedlot-registration-title">
             <PageTitle
               title="Seedlot Registration"
               subtitle={(
@@ -622,7 +619,7 @@ const SeedlotRegistrationForm = () => {
           </Column>
         </Row>
         <Row>
-          <Column className="seedlot-registration-progress" sm={4} md={8} lg={16} xlg={16}>
+          <Column className="seedlot-registration-progress">
             <SeedlotRegistrationProgress
               progressStatus={progressStatus}
               className="seedlot-registration-steps"
@@ -634,15 +631,34 @@ const SeedlotRegistrationForm = () => {
           </Column>
         </Row>
         {
-          errorSubmitting.errOccured
+          submitSeedlot.isError
             ? (
               <Row>
-                <Column sm={4} md={8} lg={16} xlg={16}>
+                <Column>
                   <InlineNotification
                     lowContrast
                     kind="error"
-                    title={errorSubmitting.title}
-                    subtitle={errorSubmitting.description}
+                    title={getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError)).title}
+                    subtitle={getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError)).description}
+                  />
+                </Column>
+              </Row>
+            )
+            : null
+        }
+        {
+          saveProgress.isError
+            ? (
+              <Row>
+                <Column>
+                  <ActionableNotification
+                    className="save-error-actionable-notification"
+                    lowContrast
+                    kind="error"
+                    title={`${smartSaveText.error}:\u00A0`}
+                    subtitle={smartSaveText.suggestion}
+                    actionButtonLabel={smartSaveText.idle}
+                    onActionButtonClick={() => handleSaveBtn()}
                   />
                 </Column>
               </Row>
@@ -650,7 +666,7 @@ const SeedlotRegistrationForm = () => {
             : null
         }
         <Row>
-          <Column className="seedlot-registration-row" sm={4} md={8} lg={16} xlg={16}>
+          <Column className="seedlot-registration-row">
             {
               (
                 vegCodeQuery.isFetched
