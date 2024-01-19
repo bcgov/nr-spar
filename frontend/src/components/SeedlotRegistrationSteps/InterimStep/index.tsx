@@ -187,7 +187,7 @@ const InterimStorage = (
               invalid={state.startDate.isInvalid}
               invalidText={pageTexts.storageDate.invalidText}
               readOnly={readOnly}
-              autocomplete="off"
+              autoComplete="off"
             />
           </DatePicker>
         </Column>
@@ -211,7 +211,7 @@ const InterimStorage = (
               invalid={state.startDate.isInvalid}
               invalidText={pageTexts.storageDate.invalidText}
               readOnly={readOnly}
-              autocomplete="off"
+              autoComplete="off"
             />
           </DatePicker>
         </Column>

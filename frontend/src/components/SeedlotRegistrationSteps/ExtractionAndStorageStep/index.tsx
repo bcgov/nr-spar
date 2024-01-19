@@ -139,7 +139,7 @@ const ExtractionAndStorage = (
               invalid={state.extraction.startDate.isInvalid}
               invalidText={inputText.date.invalidText}
               disabled={state.extraction.useTSC.value}
-              autocomplete="off"
+              autoComplete="off"
             />
           </DatePicker>
         </Column>
@@ -162,7 +162,7 @@ const ExtractionAndStorage = (
               invalid={state.extraction.endDate.isInvalid}
               invalidText={inputText.date.invalidText}
               disabled={state.extraction.useTSC.value}
-              autocomplete="off"
+              autoComplete="off"
             />
           </DatePicker>
         </Column>
@@ -222,7 +222,7 @@ const ExtractionAndStorage = (
               invalid={state.seedStorage.startDate.isInvalid}
               invalidText={inputText.date.invalidText}
               disabled={state.seedStorage.useTSC.value}
-              autocomplete="off"
+              autoComplete="off"
             />
           </DatePicker>
         </Column>
@@ -245,7 +245,7 @@ const ExtractionAndStorage = (
               invalid={state.seedStorage.endDate.isInvalid}
               invalidText={inputText.date.invalidText}
               disabled={state.seedStorage.useTSC.value}
-              autocomplete="off"
+              autoComplete="off"
             />
           </DatePicker>
         </Column>
