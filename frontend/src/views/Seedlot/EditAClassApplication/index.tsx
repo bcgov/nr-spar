@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActionableNotification,
-  Breadcrumb,
-  BreadcrumbItem,
   FlexGrid,
   Column,
   Row,
@@ -36,6 +34,7 @@ import { InitialSeedlotFormData } from '../CreateAClass/constants';
 
 import './styles.scss';
 import { addParamToPath } from '../../../utils/PathUtils';
+import EditAClassBreadcrumb from './EditAClassBreadcrumb';
 
 const EditAClassApplication = () => {
   const navigate = useNavigate();
@@ -153,17 +152,7 @@ const EditAClassApplication = () => {
   return (
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
-        <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>
-            Seedlots
-          </BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>
-            My seedlots
-          </BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}>
-            {`Seedlot ${seedlotNumber}`}
-          </BreadcrumbItem>
-        </Breadcrumb>
+        <EditAClassBreadcrumb />
       </Row>
       <Row className="title-row">
         <PageTitle
