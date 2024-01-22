@@ -88,6 +88,7 @@ import {
 } from './constants';
 
 import './styles.scss';
+import SeedlotRegistrationBreadcrumb from '../../../components/SeedlotRegistrationBreadcrumb';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -483,11 +484,7 @@ const SeedlotRegistrationForm = () => {
       <FlexGrid fullWidth>
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
-            <Breadcrumb>
-              <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>Seedlots</BreadcrumbItem>
-              <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>My seedlots</BreadcrumbItem>
-              <BreadcrumbItem onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}>{`Seedlot ${seedlotNumber}`}</BreadcrumbItem>
-            </Breadcrumb>
+            <SeedlotRegistrationBreadcrumb />
           </Column>
         </Row>
         <Row>

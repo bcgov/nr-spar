@@ -34,7 +34,7 @@ import { InitialSeedlotFormData } from '../CreateAClass/constants';
 
 import './styles.scss';
 import { addParamToPath } from '../../../utils/PathUtils';
-import EditAClassBreadcrumb from './EditAClassBreadcrumb';
+import SeedlotRegistrationBreadcrumb from '../../../components/SeedlotRegistrationBreadcrumb';
 
 const EditAClassApplication = () => {
   const navigate = useNavigate();
@@ -152,7 +152,7 @@ const EditAClassApplication = () => {
   return (
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
-        <EditAClassBreadcrumb />
+        <SeedlotRegistrationBreadcrumb />
       </Row>
       <Row className="title-row">
         <PageTitle

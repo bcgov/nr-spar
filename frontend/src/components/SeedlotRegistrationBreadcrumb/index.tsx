@@ -6,12 +6,12 @@ import {
 } from '@carbon/react';
 
 import { useNavigate, useParams } from 'react-router-dom';
-import PathConstants from '../../../../routes/pathConstants';
-import { addParamToPath } from '../../../../utils/PathUtils';
+import PathConstants from '../../routes/pathConstants';
+import { addParamToPath } from '../../utils/PathUtils';
 
 import './styles.scss';
 
-const EditAClassBreadcrumb = () => {
+const SeedlotRegistrationBreadcrumb = () => {
   const navigate = useNavigate();
   const { seedlotNumber } = useParams();
 
@@ -39,4 +39,4 @@ const EditAClassBreadcrumb = () => {
   );
 };
 
-export default EditAClassBreadcrumb;
+export default SeedlotRegistrationBreadcrumb;
