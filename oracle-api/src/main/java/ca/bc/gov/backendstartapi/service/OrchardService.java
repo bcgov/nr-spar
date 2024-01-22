@@ -62,7 +62,7 @@ public class OrchardService {
     if (orchard.isPresent()) {
       OrchardLotTypeCode orchardLotTypeCode = orchard.get().getOrchardLotTypeCode();
       if (Objects.isNull(orchardLotTypeCode) || !orchardLotTypeCode.isValid()) {
-        SparLog.info("Orchard lot type is not valid!");
+        SparLog.warn("Orchard lot type is not valid!");
         return Optional.empty();
       }
 
@@ -74,9 +74,12 @@ public class OrchardService {
               orchardLotTypeCode.getCode(),
               orchardLotTypeCode.getDescription(),
               orchard.get().getStageCode());
+
+      SparLog.info("Valid not retired Orchard found for id: {}", id);
       return Optional.of(descriptionDto);
     }
 
+    SparLog.info("Valid not retired Orchard not found for id: {}", id);
     return Optional.empty();
   }
 
@@ -100,8 +103,11 @@ public class OrchardService {
     SparLog.debug("Time elapsed querying orchard by id: {}", endingOne - starting);
 
     if (orchard.isEmpty()) {
+      SparLog.info("Orchard not found for id {}", orchardId);
       return Optional.empty();
     }
+
+    SparLog.info("Orchard found for id {}, fetching orchard parent tree data", orchardId);
 
     // Orchard
     OrchardParentTreeDto orchardParentTreeDto = new OrchardParentTreeDto();
@@ -117,6 +123,7 @@ public class OrchardService {
 
     long ending = Instant.now().toEpochMilli();
     SparLog.debug("Time elapsed final: {}", ending - starting);
+    SparLog.info("Orchard parent tree data fetched successfully");
     return Optional.of(orchardParentTreeDto);
   }
 
@@ -151,8 +158,11 @@ public class OrchardService {
         });
 
     if (resultList.isEmpty()) {
+      SparLog.info("No records for not retired Orchard for VegCode: {}", vegCode);
       return Optional.empty();
     }
+
+    SparLog.info("{} records for not retired Orchard for VegCode: {}", resultList.size(), vegCode);
     return Optional.of(resultList);
   }
 
@@ -194,6 +204,7 @@ public class OrchardService {
                         .equals(Long.valueOf(orchardSpuMap.get(treeDto.getOrchardId()))))
             .toList();
 
+    SparLog.info("{} parent trees found under VegCode: {}", resultList.size(), vegCode);
     return resultList;
   }
 

@@ -10,13 +10,11 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.With;
 
 /** This class represents a user's favorite activity in the database. */
 @Entity
 @Getter
 @Setter
-@With
 @AllArgsConstructor
 @Table(name = "favourite_activity")
 @Schema(description = "An object representing a user's favourite activity in the database")

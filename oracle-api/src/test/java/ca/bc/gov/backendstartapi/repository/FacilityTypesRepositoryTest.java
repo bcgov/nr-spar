@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.repository;
 
 import ca.bc.gov.backendstartapi.entity.FacilityTypes;
-
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;

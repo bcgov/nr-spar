@@ -9,6 +9,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class InvalidActivityException extends ResponseStatusException {
 
   public InvalidActivityException() {
-    super(HttpStatus.NOT_FOUND, "Invalid activity or page name!");
+    super(HttpStatus.NOT_FOUND, "Invalid or not found activity id!");
   }
 }

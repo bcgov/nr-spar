@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 /** This class contains all routines and database access to a users' favorite activity. */
@@ -58,7 +59,10 @@ public class FavouriteActivityService {
     FavouriteActivityEntity activityEntity = new FavouriteActivityEntity();
     activityEntity.setUserId(userId);
     activityEntity.setActivity(activityDto.activity());
-    return favouriteActivityRepository.save(activityEntity);
+
+    FavouriteActivityEntity activityEntitySaved = favouriteActivityRepository.save(activityEntity);
+    SparLog.info("Activity {} created for user {}", activityDto.activity(), userId);
+    return activityEntitySaved;
   }
 
   /**
@@ -69,7 +73,11 @@ public class FavouriteActivityService {
   public List<FavouriteActivityEntity> getAllUserFavoriteActivities() {
     String userId = loggedUserService.getLoggedUserId();
     SparLog.info("Retrieving all favorite activities for user {}", userId);
-    return favouriteActivityRepository.findAllByUserId(userId);
+
+    List<FavouriteActivityEntity> list = favouriteActivityRepository.findAllByUserId(userId);
+    SparLog.info("{} favourite activity(ies) for user {}", list.size(), userId);
+
+    return list;
   }
 
   /**
@@ -81,7 +89,8 @@ public class FavouriteActivityService {
    * @throws InvalidActivityException if the activity doesn't exist
    */
   @Transactional
-  public FavouriteActivityEntity updateUserActivity(Long id, FavouriteActivityUpdateDto updateDto) {
+  public FavouriteActivityEntity updateUserActivity(
+      @NonNull Long id, FavouriteActivityUpdateDto updateDto) {
     String userId = loggedUserService.getLoggedUserId();
 
     SparLog.info("Updating activity id {} for user {}", id, userId);
@@ -93,9 +102,12 @@ public class FavouriteActivityService {
       favouriteActivityRepository.removeAllHighlightedByUser(userId);
     }
 
-    FavouriteActivityEntity entity = activityEntity.withHighlighted(updateDto.highlighted());
+    activityEntity.setHighlighted(updateDto.highlighted());
 
-    return favouriteActivityRepository.save(entity);
+    FavouriteActivityEntity activityEntitySaved = favouriteActivityRepository.save(activityEntity);
+    SparLog.info("Activity id {} updated for user {}", id, userId);
+
+    return activityEntitySaved;
   }
 
   /**
@@ -103,7 +115,7 @@ public class FavouriteActivityService {
    *
    * @param id A {@link Long} value as the id of the activity
    */
-  public void deleteUserActivity(Long id) {
+  public void deleteUserActivity(@NonNull Long id) {
     String userId = loggedUserService.getLoggedUserId();
 
     SparLog.info("Deleting activity id {} for user {}", id, userId);
@@ -113,5 +125,6 @@ public class FavouriteActivityService {
     }
 
     favouriteActivityRepository.deleteById(id);
+    SparLog.info("Activity id {} deleted for user {}", id, userId);
   }
 }

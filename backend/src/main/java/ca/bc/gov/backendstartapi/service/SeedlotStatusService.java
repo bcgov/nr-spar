@@ -30,6 +30,7 @@ public class SeedlotStatusService {
               resultList.add(methodToAdd);
             });
 
+    SparLog.info("{} valid seedlot statuses found for CodeDescriptionDto", resultList.size());
     return resultList;
   }
 
@@ -40,7 +41,12 @@ public class SeedlotStatusService {
    */
   public List<SeedlotStatusEntity> getAllValidSeedlotStatusEntity() {
     SparLog.info("Fetching all seedlot statuses for SeedlotStatusEntity");
-    return seedlotStatusRepository.findAll().stream().filter(method -> method.isValid()).toList();
+
+    List<SeedlotStatusEntity> list =
+        seedlotStatusRepository.findAll().stream().filter(method -> method.isValid()).toList();
+    SparLog.info("{} valid seedlot statuses found for SeedlotStatusEntity", list.size());
+
+    return list;
   }
 
   /**
@@ -51,8 +57,19 @@ public class SeedlotStatusService {
    */
   public Optional<SeedlotStatusEntity> getValidSeedlotStatus(String statusCode) {
     SparLog.info("Get a single valid seedlot status for SeedlotStatusEntity code {}", statusCode);
-    return getAllValidSeedlotStatusEntity().stream()
-        .filter(x -> x.getSeedlotStatusCode().equals(statusCode))
-        .findFirst();
+
+    Optional<SeedlotStatusEntity> optionalSeedlot =
+        getAllValidSeedlotStatusEntity().stream()
+            .filter(x -> x.getSeedlotStatusCode().equals(statusCode))
+            .findFirst();
+
+    String empty = "";
+    if (optionalSeedlot.isEmpty()) {
+      empty = "not";
+    }
+
+    SparLog.info("Single seedlot status " + empty + " found for code {}", statusCode);
+
+    return optionalSeedlot;
   }
 }

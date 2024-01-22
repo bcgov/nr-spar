@@ -33,6 +33,7 @@ public class GameticMethodologyService {
               resultList.add(methodToAdd);
             });
 
+    SparLog.info("{} gametic methodologies found.", resultList.size());
     return resultList;
   }
 }

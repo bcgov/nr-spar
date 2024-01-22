@@ -33,6 +33,7 @@ public class ConeCollectionMethodService {
               resultList.add(methodToAdd);
             });
 
+    SparLog.info("{} Cone Collection Methods found.", resultList.size());
     return resultList;
   }
 
@@ -43,6 +44,10 @@ public class ConeCollectionMethodService {
    */
   public List<ConeCollectionMethodEntity> getAllValidConeCollectionMethods() {
     SparLog.info("Fetching all Cone Collection Methods for ConeCollectionMethodEntity");
-    return coneCollectionMethodRepository.findAll().stream().filter(x -> x.isValid()).toList();
+
+    List<ConeCollectionMethodEntity> list =
+        coneCollectionMethodRepository.findAll().stream().filter(x -> x.isValid()).toList();
+    SparLog.info("{} Cone Collection Methods found.", list.size());
+    return list;
   }
 }

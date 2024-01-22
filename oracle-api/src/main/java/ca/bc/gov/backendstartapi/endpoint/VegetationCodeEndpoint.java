@@ -68,6 +68,9 @@ public class VegetationCodeEndpoint {
           String code) {
     SparLog.info("Fetching information to vegetation code: {}", code);
     var retrievalResult = vegetationCodeRepository.findById(code);
+    if (retrievalResult.isPresent()) {
+      SparLog.info("Vegetation code found for code {}", code);
+    }
     return retrievalResult.orElseThrow(
         () ->
             new ResponseStatusException(
@@ -121,6 +124,8 @@ public class VegetationCodeEndpoint {
     if (Objects.isNull(vegetationPage)) {
       return List.of();
     }
+    SparLog.info(
+        "{} Vegetation codes found for search {}", vegetationPage.getNumberOfElements(), search);
     return vegetationPage.getContent();
   }
 }

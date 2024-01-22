@@ -32,6 +32,7 @@ public class SeedlotSourceService {
               resultList.add(methodToAdd);
             });
 
+    SparLog.info("{} valid seedlot sources found.", resultList.size());
     return resultList;
   }
 }

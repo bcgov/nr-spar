@@ -52,7 +52,11 @@ public class FundingSourceEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   public List<FundingSource> getAllValidFundingSources() {
-    SparLog.info("Fetching all valid Funding Sources");
-    return fundingSourceRepository.findAllValid();
+    SparLog.info("Fetching all valid funding sources");
+    
+    List<FundingSource> resultList = fundingSourceRepository.findAllValid();
+    SparLog.info("{} valid funding sources found.", resultList.size());
+
+    return resultList;
   }
 }

@@ -34,6 +34,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods for handling Seedlots in the database. */
@@ -122,10 +123,10 @@ public class SeedlotService {
    * @throws InvalidSeedlotRequestException in case of errors.
    */
   private String nextSeedlotNumber(Character seedlotClassCode) {
-    SparLog.info("Retrieving the next class {} Seedlot number", seedlotClassCode);
+    SparLog.info("Retrieving next seedlot number for class-{}", seedlotClassCode);
 
     if (seedlotClassCode.equals('B')) {
-      SparLog.error("Class B Seedlots not implemented yet!");
+      SparLog.error("Class-b seedlots not implemented yet!");
       throw new InvalidSeedlotRequestException();
     }
 
@@ -139,7 +140,7 @@ public class SeedlotService {
 
     seedlotNumber += 1;
 
-    SparLog.debug("Next class {} seedlot number: {}", seedlotNumber);
+    SparLog.info("Next seedlot number for class-{} {}", seedlotClassCode, seedlotNumber);
     return String.valueOf(seedlotNumber);
   }
 
@@ -152,15 +153,21 @@ public class SeedlotService {
    * @return a list of the user's seedlots
    */
   public Optional<Page<Seedlot>> getUserSeedlots(String userId, int pageNumber, int pageSize) {
+    SparLog.info("Retrieving paginated list of seedlots for the user {}", userId);
     if (pageSize == 0) {
+      SparLog.info("No given value for the page size, using default 10.");
       pageSize = 10;
     }
 
+    SparLog.info("Pagination settings: pageNumber {}, pageSize {}", pageNumber, pageSize);
     Pageable sortedPageable =
         PageRequest.of(
             pageNumber, pageSize, Sort.by(Direction.DESC, "AuditInformation_UpdateTimestamp"));
-    return Optional.of(
-        seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable));
+
+    Page<Seedlot> seedlotPage =
+        seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable);
+    SparLog.info("{} results and {} pages", seedlotPage.getNumber(), seedlotPage.getTotalPages());
+    return Optional.of(seedlotPage);
   }
 
   /**
@@ -170,18 +177,13 @@ public class SeedlotService {
    * @return A Seedlot entity.
    * @throws SeedlotNotFoundException in case of errors.
    */
-  public Seedlot getSingleSeedlotInfo(String seedlotNumber) {
+  public Seedlot getSingleSeedlotInfo(@NonNull String seedlotNumber) {
     SparLog.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
     Seedlot seedlotInfo =
-        seedlotRepository
-            .findById(seedlotNumber)
-            .orElseThrow(
-                () -> {
-                  SparLog.error("Nothing found for seedlot number: {}", seedlotNumber);
-                  return new SeedlotNotFoundException();
-                });
+        seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
+    SparLog.info("Seedlot number {} found", seedlotNumber);
     return seedlotInfo;
   }
 
@@ -193,31 +195,21 @@ public class SeedlotService {
    * @throws SeedlotNotFoundException in case of seedlot not found error.
    * @throws SeedlotSourceNotFoundException in case of seedlot source not found error.
    */
-  public Seedlot patchApplicantionInfo(String seedlotNumber, SeedlotApplicationPatchDto patchDto) {
+  public Seedlot patchApplicantionInfo(
+      @NonNull String seedlotNumber, SeedlotApplicationPatchDto patchDto) {
     SparLog.info("Patching seedlot entry for seedlot number {}", seedlotNumber);
 
     Seedlot seedlotInfo =
-        seedlotRepository
-            .findById(seedlotNumber)
-            .orElseThrow(
-                () -> {
-                  SparLog.error("Nothing found for seedlot number: {}", seedlotNumber);
-                  return new SeedlotNotFoundException();
-                });
+        seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    SparLog.info("Seedlot number {} found", seedlotNumber);
 
     seedlotInfo.setApplicantEmailAddress(patchDto.applicantEmailAddress());
 
     SeedlotSourceEntity updatedSource =
         seedlotSourceRepository
             .findById(patchDto.seedlotSourceCode())
-            .orElseThrow(
-                () -> {
-                  SparLog.error(
-                      "Seedlot source not found while patching in patchApplicantionInfo for seedlot"
-                          + " number: {}",
-                      seedlotNumber);
-                  return new SeedlotSourceNotFoundException();
-                });
+            .orElseThrow(SeedlotSourceNotFoundException::new);
 
     seedlotInfo.setSeedlotSource(updatedSource);
 
@@ -226,7 +218,9 @@ public class SeedlotService {
     // The field intendedForCrownLand == to be registered indicator.
     seedlotInfo.setIntendedForCrownLand(patchDto.toBeRegistrdInd());
 
-    return seedlotRepository.save(seedlotInfo);
+    Seedlot seedlotSaved = seedlotRepository.save(seedlotInfo);
+    SparLog.info("Seedlot number {} successfully patched", seedlotNumber);
+    return seedlotSaved;
   }
 
   /**
@@ -270,6 +264,7 @@ public class SeedlotService {
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
 
+    SparLog.info("Seedlot entity and related tables successfully saved.");
     return new SeedlotCreateResponseDto(
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
   }
