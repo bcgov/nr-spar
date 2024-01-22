@@ -28,7 +28,7 @@ const SeedlotRegistrationBreadcrumb = () => {
             </BreadcrumbItem>
           </OverflowMenu>
         </BreadcrumbItem>
-        <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)} className="my-seedlots-breadcrumb">
+        <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)} className="overflow-breadcrumb">
           My seedlots
         </BreadcrumbItem>
         <BreadcrumbItem onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}>

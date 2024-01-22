@@ -4,8 +4,8 @@
     display: none;
   }
 
-@media only screen and (max-width: 672px) {
-  .my-seedlots-breadcrumb {
+@media only screen and (max-width: 320px) {
+  .overflow-breadcrumb {
     display: none;
   }
   .overflow-menu-container {
