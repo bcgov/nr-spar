@@ -17,15 +17,27 @@ export const clientSearchOptions: Array<ClientSearchDropdown> = [
   }
 ];
 
-export const getEmptySectionDescription = () => (
-  <span>
-    Start by searching for a client or agency acronym,
-    <br />
-    number, or name. The matching results will be
-    <br />
-    shown here.
-  </span>
-);
+export const getEmptySectionDescription = (message: string) => {
+  if (message) {
+    return (
+      <span>
+        Something went wrong while trying to search for users...
+        <br />
+        Error Message:
+        {` ${message}`}
+      </span>
+    );
+  }
+  return (
+    <span>
+      Start by searching for a client or agency acronym,
+      <br />
+      number, or name. The matching results will be
+      <br />
+      shown here.
+    </span>
+  );
+};
 
 export const forestClientMockData: Array<ForestClientDisplayType> = [
   {

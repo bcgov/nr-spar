@@ -12,6 +12,7 @@ import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
+import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientDisplayType';
 import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { FilterObj, filterInput } from '../../utils/FilterUtils';
 
@@ -227,7 +228,30 @@ const ApplicantAgencyFields = ({
           <p>
             If you don&apos;t remember the agency information you can
             {' '}
-            <ClientSearchModal linkText="open the client search" modalLabel="Register A-Class Seedlot" />
+            <ClientSearchModal
+              linkText="open the client search"
+              modalLabel="Register A-Class Seedlot"
+              applySelectedClient={(clientAgency: ForestClientDisplayType) => {
+                const agencyObj: MultiOptionsObj = {
+                  code: clientAgency.number,
+                  label: `${clientAgency.number} - ${clientAgency.fullName} - ${clientAgency.acronym}`,
+                  description: clientAgency.fullName
+                };
+
+                const selectedAgency = {
+                  ...agency,
+                  value: agencyObj,
+                  isInvalid: false
+                };
+
+                const selectedLocationCode = {
+                  ...locationCode,
+                  value: clientAgency.locationCode
+                };
+                setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
+                setAgencyAndCode(false, selectedAgency, selectedLocationCode);
+              }}
+            />
           </p>
         </Column>
       </Row>

@@ -8,5 +8,7 @@ export type HeaderObjType = {
 export interface ClientSearchTableProps {
   clientData: ForestClientDisplayType[],
   showPagination: boolean,
-  tablePagination: JSX.Element
+  tablePagination: JSX.Element,
+  selectClientFn?: Function,
+  currentSelected?: ForestClientDisplayType
 }

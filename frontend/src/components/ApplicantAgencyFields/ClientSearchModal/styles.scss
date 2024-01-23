@@ -3,8 +3,12 @@
 
 
 .client-search-modal {
-  .#{vars.$bcgov-prefix}--modal-header__heading {
-    padding: 0;
+  .#{vars.$bcgov-prefix}--data-table-content {
+    overflow: visible;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-header__label {
+    @include type.type-style('label-02');
   }
 
   .client-search-grid {
@@ -34,6 +38,7 @@
   }
 
   .#{vars.$bcgov-prefix}--modal-footer {
+    margin-block-start: 1rem;
     block-size: 3rem;
 
     button {

@@ -179,10 +179,12 @@ export const searchForestClients = (
       const filteredResults = forestClientMockData.filter(
         (client: ForestClientDisplayType) => client[searchOption].includes(searchWord.toUpperCase())
       );
-      if (searchWord !== 'error') {
+      if (searchWord === 'all') {
+        resolve(forestClientMockData);
+      } else if (searchWord !== 'error') {
         resolve(filteredResults);
       } else {
-        reject(new Error('error on fake backend :('));
+        reject(new Error('Error on fake backend :('));
       }
     }, 3000);
   });

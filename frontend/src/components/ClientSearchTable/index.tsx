@@ -23,7 +23,9 @@ const ClientSearchTable = (
   {
     clientData,
     showPagination,
-    tablePagination
+    tablePagination,
+    selectClientFn,
+    currentSelected
   }: ClientSearchTableProps
 ) => {
   const [sortThisHeader, setSortThisHeader] = useState<keyof ForestClientDisplayType | null>(null);
@@ -47,14 +49,31 @@ const ClientSearchTable = (
 
     setSortDirection(newDirection);
     setProcessedData((prevData) => sortByKey(prevData, headerId, newDirection));
-
     setSortThisHeader(headerId);
+  };
+
+  const renderRadioSelect = (client: ForestClientDisplayType) => {
+    if (typeof selectClientFn === 'function') {
+      return (
+        <TableSelectRow
+          radio
+          ariaLabel={`Select client ${client.fullName} with location code ${client.locationCode}`}
+          id={`client-radio-${client.number}-${client.locationCode}`}
+          name="client-radio"
+          checked={client === currentSelected}
+          onSelect={() => {
+            selectClientFn(client);
+          }}
+        />
+      );
+    }
+    return null;
   };
 
   return (
     <>
-      <Table size="lg" useZebraStyles={false} className="client-table" stickyHeader>
-        <TableHead>
+      <Table size="lg" useZebraStyles={false} className="client-table">
+        <TableHead className="client-table-header">
           <TableRow>
             {/* Empty table header to fit the radio button
                 correctly */}
@@ -83,14 +102,9 @@ const ClientSearchTable = (
                   id={`client-table-row-${client.number}-${client.locationCode}`}
                   key={`${client.number}-${client.locationCode}`}
                 >
-                  <TableSelectRow
-                    radio
-                    ariaLabel={`Select client ${client.fullName} with location code ${client.locationCode}`}
-                    id={`client-radio-${client.number}-${client.locationCode}`}
-                    name={`client-radio-${client.number}-${client.locationCode}`}
-                    checked={false}
-                    onSelect={() => null}
-                  />
+                  {
+                    renderRadioSelect(client)
+                  }
                   {
                     TableHeaders.map((header) => (
                       <TableCell
@@ -105,20 +119,24 @@ const ClientSearchTable = (
                   }
                 </TableRow>
               ))
-              : (
-                <TableRow className="empty-section-row">
-                  <TableCell>
-                    <EmptySection
-                      pictogram="UserSearch"
-                      title="No results found!"
-                      description="Nothing found for your search, try adjusting it to find what you want."
-                    />
-                  </TableCell>
-                </TableRow>
-              )
+              : null
           }
         </TableBody>
       </Table>
+      {/* Adding this empty component outside of the table
+          so we don't have  to make a lot of style changes
+          worry about DOM tags */}
+      {
+        !processedData.length
+          ? (
+            <EmptySection
+              pictogram="UserSearch"
+              title="No results found!"
+              description="Nothing found for your search, try adjusting it to find what you want."
+            />
+          )
+          : null
+      }
       {
         showPagination
           ? tablePagination

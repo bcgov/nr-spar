@@ -1,55 +1,48 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import {
   Modal,
   Link,
   FlexGrid,
   Row,
   Column,
-  TextInput,
-  Dropdown,
-  Button,
   Pagination,
   DataTableSkeleton
 } from '@carbon/react';
-import { Search } from '@carbon/icons-react';
 
-import ModalStateManager from '../../ModalStateManager';
 import ClientSearchTable from '../../ClientSearchTable';
 import EmptySection from '../../EmptySection';
+import HeaderTest from './ClientSearchFields';
 
 import { searchForestClients } from '../../../api-service/forestClientsAPI';
 import PaginationChangeType from '../../../types/PaginationChangeType';
-import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import { ForestClientDisplayType } from '../../../types/ForestClientTypes/ForestClientDisplayType';
 
 import {
-  ClientSearchDropdown, ClientSearchModalProps,
-  ClientSearchOptions, LaunchModal
+  ClientSearchDropdown, ClientSearchModalProps, MutationParams
 } from './definitions';
 import { clientSearchOptions, getEmptySectionDescription } from './constants';
 
 import './styles.scss';
 
-type MutationParams = {
-  word: string;
-  option: ClientSearchOptions
-};
-
 const ClientSearchModal = (
   {
     linkText,
-    modalLabel
+    modalLabel,
+    applySelectedClient
   }: ClientSearchModalProps
 ) => {
-  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [searchWord, setSearchWord] = useState<string>('');
   const [searchOption, setSearchOption] = useState<ClientSearchDropdown>(clientSearchOptions[0]);
   const [showTable, setShowTable] = useState<boolean>(false);
   const [searchResults, setSearchResults] = useState<ForestClientDisplayType[]>([]);
+  const [selectedClient, setSelectedClient] = useState<ForestClientDisplayType>();
+  const [disableApplyButton, setDisableApplyButton] = useState<boolean>(true);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const searchClientMutation = useMutation({
     mutationFn: (requestParam: MutationParams) => {
@@ -60,11 +53,11 @@ const ClientSearchModal = (
       );
     },
     onSuccess: (res: any) => {
-      console.log(res);
       setSearchResults(res);
     },
     onError: (error: Error) => {
-      console.log(error.message);
+      setShowTable(false);
+      setErrorMessage(error.message);
     }
   });
 
@@ -103,125 +96,75 @@ const ClientSearchModal = (
       : (
         <ClientSearchTable
           clientData={searchResults}
-          showPagination
+          showPagination={searchResults.length > 10}
           tablePagination={tablePagination()}
+          selectClientFn={(client: ForestClientDisplayType) => {
+            if (disableApplyButton) {
+              setDisableApplyButton(false);
+            }
+            setSelectedClient(client);
+          }}
+          currentSelected={selectedClient}
         />
       )
   );
 
-  const modalHeader = () => (
-    <FlexGrid className="client-search-grid">
-      <Row className="client-modal-title">
-        <Column sm={4} md={4} lg={16} xlg={16}>
-          <h3>Client Search</h3>
-        </Column>
-      </Row>
-      <Row>
-        <Column sm={4} md={4} lg={16} xlg={16}>
-          <p className="client-modal-description">
-            Search for a specific client or agency, you can search by name, acronym or number.
-            To view more information about the client, you can
-            {' '}
-            <Link
-              onClick={() => navigate('/seedlots')}
-              href="#"
-            >
-              go to client search screen.
-            </Link>
-          </p>
-        </Column>
-      </Row>
-      <Row className="client-search-row">
-        <Column sm={4} md={4} lg={10} xlg={10}>
-          <TextInput
-            id="client-search-input"
-            labelText=""
-            aria-label="Client Search Input"
-            placeholder="Search for client or agency"
-            defaultValue={searchWord}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setSearchWord(e.target.value);
-            }}
-            disabled={searchClientMutation.isLoading}
-          />
-        </Column>
-        <Column sm={4} md={4} lg={4} xlg={4}>
-          <Dropdown
-            id="client-search-dropdown"
-            label=""
-            aria-label="Client Search Field Select Dropdown"
-            titleText=""
-            items={clientSearchOptions}
-            initialSelectedItem={clientSearchOptions[0]}
-            selectedItem={searchOption}
-            disabled={searchClientMutation.isLoading}
-            onChange={(e: ComboBoxEvent) => {
-              setSearchOption(e.selectedItem);
-            }}
-          />
-        </Column>
-        <Column sm={4} md={4} lg={2} xlg={2}>
-          <Button
-            size="md"
-            renderIcon={Search}
-            className="client-search-button"
-            disabled={searchClientMutation.isLoading}
-            onClick={
-              () => searchClientMutation.mutate({ word: searchWord, option: searchOption.option })
-            }
-          >
-            Search
-          </Button>
-        </Column>
-      </Row>
-    </FlexGrid>
-  );
-
   return (
-    <ModalStateManager
-      renderLauncher={({ setOpen }: LaunchModal) => (
-        <Link
-          role="button"
-          onClick={() => setOpen(true)}
-          href="#"
-        >
-          {linkText}
-        </Link>
-      )}
-    >
-      {({ open, setOpen }: LaunchModal) => (
-        <Modal
-          className="client-search-modal"
-          size="lg"
-          open={open}
-          onRequestClose={() => setOpen(false)}
-          modalLabel={modalLabel}
-          primaryButtonText="Apply selected client"
-          primaryButtonDisabled
-          secondaryButtonText="Cancel"
-          modalHeading={modalHeader()}
-          closeButtonLabel="Close client search modal"
-        >
-          <FlexGrid className="client-search-grid">
-            <Row>
-              <Column sm={4} md={4} lg={16} xlg={16}>
-                {
-                  showTable
-                    ? showResultsTable()
-                    : (
-                      <EmptySection
-                        pictogram="Summit"
-                        title="Nothing to show yet!"
-                        description={getEmptySectionDescription()}
-                      />
-                    )
-                }
-              </Column>
-            </Row>
-          </FlexGrid>
-        </Modal>
-      )}
-    </ModalStateManager>
+    <>
+      <Link
+        role="button"
+        onClick={() => setIsOpen(true)}
+        href="#"
+      >
+        {linkText}
+      </Link>
+      {
+        createPortal(
+          <Modal
+            className="client-search-modal"
+            size="lg"
+            open={isOpen}
+            onRequestClose={() => setIsOpen(false)}
+            onRequestSubmit={() => {
+              applySelectedClient(selectedClient);
+              setIsOpen(false);
+            }}
+            modalLabel={modalLabel}
+            modalHeading="Client search"
+            primaryButtonText="Apply selected client"
+            primaryButtonDisabled={disableApplyButton}
+            secondaryButtonText="Cancel"
+            closeButtonLabel="Close client search modal"
+          >
+            <FlexGrid className="client-search-grid">
+              <HeaderTest
+                searchWord={searchWord}
+                setSearchWord={setSearchWord}
+                searchOption={searchOption}
+                setSearchOption={setSearchOption}
+                mutationFn={searchClientMutation}
+              />
+              <Row>
+                <Column sm={4} md={4} lg={16} xlg={16}>
+                  {
+                    showTable
+                      ? showResultsTable()
+                      : (
+                        <EmptySection
+                          pictogram={errorMessage ? 'FaceVeryDissatisfied' : 'Summit'}
+                          title={errorMessage ? 'An unexpected error occuried :(' : 'Nothing to show yet!'}
+                          description={getEmptySectionDescription(errorMessage)}
+                        />
+                      )
+                  }
+                </Column>
+              </Row>
+            </FlexGrid>
+          </Modal>,
+          document.body
+        )
+      }
+    </>
   );
 };
 
