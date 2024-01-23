@@ -1,4 +1,4 @@
-import ForestClientType from '../../types/ForestClientTypes/ForestClientType';
+import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 
 const ApplicantAgenciesItems: ForestClientType[] = [
   {
