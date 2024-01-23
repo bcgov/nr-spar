@@ -176,7 +176,7 @@ const SeedlotDetails = () => {
               <TabPanels>
                 <TabPanel>
                   {
-                    isSubmitSuccess
+                    isSubmitSuccess && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'SUB')
                       ? (
                         <InlineNotification
                           className="seedlot-submitted-notification"

@@ -21,7 +21,7 @@ export type AllStepData = {
   extractionStorageStep: ExtractionStorageForm
 }
 
-type ProgressStepStatus = {
+export type ProgressStepStatus = {
   isComplete: boolean;
   isCurrent: boolean;
   isInvalid: boolean;
@@ -38,4 +38,12 @@ export type ProgressIndicatorConfig = {
 
 export type StepMap = {
   [key: number]: keyof ProgressIndicatorConfig;
+}
+
+export type SaveTooltipProps = {
+  saveStatus: string | null;
+  saveDescription: string;
+  mutationStatus: 'idle' | 'loading' | 'success' | 'error';
+  lastSaveTimestamp: string;
+  handleSaveBtn: Function;
 }

@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import BigNumber from 'bignumber.js';
+import { AxiosError } from 'axios';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { OrchardForm, OrchardObj } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
@@ -19,6 +20,7 @@ import {
   OrchardFormSubmitType, ParentTreeFormSubmitType, SingleOwnerFormSubmitType
 } from '../../../types/SeedlotType';
 import { dateStringToISO } from '../../../utils/DateUtils';
+import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 
 import { stepMap } from './constants';
 import {
@@ -549,7 +551,7 @@ export const checkAllStepsCompletion = (status: ProgressIndicatorConfig, extract
     // the initial value of the form is already in complete, but we only
     // update the progress indicator when leaving the step
     if ((!status[key as keyof ProgressIndicatorConfig].isComplete && key !== 'extraction')
-        || !extractionCompleteness) {
+      || !extractionCompleteness) {
       allStepsComplete = false;
     }
   });
@@ -643,3 +645,28 @@ export const convertExtraction = (extractionData: ExtractionStorageForm): Extrac
   temporaryStrgStartDate: dateStringToISO(extractionData.seedStorage.startDate.value),
   temporaryStrgEndDate: dateStringToISO(extractionData.seedStorage.endDate.value)
 });
+
+export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptionType => {
+  switch (err.response?.status) {
+    case 401:
+      return {
+        title: 'Session expired!',
+        description: 'Your session has expired. Please refresh the page and log in again to continue. (Error code 401)'
+      };
+    case 500:
+      return {
+        title: 'Submission failure!',
+        description: 'An unexpected error occurred while submitting your seedlot registration. Please try again, and if the issue persists, contact support. (Error code 500)'
+      };
+    case 503:
+      return {
+        title: 'Network error!',
+        description: 'System is facing network issues at the moment. Please check your internet connection and retry. (Error code 503)'
+      };
+    default:
+      return {
+        title: 'Unknown failure!',
+        description: `${err.message} (Error code ${err.response?.status ?? err.code})`
+      };
+  }
+};
