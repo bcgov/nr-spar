@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  useNavigate, useParams, useSearchParams, useLocation
+} from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
@@ -11,20 +13,25 @@ import {
   Button,
   Loading,
   Grid,
-  InlineNotification
+  InlineNotification,
+  InlineLoading,
+  ActionableNotification
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
+import { DateTime } from 'luxon';
 
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
-import { getSeedlotById, putAClassSeedlot } from '../../../api-service/seedlotAPI';
+import { getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
-import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import {
+  TEN_SECONDS, THREE_HALF_HOURS, THREE_HOURS, FIVE_SECONDS
+} from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
@@ -44,16 +51,15 @@ import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptions
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
-import ResponseErrorType from '../../../types/ResponseErrorType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import createErrorMessage from '../../../utils/ErrorHandlingUtils';
 import { addParamToPath } from '../../../utils/PathUtils';
 import PathConstants from '../../../routes/pathConstants';
 
-import { EmptyMultiOptObj, EmptyResponseError } from '../../../shared-constants/shared-constants';
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
-import { AllStepData, ProgressIndicatorConfig } from './definitions';
+import SaveTooltipLabel from './SaveTooltip';
+import { AllStepData, ProgressIndicatorConfig, ProgressStepStatus } from './definitions';
 import {
   initProgressBar,
   initCollectionState,
@@ -81,10 +87,12 @@ import {
   convertInterim,
   convertOrchard,
   convertOwnership,
-  convertParentTree
+  convertParentTree,
+  getSeedlotSubmitErrDescription
 } from './utils';
 import {
-  initialProgressConfig, stepMap, tscAgencyObj, tscLocationCode
+  MAX_EDIT_BEFORE_SAVE,
+  initialProgressConfig, smartSaveText, stepMap, tscAgencyObj, tscLocationCode
 } from './constants';
 
 import './styles.scss';
@@ -94,6 +102,8 @@ const SeedlotRegistrationForm = () => {
   const { seedlotNumber } = useParams();
   const [searchParams] = useSearchParams();
   const stepParam = searchParams.get('step');
+
+  const isPageRendered = useRef(false);
 
   const [formStep, setFormStep] = useState<number>(
     stepParam
@@ -105,8 +115,11 @@ const SeedlotRegistrationForm = () => {
     setProgressStatus
   ] = useState<ProgressIndicatorConfig>(() => initProgressBar(formStep, initialProgressConfig));
 
-  const [errorSubmitting, setErrorSubmitting] = useState<ResponseErrorType>(EmptyResponseError);
   const [allStepCompleted, setAllStepCompleted] = useState<boolean>(false);
+  const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(() => DateTime.now().toISO());
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [saveDescription, setSaveDescription] = useState<string>('Save changes');
+  const numOfEdit = useRef(0);
 
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
@@ -184,6 +197,7 @@ const SeedlotRegistrationForm = () => {
         }
       }
     }));
+    numOfEdit.current += 1;
   };
 
   const forestClientQuery = useQuery({
@@ -238,6 +252,7 @@ const SeedlotRegistrationForm = () => {
     }
     newData[stepName] = stepData;
     setAllStepData(newData);
+    numOfEdit.current += 1;
   };
 
   const methodsOfPaymentQuery = useQuery({
@@ -259,6 +274,48 @@ const SeedlotRegistrationForm = () => {
     console.log(allStepData);
   };
 
+  const updateStepStatus = (stepName: keyof ProgressIndicatorConfig): ProgressStepStatus => {
+    const clonedStepStatus = structuredClone(progressStatus[stepName]);
+    if (stepName === 'collection') {
+      clonedStepStatus.isInvalid = validateCollectionStep(allStepData.collectionStep);
+      if (!clonedStepStatus.isInvalid) {
+        clonedStepStatus.isComplete = verifyCollectionStepCompleteness(allStepData.collectionStep);
+      }
+    }
+    if (stepName === 'ownership') {
+      clonedStepStatus.isInvalid = validateOwnershipStep(allStepData.ownershipStep);
+      if (!clonedStepStatus.isInvalid) {
+        clonedStepStatus.isComplete = verifyOwnershipStepCompleteness(allStepData.ownershipStep);
+      }
+    }
+    if (stepName === 'interim') {
+      clonedStepStatus.isInvalid = validateInterimStep(allStepData.interimStep);
+      if (!clonedStepStatus.isInvalid) {
+        clonedStepStatus.isComplete = verifyInterimStepCompleteness(allStepData.interimStep);
+      }
+    }
+    if (stepName === 'orchard') {
+      clonedStepStatus.isInvalid = validateOrchardStep(allStepData.orchardStep);
+      if (!clonedStepStatus.isInvalid) {
+        clonedStepStatus.isComplete = verifyOrchardStepCompleteness(allStepData.orchardStep);
+      }
+    }
+    if (stepName === 'parent') {
+      clonedStepStatus.isInvalid = validateParentStep(allStepData.parentTreeStep);
+      if (!clonedStepStatus.isInvalid) {
+        clonedStepStatus.isComplete = verifyParentStepCompleteness(allStepData.parentTreeStep);
+      }
+    }
+    if (stepName === 'extraction') {
+      clonedStepStatus.isInvalid = validateExtractionStep(allStepData.extractionStorageStep);
+      if (!clonedStepStatus.isInvalid) {
+        clonedStepStatus.isComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
+      }
+    }
+
+    return clonedStepStatus;
+  };
+
   /**
    * Update the progress indicator status
    */
@@ -266,6 +323,36 @@ const SeedlotRegistrationForm = () => {
     const clonedStatus = structuredClone(progressStatus);
     const currentStepName = stepMap[currentStepNum];
     const prevStepName = stepMap[prevStepNum];
+
+    // Set invalid or complete status for Collection Step
+    if (currentStepName !== 'collection' && prevStepName === 'collection') {
+      clonedStatus.collection = updateStepStatus('collection');
+    }
+
+    // Set invalid or complete status for Ownership Step
+    if (currentStepName !== 'ownership' && prevStepName === 'ownership') {
+      clonedStatus.ownership = updateStepStatus('ownership');
+    }
+
+    // Set invalid or complete status for Interim Step
+    if (currentStepName !== 'interim' && prevStepName === 'interim') {
+      clonedStatus.interim = updateStepStatus('interim');
+    }
+
+    // Set invalid or complete status for Orchard Step
+    if (currentStepName !== 'orchard' && prevStepName === 'orchard') {
+      clonedStatus.orchard = updateStepStatus('orchard');
+    }
+
+    // Set invalid or complete status for Parent Tree Step
+    if (currentStepName !== 'parent' && prevStepName === 'parent') {
+      clonedStatus.parent = updateStepStatus('parent');
+    }
+
+    // Set invalid or complete status for Extraction and Storage Step
+    if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
+      clonedStatus.extraction = updateStepStatus('extraction');
+    }
 
     // Set the current step's current val to true, and everything else false
     clonedStatus[currentStepName].isCurrent = true;
@@ -275,66 +362,6 @@ const SeedlotRegistrationForm = () => {
         clonedStatus[nonCurrentStepName].isCurrent = false;
       });
 
-    // Set invalid or complete status for Collection Step
-    if (currentStepName !== 'collection' && prevStepName === 'collection') {
-      const isCollectionInvalid = validateCollectionStep(allStepData.collectionStep);
-      clonedStatus.collection.isInvalid = isCollectionInvalid;
-      if (!isCollectionInvalid) {
-        const isCollectionComplete = verifyCollectionStepCompleteness(allStepData.collectionStep);
-        clonedStatus.collection.isComplete = isCollectionComplete;
-      }
-    }
-
-    // Set invalid or complete status for Ownership Step
-    if (currentStepName !== 'ownership' && prevStepName === 'ownership') {
-      const isOwnershipInvalid = validateOwnershipStep(allStepData.ownershipStep);
-      clonedStatus.ownership.isInvalid = isOwnershipInvalid;
-      if (!isOwnershipInvalid) {
-        const isOwnershipComplete = verifyOwnershipStepCompleteness(allStepData.ownershipStep);
-        clonedStatus.ownership.isComplete = isOwnershipComplete;
-      }
-    }
-
-    // Set invalid or complete status for Interim Step
-    if (currentStepName !== 'interim' && prevStepName === 'interim') {
-      const isInterimInvalid = validateInterimStep(allStepData.interimStep);
-      clonedStatus.interim.isInvalid = isInterimInvalid;
-      if (!isInterimInvalid) {
-        const isInterimComplete = verifyInterimStepCompleteness(allStepData.interimStep);
-        clonedStatus.interim.isComplete = isInterimComplete;
-      }
-    }
-
-    // Set invalid or complete status for Orchard Step
-    if (currentStepName !== 'orchard' && prevStepName === 'orchard') {
-      const isOrchardInvalid = validateOrchardStep(allStepData.orchardStep);
-      clonedStatus.orchard.isInvalid = isOrchardInvalid;
-      if (!isOrchardInvalid) {
-        const isOrchardComplete = verifyOrchardStepCompleteness(allStepData.orchardStep);
-        clonedStatus.orchard.isComplete = isOrchardComplete;
-      }
-    }
-
-    // Set invalid or complete status for Parent Tree Step
-    if (currentStepName !== 'parent' && prevStepName === 'parent') {
-      const isParentInvalid = validateParentStep(allStepData.parentTreeStep);
-      clonedStatus.parent.isInvalid = isParentInvalid;
-      if (!isParentInvalid) {
-        const isParentComplete = verifyParentStepCompleteness(allStepData.parentTreeStep);
-        clonedStatus.parent.isComplete = isParentComplete;
-      }
-    }
-
-    // Set invalid or complete status for Extraction and Storage Step
-    if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
-      const isExtractionInvalid = validateExtractionStep(allStepData.extractionStorageStep);
-      clonedStatus.extraction.isInvalid = isExtractionInvalid;
-      if (!isExtractionInvalid) {
-        const isExtractionComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
-        clonedStatus.extraction.isComplete = isExtractionComplete;
-      }
-    }
-
     setProgressStatus(clonedStatus);
   };
 
@@ -343,6 +370,7 @@ const SeedlotRegistrationForm = () => {
     const prevStep = formStep;
     const newStep = prevStep + delta;
     updateProgressStatus(newStep, prevStep);
+    window.history.replaceState(null, '', `?step=${newStep + 1}`);
     setFormStep(newStep);
   };
 
@@ -359,7 +387,113 @@ const SeedlotRegistrationForm = () => {
         isInvalid: false
       }
     }));
+    numOfEdit.current += 1;
   };
+
+  const getSeedlotPayload = (): SeedlotAClassSubmitType => ({
+    seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
+    seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
+    seedlotFormInterimDto: convertInterim(allStepData.interimStep),
+    seedlotFormOrchardDto: convertOrchard(
+      allStepData.orchardStep,
+      allStepData.parentTreeStep.tableRowData
+    ),
+    seedlotFormParentTreeSmpDtoList: convertParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
+    seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
+  });
+
+  const submitSeedlot = useMutation({
+    mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
+    onSuccess: () => {
+      navigate({
+        pathname: addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''),
+        search: '?isSubmitSuccess=true'
+      });
+    },
+    retry: 0
+  });
+
+  useEffect(() => {
+    const completionStatus = checkAllStepsCompletion(progressStatus, verifyExtractionStepCompleteness(allStepData.extractionStorageStep));
+    setAllStepCompleted(completionStatus);
+  }, [progressStatus, allStepData.extractionStorageStep, formStep]);
+
+  const updateAllStepStatus = (): ProgressIndicatorConfig => {
+    const clonedStatus = structuredClone(progressStatus);
+    const stepNames = Object.keys(clonedStatus) as (keyof ProgressIndicatorConfig)[];
+    stepNames.forEach((stepName) => {
+      clonedStatus[stepName] = updateStepStatus(stepName);
+    });
+    setProgressStatus(clonedStatus);
+    return clonedStatus;
+  };
+
+  const saveProgress = useMutation({
+    mutationFn: () => putAClassSeedlotProgress(
+      seedlotNumber ?? '',
+      {
+        allStepData,
+        progressStatus: updateAllStepStatus()
+      }
+    ),
+    onSuccess: () => {
+      numOfEdit.current = 0;
+      setLastSaveTimestamp(DateTime.now().toISO());
+      setSaveStatus('finished');
+      setSaveDescription(smartSaveText.success);
+    },
+    onError: () => {
+      setSaveStatus('error');
+      setSaveDescription(smartSaveText.error);
+    },
+    onSettled: () => {
+      setTimeout(() => {
+        setSaveStatus(null);
+        setSaveDescription(smartSaveText.idle);
+      }, FIVE_SECONDS);
+    },
+    retry: 0
+  });
+
+  const handleSaveBtn = () => {
+    setSaveStatus('active');
+    setSaveDescription(smartSaveText.loading);
+    if (!saveProgress.isLoading) {
+      saveProgress.mutate();
+    }
+  };
+
+  const location = useLocation();
+
+  /**
+   * For save progress on page leave.
+   */
+  useEffect(() => () => {
+    // Prevent save on first render.
+    if (isPageRendered.current) {
+      saveProgress.mutate();
+    }
+    isPageRendered.current = true;
+  }, [location]);
+
+  /**
+   * For auto save on interval.
+   */
+  useEffect(() => {
+    if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE) {
+      if (!saveProgress.isLoading) {
+        saveProgress.mutate();
+      }
+    }
+
+    const interval = setInterval(() => {
+      if (numOfEdit.current > 0 && !saveProgress.isLoading) {
+        saveProgress.mutate();
+      }
+    }, TEN_SECONDS);
+
+    return () => clearInterval(interval);
+  }, [numOfEdit.current]);
 
   const renderStep = () => {
     const defaultAgencyObj = getDefaultAgencyObj();
@@ -448,41 +582,11 @@ const SeedlotRegistrationForm = () => {
     }
   };
 
-  const getSeedlotPayload = (): SeedlotAClassSubmitType => ({
-    seedlotFormCollectionDto: convertCollection(allStepData.collectionStep),
-    seedlotFormOwnershipDtoList: convertOwnership(allStepData.ownershipStep),
-    seedlotFormInterimDto: convertInterim(allStepData.interimStep),
-    seedlotFormOrchardDto: convertOrchard(
-      allStepData.orchardStep,
-      allStepData.parentTreeStep.tableRowData
-    ),
-    seedlotFormParentTreeSmpDtoList: convertParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
-    seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
-  });
-
-  const submitSeedlot = useMutation({
-    mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
-    onSuccess: () => {
-      navigate({
-        pathname: addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''),
-        search: '?isSubmitSuccess=true'
-      });
-    },
-    onError: (err: AxiosError) => {
-      setErrorSubmitting(createErrorMessage(err));
-    }
-  });
-
-  useEffect(() => {
-    const completionStatus = checkAllStepsCompletion(progressStatus, verifyExtractionStepCompleteness(allStepData.extractionStorageStep));
-    setAllStepCompleted(completionStatus);
-  }, [progressStatus, allStepData.extractionStorageStep]);
-
   return (
     <div className="seedlot-registration-page">
       <FlexGrid fullWidth>
         <Row>
-          <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
+          <Column className="seedlot-registration-breadcrumb">
             <Breadcrumb>
               <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>Seedlots</BreadcrumbItem>
               <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>My seedlots</BreadcrumbItem>
@@ -491,36 +595,70 @@ const SeedlotRegistrationForm = () => {
           </Column>
         </Row>
         <Row>
-          <Column className="seedlot-registration-title" sm={4} md={8} lg={16} xlg={16}>
+          <Column className="seedlot-registration-title">
             <PageTitle
               title="Seedlot Registration"
-              subtitle={`Seedlot ${seedlotNumber}`}
+              subtitle={(
+                <div className="seedlot-form-subtitle">
+                  <span>
+                    {`Seedlot ${seedlotNumber}`}
+                    &nbsp;
+                    -
+                    &nbsp;
+                  </span>
+                  <SaveTooltipLabel
+                    handleSaveBtn={handleSaveBtn}
+                    saveStatus={saveStatus}
+                    saveDescription={saveDescription}
+                    mutationStatus={saveProgress.status}
+                    lastSaveTimestamp={lastSaveTimestamp}
+                  />
+                </div>
+              )}
             />
           </Column>
         </Row>
         <Row>
-          <Column className="seedlot-registration-progress" sm={4} md={8} lg={16} xlg={16}>
+          <Column className="seedlot-registration-progress">
             <SeedlotRegistrationProgress
               progressStatus={progressStatus}
               className="seedlot-registration-steps"
               interactFunction={(e: number) => {
-                window.history.replaceState(null, '', `?step=${(e + 1).toString()}`);
                 updateProgressStatus(e, formStep);
-                setFormStep(e);
+                setStep((e - formStep));
               }}
             />
           </Column>
         </Row>
         {
-          errorSubmitting.errOccured
+          submitSeedlot.isError
             ? (
               <Row>
-                <Column sm={4} md={8} lg={16} xlg={16}>
+                <Column>
                   <InlineNotification
                     lowContrast
                     kind="error"
-                    title={errorSubmitting.title}
-                    subtitle={errorSubmitting.description}
+                    title={getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError)).title}
+                    subtitle={getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError)).description}
+                  />
+                </Column>
+              </Row>
+            )
+            : null
+        }
+        {
+          saveProgress.isError
+            ? (
+              <Row>
+                <Column>
+                  <ActionableNotification
+                    className="save-error-actionable-notification"
+                    lowContrast
+                    kind="error"
+                    title={`${smartSaveText.error}:\u00A0`}
+                    subtitle={smartSaveText.suggestion}
+                    actionButtonLabel={smartSaveText.idle}
+                    onActionButtonClick={() => handleSaveBtn()}
                   />
                 </Column>
               </Row>
@@ -528,7 +666,7 @@ const SeedlotRegistrationForm = () => {
             : null
         }
         <Row>
-          <Column className="seedlot-registration-row" sm={4} md={8} lg={16} xlg={16}>
+          <Column className="seedlot-registration-row">
             {
               (
                 vegCodeQuery.isFetched
@@ -555,7 +693,7 @@ const SeedlotRegistrationForm = () => {
                     <Button
                       kind="secondary"
                       size="lg"
-                      className="back-next-btn"
+                      className="form-action-btn"
                       onClick={() => setStep(-1)}
                     >
                       Back
@@ -565,7 +703,7 @@ const SeedlotRegistrationForm = () => {
                     <Button
                       kind="secondary"
                       size="lg"
-                      className="back-next-btn"
+                      className="form-action-btn"
                       onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}
                     >
                       Cancel
@@ -575,13 +713,24 @@ const SeedlotRegistrationForm = () => {
               }
             </Column>
             <Column sm={4} md={3} lg={3} xlg={4}>
+              <Button
+                kind="secondary"
+                size="lg"
+                className="form-action-btn"
+                onClick={() => handleSaveBtn()}
+                disabled={saveProgress.isLoading}
+              >
+                <InlineLoading status={saveStatus} description={saveDescription} />
+              </Button>
+            </Column>
+            <Column sm={4} md={3} lg={3} xlg={4}>
               {
                 formStep !== 5
                   ? (
                     <Button
                       kind="primary"
                       size="lg"
-                      className="back-next-btn"
+                      className="form-action-btn"
                       onClick={() => setStep(1)}
                       renderIcon={ArrowRight}
                     >

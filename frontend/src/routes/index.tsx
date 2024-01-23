@@ -1,7 +1,6 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, RouteObject } from 'react-router-dom';
 
-import { RoutesType } from './definitions';
 import PathConstants from './pathConstants';
 import { getStoredPath } from '../utils/PathUtils';
 
@@ -14,7 +13,7 @@ import SeedlotCreatedFeedback from '../views/Seedlot/SeedlotCreatedFeedback';
 import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotRegistrationForm from '../views/Seedlot/SeedlotRegistrationForm';
 
-const routes: Array<RoutesType> = [
+const routes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
   // dashboard, when user is logged in
   {

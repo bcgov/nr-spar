@@ -1,5 +1,7 @@
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
-import { SeedlotAClassSubmitType, SeedlotType, SeedlotsReturnType } from '../types/SeedlotType';
+import {
+  SeedlotAClassSubmitType, SeedlotProgressPayloadType, SeedlotType, SeedlotsReturnType
+} from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
 
@@ -44,4 +46,12 @@ export const patchSeedlotApplicationInfo = (
 ) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/application-info`;
   return api.patch(url, payload);
+};
+
+export const putAClassSeedlotProgress = (
+  seedlotNumber: string,
+  payload: SeedlotProgressPayloadType
+) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-progress`;
+  return api.put(url, payload);
 };

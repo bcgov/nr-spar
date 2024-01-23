@@ -400,7 +400,7 @@ const OrchardStep = ({
           <Subtitle text={orchardStepText.pollenSection.subtitle} />
         </Column>
       </Row>
-      <Row className="orchard-row">
+      <Row>
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
             id={state.hasPollenContamination.id}
@@ -429,12 +429,12 @@ const OrchardStep = ({
         state.hasPollenContamination.value
           ? (
             <>
-              <Row className="orchard-row">
+              <Row className="pollen-contam-row">
                 <Column sm={4} md={8} lg={16} xlg={12}>
                   <NumberInput
                     id={state.breedingPercentage.id}
                     name="breedingPercentage"
-                    value={state.breedingPercentage.value}
+                    defaultValue={state.breedingPercentage.value}
                     step={10}
                     disableWheel
                     type="number"
@@ -442,11 +442,6 @@ const OrchardStep = ({
                     helperText={orchardStepText.pollenSection.breedingPercentage.helper}
                     invalid={state.breedingPercentage.isInvalid}
                     invalidText={orchardStepText.pollenSection.breedingPercentage.invalid}
-                    onChange={(e: React.ChangeEvent) => {
-                      if (e.target.matches('input')) {
-                        setAndValidateBreedPerc((e.target as HTMLInputElement).value, true);
-                      }
-                    }}
                     onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setAndValidateBreedPerc(e.target.value, false);
                     }}

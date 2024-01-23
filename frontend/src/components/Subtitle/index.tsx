@@ -8,9 +8,9 @@ interface SubtitleProps {
 }
 
 const Subtitle = ({ text, className }: SubtitleProps) => (
-  <p className={className ? `${className} subtitle-section` : 'subtitle-section'}>
+  <div className={className ? `${className} subtitle-section` : 'subtitle-section'}>
     {text}
-  </p>
+  </div>
 );
 
 export default Subtitle;

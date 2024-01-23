@@ -111,8 +111,10 @@ const SingleOwnerInfo = ({
       // Set the other value
       if (isReserved) {
         clonedState.surplusPerc.value = otherValue;
+        clonedState.surplusPerc.isInvalid = false;
       } else {
         clonedState.reservedPerc.value = otherValue;
+        clonedState.reservedPerc.isInvalid = false;
       }
     }
 
@@ -161,11 +163,11 @@ const SingleOwnerInfo = ({
               id={ownerInfo.ownerPortion.id}
               name="ownerPortion"
               label={inputText.portion.label}
-              value={ownerInfo.ownerPortion.value}
+              defaultValue={ownerInfo.ownerPortion.value}
               hideSteppers
               max={100}
               min={0}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                 // The guard is needed here because onClick also trigger the onChange method
                 // but it does not pass in any value
                 if (e?.target?.name && e?.target?.value) {

@@ -5,6 +5,55 @@
 
   .seedlot-registration-title {
     padding: 0;
+
+    .seedlot-form-subtitle {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  .save-toggletip {
+    .save-toggletip-btn {
+      padding: 0;
+      height: auto;
+      min-height: 0;
+      background: transparent;
+      border: none;
+
+      p {
+        @include type.type-style('body-01');
+        color: var(--#{vars.$bcgov-prefix}-text-secondary);
+        text-decoration: underline dotted var(--#{vars.$bcgov-prefix}-border-interactive);
+      }
+
+      .save-error-p {
+        color: var(--#{vars.$bcgov-prefix}-text-error);
+      }
+    }
+
+    .save-toggletip-content {
+      .save-toggletip-save-btn {
+        width: 100%;
+
+        .#{vars.$bcgov-prefix}--inline-loading {
+          min-block-size: 0;
+
+          .#{vars.$bcgov-prefix}--inline-loading__text {
+            @include type.type-style('body-compact-01');
+            color: var(--#{vars.$bcgov-prefix}-text-on-color);
+          }
+        }
+
+        .#{vars.$bcgov-prefix}--inline-loading__checkmark-container {
+          fill: white;
+        }
+
+        .#{vars.$bcgov-prefix}--inline-loading--error {
+          fill: white;
+        }
+      }
+    }
   }
 
   .seedlot-registration-progress {
@@ -21,9 +70,28 @@
   }
 
   .seedlot-registration-button-row {
-    .back-next-btn {
+    .form-action-btn {
+      margin-top: 1rem;
       width: 100%;
       max-width: none;
+      white-space: nowrap;
+
+      .#{vars.$bcgov-prefix}--inline-loading {
+        min-block-size: 0;
+
+        .#{vars.$bcgov-prefix}--inline-loading__text {
+          @include type.type-style('body-compact-01');
+          color: var(--#{vars.$bcgov-prefix}-text-on-color);
+        }
+      }
+
+      .#{vars.$bcgov-prefix}--inline-loading__checkmark-container {
+        fill: white;
+      }
+
+      .#{vars.$bcgov-prefix}--inline-loading--error {
+        fill: white;
+      }
     }
 
     .#{vars.$bcgov-prefix}--css-grid {
@@ -45,4 +113,50 @@
     }
   }
 
+  .save-error-actionable-notification {
+    width: 100%;
+    max-width: none;
+    margin-bottom: 3rem;
+
+    .#{vars.$bcgov-prefix}--actionable-notification__content {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__details {
+      align-items: center;
+
+      svg {
+        margin: 0 0.8125rem 0 0;
+      }
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification {
+      width: 100%;
+      max-width: none;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__text-wrapper {
+      padding: 0.9375rem 0;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__button-wrapper {
+      align-items: center;
+      flex-direction: row;
+
+      .bx--actionable-notification__action-button{
+        right: 3rem;
+      }
+
+      button{
+        border: none;
+        margin: 0;
+      }
+      button:hover{
+        background: inherit;
+        border: inherit;
+        color: var(--#{vars.$bcgov-prefix}-button-tertiary);
+      }
+    }
+  }
 }

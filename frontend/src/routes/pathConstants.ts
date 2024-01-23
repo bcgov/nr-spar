@@ -1,6 +1,4 @@
-import { RouteNames } from './definitions';
-
-const PathConstants: RouteNames = {
+const PathConstants: Record<string, string> = {
   ALL_ROUTES: '*',
   LOGIN: '/login',
   ROOT: '/',
