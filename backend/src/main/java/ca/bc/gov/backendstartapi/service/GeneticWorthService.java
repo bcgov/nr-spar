@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 /** This class contains all routines and database access to a list of genetic worth. */
@@ -38,15 +40,18 @@ public class GeneticWorthService {
               resultList.add(methodToAdd);
             });
 
+    SparLog.info("{} genetic worth found.", resultList.size());
     return resultList;
   }
 
   /** Fetch a genetic worth from the repository by code. */
-  public CodeDescriptionDto getGeneticWorthByCode(String code) {
-    SparLog.info("Fetching genetic worth with code %s", code);
+  public CodeDescriptionDto getGeneticWorthByCode(@NonNull String code) {
+    SparLog.info("Fetching genetic worth with code {}", code);
 
-    return geneticWorthRepository
-        .findById(code)
+    Optional<GeneticWorthEntity> gweOptional = geneticWorthRepository.findById(code);
+    gweOptional.ifPresent(entity -> SparLog.info("Genetic worth {} found.", code));
+
+    return gweOptional
         .map(
             entity -> new CodeDescriptionDto(entity.getGeneticWorthCode(), entity.getDescription()))
         .orElseThrow(NoGeneticWorthException::new);
@@ -62,6 +67,7 @@ public class GeneticWorthService {
    */
   public GeneticWorthSummaryDto calculateGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
+    SparLog.info("Starting Genetic Worth calculations");
     BigDecimal minimumThreshold = new BigDecimal("0.7");
     BigDecimal neValue = calculateNe(traitsDto);
 
@@ -77,6 +83,9 @@ public class GeneticWorthService {
       if (percentage.compareTo(minimumThreshold) >= 0) {
         SparLog.info("Calculating Genetic Worth for {} trait", trait.code());
         calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);
+      } else {
+        SparLog.info(
+            "No Genetic Worth calculations for trait {}, threshold not met.", trait.code());
       }
 
       GeneticWorthTraitsDto traitResponse =

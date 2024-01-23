@@ -36,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -405,6 +406,7 @@ public class SeedlotEndpoint {
               required = true,
               schema = @Schema(type = "integer", format = "int64"))
           @PathVariable
+          @NonNull
           String seedlotNumber,
       @RequestBody SaveSeedlotFormDtoClassA data) {
 
@@ -438,6 +440,7 @@ public class SeedlotEndpoint {
               required = true,
               schema = @Schema(type = "integer", format = "int64"))
           @PathVariable
+          @NonNull
           String seedlotNumber) {
 
     return saveSeedlotFormService.getFormClassA(seedlotNumber);

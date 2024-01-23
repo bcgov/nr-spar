@@ -39,6 +39,7 @@ public class OrchardService {
    * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
    */
   public List<ActiveOrchardSpuEntity> findSpuIdByOrchard(String orchardId) {
+    SparLog.info("Finding SPU id for orchard id {}", orchardId);
     return findSpuIdByOrchardWithActive(orchardId, true);
   }
 
@@ -49,7 +50,13 @@ public class OrchardService {
    * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
    */
   public List<ActiveOrchardSpuEntity> findAllSpu(boolean active) {
-    return activeOrchardSeedPlanningUnitRepository.findAllByActive(active);
+    SparLog.info("Finding all orchard seed planning unit by active state {}", active);
+
+    List<ActiveOrchardSpuEntity> list =
+        activeOrchardSeedPlanningUnitRepository.findAllByActive(active);
+    SparLog.info("{} orchard seed planning unit by active state found", list.size());
+
+    return list;
   }
 
   /**
@@ -61,7 +68,13 @@ public class OrchardService {
    */
   public List<ActiveOrchardSpuEntity> findSpuIdByOrchardWithActive(
       String orchardId, boolean active) {
-    return activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, active);
+    SparLog.info("Finding SPU id for orchard id {} and active {}", orchardId, active);
+
+    List<ActiveOrchardSpuEntity> list =
+        activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, active);
+    SparLog.info("{} Orchards by spu found.", list.size());
+
+    return list;
   }
 
   /**
@@ -96,7 +109,11 @@ public class OrchardService {
    * @return An {@link List} of {@link OrchardDto} from oracle-api
    */
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    return oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
+    SparLog.info("Finding all orchards by veg code for code {}", vegCode);
+
+    List<OrchardDto> list = oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
+    SparLog.info("{} orchards found for veg code {}", list.size(), vegCode);
+    return list;
   }
 
   /**
@@ -106,6 +123,7 @@ public class OrchardService {
    * @return An {@link List} of {@link SameSpeciesTreeDto} from oracle-api
    */
   public List<SameSpeciesTreeDto> findParentTreesByVegCode(String vegCode) {
+    SparLog.info("Finding parent trees by veg code with code {}", vegCode);
     List<ActiveOrchardSpuEntity> spuList = findAllSpu(true);
     Map<String, String> orchardSpuMap = new HashMap<>();
 
@@ -115,6 +133,9 @@ public class OrchardService {
                 orchardSpuMap.put(
                     spuObj.getOrchardId(), String.valueOf(spuObj.getSeedPlanningUnitId())));
 
-    return oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase(), orchardSpuMap);
+    List<SameSpeciesTreeDto> list =
+        oracleApiProvider.findParentTreesByVegCode(vegCode.toUpperCase(), orchardSpuMap);
+    SparLog.info("{} parent tree by veg code found.", list.size());
+    return list;
   }
 }

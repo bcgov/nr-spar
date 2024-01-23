@@ -175,6 +175,7 @@ const CollectionStep = (
               invalid={state.startDate.isInvalid}
               invalidText={fieldsConfig.startDate.invalidText}
               size="md"
+              autoComplete="off"
             />
           </DatePicker>
         </Column>
@@ -198,6 +199,7 @@ const CollectionStep = (
               invalid={state.endDate.isInvalid}
               invalidText={fieldsConfig.endDate.invalidText}
               size="md"
+              autoComplete="off"
             />
           </DatePicker>
         </Column>
@@ -284,11 +286,11 @@ const CollectionStep = (
           <TextArea
             id={state.comments.id}
             name={fieldsConfig.comments.name}
-            value={state.comments.value}
             labelText={fieldsConfig.comments.labelText}
             readOnly={readOnly}
             placeholder={fieldsConfig.comments.placeholder}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            defaultValue={state.comments.value}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleComment(e.target.value);
             }}
             rows={5}

@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.DescribedEnumDto;
 import ca.bc.gov.backendstartapi.enums.DescribedEnum;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,8 +46,11 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
             description = "A list of all the codes and their descriptions.")
       })
   default ResponseEntity<List<DescribedEnumDto<E>>> fetchAll() {
+    String simpleName = enumClass().getSimpleName();
+    SparLog.info("Fetching all codes and descriptions for {} class", simpleName);
     var valueDtos =
         Arrays.stream(enumClass().getEnumConstants()).map(DescribedEnumDto::new).toList();
+    SparLog.info("{} records found for class {}", valueDtos.size(), simpleName);
     return ResponseEntity.ok(valueDtos);
   }
 
@@ -66,11 +71,22 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
       })
   default ResponseEntity<DescribedEnumDto<E>> fetch(
       @Parameter(description = "The code to be fetched.") @PathVariable("code") String code) {
-    var valueDto =
+    SparLog.info(
+        "Fetching code and description from class {} with code {}",
+        enumClass().getSimpleName(),
+        code);
+    Optional<DescribedEnumDto<E>> valueDto =
         Arrays.stream(enumClass().getEnumConstants())
             .dropWhile(v -> !v.name().equals(code))
             .findFirst()
             .map(DescribedEnumDto::new);
+    String simpleName = enumClass().getSimpleName();
+    valueDto.ifPresent(
+        values ->
+            SparLog.info("Record for code {} found in class {}", code, simpleName));
+    if (valueDto.isEmpty()) {
+      SparLog.warn("Record for code {} not found in class {}", code, simpleName);
+    }
     return ResponseEntity.of(valueDto);
   }
 }
