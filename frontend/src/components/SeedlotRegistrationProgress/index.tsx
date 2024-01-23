@@ -23,6 +23,7 @@ const SeedlotRegistrationProgress = ({
     className={className}
     spaceEqually
     onChange={interactFunction ?? null}
+    vertical={window.innerWidth <= 320}
   >
     <ProgressStep
       label="Collection"
