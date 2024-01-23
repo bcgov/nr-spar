@@ -63,9 +63,15 @@ const ClientSearchModal = (
 
   const [currPageNumber, setCurrPageNumber] = useState<number>(0);
   const [currPageSize, setCurrPageSize] = useState<number>(10);
+  const [curIndex, setCurIndex] = useState<number>(0);
 
   const handlePagination = (paginationObj: PaginationChangeType) => {
-    setCurrPageNumber(paginationObj.page - 1); // index starts at 0 on java.
+    if (paginationObj.forwardBtnRef) {
+      setCurIndex(curIndex - paginationObj.pageSize);
+    } else {
+      setCurIndex(curIndex + paginationObj.pageSize);
+    }
+    setCurrPageNumber(paginationObj.page - 1);
     setCurrPageSize(paginationObj.pageSize);
   };
 
@@ -95,7 +101,10 @@ const ClientSearchModal = (
       )
       : (
         <ClientSearchTable
-          clientData={searchResults}
+          clientData={searchResults.slice(
+            curIndex,
+            currPageSize + Math.min(curIndex, searchResults.length)
+          )}
           showPagination={searchResults.length > 10}
           tablePagination={tablePagination()}
           selectClientFn={(client: ForestClientDisplayType) => {
