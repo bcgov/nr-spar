@@ -1,4 +1,4 @@
-import ForestClientType from '../types/ForestClientTypes/ForestClientType';
+import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import ApplicantAgenciesItems from '../mock-server/fixtures/ApplicantAgenciesItems';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 

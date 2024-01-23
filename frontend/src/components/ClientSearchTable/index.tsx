@@ -9,11 +9,15 @@ import {
   TableSelectRow
 } from '@carbon/react';
 
+import EmptySection from '../EmptySection';
+
 import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientDisplayType';
 
 import { TableHeaders } from './constants';
 import { sortByKey } from './utils';
 import { ClientSearchTableProps, HeaderObjType } from './definitions';
+
+import './styles.scss';
 
 const ClientSearchTable = (
   {
@@ -49,12 +53,12 @@ const ClientSearchTable = (
 
   return (
     <>
-      <Table size="lg" useZebraStyles={false} className="client-table">
+      <Table size="lg" useZebraStyles={false} className="client-table" stickyHeader>
         <TableHead>
           <TableRow>
             {/* Empty table header to fit the radio button
                 correctly */}
-            <TableHeader />
+            <TableHeader className="radiobutton-header" />
             {
               TableHeaders.map((header: HeaderObjType) => (
                 <TableHeader
@@ -73,33 +77,45 @@ const ClientSearchTable = (
         </TableHead>
         <TableBody>
           {
-            processedData.map((client) => (
-              <TableRow
-                id={`client-table-row-${client.number}-${client.locationCode}`}
-                key={`${client.number}-${client.locationCode}`}
-              >
-                <TableSelectRow
-                  radio
-                  ariaLabel={`Select client ${client.fullName} with location code ${client.locationCode}`}
-                  id={`client-radio-${client.number}-${client.locationCode}`}
-                  name={`client-radio-${client.number}-${client.locationCode}`}
-                  checked={false}
-                  onSelect={() => null}
-                />
-                {
-                  TableHeaders.map((header) => (
-                    <TableCell
-                      id={`client-table-cell-${client.number}-${client.locationCode}-${header.id}`}
-                      key={header.id}
-                    >
-                      {
-                        client[header.id]
-                      }
-                    </TableCell>
-                  ))
-                }
-              </TableRow>
-            ))
+            processedData.length
+              ? processedData.map((client) => (
+                <TableRow
+                  id={`client-table-row-${client.number}-${client.locationCode}`}
+                  key={`${client.number}-${client.locationCode}`}
+                >
+                  <TableSelectRow
+                    radio
+                    ariaLabel={`Select client ${client.fullName} with location code ${client.locationCode}`}
+                    id={`client-radio-${client.number}-${client.locationCode}`}
+                    name={`client-radio-${client.number}-${client.locationCode}`}
+                    checked={false}
+                    onSelect={() => null}
+                  />
+                  {
+                    TableHeaders.map((header) => (
+                      <TableCell
+                        id={`client-table-cell-${client.number}-${client.locationCode}-${header.id}`}
+                        key={header.id}
+                      >
+                        {
+                          client[header.id]
+                        }
+                      </TableCell>
+                    ))
+                  }
+                </TableRow>
+              ))
+              : (
+                <TableRow className="empty-section-row">
+                  <TableCell>
+                    <EmptySection
+                      pictogram="UserSearch"
+                      title="No results found!"
+                      description="Nothing found for your search, try adjusting it to find what you want."
+                    />
+                  </TableCell>
+                </TableRow>
+              )
           }
         </TableBody>
       </Table>

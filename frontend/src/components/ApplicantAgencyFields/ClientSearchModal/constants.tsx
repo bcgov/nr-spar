@@ -1,10 +1,20 @@
 import React from 'react';
 import { ForestClientDisplayType } from '../../../types/ForestClientTypes/ForestClientDisplayType';
+import { ClientSearchDropdown } from './definitions';
 
-export const clientSearchOptions: Array<string> = [
-  'Full name',
-  'Acronym',
-  'Number'
+export const clientSearchOptions: Array<ClientSearchDropdown> = [
+  {
+    label: 'Full name',
+    option: 'fullName'
+  },
+  {
+    label: 'Acronym',
+    option: 'acronym'
+  },
+  {
+    label: 'Number',
+    option: 'number'
+  }
 ];
 
 export const getEmptySectionDescription = () => (

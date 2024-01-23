@@ -1,0 +1,19 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.client-table {
+  thead th.radiobutton-header {
+    border-block-end: 0;
+  }
+
+  tbody tr.empty-section-row {
+    height: auto;
+
+    td {
+      color: var(--#{vars.$bcgov-prefix}-text-primary);
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+}
