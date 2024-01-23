@@ -400,7 +400,7 @@ const OrchardStep = ({
           <Subtitle text={orchardStepText.pollenSection.subtitle} />
         </Column>
       </Row>
-      <Row className="orchard-row">
+      <Row>
         <Column sm={4} md={8} lg={16}>
           <RadioButtonGroup
             id={state.hasPollenContamination.id}
@@ -429,7 +429,7 @@ const OrchardStep = ({
         state.hasPollenContamination.value
           ? (
             <>
-              <Row className="orchard-row">
+              <Row className="pollen-contam-row">
                 <Column sm={4} md={8} lg={16} xlg={12}>
                   <NumberInput
                     id={state.breedingPercentage.id}
