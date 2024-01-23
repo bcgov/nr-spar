@@ -3,12 +3,16 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 /** Service to deal with {@link ForestClientDto ForestClients}. */
 @Service
@@ -28,7 +32,7 @@ public class ForestClientService {
    * @return the ForestClient with client number or acronym {@code identifier}, if one exists
    */
   public Optional<ForestClientDto> fetchClient(String identifier) {
-    SparLog.info("Fetching a Forest Client by its number {}", identifier);
+    SparLog.info("Fetching a Forest Client by its number or acronym {}", identifier);
     try {
       return forestClientApiProvider.fetchClientByIdentifier(identifier);
     } catch (HttpClientErrorException.NotFound e) {
@@ -45,7 +49,7 @@ public class ForestClientService {
    */
   public List<ForestClientLocationDto> fetchClientLocations(String clientNumber) {
     SparLog.info("Fetching up to 10 first Forest Clients by its number {}", clientNumber);
-    return forestClientApiProvider.fetchLocationsByClientNumber(clientNumber);
+    return forestClientApiProvider.fetchLocationsByClientNumber(clientNumber, false);
   }
 
   /**
@@ -62,5 +66,69 @@ public class ForestClientService {
         clientNumber,
         locationCode);
     return forestClientApiProvider.fetchSingleClientLocation(clientNumber, locationCode);
+  }
+
+  public List<ForestClientSearchDto> searchClients(String type, String query) {
+    if (!type.equals("acronym") && !type.equals("client_number") && !type.equals("full_name")) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid search type.");
+    }
+
+    if (type.equals("acronym") || type.equals("client_number")) {
+      return searchClientsByIdentifier(query);
+    }
+
+    return List.of();
+  }
+
+  private List<ForestClientSearchDto> searchClientsByIdentifier(String query) {
+    // Fetch the Forest client
+    Optional<ForestClientDto> optionalForestClient = fetchClient(query);
+    if (optionalForestClient.isEmpty()) {
+      return List.of();
+    }
+
+    ForestClientDto fc = optionalForestClient.get();
+
+    // Fetch location codes with client number
+    String clientNumber = fc.clientNumber();
+
+    List<ForestClientLocationDto> fcLocations =
+        forestClientApiProvider.fetchLocationsByClientNumber(clientNumber, true);
+
+    List<ForestClientSearchDto> mappedList = new ArrayList<>();
+
+    fcLocations.forEach(
+        fcl -> {
+          mappedList.add(
+              new ForestClientSearchDto(
+                  fc.clientNumber(),
+                  fc.clientName(),
+                  fc.legalFirstName(),
+                  fc.legalMiddleName(),
+                  fc.clientStatusCode(),
+                  fc.clientTypeCode(),
+                  fc.acronym(),
+                  fcl.locationCode(),
+                  fcl.locationName(),
+                  fcl.companyCode(),
+                  fcl.address1(),
+                  fcl.address2(),
+                  fcl.address3(),
+                  fcl.city(),
+                  fcl.province(),
+                  fcl.postalCode(),
+                  fcl.country(),
+                  fcl.businessPhone(),
+                  fcl.homePhone(),
+                  fcl.cellPhone(),
+                  fcl.faxNumber(),
+                  fcl.email(),
+                  fcl.expired(),
+                  fcl.trusted(),
+                  fcl.returnedMailDate(),
+                  fcl.comment()));
+        });
+
+    return mappedList;
   }
 }

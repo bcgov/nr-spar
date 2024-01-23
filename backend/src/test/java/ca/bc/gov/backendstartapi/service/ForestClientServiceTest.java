@@ -84,7 +84,7 @@ class ForestClientServiceTest {
   void fetchNonExistingLocation() {
     String number = "00000001";
 
-    when(forestClientApiProvider.fetchLocationsByClientNumber(number))
+    when(forestClientApiProvider.fetchLocationsByClientNumber(number, false))
         .thenReturn(Collections.emptyList());
 
     List<ForestClientLocationDto> locationDto = forestClientService.fetchClientLocations(number);
@@ -122,7 +122,7 @@ class ForestClientServiceTest {
 
     List<ForestClientLocationDto> locations = List.of(location);
 
-    when(forestClientApiProvider.fetchLocationsByClientNumber(number))
+    when(forestClientApiProvider.fetchLocationsByClientNumber(number, false))
         .thenReturn(locations);
 
     List<ForestClientLocationDto> locationsDto = forestClientService.fetchClientLocations(number);

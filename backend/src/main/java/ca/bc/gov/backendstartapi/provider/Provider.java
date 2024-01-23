@@ -19,7 +19,7 @@ public interface Provider {
     return Optional.empty();
   }
 
-  default List<ForestClientLocationDto> fetchLocationsByClientNumber(String number) {
+  default List<ForestClientLocationDto> fetchLocationsByClientNumber(String number, Boolean shouldFetchAll) {
     return List.of();
   }
 

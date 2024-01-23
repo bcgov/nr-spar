@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -139,34 +140,57 @@ public class ForestClientApiProvider implements Provider {
    * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
   @Override
-  public List<ForestClientLocationDto> fetchLocationsByClientNumber(String clientNumber) {
-    String apiUrl = String.format("%s/clients/{clientNumber}/locations", rootUri);
-    SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
-
+  public List<ForestClientLocationDto> fetchLocationsByClientNumber(
+      String clientNumber, Boolean shouldFetchAll) {
     if (shouldMock()) {
       return List.of(mockForestClientLocationDto(clientNumber, "99"));
     }
 
-    try {
-      ResponseEntity<List<ForestClientLocationDto>> response =
-          restTemplate.exchange(
-              apiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
-              new ParameterizedTypeReference<List<ForestClientLocationDto>>() {},
-              createParamsMap("clientNumber", clientNumber));
+    int page = 0;
+    int totalFetched = 0;
+    int xTotalCount = Integer.MAX_VALUE;
+    List<ForestClientLocationDto> result = new ArrayList<>();
 
-      SparLog.info(
-          "Finished {} request for function {} - 200 OK!",
-          PROVIDER,
-          "fetchLocationsByClientNumber");
-      return response.getBody();
-    } catch (HttpClientErrorException httpExc) {
-      SparLog.error(
-          "Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+    while (totalFetched < xTotalCount) {
+      String apiUrl =
+          String.format("%s/clients/{clientNumber}/locations?page=%s&size=10", rootUri, page);
+      SparLog.info("Starting {} request to {} for page {}", PROVIDER, apiUrl, page);
+
+      try {
+        ResponseEntity<List<ForestClientLocationDto>> response =
+            restTemplate.exchange(
+                apiUrl,
+                HttpMethod.GET,
+                new HttpEntity<>(addHttpHeaders()),
+                new ParameterizedTypeReference<List<ForestClientLocationDto>>() {},
+                createParamsMap("clientNumber", clientNumber));
+
+        SparLog.info(
+            "Finished {} request for function {} for page {} - 200 OK!",
+            PROVIDER,
+            "fetchLocationsByClientNumber",
+            page);
+
+        if (!shouldFetchAll) {
+          return response.getBody();
+        }
+
+        xTotalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
+
+        totalFetched += response.getBody().size();
+
+        page += 1;
+
+        result.addAll(response.getBody());
+      } catch (HttpClientErrorException httpExc) {
+        SparLog.error(
+            "Finished {} request - Response code error: {}", PROVIDER, httpExc.getStatusCode());
+      }
     }
 
-    return List.of();
+    SparLog.info("Total number of location fetched: {}", result.size());
+
+    return result;
   }
 
   /**

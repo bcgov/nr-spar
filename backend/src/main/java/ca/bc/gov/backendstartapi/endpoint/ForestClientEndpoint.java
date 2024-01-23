@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -134,5 +136,28 @@ public class ForestClientEndpoint {
               description = "Number that identify the location.")
           String locationCode) {
     return forestClientService.fetchSingleClientLocation(clientNumber, locationCode);
+  }
+
+  @GetMapping(path = "/search")
+  @Operation(
+      summary = "",
+      description = """
+             """,
+      responses = {
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "400"),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
+      })
+  public List<ForestClientSearchDto> searchForestClients(
+      @RequestParam(defaultValue = "acronym")
+          @Parameter(
+              name = "type",
+              in = ParameterIn.QUERY,
+              description = "Specify one of the search types: acronym, full_name, client_number.")
+          String type,
+      @RequestParam
+          @Parameter(name = "query", in = ParameterIn.QUERY, description = "The search keyword.")
+          String query) {
+    return forestClientService.searchClients(type, query);
   }
 }

@@ -196,7 +196,7 @@ class ForestClientApiProviderTest {
         .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
     List<ForestClientLocationDto> locationDto =
-        forestClientApiProvider.fetchLocationsByClientNumber(number);
+        forestClientApiProvider.fetchLocationsByClientNumber(number, false);
 
     Assertions.assertFalse(locationDto.isEmpty());
 
@@ -242,7 +242,7 @@ class ForestClientApiProviderTest {
         .andRespond(withStatus(HttpStatusCode.valueOf(404)));
 
     List<ForestClientLocationDto> locationDto =
-        forestClientApiProvider.fetchLocationsByClientNumber(number);
+        forestClientApiProvider.fetchLocationsByClientNumber(number, false);
 
     Assertions.assertTrue(locationDto.isEmpty());
   }
