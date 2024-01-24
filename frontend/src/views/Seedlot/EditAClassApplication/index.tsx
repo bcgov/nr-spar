@@ -25,6 +25,7 @@ import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
 import PathConstants from '../../../routes/pathConstants';
 import ErrorToast from '../../../components/Toast/ErrorToast';
+import SeedlotRegistrationBreadcrumb from '../../../components/SeedlotRegistrationBreadcrumb';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import { ForestClientType } from '../../../types/ForestClientType';
 import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
@@ -34,7 +35,6 @@ import { InitialSeedlotFormData } from '../CreateAClass/constants';
 
 import './styles.scss';
 import { addParamToPath } from '../../../utils/PathUtils';
-import SeedlotRegistrationBreadcrumb from '../../../components/SeedlotRegistrationBreadcrumb';
 
 const EditAClassApplication = () => {
   const navigate = useNavigate();
