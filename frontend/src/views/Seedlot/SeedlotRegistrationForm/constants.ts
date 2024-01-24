@@ -1,6 +1,8 @@
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { ProgressIndicatorConfig, StepMap } from './definitions';
 
+export const MAX_EDIT_BEFORE_SAVE = 5;
+
 export const initialProgressConfig: ProgressIndicatorConfig = {
   collection: {
     isComplete: false,
@@ -50,3 +52,11 @@ export const tscAgencyObj: MultiOptionsObj = {
 };
 
 export const tscLocationCode = '00';
+
+export const smartSaveText = {
+  loading: 'Saving...',
+  error: 'Save changes failed',
+  idle: 'Save changes',
+  success: 'Changes saved!',
+  suggestion: 'Your recent changes could not be saved. Please try saving the form manually to keep all of your changes.'
+};
