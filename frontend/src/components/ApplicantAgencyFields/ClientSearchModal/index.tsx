@@ -77,7 +77,7 @@ const ClientSearchModal = (
 
   const tablePagination = () => (
     <Pagination
-      className="seedlot-data-table-pagination"
+      className="client-table-pagination"
       page={currPageNumber + 1}
       pageSize={currPageSize}
       pageSizes={[10, 20, 30, 40, 50]}
