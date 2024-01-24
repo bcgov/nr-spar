@@ -14,7 +14,7 @@ import {
 
 import ClientSearchTable from '../../ClientSearchTable';
 import EmptySection from '../../EmptySection';
-import HeaderTest from './ClientSearchFields';
+import ClientSearchFields from './ClientSearchFields';
 
 import { searchForestClients } from '../../../api-service/forestClientsAPI';
 import PaginationChangeType from '../../../types/PaginationChangeType';
@@ -146,7 +146,7 @@ const ClientSearchModal = (
             closeButtonLabel="Close client search modal"
           >
             <FlexGrid className="client-search-grid">
-              <HeaderTest
+              <ClientSearchFields
                 searchWord={searchWord}
                 setSearchWord={setSearchWord}
                 searchOption={searchOption}
