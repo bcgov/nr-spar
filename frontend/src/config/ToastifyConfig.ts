@@ -3,11 +3,11 @@
  * see usage in src/components/ApplicantInformationForm/index.tsx.
  */
 
-import { ToastOptions, toast } from 'react-toastify';
+import { ToastOptions } from 'react-toastify';
 import { SEVEN_SECONDS } from './TimeUnits';
 
 export const ErrToastOption: ToastOptions = {
-  position: toast.POSITION.TOP_RIGHT,
+  position: 'top-right',
   icon: false,
   closeButton: false,
   theme: 'dark',
