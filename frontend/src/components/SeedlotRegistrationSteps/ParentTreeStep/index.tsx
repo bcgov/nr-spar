@@ -327,6 +327,7 @@ const ParentTreeStep = (
                   <TableContainer
                     title={pageText[currentTab].tabTitle}
                     description={pageText[currentTab].tableDescription}
+                    className={(!disableOptions) ? 'sticky-table-title' : undefined}
                   >
                     <div className={(!disableOptions) ? 'sticky-toolbar' : undefined}>
                       <TableToolbar aria-label="data table toolbar">

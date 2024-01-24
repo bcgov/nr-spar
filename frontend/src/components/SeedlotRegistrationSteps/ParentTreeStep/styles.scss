@@ -6,9 +6,17 @@
   padding-right: 0rem;
   padding-bottom: 1rem;
 
+  .sticky-table-title {
+    .#{vars.$bcgov-prefix}--data-table-header {
+      position: sticky;
+      top: 3rem;
+      z-index: 1;
+    }
+  }
+
   .sticky-toolbar {
     position: sticky;
-    top: 3rem;
+    top: 8.3rem;
     background: var(--#{vars.$bcgov-prefix}-layer);
     z-index: 1;
   }
@@ -166,7 +174,7 @@
   .table-header {
     height: 4rem;
     position: sticky;
-    top: 6rem;
+    top: 11.3rem;
     z-index: 1;
 
     th {
