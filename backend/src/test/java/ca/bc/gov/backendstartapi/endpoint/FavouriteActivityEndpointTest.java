@@ -173,9 +173,9 @@ class FavouriteActivityEndpointTest {
         .andExpect(jsonPath("$.highlighted").value("false"))
         .andReturn();
 
-    FavouriteActivityEntity activityUpdated = activityEntity.withHighlighted(true);
+    activityEntity.setHighlighted(true);
 
-    when(favouriteActivityService.updateUserActivity(any(), any())).thenReturn(activityUpdated);
+    when(favouriteActivityService.updateUserActivity(any(), any())).thenReturn(activityEntity);
 
     String stringifyUpdate = "{\"highlighted\":\"true\",\"enabled\":\"true\"}";
 
@@ -213,13 +213,13 @@ class FavouriteActivityEndpointTest {
         .andExpect(jsonPath("$.highlighted").value("false"))
         .andReturn();
 
-    FavouriteActivityEntity activityUpdated = activityEntity.withHighlighted(true);
+    activityEntity.setHighlighted(true);
 
     doNothing().when(favouriteActivityService).deleteUserActivity(any());
 
     mockMvc
         .perform(
-            delete(API_PATH + "/{id}", activityUpdated.getId())
+            delete(API_PATH + "/{id}", activityEntity.getId())
                 .with(csrf().asHeader())
                 .header(CONTENT_HEADER, JSON)
                 .accept(MediaType.APPLICATION_JSON))

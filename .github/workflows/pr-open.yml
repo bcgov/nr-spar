@@ -41,7 +41,7 @@ jobs:
             [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
 
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v2.0.0
+        uses: bcgov-nr/action-deployer-openshift@v2.1.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -101,7 +101,6 @@ jobs:
             parameters:
               -p DB_PVC_SIZE=128Mi
             overwrite: false
-            triggers: ('common/' 'database/' 'backend/' 'frontend/')
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
@@ -110,12 +109,10 @@ jobs:
               -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ needs.init.outputs.tag }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-            triggers: ('common/' 'database/' 'backend/' 'frontend/')
             verification_path: "actuator/health"
           - name: fluentbit
             file: common/openshift.fluentbit.yml
             overwrite: true
-            triggers: ('common/' 'database/' 'backend/' 'frontend/' 'oracle-api/')
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -126,7 +123,6 @@ jobs:
               -p MAX_REPLICAS=1
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-            triggers: ('common/' 'database/' 'backend/' 'oracle-api/' 'frontend/')
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
@@ -138,7 +134,7 @@ jobs:
             triggers: ('common/' 'oracle-api/')
             verification_path: "actuator/health"
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.0.0
+      - uses: bcgov-nr/action-deployer-openshift@v2.1.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}

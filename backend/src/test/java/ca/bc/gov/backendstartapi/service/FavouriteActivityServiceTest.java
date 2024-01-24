@@ -75,7 +75,7 @@ class FavouriteActivityServiceTest {
             () -> favouriteActivityService.createUserActivity(createDto));
 
     Assertions.assertEquals(
-        "404 NOT_FOUND \"Invalid activity or page name!\"", notFoundExc.getMessage());
+        "404 NOT_FOUND \"Invalid or not found activity id!\"", notFoundExc.getMessage());
 
     List<FavouriteActivityEntity> userFavList = List.of(entity);
     when(favouriteActivityRepository.findAllByUserId(any())).thenReturn(userFavList);
@@ -147,7 +147,7 @@ class FavouriteActivityServiceTest {
             InvalidActivityException.class,
             () -> favouriteActivityService.updateUserActivity(1L, updateDto));
 
-    Assertions.assertEquals("404 NOT_FOUND \"Invalid activity or page name!\"", e.getMessage());
+    Assertions.assertEquals("404 NOT_FOUND \"Invalid or not found activity id!\"", e.getMessage());
   }
 
   @Test
@@ -184,6 +184,6 @@ class FavouriteActivityServiceTest {
         Assertions.assertThrows(
             InvalidActivityException.class, () -> favouriteActivityService.deleteUserActivity(1L));
 
-    Assertions.assertEquals("404 NOT_FOUND \"Invalid activity or page name!\"", e.getMessage());
+    Assertions.assertEquals("404 NOT_FOUND \"Invalid or not found activity id!\"", e.getMessage());
   }
 }

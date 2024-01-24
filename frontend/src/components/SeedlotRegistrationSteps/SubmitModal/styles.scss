@@ -2,8 +2,10 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .submit-modal-btn {
-  width: 100%;
-  max-width: none;
+  min-width: 100%;
+  max-width: fit-content;
+  margin-top: 1rem;
+  white-space: nowrap;
 }
 
 .seedlot-registration-modal {
