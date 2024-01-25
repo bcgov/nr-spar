@@ -88,7 +88,7 @@ import {
 } from './constants';
 
 import './styles.scss';
-import SeedlotRegistrationBreadcrumb from '../../../components/SeedlotRegistrationBreadcrumb';
+import BCBreadcrumb from '../../../components/BCBreadcrumb';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -474,6 +474,18 @@ const SeedlotRegistrationForm = () => {
     }
   });
 
+  const BCBreadcrumbs = [
+    { name: "Seedlots",
+      path: `${PathConstants.SEEDLOTS}`
+    },
+    { name: "My seedlots",
+      path: `${PathConstants.MY_SEEDLOTS}`
+    },
+    { name: `Seedlot ${seedlotNumber}`,
+      path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
+    }
+  ] 
+
   useEffect(() => {
     const completionStatus = checkAllStepsCompletion(progressStatus, verifyExtractionStepCompleteness(allStepData.extractionStorageStep));
     setAllStepCompleted(completionStatus);
@@ -484,7 +496,7 @@ const SeedlotRegistrationForm = () => {
       <FlexGrid fullWidth>
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
-            <SeedlotRegistrationBreadcrumb />
+            <BCBreadcrumb breadcrumbData={BCBreadcrumbs} />
           </Column>
         </Row>
         <Row>
