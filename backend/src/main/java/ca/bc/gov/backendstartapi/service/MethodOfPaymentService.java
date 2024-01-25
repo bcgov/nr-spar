@@ -31,6 +31,7 @@ public class MethodOfPaymentService {
               resultList.add(methodToAdd);
             });
 
+    SparLog.info("{} valid payment method found for MethodOfPaymentDto.", resultList.size());
     return resultList;
   }
 
@@ -41,6 +42,11 @@ public class MethodOfPaymentService {
    */
   public List<MethodOfPaymentEntity> getAllValidMethodOfPayments() {
     SparLog.info("Fetching all method of payment for MethodOfPaymentEntity");
-    return methodOfPaymentRepository.findAll().stream().filter(x -> x.isValid()).toList();
+
+    List<MethodOfPaymentEntity> list =
+        methodOfPaymentRepository.findAll().stream().filter(x -> x.isValid()).toList();
+    SparLog.info("{} valid payment method found for MethodOfPaymentEntity.", list.size());
+
+    return list;
   }
 }

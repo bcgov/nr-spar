@@ -1,7 +1,7 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 @use '@carbon/type';
 
-p.recent-seedlots-subtitle {
+.recent-seedlots-subtitle {
   padding-bottom: 1rem;
 }
 
@@ -20,7 +20,7 @@ p.recent-seedlots-subtitle {
   padding-top: 1rem;
 }
 
-.recent-seedlots-title > h2 {
+.recent-seedlots-title>h2 {
   @include type.type-style('heading-03');
   margin-bottom: 0.5rem;
 }
