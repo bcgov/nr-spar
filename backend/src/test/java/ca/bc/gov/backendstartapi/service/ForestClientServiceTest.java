@@ -87,7 +87,7 @@ class ForestClientServiceTest {
     when(forestClientApiProvider.fetchLocationsByClientNumber(number, false))
         .thenReturn(Collections.emptyList());
 
-    List<ForestClientLocationDto> locationDto = forestClientService.fetchClientLocations(number);
+    List<ForestClientLocationDto> locationDto = forestClientService.fetchClientLocations(number, false);
 
     Assertions.assertTrue(locationDto.isEmpty());
   }
@@ -125,7 +125,7 @@ class ForestClientServiceTest {
     when(forestClientApiProvider.fetchLocationsByClientNumber(number, false))
         .thenReturn(locations);
 
-    List<ForestClientLocationDto> locationsDto = forestClientService.fetchClientLocations(number);
+    List<ForestClientLocationDto> locationsDto = forestClientService.fetchClientLocations(number, false);
 
     Assertions.assertFalse(locationsDto.isEmpty());
 

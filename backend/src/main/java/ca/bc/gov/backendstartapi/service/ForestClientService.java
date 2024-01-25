@@ -47,9 +47,11 @@ public class ForestClientService {
    * @param clientNumber the ForestClient identifier to fetch their locations
    * @return a list of {@link ForestClientLocationDto} containing the client's locations data
    */
-  public List<ForestClientLocationDto> fetchClientLocations(String clientNumber) {
-    SparLog.info("Fetching up to 10 first Forest Clients by its number {}", clientNumber);
-    return forestClientApiProvider.fetchLocationsByClientNumber(clientNumber, false);
+  public List<ForestClientLocationDto> fetchClientLocations(
+      String clientNumber, Boolean shouldFetchAll) {
+    SparLog.info(
+        "Fetching {} Forest Clients by its number {}", clientNumber, shouldFetchAll ? "all" : "10");
+    return forestClientApiProvider.fetchLocationsByClientNumber(clientNumber, shouldFetchAll);
   }
 
   /**
@@ -68,8 +70,15 @@ public class ForestClientService {
     return forestClientApiProvider.fetchSingleClientLocation(clientNumber, locationCode);
   }
 
+  /**
+   * Search for clients by either the acronym, client number or client name.
+   *
+   * @param type the type of the search query: acronym, client number or client name.
+   * @param query the keyword to search
+   * @return a list of {@link ForestClientSearchDto}
+   */
   public List<ForestClientSearchDto> searchClients(String type, String query) {
-    if (!type.equals("acronym") && !type.equals("client_number") && !type.equals("full_name")) {
+    if (!type.equals("acronym") && !type.equals("client_number") && !type.equals("client_name")) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid search type.");
     }
 
@@ -77,12 +86,36 @@ public class ForestClientService {
       return searchClientsByIdentifier(query);
     }
 
-    return List.of();
+    return searchClientsByFullName(query);
+  }
+
+  private List<ForestClientSearchDto> searchClientsByFullName(String query) {
+    List<ForestClientSearchDto> mappedList = new ArrayList<>();
+
+    List<ForestClientDto> clientsFound = forestClientApiProvider.fetchClientsByClientName(query);
+
+    if (clientsFound.isEmpty()) {
+      return mappedList;
+    }
+
+    clientsFound.forEach(
+        client -> {
+          List<ForestClientLocationDto> fcLocations =
+              forestClientApiProvider.fetchLocationsByClientNumber(client.clientNumber(), true);
+          fcLocations.forEach(
+              fcl -> {
+                mappedList.add(combineClientAndLocationRecord(client, fcl));
+              });
+        });
+
+    return mappedList;
   }
 
   private List<ForestClientSearchDto> searchClientsByIdentifier(String query) {
     // Fetch the Forest client
-    Optional<ForestClientDto> optionalForestClient = fetchClient(query);
+    Optional<ForestClientDto> optionalForestClient =
+        forestClientApiProvider.fetchClientByIdentifier(query);
+
     if (optionalForestClient.isEmpty()) {
       return List.of();
     }
@@ -99,36 +132,40 @@ public class ForestClientService {
 
     fcLocations.forEach(
         fcl -> {
-          mappedList.add(
-              new ForestClientSearchDto(
-                  fc.clientNumber(),
-                  fc.clientName(),
-                  fc.legalFirstName(),
-                  fc.legalMiddleName(),
-                  fc.clientStatusCode(),
-                  fc.clientTypeCode(),
-                  fc.acronym(),
-                  fcl.locationCode(),
-                  fcl.locationName(),
-                  fcl.companyCode(),
-                  fcl.address1(),
-                  fcl.address2(),
-                  fcl.address3(),
-                  fcl.city(),
-                  fcl.province(),
-                  fcl.postalCode(),
-                  fcl.country(),
-                  fcl.businessPhone(),
-                  fcl.homePhone(),
-                  fcl.cellPhone(),
-                  fcl.faxNumber(),
-                  fcl.email(),
-                  fcl.expired(),
-                  fcl.trusted(),
-                  fcl.returnedMailDate(),
-                  fcl.comment()));
+          mappedList.add(combineClientAndLocationRecord(fc, fcl));
         });
 
     return mappedList;
+  }
+
+  private ForestClientSearchDto combineClientAndLocationRecord(
+      ForestClientDto fc, ForestClientLocationDto fcl) {
+    return new ForestClientSearchDto(
+        fc.clientNumber(),
+        fc.clientName(),
+        fc.legalFirstName(),
+        fc.legalMiddleName(),
+        fc.clientStatusCode(),
+        fc.clientTypeCode(),
+        fc.acronym(),
+        fcl.locationCode(),
+        fcl.locationName(),
+        fcl.companyCode(),
+        fcl.address1(),
+        fcl.address2(),
+        fcl.address3(),
+        fcl.city(),
+        fcl.province(),
+        fcl.postalCode(),
+        fcl.country(),
+        fcl.businessPhone(),
+        fcl.homePhone(),
+        fcl.cellPhone(),
+        fcl.faxNumber(),
+        fcl.email(),
+        fcl.expired(),
+        fcl.trusted(),
+        fcl.returnedMailDate(),
+        fcl.comment());
   }
 }

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 import org.springframework.http.MediaType;
@@ -82,10 +83,10 @@ public class ForestClientEndpoint {
    */
   @GetMapping(path = "/{clientNumber}/locations")
   @Operation(
-      summary = "Fetch up to the 10 first locations of the ForestClient.",
+      summary = "Fetch either 10 or all locations of the ForestClient.",
       description =
           """
-              Returns a list up to the 10 first locations associated with the ForestClient,
+              Returns a list of 10 or all locations associated with the ForestClient,
               identified by it's number.""",
       responses = {
         @ApiResponse(responseCode = "200"),
@@ -99,8 +100,14 @@ public class ForestClientEndpoint {
               in = ParameterIn.PATH,
               description = "Number that identifies the client to get the locations.",
               required = true)
-          String clientNumber) {
-    return forestClientService.fetchClientLocations(clientNumber);
+          String clientNumber,
+      @RequestParam(defaultValue = "false")
+          @Parameter(
+              name = "shouldFetchAll",
+              in = ParameterIn.QUERY,
+              description = "If it should fetch all client locations.")
+          Boolean shouldFetchAll) {
+    return forestClientService.fetchClientLocations(clientNumber, shouldFetchAll);
   }
 
   /**
@@ -153,9 +160,11 @@ public class ForestClientEndpoint {
           @Parameter(
               name = "type",
               in = ParameterIn.QUERY,
-              description = "Specify one of the search types: acronym, full_name, client_number.")
+              description =
+                  "Specify one of the search types: acronym, client_number or client_name.")
           String type,
       @RequestParam
+          @Size(max = 100, message = "Parameter 'query' should be at most 100 characters long.")
           @Parameter(name = "query", in = ParameterIn.QUERY, description = "The search keyword.")
           String query) {
     return forestClientService.searchClients(type, query);
