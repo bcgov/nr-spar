@@ -365,6 +365,7 @@ export const renderPagination = (
   if (currentTab === 'mixTab') {
     return (
       <Pagination
+        className="table-pagination"
         pageSize={currMixPageSize}
         pageSizes={PageSizesConfig}
         itemsPerPageText=""
@@ -387,6 +388,7 @@ export const renderPagination = (
   }
   return (
     <Pagination
+      className="table-pagination"
       pageSize={currPageSize}
       pageSizes={PageSizesConfig}
       itemsPerPageText=""
