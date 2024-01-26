@@ -154,7 +154,7 @@ class ForestClientApiProviderTest {
   @DisplayName("fetchExistentClientLocation")
   void fetchExistentClientLocation() {
     String number = "00030064";
-    String url = "/null/clients/" + number + "/locations";
+    String url = "/null/clients/" + number + "/locations?page=0&size=10";
 
     String json =
         """
@@ -232,13 +232,15 @@ class ForestClientApiProviderTest {
   @DisplayName("fetchNonExistentClientLocation")
   void fetchNonExistentClientLocation() {
     String number = "00000000";
-    String url = "/null/clients/" + number + "/locations";
+    String url = "/null/clients/" + number + "/locations?page=0&size=10";
 
     when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
 
+    String json = "[]";
+
     mockRestServiceServer
         .expect(requestTo(url))
-        .andRespond(withStatus(HttpStatusCode.valueOf(404)));
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
     List<ForestClientLocationDto> locationDto =
         forestClientApiProvider.fetchLocationsByClientNumber(number, false);
