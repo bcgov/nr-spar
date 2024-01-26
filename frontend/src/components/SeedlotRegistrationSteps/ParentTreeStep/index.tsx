@@ -327,72 +327,75 @@ const ParentTreeStep = (
                   <TableContainer
                     title={pageText[currentTab].tabTitle}
                     description={pageText[currentTab].tableDescription}
+                    className={(!disableOptions) ? 'sticky-table-title' : undefined}
                   >
-                    <TableToolbar aria-label="data table toolbar">
-                      <TableToolbarContent>
-                        {
-                          currentTab === 'mixTab'
-                            ? (
-                              <Button
-                                kind="ghost"
-                                hasIconOnly
-                                disabled={disableOptions}
-                                renderIcon={Add}
-                                iconDescription="Add a new row"
-                                onClick={() => addNewMixRow(state, setStepData)}
-                              />
-                            )
-                            : null
-                        }
-                        <OverflowMenu
-                          menuOptionsClass="parent-tree-table-toggle-menu"
-                          renderIcon={View}
-                          iconDescription="Show/hide columns"
-                          flipped
-                          disabled={disableOptions}
-                        >
+                    <div className={(!disableOptions) ? 'sticky-toolbar' : undefined}>
+                      <TableToolbar aria-label="data table toolbar">
+                        <TableToolbarContent>
                           {
-                            renderColOptions(headerConfig, currentTab, setHeaderConfig)
-                          }
-                        </OverflowMenu>
-                        <OverflowMenu
-                          renderIcon={Settings}
-                          iconDescription="More options"
-                          menuOptionsClass="parent-tree-table-option-menu"
-                          disabled={disableOptions}
-                        >
-                          <OverflowMenuItem
-                            itemText={
-                              (
-                                <Link
-                                  ref={linkRef}
-                                  to={getDownloadUrl(currentTab)}
-                                  target="_blank"
-                                >
-                                  Download table template
-                                </Link>
+                            currentTab === 'mixTab'
+                              ? (
+                                <Button
+                                  kind="ghost"
+                                  hasIconOnly
+                                  disabled={disableOptions}
+                                  renderIcon={Add}
+                                  iconDescription="Add a new row"
+                                  onClick={() => addNewMixRow(state, setStepData)}
+                                />
                               )
+                              : null
+                          }
+                          <OverflowMenu
+                            menuOptionsClass="parent-tree-table-toggle-menu"
+                            renderIcon={View}
+                            iconDescription="Show/hide columns"
+                            flipped
+                            disabled={disableOptions}
+                          >
+                            {
+                              renderColOptions(headerConfig, currentTab, setHeaderConfig)
                             }
-                            onClick={() => linkRef.current?.click()}
-                          />
-                          <OverflowMenuItem itemText="Export table as CSV file" disabled />
-                          <OverflowMenuItem
-                            itemText="Clean table data"
-                            onClick={() => setIsCleanWarnOpen(true)}
-                          />
-                        </OverflowMenu>
-                        <Button
-                          className="upload-button"
-                          size="lg"
-                          kind="primary"
-                          renderIcon={Upload}
-                          onClick={() => setIsUploadOpen(true)}
-                          disabled={disableOptions || !allParentTreeQuery.isFetched}
-                        >
-                          Upload from file
-                        </Button>
-                      </TableToolbarContent>
-                    </TableToolbar>
+                          </OverflowMenu>
+                          <OverflowMenu
+                            renderIcon={Settings}
+                            iconDescription="More options"
+                            menuOptionsClass="parent-tree-table-option-menu"
+                            disabled={disableOptions}
+                          >
+                            <OverflowMenuItem
+                              itemText={
+                                (
+                                  <Link
+                                    ref={linkRef}
+                                    to={getDownloadUrl(currentTab)}
+                                    target="_blank"
+                                  >
+                                    Download table template
+                                  </Link>
+                                )
+                              }
+                              onClick={() => linkRef.current?.click()}
+                            />
+                            <OverflowMenuItem itemText="Export table as CSV file" disabled />
+                            <OverflowMenuItem
+                              itemText="Clean table data"
+                              onClick={() => setIsCleanWarnOpen(true)}
+                            />
+                          </OverflowMenu>
+                          <Button
+                            className="upload-button"
+                            size="lg"
+                            kind="primary"
+                            renderIcon={Upload}
+                            onClick={() => setIsUploadOpen(true)}
+                            disabled={disableOptions || !allParentTreeQuery.isFetched}
+                          >
+                            Upload from file
+                          </Button>
+                        </TableToolbarContent>
+                      </TableToolbar>
+                    </div>
                     {
                       // Check if it's fetching parent tree data
                       (!disableOptions && allParentTreeQuery.isFetching)
