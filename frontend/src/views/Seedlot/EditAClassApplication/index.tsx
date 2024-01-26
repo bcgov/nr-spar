@@ -149,22 +149,25 @@ const EditAClassApplication = () => {
     });
   };
 
-    const EditAClassApplicationBreadcrumbs = [
-  { name: "Seedlots",
-    path: `${PathConstants.SEEDLOTS}`
-  },
-  { name: "My seedlots",
-    path: `${PathConstants.MY_SEEDLOTS}`
-  },
-  { name: `Seedlot ${seedlotNumber}`,
-    path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
-  }
-]
+  const EditAClassApplicationBreadcrumbs = [
+    {
+      name: 'Seedlots',
+      path: `${PathConstants.SEEDLOTS}`
+    },
+    {
+      name: 'My seedlots',
+      path: `${PathConstants.MY_SEEDLOTS}`
+    },
+    {
+      name: `Seedlot ${seedlotNumber}`,
+      path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
+    }
+  ];
 
   return (
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
-        <BCBreadcrumb breadcrumbData={EditAClassApplicationBreadcrumbs}/>
+        <BCBreadcrumb breadcrumbData={EditAClassApplicationBreadcrumbs} />
       </Row>
       <Row className="title-row">
         <PageTitle

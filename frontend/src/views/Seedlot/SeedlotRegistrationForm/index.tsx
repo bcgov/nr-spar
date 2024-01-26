@@ -8,8 +8,6 @@ import {
   FlexGrid,
   Row,
   Column,
-  Breadcrumb,
-  BreadcrumbItem,
   Button,
   Loading,
   Grid,
@@ -42,6 +40,7 @@ import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardSte
 import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
+import BCBreadcrumb from '../../../components/BCBreadcrumb';
 
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
@@ -96,7 +95,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import BCBreadcrumb from '../../../components/BCBreadcrumb';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -456,17 +454,20 @@ const SeedlotRegistrationForm = () => {
     retry: 0
   });
 
-    const BCBreadcrumbs = [
-    { name: "Seedlots",
+  const BCBreadcrumbs = [
+    {
+      name: 'Seedlots',
       path: `${PathConstants.SEEDLOTS}`
     },
-    { name: "My seedlots",
+    {
+      name: 'My seedlots',
       path: `${PathConstants.MY_SEEDLOTS}`
     },
-    { name: `Seedlot ${seedlotNumber}`,
+    {
+      name: `Seedlot ${seedlotNumber}`,
       path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
     }
-  ] 
+  ];
 
   const handleSaveBtn = () => {
     setSaveStatus('active');
