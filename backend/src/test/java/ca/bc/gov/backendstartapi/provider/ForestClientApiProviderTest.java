@@ -226,7 +226,6 @@ class ForestClientApiProviderTest {
     Assertions.assertEquals("CANADA", clientLocation.country());
     Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.expired());
     Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.trusted());
-
   }
 
   @Test
@@ -320,11 +319,69 @@ class ForestClientApiProviderTest {
 
     ResponseStatusException exc =
         Assertions.assertThrows(
-          ResponseStatusException.class,
-          () -> {
-            forestClientApiProvider.fetchSingleClientLocation(number, locationCode);
-          });
+            ResponseStatusException.class,
+            () -> {
+              forestClientApiProvider.fetchSingleClientLocation(number, locationCode);
+            });
 
     Assertions.assertEquals(HttpStatus.NOT_FOUND, exc.getStatusCode());
+  }
+
+  @Test
+  @DisplayName("Search clients by name bad request")
+  void searchClientsByNameBadRequest() {
+    String clientName = "AlDente";
+
+    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+
+    String url = "/null/clients/findByNames?page=0&size=50&clientName=" + clientName;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withStatus(HttpStatusCode.valueOf(400)));
+
+    ResponseStatusException exc =
+        Assertions.assertThrows(
+            ResponseStatusException.class,
+            () -> {
+              forestClientApiProvider.fetchClientsByClientName(clientName);
+            });
+
+    Assertions.assertEquals(HttpStatus.BAD_REQUEST, exc.getStatusCode());
+  }
+
+  @Test
+  @DisplayName("Search clients by name success request")
+  void searchClientByNameOkRequest() {
+    String clientName = "AlDente";
+
+    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+
+    String url = "/null/clients/findByNames?page=0&size=50&clientName=" + clientName;
+
+    String json =
+        """
+          [{
+            "clientNumber": "00012797",
+            "clientName": "AlDente",
+            "legalFirstName": null,
+            "legalMiddleName": null,
+            "clientStatusCode": "ACT",
+            "clientTypeCode": "F",
+            "acronym": "MOF"
+          }]
+        """;
+
+    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON).header("x-total-count", "1"));
+
+    ForestClientDto fc = forestClientApiProvider.fetchClientsByClientName(clientName).get(0);
+
+    Assertions.assertNotNull(fc);
+
+    Assertions.assertEquals(clientName, fc.clientName());
   }
 }

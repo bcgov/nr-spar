@@ -391,4 +391,42 @@ class ForestClientEndpointTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].clientNumber").value(clientNumber));
   }
+
+  @Test
+  @DisplayName("Search forest clients with valid acronym should succeed")
+  void searchForestClientsValidAcronym_shouldSucceed() throws Exception {
+    String clientNumber = "00012797";
+    String locationCode = "00";
+
+    when(forestClientService.searchClients("acronym", "MOF"))
+        .thenReturn(List.of(mockForestClientSearchDto(clientNumber, locationCode)));
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=acronym&query=MOF")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].clientNumber").value(clientNumber));
+  }
+
+  @Test
+  @DisplayName("Search forest clients with valid client name should succeed")
+  void searchForestClientsValidName_shouldSucceed() throws Exception {
+    String clientNumber = "00012797";
+    String locationCode = "00";
+
+    when(forestClientService.searchClients(any(), any()))
+        .thenReturn(List.of(mockForestClientSearchDto(clientNumber, locationCode)));
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=client_name&query=Ministry%20of%20forests")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].clientNumber").value(clientNumber));
+  }
 }
