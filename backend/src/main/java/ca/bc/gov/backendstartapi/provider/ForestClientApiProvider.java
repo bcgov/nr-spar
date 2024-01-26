@@ -152,10 +152,10 @@ public class ForestClientApiProvider implements Provider {
     int page = 0;
     int size = shouldFetchAll ? 50 : 10;
     int totalFetched = 0;
-    int xTotalCount = Integer.MAX_VALUE;
+    int totalCount = Integer.MAX_VALUE;
     List<ForestClientLocationDto> result = new ArrayList<>();
 
-    while (totalFetched < xTotalCount) {
+    while (totalFetched < totalCount) {
       try {
         String apiUrl =
             String.format(
@@ -180,7 +180,7 @@ public class ForestClientApiProvider implements Provider {
           return response.getBody();
         }
 
-        xTotalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
+        totalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
 
         totalFetched += response.getBody().size();
 
@@ -250,10 +250,10 @@ public class ForestClientApiProvider implements Provider {
     int page = 0;
     int size = 50;
     int totalFetched = 0;
-    int xTotalCount = Integer.MAX_VALUE;
+    int totalCount = Integer.MAX_VALUE;
     List<ForestClientDto> result = new ArrayList<>();
 
-    while (totalFetched < xTotalCount) {
+    while (totalFetched < totalCount) {
       try {
         String uriBuilder =
             UriComponentsBuilder.fromUriString(String.format("%s/clients/findByNames", rootUri))
@@ -285,7 +285,7 @@ public class ForestClientApiProvider implements Provider {
             "fetchClientsByClientName",
             page);
 
-        xTotalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
+        totalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
 
         totalFetched += response.getBody().size();
 
