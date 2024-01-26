@@ -40,7 +40,7 @@ import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardSte
 import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
-import BCBreadcrumb from '../../../components/BCBreadcrumb';
+import DisplayBredcrumb from '../../../components/DisplayBreadcrumb';
 
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
@@ -454,7 +454,7 @@ const SeedlotRegistrationForm = () => {
     retry: 0
   });
 
-  const BCBreadcrumbs = [
+  const DisplayBredcrumbs = [
     {
       name: 'Seedlots',
       path: `${PathConstants.SEEDLOTS}`
@@ -601,7 +601,7 @@ const SeedlotRegistrationForm = () => {
       <FlexGrid fullWidth>
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
-            <BCBreadcrumb breadcrumbData={BCBreadcrumbs} />
+            <DisplayBredcrumb breadcrumbData={DisplayBredcrumbs} />
           </Column>
         </Row>
         <Row>

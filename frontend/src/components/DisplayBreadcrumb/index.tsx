@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 import './styles.scss';
 
-interface BCBreadcrumbProps {
+interface DisplayBredcrumbProps {
   breadcrumbData:
     {
       name: string,
@@ -18,7 +18,7 @@ interface BCBreadcrumbProps {
     }[];
 }
 
-const BCBreadcrumb = ({ breadcrumbData }:BCBreadcrumbProps) => {
+const DisplayBredcrumb = ({ breadcrumbData }:DisplayBredcrumbProps) => {
   const navigate = useNavigate();
 
   const lastBreadcrumb = breadcrumbData.length - 1;
@@ -75,4 +75,4 @@ const BCBreadcrumb = ({ breadcrumbData }:BCBreadcrumbProps) => {
   );
 };
 
-export default BCBreadcrumb;
+export default DisplayBredcrumb;
