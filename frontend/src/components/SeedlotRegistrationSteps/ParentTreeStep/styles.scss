@@ -6,6 +6,21 @@
   padding-right: 0rem;
   padding-bottom: 1rem;
 
+  .sticky-table-title {
+    .#{vars.$bcgov-prefix}--data-table-header {
+      position: sticky;
+      top: 3rem;
+      z-index: 1;
+    }
+  }
+
+  .sticky-toolbar {
+    position: sticky;
+    top: 8.3rem;
+    background: var(--#{vars.$bcgov-prefix}-layer);
+    z-index: 1;
+  }
+
   .parent-tree-step-tab-list {
     margin-left: -1rem;
     border-bottom: 2px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
@@ -85,7 +100,7 @@
     }
   }
 
-  .ghost-button-underlined{
+  .ghost-button-underlined {
     padding: 0;
     min-height: fit-content;
     text-decoration: underline;
@@ -158,11 +173,19 @@
 
   .table-header {
     height: 4rem;
+    position: sticky;
+    top: 11.3rem;
+    z-index: 1;
 
     th {
       vertical-align: baseline;
       padding-top: 1rem;
     }
+  }
+
+  .table-pagination {
+    z-index: 2;
+    position: relative;
   }
 
   .#{vars.$bcgov-prefix}--data-table-content {
