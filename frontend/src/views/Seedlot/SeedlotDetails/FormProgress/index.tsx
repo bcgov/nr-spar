@@ -11,6 +11,7 @@ import { Edit } from '@carbon/icons-react';
 import { getAClassSeedlotProgressStatus } from '../../../../api-service/seedlotAPI';
 import { ProgressIndicatorConfig } from '../../SeedlotRegistrationForm/definitions';
 import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
+import NetworkError from '../../../../components/NetworkError';
 import { completeProgressConfig, initialProgressConfig } from '../../SeedlotRegistrationForm/constants';
 import PathConstants from '../../../../routes/pathConstants';
 import { addParamToPath } from '../../../../utils/PathUtils';
@@ -51,7 +52,6 @@ const FormProgress = (
     enabled: getSeedlotQueryStatus === 'success'
       && (seedlotStatusCode === 'PND' || seedlotStatusCode === 'INC'),
     refetchOnMount: true,
-    refetchOnWindowFocus: true,
     retry: 1
   });
 
@@ -59,14 +59,7 @@ const FormProgress = (
     if (formProgressStatusQuery.status === 'success') {
       const retreivedProgress = formProgressStatusQuery.data
         .data as unknown as ProgressIndicatorConfig;
-
-      const keys = Object.keys(retreivedProgress) as (keyof ProgressIndicatorConfig)[];
-
-      keys.forEach((key) => {
-        retreivedProgress[key].isCurrent = false;
-      });
-
-      setProgressStatus(formProgressStatusQuery.data.data as unknown as ProgressIndicatorConfig);
+      setProgressStatus(retreivedProgress);
     }
 
     if (formProgressStatusQuery.status === 'error') {
@@ -74,7 +67,34 @@ const FormProgress = (
         setProgressStatus(initialProgressConfig);
       }
     }
-  }, [seedlotStatusCode, formProgressStatusQuery.status]);
+  }, [
+    seedlotStatusCode, formProgressStatusQuery.status, formProgressStatusQuery.isFetchedAfterMount
+  ]);
+
+  const renderProgress = () => {
+    if (!seedlotStatusCode || seedlotStatusCode === 'PND' || seedlotStatusCode === 'INC') {
+      if ((getSeedlotQueryStatus === 'loading' || formProgressStatusQuery.status === 'loading')) {
+        return <ProgressIndicatorSkeleton />;
+      }
+
+      // Render network error only if it's not 404.
+      if (formProgressStatusQuery.status === 'error'
+        && (formProgressStatusQuery.error as AxiosError).response?.status !== 404
+      ) {
+        return <NetworkError description={(formProgressStatusQuery.error as AxiosError).message} />;
+      }
+    }
+    return (
+      <SeedlotRegistrationProgress
+        progressStatus={progressStatus}
+        interactFunction={(e: number) => {
+          // Add 1 to the number to make it comply with
+          // the step numbers shown to the user
+          navigate(`${addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=${e + 1}`);
+        }}
+      />
+    );
+  };
 
   return (
     <div className="form-progress">
@@ -83,28 +103,11 @@ const FormProgress = (
           See where you are in the registration process
         </p>
       </div>
-      {
-        seedlotStatusCode !== undefined
-          ? (
-            <div className="steps-box">
-              {
-                (seedlotStatusCode === 'PND' || seedlotStatusCode === 'INC')
-                  && (getSeedlotQueryStatus === 'loading' || formProgressStatusQuery.status === 'loading')
-                  ? <ProgressIndicatorSkeleton />
-                  : (
-                    <SeedlotRegistrationProgress
-                      progressStatus={progressStatus}
-                      interactFunction={(e: number) => {
-                        // Add 1 to the number to make it comply with
-                        // the step numbers shown to the user
-                        navigate(`${addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=${e + 1}`);
-                      }}
-                    />
-                  )
-              }
-            </div>
-          ) : null
-      }
+      <div className="steps-box">
+        {
+          renderProgress()
+        }
+      </div>
       <div>
         <Button
           kind="tertiary"

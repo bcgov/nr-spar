@@ -429,13 +429,23 @@ const SeedlotRegistrationForm = () => {
   };
 
   const saveProgress = useMutation({
-    mutationFn: () => putAClassSeedlotProgress(
-      seedlotNumber ?? '',
-      {
-        allStepData,
-        progressStatus: updateAllStepStatus()
-      }
-    ),
+    mutationFn: () => {
+      const updatedProgressStatus = updateAllStepStatus();
+      const keys = Object.keys(updatedProgressStatus) as (keyof ProgressIndicatorConfig)[];
+
+      // Set each status' isCurrent to false, otherwise the property will take priority when true.
+      keys.forEach((key) => {
+        updatedProgressStatus[key].isCurrent = false;
+      });
+
+      return putAClassSeedlotProgress(
+        seedlotNumber ?? '',
+        {
+          allStepData,
+          progressStatus: updatedProgressStatus
+        }
+      );
+    },
     onSuccess: () => {
       numOfEdit.current = 0;
       setLastSaveTimestamp(DateTime.now().toISO());
