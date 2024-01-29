@@ -7,7 +7,7 @@ import {
 import { Edit } from '@carbon/icons-react';
 
 import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
-import { initialProgressConfig } from '../../SeedlotRegistrationForm/constants';
+import { initialProgressConfig } from '../../SeedlotRegFormClassA/constants';
 import PathConstants from '../../../../routes/pathConstants';
 import { addParamToPath } from '../../../../utils/PathUtils';
 

@@ -17,9 +17,9 @@ import ExtractionAndStorage from '../SeedlotRegistrationSteps/ExtractionAndStora
 import { OrchardForm } from '../SeedlotRegistrationSteps/OrchardStep/definitions';
 import {
   initCollectionState, initOwnershipState, initInterimState, initExtractionStorageState
-} from '../../views/Seedlot/SeedlotRegistrationForm/utils';
-import { AllStepData } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { tscAgencyObj, tscLocationCode } from '../../views/Seedlot/SeedlotRegistrationForm/constants';
+} from '../../views/Seedlot/SeedlotRegFormClassA/utils';
+import { AllStepData } from '../../views/Seedlot/SeedlotRegFormClassA/definitions';
+import { tscAgencyObj, tscLocationCode } from '../../views/Seedlot/SeedlotRegFormClassA/constants';
 import formReviewText from './constants';
 
 import './styles.scss';

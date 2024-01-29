@@ -6,7 +6,7 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-import ClassAContext from '../../../views/Seedlot/SeedlotRegistrationForm/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
 import TitleAccordion from '../../TitleAccordion';
 import SingleOwnerInfo from './SingleOwnerInfo';
 

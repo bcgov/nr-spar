@@ -17,7 +17,7 @@ import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
-import ClassAContext from '../../../views/Seedlot/SeedlotRegistrationForm/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
