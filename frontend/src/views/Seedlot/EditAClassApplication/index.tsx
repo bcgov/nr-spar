@@ -25,7 +25,7 @@ import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
 import PathConstants from '../../../routes/pathConstants';
 import ErrorToast from '../../../components/Toast/ErrorToast';
-import DisplayBredcrumb from '../../../components/DisplayBreadcrumb';
+import DisplayBreadcrumb from '../../../components/DisplayBreadcrumb';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import { ForestClientType } from '../../../types/ForestClientType';
 import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
@@ -167,7 +167,7 @@ const EditAClassApplication = () => {
   return (
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
-        <DisplayBredcrumb breadcrumbData={EditAClassApplicationBreadcrumbs} />
+        <DisplayBreadcrumb breadcrumbData={EditAClassApplicationBreadcrumbs} />
       </Row>
       <Row className="title-row">
         <PageTitle
