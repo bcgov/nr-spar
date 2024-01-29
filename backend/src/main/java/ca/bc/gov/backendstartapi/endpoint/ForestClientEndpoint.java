@@ -97,13 +97,14 @@ public class ForestClientEndpoint {
           @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
           @Parameter(
               name = "clientNumber",
+              required = true,
               in = ParameterIn.PATH,
-              description = "Number that identifies the client to get the locations.",
-              required = true)
+              description = "Number that identifies the client to get the locations.")
           String clientNumber,
       @RequestParam(defaultValue = "false")
           @Parameter(
               name = "shouldFetchAll",
+              required = true,
               in = ParameterIn.QUERY,
               description = "If it should fetch all client locations.")
           Boolean shouldFetchAll) {
@@ -159,13 +160,18 @@ public class ForestClientEndpoint {
       @RequestParam(defaultValue = "acronym")
           @Parameter(
               name = "type",
+              required = true,
               in = ParameterIn.QUERY,
               description =
                   "Specify one of the search types: acronym, client_number or client_name.")
           String type,
       @RequestParam
           @Size(max = 100, message = "Parameter 'query' should be at most 100 characters long.")
-          @Parameter(name = "query", in = ParameterIn.QUERY, description = "The search keyword.")
+          @Parameter(
+              name = "query",
+              required = true,
+              in = ParameterIn.QUERY,
+              description = "The search keyword.")
           String query) {
     return forestClientService.searchClients(type, query);
   }
