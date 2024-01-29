@@ -78,7 +78,9 @@ public class ForestClientService {
    * @return a list of {@link ForestClientSearchDto}
    */
   public List<ForestClientSearchDto> searchClients(String type, String query) {
-    if (!type.equals("acronym") && !type.equals("client_number") && !type.equals("client_name")) {
+    List<String> validTypes = List.of("acronym", "client_number", "client_name");
+
+    if (!validTypes.contains(type)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid search type.");
     }
 
