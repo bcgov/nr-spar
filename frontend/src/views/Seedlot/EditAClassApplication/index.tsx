@@ -31,6 +31,7 @@ import { ForestClientType } from '../../../types/ForestClientType';
 import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
+import { EditAClassApplicationBreadcrumbs } from './constants';
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
 
 import './styles.scss';
@@ -148,21 +149,6 @@ const EditAClassApplication = () => {
       bcSourceInd: seedlotEditData.isBcSource.value
     });
   };
-
-  const EditAClassApplicationBreadcrumbs = [
-    {
-      name: 'Seedlots',
-      path: `${PathConstants.SEEDLOTS}`
-    },
-    {
-      name: 'My seedlots',
-      path: `${PathConstants.MY_SEEDLOTS}`
-    },
-    {
-      name: `Seedlot ${seedlotNumber}`,
-      path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
-    }
-  ];
 
   return (
     <FlexGrid className="edit-a-class-seedlot-page">

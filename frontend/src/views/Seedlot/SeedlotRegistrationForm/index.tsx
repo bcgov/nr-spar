@@ -40,7 +40,7 @@ import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardSte
 import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
-import DisplayBredcrumb from '../../../components/DisplayBreadcrumb';
+import DisplayBreadcrumb from '../../../components/DisplayBreadcrumb';
 
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
@@ -91,7 +91,7 @@ import {
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE,
-  initialProgressConfig, smartSaveText, stepMap, tscAgencyObj, tscLocationCode
+  initialProgressConfig, seedlotRegistrationBreadcrumbs, smartSaveText, stepMap, tscAgencyObj, tscLocationCode
 } from './constants';
 
 import './styles.scss';
@@ -454,21 +454,6 @@ const SeedlotRegistrationForm = () => {
     retry: 0
   });
 
-  const DisplayBredcrumbs = [
-    {
-      name: 'Seedlots',
-      path: `${PathConstants.SEEDLOTS}`
-    },
-    {
-      name: 'My seedlots',
-      path: `${PathConstants.MY_SEEDLOTS}`
-    },
-    {
-      name: `Seedlot ${seedlotNumber}`,
-      path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
-    }
-  ];
-
   const handleSaveBtn = () => {
     setSaveStatus('active');
     setSaveDescription(smartSaveText.loading);
@@ -601,7 +586,7 @@ const SeedlotRegistrationForm = () => {
       <FlexGrid fullWidth>
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
-            <DisplayBredcrumb breadcrumbData={DisplayBredcrumbs} />
+            <DisplayBreadcrumb breadcrumbData={seedlotRegistrationBreadcrumbs} />
           </Column>
         </Row>
         <Row>
