@@ -223,38 +223,50 @@ const ApplicantAgencyFields = ({
           }
         </Column>
       </Row>
-      <Row className="applicant-client-search-row">
-        <Column sm={4} md={4} lg={16} xlg={16}>
-          <p>
-            If you don&apos;t remember the agency information you can
-            {' '}
-            <ClientSearchModal
-              linkText="open the client search"
-              modalLabel="Register A-Class Seedlot"
-              applySelectedClient={(clientAgency: ForestClientDisplayType) => {
-                const agencyObj: MultiOptionsObj = {
-                  code: clientAgency.number,
-                  label: `${clientAgency.number} - ${clientAgency.fullName} - ${clientAgency.acronym}`,
-                  description: clientAgency.fullName
-                };
+      {
+        !isDefault.value
+          ? (
+            <Row className="applicant-client-search-row">
+              <Column sm={4} md={4} lg={16} xlg={16}>
+                <p>
+                  If you don&apos;t remember the agency information you can
+                  {' '}
+                  <ClientSearchModal
+                    linkText="open the client search"
+                    modalLabel="Register A-Class Seedlot"
+                    applySelectedClient={(clientAgency: ForestClientDisplayType) => {
+                      const agencyObj: MultiOptionsObj = {
+                        code: clientAgency.number,
+                        label: `${clientAgency.number} - ${clientAgency.fullName} - ${clientAgency.acronym}`,
+                        description: clientAgency.fullName
+                      };
 
-                const selectedAgency = {
-                  ...agency,
-                  value: agencyObj,
-                  isInvalid: false
-                };
+                      const selectedAgency = {
+                        ...agency,
+                        value: agencyObj,
+                        isInvalid: false
+                      };
 
-                const selectedLocationCode = {
-                  ...locationCode,
-                  value: clientAgency.locationCode
-                };
-                setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
-                setAgencyAndCode(false, selectedAgency, selectedLocationCode);
-              }}
-            />
-          </p>
-        </Column>
-      </Row>
+                      const selectedLocationCode = {
+                        ...locationCode,
+                        value: clientAgency.locationCode
+                      };
+
+                      const updateIsDefault = {
+                        ...isDefault,
+                        value: false
+                      };
+
+                      setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
+                      setAgencyAndCode(updateIsDefault, selectedAgency, selectedLocationCode);
+                    }}
+                  />
+                </p>
+              </Column>
+            </Row>
+          )
+          : null
+      }
     </FlexGrid>
   );
 };
