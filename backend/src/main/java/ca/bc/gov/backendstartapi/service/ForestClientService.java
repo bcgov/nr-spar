@@ -50,7 +50,7 @@ public class ForestClientService {
   public List<ForestClientLocationDto> fetchClientLocations(
       String clientNumber, Boolean shouldFetchAll) {
     SparLog.info(
-        "Fetching {} Forest Clients by its number {}", clientNumber, shouldFetchAll ? "all" : "10");
+        "Fetching {} Forest Clients by its number {}", shouldFetchAll ? "all" : "10", clientNumber);
     return forestClientApiProvider.fetchLocationsByClientNumber(clientNumber, shouldFetchAll);
   }
 
