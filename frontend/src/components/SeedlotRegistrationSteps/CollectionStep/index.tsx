@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   FlexGrid,
   Column,
@@ -17,6 +17,7 @@ import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import ClassAContext from '../../../views/Seedlot/SeedlotRegistrationForm/ClassAContext';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -31,8 +32,6 @@ import './styles.scss';
 
 const CollectionStep = (
   {
-    state,
-    setStepData,
     defaultAgency,
     defaultCode,
     agencyOptions,
@@ -40,6 +39,8 @@ const CollectionStep = (
     readOnly
   }: CollectionStepProps
 ) => {
+  const { allStepData: { collectionStep: state }, setStepData } = useContext(ClassAContext);
+
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
   const setAgencyAndCode = (
@@ -51,7 +52,7 @@ const CollectionStep = (
     clonedState.useDefaultAgencyInfo = isDefault;
     clonedState.collectorAgency = agency;
     clonedState.locationCode = locationCode;
-    setStepData(clonedState);
+    setStepData('collectionStep', clonedState);
   };
 
   const handleDateChange = (isStartDate: boolean, value: string) => {
@@ -66,7 +67,7 @@ const CollectionStep = (
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
 
-    setStepData(clonedState);
+    setStepData('collectionStep', clonedState);
   };
 
   const handleContainerNumAndVol = (isNum: boolean, value: string) => {
@@ -84,7 +85,7 @@ const CollectionStep = (
     );
     clonedState.volumeOfCones.value = multipliedVol;
 
-    setStepData(clonedState);
+    setStepData('collectionStep', clonedState);
   };
 
   const handleVolOfCones = (value: string) => {
@@ -101,7 +102,7 @@ const CollectionStep = (
     if (!isOverDecimal) {
       setIsCalcWrong(Number(multipliedVol).toFixed(3) !== Number(value).toFixed(3));
     }
-    setStepData(clonedState);
+    setStepData('collectionStep', clonedState);
   };
 
   const handleCollectionMethods = (selectedMethod: string) => {
@@ -112,13 +113,13 @@ const CollectionStep = (
     } else {
       clonedState.selectedCollectionCodes.value.push(selectedMethod);
     }
-    setStepData(clonedState);
+    setStepData('collectionStep', clonedState);
   };
 
   const handleComment = (value: string) => {
     const clonedState = structuredClone(state);
     clonedState.comments.value = value;
-    setStepData(clonedState);
+    setStepData('collectionStep', clonedState);
   };
 
   return (

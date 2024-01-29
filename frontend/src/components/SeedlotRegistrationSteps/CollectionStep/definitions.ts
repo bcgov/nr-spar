@@ -20,8 +20,6 @@ export type CollectionForm = {
 }
 
 export interface CollectionStepProps {
-  state: CollectionForm,
-  setStepData: Function,
   defaultAgency: MultiOptionsObj,
   defaultCode: string,
   agencyOptions: Array<MultiOptionsObj>,

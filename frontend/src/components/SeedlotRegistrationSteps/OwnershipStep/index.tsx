@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import {
   Accordion,
   AccordionItem,
@@ -6,6 +6,7 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
+import ClassAContext from '../../../views/Seedlot/SeedlotRegistrationForm/ClassAContext';
 import TitleAccordion from '../../TitleAccordion';
 import SingleOwnerInfo from './SingleOwnerInfo';
 
@@ -31,8 +32,6 @@ import './styles.scss';
 */
 const OwnershipStep = (
   {
-    state,
-    setStepData,
     defaultCode,
     defaultAgency,
     agencyOptions,
@@ -41,6 +40,8 @@ const OwnershipStep = (
     methodsOfPayment
   }: OwnershipStepProps
 ) => {
+  const { allStepData: { ownershipStep: state }, setStepData } = useContext(ClassAContext);
+
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
 
   const refControl = useRef<any>({});
@@ -50,7 +51,7 @@ const OwnershipStep = (
     for (let i = 0; i < updatedArray.length; i += 1) {
       clonedArray[i].ownerPortion.isInvalid = isInvalid;
     }
-    setStepData(clonedArray);
+    setStepData('ownershipStep', clonedArray);
   };
 
   const addAnOwner = () => {
@@ -59,7 +60,7 @@ const OwnershipStep = (
       return;
     }
     const newOwnerArr = insertOwnerForm(state, methodsOfPayment);
-    setStepData(newOwnerArr);
+    setStepData('ownershipStep', newOwnerArr);
   };
 
   const deleteAnOwner = (id: number) => {
@@ -137,7 +138,7 @@ const OwnershipStep = (
                   setState={(singleState: SingleOwnerForm, id: number) => {
                     const arrayClone = structuredClone(state);
                     arrayClone[id] = singleState;
-                    setStepData(arrayClone);
+                    setStepData('ownershipStep', arrayClone);
                   }}
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
