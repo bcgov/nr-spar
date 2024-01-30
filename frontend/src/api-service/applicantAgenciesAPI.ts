@@ -1,13 +1,13 @@
-import ApplicantAgencyType from '../types/ApplicantAgencyType';
+import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import ApplicantAgenciesItems from '../mock-server/fixtures/ApplicantAgenciesItems';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 
 const getApplicantAgenciesOptions = (): MultiOptionsObj[] => {
   const options: MultiOptionsObj[] = [];
   ApplicantAgenciesItems.sort(
-    (a: ApplicantAgencyType, b: ApplicantAgencyType) => (a.clientName < b.clientName ? -1 : 1)
+    (a: ForestClientType, b: ForestClientType) => (a.clientName < b.clientName ? -1 : 1)
   );
-  ApplicantAgenciesItems.forEach((agency: ApplicantAgencyType) => {
+  ApplicantAgenciesItems.forEach((agency: ForestClientType) => {
     let clientName = agency.clientName
       .toLowerCase()
       .split(' ')
