@@ -1,10 +1,11 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
 import {
-  FlexGrid, Row, Column, Link,
+  FlexGrid, Row, Column,
   TextInput, Dropdown, Button
 } from '@carbon/react';
 import { Search } from '@carbon/icons-react';
+import { Link } from 'react-router-dom';
 
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 
@@ -25,9 +26,7 @@ const ClientSearchFields = ({
           Search for a specific client or agency, you can search by name, acronym or number.
           To view more information about the client, you can
           {' '}
-          <Link
-            href="#"
-          >
+          <Link to="">
             go to client search screen.
           </Link>
         </p>

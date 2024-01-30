@@ -69,9 +69,22 @@
 
   .applicant-client-search-row {
     margin-bottom: 3rem;
+
     p {
       color: colors.$gray-70;
       font-size: 0.875rem;
+    }
+
+    .client-search-toggle-btn {
+      padding: 0;
+      height: auto;
+      min-height: 0;
+      background: transparent;
+      border: none;
+
+      p {
+        color: var(--#{vars.$bcgov-prefix}-link-primary);
+      }
     }
   }
 }

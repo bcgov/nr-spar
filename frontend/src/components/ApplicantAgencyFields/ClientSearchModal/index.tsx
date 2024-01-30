@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMutation } from '@tanstack/react-query';
 import {
+  Button,
   Modal,
-  Link,
   FlexGrid,
   Row,
   Column,
@@ -120,13 +120,12 @@ const ClientSearchModal = (
 
   return (
     <>
-      <Link
-        role="button"
+      <Button
+        className="client-search-toggle-btn"
         onClick={() => setIsOpen(true)}
-        href="#"
       >
-        {linkText}
-      </Link>
+        <p>{linkText}</p>
+      </Button>
       {
         createPortal(
           <Modal

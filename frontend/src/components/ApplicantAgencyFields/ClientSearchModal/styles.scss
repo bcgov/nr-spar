@@ -10,6 +10,10 @@
     @include type.type-style('label-02');
   }
 
+  .#{vars.$bcgov-prefix}--btn.#{vars.$bcgov-prefix}--btn--disabled {
+    box-shadow: none;
+  }
+
   .client-search-grid {
     padding-inline: 0;
 
@@ -27,7 +31,7 @@
       margin-bottom: 1.5rem;
     }
 
-    .client-search-row > div:nth-child(-n + 2) {
+    .client-search-row>div:nth-child(-n + 2) {
       padding-inline-end: 0;
     }
 

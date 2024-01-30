@@ -249,7 +249,8 @@ const ApplicantAgencyFields = ({
 
                       const selectedLocationCode = {
                         ...locationCode,
-                        value: clientAgency.locationCode
+                        value: clientAgency.locationCode,
+                        isInvalid: false
                       };
 
                       const updateIsDefault = {
