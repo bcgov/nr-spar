@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -9,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
@@ -34,6 +36,36 @@ class ForestClientEndpointTest {
   @Autowired private MockMvc mockMvc;
 
   @MockBean private ForestClientService forestClientService;
+
+  private ForestClientSearchDto mockForestClientSearchDto(String number, String location) {
+    return new ForestClientSearchDto(
+        number,
+        "name",
+        "firstName",
+        "legalMiddleName",
+        ForestClientStatusEnum.ACT,
+        ForestClientTypeEnum.A,
+        "acronym",
+        location,
+        "locationName",
+        "company",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ForestClientExpiredEnum.N,
+        ForestClientExpiredEnum.Y,
+        "",
+        "");
+  }
 
   @Test
   @DisplayName("fetchExistentClientByNumber")
@@ -153,13 +185,11 @@ class ForestClientEndpointTest {
             ForestClientExpiredEnum.N,
             ForestClientExpiredEnum.Y,
             "",
-            "Near a park"
-        );
-
+            "Near a park");
 
     List<ForestClientLocationDto> locations = List.of(testLocation);
 
-    when(forestClientService.fetchClientLocations("00000000")).thenReturn(locations);
+    when(forestClientService.fetchClientLocations("00000000", false)).thenReturn(locations);
 
     mockMvc
         .perform(
@@ -195,7 +225,8 @@ class ForestClientEndpointTest {
   @Test
   @DisplayName("fetchNonExistentClientLocations")
   void fetchNonExistentClientLocations() throws Exception {
-    when(forestClientService.fetchClientLocations("00000000")).thenReturn(Collections.emptyList());
+    when(forestClientService.fetchClientLocations("00000000", false))
+        .thenReturn(Collections.emptyList());
 
     // Forest Client API returns an empty list for non existent
     // clientNumber, with an OK status
@@ -232,8 +263,7 @@ class ForestClientEndpointTest {
             ForestClientExpiredEnum.N,
             ForestClientExpiredEnum.Y,
             "",
-            "Near a park"
-        );
+            "Near a park");
 
     when(forestClientService.fetchSingleClientLocation("00000000", "12")).thenReturn(testLocation);
 
@@ -281,5 +311,122 @@ class ForestClientEndpointTest {
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Search forest clients with wrong type should return empty")
+  void searchForestClientsWrongType_shouldReturnEmpty() throws Exception {
+    when(forestClientService.searchClients(any(), any())).thenReturn(List.of());
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=mafia&query=al%20dente")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string("[]"));
+  }
+
+  @Test
+  @DisplayName("Search forest clients with non-existing number should return empty")
+  void searchForestClientsNonExistNum_shouldReturnEmpty() throws Exception {
+    when(forestClientService.searchClients("client_number", "5055034455")).thenReturn(List.of());
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=client_number&query=5055034455")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string("[]"));
+  }
+
+  @Test
+  @DisplayName("Search forest clients with non-existing acronym should return Empty")
+  void searchForestClientsNonExistAcronym_shouldReturnEmpty() throws Exception {
+    when(forestClientService.searchClients("acronym", "BAMF")).thenReturn(List.of());
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=acronym&query=BAMF")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string("[]"));
+  }
+
+  @Test
+  @DisplayName("Search forest clients with non-existing name should return empty")
+  void searchForestClientsNonExistName_shouldReturnEmpty() throws Exception {
+    when(forestClientService.searchClients("client_name", "ColeCassidy")).thenReturn(List.of());
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=client_name&query=ColeCassidy")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().string("[]"));
+  }
+
+  @Test
+  @DisplayName("Search forest clients with valid number should succeed")
+  void searchForestClientsValidNum_shouldSucceed() throws Exception {
+    String clientNumber = "00012797";
+    String locationCode = "00";
+
+    when(forestClientService.searchClients("client_number", clientNumber))
+        .thenReturn(List.of(mockForestClientSearchDto(clientNumber, locationCode)));
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=client_number&query=" + clientNumber)
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].clientNumber").value(clientNumber));
+  }
+
+  @Test
+  @DisplayName("Search forest clients with valid acronym should succeed")
+  void searchForestClientsValidAcronym_shouldSucceed() throws Exception {
+    String clientNumber = "00012797";
+    String locationCode = "00";
+
+    when(forestClientService.searchClients("acronym", "MOF"))
+        .thenReturn(List.of(mockForestClientSearchDto(clientNumber, locationCode)));
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=acronym&query=MOF")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].clientNumber").value(clientNumber));
+  }
+
+  @Test
+  @DisplayName("Search forest clients with valid client name should succeed")
+  void searchForestClientsValidName_shouldSucceed() throws Exception {
+    String clientNumber = "00012797";
+    String locationCode = "00";
+
+    when(forestClientService.searchClients(any(), any()))
+        .thenReturn(List.of(mockForestClientSearchDto(clientNumber, locationCode)));
+
+    mockMvc
+        .perform(
+            get("/api/forest-clients/search?type=client_name&query=Ministry%20of%20forests")
+                .with(csrf().asHeader())
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].clientNumber").value(clientNumber));
   }
 }

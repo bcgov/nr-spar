@@ -1,9 +1,11 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
@@ -84,10 +86,11 @@ class ForestClientServiceTest {
   void fetchNonExistingLocation() {
     String number = "00000001";
 
-    when(forestClientApiProvider.fetchLocationsByClientNumber(number))
+    when(forestClientApiProvider.fetchLocationsByClientNumber(number, false))
         .thenReturn(Collections.emptyList());
 
-    List<ForestClientLocationDto> locationDto = forestClientService.fetchClientLocations(number);
+    List<ForestClientLocationDto> locationDto =
+        forestClientService.fetchClientLocations(number, false);
 
     Assertions.assertTrue(locationDto.isEmpty());
   }
@@ -122,10 +125,10 @@ class ForestClientServiceTest {
 
     List<ForestClientLocationDto> locations = List.of(location);
 
-    when(forestClientApiProvider.fetchLocationsByClientNumber(number))
-        .thenReturn(locations);
+    when(forestClientApiProvider.fetchLocationsByClientNumber(number, false)).thenReturn(locations);
 
-    List<ForestClientLocationDto> locationsDto = forestClientService.fetchClientLocations(number);
+    List<ForestClientLocationDto> locationsDto =
+        forestClientService.fetchClientLocations(number, false);
 
     Assertions.assertFalse(locationsDto.isEmpty());
 
@@ -143,10 +146,12 @@ class ForestClientServiceTest {
     Assertions.assertEquals("V1N1H3", singleLocationDto.postalCode());
     Assertions.assertEquals("CANADA", singleLocationDto.country());
     Assertions.assertEquals("2503658600", singleLocationDto.businessPhone());
-    Assertions.assertEquals(ForestClientExpiredEnum.N,
-                            ForestClientExpiredEnum.valueOf(singleLocationDto.expired().name()));
-    Assertions.assertEquals(ForestClientExpiredEnum.N,
-                            ForestClientExpiredEnum.valueOf(singleLocationDto.trusted().name()));
+    Assertions.assertEquals(
+        ForestClientExpiredEnum.N,
+        ForestClientExpiredEnum.valueOf(singleLocationDto.expired().name()));
+    Assertions.assertEquals(
+        ForestClientExpiredEnum.N,
+        ForestClientExpiredEnum.valueOf(singleLocationDto.trusted().name()));
   }
 
   @Test
@@ -213,9 +218,68 @@ class ForestClientServiceTest {
     Assertions.assertEquals("V1N1H3", locationDto.postalCode());
     Assertions.assertEquals("CANADA", locationDto.country());
     Assertions.assertEquals("2503658600", locationDto.businessPhone());
-    Assertions.assertEquals(ForestClientExpiredEnum.N,
-                            ForestClientExpiredEnum.valueOf(locationDto.expired().name()));
-    Assertions.assertEquals(ForestClientExpiredEnum.N,
-                            ForestClientExpiredEnum.valueOf(locationDto.trusted().name()));
+    Assertions.assertEquals(
+        ForestClientExpiredEnum.N, ForestClientExpiredEnum.valueOf(locationDto.expired().name()));
+    Assertions.assertEquals(
+        ForestClientExpiredEnum.N, ForestClientExpiredEnum.valueOf(locationDto.trusted().name()));
+  }
+
+  @Test
+  @DisplayName("Search clients with wrong type should fail")
+  void searchClientsWrongType_shouldFail() {
+    Assertions.assertThrows(
+        ResponseStatusException.class,
+        () -> {
+          forestClientService.searchClients("animal", "giraffe");
+        });
+  }
+
+  @Test
+  @DisplayName("Search clients with valid client name should succeed")
+  void searchClientsValidName_shouldSucceed() {
+    String clientNumber = "000123456";
+    String locationCode = "00";
+
+    when(forestClientApiProvider.fetchClientsByClientName(any()))
+        .thenReturn(
+            List.of(
+                new ForestClientDto(
+                    clientNumber,
+                    "SMITH",
+                    "JOHN",
+                    "JOSEPH",
+                    ForestClientStatusEnum.ACT,
+                    ForestClientTypeEnum.I,
+                    "JSMITH")));
+
+    when(forestClientApiProvider.fetchLocationsByClientNumber(any(), any()))
+        .thenReturn(
+            List.of(
+                new ForestClientLocationDto(
+                    clientNumber,
+                    locationCode,
+                    "",
+                    "30055",
+                    "MINISTRY OF FORESTS",
+                    "ARROW FOREST DISTRICT",
+                    "845 COLUMBIA AVENUE",
+                    "CASTLEGAR",
+                    "BC",
+                    "V1N1H3",
+                    "CANADA",
+                    "2503658600",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ForestClientExpiredEnum.N,
+                    ForestClientExpiredEnum.N,
+                    "",
+                    "")));
+
+    ForestClientSearchDto fcs = forestClientService.searchClients("client_name", "SMITH").get(0);
+
+    Assertions.assertEquals(clientNumber, fcs.clientNumber());
+    Assertions.assertEquals(locationCode, fcs.locationCode());
   }
 }
