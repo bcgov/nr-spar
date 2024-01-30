@@ -21,7 +21,7 @@ import {
   NumStepperVal
 } from '../definitions';
 import { inputText, DEFAULT_INDEX, agencyFieldsProps } from '../constants';
-import { FilterObj, filterInput } from '../../../../utils/filterUtils';
+import { FilterObj, filterInput } from '../../../../utils/FilterUtils';
 
 import './styles.scss';
 

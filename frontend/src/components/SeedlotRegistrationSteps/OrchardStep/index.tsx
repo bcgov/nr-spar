@@ -19,7 +19,7 @@ import { Add, TrashCan } from '@carbon/icons-react';
 import validator from 'validator';
 
 import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
-import { filterInput, FilterObj } from '../../../utils/filterUtils';
+import { filterInput, FilterObj } from '../../../utils/FilterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import InputErrorText from '../../InputErrorText';

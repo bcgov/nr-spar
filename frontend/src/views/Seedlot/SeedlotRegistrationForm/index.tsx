@@ -232,48 +232,6 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getApplicantAgenciesOptions()
   });
 
-  const setStepData = (stepName: keyof AllStepData, stepData: any) => {
-    const newData = { ...allStepData };
-    // This check guarantee that every change on the collectors
-    // agency also changes the values on the interim agency, when
-    // necessary, also reflecting the invalid values
-    if (stepName === 'collectionStep'
-      && allStepData.interimStep.useCollectorAgencyInfo.value
-      && (allStepData.collectionStep.collectorAgency.value.code !== stepData.collectorAgency.value.code
-        || allStepData.collectionStep.locationCode.value !== stepData.locationCode.value)) {
-      newData.interimStep.agencyName.value = stepData.collectorAgency.value;
-      newData.interimStep.agencyName.isInvalid = stepData.collectorAgency.value.code.length
-        ? stepData.collectorAgency.isInvalid
-        : true;
-      newData.interimStep.locationCode.value = stepData.locationCode.value;
-      newData.interimStep.locationCode.isInvalid = stepData.locationCode.value.length
-        ? stepData.locationCode.isInvalid
-        : true;
-    }
-    newData[stepName] = stepData;
-    setAllStepData(newData);
-    numOfEdit.current += 1;
-  };
-
-  const methodsOfPaymentQuery = useQuery({
-    queryKey: ['methods-of-payment'],
-    queryFn: getMethodsOfPayment,
-    onSuccess: (dataArr: MultiOptionsObj[]) => {
-      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
-      const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
-      if (!allStepData.ownershipStep[0].methodOfPayment.value.code) {
-        const tempOwnershipData = structuredClone(allStepData.ownershipStep);
-        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
-        setStepData('ownershipStep', tempOwnershipData);
-      }
-    }
-  });
-
-  const logState = () => {
-    // eslint-disable-next-line no-console
-    console.log(allStepData);
-  };
-
   const updateStepStatus = (stepName: keyof ProgressIndicatorConfig): ProgressStepStatus => {
     const clonedStepStatus = structuredClone(progressStatus[stepName]);
     if (stepName === 'collection') {
@@ -314,6 +272,48 @@ const SeedlotRegistrationForm = () => {
     }
 
     return clonedStepStatus;
+  };
+
+  const setStepData = (stepName: keyof AllStepData, stepData: any) => {
+    const newData = { ...allStepData };
+    // This check guarantee that every change on the collectors
+    // agency also changes the values on the interim agency, when
+    // necessary, also reflecting the invalid values
+    if (stepName === 'collectionStep'
+      && allStepData.interimStep.useCollectorAgencyInfo.value) {
+      newData.interimStep.agencyName.value = stepData.collectorAgency.value;
+
+      newData.interimStep.locationCode.value = stepData.locationCode.value;
+
+      setProgressStatus((prevStatus) => (
+        {
+          ...prevStatus,
+          interim: updateStepStatus('interim')
+        }
+      ));
+    }
+    newData[stepName] = stepData;
+    setAllStepData(newData);
+    numOfEdit.current += 1;
+  };
+
+  const methodsOfPaymentQuery = useQuery({
+    queryKey: ['methods-of-payment'],
+    queryFn: getMethodsOfPayment,
+    onSuccess: (dataArr: MultiOptionsObj[]) => {
+      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
+      const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
+      if (!allStepData.ownershipStep[0].methodOfPayment.value.code) {
+        const tempOwnershipData = structuredClone(allStepData.ownershipStep);
+        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
+        setStepData('ownershipStep', tempOwnershipData);
+      }
+    }
+  });
+
+  const logState = () => {
+    // eslint-disable-next-line no-console
+    console.log(allStepData);
   };
 
   /**
@@ -709,7 +709,6 @@ const SeedlotRegistrationForm = () => {
                       Cancel
                     </Button>
                   )
-
               }
             </Column>
             <Column sm={4} md={3} lg={3} xlg={4}>

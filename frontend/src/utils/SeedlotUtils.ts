@@ -2,7 +2,7 @@ import { DateTime as luxon } from 'luxon';
 
 import { SeedlotApplicantType, SeedlotDisplayType, SeedlotType } from '../types/SeedlotType';
 import { MONTH_DAY_YEAR } from '../config/DateFormat';
-import { ForestClientType } from '../types/ForestClientType';
+import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../shared-constants/shared-constants';
 
