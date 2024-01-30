@@ -1,10 +1,5 @@
-import { useParams } from 'react-router-dom';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { ProgressIndicatorConfig, StepMap } from './definitions';
-import { addParamToPath } from '../../../utils/PathUtils';
-import PathConstants from '../../../routes/pathConstants';
-
-const { seedlotNumber } = useParams();
 
 export const MAX_EDIT_BEFORE_SAVE = 5;
 
@@ -65,18 +60,3 @@ export const smartSaveText = {
   success: 'Changes saved!',
   suggestion: 'Your recent changes could not be saved. Please try saving the form manually to keep all of your changes.'
 };
-
-export const seedlotRegistrationBreadcrumbs = [
-  {
-    name: 'Seedlots',
-    path: `${PathConstants.SEEDLOTS}`
-  },
-  {
-    name: 'My seedlots',
-    path: `${PathConstants.MY_SEEDLOTS}`
-  },
-  {
-    name: `Seedlot ${seedlotNumber}`,
-    path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
-  }
-];
