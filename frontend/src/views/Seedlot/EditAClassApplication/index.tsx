@@ -35,6 +35,7 @@ import { InitialSeedlotFormData } from '../CreateAClass/constants';
 
 import './styles.scss';
 import { addParamToPath } from '../../../utils/PathUtils';
+import { EditAClassApplicationBreadcrumbs } from './constants';
 
 const EditAClassApplication = () => {
   const navigate = useNavigate();
@@ -149,25 +150,10 @@ const EditAClassApplication = () => {
     });
   };
 
-  const EditAClassApplicationBreadcrumbs = [
-    {
-      name: 'Seedlots',
-      path: `${PathConstants.SEEDLOTS}`
-    },
-    {
-      name: 'My seedlots',
-      path: `${PathConstants.MY_SEEDLOTS}`
-    },
-    {
-      name: `Seedlot ${seedlotNumber}`,
-      path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
-    }
-  ];
-
   return (
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
-        <DisplayBreadcrumb breadcrumbData={EditAClassApplicationBreadcrumbs} />
+        <DisplayBreadcrumb breadcrumbData={EditAClassApplicationBreadcrumbs()} />
       </Row>
       <Row className="title-row">
         <PageTitle
