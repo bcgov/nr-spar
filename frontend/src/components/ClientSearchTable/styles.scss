@@ -1,0 +1,31 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.client-table {
+  .client-table-header {
+    height: 4rem;
+    position: sticky;
+    top: -0.5rem;
+
+    th {
+      vertical-align: baseline;
+      white-space: nowrap;
+    }
+  }
+
+  thead th.radiobutton-header {
+    border-block-end: 0;
+  }
+
+  tbody tr.empty-section-row {
+    height: auto;
+    display: flex;
+
+    td {
+      color: var(--#{vars.$bcgov-prefix}-text-primary);
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+}

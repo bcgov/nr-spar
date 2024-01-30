@@ -1,6 +1,6 @@
-import ApplicantAgencyType from '../../types/ApplicantAgencyType';
+import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 
-const ApplicantAgenciesItems: ApplicantAgencyType[] = [
+const ApplicantAgenciesItems: ForestClientType[] = [
   {
     clientNumber: '00149081',
     clientName: 'WESTERN FOREST PRODUCTS INC.',
