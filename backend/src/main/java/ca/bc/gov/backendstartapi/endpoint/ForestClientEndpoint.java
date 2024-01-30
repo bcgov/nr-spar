@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
 import org.springframework.http.MediaType;
@@ -20,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -80,10 +83,10 @@ public class ForestClientEndpoint {
    */
   @GetMapping(path = "/{clientNumber}/locations")
   @Operation(
-      summary = "Fetch up to the 10 first locations of the ForestClient.",
+      summary = "Fetch either 10 or all locations of the ForestClient.",
       description =
           """
-              Returns a list up to the 10 first locations associated with the ForestClient,
+              Returns a list of 10 or all locations associated with the ForestClient,
               identified by it's number.""",
       responses = {
         @ApiResponse(responseCode = "200"),
@@ -94,11 +97,18 @@ public class ForestClientEndpoint {
           @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
           @Parameter(
               name = "clientNumber",
+              required = true,
               in = ParameterIn.PATH,
-              description = "Number that identifies the client to get the locations.",
-              required = true)
-          String clientNumber) {
-    return forestClientService.fetchClientLocations(clientNumber);
+              description = "Number that identifies the client to get the locations.")
+          String clientNumber,
+      @RequestParam(defaultValue = "false")
+          @Parameter(
+              name = "shouldFetchAll",
+              required = true,
+              in = ParameterIn.QUERY,
+              description = "If it should fetch all client locations.")
+          Boolean shouldFetchAll) {
+    return forestClientService.fetchClientLocations(clientNumber, shouldFetchAll);
   }
 
   /**
@@ -134,5 +144,35 @@ public class ForestClientEndpoint {
               description = "Number that identify the location.")
           String locationCode) {
     return forestClientService.fetchSingleClientLocation(clientNumber, locationCode);
+  }
+
+  @GetMapping(path = "/search")
+  @Operation(
+      summary = "",
+      description = """
+             """,
+      responses = {
+        @ApiResponse(responseCode = "200"),
+        @ApiResponse(responseCode = "400"),
+        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
+      })
+  public List<ForestClientSearchDto> searchForestClients(
+      @RequestParam(defaultValue = "acronym")
+          @Parameter(
+              name = "type",
+              required = true,
+              in = ParameterIn.QUERY,
+              description =
+                  "Specify one of the search types: acronym, client_number or client_name.")
+          String type,
+      @RequestParam
+          @Size(max = 100, message = "Parameter 'query' should be at most 100 characters long.")
+          @Parameter(
+              name = "query",
+              required = true,
+              in = ParameterIn.QUERY,
+              description = "The search keyword.")
+          String query) {
+    return forestClientService.searchClients(type, query);
   }
 }
