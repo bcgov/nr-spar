@@ -19,7 +19,7 @@ export type SingleOwnerForm = {
   reservedPerc: StringInputType,
   surplusPerc: StringInputType,
   fundingSource: OptionsInputType,
-  methodOfPayment: OptionsInputType
+  methodOfPayment: OptionsInputType & { hasChanged: boolean }
 }
 
 export type SingleInvalidObj = {
@@ -44,6 +44,4 @@ export interface OwnershipStepProps {
   state: Array<SingleOwnerForm>,
   setStepData: Function,
   readOnly?: boolean,
-  fundingSources: Array<MultiOptionsObj>,
-  methodsOfPayment: Array<MultiOptionsObj>
 }

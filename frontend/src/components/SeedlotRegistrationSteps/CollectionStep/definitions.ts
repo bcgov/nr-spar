@@ -23,6 +23,5 @@ export interface CollectionStepProps {
   defaultAgency: MultiOptionsObj,
   defaultCode: string,
   agencyOptions: Array<MultiOptionsObj>,
-  collectionMethods: Array<MultiOptionsObj>,
   readOnly?: boolean,
 }

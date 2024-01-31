@@ -22,10 +22,6 @@ import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
-import getFundingSources from '../../../api-service/fundingSourcesAPI';
-import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
-import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
-import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import { getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
@@ -47,7 +43,6 @@ import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModa
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
-import { getMultiOptList, getCheckboxOptions } from '../../../utils/MultiOptionsUtils';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
@@ -176,39 +171,31 @@ const SeedlotRegistrationForm = () => {
   };
 
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
-    const newData = { ...allStepData };
-    // This check guarantee that every change on the collectors
-    // agency also changes the values on the interim agency, when
-    // necessary, also reflecting the invalid values
-    if (stepName === 'collectionStep'
-      && allStepData.interimStep.useCollectorAgencyInfo.value) {
-      newData.interimStep.agencyName.value = stepData.collectorAgency.value;
+    setAllStepData((prevData) => {
+      const newData = { ...prevData };
+      // This check guarantee that every change on the collectors
+      // agency also changes the values on the interim agency.
+      if (stepName === 'collectionStep'
+        && allStepData.interimStep.useCollectorAgencyInfo.value) {
+        newData.interimStep.agencyName.value = stepData.collectorAgency.value;
 
-      newData.interimStep.locationCode.value = stepData.locationCode.value;
+        newData.interimStep.locationCode.value = stepData.locationCode.value;
 
-      setProgressStatus((prevStatus) => (
-        {
-          ...prevStatus,
-          interim: updateStepStatus('interim')
-        }
-      ));
-    }
-    newData[stepName] = stepData;
-    setAllStepData(newData);
+        setProgressStatus((prevStatus) => (
+          {
+            ...prevStatus,
+            interim: updateStepStatus('interim')
+          }
+        ));
+      }
+      newData[stepName] = stepData;
+      return newData;
+    });
+
     numOfEdit.current += 1;
   };
 
   const contextData = useMemo(() => ({ allStepData, setStepData }), [allStepData, setStepData]);
-
-  const fundingSourcesQuery = useQuery({
-    queryKey: ['funding-sources'],
-    queryFn: getFundingSources
-  });
-
-  const coneCollectionMethodsQuery = useQuery({
-    queryKey: ['cone-collection-methods'],
-    queryFn: getConeCollectionMethod
-  });
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -291,28 +278,9 @@ const SeedlotRegistrationForm = () => {
     }
   }, [forestClientQuery.isFetched]);
 
-  const gameticMethodologyQuery = useQuery({
-    queryKey: ['gametic-methodologies'],
-    queryFn: getGameticMethodology
-  });
-
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
     queryFn: () => getApplicantAgenciesOptions()
-  });
-
-  const methodsOfPaymentQuery = useQuery({
-    queryKey: ['methods-of-payment'],
-    queryFn: getMethodsOfPayment,
-    onSuccess: (dataArr: MultiOptionsObj[]) => {
-      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
-      const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
-      if (!allStepData.ownershipStep[0].methodOfPayment.value.code) {
-        const tempOwnershipData = structuredClone(allStepData.ownershipStep);
-        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
-        setStepData('ownershipStep', tempOwnershipData);
-      }
-    }
   });
 
   const logState = () => {
@@ -521,7 +489,6 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgencyObj}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
-            collectionMethods={getCheckboxOptions(coneCollectionMethodsQuery.data)}
           />
         );
       // Ownership
@@ -532,8 +499,6 @@ const SeedlotRegistrationForm = () => {
             defaultAgency={defaultAgencyObj}
             defaultCode={defaultCode}
             agencyOptions={agencyOptions}
-            fundingSources={getMultiOptList(fundingSourcesQuery.data)}
-            methodsOfPayment={methodsOfPaymentQuery.data ?? []}
             setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
           />
         );
@@ -552,7 +517,6 @@ const SeedlotRegistrationForm = () => {
       case 3:
         return (
           <OrchardStep
-            gameticOptions={getMultiOptList(gameticMethodologyQuery.data, true, false, true, ['isFemaleMethodology', 'isPliSpecies'])}
             seedlotSpecies={seedlotSpecies}
             state={allStepData.orchardStep}
             cleanParentTables={() => cleanParentTables()}
@@ -690,10 +654,6 @@ const SeedlotRegistrationForm = () => {
                   vegCodeQuery.isFetched
                   && seedlotQuery.isFetched
                   && forestClientQuery.isFetched
-                  && fundingSourcesQuery.isFetched
-                  && methodsOfPaymentQuery.isFetched
-                  && gameticMethodologyQuery.isFetched
-                  && coneCollectionMethodsQuery.isFetched
                   && applicantAgencyQuery.isFetched
                   && !submitSeedlot.isLoading
                 )

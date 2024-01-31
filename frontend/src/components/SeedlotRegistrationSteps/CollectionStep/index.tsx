@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   FlexGrid,
   Column,
@@ -8,15 +9,18 @@ import {
   Checkbox,
   DatePickerInput,
   DatePicker,
-  TextArea
+  TextArea,
+  CheckboxSkeleton
 } from '@carbon/react';
 import moment from 'moment';
 import validator from 'validator';
 
+import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
+
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
-
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
 
 import {
@@ -29,13 +33,13 @@ import {
 import { calcVolume, isNumNotInRange } from './utils';
 
 import './styles.scss';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 const CollectionStep = (
   {
     defaultAgency,
     defaultCode,
     agencyOptions,
-    collectionMethods,
     readOnly
   }: CollectionStepProps
 ) => {
@@ -54,6 +58,13 @@ const CollectionStep = (
     clonedState.locationCode = locationCode;
     setStepData('collectionStep', clonedState);
   };
+
+  const coneCollectionMethodsQuery = useQuery({
+    queryKey: ['cone-collection-methods'],
+    queryFn: getConeCollectionMethod,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
 
   const handleDateChange = (isStartDate: boolean, value: string) => {
     const clonedState = structuredClone(state);
@@ -267,17 +278,25 @@ const CollectionStep = (
             id={state.selectedCollectionCodes.id}
           >
             {
-              collectionMethods.map((method) => (
-                <Checkbox
-                  key={method.code}
-                  id={method.label}
-                  name={method.label}
-                  labelText={method.description}
-                  readOnly={readOnly}
-                  checked={state.selectedCollectionCodes.value.includes(method.code)}
-                  onChange={() => handleCollectionMethods(method.code)}
-                />
-              ))
+              coneCollectionMethodsQuery.isFetching
+                ? (
+                  <>
+                    <CheckboxSkeleton />
+                    <CheckboxSkeleton />
+                    <CheckboxSkeleton />
+                  </>
+                )
+                : ((coneCollectionMethodsQuery.data) as MultiOptionsObj[]).map((method) => (
+                  <Checkbox
+                    key={method.code}
+                    id={method.label}
+                    name={method.label}
+                    labelText={method.description}
+                    readOnly={readOnly}
+                    checked={state.selectedCollectionCodes.value.includes(method.code)}
+                    onChange={() => handleCollectionMethods(method.code)}
+                  />
+                ))
             }
           </CheckboxGroup>
         </Column>
