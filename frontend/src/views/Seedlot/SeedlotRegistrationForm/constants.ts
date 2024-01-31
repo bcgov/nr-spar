@@ -36,6 +36,39 @@ export const initialProgressConfig: ProgressIndicatorConfig = {
   }
 };
 
+export const completeProgressConfig: ProgressIndicatorConfig = {
+  collection: {
+    isComplete: true,
+    isCurrent: false,
+    isInvalid: false
+  },
+  ownership: {
+    isComplete: true,
+    isCurrent: false,
+    isInvalid: false
+  },
+  interim: {
+    isComplete: true,
+    isCurrent: false,
+    isInvalid: false
+  },
+  orchard: {
+    isComplete: true,
+    isCurrent: false,
+    isInvalid: false
+  },
+  parent: {
+    isComplete: true,
+    isCurrent: false,
+    isInvalid: false
+  },
+  extraction: {
+    isComplete: true,
+    isCurrent: false,
+    isInvalid: false
+  }
+};
+
 export const stepMap: StepMap = {
   0: 'collection',
   1: 'ownership',

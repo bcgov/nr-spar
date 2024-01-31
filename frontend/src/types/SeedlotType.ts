@@ -14,7 +14,7 @@ type GeneticClass = {
   geneticClassCode: string
 }
 
-type SeedlotStatusCode = 'APP' | 'CAN' | 'COM' | 'EXP' | 'INC' | 'PND' | 'SUB';
+export type SeedlotStatusCode = 'APP' | 'CAN' | 'COM' | 'EXP' | 'INC' | 'PND' | 'SUB';
 
 type SeedlotStatus = {
   description: keyof typeof StatusColourMap,
