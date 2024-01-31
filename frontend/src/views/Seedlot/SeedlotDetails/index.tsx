@@ -189,7 +189,8 @@ const SeedlotDetails = () => {
                   }
                   <FormProgress
                     seedlotNumber={seedlotNumber}
-                    isFetching={seedlotQuery.isFetching}
+                    seedlotStatusCode={seedlotQuery.data?.seedlotStatus.seedlotStatusCode}
+                    getSeedlotQueryStatus={seedlotQuery.status}
                   />
                   <ApplicantInformation
                     seedlotNumber={seedlotNumber}

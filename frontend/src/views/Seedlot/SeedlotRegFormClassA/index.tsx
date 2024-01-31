@@ -22,6 +22,10 @@ import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
+import getFundingSources from '../../../api-service/fundingSourcesAPI';
+import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
+import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
+import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import { getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
@@ -89,9 +93,9 @@ import {
   MAX_EDIT_BEFORE_SAVE,
   initialProgressConfig, smartSaveText, stepMap, tscAgencyObj, tscLocationCode
 } from './constants';
-import ClassAContext from './ClassAContext';
 
 import './styles.scss';
+import ClassAContext from './ClassAContext';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -127,75 +131,15 @@ const SeedlotRegistrationForm = () => {
     extractionStorageStep: initExtractionStorageState(tscAgencyObj, tscLocationCode)
   }));
 
-  const updateStepStatus = (stepName: keyof ProgressIndicatorConfig): ProgressStepStatus => {
-    const clonedStepStatus = structuredClone(progressStatus[stepName]);
-    if (stepName === 'collection') {
-      clonedStepStatus.isInvalid = validateCollectionStep(allStepData.collectionStep);
-      if (!clonedStepStatus.isInvalid) {
-        clonedStepStatus.isComplete = verifyCollectionStepCompleteness(allStepData.collectionStep);
-      }
-    }
-    if (stepName === 'ownership') {
-      clonedStepStatus.isInvalid = validateOwnershipStep(allStepData.ownershipStep);
-      if (!clonedStepStatus.isInvalid) {
-        clonedStepStatus.isComplete = verifyOwnershipStepCompleteness(allStepData.ownershipStep);
-      }
-    }
-    if (stepName === 'interim') {
-      clonedStepStatus.isInvalid = validateInterimStep(allStepData.interimStep);
-      if (!clonedStepStatus.isInvalid) {
-        clonedStepStatus.isComplete = verifyInterimStepCompleteness(allStepData.interimStep);
-      }
-    }
-    if (stepName === 'orchard') {
-      clonedStepStatus.isInvalid = validateOrchardStep(allStepData.orchardStep);
-      if (!clonedStepStatus.isInvalid) {
-        clonedStepStatus.isComplete = verifyOrchardStepCompleteness(allStepData.orchardStep);
-      }
-    }
-    if (stepName === 'parent') {
-      clonedStepStatus.isInvalid = validateParentStep(allStepData.parentTreeStep);
-      if (!clonedStepStatus.isInvalid) {
-        clonedStepStatus.isComplete = verifyParentStepCompleteness(allStepData.parentTreeStep);
-      }
-    }
-    if (stepName === 'extraction') {
-      clonedStepStatus.isInvalid = validateExtractionStep(allStepData.extractionStorageStep);
-      if (!clonedStepStatus.isInvalid) {
-        clonedStepStatus
-          .isComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
-      }
-    }
+  const fundingSourcesQuery = useQuery({
+    queryKey: ['funding-sources'],
+    queryFn: getFundingSources
+  });
 
-    return clonedStepStatus;
-  };
-
-  const setStepData = (stepName: keyof AllStepData, stepData: any) => {
-    setAllStepData((prevData) => {
-      const newData = { ...prevData };
-      // This check guarantee that every change on the collectors
-      // agency also changes the values on the interim agency.
-      if (stepName === 'collectionStep'
-        && allStepData.interimStep.useCollectorAgencyInfo.value) {
-        newData.interimStep.agencyName.value = stepData.collectorAgency.value;
-
-        newData.interimStep.locationCode.value = stepData.locationCode.value;
-
-        setProgressStatus((prevStatus) => (
-          {
-            ...prevStatus,
-            interim: updateStepStatus('interim')
-          }
-        ));
-      }
-      newData[stepName] = stepData;
-      return newData;
-    });
-
-    numOfEdit.current += 1;
-  };
-
-  const contextData = useMemo(() => ({ allStepData, setStepData }), [allStepData, setStepData]);
+  const coneCollectionMethodsQuery = useQuery({
+    queryKey: ['cone-collection-methods'],
+    queryFn: getConeCollectionMethod
+  });
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -278,9 +222,98 @@ const SeedlotRegistrationForm = () => {
     }
   }, [forestClientQuery.isFetched]);
 
+  const gameticMethodologyQuery = useQuery({
+    queryKey: ['gametic-methodologies'],
+    queryFn: getGameticMethodology
+  });
+
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
     queryFn: () => getApplicantAgenciesOptions()
+  });
+
+  const updateStepStatus = (
+    stepName: keyof ProgressIndicatorConfig,
+    stepStatusObj: ProgressStepStatus
+  ): ProgressStepStatus => {
+    const stepStatus = stepStatusObj;
+    if (stepName === 'collection') {
+      stepStatus.isInvalid = validateCollectionStep(allStepData.collectionStep);
+      if (!stepStatus.isInvalid) {
+        stepStatus.isComplete = verifyCollectionStepCompleteness(allStepData.collectionStep);
+      }
+    }
+    if (stepName === 'ownership') {
+      stepStatus.isInvalid = validateOwnershipStep(allStepData.ownershipStep);
+      if (!stepStatus.isInvalid) {
+        stepStatus.isComplete = verifyOwnershipStepCompleteness(allStepData.ownershipStep);
+      }
+    }
+    if (stepName === 'interim') {
+      stepStatus.isInvalid = validateInterimStep(allStepData.interimStep);
+      if (!stepStatus.isInvalid) {
+        stepStatus.isComplete = verifyInterimStepCompleteness(allStepData.interimStep);
+      }
+    }
+    if (stepName === 'orchard') {
+      stepStatus.isInvalid = validateOrchardStep(allStepData.orchardStep);
+      if (!stepStatus.isInvalid) {
+        stepStatus.isComplete = verifyOrchardStepCompleteness(allStepData.orchardStep);
+      }
+    }
+    if (stepName === 'parent') {
+      stepStatus.isInvalid = validateParentStep(allStepData.parentTreeStep);
+      if (!stepStatus.isInvalid) {
+        stepStatus.isComplete = verifyParentStepCompleteness(allStepData.parentTreeStep);
+      }
+    }
+    if (stepName === 'extraction') {
+      stepStatus.isInvalid = validateExtractionStep(allStepData.extractionStorageStep);
+      if (!stepStatus.isInvalid) {
+        stepStatus.isComplete = verifyExtractionStepCompleteness(allStepData.extractionStorageStep);
+      }
+    }
+
+    return stepStatus;
+  };
+
+  const setStepData = (stepName: keyof AllStepData, stepData: any) => {
+    const newData = { ...allStepData };
+    // This check guarantee that every change on the collectors
+    // agency also changes the values on the interim agency, when
+    // necessary, also reflecting the invalid values
+    if (stepName === 'collectionStep'
+      && allStepData.interimStep.useCollectorAgencyInfo.value) {
+      newData.interimStep.agencyName.value = stepData.collectorAgency.value;
+
+      newData.interimStep.locationCode.value = stepData.locationCode.value;
+
+      setProgressStatus((prevStatus) => (
+        {
+          ...prevStatus,
+          interim: updateStepStatus('interim', prevStatus.interim)
+        }
+      ));
+    }
+    newData[stepName] = stepData;
+    setAllStepData(newData);
+    numOfEdit.current += 1;
+  };
+
+  const contextData = useMemo(() => ({ allStepData, setStepData }), [allStepData, setStepData]);
+
+  const methodsOfPaymentQuery = useQuery({
+    queryKey: ['methods-of-payment'],
+    queryFn: getMethodsOfPayment,
+    onSuccess: (dataArr: MultiOptionsObj[]) => {
+      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
+      const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
+      if (!allStepData.ownershipStep[0].methodOfPayment.value.code) {
+        const tempOwnershipData = structuredClone(allStepData.ownershipStep);
+        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
+        setStepData('ownershipStep', tempOwnershipData);
+      }
+    }
   });
 
   const logState = () => {
@@ -298,41 +331,40 @@ const SeedlotRegistrationForm = () => {
 
     // Set invalid or complete status for Collection Step
     if (currentStepName !== 'collection' && prevStepName === 'collection') {
-      clonedStatus.collection = updateStepStatus('collection');
+      clonedStatus.collection = updateStepStatus('collection', clonedStatus.collection);
     }
 
     // Set invalid or complete status for Ownership Step
     if (currentStepName !== 'ownership' && prevStepName === 'ownership') {
-      clonedStatus.ownership = updateStepStatus('ownership');
+      clonedStatus.ownership = updateStepStatus('ownership', clonedStatus.ownership);
     }
 
     // Set invalid or complete status for Interim Step
     if (currentStepName !== 'interim' && prevStepName === 'interim') {
-      clonedStatus.interim = updateStepStatus('interim');
+      clonedStatus.interim = updateStepStatus('interim', clonedStatus.interim);
     }
 
     // Set invalid or complete status for Orchard Step
     if (currentStepName !== 'orchard' && prevStepName === 'orchard') {
-      clonedStatus.orchard = updateStepStatus('orchard');
+      clonedStatus.orchard = updateStepStatus('orchard', clonedStatus.orchard);
     }
 
     // Set invalid or complete status for Parent Tree Step
     if (currentStepName !== 'parent' && prevStepName === 'parent') {
-      clonedStatus.parent = updateStepStatus('parent');
+      clonedStatus.parent = updateStepStatus('parent', clonedStatus.parent);
     }
 
     // Set invalid or complete status for Extraction and Storage Step
     if (currentStepName !== 'extraction' && prevStepName === 'extraction') {
-      clonedStatus.extraction = updateStepStatus('extraction');
+      clonedStatus.extraction = updateStepStatus('extraction', clonedStatus.extraction);
     }
 
     // Set the current step's current val to true, and everything else false
-    clonedStatus[currentStepName].isCurrent = true;
     const stepNames = Object.keys(clonedStatus) as Array<keyof ProgressIndicatorConfig>;
-    stepNames.filter((stepName: keyof ProgressIndicatorConfig) => stepName !== currentStepName)
-      .forEach((nonCurrentStepName) => {
-        clonedStatus[nonCurrentStepName].isCurrent = false;
-      });
+    stepNames.forEach((nonCurrentStepName) => {
+      clonedStatus[nonCurrentStepName].isCurrent = false;
+    });
+    clonedStatus[currentStepName].isCurrent = true;
 
     setProgressStatus(clonedStatus);
   };
@@ -386,31 +418,49 @@ const SeedlotRegistrationForm = () => {
   });
 
   useEffect(() => {
-    const isExtractionStepComplete = verifyExtractionStepCompleteness(
-      allStepData.extractionStorageStep
+    const completionStatus = checkAllStepsCompletion(
+      progressStatus,
+      verifyExtractionStepCompleteness(allStepData.extractionStorageStep)
     );
-    const completionStatus = checkAllStepsCompletion(progressStatus, isExtractionStepComplete);
     setAllStepCompleted(completionStatus);
   }, [progressStatus, allStepData.extractionStorageStep, formStep]);
 
+  /**
+   * Update each step status EXCEPT for step 6.
+   */
   const updateAllStepStatus = (): ProgressIndicatorConfig => {
     const clonedStatus = structuredClone(progressStatus);
     const stepNames = Object.keys(clonedStatus) as (keyof ProgressIndicatorConfig)[];
     stepNames.forEach((stepName) => {
-      clonedStatus[stepName] = updateStepStatus(stepName);
+      // Only update the status of the extraction if it is the current step
+      if (stepName !== 'extraction'
+        || (stepName === 'extraction' && clonedStatus.extraction.isCurrent)
+      ) {
+        clonedStatus[stepName] = updateStepStatus(stepName, clonedStatus[stepName]);
+      }
     });
     setProgressStatus(clonedStatus);
     return clonedStatus;
   };
 
   const saveProgress = useMutation({
-    mutationFn: () => putAClassSeedlotProgress(
-      seedlotNumber ?? '',
-      {
-        allStepData,
-        progressStatus: updateAllStepStatus()
-      }
-    ),
+    mutationFn: () => {
+      const updatedProgressStatus = structuredClone(updateAllStepStatus());
+      const keys = Object.keys(updatedProgressStatus) as (keyof ProgressIndicatorConfig)[];
+
+      // Set each status' isCurrent to false, otherwise the property will take priority when true.
+      keys.forEach((key) => {
+        updatedProgressStatus[key].isCurrent = false;
+      });
+
+      return putAClassSeedlotProgress(
+        seedlotNumber ?? '',
+        {
+          allStepData,
+          progressStatus: updatedProgressStatus
+        }
+      );
+    },
     onSuccess: () => {
       numOfEdit.current = 0;
       setLastSaveTimestamp(DateTime.now().toISO());
@@ -618,9 +668,8 @@ const SeedlotRegistrationForm = () => {
                         getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError)).title
                       }
                       subtitle={
-                        getSeedlotSubmitErrDescription(
-                          (submitSeedlot.error as AxiosError)
-                        ).description
+                        getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError))
+                          .description
                       }
                     />
                   </Column>
@@ -654,6 +703,10 @@ const SeedlotRegistrationForm = () => {
                   vegCodeQuery.isFetched
                   && seedlotQuery.isFetched
                   && forestClientQuery.isFetched
+                  && fundingSourcesQuery.isFetched
+                  && methodsOfPaymentQuery.isFetched
+                  && gameticMethodologyQuery.isFetched
+                  && coneCollectionMethodsQuery.isFetched
                   && applicantAgencyQuery.isFetched
                   && !submitSeedlot.isLoading
                 )
@@ -687,7 +740,6 @@ const SeedlotRegistrationForm = () => {
                         Cancel
                       </Button>
                     )
-
                 }
               </Column>
               <Column sm={4} md={3} lg={3} xlg={4}>

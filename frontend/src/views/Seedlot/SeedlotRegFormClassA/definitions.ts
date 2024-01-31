@@ -4,6 +4,7 @@ import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/Ow
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import { MutationStatusType } from '../../../types/QueryStatusType';
 
 export type ParentTreeStepDataObj = {
   tableRowData: RowDataDictType, // able row data used in Cone & Pollen and the SMP Success tabs
@@ -43,7 +44,7 @@ export type StepMap = {
 export type SaveTooltipProps = {
   saveStatus: string | null;
   saveDescription: string;
-  mutationStatus: 'idle' | 'loading' | 'success' | 'error';
+  mutationStatus: MutationStatusType;
   lastSaveTimestamp: string;
   handleSaveBtn: Function;
 }
