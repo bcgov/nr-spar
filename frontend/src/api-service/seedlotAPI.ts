@@ -55,3 +55,8 @@ export const putAClassSeedlotProgress = (
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-progress`;
   return api.put(url, payload);
 };
+
+export const getAClassSeedlotProgressStatus = (seedlotNumber: string) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-progress/status`;
+  return api.get(url);
+};
