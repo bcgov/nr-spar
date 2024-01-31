@@ -57,9 +57,9 @@ const FormProgress = (
 
   useEffect(() => {
     if (formProgressStatusQuery.status === 'success') {
-      const retreivedProgress = formProgressStatusQuery.data
+      const retrievedProgress = formProgressStatusQuery.data
         .data as unknown as ProgressIndicatorConfig;
-      setProgressStatus(retreivedProgress);
+      setProgressStatus(retrievedProgress);
     }
 
     if (formProgressStatusQuery.status === 'error') {
