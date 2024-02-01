@@ -22,7 +22,9 @@ import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
-import { getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
+import {
+  getAClassSeedlotDraft, getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress
+} from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
@@ -34,7 +36,7 @@ import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
+import { SeedlotAClassSubmitType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
@@ -191,12 +193,6 @@ const SeedlotRegistrationForm = () => {
   });
 
   const getDefaultLocationCode = (): string => (seedlotQuery.data?.applicantLocationCode ?? '');
-
-  useEffect(() => {
-    if (forestClientQuery.isFetched) {
-      setDefaultAgencyAndCode(getDefaultAgencyObj(), getDefaultLocationCode());
-    }
-  }, [forestClientQuery.isFetched]);
 
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
@@ -497,6 +493,40 @@ const SeedlotRegistrationForm = () => {
     return () => clearInterval(interval);
   }, [numOfEdit.current]);
 
+  const getFormDraftQuery = useQuery({
+    queryKey: ['seedlots', 'a-class-form-progress', seedlotNumber ?? 'unknown'],
+    queryFn: () => getAClassSeedlotDraft(seedlotNumber ?? ''),
+    enabled: seedlotNumber !== undefined && seedlotNumber.length > 0,
+    refetchOnMount: true,
+    select: (data) => data.data as SeedlotProgressPayloadType,
+    retry: 1
+  });
+
+  useEffect(() => {
+    if (getFormDraftQuery.status === 'success') {
+      setAllStepData(getFormDraftQuery.data.allStepData);
+      const savedStatus = getFormDraftQuery.data.progressStatus;
+      const currStepName = stepMap[formStep];
+      savedStatus[currStepName].isCurrent = true;
+
+      setProgressStatus(getFormDraftQuery.data.progressStatus);
+    }
+    if (getFormDraftQuery.status === 'error') {
+      const error = getFormDraftQuery.error as AxiosError;
+      if (error.response?.status !== 404) {
+        // eslint-disable-next-line no-alert
+        alert(`Error retrieving form draft! ${error.message}`);
+        navigate(`/seedlots/details/${seedlotNumber}`);
+      }
+    }
+  }, [getFormDraftQuery.status, getFormDraftQuery.isFetchedAfterMount]);
+
+  useEffect(() => {
+    if (forestClientQuery.isFetched && getFormDraftQuery.status === 'error') {
+      setDefaultAgencyAndCode(getDefaultAgencyObj(), getDefaultLocationCode());
+    }
+  }, [forestClientQuery.isFetched, getFormDraftQuery.status]);
+
   return (
     <ClassAContext.Provider value={contextData}>
       <div className="seedlot-registration-page">
@@ -596,18 +626,19 @@ const SeedlotRegistrationForm = () => {
             <Column className="seedlot-registration-row">
               {
                 (
-                  vegCodeQuery.isFetched
-                  && seedlotQuery.isFetched
-                  && forestClientQuery.isFetched
-                  && applicantAgencyQuery.isFetched
-                  && !submitSeedlot.isLoading
+                  vegCodeQuery.isFetching
+                  || seedlotQuery.isFetching
+                  || forestClientQuery.isFetching
+                  || applicantAgencyQuery.isFetching
+                  || getFormDraftQuery.isFetching
+                  || submitSeedlot.isLoading
                 )
-                  ? (
+                  ? <Loading />
+                  : (
                     <RegForm
                       cleanParentTables={cleanParentTables}
                     />
                   )
-                  : <Loading />
               }
             </Column>
           </Row>
