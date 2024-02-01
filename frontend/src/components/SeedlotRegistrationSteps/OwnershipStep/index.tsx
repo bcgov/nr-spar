@@ -39,13 +39,16 @@ import './styles.scss';
 */
 const OwnershipStep = (
   {
-    defaultCode,
-    defaultAgency,
-    agencyOptions,
     readOnly
   }: OwnershipStepProps
 ) => {
-  const { allStepData: { ownershipStep: state }, setStepData } = useContext(ClassAContext);
+  const {
+    allStepData: { ownershipStep: state },
+    setStepData,
+    defaultAgencyObj: defaultAgency,
+    defaultCode,
+    agencyOptions
+  } = useContext(ClassAContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import {
@@ -26,10 +26,10 @@ import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import InputErrorText from '../../InputErrorText';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
-import { RowDataDictType } from '../ParentTreeStep/definitions';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import Subtitle from '../../Subtitle';
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { initialStagedOrchard, MAX_ORCHARDS, orchardStepText } from './constants';
@@ -44,22 +44,21 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  seedlotSpecies: MultiOptionsObj
-  state: OrchardForm
-  setStepData: Function,
   cleanParentTables: Function,
-  tableRowData: RowDataDictType
   readOnly?: boolean
 }
 
 const OrchardStep = ({
-  seedlotSpecies,
-  state,
-  setStepData,
   cleanParentTables,
-  tableRowData,
   readOnly
 }: OrchardStepProps) => {
+  const {
+    allStepData: { orchardStep: state },
+    allStepData: { parentTreeStep: { tableRowData } },
+    setStepData,
+    seedlotSpecies
+  } = useContext(ClassAContext);
+
   const [isPliSpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalType, setModalType] = useState<keyof orchardModalOptions>('change');
@@ -106,7 +105,7 @@ const OrchardStep = ({
     const selectedItem = event.selectedItem ?? EmptyMultiOptObj;
     const gameticType: keyof OrchardForm = isFemale ? 'femaleGametic' : 'maleGametic';
     clonedState[gameticType].value = selectedItem;
-    setStepData(clonedState);
+    setStepData('orchardStep', clonedState);
   };
 
   const setBooleanValue = (
@@ -117,7 +116,7 @@ const OrchardStep = ({
   ) => {
     const clonedState = structuredClone(state);
     clonedState[field].value = checked;
-    setStepData(clonedState);
+    setStepData('orchardStep', clonedState);
   };
 
   const setAndValidateBreedPerc = (value: string, setOnly: boolean) => {
@@ -126,7 +125,7 @@ const OrchardStep = ({
     if (!setOnly) {
       clonedState.breedingPercentage.isInvalid = !validator.isInt(value, { min: 0, max: 100 });
     }
-    setStepData(clonedState);
+    setStepData('orchardStep', clonedState);
   };
 
   const addOrchardObj = () => {
@@ -139,10 +138,13 @@ const OrchardStep = ({
         isInvalid: false
       };
       orchards.push(newOrchard);
-      setStepData({
-        ...state,
-        orchards
-      });
+      setStepData(
+        'orchardStep',
+        {
+          ...state,
+          orchards
+        }
+      );
     }
   };
 
@@ -150,10 +152,13 @@ const OrchardStep = ({
     const orchards = structuredClone(state.orchards);
     const numOfOrchard = orchards.length;
     const newOrchards = orchards.filter((orchard) => orchard.inputId !== (numOfOrchard - 1));
-    setStepData({
-      ...state,
-      orchards: newOrchards
-    });
+    setStepData(
+      'orchardStep',
+      {
+        ...state,
+        orchards: newOrchards
+      }
+    );
   };
 
   const setOrchard = (inputId: number, selectedItem: MultiOptionsObj | null) => {
@@ -161,10 +166,13 @@ const OrchardStep = ({
     const selectedOrchardIndex = orchards.findIndex((orchard) => orchard.inputId === inputId);
     if (selectedOrchardIndex > -1) {
       orchards[selectedOrchardIndex].selectedItem = selectedItem;
-      setStepData({
-        ...state,
-        orchards
-      });
+      setStepData(
+        'orchardStep',
+        {
+          ...state,
+          orchards
+        }
+      );
     }
   };
 

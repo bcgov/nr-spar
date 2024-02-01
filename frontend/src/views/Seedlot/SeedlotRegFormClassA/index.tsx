@@ -22,10 +22,6 @@ import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
-import getFundingSources from '../../../api-service/fundingSourcesAPI';
-import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
-import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
-import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import { getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
@@ -36,18 +32,7 @@ import {
 
 import PageTitle from '../../../components/PageTitle';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
-import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
-import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
-import InterimStorage from '../../../components/SeedlotRegistrationSteps/InterimStep';
-import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
-import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
-import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
-
-import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
-import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
-import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
@@ -96,6 +81,7 @@ import {
 
 import './styles.scss';
 import ClassAContext from './ClassAContext';
+import RegForm from './RegForm';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
@@ -130,16 +116,6 @@ const SeedlotRegistrationForm = () => {
     parentTreeStep: initParentTreeState(),
     extractionStorageStep: initExtractionStorageState(tscAgencyObj, tscLocationCode)
   }));
-
-  const fundingSourcesQuery = useQuery({
-    queryKey: ['funding-sources'],
-    queryFn: getFundingSources
-  });
-
-  const coneCollectionMethodsQuery = useQuery({
-    queryKey: ['cone-collection-methods'],
-    queryFn: getConeCollectionMethod
-  });
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -222,14 +198,9 @@ const SeedlotRegistrationForm = () => {
     }
   }, [forestClientQuery.isFetched]);
 
-  const gameticMethodologyQuery = useQuery({
-    queryKey: ['gametic-methodologies'],
-    queryFn: getGameticMethodology
-  });
-
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
-    queryFn: () => getApplicantAgenciesOptions()
+    queryFn: getApplicantAgenciesOptions
   });
 
   const updateStepStatus = (
@@ -300,22 +271,6 @@ const SeedlotRegistrationForm = () => {
     numOfEdit.current += 1;
   };
 
-  const contextData = useMemo(() => ({ allStepData, setStepData }), [allStepData, setStepData]);
-
-  const methodsOfPaymentQuery = useQuery({
-    queryKey: ['methods-of-payment'],
-    queryFn: getMethodsOfPayment,
-    onSuccess: (dataArr: MultiOptionsObj[]) => {
-      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
-      const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
-      if (!allStepData.ownershipStep[0].methodOfPayment.value.code) {
-        const tempOwnershipData = structuredClone(allStepData.ownershipStep);
-        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
-        setStepData('ownershipStep', tempOwnershipData);
-      }
-    }
-  });
-
   const logState = () => {
     // eslint-disable-next-line no-console
     console.log(allStepData);
@@ -377,6 +332,28 @@ const SeedlotRegistrationForm = () => {
     window.history.replaceState(null, '', `?step=${newStep + 1}`);
     setFormStep(newStep);
   };
+
+  const contextData = useMemo(
+    () => (
+      {
+        allStepData,
+        setStepData,
+        seedlotSpecies: getSpeciesOptionByCode(
+          seedlotQuery.data?.vegetationCode,
+          vegCodeQuery.data
+        ),
+        formStep,
+        setStep,
+        defaultAgencyObj: getDefaultAgencyObj(),
+        defaultCode: getDefaultLocationCode(),
+        agencyOptions: applicantAgencyQuery.data ?? []
+      }),
+    [
+      allStepData, setStepData, seedlotQuery.status,
+      vegCodeQuery.status, formStep, forestClientQuery.status,
+      applicantAgencyQuery.status
+    ]
+  );
 
   const cleanParentTables = () => {
     const clonedState = { ...allStepData };
@@ -520,87 +497,6 @@ const SeedlotRegistrationForm = () => {
     return () => clearInterval(interval);
   }, [numOfEdit.current]);
 
-  const renderStep = () => {
-    const defaultAgencyObj = getDefaultAgencyObj();
-    const defaultCode = getDefaultLocationCode();
-
-    const agencyOptions = applicantAgencyQuery.data ?? [];
-
-    const seedlotSpecies = getSpeciesOptionByCode(
-      seedlotQuery.data?.vegetationCode,
-      vegCodeQuery.data
-    );
-
-    switch (formStep) {
-      // Collection
-      case 0:
-        return (
-          <CollectionStep
-            defaultAgency={defaultAgencyObj}
-            defaultCode={defaultCode}
-            agencyOptions={agencyOptions}
-          />
-        );
-      // Ownership
-      case 1:
-        return (
-          <OwnershipStep
-            state={allStepData.ownershipStep}
-            defaultAgency={defaultAgencyObj}
-            defaultCode={defaultCode}
-            agencyOptions={agencyOptions}
-            setStepData={(data: Array<SingleOwnerForm>) => setStepData('ownershipStep', data)}
-          />
-        );
-      // Interim Storage
-      case 2:
-        return (
-          <InterimStorage
-            state={allStepData.interimStep}
-            collectorAgency={allStepData.collectionStep.collectorAgency}
-            collectorCode={allStepData.collectionStep.locationCode}
-            agencyOptions={agencyOptions}
-            setStepData={(data: InterimForm) => setStepData('interimStep', data)}
-          />
-        );
-      // Orchard
-      case 3:
-        return (
-          <OrchardStep
-            seedlotSpecies={seedlotSpecies}
-            state={allStepData.orchardStep}
-            cleanParentTables={() => cleanParentTables()}
-            setStepData={(data: OrchardForm) => setStepData('orchardStep', data)}
-            tableRowData={allStepData.parentTreeStep.tableRowData}
-          />
-        );
-      // Parent Tree and SMP
-      case 4:
-        return (
-          <ParentTreeStep
-            seedlotSpecies={seedlotSpecies}
-            state={allStepData.parentTreeStep}
-            orchards={allStepData.orchardStep.orchards}
-            setStep={setStep}
-            setStepData={(data: any) => setStepData('parentTreeStep', data)}
-          />
-        );
-      // Extraction and Storage
-      case 5:
-        return (
-          <ExtractionAndStorage
-            state={allStepData.extractionStorageStep}
-            defaultAgency={tscAgencyObj}
-            defaultCode={tscLocationCode}
-            agencyOptions={agencyOptions}
-            setStepData={(data: ExtractionStorageForm) => setStepData('extractionStorageStep', data)}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <ClassAContext.Provider value={contextData}>
       <div className="seedlot-registration-page">
@@ -703,14 +599,14 @@ const SeedlotRegistrationForm = () => {
                   vegCodeQuery.isFetched
                   && seedlotQuery.isFetched
                   && forestClientQuery.isFetched
-                  && fundingSourcesQuery.isFetched
-                  && methodsOfPaymentQuery.isFetched
-                  && gameticMethodologyQuery.isFetched
-                  && coneCollectionMethodsQuery.isFetched
                   && applicantAgencyQuery.isFetched
                   && !submitSeedlot.isLoading
                 )
-                  ? renderStep()
+                  ? (
+                    <RegForm
+                      cleanParentTables={cleanParentTables}
+                    />
+                  )
                   : <Loading />
               }
             </Column>

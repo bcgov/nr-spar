@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import moment from 'moment';
 
 import {
@@ -12,9 +12,9 @@ import {
 
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
-
-import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 import {
@@ -27,24 +27,24 @@ import {
 import './styles.scss';
 
 interface ExtractionAndStorageProps {
-  state: ExtractionStorageForm,
-  setStepData: Function,
-  defaultAgency: MultiOptionsObj,
-  defaultCode: string,
-  agencyOptions: Array<MultiOptionsObj>,
-  readOnly?: boolean
+  readOnly?: boolean,
+  defaultAgency: MultiOptionsObj
+  defaultCode: string
 }
 
 const ExtractionAndStorage = (
   {
-    state,
-    setStepData,
     defaultAgency,
     defaultCode,
-    agencyOptions,
     readOnly
   }: ExtractionAndStorageProps
 ) => {
+  const {
+    allStepData: { extractionStorageStep: state },
+    setStepData,
+    agencyOptions
+  } = useContext(ClassAContext);
+
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
 
@@ -59,7 +59,7 @@ const ExtractionAndStorage = (
     clonedState[extractionOrStorage].agency = agency;
     clonedState[extractionOrStorage].locationCode = locationCode;
 
-    setStepData(clonedState);
+    setStepData('extractionStorageStep', clonedState);
   };
 
   // This function validates changes on both start and end dates
@@ -90,7 +90,7 @@ const ExtractionAndStorage = (
     const isInvalid = validateStorageDates(clonedState, extractionOrStorage);
     clonedState[extractionOrStorage].startDate.isInvalid = isInvalid;
     clonedState[extractionOrStorage].endDate.isInvalid = isInvalid;
-    setStepData(clonedState);
+    setStepData('extractionStorageStep', clonedState);
   };
 
   return (

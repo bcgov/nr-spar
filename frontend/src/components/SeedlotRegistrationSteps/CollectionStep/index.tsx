@@ -22,6 +22,7 @@ import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAP
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -33,17 +34,19 @@ import {
 import { calcVolume, isNumNotInRange } from './utils';
 
 import './styles.scss';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 const CollectionStep = (
   {
-    defaultAgency,
-    defaultCode,
-    agencyOptions,
     readOnly
   }: CollectionStepProps
 ) => {
-  const { allStepData: { collectionStep: state }, setStepData } = useContext(ClassAContext);
+  const {
+    allStepData: { collectionStep: state },
+    setStepData,
+    defaultAgencyObj: defaultAgency,
+    defaultCode,
+    agencyOptions
+  } = useContext(ClassAContext);
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
@@ -273,32 +276,36 @@ const CollectionStep = (
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={8} lg={16} xlg={16}>
-          <CheckboxGroup
-            legendText={fieldsConfig.collectionMethodOptionsLabel}
-            id={state.selectedCollectionCodes.id}
-          >
-            {
-              coneCollectionMethodsQuery.isFetching
-                ? (
-                  <>
-                    <CheckboxSkeleton />
-                    <CheckboxSkeleton />
-                    <CheckboxSkeleton />
-                  </>
-                )
-                : ((coneCollectionMethodsQuery.data) as MultiOptionsObj[]).map((method) => (
-                  <Checkbox
-                    key={method.code}
-                    id={method.label}
-                    name={method.label}
-                    labelText={method.description}
-                    readOnly={readOnly}
-                    checked={state.selectedCollectionCodes.value.includes(method.code)}
-                    onChange={() => handleCollectionMethods(method.code)}
-                  />
-                ))
-            }
-          </CheckboxGroup>
+          {
+            coneCollectionMethodsQuery.isFetching
+              ? (
+                <>
+                  <CheckboxSkeleton />
+                  <CheckboxSkeleton />
+                  <CheckboxSkeleton />
+                </>
+              )
+              : (
+                <CheckboxGroup
+                  legendText={fieldsConfig.collectionMethodOptionsLabel}
+                  id={state.selectedCollectionCodes.id}
+                >
+                  {
+                    (coneCollectionMethodsQuery.data as MultiOptionsObj[]).map((method) => (
+                      <Checkbox
+                        key={method.code}
+                        id={`cone-collection-method-checkbox-${method.code}`}
+                        name={method.label}
+                        labelText={method.description}
+                        readOnly={readOnly}
+                        checked={state.selectedCollectionCodes.value.includes(method.code)}
+                        onChange={() => handleCollectionMethods(method.code)}
+                      />
+                    ))
+                  }
+                </CheckboxGroup>
+              )
+          }
         </Column>
       </Row>
       <Row className="collection-step-row">

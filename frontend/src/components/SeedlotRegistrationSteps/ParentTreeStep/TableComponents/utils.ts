@@ -262,7 +262,7 @@ export const handleInput = (
   }
   clonedState.mixTabData = mixTabData;
   clonedState.tableRowData = tableRowData;
-  setStepData(clonedState);
+  setStepData('parentTreeStep', clonedState);
 };
 
 export const deleteMixRow = (
@@ -276,5 +276,5 @@ export const deleteMixRow = (
   delete mixTabData[rowData.rowId];
   const volume = rowData.volume.value === null ? '0' : rowData.volume.value;
   clonedState.mixTabData = calculateSmpRow(volume, rowData, mixTabData, applicableGenWorths);
-  setStepData(clonedState);
+  setStepData('parentTreeStep', clonedState);
 };

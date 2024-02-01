@@ -1,5 +1,4 @@
 import React from 'react';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 export type AccordionItemHeadClick = {
@@ -38,10 +37,5 @@ export type NumStepperVal = {
 }
 
 export interface OwnershipStepProps {
-  defaultAgency: MultiOptionsObj
-  defaultCode: string,
-  agencyOptions: Array<MultiOptionsObj>,
-  state: Array<SingleOwnerForm>,
-  setStepData: Function,
-  readOnly?: boolean,
+  readOnly?: boolean
 }
