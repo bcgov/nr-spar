@@ -45,6 +45,8 @@ import PathConstants from '../../../routes/pathConstants';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
 import SaveTooltipLabel from './SaveTooltip';
+import ClassAContext from './ClassAContext';
+import RegForm from './RegForm';
 import { AllStepData, ProgressIndicatorConfig, ProgressStepStatus } from './definitions';
 import {
   initProgressBar,
@@ -82,8 +84,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import ClassAContext from './ClassAContext';
-import RegForm from './RegForm';
 
 const SeedlotRegistrationForm = () => {
   const navigate = useNavigate();
