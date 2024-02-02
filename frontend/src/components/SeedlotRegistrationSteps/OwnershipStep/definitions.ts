@@ -1,5 +1,4 @@
 import React from 'react';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 export type AccordionItemHeadClick = {
@@ -19,7 +18,7 @@ export type SingleOwnerForm = {
   reservedPerc: StringInputType,
   surplusPerc: StringInputType,
   fundingSource: OptionsInputType,
-  methodOfPayment: OptionsInputType
+  methodOfPayment: OptionsInputType & { hasChanged: boolean }
 }
 
 export type SingleInvalidObj = {
@@ -38,12 +37,5 @@ export type NumStepperVal = {
 }
 
 export interface OwnershipStepProps {
-  defaultAgency: MultiOptionsObj
-  defaultCode: string,
-  agencyOptions: Array<MultiOptionsObj>,
-  state: Array<SingleOwnerForm>,
-  setStepData: Function,
-  readOnly?: boolean,
-  fundingSources: Array<MultiOptionsObj>,
-  methodsOfPayment: Array<MultiOptionsObj>
+  readOnly?: boolean
 }

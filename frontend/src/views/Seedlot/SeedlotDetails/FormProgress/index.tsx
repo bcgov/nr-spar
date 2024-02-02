@@ -9,10 +9,10 @@ import {
 import { Edit } from '@carbon/icons-react';
 
 import { getAClassSeedlotProgressStatus } from '../../../../api-service/seedlotAPI';
-import { ProgressIndicatorConfig } from '../../SeedlotRegistrationForm/definitions';
+import { ProgressIndicatorConfig } from '../../SeedlotRegFormClassA/definitions';
 import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
 import NetworkError from '../../../../components/NetworkError';
-import { completeProgressConfig, initialProgressConfig } from '../../SeedlotRegistrationForm/constants';
+import { completeProgressConfig, initialProgressConfig } from '../../SeedlotRegFormClassA/constants';
 import PathConstants from '../../../../routes/pathConstants';
 import { addParamToPath } from '../../../../utils/PathUtils';
 import { QueryStatusType } from '../../../../types/QueryStatusType';

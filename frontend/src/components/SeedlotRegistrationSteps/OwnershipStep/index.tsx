@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Accordion,
   AccordionItem,
@@ -6,6 +7,13 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
+import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import TitleAccordion from '../../TitleAccordion';
 import SingleOwnerInfo from './SingleOwnerInfo';
 
@@ -31,16 +39,17 @@ import './styles.scss';
 */
 const OwnershipStep = (
   {
-    state,
-    setStepData,
-    defaultCode,
-    defaultAgency,
-    agencyOptions,
-    readOnly,
-    fundingSources,
-    methodsOfPayment
+    readOnly
   }: OwnershipStepProps
 ) => {
+  const {
+    allStepData: { ownershipStep: state },
+    setStepData,
+    defaultAgencyObj: defaultAgency,
+    defaultCode,
+    agencyOptions
+  } = useContext(ClassAContext);
+
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
 
   const refControl = useRef<any>({});
@@ -50,16 +59,7 @@ const OwnershipStep = (
     for (let i = 0; i < updatedArray.length; i += 1) {
       clonedArray[i].ownerPortion.isInvalid = isInvalid;
     }
-    setStepData(clonedArray);
-  };
-
-  const addAnOwner = () => {
-    // Maximum # of ownership can be set
-    if (state.length >= MAX_OWNERS) {
-      return;
-    }
-    const newOwnerArr = insertOwnerForm(state, methodsOfPayment);
-    setStepData(newOwnerArr);
+    setStepData('ownershipStep', clonedArray);
   };
 
   const deleteAnOwner = (id: number) => {
@@ -82,6 +82,40 @@ const OwnershipStep = (
     clonedState[entryId] = updatedEntry;
     const portionsInvalid = !arePortionsValid(clonedState);
     setPortionsValid(clonedState, portionsInvalid);
+  };
+
+  const fundingSourcesQuery = useQuery({
+    queryKey: ['funding-sources'],
+    queryFn: getFundingSources,
+    select: (data) => getMultiOptList(data),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  const methodsOfPaymentQuery = useQuery({
+    queryKey: ['methods-of-payment'],
+    queryFn: getMethodsOfPayment,
+    onSuccess: (dataArr: MultiOptionsObj[]) => {
+      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
+      const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
+      if (!state[0].methodOfPayment.value.code && !state[0].methodOfPayment.hasChanged) {
+        const tempOwnershipData = structuredClone(state);
+        tempOwnershipData[0].methodOfPayment.value = defaultMethod;
+        setStepData('ownershipStep', tempOwnershipData);
+      }
+    },
+    select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  const addAnOwner = () => {
+    // Maximum # of ownership can be set
+    if (state.length >= MAX_OWNERS) {
+      return;
+    }
+    const newOwnerArr = insertOwnerForm(state, methodsOfPaymentQuery.data ?? []);
+    setStepData('ownershipStep', newOwnerArr);
   };
 
   return (
@@ -131,13 +165,13 @@ const OwnershipStep = (
                   agencyOptions={agencyOptions}
                   defaultAgency={defaultAgency}
                   defaultCode={defaultCode}
-                  fundingSources={fundingSources}
-                  methodsOfPayment={methodsOfPayment}
+                  fundingSourcesQuery={fundingSourcesQuery}
+                  methodsOfPaymentQuery={methodsOfPaymentQuery}
                   deleteAnOwner={(id: number) => deleteAnOwner(id)}
                   setState={(singleState: SingleOwnerForm, id: number) => {
                     const arrayClone = structuredClone(state);
                     arrayClone[id] = singleState;
-                    setStepData(arrayClone);
+                    setStepData('ownershipStep', arrayClone);
                   }}
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)

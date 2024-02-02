@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { UseQueryResult } from '@tanstack/react-query';
 import {
   NumberInput,
   FlexGrid,
   Column,
   ComboBox,
   Row,
-  Button
+  Button,
+  DropdownSkeleton
 } from '@carbon/react';
 import { TrashCan } from '@carbon/icons-react';
 import ApplicantAgencyFields from '../../../ApplicantAgencyFields';
@@ -31,16 +33,16 @@ interface SingleOwnerInfoProps {
   agencyOptions: Array<MultiOptionsObj>,
   defaultAgency: MultiOptionsObj,
   defaultCode: string,
-  fundingSources: Array<MultiOptionsObj>,
-  methodsOfPayment: Array<MultiOptionsObj>,
+  fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
+  methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>,
   checkPortionSum: Function,
   setState: Function,
   readOnly?: boolean
 }
 
 const SingleOwnerInfo = ({
-  ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSources,
-  methodsOfPayment, deleteAnOwner, checkPortionSum, setState, readOnly
+  ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSourcesQuery,
+  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState, readOnly
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>(
     inputText.portion.invalidText
@@ -130,6 +132,7 @@ const SingleOwnerInfo = ({
   const handleMethodOfPayment = (selectedOption: MultiOptionsObj) => {
     const clonedState = structuredClone(ownerInfo);
     clonedState.methodOfPayment.value = selectedOption;
+    clonedState.methodOfPayment.hasChanged = true;
     setState(clonedState, ownerInfo.id);
   };
 
@@ -256,42 +259,55 @@ const SingleOwnerInfo = ({
         </Row>
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            <ComboBox
-              className="single-owner-combobox"
-              id={ownerInfo.fundingSource.id}
-              name="fundingSource"
-              items={fundingSources}
-              selectedItem={ownerInfo.fundingSource.value}
-              shouldFilterItem={
-                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-              }
-              placeholder={inputText.funding.placeholder}
-              titleText={inputText.funding.titleText}
-              direction="top"
-              onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
-              invalid={ownerInfo.fundingSource.isInvalid}
-              invalidText={inputText.funding.invalidText}
-              readOnly={readOnly}
-            />
+            {
+              fundingSourcesQuery.isFetching
+                ? <DropdownSkeleton />
+                : (
+                  <ComboBox
+                    className="single-owner-combobox"
+                    id={ownerInfo.fundingSource.id}
+                    name="fundingSource"
+                    items={fundingSourcesQuery.data ?? []}
+                    selectedItem={ownerInfo.fundingSource.value}
+                    shouldFilterItem={
+                      ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                    }
+                    placeholder={inputText.funding.placeholder}
+                    titleText={inputText.funding.titleText}
+                    direction="top"
+                    onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
+                    invalid={ownerInfo.fundingSource.isInvalid}
+                    invalidText={inputText.funding.invalidText}
+                    readOnly={readOnly}
+                  />
+                )
+            }
           </Column>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            <ComboBox
-              className="single-owner-combobox"
-              id={ownerInfo.methodOfPayment.id}
-              name="methodOfPayment"
-              items={methodsOfPayment}
-              selectedItem={ownerInfo.methodOfPayment.value}
-              shouldFilterItem={
-                ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-              }
-              placeholder={inputText.payment.placeholder}
-              titleText={inputText.payment.titleText}
-              direction="top"
-              onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
-              invalid={ownerInfo.methodOfPayment.isInvalid}
-              invalidText={inputText.payment.invalidText}
-              readOnly={readOnly}
-            />
+            {
+              methodsOfPaymentQuery.isFetching
+                ? <DropdownSkeleton />
+                : (
+                  <ComboBox
+                    className="single-owner-combobox"
+                    id={ownerInfo.methodOfPayment.id}
+                    name="methodOfPayment"
+                    items={methodsOfPaymentQuery.data ?? []}
+                    selectedItem={ownerInfo.methodOfPayment.value}
+                    shouldFilterItem={
+                      ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                    }
+                    placeholder={inputText.payment.placeholder}
+                    titleText={inputText.payment.titleText}
+                    direction="top"
+                    onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
+                    invalid={ownerInfo.methodOfPayment.isInvalid}
+                    invalidText={inputText.payment.invalidText}
+                    readOnly={readOnly}
+                  />
+
+                )
+            }
           </Column>
         </Row>
         {(!readOnly) && (

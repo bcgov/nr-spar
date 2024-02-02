@@ -24,7 +24,6 @@ import ComboButton from '../../../components/ComboButton';
 import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
-import FormReview from '../../../components/FormReview';
 
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -198,7 +197,6 @@ const SeedlotDetails = () => {
                     applicant={applicantData}
                     isFetching={forestClientQuery?.isFetching}
                   />
-                  <FormReview />
                 </TabPanel>
               </TabPanels>
             </Tabs>
