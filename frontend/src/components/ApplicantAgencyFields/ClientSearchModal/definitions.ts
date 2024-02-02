@@ -6,7 +6,7 @@ export interface ClientSearchModalProps {
   applySelectedClient: Function;
 }
 
-export type ClientSearchOptions = 'acronym' | 'fullName' | 'number';
+export type ClientSearchOptions = 'acronym' | 'client_name' | 'client_number';
 
 export type ClientSearchDropdown = {
   label: string;

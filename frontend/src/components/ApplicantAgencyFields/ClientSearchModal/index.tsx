@@ -18,7 +18,7 @@ import ClientSearchFields from './ClientSearchFields';
 
 import { searchForestClients } from '../../../api-service/forestClientsAPI';
 import PaginationChangeType from '../../../types/PaginationChangeType';
-import { ForestClientDisplayType } from '../../../types/ForestClientTypes/ForestClientDisplayType';
+import { ForestClientSearchType } from '../../../types/ForestClientTypes/ForestClientSearchType';
 
 import {
   ClientSearchDropdown, ClientSearchModalProps, MutationParams
@@ -38,25 +38,20 @@ const ClientSearchModal = (
 
   const [searchWord, setSearchWord] = useState<string>('');
   const [searchOption, setSearchOption] = useState<ClientSearchDropdown>(clientSearchOptions[0]);
-  const [showTable, setShowTable] = useState<boolean>(false);
-  const [searchResults, setSearchResults] = useState<ForestClientDisplayType[]>([]);
-  const [selectedClient, setSelectedClient] = useState<ForestClientDisplayType>();
+  const [searchResults, setSearchResults] = useState<ForestClientSearchType[]>([]);
+  const [selectedClient, setSelectedClient] = useState<ForestClientSearchType>();
   const [disableApplyButton, setDisableApplyButton] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const searchClientMutation = useMutation({
-    mutationFn: (requestParam: MutationParams) => {
-      setShowTable(true);
-      return searchForestClients(
-        requestParam.word,
-        requestParam.option
-      );
-    },
+    mutationFn: (requestParam: MutationParams) => searchForestClients(
+      requestParam.word,
+      requestParam.option
+    ),
     onSuccess: (res: any) => {
       setSearchResults(res);
     },
     onError: (error: Error) => {
-      setShowTable(false);
       setErrorMessage(error.message);
     }
   });
@@ -107,7 +102,7 @@ const ClientSearchModal = (
           )}
           showPagination={searchResults.length > 10}
           tablePagination={tablePagination()}
-          selectClientFn={(client: ForestClientDisplayType) => {
+          selectClientFn={(client: ForestClientSearchType) => {
             if (disableApplyButton) {
               setDisableApplyButton(false);
             }
@@ -155,7 +150,7 @@ const ClientSearchModal = (
               <Row>
                 <Column sm={4} md={4} lg={16} xlg={16}>
                   {
-                    showTable
+                    searchClientMutation.status === 'success' || searchClientMutation.status === 'loading'
                       ? showResultsTable()
                       : (
                         <EmptySection

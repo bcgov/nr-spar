@@ -6,11 +6,11 @@ export const TableHeaders: Array<HeaderObjType> = [
     label: 'Acronym'
   },
   {
-    id: 'number',
+    id: 'clientNumber',
     label: 'Number'
   },
   {
-    id: 'fullName',
+    id: 'clientName',
     label: 'Full name'
   },
   {
@@ -18,7 +18,7 @@ export const TableHeaders: Array<HeaderObjType> = [
     label: 'Loc. code'
   },
   {
-    id: 'location',
+    id: 'locationName',
     label: 'Location'
   },
   {

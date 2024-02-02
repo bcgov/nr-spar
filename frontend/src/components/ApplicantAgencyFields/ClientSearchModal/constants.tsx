@@ -4,7 +4,7 @@ import { ClientSearchDropdown } from './definitions';
 export const clientSearchOptions: Array<ClientSearchDropdown> = [
   {
     label: 'Full name',
-    option: 'fullName'
+    option: 'client_name'
   },
   {
     label: 'Acronym',
@@ -12,7 +12,7 @@ export const clientSearchOptions: Array<ClientSearchDropdown> = [
   },
   {
     label: 'Number',
-    option: 'number'
+    option: 'client_number'
   }
 ];
 

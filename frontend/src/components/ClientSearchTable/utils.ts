@@ -1,4 +1,4 @@
-import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientDisplayType';
+import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientSearchType';
 
 export const sortByKey = (
   dataToSort: ForestClientDisplayType[],

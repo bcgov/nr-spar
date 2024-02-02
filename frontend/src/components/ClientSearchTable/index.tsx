@@ -11,7 +11,7 @@ import {
 
 import EmptySection from '../EmptySection';
 
-import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientDisplayType';
+import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 
 import { TableHeaders } from './constants';
 import { sortByKey } from './utils';
@@ -28,16 +28,16 @@ const ClientSearchTable = (
     currentSelected
   }: ClientSearchTableProps
 ) => {
-  const [sortThisHeader, setSortThisHeader] = useState<keyof ForestClientDisplayType | null>(null);
+  const [sortThisHeader, setSortThisHeader] = useState<keyof ForestClientSearchType | null>(null);
   const [sortDirection, setSortDirection] = useState('NONE');
-  const [processedData, setProcessedData] = useState<ForestClientDisplayType[]>(clientData);
+  const [processedData, setProcessedData] = useState<ForestClientSearchType[]>(clientData);
 
   // Without this the table will be empty after refresh.
   useEffect(() => {
     setProcessedData(clientData);
   }, [clientData]);
 
-  const handleSort = (headerId: keyof ForestClientDisplayType) => {
+  const handleSort = (headerId: keyof ForestClientSearchType) => {
     let newDirection = 'NONE';
     if (sortThisHeader !== headerId || sortDirection === 'NONE') {
       newDirection = 'ASC';
@@ -52,13 +52,13 @@ const ClientSearchTable = (
     setSortThisHeader(headerId);
   };
 
-  const renderRadioSelect = (client: ForestClientDisplayType) => {
+  const renderRadioSelect = (client: ForestClientSearchType) => {
     if (typeof selectClientFn === 'function') {
       return (
         <TableSelectRow
           radio
-          ariaLabel={`Select client ${client.fullName} with location code ${client.locationCode}`}
-          id={`client-radio-${client.number}-${client.locationCode}`}
+          ariaLabel={`Select client ${client.clientName} with location code ${client.locationCode}`}
+          id={`client-radio-${client.clientNumber}-${client.locationCode}`}
           name="client-radio"
           checked={client === currentSelected}
           onSelect={() => {
@@ -99,8 +99,8 @@ const ClientSearchTable = (
             processedData.length
               ? processedData.map((client) => (
                 <TableRow
-                  id={`client-table-row-${client.number}-${client.locationCode}`}
-                  key={`${client.number}-${client.locationCode}`}
+                  id={`client-table-row-${client.clientNumber}-${client.locationCode}`}
+                  key={`${client.clientNumber}-${client.locationCode}`}
                 >
                   {
                     renderRadioSelect(client)
@@ -108,7 +108,7 @@ const ClientSearchTable = (
                   {
                     TableHeaders.map((header) => (
                       <TableCell
-                        id={`client-table-cell-${client.number}-${client.locationCode}-${header.id}`}
+                        id={`client-table-cell-${client.clientNumber}-${client.locationCode}-${header.id}`}
                         key={header.id}
                       >
                         {
