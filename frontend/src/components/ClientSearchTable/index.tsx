@@ -17,7 +17,7 @@ import PaginationChangeType from '../../types/PaginationChangeType';
 
 import EmptySection from '../EmptySection';
 
-import { TableHeaders } from './constants';
+import { DEFAULT_PAGE_NUM, DEFAULT_PAGE_SIZE, TableHeaders } from './constants';
 import { sortByKey } from './utils';
 import { ClientSearchTableProps, HeaderObjType } from './definitions';
 
@@ -36,8 +36,8 @@ const ClientSearchTable = (
   const [sortDirection, setSortDirection] = useState('NONE');
   const [processedData, setProcessedData] = useState<ForestClientSearchType[]>(clientData);
 
-  const [currPageNumber, setCurrPageNumber] = useState<number>(0);
-  const [currPageSize, setCurrPageSize] = useState<number>(10);
+  const [currPageNumber, setCurrPageNumber] = useState<number>(DEFAULT_PAGE_NUM);
+  const [currPageSize, setCurrPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
   const sliceData = (pageNum: number, pageSize: number) => (
     clientData
@@ -53,8 +53,10 @@ const ClientSearchTable = (
   };
 
   useEffect(() => {
+    setCurrPageNumber(DEFAULT_PAGE_NUM);
+    setCurrPageSize(DEFAULT_PAGE_SIZE);
     setProcessedData(
-      sliceData(currPageNumber, currPageSize)
+      sliceData(DEFAULT_PAGE_NUM, DEFAULT_PAGE_SIZE)
     );
   }, [clientData]);
 
