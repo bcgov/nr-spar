@@ -60,3 +60,8 @@ export const getAClassSeedlotProgressStatus = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-progress/status`;
   return api.get(url);
 };
+
+export const getAClassSeedlotDraft = (seedlotNumber: string) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-progress`;
+  return api.get(url);
+};

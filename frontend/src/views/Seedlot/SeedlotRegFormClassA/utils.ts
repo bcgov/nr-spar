@@ -543,7 +543,7 @@ export const verifyExtractionStepCompleteness = (
 /**
  * Check if all steps are completed
  */
-export const checkAllStepsCompletion = (status: ProgressIndicatorConfig, extractionCompleteness: boolean) => {
+export const checkAllStepsCompletion = (status: ProgressIndicatorConfig, isExtractionStepComplete: boolean) => {
   let allStepsComplete = true;
 
   Object.keys(status).forEach((key: string) => {
@@ -551,7 +551,7 @@ export const checkAllStepsCompletion = (status: ProgressIndicatorConfig, extract
     // the initial value of the form is already in complete, but we only
     // update the progress indicator when leaving the step
     if ((!status[key as keyof ProgressIndicatorConfig].isComplete && key !== 'extraction')
-      || !extractionCompleteness) {
+      || !isExtractionStepComplete) {
       allStepsComplete = false;
     }
   });

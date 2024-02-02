@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import {
@@ -13,19 +13,23 @@ import {
   Button,
   TextInput,
   TextInputSkeleton,
-  FlexGrid
+  FlexGrid,
+  DropdownSkeleton
 } from '@carbon/react';
 import { Add, TrashCan } from '@carbon/icons-react';
 import validator from 'validator';
 
 import { getOrchardByVegCode } from '../../../api-service/orchardAPI';
+import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
 import { filterInput, FilterObj } from '../../../utils/FilterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import InputErrorText from '../../InputErrorText';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
-import { RowDataDictType } from '../ParentTreeStep/definitions';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import Subtitle from '../../Subtitle';
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { initialStagedOrchard, MAX_ORCHARDS, orchardStepText } from './constants';
@@ -40,43 +44,55 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  seedlotSpecies: MultiOptionsObj
-  gameticOptions: MultiOptionsObj[],
-  state: OrchardForm
-  setStepData: Function,
   cleanParentTables: Function,
-  tableRowData: RowDataDictType
   readOnly?: boolean
 }
 
 const OrchardStep = ({
-  seedlotSpecies,
-  gameticOptions,
-  state,
-  setStepData,
   cleanParentTables,
-  tableRowData,
   readOnly
 }: OrchardStepProps) => {
+  const {
+    allStepData: { orchardStep: state },
+    allStepData: { parentTreeStep: { tableRowData } },
+    setStepData,
+    seedlotSpecies
+  } = useContext(ClassAContext);
+
   const [isPliSpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalType, setModalType] = useState<keyof orchardModalOptions>('change');
   // Store the orchard selection until the user has confirmed the warning modal
   const [stagedOrchard, setStagedOrchard] = useState<OrchardObj>(initialStagedOrchard);
 
+  const gameticMethodologyQuery = useQuery({
+    queryKey: ['gametic-methodologies'],
+    queryFn: getGameticMethodology,
+    select: (data) => getMultiOptList(data, true, false, true, ['isFemaleMethodology', 'isPliSpecies']),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
   const filterGameticOptions = (isFemale: boolean) => {
-    const result = gameticOptions
-      .filter((option) => {
-        if (!isPliSpecies && option.isPliSpecies) {
-          return false;
-        }
-        return option.isFemaleMethodology === isFemale;
-      });
-    return result;
+    if (gameticMethodologyQuery.status === 'success') {
+      const result = gameticMethodologyQuery.data
+        .filter((option) => {
+          if (!isPliSpecies && option.isPliSpecies) {
+            return false;
+          }
+          return option.isFemaleMethodology === isFemale;
+        });
+      return result;
+    }
+    return [];
   };
 
-  const maleGameticOptions = useMemo(() => filterGameticOptions(false), []);
-  const femaleGameticOptions = useMemo(() => filterGameticOptions(true), []);
+  const maleGameticOptions = useMemo(() => filterGameticOptions(false), [
+    gameticMethodologyQuery.status
+  ]);
+  const femaleGameticOptions = useMemo(() => filterGameticOptions(true), [
+    gameticMethodologyQuery.status
+  ]);
 
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
@@ -89,7 +105,7 @@ const OrchardStep = ({
     const selectedItem = event.selectedItem ?? EmptyMultiOptObj;
     const gameticType: keyof OrchardForm = isFemale ? 'femaleGametic' : 'maleGametic';
     clonedState[gameticType].value = selectedItem;
-    setStepData(clonedState);
+    setStepData('orchardStep', clonedState);
   };
 
   const setBooleanValue = (
@@ -100,7 +116,7 @@ const OrchardStep = ({
   ) => {
     const clonedState = structuredClone(state);
     clonedState[field].value = checked;
-    setStepData(clonedState);
+    setStepData('orchardStep', clonedState);
   };
 
   const setAndValidateBreedPerc = (value: string, setOnly: boolean) => {
@@ -109,7 +125,7 @@ const OrchardStep = ({
     if (!setOnly) {
       clonedState.breedingPercentage.isInvalid = !validator.isInt(value, { min: 0, max: 100 });
     }
-    setStepData(clonedState);
+    setStepData('orchardStep', clonedState);
   };
 
   const addOrchardObj = () => {
@@ -122,10 +138,13 @@ const OrchardStep = ({
         isInvalid: false
       };
       orchards.push(newOrchard);
-      setStepData({
-        ...state,
-        orchards
-      });
+      setStepData(
+        'orchardStep',
+        {
+          ...state,
+          orchards
+        }
+      );
     }
   };
 
@@ -133,10 +152,13 @@ const OrchardStep = ({
     const orchards = structuredClone(state.orchards);
     const numOfOrchard = orchards.length;
     const newOrchards = orchards.filter((orchard) => orchard.inputId !== (numOfOrchard - 1));
-    setStepData({
-      ...state,
-      orchards: newOrchards
-    });
+    setStepData(
+      'orchardStep',
+      {
+        ...state,
+        orchards: newOrchards
+      }
+    );
   };
 
   const setOrchard = (inputId: number, selectedItem: MultiOptionsObj | null) => {
@@ -144,10 +166,13 @@ const OrchardStep = ({
     const selectedOrchardIndex = orchards.findIndex((orchard) => orchard.inputId === inputId);
     if (selectedOrchardIndex > -1) {
       orchards[selectedOrchardIndex].selectedItem = selectedItem;
-      setStepData({
-        ...state,
-        orchards
-      });
+      setStepData(
+        'orchardStep',
+        {
+          ...state,
+          orchards
+        }
+      );
     }
   };
 
@@ -306,42 +331,54 @@ const OrchardStep = ({
       </Row>
       <Row className="orchard-row">
         <Column sm={4} md={8} lg={16} xlg={12} max={10}>
-          <ComboBox
-            className="gametic-combobox"
-            id={state.femaleGametic.id}
-            name="femaleGametic"
-            items={femaleGameticOptions}
-            shouldFilterItem={
-              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-            }
-            placeholder={orchardStepText.gameteSection.femaleGametic.placeholder}
-            titleText={orchardStepText.gameteSection.femaleGametic.label}
-            invalid={state.femaleGametic.isInvalid}
-            invalidText={orchardStepText.gameteSection.femaleGametic.invalid}
-            onChange={(e: ComboBoxEvent) => setGametic(e, true)}
-            readOnly={readOnly}
-            selectedItem={state.femaleGametic.value}
-          />
+          {
+            gameticMethodologyQuery.isFetching
+              ? <DropdownSkeleton />
+              : (
+                <ComboBox
+                  className="gametic-combobox"
+                  id={state.femaleGametic.id}
+                  name="femaleGametic"
+                  items={femaleGameticOptions}
+                  shouldFilterItem={
+                    ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                  }
+                  placeholder={orchardStepText.gameteSection.femaleGametic.placeholder}
+                  titleText={orchardStepText.gameteSection.femaleGametic.label}
+                  invalid={state.femaleGametic.isInvalid}
+                  invalidText={orchardStepText.gameteSection.femaleGametic.invalid}
+                  onChange={(e: ComboBoxEvent) => setGametic(e, true)}
+                  readOnly={readOnly}
+                  selectedItem={state.femaleGametic.value}
+                />
+              )
+          }
         </Column>
       </Row>
       <Row className="orchard-row">
         <Column sm={4} md={8} lg={16} xlg={12} max={10}>
-          <ComboBox
-            className="gametic-combobox"
-            id={state.maleGametic.id}
-            name="maleGametic"
-            items={maleGameticOptions}
-            shouldFilterItem={
-              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-            }
-            placeholder={orchardStepText.gameteSection.maleGametic.placeholder}
-            titleText={orchardStepText.gameteSection.maleGametic.label}
-            invalid={state.maleGametic.isInvalid}
-            invalidText={orchardStepText.gameteSection.maleGametic.invalid}
-            onChange={(e: ComboBoxEvent) => setGametic(e, false)}
-            readOnly={readOnly}
-            selectedItem={state.maleGametic.value}
-          />
+          {
+            gameticMethodologyQuery.isFetching
+              ? <DropdownSkeleton />
+              : (
+                <ComboBox
+                  className="gametic-combobox"
+                  id={state.maleGametic.id}
+                  name="maleGametic"
+                  items={maleGameticOptions}
+                  shouldFilterItem={
+                    ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                  }
+                  placeholder={orchardStepText.gameteSection.maleGametic.placeholder}
+                  titleText={orchardStepText.gameteSection.maleGametic.label}
+                  invalid={state.maleGametic.isInvalid}
+                  invalidText={orchardStepText.gameteSection.maleGametic.invalid}
+                  onChange={(e: ComboBoxEvent) => setGametic(e, false)}
+                  readOnly={readOnly}
+                  selectedItem={state.maleGametic.value}
+                />
+              )
+          }
         </Column>
       </Row>
       <Row className="orchard-row">

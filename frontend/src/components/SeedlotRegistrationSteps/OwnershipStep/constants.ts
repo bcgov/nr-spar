@@ -87,6 +87,7 @@ export const createOwnerTemplate = (newId: number): SingleOwnerForm => ({
   methodOfPayment: {
     id: `ownership-method-payment-${newId}`,
     value: EmptyMultiOptObj,
-    isInvalid: false
+    isInvalid: false,
+    hasChanged: false
   }
 });

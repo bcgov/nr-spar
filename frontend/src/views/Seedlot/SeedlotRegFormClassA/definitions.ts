@@ -48,3 +48,7 @@ export type SaveTooltipProps = {
   lastSaveTimestamp: string;
   handleSaveBtn: Function;
 }
+
+export type RegFormProps = {
+  cleanParentTables: Function
+};

@@ -9,7 +9,7 @@ import {
   EditableCellProps,
   HeaderObj, RowItem, StrTypeRowItem, TabTypes
 } from '../definitions';
-import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegFormClassA/definitions';
 import { OrchardObj } from '../../OrchardStep/definitions';
 import PaginationChangeType from '../../../../types/PaginationChangeType';
 import blurOnEnter from '../../../../utils/KeyboardUtil';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import moment from 'moment';
 
@@ -21,6 +21,8 @@ import getFacilityTypes from '../../../api-service/facilityTypesAPI';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
+
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
 import InterimForm from './definitions';
 import {
   DATE_FORMAT, MAX_FACILITY_DESC_CHAR, agencyFieldsProps, pageTexts
@@ -30,24 +32,22 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import './styles.scss';
 
 interface InterimStorageStepProps {
-  state: InterimForm,
-  setStepData: Function,
-  collectorAgency: OptionsInputType,
-  collectorCode: StringInputType,
-  agencyOptions: Array<MultiOptionsObj>,
   readOnly?: boolean
 }
 
 const InterimStorage = (
   {
-    state,
-    setStepData,
-    collectorAgency,
-    collectorCode,
-    agencyOptions,
     readOnly
   }: InterimStorageStepProps
 ) => {
+  const {
+    allStepData: { interimStep: state },
+    allStepData: { collectionStep: { collectorAgency } },
+    allStepData: { collectionStep: { locationCode: collectorCode } },
+    setStepData,
+    agencyOptions
+  } = useContext(ClassAContext);
+
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
 
   const setAgencyAndCode = (
@@ -59,7 +59,7 @@ const InterimStorage = (
     clonedState.agencyName = agencyData;
     clonedState.locationCode = locationCodeData;
     clonedState.useCollectorAgencyInfo = useDefaultData;
-    setStepData(clonedState);
+    setStepData('interimStep', clonedState);
   };
 
   // This function validates changes on both start and end dates
@@ -84,7 +84,7 @@ const InterimStorage = (
     const isInvalid = validateStorageDates(clonedState);
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
-    setStepData(clonedState);
+    setStepData('interimStep', clonedState);
   };
 
   const handleFacilityType = (selected: string) => {
@@ -99,7 +99,7 @@ const InterimStorage = (
       setOtherChecked(false);
     }
 
-    setStepData(clonedState);
+    setStepData('interimStep', clonedState);
   };
 
   const handleOtherFacilityTypeInput = (facilityType: string) => {
@@ -108,7 +108,7 @@ const InterimStorage = (
 
     clonedState.facilityOtherType.isInvalid = facilityType.length > 50;
 
-    setStepData(clonedState);
+    setStepData('interimStep', clonedState);
   };
 
   const facilityTypesQuery = useQuery({

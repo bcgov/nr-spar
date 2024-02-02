@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {
+  useState, useEffect, useRef, useContext
+} from 'react';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -24,6 +26,10 @@ import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUt
 import { recordValues } from '../../../utils/RecordUtils';
 import { GenWorthCalcPayload } from '../../../types/GeneticWorthTypes';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+
+import InputErrorNotification from './InputErrorNotification';
+import UploadWarnNotification from './UploadWarnNotification';
 import {
   renderColOptions, renderTableBody, renderNotification,
   renderDefaultInputs, renderPagination
@@ -37,7 +43,7 @@ import {
   PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
 } from './constants';
 import {
-  TabTypes, HeaderObj, RowItem, ParentTreeStepProps
+  TabTypes, HeaderObj, RowItem
 } from './definitions';
 import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
@@ -47,18 +53,16 @@ import {
 } from './utils';
 
 import './styles.scss';
-import InputErrorNotification from './InputErrorNotification';
-import UploadWarnNotification from './UploadWarnNotification';
 
-const ParentTreeStep = (
-  {
-    seedlotSpecies,
-    state,
-    setStep,
+const ParentTreeStep = () => {
+  const {
+    allStepData: { parentTreeStep: state },
+    allStepData: { orchardStep: { orchards } },
     setStepData,
-    orchards
-  }: ParentTreeStepProps
-) => {
+    setStep,
+    seedlotSpecies
+  } = useContext(ClassAContext);
+
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
   const [currentTab, setCurrentTab] = useState<TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(

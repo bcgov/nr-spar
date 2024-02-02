@@ -11,7 +11,7 @@ import EditAClassApplication from '../views/Seedlot/EditAClassApplication';
 import MySeedlots from '../views/Seedlot/MySeedlots';
 import SeedlotCreatedFeedback from '../views/Seedlot/SeedlotCreatedFeedback';
 import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
-import SeedlotRegistrationForm from '../views/Seedlot/SeedlotRegistrationForm';
+import SeedlotRegistrationForm from '../views/Seedlot/SeedlotRegFormClassA';
 
 const routes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
