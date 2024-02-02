@@ -63,19 +63,6 @@ const LotApplicantAndInfoForm = ({
     }
   };
 
-  const renderSeedlotForm = () => {
-    if (isSeedlot && seedlotFormData && setSeedlotFormData) {
-      return (
-        <SeedlotInformation
-          seedlotFormData={seedlotFormData}
-          setSeedlotFormData={setSeedlotFormData}
-          isEdit={isEdit}
-        />
-      );
-    }
-    return null;
-  };
-
   return (
     <FlexGrid className="applicant-information-form">
       <Row className="section-title">
@@ -123,8 +110,14 @@ const LotApplicantAndInfoForm = ({
         </Column>
       </Row>
       {
-        isSeedlot
-          ? renderSeedlotForm()
+        isSeedlot && seedlotFormData && setSeedlotFormData
+          ? (
+            <SeedlotInformation
+              seedlotFormData={seedlotFormData}
+              setSeedlotFormData={setSeedlotFormData}
+              isEdit={isEdit}
+            />
+          )
           : null // The false case is reserved for vegLog
       }
     </FlexGrid>

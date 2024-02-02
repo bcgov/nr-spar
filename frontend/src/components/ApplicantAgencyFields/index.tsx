@@ -224,7 +224,7 @@ const ApplicantAgencyFields = ({
         </Column>
       </Row>
       {
-        !isDefault.value
+        !isDefault.value && !readOnly
           ? (
             <Row className="applicant-client-search-row">
               <Column sm={4} md={4} lg={16} xlg={16}>
