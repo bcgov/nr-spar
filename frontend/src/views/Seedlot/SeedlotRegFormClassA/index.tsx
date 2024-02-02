@@ -138,6 +138,13 @@ const SeedlotRegistrationForm = () => {
     refetchOnWindowFocus: false
   });
 
+  /**
+   * Determine if the form is incomplete or pending,
+   * if true then users can save a draft of their forms,
+   * otherwise the form will be populated with data directly from the seedlot table.
+   */
+  const isFormIncomplete = seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND' || seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'INC';
+
   const setDefaultAgencyAndCode = (agency: MultiOptionsObj, locationCode: string) => {
     setAllStepData((prevData) => ({
       ...prevData,
@@ -468,7 +475,7 @@ const SeedlotRegistrationForm = () => {
    */
   useEffect(() => () => {
     // Prevent save on first render.
-    if (isPageRendered.current) {
+    if (isPageRendered.current && isFormIncomplete) {
       saveProgress.mutate();
     }
     isPageRendered.current = true;
@@ -478,14 +485,14 @@ const SeedlotRegistrationForm = () => {
    * For auto save on interval.
    */
   useEffect(() => {
-    if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE) {
+    if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE && isFormIncomplete) {
       if (!saveProgress.isLoading) {
         saveProgress.mutate();
       }
     }
 
     const interval = setInterval(() => {
-      if (numOfEdit.current > 0 && !saveProgress.isLoading) {
+      if (numOfEdit.current > 0 && !saveProgress.isLoading && isFormIncomplete) {
         saveProgress.mutate();
       }
     }, TEN_SECONDS);
@@ -493,10 +500,13 @@ const SeedlotRegistrationForm = () => {
     return () => clearInterval(interval);
   }, [numOfEdit.current]);
 
+  /**
+   * Fetch the seedlot form draft only if the status of the seedlot is pending or incomplete.
+   */
   const getFormDraftQuery = useQuery({
     queryKey: ['seedlots', 'a-class-form-progress', seedlotNumber ?? 'unknown'],
     queryFn: () => getAClassSeedlotDraft(seedlotNumber ?? ''),
-    enabled: seedlotNumber !== undefined && seedlotNumber.length > 0,
+    enabled: seedlotNumber !== undefined && seedlotNumber.length > 0 && isFormIncomplete,
     refetchOnMount: true,
     select: (data) => data.data as SeedlotProgressPayloadType,
     retry: 1
@@ -517,15 +527,13 @@ const SeedlotRegistrationForm = () => {
         // eslint-disable-next-line no-alert
         alert(`Error retrieving form draft! ${error.message}`);
         navigate(`/seedlots/details/${seedlotNumber}`);
+      } else if (forestClientQuery.isFetched) {
+        // set default agency and code only if the seedlot has no draft saved,
+        // meaning this is their first time opening this form
+        setDefaultAgencyAndCode(getDefaultAgencyObj(), getDefaultLocationCode());
       }
     }
-  }, [getFormDraftQuery.status, getFormDraftQuery.isFetchedAfterMount]);
-
-  useEffect(() => {
-    if (forestClientQuery.isFetched && getFormDraftQuery.status === 'error') {
-      setDefaultAgencyAndCode(getDefaultAgencyObj(), getDefaultLocationCode());
-    }
-  }, [forestClientQuery.isFetched, getFormDraftQuery.status]);
+  }, [getFormDraftQuery.status, getFormDraftQuery.isFetchedAfterMount, forestClientQuery.status]);
 
   return (
     <ClassAContext.Provider value={contextData}>
@@ -554,17 +562,27 @@ const SeedlotRegistrationForm = () => {
                   <div className="seedlot-form-subtitle">
                     <span>
                       {`Seedlot ${seedlotNumber}`}
-                      &nbsp;
-                      -
-                      &nbsp;
                     </span>
-                    <SaveTooltipLabel
-                      handleSaveBtn={handleSaveBtn}
-                      saveStatus={saveStatus}
-                      saveDescription={saveDescription}
-                      mutationStatus={saveProgress.status}
-                      lastSaveTimestamp={lastSaveTimestamp}
-                    />
+                    {
+                      isFormIncomplete
+                        ? (
+                          <>
+                            <span>
+                              &nbsp;
+                              -
+                              &nbsp;
+                            </span>
+                            <SaveTooltipLabel
+                              handleSaveBtn={handleSaveBtn}
+                              saveStatus={saveStatus}
+                              saveDescription={saveDescription}
+                              mutationStatus={saveProgress.status}
+                              lastSaveTimestamp={lastSaveTimestamp}
+                            />
+                          </>
+                        )
+                        : null
+                    }
                   </div>
                 )}
               />
@@ -669,17 +687,23 @@ const SeedlotRegistrationForm = () => {
                     )
                 }
               </Column>
-              <Column sm={4} md={3} lg={3} xlg={4}>
-                <Button
-                  kind="secondary"
-                  size="lg"
-                  className="form-action-btn"
-                  onClick={() => handleSaveBtn()}
-                  disabled={saveProgress.isLoading}
-                >
-                  <InlineLoading status={saveStatus} description={saveDescription} />
-                </Button>
-              </Column>
+              {
+                isFormIncomplete
+                  ? (
+                    <Column sm={4} md={3} lg={3} xlg={4}>
+                      <Button
+                        kind="secondary"
+                        size="lg"
+                        className="form-action-btn"
+                        onClick={() => handleSaveBtn()}
+                        disabled={saveProgress.isLoading}
+                      >
+                        <InlineLoading status={saveStatus} description={saveDescription} />
+                      </Button>
+                    </Column>
+                  )
+                  : null
+              }
               <Column sm={4} md={3} lg={3} xlg={4}>
                 {
                   formStep !== 5
