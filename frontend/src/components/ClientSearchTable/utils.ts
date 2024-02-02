@@ -1,8 +1,8 @@
-import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientSearchType';
+import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 
 export const sortByKey = (
-  dataToSort: ForestClientDisplayType[],
-  headerId: keyof ForestClientDisplayType | null,
+  dataToSort: ForestClientSearchType[],
+  headerId: keyof ForestClientSearchType | null,
   direction: string
 ) => {
   if (headerId && direction === 'ASC') {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import {
   TableHead,
   TableRow,
@@ -6,12 +7,15 @@ import {
   TableHeader,
   TableBody,
   TableCell,
-  TableSelectRow
+  TableSelectRow,
+  Pagination,
+  DataTableSkeleton
 } from '@carbon/react';
 
-import EmptySection from '../EmptySection';
-
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
+import PaginationChangeType from '../../types/PaginationChangeType';
+
+import EmptySection from '../EmptySection';
 
 import { TableHeaders } from './constants';
 import { sortByKey } from './utils';
@@ -23,18 +27,35 @@ const ClientSearchTable = (
   {
     clientData,
     showPagination,
-    tablePagination,
     selectClientFn,
-    currentSelected
+    currentSelected,
+    mutationFn
   }: ClientSearchTableProps
 ) => {
   const [sortThisHeader, setSortThisHeader] = useState<keyof ForestClientSearchType | null>(null);
   const [sortDirection, setSortDirection] = useState('NONE');
   const [processedData, setProcessedData] = useState<ForestClientSearchType[]>(clientData);
 
-  // Without this the table will be empty after refresh.
+  const [currPageNumber, setCurrPageNumber] = useState<number>(0);
+  const [currPageSize, setCurrPageSize] = useState<number>(10);
+
+  const sliceData = (pageNum: number, pageSize: number) => (
+    clientData
+      .slice((pageNum - 1) * pageSize).slice(0, pageSize)
+  );
+
+  const handlePagination = (paginationObj: PaginationChangeType) => {
+    setCurrPageNumber(paginationObj.page - 1);
+    setCurrPageSize(paginationObj.pageSize);
+    setProcessedData(
+      sliceData(paginationObj.page, paginationObj.pageSize)
+    );
+  };
+
   useEffect(() => {
-    setProcessedData(clientData);
+    setProcessedData(
+      sliceData(currPageNumber, currPageSize)
+    );
   }, [clientData]);
 
   const handleSort = (headerId: keyof ForestClientSearchType) => {
@@ -52,23 +73,50 @@ const ClientSearchTable = (
     setSortThisHeader(headerId);
   };
 
-  const renderRadioSelect = (client: ForestClientSearchType) => {
-    if (typeof selectClientFn === 'function') {
-      return (
-        <TableSelectRow
-          radio
-          ariaLabel={`Select client ${client.clientName} with location code ${client.locationCode}`}
-          id={`client-radio-${client.clientNumber}-${client.locationCode}`}
-          name="client-radio"
-          checked={client === currentSelected}
-          onSelect={() => {
-            selectClientFn(client);
-          }}
-        />
-      );
-    }
-    return null;
-  };
+  if (mutationFn?.status === 'loading') {
+    return (
+      <DataTableSkeleton
+        showToolbar={false}
+        showHeader={false}
+      />
+    );
+  }
+
+  if (mutationFn?.status === 'error') {
+    const error = mutationFn.error as AxiosError;
+    return (
+      <EmptySection
+        pictogram="FaceVeryDissatisfied"
+        title="An unexpected error occuried"
+        description={(
+          <span>
+            Something went wrong while trying to search for users...
+            <br />
+            Error Message:
+            {` ${error.message}`}
+          </span>
+        )}
+      />
+    );
+  }
+
+  if (mutationFn?.status === 'idle') {
+    return (
+      <EmptySection
+        pictogram="Summit"
+        title="Nothing to show yet!"
+        description={(
+          <span>
+            Start by searching for a client or agency acronym,
+            <br />
+            number, or name. The matching results will be
+            <br />
+            shown here.
+          </span>
+        )}
+      />
+    );
+  }
 
   return (
     <>
@@ -103,7 +151,20 @@ const ClientSearchTable = (
                   key={`${client.clientNumber}-${client.locationCode}`}
                 >
                   {
-                    renderRadioSelect(client)
+                    typeof selectClientFn === 'function'
+                      ? (
+                        <TableSelectRow
+                          radio
+                          ariaLabel={`Select client ${client.clientName} with location code ${client.locationCode}`}
+                          id={`client-radio-${client.clientNumber}-${client.locationCode}`}
+                          name="client-radio"
+                          checked={client === currentSelected}
+                          onSelect={() => {
+                            selectClientFn(client);
+                          }}
+                        />
+                      )
+                      : null
                   }
                   {
                     TableHeaders.map((header) => (
@@ -127,7 +188,7 @@ const ClientSearchTable = (
           so we don't have  to make a lot of style changes
           worry about DOM tags */}
       {
-        !processedData.length
+        !clientData.length && mutationFn?.status === 'success'
           ? (
             <EmptySection
               pictogram="UserSearch"
@@ -138,8 +199,22 @@ const ClientSearchTable = (
           : null
       }
       {
-        showPagination
-          ? tablePagination
+        showPagination && clientData.length > 10
+          ? (
+            <Pagination
+              className="general-data-table-pagination"
+              page={currPageNumber + 1}
+              pageSize={currPageSize}
+              pageSizes={[10, 20, 30, 40, 50]}
+              itemsPerPageText=""
+              totalItems={clientData.length ?? 0}
+              onChange={
+                (paginationObj: PaginationChangeType) => {
+                  handlePagination(paginationObj);
+                }
+              }
+            />
+          )
           : null
       }
     </>

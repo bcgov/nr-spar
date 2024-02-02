@@ -1,4 +1,5 @@
 import { UseMutationResult } from '@tanstack/react-query';
+import { ForestClientSearchType } from '../../../types/ForestClientTypes/ForestClientSearchType';
 
 export interface ClientSearchModalProps {
   linkText: string;
@@ -13,15 +14,10 @@ export type ClientSearchDropdown = {
   option: ClientSearchOptions
 };
 
-export type MutationParams = {
-  word: string;
-  option: ClientSearchOptions
-};
-
 export type ClientSearchFieldsProps = {
   searchWord: string,
   setSearchWord: Function,
   searchOption: ClientSearchDropdown,
   setSearchOption: Function,
-  mutationFn: UseMutationResult<unknown, Error, MutationParams, unknown>
+  mutationFn: UseMutationResult<ForestClientSearchType[], unknown, void, unknown>
 };

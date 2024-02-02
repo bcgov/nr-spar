@@ -1,3 +1,4 @@
+import { UseMutationResult } from '@tanstack/react-query';
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 
 export type HeaderObjType = {
@@ -8,7 +9,7 @@ export type HeaderObjType = {
 export interface ClientSearchTableProps {
   clientData: ForestClientSearchType[],
   showPagination: boolean,
-  tablePagination: JSX.Element,
   selectClientFn?: Function,
   currentSelected?: ForestClientSearchType
+  mutationFn?: UseMutationResult<ForestClientSearchType[], unknown, void, unknown>
 }
