@@ -1,0 +1,72 @@
+@Library('polaris')
+import ca.bc.gov.nrids.polaris.Podman
+import ca.bc.gov.nrids.polaris.BrokerIntention
+import ca.bc.gov.nrids.polaris.Vault
+
+def podman
+
+pipeline {
+    agent none 
+    stages {
+         stage('Checkout code') {
+			agent {
+                label Podman.AGENT_LABEL_APP
+            }
+		 	steps {
+				checkout scm
+			}
+		 }
+		 stage('Run Compose') {
+			agent {
+                label Podman.AGENT_LABEL_APP
+            }
+		 	steps {
+				sh 'pwd'
+				sh 'dir'
+				sh 'podman build --file=Dockerfile_Polaris .'
+			}
+		 }
+    }
+	/* post {
+        unstable {
+            node(Podman.AGENT_LABEL_APP) {
+                script {
+                    if (intention) {
+                        println intention.close(false)
+                    }
+                }
+            }
+        }
+        failure {
+            node(Podman.AGENT_LABEL_APP) {
+                script {
+                    if (intention) {
+                        println intention.close(false)
+                    }
+                }
+            }
+        }
+        aborted {
+            node(Podman.AGENT_LABEL_APP) {
+                script {
+                    if (intention) {
+                        println  intention.close(true)
+                    }
+                }
+            }
+        }
+        always {
+            node(Podman.AGENT_LABEL_APP) {
+                cleanWs(
+                    cleanWhenAborted: true,
+                    cleanWhenFailure: false,
+                    cleanWhenSuccess: true,
+                    cleanWhenUnstable: false,
+                    deleteDirs: true
+                )
+            }
+        }
+    }*/
+}
+
+ 
