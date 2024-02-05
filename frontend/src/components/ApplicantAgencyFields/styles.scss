@@ -1,4 +1,5 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
 @use '@carbon/type';
 
 .agency-information-section {
@@ -63,6 +64,27 @@
 
     #agency-number-input {
       @include type.type-style('code-02');
+    }
+  }
+
+  .applicant-client-search-row {
+    margin-bottom: 3rem;
+
+    p {
+      color: colors.$gray-70;
+      font-size: 0.875rem;
+    }
+
+    .client-search-toggle-btn {
+      padding: 0;
+      height: auto;
+      min-height: 0;
+      background: transparent;
+      border: none;
+
+      p {
+        color: var(--#{vars.$bcgov-prefix}-link-primary);
+      }
     }
   }
 }

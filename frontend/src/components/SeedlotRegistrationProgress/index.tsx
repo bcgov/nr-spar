@@ -5,7 +5,7 @@ import {
   ProgressStep
 } from '@carbon/react';
 
-import { ProgressIndicatorConfig } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { ProgressIndicatorConfig } from '../../views/Seedlot/SeedlotRegFormClassA/definitions';
 import { SMALL_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 
 interface SeedlotRegistrationProgressProps {

@@ -1,5 +1,5 @@
 import { StatusColourMap } from '../components/StatusTag/definitions';
-import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/SeedlotRegFormClassA/definitions';
 import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
 
 type EffectiveDateRange = {
@@ -14,7 +14,7 @@ type GeneticClass = {
   geneticClassCode: string
 }
 
-type SeedlotStatusCode = 'APP' | 'CAN' | 'COM' | 'EXP' | 'INC' | 'PND' | 'SUB';
+export type SeedlotStatusCode = 'APP' | 'CAN' | 'COM' | 'EXP' | 'INC' | 'PND' | 'SUB';
 
 type SeedlotStatus = {
   description: keyof typeof StatusColourMap,

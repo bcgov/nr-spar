@@ -6,12 +6,15 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import validator from 'validator';
 
+import ClientSearchModal from './ClientSearchModal';
+
 import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
+import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientDisplayType';
 import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
-import { FilterObj, filterInput } from '../../utils/filterUtils';
+import { FilterObj, filterInput } from '../../utils/FilterUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
 import supportTexts from './constants';
@@ -220,6 +223,51 @@ const ApplicantAgencyFields = ({
           }
         </Column>
       </Row>
+      {
+        !isDefault.value
+          ? (
+            <Row className="applicant-client-search-row">
+              <Column sm={4} md={4} lg={16} xlg={16}>
+                <p>
+                  If you don&apos;t remember the agency information you can
+                  {' '}
+                  <ClientSearchModal
+                    linkText="open the client search"
+                    modalLabel="Register A-Class Seedlot"
+                    applySelectedClient={(clientAgency: ForestClientDisplayType) => {
+                      const agencyObj: MultiOptionsObj = {
+                        code: clientAgency.number,
+                        label: `${clientAgency.number} - ${clientAgency.fullName} - ${clientAgency.acronym}`,
+                        description: clientAgency.fullName
+                      };
+
+                      const selectedAgency = {
+                        ...agency,
+                        value: agencyObj,
+                        isInvalid: false
+                      };
+
+                      const selectedLocationCode = {
+                        ...locationCode,
+                        value: clientAgency.locationCode,
+                        isInvalid: false
+                      };
+
+                      const updateIsDefault = {
+                        ...isDefault,
+                        value: false
+                      };
+
+                      setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
+                      setAgencyAndCode(updateIsDefault, selectedAgency, selectedLocationCode);
+                    }}
+                  />
+                </p>
+              </Column>
+            </Row>
+          )
+          : null
+      }
     </FlexGrid>
   );
 };

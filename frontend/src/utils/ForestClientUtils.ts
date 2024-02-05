@@ -1,4 +1,4 @@
-import { ForestClientType } from '../types/ForestClientType';
+import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import { OptionsInputType } from '../types/FormInputType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 import { getOptionsInputObj } from './FormInputUtils';

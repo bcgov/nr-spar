@@ -3,7 +3,7 @@ import React from 'react';
 import BigNumber from 'bignumber.js';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
-import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegFormClassA/definitions';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
@@ -250,7 +250,7 @@ export const processParentTreeData = (
     'parentTreeNumber',
     setSlicedRows
   );
-  setStepData(modifiedState);
+  setStepData('parentTreeStep', modifiedState);
 };
 
 export const getMixRowTemplate = (): RowItem => {
@@ -295,7 +295,7 @@ export const cleanTable = (
       });
     });
   }
-  setStepData(clonedState);
+  setStepData('parentTreeStep', clonedState);
   return clonedState;
 };
 
@@ -315,7 +315,7 @@ export const applyValueToAll = (
     clonedState.tableRowData[number][field].isInvalid = isInvalid;
     clonedState.tableRowData[number][field].errMsg = errMsg;
   });
-  setStepData(clonedState);
+  setStepData('parentTreeStep', clonedState);
 };
 
 export const fillCompostitionTables = (
@@ -374,7 +374,7 @@ export const fillCompostitionTables = (
     }
   });
 
-  setStepData(clonedState);
+  setStepData('parentTreeStep', clonedState);
 
   setInvalidPTNumbers(invalidParentTreeNumbers.sort((a, b) => Number(a) - Number(b)));
 };
@@ -392,7 +392,7 @@ export const toggleNotification = (
   if (notifType === 'error') {
     modifiedState.notifCtrl[currentTab].showError = false;
   }
-  setStepData(modifiedState);
+  setStepData('parentTreeStep', modifiedState);
 };
 
 export const toggleColumn = (
@@ -551,7 +551,7 @@ export const addNewMixRow = (state: ParentTreeStepDataObj, setStepData: Function
   newRow.rowId = newRowId;
   Object.assign(mixTableData, { [newRowId]: populateStrInputId(newRowId, newRow) });
   clonedState.mixTabData = mixTableData;
-  setStepData(clonedState);
+  setStepData('parentTreeStep', clonedState);
 };
 
 /**
@@ -619,5 +619,5 @@ export const fillMixTable = (
 
   newRows = updateCalculations(newRows, applicableGenWorths);
   clonedState.mixTabData = newRows;
-  setStepData(clonedState);
+  setStepData('parentTreeStep', clonedState);
 };

@@ -3,16 +3,7 @@ import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
-import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegistrationForm/definitions';
-import { OrchardObj } from '../OrchardStep/definitions';
-
-export type ParentTreeStepProps = {
-  seedlotSpecies: MultiOptionsObj
-  state: ParentTreeStepDataObj;
-  setStep: Function
-  setStepData: Function;
-  orchards: Array<OrchardObj>;
-}
+import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegFormClassA/definitions';
 
 export type TabTypes = 'coneTab' | 'successTab' | 'mixTab';
 
