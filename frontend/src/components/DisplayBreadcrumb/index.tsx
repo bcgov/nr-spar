@@ -22,14 +22,14 @@ const DisplayBreadcrumb = ({ breadcrumbData }:DisplayBreadcrumbProps) => {
   const navigate = useNavigate();
 
   const lastBreadcrumb = breadcrumbData.length - 1;
-  const overflowData = breadcrumbData.slice(1, lastBreadcrumb);
+  const middleBreadcrumbs = breadcrumbData.slice(1, lastBreadcrumb);
   return (
     <div className="breadcrumbs-container">
       <Breadcrumb>
         <BreadcrumbItem onClick={() => navigate(breadcrumbData[0].path)}>
           {breadcrumbData[0].name}
         </BreadcrumbItem>
-        {(breadcrumbData.length >= 3) ? (overflowData.map((breadcrumb) => (
+        {(breadcrumbData.length >= 3) ? (middleBreadcrumbs.map((breadcrumb) => (
           <BreadcrumbItem
             onClick={() => navigate(breadcrumb.path)}
             className="overflow-breadcrumb"
@@ -41,7 +41,7 @@ const DisplayBreadcrumb = ({ breadcrumbData }:DisplayBreadcrumbProps) => {
         {(breadcrumbData.length >= 3) ? (
           <BreadcrumbItem className="overflow-menu-container">
             <OverflowMenu>
-              {overflowData.map((breadcrumb) => (
+              {middleBreadcrumbs.map((breadcrumb) => (
                 <BreadcrumbItem
                   onClick={() => navigate(breadcrumb.path)}
                   key={breadcrumb.name}

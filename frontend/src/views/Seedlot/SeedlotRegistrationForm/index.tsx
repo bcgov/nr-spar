@@ -586,7 +586,7 @@ const SeedlotRegistrationForm = () => {
       <FlexGrid fullWidth>
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
-            <DisplayBreadcrumb breadcrumbData={seedlotRegistrationBreadcrumbs()} />
+            <DisplayBreadcrumb breadcrumbData={seedlotRegistrationBreadcrumbs(seedlotNumber!)} />
           </Column>
         </Row>
         <Row>

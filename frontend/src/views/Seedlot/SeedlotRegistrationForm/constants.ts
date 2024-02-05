@@ -1,4 +1,3 @@
-import { useParams } from 'react-router-dom';
 import PathConstants from '../../../routes/pathConstants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { addParamToPath } from '../../../utils/PathUtils';
@@ -64,21 +63,17 @@ export const smartSaveText = {
   suggestion: 'Your recent changes could not be saved. Please try saving the form manually to keep all of your changes.'
 };
 
-export const seedlotRegistrationBreadcrumbs = () => {
-  const { seedlotNumber } = useParams();
-  const breadcrumbData = [
-    {
-      name: 'Seedlots',
-      path: `${PathConstants.SEEDLOTS}`
-    },
-    {
-      name: 'My seedlots',
-      path: `${PathConstants.MY_SEEDLOTS}`
-    },
-    {
-      name: `Seedlot ${seedlotNumber}`,
-      path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')}`
-    }
-  ];
-  return breadcrumbData;
-};
+export const seedlotRegistrationBreadcrumbs = (seedlotNumber: string) => [
+  {
+    name: 'Seedlots',
+    path: `${PathConstants.SEEDLOTS}`
+  },
+  {
+    name: 'My seedlots',
+    path: `${PathConstants.MY_SEEDLOTS}`
+  },
+  {
+    name: `Seedlot ${seedlotNumber}`,
+    path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber)}`
+  }
+];

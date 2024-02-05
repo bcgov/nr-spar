@@ -32,10 +32,10 @@ import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
+import { editAClassApplicationBreadcrumbs } from './constants';
 
 import './styles.scss';
 import { addParamToPath } from '../../../utils/PathUtils';
-import { EditAClassApplicationBreadcrumbs } from './constants';
 
 const EditAClassApplication = () => {
   const navigate = useNavigate();
@@ -153,7 +153,7 @@ const EditAClassApplication = () => {
   return (
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
-        <DisplayBreadcrumb breadcrumbData={EditAClassApplicationBreadcrumbs()} />
+        <DisplayBreadcrumb breadcrumbData={editAClassApplicationBreadcrumbs(seedlotNumber!)} />
       </Row>
       <Row className="title-row">
         <PageTitle
