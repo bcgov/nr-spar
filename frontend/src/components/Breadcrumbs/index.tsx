@@ -54,9 +54,46 @@ const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
 
   if (overflowCrumbs.length === 0) {
     return (
+      <div className="breadcrumbs-container">
+        <Breadcrumb>
+          {
+            displayedCrumbs.map((crumb) => (
+              <BreadcrumbItem
+                onClick={() => navigate(crumb.path)}
+                key={crumb.name}
+              >
+                {crumb.name}
+              </BreadcrumbItem>
+            ))
+          }
+        </Breadcrumb>
+      </div>
+    );
+  }
+
+  return (
+    <div className="breadcrumbs-container">
       <Breadcrumb>
+        <BreadcrumbItem
+          onClick={() => navigate(displayedCrumbs[0].path)}
+        >
+          {displayedCrumbs[0].name}
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+          <OverflowMenu>
+            {
+              overflowCrumbs.map((overflowCrumb) => (
+                <OverflowMenuItem
+                  key={overflowCrumb.name}
+                  itemText={overflowCrumb.name}
+                  onClick={() => navigate(overflowCrumb.path)}
+                />
+              ))
+            }
+          </OverflowMenu>
+        </BreadcrumbItem>
         {
-          displayedCrumbs.map((crumb) => (
+          displayedCrumbs.slice(1).map((crumb) => (
             <BreadcrumbItem
               onClick={() => navigate(crumb.path)}
               key={crumb.name}
@@ -66,40 +103,7 @@ const Breadcrumbs = ({ crumbs }: BreadcrumbsProps) => {
           ))
         }
       </Breadcrumb>
-    );
-  }
-
-  return (
-    <Breadcrumb>
-      <BreadcrumbItem
-        onClick={() => navigate(displayedCrumbs[0].path)}
-      >
-        {displayedCrumbs[0].name}
-      </BreadcrumbItem>
-      <BreadcrumbItem>
-        <OverflowMenu>
-          {
-            overflowCrumbs.map((overflowCrumb) => (
-              <OverflowMenuItem
-                key={overflowCrumb.name}
-                itemText={overflowCrumb.name}
-                onClick={() => navigate(overflowCrumb.path)}
-              />
-            ))
-          }
-        </OverflowMenu>
-      </BreadcrumbItem>
-      {
-        displayedCrumbs.slice(1).map((crumb) => (
-          <BreadcrumbItem
-            onClick={() => navigate(crumb.path)}
-            key={crumb.name}
-          >
-            {crumb.name}
-          </BreadcrumbItem>
-        ))
-      }
-    </Breadcrumb>
+    </div>
   );
 };
 

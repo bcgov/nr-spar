@@ -4,7 +4,9 @@ import {
   ProgressIndicator,
   ProgressStep
 } from '@carbon/react';
+
 import { ProgressIndicatorConfig } from '../../views/Seedlot/SeedlotRegistrationForm/definitions';
+import { SMALL_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 
 interface SeedlotRegistrationProgressProps {
   progressStatus: ProgressIndicatorConfig;
@@ -23,7 +25,7 @@ const SeedlotRegistrationProgress = ({
     className={className}
     spaceEqually
     onChange={interactFunction ?? null}
-    vertical={window.innerWidth <= 320}
+    vertical={window.innerWidth <= SMALL_SCREEN_WIDTH}
   >
     <ProgressStep
       label="Collection"
