@@ -1,14 +1,7 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .breadcrumbs-container{
-  .overflow-menu-container {
-    display: none;
-  }
-
   @media only screen and (max-width: 320px) {
-    .overflow-breadcrumb {
-      display: none;
-    }
     .overflow-menu-container {
       display: flex;
     }

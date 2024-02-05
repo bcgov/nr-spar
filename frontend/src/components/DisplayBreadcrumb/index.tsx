@@ -29,29 +29,30 @@ const DisplayBreadcrumb = ({ breadcrumbData }:DisplayBreadcrumbProps) => {
         <BreadcrumbItem onClick={() => navigate(breadcrumbData[0].path)}>
           {breadcrumbData[0].name}
         </BreadcrumbItem>
-        {(breadcrumbData.length >= 3) ? (middleBreadcrumbs.map((breadcrumb) => (
-          <BreadcrumbItem
-            onClick={() => navigate(breadcrumb.path)}
-            className="overflow-breadcrumb"
-            key={breadcrumb.name}
-          >
-            {breadcrumb.name}
-          </BreadcrumbItem>
-        ))) : null }
-        {(breadcrumbData.length >= 3) ? (
-          <BreadcrumbItem className="overflow-menu-container">
-            <OverflowMenu>
-              {middleBreadcrumbs.map((breadcrumb) => (
-                <BreadcrumbItem
-                  onClick={() => navigate(breadcrumb.path)}
-                  key={breadcrumb.name}
-                >
-                  {breadcrumb.name}
-                </BreadcrumbItem>
-              ))}
-            </OverflowMenu>
-          </BreadcrumbItem>
-        ) : null}
+        {(breadcrumbData.length >= 3 && window.innerWidth <= 671)
+          ? (
+            <BreadcrumbItem className="overflow-menu-container">
+              <OverflowMenu>
+                {middleBreadcrumbs.map((breadcrumb) => (
+                  <BreadcrumbItem
+                    onClick={() => navigate(breadcrumb.path)}
+                    key={breadcrumb.name}
+                  >
+                    {breadcrumb.name}
+                  </BreadcrumbItem>
+                ))}
+              </OverflowMenu>
+            </BreadcrumbItem>
+          )
+          : (middleBreadcrumbs.map((breadcrumb) => (
+            <BreadcrumbItem
+              onClick={() => navigate(breadcrumb.path)}
+              className="overflow-breadcrumb"
+              key={breadcrumb.name}
+            >
+              {breadcrumb.name}
+            </BreadcrumbItem>
+          ))) }
         {lastBreadcrumb ? (
           <BreadcrumbItem onClick={() => navigate(breadcrumbData[lastBreadcrumb].path)}>
             {breadcrumbData[lastBreadcrumb].name}
