@@ -25,17 +25,18 @@ import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
 import PathConstants from '../../../routes/pathConstants';
 import ErrorToast from '../../../components/Toast/ErrorToast';
-import DisplayBreadcrumb from '../../../components/DisplayBreadcrumb';
+import Breadcrumbs from '../../../components/Breadcrumbs';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import { ForestClientType } from '../../../types/ForestClientType';
 import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
-import { editAClassApplicationBreadcrumbs } from './constants';
+import { addParamToPath } from '../../../utils/PathUtils';
+
+import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
-import { addParamToPath } from '../../../utils/PathUtils';
 
 const EditAClassApplication = () => {
   const navigate = useNavigate();
@@ -153,7 +154,7 @@ const EditAClassApplication = () => {
   return (
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
-        <DisplayBreadcrumb breadcrumbData={editAClassApplicationBreadcrumbs(seedlotNumber!)} />
+        <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
       </Row>
       <Row className="title-row">
         <PageTitle

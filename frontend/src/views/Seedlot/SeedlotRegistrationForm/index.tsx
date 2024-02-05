@@ -40,7 +40,7 @@ import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardSte
 import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
-import DisplayBreadcrumb from '../../../components/DisplayBreadcrumb';
+import Breadcrumbs from '../../../components/Breadcrumbs';
 
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
@@ -87,11 +87,12 @@ import {
   convertOrchard,
   convertOwnership,
   convertParentTree,
-  getSeedlotSubmitErrDescription
+  getSeedlotSubmitErrDescription,
+  getBreadcrumbs
 } from './utils';
 import {
-  MAX_EDIT_BEFORE_SAVE,
-  initialProgressConfig, seedlotRegistrationBreadcrumbs, smartSaveText, stepMap, tscAgencyObj, tscLocationCode
+  MAX_EDIT_BEFORE_SAVE, initialProgressConfig,
+  smartSaveText, stepMap, tscAgencyObj, tscLocationCode
 } from './constants';
 
 import './styles.scss';
@@ -586,7 +587,7 @@ const SeedlotRegistrationForm = () => {
       <FlexGrid fullWidth>
         <Row>
           <Column className="seedlot-registration-breadcrumb" sm={4} md={8} lg={16} xlg={16}>
-            <DisplayBreadcrumb breadcrumbData={seedlotRegistrationBreadcrumbs(seedlotNumber!)} />
+            <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
           </Column>
         </Row>
         <Row>

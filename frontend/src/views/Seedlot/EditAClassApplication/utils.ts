@@ -1,7 +1,7 @@
 import PathConstants from '../../../routes/pathConstants';
 import { addParamToPath } from '../../../utils/PathUtils';
 
-export const editAClassApplicationBreadcrumbs = (seedlotNumber: string) => [
+export const getBreadcrumbs = (seedlotNumber: string) => [
   {
     name: 'Seedlots',
     path: `${PathConstants.SEEDLOTS}`

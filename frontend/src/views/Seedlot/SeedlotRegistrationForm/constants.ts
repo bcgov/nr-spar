@@ -1,6 +1,4 @@
-import PathConstants from '../../../routes/pathConstants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { addParamToPath } from '../../../utils/PathUtils';
 import { ProgressIndicatorConfig, StepMap } from './definitions';
 
 export const MAX_EDIT_BEFORE_SAVE = 5;
@@ -62,18 +60,3 @@ export const smartSaveText = {
   success: 'Changes saved!',
   suggestion: 'Your recent changes could not be saved. Please try saving the form manually to keep all of your changes.'
 };
-
-export const seedlotRegistrationBreadcrumbs = (seedlotNumber: string) => [
-  {
-    name: 'Seedlots',
-    path: `${PathConstants.SEEDLOTS}`
-  },
-  {
-    name: 'My seedlots',
-    path: `${PathConstants.MY_SEEDLOTS}`
-  },
-  {
-    name: `Seedlot ${seedlotNumber}`,
-    path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber)}`
-  }
-];
