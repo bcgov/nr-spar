@@ -140,7 +140,7 @@
       align-items: center;
       flex-direction: row;
 
-      .bx--actionable-notification__action-button {
+      .#{vars.$bcgov-prefix}--actionable-notification__action-button {
         right: 3rem;
       }
 
