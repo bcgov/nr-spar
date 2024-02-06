@@ -70,7 +70,7 @@ const SeedlotTable = (
 
   const tablePagination = () => (
     <Pagination
-      className="seedlot-data-table-pagination"
+      className="general-data-table-pagination"
       page={currPageNumber + 1}
       pageSize={currPageSize}
       pageSizes={PageSizesConfig}
