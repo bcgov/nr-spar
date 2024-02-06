@@ -1,16 +1,20 @@
 import { HeaderObjType } from './definitions';
 
+export const DEFAULT_PAGE_NUM = 0;
+
+export const DEFAULT_PAGE_SIZE = 10;
+
 export const TableHeaders: Array<HeaderObjType> = [
   {
     id: 'acronym',
     label: 'Acronym'
   },
   {
-    id: 'number',
+    id: 'clientNumber',
     label: 'Number'
   },
   {
-    id: 'fullName',
+    id: 'clientName',
     label: 'Full name'
   },
   {
@@ -18,7 +22,7 @@ export const TableHeaders: Array<HeaderObjType> = [
     label: 'Loc. code'
   },
   {
-    id: 'location',
+    id: 'locationName',
     label: 'Location'
   },
   {
