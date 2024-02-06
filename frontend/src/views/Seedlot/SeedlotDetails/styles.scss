@@ -15,8 +15,21 @@
     cursor: pointer;
   }
 
-  .seedlot-summary-title .combo-button-wrapper {
-    text-align: right;
+  .summary-title-flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .summary-title-flex-col {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+
+    .combo-button-container {
+      margin-top: 1rem;
+    }
   }
 
   // Using negative margin here for now
