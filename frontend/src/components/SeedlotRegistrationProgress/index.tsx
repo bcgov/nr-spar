@@ -9,23 +9,23 @@ import { ProgressIndicatorConfig } from '../../views/Seedlot/SeedlotRegFormClass
 import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 import useWindowSize from '../../hooks/UseWindowSize';
 
+import './styles.scss';
+
 interface SeedlotRegistrationProgressProps {
   progressStatus: ProgressIndicatorConfig;
-  className?: string;
   interactFunction?: Function;
 }
 
 const SeedlotRegistrationProgress = ({
   progressStatus,
-  className,
   interactFunction
 }: SeedlotRegistrationProgressProps) => {
   const widowSize = useWindowSize();
   return (
     <ProgressIndicator
       // Needs to feed it a -1 value otherwise step 1 will stuck at current
+      className="spar-seedlot-reg-progress-bar"
       currentIndex={-1}
-      className={className}
       spaceEqually
       onChange={interactFunction ?? null}
       vertical={widowSize.innerWidth < MEDIUM_SCREEN_WIDTH}

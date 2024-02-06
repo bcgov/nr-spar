@@ -4,7 +4,6 @@ import {
   FlexGrid,
   Row,
   Column,
-  Stack,
   Breadcrumb,
   BreadcrumbItem,
   Tabs,
@@ -21,9 +20,7 @@ import { SeedlotApplicantType, SeedlotDisplayType, SeedlotType } from '../../../
 
 import PageTitle from '../../../components/PageTitle';
 import ComboButton from '../../../components/ComboButton';
-import SeedlotSummary from './SeedlotSummary';
-import ApplicantInformation from './ApplicantInformation';
-import FormProgress from './FormProgress';
+import useWindowSize from '../../../hooks/UseWindowSize';
 
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -33,10 +30,16 @@ import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import PathConstants from '../../../routes/pathConstants';
 import { addParamToPath } from '../../../utils/PathUtils';
 
+import SeedlotSummary from './SeedlotSummary';
+import ApplicantInformation from './ApplicantInformation';
+import FormProgress from './FormProgress';
+
 import './styles.scss';
+import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
 const SeedlotDetails = () => {
   const navigate = useNavigate();
+  const windowSize = useWindowSize();
   const { seedlotNumber } = useParams();
   const [searchParams] = useSearchParams();
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
@@ -136,74 +139,71 @@ const SeedlotDetails = () => {
           </BreadcrumbItem>
         </Breadcrumb>
       </Row>
-      <Stack gap={6}>
-        <Row className="seedlot-summary-title">
-          <Column sm={4} md={6} lg={14} xlg={12}>
-            {
-              seedlotQuery.isFetched
-              && (
+      <Row>
+        <Column className={windowSize.innerWidth < MEDIUM_SCREEN_WIDTH ? 'summary-title-flex-col' : 'summary-title-flex-row'}>
+          {
+            seedlotQuery.isFetched
+            && (
+              <>
                 <PageTitle
                   title={`Seedlot ${seedlotQuery.data?.id}`}
                   subtitle="Check and manage this seedlot"
                   enableFavourite
                 />
-              )
-            }
-          </Column>
-          <Column sm={4} md={2} lg={2} xlg={4}>
-            <ComboButton
-              title="Edit seedlot form"
-              items={manageOptions}
-              menuOptionsClass="edit-seedlot-form"
-              titleBtnFunc={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
-            />
-          </Column>
-        </Row>
+                <ComboButton
+                  title="Edit seedlot form"
+                  items={manageOptions}
+                  menuOptionsClass="edit-seedlot-form"
+                  titleBtnFunc={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
+                />
+              </>
+            )
+          }
+        </Column>
+      </Row>
 
-        <Row className="seedlot-summary-content">
-          <Column sm={4}>
-            <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
-          </Column>
-        </Row>
+      <Row className="seedlot-summary-content">
+        <Column sm={4}>
+          <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
+        </Column>
+      </Row>
 
-        <Row className="seedlot-details-content">
-          <Column>
-            <Tabs>
-              <TabList aria-label="List of tabs">
-                <Tab>Seedlot Details</Tab>
-              </TabList>
-              <TabPanels>
-                <TabPanel>
-                  {
-                    isSubmitSuccess && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'SUB')
-                      ? (
-                        <InlineNotification
-                          className="seedlot-submitted-notification"
-                          lowContrast
-                          kind="success"
-                          title="Submitted:"
-                          subtitle="Your seedlot registration was submitted with success and is now under review by the TSC"
-                        />
-                      )
-                      : null
-                  }
-                  <FormProgress
-                    seedlotNumber={seedlotNumber}
-                    seedlotStatusCode={seedlotQuery.data?.seedlotStatus.seedlotStatusCode}
-                    getSeedlotQueryStatus={seedlotQuery.status}
-                  />
-                  <ApplicantInformation
-                    seedlotNumber={seedlotNumber}
-                    applicant={applicantData}
-                    isFetching={forestClientQuery?.isFetching}
-                  />
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-          </Column>
-        </Row>
-
-      </Stack>
+      <Row className="seedlot-details-content">
+        <Column>
+          <Tabs>
+            <TabList aria-label="List of tabs">
+              <Tab>Seedlot Details</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                {
+                  isSubmitSuccess && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'SUB')
+                    ? (
+                      <InlineNotification
+                        className="seedlot-submitted-notification"
+                        lowContrast
+                        kind="success"
+                        title="Submitted:"
+                        subtitle="Your seedlot registration was submitted with success and is now under review by the TSC"
+                      />
+                    )
+                    : null
+                }
+                <FormProgress
+                  seedlotNumber={seedlotNumber}
+                  seedlotStatusCode={seedlotQuery.data?.seedlotStatus.seedlotStatusCode}
+                  getSeedlotQueryStatus={seedlotQuery.status}
+                />
+                <ApplicantInformation
+                  seedlotNumber={seedlotNumber}
+                  applicant={applicantData}
+                  isFetching={forestClientQuery?.isFetching}
+                />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Column>
+      </Row>
     </FlexGrid>
   );
 };

@@ -1,8 +1,7 @@
 import React from 'react';
 import {
   FlexGrid,
-  Row,
-  Stack
+  Row
 } from '@carbon/react';
 
 import PageTitle from '../../../components/PageTitle';
@@ -13,18 +12,16 @@ import './styles.scss';
 
 const SeedlotDashboard = () => (
   <FlexGrid className="seedlot-page">
-    <Stack gap={7}>
-      <Row>
-        <PageTitle
-          title="Seedlots"
-          subtitle="Register and manage your seedlots"
-          enableFavourite
-          activity="seedlots"
-        />
-      </Row>
-      <SeedlotActivities />
-      <RecentSeedlots />
-    </Stack>
+    <Row>
+      <PageTitle
+        title="Seedlots"
+        subtitle="Register and manage your seedlots"
+        enableFavourite
+        activity="seedlots"
+      />
+    </Row>
+    <SeedlotActivities />
+    <RecentSeedlots />
   </FlexGrid>
 );
 

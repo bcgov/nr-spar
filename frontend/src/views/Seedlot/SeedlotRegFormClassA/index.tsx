@@ -582,7 +582,6 @@ const SeedlotRegistrationForm = () => {
             <Column className="seedlot-registration-progress">
               <SeedlotRegistrationProgress
                 progressStatus={progressStatus}
-                className="seedlot-registration-steps"
                 interactFunction={(e: number) => {
                   updateProgressStatus(e, formStep);
                   setStep((e - formStep));
