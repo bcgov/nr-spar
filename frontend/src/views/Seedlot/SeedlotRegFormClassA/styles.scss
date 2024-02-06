@@ -58,15 +58,11 @@
 
   .seedlot-registration-progress {
     margin-top: 1.5rem;
+    margin-bottom: 4rem;
   }
 
   .seedlot-registration-breadcrumb .#{vars.$bcgov-prefix}--link {
     cursor: pointer;
-  }
-
-  .seedlot-registration-steps {
-    width: 100%;
-    margin-bottom: 4rem;
   }
 
   .seedlot-registration-button-row {
@@ -144,15 +140,16 @@
       align-items: center;
       flex-direction: row;
 
-      .bx--actionable-notification__action-button{
+      .#{vars.$bcgov-prefix}--actionable-notification__action-button {
         right: 3rem;
       }
 
-      button{
+      button {
         border: none;
         margin: 0;
       }
-      button:hover{
+
+      button:hover {
         background: inherit;
         border: inherit;
         color: var(--#{vars.$bcgov-prefix}-button-tertiary);

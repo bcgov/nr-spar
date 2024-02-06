@@ -9,8 +9,6 @@ import {
   FlexGrid,
   Row,
   Column,
-  Breadcrumb,
-  BreadcrumbItem,
   Button,
   Loading,
   Grid,
@@ -33,6 +31,7 @@ import {
 } from '../../../config/TimeUnits';
 
 import PageTitle from '../../../components/PageTitle';
+import Breadcrumbs from '../../../components/Breadcrumbs';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
@@ -76,7 +75,8 @@ import {
   convertOrchard,
   convertOwnership,
   convertParentTree,
-  getSeedlotSubmitErrDescription
+  getSeedlotSubmitErrDescription,
+  getBreadcrumbs
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE,
@@ -541,17 +541,7 @@ const SeedlotRegistrationForm = () => {
         <FlexGrid fullWidth>
           <Row>
             <Column className="seedlot-registration-breadcrumb">
-              <Breadcrumb>
-                <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>
-                  Seedlots
-                </BreadcrumbItem>
-                <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>
-                  My seedlots
-                </BreadcrumbItem>
-                <BreadcrumbItem onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}>
-                  {`Seedlot ${seedlotNumber}`}
-                </BreadcrumbItem>
-              </Breadcrumb>
+              <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
             </Column>
           </Row>
           <Row>
@@ -592,7 +582,6 @@ const SeedlotRegistrationForm = () => {
             <Column className="seedlot-registration-progress">
               <SeedlotRegistrationProgress
                 progressStatus={progressStatus}
-                className="seedlot-registration-steps"
                 interactFunction={(e: number) => {
                   updateProgressStatus(e, formStep);
                   setStep((e - formStep));

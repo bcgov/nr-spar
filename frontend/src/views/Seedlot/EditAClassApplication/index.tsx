@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActionableNotification,
-  Breadcrumb,
-  BreadcrumbItem,
   FlexGrid,
   Column,
   Row,
@@ -27,15 +25,18 @@ import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
 import PathConstants from '../../../routes/pathConstants';
 import ErrorToast from '../../../components/Toast/ErrorToast';
+import Breadcrumbs from '../../../components/Breadcrumbs';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
+import { addParamToPath } from '../../../utils/PathUtils';
+
+import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
-import { addParamToPath } from '../../../utils/PathUtils';
 
 const EditAClassApplication = () => {
   const navigate = useNavigate();
@@ -153,17 +154,7 @@ const EditAClassApplication = () => {
   return (
     <FlexGrid className="edit-a-class-seedlot-page">
       <Row className="breadcrumb-row">
-        <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>
-            Seedlots
-          </BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>
-            My seedlots
-          </BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}>
-            {`Seedlot ${seedlotNumber}`}
-          </BreadcrumbItem>
-        </Breadcrumb>
+        <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
       </Row>
       <Row className="title-row">
         <PageTitle
