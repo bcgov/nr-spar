@@ -28,7 +28,7 @@ const ComboButton = ({
   items,
   menuOptionsClass
 }: ComboButtonProps) => (
-  <div className="combo-button-wrapper">
+  <div className="combo-button-container">
     <Button
       className="combo-button"
       size="md"

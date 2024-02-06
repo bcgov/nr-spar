@@ -1,44 +1,42 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
-.combo-button {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  padding-right: 1.25rem;
-}
+.combo-button-container {
+  display: flex;
+  flex-direction: row;
+  height: fit-content;
 
-.combo-options {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  background: var(--#{vars.$bcgov-prefix}-background-brand);
-  border-left: solid white 1px;
-}
+  .combo-button {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    padding-right: 1.25rem;
+  }
 
-.combo-options svg,
-.combo-options.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open svg {
-  fill: white;
-}
+  .combo-options {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background: var(--#{vars.$bcgov-prefix}-background-brand);
+    border-left: solid white 1px;
+  }
 
-.combo-options:hover {
-  background-color: var(--#{vars.$bcgov-prefix}-button-primary-hover);
-}
+  svg,
+  .#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open svg {
+    fill: white;
+  }
 
-.combo-options.#{vars.$bcgov-prefix}--overflow-menu:focus {
-  outline-color: white;
-  outline-width: 1px;
-}
+  .combo-options.#{vars.$bcgov-prefix}--overflow-menu:focus {
+    outline-color: white;
+    outline-width: 1px;
+  }
 
-button.combo-options + .#{vars.$bcgov-prefix}--popover {
-  display: none;
-}
+  .#{vars.$bcgov-prefix}--popover {
+    display: none;
+  }
 
-.combo-options.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  box-shadow: 0 2px 6px var(--#{vars.$bcgov-prefix}-shadow, rgba(0, 0, 0, 0.3));
-  background-color: var(--#{vars.$bcgov-prefix}-button-primary-active);
-  transition: none;
-}
-
-.#{vars.$bcgov-prefix}--overflow-menu-options[data-floating-menu-direction=bottom]:not(.#{vars.$bcgov-prefix}--breadcrumb-menu-options)::after {
-  top: 0;
+  .#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    box-shadow: 0 2px 6px var(--#{vars.$bcgov-prefix}-shadow, rgba(0, 0, 0, 0.3));
+    background-color: var(--#{vars.$bcgov-prefix}-button-primary-active);
+    transition: none;
+  }
 }

@@ -7,3 +7,7 @@ export const EmptyMultiOptObj: MultiOptionsObj = {
   label: '',
   description: ''
 };
+
+export const SMALL_SCREEN_WIDTH = 320;
+export const MEDIUM_SCREEN_WIDTH = 672;
+export const LARGE_SCREEN_WIDTH = 1056;
