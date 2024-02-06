@@ -12,7 +12,7 @@ import { getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
-import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientDisplayType';
+import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { FilterObj, filterInput } from '../../utils/FilterUtils';
 
@@ -224,7 +224,7 @@ const ApplicantAgencyFields = ({
         </Column>
       </Row>
       {
-        !isDefault.value
+        !isDefault.value && !readOnly
           ? (
             <Row className="applicant-client-search-row">
               <Column sm={4} md={4} lg={16} xlg={16}>
@@ -234,11 +234,11 @@ const ApplicantAgencyFields = ({
                   <ClientSearchModal
                     linkText="open the client search"
                     modalLabel="Register A-Class Seedlot"
-                    applySelectedClient={(clientAgency: ForestClientDisplayType) => {
+                    applySelectedClient={(client: ForestClientSearchType) => {
                       const agencyObj: MultiOptionsObj = {
-                        code: clientAgency.number,
-                        label: `${clientAgency.number} - ${clientAgency.fullName} - ${clientAgency.acronym}`,
-                        description: clientAgency.fullName
+                        code: client.clientNumber,
+                        label: `${client.clientNumber} - ${client.clientName} - ${client.acronym}`,
+                        description: client.clientName
                       };
 
                       const selectedAgency = {
@@ -249,7 +249,7 @@ const ApplicantAgencyFields = ({
 
                       const selectedLocationCode = {
                         ...locationCode,
-                        value: clientAgency.locationCode,
+                        value: client.locationCode,
                         isInvalid: false
                       };
 

@@ -176,13 +176,15 @@ public class ForestClientApiProvider implements Provider {
             "fetchLocationsByClientNumber",
             page);
 
-        if (!shouldFetchAll) {
+        int responseSize = response.getBody().size();
+
+        if (!shouldFetchAll || responseSize == 0) {
           return response.getBody();
         }
 
         totalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
 
-        totalFetched += response.getBody().size();
+        totalFetched += responseSize;
 
         page += 1;
 
@@ -285,9 +287,16 @@ public class ForestClientApiProvider implements Provider {
             "fetchClientsByClientName",
             page);
 
+        int responseSize = response.getBody().size();
+
+        // Empty response will not have a x-total-count header so we return the empty array here.
+        if (responseSize == 0) {
+          return result;
+        }
+
         totalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
 
-        totalFetched += response.getBody().size();
+        totalFetched += responseSize;
 
         page += 1;
 

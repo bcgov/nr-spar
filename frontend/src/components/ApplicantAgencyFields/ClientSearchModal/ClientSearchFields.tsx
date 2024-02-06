@@ -68,7 +68,9 @@ const ClientSearchFields = ({
           className="client-search-button"
           disabled={mutationFn.isLoading}
           onClick={
-            () => mutationFn.mutate({ word: searchWord, option: searchOption.option })
+            searchWord.length
+              ? () => mutationFn.mutate()
+              : null
           }
         >
           Search
