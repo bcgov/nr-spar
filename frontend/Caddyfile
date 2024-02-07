@@ -18,9 +18,6 @@
 	}
 
 	header {
-		Access-Control-Allow-Headers *
-		Access-Control-Allow-Methods *
-		Access-Control-Allow-Origin *
 		X-Frame-Options "SAMEORIGIN"
 		X-XSS-Protection "1;mode=block"
 		Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate"
