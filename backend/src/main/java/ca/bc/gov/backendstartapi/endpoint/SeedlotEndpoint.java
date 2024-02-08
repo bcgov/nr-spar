@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.dto.SeedlotAClassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -274,6 +275,45 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
     return seedlotService.getSingleSeedlotInfo(seedlotNumber);
   }
+
+  /**
+   * Get full information from a single seedlot.
+   *
+   * @param seedlotNumber the seedlot number to fetch the info for
+   * @return A {@link SeedlotAClassFormDto} with all the current information for
+   *         the seedlot and parent tree data.
+   */
+  @GetMapping("/a-class-form-full/{seedlotNumber}")
+  @Operation(
+      summary = "Fetch a single seedlot information and respective parent tree data",
+      description =
+          """
+          Fetch all current information from a single seedlot and respective
+          parent tree data, identified by it's number
+          """)
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "The Seedlot info was correctly found"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Could not find information for the given seedlot number")
+      })
+  public SeedlotAClassFormDto getFullSeedlotInfo(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber) {
+    return seedlotService.getAClassSeedlotFormInfo(seedlotNumber);
+  }
+
 
   /**
    * PATCH an entry on the Seedlot table.
