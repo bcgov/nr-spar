@@ -157,7 +157,8 @@ const getPageText = () => ({
     secondaryButtonText: 'Cancel'
   },
   emptySection: {
-    title: 'Nothing to show yet!'
+    title: 'Nothing to show yet!',
+    emptyOrchard: 'Empty orchard(s)!'
   },
   invalidPTNumberMsg: 'One or more of the parent tree numbers entered are invalid because these numbers might not exist within your orchard composition.',
   errNotifEndMsg: 'Please review your entries and remember to check all pages.',
@@ -783,5 +784,11 @@ export const getEmptySectionDescription = (setStep: Function) => (
     &quot;.
     <br />
     Please, fill the orchard ID to complete the cone and pollen table.
+  </span>
+);
+
+export const noParentTreeDescription = (
+  <span>
+    No parent tree found under selected orchard(s)
   </span>
 );

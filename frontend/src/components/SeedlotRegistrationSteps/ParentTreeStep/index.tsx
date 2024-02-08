@@ -40,7 +40,8 @@ import InfoSectionRow from '../../InfoSection/InfoSectionRow';
 import {
   pageText, headerTemplate, geneticWorthDict, SummarySectionConfig,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, DEFAULT_MIX_PAGE_SIZE,
-  PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate, getEmptySectionDescription
+  PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate,
+  getEmptySectionDescription, noParentTreeDescription
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem
@@ -49,7 +50,8 @@ import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   fillCalculatedInfo, generateGenWorthPayload, addNewMixRow, calcMixTabInfoItems,
-  fillMixTable
+  fillMixTable,
+  hasParentTreesForSelectedOrchards
 } from './utils';
 
 import './styles.scss';
@@ -102,6 +104,7 @@ const ParentTreeStep = () => {
   const [applicableGenWorths, setApplicableGenWorths] = useState<string[]>([]);
   // Array that stores invalid p.t. numbers uploaded from users from composition tabs
   const [invalidPTNumbers, setInvalidPTNumbers] = useState<string[]>([]);
+  const [isOrchardEmpty, setIsOrchardEmpty] = useState<boolean>(false);
 
   const emptySectionDescription = getEmptySectionDescription(setStep);
 
@@ -181,15 +184,23 @@ const ParentTreeStep = () => {
       && allParentTreeQuery.isFetched
       && allParentTreeQuery.data
     ) {
-      processParentTreeData(
-        allParentTreeQuery.data,
-        state,
-        orchardsData.map((o) => o.selectedItem?.code),
-        currentPage,
-        currPageSize,
-        setSlicedRows,
-        setStepData
-      );
+      const orchardIds = orchardsData.map((o) => o.selectedItem?.code);
+
+      if (hasParentTreesForSelectedOrchards(orchardIds, allParentTreeQuery.data)) {
+        setDisableOptions(false);
+        processParentTreeData(
+          allParentTreeQuery.data,
+          state,
+          orchardsData.map((o) => o.selectedItem?.code),
+          currentPage,
+          currPageSize,
+          setSlicedRows,
+          setStepData
+        );
+      } else {
+        setDisableOptions(true);
+        setIsOrchardEmpty(true);
+      }
     }
   }, [state.tableRowData, allParentTreeQuery.isFetched]);
 
@@ -452,7 +463,25 @@ const ParentTreeStep = () => {
                     }
                     {
                       disableOptions
-                        ? <EmptySection title={pageText.emptySection.title} description={emptySectionDescription} pictogram="CloudyWindy" />
+                        ? (
+                          <EmptySection
+                            title={
+                              isOrchardEmpty
+                                ? pageText.emptySection.emptyOrchard
+                                : pageText.emptySection.title
+                            }
+                            description={
+                              isOrchardEmpty
+                                ? noParentTreeDescription
+                                : emptySectionDescription
+                            }
+                            pictogram={
+                              isOrchardEmpty
+                                ? 'Question'
+                                : 'CloudyWindy'
+                            }
+                          />
+                        )
                         : renderPagination(
                           state,
                           currentTab,

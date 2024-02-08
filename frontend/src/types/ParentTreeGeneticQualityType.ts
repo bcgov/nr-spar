@@ -18,6 +18,9 @@ export type SingleParentTreeGeneticObj = {
   geneticQualityValue: number;
 };
 
+/**
+ * The type returned from get parent trees by species endpoint.
+ */
 export type ParentTreeGeneticQualityType = {
   [key: string]: any;
   parentTreeId: number;
