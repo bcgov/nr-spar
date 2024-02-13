@@ -43,6 +43,15 @@ public class SeedlotSeedPlanZoneEntity {
 
   // endregion
 
+  @Column(name = "seed_plan_zone_id", nullable = false)
+  @NonNull
+  private Integer seedPlanZoneId;
+
+  @ManyToOne
+  @JoinColumn(name = "genetic_class_code")
+  @NonNull
+  private GeneticClassEntity geneticClass;
+
   @Embedded private AuditInformation auditInformation;
 
   @Column(name = "revision_count", nullable = false)
