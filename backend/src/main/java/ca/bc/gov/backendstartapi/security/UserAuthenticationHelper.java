@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.security;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -96,8 +97,12 @@ public class UserAuthenticationHelper {
     SparLog.info("User not authenticated!");
 
     // Checks if it's the 'docker-compose' profile enabled (local dev env)
-    String[] profiles = environment.getActiveProfiles();
-    boolean isDockerComposeProfile = Arrays.asList(profiles).contains("docker-compose");
+    boolean isDockerComposeProfile = false;
+    if (!Objects.isNull(environment)) {
+      String[] profiles = environment.getActiveProfiles();
+      isDockerComposeProfile = Arrays.asList(profiles).contains("docker-compose");
+    }
+
     if (isDockerComposeProfile) {
       SparLog.info("Local development environment found! Using dev user!");
 
