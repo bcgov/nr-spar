@@ -35,7 +35,7 @@
     </rollingPolicy>
   </appender>
 
-  <springProfile name="dev,all-tests,integration-test,test">
+  <springProfile name="dev,all-tests,integration-test,test,docker-compose">
     <!-- LOG everything at INFO level -->
     <root level="info">
       <appender-ref ref="Console" />
