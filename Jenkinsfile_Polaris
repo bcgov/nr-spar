@@ -7,6 +7,12 @@ def podman
 
 pipeline {
     agent none 
+	environment {
+		VTOKEN_COMMENT = 'Vault Token'
+        VTOKEN = credentials('VTOKEN')
+		TESTE_COMMMENT = 'Test Variable to check environment spread into podman instance'
+		TESTE = '123'
+    }
     stages {
          stage('Checkout code') {
 			agent {
@@ -23,50 +29,14 @@ pipeline {
 		 	steps {
 				sh 'pwd'
 				sh 'dir'
-				sh 'podman build --file=Dockerfile_Polaris .'
+				sh 'echo $TESTE'
+				sh 'echo $VURL'
+				sh 'echo $TESTE_MODE'
+				sh 'echo $DSE_TEST_EXEC'
+				sh 'podman build --env=vtoken=$VTOKEN --env=vurl=$VURL --env=test_mode=$DSE_TEST_EXEC --env=teste=$TESTE --file=Dockerfile_Polaris .'
 			}
-		 }
+		 }		 
     }
-	/* post {
-        unstable {
-            node(Podman.AGENT_LABEL_APP) {
-                script {
-                    if (intention) {
-                        println intention.close(false)
-                    }
-                }
-            }
-        }
-        failure {
-            node(Podman.AGENT_LABEL_APP) {
-                script {
-                    if (intention) {
-                        println intention.close(false)
-                    }
-                }
-            }
-        }
-        aborted {
-            node(Podman.AGENT_LABEL_APP) {
-                script {
-                    if (intention) {
-                        println  intention.close(true)
-                    }
-                }
-            }
-        }
-        always {
-            node(Podman.AGENT_LABEL_APP) {
-                cleanWs(
-                    cleanWhenAborted: true,
-                    cleanWhenFailure: false,
-                    cleanWhenSuccess: true,
-                    cleanWhenUnstable: false,
-                    deleteDirs: true
-                )
-            }
-        }
-    }*/
 }
 
  

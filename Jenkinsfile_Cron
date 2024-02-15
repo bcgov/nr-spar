@@ -28,7 +28,7 @@ pipeline {
          }
 		 stage('execute-data-sync') {
              steps{
-                 withCredentials([usernamePassword(credentialsId: 'IDTESTE_SPAR', passwordVariable: 'Psw_Test', usernameVariable: 'Usr_teste')]) {
+                 withCredentials([string(credentialsId: 'VltEndPoint', variable: 'vltEndPoint'), string(credentialsId: 'VltToken', variable: 'vltToken'), usernamePassword(credentialsId: 'IDTESTE_SPAR', passwordVariable: 'Psw_Test', usernameVariable: 'Usr_teste')]) {
                     bat '''
                         source ve/bin/activate
 					    python -m pip install -r ./requirements.txt --cache-dir ./data
