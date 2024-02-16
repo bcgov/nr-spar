@@ -254,7 +254,8 @@ public class SeedlotService {
     // Orchard Step 4
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto());
     // Parent Tree Step 5
-    saveSeedlotFormStep5(seedlot, form.seedlotFormParentTreeSmpDtoList());
+    saveSeedlotFormStep5(
+        seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
     // Extraction Step 6
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
 
@@ -303,7 +304,9 @@ public class SeedlotService {
   }
 
   private void saveSeedlotFormStep5(
-      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList) {
     SparLog.info(
         "Saving Seedlot Form Step 5-Parent Tree SMP Mix for seedlot number {}", seedlot.getId());
 
@@ -312,9 +315,15 @@ public class SeedlotService {
         seedlot, seedlotFormParentTreeDtoList);
     seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
 
-    smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
-    smpMixGeneticQualityService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
-    seedlotParentTreeSmpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+    // SMP Mix information is optional, so the array may be empty,
+    // in this case there is no need to save the list
+    if (!seedlotFormParentTreeSmpDtoList.isEmpty()) {
+      smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
+      smpMixGeneticQualityService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
+      seedlotParentTreeSmpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
+    } else {
+      SparLog.info("No SmpMix data for seedlot number {}", seedlot.getId());
+    }
   }
 
   private void saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
