@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.config;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
@@ -27,9 +26,11 @@ public class CorsConfig implements WebMvcConfigurer {
       SparLog.info("allowedOrigins: {}", Arrays.asList(allowedOrigins));
 
       String[] origins = new String[allowedOrigins.length];
-      IntStream.range(0, allowedOrigins.length).forEach(idx -> {
-        origins[idx] = allowedOrigins[idx];
-      });
+      IntStream.range(0, allowedOrigins.length)
+          .forEach(
+              idx -> {
+                origins[idx] = allowedOrigins[idx];
+              });
 
       registry
           .addMapping("/**")

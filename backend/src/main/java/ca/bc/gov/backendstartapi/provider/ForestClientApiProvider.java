@@ -312,7 +312,7 @@ public class ForestClientApiProvider implements Provider {
     while (totalFetched < totalCount) {
       try {
         String uriBuilder =
-            UriComponentsBuilder.fromUriString(rootUri + "%s/clients/findByNames")
+            UriComponentsBuilder.fromUriString(rootUri + "/clients/findByNames")
                 .queryParam("page", "{page}")
                 .queryParam("size", "{size}")
                 .queryParam("clientName", "{clientName}")

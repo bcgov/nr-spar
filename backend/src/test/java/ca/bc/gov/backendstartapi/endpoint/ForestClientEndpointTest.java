@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
+import ca.bc.gov.backendstartapi.exception.ForestClientException;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import java.util.Collections;
 import java.util.List;
@@ -88,7 +89,7 @@ class ForestClientEndpointTest {
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType("application/json"))
         .andExpectAll(
             jsonPath("$.clientNumber").value(client.clientNumber()),
             jsonPath("$.clientName").value(client.clientName()),
@@ -102,7 +103,7 @@ class ForestClientEndpointTest {
   @Test
   @DisplayName("fetchNonExistentClientByNumber")
   void fetchNonExistentClientByNumber() throws Exception {
-    when(forestClientService.fetchClient("00000000")).thenReturn(null);
+    when(forestClientService.fetchClient("00000000")).thenThrow(new ForestClientException(404));
 
     mockMvc
         .perform(
@@ -135,7 +136,7 @@ class ForestClientEndpointTest {
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType("application/json"))
         .andExpectAll(
             jsonPath("$.clientNumber").value(client.clientNumber()),
             jsonPath("$.clientName").value(client.clientName()),
@@ -149,7 +150,7 @@ class ForestClientEndpointTest {
   @Test
   @DisplayName("fetchNonExistentClientByAcronym")
   void fetchNonExistentClientByAcronym() throws Exception {
-    when(forestClientService.fetchClient("JSMITH")).thenReturn(null);
+    when(forestClientService.fetchClient("JSMITH")).thenThrow(new ForestClientException(404));
 
     mockMvc
         .perform(
@@ -197,7 +198,7 @@ class ForestClientEndpointTest {
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType("application/json"))
         .andExpectAll(
             jsonPath("$[0].clientNumber").value(locations.get(0).clientNumber()),
             jsonPath("$[0].locationCode").value(locations.get(0).locationCode()),
@@ -273,7 +274,7 @@ class ForestClientEndpointTest {
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().contentType("application/json"))
         .andExpectAll(
             jsonPath("$.clientNumber").value(testLocation.clientNumber()),
             jsonPath("$.locationCode").value(testLocation.locationCode()),

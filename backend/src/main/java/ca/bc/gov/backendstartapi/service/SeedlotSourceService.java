@@ -39,6 +39,13 @@ public class SeedlotSourceService {
     return resultList;
   }
 
+  /**
+   * Get a {@link SeedlotSourceEntity} from the database given its code.
+   *
+   * @param code The seedlot source code.
+   * @return A {@link SeedlotSourceEntity} instance if found
+   * @throws SeedlotSourceNotFoundException if not found
+   */
   public SeedlotSourceEntity getSeedlotSourceEntity(String code) {
     if (null == code || "null".equals(code)) {
       throw new InvalidSeedlotRequestException();

@@ -6,11 +6,10 @@ import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
-import lombok.RequiredArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +50,13 @@ public class GeneticClassService {
         .orElseThrow(NoGeneticWorthException::new);
   }
 
+  /**
+   * Get a {@link GeneticClassEntity} from the database given its code.
+   *
+   * @param code The genetic class code.
+   * @return A {@link GeneticClassEntity} instance if found
+   * @throws InvalidSeedlotRequestException if not found
+   */
   public GeneticClassEntity getGeneticClassEntity(Character code) {
     String genClassCode = String.valueOf(code);
     if (null == genClassCode || "null".equals(genClassCode)) {
