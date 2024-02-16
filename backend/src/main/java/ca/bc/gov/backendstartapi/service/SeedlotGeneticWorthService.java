@@ -82,8 +82,15 @@ public class SeedlotGeneticWorthService {
     List<SeedlotGeneticWorth> seedlotGeneticWorths = new ArrayList<>();
     for (ParentTreeGeneticQualityDto ptgqDto : genWorthCodeToInsert) {
 
+      String geneticWorthCode = ptgqDto.geneticWorthCode();
+      if (geneticWorthCode == null) {
+        SparLog.warn(
+            "No genetic worth entity found for genetic word code {}", ptgqDto.geneticWorthCode());
+        geneticWorthCode = "";
+      }
+
       GeneticWorthEntity gwEntity =
-          geneticWorthEntityDao.getGeneticWorthEntity(ptgqDto.geneticWorthCode()).orElseThrow();
+          geneticWorthEntityDao.getGeneticWorthEntity(geneticWorthCode).orElseThrow();
 
       SeedlotGeneticWorth sgw =
           new SeedlotGeneticWorth(seedlot, gwEntity, loggedUserService.createAuditCurrentUser());

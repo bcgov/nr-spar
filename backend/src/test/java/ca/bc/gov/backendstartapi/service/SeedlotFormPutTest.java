@@ -22,10 +22,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
-import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -44,11 +41,9 @@ class SeedlotFormPutTest {
 
   @Mock SeedlotRepository seedlotRepository;
 
-  @Mock SeedlotSourceRepository seedlotSourceRepository;
+  @Mock SeedlotSourceService seedlotSourceService;
 
-  @Mock SeedlotStatusRepository seedlotStatusRepository;
-
-  @Mock GeneticClassRepository geneticClassRepository;
+  @Mock GeneticClassService geneticClassService;
 
   @Mock LoggedUserService loggedUserService;
 
@@ -160,9 +155,8 @@ class SeedlotFormPutTest {
     seedlotService =
         new SeedlotService(
             seedlotRepository,
-            seedlotSourceRepository,
-            seedlotStatusRepository,
-            geneticClassRepository,
+            seedlotSourceService,
+            geneticClassService,
             loggedUserService,
             seedlotCollectionMethodService,
             seedlotOwnerQuantityService,

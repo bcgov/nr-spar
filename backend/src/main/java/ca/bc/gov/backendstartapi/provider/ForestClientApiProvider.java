@@ -7,9 +7,11 @@ import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
+import ca.bc.gov.backendstartapi.exception.BadConfigurationException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -69,7 +71,7 @@ public class ForestClientApiProvider implements Provider {
   }
 
   private Optional<ForestClientDto> fetchClientByNumber(String number) {
-    String apiUrl = String.format("%s/clients/findByClientNumber/{number}", rootUri);
+    String apiUrl = rootUri + "/clients/findByClientNumber/{number}";
     SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     if (shouldMock()) {
@@ -77,13 +79,23 @@ public class ForestClientApiProvider implements Provider {
     }
 
     try {
+      HttpHeaders headers = addHttpHeaders();
+      if (headers == null) {
+        throw new BadConfigurationException();
+      }
+
+      Map<String, Object> params = createParamsMap("number", number);
+      if (params == null) {
+        throw new BadConfigurationException();
+      }
+
       ResponseEntity<ForestClientDto> response =
           restTemplate.exchange(
               apiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
+              HttpMethod.valueOf("GET"),
+              new HttpEntity<>(headers),
               ForestClientDto.class,
-              createParamsMap("number", number));
+              params);
 
       SparLog.info(
           "Finished {} request for function {} - 200 OK!", PROVIDER, "fetchClientByNumber");
@@ -97,7 +109,7 @@ public class ForestClientApiProvider implements Provider {
   }
 
   private Optional<ForestClientDto> fetchClientByAcronym(String acronym) {
-    String apiUrl = String.format("%s/clients/findByAcronym?acronym={acronym}", rootUri);
+    String apiUrl = rootUri + "/clients/findByAcronym?acronym={acronym}";
     SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     if (shouldMock()) {
@@ -105,13 +117,23 @@ public class ForestClientApiProvider implements Provider {
     }
 
     try {
+      HttpHeaders headers = addHttpHeaders();
+      if (headers == null) {
+        throw new BadConfigurationException();
+      }
+
+      Map<String, Object> params = createParamsMap("acronym", acronym.toUpperCase());
+      if (params == null) {
+        throw new BadConfigurationException();
+      }
+
       ResponseEntity<List<ForestClientDto>> response =
           restTemplate.exchange(
               apiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
+              HttpMethod.valueOf("GET"),
+              new HttpEntity<>(headers),
               new ParameterizedTypeReference<List<ForestClientDto>>() {},
-              createParamsMap("acronym", acronym.toUpperCase()));
+              params);
 
       List<ForestClientDto> dtoList = response.getBody();
 
@@ -157,18 +179,28 @@ public class ForestClientApiProvider implements Provider {
 
     while (totalFetched < totalCount) {
       try {
-        String apiUrl =
-            String.format(
-                "%s/clients/{clientNumber}/locations?page=%s&size=%s", rootUri, page, size);
+        String apiUrl = rootUri;
+        apiUrl += "/clients/{clientNumber}/locations?page=" + page + "&size=" + size;
+
         SparLog.info("Starting {} request to {} for page {}", PROVIDER, apiUrl, page);
+
+        HttpHeaders headers = addHttpHeaders();
+        if (headers == null) {
+          throw new BadConfigurationException();
+        }
+
+        Map<String, Object> params = createParamsMap("clientNumber", clientNumber);
+        if (params == null) {
+          throw new BadConfigurationException();
+        }
 
         ResponseEntity<List<ForestClientLocationDto>> response =
             restTemplate.exchange(
                 apiUrl,
-                HttpMethod.GET,
-                new HttpEntity<>(addHttpHeaders()),
+                HttpMethod.valueOf("GET"),
+                new HttpEntity<>(headers),
                 new ParameterizedTypeReference<List<ForestClientLocationDto>>() {},
-                createParamsMap("clientNumber", clientNumber));
+                params);
 
         SparLog.info(
             "Finished {} request for function {} for page {} - 200 OK!",
@@ -176,13 +208,24 @@ public class ForestClientApiProvider implements Provider {
             "fetchLocationsByClientNumber",
             page);
 
-        int responseSize = response.getBody().size();
-
-        if (!shouldFetchAll || responseSize == 0) {
-          return response.getBody();
+        int responseSize = 0;
+        List<ForestClientLocationDto> clientDtos = response.getBody();
+        if (clientDtos != null) {
+          responseSize = clientDtos.size();
         }
 
-        totalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
+        if (!shouldFetchAll || responseSize == 0) {
+          return clientDtos;
+        }
+
+        totalCount = 0;
+        HttpHeaders responseHeaders = response.getHeaders();
+        if (responseHeaders != null) {
+          List<String> headerValues = responseHeaders.get("x-total-count");
+          if (headerValues != null) {
+            totalCount = Integer.parseInt(headerValues.get(0));
+          }
+        }
 
         totalFetched += responseSize;
 
@@ -211,7 +254,7 @@ public class ForestClientApiProvider implements Provider {
   @Override
   public ForestClientLocationDto fetchSingleClientLocation(
       String clientNumber, String locationCode) {
-    String apiUrl = String.format("%s/clients/{clientNumber}/locations/{locationCode}", rootUri);
+    String apiUrl = rootUri + "/clients/{clientNumber}/locations/{locationCode}";
     SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     if (shouldMock()) {
@@ -219,13 +262,24 @@ public class ForestClientApiProvider implements Provider {
     }
 
     try {
+      HttpHeaders headers = addHttpHeaders();
+      if (headers == null) {
+        throw new BadConfigurationException();
+      }
+
+      Map<String, Object> params =
+          createParamsMap("clientNumber", clientNumber, "locationCode", locationCode);
+      if (params == null) {
+        throw new BadConfigurationException();
+      }
+
       ResponseEntity<ForestClientLocationDto> response =
           restTemplate.exchange(
               apiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
+              HttpMethod.valueOf("GET"),
+              new HttpEntity<>(headers),
               new ParameterizedTypeReference<ForestClientLocationDto>() {},
-              createParamsMap("clientNumber", clientNumber, "locationCode", locationCode));
+              params);
 
       SparLog.info(
           "Finished {} request for function {} - 200 OK!", PROVIDER, "fetchSingleClientLocation");
@@ -258,7 +312,7 @@ public class ForestClientApiProvider implements Provider {
     while (totalFetched < totalCount) {
       try {
         String uriBuilder =
-            UriComponentsBuilder.fromUriString(String.format("%s/clients/findByNames", rootUri))
+            UriComponentsBuilder.fromUriString(rootUri + "%s/clients/findByNames")
                 .queryParam("page", "{page}")
                 .queryParam("size", "{size}")
                 .queryParam("clientName", "{clientName}")
@@ -267,19 +321,30 @@ public class ForestClientApiProvider implements Provider {
 
         SparLog.info("Starting {} request to {}, Page {}", PROVIDER, uriBuilder, page);
 
+        HttpHeaders headers = addHttpHeaders();
+        if (headers == null) {
+          throw new BadConfigurationException();
+        }
+
+        Map<String, Object> params =
+            createParamsMap(
+                "page",
+                String.valueOf(page),
+                "size",
+                String.valueOf(size),
+                "clientName",
+                clientName);
+        if (params == null) {
+          throw new BadConfigurationException();
+        }
+
         ResponseEntity<List<ForestClientDto>> response =
             restTemplate.exchange(
                 uriBuilder,
-                HttpMethod.GET,
-                new HttpEntity<>(addHttpHeaders()),
+                HttpMethod.valueOf("GET"),
+                new HttpEntity<>(headers),
                 new ParameterizedTypeReference<List<ForestClientDto>>() {},
-                createParamsMap(
-                    "page",
-                    String.valueOf(page),
-                    "size",
-                    String.valueOf(size),
-                    "clientName",
-                    clientName));
+                params);
 
         SparLog.info(
             "Finished {} request for function {}, Page {} - 200 OK!",
@@ -287,14 +352,23 @@ public class ForestClientApiProvider implements Provider {
             "fetchClientsByClientName",
             page);
 
-        int responseSize = response.getBody().size();
+        List<ForestClientDto> body = response.getBody();
+
+        int responseSize = body == null ? 0 : body.size();
 
         // Empty response will not have a x-total-count header so we return the empty array here.
         if (responseSize == 0) {
           return result;
         }
 
-        totalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
+        totalCount = 0;
+        HttpHeaders responseHeaders = response.getHeaders();
+        if (responseHeaders != null) {
+          List<String> headerValues = responseHeaders.get("x-total-count");
+          if (headerValues != null) {
+            totalCount = Integer.parseInt(headerValues.get(0));
+          }
+        }
 
         totalFetched += responseSize;
 
@@ -314,17 +388,28 @@ public class ForestClientApiProvider implements Provider {
   }
 
   @Override
-  public String[] addAuthorizationHeader() {
-    String apiKey = this.providersConfig.getForestClientApiKey();
-    return new String[] {"X-API-KEY", apiKey};
+  public String getAuthorizationHeaderValue() {
+    return this.providersConfig.getForestClientApiKey();
+  }
+
+  @Override
+  public String getAuthorizationHeaderKey() {
+    return "X-API-KEY";
   }
 
   @Override
   public HttpHeaders addHttpHeaders() {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-    String[] authorization = addAuthorizationHeader();
-    headers.set(authorization[0], authorization[1]);
+
+    String authKey = getAuthorizationHeaderValue();
+    if (null == authKey) {
+      SparLog.warn("Forest Client authentication key is not valid.");
+      authKey = "";
+    }
+
+    String authValue = getAuthorizationHeaderKey();
+    headers.set(authKey, authValue);
 
     return headers;
   }

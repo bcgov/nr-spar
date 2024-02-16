@@ -9,8 +9,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
-import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
-import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -19,10 +17,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
-import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -44,11 +39,9 @@ public class SeedlotService {
 
   private final SeedlotRepository seedlotRepository;
 
-  private final SeedlotSourceRepository seedlotSourceRepository;
+  private final SeedlotSourceService seedlotSourceService;
 
-  private final SeedlotStatusRepository seedlotStatusRepository;
-
-  private final GeneticClassRepository geneticClassRepository;
+  private final GeneticClassService geneticClassService;
 
   private final LoggedUserService loggedUserService;
 
@@ -85,23 +78,19 @@ public class SeedlotService {
 
     Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
 
-    Optional<SeedlotStatusEntity> seedLotStatusEntity =
-        seedlotStatusRepository.findById(Constants.CLASS_A_SEEDLOT_STATUS);
-    seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(InvalidSeedlotRequestException::new));
+    seedlot.setSeedlotStatus(
+        seedlotStatusService.getValidSeedlotStatus(Constants.CLASS_A_SEEDLOT_STATUS).get());
 
     seedlot.setApplicantClientNumber(createDto.applicantClientNumber());
     seedlot.setApplicantLocationCode(createDto.applicantLocationCode());
     seedlot.setApplicantEmailAddress(createDto.applicantEmailAddress());
     seedlot.setVegetationCode(createDto.vegetationCode());
 
-    Optional<GeneticClassEntity> classEntity =
-        geneticClassRepository.findById(createDto.geneticClassCode().toString());
-    seedlot.setGeneticClass(classEntity.orElseThrow(InvalidSeedlotRequestException::new));
+    seedlot.setGeneticClass(
+        geneticClassService.getGeneticClassEntity(createDto.geneticClassCode()));
 
-    Optional<SeedlotSourceEntity> seedlotSourceEntity =
-        seedlotSourceRepository.findById(createDto.seedlotSourceCode());
-    seedlot.setSeedlotSource(seedlotSourceEntity.orElseThrow(InvalidSeedlotRequestException::new));
-
+    seedlot.setSeedlotSource(
+        seedlotSourceService.getSeedlotSourceEntity(createDto.seedlotSourceCode()));
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
     seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
@@ -206,12 +195,8 @@ public class SeedlotService {
 
     seedlotInfo.setApplicantEmailAddress(patchDto.applicantEmailAddress());
 
-    SeedlotSourceEntity updatedSource =
-        seedlotSourceRepository
-            .findById(patchDto.seedlotSourceCode())
-            .orElseThrow(SeedlotSourceNotFoundException::new);
-
-    seedlotInfo.setSeedlotSource(updatedSource);
+    seedlotInfo.setSeedlotSource(
+        seedlotSourceService.getSeedlotSourceEntity(patchDto.seedlotSourceCode()));
 
     seedlotInfo.setSourceInBc(patchDto.bcSourceInd());
 
@@ -232,10 +217,13 @@ public class SeedlotService {
    */
   @Transactional
   public SeedlotCreateResponseDto submitSeedlotForm(
-      String seedlotNumber, SeedlotFormSubmissionDto form) {
+      @NonNull String seedlotNumber, SeedlotFormSubmissionDto form) {
     SparLog.info("Seedlot number {} submitted for saving!", seedlotNumber);
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
-    Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
+    Seedlot seedlot = seedlotEntity.get();
+    if (null == seedlot) {
+      throw new SeedlotNotFoundException();
+    }
 
     /*
      * Merging entities script:

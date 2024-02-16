@@ -48,7 +48,9 @@ public interface Provider {
   }
 
   // Common methods
-  String[] addAuthorizationHeader();
+  String getAuthorizationHeaderKey();
+
+  String getAuthorizationHeaderValue();
 
   HttpHeaders addHttpHeaders();
 
@@ -60,8 +62,8 @@ public interface Provider {
    *     "application/json", "accept", "someting"
    * @return Map containing all key and value parameters.
    */
-  default Map<String, String> createParamsMap(String... values) {
-    Map<String, String> uriVars = new HashMap<>();
+  default Map<String, Object> createParamsMap(String... values) {
+    Map<String, Object> uriVars = new HashMap<>();
     for (int i = 0; i < values.length; i += 2) {
       uriVars.put(values[i], values[i + 1]);
     }

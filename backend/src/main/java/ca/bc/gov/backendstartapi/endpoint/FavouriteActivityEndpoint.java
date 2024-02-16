@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -165,6 +166,7 @@ public class FavouriteActivityEndpoint {
               description = "FavouriteActivityEntity ID",
               required = true,
               schema = @Schema(type = "integer", format = "int64"))
+          @NonNull
           @PathVariable
           Long id,
       @Valid @RequestBody FavouriteActivityUpdateDto updateDto) {
@@ -204,6 +206,7 @@ public class FavouriteActivityEndpoint {
               description = "FavouriteActivityEntity ID",
               required = true,
               schema = @Schema(type = "integer", format = "int64"))
+          @NonNull
           @PathVariable
           Long id) {
     favouriteActivityService.deleteUserActivity(id);

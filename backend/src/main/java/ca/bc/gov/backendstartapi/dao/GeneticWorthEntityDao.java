@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /** This class holds methods for storing a {@link GeneticWorthEntity} in memory. */
@@ -25,7 +26,7 @@ public class GeneticWorthEntityDao {
    * @param geneticWorthCode The genetic worth code to be fetched.
    * @return An Optional of the {@link GeneticWorthEntity}
    */
-  public Optional<GeneticWorthEntity> getGeneticWorthEntity(String geneticWorthCode) {
+  public Optional<GeneticWorthEntity> getGeneticWorthEntity(@NonNull String geneticWorthCode) {
     if (map.containsKey(geneticWorthCode)) {
       return Optional.of(map.get(geneticWorthCode));
     }

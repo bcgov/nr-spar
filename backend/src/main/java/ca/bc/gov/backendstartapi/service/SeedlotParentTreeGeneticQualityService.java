@@ -79,10 +79,16 @@ public class SeedlotParentTreeGeneticQualityService {
       for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
           seedlotPtFormDto.parentTreeGeneticQualities()) {
 
+        String geneticWorthCode = seedlotGenQltyDto.geneticWorthCode();
+        if (geneticWorthCode == null) {
+          SparLog.warn(
+              "No genetic worth entity found for genetic word code {}",
+              seedlotGenQltyDto.geneticWorthCode());
+          geneticWorthCode = "";
+        }
+
         GeneticWorthEntity genWorthEnt =
-            geneticWorthEntityDao
-                .getGeneticWorthEntity(seedlotGenQltyDto.geneticWorthCode())
-                .orElseThrow();
+            geneticWorthEntityDao.getGeneticWorthEntity(geneticWorthCode).orElseThrow();
 
         SeedlotParentTreeGeneticQuality sptgq =
             new SeedlotParentTreeGeneticQuality(

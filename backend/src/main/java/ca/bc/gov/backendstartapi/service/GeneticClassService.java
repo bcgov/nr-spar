@@ -3,8 +3,11 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,12 +16,10 @@ import org.springframework.stereotype.Service;
 
 /** This class contains all routines and database access to a list of genetic class. */
 @Service
+@RequiredArgsConstructor
 public class GeneticClassService {
-  private GeneticClassRepository geneticClassRepository;
 
-  public GeneticClassService(GeneticClassRepository geneticClassRepository) {
-    this.geneticClassRepository = geneticClassRepository;
-  }
+  private final GeneticClassRepository geneticClassRepository;
 
   /** Fetch all valid genetic class from the repository. */
   public List<CodeDescriptionDto> getAllGeneticClass() {
@@ -48,5 +49,20 @@ public class GeneticClassService {
         .map(
             entity -> new CodeDescriptionDto(entity.getGeneticClassCode(), entity.getDescription()))
         .orElseThrow(NoGeneticWorthException::new);
+  }
+
+  public GeneticClassEntity getGeneticClassEntity(Character code) {
+    String genClassCode = String.valueOf(code);
+    if (null == genClassCode || "null".equals(genClassCode)) {
+      throw new InvalidSeedlotRequestException();
+    }
+
+    Optional<GeneticClassEntity> entity = geneticClassRepository.findById(genClassCode);
+
+    if (entity.isEmpty()) {
+      throw new InvalidSeedlotRequestException();
+    }
+
+    return entity.get();
   }
 }

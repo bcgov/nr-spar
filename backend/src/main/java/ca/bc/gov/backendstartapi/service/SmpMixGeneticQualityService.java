@@ -74,10 +74,16 @@ public class SmpMixGeneticQualityService {
           throw new SmpMixNotFoundException();
         }
 
+        String geneticWorthCode = seedlotGenQltyDto.geneticWorthCode();
+        if (geneticWorthCode == null) {
+          SparLog.warn(
+              "No genetic worth entity found for genetic word code {}",
+              seedlotGenQltyDto.geneticWorthCode());
+          geneticWorthCode = "";
+        }
+
         GeneticWorthEntity gwe =
-            geneticWorthEntityDao
-                .getGeneticWorthEntity(seedlotGenQltyDto.geneticWorthCode())
-                .orElseThrow();
+            geneticWorthEntityDao.getGeneticWorthEntity(geneticWorthCode).orElseThrow();
 
         SmpMixGeneticQuality smpMixGeneticQuality =
             new SmpMixGeneticQuality(

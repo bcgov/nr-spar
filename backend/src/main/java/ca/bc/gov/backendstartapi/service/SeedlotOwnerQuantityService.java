@@ -54,9 +54,8 @@ public class SeedlotOwnerQuantityService {
           soqList.size(),
           seedlot.getId());
 
-      List<SeedlotOwnerQuantityId> idsToDelete =
-          soqList.stream().map(x -> x.getId()).collect(Collectors.toList());
-
+      List<SeedlotOwnerQuantityId> idsToDelete = new ArrayList<>();
+      idsToDelete.addAll(soqList.stream().map(x -> x.getId()).collect(Collectors.toList()));
       seedlotOwnerQuantityRepository.deleteAllById(idsToDelete);
     }
 

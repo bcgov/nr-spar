@@ -9,6 +9,7 @@ import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
 import ca.bc.gov.backendstartapi.enums.ForestClientExpiredEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientStatusEnum;
 import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
+import ca.bc.gov.backendstartapi.exception.ForestClientException;
 import ca.bc.gov.backendstartapi.provider.ForestClientApiProvider;
 import java.util.Collections;
 import java.util.List;
@@ -36,15 +37,17 @@ class ForestClientServiceTest {
   }
 
   @Test
-  @DisplayName("fetchExistentClientByNumber")
+  @DisplayName("fetchNonExistentClientByNumber")
   void fetchClientNotFound() {
     String identifier = "00000001";
 
     when(forestClientApiProvider.fetchClientByIdentifier(identifier)).thenReturn(Optional.empty());
 
-    Optional<ForestClientDto> optionalDto = forestClientService.fetchClient(identifier);
-
-    Assertions.assertTrue(optionalDto.isEmpty());
+    Assertions.assertThrows(
+        ForestClientException.class,
+        () -> {
+          forestClientService.fetchClient(identifier);
+        });
   }
 
   @Test
@@ -65,11 +68,7 @@ class ForestClientServiceTest {
     when(forestClientApiProvider.fetchClientByIdentifier(identifier))
         .thenReturn(Optional.of(client));
 
-    Optional<ForestClientDto> optionalDto = forestClientService.fetchClient(identifier);
-
-    Assertions.assertFalse(optionalDto.isEmpty());
-
-    ForestClientDto clientDto = optionalDto.get();
+    ForestClientDto clientDto = forestClientService.fetchClient(identifier);
 
     Assertions.assertNotNull(clientDto);
     Assertions.assertEquals("00000101", clientDto.clientNumber());

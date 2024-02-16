@@ -270,6 +270,7 @@ public class SeedlotEndpoint {
               description = "Seedlot ID",
               required = true,
               schema = @Schema(type = "integer", format = "int64"))
+          @NonNull
           @PathVariable
           String seedlotNumber) {
     return seedlotService.getSingleSeedlotInfo(seedlotNumber);
@@ -321,6 +322,7 @@ public class SeedlotEndpoint {
               required = true,
               schema = @Schema(type = "integer", format = "int64"))
           @PathVariable
+          @NonNull
           String seedlotNumber,
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing minimum required fields to create a seedlot",
@@ -371,6 +373,7 @@ public class SeedlotEndpoint {
               description = "Seedlot ID",
               required = true,
               schema = @Schema(type = "integer", format = "int64"))
+          @NonNull
           @PathVariable
           String seedlotNumber,
       @RequestBody SeedlotFormSubmissionDto form) {

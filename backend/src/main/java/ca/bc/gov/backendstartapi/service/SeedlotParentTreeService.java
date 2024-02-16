@@ -75,8 +75,9 @@ public class SeedlotParentTreeService {
           sptgqList.size(),
           seedlot.getId());
 
-      List<SeedlotParentTreeGeneticQualityId> existingSeedlotPtGenQltyIdList =
-          sptgqList.stream().map(x -> x.getId()).collect(Collectors.toList());
+      List<SeedlotParentTreeGeneticQualityId> existingSeedlotPtGenQltyIdList = new ArrayList<>();
+      existingSeedlotPtGenQltyIdList.addAll(
+          sptgqList.stream().map(x -> x.getId()).collect(Collectors.toList()));
 
       seedlotParentTreeGeneticQualityRepository.deleteAllById(existingSeedlotPtGenQltyIdList);
     }
@@ -91,8 +92,9 @@ public class SeedlotParentTreeService {
           smpMixGenQltyList.size(),
           seedlot.getId());
 
-      List<SmpMixGeneticQualityId> existingSmpMixGenQltyIdList =
-          smpMixGenQltyList.stream().map(x -> x.getId()).collect(Collectors.toList());
+      List<SmpMixGeneticQualityId> existingSmpMixGenQltyIdList = new ArrayList<>();
+      existingSmpMixGenQltyIdList.addAll(
+          smpMixGenQltyList.stream().map(x -> x.getId()).collect(Collectors.toList()));
 
       smpMixGeneticQualityRepository.deleteAllById(existingSmpMixGenQltyIdList);
     }
@@ -128,8 +130,8 @@ public class SeedlotParentTreeService {
           sptsmList.size(),
           seedlot.getId());
 
-      List<SeedlotParentTreeSmpMixId> sptsmExistingList =
-          sptsmList.stream().map(x -> x.getId()).collect(Collectors.toList());
+      List<SeedlotParentTreeSmpMixId> sptsmExistingList = new ArrayList<>();
+      sptsmExistingList.addAll(sptsmList.stream().map(x -> x.getId()).collect(Collectors.toList()));
 
       seedlotParentTreeSmpMixRepository.deleteAllById(sptsmExistingList);
     }

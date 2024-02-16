@@ -4,6 +4,7 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
+import ca.bc.gov.backendstartapi.exception.ForestClientException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +32,18 @@ public class ForestClientService {
    * @param identifier the client number or acronym to search for
    * @return the ForestClient with client number or acronym {@code identifier}, if one exists
    */
-  public Optional<ForestClientDto> fetchClient(String identifier) {
+  public ForestClientDto fetchClient(String identifier) {
     SparLog.info("Fetching a Forest Client by its number or acronym {}", identifier);
     try {
-      return forestClientApiProvider.fetchClientByIdentifier(identifier);
+      Optional<ForestClientDto> forestOptional =
+          forestClientApiProvider.fetchClientByIdentifier(identifier);
+      if (forestOptional.isEmpty()) {
+        throw new ForestClientException(HttpStatus.NOT_FOUND.value());
+      }
+      return forestOptional.get();
     } catch (HttpClientErrorException.NotFound e) {
       SparLog.info(String.format("Client %s not found", identifier), e);
-      return Optional.empty();
+      throw new ForestClientException(e.getStatusCode().value());
     }
   }
 

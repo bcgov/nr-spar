@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.exception.BadConfigurationException;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -59,19 +60,29 @@ public class OracleApiProvider implements Provider {
   @Override
   public Optional<OrchardSpuDto> findOrchardParentTreeGeneticQualityData(
       String orchardId, int spuId) {
-    String apiUrl =
-        String.format("%s/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}", rootUri);
+    String apiUrl = rootUri + "/api/orchards/parent-tree-genetic-quality/{orchardId}/{spuId}";
 
     SparLog.info("Starting {} request to {}", PROVIDER, apiUrl);
 
     try {
+      HttpHeaders headers = addHttpHeaders();
+      if (headers == null) {
+        throw new BadConfigurationException();
+      }
+
+      Map<String, Object> params =
+          createParamsMap("orchardId", orchardId, "spuId", String.valueOf(spuId));
+      if (params == null) {
+        throw new BadConfigurationException();
+      }
+
       ResponseEntity<OrchardSpuDto> response =
           restTemplate.exchange(
               apiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
+              HttpMethod.valueOf("GET"),
+              new HttpEntity<>(headers),
               OrchardSpuDto.class,
-              createParamsMap("orchardId", orchardId, "spuId", String.valueOf(spuId)));
+              params);
 
       SparLog.info("Finished {} request - 200 OK!", PROVIDER);
       return Optional.of(response.getBody());
@@ -91,18 +102,28 @@ public class OracleApiProvider implements Provider {
    */
   @Override
   public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/{vegCode}", rootUri);
+    String oracleApiUrl = rootUri + "/api/orchards/vegetation-code/{vegCode}";
 
     SparLog.info("Starting {} - {} request to {}", PROVIDER, "findOrchardsByVegCode", oracleApiUrl);
 
     try {
+      HttpHeaders headers = addHttpHeaders();
+      if (headers == null) {
+        throw new BadConfigurationException();
+      }
+
+      Map<String, Object> params = createParamsMap("vegCode", vegCode);
+      if (params == null) {
+        throw new BadConfigurationException();
+      }
+
       ResponseEntity<List<OrchardDto>> orchardsResult =
           restTemplate.exchange(
               oracleApiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
+              HttpMethod.valueOf("GET"),
+              new HttpEntity<>(headers),
               new ParameterizedTypeReference<List<OrchardDto>>() {},
-              createParamsMap("vegCode", vegCode));
+              params);
       SparLog.info("GET orchards by vegCode from oracle - Success response!");
       return orchardsResult.getBody();
     } catch (HttpClientErrorException httpExc) {
@@ -122,8 +143,7 @@ public class OracleApiProvider implements Provider {
   @Override
   public List<SameSpeciesTreeDto> findParentTreesByVegCode(
       String vegCode, Map<String, String> orchardSpuMap) {
-    String oracleApiUrl =
-        String.format("%s/api/orchards/parent-trees/vegetation-codes/{vegCode}", rootUri);
+    String oracleApiUrl = rootUri + "/api/orchards/parent-trees/vegetation-codes/{vegCode}";
 
     SparLog.info(
         "Starting {} - {} request to {}", PROVIDER, "findParentTreesByVegCode", oracleApiUrl);
@@ -132,13 +152,18 @@ public class OracleApiProvider implements Provider {
         new HttpEntity<>(orchardSpuMap, addHttpHeaders());
 
     try {
+      Map<String, Object> params = createParamsMap("vegCode", vegCode);
+      if (params == null) {
+        throw new BadConfigurationException();
+      }
+
       ResponseEntity<List<SameSpeciesTreeDto>> parentTreesResult =
           restTemplate.exchange(
               oracleApiUrl,
-              HttpMethod.POST,
+              HttpMethod.valueOf("POST"),
               requestEntity,
               new ParameterizedTypeReference<List<SameSpeciesTreeDto>>() {},
-              createParamsMap("vegCode", vegCode));
+              params);
       List<SameSpeciesTreeDto> list = parentTreesResult.getBody();
       int size = list == null ? 0 : list.size();
       SparLog.info(
@@ -155,9 +180,13 @@ public class OracleApiProvider implements Provider {
   }
 
   @Override
-  public String[] addAuthorizationHeader() {
-    String token = this.loggedUserService.getLoggedUserToken();
-    return new String[] {"Authorization", "Bearer " + token};
+  public String getAuthorizationHeaderValue() {
+    return "Bearer " + this.loggedUserService.getLoggedUserToken();
+  }
+
+  @Override
+  public String getAuthorizationHeaderKey() {
+    return "Authorization";
   }
 
   @Override
@@ -165,8 +194,14 @@ public class OracleApiProvider implements Provider {
     HttpHeaders headers = new HttpHeaders();
     headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 
-    String[] authorization = addAuthorizationHeader();
-    headers.set(authorization[0], authorization[1]);
+    String authKey = getAuthorizationHeaderValue();
+    if (null == authKey) {
+      SparLog.warn("Forest Client authentication key is not valid.");
+      authKey = "";
+    }
+
+    String authValue = getAuthorizationHeaderKey();
+    headers.set(authKey, authValue);
 
     // For distributed log tracing
     String correlationId = RequestCorrelation.getId();

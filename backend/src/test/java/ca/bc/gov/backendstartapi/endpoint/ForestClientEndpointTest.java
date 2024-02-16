@@ -17,7 +17,6 @@ import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +79,7 @@ class ForestClientEndpointTest {
             ForestClientTypeEnum.I,
             "JSMITH");
 
-    when(forestClientService.fetchClient("00000000")).thenReturn(Optional.of(client));
+    when(forestClientService.fetchClient("00000000")).thenReturn(client);
 
     mockMvc
         .perform(
@@ -103,7 +102,7 @@ class ForestClientEndpointTest {
   @Test
   @DisplayName("fetchNonExistentClientByNumber")
   void fetchNonExistentClientByNumber() throws Exception {
-    when(forestClientService.fetchClient("00000000")).thenReturn(Optional.empty());
+    when(forestClientService.fetchClient("00000000")).thenReturn(null);
 
     mockMvc
         .perform(
@@ -127,7 +126,7 @@ class ForestClientEndpointTest {
             ForestClientTypeEnum.I,
             "JSMITH");
 
-    when(forestClientService.fetchClient("JSMITH")).thenReturn(Optional.of(client));
+    when(forestClientService.fetchClient("JSMITH")).thenReturn(client);
 
     mockMvc
         .perform(
@@ -150,7 +149,7 @@ class ForestClientEndpointTest {
   @Test
   @DisplayName("fetchNonExistentClientByAcronym")
   void fetchNonExistentClientByAcronym() throws Exception {
-    when(forestClientService.fetchClient("JSMITH")).thenReturn(Optional.empty());
+    when(forestClientService.fetchClient("JSMITH")).thenReturn(null);
 
     mockMvc
         .perform(

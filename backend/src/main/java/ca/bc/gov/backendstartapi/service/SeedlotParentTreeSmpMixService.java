@@ -75,10 +75,16 @@ public class SeedlotParentTreeSmpMixService {
           throw new SeedlotParentTreeNotFoundException();
         }
 
+        String geneticWorthCode = seedlotGenQltyDto.geneticWorthCode();
+        if (geneticWorthCode == null) {
+          SparLog.warn(
+              "No genetic worth entity found for genetic word code {}",
+              seedlotGenQltyDto.geneticWorthCode());
+          geneticWorthCode = "";
+        }
+
         GeneticWorthEntity gwe =
-            geneticWorthEntityDao
-                .getGeneticWorthEntity(seedlotGenQltyDto.geneticWorthCode())
-                .orElseThrow();
+            geneticWorthEntityDao.getGeneticWorthEntity(geneticWorthCode).orElseThrow();
 
         SeedlotParentTreeSmpMix sptsmEntity =
             new SeedlotParentTreeSmpMix(

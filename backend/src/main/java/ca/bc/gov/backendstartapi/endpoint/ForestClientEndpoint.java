@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
@@ -14,17 +13,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.io.Serializable;
 import java.util.List;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /** Controller for ForestClient-related endpoints. */
 @RestController
@@ -58,7 +54,7 @@ public class ForestClientEndpoint {
             content = @Content(schema = @Schema(implementation = ForestClientDto.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  public ResponseEntity<Serializable> fetchClient(
+  public ForestClientDto fetchClient(
       @PathVariable("identifier")
           @Pattern(regexp = "^\\d{8}$|^\\w{1,8}$")
           @Parameter(
@@ -66,13 +62,7 @@ public class ForestClientEndpoint {
               in = ParameterIn.PATH,
               description = "Number or acronym that identifies the client to be fetched.")
           String identifier) {
-    try {
-      var response = forestClientService.fetchClient(identifier).map(Serializable.class::cast);
-      return ResponseEntity.of(response);
-    } catch (HttpStatusCodeException e) {
-      SparLog.warn("External error while retrieving ForestClient " + identifier, e);
-      return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
-    }
+    return forestClientService.fetchClient(identifier);
   }
 
   /**
