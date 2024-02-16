@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.entity.VegetationCode;
 import ca.bc.gov.backendstartapi.repository.VegetationCodeRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.CsrfRequestPostProcessor;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -34,8 +36,8 @@ class VegetationCodeEndpointTest {
 
   private final WebApplicationContext webApplicationContext;
 
-  VegetationCodeEndpointTest(WebApplicationContext webApplicationContext) {
-    this.webApplicationContext = webApplicationContext;
+  VegetationCodeEndpointTest(WebApplicationContext context) {
+    this.webApplicationContext = context;
   }
 
   @BeforeEach
@@ -58,7 +60,7 @@ class VegetationCodeEndpointTest {
     mockMvc
         .perform(get("/api/vegetation-codes/C1").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
   }
 
   @Test
@@ -74,11 +76,13 @@ class VegetationCodeEndpointTest {
     when(vegetationCodeRepository.findById("C1")).thenReturn(Optional.of(vc));
     when(vegetationCodeRepository.findById("C2")).thenReturn(Optional.empty());
 
+    CsrfRequestPostProcessor csrf = csrf().asHeader();
+    if (csrf == null) {
+      throw new RuntimeException("Exception when getting CSRF header!");
+    }
+
     mockMvc
-        .perform(
-            get("/api/vegetation-codes/C2")
-                .with(csrf().asHeader())
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/vegetation-codes/C2").with(csrf).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andExpect(content().string(""));
   }
@@ -94,16 +98,21 @@ class VegetationCodeEndpointTest {
             LocalDateTime.now());
 
     Pageable pageable = PageRequest.of(0, 20);
-    Page<VegetationCode> vegPage = new PageImpl<VegetationCode>(List.of(vc));
+    List<VegetationCode> vegList = new ArrayList<>(1);
+    vegList.add(vc);
+    Page<VegetationCode> vegPage = new PageImpl<VegetationCode>(vegList);
     when(vegetationCodeRepository.findByCodeOrDescription("1", pageable)).thenReturn(vegPage);
+
+    CsrfRequestPostProcessor csrf = csrf().asHeader();
+    if (csrf == null) {
+      throw new RuntimeException("Exception when getting CSRF header!");
+    }
 
     mockMvc
         .perform(
-            get("/api/vegetation-codes?search=1")
-                .with(csrf().asHeader())
-                .accept(MediaType.APPLICATION_JSON))
+            get("/api/vegetation-codes?search=1").with(csrf).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
   }
 
   @Test
@@ -113,13 +122,16 @@ class VegetationCodeEndpointTest {
 
     when(vegetationCodeRepository.findByCodeOrDescription("1", pageable)).thenReturn(vegPage);
 
+    CsrfRequestPostProcessor csrf = csrf().asHeader();
+    if (csrf == null) {
+      throw new RuntimeException("Exception when getting CSRF header!");
+    }
+
     mockMvc
         .perform(
-            get("/api/vegetation-codes?search=1")
-                .with(csrf().asHeader())
-                .accept(MediaType.APPLICATION_JSON))
+            get("/api/vegetation-codes?search=1").with(csrf).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
   }
 
   @Test
@@ -129,10 +141,15 @@ class VegetationCodeEndpointTest {
     when(vegetationCodeRepository.findByCodeOrDescription("1", pageable))
         .thenThrow(new RuntimeException("Invalid negatative page index"));
 
+    CsrfRequestPostProcessor csrf = csrf().asHeader();
+    if (csrf == null) {
+      throw new RuntimeException("Exception when getting CSRF header!");
+    }
+
     mockMvc
         .perform(
             get("/api/vegetation-codes?search=1&page=-1")
-                .with(csrf().asHeader())
+                .with(csrf)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
@@ -148,14 +165,21 @@ class VegetationCodeEndpointTest {
             LocalDateTime.now());
 
     Pageable pageable = PageRequest.of(0, 10);
-    Page<VegetationCode> vegPage = new PageImpl<VegetationCode>(List.of(vc));
+    List<VegetationCode> vegCodeList = new ArrayList<>(1);
+    vegCodeList.add(vc);
+    Page<VegetationCode> vegPage = new PageImpl<VegetationCode>(vegCodeList);
 
     when(vegetationCodeRepository.findByCodeOrDescription("1", pageable)).thenReturn(vegPage);
+
+    CsrfRequestPostProcessor csrf = csrf().asHeader();
+    if (csrf == null) {
+      throw new RuntimeException("Exception when getting CSRF header!");
+    }
 
     mockMvc
         .perform(
             get("/api/vegetation-codes?search=1&perPage=0")
-                .with(csrf().asHeader())
+                .with(csrf)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }

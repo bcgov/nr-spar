@@ -45,7 +45,7 @@ class SaveSeedlotFormServiceTest {
   @Test
   @DisplayName("Save seedlot progress with missing seedlot should fail.")
   void saveSeedlotProgress_seedlotMissing_shouldFail() throws Exception {
-    when(seedlotRepository.findById(any())).thenReturn(Optional.empty());
+    when(seedlotRepository.findById("123")).thenReturn(Optional.empty());
 
     JsonNode allStepData = new ObjectMapper().readTree("{ \"f1\" : \"v1\" } ");
 
@@ -66,9 +66,11 @@ class SaveSeedlotFormServiceTest {
   void saveSeedlotProgress_shouldSucceed() throws Exception {
     Seedlot testSeedlot = new Seedlot(SEEDLOT_NUMBER);
 
-    when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
+    when(seedlotRepository.findById(SEEDLOT_NUMBER)).thenReturn(Optional.of(testSeedlot));
 
-    when(saveSeedlotProgressRepositoryClassA.save(any()))
+    SaveSeedlotProgressEntityClassA seedClassA =
+        new SaveSeedlotProgressEntityClassA(testSeedlot, null, null, null);
+    when(saveSeedlotProgressRepositoryClassA.save(seedClassA))
         .thenReturn(new SaveSeedlotProgressEntityClassA(testSeedlot, null, null, null));
 
     JsonNode allStepData = new ObjectMapper().readTree("{ \"f1\" : \"v1\" } ");
@@ -84,7 +86,7 @@ class SaveSeedlotFormServiceTest {
   @Test
   @DisplayName("Get seedlot progress with non-existing seedlot number should fail.")
   void getSeedlotProgress_noSeedlotNumber_shouldFail() throws Exception {
-    when(saveSeedlotProgressRepositoryClassA.findById(any())).thenReturn(Optional.empty());
+    when(saveSeedlotProgressRepositoryClassA.findById("123")).thenReturn(Optional.empty());
 
     ResponseStatusException expectedException =
         assertThrows(
@@ -99,9 +101,9 @@ class SaveSeedlotFormServiceTest {
   void getSeedlotProgress_shouldSucceed() throws Exception {
     Seedlot testSeedlot = new Seedlot(SEEDLOT_NUMBER);
 
-    when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
+    when(seedlotRepository.findById(SEEDLOT_NUMBER)).thenReturn(Optional.of(testSeedlot));
 
-    when(saveSeedlotProgressRepositoryClassA.findById(any()))
+    when(saveSeedlotProgressRepositoryClassA.findById(SEEDLOT_NUMBER))
         .thenReturn(
             Optional.of(new SaveSeedlotProgressEntityClassA(testSeedlot, null, null, null)));
 
@@ -113,7 +115,7 @@ class SaveSeedlotFormServiceTest {
   @Test
   @DisplayName("Get seedlot progress status with non-existing seedlot number should fail.")
   void getSeedlotProgressStatus_noSeedlotNumber_shouldFail() throws Exception {
-    when(saveSeedlotProgressRepositoryClassA.findById(any())).thenReturn(Optional.empty());
+    when(saveSeedlotProgressRepositoryClassA.findById("123")).thenReturn(Optional.empty());
 
     ResponseStatusException expectedException =
         assertThrows(
@@ -128,7 +130,7 @@ class SaveSeedlotFormServiceTest {
   void getSeedlotProgressStatus_shouldSucceed() throws Exception {
     Seedlot testSeedlot = new Seedlot(SEEDLOT_NUMBER);
 
-    when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
+    when(seedlotRepository.findById(SEEDLOT_NUMBER)).thenReturn(Optional.of(testSeedlot));
 
     String progressStatus = "{ \"f2\" : \"v2\" } ";
 

@@ -44,13 +44,17 @@ class FavouriteActivityServiceTest {
   void createUserActivityTest() {
     when(loggedUserService.getLoggedUserId()).thenReturn(USER_ID);
 
-    FavouriteActivityEntity entity = new FavouriteActivityEntity();
-    entity.setActivity("CREATE_A_CLASS_SEEDLOT");
-    entity.setHighlighted(Boolean.FALSE);
-    when(favouriteActivityRepository.save(any())).thenReturn(entity);
+    FavouriteActivityEntity entityToSave = new FavouriteActivityEntity();
+    entityToSave.setUserId(USER_ID);
+    entityToSave.setActivity("CREATE_A_CLASS_SEEDLOT");
+
+    FavouriteActivityEntity entitySaved = new FavouriteActivityEntity();
+    entitySaved.setActivity("CREATE_A_CLASS_SEEDLOT");
+    entitySaved.setHighlighted(Boolean.FALSE);
+    when(favouriteActivityRepository.save(entityToSave)).thenReturn(entitySaved);
 
     FavouriteActivityCreateDto createDto = new FavouriteActivityCreateDto("CREATE_A_CLASS_SEEDLOT");
-    FavouriteActivityEntity entitySaved = favouriteActivityService.createUserActivity(createDto);
+    favouriteActivityService.createUserActivity(createDto);
 
     Assertions.assertNotNull(entitySaved);
     Assertions.assertEquals("CREATE_A_CLASS_SEEDLOT", entitySaved.getActivity());
@@ -176,9 +180,11 @@ class FavouriteActivityServiceTest {
   void deleteUserActivityExceptionTest() {
     when(loggedUserService.getLoggedUserId()).thenReturn(USER_ID);
 
-    when(favouriteActivityRepository.findById(any())).thenReturn(Optional.empty());
+    Long id = 11L;
 
-    doNothing().when(favouriteActivityRepository).deleteById(any());
+    when(favouriteActivityRepository.findById(id)).thenReturn(Optional.empty());
+
+    doNothing().when(favouriteActivityRepository).deleteById(id);
 
     Exception e =
         Assertions.assertThrows(
