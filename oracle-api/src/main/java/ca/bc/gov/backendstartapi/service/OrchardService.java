@@ -3,10 +3,10 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.OrchardSpuSpzDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.dto.SpzBySpuDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
@@ -48,7 +48,7 @@ public class OrchardService {
 
   private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
 
-  private TestedPtAreaofUseRepository testedParentTreeRepository;
+  private TestedPtAreaofUseRepository testedPtAreaofUseRepository;
 
   private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
 
@@ -61,7 +61,7 @@ public class OrchardService {
       ParentTreeOrchardRepository parentTreeOrchardRepository,
       ParentTreeRepository parentTreeRepository,
       ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
-      TestedPtAreaofUseRepository testedParentTreeRepository,
+      TestedPtAreaofUseRepository testedPtAreaofUseRepository,
       TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository,
       SeedPlanUnitRepository seedPlanUnitRepository,
       SeedPlanZoneRepository seedPlanZoneRepository) {
@@ -69,7 +69,7 @@ public class OrchardService {
     this.parentTreeOrchardRepository = parentTreeOrchardRepository;
     this.parentTreeRepository = parentTreeRepository;
     this.parentTreeGeneticQualityRepository = parentTreeGeneticQualityRepository;
-    this.testedParentTreeRepository = testedParentTreeRepository;
+    this.testedPtAreaofUseRepository = testedPtAreaofUseRepository;
     this.testedPtAreaOfUseSpuRepository = testedPtAreaOfUseSpuRepository;
     this.seedPlanUnitRepository = seedPlanUnitRepository;
     this.seedPlanZoneRepository = seedPlanZoneRepository;
@@ -339,21 +339,21 @@ public class OrchardService {
    * Get SPZ information given a list of SPU Ids.
    *
    * @param spuIds A list of SPU ID to be fetched.
-   * @return A List of {@link OrchardSpuSpzDto}
+   * @return A List of {@link SpzBySpuDto}
    */
-  public List<OrchardSpuSpzDto> getOrchardSpuSpzInformation(List<Integer> spuIds) {
+  public List<SpzBySpuDto> getSpzInformationBySpu(List<Integer> spuIds) {
     SparLog.info("Getting SPZ information for SPU IDs {}", spuIds);
 
     // Finds all TESTES PT AREA OF USE and map them for spu
     List<TestedPtAreaOfUse> testedList =
-        testedParentTreeRepository.findAllBySeedPlanUnitIdIn(spuIds);
+        testedPtAreaofUseRepository.findAllBySeedPlanUnitIdIn(spuIds);
 
     if (testedList.isEmpty()) {
       SparLog.info("No testes parent tree area of use found!");
       return List.of();
     }
 
-    List<OrchardSpuSpzDto> responseDtpList = new ArrayList<>();
+    List<SpzBySpuDto> responseDtpList = new ArrayList<>();
     for (TestedPtAreaOfUse testedEntity : testedList) {
       final Integer spuId = testedEntity.getSeedPlanUnitId();
       final Integer testedPtAreaId = testedEntity.getTestedPtAreaOfUseId();
@@ -372,7 +372,7 @@ public class OrchardService {
         throw new TestedPtAreaOfUseException();
       }
 
-      OrchardSpuSpzDto responseDto = new OrchardSpuSpzDto();
+      SpzBySpuDto responseDto = new SpzBySpuDto();
       responseDto.setSeedPlanUnitId(spuId);
 
       Optional<SeedPlanUnit> seedPlanUnitOp = seedPlanUnitRepository.findById(spuId);

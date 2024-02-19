@@ -3,9 +3,9 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.OrchardSpuSpzDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.dto.SpzBySpuDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -191,7 +191,7 @@ public class OrchardEndpoint {
    * Gets all SPZ information given a list of SPU IDs.
    *
    * @param spuIds A list of SPU ID to be fetched.
-   * @return A list of {@link OrchardSpuSpzDto} containing the results or an empty list.
+   * @return A list of {@link SpzBySpuDto} containing the results or an empty list.
    */
   @GetMapping(path = "/spz-information/{spuIds}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
@@ -206,8 +206,8 @@ public class OrchardEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<OrchardSpuSpzDto> getSpzInformation(
+  public List<SpzBySpuDto> getSpzInformation(
       @Parameter(description = "The SPU id list.") @PathVariable("spuIds") Integer[] spuIds) {
-    return orchardService.getOrchardSpuSpzInformation(Arrays.asList(spuIds));
+    return orchardService.getSpzInformationBySpu(Arrays.asList(spuIds));
   }
 }

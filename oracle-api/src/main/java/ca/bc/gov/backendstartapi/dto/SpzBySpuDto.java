@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Schema(description = "represents a JSON response when requesting SPZ information from a SPU.")
-public class OrchardSpuSpzDto {
+public class SpzBySpuDto {
 
   @Schema(
       description = "A unique identifier which is assigned to a Seed Planning Unit.",
