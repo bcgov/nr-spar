@@ -637,6 +637,35 @@ export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlot
   return parentTreePayload;
 };
 
+export const convertSmpParentTree = (smpParentTreeData: ParentTreeStepDataObj, seedlotNumber: string): Array<ParentTreeFormSubmitType> => {
+  const { allParentTreeData } = smpParentTreeData;
+  const smpMixPayload: Array<ParentTreeFormSubmitType> = [];
+
+  if (smpParentTreeData.mixTabData) {
+    Object.keys(smpParentTreeData.mixTabData).forEach((key: string) => {
+      // Each key is a line in the table, so we need to get
+      // the parent tree value that the user set and use it
+      const curParentTree = smpParentTreeData.mixTabData[key].parentTreeNumber.value;
+      if (allParentTreeData[curParentTree]) {
+        smpMixPayload.push({
+          seedlotNumber,
+          parentTreeId: smpParentTreeData.allParentTreeData[curParentTree].parentTreeId,
+          parentTreeNumber: smpParentTreeData.allParentTreeData[curParentTree].parentTreeNumber,
+          coneCount: +smpParentTreeData.mixTabData[key].coneCount.value,
+          pollenPount: +smpParentTreeData.mixTabData[key].pollenCount.value,
+          smpSuccessPct: +smpParentTreeData.mixTabData[key].smpSuccessPerc.value,
+          nonOrchardPollenContamPct: +smpParentTreeData.mixTabData[key].nonOrchardPollenContam.value,
+          amountOfMaterial: +smpParentTreeData.mixTabData[key].volume.value,
+          proportion: +smpParentTreeData.mixTabData[key].proportion.value,
+          parentTreeGeneticQualities: smpParentTreeData.allParentTreeData[curParentTree].parentTreeGeneticQualities
+        });
+      }
+    });
+  }
+
+  return smpMixPayload;
+};
+
 export const convertExtraction = (extractionData: ExtractionStorageForm): ExtractionFormSubmitType => ({
   extractoryClientNumber: extractionData.extraction.agency.value.code,
   extractoryLocnCode: extractionData.extraction.locationCode.value,

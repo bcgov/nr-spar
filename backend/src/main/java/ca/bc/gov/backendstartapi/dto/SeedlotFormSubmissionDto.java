@@ -8,5 +8,6 @@ public record SeedlotFormSubmissionDto(
     List<SeedlotFormOwnershipDto> seedlotFormOwnershipDtoList,
     SeedlotFormInterimDto seedlotFormInterimDto,
     SeedlotFormOrchardDto seedlotFormOrchardDto,
+    List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
     List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList,
     SeedlotFormExtractionDto seedlotFormExtractionDto) {}

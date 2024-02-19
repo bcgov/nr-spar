@@ -76,7 +76,8 @@ import {
   convertOwnership,
   convertParentTree,
   getSeedlotSubmitErrDescription,
-  getBreadcrumbs
+  getBreadcrumbs,
+  convertSmpParentTree
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE,
@@ -382,7 +383,8 @@ const SeedlotRegistrationForm = () => {
       allStepData.orchardStep,
       allStepData.parentTreeStep.tableRowData
     ),
-    seedlotFormParentTreeSmpDtoList: convertParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
+    seedlotFormParentTreeDtoList: convertParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
+    seedlotFormParentTreeSmpDtoList: convertSmpParentTree(allStepData.parentTreeStep, (seedlotNumber ?? '')),
     seedlotFormExtractionDto: convertExtraction(allStepData.extractionStorageStep)
   });
 

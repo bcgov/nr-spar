@@ -152,6 +152,7 @@ class SeedlotFormPutTest {
         interimDto,
         orchardDto,
         List.of(parentTreeDto),
+        List.of(parentTreeDto),
         extractionDto);
   }
 
