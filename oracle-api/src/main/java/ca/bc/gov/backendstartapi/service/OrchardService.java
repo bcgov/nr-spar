@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.OrchardSpuSpzDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
@@ -11,12 +12,21 @@ import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
+import ca.bc.gov.backendstartapi.entity.SeedPlanUnit;
+import ca.bc.gov.backendstartapi.entity.SeedPlanZone;
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUse;
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpu;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
 import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
+import ca.bc.gov.backendstartapi.exception.TestedPtAreaOfUseException;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
+import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
+import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
+import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpuRepository;
+import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
 import ca.bc.gov.backendstartapi.util.ModelMapper;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -38,15 +48,31 @@ public class OrchardService {
 
   private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
 
+  private TestedPtAreaofUseRepository testedParentTreeRepository;
+
+  private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
+
+  private SeedPlanUnitRepository seedPlanUnitRepository;
+
+  private SeedPlanZoneRepository seedPlanZoneRepository;
+
   OrchardService(
       OrchardRepository orchardRepository,
       ParentTreeOrchardRepository parentTreeOrchardRepository,
       ParentTreeRepository parentTreeRepository,
-      ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository) {
+      ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
+      TestedPtAreaofUseRepository testedParentTreeRepository,
+      TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository,
+      SeedPlanUnitRepository seedPlanUnitRepository,
+      SeedPlanZoneRepository seedPlanZoneRepository) {
     this.orchardRepository = orchardRepository;
     this.parentTreeOrchardRepository = parentTreeOrchardRepository;
     this.parentTreeRepository = parentTreeRepository;
     this.parentTreeGeneticQualityRepository = parentTreeGeneticQualityRepository;
+    this.testedParentTreeRepository = testedParentTreeRepository;
+    this.testedPtAreaOfUseSpuRepository = testedPtAreaOfUseSpuRepository;
+    this.seedPlanUnitRepository = seedPlanUnitRepository;
+    this.seedPlanZoneRepository = seedPlanZoneRepository;
   }
 
   /**
@@ -307,5 +333,75 @@ public class OrchardService {
         ModelMapper.convert(parentTree, ParentTreeGeneticInfoDto.class);
     parentTreeGenInfoDto.setParentTreeId(parentTree.getId());
     return parentTreeGenInfoDto;
+  }
+
+  /**
+   * Get SPZ information given a list of SPU Ids.
+   *
+   * @param spuIds A list of SPU ID to be fetched.
+   * @return A List of {@link OrchardSpuSpzDto}
+   */
+  public List<OrchardSpuSpzDto> getOrchardSpuSpzInformation(List<Integer> spuIds) {
+    SparLog.info("Getting SPZ information for SPU IDs {}", spuIds);
+
+    // Finds all TESTES PT AREA OF USE and map them for spu
+    List<TestedPtAreaOfUse> testedList =
+        testedParentTreeRepository.findAllBySeedPlanUnitIdIn(spuIds);
+
+    if (testedList.isEmpty()) {
+      SparLog.info("No testes parent tree area of use found!");
+      return List.of();
+    }
+
+    List<OrchardSpuSpzDto> responseDtpList = new ArrayList<>();
+    for (TestedPtAreaOfUse testedEntity : testedList) {
+      final Integer spuId = testedEntity.getSeedPlanUnitId();
+      final Integer testedPtAreaId = testedEntity.getTestedPtAreaOfUseId();
+
+      SparLog.info("Tested PT area of use id {} found for spu id {}", testedPtAreaId, spuId);
+
+      Optional<TestedPtAreaOfUseSpu> testedSpu =
+          testedPtAreaOfUseSpuRepository.findByTestedPtAreaOfUseIdAndSeedPlanUnitId(
+              testedPtAreaId, spuId);
+
+      if (testedSpu.isEmpty()) {
+        SparLog.warn(
+            "Broken relationship between TESTED_PT_AREA_OF_USE_SPU and TESTED_PT_AREA_OF_USE for"
+                + " SPU id {}",
+            spuId);
+        throw new TestedPtAreaOfUseException();
+      }
+
+      OrchardSpuSpzDto responseDto = new OrchardSpuSpzDto();
+      responseDto.setSeedPlanUnitId(spuId);
+
+      Optional<SeedPlanUnit> seedPlanUnitOp = seedPlanUnitRepository.findById(spuId);
+      if (seedPlanUnitOp.isEmpty()) {
+        SparLog.warn("No Seed Plan Unit record found for spu id {}", spuId);
+      } else {
+        SparLog.info("Seed Plan Unit record found for SPU id {}", spuId);
+
+        responseDto.setSeedPlanZoneId(seedPlanUnitOp.get().getSeedPlanZoneId());
+        responseDto.setElevationMin(seedPlanUnitOp.get().getElevationMin());
+        responseDto.setElevationMax(seedPlanUnitOp.get().getElevationMax());
+
+        final Integer spzId = seedPlanUnitOp.get().getSeedPlanZoneId();
+
+        Optional<SeedPlanZone> seedPlanZoneOp = seedPlanZoneRepository.findById(spzId);
+        if (seedPlanZoneOp.isEmpty()) {
+          SparLog.warn("No Seed Plan Zone record found for SPZ id {}", spzId);
+        } else {
+          SparLog.info("Seed Plan Zone record found for SPZ id {}", spzId);
+
+          responseDto.setGeneticClassCode(seedPlanZoneOp.get().getGeneticClassCode());
+          responseDto.setSeedPlanZoneCode(seedPlanZoneOp.get().getSeedPlanZoneCode());
+          responseDto.setVegetationCode(seedPlanZoneOp.get().getVegetationCode());
+        }
+      }
+
+      responseDtpList.add(responseDto);
+    }
+
+    return responseDtpList;
   }
 }
