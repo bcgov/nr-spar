@@ -8,7 +8,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpzBySpuDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
@@ -400,7 +400,7 @@ class OrchardServiceTest {
     seedPlanZone.setVegetationCode("FDC");
     when(seedPlanZoneRepository.findById(spzId)).thenReturn(Optional.of(seedPlanZone));
 
-    List<SpzBySpuDto> dto = orchardService.getSpzInformationBySpu(List.of(7));
+    List<SeedPlanZoneDto> dto = orchardService.getSpzInformationBySpu(List.of(7));
 
     Assertions.assertFalse(dto.isEmpty());
     Assertions.assertEquals(1, dto.size());
@@ -423,7 +423,7 @@ class OrchardServiceTest {
     testedPt.setTestedPtAreaOfUseId(40);
     when(testedPtAreaofUseRepository.findAllBySeedPlanUnitIdIn(spuIdList)).thenReturn(List.of());
 
-    List<SpzBySpuDto> dto = orchardService.getSpzInformationBySpu(List.of(7));
+    List<SeedPlanZoneDto> dto = orchardService.getSpzInformationBySpu(List.of(7));
 
     Assertions.assertTrue(dto.isEmpty());
   }

@@ -6,7 +6,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpzBySpuDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
@@ -339,12 +339,11 @@ public class OrchardService {
    * Get SPZ information given a list of SPU Ids.
    *
    * @param spuIds A list of SPU ID to be fetched.
-   * @return A List of {@link SpzBySpuDto}
+   * @return A List of {@link SeedPlanZoneDto}
    */
-  public List<SpzBySpuDto> getSpzInformationBySpu(List<Integer> spuIds) {
+  public List<SeedPlanZoneDto> getSpzInformationBySpu(List<Integer> spuIds) {
     SparLog.info("Getting SPZ information for SPU IDs {}", spuIds);
 
-    // Finds all TESTES PT AREA OF USE and map them for spu
     List<TestedPtAreaOfUse> testedList =
         testedPtAreaofUseRepository.findAllBySeedPlanUnitIdIn(spuIds);
 
@@ -353,7 +352,7 @@ public class OrchardService {
       return List.of();
     }
 
-    List<SpzBySpuDto> responseDtpList = new ArrayList<>();
+    List<SeedPlanZoneDto> seedPlanZoneDtoList = new ArrayList<>();
     for (TestedPtAreaOfUse testedEntity : testedList) {
       final Integer spuId = testedEntity.getSeedPlanUnitId();
       final Integer testedPtAreaId = testedEntity.getTestedPtAreaOfUseId();
@@ -372,7 +371,7 @@ public class OrchardService {
         throw new TestedPtAreaOfUseException();
       }
 
-      SpzBySpuDto responseDto = new SpzBySpuDto();
+      SeedPlanZoneDto responseDto = new SeedPlanZoneDto();
       responseDto.setSeedPlanUnitId(spuId);
 
       Optional<SeedPlanUnit> seedPlanUnitOp = seedPlanUnitRepository.findById(spuId);
@@ -399,9 +398,9 @@ public class OrchardService {
         }
       }
 
-      responseDtpList.add(responseDto);
+      seedPlanZoneDtoList.add(responseDto);
     }
 
-    return responseDtpList;
+    return seedPlanZoneDtoList;
   }
 }

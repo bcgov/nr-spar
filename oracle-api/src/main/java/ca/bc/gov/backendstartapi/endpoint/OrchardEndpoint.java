@@ -5,7 +5,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpzBySpuDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -191,12 +191,14 @@ public class OrchardEndpoint {
    * Gets all SPZ information given a list of SPU IDs.
    *
    * @param spuIds A list of SPU ID to be fetched.
-   * @return A list of {@link SpzBySpuDto} containing the results or an empty list.
+   * @return A list of {@link SeedPlanZoneDto} containing the results or an empty list.
    */
-  @GetMapping(path = "/spz-information/{spuIds}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(
+      path = "/spz-information-by-spu-ids/{spuIds}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
-      summary = "Gets SPZ information",
-      description = "Gets all SPZ information given a list of SPU IDs.",
+      summary = "Get SPZ (Seed Plan Zone) information given a list of SPU IDs",
+      description = "Gets all SPZ information for one or more SPU IDs.",
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -206,8 +208,9 @@ public class OrchardEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<SpzBySpuDto> getSpzInformation(
-      @Parameter(description = "The SPU id list.") @PathVariable("spuIds") Integer[] spuIds) {
+  public List<SeedPlanZoneDto> getSpzInformation(
+      @Parameter(description = "The SPU (Seed Planning Unit) ID list") @PathVariable("spuIds")
+          Integer[] spuIds) {
     return orchardService.getSpzInformationBySpu(Arrays.asList(spuIds));
   }
 }
