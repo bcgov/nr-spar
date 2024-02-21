@@ -7,7 +7,7 @@ import lombok.Setter;
 /** This class represents a JSON response when requesting SPZ information from a SPU. */
 @Getter
 @Setter
-@Schema(description = "represents a JSON response when requesting SPZ information from a SPU.")
+@Schema(description = "Represents a JSON response when requesting SPZ information from a SPU.")
 public class SeedPlanZoneDto {
 
   @Schema(
