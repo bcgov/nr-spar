@@ -292,9 +292,9 @@ public class SeedlotService {
   }
 
   private void setSeedlotSpzInformation(Seedlot seedlot) {
-    if (!seedlot.getSeedlotSource().getSeedlotSourceCode().equals("TST")) {
+    if (!seedlot.getSeedlotSource().getSeedlotSourceCode().equals("TPT")) {
       SparLog.warn(
-          "Skipping SPZ information for seedlot {}, due the seedlot source code not be tested!",
+          "Skipping SPZ information for seedlot {}, due the seedlot source code not being tested!",
           seedlot.getId());
       return;
     }
