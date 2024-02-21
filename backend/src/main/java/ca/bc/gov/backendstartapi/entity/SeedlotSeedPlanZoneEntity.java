@@ -21,7 +21,7 @@ import lombok.Setter;
 
 /** This class represents a Seedlot Seed Plan Zone entity. */
 @Entity
-@Table(name = "seedlot_smp_mix")
+@Table(name = "seedlot_seed_plan_zone")
 @IdClass(SeedlotSeedPlanZoneId.class)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @RequiredArgsConstructor
