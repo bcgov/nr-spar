@@ -17,8 +17,11 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.provider.Provider;
+import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneEntityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -68,6 +71,12 @@ class SeedlotServiceTest {
 
   @Mock SeedlotStatusService seedlotStatusService;
 
+  @Mock ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;
+
+  @Mock SeedlotSeedPlanZoneEntityRepository seedlotSeedPlanZoneEntityRepository;
+
+  @Mock Provider oracleApiProvider;
+
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
@@ -100,7 +109,10 @@ class SeedlotServiceTest {
             smpMixService,
             smpMixGeneticQualityService,
             seedlotParentTreeSmpMixService,
-            seedlotStatusService);
+            seedlotStatusService,
+            activeOrchardSeedPlanningUnitRepository,
+            seedlotSeedPlanZoneEntityRepository,
+            oracleApiProvider);
   }
 
   @Test

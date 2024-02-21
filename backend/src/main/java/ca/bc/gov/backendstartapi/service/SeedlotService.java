@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -9,26 +10,37 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
+import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotSeedPlanZoneId;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
+import ca.bc.gov.backendstartapi.provider.Provider;
+import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneEntityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -71,6 +83,13 @@ public class SeedlotService {
   private final SeedlotParentTreeSmpMixService seedlotParentTreeSmpMixService;
 
   private final SeedlotStatusService seedlotStatusService;
+
+  private final ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;
+
+  private final SeedlotSeedPlanZoneEntityRepository seedlotSeedPlanZoneEntityRepository;
+
+  @Qualifier("oracleApi")
+  private final Provider oracleApiProvider;
 
   /**
    * Creates a Seedlot in the database.
@@ -262,12 +281,80 @@ public class SeedlotService {
     String submittedStatus = "SUB";
     setSeedlotStatus(seedlot, submittedStatus);
 
+    setSeedlotSpzInformation(seedlot);
+
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
 
     SparLog.info("Seedlot entity and related tables successfully saved.");
     return new SeedlotCreateResponseDto(
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  private void setSeedlotSpzInformation(Seedlot seedlot) {
+    if (!seedlot.getSeedlotSource().getSeedlotSourceCode().equals("TPT")) {
+      SparLog.warn(
+          "Skipping SPZ information for seedlot {}, due the seedlot source code not being tested!",
+          seedlot.getId());
+      return;
+    }
+
+    List<SeedlotOrchard> seedlotOrchards =
+        seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlot.getId());
+
+    List<Integer> spuIds = new ArrayList<>();
+    Map<String, Integer> orchardIdSpuIdMap = new HashMap<>();
+
+    for (SeedlotOrchard orchard : seedlotOrchards) {
+      List<ActiveOrchardSpuEntity> spuEntity =
+          activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(
+              orchard.getOrchard(), true);
+      if (spuEntity.size() != 1) {
+        SparLog.warn(
+            "Zero or more than one records found for the Active SPU x Orchard relationship for"
+                + " orchard {}",
+            orchard.getOrchard());
+        continue;
+      }
+
+      Integer spuId = spuEntity.get(0).getSeedPlanningUnitId();
+
+      SparLog.info("Adding SPU id to fetch from Oracle {}", spuId);
+      spuIds.add(spuId);
+      orchardIdSpuIdMap.put(orchard.getOrchard(), spuId);
+    }
+
+    List<SeedPlanZoneDto> seedPlanZoneResp = oracleApiProvider.getSpzInformationBySpuIds(spuIds);
+
+    for (SeedPlanZoneDto spz : seedPlanZoneResp) {
+      SeedlotSeedPlanZoneId spzId =
+          new SeedlotSeedPlanZoneId(seedlot.getId(), spz.getSeedPlanZoneCode());
+      Optional<SeedlotSeedPlanZoneEntity> spzEntityOp =
+          seedlotSeedPlanZoneEntityRepository.findById(spzId);
+
+      if (spzEntityOp.isPresent()) {
+        seedlotSeedPlanZoneEntityRepository.deleteById(spzId);
+        seedlotSeedPlanZoneEntityRepository.flush();
+      }
+
+      Optional<GeneticClassEntity> classEntity =
+          geneticClassRepository.findById(spz.getGeneticClassCode().toString());
+
+      // Save in the seedlot seed plan zone object the relevant information
+      SeedlotSeedPlanZoneEntity spzEntity =
+          new SeedlotSeedPlanZoneEntity(
+              seedlot,
+              spz.getSeedPlanZoneCode(),
+              spz.getSeedPlanZoneId(),
+              classEntity.orElseThrow(InvalidSeedlotRequestException::new));
+      spzEntity.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
+
+      seedlotSeedPlanZoneEntityRepository.saveAndFlush(spzEntity);
+
+      // Save in the seedlot object the relevant information
+      seedlot.setElevationMin(spz.getElevationMin());
+      seedlot.setElevationMax(spz.getElevationMax());
+    }
   }
 
   private void setSeedlotStatus(Seedlot seedlot, String newStatus) {
