@@ -13,6 +13,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -272,6 +273,41 @@ class OrchardEndpointTest {
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSpzInformationBySpu_sucessTest")
+  @WithMockUser(roles = "user_read")
+  void getSpzInformationBySpu_sucessTest() throws Exception {
+    SeedPlanZoneDto responseDto = new SeedPlanZoneDto();
+    responseDto.setSeedPlanUnitId(7);
+    responseDto.setSeedPlanZoneId(40);
+    responseDto.setGeneticClassCode('A');
+    responseDto.setSeedPlanZoneCode("M");
+    responseDto.setVegetationCode("FDC");
+    responseDto.setElevationMin(1);
+    responseDto.setElevationMax(700);
+
+    List<Integer> spuIds = List.of(7);
+    when(orchardService.getSpzInformationBySpu(spuIds)).thenReturn(List.of(responseDto));
+
+    mockMvc
+        .perform(
+            get("/api/orchards/spz-information-by-spu-ids/{spuIds}", spuIds.toArray())
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].seedPlanUnitId").value(responseDto.getSeedPlanUnitId()))
+        .andExpect(jsonPath("$[0].seedPlanZoneId").value(responseDto.getSeedPlanZoneId()))
+        .andExpect(
+            jsonPath("$[0].geneticClassCode").value(responseDto.getGeneticClassCode().toString()))
+        .andExpect(jsonPath("$[0].seedPlanZoneCode").value(responseDto.getSeedPlanZoneCode()))
+        .andExpect(jsonPath("$[0].vegetationCode").value(responseDto.getVegetationCode()))
+        .andExpect(jsonPath("$[0].elevationMin").value(responseDto.getElevationMin()))
+        .andExpect(jsonPath("$[0].elevationMax").value(responseDto.getElevationMax()))
         .andReturn();
   }
 }
