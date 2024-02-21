@@ -347,6 +347,7 @@ public class SeedlotService {
               spz.getSeedPlanZoneCode(),
               spz.getSeedPlanZoneId(),
               classEntity.orElseThrow(InvalidSeedlotRequestException::new));
+      spzEntity.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
 
       seedlotSeedPlanZoneEntityRepository.saveAndFlush(spzEntity);
 
