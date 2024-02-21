@@ -9,7 +9,6 @@ import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -165,8 +164,13 @@ public class OracleApiProvider implements Provider {
         "Starting {} - {} request to {}", PROVIDER, "getSpzInformationBySpuIds", oracleApiUrl);
 
     try {
-      Map<String, Object[]> uriVars = new HashMap<>();
-      uriVars.put("spuIds", spuIds.toArray());
+      StringBuilder sb = new StringBuilder();
+      for (Integer id : spuIds) {
+        if (!sb.isEmpty()) {
+          sb.append(",");
+        }
+        sb.append(id);
+      }
 
       ResponseEntity<List<SeedPlanZoneDto>> seedPlanZoneResult =
           restTemplate.exchange(
@@ -174,7 +178,7 @@ public class OracleApiProvider implements Provider {
               HttpMethod.GET,
               new HttpEntity<>(addHttpHeaders()),
               new ParameterizedTypeReference<List<SeedPlanZoneDto>>() {},
-              uriVars);
+              createParamsMap("spuIds", sb.toString()));
       List<SeedPlanZoneDto> list = seedPlanZoneResult.getBody();
       int size = list == null ? 0 : list.size();
       SparLog.info("GET SPZ from Oracle - Success response with {} record(s)!", size);
