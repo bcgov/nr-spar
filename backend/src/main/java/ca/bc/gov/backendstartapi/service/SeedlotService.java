@@ -308,6 +308,10 @@ public class SeedlotService {
       throw new SeedlotNotFoundException();
     }
 
+    SparLog.info("Fetching seedlot seed plan zone entity");
+    List<SeedlotSeedPlanZoneEntity> sspzList =
+        seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber);
+
     SparLog.info("Fetching seedlot orchard entity");
     List<String> orchardIdList =
         seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber).stream()
@@ -319,32 +323,25 @@ public class SeedlotService {
       throw new SeedlotOrchardNotFoundException();
     }
 
-    SparLog.info("Fetching seedlot seed plan zone entity");
-    List<SeedlotSeedPlanZoneEntity> sspzList =
-        seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber);
-
     List<SeedPlanZoneDto> spzDtoList = new ArrayList<>();
 
     for (String orchardId : orchardIdList) {
       SparLog.info("Fetching active orchard seed plannining unit entity");
 
-      Optional<ActiveOrchardSpuEntity> spuEntity =
+      Optional<ActiveOrchardSpuEntity> spuOp =
           orchardService.findSpuIdByOrchardWithActive(orchardId, true);
-      if (spuEntity.isEmpty()) {
+      if (spuOp.isEmpty()) {
         SparLog.warn("No ActiveOrchardSpuEntity record found for orchard id {}", orchardId);
         continue;
       }
 
-      Integer spuId = spuEntity.get().getSeedPlanningUnitId();
-
-      Optional<SeedlotSeedPlanZoneEntity> sspzOp =
-          sspzList.stream().filter(e -> e.getSeedPlanZoneId().equals(spuId)).findFirst();
+      Optional<SeedlotSeedPlanZoneEntity> sspzOp = sspzList.stream().findFirst();
 
       if (sspzOp.isPresent()) {
         SparLog.info("Creating Seed Plan Zone dto response");
         spzDtoList.add(
             new SeedPlanZoneDto(
-                spuId,
+                spuOp.get().getSeedPlanningUnitId(),
                 sspzOp.get().getSeedPlanZoneId(),
                 sspzOp.get().getGeneticClass().getGeneticClassCode().charAt(0),
                 sspzOp.get().getSeedPlanZoneCode(),
@@ -352,8 +349,13 @@ public class SeedlotService {
                 seedlotOp.get().getElevationMin(),
                 seedlotOp.get().getElevationMax()));
       } else {
-        SparLog.warn("No Seed plan Zone found for spu id {}", spuId);
+        SparLog.warn("No Seed plan Zone found for spu id {}", spuOp.get().getSeedPlanningUnitId());
       }
+    }
+
+    if (spzDtoList.isEmpty()) {
+      SparLog.warn("ActiveOrchardSpuEntity record not found for any seedlot orchard");
+      throw new SeedlotOrchardNotFoundException();
     }
 
     return spzDtoList;
@@ -403,7 +405,6 @@ public class SeedlotService {
       Optional<GeneticClassEntity> classEntity =
           geneticClassRepository.findById(spz.getGeneticClassCode().toString());
 
-      // Save in the seedlot seed plan zone object the relevant information
       SeedlotSeedPlanZoneEntity spzEntity =
           new SeedlotSeedPlanZoneEntity(
               seedlot,
@@ -414,7 +415,6 @@ public class SeedlotService {
 
       seedlotSeedPlanZoneRepository.saveAndFlush(spzEntity);
 
-      // Save in the seedlot object the relevant information
       seedlot.setElevationMin(spz.getElevationMin());
       seedlot.setElevationMax(spz.getElevationMax());
     }
