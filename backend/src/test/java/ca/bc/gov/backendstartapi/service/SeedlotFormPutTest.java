@@ -24,10 +24,9 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
-import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneEntityRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -76,9 +75,9 @@ class SeedlotFormPutTest {
 
   @Mock SeedlotStatusService seedlotStatusService;
 
-  @Mock ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;
+  @Mock OrchardService orchardService;
 
-  @Mock SeedlotSeedPlanZoneEntityRepository seedlotSeedPlanZoneEntityRepository;
+  @Mock SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
 
   @Mock Provider oracleApiProvider;
 
@@ -185,8 +184,8 @@ class SeedlotFormPutTest {
             smpMixGeneticQualityService,
             seedlotParentTreeSmpMixService,
             seedlotStatusService,
-            activeOrchardSeedPlanningUnitRepository,
-            seedlotSeedPlanZoneEntityRepository,
+            orchardService,
+            seedlotSeedPlanZoneRepository,
             oracleApiProvider);
   }
 

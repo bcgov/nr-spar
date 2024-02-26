@@ -6,22 +6,26 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotOrchardNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
-import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneEntityRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -71,9 +75,9 @@ class SeedlotServiceTest {
 
   @Mock SeedlotStatusService seedlotStatusService;
 
-  @Mock ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;
+  @Mock OrchardService orchardService;
 
-  @Mock SeedlotSeedPlanZoneEntityRepository seedlotSeedPlanZoneEntityRepository;
+  @Mock SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
 
   @Mock Provider oracleApiProvider;
 
@@ -110,8 +114,8 @@ class SeedlotServiceTest {
             smpMixGeneticQualityService,
             seedlotParentTreeSmpMixService,
             seedlotStatusService,
-            activeOrchardSeedPlanningUnitRepository,
-            seedlotSeedPlanZoneEntityRepository,
+            orchardService,
+            seedlotSeedPlanZoneRepository,
             oracleApiProvider);
   }
 
@@ -361,5 +365,84 @@ class SeedlotServiceTest {
         testDto.seedlotSourceCode(), patchedSeedlot.getSeedlotSource().getSeedlotSourceCode());
     assertEquals(testDto.toBeRegistrdInd(), patchedSeedlot.getIntendedForCrownLand());
     assertEquals(testDto.bcSourceInd(), patchedSeedlot.getSourceInBc());
+  }
+
+  @Test
+  @DisplayName("Get seed plan zone data happy path should success")
+  void getSeedPlanZoneData_success_shouldSucceed() {
+    String seedlotNumber = "63022";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setVegetationCode("FDC");
+    seedlot.setElevationMax(700);
+    seedlot.setElevationMin(1);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+
+    String orchardId = "405";
+    SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, orchardId);
+    when(seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber))
+        .thenReturn(List.of(seedlotOrchard));
+
+    GeneticClassEntity classEntity = new GeneticClassEntity();
+    classEntity.setGeneticClassCode("A");
+    SeedlotSeedPlanZoneEntity sspzEntity =
+        new SeedlotSeedPlanZoneEntity(seedlot, "M", 40, classEntity);
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber))
+        .thenReturn(List.of(sspzEntity));
+
+    ActiveOrchardSpuEntity activeSpu = new ActiveOrchardSpuEntity(orchardId, 7, true, false, false);
+    when(orchardService.findSpuIdByOrchardWithActive(orchardId, true))
+        .thenReturn(Optional.of(activeSpu));
+
+    List<SeedPlanZoneDto> seedPlanZoneDto = seedlotService.getSeedPlanZoneData(seedlotNumber);
+
+    Assertions.assertFalse(seedPlanZoneDto.isEmpty());
+    Assertions.assertEquals(
+        activeSpu.getSeedPlanningUnitId(), seedPlanZoneDto.get(0).getSeedPlanUnitId());
+    Assertions.assertEquals(
+        sspzEntity.getSeedPlanZoneId(), seedPlanZoneDto.get(0).getSeedPlanZoneId());
+    Assertions.assertEquals(
+        classEntity.getGeneticClassCode().charAt(0), seedPlanZoneDto.get(0).getGeneticClassCode());
+    Assertions.assertEquals(
+        sspzEntity.getSeedPlanZoneCode(), seedPlanZoneDto.get(0).getSeedPlanZoneCode());
+    Assertions.assertEquals(
+        seedlot.getVegetationCode(), seedPlanZoneDto.get(0).getVegetationCode());
+    Assertions.assertEquals(seedlot.getElevationMin(), seedPlanZoneDto.get(0).getElevationMin());
+    Assertions.assertEquals(seedlot.getElevationMax(), seedPlanZoneDto.get(0).getElevationMax());
+  }
+
+  @Test
+  @DisplayName("Get seed plan zone data seedlot not found should fail")
+  void getSeedPlanZoneData_seedlotNotFound_shouldFail() {
+    String seedlotNumber = "63022";
+
+    when(seedlotRepository.findById(seedlotNumber)).thenThrow(new SeedlotNotFoundException());
+
+    Assertions.assertThrows(
+        SeedlotNotFoundException.class,
+        () -> {
+          seedlotService.getSeedPlanZoneData(seedlotNumber);
+        });
+  }
+
+  @Test
+  @DisplayName("Get seed plan zone data seedlot x orchard not found should fail")
+  void getSeedPlanZoneData_seedlotOrchardNotFound_shouldFail() {
+    String seedlotNumber = "63022";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setVegetationCode("FDC");
+    seedlot.setElevationMax(700);
+    seedlot.setElevationMin(1);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+
+    when(seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber))
+        .thenThrow(new SeedlotOrchardNotFoundException());
+
+    Assertions.assertThrows(
+        SeedlotOrchardNotFoundException.class,
+        () -> {
+          seedlotService.getSeedPlanZoneData(seedlotNumber);
+        });
   }
 }

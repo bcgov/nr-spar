@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -475,5 +476,43 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
 
     return saveSeedlotFormService.getFormStatusClassA(seedlotNumber);
+  }
+
+  /**
+   * Get all the seed plan zone information given a seedlot number.
+   *
+   * @param seedlotNumber the Seedlot id
+   * @return A list of {@link SeedPlanZoneDto} containing all records.
+   */
+  @GetMapping("/{seedlotNumber}/seed-plan-zone-data")
+  @Operation(
+      summary = "Get SPZ (Seed Plan Zone) data given a seedlot number.",
+      description = "Fetches all the seed plan zone information to a particular seedlot number")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "A list of `SeedPlanZoneDto` containing all the SPZ information if found."),
+        @ApiResponse(
+            responseCode = "404",
+            description = "If no seedlot record found, or if no Orchard Seedlot record found.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public List<SeedPlanZoneDto> getSeedPlanZoneData(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          @NonNull
+          String seedlotNumber) {
+    return seedlotService.getSeedPlanZoneData(seedlotNumber);
   }
 }
