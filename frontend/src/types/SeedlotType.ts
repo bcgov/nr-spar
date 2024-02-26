@@ -172,7 +172,7 @@ export type ParentTreeFormSubmitType = {
   parentTreeId: number,
   parentTreeNumber: string,
   coneCount: number,
-  pollenPount: number,
+  pollenCount: number,
   smpSuccessPct: number,
   nonOrchardPollenContamPct: number,
   amountOfMaterial: number,
