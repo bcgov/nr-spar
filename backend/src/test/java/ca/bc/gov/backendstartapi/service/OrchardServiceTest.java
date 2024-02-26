@@ -53,11 +53,11 @@ class OrchardServiceTest {
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of(activeOrchardSpu));
 
-    List<ActiveOrchardSpuEntity> list = orchardService.findSpuIdByOrchard(orchardId);
+    Optional<ActiveOrchardSpuEntity> list = orchardService.findSpuIdByOrchard(orchardId);
 
     Assertions.assertFalse(list.isEmpty());
 
-    ActiveOrchardSpuEntity orchardSpu = list.get(0);
+    ActiveOrchardSpuEntity orchardSpu = list.get();
     Assertions.assertEquals(orchardId, orchardSpu.getOrchardId());
     Assertions.assertTrue(orchardSpu.isActive());
   }
@@ -72,11 +72,11 @@ class OrchardServiceTest {
     when(activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, true))
         .thenReturn(List.of(activeOrchardSpu));
 
-    List<ActiveOrchardSpuEntity> list = orchardService.findSpuIdByOrchard(orchardId);
+    Optional<ActiveOrchardSpuEntity> list = orchardService.findSpuIdByOrchard(orchardId);
 
     Assertions.assertFalse(list.isEmpty());
 
-    ActiveOrchardSpuEntity orchardSpu = list.get(0);
+    ActiveOrchardSpuEntity orchardSpu = list.get();
     Assertions.assertEquals(orchardId, orchardSpu.getOrchardId());
     Assertions.assertFalse(orchardSpu.isActive());
   }
