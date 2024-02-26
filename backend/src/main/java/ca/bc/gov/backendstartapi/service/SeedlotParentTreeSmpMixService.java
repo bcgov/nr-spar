@@ -3,7 +3,6 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
-import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
@@ -30,8 +29,6 @@ public class SeedlotParentTreeSmpMixService {
 
   private final SeedlotParentTreeService seedlotParentTreeService;
 
-  private final OrchardService orchardService;
-
   private final GeneticWorthEntityDao geneticWorthEntityDao;
 
   private final LoggedUserService loggedUserService;
@@ -42,22 +39,22 @@ public class SeedlotParentTreeSmpMixService {
    * @param seedlot The {@link Seedlot} related
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
-  public List<SeedlotParentTreeSmpMix> saveSeedlotFormStep5(
+  public void saveSeedlotFormStep5(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     SparLog.info("Saving SeedlotParentTreeSmpMix for seedlot number {}", seedlot.getId());
 
-    return addSeedlotPtSmpMix(seedlot, seedlotFormParentTreeDtoList);
+    addSeedlotPtSmpMix(seedlot, seedlotFormParentTreeDtoList);
   }
 
   // Form Step 5 Seedlot Parent Tree SMP Fix related
-  private List<SeedlotParentTreeSmpMix> addSeedlotPtSmpMix(
+  private void addSeedlotPtSmpMix(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     if (seedlotFormParentTreeDtoList.isEmpty()) {
       SparLog.info(
           "No new records to be inserted on the SeedlotParentTreeSmpMix table for seedlot number"
               + " {}",
           seedlot.getId());
-      return List.of();
+      return;
     }
 
     SparLog.info(
@@ -69,68 +66,34 @@ public class SeedlotParentTreeSmpMixService {
         seedlotParentTreeService.getAllSeedlotParentTree(seedlot.getId()).stream()
             .collect(Collectors.toMap(SeedlotParentTree::getParentTreeId, Function.identity()));
 
-    List<SameSpeciesTreeDto> allPtData =
-        orchardService.findParentTreesByVegCode(seedlot.getVegetationCode());
-
     List<SeedlotParentTreeSmpMix> sptsmToInsertList = new ArrayList<>();
-
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
-
       for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
           seedlotPtFormDto.parentTreeGeneticQualities()) {
+        SeedlotParentTree sptEntity = sptMap.get(seedlotPtFormDto.parentTreeId());
+        if (Objects.isNull(sptEntity)) {
+          // This means that the parent tree is not present in the
+          // selected orchard, so there is no need to include it
+          continue;
+        }
 
         GeneticWorthEntity gwe =
             geneticWorthEntityDao
                 .getGeneticWorthEntity(seedlotGenQltyDto.geneticWorthCode())
                 .orElseThrow();
 
-        SeedlotParentTree sptEntity = sptMap.get(seedlotPtFormDto.parentTreeId());
-
-        List<SameSpeciesTreeDto> ptFilteredList = allPtData.stream()
-            .filter(parentTree -> {
-              if (parentTree.getParentTreeNumber().equals(seedlotPtFormDto.parentTreeNumber())) {
-                return true;
-              }
-              return false;
-            })
-            .collect(Collectors.toList());
-
-        if (!Objects.isNull(sptEntity)) {
-          SeedlotParentTreeSmpMix sptsmEntity =
-              new SeedlotParentTreeSmpMix(
-                  sptEntity,
-                  seedlotGenQltyDto.geneticTypeCode(),
-                  gwe,
-                  seedlotGenQltyDto.geneticQualityValue(),
-                  loggedUserService.createAuditCurrentUser());
-          sptsmToInsertList.add(sptsmEntity);
-        } else if (!ptFilteredList.isEmpty()) {
-          // This is the case where the parent tree is outside of the selected
-          // orchard, so we need to create a new seedlot parent tree before
-          // creating the seedlot parent tree sp mix
-          SeedlotParentTree outOfOrchardParentTree = new SeedlotParentTree(
-            seedlot,
-            seedlotPtFormDto.parentTreeId(),
-            seedlotPtFormDto.parentTreeNumber(),
-            seedlotPtFormDto.coneCount(),
-            seedlotPtFormDto.pollenPount(),
-            loggedUserService.createAuditCurrentUser());
-
-          SeedlotParentTreeSmpMix sptsmEntity =
+        SeedlotParentTreeSmpMix sptsmEntity =
             new SeedlotParentTreeSmpMix(
-                outOfOrchardParentTree,
+                sptEntity,
                 seedlotGenQltyDto.geneticTypeCode(),
                 gwe,
                 seedlotGenQltyDto.geneticQualityValue(),
                 loggedUserService.createAuditCurrentUser());
 
-          sptsmToInsertList.add(sptsmEntity);
-        } else {
-          throw new SeedlotParentTreeNotFoundException();
-        }
+        sptsmToInsertList.add(sptsmEntity);
       }
     }
 
-    return seedlotParentTreeSmpMixRepository.saveAll(sptsmToInsertList);
+    seedlotParentTreeSmpMixRepository.saveAll(sptsmToInsertList);
   }
 }
