@@ -36,9 +36,9 @@ public class OrchardService {
    * Find an active SPU ID given an Orchard ID.
    *
    * @param orchardId Orchard's identification.
-   * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
+   * @return An Optional of {@link ActiveOrchardSpuEntity} or an empty list.
    */
-  public List<ActiveOrchardSpuEntity> findSpuIdByOrchard(String orchardId) {
+  public Optional<ActiveOrchardSpuEntity> findSpuIdByOrchard(String orchardId) {
     SparLog.info("Finding SPU id for orchard id {}", orchardId);
     return findSpuIdByOrchardWithActive(orchardId, true);
   }
@@ -64,17 +64,24 @@ public class OrchardService {
    *
    * @param orchardId Orchard's identification.
    * @param active determine if the SPU should be active or not.
-   * @return A {@link List} of {@link ActiveOrchardSpuEntity} or an empty list.
+   * @return An Optional of {@link ActiveOrchardSpuEntity}.
    */
-  public List<ActiveOrchardSpuEntity> findSpuIdByOrchardWithActive(
+  public Optional<ActiveOrchardSpuEntity> findSpuIdByOrchardWithActive(
       String orchardId, boolean active) {
     SparLog.info("Finding SPU id for orchard id {} and active {}", orchardId, active);
 
     List<ActiveOrchardSpuEntity> list =
         activeOrchardSeedPlanningUnitRepository.findByOrchardIdAndActive(orchardId, active);
-    SparLog.info("{} Orchards by spu found.", list.size());
+    SparLog.info("{} Orchards for this spu id found.", list.size());
 
-    return list;
+    if (list.size() > 1) {
+      SparLog.warn(
+          "More than one records found for the Active SPU x Orchard relationship for"
+              + " orchard {}",
+          orchardId);
+    }
+
+    return list.stream().findFirst();
   }
 
   /**
@@ -86,12 +93,12 @@ public class OrchardService {
   public OrchardSpuDto findParentTreeGeneticQualityData(String orchardId) {
     SparLog.info("Fetching Parent Tree data for Orchard ID: {}", orchardId);
 
-    List<ActiveOrchardSpuEntity> spuList = findSpuIdByOrchard(orchardId);
+    Optional<ActiveOrchardSpuEntity> spuList = findSpuIdByOrchard(orchardId);
     if (spuList.isEmpty()) {
       throw new NoSpuForOrchardException();
     }
 
-    int spuId = spuList.get(0).getSeedPlanningUnitId();
+    int spuId = spuList.get().getSeedPlanningUnitId();
     SparLog.info("Found SPU Id {} for Orchard Id {}", spuId, orchardId);
 
     Optional<OrchardSpuDto> parentTreeDto =
