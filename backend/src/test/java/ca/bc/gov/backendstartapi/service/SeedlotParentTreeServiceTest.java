@@ -86,7 +86,7 @@ class SeedlotParentTreeServiceTest {
             formStep5.parentTreeId(),
             formStep5.parentTreeNumber(),
             formStep5.coneCount(),
-            formStep5.pollenPount(),
+            formStep5.pollenCount(),
             audit);
     when(seedlotParentTreeRepository.saveAll(any())).thenReturn(List.of(spt));
 
@@ -109,7 +109,7 @@ class SeedlotParentTreeServiceTest {
             formStep5.parentTreeId(),
             formStep5.parentTreeNumber(),
             formStep5.coneCount(),
-            formStep5.pollenPount(),
+            formStep5.pollenCount(),
             audit);
 
     when(seedlotParentTreeRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(spt));
@@ -139,7 +139,7 @@ class SeedlotParentTreeServiceTest {
             formStep5.parentTreeId(),
             formStep5.parentTreeNumber(),
             formStep5.coneCount(),
-            formStep5.pollenPount(),
+            formStep5.pollenCount(),
             audit);
 
     when(seedlotParentTreeRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(spt));

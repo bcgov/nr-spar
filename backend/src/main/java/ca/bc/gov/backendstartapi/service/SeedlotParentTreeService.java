@@ -180,7 +180,7 @@ public class SeedlotParentTreeService {
               seedlotPtDto.parentTreeId(),
               seedlotPtDto.parentTreeNumber(),
               seedlotPtDto.coneCount(),
-              seedlotPtDto.pollenPount(),
+              seedlotPtDto.pollenCount(),
               loggedUserService.createAuditCurrentUser());
 
       seedlotParentTree.setSmpSuccessPercentage(seedlotPtDto.smpSuccessPct());
