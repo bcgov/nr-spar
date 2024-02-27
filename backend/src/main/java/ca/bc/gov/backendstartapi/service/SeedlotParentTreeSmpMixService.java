@@ -8,7 +8,6 @@ import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeSmpMixRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
