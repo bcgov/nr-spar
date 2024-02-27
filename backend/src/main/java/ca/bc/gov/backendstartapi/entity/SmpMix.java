@@ -60,4 +60,8 @@ public class SmpMix {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
+
+  public SmpMixId getId() {
+    return new SmpMixId(seedlot.getId(), parentTreeId);
+  }
 }

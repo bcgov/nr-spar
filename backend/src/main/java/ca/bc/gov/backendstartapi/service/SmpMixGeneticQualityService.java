@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
 import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
@@ -46,6 +47,10 @@ public class SmpMixGeneticQualityService {
     addSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
 
+  public List<SmpMixGeneticQuality> findAllBySmpMix(SmpMixId smixId) {
+    return smpMixGeneticQualityRepository.findAllBySmpMix(smixId);
+  }
+  
   // Form Step 5 SMP Mix Genetic Quality related
   private void addSmpMixGenQlty(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {

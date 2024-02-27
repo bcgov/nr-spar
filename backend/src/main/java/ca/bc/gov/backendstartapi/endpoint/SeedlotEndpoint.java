@@ -476,4 +476,9 @@ public class SeedlotEndpoint {
 
     return saveSeedlotFormService.getFormStatusClassA(seedlotNumber);
   }
+
+  @GetMapping("/{seedlogNumber}/lat-long-elevation")
+  public void getLatLongElevation(@PathVariable String seedlotNumber) {
+    seedlotService.getLatLongElevation(seedlotNumber);
+  }
 }
