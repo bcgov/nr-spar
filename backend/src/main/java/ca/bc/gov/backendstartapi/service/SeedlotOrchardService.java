@@ -44,8 +44,7 @@ public class SeedlotOrchardService {
         formStep4.orchardsId().size(),
         seedlot.getId());
 
-    List<SeedlotOrchard> seedlotOrchards =
-        seedlotOrchardRepository.findAllBySeedlot_id(seedlot.getId());
+    List<SeedlotOrchard> seedlotOrchards = getAllSeedlotOrchardBySeedlotNumber(seedlot.getId());
 
     if (!seedlotOrchards.isEmpty()) {
       SparLog.info(
@@ -89,5 +88,15 @@ public class SeedlotOrchardService {
     }
 
     seedlotOrchardRepository.saveAll(seedlotOrchards);
+  }
+
+  /**
+   * Get all {@link SeedlotOrchard} given a {@link Seedlot} id (seedlot number).
+   *
+   * @param seedlotNumber the seedlot id
+   * @return A List of SeedlotOrchard containing the found records or an empty list.
+   */
+  public List<SeedlotOrchard> getAllSeedlotOrchardBySeedlotNumber(String seedlotNumber) {
+    return seedlotOrchardRepository.findAllBySeedlot_id(seedlotNumber);
   }
 }

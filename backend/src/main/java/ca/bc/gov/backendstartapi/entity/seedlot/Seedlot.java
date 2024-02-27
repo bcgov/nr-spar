@@ -214,6 +214,127 @@ public class Seedlot implements Serializable {
 
   // endregion
 
+  // geographic data
+
+  @Column(name = "seed_plan_unit_id")
+  private Integer seedPlanUnitId;
+
+  @Column(name = "bgc_zone_code", length = 4)
+  private String bgcZoneCode;
+
+  @Column(name = "bgc_subzone_code", length = 3)
+  private String bgcSubzoneCode;
+
+  @Column(name = "variant")
+  private Character variant;
+
+  @Column(name = "bec_version_id")
+  private Integer becVersionId;
+
+  @Column(name = "elevation")
+  private Integer elevation;
+
+  @Column(name = "latitude_degrees")
+  private Integer latitudeDegrees;
+
+  @Column(name = "latitude_minutes")
+  private Integer latitudeMinutes;
+
+  @Column(name = "latitude_seconds")
+  private Integer latitudeSeconds;
+
+  @Column(name = "longitude_degrees")
+  private Integer longitudeDegrees;
+
+  @Column(name = "longitude_minutes")
+  private Integer longitudeMinutes;
+
+  @Column(name = "longitude_seconds")
+  private Integer longitudeSeconds;
+
+  @Column(name = "collection_elevation")
+  private Integer collectionElevation;
+
+  @Column(name = "collection_elevation_min")
+  private Integer collectionElevationMin;
+
+  @Column(name = "collection_elevation_max")
+  private Integer collectionElevationMax;
+
+  @Column(name = "collection_latitude_deg")
+  private Integer collectionLatitudeDeg;
+
+  @Column(name = "collection_latitude_min")
+  private Integer collectionLatitudeMin;
+
+  @Column(name = "collection_latitude_sec")
+  private Integer collectionLatitudeSec;
+
+  @Column(name = "collection_latitude_code")
+  private Character collectionLatitudeCode;
+
+  @Column(name = "collection_longitude_deg")
+  private Integer collectionLongitudeDeg;
+
+  @Column(name = "collection_longitude_min")
+  private Integer collectionLongitudeMin;
+
+  @Column(name = "collection_longitude_sec")
+  private Integer collectionLongitudeSec;
+
+  @Column(name = "collection_longitude_code")
+  private Character collectionLongitudeCode;
+
+  @Column(name = "elevation_min")
+  private Integer elevationMin;
+
+  @Column(name = "elevation_max")
+  private Integer elevationMax;
+
+  @Column(name = "latitude_deg_min")
+  private Integer latitudeDegMin;
+
+  @Column(name = "latitude_min_min")
+  private Integer latitudeMinMin;
+
+  @Column(name = "latitude_sec_min")
+  private Integer latitudeSecMin;
+
+  @Column(name = "latitude_deg_max")
+  private Integer latitudeDegMax;
+
+  @Column(name = "latitude_min_max")
+  private Integer latitudeMinMax;
+
+  @Column(name = "latitude_sec_max")
+  private Integer latitudeSecMax;
+
+  @Column(name = "longitude_deg_min")
+  private Integer longitudeDegMin;
+
+  @Column(name = "longitude_min_min")
+  private Integer longitudeMinMin;
+
+  @Column(name = "longitude_sec_min")
+  private Integer longitudeSecMin;
+
+  @Column(name = "longitude_deg_max")
+  private Integer longitudeDegMax;
+
+  @Column(name = "longitude_min_max")
+  private Integer longitudeMinMax;
+
+  @Column(name = "longitude_sec_max")
+  private Integer longitudeSecMax;
+
+  @Column(name = "smp_mean_bv_growth", precision = 4, scale = 1)
+  private BigDecimal smpMeanBvGrowth;
+
+  @Column(name = "area_of_use_comment", length = 2000)
+  private String areaOfUseComment;
+
+  // end geographic
+
   public Seedlot(String id) {
     this.id = id;
   }

@@ -7,23 +7,19 @@ import {
   Modal,
   FlexGrid,
   Row,
-  Column,
-  Pagination,
-  DataTableSkeleton
+  Column
 } from '@carbon/react';
 
 import ClientSearchTable from '../../ClientSearchTable';
-import EmptySection from '../../EmptySection';
 import ClientSearchFields from './ClientSearchFields';
 
 import { searchForestClients } from '../../../api-service/forestClientsAPI';
-import PaginationChangeType from '../../../types/PaginationChangeType';
-import { ForestClientDisplayType } from '../../../types/ForestClientTypes/ForestClientDisplayType';
+import { ForestClientSearchType } from '../../../types/ForestClientTypes/ForestClientSearchType';
 
 import {
-  ClientSearchDropdown, ClientSearchModalProps, MutationParams
+  ClientSearchDropdown, ClientSearchModalProps
 } from './definitions';
-import { clientSearchOptions, getEmptySectionDescription } from './constants';
+import { clientSearchOptions } from './constants';
 
 import './styles.scss';
 
@@ -38,85 +34,15 @@ const ClientSearchModal = (
 
   const [searchWord, setSearchWord] = useState<string>('');
   const [searchOption, setSearchOption] = useState<ClientSearchDropdown>(clientSearchOptions[0]);
-  const [showTable, setShowTable] = useState<boolean>(false);
-  const [searchResults, setSearchResults] = useState<ForestClientDisplayType[]>([]);
-  const [selectedClient, setSelectedClient] = useState<ForestClientDisplayType>();
+  const [selectedClient, setSelectedClient] = useState<ForestClientSearchType>();
   const [disableApplyButton, setDisableApplyButton] = useState<boolean>(true);
-  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const searchClientMutation = useMutation({
-    mutationFn: (requestParam: MutationParams) => {
-      setShowTable(true);
-      return searchForestClients(
-        requestParam.word,
-        requestParam.option
-      );
-    },
-    onSuccess: (res: any) => {
-      setSearchResults(res);
-    },
-    onError: (error: Error) => {
-      setShowTable(false);
-      setErrorMessage(error.message);
-    }
+    mutationFn: () => searchForestClients(
+      searchWord,
+      searchOption.option
+    )
   });
-
-  const [currPageNumber, setCurrPageNumber] = useState<number>(0);
-  const [currPageSize, setCurrPageSize] = useState<number>(10);
-  const [curIndex, setCurIndex] = useState<number>(0);
-
-  const handlePagination = (paginationObj: PaginationChangeType) => {
-    if (paginationObj.forwardBtnRef) {
-      setCurIndex(curIndex - paginationObj.pageSize);
-    } else {
-      setCurIndex(curIndex + paginationObj.pageSize);
-    }
-    setCurrPageNumber(paginationObj.page - 1);
-    setCurrPageSize(paginationObj.pageSize);
-  };
-
-  const tablePagination = () => (
-    <Pagination
-      className="client-table-pagination"
-      page={currPageNumber + 1}
-      pageSize={currPageSize}
-      pageSizes={[10, 20, 30, 40, 50]}
-      itemsPerPageText=""
-      totalItems={searchResults.length ?? 0}
-      onChange={
-        (paginationObj: PaginationChangeType) => {
-          handlePagination(paginationObj);
-        }
-      }
-    />
-  );
-
-  const showResultsTable = () => (
-    searchClientMutation.isLoading
-      ? (
-        <DataTableSkeleton
-          showToolbar={false}
-          showHeader={false}
-        />
-      )
-      : (
-        <ClientSearchTable
-          clientData={searchResults.slice(
-            curIndex,
-            currPageSize + Math.min(curIndex, searchResults.length)
-          )}
-          showPagination={searchResults.length > 10}
-          tablePagination={tablePagination()}
-          selectClientFn={(client: ForestClientDisplayType) => {
-            if (disableApplyButton) {
-              setDisableApplyButton(false);
-            }
-            setSelectedClient(client);
-          }}
-          currentSelected={selectedClient}
-        />
-      )
-  );
 
   return (
     <>
@@ -154,17 +80,18 @@ const ClientSearchModal = (
               />
               <Row>
                 <Column sm={4} md={4} lg={16} xlg={16}>
-                  {
-                    showTable
-                      ? showResultsTable()
-                      : (
-                        <EmptySection
-                          pictogram={errorMessage ? 'FaceVeryDissatisfied' : 'Summit'}
-                          title={errorMessage ? 'An unexpected error occuried :(' : 'Nothing to show yet!'}
-                          description={getEmptySectionDescription(errorMessage)}
-                        />
-                      )
-                  }
+                  <ClientSearchTable
+                    clientData={searchClientMutation.data ?? []}
+                    showPagination
+                    selectClientFn={(client: ForestClientSearchType) => {
+                      if (disableApplyButton) {
+                        setDisableApplyButton(false);
+                      }
+                      setSelectedClient(client);
+                    }}
+                    currentSelected={selectedClient}
+                    mutationFn={searchClientMutation}
+                  />
                 </Column>
               </Row>
             </FlexGrid>

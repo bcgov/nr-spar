@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.ConeCollectionMethodNotFoundException;
@@ -22,8 +23,10 @@ import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
+import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
@@ -71,6 +74,12 @@ class SeedlotFormPutTest {
   @Mock SeedlotParentTreeSmpMixService seedlotParentTreeSmpMixService;
 
   @Mock SeedlotStatusService seedlotStatusService;
+
+  @Mock OrchardService orchardService;
+
+  @Mock SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
+
+  @Mock Provider oracleApiProvider;
 
   private SeedlotService seedlotService;
 
@@ -152,6 +161,7 @@ class SeedlotFormPutTest {
         interimDto,
         orchardDto,
         List.of(parentTreeDto),
+        List.of(parentTreeDto),
         extractionDto);
   }
 
@@ -173,7 +183,10 @@ class SeedlotFormPutTest {
             smpMixService,
             smpMixGeneticQualityService,
             seedlotParentTreeSmpMixService,
-            seedlotStatusService);
+            seedlotStatusService,
+            orchardService,
+            seedlotSeedPlanZoneRepository,
+            oracleApiProvider);
   }
 
   @Test
@@ -308,6 +321,9 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Success")
   void submitSeedlotForm_happyPath_shouldSucceed() {
     Seedlot seedlot = new Seedlot("5432");
+    SeedlotSourceEntity seedSource = new SeedlotSourceEntity();
+    seedSource.setSeedlotSourceCode("UNT");
+    seedlot.setSeedlotSource(seedSource);
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
     doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any());

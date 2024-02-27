@@ -8,17 +8,27 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
+import ca.bc.gov.backendstartapi.entity.SeedPlanUnit;
+import ca.bc.gov.backendstartapi.entity.SeedPlanZone;
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUse;
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpu;
 import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
 import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
+import ca.bc.gov.backendstartapi.exception.TestedPtAreaOfUseException;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
+import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
+import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
+import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpuRepository;
+import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -46,6 +56,14 @@ class OrchardServiceTest {
   @Mock private ParentTreeRepository parentTreeRepository;
 
   @Mock private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
+
+  @Mock private TestedPtAreaofUseRepository testedPtAreaofUseRepository;
+
+  @Mock private SeedPlanUnitRepository seedPlanUnitRepository;
+
+  @Mock private SeedPlanZoneRepository seedPlanZoneRepository;
+
+  @Mock private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
 
   @Autowired @InjectMocks private OrchardService orchardService;
 
@@ -348,5 +366,86 @@ class OrchardServiceTest {
         repoResult.get(1).getParentTreeId(), listToTest.get(1).getParentTreeId());
     Assertions.assertEquals(
         repoResult.get(1).getParentTreeNumber(), listToTest.get(1).getParentTreeNumber());
+  }
+
+  @Test
+  @DisplayName("getOrchardSpuSpzInformation_successTest")
+  void getOrchardSpuSpzInformation_successTest() {
+    Integer spuId = 7;
+    List<Integer> spuIdList = List.of(spuId);
+    TestedPtAreaOfUse testedPt = new TestedPtAreaOfUse();
+    testedPt.setSeedPlanUnitId(7);
+    testedPt.setTestedPtAreaOfUseId(40);
+    when(testedPtAreaofUseRepository.findAllBySeedPlanUnitIdIn(spuIdList))
+        .thenReturn(List.of(testedPt));
+
+    TestedPtAreaOfUseSpu tested = new TestedPtAreaOfUseSpu();
+    tested.setSeedPlanUnitId(spuId);
+    tested.setTestedPtAreaOfUseId(40);
+    when(testedPtAreaOfUseSpuRepository.findByTestedPtAreaOfUseIdAndSeedPlanUnitId(40, 7))
+        .thenReturn(Optional.of(tested));
+
+    Integer spzId = 40;
+    SeedPlanUnit seedPlanUnit = new SeedPlanUnit();
+    seedPlanUnit.setSeedPlanUnitId(spuId);
+    seedPlanUnit.setSeedPlanZoneId(spzId);
+    seedPlanUnit.setElevationMax(701);
+    seedPlanUnit.setElevationMin(1);
+    when(seedPlanUnitRepository.findById(spuId)).thenReturn(Optional.of(seedPlanUnit));
+
+    SeedPlanZone seedPlanZone = new SeedPlanZone();
+    seedPlanZone.setSeedPlanZoneId(1284);
+    seedPlanZone.setGeneticClassCode('A');
+    seedPlanZone.setSeedPlanZoneCode("M");
+    seedPlanZone.setVegetationCode("FDC");
+    when(seedPlanZoneRepository.findById(spzId)).thenReturn(Optional.of(seedPlanZone));
+
+    List<SeedPlanZoneDto> dto = orchardService.getSpzInformationBySpu(List.of(7));
+
+    Assertions.assertFalse(dto.isEmpty());
+    Assertions.assertEquals(1, dto.size());
+    Assertions.assertEquals(spuId, dto.get(0).getSeedPlanUnitId());
+    Assertions.assertEquals(spzId, dto.get(0).getSeedPlanZoneId());
+    Assertions.assertEquals('A', dto.get(0).getGeneticClassCode());
+    Assertions.assertEquals("M", dto.get(0).getSeedPlanZoneCode());
+    Assertions.assertEquals("FDC", dto.get(0).getVegetationCode());
+    Assertions.assertEquals(1, dto.get(0).getElevationMin());
+    Assertions.assertEquals(701, dto.get(0).getElevationMax());
+  }
+
+  @Test
+  @DisplayName("getOrchardSpuSpzInformation_emptyTest")
+  void getOrchardSpuSpzInformation_emptyTest() {
+
+    List<Integer> spuIdList = List.of(7);
+    TestedPtAreaOfUse testedPt = new TestedPtAreaOfUse();
+    testedPt.setSeedPlanUnitId(7);
+    testedPt.setTestedPtAreaOfUseId(40);
+    when(testedPtAreaofUseRepository.findAllBySeedPlanUnitIdIn(spuIdList)).thenReturn(List.of());
+
+    List<SeedPlanZoneDto> dto = orchardService.getSpzInformationBySpu(List.of(7));
+
+    Assertions.assertTrue(dto.isEmpty());
+  }
+
+  @Test
+  @DisplayName("getOrchardSpuSpzInformation_badRelationshipTest")
+  void getOrchardSpuSpzInformation_badRelationshipTest() {
+    Integer spuId = 7;
+    List<Integer> spuIdList = List.of(spuId);
+    TestedPtAreaOfUse testedPt = new TestedPtAreaOfUse();
+    testedPt.setSeedPlanUnitId(7);
+    testedPt.setTestedPtAreaOfUseId(40);
+    when(testedPtAreaofUseRepository.findAllBySeedPlanUnitIdIn(spuIdList))
+        .thenReturn(List.of(testedPt));
+
+    when(testedPtAreaOfUseSpuRepository.findByTestedPtAreaOfUseIdAndSeedPlanUnitId(40, 7))
+        .thenReturn(Optional.empty());
+
+    Assertions.assertThrows(
+        TestedPtAreaOfUseException.class,
+        () -> {
+          orchardService.getSpzInformationBySpu(List.of(7));
+        });
   }
 }

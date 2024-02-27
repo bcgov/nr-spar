@@ -214,13 +214,13 @@ export const processParentTreeData = (
   setStepData: Function
 ) => {
   const modifiedState = { ...state };
-  const clonedAllData = structuredClone(state.allParentTreeData);
-  let clonedTableRowData: RowDataDictType = structuredClone(state.tableRowData);
+  const allParentTreeData = {};
+  let tableRowData: RowDataDictType = structuredClone(state.tableRowData);
 
   data.forEach((parentTree) => {
-    Object.assign(clonedAllData, { [parentTree.parentTreeNumber]: parentTree });
+    Object.assign(allParentTreeData, { [parentTree.parentTreeNumber]: parentTree });
     if (
-      !Object.prototype.hasOwnProperty.call(clonedTableRowData, parentTree.parentTreeNumber)
+      !Object.prototype.hasOwnProperty.call(tableRowData, parentTree.parentTreeNumber)
       && orchardIds.includes(parentTree.orchardId)
     ) {
       const newRowData: RowItem = structuredClone(rowTemplate);
@@ -234,23 +234,50 @@ export const processParentTreeData = (
           newRowData[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
         }
       });
-      clonedTableRowData = Object.assign(clonedTableRowData, {
+      tableRowData = Object.assign(tableRowData, {
         [parentTree.parentTreeNumber]: populateStrInputId(parentTree.parentTreeNumber, newRowData)
       });
     }
   });
 
-  modifiedState.tableRowData = clonedTableRowData;
-  modifiedState.allParentTreeData = clonedAllData;
+  modifiedState.tableRowData = tableRowData;
+  modifiedState.allParentTreeData = allParentTreeData;
+
   sliceTableRowData(
-    Object.values(clonedTableRowData),
+    Object.values(tableRowData),
     currentPage,
     currPageSize,
     false,
     'parentTreeNumber',
     setSlicedRows
   );
+
+  // Only set data if tableRowData is not empty, otherwise a inf loop will occur.
   setStepData('parentTreeStep', modifiedState);
+};
+
+/**
+ * Determines if selected orchards contains a least one parent tree.
+ */
+export const hasParentTreesForSelectedOrchards = (
+  orchardIds: (string | undefined)[],
+  data: ParentTreeGeneticQualityType[]
+): boolean => {
+  const proceed = true;
+  const stop = false;
+  let hasParentTrees = false;
+
+  // Loop through every parent tree data obj
+  // and stop as soon as a tree is found with the matching orchard id.
+  data.every((parentTree) => {
+    if (orchardIds.includes(parentTree.orchardId)) {
+      hasParentTrees = true;
+      return stop;
+    }
+    return proceed;
+  });
+
+  return hasParentTrees;
 };
 
 export const getMixRowTemplate = (): RowItem => {

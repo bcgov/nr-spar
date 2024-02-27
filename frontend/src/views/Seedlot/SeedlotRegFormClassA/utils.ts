@@ -21,6 +21,8 @@ import {
 } from '../../../types/SeedlotType';
 import { dateStringToISO } from '../../../utils/DateUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
+import PathConstants from '../../../routes/pathConstants';
+import { addParamToPath } from '../../../utils/PathUtils';
 
 import { stepMap } from './constants';
 import {
@@ -623,7 +625,7 @@ export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlot
       parentTreeId: parentTreeData.allParentTreeData[key].parentTreeId,
       parentTreeNumber: parentTreeData.allParentTreeData[key].parentTreeNumber,
       coneCount: +parentTreeData.tableRowData[key].coneCount.value,
-      pollenPount: +parentTreeData.tableRowData[key].pollenCount.value,
+      pollenCount: +parentTreeData.tableRowData[key].pollenCount.value,
       smpSuccessPct: +parentTreeData.tableRowData[key].smpSuccessPerc.value,
       nonOrchardPollenContamPct: +parentTreeData.tableRowData[key].nonOrchardPollenContam.value,
       amountOfMaterial: +parentTreeData.tableRowData[key].volume.value,
@@ -633,6 +635,35 @@ export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlot
   });
 
   return parentTreePayload;
+};
+
+export const convertSmpParentTree = (smpParentTreeData: ParentTreeStepDataObj, seedlotNumber: string): Array<ParentTreeFormSubmitType> => {
+  const { allParentTreeData } = smpParentTreeData;
+  const smpMixPayload: Array<ParentTreeFormSubmitType> = [];
+
+  if (smpParentTreeData.mixTabData) {
+    Object.keys(smpParentTreeData.mixTabData).forEach((key: string) => {
+      // Each key is a line in the table, so we need to get
+      // the parent tree value that the user set and use it
+      const curParentTree = smpParentTreeData.mixTabData[key].parentTreeNumber.value;
+      if (allParentTreeData[curParentTree]) {
+        smpMixPayload.push({
+          seedlotNumber,
+          parentTreeId: smpParentTreeData.allParentTreeData[curParentTree].parentTreeId,
+          parentTreeNumber: smpParentTreeData.allParentTreeData[curParentTree].parentTreeNumber,
+          coneCount: +smpParentTreeData.mixTabData[key].coneCount.value,
+          pollenCount: +smpParentTreeData.mixTabData[key].pollenCount.value,
+          smpSuccessPct: +smpParentTreeData.mixTabData[key].smpSuccessPerc.value,
+          nonOrchardPollenContamPct: +smpParentTreeData.mixTabData[key].nonOrchardPollenContam.value,
+          amountOfMaterial: +smpParentTreeData.mixTabData[key].volume.value,
+          proportion: +smpParentTreeData.mixTabData[key].proportion.value,
+          parentTreeGeneticQualities: smpParentTreeData.allParentTreeData[curParentTree].parentTreeGeneticQualities
+        });
+      }
+    });
+  }
+
+  return smpMixPayload;
 };
 
 export const convertExtraction = (extractionData: ExtractionStorageForm): ExtractionFormSubmitType => ({
@@ -670,3 +701,18 @@ export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptio
       };
   }
 };
+
+export const getBreadcrumbs = (seedlotNumber: string) => [
+  {
+    name: 'Seedlots',
+    path: `${PathConstants.SEEDLOTS}`
+  },
+  {
+    name: 'My seedlots',
+    path: `${PathConstants.MY_SEEDLOTS}`
+  },
+  {
+    name: `Seedlot ${seedlotNumber}`,
+    path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber)}`
+  }
+];

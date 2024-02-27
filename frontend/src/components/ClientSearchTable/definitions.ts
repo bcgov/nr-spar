@@ -1,14 +1,15 @@
-import { ForestClientDisplayType } from '../../types/ForestClientTypes/ForestClientDisplayType';
+import { UseMutationResult } from '@tanstack/react-query';
+import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 
 export type HeaderObjType = {
-  id: keyof ForestClientDisplayType,
+  id: keyof ForestClientSearchType,
   label: string
 };
 
 export interface ClientSearchTableProps {
-  clientData: ForestClientDisplayType[],
+  clientData: ForestClientSearchType[],
   showPagination: boolean,
-  tablePagination: JSX.Element,
   selectClientFn?: Function,
-  currentSelected?: ForestClientDisplayType
+  currentSelected?: ForestClientSearchType
+  mutationFn?: UseMutationResult<ForestClientSearchType[], unknown, void, unknown>
 }
