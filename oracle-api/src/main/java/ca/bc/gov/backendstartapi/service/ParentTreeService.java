@@ -27,8 +27,7 @@ public class ParentTreeService {
     SparLog.info("Getting lat long elevation data for {} parent tree id(s)", ptIds);
     List<Long> idList = ptIds.stream().map(LatLongRequestDto::parentTreeId).toList();
 
-    List<ParentTreeEntity> ptEntityList =
-        parentTreeRepository.findAllLatLongByParentTreeIdList(idList);
+    List<ParentTreeEntity> ptEntityList = parentTreeRepository.findAllIn(idList);
 
     List<ParentTreeOrchardDto> resultList = new ArrayList<>();
 
