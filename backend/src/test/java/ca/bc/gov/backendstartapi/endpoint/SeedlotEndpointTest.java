@@ -128,7 +128,7 @@ class SeedlotEndpointTest {
           "parentTreeId": 4023,
           "parentTreeNumber": "87",
           "coneCount": 1,
-          "pollenPount": 5,
+          "pollenCount": 5,
           "smpSuccessPct": 6,
           "nonOrchardPollenContamPct": 2,
           "amountOfMaterial": 50,
