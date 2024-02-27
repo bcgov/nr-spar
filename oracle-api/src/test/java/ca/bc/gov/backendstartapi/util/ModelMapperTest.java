@@ -22,7 +22,14 @@ class ModelMapperTest {
             true,
             true,
             Long.valueOf(123),
-            Long.valueOf(456));
+            Long.valueOf(456),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
 
     ParentTreeDto parentTreeDto = ModelMapper.convert(parentTreeEntity, ParentTreeDto.class);
 

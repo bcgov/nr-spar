@@ -29,4 +29,7 @@ public interface ParentTreeRepository extends JpaRepository<ParentTreeEntity, Lo
           """,
       nativeQuery = true)
   List<ParentTreeProj> findAllParentTreeWithVegCode(String vegCode);
+
+  @Query(value = "FROM ParentTreeEntity pt WHERE pt.id IN ?1")
+  List<ParentTreeEntity> findAllLatLongByParentTreeIdList(List<Long> parentTreeIds);
 }
