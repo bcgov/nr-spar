@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
@@ -192,6 +193,11 @@ public class OracleApiProvider implements Provider {
     }
   }
 
+  @Override
+  public List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
+    return List.of();
+  }
+  
   @Override
   public String[] addAuthorizationHeader() {
     String token = this.loggedUserService.getLoggedUserToken();

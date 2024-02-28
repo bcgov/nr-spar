@@ -12,12 +12,9 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
-import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
-import ca.bc.gov.backendstartapi.entity.SmpMix;
-import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
@@ -36,15 +33,12 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -295,98 +289,6 @@ public class SeedlotService {
     SparLog.info("Seedlot entity and related tables successfully saved.");
     return new SeedlotCreateResponseDto(
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
-  }
-
-  public void getLatLongElevation(String seedlotNumber) {
-    SparLog.info("Seedlot info: {}", seedlotNumber);
-
-    /*
-    First loop through list to get total amount of material and # of pt outside of seedlot.
-
-    var smpMixList = find All smp_mix records for that seedlot number;
-
-    for (SmpMix smpMix : smpMixList) {
-      if (smpMix.amount_of_material is not null) {
-        v_total_amount_of_material += smpMix.amount_of_material;
-      }
-
-      // checks if the parent tree is inside the orchard
-      select seedlot_number from seedlot_parent_tree where seedlot_number = main_seedlot_number and parent_tree_id = smpMix.parent_tree_id;
-      if (seedlot_number is not null) {
-        v_num_parents_from_outside += 1;
-      }
-    }
-    */
-
-    List<SmpMix> smpMixList = smpMixService.getAllBySeedlotNumber(seedlotNumber);
-    SparLog.info("Found {} smp_mix record(s)", smpMixList.size());
-
-    List<SeedlotParentTree> sparentList =
-        seedlotParentTreeService.getAllSeedlotParentTree(seedlotNumber);
-    Map<Integer, SeedlotParentTree> insideMap =
-        sparentList.stream()
-            .collect(Collectors.toMap(SeedlotParentTree::getParentTreeId, Function.identity()));
-
-    int amountOfMaterialSum = 0;
-    int amountOutside = 0;
-    for (SmpMix sm : smpMixList) {
-      amountOfMaterialSum += sm.getAmountOfMaterial();
-
-      if (insideMap.containsKey(sm.getParentTreeId())) {
-        amountOutside++;
-      }
-    }
-
-    /*
-    Second loop through list to calculate proportion and weight values.
-
-    for (SmpMix smpMix : smpMixList) {
-      // calculate the proportion
-      // PS: we don't need that. We're doing this calculation in the FE
-      //
-      if (smpMix.amount_of_material is not null) {
-        smpMix.proportion = smpMix.amount_of_material / v_total_amount_of_material;
-      }
-
-      // weighted for each trait
-      fetch the smp_mix_gen_qlty record
-      var weighted_bv_AD = smpMix.proportion * smp_mix_gen_qlty_ad.genetic_quality_value;
-      // repeat for DFS, DFU, DFW, etc..
-
-      // mean elevation
-      var weighted_elevation = smpMix.proportion * smpMix.elevation;
-      var v_coll_lat = (p_pt(i).latitude_degrees*60) + p_pt(i).latitude_minutes + (p_pt(i).latitude_seconds/60);
-      var v_coll_long = (p_pt(i).longitude_degrees*60) + p_pt(i).longitude_minutes + (p_pt(i).longitude_seconds/60);
-
-      p_pt(i).weighted_latitude = p_pt(i).proportion * NVL(v_coll_lat, 0);
-      p_pt(i).weighted_longitude = p_pt(i).proportion * NVL(v_coll_long, 0);
-
-      // sums all weighted values, for each trait
-      v_sum_wtd_bv_AD += weighted_bv_AD;
-
-      // set smp mix calculated values. For each traita
-      p_smp_mix_bv_AD = v_sum_wtd_bv_AD;
-
-      //
-      // !! the packages doesn't save the calculated. But I think we need to do it.
-      // saves the calculation!
-      //
-    }
-    */
-
-    for (SmpMix sm : smpMixList) {
-      BigDecimal proportion = sm.getProportion();
-
-      List<SmpMixGeneticQuality> smixGenQltyList =
-          smpMixGeneticQualityService.findAllBySmpMix(sm.getId());
-      for (SmpMixGeneticQuality smixGenQlty : smixGenQltyList) {
-        // weighted for each trait
-        BigDecimal weighted = proportion.multiply(smixGenQlty.getGeneticQualityValue());
-
-        // mean elevation - FIXME -> smpMix.elevation
-        BigDecimal weightedElevation = proportion.multiply(BigDecimal.ONE);
-      }
-    }
   }
 
   private void setSeedlotSpzInformation(Seedlot seedlot) {

@@ -4,6 +4,7 @@ import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import java.util.HashMap;
@@ -49,6 +50,10 @@ public interface Provider {
   }
 
   default List<SeedPlanZoneDto> getSpzInformationBySpuIds(List<Integer> spuIds) {
+    return List.of();
+  }
+
+  default List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
     return List.of();
   }
 
