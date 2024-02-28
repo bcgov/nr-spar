@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAClassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
@@ -422,6 +423,38 @@ class SeedlotEndpointTest {
 
     mockMvc
         .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
+        .andDo(print())
+        .andExpect(status().isNotFound())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotAClassFullInfoTest")
+  @WithMockUser(roles = "user_read")
+  void getSingleSeedlotAClassFullInfoTest() throws Exception {
+    Seedlot seedlotEntity = new Seedlot("0000000");
+
+    SeedlotAClassFormDto seedlotFullInfo = new SeedlotAClassFormDto(
+      seedlotEntity,
+      null,
+      null
+    );
+
+    when(seedlotService.getAClassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
+
+    mockMvc
+        .perform(get("/api/seedlots/a-class-form-full/0000000").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotAClassFullInfoNotFoundTest")
+  void getSingleSeedlotAClassFullInfoNotFoundTest() throws Exception {
+    when(seedlotService.getAClassSeedlotFormInfo(any())).thenThrow(new SeedlotNotFoundException());
+
+    mockMvc
+        .perform(get("/api/seedlots/a-class-form-full/0000000").accept(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isNotFound())
         .andReturn();

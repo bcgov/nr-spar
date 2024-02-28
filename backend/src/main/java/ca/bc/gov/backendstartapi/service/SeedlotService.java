@@ -311,7 +311,7 @@ public class SeedlotService {
   }
 
   /**
-   * Retrieve a single seedlot information.
+   * Retrieve a single seedlot information, with all parent tree data and calculation results
    *
    * @param seedlotNumber the seedlot number of the seedlot to fetch the information
    * @return A {@link SeedlotAClassFormDto} containing the number and the status of the created
@@ -330,15 +330,11 @@ public class SeedlotService {
 
     List<SmpMix> smpMixsData = smpMixService.getAllBySeedlotNumber(seedlotNumber);
 
-    List<SeedlotParentTreeSmpMix> parentTreeSmpMixData =
-        seedlotParentTreeSmpMixService.getAllBySeedlotNumber(seedlotNumber);
-
     List<SeedlotGeneticWorth> genWorthData =
         seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber);
 
     List<SeedlotFormParentTreeSmpDto> parentTreesInfo = new ArrayList<>();
 
-    SparLog.info("parentTreeSmpMixData {}", parentTreeSmpMixData.size());
 
     // Iterate thru the seedlot parent tree list and get these
     // seedlot data
@@ -384,7 +380,7 @@ public class SeedlotService {
       }
     }
 
-    List<GeneticWorthTraitsDto> calculateGenWorth = new ArrayList<>();
+    List<GeneticWorthTraitsDto> calculatedGenWorth = new ArrayList<>();
 
     for (SeedlotGeneticWorth genWorth : genWorthData) {
       GeneticWorthTraitsDto curGenWorth = new GeneticWorthTraitsDto(
@@ -393,16 +389,16 @@ public class SeedlotService {
         genWorth.getGeneticQualityValue(),
         genWorth.getTestedParentTreeContributionPercentage()
       );
-      calculateGenWorth.add(curGenWorth);
+      calculatedGenWorth.add(curGenWorth);
     }
 
     SeedlotAClassFormDto seedlotClassAFullInfo = new SeedlotAClassFormDto(
       seedlotInfo,
       parentTreesInfo,
-      calculateGenWorth
+      calculatedGenWorth
     );
 
-    // SparLog.info("Seedlot registration info found {}", seedlotClassAFullInfo);
+    SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
     return seedlotClassAFullInfo;
   }
 
