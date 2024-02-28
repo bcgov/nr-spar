@@ -4,13 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-/** This class represents a json response object when fetching lat long data for an orchard. */
+/** This class represents a json response object when fetching lat long data for a Parent Tree. */
 @Getter
 @Setter
 @Schema(
     description =
-        "This class represents a json response object when fetching lat long data for an orchard.")
-public class ParentTreeOrchardDto {
+        "This class represents a json response object when fetching lat long data for a Parent"
+            + " Tree.")
+public class ParentTreeLatLongDto {
 
   @Schema(description = "A unique identifier for each Parent Tree.", example = "4032")
   private Long parentTreeId;

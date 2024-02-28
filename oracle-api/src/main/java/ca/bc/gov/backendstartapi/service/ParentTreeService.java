@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeOrchardDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import java.util.ArrayList;
@@ -18,22 +18,22 @@ public class ParentTreeService {
   private final ParentTreeRepository parentTreeRepository;
 
   /**
-   * Gets latitude, longite and elevation data for each parent tree given a list of orchard ids.
+   * Gets latitude, longite and elevation data for each parent tree given a list of Parent Tree ids.
    *
    * @param ptIds The {@link ParentTreeEntity} identification list.
-   * @return A List of {@link ParentTreeOrchardDto} containing the result rows.
+   * @return A List of {@link ParentTreeLatLongDto} containing the result rows.
    */
-  public List<ParentTreeOrchardDto> getLatLongParentTreeData(List<LatLongRequestDto> ptIds) {
+  public List<ParentTreeLatLongDto> getLatLongParentTreeData(List<LatLongRequestDto> ptIds) {
     SparLog.info("Getting lat long elevation data for {} parent tree id(s)", ptIds);
     List<Long> idList = ptIds.stream().map(LatLongRequestDto::parentTreeId).toList();
 
     List<ParentTreeEntity> ptEntityList = parentTreeRepository.findAllIn(idList);
 
-    List<ParentTreeOrchardDto> resultList = new ArrayList<>();
+    List<ParentTreeLatLongDto> resultList = new ArrayList<>();
 
     ptEntityList.forEach(
         (pt) -> {
-          ParentTreeOrchardDto dto = new ParentTreeOrchardDto();
+          ParentTreeLatLongDto dto = new ParentTreeLatLongDto();
           dto.setParentTreeId(pt.getId());
           dto.setLatitudeDegrees(pt.getLatitudeDegrees());
           dto.setLatitudeMinutes(pt.getLatitudeMinutes());

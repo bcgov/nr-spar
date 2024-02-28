@@ -3,7 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeOrchardDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ class ParentTreeServiceTest {
     List<LatLongRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new LatLongRequestDto(4110L));
 
-    List<ParentTreeOrchardDto> dtoList = parentTreeService.getLatLongParentTreeData(ptIds);
+    List<ParentTreeLatLongDto> dtoList = parentTreeService.getLatLongParentTreeData(ptIds);
 
     Assertions.assertFalse(dtoList.isEmpty());
     Assertions.assertEquals(ptreeEntity.getId(), dtoList.get(0).getParentTreeId());
@@ -70,7 +70,7 @@ class ParentTreeServiceTest {
     List<LatLongRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new LatLongRequestDto(4110L));
 
-    List<ParentTreeOrchardDto> dtoList = parentTreeService.getLatLongParentTreeData(ptIds);
+    List<ParentTreeLatLongDto> dtoList = parentTreeService.getLatLongParentTreeData(ptIds);
 
     Assertions.assertTrue(dtoList.isEmpty());
   }

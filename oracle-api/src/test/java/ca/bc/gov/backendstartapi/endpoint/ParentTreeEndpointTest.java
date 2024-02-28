@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeOrchardDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
 import ca.bc.gov.backendstartapi.service.ParentTreeService;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ class ParentTreeEndpointTest {
     List<LatLongRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new LatLongRequestDto(4110L));
 
-    ParentTreeOrchardDto dto = new ParentTreeOrchardDto();
+    ParentTreeLatLongDto dto = new ParentTreeLatLongDto();
     dto.setParentTreeId(4110L);
     dto.setLatitudeDegrees(49);
     dto.setLatitudeMinutes(52);
