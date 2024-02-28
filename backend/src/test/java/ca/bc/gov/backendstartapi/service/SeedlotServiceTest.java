@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotAClassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAhClassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -40,10 +40,8 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -111,9 +109,9 @@ class SeedlotServiceTest {
 
   private ParentTreeGeneticQualityDto createParentTreeGenQuaDto() {
     return new ParentTreeGeneticQualityDto(
-      "BV",
-      "GVO",
-      new BigDecimal("18"));
+        "BV",
+        "GVO",
+        new BigDecimal("18"));
   }
 
   private SeedlotFormParentTreeSmpDto createParentTreeDto(Integer parentTreeId) {
@@ -366,85 +364,92 @@ class SeedlotServiceTest {
 
     SeedlotParentTreeGeneticQuality sptgq =
         new SeedlotParentTreeGeneticQuality(
-          spt,
-          sptgqDto.geneticTypeCode(),
-          new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
-          sptgqDto.geneticQualityValue(),
-          audit);
+            spt,
+            sptgqDto.geneticTypeCode(),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+            sptgqDto.geneticQualityValue(),
+            audit);
 
     List<SeedlotParentTreeGeneticQuality> genQualityData = List.of(sptgq);
 
     SmpMix smpMix = new SmpMix(
-      seedlotEntity,
-      parentTreeId,
-      parentTreeDto.parentTreeNumber(),
-      parentTreeDto.amountOfMaterial(),
-      parentTreeDto.proportion(),
-      audit,
-      0);
+        seedlotEntity,
+        parentTreeId,
+        parentTreeDto.parentTreeNumber(),
+        parentTreeDto.amountOfMaterial(),
+        parentTreeDto.proportion(),
+        audit,
+        0);
 
     List<SmpMix> smpMixsData = List.of(smpMix);
 
     SeedlotParentTreeSmpMix sptSmpMix = new SeedlotParentTreeSmpMix(
-      spt,
-      sptgqDto.geneticTypeCode(),
-      new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
-      sptgqDto.geneticQualityValue(),
-      audit);
+        spt,
+        sptgqDto.geneticTypeCode(),
+        new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+        sptgqDto.geneticQualityValue(),
+        audit);
 
     List<SeedlotParentTreeSmpMix> parentTreeSmpMixData = List.of(sptSmpMix);
 
     SeedlotGeneticWorth seedlotGenWor = new SeedlotGeneticWorth(
-      seedlotEntity,
-      new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
-      audit);
+        seedlotEntity,
+        new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+        audit);
 
     List<SeedlotGeneticWorth> genWorthData = List.of(seedlotGenWor);
 
-    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlotEntity));
-    when(seedlotParentTreeService.getAllSeedlotParentTree(seedlotNumber)).thenReturn(parentTreeData);
-    when(seedlotParentTreeGeneticQualityService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(genQualityData);
-    when(smpMixService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(smpMixsData);
-    when(seedlotParentTreeSmpMixService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(parentTreeSmpMixData);
-    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber)).thenReturn(genWorthData);
+    when(seedlotRepository.findById(seedlotNumber))
+        .thenReturn(Optional.of(seedlotEntity));
+    when(seedlotParentTreeService.getAllSeedlotParentTree(seedlotNumber))
+        .thenReturn(parentTreeData);
+    when(seedlotParentTreeGeneticQualityService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(genQualityData);
+    when(smpMixService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(smpMixsData);
+    when(seedlotParentTreeSmpMixService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(parentTreeSmpMixData);
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(genWorthData);
 
-    SeedlotAClassFormDto responseFromService = seedlotService.getAClassSeedlotFormInfo(seedlotNumber);
+    SeedlotAhClassFormDto responseFromService =
+        seedlotService.getAhClassSeedlotFormInfo(seedlotNumber);
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(responseFromService.seedlotData(), seedlotEntity);
     Assertions.assertEquals(responseFromService.calculatedValues(),
-      List.of(
-        new GeneticWorthTraitsDto(
-          seedlotGenWor.getGeneticWorthCode(),
-          null,
-          seedlotGenWor.getGeneticQualityValue(),
-          seedlotGenWor.getTestedParentTreeContributionPercentage()
-        )
-      ));
+        List.of(
+          new GeneticWorthTraitsDto(
+              seedlotGenWor.getGeneticWorthCode(),
+              null,
+              seedlotGenWor.getGeneticQualityValue(),
+              seedlotGenWor.getTestedParentTreeContributionPercentage()
+          )
+        ));
 
     SeedlotFormParentTreeSmpDto sptDto = new SeedlotFormParentTreeSmpDto(
-      seedlotNumber,
-      parentTreeId,
-      parentTreeDto.parentTreeNumber(),
-      parentTreeDto.coneCount(),
-      parentTreeDto.pollenCount(),
-      null,
-      null,
-      null,
-      null,
-      List.of(sptgqDto));
+        seedlotNumber,
+        parentTreeId,
+        parentTreeDto.parentTreeNumber(),
+        parentTreeDto.coneCount(),
+        parentTreeDto.pollenCount(),
+        null,
+        null,
+        null,
+        null,
+        List.of(sptgqDto));
 
     SeedlotFormParentTreeSmpDto sptSmpMixDto = new SeedlotFormParentTreeSmpDto(
-      seedlotNumber,
-      parentTreeId,
-      parentTreeDto.parentTreeNumber(),
-      null,
-      null,
-      null,
-      null,
-      parentTreeDto.amountOfMaterial(),
-      parentTreeDto.proportion(),
-      List.of(sptgqDto));
+        seedlotNumber,
+        parentTreeId,
+        parentTreeDto.parentTreeNumber(),
+        null,
+        null,
+        null,
+        null,
+        parentTreeDto.amountOfMaterial(),
+        parentTreeDto.proportion(),
+        List.of(sptgqDto));
 
     List<SeedlotFormParentTreeSmpDto> parentTreesInfo = List.of(sptDto, sptSmpMixDto);
     Assertions.assertEquals(responseFromService.parentTrees(), parentTreesInfo);
@@ -461,7 +466,7 @@ class SeedlotServiceTest {
         Assertions.assertThrows(
             SeedlotNotFoundException.class,
             () -> {
-              seedlotService.getAClassSeedlotFormInfo(seedlotNumber);
+              seedlotService.getAhClassSeedlotFormInfo(seedlotNumber);
             });
 
     Assertions.assertEquals(SEEDLOT_NOT_FOUND_STR, exc.getMessage());

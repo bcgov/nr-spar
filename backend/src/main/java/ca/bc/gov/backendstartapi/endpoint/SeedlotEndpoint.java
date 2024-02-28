@@ -1,8 +1,8 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
-import ca.bc.gov.backendstartapi.dto.SeedlotAClassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAhClassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -281,7 +281,7 @@ public class SeedlotEndpoint {
    * Get full information from a single seedlot.
    *
    * @param seedlotNumber the seedlot number to fetch the info for
-   * @return A {@link SeedlotAClassFormDto} with all the current information for
+   * @return A {@link SeedlotAhClassFormDto} with all the current information for
    *         the seedlot and parent tree data.
    */
   @GetMapping("/a-class-form-full/{seedlotNumber}")
@@ -303,7 +303,7 @@ public class SeedlotEndpoint {
             responseCode = "404",
             description = "Could not find information for the given seedlot number")
       })
-  public SeedlotAClassFormDto getFullSeedlotInfo(
+  public SeedlotAhClassFormDto getFullSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -312,7 +312,7 @@ public class SeedlotEndpoint {
               schema = @Schema(type = "integer", format = "int64"))
           @PathVariable
           String seedlotNumber) {
-    return seedlotService.getAClassSeedlotFormInfo(seedlotNumber);
+    return seedlotService.getAhClassSeedlotFormInfo(seedlotNumber);
   }
 
 
