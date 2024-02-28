@@ -17,13 +17,13 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@Sql(scripts = {"classpath:scripts/ParentTreeRepository.sql"})
 class ParentTreeRepositoryTest {
 
   @Autowired private ParentTreeRepository parentTreeRepository;
 
   @Test
   @DisplayName("findAllInTest")
-  @Sql(scripts = {"classpath:scripts/ParentTreeRepository.sql"})
   void findAllInTest() {
     List<ParentTreeEntity> parentTreeList = parentTreeRepository.findAllIn(List.of(4032L, 4033L));
 
@@ -53,5 +53,24 @@ class ParentTreeRepositoryTest {
     assertFalse(parentTree2.getBreedingProgram());
     assertEquals(10001L, parentTree2.getFemaleParentTreeId());
     assertEquals(10002L, parentTree2.getMaleParentTreeId());
+  }
+
+  @Test
+  @DisplayName("getLatLongParentTreeData_successTest")
+  void getLatLongParentTreeData_successTest() {
+    List<ParentTreeEntity> ptreeEntity = parentTreeRepository.findAllIn(List.of(4032L));
+
+    assertFalse(ptreeEntity.isEmpty());
+    assertEquals(1, ptreeEntity.size());
+
+    ParentTreeEntity parentTree = ptreeEntity.get(0);
+    assertEquals(4032L, parentTree.getId());
+    assertEquals(49, parentTree.getLatitudeDegrees());
+    assertEquals(2, parentTree.getLatitudeMinutes());
+    assertEquals(0, parentTree.getLatitudeSeconds());
+    assertEquals(124, parentTree.getLongitudeDegrees());
+    assertEquals(3, parentTree.getLongitudeMinutes());
+    assertEquals(0, parentTree.getLongitudeSeconds());
+    assertEquals(579, parentTree.getElevation());
   }
 }
