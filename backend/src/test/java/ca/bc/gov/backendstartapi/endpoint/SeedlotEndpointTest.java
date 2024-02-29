@@ -443,7 +443,7 @@ class SeedlotEndpointTest {
     when(seedlotService.getAhClassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
 
     mockMvc
-        .perform(get("/api/seedlots/a-class-form-full/0000000").accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/seedlots/0000000/a-class-full-form").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
   }
@@ -454,7 +454,7 @@ class SeedlotEndpointTest {
     when(seedlotService.getAhClassSeedlotFormInfo(any())).thenThrow(new SeedlotNotFoundException());
 
     mockMvc
-        .perform(get("/api/seedlots/a-class-form-full/0000000").accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/seedlots/0000000/a-class-full-form").accept(MediaType.APPLICATION_JSON))
         .andDo(print())
         .andExpect(status().isNotFound())
         .andReturn();

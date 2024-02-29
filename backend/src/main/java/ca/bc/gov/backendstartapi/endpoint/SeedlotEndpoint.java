@@ -278,15 +278,20 @@ public class SeedlotEndpoint {
   }
 
   /**
-   * Get full information from a single seedlot.
+   * Get full information from a single seedlot, including parent trees and
+   * calculation results.
    *
    * @param seedlotNumber the seedlot number to fetch the info for
    * @return A {@link SeedlotAhClassFormDto} with all the current information for
    *         the seedlot and parent tree data.
    */
-  @GetMapping("/a-class-form-full/{seedlotNumber}")
+  @GetMapping("/{seedlotNumber}/a-class-full-form")
   @Operation(
-      summary = "Fetch a single seedlot information and respective parent tree data",
+      summary =
+          """
+          Fetch single seedlot information, with all respective form fields,
+          including parent tree data and calculation results
+          """,
       description =
           """
           Fetch all current information from a single seedlot and respective
