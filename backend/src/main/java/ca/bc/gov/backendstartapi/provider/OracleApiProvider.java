@@ -10,9 +10,12 @@ import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -194,10 +197,38 @@ public class OracleApiProvider implements Provider {
   }
 
   @Override
-  public List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
-    return List.of();
+  public List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Long> ptIds) {
+    String oracleApiUrl = String.format("%s/api/parent-trees/lat-long-elevation", rootUri);
+
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getParentTreeLatLongByIdList", oracleApiUrl);
+
+    try {
+      List<Number> listNumber = new ArrayList<>();
+      ptIds.forEach((id) -> listNumber.add(id));
+      HttpEntity<List<Number>> requestEntity = new HttpEntity<>(listNumber, addHttpHeaders());
+
+      ResponseEntity<List<ParentTreeLatLongDto>> ptreeResponse =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.POST,
+              requestEntity,
+              new ParameterizedTypeReference<List<ParentTreeLatLongDto>>() {});
+
+      List<ParentTreeLatLongDto> list = ptreeResponse.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info(
+          "GET parent tree lat long from Oracle - Success response with {} record(s)!", size);
+      return list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET parent tree lat long from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
   }
-  
+
   @Override
   public String[] addAuthorizationHeader() {
     String token = this.loggedUserService.getLoggedUserToken();

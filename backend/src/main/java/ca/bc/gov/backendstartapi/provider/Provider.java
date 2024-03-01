@@ -53,7 +53,7 @@ public interface Provider {
     return List.of();
   }
 
-  default List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
+  default List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Long> ptIds) {
     return List.of();
   }
 

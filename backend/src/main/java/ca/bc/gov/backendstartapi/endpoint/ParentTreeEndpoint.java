@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
-import ca.bc.gov.backendstartapi.service.ParentTreeService;
+import ca.bc.gov.backendstartapi.service.ParentTreeServiceee;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ParentTreeEndpoint {
 
-  private final ParentTreeService parentTreeService;
+  private final ParentTreeServiceee parentTreeService;
 
   /**
    * Gets latitude, longite and elevation data for each parent tree given a list of orchard ids.
