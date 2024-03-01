@@ -14,7 +14,7 @@ import java.util.List;
  *                         to the seedlot
  */
 @Schema(description = "An object with seedlot related data, for a-class seedlots")
-public record SeedlotAhClassFormDto(
+public record SeedlotAclassFormDto(
     Seedlot seedlotData,
     List<SeedlotFormParentTreeSmpDto> parentTrees,
     List<GeneticWorthTraitsDto> calculatedValues

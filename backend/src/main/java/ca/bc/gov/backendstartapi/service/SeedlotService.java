@@ -5,7 +5,7 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotAhClassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -312,11 +312,11 @@ public class SeedlotService {
    * Retrieve a single seedlot information, with all parent tree data and calculation results.
    *
    * @param seedlotNumber the seedlot number of the seedlot to fetch the information
-   * @return A {@link SeedlotAhClassFormDto} containing the number and the status of the created
+   * @return A {@link SeedlotAclassFormDto} containing the number and the status of the created
    *         seedlot.
    * @throws SeedlotNotFoundException in case of errors.
    */
-  public SeedlotAhClassFormDto getAhClassSeedlotFormInfo(@NonNull String seedlotNumber) {
+  public SeedlotAclassFormDto getAclassSeedlotFormInfo(@NonNull String seedlotNumber) {
     SparLog.info("Retrieving complete information for A-class Seedlot number {}", seedlotNumber);
 
     List<SeedlotParentTree> parentTreeData =
@@ -389,14 +389,14 @@ public class SeedlotService {
     Seedlot seedlotInfo =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
-    SeedlotAhClassFormDto seedlotClassAhFullInfo = new SeedlotAhClassFormDto(
+    SeedlotAclassFormDto seedlotAclassFullInfo = new SeedlotAclassFormDto(
         seedlotInfo,
         parentTreesInfo,
         calculatedGenWorth
     );
 
     SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
-    return seedlotClassAhFullInfo;
+    return seedlotAclassFullInfo;
   }
 
   /**

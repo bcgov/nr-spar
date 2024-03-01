@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotAhClassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
@@ -429,18 +429,18 @@ class SeedlotEndpointTest {
   }
 
   @Test
-  @DisplayName("getSingleSeedlotAhClassFullInfoTest")
+  @DisplayName("getSingleSeedlotAclassFullInfoTest")
   @WithMockUser(roles = "user_read")
-  void getSingleSeedlotAhClassFullInfoTest() throws Exception {
+  void getSingleSeedlotAclassFullInfoTest() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000000");
 
-    SeedlotAhClassFormDto seedlotFullInfo = new SeedlotAhClassFormDto(
+    SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(
         seedlotEntity,
         null,
         null
     );
 
-    when(seedlotService.getAhClassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
+    when(seedlotService.getAclassSeedlotFormInfo(any())).thenReturn(seedlotFullInfo);
 
     mockMvc
         .perform(get("/api/seedlots/0000000/a-class-full-form").accept(MediaType.APPLICATION_JSON))
@@ -449,9 +449,9 @@ class SeedlotEndpointTest {
   }
 
   @Test
-  @DisplayName("getSingleSeedlotAhClassFullInfoNotFoundTest")
-  void getSingleSeedlotAhClassFullInfoNotFoundTest() throws Exception {
-    when(seedlotService.getAhClassSeedlotFormInfo(any())).thenThrow(new SeedlotNotFoundException());
+  @DisplayName("getSingleSeedlotAclassFullInfoNotFoundTest")
+  void getSingleSeedlotAclassFullInfoNotFoundTest() throws Exception {
+    when(seedlotService.getAclassSeedlotFormInfo(any())).thenThrow(new SeedlotNotFoundException());
 
     mockMvc
         .perform(get("/api/seedlots/0000000/a-class-full-form").accept(MediaType.APPLICATION_JSON))

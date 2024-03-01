@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotAhClassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -412,8 +412,8 @@ class SeedlotServiceTest {
     when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber))
         .thenReturn(genWorthData);
 
-    SeedlotAhClassFormDto responseFromService =
-        seedlotService.getAhClassSeedlotFormInfo(seedlotNumber);
+    SeedlotAclassFormDto responseFromService =
+        seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(responseFromService.seedlotData(), seedlotEntity);
@@ -466,7 +466,7 @@ class SeedlotServiceTest {
         Assertions.assertThrows(
             SeedlotNotFoundException.class,
             () -> {
-              seedlotService.getAhClassSeedlotFormInfo(seedlotNumber);
+              seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
             });
 
     Assertions.assertEquals(SEEDLOT_NOT_FOUND_STR, exc.getMessage());
