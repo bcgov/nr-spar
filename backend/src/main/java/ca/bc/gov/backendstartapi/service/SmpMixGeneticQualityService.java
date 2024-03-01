@@ -95,4 +95,14 @@ public class SmpMixGeneticQualityService {
 
     smpMixGeneticQualityRepository.saveAll(smpMixGenQltys);
   }
+
+  /**
+   * Gets all SmpMixGeneticQuality given a {@link Seedlot} id number.
+   *
+   * @param seedlotNumber The Seedlot id.
+   * @return A List of {@link SmpMixGeneticQuality}
+   */
+  public List<SmpMixGeneticQuality> getAllBySeedlotNumber(String seedlotNumber) {
+    return smpMixGeneticQualityRepository.findAllBySmpMix_Seedlot_id(seedlotNumber);
+  }
 }

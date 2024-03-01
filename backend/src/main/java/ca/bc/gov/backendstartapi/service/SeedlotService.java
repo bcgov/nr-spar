@@ -2,7 +2,10 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -12,10 +15,17 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
 import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.SmpMix;
+import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
+import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotSeedPlanZoneId;
@@ -39,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -204,6 +216,187 @@ public class SeedlotService {
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
     return seedlotInfo;
+  }
+
+  /**
+   * Auxiliar function to get the genetic quality for each seedlot's parent
+   * tree.
+   *
+   * @param parentTreeId the parent tree id to get the genetic quality
+   * @param seedlotNumber the seedlot that the current parent tree is
+   * @return a list of {@link ParentTreeGeneticQualityDto}
+   */
+  private List<ParentTreeGeneticQualityDto> getParentTreeGenQual(
+      Integer parentTreeId,
+      String seedlotNumber
+  ) {
+    List<SeedlotParentTreeGeneticQuality> genQualityData =
+        seedlotParentTreeGeneticQualityService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<ParentTreeGeneticQualityDto> parentTreeGenQualList = new ArrayList<>();
+
+    for (SeedlotParentTreeGeneticQuality parentTreeGenQual : genQualityData) {
+      Integer curParentTreeId = parentTreeGenQual.getId().getSeedlotParentTree().getParentTreeId();
+      if (curParentTreeId == parentTreeId) {
+        ParentTreeGeneticQualityDto parentTreeGenQualDto =
+            new ParentTreeGeneticQualityDto(
+              parentTreeGenQual.getGeneticTypeCode(),
+              parentTreeGenQual.getGeneticWorth().getGeneticWorthCode(),
+              parentTreeGenQual.getGeneticQualityValue()
+            );
+        parentTreeGenQualList.add(parentTreeGenQualDto);
+      }
+    }
+
+    return parentTreeGenQualList;
+  }
+
+  /**
+   * Auxiliar function to get the genetic quality for each seedlot's SMP Mix
+   * parent tree.
+   *
+   * @param mixTabInfo the Smp mix parent tree information
+   * @param seedlotNumber the seedlot that the current parent tree is
+   * @param sptMap a map of each parent tree in the orchard, to check if
+   *               any smp mix parent tree is in the orchard or not
+   * @return a list of {@link ParentTreeGeneticQualityDto}
+   */
+  private List<ParentTreeGeneticQualityDto> getSmpMixParentTreeGenQual(
+      SmpMix mixTabInfo,
+      String seedlotNumber,
+      Map<SeedlotParentTreeId, SeedlotParentTree> sptMap
+  ) {
+    List<SmpMixGeneticQuality> smpMixGenQualData =
+        smpMixGeneticQualityService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<SeedlotParentTreeSmpMix> parentTreeSmpMixData =
+        seedlotParentTreeSmpMixService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<ParentTreeGeneticQualityDto> smpMixGenQualList = new ArrayList<>();
+
+    // If the current parent tree is in the orchard and also on the SMP Mix,
+    // then, the genetic quality data comes from SeedlotParentTreeSmpMix list,
+    // else, the gen quality data comes from SmpMixGeneticQuality
+    if (sptMap.containsKey(mixTabInfo.getId())) {
+      for (SeedlotParentTreeSmpMix sptSmpMixGenQual : parentTreeSmpMixData) {
+        Integer parentTreeId = sptSmpMixGenQual.getId().getSeedlotParentTree().getParentTreeId();
+        if (parentTreeId == mixTabInfo.getParentTreeId()) {
+          ParentTreeGeneticQualityDto parentTreeGenQualDto =
+              new ParentTreeGeneticQualityDto(
+                sptSmpMixGenQual.getGeneticTypeCode(),
+                sptSmpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
+                sptSmpMixGenQual.getGeneticQualityValue()
+              );
+          smpMixGenQualList.add(parentTreeGenQualDto);
+        }
+      }
+    } else {
+      for (SmpMixGeneticQuality smpMixGenQual : smpMixGenQualData) {
+        Integer parentTreeId = smpMixGenQual.getId().getSmpMix().getParentTreeId();
+        if (parentTreeId == mixTabInfo.getParentTreeId()) {
+          ParentTreeGeneticQualityDto parentTreeGenQualDto =
+              new ParentTreeGeneticQualityDto(
+                smpMixGenQual.getGeneticTypeCode(),
+                smpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
+                smpMixGenQual.getGeneticQualityValue()
+              );
+          smpMixGenQualList.add(parentTreeGenQualDto);
+        }
+      }
+    }
+
+    return smpMixGenQualList;
+  }
+
+  /**
+   * Retrieve a single seedlot information, with all parent tree data and calculation results.
+   *
+   * @param seedlotNumber the seedlot number of the seedlot to fetch the information
+   * @return A {@link SeedlotAclassFormDto} containing the number and the status of the created
+   *         seedlot.
+   * @throws SeedlotNotFoundException in case of errors.
+   */
+  public SeedlotAclassFormDto getAclassSeedlotFormInfo(@NonNull String seedlotNumber) {
+    SparLog.info("Retrieving complete information for A-class Seedlot number {}", seedlotNumber);
+
+    List<SeedlotParentTree> parentTreeData =
+        seedlotParentTreeService.getAllSeedlotParentTree(seedlotNumber);
+
+    List<SmpMix> smpMixsData = smpMixService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<SeedlotGeneticWorth> genWorthData =
+        seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<SeedlotFormParentTreeSmpDto> parentTreesInfo = new ArrayList<>();
+
+
+    // Iterate thru the seedlot parent tree list and get these
+    // seedlot data
+    for (SeedlotParentTree parentTree : parentTreeData) {
+      SeedlotFormParentTreeSmpDto curParentTree = new SeedlotFormParentTreeSmpDto(
+          seedlotNumber,
+          parentTree.getParentTreeId(),
+          parentTree.getParentTreeNumber(),
+          parentTree.getConeCount(),
+          parentTree.getPollenCount(),
+          parentTree.getSmpSuccessPercentage(),
+          parentTree.getNonOrchardPollenContaminationCount(),
+          null,
+          null,
+          getParentTreeGenQual(parentTree.getParentTreeId(), seedlotNumber)
+      );
+
+      parentTreesInfo.add(curParentTree);
+    }
+
+    if (smpMixsData.size() > 0) {
+      // This map is used to see if any SMPMix parent tree
+      // are in the current orchard
+      Map<SeedlotParentTreeId, SeedlotParentTree> sptMap =
+          parentTreeData.stream().collect(Collectors
+          .toMap(SeedlotParentTree::getId, Function.identity()));
+
+      for (SmpMix mixTabInfo : smpMixsData) {
+        SeedlotFormParentTreeSmpDto curSmpMix = new SeedlotFormParentTreeSmpDto(
+            seedlotNumber,
+            mixTabInfo.getParentTreeId(),
+            mixTabInfo.getParentTreeNumber(),
+            null,
+            null,
+            null,
+            null,
+            mixTabInfo.getAmountOfMaterial(),
+            mixTabInfo.getProportion(),
+            getSmpMixParentTreeGenQual(mixTabInfo, seedlotNumber, sptMap)
+        );
+        parentTreesInfo.add(curSmpMix);
+      }
+    }
+
+    List<GeneticWorthTraitsDto> calculatedGenWorth = new ArrayList<>();
+
+    for (SeedlotGeneticWorth genWorth : genWorthData) {
+      GeneticWorthTraitsDto curGenWorth = new GeneticWorthTraitsDto(
+          genWorth.getGeneticWorthCode(),
+          null,
+          genWorth.getGeneticQualityValue(),
+          genWorth.getTestedParentTreeContributionPercentage()
+      );
+      calculatedGenWorth.add(curGenWorth);
+    }
+
+    // Get seedlot data to retrieve to the user
+    Seedlot seedlotInfo =
+        seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    SeedlotAclassFormDto seedlotAclassFullInfo = new SeedlotAclassFormDto(
+        seedlotInfo,
+        parentTreesInfo,
+        calculatedGenWorth
+    );
+
+    SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
+    return seedlotAclassFullInfo;
   }
 
   /**

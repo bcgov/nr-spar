@@ -93,4 +93,14 @@ public class SeedlotGeneticWorthService {
 
     return seedlotGeneticWorthRepository.saveAll(seedlotGeneticWorths);
   }
+
+  /**
+   * Gets all SeedlotGeneticWorth given a {@link Seedlot} id number.
+   *
+   * @param seedlotNumber The Seedlot id.
+   * @return A List of {@link SeedlotGeneticWorth}
+   */
+  public List<SeedlotGeneticWorth> getAllBySeedlotNumber(String seedlotNumber) {
+    return seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlotNumber);
+  }
 }

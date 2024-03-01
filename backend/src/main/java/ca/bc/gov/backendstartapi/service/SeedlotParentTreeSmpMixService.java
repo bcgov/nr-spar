@@ -95,4 +95,14 @@ public class SeedlotParentTreeSmpMixService {
 
     seedlotParentTreeSmpMixRepository.saveAll(sptsmToInsertList);
   }
+
+  /**
+   * Gets all SeedlotParentTreeSmpMix given a {@link Seedlot} id number.
+   *
+   * @param seedlotNumber The Seedlot id.
+   * @return A List of {@link SeedlotParentTreeSmpMix}
+   */
+  public List<SeedlotParentTreeSmpMix> getAllBySeedlotNumber(String seedlotNumber) {
+    return seedlotParentTreeSmpMixRepository.findAllBySeedlotParentTree_Seedlot_id(seedlotNumber);
+  }
 }
