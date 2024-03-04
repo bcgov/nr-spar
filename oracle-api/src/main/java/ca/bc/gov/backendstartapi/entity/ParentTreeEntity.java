@@ -48,4 +48,25 @@ public class ParentTreeEntity {
 
   @Column(name = "MALE_PARENT_PARENT_TREE_ID")
   private Long maleParentTreeId;
+
+  @Column(name = "LATITUDE_DEGREES")
+  private Integer latitudeDegrees;
+
+  @Column(name = "LATITUDE_MINUTES")
+  private Integer latitudeMinutes;
+
+  @Column(name = "LATITUDE_SECONDS")
+  private Integer latitudeSeconds;
+
+  @Column(name = "LONGITUDE_DEGREES")
+  private Integer longitudeDegrees;
+
+  @Column(name = "LONGITUDE_MINUTES")
+  private Integer longitudeMinutes;
+
+  @Column(name = "LONGITUDE_SECONDS")
+  private Integer longitudeSeconds;
+
+  @Column(name = "ELEVATION")
+  private Integer elevation;
 }

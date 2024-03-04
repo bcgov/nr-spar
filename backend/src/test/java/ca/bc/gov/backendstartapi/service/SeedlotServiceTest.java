@@ -6,22 +6,41 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.SmpMix;
+import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotOrchardNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -68,6 +87,12 @@ class SeedlotServiceTest {
 
   @Mock SeedlotStatusService seedlotStatusService;
 
+  @Mock OrchardService orchardService;
+
+  @Mock SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
+
+  @Mock Provider oracleApiProvider;
+
   private SeedlotService seedlotService;
 
   private static final String BAD_REQUEST_STR = "400 BAD_REQUEST \"Invalid Seedlot request\"";
@@ -80,6 +105,28 @@ class SeedlotServiceTest {
   private SeedlotCreateDto createSeedlotDto() {
     return new SeedlotCreateDto(
         "00012797", "01", "user.lastname@domain.com", "FDI", "TPT", true, true, 'A');
+  }
+
+  private ParentTreeGeneticQualityDto createParentTreeGenQuaDto() {
+    return new ParentTreeGeneticQualityDto(
+        "BV",
+        "GVO",
+        new BigDecimal("18"));
+  }
+
+  private SeedlotFormParentTreeSmpDto createParentTreeDto(Integer parentTreeId) {
+    ParentTreeGeneticQualityDto ptgqDto = createParentTreeGenQuaDto();
+    return new SeedlotFormParentTreeSmpDto(
+        "85",
+        parentTreeId,
+        "87",
+        new BigDecimal("1"),
+        new BigDecimal("5"),
+        6,
+        2,
+        50,
+        new BigDecimal("100"),
+        List.of(ptgqDto));
   }
 
   @BeforeEach
@@ -100,7 +147,10 @@ class SeedlotServiceTest {
             smpMixService,
             smpMixGeneticQualityService,
             seedlotParentTreeSmpMixService,
-            seedlotStatusService);
+            seedlotStatusService,
+            orchardService,
+            seedlotSeedPlanZoneRepository,
+            oracleApiProvider);
   }
 
   @Test
@@ -257,6 +307,7 @@ class SeedlotServiceTest {
     Assertions.assertTrue(responseFromService.isEmpty());
   }
 
+  @Test
   @DisplayName("findSingleSeedlotSuccessTest")
   void findSingleSeedlotSuccessTest() {
     Seedlot seedlotEntity = new Seedlot("0000000");
@@ -266,7 +317,7 @@ class SeedlotServiceTest {
     Seedlot responseFromService = seedlotService.getSingleSeedlotInfo("0000000");
 
     Assertions.assertNotNull(responseFromService);
-    Assertions.assertEquals(Optional.of(seedlotEntity), responseFromService);
+    Assertions.assertEquals(seedlotEntity, responseFromService);
   }
 
   @Test
@@ -285,6 +336,142 @@ class SeedlotServiceTest {
 
     Assertions.assertEquals(SEEDLOT_NOT_FOUND_STR, exc.getMessage());
   }
+
+  @Test
+  @DisplayName("findSingleSeedlotFullDataSuccessTest")
+  void findSingleSeedlotFullDataSuccessTest() {
+    String seedlotNumber = "0000000";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
+    Integer parentTreeId = 4023;
+
+    AuditInformation audit = new AuditInformation("userId");
+    when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
+
+    SeedlotFormParentTreeSmpDto parentTreeDto = createParentTreeDto(parentTreeId);
+
+    SeedlotParentTree spt =
+        new SeedlotParentTree(
+            seedlotEntity,
+            parentTreeDto.parentTreeId(),
+            parentTreeDto.parentTreeNumber(),
+            parentTreeDto.coneCount(),
+            parentTreeDto.pollenCount(),
+            audit);
+
+    List<SeedlotParentTree> parentTreeData = List.of(spt);
+
+    ParentTreeGeneticQualityDto sptgqDto = createParentTreeGenQuaDto();
+
+    SeedlotParentTreeGeneticQuality sptgq =
+        new SeedlotParentTreeGeneticQuality(
+            spt,
+            sptgqDto.geneticTypeCode(),
+            new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+            sptgqDto.geneticQualityValue(),
+            audit);
+
+    List<SeedlotParentTreeGeneticQuality> genQualityData = List.of(sptgq);
+
+    SmpMix smpMix = new SmpMix(
+        seedlotEntity,
+        parentTreeId,
+        parentTreeDto.parentTreeNumber(),
+        parentTreeDto.amountOfMaterial(),
+        parentTreeDto.proportion(),
+        audit,
+        0);
+
+    List<SmpMix> smpMixsData = List.of(smpMix);
+
+    SeedlotParentTreeSmpMix sptSmpMix = new SeedlotParentTreeSmpMix(
+        spt,
+        sptgqDto.geneticTypeCode(),
+        new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+        sptgqDto.geneticQualityValue(),
+        audit);
+
+    List<SeedlotParentTreeSmpMix> parentTreeSmpMixData = List.of(sptSmpMix);
+
+    SeedlotGeneticWorth seedlotGenWor = new SeedlotGeneticWorth(
+        seedlotEntity,
+        new GeneticWorthEntity(sptgqDto.geneticWorthCode(), "", null),
+        audit);
+
+    List<SeedlotGeneticWorth> genWorthData = List.of(seedlotGenWor);
+
+    when(seedlotRepository.findById(seedlotNumber))
+        .thenReturn(Optional.of(seedlotEntity));
+    when(seedlotParentTreeService.getAllSeedlotParentTree(seedlotNumber))
+        .thenReturn(parentTreeData);
+    when(seedlotParentTreeGeneticQualityService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(genQualityData);
+    when(smpMixService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(smpMixsData);
+    when(seedlotParentTreeSmpMixService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(parentTreeSmpMixData);
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber))
+        .thenReturn(genWorthData);
+
+    SeedlotAclassFormDto responseFromService =
+        seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(responseFromService.seedlotData(), seedlotEntity);
+    Assertions.assertEquals(responseFromService.calculatedValues(),
+        List.of(
+          new GeneticWorthTraitsDto(
+              seedlotGenWor.getGeneticWorthCode(),
+              null,
+              seedlotGenWor.getGeneticQualityValue(),
+              seedlotGenWor.getTestedParentTreeContributionPercentage()
+          )
+        ));
+
+    SeedlotFormParentTreeSmpDto sptDto = new SeedlotFormParentTreeSmpDto(
+        seedlotNumber,
+        parentTreeId,
+        parentTreeDto.parentTreeNumber(),
+        parentTreeDto.coneCount(),
+        parentTreeDto.pollenCount(),
+        null,
+        null,
+        null,
+        null,
+        List.of(sptgqDto));
+
+    SeedlotFormParentTreeSmpDto sptSmpMixDto = new SeedlotFormParentTreeSmpDto(
+        seedlotNumber,
+        parentTreeId,
+        parentTreeDto.parentTreeNumber(),
+        null,
+        null,
+        null,
+        null,
+        parentTreeDto.amountOfMaterial(),
+        parentTreeDto.proportion(),
+        List.of(sptgqDto));
+
+    List<SeedlotFormParentTreeSmpDto> parentTreesInfo = List.of(sptDto, sptSmpMixDto);
+    Assertions.assertEquals(responseFromService.parentTrees(), parentTreesInfo);
+  }
+
+  @Test
+  @DisplayName("findSingleSeedlotFullDataFailTest")
+  void findSingleSeedlotFullDataFailTest() {
+    String seedlotNumber = "123456";
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+
+    Exception exc =
+        Assertions.assertThrows(
+            SeedlotNotFoundException.class,
+            () -> {
+              seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+            });
+
+    Assertions.assertEquals(SEEDLOT_NOT_FOUND_STR, exc.getMessage());
+  }
+
 
   @Test
   @DisplayName("patchSeedlotFailByIdTest")
@@ -349,5 +536,84 @@ class SeedlotServiceTest {
         testDto.seedlotSourceCode(), patchedSeedlot.getSeedlotSource().getSeedlotSourceCode());
     assertEquals(testDto.toBeRegistrdInd(), patchedSeedlot.getIntendedForCrownLand());
     assertEquals(testDto.bcSourceInd(), patchedSeedlot.getSourceInBc());
+  }
+
+  @Test
+  @DisplayName("Get seed plan zone data happy path should success")
+  void getSeedPlanZoneData_success_shouldSucceed() {
+    String seedlotNumber = "63022";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setVegetationCode("FDC");
+    seedlot.setElevationMax(700);
+    seedlot.setElevationMin(1);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+
+    String orchardId = "405";
+    SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, orchardId);
+    when(seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber))
+        .thenReturn(List.of(seedlotOrchard));
+
+    GeneticClassEntity classEntity = new GeneticClassEntity();
+    classEntity.setGeneticClassCode("A");
+    SeedlotSeedPlanZoneEntity sspzEntity =
+        new SeedlotSeedPlanZoneEntity(seedlot, "M", 40, classEntity);
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber))
+        .thenReturn(List.of(sspzEntity));
+
+    ActiveOrchardSpuEntity activeSpu = new ActiveOrchardSpuEntity(orchardId, 7, true, false, false);
+    when(orchardService.findSpuIdByOrchardWithActive(orchardId, true))
+        .thenReturn(Optional.of(activeSpu));
+
+    List<SeedPlanZoneDto> seedPlanZoneDto = seedlotService.getSeedPlanZoneData(seedlotNumber);
+
+    Assertions.assertFalse(seedPlanZoneDto.isEmpty());
+    Assertions.assertEquals(
+        activeSpu.getSeedPlanningUnitId(), seedPlanZoneDto.get(0).getSeedPlanUnitId());
+    Assertions.assertEquals(
+        sspzEntity.getSeedPlanZoneId(), seedPlanZoneDto.get(0).getSeedPlanZoneId());
+    Assertions.assertEquals(
+        classEntity.getGeneticClassCode().charAt(0), seedPlanZoneDto.get(0).getGeneticClassCode());
+    Assertions.assertEquals(
+        sspzEntity.getSeedPlanZoneCode(), seedPlanZoneDto.get(0).getSeedPlanZoneCode());
+    Assertions.assertEquals(
+        seedlot.getVegetationCode(), seedPlanZoneDto.get(0).getVegetationCode());
+    Assertions.assertEquals(seedlot.getElevationMin(), seedPlanZoneDto.get(0).getElevationMin());
+    Assertions.assertEquals(seedlot.getElevationMax(), seedPlanZoneDto.get(0).getElevationMax());
+  }
+
+  @Test
+  @DisplayName("Get seed plan zone data seedlot not found should fail")
+  void getSeedPlanZoneData_seedlotNotFound_shouldFail() {
+    String seedlotNumber = "63022";
+
+    when(seedlotRepository.findById(seedlotNumber)).thenThrow(new SeedlotNotFoundException());
+
+    Assertions.assertThrows(
+        SeedlotNotFoundException.class,
+        () -> {
+          seedlotService.getSeedPlanZoneData(seedlotNumber);
+        });
+  }
+
+  @Test
+  @DisplayName("Get seed plan zone data seedlot x orchard not found should fail")
+  void getSeedPlanZoneData_seedlotOrchardNotFound_shouldFail() {
+    String seedlotNumber = "63022";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setVegetationCode("FDC");
+    seedlot.setElevationMax(700);
+    seedlot.setElevationMin(1);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+
+    when(seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber))
+        .thenThrow(new SeedlotOrchardNotFoundException());
+
+    Assertions.assertThrows(
+        SeedlotOrchardNotFoundException.class,
+        () -> {
+          seedlotService.getSeedPlanZoneData(seedlotNumber);
+        });
   }
 }

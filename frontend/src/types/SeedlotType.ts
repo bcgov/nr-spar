@@ -172,7 +172,7 @@ export type ParentTreeFormSubmitType = {
   parentTreeId: number,
   parentTreeNumber: string,
   coneCount: number,
-  pollenPount: number,
+  pollenCount: number,
   smpSuccessPct: number,
   nonOrchardPollenContamPct: number,
   amountOfMaterial: number,
@@ -196,6 +196,7 @@ export type SeedlotAClassSubmitType = {
   seedlotFormOwnershipDtoList: Array<SingleOwnerFormSubmitType>,
   seedlotFormInterimDto: InterimFormSubmitType,
   seedlotFormOrchardDto: OrchardFormSubmitType,
+  seedlotFormParentTreeDtoList: Array<ParentTreeFormSubmitType>,
   seedlotFormParentTreeSmpDtoList: Array<ParentTreeFormSubmitType>,
   seedlotFormExtractionDto: ExtractionFormSubmitType
 }

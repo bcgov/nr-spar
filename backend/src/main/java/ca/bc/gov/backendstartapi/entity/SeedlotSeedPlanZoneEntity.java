@@ -21,7 +21,7 @@ import lombok.Setter;
 
 /** This class represents a Seedlot Seed Plan Zone entity. */
 @Entity
-@Table(name = "seedlot_smp_mix")
+@Table(name = "seedlot_seed_plan_zone")
 @IdClass(SeedlotSeedPlanZoneId.class)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @RequiredArgsConstructor
@@ -42,6 +42,15 @@ public class SeedlotSeedPlanZoneEntity {
   private String seedPlanZoneCode;
 
   // endregion
+
+  @Column(name = "seed_plan_zone_id", nullable = false)
+  @NonNull
+  private Integer seedPlanZoneId;
+
+  @ManyToOne
+  @JoinColumn(name = "genetic_class_code")
+  @NonNull
+  private GeneticClassEntity geneticClass;
 
   @Embedded private AuditInformation auditInformation;
 
