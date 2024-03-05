@@ -3,23 +3,36 @@ package ca.bc.gov.backendstartapi.util;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/** This class contains methods for lat and long conversions. */
 public class LatLongUtil {
 
-  public static int[] decimalToDegree(BigDecimal decimalLatLong) {
-    int degree = decimalLatLong.intValue();
-    decimalLatLong = decimalLatLong.subtract(new BigDecimal(degree));
+  /**
+   * Convert a decimal latitude or longitude to a list of degrees, minutes and seconds.
+   *
+   * @param decimalValue The decimal representation of a latitude or longitude.
+   * @return An array of integer containing always 3 numbers.
+   */
+  public static int[] decimalToDegree(BigDecimal decimalValue) {
+    int degree = decimalValue.intValue();
+    decimalValue = decimalValue.subtract(new BigDecimal(degree));
 
-    decimalLatLong = decimalLatLong.multiply(new BigDecimal(60));
-    int minutes = decimalLatLong.intValue();
+    decimalValue = decimalValue.multiply(new BigDecimal(60));
+    int minutes = decimalValue.intValue();
 
-    decimalLatLong = decimalLatLong.subtract(new BigDecimal(minutes));
-    decimalLatLong = decimalLatLong.multiply(new BigDecimal(60));
+    decimalValue = decimalValue.subtract(new BigDecimal(minutes));
+    decimalValue = decimalValue.multiply(new BigDecimal(60));
 
-    int seconds = decimalLatLong.intValue();
+    int seconds = decimalValue.intValue();
 
     return new int[] {degree, minutes, seconds};
   }
 
+  /**
+   * Convert a list of degrees, minutes and seconds to decimal value.
+   *
+   * @param degreeLatLong An array of integer containing always 3 numbers.
+   * @return The decimal representation of a latitude or longitude.
+   */
   public static BigDecimal degreeToDecimal(int[] degreeLatLong) {
     BigDecimal degree = new BigDecimal(degreeLatLong[0]);
     BigDecimal minutes =
@@ -32,6 +45,13 @@ public class LatLongUtil {
     return sum;
   }
 
+  /**
+   * Convert a list of degrees, minutes and seconds to minutes representation. I.e.: multiply the
+   * degree value by 60, do not change the minutes value, divide the seconds by 60.
+   *
+   * @param degreeLatLong An array of integer containing always 3 numbers.
+   * @return The minutes representation of a latitude or longitude.
+   */
   public static BigDecimal degreeToMinutes(int[] degreeLatLong) {
     BigDecimal degree = new BigDecimal(degreeLatLong[0] * 60);
     BigDecimal minutes = new BigDecimal(degreeLatLong[1]);

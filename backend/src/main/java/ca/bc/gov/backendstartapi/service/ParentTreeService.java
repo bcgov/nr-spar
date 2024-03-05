@@ -20,12 +20,18 @@ import org.springframework.stereotype.Service;
 
 /** This class holds methods for handling Parent Trees records. */
 @Service
-public class ParentTreeServiceee {
+public class ParentTreeService {
 
   @Autowired
   @Qualifier("oracleApi")
   private Provider oracleProvider;
 
+  /**
+   * Calculate lat long and elevation values given a list of {@link LatLongRequestDto}.
+   *
+   * @param ptreeIds List of parent trees and traits.
+   * @return A List of {@link ParentTreeLatLongDto}
+   */
   public List<ParentTreeLatLongDto> getLatLongElevation(List<LatLongRequestDto> ptreeIds) {
     SparLog.info(
         "{} parent tree record(s) received to calculate lat long and elevation", ptreeIds.size());
@@ -76,7 +82,7 @@ public class ParentTreeServiceee {
             parentTreeDto.getLatitudeMinutes(),
             parentTreeDto.getLatitudeSeconds()
           };
-      BigDecimal vCollLat = LatLongUtil.degreeToMinutes(latDegree); // (degree*60)+min+(sec/60)
+      BigDecimal collectionLat = LatLongUtil.degreeToMinutes(latDegree); // (degree*60)+min+(sec/60)
       parentTreeDto.setLatitudeDegreesFmt(LatLongUtil.degreeToDecimal(latDegree));
 
       // longitude
@@ -86,12 +92,13 @@ public class ParentTreeServiceee {
             parentTreeDto.getLongitudeMinutes(),
             parentTreeDto.getLongitudeSeconds()
           };
-      BigDecimal vCollLong = LatLongUtil.degreeToMinutes(longDegree); // (degree*60)+min+(sec/60)
+      BigDecimal collectionLong =
+          LatLongUtil.degreeToMinutes(longDegree); // (degree*60)+min+(sec/60)
       parentTreeDto.setLongitudeDegreeFmt(LatLongUtil.degreeToDecimal(longDegree));
 
       // parent tree weighted lat x long
-      parentTreeDto.setWeightedLatitude(dto.proportion().multiply(vCollLat));
-      parentTreeDto.setWeightedLongitude(dto.proportion().multiply(vCollLong));
+      parentTreeDto.setWeightedLatitude(dto.proportion().multiply(collectionLat));
+      parentTreeDto.setWeightedLongitude(dto.proportion().multiply(collectionLong));
 
       resultList.add(parentTreeDto);
     }

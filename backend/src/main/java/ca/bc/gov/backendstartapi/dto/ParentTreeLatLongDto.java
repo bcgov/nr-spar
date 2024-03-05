@@ -5,6 +5,7 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
+/** This class represents a response body when calculating the SMP values. */
 @Getter
 @Setter
 public class ParentTreeLatLongDto {
