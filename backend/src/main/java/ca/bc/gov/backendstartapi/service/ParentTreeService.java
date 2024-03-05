@@ -22,9 +22,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class ParentTreeService {
 
-  @Autowired
   @Qualifier("oracleApi")
   private Provider oracleProvider;
+
+  @Autowired
+  public ParentTreeService(Provider oracleProvider) {
+    this.oracleProvider = oracleProvider;
+  }
 
   /**
    * Calculate lat long and elevation values given a list of {@link LatLongRequestDto}.
@@ -76,8 +80,8 @@ public class ParentTreeService {
       parentTreeDto.setWeightedElevation(weightedElevation);
 
       // latitude
-      int[] latDegree =
-          new int[] {
+      double[] latDegree =
+          new double[] {
             parentTreeDto.getLatitudeDegrees(),
             parentTreeDto.getLatitudeMinutes(),
             parentTreeDto.getLatitudeSeconds()
@@ -86,8 +90,8 @@ public class ParentTreeService {
       parentTreeDto.setLatitudeDegreesFmt(LatLongUtil.degreeToDecimal(latDegree));
 
       // longitude
-      int[] longDegree =
-          new int[] {
+      double[] longDegree =
+          new double[] {
             parentTreeDto.getLongitudeDegrees(),
             parentTreeDto.getLongitudeMinutes(),
             parentTreeDto.getLongitudeSeconds()
