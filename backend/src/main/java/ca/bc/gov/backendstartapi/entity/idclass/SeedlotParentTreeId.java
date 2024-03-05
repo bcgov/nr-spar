@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /** Composite key for {@link ca.bc.gov.backendstartapi.entity.SeedlotParentTree}. */
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
@@ -15,6 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode
+@ToString
 public class SeedlotParentTreeId implements Serializable {
 
   @NonNull private String seedlot;

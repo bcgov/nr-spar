@@ -1,6 +1,8 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
@@ -276,6 +278,50 @@ public class SeedlotEndpoint {
   }
 
   /**
+   * Get full information from a single seedlot, including parent trees and
+   * calculation results.
+   *
+   * @param seedlotNumber the seedlot number to fetch the info for
+   * @return A {@link SeedlotAclassFormDto} with all the current information for
+   *         the seedlot and parent tree data.
+   */
+  @GetMapping("/{seedlotNumber}/a-class-full-form")
+  @Operation(
+      summary =
+          """
+          Fetch single seedlot information, with all respective form fields,
+          including parent tree data and calculation results
+          """,
+      description =
+          """
+          Fetch all current information from a single seedlot and respective
+          parent tree data, identified by it's number
+          """)
+  @ApiResponses(
+      value = {
+        @ApiResponse(responseCode = "200", description = "The Seedlot info was correctly found"),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Could not find information for the given seedlot number")
+      })
+  public SeedlotAclassFormDto getFullSeedlotInfo(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot ID",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          String seedlotNumber) {
+    return seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
+  }
+
+
+  /**
    * PATCH an entry on the Seedlot table.
    *
    * @param patchDto A {@link SeedlotApplicationPatchDto} containig all required field to get a new
@@ -475,5 +521,43 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
 
     return saveSeedlotFormService.getFormStatusClassA(seedlotNumber);
+  }
+
+  /**
+   * Get all the seed plan zone information given a seedlot number.
+   *
+   * @param seedlotNumber the Seedlot id
+   * @return A list of {@link SeedPlanZoneDto} containing all records.
+   */
+  @GetMapping("/{seedlotNumber}/seed-plan-zone-data")
+  @Operation(
+      summary = "Get SPZ (Seed Plan Zone) data given a seedlot number.",
+      description = "Fetches all the seed plan zone information to a particular seedlot number")
+  @ApiResponses(
+      value = {
+        @ApiResponse(
+            responseCode = "200",
+            description =
+                "A list of `SeedPlanZoneDto` containing all the SPZ information if found."),
+        @ApiResponse(
+            responseCode = "404",
+            description = "If no seedlot record found, or if no Orchard Seedlot record found.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public List<SeedPlanZoneDto> getSeedPlanZoneData(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "Seedlot number",
+              required = true,
+              schema = @Schema(type = "integer", format = "int64"))
+          @PathVariable
+          @NonNull
+          String seedlotNumber) {
+    return seedlotService.getSeedPlanZoneData(seedlotNumber);
   }
 }

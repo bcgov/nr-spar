@@ -9,7 +9,7 @@ public record SeedlotFormParentTreeSmpDto(
     Integer parentTreeId,
     String parentTreeNumber,
     BigDecimal coneCount,
-    BigDecimal pollenPount,
+    BigDecimal pollenCount,
     Integer smpSuccessPct,
     Integer nonOrchardPollenContamPct,
     Integer amountOfMaterial,

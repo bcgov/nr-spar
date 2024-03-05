@@ -8,8 +8,15 @@ insert into PARENT_TREE (
   TESTED_IND,
   BREEDING_PROGRAM_IND,
   FEMALE_PARENT_PARENT_TREE_ID,
-  MALE_PARENT_PARENT_TREE_ID
+  MALE_PARENT_PARENT_TREE_ID,
+  LATITUDE_DEGREES,
+  LATITUDE_MINUTES,
+  LATITUDE_SECONDS,
+  LONGITUDE_DEGREES,
+  LONGITUDE_MINUTES,
+  LONGITUDE_SECONDS,
+  ELEVATION
 )
 values
-  (4032, '37', 'AT', 'APP', '111', 'Y', 'Y', 'Y', null, null),
-  (4033, '38', 'AC', 'APP', '112', 'N', 'N', 'N', 10001, 10002);
+  (4032, '37', 'AT', 'APP', '111', 'Y', 'Y', 'Y', null, null, 49, 2, 0, 124, 3, 0, 579),
+  (4033, '38', 'AC', 'APP', '112', 'N', 'N', 'N', 10001, 10002, null, null, null, null, null, null, null);

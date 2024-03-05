@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.entity;
 
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
+import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import jakarta.persistence.Column;
@@ -61,7 +62,13 @@ public class SmpMix {
   @Setter(AccessLevel.NONE)
   private int revisionCount;
 
-  public SmpMixId getId() {
-    return new SmpMixId(seedlot.getId(), parentTreeId);
+  /**
+   * Creates an instance of {@link SeedlotParentTreeId} containing: the seedlot id (seedlot number)
+   * and the parent tree id.
+   *
+   * @return A {@link SeedlotParentTreeId}
+   */
+  public SeedlotParentTreeId getSeedlotParentTreeId() {
+    return new SeedlotParentTreeId(seedlot.getId(), parentTreeId);
   }
 }

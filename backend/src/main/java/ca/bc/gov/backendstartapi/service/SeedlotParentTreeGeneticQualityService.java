@@ -101,4 +101,15 @@ public class SeedlotParentTreeGeneticQualityService {
 
     seedlotParentTreeGeneticQualityRepository.saveAll(seedlotPtToInsert);
   }
+
+  /**
+   * Gets all SeedlotParentTreeGeneticQuality given a {@link Seedlot} id number.
+   *
+   * @param seedlotNumber The Seedlot id.
+   * @return A List of {@link SeedlotParentTreeGeneticQuality}
+   */
+  public List<SeedlotParentTreeGeneticQuality> getAllBySeedlotNumber(String seedlotNumber) {
+    return seedlotParentTreeGeneticQualityRepository
+        .findAllBySeedlotParentTree_Seedlot_id(seedlotNumber);
+  }
 }
