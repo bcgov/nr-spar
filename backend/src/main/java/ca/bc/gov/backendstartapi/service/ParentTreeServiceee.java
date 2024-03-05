@@ -7,14 +7,13 @@ import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.util.LatLongUtil;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -25,13 +24,13 @@ public class ParentTreeServiceee {
 
   @Autowired
   @Qualifier("oracleApi")
-  private  Provider oracleProvider;
+  private Provider oracleProvider;
 
   public List<ParentTreeLatLongDto> getLatLongElevation(List<LatLongRequestDto> ptreeIds) {
     SparLog.info(
         "{} parent tree record(s) received to calculate lat long and elevation", ptreeIds.size());
 
-    List<Long> ptIds = ptreeIds.stream().map(LatLongRequestDto::parentTreeId).toList();
+    List<Integer> ptIds = ptreeIds.stream().map(LatLongRequestDto::parentTreeId).toList();
 
     List<ParentTreeLatLongDto> oracleDtoList = oracleProvider.getParentTreeLatLongByIdList(ptIds);
 
@@ -44,25 +43,11 @@ public class ParentTreeServiceee {
         oracleDtoList.stream()
             .collect(Collectors.toMap(ParentTreeLatLongDto::getParentTreeId, Function.identity()));
 
-    BigDecimal amountOfMaterialSum = BigDecimal.ZERO;
-    // int amountOutside = 0;
-
-    // First loop through list to get total amount of material and # of pt outside of seedlot.
-    for (LatLongRequestDto dto : ptreeIds) {
-      amountOfMaterialSum = amountOfMaterialSum.add(dto.amountOfMaterial());
-
-      // if (!dto.insideOrchard()) {
-      //  amountOutside++;
-      // }
-    }
-
     List<ParentTreeLatLongDto> resultList = new ArrayList<>();
 
     // Second loop through list to calculate proportion and weight values.
     for (LatLongRequestDto dto : ptreeIds) {
       // frontend already do this:
-      BigDecimal proportion =
-          dto.amountOfMaterial().divide(amountOfMaterialSum, 10, RoundingMode.HALF_UP);
 
       ParentTreeLatLongDto parentTreeDto = oracleMap.get(dto.parentTreeId());
       if (Objects.isNull(parentTreeDto)) {
@@ -71,42 +56,42 @@ public class ParentTreeServiceee {
         continue;
       }
 
-      parentTreeDto.setWeightedTraiList(new ArrayList<>());
+      parentTreeDto.setWeightedTraitList(new HashMap<>());
+      parentTreeDto.setLongitudeDegrees(parentTreeDto.getLongitudeDegrees() * -1);
       for (GeneticWorthTraitsDto traitDto : dto.traitsList()) {
         // weighted for each trait
-        BigDecimal weighted = proportion.multiply(traitDto.traitValue());
-
-        String waightedTrait = traitDto.traitCode() + ": " + weighted;
-        parentTreeDto.getWeightedTraiList().add(waightedTrait);
+        BigDecimal weighted = dto.proportion().multiply(traitDto.traitValue());
+        parentTreeDto.getWeightedTraitList().put(traitDto.traitCode(), weighted);
       }
 
-      // mean elevation
+      // mean elevation = parent tree proportion * elevation
       BigDecimal weightedElevation =
-          proportion.multiply(new BigDecimal(parentTreeDto.getElevation()));
+          dto.proportion().multiply(new BigDecimal(parentTreeDto.getElevation()));
       parentTreeDto.setWeightedElevation(weightedElevation);
 
+      // latitude
       int[] latDegree =
           new int[] {
             parentTreeDto.getLatitudeDegrees(),
             parentTreeDto.getLatitudeMinutes(),
             parentTreeDto.getLatitudeSeconds()
           };
-      BigDecimal vCollLatMin = LatLongUtil.degreeToMinutes(latDegree);
-      BigDecimal vCollLatDec = LatLongUtil.degreeToDecimal(latDegree, false);
+      BigDecimal vCollLat = LatLongUtil.degreeToMinutes(latDegree); // (degree*60)+min+(sec/60)
+      parentTreeDto.setLatitudeDegreesFmt(LatLongUtil.degreeToDecimal(latDegree));
 
+      // longitude
       int[] longDegree =
           new int[] {
             parentTreeDto.getLongitudeDegrees(),
             parentTreeDto.getLongitudeMinutes(),
             parentTreeDto.getLongitudeSeconds()
           };
-      BigDecimal vCollLongMin = LatLongUtil.degreeToMinutes(longDegree);
-      BigDecimal vCollLongDec = LatLongUtil.degreeToDecimal(longDegree, true);
+      BigDecimal vCollLong = LatLongUtil.degreeToMinutes(longDegree); // (degree*60)+min+(sec/60)
+      parentTreeDto.setLongitudeDegreeFmt(LatLongUtil.degreeToDecimal(longDegree));
 
-      parentTreeDto.setWeightedLatMinutes(proportion.multiply(vCollLatMin));
-      parentTreeDto.setWeightedLatDecimal(proportion.multiply(vCollLatDec));
-      parentTreeDto.setWeightedLongMinutes(proportion.multiply(vCollLongMin));
-      parentTreeDto.setWeightedLongDecimal(proportion.multiply(vCollLongDec));
+      // parent tree weighted lat x long
+      parentTreeDto.setWeightedLatitude(dto.proportion().multiply(vCollLat));
+      parentTreeDto.setWeightedLongitude(dto.proportion().multiply(vCollLong));
 
       resultList.add(parentTreeDto);
     }

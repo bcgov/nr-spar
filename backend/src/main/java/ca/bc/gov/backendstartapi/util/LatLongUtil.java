@@ -20,7 +20,7 @@ public class LatLongUtil {
     return new int[] {degree, minutes, seconds};
   }
 
-  public static BigDecimal degreeToDecimal(int[] degreeLatLong, boolean longitude) {
+  public static BigDecimal degreeToDecimal(int[] degreeLatLong) {
     BigDecimal degree = new BigDecimal(degreeLatLong[0]);
     BigDecimal minutes =
         new BigDecimal(degreeLatLong[1]).divide(new BigDecimal(60), 10, RoundingMode.HALF_UP);
@@ -28,10 +28,6 @@ public class LatLongUtil {
         new BigDecimal(degreeLatLong[2]).divide(new BigDecimal(3600), 10, RoundingMode.HALF_UP);
 
     BigDecimal sum = degree.add(minutes).add(seconds);
-
-    if (longitude) {
-      sum = sum.negate();
-    }
 
     return sum;
   }

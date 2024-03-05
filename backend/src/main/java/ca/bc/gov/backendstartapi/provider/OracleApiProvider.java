@@ -10,12 +10,9 @@ import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
@@ -197,16 +194,23 @@ public class OracleApiProvider implements Provider {
   }
 
   @Override
-  public List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Long> ptIds) {
+  public List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
     String oracleApiUrl = String.format("%s/api/parent-trees/lat-long-elevation", rootUri);
 
     SparLog.info(
         "Starting {} - {} request to {}", PROVIDER, "getParentTreeLatLongByIdList", oracleApiUrl);
 
     try {
-      List<Number> listNumber = new ArrayList<>();
-      ptIds.forEach((id) -> listNumber.add(id));
-      HttpEntity<List<Number>> requestEntity = new HttpEntity<>(listNumber, addHttpHeaders());
+      StringBuilder sb = new StringBuilder("[");
+      ptIds.forEach(
+          (id) -> {
+            if (ptIds.indexOf(id) > 0) {
+              sb.append(",");
+            }
+            sb.append("{").append("\"parentTreeId\":").append(id).append("}");
+          });
+      sb.append("]");
+      HttpEntity<String> requestEntity = new HttpEntity<>(sb.toString(), addHttpHeaders());
 
       ResponseEntity<List<ParentTreeLatLongDto>> ptreeResponse =
           restTemplate.exchange(

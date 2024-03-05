@@ -5,7 +5,7 @@ import java.util.List;
 
 /** This record represents each parent tree id to fetch lat long data. */
 public record LatLongRequestDto(
-    Long parentTreeId,
+    Integer parentTreeId,
     boolean insideOrchard,
     BigDecimal amountOfMaterial,
     BigDecimal proportion,

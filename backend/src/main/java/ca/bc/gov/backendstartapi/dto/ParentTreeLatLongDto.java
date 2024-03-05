@@ -1,8 +1,7 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import java.math.BigDecimal;
-import java.util.List;
-
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,14 +13,14 @@ public class ParentTreeLatLongDto {
   private Integer latitudeDegrees;
   private Integer latitudeMinutes;
   private Integer latitudeSeconds;
+  private BigDecimal latitudeDegreesFmt;
   private Integer longitudeDegrees;
   private Integer longitudeMinutes;
   private Integer longitudeSeconds;
+  private BigDecimal longitudeDegreeFmt;
   private Integer elevation;
-  private BigDecimal weightedLatMinutes;
-  private BigDecimal weightedLatDecimal;
-  private BigDecimal weightedLongMinutes;
-  private BigDecimal weightedLongDecimal;
+  private BigDecimal weightedLatitude;
+  private BigDecimal weightedLongitude;
   private BigDecimal weightedElevation;
-  private List<String> weightedTraiList;
+  private Map<String, BigDecimal> weightedTraitList;
 }
