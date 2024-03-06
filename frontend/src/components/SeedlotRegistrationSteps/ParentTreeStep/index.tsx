@@ -65,7 +65,9 @@ const ParentTreeStep = () => {
     seedlotSpecies
   } = useContext(ClassAContext);
 
-  const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>([]);
+  const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
+    () => processOrchards(orchards)
+  );
   const [currentTab, setCurrentTab] = useState<TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
     structuredClone(headerTemplate)
@@ -177,7 +179,7 @@ const ParentTreeStep = () => {
    * Re-populate table if it is emptied by users and data is cached
    */
   useEffect(() => {
-    const disabled = processOrchards(orchards).length === 0;
+    const disabled = orchardsData.length === 0;
     if (
       !disabled
       && Object.keys(state.tableRowData).length === 0
