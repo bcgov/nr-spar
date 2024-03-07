@@ -7,10 +7,6 @@
   margin-bottom: 0.25rem;
 }
 
-.std-card-title {
-  width: 15rem;
-}
-
 p.std-card-title {
   @include type.type-style('heading-03');
 }
