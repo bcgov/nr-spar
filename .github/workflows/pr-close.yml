@@ -10,12 +10,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cleanup:
-    name: Cleanup and Images
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@v0.4.0
-    secrets:
-      oc_namespace: ${{ secrets.OC_NAMESPACE }}
-      oc_token: ${{ secrets.OC_TOKEN }}
-    with:
-      cleanup: helm
-      packages: backend frontend migrations
+  # cleanup:
+  #   name: Cleanup and Images
+  #   uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@v0.4.0
+  #   secrets:
+  #     oc_namespace: ${{ secrets.OC_NAMESPACE }}
+  #     oc_token: ${{ secrets.OC_TOKEN }}
+  #   with:
+  #     cleanup: helm
+  #     packages: backend frontend migrations
+  
+  results:
+    name: Results
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"

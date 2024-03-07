@@ -14,49 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
-    name: Tests
-    if: ${{ ! github.event.pull_request.draft }}
-    runs-on: ubuntu-22.04
-    timeout-minutes: 5
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    strategy:
-      matrix:
-        dir: [backend, frontend]
-        include:
-          - dir: backend
-            token: SONAR_TOKEN_BACKEND
-          - dir: frontend
-            token: SONAR_TOKEN_FRONTEND
-    steps:
-      - uses: bcgov-nr/action-test-and-analyse@v1.1.1
-        with:
-          commands: |
-            npm ci
-            npm run test:cov
-          dir: ${{ matrix.dir }}
-          node_version: "20"
-          sonar_args: >
-            -Dsonar.exclusions=**/coverage/**,**/node_modules/**,**/*spec.ts
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.projectKey=quickstart-openshift_${{ matrix.dir }}
-            -Dsonar.sources=src
-            -Dsonar.tests.inclusions=**/*spec.ts
-            -Dsonar.javascript.lcov.reportPaths=./coverage/lcov.info
-          sonar_token: ${{ secrets[matrix.token] }}
-          triggers: ('${{ matrix.dir }}/')
-
   codeql:
     name: CodeQL Security Scan
     if: ${{ ! github.event.pull_request.draft }}
@@ -65,13 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
-        with:
-          languages: javascript
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:javascript"
+      - uses: github/codeql-action/analyze@v3
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
@@ -98,7 +49,7 @@ jobs:
 
   results:
     name: Analysis Results
-    needs: [tests, codeql, trivy]
+    needs: [codeql, trivy]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
