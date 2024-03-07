@@ -4,16 +4,8 @@ description: |
   compliance.
 spec:
   - name: PIA
-<<<<<<< HEAD
     status: in-progress
     last-updated: '2023-12-14T10:00:00.000Z'
   - name: STRA
     status: in-progress
     last-updated: '2023-12-14T10:00:00.000Z'
-=======
-    status: not-required
-    last-updated: '2022-01-26T23:07:19.992Z'
-  - name: STRA
-    status: not-required
-    last-updated: '2022-01-26T23:07:19.992Z'
->>>>>>> 5cb9c88 (Initial commit)
