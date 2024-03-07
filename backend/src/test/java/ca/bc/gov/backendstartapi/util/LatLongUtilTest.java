@@ -25,8 +25,8 @@ class LatLongUtilTest {
 
   @Test
   void degreeToDecimalTest() {
-    BigDecimal decimalLat = LatLongUtil.degreeToDecimal(new double[]{26,17,46.2804});
-    BigDecimal decimalLong = LatLongUtil.degreeToDecimal(new double[]{48,50,42.6336});
+    BigDecimal decimalLat = LatLongUtil.degreeToDecimal(new double[] {26, 17, 46.2804});
+    BigDecimal decimalLong = LatLongUtil.degreeToDecimal(new double[] {48, 50, 42.6336});
 
     Assertions.assertEquals(new BigDecimal("26.296189"), decimalLat);
     Assertions.assertEquals(new BigDecimal("48.845176"), decimalLong);
@@ -34,8 +34,8 @@ class LatLongUtilTest {
 
   @Test
   void degreeToMinutes() {
-    BigDecimal decimalLat = LatLongUtil.degreeToMinutes(new double[]{26,17,46.2804});
-    BigDecimal decimalLong = LatLongUtil.degreeToMinutes(new double[]{48,50,42.6336});
+    BigDecimal decimalLat = LatLongUtil.degreeToMinutes(new double[] {26, 17, 46.2804});
+    BigDecimal decimalLong = LatLongUtil.degreeToMinutes(new double[] {48, 50, 42.6336});
 
     Assertions.assertEquals(new BigDecimal("1577.771340"), decimalLat);
     Assertions.assertEquals(new BigDecimal("2930.710560"), decimalLong);
