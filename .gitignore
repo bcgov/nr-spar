@@ -120,3 +120,11 @@ test-report.xml
 
 # VSCode
 .vscode/
+
+# Python
+**/venv
+**/.venv
+
+# Data
+app/data/
+**/__pycache__

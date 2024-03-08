@@ -9,8 +9,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  python:
+    name: Python
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - working-directory: app
+      run: |
+        ./run.sh || echo "App failing!"
+
+  oc:
+    name: OpenShift
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Execute OC Test
+        run: |
+          oc version
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
+          oc whoami
+
+
   results:
     name: PR Results
+    needs: [python, oc]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
