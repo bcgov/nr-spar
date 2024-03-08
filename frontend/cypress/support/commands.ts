@@ -14,20 +14,23 @@ Cypress.Commands.add('login', () => {
     username: Cypress.env('USERNAME'),
     password: Cypress.env('PASSWORD'),
     timeout: HALF_SECOND,
+    loginService: Cypress.env('LOGIN_SERVICE') ?? 'IDIR',
     delay: TYPE_DELAY
   };
 
   cy.session(
     config.username,
     () => {
+      const loginBtnId = `landing-button__${config.loginService.toLowerCase()}`;
+      const loginLogo = `#${config.loginService.toLowerCase()}Logo`;
       cy.clearAllCookies();
       cy.clearAllLocalStorage();
       cy.clearAllSessionStorage();
       cy.visit('/');
-      cy.getByDataTest('landing-button__bceid').click();
+      cy.getByDataTest(loginBtnId).click();
       cy.url().then((url) => {
         if (url.includes('.gov.bc.ca')) {
-          cy.get('#bceidLogo', { timeout: config.timeout }).should('be.visible');
+          cy.get(loginLogo, { timeout: config.timeout }).should('be.visible');
           cy.get('input[name=user]')
             .clear()
             .type(config.username, { delay: config.delay });
@@ -44,7 +47,7 @@ Cypress.Commands.add('login', () => {
                 username, password, delay, timeout
               }
             ) => {
-              cy.get('#bceidLogo', { timeout }).should('be.visible');
+              cy.get(loginLogo, { timeout }).should('be.visible');
               cy.get('input[name=user]')
                 .clear()
                 .type(username, { delay });

@@ -1,4 +1,4 @@
-import { BCEID_NAME, FIVE_SECONDS, USERNAME } from '../../constants';
+import { FIVE_SECONDS } from '../../constants';
 
 describe('Login page test', () => {
   let loginPageData: {
@@ -21,7 +21,7 @@ describe('Login page test', () => {
     cy.getByDataTest('landing-desc').should('have.text', loginPageData.description);
   });
 
-  it('should navigate to the user form page IDIR', () => {
+  it('should navigate to the IDIR login page', () => {
     cy.visit('/');
     cy.getByDataTest('landing-button__idir').click();
     cy.url().then((url) => {
@@ -35,7 +35,7 @@ describe('Login page test', () => {
     });
   });
 
-  it('should navigate to the user form page BCeID', () => {
+  it('should navigate to the BCeID login page', () => {
     cy.visit('/');
     cy.getByDataTest('landing-button__bceid').click();
     cy.url().then((url) => {
@@ -54,21 +54,14 @@ describe('Login page test', () => {
     cy.getByDataTest('landing-title').should('have.text', loginPageData.title);
   });
 
-  it('can log in with BCeID and validate user role', () => {
+  it('can log in with BCeID/IDIR and validate user role', () => {
+    const loginService = Cypress.env('LOGIN_SERVICE') === 'BCeID' ? 'BCeID: ' : 'IDIR: ';
     cy.login();
     cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');
     cy.contains('Main activities');
     cy.getByDataTest('header-button__user').click();
-    cy.get('.user-data').find('p').contains(`BCeID: ${BCEID_NAME}`);
-  });
-
-  it('can log in with BCeID and validate user information', () => {
-    cy.login();
-    cy.visit('/dashboard');
-    cy.url().should('contains', '/dashboard');
-    cy.contains('Main activities');
-    cy.getByDataTest('header-button__user').click();
-    cy.get('.user-data').find('p').contains(USERNAME);
+    cy.get('.user-data').find('p').contains(loginService);
+    cy.get('.user-data').find('p').contains('@');
   });
 });

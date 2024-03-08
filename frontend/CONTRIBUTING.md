@@ -65,8 +65,8 @@ VITE_USER_POOLS_WEB_CLIENT_ID=<pools-web-client-id>
 
 And if you want to run Cypress, please add:
 ```
-CYPRESS_USERNAME=
-CYPRESS_PASSWORD=
+CYPRESS_USERNAME=<YOUR IDIR USERNAME>
+CYPRESS_PASSWORD=<YOUR IDIR PASSWORD>
 ```
 
 > If don't have these values, please reach a member of the team
