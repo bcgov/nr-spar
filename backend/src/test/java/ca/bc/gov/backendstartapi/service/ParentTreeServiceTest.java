@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
@@ -44,11 +43,7 @@ class ParentTreeServiceTest {
     List<Integer> ptIds = List.of(4032);
     when(oracleApiProvider.getParentTreeLatLongByIdList(ptIds)).thenReturn(List.of(oracleDto));
 
-    GeneticWorthTraitsDto traitsDto =
-        new GeneticWorthTraitsDto("gvo", new BigDecimal("18"), null, null);
-    LatLongRequestDto requestDto =
-        new LatLongRequestDto(
-            4032, true, new BigDecimal("255"), new BigDecimal("100"), List.of(traitsDto));
+    LatLongRequestDto requestDto = new LatLongRequestDto(4032, new BigDecimal("0.5"));
 
     List<ParentTreeLatLongDto> resp = parentTreeService.getLatLongElevation(List.of(requestDto));
 
@@ -66,9 +61,9 @@ class ParentTreeServiceTest {
     // values added
     Assertions.assertEquals(new BigDecimal("49.033333"), resp.get(0).getLatitudeDegreesFmt());
     Assertions.assertEquals(new BigDecimal("124.050000"), resp.get(0).getLongitudeDegreeFmt());
-    Assertions.assertEquals(new BigDecimal("294200.000000"), resp.get(0).getWeightedLatitude());
-    Assertions.assertEquals(new BigDecimal("744300.000000"), resp.get(0).getWeightedLongitude());
-    Assertions.assertEquals(new BigDecimal("54900"), resp.get(0).getWeightedElevation());
+    Assertions.assertEquals(new BigDecimal("1471.0000000"), resp.get(0).getWeightedLatitude());
+    Assertions.assertEquals(new BigDecimal("3721.5000000"), resp.get(0).getWeightedLongitude());
+    Assertions.assertEquals(new BigDecimal("274.5"), resp.get(0).getWeightedElevation());
   }
 
   @Test
@@ -77,11 +72,7 @@ class ParentTreeServiceTest {
     List<Integer> ptIds = List.of(4032);
     when(oracleApiProvider.getParentTreeLatLongByIdList(ptIds)).thenReturn(List.of());
 
-    GeneticWorthTraitsDto traitsDto =
-        new GeneticWorthTraitsDto("gvo", new BigDecimal("18"), null, null);
-    LatLongRequestDto requestDto =
-        new LatLongRequestDto(
-            4032, true, new BigDecimal("255"), new BigDecimal("100"), List.of(traitsDto));
+    LatLongRequestDto requestDto = new LatLongRequestDto(4032, new BigDecimal("0.5"));
 
     List<ParentTreeLatLongDto> resp = parentTreeService.getLatLongElevation(List.of(requestDto));
 

@@ -1,34 +1,28 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.util.LatLongUtil;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /** This class holds methods for handling Parent Trees records. */
 @Service
+@RequiredArgsConstructor
 public class ParentTreeService {
 
   @Qualifier("oracleApi")
-  private Provider oracleProvider;
-
-  @Autowired
-  public ParentTreeService(Provider oracleProvider) {
-    this.oracleProvider = oracleProvider;
-  }
+  private final Provider oracleApiProvider;
 
   /**
    * Calculate lat long and elevation values given a list of {@link LatLongRequestDto}.
@@ -42,7 +36,8 @@ public class ParentTreeService {
 
     List<Integer> ptIds = ptreeIds.stream().map(LatLongRequestDto::parentTreeId).toList();
 
-    List<ParentTreeLatLongDto> oracleDtoList = oracleProvider.getParentTreeLatLongByIdList(ptIds);
+    List<ParentTreeLatLongDto> oracleDtoList =
+        oracleApiProvider.getParentTreeLatLongByIdList(ptIds);
 
     if (oracleDtoList.isEmpty()) {
       SparLog.info("No parent tree lat long data from Oracle for the given parent tree ids.");
@@ -66,13 +61,7 @@ public class ParentTreeService {
         continue;
       }
 
-      parentTreeDto.setWeightedTraitList(new HashMap<>());
       parentTreeDto.setLongitudeDegrees(parentTreeDto.getLongitudeDegrees() * -1);
-      for (GeneticWorthTraitsDto traitDto : dto.traitsList()) {
-        // weighted for each trait
-        BigDecimal weighted = dto.proportion().multiply(traitDto.traitValue());
-        parentTreeDto.getWeightedTraitList().put(traitDto.traitCode(), weighted);
-      }
 
       // mean elevation = parent tree proportion * elevation
       BigDecimal weightedElevation =

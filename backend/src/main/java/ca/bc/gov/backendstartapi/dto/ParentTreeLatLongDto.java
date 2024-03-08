@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,5 +22,4 @@ public class ParentTreeLatLongDto {
   private BigDecimal weightedLatitude;
   private BigDecimal weightedLongitude;
   private BigDecimal weightedElevation;
-  private Map<String, BigDecimal> weightedTraitList;
 }
