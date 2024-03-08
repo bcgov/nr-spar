@@ -11,15 +11,21 @@ concurrency:
 jobs:
   python:
     name: Python
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: 1
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-    - working-directory: app
-      run: |
-        ./run.sh || echo "App failing!"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - working-directory: app
+        run: pip install -r ./requirements.txt
+      - working-directory: app/src/
+        run: python main.py || echo "App failing!"
 
   oc:
     name: OpenShift
@@ -31,7 +37,6 @@ jobs:
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
           oc whoami
-
 
   results:
     name: PR Results
