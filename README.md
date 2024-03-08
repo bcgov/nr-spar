@@ -1,5 +1,10 @@
-# nr-spar-data-sync
+[![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle:Maturing](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](<https://github.com/bcgov/nr-spar-data-sync/blob/main/README.md>)
+
+[![Merge](https://github.com/bcgov/nr-spar-data/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar-data/actions/workflows/merge.yml)
+[![Scheduled](https://github.com/bcgov/nr-spar-data/actions/workflows/scheduled.yml/badge.svg)](https://github.com/bcgov/nr-spar-data/actions/workflows/scheduled.yml)
+
+# nr-spar-data-sync
 
 Engine to sync data for SPAR application (from Postgres to Oracle). The application extracts, transforms, and loads data based on a few parameters/configurations.
 
