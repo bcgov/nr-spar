@@ -47,10 +47,16 @@ public class SmpMixGeneticQualityService {
     addSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
 
+  /**
+   * Finds all {@link SmpMixGeneticQuality} given a {@link SmpMixId} id.
+   *
+   * @param smixId The SmpMixId instance.
+   * @return A list of SmpMixGeneticQuality or an empty list.
+   */
   public List<SmpMixGeneticQuality> findAllBySmpMix(SmpMixId smixId) {
     return smpMixGeneticQualityRepository.findAllBySmpMix(smixId);
   }
-  
+
   // Form Step 5 SMP Mix Genetic Quality related
   private void addSmpMixGenQlty(
       Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
