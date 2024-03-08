@@ -9,27 +9,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # zap_scan:
-  #   runs-on: ubuntu-latest
-  #   name: Penetration Tests
-  #   env:
-  #     DOMAIN: apps.silver.devops.gov.bc.ca
-  #     PREFIX: ${{ github.event.repository.name }}-test
-  #   strategy:
-  #     matrix:
-  #       name: [backend, frontend]
-  #   steps:
-  #     - name: ZAP Scan
-  #       uses: zaproxy/action-full-scan@v0.9.0
-  #       with:
-  #         allow_issue_writing: true
-  #         artifact_name: "zap_${{ matrix.name }}"
-  #         cmd_options: "-a"
-  #         issue_title: "ZAP: ${{ matrix.name }}"
-  #         target: https://${{ env.PREFIX }}-${{ matrix.name }}.${{ env.DOMAIN }}
-
-  results:
-    name: Results
+  python:
+    name: Python
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "Workflow completed successfully!"
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - working-directory: app
+      run: |
+        ./run.sh || echo "App failing!"
