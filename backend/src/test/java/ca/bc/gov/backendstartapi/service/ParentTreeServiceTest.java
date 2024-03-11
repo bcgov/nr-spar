@@ -3,7 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,7 +30,7 @@ class ParentTreeServiceTest {
   @Test
   @DisplayName("getLatLongElevation success test should succeed")
   void getLatLongElevation_successTest() {
-    ParentTreeLatLongDto oracleDto = new ParentTreeLatLongDto();
+    ParentTreeLocInfoDto oracleDto = new ParentTreeLocInfoDto();
     oracleDto.setParentTreeId(4032);
     oracleDto.setLatitudeDegrees(49);
     oracleDto.setLatitudeMinutes(2);
@@ -45,7 +45,7 @@ class ParentTreeServiceTest {
 
     LatLongRequestDto requestDto = new LatLongRequestDto(4032, new BigDecimal("0.5"));
 
-    List<ParentTreeLatLongDto> resp = parentTreeService.getLatLongElevation(List.of(requestDto));
+    List<ParentTreeLocInfoDto> resp = parentTreeService.getLatLongElevation(List.of(requestDto));
 
     Assertions.assertFalse(resp.isEmpty());
     Assertions.assertEquals(1, resp.size());
@@ -74,7 +74,7 @@ class ParentTreeServiceTest {
 
     LatLongRequestDto requestDto = new LatLongRequestDto(4032, new BigDecimal("0.5"));
 
-    List<ParentTreeLatLongDto> resp = parentTreeService.getLatLongElevation(List.of(requestDto));
+    List<ParentTreeLocInfoDto> resp = parentTreeService.getLatLongElevation(List.of(requestDto));
 
     Assertions.assertTrue(resp.isEmpty());
   }

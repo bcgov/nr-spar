@@ -7,7 +7,7 @@ import lombok.Setter;
 /** This class represents a response body when calculating the SMP values. */
 @Getter
 @Setter
-public class ParentTreeLatLongDto {
+public class ParentTreeLocInfoDto {
 
   private Integer parentTreeId;
   private Integer latitudeDegrees;

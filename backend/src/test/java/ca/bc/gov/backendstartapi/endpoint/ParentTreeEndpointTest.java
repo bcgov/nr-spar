@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
 import ca.bc.gov.backendstartapi.service.ParentTreeService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ class ParentTreeEndpointTest {
     List<LatLongRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new LatLongRequestDto(4032, new BigDecimal("0.162")));
 
-    ParentTreeLatLongDto responseDto = new ParentTreeLatLongDto();
+    ParentTreeLocInfoDto responseDto = new ParentTreeLocInfoDto();
     responseDto.setParentTreeId(4032);
     responseDto.setLatitudeDegrees(49);
     responseDto.setLatitudeMinutes(2);
@@ -58,7 +58,7 @@ class ParentTreeEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/parent-trees/lat-long-elevation")
+            post("/api/parent-trees/location-info")
                 .with(csrf().asHeader())
                 .content(postBody.toString())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +95,7 @@ class ParentTreeEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/parent-trees/lat-long-elevation")
+            post("/api/parent-trees/location-info")
                 .with(csrf().asHeader())
                 .content(postBody.toString())
                 .contentType(MediaType.APPLICATION_JSON)

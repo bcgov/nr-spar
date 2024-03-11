@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
 import ca.bc.gov.backendstartapi.service.ParentTreeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,12 +25,12 @@ public class ParentTreeEndpoint {
   private final ParentTreeService parentTreeService;
 
   /**
-   * Gets latitude, longite and elevation data for each parent tree given a list of orchard ids.
+   * Gets latitude, longitude and elevation data for each parent tree given a list of orchard ids.
    *
    * @param ptreeIds The {@link LatLongRequestDto} list with parent trees and all tab 3 data.
    * @return A List of {@link ParentTreeOrchardDto} containing the result rows.
    */
-  @PostMapping("/lat-long-elevation")
+  @PostMapping("/location-info")
   @Operation(
       summary = "",
       description = "",
@@ -43,9 +43,9 @@ public class ParentTreeEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<ParentTreeLatLongDto> getLatLongParentTreeData(
+  public List<ParentTreeLocInfoDto> getLatLongParentTreeData(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description = "A list of orchard id to fetch lat and long.",
+              description = "A list of orchard id to fetch lat, long and elevation data.",
               required = true)
           @RequestBody
           List<LatLongRequestDto> ptreeIds) {

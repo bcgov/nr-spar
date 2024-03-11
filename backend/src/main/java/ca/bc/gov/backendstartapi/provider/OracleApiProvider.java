@@ -5,7 +5,7 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
@@ -194,7 +194,7 @@ public class OracleApiProvider implements Provider {
   }
 
   @Override
-  public List<ParentTreeLatLongDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
+  public List<ParentTreeLocInfoDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
     String oracleApiUrl = String.format("%s/api/parent-trees/lat-long-elevation", rootUri);
 
     SparLog.info(
@@ -212,14 +212,14 @@ public class OracleApiProvider implements Provider {
       sb.append("]");
       HttpEntity<String> requestEntity = new HttpEntity<>(sb.toString(), addHttpHeaders());
 
-      ResponseEntity<List<ParentTreeLatLongDto>> ptreeResponse =
+      ResponseEntity<List<ParentTreeLocInfoDto>> ptreeResponse =
           restTemplate.exchange(
               oracleApiUrl,
               HttpMethod.POST,
               requestEntity,
-              new ParameterizedTypeReference<List<ParentTreeLatLongDto>>() {});
+              new ParameterizedTypeReference<List<ParentTreeLocInfoDto>>() {});
 
-      List<ParentTreeLatLongDto> list = ptreeResponse.getBody();
+      List<ParentTreeLocInfoDto> list = ptreeResponse.getBody();
       int size = list == null ? 0 : list.size();
       SparLog.info(
           "GET parent tree lat long from Oracle - Success response with {} record(s)!", size);

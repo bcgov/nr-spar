@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.util.LatLongUtil;
 import java.math.BigDecimal;
@@ -28,15 +28,15 @@ public class ParentTreeService {
    * Calculate lat long and elevation values given a list of {@link LatLongRequestDto}.
    *
    * @param ptreeIds List of parent trees and traits.
-   * @return A List of {@link ParentTreeLatLongDto}
+   * @return A List of {@link ParentTreeLocInfoDto}
    */
-  public List<ParentTreeLatLongDto> getLatLongElevation(List<LatLongRequestDto> ptreeIds) {
+  public List<ParentTreeLocInfoDto> getLatLongElevation(List<LatLongRequestDto> ptreeIds) {
     SparLog.info(
         "{} parent tree record(s) received to calculate lat long and elevation", ptreeIds.size());
 
     List<Integer> ptIds = ptreeIds.stream().map(LatLongRequestDto::parentTreeId).toList();
 
-    List<ParentTreeLatLongDto> oracleDtoList =
+    List<ParentTreeLocInfoDto> oracleDtoList =
         oracleApiProvider.getParentTreeLatLongByIdList(ptIds);
 
     if (oracleDtoList.isEmpty()) {
@@ -44,17 +44,17 @@ public class ParentTreeService {
       return List.of();
     }
 
-    Map<Integer, ParentTreeLatLongDto> oracleMap =
+    Map<Integer, ParentTreeLocInfoDto> oracleMap =
         oracleDtoList.stream()
-            .collect(Collectors.toMap(ParentTreeLatLongDto::getParentTreeId, Function.identity()));
+            .collect(Collectors.toMap(ParentTreeLocInfoDto::getParentTreeId, Function.identity()));
 
-    List<ParentTreeLatLongDto> resultList = new ArrayList<>();
+    List<ParentTreeLocInfoDto> resultList = new ArrayList<>();
 
     // Second loop through list to calculate proportion and weight values.
     for (LatLongRequestDto dto : ptreeIds) {
       // frontend already do this:
 
-      ParentTreeLatLongDto parentTreeDto = oracleMap.get(dto.parentTreeId());
+      ParentTreeLocInfoDto parentTreeDto = oracleMap.get(dto.parentTreeId());
       if (Objects.isNull(parentTreeDto)) {
         SparLog.info(
             "Unable to calculate for parent tree {}, no data found on Oracle!", dto.parentTreeId());
