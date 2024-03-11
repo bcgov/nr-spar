@@ -1,0 +1,34 @@
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.small-card {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 4rem;
+  background: var(--#{vars.$bcgov-prefix}-layer-02, #FFF);
+  border-radius: 0.25rem;
+  border: 0.0625rem solid var(--#{vars.$bcgov-prefix}-subtle-02, #DFDFE1);
+  margin-top: 0.5rem;
+
+  .image-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      stroke-width: 0.01875rem;
+      fill: var(--#{vars.$bcgov-prefix}-link-primary, #005CB8);
+      stroke: var(--#{vars.$bcgov-prefix}-link-primary, #005CB8);
+    }
+
+    .header {
+      @include type.type-style('heading-02');
+      margin-left: 0.75rem;
+    }
+  }
+}
