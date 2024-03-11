@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
 import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SmpMixGeneticQualityRepository;
@@ -44,6 +45,16 @@ public class SmpMixGeneticQualityService {
     SparLog.info("Saving SmpMixGeneticQuality for seedlot number {}", seedlot.getId());
 
     addSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList);
+  }
+
+  /**
+   * Finds all {@link SmpMixGeneticQuality} given a {@link SmpMixId} id.
+   *
+   * @param smixId The SmpMixId instance.
+   * @return A list of SmpMixGeneticQuality or an empty list.
+   */
+  public List<SmpMixGeneticQuality> findAllBySmpMix(SmpMixId smixId) {
+    return smpMixGeneticQualityRepository.findAllBySmpMix(smixId);
   }
 
   // Form Step 5 SMP Mix Genetic Quality related

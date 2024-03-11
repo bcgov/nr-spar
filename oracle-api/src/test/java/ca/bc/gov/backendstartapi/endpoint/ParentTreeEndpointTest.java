@@ -5,6 +5,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
@@ -65,6 +66,31 @@ class ParentTreeEndpointTest {
         .andExpect(jsonPath("$[0].longitudeMinutes").value(dto.getLongitudeMinutes()))
         .andExpect(jsonPath("$[0].longitudeSeconds").value(dto.getLongitudeSeconds()))
         .andExpect(jsonPath("$[0].elevation").value(dto.getElevation()))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getLatLongParentTreeDataEmptyTest")
+  @WithMockUser(roles = "user_read")
+  void getLatLongParentTreeDataEmptyTest() throws Exception {
+    List<LatLongRequestDto> ptIds = new ArrayList<>();
+    ptIds.add(new LatLongRequestDto(4110L));
+
+    when(parentTreeService.getLatLongParentTreeData(ptIds)).thenReturn(List.of());
+
+    String postBody = "[{\"parentTreeId\":4110}]";
+
+    mockMvc
+        .perform(
+            post("/api/parent-trees/lat-long-elevation")
+                .with(csrf().asHeader())
+                .content(postBody.toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(content().string("[]") )
         .andReturn();
   }
 }

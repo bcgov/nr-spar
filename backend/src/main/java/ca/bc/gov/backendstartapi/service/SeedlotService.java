@@ -277,7 +277,7 @@ public class SeedlotService {
     // If the current parent tree is in the orchard and also on the SMP Mix,
     // then, the genetic quality data comes from SeedlotParentTreeSmpMix list,
     // else, the gen quality data comes from SmpMixGeneticQuality
-    if (sptMap.containsKey(mixTabInfo.getId())) {
+    if (sptMap.containsKey(mixTabInfo.getSeedlotParentTreeId())) {
       for (SeedlotParentTreeSmpMix sptSmpMixGenQual : parentTreeSmpMixData) {
         Integer parentTreeId = sptSmpMixGenQual.getId().getSeedlotParentTree().getParentTreeId();
         if (parentTreeId == mixTabInfo.getParentTreeId()) {
@@ -293,7 +293,7 @@ public class SeedlotService {
     } else {
       for (SmpMixGeneticQuality smpMixGenQual : smpMixGenQualData) {
         Integer parentTreeId = smpMixGenQual.getId().getSmpMix().getParentTreeId();
-        if (parentTreeId == mixTabInfo.getParentTreeId()) {
+        if (parentTreeId.equals(mixTabInfo.getParentTreeId())) {
           ParentTreeGeneticQualityDto parentTreeGenQualDto =
               new ParentTreeGeneticQualityDto(
                 smpMixGenQual.getGeneticTypeCode(),
