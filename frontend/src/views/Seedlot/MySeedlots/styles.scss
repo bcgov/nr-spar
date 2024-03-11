@@ -1,22 +1,29 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .my-seedlot-content {
+  padding-inline: 0;
+
   .my-seedlot-breadcrumb {
-    padding-left: 1rem;
-    margin-bottom: 0.5rem;
+    margin: 0 2.5rem 0.5rem 2.5rem;
   }
 
   .title-section {
-    padding-left: 0;
-    margin-left: 0;
+    padding: 0;
   }
 
   .my-seedlot-title {
     justify-content: space-between;
-    margin-bottom: 2rem;
+    margin: 0 2.5rem 2.5rem 2.5rem;
   }
 
-  .btn-my-seedlot {
+  .reg-seedlot-btn {
+    width: fit-content;
+    max-width: 16rem;
+    margin-top: 1rem;
+    white-space: nowrap;
+  }
+
+  .reg-btn-float-right {
     float: right;
   }
 
@@ -34,6 +41,10 @@
   }
 
   .my-seedlot-data-table-row {
-    margin: auto -2.5rem;
+    margin-inline: 0;
+  }
+
+  .no-padding-col {
+    padding: 0;
   }
 }

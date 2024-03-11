@@ -4,8 +4,6 @@ import {
   FlexGrid,
   Row,
   Column,
-  Breadcrumb,
-  BreadcrumbItem,
   Tabs,
   TabList,
   Tab,
@@ -29,13 +27,14 @@ import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import PathConstants from '../../../routes/pathConstants';
 import { addParamToPath } from '../../../utils/PathUtils';
+import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
+import Breadcrumbs from '../../../components/Breadcrumbs';
 
 import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
 
 import './styles.scss';
-import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
 const SeedlotDetails = () => {
   const navigate = useNavigate();
@@ -130,14 +129,11 @@ const SeedlotDetails = () => {
   return (
     <FlexGrid className="seedlot-details-page">
       <Row className="seedlot-details-breadcrumb">
-        <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>
-            Seedlots
-          </BreadcrumbItem>
-          <BreadcrumbItem onClick={() => navigate(PathConstants.MY_SEEDLOTS)}>
-            My seedlots
-          </BreadcrumbItem>
-        </Breadcrumb>
+        <Breadcrumbs crumbs={[
+          { name: 'Seedlots', path: PathConstants.SEEDLOTS },
+          { name: 'My seedlots', path: PathConstants.MY_SEEDLOTS }
+        ]}
+        />
       </Row>
       <Row>
         <Column className={windowSize.innerWidth < MEDIUM_SCREEN_WIDTH ? 'summary-title-flex-col' : 'summary-title-flex-row'}>
@@ -162,11 +158,7 @@ const SeedlotDetails = () => {
         </Column>
       </Row>
 
-      <Row className="seedlot-summary-content">
-        <Column sm={4}>
-          <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
-        </Column>
-      </Row>
+      <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
 
       <Row className="seedlot-details-content">
         <Column>

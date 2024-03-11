@@ -4,33 +4,47 @@
 
 .favourite-activities {
   background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+
+  .favourite-activities-title {
+    h2 {
+      @include type.type-style('heading-03');
+    }
+
+    padding-bottom: 2rem;
+  }
+
+  .favourite-activities-subtitle {
+    display: inline;
+  }
+
+  .tooltip-button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  button.tooltip-button>svg {
+    color: var(--#{vars.$bcgov-prefix}-text-secondary);
+  }
+
+  .favourite-activity-tooltip {
+    top: 0.1875rem;
+    padding-left: 0.3125rem;
+  }
+
+  .favourite-activities-cards {
+    padding-inline: 0;
+  }
+
+  .card-column {
+    padding: 0 1rem 0 0;
+  }
+}
+
+.favourite-activities-sm-padding{
+  padding: 2rem 1rem;
+}
+
+.favourite-activities-padding{
   padding: 2rem;
-}
-
-.favourite-activities-title>h2 {
-  @include type.type-style('heading-03');
-  margin-bottom: 0.5rem;
-}
-
-.#{vars.$bcgov-prefix}--row>.favourite-activities-title {
-  padding-left: 0.5rem;
-}
-
-.favourite-activities-subtitle {
-  display: inline;
-}
-
-.tooltip-button {
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-button.tooltip-button>svg {
-  color: var(--#{vars.$bcgov-prefix}-text-secondary);
-}
-
-.favourite-activity-tooltip {
-  top: 0.1875rem;
-  padding-left: 0.3125rem;
 }
