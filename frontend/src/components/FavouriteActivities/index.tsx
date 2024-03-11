@@ -43,7 +43,7 @@ const FavouriteActivities = () => {
           align="top"
           label="You can add a shortcut to your favourite activity by clicking on the heart icon inside each page."
         >
-          <button className="tooltip-button" type="button" aria-label="tooltip-button">
+          <button className="tooltip-button" type="button" aria-label="favourite activity description tooltip">
             <Information />
           </button>
         </Tooltip>
@@ -62,8 +62,8 @@ const FavouriteActivities = () => {
                   <EmptySection
                     icon="Application"
                     title="You don't have any favourites to show yet!"
-                    description="You can favourite your most used activities by clicking on the heart icon
-                inside each page"
+                    description="You can favourite your most used
+                    activities by clicking on the heart icon inside each page"
                   />
                 ) : favActQuery.data.map((favObject, index) => (
                   <Card
