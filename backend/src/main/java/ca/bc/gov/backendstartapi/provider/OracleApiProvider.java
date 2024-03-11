@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
+import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
@@ -186,6 +187,46 @@ public class OracleApiProvider implements Provider {
     } catch (HttpClientErrorException httpExc) {
       SparLog.error(
           "GET SPZ from Oracle - Response code error: {}, {}",
+          httpExc.getStatusCode(),
+          httpExc.getMessage());
+      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
+    }
+  }
+
+  @Override
+  public List<ParentTreeLocInfoDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
+    String oracleApiUrl = String.format("%s/api/parent-trees/lat-long-elevation", rootUri);
+
+    SparLog.info(
+        "Starting {} - {} request to {}", PROVIDER, "getParentTreeLatLongByIdList", oracleApiUrl);
+
+    try {
+      StringBuilder sb = new StringBuilder("[");
+      ptIds.forEach(
+          (id) -> {
+            if (ptIds.indexOf(id) > 0) {
+              sb.append(",");
+            }
+            sb.append("{").append("\"parentTreeId\":").append(id).append("}");
+          });
+      sb.append("]");
+      HttpEntity<String> requestEntity = new HttpEntity<>(sb.toString(), addHttpHeaders());
+
+      ResponseEntity<List<ParentTreeLocInfoDto>> ptreeResponse =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.POST,
+              requestEntity,
+              new ParameterizedTypeReference<List<ParentTreeLocInfoDto>>() {});
+
+      List<ParentTreeLocInfoDto> list = ptreeResponse.getBody();
+      int size = list == null ? 0 : list.size();
+      SparLog.info(
+          "GET parent tree lat long from Oracle - Success response with {} record(s)!", size);
+      return list;
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET parent tree lat long from Oracle - Response code error: {}, {}",
           httpExc.getStatusCode(),
           httpExc.getMessage());
       throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());

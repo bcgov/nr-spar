@@ -68,7 +68,7 @@ public class SmpMix {
    *
    * @return A {@link SeedlotParentTreeId}
    */
-  public SeedlotParentTreeId getId() {
+  public SeedlotParentTreeId getSeedlotParentTreeId() {
     return new SeedlotParentTreeId(seedlot.getId(), parentTreeId);
   }
 }
