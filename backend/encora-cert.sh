@@ -1,10 +1,12 @@
-# Import certificates - For Encora folks, needed by ZScaler Encora VPN
-if [ -f "$HOME/zscaler-certs/ziaroot.crt" ]; then
-  keytool -import -trustcacerts -file $HOME/zscaler-certs/ziaroot.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
+#!/bin/bash
+
+# Import certificates - Needed by Encora ZScaler VPN
+if [ -f "/certs/ziaroot.crt" ]; then
+  keytool -import -trustcacerts -file /certs/ziaroot.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
 fi
 
-if [ -f "$HOME/zscaler-certs/zscaler-ca.crt" ]; then
-  keytool -import -trustcacerts -file $HOME/zscaler-certs/zscaler-ca.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
+if [ -f "/certs/zscaler-ca.crt" ]; then
+  keytool -import -trustcacerts -file /certs/zscaler-ca.crt -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
 fi
 
 mvn -ntp spring-boot:run \

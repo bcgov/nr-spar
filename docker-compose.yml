@@ -54,7 +54,9 @@ services:
     image: maven:3.9.6-eclipse-temurin-17
     entrypoint: sh -c './encora-cert.sh'
     working_dir: /app
-    volumes: ["./backend:/app"]
+    volumes:
+      - ./backend:/app
+      - $HOME/zscaler-certs:/certs
     healthcheck:
       test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
       interval: 5s
