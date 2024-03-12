@@ -21,7 +21,8 @@ import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
 import {
-  getAClassSeedlotDraft, getSeedlotById, putAClassSeedlot, putAClassSeedlotProgress
+  getAClassSeedlotDraft, getAClassSeedlotFullForm, getSeedlotById,
+  putAClassSeedlot, putAClassSeedlotProgress
 } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
@@ -81,7 +82,8 @@ import {
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE,
-  initialProgressConfig, smartSaveText, stepMap, tscAgencyObj, tscLocationCode
+  emptyCollectionStep, emptyOwnershipStep, emptyInterimStep, emptyOrchardStep,
+  initialProgressConfig, smartSaveText, stepMap, tscAgencyObj, tscLocationCode, emptyExtractionStep
 } from './constants';
 
 import './styles.scss';
@@ -110,15 +112,18 @@ const SeedlotRegistrationForm = () => {
   const [saveDescription, setSaveDescription] = useState<string>('Save changes');
   const numOfEdit = useRef(0);
 
-  // Initialize all step's state here
-  const [allStepData, setAllStepData] = useState<AllStepData>(() => ({
-    collectionStep: initCollectionState(EmptyMultiOptObj, ''),
-    ownershipStep: [initOwnershipState(EmptyMultiOptObj, '')],
-    interimStep: initInterimState(EmptyMultiOptObj, ''),
-    orchardStep: initOrchardState(),
+  const initEmptySteps = () => ({
+    collectionStep: initCollectionState(EmptyMultiOptObj, '', emptyCollectionStep),
+    ownershipStep: initOwnershipState(EmptyMultiOptObj, '', emptyOwnershipStep),
+    interimStep: initInterimState(EmptyMultiOptObj, '', emptyInterimStep),
+    orchardStep: initOrchardState(emptyOrchardStep),
     parentTreeStep: initParentTreeState(),
-    extractionStorageStep: initExtractionStorageState(tscAgencyObj, tscLocationCode)
-  }));
+    extractionStorageStep: initExtractionStorageState(
+      tscAgencyObj,
+      tscLocationCode,
+      emptyExtractionStep
+    )
+  });
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -145,6 +150,28 @@ const SeedlotRegistrationForm = () => {
    * otherwise the form will be populated with data directly from the seedlot table.
    */
   const isFormIncomplete = seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND' || seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'INC';
+
+  /**
+   * Determine if the form is already submitted for review,
+   * if true, it is necessary to fetch all of the seedlot's data
+   * and use it to fill the form
+   */
+  const isFormSubmitted = seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'SUB';
+
+  const getAllSeeedlotInfoQuery = useQuery({
+    queryKey: ['seedlots', seedlotNumber],
+    queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? ''),
+    onError: (err: AxiosError) => {
+      if (err.response?.status === 404) {
+        navigate(PathConstants.FOUR_OH_FOUR);
+      }
+    },
+    enabled: isFormSubmitted,
+    refetchOnWindowFocus: false
+  });
+
+  // Initialize all step's state here
+  const [allStepData, setAllStepData] = useState<AllStepData>(() => initEmptySteps());
 
   const setDefaultAgencyAndCode = (agency: MultiOptionsObj, locationCode: string) => {
     setAllStepData((prevData) => ({
@@ -274,6 +301,40 @@ const SeedlotRegistrationForm = () => {
     setAllStepData(newData);
     numOfEdit.current += 1;
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line no-debugger
+    debugger;
+    if (getAllSeeedlotInfoQuery.status === 'success') {
+      const { seedlotData } = getAllSeeedlotInfoQuery.data;
+      setAllStepData({
+        collectionStep: initCollectionState(EmptyMultiOptObj, '', seedlotData.seedlotFormCollectionDto),
+        ownershipStep: initOwnershipState(EmptyMultiOptObj, '', seedlotData.seedlotFormOwnershipDtoList),
+        interimStep: initInterimState(EmptyMultiOptObj, '', seedlotData.seedlotFormInterimDto),
+        orchardStep: initOrchardState(seedlotData.seedlotFormOrchardDto),
+        parentTreeStep: initParentTreeState(
+          seedlotData.seedlotFormParentTreeDtoList,
+          seedlotData.seedlotFormParentTreeSmpDtoList
+        ),
+        extractionStorageStep: initExtractionStorageState(
+          tscAgencyObj,
+          tscLocationCode,
+          seedlotData.seedlotFormExtractionDto
+        )
+      });
+    } else if (getAllSeeedlotInfoQuery.status === 'error') {
+      const error = getAllSeeedlotInfoQuery.error as AxiosError;
+      if (error.response?.status !== 404) {
+        // eslint-disable-next-line no-alert
+        alert(`Error retrieving seedlot data! ${error.message}`);
+        navigate(`/seedlots/details/${seedlotNumber}`);
+      }
+    }
+  }, [
+    getAllSeeedlotInfoQuery.status,
+    getAllSeeedlotInfoQuery.isFetchedAfterMount,
+    forestClientQuery.status
+  ]);
 
   const logState = () => {
     // eslint-disable-next-line no-console
