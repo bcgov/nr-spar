@@ -3,7 +3,7 @@
 -- Should be used in a trigger in seedlot table
 -- trigger statement in the bottom part of this script
 */
-CREATE OR REPLACE FUNCTION seedlot_if_modified_func() RETURNS trigger AS $body$
+CREATE OR REPLACE FUNCTION spar.seedlot_if_modified_func() RETURNS trigger AS $body$
 DECLARE
     v_old_data TEXT;
     v_new_data TEXT;
