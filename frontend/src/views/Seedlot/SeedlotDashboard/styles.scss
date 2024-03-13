@@ -4,12 +4,12 @@
   padding-left: 0;
   padding-right: 0;
 
-  .title-section{
-    padding-left: 0;
+  .title-row {
+    margin: 0;
+    margin-left: 1.5rem;
   }
 
-  .#{vars.$bcgov-prefix}--row {
-    margin-left: 2.5rem;
-    margin-right: 2.5rem;
+  .title-section {
+    margin: 0;
   }
 }
