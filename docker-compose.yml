@@ -52,15 +52,11 @@ services:
       <<: *db-vars
     ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.6-eclipse-temurin-17
-    entrypoint:
-      - "/bin/sh"
-      - -ecx
-      - |
-        mvn -ntp spring-boot:run \
-        -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005" \
-        -Dmaven.plugin.validation=VERBOSE
+    entrypoint: sh -c './encora-cert.sh'
     working_dir: /app
-    volumes: ["./backend:/app"]
+    volumes:
+      - ./backend:/app
+      - $HOME/zscaler-certs:/certs
     healthcheck:
       test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
       interval: 5s
