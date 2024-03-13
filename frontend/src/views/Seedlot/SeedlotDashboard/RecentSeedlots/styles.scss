@@ -6,14 +6,14 @@
 }
 
 .recent-seedlots {
-  background-color: var(--#{vars.$bcgov-prefix}-layer-02) !important;
-  margin: 1.5rem 2rem 2rem 2rem;
+  background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+  margin: 0 2.5rem;
   border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-02);
   border-radius: 4px;
 }
 
 .seedlot-table {
-  padding: 0 !important;
+  padding: 0;
 }
 
 .recent-seedlots-title {
@@ -26,7 +26,7 @@
 }
 
 .recent-seedlots-table {
-  padding: 0 !important;
+  padding: 0;
 }
 
 .empty-recent-seedlots {

@@ -15,6 +15,8 @@ import PageTitle from '../../../components/PageTitle';
 import AuthContext from '../../../contexts/AuthContext';
 import SeedlotTable from '../../../components/SeedlotTable';
 import PathConstants from '../../../routes/pathConstants';
+import useWindowSize from '../../../hooks/UseWindowSize';
+import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
 import { tableText } from './constants';
 
@@ -22,6 +24,7 @@ import './styles.scss';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
+  const windowSize = useWindowSize();
   const { user } = useContext(AuthContext);
 
   const userId = user?.userId ?? '';
@@ -34,7 +37,7 @@ const MySeedlots = () => {
         </Breadcrumb>
       </Row>
       <Row className="my-seedlot-title">
-        <Column sm={4} md={6} lg={14} xlg={12}>
+        <Column className="no-padding-col" sm={4} md={6} lg={12} xlg={12}>
           <PageTitle
             title={tableText.pageTitle}
             subtitle={tableText.pageSubtitle}
@@ -42,12 +45,12 @@ const MySeedlots = () => {
             activity="mySeedlots"
           />
         </Column>
-        <Column sm={4} md={2} lg={2} xlg={4}>
+        <Column className="no-padding-col" sm={4} md={2} lg={4} xlg={4}>
           <Button
             kind="primary"
             onClick={() => { navigate(PathConstants.SEEDLOTS_A_CLASS_CREATION); }}
             size="lg"
-            className="btn-my-seedlot"
+            className={`reg-seedlot-btn ${windowSize.innerWidth >= MEDIUM_SCREEN_WIDTH ? 'reg-btn-float-right' : null}`}
             renderIcon={Add}
           >
             {tableText.buttonText}

@@ -12,7 +12,7 @@ import './styles.scss';
 
 const SeedlotDashboard = () => (
   <FlexGrid className="seedlot-page">
-    <Row>
+    <Row className="title-row">
       <PageTitle
         title="Seedlots"
         subtitle="Register and manage your seedlots"
