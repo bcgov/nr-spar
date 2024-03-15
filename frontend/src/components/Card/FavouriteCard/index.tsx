@@ -83,7 +83,7 @@ const FavouriteCard = ({
     >
       <div className="fav-card-header">
         <Icon className="fav-card-icon" />
-        <p className="fav-card-title-small">{favObject.header}</p>
+        {ActionBtn}
       </div>
       <div className="fav-card-content">
         <p className="fav-card-title-large">{favObject.header}</p>
