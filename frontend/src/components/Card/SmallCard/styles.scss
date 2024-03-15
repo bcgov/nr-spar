@@ -32,3 +32,17 @@
     }
   }
 }
+
+.small-card:hover,
+.small-card:focus {
+  cursor: pointer;
+}
+
+.fav-card-main-highlighted .image-header > svg {
+  fill: #FFF;
+  stroke: #FFF;
+}
+
+.fav-card-main-highlighted .image-header .header {
+  color: #FFF;
+}
