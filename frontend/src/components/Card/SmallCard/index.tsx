@@ -11,18 +11,20 @@ type SmallCardProps = {
   actionBtn: JSX.Element
   path: string,
   image: string,
-  isIcon: boolean
+  isIcon: boolean,
+  favClassName?: string,
+  favTabIndex?: number
 }
 
 const SmallCard = ({
-  header, actionBtn, path, isIcon, image
+  header, actionBtn, path, isIcon, image, favClassName, favTabIndex
 }: SmallCardProps) => {
   const navigate = useNavigate();
 
   const Img = isIcon ? Icons[image] : Pictograms[image];
 
   return (
-    <Tile className="small-card" onClick={() => navigate(path)}>
+    <Tile className={`${favClassName} small-card`} tabIndex={favTabIndex} onClick={() => navigate(path)}>
       <div className="image-header">
         <Img className="image" />
         <p className="header">{header}</p>
