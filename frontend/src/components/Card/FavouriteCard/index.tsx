@@ -70,7 +70,9 @@ const FavouriteCard = ({
         actionBtn={ActionBtn}
         path={favObject.link}
         image={favObject.image}
-        isIcon={true}
+        isIcon
+        favClassName={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
+        favTabIndex={index}
       />
     );
   }
