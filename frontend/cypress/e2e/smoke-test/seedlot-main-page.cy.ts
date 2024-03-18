@@ -30,4 +30,6 @@ describe('Seedlot Main page test', () => {
       .find('.recent-seedlots-subtitle')
       .should('have.text', seedlotMainPageData.secondSectionSubtitle);
   });
+
+  // TODO: Check if 4 seedlots are being rendered at the bottom
 });
