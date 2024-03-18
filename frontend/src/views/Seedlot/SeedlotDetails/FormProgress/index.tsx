@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import {
-  Button, ProgressIndicatorSkeleton
+  Button, ProgressIndicatorSkeleton, Row, Column
 } from '@carbon/react';
 import { Edit } from '@carbon/icons-react';
 
@@ -19,6 +19,7 @@ import { QueryStatusType } from '../../../../types/QueryStatusType';
 import { SeedlotStatusCode } from '../../../../types/SeedlotType';
 
 import './styles.scss';
+import DetailSection from '../../../../components/DetailSection';
 
 interface FormProgressProps {
   seedlotNumber?: string;
@@ -97,30 +98,29 @@ const FormProgress = (
   };
 
   return (
-    <div className="form-progress">
-      <div className="form-progress-title-section">
-        <p className="form-progress-title">
-          See where you are in the registration process
-        </p>
-      </div>
-      <div className="steps-box">
-        {
-          renderProgress()
-        }
-      </div>
-      <div>
-        <Button
-          kind="tertiary"
-          size="md"
-          className="btn-fp"
-          renderIcon={Edit}
-          onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
-          disabled={getSeedlotQueryStatus === 'loading'}
-        >
-          Edit seedlot form
-        </Button>
-      </div>
-    </div>
+    <DetailSection title="See where you are in the registration process">
+      <Row>
+        <Column className="steps-box">
+          {
+            renderProgress()
+          }
+        </Column>
+      </Row>
+      <Row>
+        <Column>
+          <Button
+            kind="tertiary"
+            size="md"
+            className="btn-fp"
+            renderIcon={Edit}
+            onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
+            disabled={getSeedlotQueryStatus === 'loading'}
+          >
+            Edit seedlot form
+          </Button>
+        </Column>
+      </Row>
+    </DetailSection>
   );
 };
 
