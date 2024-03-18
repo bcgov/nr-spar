@@ -50,12 +50,12 @@ export const initProgressBar = (
 
 export const initCollectionState = (
   defaultAgency: MultiOptionsObj,
-  defaultCode: string,
-  collectionStepData: CollectionFormSubmitType
+  collectionStepData: CollectionFormSubmitType,
+  useDefaultAgency = true
 ):CollectionForm => ({
   useDefaultAgencyInfo: {
     id: 'collection-use-default-agency',
-    value: true,
+    value: useDefaultAgency,
     isInvalid: false
   },
   collectorAgency: {
@@ -107,14 +107,29 @@ export const initCollectionState = (
 
 export const initOwnershipState = (
   defaultAgency: MultiOptionsObj,
-  defaultCode: string,
-  ownersStepData: Array<SingleOwnerFormSubmitType>
+  ownersStepData: Array<SingleOwnerFormSubmitType>,
+  useDefault?: boolean,
+  methodsOfPayment?: Array<MultiOptionsObj>,
+  fundingSource?: Array<MultiOptionsObj>,
+  defaultAgencyNumber = ''
 ): Array<SingleOwnerForm> => {
   const seedlotOwners: Array<SingleOwnerForm> = ownersStepData.map((curOwner, index) => {
     const ownerState = createOwnerTemplate(index, curOwner);
-    ownerState.ownerAgency.value = defaultAgency;
-    ownerState.ownerCode.value = defaultCode;
-    ownerState.ownerPortion.value = '100';
+    ownerState.ownerAgency.value = useDefault
+      ? defaultAgency
+      : {
+        code: curOwner.ownerClientNumber,
+        description: '',
+        label: curOwner.ownerClientNumber
+      };
+    ownerState.useDefaultAgencyInfo.value = ownerState.ownerAgency.value.code === defaultAgencyNumber;
+    ownerState.ownerCode.value = curOwner.ownerLocnCode;
+    if (methodsOfPayment && fundingSource) {
+      const payment = methodsOfPayment.filter((data: MultiOptionsObj) => data.code === curOwner.methodOfPaymentCode)[0];
+      const fundSource = fundingSource.filter((data: MultiOptionsObj) => data.code === curOwner.sparFundSrceCode)[0];
+      ownerState.methodOfPayment.value = payment;
+      ownerState.fundingSource.value = fundSource;
+    }
     return ownerState;
   });
   return seedlotOwners;
@@ -122,12 +137,12 @@ export const initOwnershipState = (
 
 export const initInterimState = (
   defaultAgency: MultiOptionsObj,
-  defaultCode: string,
-  interimStepData: InterimFormSubmitType
+  interimStepData: InterimFormSubmitType,
+  useDefaultAgency = true
 ): InterimForm => ({
   useCollectorAgencyInfo: {
     id: 'interim-use-collection-agency',
-    value: true,
+    value: useDefaultAgency,
     isInvalid: false
   },
   agencyName: {
@@ -162,23 +177,47 @@ export const initInterimState = (
   }
 });
 
-export const initOrchardState = (orchardStepData: OrchardFormSubmitType): OrchardForm => (
+const convertToOrchardsType = (
+  orchards: Array<MultiOptionsObj> | undefined,
+  orchardsIds: Array<string>
+): Array<OrchardObj> => {
+  if (orchards) {
+    const filteredOrchards = orchards.filter((curOrch) => orchardsIds.includes(curOrch.code));
+    return filteredOrchards.map((curFilteredOrch, index) => ({
+      inputId: index,
+      selectedItem: curFilteredOrch,
+      isInvalid: false
+    }));
+  }
+
+  return [
+    {
+      inputId: 0,
+      selectedItem: null,
+      isInvalid: false
+    }
+  ];
+};
+
+export const initOrchardState = (
+  orchardStepData: OrchardFormSubmitType,
+  possibleOrchards?: Array<MultiOptionsObj>,
+  gameticMethodology?: Array<MultiOptionsObj>
+): OrchardForm => (
   {
-    orchards: [
-      {
-        inputId: 0,
-        selectedItem: null,
-        isInvalid: false
-      }
-    ],
+    orchards: convertToOrchardsType(possibleOrchards, orchardStepData.orchardsId),
     femaleGametic: {
       id: 'orchard-female-gametic',
-      value: EmptyMultiOptObj,
+      value: gameticMethodology
+        ? gameticMethodology.filter((data) => data.code === orchardStepData.femaleGameticMthdCode)[0]
+        : EmptyMultiOptObj,
       isInvalid: false
     },
     maleGametic: {
       id: 'orchard-male-gametic',
-      value: EmptyMultiOptObj,
+      value: gameticMethodology
+        ? gameticMethodology.filter((data) => data.code === orchardStepData.maleGameticMthdCode)[0]
+        : EmptyMultiOptObj,
       isInvalid: false
     },
     isControlledCross: {
@@ -245,6 +284,7 @@ export const initParentTreeState = (
       smpMixTrees.forEach(
         (curSmpMix) => {
           const newRow: RowItem = structuredClone(rowTemplate);
+          newRow.rowId = curSmpMix.parentTreeId.toString();
           newRow.parentTreeNumber.value = curSmpMix.parentTreeNumber;
           newRow.isMixTab = true;
           newRow.proportion.value = curSmpMix.proportion.toString();
@@ -274,25 +314,29 @@ export const initParentTreeState = (
 };
 
 export const initExtractionStorageState = (
-  defaultAgency: MultiOptionsObj,
-  defaultCode: string,
-  extractionStepData: ExtractionFormSubmitType
+  defaultExtractAgency: MultiOptionsObj,
+  defaultStorageAgency: MultiOptionsObj,
+  extractionStepData: ExtractionFormSubmitType,
+  defaultExtractLoc?: string,
+  defaultStorageLoc?: string,
+  useTSCExtract = true,
+  useTSCStorage = true
 ): ExtractionStorageForm => (
   {
     extraction: {
       useTSC: {
         id: 'ext-agency-tsc-checkbox',
-        value: true,
+        value: useTSCExtract,
         isInvalid: false
       },
       agency: {
         id: 'ext-agency-combobox',
-        value: defaultAgency,
+        value: defaultExtractAgency,
         isInvalid: false
       },
       locationCode: {
         id: 'ext-location-code',
-        value: defaultCode,
+        value: defaultExtractLoc ?? extractionStepData.extractoryLocnCode,
         isInvalid: false
       },
       startDate: {
@@ -309,17 +353,17 @@ export const initExtractionStorageState = (
     seedStorage: {
       useTSC: {
         id: 'str-agency-tsc-checkbox',
-        value: true,
+        value: useTSCStorage,
         isInvalid: false
       },
       agency: {
         id: 'str-agency-combobox',
-        value: defaultAgency,
+        value: defaultStorageAgency,
         isInvalid: false
       },
       locationCode: {
         id: 'str-location-code',
-        value: defaultCode,
+        value: defaultStorageLoc ?? extractionStepData.storageLocnCode,
         isInvalid: false
       },
       startDate: {

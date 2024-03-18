@@ -244,3 +244,15 @@ export type SeedlotProgressPayloadType = {
   allStepData: AllStepData,
   progressStatus: ProgressIndicatorConfig
 };
+
+export type SeedlotCalculationsResultsType = {
+  traitCode: string,
+  traitValue: number,
+  calculatedValue: number,
+  testedParentTreePerc: number
+}
+
+export type SeedlotAClassFullResponseType = {
+  seedlotData: SeedlotAClassSubmitType,
+  calculatedValues: Array<SeedlotCalculationsResultsType>
+}

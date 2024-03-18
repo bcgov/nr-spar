@@ -130,7 +130,8 @@ const EditableCell = ({
   applicableGenWorths,
   state,
   setStepData,
-  seedlotSpecies
+  seedlotSpecies,
+  readOnly
 }: EditableCellProps) => {
   const headerId = header.id as keyof StrTypeRowItem;
   const ref = useRef<HTMLInputElement>(null);
@@ -167,6 +168,7 @@ const EditableCell = ({
         );
       }}
       invalid={rowData[headerId].isInvalid}
+      readOnly={readOnly}
     />
   );
 
@@ -186,7 +188,8 @@ const renderTableCell = (
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function,
-  seedlotSpecies: MultiOptionsObj
+  seedlotSpecies: MultiOptionsObj,
+  isFormSubmitted: boolean
 ) => {
   const className = header.editable ? 'td-no-padding' : null;
   if (header.id === 'actions') {
@@ -211,6 +214,7 @@ const renderTableCell = (
                 state={state}
                 setStepData={setStepData}
                 seedlotSpecies={seedlotSpecies}
+                readOnly={isFormSubmitted}
               />
             )
             : (
@@ -231,7 +235,8 @@ export const renderTableBody = (
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function,
-  seedlotSpecies: MultiOptionsObj
+  seedlotSpecies: MultiOptionsObj,
+  isFormSubmitted: boolean
 ) => {
   if (currentTab === 'mixTab') {
     return (
@@ -255,7 +260,8 @@ export const renderTableBody = (
                       applicableGenWorths,
                       state,
                       setStepData,
-                      seedlotSpecies
+                      seedlotSpecies,
+                      isFormSubmitted
                     );
                   })
               }
@@ -285,7 +291,8 @@ export const renderTableBody = (
                         applicableGenWorths,
                         state,
                         setStepData,
-                        seedlotSpecies
+                        seedlotSpecies,
+                        isFormSubmitted
                       )
                     ))
                 }

@@ -84,8 +84,8 @@ export const stepMap: StepMap = {
 
 export const tscAgencyObj: MultiOptionsObj = {
   code: '00012797',
-  label: 'Tree Seed Centre',
-  description: '00012797 - Tree Seed Centre - MOF'
+  label: '00012797 - Tree Seed Centre - MOF',
+  description: 'Tree Seed Centre'
 };
 
 export const tscLocationCode = '00';
@@ -113,7 +113,7 @@ export const emptyCollectionStep: CollectionFormSubmitType = {
 export const emptyOwnershipStep: Array<SingleOwnerFormSubmitType> = [{
   ownerClientNumber: '',
   ownerLocnCode: '',
-  originalPctOwned: 0.00,
+  originalPctOwned: 100.00,
   originalPctRsrvd: 100.00,
   originalPctSrpls: 0.00,
   methodOfPaymentCode: '',

@@ -117,7 +117,7 @@ const FormProgress = (
           onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
           disabled={getSeedlotQueryStatus === 'loading'}
         >
-          Edit seedlot form
+          {seedlotStatusCode === 'SUB' ? 'Check your seedlot' : 'Edit seedlot form'}
         </Button>
       </div>
     </div>
