@@ -118,7 +118,14 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const signIn = (signInProvider: LoginProviders): void => {
-    const appEnv = env.VITE_ZONE ?? 'DEV';
+    let appEnv = env.VITE_ZONE ?? 'DEV';
+
+    // Workaround for the Business BCeID in TEST calling actually PROD
+    const applyWorkaround = signInProvider === LoginProviders.BCEID_BUSINESS
+        && appEnv === 'TEST';
+    if (applyWorkaround) {
+      appEnv = 'PROD';
+    }
 
     Auth.federatedSignIn({
       customProvider: `${(appEnv).toLocaleUpperCase()}-${signInProvider.toString()}`
