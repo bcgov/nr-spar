@@ -7,14 +7,13 @@ import {
 import * as Icons from '@carbon/icons-react';
 
 import AuthContext from '../../contexts/AuthContext';
-
 import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
-
 import { useThemePreference } from '../../utils/ThemePreference';
+import LoginProviders from '../../types/LoginProviders';
+import { env } from '../../env';
 
 import './style.scss';
-import LoginProviders from '../../types/LoginProviders';
 
 const accountOptions = [
   {
@@ -35,6 +34,8 @@ const accountOptions = [
 ];
 
 const MyProfile = () => {
+  const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
+
   const { theme, setTheme } = useThemePreference();
   const { user, signOut } = useContext(AuthContext);
 
@@ -117,6 +118,28 @@ const MyProfile = () => {
           >
             Sign out
           </SideNavLink>
+          {
+            appVersion === 'dev'
+              ? (
+                <>
+                  <PanelSectionName title="Dev Zone" light />
+                  <SideNavLink
+                    renderIcon={Icons.Pen}
+                    // eslint-disable-next-line no-console
+                    onClick={() => console.log(user)}
+                  >
+                    Log user object
+                  </SideNavLink>
+                  <SideNavLink
+                    renderIcon={Icons.Copy}
+                    onClick={() => navigator.clipboard.writeText(user?.jwtToken ?? '')}
+                  >
+                    Copy JWT
+                  </SideNavLink>
+                </>
+              )
+              : null
+          }
         </ul>
       </nav>
     </>
