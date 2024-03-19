@@ -1,17 +1,17 @@
-import PathConstants from '../../../routes/pathConstants';
+import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 
 export const getBreadcrumbs = (seedlotNumber: string) => [
   {
     name: 'Seedlots',
-    path: `${PathConstants.SEEDLOTS}`
+    path: `${ROUTES.SEEDLOTS}`
   },
   {
     name: 'My seedlots',
-    path: `${PathConstants.MY_SEEDLOTS}`
+    path: `${ROUTES.MY_SEEDLOTS}`
   },
   {
     name: `Seedlot ${seedlotNumber}`,
-    path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber)}`
+    path: `${addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber)}`
   }
 ];

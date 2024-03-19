@@ -13,7 +13,7 @@ import { ProgressIndicatorConfig } from '../../SeedlotRegFormClassA/definitions'
 import SeedlotRegistrationProgress from '../../../../components/SeedlotRegistrationProgress';
 import NetworkError from '../../../../components/NetworkError';
 import { completeProgressConfig, initialProgressConfig } from '../../SeedlotRegFormClassA/constants';
-import PathConstants from '../../../../routes/pathConstants';
+import ROUTES from '../../../../routes/constants';
 import { addParamToPath } from '../../../../utils/PathUtils';
 import { QueryStatusType } from '../../../../types/QueryStatusType';
 import { SeedlotStatusCode } from '../../../../types/SeedlotType';
@@ -91,7 +91,7 @@ const FormProgress = (
         interactFunction={(e: number) => {
           // Add 1 to the number to make it comply with
           // the step numbers shown to the user
-          navigate(`${addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=${e + 1}`);
+          navigate(`${addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? '')}?step=${e + 1}`);
         }}
       />
     );
@@ -111,9 +111,9 @@ const FormProgress = (
           <Button
             kind="tertiary"
             size="md"
-            className="btn-fp"
+            className="section-btn"
             renderIcon={Edit}
-            onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
+            onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
             disabled={getSeedlotQueryStatus === 'loading'}
           >
             Edit seedlot form

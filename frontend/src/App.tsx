@@ -14,7 +14,7 @@ import Landing from './views/Landing';
 import awsconfig from './aws-exports';
 import AuthContext from './contexts/AuthContext';
 import routes from './routes';
-import PathConstants from './routes/pathConstants';
+import ROUTES from './routes/constants';
 import FourOhFour from './views/FourOhFour';
 import ProtectedRoute from './routes/ProtectedRoute';
 
@@ -34,7 +34,7 @@ const App: React.FC = () => {
 
   const router = createBrowserRouter([
     {
-      path: PathConstants.ROOT,
+      path: ROUTES.ROOT,
       element: <ProtectedRoute />,
       children: [
         {
@@ -44,14 +44,14 @@ const App: React.FC = () => {
       ]
     },
     {
-      path: PathConstants.ALL_ROUTES,
+      path: ROUTES.ALL_ROUTES,
       element: <FourOhFour />
     }
   ]);
 
   const notSignedRouter = createBrowserRouter([
     {
-      path: PathConstants.ALL_ROUTES,
+      path: ROUTES.ALL_ROUTES,
       element: <Landing />
     }
   ]);

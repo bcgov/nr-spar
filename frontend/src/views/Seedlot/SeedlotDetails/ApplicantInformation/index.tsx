@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { SeedlotApplicantType } from '../../../../types/SeedlotType';
 import { addParamToPath } from '../../../../utils/PathUtils';
-import PathConstants from '../../../../routes/pathConstants';
+import ROUTES from '../../../../routes/constants';
 
 import './styles.scss';
 
@@ -160,11 +160,11 @@ const ApplicantInformation = (
           <Button
             kind="tertiary"
             size="md"
-            className="btn-edit"
+            className="section-btn"
             renderIcon={Edit}
-            onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? ''))}
+            onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? ''))}
           >
-            Edit applicant and seedlot
+            Edit applicant
           </Button>
         </Column>
       </Row>

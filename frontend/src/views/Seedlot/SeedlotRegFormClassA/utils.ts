@@ -21,7 +21,7 @@ import {
 } from '../../../types/SeedlotType';
 import { dateStringToISO } from '../../../utils/DateUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
-import PathConstants from '../../../routes/pathConstants';
+import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 
 import { stepMap } from './constants';
@@ -705,14 +705,14 @@ export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptio
 export const getBreadcrumbs = (seedlotNumber: string) => [
   {
     name: 'Seedlots',
-    path: `${PathConstants.SEEDLOTS}`
+    path: `${ROUTES.SEEDLOTS}`
   },
   {
     name: 'My seedlots',
-    path: `${PathConstants.MY_SEEDLOTS}`
+    path: `${ROUTES.MY_SEEDLOTS}`
   },
   {
     name: `Seedlot ${seedlotNumber}`,
-    path: `${addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber)}`
+    path: `${addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber)}`
   }
 ];

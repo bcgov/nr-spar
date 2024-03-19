@@ -39,7 +39,7 @@ import { SeedlotAClassSubmitType, SeedlotProgressPayloadType } from '../../../ty
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
-import PathConstants from '../../../routes/pathConstants';
+import ROUTES from '../../../routes/constants';
 
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
@@ -132,7 +132,7 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
     onError: (err: AxiosError) => {
       if (err.response?.status === 404) {
-        navigate(PathConstants.FOUR_OH_FOUR);
+        navigate(ROUTES.FOUR_OH_FOUR);
       }
     },
     enabled: vegCodeQuery.isFetched,
@@ -392,7 +392,7 @@ const SeedlotRegistrationForm = () => {
     mutationFn: (payload: SeedlotAClassSubmitType) => putAClassSeedlot(seedlotNumber ?? '', payload),
     onSuccess: () => {
       navigate({
-        pathname: addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''),
+        pathname: addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''),
         search: '?isSubmitSuccess=true'
       });
     },
@@ -671,7 +671,7 @@ const SeedlotRegistrationForm = () => {
                         kind="secondary"
                         size="lg"
                         className="form-action-btn"
-                        onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}
+                        onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''))}
                       >
                         Cancel
                       </Button>

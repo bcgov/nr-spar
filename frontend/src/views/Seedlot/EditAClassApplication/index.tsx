@@ -23,7 +23,7 @@ import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
-import PathConstants from '../../../routes/pathConstants';
+import ROUTES from '../../../routes/constants';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
@@ -65,7 +65,7 @@ const EditAClassApplication = () => {
       seedlotQuery.status === 'error'
       && (seedlotQuery.error as AxiosError).response?.status === 404
     ) {
-      navigate(PathConstants.FOUR_OH_FOUR);
+      navigate(ROUTES.FOUR_OH_FOUR);
     }
   }, [seedlotQuery.status]);
 
@@ -108,7 +108,7 @@ const EditAClassApplication = () => {
     mutationFn: (
       payload: SeedlotPatchPayloadType
     ) => patchSeedlotApplicationInfo(seedlotNumber ?? '', payload),
-    onSuccess: () => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? '')),
+    onSuccess: () => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? '')),
     onError: (err: AxiosError) => {
       toast.error(
         <ErrorToast
