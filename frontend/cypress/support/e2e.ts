@@ -109,5 +109,15 @@ beforeEach(() => {
     }
   ).as('GET_client_mof');
 
-  // TODO: Mock seedlot sources call /api/seedlot-sources, use fixture
+  cy.intercept(
+    {
+      method: 'GET',
+      url: '**/api/seedlot-sources'
+    },
+    {
+      statusCode: 200,
+      fixture: 'seedlot-source.json'
+    }
+  ).as('GET_seedlot_source_by_63001');
+
 });
