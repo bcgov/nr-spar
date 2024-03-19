@@ -10,7 +10,8 @@ export default defineConfig({
     viewportHeight: 720,
     experimentalWebKitSupport: true,
     env: {
-      loginUrl: 'https://logontest7.gov.bc.ca'
+      idirLoginUrl: 'https://logontest7.gov.bc.ca',
+      businessBceIdLoginUrl: 'https://logon7.gov.bc.ca'
     },
     specPattern: [
       '**/login-page.cy.ts',
