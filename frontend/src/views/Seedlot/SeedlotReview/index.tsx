@@ -1,11 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import {
+  Button,
+  FlexGrid,
+  Row,
+  Column
+} from '@carbon/react';
+import { Edit, Save } from '@carbon/icons-react';
 
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
+import Breadcrumbs from '../../../components/Breadcrumbs';
+import PageTitle from '../../../components/PageTitle';
+import RowGap from '../../../components/RowGap';
+
+import { getBreadcrumbs } from './utils';
+
+import './styles.scss';
 
 const SeedlotReview = () => {
   const navigate = useNavigate();
@@ -38,12 +52,101 @@ const SeedlotReview = () => {
     }
   }, [seedlotQuery.status]);
 
+  // True if in view mode, false in edit mode.
+  const [isViewMode, setIsViewMode] = useState(true);
+
   return (
-    <div>
-      haha
-      {' '}
-      {seedlotNumber}
-    </div>
+    <FlexGrid className="seedlot-review-grid">
+      <Button
+        kind="secondary"
+        size="md"
+        className="edit-save-btn"
+        renderIcon={isViewMode ? Edit : Save}
+        onClick={() => setIsViewMode(!isViewMode)}
+      >
+        {isViewMode ? 'Edit seedlot' : 'Save edit'}
+      </Button>
+
+      <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber ?? '')} />
+      <Row>
+        <PageTitle
+          title={`Review Seedlot ${seedlotQuery.data?.id}`}
+          subtitle={`${seedlotQuery.data?.seedlotStatus.description} status`}
+        />
+      </Row>
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Applicant and seedlot</div>
+        </Column>
+      </Row>
+
+      <RowGap />
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Collection</div>
+        </Column>
+      </Row>
+
+      <RowGap />
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Area of use</div>
+        </Column>
+      </Row>
+
+      <RowGap />
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Ownership</div>
+        </Column>
+      </Row>
+
+      <RowGap />
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Interim storage</div>
+        </Column>
+      </Row>
+
+      <RowGap />
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Orchard</div>
+        </Column>
+      </Row>
+
+      <RowGap />
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Parent tree and SMP</div>
+        </Column>
+      </Row>
+
+      <RowGap />
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Extraction and storage information</div>
+        </Column>
+      </Row>
+
+      <RowGap />
+
+      <Row className="section-row">
+        <Column>
+          <div className="section-title">Audit history</div>
+        </Column>
+      </Row>
+
+      <RowGap gapSize={4} />
+    </FlexGrid>
   );
 };
 

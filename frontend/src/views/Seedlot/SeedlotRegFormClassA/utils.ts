@@ -705,11 +705,11 @@ export const getSeedlotSubmitErrDescription = (err: AxiosError): ErrorDescriptio
 export const getBreadcrumbs = (seedlotNumber: string) => [
   {
     name: 'Seedlots',
-    path: `${ROUTES.SEEDLOTS}`
+    path: ROUTES.SEEDLOTS
   },
   {
     name: 'My seedlots',
-    path: `${ROUTES.MY_SEEDLOTS}`
+    path: ROUTES.MY_SEEDLOTS
   },
   {
     name: `Seedlot ${seedlotNumber}`,
