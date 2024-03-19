@@ -192,7 +192,7 @@ const SeedlotDetails = () => {
                   applicant={applicantData}
                   isFetching={forestClientQuery?.isFetching}
                 />
-                <TscReviewSection />
+                <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
               </TabPanel>
             </TabPanels>
           </Tabs>

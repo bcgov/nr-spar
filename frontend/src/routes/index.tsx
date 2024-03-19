@@ -12,8 +12,9 @@ import MySeedlots from '../views/Seedlot/MySeedlots';
 import SeedlotCreatedFeedback from '../views/Seedlot/SeedlotCreatedFeedback';
 import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotRegistrationForm from '../views/Seedlot/SeedlotRegFormClassA';
+import SeedlotReview from '../views/Seedlot/SeedlotReview';
 
-const routes: Array<RouteObject> = [
+const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
   // dashboard, when user is logged in
   {
@@ -78,8 +79,11 @@ const routes: Array<RouteObject> = [
     )
   },
   {
-    path: ROUTES.SEEDLOT_A_CLASS_REVIEW
+    path: ROUTES.SEEDLOT_A_CLASS_REVIEW,
+    element: (
+      <SeedlotReview />
+    )
   }
 ];
 
-export default routes;
+export default BrowserRoutes;

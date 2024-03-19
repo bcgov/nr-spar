@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom/client';
 import { ClassPrefix } from '@carbon/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { isAxiosError } from 'axios';
+
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemePreference } from './utils/ThemePreference';
@@ -22,13 +24,28 @@ if (isDevEnv) {
   makeServer('development');
 }
 
+const HTTP_STATUS_TO_NOT_RETRY = [400, 401, 403, 404];
+const MAX_RETRIES = 3;
+
 const queryClient = new QueryClient(
   {
     defaultOptions: {
       queries: {
         refetchOnMount: false,
         refetchOnWindowFocus: false,
-        retry: 3
+        // Do not retry on errors defined above
+        retry: (failureCount, error) => {
+          if (failureCount > MAX_RETRIES) {
+            return false;
+          }
+          if (
+            isAxiosError(error)
+            && HTTP_STATUS_TO_NOT_RETRY.includes(error.response?.status ?? 0)
+          ) {
+            return false;
+          }
+          return true;
+        }
       }
     }
   }

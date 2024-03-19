@@ -41,6 +41,8 @@ const SeedlotReview = () => {
   return (
     <div>
       haha
+      {' '}
+      {seedlotNumber}
     </div>
   );
 };

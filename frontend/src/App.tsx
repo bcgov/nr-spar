@@ -13,7 +13,7 @@ import Landing from './views/Landing';
 
 import awsconfig from './aws-exports';
 import AuthContext from './contexts/AuthContext';
-import routes from './routes';
+import BrowserRoutes from './routes';
 import ROUTES from './routes/constants';
 import FourOhFour from './views/FourOhFour';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -32,14 +32,14 @@ const App: React.FC = () => {
     isCurrentAuthUser(window.location.pathname);
   }, []);
 
-  const router = createBrowserRouter([
+  const signedRouter = createBrowserRouter([
     {
       path: ROUTES.ROOT,
       element: <ProtectedRoute />,
       children: [
         {
           element: <Layout />,
-          children: routes
+          children: BrowserRoutes
         }
       ]
     },
@@ -59,7 +59,7 @@ const App: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <RouterProvider router={signed ? router : notSignedRouter} />
+      <RouterProvider router={signed ? signedRouter : notSignedRouter} />
     </>
   );
 };
