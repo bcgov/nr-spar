@@ -31,5 +31,32 @@ describe('Seedlot Main page test', () => {
       .should('have.text', seedlotMainPageData.secondSectionSubtitle);
   });
 
-  // TODO: Check if 4 seedlots are being rendered at the bottom
+  it('should Check if 4 seedlots are being rendered at the bottom', () => {
+    cy.get('table.bx--data-table')
+      .should('be.visible')
+    
+    cy.get('table.bx--data-table tbody tr')
+      .eq(0)
+      .find('td')
+      .first()
+      .should('have.text', '63001');
+
+    cy.get('table.bx--data-table tbody tr')
+      .eq(1)
+      .find('td')
+      .first()
+      .should('have.text', '63032');
+
+    cy.get('table.bx--data-table tbody tr')
+      .eq(2)
+      .find('td')
+      .first()
+      .should('have.text', '63001');
+
+    cy.get('table.bx--data-table tbody tr')
+      .eq(3)
+      .find('td')
+      .first()
+      .should('have.text', '63012');
+  });
 });
