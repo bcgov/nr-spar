@@ -1,13 +1,13 @@
 @use '@carbon/type';
 
 .seedlot-review-grid {
-  .section-title {
-    @include type.type-style('heading-03');
-    margin-bottom: 2rem;
-  }
+  .section-title-row {
+    padding-top: 2.5rem;
 
-  .section-row {
-    padding: 2.5rem 0;
+    .section-title {
+      @include type.type-style('heading-03');
+      margin-bottom: 2rem;
+    }
   }
 
   .edit-save-btn {

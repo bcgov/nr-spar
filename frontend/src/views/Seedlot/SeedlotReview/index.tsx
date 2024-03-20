@@ -20,6 +20,7 @@ import RowGap from '../../../components/RowGap';
 import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
+import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
 
 const SeedlotReview = () => {
   const navigate = useNavigate();
@@ -75,15 +76,29 @@ const SeedlotReview = () => {
         />
       </Row>
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Applicant and seedlot</div>
+        </Column>
+      </Row>
+      <Row className="section-row">
+        <Column>
+          {
+            isViewMode
+              ? null
+              : (
+                <LotApplicantAndInfoForm
+                  isSeedlot
+                  isEdit={false}
+                />
+              )
+          }
         </Column>
       </Row>
 
       <RowGap />
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Collection</div>
         </Column>
@@ -91,7 +106,7 @@ const SeedlotReview = () => {
 
       <RowGap />
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Area of use</div>
         </Column>
@@ -99,7 +114,7 @@ const SeedlotReview = () => {
 
       <RowGap />
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Ownership</div>
         </Column>
@@ -107,7 +122,7 @@ const SeedlotReview = () => {
 
       <RowGap />
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Interim storage</div>
         </Column>
@@ -115,7 +130,7 @@ const SeedlotReview = () => {
 
       <RowGap />
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Orchard</div>
         </Column>
@@ -123,7 +138,7 @@ const SeedlotReview = () => {
 
       <RowGap />
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Parent tree and SMP</div>
         </Column>
@@ -131,7 +146,7 @@ const SeedlotReview = () => {
 
       <RowGap />
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Extraction and storage information</div>
         </Column>
@@ -139,7 +154,7 @@ const SeedlotReview = () => {
 
       <RowGap />
 
-      <Row className="section-row">
+      <Row className="section-title-row">
         <Column>
           <div className="section-title">Audit history</div>
         </Column>
