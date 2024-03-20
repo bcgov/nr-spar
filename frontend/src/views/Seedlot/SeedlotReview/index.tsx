@@ -16,11 +16,12 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import PageTitle from '../../../components/PageTitle';
 import RowGap from '../../../components/RowGap';
+import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
+import ApplicantAndSeedlotRead from '../../../components/ApplicantAndSeedlot/Read';
 
 import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
-import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
 
 const SeedlotReview = () => {
   const navigate = useNavigate();
@@ -77,15 +78,15 @@ const SeedlotReview = () => {
       </Row>
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Applicant and seedlot</div>
+        <Column className="section-title-col">
+          Applicant and seedlot
         </Column>
       </Row>
       <Row className="section-row">
         <Column>
           {
             isReadMode
-              ? null
+              ? <ApplicantAndSeedlotRead />
               : (
                 <LotApplicantAndInfoForm
                   isSeedlot
@@ -99,64 +100,64 @@ const SeedlotReview = () => {
       <RowGap />
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Collection</div>
+        <Column className="section-title-col">
+          Collection
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Area of use</div>
+        <Column className="section-title-col">
+          Area of use
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Ownership</div>
+        <Column className="section-title-col">
+          Ownership
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Interim storage</div>
+        <Column className="section-title-col">
+          Interim storage
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Orchard</div>
+        <Column className="section-title-col">
+          Orchard
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Parent tree and SMP</div>
+        <Column className="section-title-col">
+          Parent tree and SMP
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Extraction and storage information</div>
+        <Column className="section-title-col">
+          Extraction and storage information
         </Column>
       </Row>
 
       <RowGap />
 
       <Row className="section-title-row">
-        <Column>
-          <div className="section-title">Audit history</div>
+        <Column className="section-title-col">
+          Audit history
         </Column>
       </Row>
 
