@@ -133,5 +133,6 @@ export type EditableCellProps = {
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
   setStepData: Function,
-  seedlotSpecies: MultiOptionsObj
+  seedlotSpecies: MultiOptionsObj,
+  readOnly: boolean
 };
