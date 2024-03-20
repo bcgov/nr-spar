@@ -9,18 +9,16 @@ describe('Applicant and seedlot information page', () => {
     cy.visit('/seedlots/details/63001');
     cy.url().should('contains', '/seedlots/details/63001');
 
-    // TODO: Click on Edit applicant and seedlot button
+    // Click on Edit applicant and seedlot button
     cy.get('.applicant-seedlot-information')
       .find('.btn-edit')
       .should('have.text', 'Edit applicant and seedlot')
       .click();
 
-    // TODO: Verify it's at the edit-a-class-application/{seedlot_number} page
+    // Verify it's at the edit-a-class-application/{seedlot_number} page
     cy.url().should('contains', '/seedlots/edit-a-class-application/63001');
 
-    // TODO: Verify if information are displayed correctly
-
-    // TODO: Change some entries
+    // Change some entries
     cy.get('#edit-seedlot-email')
       .clear()
       .type('test@gmail.com');
@@ -35,10 +33,10 @@ describe('Applicant and seedlot information page', () => {
       .should('be.visible')
       .click({ force: true });
 
-    // TODO: Save edit
+    // Save edit
     cy.get('.submit-button').click();
 
-    // TODO: Intercept PATCH /api/seedlots/{seedlot_number}/application-info call
+    // Intercept PATCH /api/seedlots/{seedlot_number}/application-info call
     cy.intercept(
       {
         method: 'PATCH',
@@ -50,7 +48,7 @@ describe('Applicant and seedlot information page', () => {
       }
     ).as('PATCH_applicant_info_change_63001');
 
-    // TODO: Intercept GET /api/seedlots/{seedlot_number} call, to reflect updated data
+    // Intercept GET /api/seedlots/{seedlot_number} call, to reflect updated data
     cy.intercept(
       {
         method: 'GET',
@@ -62,10 +60,10 @@ describe('Applicant and seedlot information page', () => {
       }
     ).as('GET_applicant_info_change_63001');
 
-    // TODO: Verify it's redirected to seedlot detail
+    // Verify it's redirected to seedlot detail
     cy.url().should('contains', '/seedlots/details/63001');
 
-    // TODO: Verify the stuff you changed are being displayed
+    // Verify the stuff you changed are being displayed
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-email')
       .should('have.value', 'test@gmail.com');
