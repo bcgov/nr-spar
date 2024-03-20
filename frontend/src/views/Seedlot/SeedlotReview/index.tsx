@@ -54,7 +54,7 @@ const SeedlotReview = () => {
   }, [seedlotQuery.status]);
 
   // True if in view mode, false in edit mode.
-  const [isViewMode, setIsViewMode] = useState(true);
+  const [isReadMode, setIsReadMode] = useState(true);
 
   return (
     <FlexGrid className="seedlot-review-grid">
@@ -62,10 +62,10 @@ const SeedlotReview = () => {
         kind="secondary"
         size="md"
         className="edit-save-btn"
-        renderIcon={isViewMode ? Edit : Save}
-        onClick={() => setIsViewMode(!isViewMode)}
+        renderIcon={isReadMode ? Edit : Save}
+        onClick={() => setIsReadMode(!isReadMode)}
       >
-        {isViewMode ? 'Edit seedlot' : 'Save edit'}
+        {isReadMode ? 'Edit seedlot' : 'Save edit'}
       </Button>
 
       <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber ?? '')} />
@@ -84,7 +84,7 @@ const SeedlotReview = () => {
       <Row className="section-row">
         <Column>
           {
-            isViewMode
+            isReadMode
               ? null
               : (
                 <LotApplicantAndInfoForm
