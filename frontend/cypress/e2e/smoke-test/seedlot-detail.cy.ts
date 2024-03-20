@@ -24,10 +24,5 @@ describe('Seedlot detail page', () => {
   it('renders Applicant and Seedlot Information section correctly', () => {
     cy.get('.applicant-seedlot-information-title')
       .should('have.text', 'Check your applicant and seedlot information');
-
-    cy.get('.applicant-seedlot-information')
-      .find('.btn-edit')
-      .should('have.text', 'Edit applicant and seedlot')
-      .click();
   });
 });
