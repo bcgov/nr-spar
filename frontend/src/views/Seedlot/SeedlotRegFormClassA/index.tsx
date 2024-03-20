@@ -47,8 +47,10 @@ import { addParamToPath } from '../../../utils/PathUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import ROUTES from '../../../routes/constants';
 
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
+
 import SaveTooltipLabel from './SaveTooltip';
-import ClassAContext from '../SeedlotContextClassA/ClassAContext';
+import ClassAContext from './ClassAContext';
 import RegForm from './RegForm';
 import {
   AllStepData, ProgressIndicatorConfig,
@@ -56,6 +58,12 @@ import {
 } from './definitions';
 import {
   initProgressBar,
+  initCollectionState,
+  initInterimState,
+  initOrchardState,
+  initOwnershipState,
+  initExtractionStorageState,
+  initParentTreeState,
   getSpeciesOptionByCode,
   validateCollectionStep,
   verifyCollectionStepCompleteness,
@@ -78,13 +86,12 @@ import {
   convertParentTree,
   getSeedlotSubmitErrDescription,
   getBreadcrumbs,
-  convertSmpParentTree,
-  initEmptySteps,
-  refillStateData
+  convertSmpParentTree
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE,
-  initialProgressConfig, smartSaveText, stepMap
+  emptyCollectionStep, emptyOwnershipStep, emptyInterimStep, emptyOrchardStep,
+  initialProgressConfig, smartSaveText, stepMap, tscAgencyObj, emptyExtractionStep, tscLocationCode
 } from './constants';
 
 import './styles.scss';
@@ -112,6 +119,21 @@ const SeedlotRegistrationForm = () => {
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [saveDescription, setSaveDescription] = useState<string>('Save changes');
   const numOfEdit = useRef(0);
+
+  const initEmptySteps = () => ({
+    collectionStep: initCollectionState(EmptyMultiOptObj, emptyCollectionStep),
+    ownershipStep: initOwnershipState(EmptyMultiOptObj, emptyOwnershipStep, true),
+    interimStep: initInterimState(EmptyMultiOptObj, emptyInterimStep),
+    orchardStep: initOrchardState(emptyOrchardStep),
+    parentTreeStep: initParentTreeState(),
+    extractionStorageStep: initExtractionStorageState(
+      tscAgencyObj,
+      tscAgencyObj,
+      emptyExtractionStep,
+      tscLocationCode,
+      tscLocationCode
+    )
+  });
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -152,12 +174,12 @@ const SeedlotRegistrationForm = () => {
     }
   }, [seedlotQuery.isFetched]);
 
-  const seedlotFullFormQuery = useQuery({
+  const getAllSeeedlotInfoQuery = useQuery({
     queryKey: ['seedlot-full-form', seedlotNumber],
     queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? ''),
     onError: (err: AxiosError) => {
       if (err.response?.status === 404) {
-        navigate(ROUTES.FOUR_OH_FOUR);
+        navigate(PathConstants.FOUR_OH_FOUR);
       }
     },
     enabled: isFormSubmitted,
@@ -226,7 +248,7 @@ const SeedlotRegistrationForm = () => {
     queries: clientNumbers.map((client) => ({
       queryKey: ['forest-clients', client],
       queryFn: () => getForestClientByNumber(client),
-      enabled: seedlotFullFormQuery.isFetched,
+      enabled: getAllSeeedlotInfoQuery.isFetched,
       staleTime: THREE_HOURS,
       cacheTime: THREE_HALF_HOURS
     }))
@@ -291,7 +313,7 @@ const SeedlotRegistrationForm = () => {
   };
 
   useEffect(() => {
-    if (seedlotFullFormQuery.status === 'success') {
+    if (getAllSeeedlotInfoQuery.status === 'success') {
       const clonedStatus = structuredClone(progressStatus);
       const stepNames = Object.keys(clonedStatus) as Array<keyof ProgressIndicatorConfig>;
       stepNames.forEach((step) => {
@@ -299,7 +321,7 @@ const SeedlotRegistrationForm = () => {
       });
       setProgressStatus(clonedStatus);
     }
-  }, [seedlotFullFormQuery.isFetched]);
+  }, [getAllSeeedlotInfoQuery.isFetched]);
 
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
     const newData = { ...allStepData };
@@ -326,8 +348,8 @@ const SeedlotRegistrationForm = () => {
   // This useEffect fetchs all data regarding agencies on the
   // form steps
   useEffect(() => {
-    if (seedlotFullFormQuery.status === 'success') {
-      const { seedlotData } = seedlotFullFormQuery.data;
+    if (getAllSeeedlotInfoQuery.status === 'success') {
+      const { seedlotData } = getAllSeeedlotInfoQuery.data;
       const clientNumbersArray: string[] = [];
       clientNumbersArray.push(seedlotData.seedlotFormCollectionDto.collectionClientNumber);
       clientNumbersArray.push(seedlotData.seedlotFormInterimDto.intermStrgClientNumber);
@@ -338,13 +360,13 @@ const SeedlotRegistrationForm = () => {
       clientNumbersArray.push(seedlotData.seedlotFormExtractionDto.storageClientNumber);
       setClientNumbers(clientNumbersArray);
     }
-  }, [seedlotFullFormQuery.isFetched]);
+  }, [getAllSeeedlotInfoQuery.isFetched]);
 
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
     queryFn: getFundingSources,
     select: (data) => getMultiOptList(data),
-    enabled: seedlotFullFormQuery.status === 'success',
+    enabled: getAllSeeedlotInfoQuery.status === 'success',
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -353,7 +375,7 @@ const SeedlotRegistrationForm = () => {
     queryKey: ['methods-of-payment'],
     queryFn: getMethodsOfPayment,
     select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
-    enabled: seedlotFullFormQuery.status === 'success',
+    enabled: getAllSeeedlotInfoQuery.status === 'success',
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -362,7 +384,7 @@ const SeedlotRegistrationForm = () => {
     queryKey: ['gametic-methodologies'],
     queryFn: getGameticMethodology,
     select: (data) => getMultiOptList(data, true, false, true, ['isFemaleMethodology', 'isPliSpecies']),
-    enabled: seedlotFullFormQuery.status === 'success',
+    enabled: getAllSeeedlotInfoQuery.status === 'success',
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -375,29 +397,74 @@ const SeedlotRegistrationForm = () => {
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
     queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
-    enabled: seedlotFullFormQuery.status === 'success'
+    enabled: getAllSeeedlotInfoQuery.status === 'success'
   });
 
   useEffect(() => {
-    if (seedlotFullFormQuery.status === 'success'
-      && fundingSourcesQuery.status === 'success'
-      && methodsOfPaymentQuery.status === 'success'
-      && gameticMethodologyQuery.status === 'success'
-      && orchardQuery.status === 'success') {
-      const fullFormData = seedlotFullFormQuery.data.seedlotData;
+    if (getAllSeeedlotInfoQuery.status === 'success'
+        && fundingSourcesQuery.status === 'success'
+        && methodsOfPaymentQuery.status === 'success'
+        && gameticMethodologyQuery.status === 'success'
+        && orchardQuery.status === 'success') {
+      const { seedlotData } = getAllSeeedlotInfoQuery.data;
       const defaultAgencyNumber = seedlotQuery.data?.applicantClientNumber;
-      setAllStepData(
-        refillStateData(
-          fullFormData,
-          defaultAgencyNumber,
+      setAllStepData({
+        collectionStep: initCollectionState(
+          {
+            code: seedlotData.seedlotFormCollectionDto.collectionClientNumber,
+            description: '',
+            label: seedlotData.seedlotFormCollectionDto.collectionClientNumber
+          },
+          seedlotData.seedlotFormCollectionDto,
+          seedlotData.seedlotFormCollectionDto.collectionClientNumber === defaultAgencyNumber
+        ),
+        ownershipStep: initOwnershipState(
+          EmptyMultiOptObj,
+          seedlotData.seedlotFormOwnershipDtoList,
+          false,
           methodsOfPaymentQuery.data,
           fundingSourcesQuery.data,
+          defaultAgencyNumber
+        ),
+        interimStep: initInterimState(
+          {
+            code: seedlotData.seedlotFormInterimDto.intermStrgClientNumber,
+            description: '',
+            label: seedlotData.seedlotFormInterimDto.intermStrgClientNumber
+          },
+          seedlotData.seedlotFormInterimDto,
+          // eslint-disable-next-line max-len
+          seedlotData.seedlotFormInterimDto.intermStrgClientNumber === seedlotData.seedlotFormCollectionDto.collectionClientNumber
+        ),
+        orchardStep: initOrchardState(
+          seedlotData.seedlotFormOrchardDto,
           orchardQuery.data,
           gameticMethodologyQuery.data
+        ),
+        parentTreeStep: initParentTreeState(
+          seedlotData.seedlotFormParentTreeDtoList,
+          seedlotData.seedlotFormParentTreeSmpDtoList
+        ),
+        extractionStorageStep: initExtractionStorageState(
+          {
+            code: seedlotData.seedlotFormExtractionDto.extractoryClientNumber,
+            description: '',
+            label: seedlotData.seedlotFormExtractionDto.extractoryClientNumber
+          },
+          {
+            code: seedlotData.seedlotFormExtractionDto.storageClientNumber,
+            description: '',
+            label: seedlotData.seedlotFormExtractionDto.storageClientNumber
+          },
+          seedlotData.seedlotFormExtractionDto,
+          '',
+          '',
+          seedlotData.seedlotFormExtractionDto.extractoryClientNumber === tscAgencyObj.code,
+          seedlotData.seedlotFormExtractionDto.storageClientNumber === tscAgencyObj.code
         )
-      );
-    } else if (seedlotFullFormQuery.status === 'error') {
-      const error = seedlotFullFormQuery.error as AxiosError;
+      });
+    } else if (getAllSeeedlotInfoQuery.status === 'error') {
+      const error = getAllSeeedlotInfoQuery.error as AxiosError;
       if (error.response?.status !== 404) {
         // eslint-disable-next-line no-alert
         alert(`Error retrieving seedlot data! ${error.message}`);
@@ -405,8 +472,8 @@ const SeedlotRegistrationForm = () => {
       }
     }
   }, [
-    seedlotFullFormQuery.status,
-    seedlotFullFormQuery.isFetched,
+    getAllSeeedlotInfoQuery.status,
+    getAllSeeedlotInfoQuery.isFetched,
     fundingSourcesQuery.isFetched,
     methodsOfPaymentQuery.isFetched,
     gameticMethodologyQuery.isFetched,
@@ -779,7 +846,7 @@ const SeedlotRegistrationForm = () => {
                   || forestClientQuery.isFetching
                   || applicantAgencyQuery.isFetching
                   || getFormDraftQuery.isFetching
-                  || seedlotFullFormQuery.isFetching
+                  || getAllSeeedlotInfoQuery.isFetching
                   || submitSeedlot.isLoading
                 )
                   ? <Loading />

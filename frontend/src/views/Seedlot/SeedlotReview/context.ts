@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { createContext } from 'react';
-import { SeedlotAClassSubmitType } from '../../../types/SeedlotType';
+import { SeedlotType } from '../../../types/SeedlotType';
 
 const SeedlotReviewContext = createContext({
-  formData: {} as SeedlotAClassSubmitType | undefined
+  seedlotData: {} as SeedlotType
 });
 
 export default SeedlotReviewContext;

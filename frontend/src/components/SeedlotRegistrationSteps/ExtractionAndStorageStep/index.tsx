@@ -13,7 +13,7 @@ import {
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import ClassAContext from '../../../views/Seedlot/SeedlotContextClassA/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 

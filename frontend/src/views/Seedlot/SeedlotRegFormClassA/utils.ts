@@ -20,19 +20,15 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import {
   CollectionFormSubmitType, ExtractionFormSubmitType, InterimFormSubmitType,
-  OrchardFormSubmitType, ParentTreeFormSubmitType, SeedlotAClassSubmitType, SingleOwnerFormSubmitType
+  OrchardFormSubmitType, ParentTreeFormSubmitType, SingleOwnerFormSubmitType
 } from '../../../types/SeedlotType';
 import { dateStringToISO } from '../../../utils/DateUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 
+import { stepMap } from './constants';
 import {
-  emptyCollectionStep, emptyExtractionStep, emptyInterimStep,
-  emptyOrchardStep, emptyOwnershipStep, stepMap, tscAgencyObj, tscLocationCode
-} from './constants';
-import {
-  AllStepData,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
 
@@ -56,7 +52,7 @@ export const initCollectionState = (
   defaultAgency: MultiOptionsObj,
   collectionStepData: CollectionFormSubmitType,
   useDefaultAgency = true
-): CollectionForm => ({
+):CollectionForm => ({
   useDefaultAgencyInfo: {
     id: 'collection-use-default-agency',
     value: useDefaultAgency,
@@ -828,83 +824,3 @@ export const getBreadcrumbs = (seedlotNumber: string) => [
     path: `${addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber)}`
   }
 ];
-
-export const initEmptySteps = () => ({
-  collectionStep: initCollectionState(EmptyMultiOptObj, emptyCollectionStep),
-  ownershipStep: initOwnershipState(EmptyMultiOptObj, emptyOwnershipStep, true),
-  interimStep: initInterimState(EmptyMultiOptObj, emptyInterimStep),
-  orchardStep: initOrchardState(emptyOrchardStep),
-  parentTreeStep: initParentTreeState(),
-  extractionStorageStep: initExtractionStorageState(
-    tscAgencyObj,
-    tscAgencyObj,
-    emptyExtractionStep,
-    tscLocationCode,
-    tscLocationCode
-  )
-});
-
-export const refillStateData = (
-  fullFormData: SeedlotAClassSubmitType,
-  defaultAgencyNumber: string | undefined,
-  methodsOfPaymentData: MultiOptionsObj[],
-  fundingSourcesData: MultiOptionsObj[],
-  orchardQueryData: MultiOptionsObj[],
-  gameticMethodologyData: MultiOptionsObj[]
-): AllStepData => (
-  {
-    collectionStep: initCollectionState(
-      {
-        code: fullFormData.seedlotFormCollectionDto.collectionClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormCollectionDto.collectionClientNumber
-      },
-      fullFormData.seedlotFormCollectionDto,
-      fullFormData.seedlotFormCollectionDto.collectionClientNumber === defaultAgencyNumber
-    ),
-    ownershipStep: initOwnershipState(
-      EmptyMultiOptObj,
-      fullFormData.seedlotFormOwnershipDtoList,
-      false,
-      methodsOfPaymentData,
-      fundingSourcesData,
-      defaultAgencyNumber
-    ),
-    interimStep: initInterimState(
-      {
-        code: fullFormData.seedlotFormInterimDto.intermStrgClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormInterimDto.intermStrgClientNumber
-      },
-      fullFormData.seedlotFormInterimDto,
-      // eslint-disable-next-line max-len
-      fullFormData.seedlotFormInterimDto.intermStrgClientNumber === fullFormData.seedlotFormCollectionDto.collectionClientNumber
-    ),
-    orchardStep: initOrchardState(
-      fullFormData.seedlotFormOrchardDto,
-      orchardQueryData,
-      gameticMethodologyData
-    ),
-    parentTreeStep: initParentTreeState(
-      fullFormData.seedlotFormParentTreeDtoList,
-      fullFormData.seedlotFormParentTreeSmpDtoList
-    ),
-    extractionStorageStep: initExtractionStorageState(
-      {
-        code: fullFormData.seedlotFormExtractionDto.extractoryClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormExtractionDto.extractoryClientNumber
-      },
-      {
-        code: fullFormData.seedlotFormExtractionDto.storageClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormExtractionDto.storageClientNumber
-      },
-      fullFormData.seedlotFormExtractionDto,
-      '',
-      '',
-      fullFormData.seedlotFormExtractionDto.extractoryClientNumber === tscAgencyObj.code,
-      fullFormData.seedlotFormExtractionDto.storageClientNumber === tscAgencyObj.code
-    )
-  }
-);

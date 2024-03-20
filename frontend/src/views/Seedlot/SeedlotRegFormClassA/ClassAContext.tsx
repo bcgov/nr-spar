@@ -4,7 +4,7 @@ import { createContext } from 'react';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
-import { AllStepData } from '../SeedlotRegFormClassA/definitions';
+import { AllStepData } from './definitions';
 
 const ClassAContext = createContext({
   allStepData: {} as AllStepData,
