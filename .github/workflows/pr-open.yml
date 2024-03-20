@@ -25,7 +25,7 @@ jobs:
         env:
           DOMAIN: apps.silver.devops.gov.bc.ca
           PREFIX: ${{ github.event.repository.name }}-${{ steps.tag.outputs.tag }}
-        uses: bcgov-nr/action-pr-description-add@v1.1.0
+        uses: bcgov-nr/action-pr-description-add@v1.1.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           add_markdown: |
@@ -79,7 +79,7 @@ jobs:
             triggers: ('oracle-api/')
     steps:
       - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.1
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
         with:
           package: ${{ matrix.package }}
           tag: ${{ needs.init.outputs.tag }}
@@ -164,7 +164,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Cypress CI
-        uses: bcgov-nr/action-test-and-analyse@v1.1.0
+        uses: bcgov-nr/action-test-and-analyse@v1.1.1
         with:
           node_version: "18"
           commands: |

@@ -22,13 +22,15 @@ describe('Login page test', () => {
   });
 
   it('should navigate to the IDIR login page', () => {
+    const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID' ?
+          Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
     cy.visit('/');
     cy.getByDataTest('landing-button__idir').click();
     cy.url().then((url) => {
       if (url.includes('.gov.bc.ca')) {
         cy.get('#idirLogo', { timeout: 5000 }).should('be.visible');
       } else {
-        cy.origin(Cypress.env('loginUrl'), { args: { timeout: FIVE_SECONDS } }, ({ timeout }) => {
+        cy.origin(loginUrl, { args: { timeout: FIVE_SECONDS } }, ({ timeout }) => {
           cy.get('#idirLogo', { timeout }).should('be.visible');
         });
       }
@@ -36,13 +38,15 @@ describe('Login page test', () => {
   });
 
   it('should navigate to the BCeID login page', () => {
+    const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID' ?
+          Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
     cy.visit('/');
     cy.getByDataTest('landing-button__bceid').click();
     cy.url().then((url) => {
       if (url.includes('.gov.bc.ca')) {
         cy.get('#bceidLogo', { timeout: 5000 }).should('be.visible');
       } else {
-        cy.origin(Cypress.env('loginUrl'), { args: { timeout: FIVE_SECONDS } }, ({ timeout }) => {
+        cy.origin(loginUrl, { args: { timeout: FIVE_SECONDS } }, ({ timeout }) => {
           cy.get('#bceidLogo', { timeout }).should('be.visible');
         });
       }
