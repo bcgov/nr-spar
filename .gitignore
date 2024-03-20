@@ -126,5 +126,5 @@ test-report.xml
 **/.venv
 
 # Data
-app/data/
+sync/data/
 **/__pycache__

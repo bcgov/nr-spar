@@ -9,38 +9,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  python:
-    name: Python
-    env:
-      PIP_DISABLE_PIP_VERSION_CHECK: 1
-      PYTHONUNBUFFERED: 1
-      PYTHONDONTWRITEBYTECODE: 1
+  # https://github.com/bcgov-nr/action-builder-ghcr
+  builds:
+    name: Builds
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        id: builds
         with:
-          python-version: '3.10'
-          cache: 'pip'
-      - working-directory: app
-        run: pip install -r ./requirements.txt
-      - working-directory: app/src/
-        run: python main.py || echo "App failing!"
+          keep_versions: 50
+          package: sync
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          triggers: ('sync/')
 
-  oc:
-    name: OpenShift
-    runs-on: ubuntu-22.04
+  deploys:
+    name: Deploys
+    needs: [builds]
+    runs-on: ubuntu-latest
     steps:
-      - name: Execute OC Test
-        run: |
-          oc version
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ secrets.OC_NAMESPACE }} # Safeguard!
-          oc whoami
+      - name: Deploys
+        uses: bcgov-nr/action-deployer-openshift@v2.1.0
+        with:
+          file: sync/openshift.deploy.yml
+          oc_namespace: ${{ secrets.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          overwrite: true
+          parameters:
+            -p ZONE=${{ github.event.number }} -p PROMOTE=bcgov/nr-spar-data/sync:${{ github.event.number }}
+          triggers: ('sync/')
 
   results:
     name: PR Results
-    needs: [python, oc]
+    needs: [deploys]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
