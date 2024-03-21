@@ -6,15 +6,15 @@ RUN apt update && \
 
 # Disable cache dir, disable upgrade message, create .venv in project dir
 ARG PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    POETRY_VIRTUALENVS_IN_PROJECT=1
+    PIP_DISABLE_PIP_VERSION_CHECK=on
 
 # Copy files and install requirements
 WORKDIR /app
-COPY . .
+COPY requirements.txt .
 RUN pip install -r ./requirements.txt
 
 # Start the app
-USER 1001
 WORKDIR /app/src
+COPY src .
+USER 1001
 CMD python3 main.py
