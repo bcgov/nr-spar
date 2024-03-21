@@ -4,5 +4,6 @@
   .#{vars.$bcgov-prefix}--text-input {
     padding: 0;
     border: none;
+    text-overflow: ellipsis;
   }
 }

@@ -1,6 +1,7 @@
 @use '@carbon/type';
 
 .seedlot-review-grid {
+
   .section-title-row {
     padding-top: 2.5rem;
 
@@ -17,17 +18,20 @@
   }
 
   .sub-section-grid {
-    padding: 0;
+    padding: 0 0 2.5rem 0;
   }
 
   .sub-section-title-col {
     @include type.type-style('heading-02');
-    margin-bottom: 2rem;
   }
 
   .section-title {
     h2 {
       @include type.type-style('heading-02');
     }
+  }
+
+  .info-col {
+    padding-top: 2rem;
   }
 }

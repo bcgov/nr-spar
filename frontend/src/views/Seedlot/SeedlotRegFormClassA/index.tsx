@@ -707,6 +707,7 @@ const SeedlotRegistrationForm = ({ children }: props) => {
   const contextData = useMemo(
     () => (
       {
+        seedlotData: seedlotQuery.data,
         seedlotNumber,
         allStepData,
         setStepData,
