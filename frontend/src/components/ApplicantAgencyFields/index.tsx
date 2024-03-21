@@ -15,6 +15,7 @@ import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { FilterObj, filterInput } from '../../utils/FilterUtils';
+import { getForestClientLabel } from '../../utils/ForestClientUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
 import supportTexts from './constants';
@@ -256,7 +257,7 @@ const ApplicantAgencyFields = ({
                     applySelectedClient={(client: ForestClientSearchType) => {
                       const agencyObj: MultiOptionsObj = {
                         code: client.clientNumber,
-                        label: `${client.clientNumber} - ${client.clientName} - ${client.acronym}`,
+                        label: getForestClientLabel(client),
                         description: client.clientName
                       };
 
