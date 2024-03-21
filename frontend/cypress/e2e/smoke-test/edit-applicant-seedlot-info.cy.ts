@@ -33,9 +33,6 @@ describe('Applicant and seedlot information page', () => {
       .should('be.visible')
       .click({ force: true });
 
-    // Save edit
-    cy.get('.submit-button').click();
-
     // Intercept PATCH /api/seedlots/{seedlot_number}/application-info call
     cy.intercept(
       {
@@ -59,6 +56,9 @@ describe('Applicant and seedlot information page', () => {
         fixture: 'applicant-info-change.json'
       }
     ).as('GET_applicant_info_change_63001');
+
+    // Save edit
+    cy.get('.submit-button').click();
 
     // Verify it's redirected to seedlot detail
     cy.url().should('contains', '/seedlots/details/63001');
