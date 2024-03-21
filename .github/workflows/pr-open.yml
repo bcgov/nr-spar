@@ -104,8 +104,6 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p MIN_REPLICAS=1
-              -p MAX_REPLICAS=1
               -p BUILD=snapshot-${{ needs.init.outputs.tag }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "actuator/health"
@@ -118,8 +116,6 @@ jobs:
             parameters:
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ needs.init.outputs.tag }}
               -p VITE_NRSPARWEBAPP_VERSION=dev
-              -p MIN_REPLICAS=1
-              -p MAX_REPLICAS=1
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
           - name: oracle-api
@@ -127,8 +123,6 @@ jobs:
             overwrite: true
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ needs.init.outputs.tag }}
-              -p MIN_REPLICAS=1
-              -p MAX_REPLICAS=1
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('common/' 'oracle-api/')
             verification_path: "actuator/health"
@@ -142,8 +136,10 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
-            -p ZONE=${{ needs.init.outputs.tag }}
+            -p MIN_REPLICAS=1
+            -p MAX_REPLICAS=2
             -p NAME=${{ github.event.repository.name }}
+            -p ZONE=${{ needs.init.outputs.tag }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path}}
