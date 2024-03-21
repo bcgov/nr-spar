@@ -22,6 +22,7 @@ import ApplicantAndSeedlotRead from '../../../components/ApplicantAndSeedlot/Rea
 import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
+import SeedlotRegistrationForm from '../SeedlotRegFormClassA';
 
 const SeedlotReview = () => {
   const navigate = useNavigate();
@@ -58,111 +59,113 @@ const SeedlotReview = () => {
   const [isReadMode, setIsReadMode] = useState(true);
 
   return (
-    <FlexGrid className="seedlot-review-grid">
-      <Button
-        kind="secondary"
-        size="md"
-        className="edit-save-btn"
-        renderIcon={isReadMode ? Edit : Save}
-        onClick={() => setIsReadMode(!isReadMode)}
-      >
-        {isReadMode ? 'Edit seedlot' : 'Save edit'}
-      </Button>
+    <SeedlotRegistrationForm>
+      <FlexGrid className="seedlot-review-grid">
+        <Button
+          kind="secondary"
+          size="md"
+          className="edit-save-btn"
+          renderIcon={isReadMode ? Edit : Save}
+          onClick={() => setIsReadMode(!isReadMode)}
+        >
+          {isReadMode ? 'Edit seedlot' : 'Save edit'}
+        </Button>
 
-      <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber ?? '')} />
-      <Row>
-        <PageTitle
-          title={`Review Seedlot ${seedlotQuery.data?.id}`}
-          subtitle={`${seedlotQuery.data?.seedlotStatus.description} status`}
-        />
-      </Row>
+        <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber ?? '')} />
+        <Row>
+          <PageTitle
+            title={`Review Seedlot ${seedlotQuery.data?.id}`}
+            subtitle={`${seedlotQuery.data?.seedlotStatus.description} status`}
+          />
+        </Row>
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Applicant and seedlot
-        </Column>
-      </Row>
-      <Row className="section-row">
-        <Column>
-          {
-            isReadMode
-              ? <ApplicantAndSeedlotRead />
-              : (
-                <LotApplicantAndInfoForm
-                  isSeedlot
-                  isEdit={false}
-                />
-              )
-          }
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Applicant and seedlot
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            {
+              isReadMode
+                ? <ApplicantAndSeedlotRead />
+                : (
+                  <LotApplicantAndInfoForm
+                    isSeedlot
+                    isEdit={false}
+                  />
+                )
+            }
+          </Column>
+        </Row>
 
-      <RowGap />
+        <RowGap />
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Collection
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Collection
+          </Column>
+        </Row>
 
-      <RowGap />
+        <RowGap />
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Area of use
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Area of use
+          </Column>
+        </Row>
 
-      <RowGap />
+        <RowGap />
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Ownership
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Ownership
+          </Column>
+        </Row>
 
-      <RowGap />
+        <RowGap />
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Interim storage
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Interim storage
+          </Column>
+        </Row>
 
-      <RowGap />
+        <RowGap />
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Orchard
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Orchard
+          </Column>
+        </Row>
 
-      <RowGap />
+        <RowGap />
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Parent tree and SMP
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Parent tree and SMP
+          </Column>
+        </Row>
 
-      <RowGap />
+        <RowGap />
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Extraction and storage information
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Extraction and storage information
+          </Column>
+        </Row>
 
-      <RowGap />
+        <RowGap />
 
-      <Row className="section-title-row">
-        <Column className="section-title-col">
-          Audit history
-        </Column>
-      </Row>
+        <Row className="section-title-row">
+          <Column className="section-title-col">
+            Audit history
+          </Column>
+        </Row>
 
-      <RowGap gapSize={4} />
-    </FlexGrid>
+        <RowGap gapSize={4} />
+      </FlexGrid>
+    </SeedlotRegistrationForm>
   );
 };
 
