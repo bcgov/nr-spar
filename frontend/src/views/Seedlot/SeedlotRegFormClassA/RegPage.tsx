@@ -14,20 +14,21 @@ import { ArrowRight } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import Breadcrumbs from '../../../components/Breadcrumbs';
-import { getBreadcrumbs, getSeedlotSubmitErrDescription } from './utils';
+import { getBreadcrumbs, getSeedlotSubmitErrDescription } from '../ContextContainerClassA/utils';
 import PageTitle from '../../../components/PageTitle';
 import SaveTooltipLabel from './SaveTooltip';
 import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
 import RegForm from './RegForm';
 import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
-import ClassAContext from './ClassAContext';
+import ClassAContext from '../ContextContainerClassA/context';
 import { addParamToPath } from '../../../utils/PathUtils';
 import ROUTES from '../../../routes/constants';
-import { smartSaveText } from './constants';
+import { smartSaveText } from '../ContextContainerClassA/constants';
 
 const RegPage = () => {
   const navigate = useNavigate();
   const {
+    allStepData,
     seedlotNumber,
     setStep,
     handleSaveBtn,
@@ -216,7 +217,7 @@ const RegPage = () => {
                       renderIconName="CheckmarkOutline"
                       disableBtn={!allStepCompleted}
                       submitFn={() => {
-                        submitSeedlot.mutate(getSeedlotPayload());
+                        submitSeedlot.mutate(getSeedlotPayload(allStepData, seedlotNumber));
                       }}
                     />
                   )

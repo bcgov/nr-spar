@@ -29,7 +29,7 @@ import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import Subtitle from '../../Subtitle';
-import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 
 import { OrchardForm, OrchardObj } from './definitions';
 import { initialStagedOrchard, MAX_ORCHARDS, orchardStepText } from './constants';

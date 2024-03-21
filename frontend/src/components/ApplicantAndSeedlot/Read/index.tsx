@@ -3,7 +3,7 @@ import { Column, Row, FlexGrid } from '@carbon/react';
 
 import Divider from '../../Divider';
 import ReadOnlyInput from '../../ReadOnlyInput';
-import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import EmailDisplay from '../../EmailDisplay';
 
 const ApplicantAndSeedlotRead = () => {

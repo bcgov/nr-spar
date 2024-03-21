@@ -33,7 +33,10 @@ type ContextType = {
   submitSeedlot: UseMutationResult<
     AxiosResponse<any, any>, unknown, SeedlotAClassSubmitType, unknown
   >,
-  getSeedlotPayload: () => SeedlotAClassSubmitType,
+  getSeedlotPayload: (
+    allStepData: AllStepData,
+    seedlotNumber: string | undefined
+  ) => SeedlotAClassSubmitType,
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => void,
   saveProgressStatus: MutationStatusType,
   isFetchingData: boolean

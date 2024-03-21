@@ -19,9 +19,9 @@ import PageTitle from '../../../components/PageTitle';
 import RowGap from '../../../components/RowGap';
 import ApplicantAndSeedlotRead from '../../../components/ApplicantAndSeedlot/Read';
 import ApplicantAndSeedlotEdit from '../../../components/ApplicantAndSeedlot/Edit';
-import ClassAContext from '../SeedlotRegFormClassA/ClassAContext';
+import ClassAContext from '../ContextContainerClassA/context';
 
-import SeedlotRegistrationForm from '../SeedlotRegFormClassA';
+import ContextContainerClassA from '../ContextContainerClassA';
 
 import { getBreadcrumbs } from './utils';
 
@@ -68,7 +68,7 @@ const SeedlotReview = () => {
   }
 
   return (
-    <SeedlotRegistrationForm>
+    <ContextContainerClassA>
       <FlexGrid className="seedlot-review-grid">
         <Button
           kind="secondary"
@@ -169,7 +169,7 @@ const SeedlotReview = () => {
 
         <RowGap gapSize={4} />
       </FlexGrid>
-    </SeedlotRegistrationForm>
+    </ContextContainerClassA>
   );
 };
 

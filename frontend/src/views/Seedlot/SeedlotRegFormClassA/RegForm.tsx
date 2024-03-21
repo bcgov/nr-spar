@@ -7,9 +7,9 @@ import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardSte
 import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
 
-import ClassAContext from './ClassAContext';
-import { RegFormProps } from './definitions';
-import { tscAgencyObj, tscLocationCode } from './constants';
+import ClassAContext from '../ContextContainerClassA/context';
+import { RegFormProps } from '../ContextContainerClassA/definitions';
+import { tscAgencyObj, tscLocationCode } from '../ContextContainerClassA/constants';
 
 const RegForm = (
   {
