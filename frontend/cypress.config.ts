@@ -17,7 +17,9 @@ export default defineConfig({
       '**/login-page.cy.ts',
       '**/dashboard-page.cy.ts',
       '**/seedlot-main-page.cy.ts',
-      '**/create-a-class-seedlot.cy.ts'
+      '**/create-a-class-seedlot.cy.ts',
+      '**/seedlot-detail.cy.ts',
+      '**/edit-applicant-seedlot-info.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
