@@ -1,0 +1,17 @@
+[
+  {
+      "code": "UPT",
+      "description": "Untested Parent Trees",
+      "isDefault": null
+  },
+  {
+      "code": "CUS",
+      "description": "Custom Seedlot",
+      "isDefault": null
+  },
+  {
+      "code": "TPT",
+      "description": "Tested Parent Trees",
+      "isDefault": true
+  }
+]
