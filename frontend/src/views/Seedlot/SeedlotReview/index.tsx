@@ -20,6 +20,8 @@ import RowGap from '../../../components/RowGap';
 import ApplicantAndSeedlotRead from '../../../components/ApplicantAndSeedlot/Read';
 import ApplicantAndSeedlotEdit from '../../../components/ApplicantAndSeedlot/Edit';
 import ClassAContext from '../ContextContainerClassA/context';
+import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
+import { InitialSeedlotFormData } from '../CreateAClass/constants';
 
 import ContextContainerClassA from '../ContextContainerClassA';
 
@@ -67,6 +69,20 @@ const SeedlotReview = () => {
     return (<Loading />);
   }
 
+  /**
+   * Applicant info data, form data should be accessed through context.
+   */
+  const [
+    applicantData,
+    setApplicantData
+  ] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
+
+  const handleEditSaveBtn = () => {
+    // eslint-disable-next-line no-console
+    console.log(applicantData);
+    setIsReadMode(!isReadMode);
+  };
+
   return (
     <ContextContainerClassA>
       <FlexGrid className="seedlot-review-grid">
@@ -75,7 +91,7 @@ const SeedlotReview = () => {
           size="md"
           className="edit-save-btn"
           renderIcon={isReadMode ? Edit : Save}
-          onClick={() => setIsReadMode(!isReadMode)}
+          onClick={handleEditSaveBtn}
         >
           {isReadMode ? 'Edit seedlot' : 'Save edit'}
         </Button>
@@ -98,7 +114,12 @@ const SeedlotReview = () => {
             {
               isReadMode
                 ? <ApplicantAndSeedlotRead />
-                : <ApplicantAndSeedlotEdit />
+                : (
+                  <ApplicantAndSeedlotEdit
+                    applicantData={applicantData}
+                    setApplicantData={setApplicantData}
+                  />
+                )
             }
           </Column>
         </Row>

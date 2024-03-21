@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { SeedlotApplicantType } from '../../../../types/SeedlotType';
 import { addParamToPath } from '../../../../utils/PathUtils';
 import ROUTES from '../../../../routes/constants';
+import EmailDisplay from '../../../../components/EmailDisplay';
 
 import './styles.scss';
 
@@ -22,11 +23,6 @@ interface ApplicantSeedlotInformationProps {
 const ApplicantInformation = (
   { seedlotNumber, applicant, isFetching }: ApplicantSeedlotInformationProps
 ) => {
-  const triggerMailTo = () => {
-    if (applicant?.email) {
-      window.location.href = `mailto: ${applicant.email}`;
-    }
-  };
   const navigate = useNavigate();
 
   return (
@@ -76,14 +72,9 @@ const ApplicantInformation = (
             isFetching
               ? <TextInputSkeleton />
               : (
-                <TextInput
-                  title=""
-                  className="spar-display-only-input email-input"
-                  readOnly
-                  id="seedlot-applicant-email"
-                  labelText="Email address"
+                <EmailDisplay
                   value={applicant?.email ?? ''}
-                  onClick={() => triggerMailTo()}
+                  label="Email address"
                 />
               )
           }
