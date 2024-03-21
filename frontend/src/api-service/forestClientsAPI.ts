@@ -10,7 +10,7 @@ export const getForestClientLocation = (clientNumber: string, locationCode: stri
   return api.get(url).then((res) => res.data);
 };
 
-export const getForestClientByNumber = (clientNumber?: string) => {
+export const getForestClientByNumber = (clientNumber: string) => {
   const url = `${ApiConfig.forestClient}/${clientNumber}`;
   return api.get(url).then((res): ForestClientType => res.data);
 };

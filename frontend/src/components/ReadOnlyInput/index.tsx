@@ -1,7 +1,7 @@
 import React from 'react';
 
 import './styles.scss';
-import { TextInput } from '@carbon/react';
+import { TextInput, TextInputSkeleton } from '@carbon/react';
 
 type props = {
   id: string,
@@ -9,6 +9,7 @@ type props = {
   value: string,
   helperText?: string,
   hideLabel?: boolean
+  showSkeleton?: boolean
 }
 
 /**
@@ -16,18 +17,22 @@ type props = {
  */
 const ReadOnlyInput = (
   {
-    id, label, value, helperText, hideLabel
+    id, label, value, helperText, hideLabel, showSkeleton
   }: props
 ) => (
-  <TextInput
-    id={id}
-    className="read-only-text-input"
-    readOnly
-    helperText={helperText}
-    labelText={label}
-    hideLabel={hideLabel}
-    value={value}
-  />
+  showSkeleton
+    ? <TextInputSkeleton />
+    : (
+      <TextInput
+        id={id}
+        className="read-only-text-input"
+        readOnly
+        helperText={helperText}
+        labelText={label}
+        hideLabel={hideLabel}
+        value={value}
+      />
+    )
 );
 
 export default ReadOnlyInput;

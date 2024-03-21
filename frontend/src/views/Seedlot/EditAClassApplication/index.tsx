@@ -74,8 +74,8 @@ const EditAClassApplication = ({ isReview }: props) => {
   }, [seedlotQuery.status]);
 
   const forestClientQuery = useQuery({
-    queryKey: ['forest-clients', seedlotQuery.data?.applicantClientNumber],
-    queryFn: () => getForestClientByNumber(seedlotQuery.data?.applicantClientNumber),
+    queryKey: ['forest-clients', seedlotQuery.data!.applicantClientNumber],
+    queryFn: () => getForestClientByNumber(seedlotQuery.data!.applicantClientNumber),
     enabled: seedlotQuery.isFetched,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS

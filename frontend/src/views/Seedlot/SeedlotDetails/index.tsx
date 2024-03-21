@@ -102,10 +102,12 @@ const SeedlotDetails = () => {
     }
   }, [seedlotQuery.isFetched, seedlotQuery.isFetchedAfterMount]);
 
+  const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
+
   const forestClientQuery = useQuery({
-    queryKey: ['forest-clients', seedlotQuery.data?.applicantClientNumber],
-    queryFn: () => getForestClientByNumber(seedlotQuery.data?.applicantClientNumber),
-    enabled: seedlotQuery.isFetched,
+    queryKey: ['forest-clients', applicantClientNumber],
+    queryFn: () => getForestClientByNumber(applicantClientNumber!),
+    enabled: !!applicantClientNumber,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });

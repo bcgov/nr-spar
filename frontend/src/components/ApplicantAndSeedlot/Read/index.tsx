@@ -4,10 +4,11 @@ import { Column, Row, FlexGrid } from '@carbon/react';
 import Divider from '../../Divider';
 import ReadOnlyInput from '../../ReadOnlyInput';
 import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import EmailDisplay from '../../EmailDisplay';
 
 const ApplicantAndSeedlotRead = () => {
   const {
-    defaultAgencyObj, defaultCode, seedlotData, seedlotSpecies
+    defaultAgencyObj, defaultCode, seedlotData, seedlotSpecies, isFetchingData
   } = useContext(ClassAContext);
 
   return (
@@ -23,6 +24,7 @@ const ApplicantAndSeedlotRead = () => {
             id="applicant-and-seedlot-agency-name"
             label="Agency name"
             value={defaultAgencyObj.label}
+            showSkeleton={isFetchingData}
           />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
@@ -30,13 +32,13 @@ const ApplicantAndSeedlotRead = () => {
             id="applicant-and-seedlot-agency-loc-code"
             label="Agency location code"
             value={defaultCode}
+            showSkeleton={isFetchingData}
           />
         </Column>
       </Row>
       <Row>
         <Column className="info-col">
-          <ReadOnlyInput
-            id="applicant-and-seedlot-email"
+          <EmailDisplay
             label="Email address"
             value={seedlotData?.applicantEmailAddress ?? ''}
           />
@@ -56,6 +58,7 @@ const ApplicantAndSeedlotRead = () => {
             id="applicant-and-seedlot-species"
             label="Seedlot species"
             value={seedlotSpecies.label}
+            showSkeleton={isFetchingData}
           />
         </Column>
       </Row>
@@ -65,6 +68,7 @@ const ApplicantAndSeedlotRead = () => {
             id="applicant-and-seedlot-a-class-source"
             label="Specify A-class source"
             value={seedlotData?.seedlotSource.description ?? ''}
+            showSkeleton={isFetchingData}
           />
         </Column>
       </Row>
@@ -74,6 +78,7 @@ const ApplicantAndSeedlotRead = () => {
             id="applicant-and-seedlot-to-be-reg-tsc"
             label="To be registered at the Tree Seed Centre?"
             value={seedlotData?.intendedForCrownLand ? 'Yes' : 'No'}
+            showSkeleton={isFetchingData}
           />
         </Column>
       </Row>
@@ -83,6 +88,7 @@ const ApplicantAndSeedlotRead = () => {
             id="applicant-and-seedlot-collected-within-bc"
             label="Collected from a location within B.C.?"
             value={seedlotData?.sourceInBc ? 'Yes' : 'No'}
+            showSkeleton={isFetchingData}
           />
         </Column>
       </Row>
