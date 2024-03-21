@@ -1,4 +1,5 @@
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { emptyOwnershipStep } from '../../../views/Seedlot/SeedlotRegFormClassA/constants';
 import { inputText, createOwnerTemplate } from './constants';
 
 import {
@@ -22,7 +23,7 @@ export const insertOwnerForm = (
 ) => {
   const clonedArray = structuredClone(ownershipArray);
   const newId = getNextId(ownershipArray);
-  const newOwnerForm = createOwnerTemplate(newId);
+  const newOwnerForm = createOwnerTemplate(newId, emptyOwnershipStep[0]);
 
   const defaultPayment = methodsOfPayment.filter((method) => method.isDefault)[0] ?? null;
   newOwnerForm.methodOfPayment.value = defaultPayment;

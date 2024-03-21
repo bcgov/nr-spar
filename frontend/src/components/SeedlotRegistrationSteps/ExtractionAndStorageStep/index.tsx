@@ -27,7 +27,6 @@ import {
 import './styles.scss';
 
 interface ExtractionAndStorageProps {
-  readOnly?: boolean,
   defaultAgency: MultiOptionsObj
   defaultCode: string
 }
@@ -35,14 +34,14 @@ interface ExtractionAndStorageProps {
 const ExtractionAndStorage = (
   {
     defaultAgency,
-    defaultCode,
-    readOnly
+    defaultCode
   }: ExtractionAndStorageProps
 ) => {
   const {
     allStepData: { extractionStorageStep: state },
     setStepData,
-    agencyOptions
+    agencyOptions,
+    isFormSubmitted
   } = useContext(ClassAContext);
 
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
@@ -116,7 +115,8 @@ const ExtractionAndStorage = (
           agency: OptionsInputType,
           locationCode: StringInputType
         ) => setAgencyAndCode(isDefault, agency, locationCode, 'extraction')}
-        readOnly={readOnly}
+        readOnly={isFormSubmitted}
+        isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
       />
       <Row className="extraction-date-row">
@@ -129,7 +129,7 @@ const ExtractionAndStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'extraction', selectedDate);
             }}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <DatePickerInput
               id={state.extraction.startDate.id}
@@ -152,7 +152,7 @@ const ExtractionAndStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'extraction', selectedDate);
             }}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <DatePickerInput
               id={state.extraction.endDate.id}
@@ -167,7 +167,7 @@ const ExtractionAndStorage = (
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.extraction.useTSC.value && !readOnly && isExtractorHintOpen && (
+          {state.extraction.useTSC.value && !isFormSubmitted && isExtractorHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"
@@ -199,7 +199,8 @@ const ExtractionAndStorage = (
           agency: OptionsInputType,
           locationCode: StringInputType
         ) => setAgencyAndCode(isDefault, agency, locationCode, 'seedStorage')}
-        readOnly={readOnly}
+        readOnly={isFormSubmitted}
+        isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
       />
       <Row className="storage-date-row">
@@ -212,7 +213,7 @@ const ExtractionAndStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'seedStorage', selectedDate);
             }}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <DatePickerInput
               id={state.seedStorage.startDate.id}
@@ -235,7 +236,7 @@ const ExtractionAndStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'seedStorage', selectedDate);
             }}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <DatePickerInput
               id={state.seedStorage.endDate.id}
@@ -250,7 +251,7 @@ const ExtractionAndStorage = (
           </DatePicker>
         </Column>
         <Column sm={4} md={8} lg={16} xlg={12}>
-          {state.seedStorage.useTSC.value && !readOnly && isStorageHintOpen && (
+          {state.seedStorage.useTSC.value && !isFormSubmitted && isStorageHintOpen && (
             <InlineNotification
               lowContrast
               kind="info"

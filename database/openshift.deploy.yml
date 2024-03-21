@@ -37,6 +37,10 @@ parameters:
     displayName: Database Volume Capacity
     required: true
     value: 256Mi
+  - name: MIN_REPLICAS
+    description: Dummy value for workflow convenience
+  - name: MAX_REPLICAS
+    description: Dummy value for workflow convenience
 objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
