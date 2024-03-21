@@ -5,18 +5,6 @@ import {
   useNavigate, useParams, useSearchParams, useLocation
 } from 'react-router-dom';
 import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
-import {
-  FlexGrid,
-  Row,
-  Column,
-  Button,
-  Loading,
-  Grid,
-  InlineNotification,
-  InlineLoading,
-  ActionableNotification
-} from '@carbon/react';
-import { ArrowRight } from '@carbon/icons-react';
 import { AxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
@@ -35,10 +23,6 @@ import {
   TEN_SECONDS, THREE_HALF_HOURS, THREE_HOURS, FIVE_SECONDS
 } from '../../../config/TimeUnits';
 
-import PageTitle from '../../../components/PageTitle';
-import Breadcrumbs from '../../../components/Breadcrumbs';
-import SeedlotRegistrationProgress from '../../../components/SeedlotRegistrationProgress';
-import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModal';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
@@ -49,9 +33,7 @@ import ROUTES from '../../../routes/constants';
 
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 
-import SaveTooltipLabel from './SaveTooltip';
 import ClassAContext from './ClassAContext';
-import RegForm from './RegForm';
 import {
   AllStepData, ProgressIndicatorConfig,
   ProgressStepStatus
@@ -84,8 +66,6 @@ import {
   convertOrchard,
   convertOwnership,
   convertParentTree,
-  getSeedlotSubmitErrDescription,
-  getBreadcrumbs,
   convertSmpParentTree
 } from './utils';
 import {
@@ -96,7 +76,11 @@ import {
 
 import './styles.scss';
 
-const SeedlotRegistrationForm = () => {
+type props = {
+  children: React.ReactNode
+}
+
+const SeedlotRegistrationForm = ({ children }: props) => {
   const navigate = useNavigate();
   const { seedlotNumber } = useParams();
   const [searchParams] = useSearchParams();
@@ -179,7 +163,7 @@ const SeedlotRegistrationForm = () => {
     queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? ''),
     onError: (err: AxiosError) => {
       if (err.response?.status === 404) {
-        navigate(PathConstants.FOUR_OH_FOUR);
+        navigate(ROUTES.FOUR_OH_FOUR);
       }
     },
     enabled: isFormSubmitted,
@@ -402,10 +386,10 @@ const SeedlotRegistrationForm = () => {
 
   useEffect(() => {
     if (getAllSeeedlotInfoQuery.status === 'success'
-        && fundingSourcesQuery.status === 'success'
-        && methodsOfPaymentQuery.status === 'success'
-        && gameticMethodologyQuery.status === 'success'
-        && orchardQuery.status === 'success') {
+      && fundingSourcesQuery.status === 'success'
+      && methodsOfPaymentQuery.status === 'success'
+      && gameticMethodologyQuery.status === 'success'
+      && orchardQuery.status === 'success') {
       const { seedlotData } = getAllSeeedlotInfoQuery.data;
       const defaultAgencyNumber = seedlotQuery.data?.applicantClientNumber;
       setAllStepData({
@@ -541,29 +525,6 @@ const SeedlotRegistrationForm = () => {
     window.history.replaceState(null, '', `?step=${newStep + 1}`);
     setFormStep(newStep);
   };
-
-  const contextData = useMemo(
-    () => (
-      {
-        allStepData,
-        setStepData,
-        seedlotSpecies: getSpeciesOptionByCode(
-          seedlotQuery.data?.vegetationCode,
-          vegCodeQuery.data
-        ),
-        formStep,
-        setStep,
-        defaultAgencyObj: getAgencyObj(),
-        defaultCode: getDefaultLocationCode(),
-        agencyOptions: applicantAgencyQuery.data ?? [],
-        isFormSubmitted
-      }),
-    [
-      allStepData, setStepData, seedlotQuery.status,
-      vegCodeQuery.status, formStep, forestClientQuery.status,
-      applicantAgencyQuery.status, isFormSubmitted
-    ]
-  );
 
   const cleanParentTables = () => {
     const clonedState = { ...allStepData };
@@ -743,195 +704,47 @@ const SeedlotRegistrationForm = () => {
     }
   }, [getFormDraftQuery.status, getFormDraftQuery.isFetchedAfterMount, forestClientQuery.status]);
 
+  const contextData = useMemo(
+    () => (
+      {
+        seedlotNumber,
+        allStepData,
+        setStepData,
+        seedlotSpecies: getSpeciesOptionByCode(
+          seedlotQuery.data?.vegetationCode,
+          vegCodeQuery.data
+        ),
+        formStep,
+        setStep,
+        defaultAgencyObj: getAgencyObj(),
+        defaultCode: getDefaultLocationCode(),
+        agencyOptions: applicantAgencyQuery.data ?? [],
+        isFormSubmitted,
+        isFormIncomplete,
+        handleSaveBtn,
+        saveStatus,
+        saveDescription,
+        lastSaveTimestamp,
+        allStepCompleted,
+        progressStatus,
+        cleanParentTables,
+        submitSeedlot,
+        getSeedlotPayload,
+        updateProgressStatus,
+        saveProgressStatus: saveProgress.status
+      }),
+    [
+      seedlotNumber, allStepData, seedlotQuery.status,
+      vegCodeQuery.status, formStep, forestClientQuery.status,
+      applicantAgencyQuery.status, isFormSubmitted, isFormIncomplete,
+      saveStatus, saveDescription, lastSaveTimestamp, allStepCompleted,
+      progressStatus, submitSeedlot, saveProgress.status
+    ]
+  );
+
   return (
     <ClassAContext.Provider value={contextData}>
-      <div className="seedlot-registration-page">
-        <FlexGrid fullWidth>
-          <Row>
-            <Column className="seedlot-registration-breadcrumb">
-              <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
-            </Column>
-          </Row>
-          <Row>
-            <Column className="seedlot-registration-title">
-              <PageTitle
-                title="Seedlot Registration"
-                subtitle={(
-                  <div className="seedlot-form-subtitle">
-                    <span>
-                      {`Seedlot ${seedlotNumber}`}
-                    </span>
-                    {
-                      isFormIncomplete
-                        ? (
-                          <>
-                            <span>
-                              &nbsp;
-                              -
-                              &nbsp;
-                            </span>
-                            <SaveTooltipLabel
-                              handleSaveBtn={handleSaveBtn}
-                              saveStatus={saveStatus}
-                              saveDescription={saveDescription}
-                              mutationStatus={saveProgress.status}
-                              lastSaveTimestamp={lastSaveTimestamp}
-                            />
-                          </>
-                        )
-                        : null
-                    }
-                  </div>
-                )}
-              />
-            </Column>
-          </Row>
-          <Row>
-            <Column className="seedlot-registration-progress">
-              <SeedlotRegistrationProgress
-                progressStatus={progressStatus}
-                interactFunction={(e: number) => {
-                  updateProgressStatus(e, formStep);
-                  setStep((e - formStep));
-                }}
-              />
-            </Column>
-          </Row>
-          {
-            submitSeedlot.isError
-              ? (
-                <Row>
-                  <Column>
-                    <InlineNotification
-                      lowContrast
-                      kind="error"
-                      title={
-                        getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError)).title
-                      }
-                      subtitle={
-                        getSeedlotSubmitErrDescription((submitSeedlot.error as AxiosError))
-                          .description
-                      }
-                    />
-                  </Column>
-                </Row>
-              )
-              : null
-          }
-          {
-            saveProgress.isError
-              ? (
-                <Row>
-                  <Column>
-                    <ActionableNotification
-                      className="save-error-actionable-notification"
-                      lowContrast
-                      kind="error"
-                      title={`${smartSaveText.error}:\u00A0`}
-                      subtitle={smartSaveText.suggestion}
-                      actionButtonLabel={smartSaveText.idle}
-                      onActionButtonClick={() => handleSaveBtn()}
-                    />
-                  </Column>
-                </Row>
-              )
-              : null
-          }
-          <Row>
-            <Column className="seedlot-registration-row">
-              {
-                (
-                  vegCodeQuery.isFetching
-                  || seedlotQuery.isFetching
-                  || forestClientQuery.isFetching
-                  || applicantAgencyQuery.isFetching
-                  || getFormDraftQuery.isFetching
-                  || getAllSeeedlotInfoQuery.isFetching
-                  || submitSeedlot.isLoading
-                )
-                  ? <Loading />
-                  : (
-                    <RegForm
-                      cleanParentTables={cleanParentTables}
-                    />
-                  )
-              }
-            </Column>
-          </Row>
-          <Row className="seedlot-registration-button-row">
-            <Grid narrow>
-              <Column sm={4} md={3} lg={3} xlg={4}>
-                {
-                  formStep !== 0
-                    ? (
-                      <Button
-                        kind="secondary"
-                        size="lg"
-                        className="form-action-btn"
-                        onClick={() => setStep(-1)}
-                      >
-                        Back
-                      </Button>
-                    )
-                    : (
-                      <Button
-                        kind="secondary"
-                        size="lg"
-                        className="form-action-btn"
-                        onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''))}
-                      >
-                        Cancel
-                      </Button>
-                    )
-                }
-              </Column>
-              {
-                isFormIncomplete
-                  ? (
-                    <Column sm={4} md={3} lg={3} xlg={4}>
-                      <Button
-                        kind="secondary"
-                        size="lg"
-                        className="form-action-btn"
-                        onClick={() => handleSaveBtn()}
-                        disabled={saveProgress.isLoading}
-                      >
-                        <InlineLoading status={saveStatus} description={saveDescription} />
-                      </Button>
-                    </Column>
-                  )
-                  : null
-              }
-              <Column sm={4} md={3} lg={3} xlg={4}>
-                {
-                  formStep !== 5
-                    ? (
-                      <Button
-                        kind="primary"
-                        size="lg"
-                        className="form-action-btn"
-                        onClick={() => setStep(1)}
-                        renderIcon={ArrowRight}
-                      >
-                        Next
-                      </Button>
-                    )
-                    : (
-                      <SubmitModal
-                        btnText="Submit Registration"
-                        renderIconName="CheckmarkOutline"
-                        disableBtn={!allStepCompleted}
-                        submitFn={() => {
-                          submitSeedlot.mutate(getSeedlotPayload());
-                        }}
-                      />
-                    )
-                }
-              </Column>
-            </Grid>
-          </Row>
-        </FlexGrid>
-      </div>
+      {children}
     </ClassAContext.Provider>
   );
 };

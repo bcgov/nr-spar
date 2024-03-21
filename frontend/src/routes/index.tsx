@@ -13,6 +13,7 @@ import SeedlotCreatedFeedback from '../views/Seedlot/SeedlotCreatedFeedback';
 import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
 import SeedlotRegistrationForm from '../views/Seedlot/SeedlotRegFormClassA';
 import SeedlotReview from '../views/Seedlot/SeedlotReview';
+import RegPage from '../views/Seedlot/SeedlotRegFormClassA/RegPage';
 
 const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
@@ -63,7 +64,9 @@ const BrowserRoutes: Array<RouteObject> = [
   {
     path: ROUTES.SEEDLOT_A_CLASS_REGISTRATION,
     element: (
-      <SeedlotRegistrationForm />
+      <SeedlotRegistrationForm>
+        <RegPage />
+      </SeedlotRegistrationForm>
     )
   },
   {
