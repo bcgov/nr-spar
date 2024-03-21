@@ -350,7 +350,6 @@ const SeedlotRegistrationForm = ({ children }: props) => {
     queryKey: ['funding-sources'],
     queryFn: getFundingSources,
     select: (data) => getMultiOptList(data),
-    enabled: getAllSeeedlotInfoQuery.status === 'success',
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -359,7 +358,6 @@ const SeedlotRegistrationForm = ({ children }: props) => {
     queryKey: ['methods-of-payment'],
     queryFn: getMethodsOfPayment,
     select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
-    enabled: getAllSeeedlotInfoQuery.status === 'success',
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -368,7 +366,6 @@ const SeedlotRegistrationForm = ({ children }: props) => {
     queryKey: ['gametic-methodologies'],
     queryFn: getGameticMethodology,
     select: (data) => getMultiOptList(data, true, false, true, ['isFemaleMethodology', 'isPliSpecies']),
-    enabled: getAllSeeedlotInfoQuery.status === 'success',
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -381,7 +378,7 @@ const SeedlotRegistrationForm = ({ children }: props) => {
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
     queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
-    enabled: getAllSeeedlotInfoQuery.status === 'success'
+    enabled: seedlotQuery.status === 'success'
   });
 
   useEffect(() => {
@@ -732,14 +729,26 @@ const SeedlotRegistrationForm = ({ children }: props) => {
         submitSeedlot,
         getSeedlotPayload,
         updateProgressStatus,
-        saveProgressStatus: saveProgress.status
+        saveProgressStatus: saveProgress.status,
+        isFetchingData: (
+          vegCodeQuery.isFetching
+          || seedlotQuery.isFetching
+          || getAllSeeedlotInfoQuery.isFetching
+          || forestClientQuery.isFetching
+          || methodsOfPaymentQuery.isFetching
+          || orchardQuery.isFetching
+          || gameticMethodologyQuery.isFetching
+          || fundingSourcesQuery.isFetching
+        )
       }),
     [
       seedlotNumber, allStepData, seedlotQuery.status,
       vegCodeQuery.status, formStep, forestClientQuery.status,
       applicantAgencyQuery.status, isFormSubmitted, isFormIncomplete,
       saveStatus, saveDescription, lastSaveTimestamp, allStepCompleted,
-      progressStatus, submitSeedlot, saveProgress.status
+      progressStatus, submitSeedlot, saveProgress.status, getAllSeeedlotInfoQuery.status,
+      methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,
+      fundingSourcesQuery.status
     ]
   );
 

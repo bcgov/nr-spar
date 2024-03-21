@@ -35,7 +35,8 @@ type ContextType = {
   >,
   getSeedlotPayload: () => SeedlotAClassSubmitType,
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => void,
-  saveProgressStatus: MutationStatusType
+  saveProgressStatus: MutationStatusType,
+  isFetchingData: boolean
 }
 
 const ClassAContext = createContext<ContextType>({
@@ -63,7 +64,8 @@ const ClassAContext = createContext<ContextType>({
   >,
   getSeedlotPayload: () => ({} as SeedlotAClassSubmitType),
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => { },
-  saveProgressStatus: 'idle'
+  saveProgressStatus: 'idle',
+  isFetchingData: false
 });
 
 export default ClassAContext;

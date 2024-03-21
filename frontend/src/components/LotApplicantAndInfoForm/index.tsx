@@ -23,6 +23,7 @@ import {
 } from './constants';
 
 import './styles.scss';
+import Divider from '../Divider';
 
 /**
  * This component displays a form for seedlot or veglot creation/edition.
@@ -30,6 +31,7 @@ import './styles.scss';
 const LotApplicantAndInfoForm = ({
   isSeedlot,
   isEdit,
+  isReview,
   seedlotFormData,
   setSeedlotFormData
 }: FormProps) => {
@@ -68,7 +70,11 @@ const LotApplicantAndInfoForm = ({
       <Row className="section-title">
         <Column lg={8}>
           <h2>Applicant agency</h2>
-          <Subtitle text="Enter the applicant agency information" />
+          {
+            isReview
+              ? null
+              : <Subtitle text="Enter the applicant agency information" />
+          }
         </Column>
       </Row>
       <ApplicantAgencyFields
@@ -112,11 +118,19 @@ const LotApplicantAndInfoForm = ({
       {
         isSeedlot && seedlotFormData && setSeedlotFormData
           ? (
-            <SeedlotInformation
-              seedlotFormData={seedlotFormData}
-              setSeedlotFormData={setSeedlotFormData}
-              isEdit={isEdit}
-            />
+            <>
+              {
+                isReview
+                  ? <Divider />
+                  : null
+              }
+              <SeedlotInformation
+                seedlotFormData={seedlotFormData}
+                setSeedlotFormData={setSeedlotFormData}
+                isEdit={isEdit}
+                isReview={isReview}
+              />
+            </>
           )
           : null // The false case is reserved for vegLog
       }

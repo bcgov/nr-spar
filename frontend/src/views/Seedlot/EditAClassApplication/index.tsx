@@ -38,7 +38,11 @@ import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
 
-const EditAClassApplication = () => {
+type props = {
+  isReview?: boolean
+}
+
+const EditAClassApplication = ({ isReview }: props) => {
   const navigate = useNavigate();
   const { seedlotNumber } = useParams();
 
@@ -152,16 +156,24 @@ const EditAClassApplication = () => {
   };
 
   return (
-    <FlexGrid className="edit-a-class-seedlot-page">
-      <Row className="breadcrumb-row">
-        <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
-      </Row>
-      <Row className="title-row">
-        <PageTitle
-          title="Applicant and seedlot information"
-          subtitle="Edit your seedlot's applicant and seedlot information"
-        />
-      </Row>
+    <FlexGrid className={`edit-a-class-seedlot-page ${isReview ? 'no-padding' : null}`}>
+      {
+        isReview
+          ? null
+          : (
+            <>
+              <Row className="breadcrumb-row">
+                <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber!)} />
+              </Row>
+              <Row className="title-row">
+                <PageTitle
+                  title="Applicant and seedlot information"
+                  subtitle="Edit your seedlot's applicant and seedlot information"
+                />
+              </Row>
+            </>
+          )
+      }
       {
         seedlotPatchMutation.isError
           ? (
@@ -194,6 +206,7 @@ const EditAClassApplication = () => {
                 <LotApplicantAndInfoForm
                   isSeedlot
                   isEdit
+                  isReview={isReview}
                   seedlotFormData={seedlotEditData}
                   setSeedlotFormData={setSeedlotEditData}
                 />
@@ -202,17 +215,24 @@ const EditAClassApplication = () => {
           }
         </Column>
       </Row>
-      <Row>
-        <Column sm={4} md={3} lg={5} xlg={4} max={3}>
-          <Button
-            className="submit-button"
-            renderIcon={Save}
-            onClick={() => validateAndSave()}
-          >
-            Save edit
-          </Button>
-        </Column>
-      </Row>
+      {
+        isReview
+          ? null
+          : (
+            <Row>
+              <Column sm={4} md={3} lg={5} xlg={4} max={3}>
+                <Button
+                  className="submit-button"
+                  renderIcon={Save}
+                  onClick={() => validateAndSave()}
+                >
+                  Save edit
+                </Button>
+              </Column>
+            </Row>
+          )
+      }
+
     </FlexGrid>
   );
 };

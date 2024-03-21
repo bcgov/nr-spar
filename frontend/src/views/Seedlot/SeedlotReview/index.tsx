@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -6,7 +6,8 @@ import {
   Button,
   FlexGrid,
   Row,
-  Column
+  Column,
+  Loading
 } from '@carbon/react';
 import { Edit, Save } from '@carbon/icons-react';
 
@@ -16,13 +17,15 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import PageTitle from '../../../components/PageTitle';
 import RowGap from '../../../components/RowGap';
-import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
 import ApplicantAndSeedlotRead from '../../../components/ApplicantAndSeedlot/Read';
+import ApplicantAndSeedlotEdit from '../../../components/ApplicantAndSeedlot/Edit';
+import ClassAContext from '../SeedlotRegFormClassA/ClassAContext';
+
+import SeedlotRegistrationForm from '../SeedlotRegFormClassA';
 
 import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
-import SeedlotRegistrationForm from '../SeedlotRegFormClassA';
 
 const SeedlotReview = () => {
   const navigate = useNavigate();
@@ -58,6 +61,12 @@ const SeedlotReview = () => {
   // True if in view mode, false in edit mode.
   const [isReadMode, setIsReadMode] = useState(true);
 
+  const { isFetchingData } = useContext(ClassAContext);
+
+  if (isFetchingData) {
+    return (<Loading />);
+  }
+
   return (
     <SeedlotRegistrationForm>
       <FlexGrid className="seedlot-review-grid">
@@ -89,12 +98,7 @@ const SeedlotReview = () => {
             {
               isReadMode
                 ? <ApplicantAndSeedlotRead />
-                : (
-                  <LotApplicantAndInfoForm
-                    isSeedlot
-                    isEdit={false}
-                  />
-                )
+                : <ApplicantAndSeedlotEdit />
             }
           </Column>
         </Row>

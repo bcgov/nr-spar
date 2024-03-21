@@ -7,7 +7,8 @@ import {
   Grid,
   InlineLoading,
   InlineNotification,
-  ActionableNotification
+  ActionableNotification,
+  Loading
 } from '@carbon/react';
 import { ArrowRight } from '@carbon/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +42,8 @@ const RegPage = () => {
     submitSeedlot,
     getSeedlotPayload,
     updateProgressStatus,
-    saveProgressStatus
+    saveProgressStatus,
+    isFetchingData
   } = useContext(ClassAContext);
 
   return (
@@ -139,9 +141,15 @@ const RegPage = () => {
         }
         <Row>
           <Column className="seedlot-registration-row">
-            <RegForm
-              cleanParentTables={cleanParentTables}
-            />
+            {
+              isFetchingData || submitSeedlot.status === 'loading'
+                ? <Loading />
+                : (
+                  <RegForm
+                    cleanParentTables={cleanParentTables}
+                  />
+                )
+            }
           </Column>
         </Row>
         <Row className="seedlot-registration-button-row">
