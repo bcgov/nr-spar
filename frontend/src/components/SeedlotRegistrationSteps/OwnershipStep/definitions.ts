@@ -35,7 +35,3 @@ export type NumStepperVal = {
   value: number,
   direction: string
 }
-
-export interface OwnershipStepProps {
-  readOnly?: boolean
-}

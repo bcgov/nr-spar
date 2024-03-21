@@ -15,8 +15,8 @@ export type ParentTreeStepDataObj = {
 
 export type AllStepData = {
   collectionStep: CollectionForm,
-  interimStep: InterimForm,
   ownershipStep: Array<SingleOwnerForm>,
+  interimStep: InterimForm,
   orchardStep: OrchardForm,
   parentTreeStep: ParentTreeStepDataObj,
   extractionStorageStep: ExtractionStorageForm

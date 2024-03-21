@@ -15,6 +15,7 @@ interface ApplicantAgencyFieldsProps {
   showCheckbox?: boolean;
   readOnly?: boolean;
   maxInputColSize?: number;
+  isFormSubmitted?: boolean;
 }
 
 export default ApplicantAgencyFieldsProps;

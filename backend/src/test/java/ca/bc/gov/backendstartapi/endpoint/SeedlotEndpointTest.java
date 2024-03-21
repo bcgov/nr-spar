@@ -435,7 +435,6 @@ class SeedlotEndpointTest {
     Seedlot seedlotEntity = new Seedlot("0000000");
 
     SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(
-        seedlotEntity,
         null,
         null
     );

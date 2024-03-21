@@ -1,5 +1,6 @@
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
+import { SingleOwnerFormSubmitType } from '../../../types/SeedlotType';
 import { SingleOwnerForm } from './definitions';
 
 export const DEFAULT_INDEX = 0;
@@ -47,7 +48,10 @@ export const inputText = {
   twoDecimal: 'Value can have up to 2 decimal places'
 };
 
-export const createOwnerTemplate = (newId: number): SingleOwnerForm => ({
+export const createOwnerTemplate = (
+  newId: number,
+  ownerData: SingleOwnerFormSubmitType
+): SingleOwnerForm => ({
   id: newId,
   useDefaultAgencyInfo: {
     id: 'ownership-use-default-agency',
@@ -61,22 +65,22 @@ export const createOwnerTemplate = (newId: number): SingleOwnerForm => ({
   },
   ownerCode: {
     id: `ownership-location-code-${newId}`,
-    value: '',
+    value: ownerData.ownerLocnCode,
     isInvalid: false
   },
   ownerPortion: {
     id: `ownership-portion-${newId}`,
-    value: '0.00',
+    value: ownerData.originalPctOwned.toString(),
     isInvalid: false
   },
   reservedPerc: {
     id: `ownership-reserved-${newId}`,
-    value: '100.00',
+    value: ownerData.originalPctRsrvd.toString(),
     isInvalid: false
   },
   surplusPerc: {
     id: `ownership-surplus-${newId}`,
-    value: '0.00',
+    value: ownerData.originalPctSrpls.toString(),
     isInvalid: false
   },
   fundingSource: {

@@ -17,7 +17,3 @@ export type CollectionForm = {
   selectedCollectionCodes: StringArrInputType,
   comments: StringInputType
 }
-
-export interface CollectionStepProps {
-  readOnly?: boolean,
-}

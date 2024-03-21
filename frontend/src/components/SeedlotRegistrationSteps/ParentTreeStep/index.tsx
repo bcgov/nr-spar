@@ -62,7 +62,8 @@ const ParentTreeStep = () => {
     allStepData: { orchardStep: { orchards } },
     setStepData,
     setStep,
-    seedlotSpecies
+    seedlotSpecies,
+    isFormSubmitted
   } = useContext(ClassAContext);
 
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
@@ -323,7 +324,7 @@ const ParentTreeStep = () => {
                                 setIsSMPDefaultValChecked(checked);
                               }
                             }
-                            disabled={disableOptions}
+                            disabled={disableOptions || isFormSubmitted}
                           />
                         </Column>
                       </Row>
@@ -355,7 +356,7 @@ const ParentTreeStep = () => {
                                 <Button
                                   kind="ghost"
                                   hasIconOnly
-                                  disabled={disableOptions}
+                                  disabled={disableOptions || isFormSubmitted}
                                   renderIcon={Add}
                                   iconDescription="Add a new row"
                                   onClick={() => addNewMixRow(state, setStepData)}
@@ -378,7 +379,7 @@ const ParentTreeStep = () => {
                             renderIcon={Settings}
                             iconDescription="More options"
                             menuOptionsClass="parent-tree-table-option-menu"
-                            disabled={disableOptions}
+                            disabled={disableOptions || isFormSubmitted}
                           >
                             <OverflowMenuItem
                               itemText={
@@ -406,7 +407,11 @@ const ParentTreeStep = () => {
                             kind="primary"
                             renderIcon={Upload}
                             onClick={() => setIsUploadOpen(true)}
-                            disabled={disableOptions || !allParentTreeQuery.isFetched}
+                            disabled={
+                              disableOptions
+                              || !allParentTreeQuery.isFetched
+                              || isFormSubmitted
+                            }
                           >
                             Upload from file
                           </Button>
@@ -457,7 +462,8 @@ const ParentTreeStep = () => {
                                   applicableGenWorths,
                                   state,
                                   setStepData,
-                                  seedlotSpecies
+                                  seedlotSpecies,
+                                  isFormSubmitted
                                 )
                             }
                           </Table>
@@ -527,29 +533,35 @@ const ParentTreeStep = () => {
                 infoItems={Object.values(popSizeAndDiversityConfig)}
               />
               {/* -------- Calculate Button Row -------- */}
-              <Row className="gen-worth-cal-row">
-                <Button
-                  size="md"
-                  kind="tertiary"
-                  renderIcon={
-                    () => (
-                      <div className="gw-calc-loading-icon">
-                        {
-                          calculateGenWorthQuery.isLoading
-                            ? <Loading withOverlay={false} small />
-                            : <Renew />
+              {
+                !isFormSubmitted
+                  ? (
+                    <Row className="gen-worth-cal-row">
+                      <Button
+                        size="md"
+                        kind="tertiary"
+                        renderIcon={
+                          () => (
+                            <div className="gw-calc-loading-icon">
+                              {
+                                calculateGenWorthQuery.isLoading
+                                  ? <Loading withOverlay={false} small />
+                                  : <Renew />
+                              }
+                            </div>
+                          )
                         }
-                      </div>
-                    )
-                  }
-                  disabled={disableOptions}
-                  onClick={() => calculateGenWorthQuery.mutate(
-                    generateGenWorthPayload(state, geneticWorthDict, seedlotSpecies)
-                  )}
-                >
-                  Calculate Genetic worth and Effective population values
-                </Button>
-              </Row>
+                        disabled={disableOptions}
+                        onClick={() => calculateGenWorthQuery.mutate(
+                          generateGenWorthPayload(state, geneticWorthDict, seedlotSpecies)
+                        )}
+                      >
+                        Calculate Genetic worth and Effective population values
+                      </Button>
+                    </Row>
+                  )
+                  : null
+              }
               {/* -------- Summary Section -------- */}
               <InfoSection
                 title={summaryConfig[currentTab].title}

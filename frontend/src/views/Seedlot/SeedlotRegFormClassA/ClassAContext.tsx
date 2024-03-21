@@ -14,7 +14,8 @@ const ClassAContext = createContext({
   setStep: (delta: number) => { },
   defaultAgencyObj: EmptyMultiOptObj,
   defaultCode: '',
-  agencyOptions: [] as MultiOptionsObj[]
+  agencyOptions: [] as MultiOptionsObj[],
+  isFormSubmitted: false
 });
 
 export default ClassAContext;

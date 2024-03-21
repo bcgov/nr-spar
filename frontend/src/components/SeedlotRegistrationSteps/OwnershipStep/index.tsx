@@ -21,7 +21,6 @@ import {
   StateReturnObj,
   AccordionCtrlObj,
   AccordionItemHeadClick,
-  OwnershipStepProps,
   SingleOwnerForm
 } from './definitions';
 import {
@@ -37,17 +36,14 @@ import './styles.scss';
 /*
   Component
 */
-const OwnershipStep = (
-  {
-    readOnly
-  }: OwnershipStepProps
-) => {
+const OwnershipStep = () => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
     defaultAgencyObj: defaultAgency,
     defaultCode,
-    agencyOptions
+    agencyOptions,
+    isFormSubmitted
   } = useContext(ClassAContext);
 
   const [accordionControls, setAccordionControls] = useState<AccordionCtrlObj>({});
@@ -88,6 +84,7 @@ const OwnershipStep = (
     queryKey: ['funding-sources'],
     queryFn: getFundingSources,
     select: (data) => getMultiOptList(data),
+    enabled: !isFormSubmitted,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -120,20 +117,17 @@ const OwnershipStep = (
 
   return (
     <div>
-      {(!readOnly) && (
-        <div className="ownership-header">
-          <div className="ownership-step-title-box">
-            <h3>
-              Ownership
-            </h3>
-            <p>
-              Enter the seedlot&apos;s ownership information, the agencies listed as
-              owners are the ones who are charged for cone and seed processing fees
-            </p>
-          </div>
+      <div className="ownership-header">
+        <div className="ownership-step-title-box">
+          <h3>
+            Ownership
+          </h3>
+          <p>
+            Enter the seedlot&apos;s ownership information, the agencies listed as
+            owners are the ones who are charged for cone and seed processing fees
+          </p>
         </div>
-      )}
-
+      </div>
       <div className="ownership-form-container">
         <Accordion className="steps-accordion">
           {
@@ -176,21 +170,27 @@ const OwnershipStep = (
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
-                  readOnly={readOnly}
+                  readOnly={isFormSubmitted}
                 />
               </AccordionItem>
             ))
           }
         </Accordion>
-        <Button
-          kind="tertiary"
-          size="md"
-          className="owner-add-btn"
-          renderIcon={Add}
-          onClick={addAnOwner}
-        >
-          Add owner
-        </Button>
+        {
+          !isFormSubmitted
+            ? (
+              <Button
+                kind="tertiary"
+                size="md"
+                className="owner-add-btn"
+                renderIcon={Add}
+                onClick={addAnOwner}
+              >
+                Add owner
+              </Button>
+            )
+            : null
+        }
       </div>
     </div>
   );

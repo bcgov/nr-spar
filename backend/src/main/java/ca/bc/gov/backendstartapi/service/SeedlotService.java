@@ -9,8 +9,11 @@ import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
@@ -37,6 +40,8 @@ import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -78,7 +83,11 @@ public class SeedlotService {
 
   private final SeedlotCollectionMethodService seedlotCollectionMethodService;
 
+  private final SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
+
   private final SeedlotOwnerQuantityService seedlotOwnerQuantityService;
+
+  private final SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
 
   private final SeedlotOrchardService seedlotOrchardService;
 
@@ -329,7 +338,6 @@ public class SeedlotService {
 
     List<SeedlotFormParentTreeSmpDto> parentTreesInfo = new ArrayList<>();
 
-
     // Iterate thru the seedlot parent tree list and get these
     // seedlot data
     for (SeedlotParentTree parentTree : parentTreeData) {
@@ -348,6 +356,8 @@ public class SeedlotService {
 
       parentTreesInfo.add(curParentTree);
     }
+
+    List<SeedlotFormParentTreeSmpDto> smpMixParentTreesInfo = new ArrayList<>();
 
     if (smpMixsData.size() > 0) {
       // This map is used to see if any SMPMix parent tree
@@ -369,7 +379,7 @@ public class SeedlotService {
             mixTabInfo.getProportion(),
             getSmpMixParentTreeGenQual(mixTabInfo, seedlotNumber, sptMap)
         );
-        parentTreesInfo.add(curSmpMix);
+        smpMixParentTreesInfo.add(curSmpMix);
       }
     }
 
@@ -385,13 +395,85 @@ public class SeedlotService {
       calculatedGenWorth.add(curGenWorth);
     }
 
-    // Get seedlot data to retrieve to the user
+    // Get seedlot data
     Seedlot seedlotInfo =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
+    List<Integer> seedlotCollectionList =
+        seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
+        .map(col -> col.getConeCollectionMethod().getConeCollectionMethodCode())
+        .collect(Collectors.toList());
+
+    // Divide the seedlot data to each respective step
+    SeedlotFormCollectionDto collectionStep = new SeedlotFormCollectionDto(
+        seedlotInfo.getCollectionClientNumber(),
+        seedlotInfo.getCollectionLocationCode(),
+        seedlotInfo.getCollectionStartDate(),
+        seedlotInfo.getCollectionEndDate(),
+        seedlotInfo.getNumberOfContainers(),
+        seedlotInfo.getContainerVolume(),
+        seedlotInfo.getTotalConeVolume(),
+        seedlotInfo.getComment(),
+        seedlotCollectionList
+    );
+
+    List<SeedlotFormOwnershipDto> ownershipStep =
+        seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
+        .map(owner -> new SeedlotFormOwnershipDto(
+            owner.getOwnerClientNumber(),
+            owner.getOwnerLocationCode(),
+            owner.getOriginalPercentageOwned(),
+            owner.getOriginalPercentageReserved(),
+            owner.getOriginalPercentageSurplus(),
+            owner.getMethodOfPayment().getMethodOfPaymentCode(),
+            owner.getFundingSourceCode()
+        ))
+        .collect(Collectors.toList());
+
+    SeedlotFormInterimDto interimStep = new SeedlotFormInterimDto(
+        seedlotInfo.getInterimStorageClientNumber(),
+        seedlotInfo.getInterimStorageLocationCode(),
+        seedlotInfo.getInterimStorageStartDate(),
+        seedlotInfo.getInterimStorageEndDate(),
+        seedlotInfo.getInterimStorageOtherFacilityDesc(),
+        seedlotInfo.getInterimStorageFacilityCode());
+
+    List<String> seedlotOrchards =
+        seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotInfo.getId()).stream()
+            .map(SeedlotOrchard::getOrchard)
+            .toList();;
+
+    SeedlotFormOrchardDto orchardStep = new SeedlotFormOrchardDto(
+        seedlotOrchards,
+        seedlotInfo.getFemaleGameticContributionMethod(),
+        seedlotInfo.getMaleGameticContributionMethod(),
+        seedlotInfo.getProducedThroughControlledCross(),
+        seedlotInfo.getProducedWithBiotechnologicalProcesses(),
+        seedlotInfo.getPollenContaminationPresentInOrchard(),
+        seedlotInfo.getPollenContaminationPercentage(),
+        seedlotInfo.getPollenContaminantBreedingValue(),
+        seedlotInfo.getPollenContaminationMethodCode());
+
+    SeedlotFormExtractionDto extractionStep = new SeedlotFormExtractionDto(
+        seedlotInfo.getExtractionClientNumber(),
+        seedlotInfo.getExtractionLocationCode(),
+        seedlotInfo.getExtractionStartDate(),
+        seedlotInfo.getExtractionEndDate(),
+        seedlotInfo.getStorageClientNumber(),
+        seedlotInfo.getStorageLocationCode(),
+        seedlotInfo.getTemporaryStorageStartDate(),
+        seedlotInfo.getTemporaryStorageEndDate());
+
     SeedlotAclassFormDto seedlotAclassFullInfo = new SeedlotAclassFormDto(
-        seedlotInfo,
-        parentTreesInfo,
+        new SeedlotFormSubmissionDto(
+            collectionStep,
+            ownershipStep,
+            interimStep,
+            orchardStep,
+            parentTreesInfo,
+            smpMixParentTreesInfo,
+            extractionStep
+        ),
         calculatedGenWorth
     );
 

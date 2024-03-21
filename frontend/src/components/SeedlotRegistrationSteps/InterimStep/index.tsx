@@ -31,21 +31,14 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import './styles.scss';
 
-interface InterimStorageStepProps {
-  readOnly?: boolean
-}
-
-const InterimStorage = (
-  {
-    readOnly
-  }: InterimStorageStepProps
-) => {
+const InterimStorage = () => {
   const {
     allStepData: { interimStep: state },
     allStepData: { collectionStep: { collectorAgency } },
     allStepData: { collectionStep: { locationCode: collectorCode } },
     setStepData,
-    agencyOptions
+    agencyOptions,
+    isFormSubmitted
   } = useContext(ClassAContext);
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
@@ -164,7 +157,8 @@ const InterimStorage = (
           agency: OptionsInputType,
           locationCode: StringInputType
         ) => setAgencyAndCode(agency, locationCode, isDefault)}
-        readOnly={readOnly}
+        readOnly={isFormSubmitted}
+        isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
       />
       <Row className="interim-storage-row">
@@ -177,7 +171,7 @@ const InterimStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(true, selectedDate);
             }}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <DatePickerInput
               id="start-date-input"
@@ -186,7 +180,7 @@ const InterimStorage = (
               placeholder={pageTexts.storageDate.placeholder}
               invalid={state.startDate.isInvalid}
               invalidText={pageTexts.storageDate.invalidText}
-              readOnly={readOnly}
+              readOnly={isFormSubmitted}
               autoComplete="off"
             />
           </DatePicker>
@@ -201,7 +195,7 @@ const InterimStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(false, selectedDate);
             }}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <DatePickerInput
               id="end-date-input"
@@ -210,7 +204,7 @@ const InterimStorage = (
               placeholder={pageTexts.storageDate.placeholder}
               invalid={state.startDate.isInvalid}
               invalidText={pageTexts.storageDate.invalidText}
-              readOnly={readOnly}
+              readOnly={isFormSubmitted}
               autoComplete="off"
             />
           </DatePicker>
@@ -224,7 +218,7 @@ const InterimStorage = (
             orientation="vertical"
             defaultSelected={state.facilityType.value}
             onChange={(e: string) => handleFacilityType(e)}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             {
               facilityTypesQuery.isFetching
@@ -256,7 +250,7 @@ const InterimStorage = (
                   onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleOtherFacilityTypeInput(e.target.value);
                   }}
-                  readOnly={readOnly}
+                  readOnly={isFormSubmitted}
                   enableCounter
                   maxCount={MAX_FACILITY_DESC_CHAR}
                 />

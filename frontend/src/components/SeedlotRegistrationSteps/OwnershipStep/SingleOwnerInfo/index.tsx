@@ -159,6 +159,7 @@ const SingleOwnerInfo = ({
               }
               showCheckbox={ownerInfo.id === DEFAULT_INDEX}
               readOnly={readOnly ?? false}
+              isFormSubmitted={readOnly}
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>

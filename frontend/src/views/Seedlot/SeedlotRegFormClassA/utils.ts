@@ -6,8 +6,11 @@ import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimSte
 import { OrchardForm, OrchardObj } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
-import { DEFAULT_MIX_PAGE_ROWS, MAX_DECIMAL_DIGITS, notificationCtrlObj } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import { RowDataDictType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import {
+  DEFAULT_MIX_PAGE_ROWS, MAX_DECIMAL_DIGITS, notificationCtrlObj,
+  rowTemplate
+} from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { RowDataDictType, RowItem, StrTypeRowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import {
   calcAverage, calcSum, generateDefaultRows,
   processOrchards
@@ -47,11 +50,12 @@ export const initProgressBar = (
 
 export const initCollectionState = (
   defaultAgency: MultiOptionsObj,
-  defaultCode: string
-) => ({
+  collectionStepData: CollectionFormSubmitType,
+  useDefaultAgency = true
+):CollectionForm => ({
   useDefaultAgencyInfo: {
     id: 'collection-use-default-agency',
-    value: true,
+    value: useDefaultAgency,
     isInvalid: false
   },
   collectorAgency: {
@@ -61,64 +65,84 @@ export const initCollectionState = (
   },
   locationCode: {
     id: 'collection-location-code',
-    value: defaultCode,
+    value: collectionStepData.collectionLocnCode,
     isInvalid: false
   },
   startDate: {
     id: 'collection-start-date',
-    value: '',
+    value: collectionStepData.collectionStartDate,
     isInvalid: false
   },
   endDate: {
     id: 'collection-end-date',
-    value: '',
+    value: collectionStepData.collectionEndDate,
     isInvalid: false
   },
   numberOfContainers: {
     id: 'collection-num-of-container',
-    value: '1',
+    value: collectionStepData.noOfContainers.toString(),
     isInvalid: false
   },
   volumePerContainers: {
     id: 'collection-vol-per-container',
-    value: '1',
+    value: collectionStepData.volPerContainer.toString(),
     isInvalid: false
   },
   volumeOfCones: {
     id: 'collection-vol-of-cones',
-    value: '1',
+    value: collectionStepData.clctnVolume.toString(),
     isInvalid: false
   },
   selectedCollectionCodes: {
     id: 'collection-selected-collection-code',
-    value: [],
+    value: collectionStepData.coneCollectionMethodCodes.map((methodCode) => methodCode.toString()),
     isInvalid: false
   },
   comments: {
     id: 'collection-comments',
-    value: '',
+    value: collectionStepData.seedlotComment,
     isInvalid: false
   }
 });
 
 export const initOwnershipState = (
   defaultAgency: MultiOptionsObj,
-  defaultCode: string
-) => {
-  const initialOwnerState = createOwnerTemplate(0);
-  initialOwnerState.ownerAgency.value = defaultAgency;
-  initialOwnerState.ownerCode.value = defaultCode;
-  initialOwnerState.ownerPortion.value = '100';
-  return initialOwnerState;
+  ownersStepData: Array<SingleOwnerFormSubmitType>,
+  useDefault?: boolean,
+  methodsOfPayment?: Array<MultiOptionsObj>,
+  fundingSource?: Array<MultiOptionsObj>,
+  defaultAgencyNumber = ''
+): Array<SingleOwnerForm> => {
+  const seedlotOwners: Array<SingleOwnerForm> = ownersStepData.map((curOwner, index) => {
+    const ownerState = createOwnerTemplate(index, curOwner);
+    ownerState.ownerAgency.value = useDefault
+      ? defaultAgency
+      : {
+        code: curOwner.ownerClientNumber,
+        description: '',
+        label: curOwner.ownerClientNumber
+      };
+    ownerState.useDefaultAgencyInfo.value = ownerState.ownerAgency.value.code === defaultAgencyNumber;
+    ownerState.ownerCode.value = curOwner.ownerLocnCode;
+    if (methodsOfPayment && fundingSource) {
+      const payment = methodsOfPayment.filter((data: MultiOptionsObj) => data.code === curOwner.methodOfPaymentCode)[0];
+      const fundSource = fundingSource.filter((data: MultiOptionsObj) => data.code === curOwner.sparFundSrceCode)[0];
+      ownerState.methodOfPayment.value = payment;
+      ownerState.fundingSource.value = fundSource;
+    }
+    return ownerState;
+  });
+  return seedlotOwners;
 };
 
 export const initInterimState = (
   defaultAgency: MultiOptionsObj,
-  defaultCode: string
-) => ({
+  interimStepData: InterimFormSubmitType,
+  useDefaultAgency = true
+): InterimForm => ({
   useCollectorAgencyInfo: {
     id: 'interim-use-collection-agency',
-    value: true,
+    value: useDefaultAgency,
     isInvalid: false
   },
   agencyName: {
@@ -128,68 +152,92 @@ export const initInterimState = (
   },
   locationCode: {
     id: 'interim-location-code',
-    value: defaultCode,
+    value: interimStepData.intermStrgLocnCode,
     isInvalid: false
   },
   startDate: {
     id: 'storage-start-date',
-    value: '',
+    value: interimStepData.intermStrgStDate,
     isInvalid: false
   },
   endDate: {
     id: 'storage-end-date',
-    value: '',
+    value: interimStepData.intermStrgEndDate,
     isInvalid: false
   },
   facilityType: {
     id: 'storage-facility-type',
-    value: 'OCV',
+    value: interimStepData.intermFacilityCode,
     isInvalid: false
   },
   facilityOtherType: {
     id: 'storage-other-type-input',
-    value: '',
+    value: interimStepData.intermOtherFacilityDesc,
     isInvalid: false
   }
 });
 
-export const initOrchardState = (): OrchardForm => (
+const convertToOrchardsType = (
+  orchards: Array<MultiOptionsObj> | undefined,
+  orchardsIds: Array<string>
+): Array<OrchardObj> => {
+  if (orchards) {
+    const filteredOrchards = orchards.filter((curOrch) => orchardsIds.includes(curOrch.code));
+    return filteredOrchards.map((curFilteredOrch, index) => ({
+      inputId: index,
+      selectedItem: curFilteredOrch,
+      isInvalid: false
+    }));
+  }
+
+  return [
+    {
+      inputId: 0,
+      selectedItem: null,
+      isInvalid: false
+    }
+  ];
+};
+
+export const initOrchardState = (
+  orchardStepData: OrchardFormSubmitType,
+  possibleOrchards?: Array<MultiOptionsObj>,
+  gameticMethodology?: Array<MultiOptionsObj>
+): OrchardForm => (
   {
-    orchards: [
-      {
-        inputId: 0,
-        selectedItem: null,
-        isInvalid: false
-      }
-    ],
+    orchards: convertToOrchardsType(possibleOrchards, orchardStepData.orchardsId),
     femaleGametic: {
       id: 'orchard-female-gametic',
-      value: EmptyMultiOptObj,
+      value: gameticMethodology
+        ? gameticMethodology.filter((data) => data.code === orchardStepData.femaleGameticMthdCode)[0]
+        : EmptyMultiOptObj,
       isInvalid: false
     },
     maleGametic: {
       id: 'orchard-male-gametic',
-      value: EmptyMultiOptObj,
+      value: gameticMethodology
+        ? gameticMethodology.filter((data) => data.code === orchardStepData.maleGameticMthdCode)[0]
+        : EmptyMultiOptObj,
       isInvalid: false
     },
     isControlledCross: {
       id: 'orchard-is-controlled-cross',
-      value: false,
+      value: orchardStepData.controlledCrossInd,
       isInvalid: false
     },
     hasBiotechProcess: {
       id: 'orchard-has-biotech-process',
-      value: false,
+      value: orchardStepData.biotechProcessesInd,
       isInvalid: false
     },
     hasPollenContamination: {
       id: 'orchard-has-pollen-contamination',
-      value: false,
+      value: orchardStepData.pollenContaminationInd,
       isInvalid: false
     },
     breedingPercentage: {
       id: 'orchard-breading-perc',
-      value: '0',
+      value: orchardStepData.contaminantPollenBv.toString(),
       isInvalid: false
     },
     isRegional: {
@@ -200,72 +248,132 @@ export const initOrchardState = (): OrchardForm => (
   }
 );
 
-export const initParentTreeState = (): ParentTreeStepDataObj => {
+export const initParentTreeState = (
+  parentTrees?: Array<ParentTreeFormSubmitType>,
+  smpMixTrees?: Array<ParentTreeFormSubmitType>
+): ParentTreeStepDataObj => {
   const defaultRows = generateDefaultRows(DEFAULT_MIX_PAGE_ROWS);
+  let tableRowsData: RowDataDictType = {};
+  let smpMixRows: RowDataDictType = {};
+  if (parentTrees) {
+    parentTrees.forEach(
+      (curParentTree) => {
+        const newRow: RowItem = structuredClone(rowTemplate);
+        newRow.parentTreeNumber.value = curParentTree.parentTreeNumber;
+        newRow.coneCount.value = curParentTree.coneCount.toString();
+        newRow.pollenCount.value = curParentTree.pollenCount.toString();
+        newRow.smpSuccessPerc.value = curParentTree.smpSuccessPct.toString();
+        newRow.nonOrchardPollenContam.value = curParentTree.nonOrchardPollenContamPct.toString();
+        curParentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
+          const genWorthName = singleGenWorthObj.geneticWorthCode
+            .toLowerCase() as keyof StrTypeRowItem;
+
+          if (Object.prototype.hasOwnProperty.call(newRow, genWorthName)) {
+            newRow[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
+          }
+        });
+        tableRowsData = Object.assign(tableRowsData, {
+          [curParentTree.parentTreeNumber]: newRow
+        });
+      }
+    );
+
+    // The SMP Mix is optional and will only be available if the parent trees
+    // are also available, so the check needs to be inside of the parent 'if'
+    if (smpMixTrees) {
+      smpMixTrees.forEach(
+        (curSmpMix) => {
+          const newRow: RowItem = structuredClone(rowTemplate);
+          newRow.rowId = curSmpMix.parentTreeId.toString();
+          newRow.parentTreeNumber.value = curSmpMix.parentTreeNumber;
+          newRow.isMixTab = true;
+          newRow.proportion.value = curSmpMix.proportion.toString();
+          newRow.volume.value = curSmpMix.amountOfMaterial.toString();
+          curSmpMix.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
+            const genWorthName = singleGenWorthObj.geneticWorthCode
+              .toLowerCase() as keyof StrTypeRowItem;
+
+            if (Object.prototype.hasOwnProperty.call(newRow, genWorthName)) {
+              newRow[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
+            }
+          });
+          smpMixRows = Object.assign(smpMixRows, {
+            [curSmpMix.parentTreeNumber]: newRow
+          });
+        }
+      );
+    }
+  }
+
   return {
-    tableRowData: {},
-    mixTabData: defaultRows,
+    tableRowData: tableRowsData,
+    mixTabData: Object.keys(smpMixRows).length === 0 ? defaultRows : smpMixRows,
     notifCtrl: structuredClone(notificationCtrlObj),
     allParentTreeData: {}
   };
 };
 
 export const initExtractionStorageState = (
-  defaultAgency: MultiOptionsObj,
-  defaultCode: string
+  defaultExtractAgency: MultiOptionsObj,
+  defaultStorageAgency: MultiOptionsObj,
+  extractionStepData: ExtractionFormSubmitType,
+  defaultExtractLoc?: string,
+  defaultStorageLoc?: string,
+  useTSCExtract = true,
+  useTSCStorage = true
 ): ExtractionStorageForm => (
   {
     extraction: {
       useTSC: {
         id: 'ext-agency-tsc-checkbox',
-        value: true,
+        value: useTSCExtract,
         isInvalid: false
       },
       agency: {
         id: 'ext-agency-combobox',
-        value: defaultAgency,
+        value: defaultExtractAgency,
         isInvalid: false
       },
       locationCode: {
         id: 'ext-location-code',
-        value: defaultCode,
+        value: defaultExtractLoc ?? extractionStepData.extractoryLocnCode,
         isInvalid: false
       },
       startDate: {
         id: 'ext-start-date',
-        value: '',
+        value: extractionStepData.extractionStDate,
         isInvalid: false
       },
       endDate: {
         id: 'ext-end-date',
-        value: '',
+        value: extractionStepData.extractionEndDate,
         isInvalid: false
       }
     },
     seedStorage: {
       useTSC: {
         id: 'str-agency-tsc-checkbox',
-        value: true,
+        value: useTSCStorage,
         isInvalid: false
       },
       agency: {
         id: 'str-agency-combobox',
-        value: defaultAgency,
+        value: defaultStorageAgency,
         isInvalid: false
       },
       locationCode: {
         id: 'str-location-code',
-        value: defaultCode,
+        value: defaultStorageLoc ?? extractionStepData.storageLocnCode,
         isInvalid: false
       },
       startDate: {
         id: 'str-start-date',
-        value: '',
+        value: extractionStepData.temporaryStrgStartDate,
         isInvalid: false
       },
       endDate: {
         id: 'str-end-date',
-        value: '',
+        value: extractionStepData.temporaryStrgEndDate,
         isInvalid: false
       }
     }

@@ -44,19 +44,18 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  cleanParentTables: Function,
-  readOnly?: boolean
+  cleanParentTables: Function
 }
 
 const OrchardStep = ({
-  cleanParentTables,
-  readOnly
+  cleanParentTables
 }: OrchardStepProps) => {
   const {
     allStepData: { orchardStep: state },
     allStepData: { parentTreeStep: { tableRowData } },
     setStepData,
-    seedlotSpecies
+    seedlotSpecies,
+    isFormSubmitted
   } = useContext(ClassAContext);
 
   const [isPliSpecies] = useState<boolean>(seedlotSpecies.code === 'PLI');
@@ -69,6 +68,7 @@ const OrchardStep = ({
     queryKey: ['gametic-methodologies'],
     queryFn: getGameticMethodology,
     select: (data) => getMultiOptList(data, true, false, true, ['isFemaleMethodology', 'isPliSpecies']),
+    enabled: !isFormSubmitted,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -97,7 +97,7 @@ const OrchardStep = ({
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
     queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
-    enabled: !readOnly
+    enabled: !isFormSubmitted
   });
 
   const setGametic = (event: ComboBoxEvent, isFemale: boolean) => {
@@ -204,7 +204,7 @@ const OrchardStep = ({
   };
 
   const renderOrchardButtons = () => {
-    if (!readOnly) {
+    if (!isFormSubmitted) {
       return state.orchards.length !== 1
         ? (
           <Row className="seedlot-orchard-add-orchard">
@@ -292,9 +292,10 @@ const OrchardStep = ({
                             } else setOrchard(orchard.inputId, e.selectedItem);
                           }
                         }
+                        readOnly={isFormSubmitted}
                       />
                       {
-                        orchardQuery.isError && !readOnly
+                        orchardQuery.isError && !isFormSubmitted
                           ? (
                             <InputErrorText
                               description={orchardStepText.orchardSection.orchardInput.fetchError}
@@ -348,7 +349,7 @@ const OrchardStep = ({
                   invalid={state.femaleGametic.isInvalid}
                   invalidText={orchardStepText.gameteSection.femaleGametic.invalid}
                   onChange={(e: ComboBoxEvent) => setGametic(e, true)}
-                  readOnly={readOnly}
+                  readOnly={isFormSubmitted}
                   selectedItem={state.femaleGametic.value}
                 />
               )
@@ -374,7 +375,7 @@ const OrchardStep = ({
                   invalid={state.maleGametic.isInvalid}
                   invalidText={orchardStepText.gameteSection.maleGametic.invalid}
                   onChange={(e: ComboBoxEvent) => setGametic(e, false)}
-                  readOnly={readOnly}
+                  readOnly={isFormSubmitted}
                   selectedItem={state.maleGametic.value}
                 />
               )
@@ -389,7 +390,7 @@ const OrchardStep = ({
             name="controlled-cross-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('isControlledCross', selected === 'Yes')}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <RadioButton
               id="controlled-cross-yes"
@@ -414,7 +415,7 @@ const OrchardStep = ({
             name="biotech-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('hasBiotechProcess', selected === 'Yes')}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <RadioButton
               id="biotech-yes"
@@ -445,7 +446,7 @@ const OrchardStep = ({
             name="pollen-contam-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('hasPollenContamination', selected === 'Yes')}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
           >
             <RadioButton
               id="pollen-contam-yes"
@@ -494,7 +495,7 @@ const OrchardStep = ({
                         }
                       }
                     }
-                    readOnly={readOnly}
+                    readOnly={isFormSubmitted}
                   />
                 </Column>
               </Row>
