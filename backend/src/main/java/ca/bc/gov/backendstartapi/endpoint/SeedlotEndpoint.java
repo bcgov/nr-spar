@@ -279,7 +279,7 @@ public class SeedlotEndpoint {
 
   /**
    * Get full information from a single seedlot, including parent trees and
-   * calculation results.
+   * calculation results, divided by registration steps.
    *
    * @param seedlotNumber the seedlot number to fetch the info for
    * @return A {@link SeedlotAclassFormDto} with all the current information for

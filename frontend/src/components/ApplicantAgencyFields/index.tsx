@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Row, Column, TextInput, Checkbox,
   ComboBox, InlineLoading, FlexGrid
 } from '@carbon/react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import validator from 'validator';
 
 import ClientSearchModal from './ClientSearchModal';
 
-import { getForestClientLocation } from '../../api-service/forestClientsAPI';
+import { getForestClientByNumber, getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
@@ -24,7 +24,8 @@ import './styles.scss';
 
 const ApplicantAgencyFields = ({
   checkboxId, isDefault, agency, locationCode, fieldsProps, agencyOptions,
-  defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize
+  defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize,
+  isFormSubmitted
 }: ApplicantAgencyFieldsProps) => {
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCode.isInvalid && agency.value
@@ -143,6 +144,24 @@ const ApplicantAgencyFields = ({
     validateLocationCodeMutation.mutate([agency.value.code, formattedCode]);
   };
 
+  const forestClientQuery = useQuery({
+    queryKey: ['forest-clients', agency.value.code],
+    queryFn: () => getForestClientByNumber(agency.value.code),
+    enabled: isFormSubmitted && agency.value.code !== ''
+  });
+
+  const [queriedAgency, setQueriedAgency] = useState<MultiOptionsObj>(EmptyMultiOptObj);
+
+  useEffect(() => {
+    if (forestClientQuery.status === 'success') {
+      setQueriedAgency({
+        code: forestClientQuery.data?.clientNumber ?? '',
+        description: forestClientQuery.data?.clientName ?? '',
+        label: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`
+      });
+    }
+  }, [forestClientQuery.isFetched]);
+
   return (
     <FlexGrid className="agency-information-section">
       {
@@ -181,7 +200,7 @@ const ApplicantAgencyFields = ({
             // If the value set is empty, the field continues
             // interactive on read only mode, so we disable it instead
             disabled={(isDefault.value && agency.value.code === '')}
-            selectedItem={agency.value}
+            selectedItem={isFormSubmitted ? queriedAgency : agency.value}
             onChange={(e: ComboBoxEvent) => handleAgencyInput(e.selectedItem)}
             invalid={agency.isInvalid}
             shouldFilterItem={
