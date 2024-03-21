@@ -14,6 +14,7 @@ import {
 
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 import PaginationChangeType from '../../types/PaginationChangeType';
+import { getForestClientFullName } from '../../utils/ForestClientUtils';
 
 import EmptySection from '../EmptySection';
 
@@ -39,10 +40,11 @@ const ClientSearchTable = (
   const [currPageNumber, setCurrPageNumber] = useState<number>(DEFAULT_PAGE_NUM);
   const [currPageSize, setCurrPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
-  const sliceData = (pageNum: number, pageSize: number) => (
-    clientData
-      .slice((pageNum - 1) * pageSize).slice(0, pageSize)
-  );
+  const sliceData = (pageNum: number, pageSize: number, data?: ForestClientSearchType[]) => {
+    const dataToSlice = data ?? clientData;
+    return dataToSlice
+      .slice((pageNum - 1) * pageSize).slice(0, pageSize);
+  };
 
   const handlePagination = (paginationObj: PaginationChangeType) => {
     setCurrPageNumber(paginationObj.page - 1);
@@ -71,8 +73,13 @@ const ClientSearchTable = (
     }
 
     setSortDirection(newDirection);
-    setProcessedData((prevData) => sortByKey(prevData, headerId, newDirection));
     setSortThisHeader(headerId);
+
+    const sorted = sortByKey(clientData, headerId, newDirection);
+
+    const sliced = sliceData(currPageNumber + 1, currPageSize, sorted);
+
+    setProcessedData(sliced);
   };
 
   if (mutationFn?.status === 'loading') {
@@ -175,7 +182,9 @@ const ClientSearchTable = (
                         key={header.id}
                       >
                         {
-                          client[header.id]
+                          header.id === 'clientName'
+                            ? getForestClientFullName(client)
+                            : client[header.id]
                         }
                       </TableCell>
                     ))
