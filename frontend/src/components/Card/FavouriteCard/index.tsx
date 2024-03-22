@@ -72,7 +72,6 @@ const FavouriteCard = ({
         image={favObject.image}
         isIcon
         favClassName={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
-        favTabIndex={index}
       />
     );
   }
@@ -80,7 +79,6 @@ const FavouriteCard = ({
   return (
     <Tile
       className={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
-      tabIndex={index}
       onClick={() => navigate(favObject.link)}
     >
       <div className="fav-card-header">
