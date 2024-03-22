@@ -23,7 +23,7 @@ const SmallCard = ({
   const Img = isIcon ? Icons[image] : Pictograms[image];
 
   return (
-    <Tile className={`${favClassName} small-card`} onClick={() => navigate(path)}>
+    <Tile className={favClassName ? `${favClassName} small-card` : 'small-card'} onClick={() => navigate(path)}>
       <div className="image-header">
         <Img className="image" />
         <p className="header">{header}</p>
