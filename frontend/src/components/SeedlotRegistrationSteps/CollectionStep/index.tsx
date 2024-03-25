@@ -28,24 +28,20 @@ import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
 } from './constants';
 import {
-  CollectionStepProps,
   CollectionForm
 } from './definitions';
 import { calcVolume, isNumNotInRange } from './utils';
 
 import './styles.scss';
 
-const CollectionStep = (
-  {
-    readOnly
-  }: CollectionStepProps
-) => {
+const CollectionStep = () => {
   const {
     allStepData: { collectionStep: state },
     setStepData,
     defaultAgencyObj: defaultAgency,
     defaultCode,
-    agencyOptions
+    agencyOptions,
+    isFormSubmitted
   } = useContext(ClassAContext);
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
@@ -161,7 +157,8 @@ const CollectionStep = (
             locationCode: StringInputType
           ) => setAgencyAndCode(isDefault, agency, locationCode)
         }
-        readOnly={readOnly}
+        isFormSubmitted={isFormSubmitted}
+        readOnly={isFormSubmitted}
         maxInputColSize={6}
       />
       <Row className="collection-step-row">
@@ -175,7 +172,7 @@ const CollectionStep = (
           <DatePicker
             datePickerType="single"
             dateFormat={DATE_FORMAT}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDateChange(true, selectedDate);
@@ -199,7 +196,7 @@ const CollectionStep = (
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDateChange(false, selectedDate);
@@ -226,7 +223,7 @@ const CollectionStep = (
             name={fieldsConfig.numberOfContainers.name}
             value={state.numberOfContainers.value}
             label={fieldsConfig.numberOfContainers.labelText}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
             invalid={state.numberOfContainers.isInvalid}
             invalidText={fieldsConfig.numberOfContainers.invalidText}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -242,7 +239,7 @@ const CollectionStep = (
             name={fieldsConfig.volumePerContainers.name}
             value={state.volumePerContainers.value}
             label={fieldsConfig.volumePerContainers.labelText}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
             invalid={state.volumePerContainers.isInvalid}
             invalidText={fieldsConfig.volumePerContainers.invalidText}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,7 +261,7 @@ const CollectionStep = (
             invalidText={fieldsConfig.volumeOfCones.invalidText}
             helperText={fieldsConfig.volumeOfCones.helperText}
             warn={isCalcWrong}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
             warnText={fieldsConfig.volumeOfCones.warnText}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleVolOfCones(e.target.value);
@@ -297,7 +294,7 @@ const CollectionStep = (
                         id={`cone-collection-method-checkbox-${method.code}`}
                         name={method.label}
                         labelText={method.description}
-                        readOnly={readOnly}
+                        readOnly={isFormSubmitted}
                         checked={state.selectedCollectionCodes.value.includes(method.code)}
                         onChange={() => handleCollectionMethods(method.code)}
                       />
@@ -314,7 +311,7 @@ const CollectionStep = (
             id={state.comments.id}
             name={fieldsConfig.comments.name}
             labelText={fieldsConfig.comments.labelText}
-            readOnly={readOnly}
+            readOnly={isFormSubmitted}
             placeholder={fieldsConfig.comments.placeholder}
             defaultValue={state.comments.value}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {

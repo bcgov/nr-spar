@@ -5,8 +5,10 @@ export const sortByKey = (
   headerId: keyof ForestClientSearchType | null,
   direction: string
 ) => {
+  // sort is inplace but we don't want that.
+  const data = structuredClone(dataToSort);
   if (headerId && direction === 'ASC') {
-    return dataToSort.sort((a, b) => {
+    return data.sort((a, b) => {
       if (a[headerId] > b[headerId]) {
         return 1;
       }
@@ -16,8 +18,9 @@ export const sortByKey = (
       return 0;
     });
   }
+
   if (headerId && direction === 'DESC') {
-    return dataToSort.sort((a, b) => {
+    return data.sort((a, b) => {
       if (a[headerId] < b[headerId]) {
         return 1;
       }
@@ -27,5 +30,6 @@ export const sortByKey = (
       return 0;
     });
   }
-  return dataToSort;
+
+  return data;
 };

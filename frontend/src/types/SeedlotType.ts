@@ -111,7 +111,46 @@ export type SeedlotType = {
     updateUserId: string,
     updateTimestamp: string
   },
-  revisionCount: number
+  revisionCount: number,
+  seedPlanUnitId: number,
+  bgcZoneCode: string,
+  bgcSubzoneCode: string,
+  variant: string,
+  becVersionId: number,
+  elevation: number,
+  latitudeDegrees: number,
+  latitudeMinutes: number,
+  latitudeSeconds: number,
+  longitudeDegrees: number,
+  longitudeMinutes: number,
+  longitudeSeconds: number,
+  collectionElevation: number,
+  collectionElevationMin: number,
+  collectionElevationMax: number,
+  collectionLatitudeDeg: number,
+  collectionLatitudeMin: number,
+  collectionLatitudeSec: number,
+  collectionLatitudeCode: string,
+  collectionLongitudeDeg: number,
+  collectionLongitudeMin: number,
+  collectionLongitudeSec: number,
+  collectionLongitudeCode: string,
+  elevationMin: number,
+  elevationMax: number,
+  latitudeDegMin: number,
+  latitudeMinMin: number,
+  latitudeSecMin: number,
+  latitudeDegMax: number,
+  latitudeMinMax: number,
+  latitudeSecMax: number,
+  longitudeDegMin: number,
+  longitudeMinMin: number,
+  longitudeSecMin: number,
+  longitudeDegMax: number,
+  longitudeMinMax: number,
+  longitudeSecMax: number,
+  smpMeanBvGrowth: number,
+  areaOfUseComment: string
 }
 
 export type SeedlotsReturnType = {
@@ -205,3 +244,15 @@ export type SeedlotProgressPayloadType = {
   allStepData: AllStepData,
   progressStatus: ProgressIndicatorConfig
 };
+
+export type SeedlotCalculationsResultsType = {
+  traitCode: string,
+  traitValue: number,
+  calculatedValue: number,
+  testedParentTreePerc: number
+}
+
+export type SeedlotAClassFullResponseType = {
+  seedlotData: SeedlotAClassSubmitType,
+  calculatedValues: Array<SeedlotCalculationsResultsType>
+}
