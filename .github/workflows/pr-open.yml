@@ -28,6 +28,8 @@ jobs:
 
   deploys:
     name: Deploys
+    env:
+      JOB: ${{ github.event.repository.name }}-${{ github.event.number }}-sync
     needs: [builds]
     runs-on: ubuntu-latest
     steps:
@@ -39,8 +41,11 @@ jobs:
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           overwrite: true
-          parameters:
-            -p ZONE=${{ github.event.number }} -p PROMOTE=bcgov/nr-spar-data/sync:${{ github.event.number }}
+          parameters: -p ZONE=${{ github.event.number }} -p TAG=${{ github.event.number }}
+          post_rollout: 
+            oc create job ${{ env.JOB }}-${{ github.run_number }} --from=cronjob/${{ env.JOB }} && \
+            sleep 10 && \
+            oc logs -l job-name=${{ env.JOB }}-${{ github.run_number }} --tail=50 --follow
           triggers: ('sync/')
 
   results:
