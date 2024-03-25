@@ -1,7 +1,7 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
 .sub-section-divider {
-  height: 1px;
+  height: 0.0625rem;
   align-self: stretch;
   background: var(--#{vars.$bcgov-prefix}-border-subtle-02, #DFDFE1);
   margin: 2.5rem 0;
