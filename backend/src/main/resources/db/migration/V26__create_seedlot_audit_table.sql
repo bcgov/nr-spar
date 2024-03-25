@@ -38,18 +38,17 @@ create table if not exists spar.seedlot_audit (
   total_parent_trees              int,
   smp_success_pct                 int,
   effective_pop_size              decimal(5, 1),
-  tested_parent_tree_cont_pct     decimal(6, 2),
-  coancestry                      decimal(20, 10),
   smp_parents_outside             int,
   non_orchard_pollen_contam_pct   int,
   extractory_client_number        varchar(8),
   extractory_locn_code            varchar(2),
   extraction_st_date              timestamp,
   extraction_end_date             timestamp,
-  storage_client_number           varchar(8),
-  storage_locn_code               varchar(2),
-  temporary_storage_start_date    timestamp,
-  temporary_storage_end_date      timestamp,
+  temporary_strg_client_number    varchar(8),
+  temporary_strg_locn_code        varchar(2),
+  temporary_strg_start_date       timestamp,
+  temporary_strg_end_date         timestamp,
+  interm_strg_locn                varchar(55),
   declared_userid                 varchar(30),
   declared_timestamp              timestamp,
   entry_userid                    varchar(30) not null,
@@ -101,18 +100,16 @@ comment on column spar.seedlot_audit.pollen_contamination_mthd_code is 'Referrin
 comment on column spar.seedlot_audit.total_parent_trees             is 'Referring value for spar.seedlot.total_parent_trees column';
 comment on column spar.seedlot_audit.smp_success_pct                is 'Referring value for spar.seedlot.smp_success_pct column';
 comment on column spar.seedlot_audit.effective_pop_size             is 'Referring value for spar.seedlot.effective_pop_size column';
-comment on column spar.seedlot_audit.tested_parent_tree_cont_pct    is 'Referring value for spar.seedlot.tested_parent_tree_cont_pct column';
-comment on column spar.seedlot_audit.coancestry                     is 'Referring value for spar.seedlot.coancestry column';
 comment on column spar.seedlot_audit.smp_parents_outside            is 'Referring value for spar.seedlot.smp_parents_outside column';
 comment on column spar.seedlot_audit.non_orchard_pollen_contam_pct  is 'Referring value for spar.seedlot.non_orchard_pollen_contam_pct column';
 comment on column spar.seedlot_audit.extractory_client_number       is 'Referring value for spar.seedlot.extractory_client_number column';
 comment on column spar.seedlot_audit.extractory_locn_code           is 'Referring value for spar.seedlot.extractory_locn_code column';
 comment on column spar.seedlot_audit.extraction_st_date             is 'Referring value for spar.seedlot.extraction_st_date column';
 comment on column spar.seedlot_audit.extraction_end_date            is 'Referring value for spar.seedlot.extraction_end_date column';
-comment on column spar.seedlot_audit.storage_client_number          is 'Referring value for spar.seedlot.storage_client_number column';
-comment on column spar.seedlot_audit.storage_locn_code              is 'Referring value for spar.seedlot.storage_locn_code column';
-comment on column spar.seedlot_audit.temporary_storage_start_date   is 'Referring value for spar.seedlot.temporary_storage_start_date column';
-comment on column spar.seedlot_audit.temporary_storage_end_date     is 'Referring value for spar.seedlot.temporary_storage_end_date column';
+comment on column spar.seedlot_audit.temporary_strg_client_number   is 'Referring value for spar.seedlot.temporary_strg_client_number column';
+comment on column spar.seedlot_audit.temporary_strg_locn_code       is 'Referring value for spar.seedlot.temporary_strg_locn_code column';
+comment on column spar.seedlot_audit.temporary_strg_start_date      is 'Referring value for spar.seedlot.temporary_strg_start_date column';
+comment on column spar.seedlot_audit.temporary_strg_end_date        is 'Referring value for spar.seedlot.temporary_strg_end_date column';
 comment on column spar.seedlot_audit.declared_userid                is 'Referring value for spar.seedlot.declared_userid column';
 comment on column spar.seedlot_audit.declared_timestamp             is 'Referring value for spar.seedlot.declared_timestamp column';
 comment on column spar.seedlot_audit.entry_userid                   is 'Referring value for spar.seedlot.entry_userid column';

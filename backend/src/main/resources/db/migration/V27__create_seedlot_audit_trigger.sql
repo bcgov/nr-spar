@@ -16,7 +16,7 @@ BEGIN
         v_new_data := ROW(NEW.*);
 		/* AUDIT REVISION number used to order the statements executed in the row */ 
 		v_auditrevision := (SELECT MAX(COALESCE(audit_revision_version,1))+1 FROM spar.seedlot_audit WHERE seedlot_number = NEW.seedlot_number) ;
-        INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,tested_parent_tree_cont_pct,coancestry,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,storage_client_number,storage_locn_code,temporary_storage_start_date,temporary_storage_end_date,declared_userid,declared_timestamp,entry_userid,entry_timestamp,update_userid,update_timestamp,revision_count)               
+        INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,temporary_strg_client_number,temporary_strg_locn_code,temporary_strg_start_date,temporary_strg_end_date,declared_userid,declared_timestamp,entry_userid,entry_timestamp,update_userid,update_timestamp,revision_count)               
 		VALUES(
 		/*spar_audit_code                */ 'U',
 		/*db_user                 	     */ session_user::TEXT,
@@ -55,18 +55,17 @@ BEGIN
 		/*total_parent_trees             */ NEW.total_parent_trees,
 		/*smp_success_pct                */ NEW.smp_success_pct,
 		/*effective_pop_size             */ NEW.effective_pop_size,
-		/*tested_parent_tree_cont_pct    */ NEW.tested_parent_tree_cont_pct,
-		/*coancestry                     */ NEW.coancestry,
 		/*smp_parents_outside            */ NEW.smp_parents_outside,
 		/*non_orchard_pollen_contam_pct  */ NEW.non_orchard_pollen_contam_pct,
 		/*extractory_client_number       */ NEW.extractory_client_number,
 		/*extractory_locn_code           */ NEW.extractory_locn_code,
 		/*extraction_st_date             */ NEW.extraction_st_date,
 		/*extraction_end_date            */ NEW.extraction_end_date,
-		/*storage_client_number          */ NEW.storage_client_number,
-		/*storage_locn_code              */ NEW.storage_locn_code,
-		/*temporary_storage_start_date   */ NEW.temporary_storage_start_date,
-		/*temporary_storage_end_date     */ NEW.temporary_storage_end_date,
+		/*temporary_strg_client_number   */ NEW.temporary_strg_client_number,
+		/*temporary_strg_locn_code       */ NEW.temporary_strg_locn_code,
+		/*temporary_strg_start_date      */ NEW.temporary_strg_start_date,
+		/*temporary_strg_end_date        */ NEW.temporary_strg_end_date,
+    /*interm_strg_locn               */ NEW.interm_strg_locn,
 		/*declared_userid                */ NEW.declared_userid,
 		/*declared_timestamp             */ NEW.declared_timestamp,
 		/*entry_userid                   */ NEW.entry_userid,
@@ -82,7 +81,7 @@ BEGIN
         values (TG_TABLE_SCHEMA::TEXT,TG_TABLE_NAME::TEXT,session_user::TEXT,substring(TG_OP,1,1),v_old_data, current_query());*/
 		/* AUDIT REVISION number used to order the statements executed in the row */ 
 		v_auditrevision := (SELECT MAX(COALESCE(audit_revision_version,1))+1 FROM spar.seedlot_audit WHERE seedlot_number = NEW.seedlot_number) ;
-		INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,tested_parent_tree_cont_pct,coancestry,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,storage_client_number,storage_locn_code,temporary_storage_start_date,temporary_storage_end_date,declared_userid,declared_timestamp,entry_userid,entry_timestamp,update_userid,update_timestamp,revision_count)               
+		INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,temporary_strg_client_number,temporary_strg_locn_code,temporary_strg_start_date,temporary_strg_end_date,interm_strg_locn,declared_userid,declared_timestamp,entry_userid,entry_timestamp,update_userid,update_timestamp,revision_count)               
 		VALUES(
 		/*spar_audit_code                */ 'D',
 		/*db_user                 	     */ session_user::TEXT,
@@ -121,18 +120,17 @@ BEGIN
 		/*total_parent_trees             */ OLD.total_parent_trees,
 		/*smp_success_pct                */ OLD.smp_success_pct,
 		/*effective_pop_size             */ OLD.effective_pop_size,
-		/*tested_parent_tree_cont_pct    */ OLD.tested_parent_tree_cont_pct,
-		/*coancestry                     */ OLD.coancestry,
 		/*smp_parents_outside            */ OLD.smp_parents_outside,
 		/*non_orchard_pollen_contam_pct  */ OLD.non_orchard_pollen_contam_pct,
 		/*extractory_client_number       */ OLD.extractory_client_number,
 		/*extractory_locn_code           */ OLD.extractory_locn_code,
 		/*extraction_st_date             */ OLD.extraction_st_date,
 		/*extraction_end_date            */ OLD.extraction_end_date,
-		/*storage_client_number          */ OLD.storage_client_number,
-		/*storage_locn_code              */ OLD.storage_locn_code,
-		/*temporary_storage_start_date   */ OLD.temporary_storage_start_date,
-		/*temporary_storage_end_date     */ OLD.temporary_storage_end_date,
+		/*temporary_strg_client_number   */ OLD.temporary_strg_client_number,
+		/*temporary_strg_locn_code       */ OLD.temporary_strg_locn_code,
+		/*temporary_strg_start_date      */ OLD.temporary_strg_start_date,
+		/*temporary_strg_end_date        */ OLD.temporary_strg_end_date,
+    /*interm_strg_locn               */ OLD.interm_strg_locn,
 		/*declared_userid                */ OLD.declared_userid,
 		/*declared_timestamp             */ OLD.declared_timestamp,
 		/*entry_userid                   */ OLD.entry_userid,
@@ -144,7 +142,7 @@ BEGIN
         RETURN OLD;
     elsif (TG_OP = 'INSERT') then
         v_new_data := ROW(NEW.*);
-        INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,tested_parent_tree_cont_pct,coancestry,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,storage_client_number,storage_locn_code,temporary_storage_start_date,temporary_storage_end_date,declared_userid,declared_timestamp,entry_userid,entry_timestamp,update_userid,update_timestamp,revision_count)               
+        INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,temporary_strg_client_number,temporary_strg_locn_code,temporary_strg_start_date,temporary_strg_end_date,interm_strg_locn,declared_userid,declared_timestamp,entry_userid,entry_timestamp,update_userid,update_timestamp,revision_count)               
 		VALUES(
 		/*spar_audit_code                */ 'I',
 		/*db_user                 	     */ session_user::TEXT,
@@ -183,18 +181,17 @@ BEGIN
 		/*total_parent_trees             */ NEW.total_parent_trees,
 		/*smp_success_pct                */ NEW.smp_success_pct,
 		/*effective_pop_size             */ NEW.effective_pop_size,
-		/*tested_parent_tree_cont_pct    */ NEW.tested_parent_tree_cont_pct,
-		/*coancestry                     */ NEW.coancestry,
 		/*smp_parents_outside            */ NEW.smp_parents_outside,
 		/*non_orchard_pollen_contam_pct  */ NEW.non_orchard_pollen_contam_pct,
 		/*extractory_client_number       */ NEW.extractory_client_number,
 		/*extractory_locn_code           */ NEW.extractory_locn_code,
 		/*extraction_st_date             */ NEW.extraction_st_date,
 		/*extraction_end_date            */ NEW.extraction_end_date,
-		/*storage_client_number          */ NEW.storage_client_number,
-		/*storage_locn_code              */ NEW.storage_locn_code,
-		/*temporary_storage_start_date   */ NEW.temporary_storage_start_date,
-		/*temporary_storage_end_date     */ NEW.temporary_storage_end_date,
+		/*temporary_strg_client_number   */ NEW.temporary_strg_client_number,
+		/*temporary_strg_locn_code       */ NEW.temporary_strg_locn_code,
+		/*temporary_strg_start_date      */ NEW.temporary_strg_start_date,
+		/*temporary_strg_end_date        */ NEW.temporary_strg_end_date,
+    /*interm_strg_locn               */ NEW.interm_strg_locn,
 		/*declared_userid                */ NEW.declared_userid,
 		/*declared_timestamp             */ NEW.declared_timestamp,
 		/*entry_userid                   */ NEW.entry_userid,
