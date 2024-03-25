@@ -29,7 +29,7 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     link: ROUTES.MY_SEEDLOTS,
     highlighted: false
   },
-  unkown: {
+  unknown: {
     id: -1,
     type: 'default',
     image: 'Unknown',

@@ -37,24 +37,12 @@ import {
   ProgressStepStatus
 } from './definitions';
 import {
-  initProgressBar,
-  getSpeciesOptionByCode,
-  validateCollectionStep,
-  verifyCollectionStepCompleteness,
-  validateOwnershipStep,
-  verifyOwnershipStepCompleteness,
-  validateInterimStep,
-  verifyInterimStepCompleteness,
-  validateOrchardStep,
-  verifyOrchardStepCompleteness,
-  validateExtractionStep,
-  verifyExtractionStepCompleteness,
-  validateParentStep,
-  verifyParentStepCompleteness,
-  checkAllStepsCompletion,
-  getSeedlotPayload,
-  initEmptySteps,
-  resDataToState
+  initProgressBar, getSpeciesOptionByCode, validateCollectionStep, verifyCollectionStepCompleteness,
+  validateOwnershipStep, verifyOwnershipStepCompleteness, validateInterimStep,
+  verifyInterimStepCompleteness, validateOrchardStep, verifyOrchardStepCompleteness,
+  validateExtractionStep, verifyExtractionStepCompleteness, validateParentStep,
+  verifyParentStepCompleteness, checkAllStepsCompletion, getSeedlotPayload,
+  initEmptySteps, resDataToState
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE,

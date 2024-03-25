@@ -10,6 +10,7 @@ import {
 import validator from 'validator';
 
 import Subtitle from '../Subtitle';
+import Divider from '../Divider';
 import ApplicantAgencyFields from '../ApplicantAgencyFields';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../types/FormInputType';
@@ -23,7 +24,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import Divider from '../Divider';
 
 /**
  * This component displays a form for seedlot or veglot creation/edition.

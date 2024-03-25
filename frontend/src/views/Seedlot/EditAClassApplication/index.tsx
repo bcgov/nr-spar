@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
+import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
+
+import EditAClassApplicationForm from './Form';
 
 import './styles.scss';
-import EditAClassApplicationForm from './Form';
 
 type props = {
   // Defines whether this component is being used on the review seedlot page
