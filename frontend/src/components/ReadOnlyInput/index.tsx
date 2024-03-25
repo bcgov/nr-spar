@@ -1,7 +1,8 @@
 import React from 'react';
 
-import './styles.scss';
 import { TextInput, TextInputSkeleton } from '@carbon/react';
+
+import './styles.scss';
 
 type props = {
   id: string,
