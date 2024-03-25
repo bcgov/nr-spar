@@ -28,7 +28,7 @@ public class SwaggerConfig {
     return new OpenAPI()
         .info(
             new Info()
-                .title("THE database REST API")
+                .title("Oracle THE database REST API")
                 .description("A REST API to fetch information from the THE database.")
                 .version("v0.0.1")
                 .termsOfService(
