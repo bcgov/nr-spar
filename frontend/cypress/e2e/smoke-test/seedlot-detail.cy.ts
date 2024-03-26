@@ -9,7 +9,7 @@ describe('Seedlot detail page', () => {
   });
 
   /**
-   * Dashboard page should load correctly.
+   * Seedlot Dashboard page should load correctly.
    */
   it('should render seedlot detail correctly', () => {
     cy.get('.title-favourite')
