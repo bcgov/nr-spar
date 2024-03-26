@@ -37,7 +37,7 @@ jobs:
       - name: Deploys
         uses: bcgov-nr/action-deployer-openshift@v2.2.0
         with:
-          file: sync/openshift.deploy.yml
+          file: sync/openshift.etl.yml
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
@@ -63,7 +63,7 @@ jobs:
           oc project ${{ secrets.oc_namespace }} #Safeguard!
 
           # Follow
-          sleep 5
+          sleep 10
           oc logs -l job-name=${{ env.JOB }}-${{ github.run_number }} --tail=50 --follow
 
   results:

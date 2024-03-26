@@ -17,4 +17,4 @@ RUN pip install -r ./requirements.txt
 WORKDIR /app/src
 COPY src .
 USER 1001
-CMD python3 main.py
+CMD python3 main.py 1
