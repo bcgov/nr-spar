@@ -29,6 +29,35 @@ describe('Seedlot detail page', () => {
     cy.get('.seedlot-summary-title')
       .should('have.text', 'Seedlot summary');
 
+    cy.contains('p.seedlot-summary-info-label', 'Seedlot number')
+      .siblings('p.seedlot-summary-info-value')
+      .should('have.text', '63001');
+
+    cy.contains('p.seedlot-summary-info-label', 'Seedlot class')
+      .siblings('p.seedlot-summary-info-value')
+      .should('have.text', 'A-class');
+
+    cy.contains('p.seedlot-summary-info-label', 'Seedlot species')
+      .siblings('p.seedlot-summary-info-value')
+      .should('have.text', 'CW - Western redcedar');
+
+    cy.contains('p.seedlot-summary-info-label', 'Status')
+      .next()
+      .children('span')
+      .should('have.text', 'Pending');
+
+    cy.contains('p.seedlot-summary-info-label', 'Created at')
+      .siblings('p.seedlot-summary-info-value')
+      .should('have.text', 'Mar 18, 2024');
+
+    cy.contains('p.seedlot-summary-info-label', 'Last updated')
+      .siblings('p.seedlot-summary-info-value')
+      .should('have.text', 'Mar 18, 2024');
+
+    cy.contains('p.seedlot-summary-info-label', 'Approved at')
+      .siblings('p.seedlot-summary-info-value')
+      .should('have.text', '--');
+
     cy.get('.combo-button-container')
       .find('.combo-button')
       .should('have.text', 'Edit seedlot form')
