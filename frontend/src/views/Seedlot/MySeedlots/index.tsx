@@ -14,7 +14,7 @@ import { Add } from '@carbon/icons-react';
 import PageTitle from '../../../components/PageTitle';
 import AuthContext from '../../../contexts/AuthContext';
 import SeedlotTable from '../../../components/SeedlotTable';
-import PathConstants from '../../../routes/pathConstants';
+import ROUTES from '../../../routes/constants';
 import useWindowSize from '../../../hooks/UseWindowSize';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
@@ -33,7 +33,7 @@ const MySeedlots = () => {
     <FlexGrid fullWidth className="my-seedlot-content">
       <Row className="my-seedlot-breadcrumb">
         <Breadcrumb>
-          <BreadcrumbItem onClick={() => navigate(PathConstants.SEEDLOTS)}>Seedlots</BreadcrumbItem>
+          <BreadcrumbItem onClick={() => navigate(ROUTES.SEEDLOTS)}>Seedlots</BreadcrumbItem>
         </Breadcrumb>
       </Row>
       <Row className="my-seedlot-title">
@@ -48,7 +48,7 @@ const MySeedlots = () => {
         <Column className="no-padding-col" sm={4} md={2} lg={4} xlg={4}>
           <Button
             kind="primary"
-            onClick={() => { navigate(PathConstants.SEEDLOTS_A_CLASS_CREATION); }}
+            onClick={() => { navigate(ROUTES.SEEDLOTS_A_CLASS_CREATION); }}
             size="lg"
             className={`reg-seedlot-btn ${windowSize.innerWidth >= MEDIUM_SCREEN_WIDTH ? 'reg-btn-float-right' : null}`}
             renderIcon={Add}

@@ -7,7 +7,7 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';

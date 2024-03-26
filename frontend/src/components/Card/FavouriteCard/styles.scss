@@ -55,8 +55,7 @@
   margin-top: auto;
 }
 
-p.fav-card-title-large,
-p.fav-card-title-small {
+p.fav-card-title-large {
   @include type.type-style('heading-02');
   font-weight: 700;
   display: block;
@@ -110,10 +109,6 @@ p.fav-card-title-small {
   outline: 2px solid colors.$white;
 }
 
-p.fav-card-title-small {
-  display: none;
-}
-
 @media only screen and (max-width: 672px) {
   .fav-card-main,
   .fav-card-main-highlighted {
@@ -136,22 +131,7 @@ p.fav-card-title-small {
     justify-content: flex-start;
     align-items: center;
   }
-
-  p.fav-card-title-small {
-    padding-left: 1rem;
-    display: block;
-    width: 100%;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  p.fav-card-title-large {
-    display: none;
-  }
-
-  .fav-card-content > p.fav-card-content-description {
-    display: none;
-  }
+  
 }
 
 .fav-card-menu-options{

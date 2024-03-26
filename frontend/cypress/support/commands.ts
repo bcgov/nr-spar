@@ -62,10 +62,11 @@ Cypress.Commands.add('login', () => {
         }
       });
       cy.url().should('contains', '/dashboard');
+      cy.setCookie('is-cypress-logged-in', 'true');
     },
     {
       validate: () => {
-        assert.exists(localStorage.getItem('famLoginUser'));
+        cy.getCookie('is-cypress-logged-in').should('exist');
       },
       cacheAcrossSpecs: true
     }
