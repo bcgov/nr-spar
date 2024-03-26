@@ -14,6 +14,13 @@ describe('Seedlot detail page', () => {
   it('should render seedlot detail correctly', () => {
     cy.get('.title-favourite')
       .should('have.text', 'Seedlot 63001');
+
+    cy.get('.combo-button-container')
+      .find('.combo-button')
+      .should('have.text', 'Edit seedlot form')
+      .click();
+
+    cy.url().should('contains', '/seedlots/a-class-registration/63001');
   });
 
   it('should render registration process section correctly', () => {
@@ -96,17 +103,38 @@ describe('Seedlot detail page', () => {
     cy.contains('p.seedlot-summary-info-label', 'Approved at')
       .siblings('p.seedlot-summary-info-value')
       .should('have.text', '--');
-
-    cy.get('.combo-button-container')
-      .find('.combo-button')
-      .should('have.text', 'Edit seedlot form')
-      .click();
-
-    cy.url().should('contains', '/seedlots/a-class-registration/63001');
   });
 
   it('renders Applicant and Seedlot Information section correctly', () => {
     cy.get('.applicant-seedlot-information-title')
       .should('have.text', 'Check your applicant and seedlot information');
+
+    cy.get('.applicant-seedlot-information')
+      .find('#seedlot-applicant-agency')
+      .should('have.value', '00012797 - MINISTRY OF FORESTS - MOF');
+
+    cy.get('.applicant-seedlot-information')
+      .find('#seedlot-applicant-location-code')
+      .should('have.value', '01');
+
+    cy.get('.applicant-seedlot-information')
+      .find('button.email-display-value')
+      .should('have.text', 'ff@cc.com');
+
+    cy.get('.applicant-seedlot-information')
+      .find('#seedlot-applicant-species')
+      .should('have.value', 'CW - Western redcedar');
+
+    cy.get('.applicant-seedlot-information')
+      .find('#seedlot-applicant-source')
+      .should('have.value', 'Tested Parent Trees');
+
+    cy.get('.applicant-seedlot-information')
+      .find('#seedlot-applicant-to-be-registered')
+      .should('have.value', 'Yes');
+
+    cy.get('.applicant-seedlot-information')
+      .find('#seedlot-applicant-within-bc')
+      .should('have.value', 'Yes');
   });
 });
