@@ -33,8 +33,8 @@ describe('Seedlot Main page test', () => {
 
   it('should Check if 4 seedlots are being rendered at the bottom', () => {
     cy.get('table.bx--data-table')
-      .should('be.visible')
-    
+      .should('be.visible');
+
     cy.get('table.bx--data-table tbody tr')
       .eq(0)
       .find('td')
