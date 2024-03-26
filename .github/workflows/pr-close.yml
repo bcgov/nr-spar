@@ -45,8 +45,6 @@ jobs:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-22.04
     needs: setup
-    env:
-      ZONE: ${{ needs.setup.outputs.zone }}
     strategy:
       matrix:
         package: [database, backend, frontend, oracle-api]
@@ -55,5 +53,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
-          target: ${{ env.ZONE }}
+          target: ${{ github.event.number }}
           tags: test
