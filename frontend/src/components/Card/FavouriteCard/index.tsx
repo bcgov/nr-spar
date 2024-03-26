@@ -8,6 +8,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FavActivityType } from '../../../types/FavActivityTypes';
 import { patchFavAct, deleteFavAct } from '../../../api-service/favouriteActivitiesAPI';
 
+import useWindowSize from '../../../hooks/UseWindowSize';
+import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
+import SmallCard from '../SmallCard';
+
 import './styles.scss';
 
 interface FavouriteCardProps {
@@ -24,6 +28,8 @@ const FavouriteCard = ({
   const favActQueryKey = ['favourite-activities'];
   const queryClient = useQueryClient();
 
+  const windowSize = useWindowSize();
+
   const highlightFavAct = useMutation({
     mutationFn: () => patchFavAct('highlighted', favObject),
     onSuccess: () => {
@@ -38,31 +44,46 @@ const FavouriteCard = ({
     }
   });
 
+  const ActionBtn = (
+    <OverflowMenu className="fav-card-overflow" menuOptionsClass="fav-card-menu-options" aria-label={`${favObject.header} options`} flipped iconDescription="More actions">
+      <OverflowMenuItem
+        itemText={favObject.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'}
+        onClick={(e: Event) => {
+          e.stopPropagation();
+          highlightFavAct.mutate();
+        }}
+      />
+      <OverflowMenuItem
+        itemText="Delete shortcut"
+        onClick={(e: Event) => {
+          e.stopPropagation();
+          removeFavAct.mutate();
+        }}
+      />
+    </OverflowMenu>
+  );
+
+  if (windowSize.innerWidth < MEDIUM_SCREEN_WIDTH) {
+    return (
+      <SmallCard
+        header={favObject.header}
+        actionBtn={ActionBtn}
+        path={favObject.link}
+        image={favObject.image}
+        isIcon
+        favClassName={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
+      />
+    );
+  }
+
   return (
     <Tile
       className={favObject.highlighted ? 'fav-card-main-highlighted' : 'fav-card-main'}
-      tabIndex={index}
       onClick={() => navigate(favObject.link)}
     >
       <div className="fav-card-header">
         <Icon className="fav-card-icon" />
-        <p className="fav-card-title-small">{favObject.header}</p>
-        <OverflowMenu className="fav-card-overflow" menuOptionsClass="fav-card-menu-options" aria-label={`${favObject.header} options`} flipped iconDescription="More actions">
-          <OverflowMenuItem
-            itemText={favObject.highlighted ? 'Dehighlight shortcut' : 'Highlight shortcut'}
-            onClick={(e: Event) => {
-              e.stopPropagation();
-              highlightFavAct.mutate();
-            }}
-          />
-          <OverflowMenuItem
-            itemText="Delete shortcut"
-            onClick={(e: Event) => {
-              e.stopPropagation();
-              removeFavAct.mutate();
-            }}
-          />
-        </OverflowMenu>
+        {ActionBtn}
       </div>
       <div className="fav-card-content">
         <p className="fav-card-title-large">{favObject.header}</p>

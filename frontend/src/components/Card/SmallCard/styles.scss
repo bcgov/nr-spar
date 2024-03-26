@@ -1,5 +1,6 @@
-@use '@carbon/type';
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@carbon/type';
 
 .small-card {
   display: flex;
@@ -8,9 +9,9 @@
   align-items: center;
   width: 100%;
   height: 4rem;
-  background: var(--#{vars.$bcgov-prefix}-layer-02, #FFF);
+  background: var(--#{vars.$bcgov-prefix}-layer-02, colors.$white);
   border-radius: 0.25rem;
-  border: 0.0625rem solid var(--#{vars.$bcgov-prefix}-subtle-02, #DFDFE1);
+  border: 0.0625rem solid var(--#{vars.$bcgov-prefix}-subtle-02, colors.$gray-20);
   margin-top: 0.5rem;
 
   .image-header {
@@ -22,8 +23,8 @@
       width: 1.5rem;
       height: 1.5rem;
       stroke-width: 0.01875rem;
-      fill: var(--#{vars.$bcgov-prefix}-link-primary, #005CB8);
-      stroke: var(--#{vars.$bcgov-prefix}-link-primary, #005CB8);
+      fill: var(--#{vars.$bcgov-prefix}-link-primary, colors.$blue-70);
+      stroke: var(--#{vars.$bcgov-prefix}-link-primary, colors.$blue-70);
     }
 
     .header {
@@ -31,4 +32,18 @@
       margin-left: 0.75rem;
     }
   }
+}
+
+.small-card:hover,
+.small-card:focus {
+  cursor: pointer;
+}
+
+.fav-card-main-highlighted .image-header > svg {
+  fill: colors.$white;
+  stroke: colors.$white;
+}
+
+.fav-card-main-highlighted .image-header .header {
+  color: colors.$white;
 }
