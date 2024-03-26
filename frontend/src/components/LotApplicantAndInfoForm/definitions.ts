@@ -11,7 +11,8 @@ export type ComboBoxPropsType = {
 
 export type FormProps = {
   isSeedlot: boolean, // If it's not a seedlot then it's veglot
-  isEdit: boolean
+  isEdit: boolean,
+  isReview?: boolean,
   isBClass?: boolean,
   seedlotFormData?: SeedlotRegFormType,
   setSeedlotFormData?: React.Dispatch<React.SetStateAction<SeedlotRegFormType>>
@@ -20,5 +21,6 @@ export type FormProps = {
 export type SeedlotInformationProps = {
   seedlotFormData: SeedlotRegFormType,
   setSeedlotFormData: React.Dispatch<React.SetStateAction<SeedlotRegFormType>>,
-  isEdit: boolean
+  isEdit: boolean,
+  isReview?: boolean,
 }
