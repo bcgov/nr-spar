@@ -49,7 +49,7 @@ jobs:
       matrix:
         package: [database, backend, frontend, oracle-api]
     steps:
-      - uses: shrink/actions-docker-registry-tag@v3
+      - uses: shrink/actions-docker-registry-tag@v4
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.package }}
