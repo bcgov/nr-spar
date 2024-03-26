@@ -5,7 +5,7 @@ import {
   ProgressStep
 } from '@carbon/react';
 
-import { ProgressIndicatorConfig } from '../../views/Seedlot/SeedlotRegFormClassA/definitions';
+import { ProgressIndicatorConfig } from '../../views/Seedlot/ContextContainerClassA/definitions';
 import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 import useWindowSize from '../../hooks/UseWindowSize';
 

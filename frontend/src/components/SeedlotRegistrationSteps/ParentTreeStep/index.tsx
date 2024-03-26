@@ -26,7 +26,7 @@ import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUt
 import { recordValues } from '../../../utils/RecordUtils';
 import { GenWorthCalcPayload } from '../../../types/GeneticWorthTypes';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
-import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 
 import InputErrorNotification from './InputErrorNotification';
 import UploadWarnNotification from './UploadWarnNotification';

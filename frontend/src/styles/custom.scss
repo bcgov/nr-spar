@@ -314,13 +314,13 @@
 
 [data-carbon-theme='g100'] {
   $button-tokens: utilities.merge(button-tokens.$button-tokens,
-    dark-button-overrides.$dark-button-token-overrides );
+      dark-button-overrides.$dark-button-token-overrides );
 
   $tag-tokens: utilities.merge(tag-tokens.$tag-tokens,
-    dark-tag-overrides.$dark-tag-token-overrides );
+      dark-tag-overrides.$dark-tag-token-overrides );
 
   $notification-tokens: utilities.merge(notification-tokens.$notification-tokens,
-    dark-notification-overrides.$dark-notification-token-overrides );
+      dark-notification-overrides.$dark-notification-token-overrides );
 
   @include theme.add-component-tokens($button-tokens);
   @include theme.add-component-tokens($tag-tokens);
@@ -330,13 +330,13 @@
 
 [data-carbon-theme='g10'] {
   $button-tokens: utilities.merge(button-tokens.$button-tokens,
-    light-button-overrides.$light-button-token-overrides );
+      light-button-overrides.$light-button-token-overrides );
 
   $tag-tokens: utilities.merge(tag-tokens.$tag-tokens,
-    light-tag-overrides.$light-tag-token-overrides );
+      light-tag-overrides.$light-tag-token-overrides );
 
   $notification-tokens: utilities.merge(notification-tokens.$notification-tokens,
-    light-notification-overrides.$light-notification-token-overrides);
+      light-notification-overrides.$light-notification-token-overrides);
 
   @include theme.add-component-tokens($button-tokens);
   @include theme.add-component-tokens($tag-tokens);
@@ -402,4 +402,8 @@ label.#{vars.$bcgov-prefix}--label--disabled {
     display: flex;
     align-items: center;
   }
+}
+
+.no-padding {
+  padding: 0;
 }
