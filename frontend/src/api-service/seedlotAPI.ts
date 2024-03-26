@@ -1,6 +1,7 @@
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
 import {
-  SeedlotAClassSubmitType, SeedlotProgressPayloadType, SeedlotType, SeedlotsReturnType
+  SeedlotAClassFullResponseType, SeedlotAClassSubmitType, SeedlotProgressPayloadType,
+  SeedlotType, SeedlotsReturnType
 } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
@@ -64,4 +65,9 @@ export const getAClassSeedlotProgressStatus = (seedlotNumber: string) => {
 export const getAClassSeedlotDraft = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-progress`;
   return api.get(url);
+};
+
+export const getAClassSeedlotFullForm = (seedlotNumber: string) => {
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-full-form`;
+  return api.get(url).then((res) => res.data as SeedlotAClassFullResponseType);
 };

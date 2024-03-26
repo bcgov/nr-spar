@@ -25,6 +25,8 @@ import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
@@ -57,7 +59,11 @@ class SeedlotFormPutTest {
 
   @Mock SeedlotCollectionMethodService seedlotCollectionMethodService;
 
+  @Mock SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
+
   @Mock SeedlotOwnerQuantityService seedlotOwnerQuantityService;
+
+  @Mock SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
 
   @Mock SeedlotOrchardService seedlotOrchardService;
 
@@ -175,7 +181,9 @@ class SeedlotFormPutTest {
             geneticClassRepository,
             loggedUserService,
             seedlotCollectionMethodService,
+            seedlotCollectionMethodRepository,
             seedlotOwnerQuantityService,
+            seedlotOwnerQuantityRepository,
             seedlotOrchardService,
             seedlotParentTreeService,
             seedlotParentTreeGeneticQualityService,
