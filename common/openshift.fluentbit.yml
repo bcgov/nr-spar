@@ -40,6 +40,10 @@ parameters:
     description: Requested Memory per pod (in gigabytes Gi or megabytes Mi ex. 500Mi)
     displayName: Memory Request
     value: 16Mi
+  - name: MIN_REPLICAS
+    description: Dummy value for workflow convenience
+  - name: MAX_REPLICAS
+    description: Dummy value for workflow convenience
 objects:
   - kind: DeploymentConfig
     apiVersion: v1
