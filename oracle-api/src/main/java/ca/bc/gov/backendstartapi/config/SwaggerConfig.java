@@ -40,8 +40,8 @@ public class SwaggerConfig {
                             "https://www2.gov.bc.ca/gov/content/data/open-data/open-government-licence-bc")))
         .externalDocs(
             new ExternalDocumentation()
-                .description("Our Jira project")
-                .url("https://apps.nrs.gov.bc.ca/int/jira/projects/FSADT2"))
+                .description("Our GitHub Repo")
+                .url("https://github.com/bcgov/nr-spar"))
         .components(
             new Components()
                 .addSecuritySchemes(
