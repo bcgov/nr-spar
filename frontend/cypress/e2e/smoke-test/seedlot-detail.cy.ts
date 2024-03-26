@@ -14,6 +14,9 @@ describe('Seedlot detail page', () => {
   it('should render seedlot detail correctly', () => {
     cy.get('.title-favourite')
       .should('have.text', 'Seedlot 63001');
+  });
+
+  it('should render registration process section correctly', () => {
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
