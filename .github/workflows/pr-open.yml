@@ -8,6 +8,9 @@ concurrency:
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
+env:
+  JOB: ${{ github.event.repository.name }}-${{ github.event.number }}-sync
+
 jobs:
   # https://github.com/bcgov-nr/action-builder-ghcr
   builds:
@@ -28,30 +31,45 @@ jobs:
 
   deploys:
     name: Deploys
-    env:
-      JOB: ${{ github.event.repository.name }}-${{ github.event.number }}-sync
     needs: [builds]
     runs-on: ubuntu-latest
     steps:
       - name: Deploys
-        uses: bcgov-nr/action-deployer-openshift@v2.1.0
+        uses: bcgov-nr/action-deployer-openshift@v2.2.0
         with:
           file: sync/openshift.deploy.yml
           oc_namespace: ${{ secrets.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
+          oc_version: 4.13
           overwrite: true
           parameters: -p ZONE=${{ github.event.number }} -p TAG=${{ github.event.number }}
           post_rollout: 
-            oc create job ${{ env.JOB }}-${{ github.run_number }} --from=cronjob/${{ env.JOB }} && \
-            sleep 10 && \
-            oc logs -l job-name=${{ env.JOB }}-${{ github.run_number }} --tail=50 --follow
+            oc create job ${{ env.JOB }}-${{ github.run_number }} --from=cronjob/${{ env.JOB }} &&
+            oc get job ${{ env.JOB }}-${{ github.run_number }}
           triggers: ('sync/')
+
+  logs:
+    name: Logs
+    needs: [deploys]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Logs
+        run: |
+          # Check job logs
+
+          # Login
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ secrets.oc_namespace }} #Safeguard!
+
+          # Follow
+          sleep 5
+          oc logs -l job-name=${{ env.JOB }}-${{ github.run_number }} --tail=50 --follow
 
   results:
     name: PR Results
     if: always() && !failure()
-    needs: [deploys]
+    needs: [logs]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
