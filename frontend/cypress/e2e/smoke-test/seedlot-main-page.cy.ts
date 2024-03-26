@@ -51,7 +51,7 @@ describe('Seedlot Main page test', () => {
       .eq(2)
       .find('td')
       .first()
-      .should('have.text', '63001');
+      .should('have.text', '63002');
 
     cy.get('table.bx--data-table tbody tr')
       .eq(3)
