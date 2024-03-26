@@ -15,7 +15,7 @@ describe('Seedlot detail page', () => {
     cy.get('.title-favourite')
       .should('have.text', 'Seedlot 63001');
 
-    cy.get('.btn-fp')
+    cy.get('.section-btn')
       .should('have.text', 'Edit seedlot form')
       .click();
 
