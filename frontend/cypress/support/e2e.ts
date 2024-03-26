@@ -94,20 +94,26 @@ beforeEach(() => {
     }
   ).as('GET_seedlot_detail_by_63001');
 
-  // TODO: Use feature instead
   cy.intercept(
-    'GET',
-    '**/api/forest-clients/00012797',
     {
-      clientNumber: '00012797',
-      clientName: 'MINISTRY OF FORESTS',
-      legalFirstName: null,
-      legalMiddleName: null,
-      clientStatusCode: 'ACT',
-      clientTypeCode: 'F',
-      acronym: 'MOF'
+      method: 'GET',
+      url: '**/api/forest-clients/00012797'
+    },
+    {
+      statusCode: 200,
+      fixture: 'forest-clients.json'
     }
   ).as('GET_client_mof');
 
-  // TODO: Mock seedlot sources call /api/seedlot-sources, use fixture
+  cy.intercept(
+    {
+      method: 'GET',
+      url: '**/api/seedlot-sources'
+    },
+    {
+      statusCode: 200,
+      fixture: 'seedlot-source.json'
+    }
+  ).as('GET_seedlot_source_by_63001');
+
 });
