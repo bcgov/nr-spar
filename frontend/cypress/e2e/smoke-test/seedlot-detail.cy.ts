@@ -16,6 +16,42 @@ describe('Seedlot detail page', () => {
       .should('have.text', 'Seedlot 63001');
 
     cy.get('.detail-section-grid')
+      .find('.steps-box ul li')
+      .eq(0)
+      .find('p.bx--progress-label')
+      .should('have.text', 'Collection')
+
+    cy.get('.detail-section-grid')
+      .find('.steps-box ul li')
+      .eq(1)
+      .find('p.bx--progress-label')
+      .should('have.text', 'Ownership')
+
+    cy.get('.detail-section-grid')
+      .find('.steps-box ul li')
+      .eq(2)
+      .find('p.bx--progress-label')
+      .should('have.text', 'Interim storage')
+
+    cy.get('.detail-section-grid')
+      .find('.steps-box ul li')
+      .eq(3)
+      .find('p.bx--progress-label')
+      .should('have.text', 'Orchard')
+
+    cy.get('.detail-section-grid')
+      .find('.steps-box ul li')
+      .eq(4)
+      .find('p.bx--progress-label')
+      .should('have.text', 'Parent tree and SMP')
+
+    cy.get('.detail-section-grid')
+      .find('.steps-box ul li')
+      .eq(5)
+      .find('p.bx--progress-label')
+      .should('have.text', 'Extraction and storage')
+
+    cy.get('.detail-section-grid')
       .children('.bx--row')
       .children('.bx--col')
       .find('button.section-btn')
