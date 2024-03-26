@@ -1,4 +1,4 @@
-import PathConstants from '../../routes/pathConstants';
+import ROUTES from '../../routes/constants';
 
 export const cards = [
   {
@@ -7,7 +7,7 @@ export const cards = [
     header: 'Register an A-class seedlot',
     description:
       'Register a seedlot which has been collected in an orchard from parent trees',
-    link: PathConstants.SEEDLOTS_A_CLASS_CREATION,
+    link: ROUTES.SEEDLOTS_A_CLASS_CREATION,
     highlighted: false,
     isEmpty: false,
     emptyTitle: '',
@@ -31,7 +31,7 @@ export const cards = [
     header: 'My seedlots',
     description:
       'Consult and manage your own seedlots',
-    link: PathConstants.MY_SEEDLOTS,
+    link: ROUTES.MY_SEEDLOTS,
     highlighted: false,
     isEmpty: false,
     emptyTitle: '',

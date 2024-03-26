@@ -22,7 +22,7 @@ import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
-import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import InterimForm from './definitions';
 import {
   DATE_FORMAT, MAX_FACILITY_DESC_CHAR, agencyFieldsProps, pageTexts

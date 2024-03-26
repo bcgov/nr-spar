@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import PathConstants from '../../routes/pathConstants';
+import ROUTES from '../../routes/constants';
 
 import mysteryImg from '../../assets/img/404-mystery.png';
 
@@ -14,11 +14,11 @@ const FourOhFour = () => {
 
   const links: linkType[] = [
     {
-      href: PathConstants.DASHBOARD,
+      href: ROUTES.DASHBOARD,
       text: 'Dashboard'
     },
     {
-      href: PathConstants.SEEDLOTS,
+      href: ROUTES.SEEDLOTS,
       text: 'Seedlots'
     }
   ];

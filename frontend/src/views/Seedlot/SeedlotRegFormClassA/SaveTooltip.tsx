@@ -12,8 +12,8 @@ import { DateTime } from 'luxon';
 
 import { ONE_SECOND } from '../../../config/TimeUnits';
 
-import { SaveTooltipProps } from './definitions';
-import { smartSaveText } from './constants';
+import { SaveTooltipProps } from '../ContextContainerClassA/definitions';
+import { smartSaveText } from '../ContextContainerClassA/constants';
 
 const SaveTooltipLabel = (
   {

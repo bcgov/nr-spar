@@ -7,7 +7,7 @@ import {
   Button
 } from '@carbon/react';
 import { Growth } from '@carbon/pictograms-react';
-import PathConstants from '../../../routes/pathConstants';
+import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 
 import './styles.scss';
@@ -44,7 +44,7 @@ const SeedlotCreatedFeedback = () => {
                 <Button
                   onClick={() => {
                     if (seedlotClass === 'A') {
-                      navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''));
+                      navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''));
                     }
                   }}
                   size="lg"
@@ -58,7 +58,7 @@ const SeedlotCreatedFeedback = () => {
               <Column sm={4} md={4} lg={12} xlg={10} max={8}>
                 <Button
                   kind="tertiary"
-                  onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlotNumber ?? ''))}
+                  onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? ''))}
                   size="lg"
                   className="btn-scf"
                 >
@@ -72,7 +72,7 @@ const SeedlotCreatedFeedback = () => {
                   kind="tertiary"
                   onClick={() => {
                     if (seedlotClass === 'A') {
-                      navigate(PathConstants.SEEDLOTS_A_CLASS_CREATION);
+                      navigate(ROUTES.SEEDLOTS_A_CLASS_CREATION);
                     }
                   }}
                   size="lg"
@@ -89,7 +89,7 @@ const SeedlotCreatedFeedback = () => {
               <Column sm={4} md={4} lg={12} xlg={10} max={8}>
                 <Button
                   kind="tertiary"
-                  onClick={() => navigate(PathConstants.SEEDLOTS)}
+                  onClick={() => navigate(ROUTES.SEEDLOTS)}
                   size="lg"
                   className="btn-scf"
                 >

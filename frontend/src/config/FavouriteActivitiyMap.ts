@@ -1,4 +1,4 @@
-import PathConstants from '../routes/pathConstants';
+import ROUTES from '../routes/constants';
 import { FavActivityType } from '../types/FavActivityTypes';
 
 const FavouriteActivityMap: Record<string, FavActivityType> = {
@@ -8,7 +8,7 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     image: 'SoilMoistureField',
     header: 'Seedlots',
     description: 'Register and manage your seedlots',
-    link: PathConstants.SEEDLOTS,
+    link: ROUTES.SEEDLOTS,
     highlighted: false
   },
   registerAClass: {
@@ -17,7 +17,7 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     image: 'TaskAdd',
     header: 'Create A-class seedlot',
     description: 'Register a new A-class seedlot',
-    link: PathConstants.SEEDLOTS_A_CLASS_CREATION,
+    link: ROUTES.SEEDLOTS_A_CLASS_CREATION,
     highlighted: false
   },
   mySeedlots: {
@@ -26,10 +26,10 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     image: 'TableSplit',
     header: 'My Seedlots',
     description: 'Check and manage your own seedlots',
-    link: PathConstants.MY_SEEDLOTS,
+    link: ROUTES.MY_SEEDLOTS,
     highlighted: false
   },
-  unkown: {
+  unknown: {
     id: -1,
     type: 'default',
     image: 'Unknown',

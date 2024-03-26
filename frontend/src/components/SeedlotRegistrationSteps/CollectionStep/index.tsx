@@ -21,7 +21,7 @@ import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAP
 
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
-import ClassAContext from '../../../views/Seedlot/SeedlotRegFormClassA/ClassAContext';
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 import {

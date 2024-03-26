@@ -1,4 +1,4 @@
-import PathConstants from '../routes/pathConstants';
+import ROUTES from '../routes/constants';
 import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
 
 export const getStoredPath = () => {
@@ -6,9 +6,9 @@ export const getStoredPath = () => {
   storedPath = localStorage.getItem(SPAR_REDIRECT_PATH);
   if (storedPath) {
     localStorage.removeItem(SPAR_REDIRECT_PATH);
-    return storedPath === PathConstants.ROOT ? PathConstants.DASHBOARD : storedPath;
+    return storedPath === ROUTES.ROOT ? ROUTES.DASHBOARD : storedPath;
   }
-  return PathConstants.DASHBOARD;
+  return ROUTES.DASHBOARD;
 };
 
 // Split on the ':' character, since it is where

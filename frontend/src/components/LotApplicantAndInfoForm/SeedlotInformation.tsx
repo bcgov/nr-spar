@@ -29,7 +29,8 @@ const SeedlotInformation = (
   {
     seedlotFormData,
     setSeedlotFormData,
-    isEdit
+    isEdit,
+    isReview
   }: SeedlotInformationProps
 ) => {
   const vegCodeQuery = useQuery({
@@ -127,7 +128,11 @@ const SeedlotInformation = (
       <Row className="section-title">
         <Column lg={8}>
           <h2>Seedlot information</h2>
-          <Subtitle text="Enter the initial information about this seedlot" />
+          {
+            isReview
+              ? null
+              : <Subtitle text="Enter the initial information about this seedlot" />
+          }
         </Column>
       </Row>
       <Row className="form-row">

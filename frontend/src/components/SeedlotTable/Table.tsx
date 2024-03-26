@@ -15,7 +15,7 @@ import { SeedlotDisplayType } from '../../types/SeedlotType';
 import { HeaderConfig } from './constants';
 import { sortByKey } from './utils';
 import { SeedlotDataTableProps } from './definitions';
-import PathConstants from '../../routes/pathConstants';
+import ROUTES from '../../routes/constants';
 import { addParamToPath } from '../../utils/PathUtils';
 
 const SeedlotDataTable = (
@@ -117,7 +117,7 @@ const SeedlotDataTable = (
               <TableRow
                 id={`seedlot-table-row-${seedlot.seedlotNumber}`}
                 key={seedlot.seedlotNumber}
-                onClick={() => navigate(addParamToPath(PathConstants.SEEDLOT_DETAILS, seedlot.seedlotNumber ?? ''))}
+                onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlot.seedlotNumber ?? ''))}
               >
                 {
                   HeaderConfig.map((header) => (

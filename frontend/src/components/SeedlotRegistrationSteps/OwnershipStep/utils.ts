@@ -1,5 +1,5 @@
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { emptyOwnershipStep } from '../../../views/Seedlot/SeedlotRegFormClassA/constants';
+import { emptyOwnershipStep } from '../../../views/Seedlot/ContextContainerClassA/constants';
 import { inputText, createOwnerTemplate } from './constants';
 
 import {

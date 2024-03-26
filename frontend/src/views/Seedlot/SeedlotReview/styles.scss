@@ -1,0 +1,39 @@
+@use '@carbon/type';
+
+.seedlot-review-grid {
+
+  .section-title-row {
+    padding-top: 2.5rem;
+
+    .section-title-col {
+      @include type.type-style('heading-03');
+      margin-bottom: 2rem;
+    }
+  }
+
+  .edit-save-btn {
+    position: fixed;
+    bottom: 2.5rem;
+    right: 2.5rem;
+    z-index: 2;
+  }
+
+  .sub-section-grid {
+    padding: 0 0 2.5rem 0;
+  }
+
+  .sub-section-title-col {
+    @include type.type-style('heading-02');
+  }
+
+  .section-title {
+    h2 {
+      @include type.type-style('heading-02');
+      margin-bottom: 0;
+    }
+  }
+
+  .info-col {
+    padding-top: 2rem;
+  }
+}

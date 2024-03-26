@@ -25,7 +25,7 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
 import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
-import PathConstants from '../../../routes/pathConstants';
+import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 import Breadcrumbs from '../../../components/Breadcrumbs';
@@ -33,6 +33,7 @@ import Breadcrumbs from '../../../components/Breadcrumbs';
 import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
 import FormProgress from './FormProgress';
+import TscReviewSection from './TscReviewSection';
 
 import './styles.scss';
 
@@ -49,7 +50,7 @@ const SeedlotDetails = () => {
   const manageOptions = [
     {
       text: 'Edit seedlot applicant',
-      onClickFunction: () => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')),
+      onClickFunction: () => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_EDIT, seedlotNumber ?? '')),
       disabled: false
     },
     {
@@ -101,10 +102,12 @@ const SeedlotDetails = () => {
     }
   }, [seedlotQuery.isFetched, seedlotQuery.isFetchedAfterMount]);
 
+  const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
+
   const forestClientQuery = useQuery({
-    queryKey: ['forest-clients', seedlotQuery.data?.applicantClientNumber],
-    queryFn: () => getForestClientByNumber(seedlotQuery.data?.applicantClientNumber),
-    enabled: seedlotQuery.isFetched,
+    queryKey: ['forest-clients', applicantClientNumber],
+    queryFn: () => getForestClientByNumber(applicantClientNumber!),
+    enabled: !!applicantClientNumber,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -130,8 +133,8 @@ const SeedlotDetails = () => {
     <FlexGrid className="seedlot-details-page">
       <Row className="seedlot-details-breadcrumb">
         <Breadcrumbs crumbs={[
-          { name: 'Seedlots', path: PathConstants.SEEDLOTS },
-          { name: 'My seedlots', path: PathConstants.MY_SEEDLOTS }
+          { name: 'Seedlots', path: ROUTES.SEEDLOTS },
+          { name: 'My seedlots', path: ROUTES.MY_SEEDLOTS }
         ]}
         />
       </Row>
@@ -150,7 +153,7 @@ const SeedlotDetails = () => {
                   title="Edit seedlot form"
                   items={manageOptions}
                   menuOptionsClass="edit-seedlot-form"
-                  titleBtnFunc={() => navigate(addParamToPath(PathConstants.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
+                  titleBtnFunc={() => navigate(addParamToPath(ROUTES.SEEDLOT_A_CLASS_REGISTRATION, seedlotNumber ?? ''))}
                 />
               </>
             )
@@ -191,6 +194,7 @@ const SeedlotDetails = () => {
                   applicant={applicantData}
                   isFetching={forestClientQuery?.isFetching}
                 />
+                <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
               </TabPanel>
             </TabPanels>
           </Tabs>

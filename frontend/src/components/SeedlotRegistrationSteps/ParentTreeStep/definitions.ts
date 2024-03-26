@@ -3,7 +3,7 @@ import { StringInputType } from '../../../types/FormInputType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
-import { ParentTreeStepDataObj } from '../../../views/Seedlot/SeedlotRegFormClassA/definitions';
+import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
 
 export type TabTypes = 'coneTab' | 'successTab' | 'mixTab';
 

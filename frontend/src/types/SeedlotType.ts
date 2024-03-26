@@ -1,5 +1,5 @@
 import { StatusColourMap } from '../components/StatusTag/definitions';
-import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/SeedlotRegFormClassA/definitions';
+import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/ContextContainerClassA/definitions';
 import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
 
 type EffectiveDateRange = {

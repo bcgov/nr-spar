@@ -9,7 +9,6 @@ interface AuthContextData {
   signIn(provider: LoginProviders): void;
   signOut(): void;
   provider: string;
-  token: string | undefined;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);

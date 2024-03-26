@@ -16,7 +16,7 @@
 .divisory {
   background-color: var(--#{vars.$bcgov-prefix}-border-subtle-01);
   border: 0;
-  height: 1px;
+  height: 0.0625rem;
 }
 
 .account-nav a {
