@@ -162,7 +162,7 @@ objects:
         - ReadWriteMany
       resources:
         requests:
-          storage: "50Mi"
+          storage: "75Mi"
       storageClassName: netapp-file-standard
   - kind: ConfigMap
     apiVersion: v1
