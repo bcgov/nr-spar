@@ -12,13 +12,11 @@ import LoginProviders from '../types/LoginProviders';
 import AuthContext from './AuthContext';
 import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
 import { TWO_MINUTE } from '../config/TimeUnits';
-import PathConstants from '../routes/pathConstants';
+import ROUTES from '../routes/constants';
 
 interface Props {
   children: React.ReactNode;
 }
-
-const FAM_LOGIN_USER = 'famLoginUser';
 
 const findFindAndLastName = (displayName: string, provider: string): Array<string> => {
   let splitString = ', ';
@@ -81,7 +79,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const [signed, setSigned] = useState<boolean>(false);
   const [user, setUser] = useState<FamUser | null>(null);
   const [provider, setProvider] = useState<string>('');
-  const [token, setToken] = useState<string>('');
   const [intervalInstance, setIntervalInstance] = useState<NodeJS.Timeout | null>(null);
 
   const fetchFamCurrentSession = async (pathname: string): Promise<FamUser | null> => {
@@ -99,8 +96,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const updateUserFamSession = (famUser: FamUser) => {
-    localStorage.setItem(FAM_LOGIN_USER, JSON.stringify(famUser));
-
     // axios token
     axios.defaults.headers.common = {
       Authorization: `Bearer ${famUser.jwtToken}`
@@ -113,7 +108,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       updateUserFamSession(famUser);
       setUser(famUser);
       setProvider(famUser.provider);
-      setToken(famUser.userId);
     }
   };
 
@@ -133,13 +127,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const signOut = (): void => {
-    localStorage.removeItem(FAM_LOGIN_USER);
     Auth.signOut()
       .then(() => {
         setSigned(false);
         setUser(null);
         setProvider('');
-        setToken('');
         if (intervalInstance) {
           console.log('stopping refresh token');
           clearInterval(intervalInstance);
@@ -149,7 +141,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const refreshTokenPvt = async () => {
-    const famUser = await fetchFamCurrentSession(PathConstants.ROOT);
+    const famUser = await fetchFamCurrentSession(ROUTES.ROOT);
     if (famUser) {
       updateUserFamSession(famUser);
     }
@@ -177,9 +169,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     isCurrentAuthUser,
     signIn,
     signOut,
-    provider,
-    token
-  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider, token]);
+    provider
+  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider]);
 
   return (
     <AuthContext.Provider value={contextValue}>

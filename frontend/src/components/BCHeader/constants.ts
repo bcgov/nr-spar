@@ -1,9 +1,9 @@
 import { env } from '../../env';
-import PathConstants from '../../routes/pathConstants';
+import ROUTES from '../../routes/constants';
 
 export const VERSION: string = `Version: ${env.VITE_NRSPARWEBAPP_VERSION}`;
 
-export const HOME_LINK = PathConstants.DASHBOARD;
+export const HOME_LINK = ROUTES.DASHBOARD;
 
 export const clearPanelState = {
   notifications: false,
@@ -17,13 +17,13 @@ export const navItems = [
       {
         name: 'Dashboard',
         icon: 'Dashboard',
-        link: PathConstants.DASHBOARD,
+        link: ROUTES.DASHBOARD,
         disabled: false
       },
       {
         name: 'Seedlots',
         icon: 'SoilMoistureField',
-        link: PathConstants.SEEDLOTS,
+        link: ROUTES.SEEDLOTS,
         disabled: false
       },
       {

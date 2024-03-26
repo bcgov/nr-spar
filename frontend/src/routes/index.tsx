@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, RouteObject } from 'react-router-dom';
 
-import PathConstants from './pathConstants';
+import ROUTES from './constants';
 import { getStoredPath } from '../utils/PathUtils';
 
 import Dashboard from '../views/Dashboard/dashboard';
@@ -11,72 +11,79 @@ import EditAClassApplication from '../views/Seedlot/EditAClassApplication';
 import MySeedlots from '../views/Seedlot/MySeedlots';
 import SeedlotCreatedFeedback from '../views/Seedlot/SeedlotCreatedFeedback';
 import SeedlotDetails from '../views/Seedlot/SeedlotDetails';
-import SeedlotRegistrationForm from '../views/Seedlot/SeedlotRegFormClassA';
+import SeedlotReview from '../views/Seedlot/SeedlotReview';
+import SeedlotRegFormClassA from '../views/Seedlot/SeedlotRegFormClassA';
 
-const routes: Array<RouteObject> = [
+const BrowserRoutes: Array<RouteObject> = [
   // Ensures that root paths get redirected to
   // dashboard, when user is logged in
   {
-    path: PathConstants.ROOT,
+    path: ROUTES.ROOT,
     element: (
       <Navigate to={getStoredPath()} replace />
     )
   },
   // Same for the login path
   {
-    path: PathConstants.LOGIN,
+    path: ROUTES.LOGIN,
     element: (
-      <Navigate to={PathConstants.DASHBOARD} replace />
+      <Navigate to={ROUTES.DASHBOARD} replace />
     )
   },
   {
-    path: PathConstants.DASHBOARD,
+    path: ROUTES.DASHBOARD,
     element: (
       <Dashboard />
     )
   },
   {
-    path: PathConstants.SEEDLOTS,
+    path: ROUTES.SEEDLOTS,
     element: (
       <SeedlotDashboard />
     )
   },
   {
-    path: PathConstants.SEEDLOTS_A_CLASS_CREATION,
+    path: ROUTES.SEEDLOTS_A_CLASS_CREATION,
     element: (
       <CreateAClass />
     )
   },
   {
-    path: PathConstants.SEEDLOT_CREATION_SUCCESS,
+    path: ROUTES.SEEDLOT_CREATION_SUCCESS,
     element: (
       <SeedlotCreatedFeedback />
     )
   },
   {
-    path: PathConstants.SEEDLOT_DETAILS,
+    path: ROUTES.SEEDLOT_DETAILS,
     element: (
       <SeedlotDetails />
     )
   },
   {
-    path: PathConstants.SEEDLOT_A_CLASS_REGISTRATION,
+    path: ROUTES.SEEDLOT_A_CLASS_REGISTRATION,
     element: (
-      <SeedlotRegistrationForm />
+      <SeedlotRegFormClassA />
     )
   },
   {
-    path: PathConstants.SEEDLOT_A_CLASS_EDIT,
+    path: ROUTES.SEEDLOT_A_CLASS_EDIT,
     element: (
       <EditAClassApplication />
     )
   },
   {
-    path: PathConstants.MY_SEEDLOTS,
+    path: ROUTES.MY_SEEDLOTS,
     element: (
       <MySeedlots />
+    )
+  },
+  {
+    path: ROUTES.SEEDLOT_A_CLASS_REVIEW,
+    element: (
+      <SeedlotReview />
     )
   }
 ];
 
-export default routes;
+export default BrowserRoutes;

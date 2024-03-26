@@ -1,0 +1,22 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.detail-section-grid {
+  height: fit-content;
+  width: auto;
+  background-color: var(--#{vars.$bcgov-prefix}-background);
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+
+
+  .title-row {
+    margin-bottom: 2rem;
+
+    .title-text {
+      @include type.type-style('heading-02');
+      font-weight: 700;
+    }
+  }
+}
