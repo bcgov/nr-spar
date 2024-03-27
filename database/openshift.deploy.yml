@@ -35,7 +35,6 @@ parameters:
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
-    required: true
     value: 256Mi
   - name: MIN_REPLICAS
     description: Dummy value for workflow convenience

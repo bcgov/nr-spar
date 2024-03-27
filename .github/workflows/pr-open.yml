@@ -98,7 +98,7 @@ jobs:
           - name: database
             file: database/openshift.deploy.yml
             parameters:
-              -p DB_PVC_SIZE=128Mi
+              -p DB_PVC_SIZE=192Mi
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
