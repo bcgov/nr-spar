@@ -24,7 +24,7 @@
     "@types/validator": "^13.7.17",
     "@typescript-eslint/parser": "^7.0.0",
     "@vitejs/plugin-react": "^4.0.4",
-    "aws-amplify": "^5.3.11",
+    "aws-amplify": "^6.0.0",
     "axios": "^1.6.8",
     "bignumber.js": "^9.0.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
