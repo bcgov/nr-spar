@@ -21,7 +21,7 @@ export const getFavAct = () => {
             userList.push(activityToAdd);
           }
         } else {
-          const invalidActivity = structuredClone(FavouriteActivityMap.unkown);
+          const invalidActivity = structuredClone(FavouriteActivityMap.unknown);
           invalidActivity.id = item.id;
           invalidActivity.type = item.activity;
           invalidActivity.header += item.activity;

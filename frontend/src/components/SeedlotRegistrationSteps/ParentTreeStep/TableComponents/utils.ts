@@ -1,7 +1,7 @@
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
 
-import { ParentTreeStepDataObj } from '../../../../views/Seedlot/SeedlotRegFormClassA/definitions';
+import { ParentTreeStepDataObj } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
 
 import {
   AllParentTreeMap, RowDataDictType, RowItem, StrTypeRowItem

@@ -1,4 +1,4 @@
-const PathConstants: Record<string, string> = {
+const ROUTES = {
   ALL_ROUTES: '*',
   LOGIN: '/login',
   ROOT: '/',
@@ -9,8 +9,9 @@ const PathConstants: Record<string, string> = {
   SEEDLOT_DETAILS: '/seedlots/details/:seedlotNumber',
   SEEDLOT_A_CLASS_REGISTRATION: '/seedlots/a-class-registration/:seedlotNumber',
   SEEDLOT_A_CLASS_EDIT: '/seedlots/edit-a-class-application/:seedlotNumber',
+  SEEDLOT_A_CLASS_REVIEW: '/seedlots/a-class/review/:seedlotNumber',
   MY_SEEDLOTS: '/seedlots/my-seedlots',
   FOUR_OH_FOUR: '/404'
 };
 
-export default PathConstants;
+export default ROUTES;
