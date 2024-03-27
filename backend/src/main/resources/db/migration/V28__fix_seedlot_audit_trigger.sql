@@ -1,3 +1,84 @@
+alter table spar.seedlot_audit
+  add column seed_plan_unit_id         smallint,
+  add column bgc_zone_code             varchar(4),
+  add column bgc_subzone_code          varchar(3),
+  add column variant                   varchar(1),
+  add column bec_version_id            smallint,
+  add column elevation                 smallint,
+  add column latitude_degrees          smallint,
+  add column latitude_minutes          smallint,
+  add column latitude_seconds          smallint,
+  add column longitude_degrees         smallint,
+  add column longitude_minutes         smallint,
+  add column longitude_seconds         smallint,
+  add column collection_elevation      smallint,
+  add column collection_elevation_min  smallint,
+  add column collection_elevation_max  smallint,
+  add column collection_latitude_deg   smallint,
+  add column collection_latitude_min   smallint,
+  add column collection_latitude_sec   smallint,
+  add column collection_latitude_code  varchar(1),
+  add column collection_longitude_deg  smallint,
+  add column collection_longitude_min  smallint,
+  add column collection_longitude_sec  smallint,
+  add column collection_longitude_code varchar(1),
+  add column elevation_min             smallint,
+  add column elevation_max             smallint,
+  add column latitude_deg_min          smallint,
+  add column latitude_min_min          smallint,
+  add column latitude_sec_min          smallint,
+  add column latitude_deg_max          smallint,
+  add column latitude_min_max          smallint,
+  add column latitude_sec_max          smallint,
+  add column longitude_deg_min         smallint,
+  add column longitude_min_min         smallint,
+  add column longitude_sec_min         smallint,
+  add column longitude_deg_max         smallint,
+  add column longitude_min_max         smallint,
+  add column longitude_sec_max         smallint,
+  add column smp_mean_bv_growth        decimal(4, 1),
+  add column area_of_use_comment       varchar(2000);
+
+comment on column spar.seedlot_audit.seed_plan_unit_id          is 'Referring value for spar.seedlot.seed_plan_unit_id column';
+comment on column spar.seedlot_audit.bgc_zone_code              is 'Referring value for spar.seedlot.bgc_zone_code column';
+comment on column spar.seedlot_audit.bgc_subzone_code           is 'Referring value for spar.seedlot.bgc_subzone_code column';
+comment on column spar.seedlot_audit.variant                    is 'Referring value for spar.seedlot.variant column';
+comment on column spar.seedlot_audit.bec_version_id             is 'Referring value for spar.seedlot.bec_version_id column';
+comment on column spar.seedlot_audit.elevation                  is 'Referring value for spar.seedlot.elevation column';
+comment on column spar.seedlot_audit.latitude_degrees           is 'Referring value for spar.seedlot.latitude_degrees column';
+comment on column spar.seedlot_audit.latitude_minutes           is 'Referring value for spar.seedlot.latitude_minutes column';
+comment on column spar.seedlot_audit.latitude_seconds           is 'Referring value for spar.seedlot.latitude_seconds column';
+comment on column spar.seedlot_audit.longitude_degrees          is 'Referring value for spar.seedlot.longitude_degrees column';
+comment on column spar.seedlot_audit.longitude_minutes          is 'Referring value for spar.seedlot.longitude_minutes column';
+comment on column spar.seedlot_audit.longitude_seconds          is 'Referring value for spar.seedlot.longitude_seconds column';
+comment on column spar.seedlot_audit.collection_elevation       is 'Referring value for spar.seedlot.collection_elevation column';
+comment on column spar.seedlot_audit.collection_elevation_min   is 'Referring value for spar.seedlot.collection_elevation_min column';
+comment on column spar.seedlot_audit.collection_elevation_max   is 'Referring value for spar.seedlot.collection_elevation_max column';
+comment on column spar.seedlot_audit.collection_latitude_deg    is 'Referring value for spar.seedlot.collection_latitude_deg column';
+comment on column spar.seedlot_audit.collection_latitude_min    is 'Referring value for spar.seedlot.collection_latitude_min column';
+comment on column spar.seedlot_audit.collection_latitude_sec    is 'Referring value for spar.seedlot.collection_latitude_sec column';
+comment on column spar.seedlot_audit.collection_latitude_code   is 'Referring value for spar.seedlot.collection_latitude_code column';
+comment on column spar.seedlot_audit.collection_longitude_deg   is 'Referring value for spar.seedlot.collection_longitude_deg column';
+comment on column spar.seedlot_audit.collection_longitude_min   is 'Referring value for spar.seedlot.collection_longitude_min column';
+comment on column spar.seedlot_audit.collection_longitude_sec   is 'Referring value for spar.seedlot.collection_longitude_sec column';
+comment on column spar.seedlot_audit.collection_longitude_code  is 'Referring value for spar.seedlot.collection_longitude_code column';
+comment on column spar.seedlot_audit.elevation_min              is 'Referring value for spar.seedlot.elevation_min column';
+comment on column spar.seedlot_audit.elevation_max              is 'Referring value for spar.seedlot.elevation_max column';
+comment on column spar.seedlot_audit.latitude_deg_min           is 'Referring value for spar.seedlot.latitude_deg_min column';
+comment on column spar.seedlot_audit.latitude_sec_min           is 'Referring value for spar.seedlot.latitude_sec_min column';
+comment on column spar.seedlot_audit.latitude_min_min           is 'Referring value for spar.seedlot.latitude_min_min column';
+comment on column spar.seedlot_audit.latitude_deg_max           is 'Referring value for spar.seedlot.latitude_deg_max column';
+comment on column spar.seedlot_audit.latitude_min_max           is 'Referring value for spar.seedlot.latitude_min_max column';
+comment on column spar.seedlot_audit.latitude_sec_max           is 'Referring value for spar.seedlot.latitude_sec_max column';
+comment on column spar.seedlot_audit.longitude_deg_min          is 'Referring value for spar.seedlot.longitude_deg_min column';
+comment on column spar.seedlot_audit.longitude_min_min          is 'Referring value for spar.seedlot.longitude_min_min column';
+comment on column spar.seedlot_audit.longitude_sec_min          is 'Referring value for spar.seedlot.longitude_sec_min column';
+comment on column spar.seedlot_audit.longitude_deg_max          is 'Referring value for spar.seedlot.longitude_deg_max column';
+comment on column spar.seedlot_audit.longitude_min_max          is 'Referring value for spar.seedlot.longitude_min_max column';
+comment on column spar.seedlot_audit.longitude_sec_max          is 'Referring value for spar.seedlot.longitude_sec_max column';
+comment on column spar.seedlot_audit.smp_mean_bv_growth         is 'Referring value for spar.seedlot.smp_mean_bv_growth column';
+comment on column spar.seedlot_audit.area_of_use_comment        is 'Referring value for spar.seedlot.area_of_use_comment column';
+
 /*  
 -- Function to fix Insert/Update/Delete staments executed on seedlot the table.
 -- Should be used in a trigger on the seedlot table
@@ -75,7 +156,7 @@ BEGIN
         RETURN NEW;
     elsif (TG_OP = 'DELETE') then
         v_old_data := ROW(OLD.*);
-        /*nsert into spar.logged_actions (schema_name,table_name,user_name,action,original_data,query)
+    /* insert into spar.logged_actions (schema_name,table_name,user_name,action,original_data,query)
         values (TG_TABLE_SCHEMA::TEXT,TG_TABLE_NAME::TEXT,session_user::TEXT,substring(TG_OP,1,1),v_old_data, current_query());*/
     /* AUDIT REVISION number used to order the statements executed in the row */ 
     v_auditrevision := (SELECT MAX(COALESCE(audit_revision_version,1))+1 FROM spar.seedlot_audit WHERE seedlot_number = NEW.seedlot_number) ;
