@@ -131,7 +131,7 @@ objects:
                 - name: VITE_USER_POOLS_WEB_CLIENT_ID
                   value: ${VITE_USER_POOLS_WEB_CLIENT_ID}
                 - name: VITE_ZONE
-                  value: ${ZONE}
+                  value: ${FAM_MODDED_ZONE}
               ports:
                 - containerPort: 3000
                   protocol: TCP
