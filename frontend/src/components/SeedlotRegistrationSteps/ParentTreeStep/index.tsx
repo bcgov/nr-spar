@@ -16,7 +16,6 @@ import {
   View, Settings, Upload, Renew, Add
 } from '@carbon/icons-react';
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
-import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
 import Subtitle from '../../Subtitle';
 import { postFile } from '../../../api-service/seedlotAPI';
@@ -305,26 +304,14 @@ const ParentTreeStep = () => {
               <Tab>{pageText.mixTab.tabTitle}</Tab>
             </TabList>
             <FlexGrid className="parent-tree-tab-container">
-              <Row className="title-row">
-                <Column sm={4} md={8} lg={16} xlg={12} max={10}>
-                  <DescriptionBox
-                    header={pageText[currentTab].tabTitle}
-                    description={pageText[currentTab].tabDescription}
-                  />
-                </Column>
-              </Row>
-              <Row className="notification-row">
-                <Column>
-                  {
-                    renderNotification(
-                      state,
-                      currentTab,
-                      orchardsData,
-                      setStepData
-                    )
-                  }
-                </Column>
-              </Row>
+              {
+                renderNotification(
+                  state,
+                  currentTab,
+                  orchardsData,
+                  setStepData
+                )
+              }
               <InputErrorNotification state={state} headerConfig={headerConfig} />
               <UploadWarnNotification
                 invalidPTNumbers={invalidPTNumbers}

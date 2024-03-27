@@ -118,50 +118,6 @@ export const calculateInstructions = (
   </span>
 );
 
-const getTabDescription = (tabType: string) => (
-  <>
-    {
-      `Enter the ${tabType} manually or upload a spreadsheet file with the template for the ${tabType} table. `
-      + 'Remember to keep your orchard updated, you can '
-    }
-    <Link to="#TODO-orchard-management-link">go to orchard&apos;s management page</Link>
-    &nbsp;to edit the listed parent trees in your orchard.
-  </>
-);
-
-const getNotificationSubtitle = (tabType: string) => {
-  let downloadName = 'seedlot composition';
-  if (tabType === 'Calculation of SMP mix') {
-    // make the first char lowercase
-    downloadName = tabType.charAt(0).toLowerCase() + tabType.slice(1);
-  }
-  return (
-    <>
-      {
-        `You can import one spreadsheet file for the ${tabType} table with the data you want to use. `
-      }
-      <br />
-      {
-        'For further guidance on how to organize the data, '
-        + "do use the SPAR's spreadsheet template. "
-      }
-      <Link
-        type="text/csv"
-        className="notification-link"
-        to={getDownloadUrl(tabType)}
-        target="_blank"
-        download={
-          (tabType === 'Calculation of SMP mix' || tabType === 'mixTab')
-            ? 'SMP_Mix_Volume_template.csv'
-            : 'Seedlot_composition_template.csv'
-        }
-      >
-        {`Download ${downloadName} template`}
-      </Link>
-    </>
-  );
-};
-
 const errorDescription = (
   <>
     To see your orchard&apos;s composition, you must first fill the
@@ -183,16 +139,12 @@ const getPageText = () => ({
   errorDescription,
   coneTab: {
     tabTitle: 'Cone and pollen count',
-    tabDescription: getTabDescription('Cone and pollen count'),
-    notificationSubtitle: getNotificationSubtitle('Cone and pollen count'),
     tableDescription: "Enter the estimative of Cone and pollen count for the orchard's seedlot (*required)",
     toggleName: 'Show breeding value',
     cleanModalHeading: getCleanTableDesc('Cone and pollen count')
   },
   successTab: {
     tabTitle: 'SMP success on parent',
-    tabDescription: getTabDescription('SMP success on parent'),
-    notificationSubtitle: getNotificationSubtitle('SMP success on parent'),
     tableDescription: "Enter the estimative of SMP success for the orchard's seedlot",
     toggleName: 'Show SMP mix used on parent',
     cleanModalHeading: getCleanTableDesc('SMP success on parent'),
@@ -202,8 +154,6 @@ const getPageText = () => ({
   },
   mixTab: {
     tabTitle: 'Calculation of SMP mix',
-    tabDescription: getTabDescription('Calculation of SMP mix'),
-    notificationSubtitle: getNotificationSubtitle('Calculation of SMP mix'),
     tableDescription: 'Enter the estimative volume of SMP mix used for each clone',
     toggleName: 'Show breeding value',
     toggleNameBottom: 'Show weighted value',

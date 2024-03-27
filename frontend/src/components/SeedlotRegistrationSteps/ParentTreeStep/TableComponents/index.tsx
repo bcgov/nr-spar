@@ -310,45 +310,26 @@ export const renderNotification = (
   orchardsData: Array<OrchardObj>,
   setStepData: Function
 ) => {
-  if (state.notifCtrl[currentTab].showInfo && orchardsData.length > 0) {
-    return (
-      <ActionableNotification
-        kind="info"
-        lowContrast
-        title={pageText.notificationTitle}
-        inline
-        actionButtonLabel=""
-        onClose={() => {
-          toggleNotification('info', state, currentTab, setStepData);
-          return false;
-        }}
-        hasFocus={false}
-        // Without this blur the page will keep focusing on the close button
-        onClick={(e: any) => e.target.blur()}
-      >
-        <span className="notification-subtitle">
-          {pageText[currentTab].notificationSubtitle}
-        </span>
-      </ActionableNotification>
-    );
-  }
-
   if (state.notifCtrl[currentTab].showError && orchardsData.length === 0) {
     return (
-      <ActionableNotification
-        kind="error"
-        lowContrast
-        title={pageText.errorNotifTitle}
-        actionButtonLabel=""
-        onClose={() => {
-          toggleNotification('error', state, currentTab, setStepData);
-          return false;
-        }}
-      >
-        <span className="notification-subtitle">
-          {pageText.errorDescription}
-        </span>
-      </ActionableNotification>
+      <Row className="notification-row">
+        <Column>
+          <ActionableNotification
+            kind="error"
+            lowContrast
+            title={pageText.errorNotifTitle}
+            actionButtonLabel=""
+            onClose={() => {
+              toggleNotification('error', state, currentTab, setStepData);
+              return false;
+            }}
+          >
+            <span className="notification-subtitle">
+              {pageText.errorDescription}
+            </span>
+          </ActionableNotification>
+        </Column>
+      </Row>
     );
   }
 
