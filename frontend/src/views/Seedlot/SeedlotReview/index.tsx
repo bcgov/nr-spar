@@ -69,6 +69,15 @@ const SeedlotReview = () => {
     return (<Loading />);
   }
 
+  useEffect(() => {
+    if (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'INC'
+      || seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND'
+    ) {
+      // Navigate back to the seedlot detail page if the seedlot is pending or incomplete
+      navigate(`/seedlots/details/${seedlotNumber}`);
+    }
+  }, [isFetchingData]);
+
   /**
    * Applicant info data, form data should be accessed through context.
    */
