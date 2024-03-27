@@ -24,7 +24,8 @@ jobs:
       - name: PR Greeting
         env:
           DOMAIN: apps.silver.devops.gov.bc.ca
-          PREFIX: ${{ github.event.repository.name }}-${{ steps.mod-tag.outputs.modded-tag }}
+          PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+          FRONT_END_PREFIX: ${{ github.event.repository.name }}-${{ steps.mod-tag.outputs.modded-tag }}
         uses: bcgov-nr/action-pr-description-add@v1.1.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -33,7 +34,7 @@ jobs:
             Thanks for the PR!
 
             Any successful deployments (not always required) will be available below.
-            [Frontend](https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}/)
+            [Frontend](https://${{ env.FRONT_END_PREFIX }}-frontend.${{ env.DOMAIN }}/)
             [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/actuator/health)
             [Oracle-API](https://${{ env.PREFIX }}-oracle-api.${{ env.DOMAIN }}/actuator/health)
 
@@ -49,7 +50,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=${{ steps.mod-tag.outputs.modded-tag }}
+            -p ZONE=${{ github.event.number }}
             -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
@@ -114,6 +115,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
+              -p FAM_MODDED_ZONE=${{ needs.init.outputs.modded-tag }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
               -p VITE_NRSPARWEBAPP_VERSION=dev
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
@@ -139,7 +141,7 @@ jobs:
             -p MIN_REPLICAS=1
             -p MAX_REPLICAS=2
             -p NAME=${{ github.event.repository.name }}
-            -p ZONE=${{ needs.init.outputs.modded-tag }}
+            -p ZONE=${{ github.event.number }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path}}
@@ -152,7 +154,7 @@ jobs:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ needs.init.outputs.modded-tag }}-backend.apps.silver.devops.gov.bc.ca
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}

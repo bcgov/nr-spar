@@ -12,6 +12,9 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: FAM_MODDED_ZONE
+    description: ZONE modded by 50 to work with FAM
+    required: true
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
@@ -128,7 +131,7 @@ objects:
                 - name: VITE_USER_POOLS_WEB_CLIENT_ID
                   value: ${VITE_USER_POOLS_WEB_CLIENT_ID}
                 - name: VITE_ZONE
-                  value: ${ZONE}
+                  value: ${FAM_MODDED_ZONE}
               ports:
                 - containerPort: 3000
                   protocol: TCP
@@ -180,7 +183,7 @@ objects:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
-      host: ${NAME}-${ZONE}-${COMPONENT}.${DOMAIN}
+      host: ${NAME}-${FAM_MODDED_ZONE}-${COMPONENT}.${DOMAIN}
       port:
         targetPort: 3000-tcp
       to:
