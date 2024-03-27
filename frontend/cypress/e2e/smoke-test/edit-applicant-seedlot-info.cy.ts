@@ -11,8 +11,8 @@ describe('Applicant and seedlot information page', () => {
 
     // Click on Edit applicant and seedlot button
     cy.get('.applicant-seedlot-information')
-      .find('.btn-edit')
-      .should('have.text', 'Edit applicant and seedlot')
+      .find('.section-btn')
+      .should('have.text', 'Edit applicant')
       .click();
 
     // Verify it's at the edit-a-class-application/{seedlot_number} page
@@ -65,8 +65,8 @@ describe('Applicant and seedlot information page', () => {
 
     // Verify the stuff you changed are being displayed
     cy.get('.applicant-seedlot-information')
-      .find('#seedlot-applicant-email')
-      .should('have.value', 'test@gmail.com');
+      .find('button.email-display-value')
+      .should('have.text', 'test@gmail.com');
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-source')
