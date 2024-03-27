@@ -72,14 +72,20 @@ public class SecurityConfig {
 
   private final Converter<Jwt, Collection<GrantedAuthority>> roleConverter =
       jwt -> {
-        if (!jwt.getClaims().containsKey("client_roles")) {
+        if (!jwt.getClaims().containsKey("cognito:groups")) {
           return List.of();
         }
-        Object clientRolesObj = jwt.getClaims().get("client_roles");
+        Object clientRolesObj = jwt.getClaims().get("cognito:groups");
         final List<String> realmAccess = new ArrayList<>();
         if (clientRolesObj instanceof List<?> list) {
           for (Object item : list) {
-            realmAccess.add(String.valueOf(item));
+            String role = String.valueOf(item);
+            // Removes Client Number
+            String clientNumber = role.substring(role.length() - 8);
+            if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
+              role = role.substring(0, role.length() - 9); // Removes dangling underscore
+            }
+            realmAccess.add(role);
           }
         }
         return realmAccess.stream()
