@@ -205,6 +205,8 @@
 }
 
 .parent-tree-step-table-container {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
   .#{vars.$bcgov-prefix}--data-table {
     .#{vars.$bcgov-prefix}--text-input {
       background: transparent;
