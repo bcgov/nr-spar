@@ -18,9 +18,23 @@
     margin: 1rem 0 2rem;
 
     .#{vars.$bcgov-prefix}--accordion__title {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
+      padding: 1rem 2rem;
       font-weight: bold;
+    }
+
+    .#{vars.$bcgov-prefix}--accordion__content {
+      @include type.type-style('body-01');
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
+      padding-left: 2rem;
+    }
+
+    strong {
+      font-weight: bold;
+    }
+
+    ul.donwload-templates-list {
+      list-style-type: disc;
+      margin: 1rem 0 1rem 3rem;
     }
   }
 

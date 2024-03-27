@@ -43,7 +43,8 @@ import {
   pageText, headerTemplate, geneticWorthDict, SummarySectionConfig,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, DEFAULT_MIX_PAGE_SIZE,
   PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate,
-  getEmptySectionDescription, noParentTreeDescription
+  getEmptySectionDescription, noParentTreeDescription, dataEntryInstructions,
+  reviewDataInstructions, calculateInstructions
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem
@@ -277,9 +278,15 @@ const ParentTreeStep = () => {
       <Row>
         <Column sm={4} md={8} lg={16}>
           <Accordion className="instructions-accordion">
-            <AccordionItem title="1. Data entry">Panel A</AccordionItem>
-            <AccordionItem title="2. Review data">Panel B</AccordionItem>
-            <AccordionItem title="3. Calculate seedlot metrics">Panel C</AccordionItem>
+            <AccordionItem open title="1. Data entry">
+              {dataEntryInstructions}
+            </AccordionItem>
+            <AccordionItem open title="2. Review data">
+              {reviewDataInstructions}
+            </AccordionItem>
+            <AccordionItem open title="3. Calculate seedlot metrics">
+              {calculateInstructions}
+            </AccordionItem>
           </Accordion>
         </Column>
       </Row>

@@ -54,6 +54,70 @@ export const getDownloadUrl = (tabType: string) => {
   return SeedlotCsvTemplate;
 };
 
+export const dataEntryInstructions = (
+  <>
+    <p>
+      <strong>1a. </strong>
+      Enter cone and pollen count and SMP data manually or;
+      <br />
+      <strong>1b. </strong>
+      Upload a spreadsheet file using the provided CSV template:
+    </p>
+    <ul className="donwload-templates-list">
+      <li>
+        <Link
+          type="text/csv"
+          className="notification-link"
+          to={SeedlotCsvTemplate}
+          target="_blank"
+          download="Seedlot_composition_template.csv"
+        >
+          Download cone and pollen count and SMP success on parent template.
+        </Link>
+      </li>
+      <li>
+        <Link
+          type="text/csv"
+          className="notification-link"
+          to={SmpMixCsvTemplate}
+          target="_blank"
+          download="SMP_Mix_Volume_template.csv"
+        >
+          Download calculation of SMP mix template.
+        </Link>
+      </li>
+    </ul>
+    <p>
+      When using the CSV template to upload data, keep the CSV format and column structure
+      provided.
+      <br />
+      To upload the filled-in template, click &quot;Upload from file&quot; and either
+      drag and drop, or select the
+      <br />
+      appropriate file.
+    </p>
+  </>
+);
+
+export const reviewDataInstructions = (
+  <span>
+    Review data in the cone and pollen count and SMP tabs for accuracy.
+    If corrections are needed, cells
+    <br />
+    can be selected and edited manually. To clear the table,
+    click &quot;clear table data&quot;.
+  </span>
+);
+
+export const calculateInstructions = (
+  <span>
+    Click &quot;calculate metrics&quot; to initiate the calculation for seedlot metrics.
+    If data is changed in the tables,
+    <br />
+    click the button again to apply the changes.
+  </span>
+);
+
 const getTabDescription = (tabType: string) => (
   <>
     {
