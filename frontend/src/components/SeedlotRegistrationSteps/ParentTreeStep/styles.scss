@@ -6,6 +6,24 @@
   padding-right: 0rem;
   padding-bottom: 1rem;
 
+  .title-row {
+    h2 {
+      @include type.type-style('heading-03');
+      margin-bottom: 0.2rem;
+    }
+    margin-bottom: 1rem;
+  }
+
+  .instructions-accordion {
+    margin: 1rem 0 2rem;
+
+    .#{vars.$bcgov-prefix}--accordion__title {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      font-weight: bold;
+    }
+  }
+
   .sticky-table-title {
     .#{vars.$bcgov-prefix}--data-table-header {
       position: sticky;

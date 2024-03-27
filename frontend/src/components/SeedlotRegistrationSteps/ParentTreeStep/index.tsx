@@ -9,7 +9,8 @@ import {
   TableContainer, TableToolbar, Checkbox,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
-  DataTableSkeleton, DefinitionTooltip, Modal, Loading
+  DataTableSkeleton, DefinitionTooltip, Modal, Loading,
+  Accordion, AccordionItem
 } from '@carbon/react';
 import {
   View, Settings, Upload, Renew, Add
@@ -17,6 +18,7 @@ import {
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
 import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
+import Subtitle from '../../Subtitle';
 import { postFile } from '../../../api-service/seedlotAPI';
 import postForCalculation from '../../../api-service/geneticWorthAPI';
 import CheckboxType from '../../../types/CheckboxType';
@@ -266,6 +268,21 @@ const ParentTreeStep = () => {
 
   return (
     <FlexGrid className="parent-tree-step-container">
+      <Row className="title-row">
+        <Column sm={4} md={8} lg={16}>
+          <h2>{pageText.stepTitle}</h2>
+          <Subtitle text={pageText.stepSubtitle} />
+        </Column>
+      </Row>
+      <Row>
+        <Column sm={4} md={8} lg={16}>
+          <Accordion className="instructions-accordion">
+            <AccordionItem title="1. Data entry">Panel A</AccordionItem>
+            <AccordionItem title="2. Review data">Panel B</AccordionItem>
+            <AccordionItem title="3. Calculate seedlot metrics">Panel C</AccordionItem>
+          </Accordion>
+        </Column>
+      </Row>
       <Row>
         <Column sm={4} md={8} lg={16} xlg={16}>
           <Tabs onChange={

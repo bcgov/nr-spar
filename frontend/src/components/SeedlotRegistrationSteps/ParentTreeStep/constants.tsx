@@ -112,6 +112,8 @@ const getCleanTableDesc = (tableName: string) => (
 );
 
 const getPageText = () => ({
+  stepTitle: 'Cone and pollen count and SMP data',
+  stepSubtitle: 'Enter cone and pollen count (*required), SMP success on parent and SMP mix information ',
   notificationTitle: 'Upload spreadsheet to table',
   errorNotifTitle: 'No orchard ID linked yet!',
   errorDescription,
