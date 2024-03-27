@@ -1,5 +1,6 @@
 /* eslint-disable func-names */
 /* eslint-disable prefer-arrow-callback */
+import prefix from '../../../src/styles/classPrefix';
 
 describe('Seedlot detail page', () => {
   beforeEach(function () {
@@ -28,42 +29,42 @@ describe('Seedlot detail page', () => {
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(0)
-      .find('p.bx--progress-label')
+      .find('p.${prefix}--progress-label')
       .should('have.text', 'Collection')
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(1)
-      .find('p.bx--progress-label')
+      .find('p.${prefix}--progress-label')
       .should('have.text', 'Ownership')
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(2)
-      .find('p.bx--progress-label')
+      .find('p.${prefix}--progress-label')
       .should('have.text', 'Interim storage')
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(3)
-      .find('p.bx--progress-label')
+      .find('p.${prefix}--progress-label')
       .should('have.text', 'Orchard')
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(4)
-      .find('p.bx--progress-label')
+      .find('p.${prefix}--progress-label')
       .should('have.text', 'Parent tree and SMP')
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(5)
-      .find('p.bx--progress-label')
+      .find('p.${prefix}--progress-label')
       .should('have.text', 'Extraction and storage')
 
     cy.get('.detail-section-grid')
-      .children('.bx--row')
-      .children('.bx--col')
+      .children('.${prefix}--row')
+      .children('.${prefix}--col')
       .find('button.section-btn')
       .should('have.text', 'Edit seedlot form')
       .click();
