@@ -1,5 +1,6 @@
 @use '@carbon/type';
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
 
 .parent-tree-step-container {
   padding-left: 0rem;
@@ -43,24 +44,39 @@
       position: sticky;
       top: 3rem;
       z-index: 1;
+      background-color: colors.$white;
     }
   }
 
   .sticky-toolbar {
     position: sticky;
     top: 8.3rem;
-    background: var(--#{vars.$bcgov-prefix}-layer);
+    background: colors.$white;
     z-index: 1;
+
+    .#{vars.$bcgov-prefix}--table-toolbar {
+      background: colors.$white;
+    }
   }
 
   .parent-tree-step-tab-list {
     margin-left: -1rem;
-    border-bottom: 2px solid var(--#{vars.$bcgov-prefix}-border-subtle-01);
     width: calc(100% + 1rem);
 
-    .#{vars.$bcgov-prefix}--tab--list {
-      // Without this the tab list will be pushed up by 2px due to the border bottom above
-      margin-bottom: -2px;
+    button.#{vars.$bcgov-prefix}--tabs__nav-item--selected {
+      background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+      border-block-start: 2px solid var(--#{vars.$bcgov-prefix}-border-interactive);
+      border-block-end: 0;
+    }
+
+    .#{vars.$bcgov-prefix}--tabs__nav-item {
+      background-color: var(--#{vars.$bcgov-prefix}-layer-accent-01);
+      border-block-end: 0;
+    }
+
+    button.#{vars.$bcgov-prefix}--tabs__nav-item:not(.#{vars.$bcgov-prefix}--tabs__nav-item--selected):not(.#{vars.$bcgov-prefix}--tabs__nav-item--disabled):hover {
+      border-block-end: 0;
+      border-block-start: 2px solid var(--#{vars.$bcgov-prefix}-border-strong);
     }
   }
 
@@ -89,12 +105,10 @@
     -moz-appearance: textfield;
   }
 
-  .smp-default-checkbox-row {
-    margin-top: 2rem;
-  }
-
+  .smp-default-checkbox-row,
   .smp-default-input-row {
-    margin-top: 1rem;
+    margin-bottom: 2rem;
+    padding-left: 2.5rem;
   }
 
   .empty-section-container {
@@ -141,6 +155,9 @@
 
 .parent-tree-tab-container {
   padding: 2.5rem 0 0.25rem 0;
+  background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+  margin-left: -2.5rem;
+  margin-right: -2.5rem;
 
   .description-box-container {
     padding-left: 0;
