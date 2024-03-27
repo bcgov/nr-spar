@@ -9,14 +9,15 @@ import {
   TableContainer, TableToolbar, Checkbox,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
-  DataTableSkeleton, DefinitionTooltip, Modal, Loading
+  DataTableSkeleton, DefinitionTooltip, Modal, Loading,
+  Accordion, AccordionItem
 } from '@carbon/react';
 import {
   View, Settings, Upload, Renew, Add
 } from '@carbon/icons-react';
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
-import DescriptionBox from '../../DescriptionBox';
 import InfoSection from '../../InfoSection';
+import Subtitle from '../../Subtitle';
 import { postFile } from '../../../api-service/seedlotAPI';
 import postForCalculation from '../../../api-service/geneticWorthAPI';
 import CheckboxType from '../../../types/CheckboxType';
@@ -41,7 +42,8 @@ import {
   pageText, headerTemplate, geneticWorthDict, SummarySectionConfig,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, DEFAULT_MIX_PAGE_SIZE,
   PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate,
-  getEmptySectionDescription, noParentTreeDescription
+  getEmptySectionDescription, noParentTreeDescription, dataEntryInstructions,
+  reviewDataInstructions, calculateInstructions
 } from './constants';
 import {
   TabTypes, HeaderObj, RowItem
@@ -266,6 +268,27 @@ const ParentTreeStep = () => {
 
   return (
     <FlexGrid className="parent-tree-step-container">
+      <Row className="title-row">
+        <Column sm={4} md={8} lg={16}>
+          <h2>{pageText.stepTitle}</h2>
+          <Subtitle text={pageText.stepSubtitle} />
+        </Column>
+      </Row>
+      <Row>
+        <Column sm={4} md={8} lg={16}>
+          <Accordion className="instructions-accordion">
+            <AccordionItem open title="1. Data entry">
+              {dataEntryInstructions}
+            </AccordionItem>
+            <AccordionItem open title="2. Review data">
+              {reviewDataInstructions}
+            </AccordionItem>
+            <AccordionItem open title="3. Calculate seedlot metrics">
+              {calculateInstructions}
+            </AccordionItem>
+          </Accordion>
+        </Column>
+      </Row>
       <Row>
         <Column sm={4} md={8} lg={16} xlg={16}>
           <Tabs onChange={
@@ -281,26 +304,14 @@ const ParentTreeStep = () => {
               <Tab>{pageText.mixTab.tabTitle}</Tab>
             </TabList>
             <FlexGrid className="parent-tree-tab-container">
-              <Row className="title-row">
-                <Column sm={4} md={8} lg={16} xlg={12} max={10}>
-                  <DescriptionBox
-                    header={pageText[currentTab].tabTitle}
-                    description={pageText[currentTab].tabDescription}
-                  />
-                </Column>
-              </Row>
-              <Row className="notification-row">
-                <Column>
-                  {
-                    renderNotification(
-                      state,
-                      currentTab,
-                      orchardsData,
-                      setStepData
-                    )
-                  }
-                </Column>
-              </Row>
+              {
+                renderNotification(
+                  state,
+                  currentTab,
+                  orchardsData,
+                  setStepData
+                )
+              }
               <InputErrorNotification state={state} headerConfig={headerConfig} />
               <UploadWarnNotification
                 invalidPTNumbers={invalidPTNumbers}
