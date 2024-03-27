@@ -94,6 +94,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
+              -p FAM_MODDED_ZONE=test
               -p VITE_SPAR_BUILD_VERSION=snapshot-test
               -p VITE_NRSPARWEBAPP_VERSION=test
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
@@ -209,6 +210,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
+              -p FAM_MODDED_ZONE=prod
               -p VITE_SPAR_BUILD_VERSION=snapshot-prod
               -p VITE_NRSPARWEBAPP_VERSION=prod
               -p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
