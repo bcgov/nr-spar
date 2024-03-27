@@ -37,9 +37,9 @@ public class SwaggerConfig {
     info.setTermsOfService(TERMS_OF_SERVICE);
 
     Contact contact = new Contact();
-    contact.setName("Team Encora");
+    contact.setName("Team Evergreen");
     contact.setEmail("michelle.douville@gov.bc.ca");
-    contact.setUrl("https://github.com/orgs/bcgov/teams/encora");
+    contact.setUrl("https://github.com/bcgov/nr-spar");
     info.setContact(contact);
 
     License license = new License();
@@ -48,8 +48,8 @@ public class SwaggerConfig {
     info.setLicense(license);
 
     ExternalDocumentation externalDoc = new ExternalDocumentation();
-    externalDoc.setDescription("Encora Team Jira Board");
-    externalDoc.setUrl("https://apps.nrs.gov.bc.ca/int/jira/projects/FSADT2");
+    externalDoc.setDescription("Our GitHub Repo");
+    externalDoc.setUrl("https://github.com/bcgov/nr-spar");
 
     SecurityScheme securityScheme = new SecurityScheme();
     securityScheme.setType(Type.HTTP);
