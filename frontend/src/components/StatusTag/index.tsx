@@ -10,7 +10,7 @@ type StatusTagProps = {
 }
 
 const StatusTag = ({ type }: StatusTagProps) => {
-  const tagType: keyof typeof StatusColourMap = Object.keys(StatusColourMap).includes(type) ? type : 'Unkown';
+  const tagType: keyof typeof StatusColourMap = Object.keys(StatusColourMap).includes(type) ? type : 'Unknown';
   return (
     <Tag className="status-tag" type={StatusColourMap[tagType]}>
       {type}

@@ -1,34 +1,7 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 @use '@carbon/type';
 
-.form-progress {
-  width: auto;
-  background-color: var(--#{vars.$bcgov-prefix}-background);
-  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
-  border-radius: 8px;
-  padding-top: 2rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
-  margin-bottom: 2rem;
-}
-
-.form-progress-title {
-  @include type.type-style('heading-02');
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.form-progress-title-section {
-  height: 2.625rem;
-  margin-bottom: 2rem;
-}
-
 .steps-box {
   height: fit-content;
-  margin-bottom: 2rem;
-}
-
-.btn-fp {
-  width: fit-content;
-  margin: 1rem 0 2rem 0;
+  margin-bottom: 3rem;
 }
