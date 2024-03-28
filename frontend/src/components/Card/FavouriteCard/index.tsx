@@ -15,13 +15,11 @@ import SmallCard from '../SmallCard';
 import './styles.scss';
 
 interface FavouriteCardProps {
-  favObject: FavActivityType,
-  index: number
+  favObject: FavActivityType
 }
 
 const FavouriteCard = ({
-  favObject,
-  index
+  favObject
 }: FavouriteCardProps) => {
   const Icon = Icons[favObject.image];
   const navigate = useNavigate();
