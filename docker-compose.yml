@@ -37,6 +37,8 @@ services:
     container_name: sync
     environment:
       <<: [*postgres-vars, *python-vars]
+    volumes:
+      - ./sync:/app
     depends_on:
       database:
         condition: service_healthy
