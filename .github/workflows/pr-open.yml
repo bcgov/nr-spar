@@ -26,7 +26,7 @@ jobs:
           triggers: ('sync/')
 
   deploy:
-    name: Deploy
+    name: Deploy and Run Job
     if: needs.build.outputs.digest != ''
     needs: [build]
     secrets: inherit

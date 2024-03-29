@@ -9,14 +9,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  python:
-    name: Python
-    runs-on: ubuntu-22.04
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-    - working-directory: app
-      run: |
-        ./run.sh || echo "App failing!"
+  deploy:
+    name: Deploy and Run Job
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: test
+      target: test
+      tag: prod
+      verify: false
