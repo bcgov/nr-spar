@@ -17,16 +17,19 @@ jobs:
       digest: ${{ steps.build.outputs.digest }}
     permissions:
       packages: write
+    strategy:
+      matrix:
+        package: [database, sync]
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
         id: build
         with:
           keep_versions: 50
-          package: sync
+          package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
           tag_fallback: latest
-          triggers: ('sync/')
+          triggers: ('${{ matrix.package }}/')
 
   deploy:
     name: Deploy
