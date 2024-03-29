@@ -15,11 +15,15 @@ x-postgres-vars: &postgres-vars
   POSTGRES_DATABASE: *POSTGRES_DATABASE
 
 x-python-vars: &python-vars
-  PIP_NO_CACHE_DIR: off
-  PIP_DISABLE_PIP_VERSION_CHECK: on
+  PIP_NO_CACHE_DIR: "off"
+  PIP_DISABLE_PIP_VERSION_CHECK: "on"
   PIP_DEFAULT_TIMEOUT: 100
   PYTHONDONTWRITEBYTECODE: 1
   PYTHONUNBUFFERED: 1
+  teste: "123"
+  test_mode: 1
+  vurl: "https://knox.io.nrs.gov.bc.ca/v1/groups/data/spar/test"
+  vtoken: ${vtoken}
 
 services:
   database:

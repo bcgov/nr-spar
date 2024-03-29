@@ -56,7 +56,7 @@ def testVault():
         print("Vault token value is not in the pattern requested")
     
     if ret:
-        vault_url = 'https://knox.io.nrs.gov.bc.ca/v1/groups/data/spar/test'
+        # vault_url = 'https://knox.io.nrs.gov.bc.ca/v1/groups/data/spar/test'
         headers = {'X-Vault-Token': vault_token}
         res = requests.get(vault_url, headers=headers)
         # print(res.text)    
@@ -70,16 +70,18 @@ def testVault():
 def main() -> None:
     logging_config.fileConfig(os.path.join(os.path.dirname(__file__), "logging.ini"), 
                               disable_existing_loggers=False)   
-    data_sync.data_sync()    
-    
+    data_sync.data_sync()
+
 if __name__ == '__main__':
     definitiion_of_yes = ["Y","YES","1","T","TRUE"]
-    this_is_a_test = sys.argv[1]
-    if this_is_a_test in definitiion_of_yes:
-        print("Executing in Test mode")
-        required_variables_exists()
-        testVault()
-        
+    if os.environ.get("test_mode") is None:
+        print("Error: test mode variable is None")
     else:
-        main()
-   
+    	this_is_a_test = os.environ.get("test_mode")
+    	if this_is_a_test in definitiion_of_yes:
+            print("Executing in Test mode")
+            required_variables_exists()
+            testVault()
+        else:
+            main()
+
