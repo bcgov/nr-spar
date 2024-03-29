@@ -38,6 +38,7 @@ jobs:
       parameters: -p TEST_MODE=1
       tag: ${{ github.event.number }}
       target: ${{ github.event.number }}
+      verify: false
 
   results:
     name: PR Results

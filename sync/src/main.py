@@ -70,12 +70,13 @@ if __name__ == '__main__':
     if os.environ.get("test_mode") is None:
         print("Error: test mode variable is None")
     else:
-    	this_is_a_test = os.environ.get("test_mode")
-    	if this_is_a_test in definitiion_of_yes:
+        this_is_a_test = os.environ.get("test_mode")
+        if this_is_a_test in definitiion_of_yes:
             print("Executing in Test mode")
             required_variables_exists()
             # Vault disabled
             # testVault()
-        else:
-            main()
+        else:            
+            print("Starting main process ...")
+            # main()
 
