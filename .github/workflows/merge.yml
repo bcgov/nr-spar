@@ -33,9 +33,27 @@ jobs:
         id: pr
         uses: bcgov-nr/action-get-pr@v0.0.1
 
-  results:
-    name: PR Results
+  deploy:
+    name: Deploy
     needs: [vars]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: test
+      target: ${{ needs.vars.outputs.pr }}
+      verify: false
+
+  promote:
+    name: Promote Images
+    needs: [deploy, vars]
     runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    timeout-minutes: 1
     steps:
-      - run: echo "Workflow completed successfully!"
+      - uses: shrink/actions-docker-registry-tag@v4
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/sync
+          target: ${{ needs.vars.outputs.pr }}
+          tags: prod

@@ -8,22 +8,16 @@ concurrency:
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
-env:
-  CRONJOB: ${{ github.event.repository.name }}-${{ github.event.number }}-sync
-
 jobs:
   # https://github.com/bcgov-nr/action-builder-ghcr
-  builds:
-    name: Builds
+  build:
+    name: Build
     runs-on: ubuntu-22.04
-    outputs:
-      digest: ${{ steps.builds.outputs.digest }}
     permissions:
       packages: write
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-        id: builds
         with:
           keep_versions: 50
           package: sync
@@ -31,72 +25,19 @@ jobs:
           tag_fallback: latest
           triggers: ('sync/')
 
-  deploys:
-    name: Deploys
-    needs: [builds]
-    if: needs.builds.outputs.digest != ''
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploys
-        uses: bcgov-nr/action-deployer-openshift@v2.2.0
-        with:
-          file: sync/openshift.etl.yml
-          oc_namespace: ${{ secrets.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          oc_version: 4.13
-          overwrite: true
-          parameters: -p ZONE=${{ github.event.number }} -p TAG=${{ github.event.number }}
-          post_rollout: 
-            oc create job ${{ env.CRONJOB }}-${{ github.run_number }} --from=cronjob/${{ env.CRONJOB }} &&
-            oc get job ${{ env.CRONJOB }}-${{ github.run_number }}
-
-  logs:
-    name: Logs
-    needs: [deploys]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Override OpenShift version
-        env:
-          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
-        working-directory: /usr/local/bin/
-        run: |
-          # Override OpenShift version
-          curl --silent ${{ env.OC }} | tar -xzvf - oc
-          oc version
-
-      - name: Logs
-        run: |
-          # Check job logs
-
-          # Login$
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ secrets.oc_namespace }} #Safeguard!
-
-          # Follow
-          oc create job ${{ env.CRONJOB }}-${{ github.run_number }} --from=cronjob/${{ env.CRONJOB }}
-          sleep 15
-          oc logs -l job-name=${{ env.CRONJOB }}-${{ github.run_number }} --tail=50 --follow
-
-          # Results and exit code
-          oc get job ${{ env.CRONJOB }}-${{ github.run_number }}
-
-          READY=$(oc get job ${{ env.CRONJOB }}-${{ github.run_number }} -o jsonpath='{.status.ready}')
-          echo "READY: $READY"
-
-          if [ $(oc get job ${{ env.CRONJOB }}-${{ github.run_number }} -o jsonpath='{.status.ready}') -eq 0 ]; then
-          if [ "${READY}" -eq 0 ]; then
-            echo "Job failed!"
-            exit 1
-          else
-            echo "Job successful!"
-            exit 0
-          fi
+  deploy:
+    name: Deploy
+    if: needs.build.outputs.digest != ''
+    needs: [build]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      target: ${{ github.event.number }}
 
   results:
     name: PR Results
     if: always() && !failure()
-    needs: [logs]
+    needs: [deploy]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
