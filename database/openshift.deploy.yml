@@ -10,11 +10,17 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-###, test or prod
     required: true
+  - name: ORACLE_PASSWORD
+    description: Oracle database password for API
+    required: true
 
   ### Recommended - suggest hard coding
   - name: APP
     description: Application/component name
     value: database
+  - name: ORACLE_USER
+    description: Oracle database username for API
+    value: proxy_fsa_spar_read_only_user
   - name: ORG
     description: GitHub organization name
     value: bcgov
@@ -22,19 +28,11 @@ parameters:
     description: Repository name
     value: nr-spar-data
 
-  ### Config
-  - name: DB_PASSWORD
+  ### Usually a bad idea - not recommended
+  - name: POSTGRES_PASSWORD
     description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
     generate: expression
-  - name: ORACLE_USER
-    description: Oracle database username for API
-    required: true
-  - name: ORACLE_PASSWORD
-    description: Oracle database password for API
-    required: true
-
-  ### Usually a bad idea - not recommended
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
@@ -67,7 +65,7 @@ objects:
         app: ${REPO}-${ZONE}
     stringData:
       database-name: ${APP}
-      database-password: ${DB_PASSWORD}
+      database-password: ${POSTGRES_PASSWORD}
       database-user: ${APP}
   - apiVersion: v1
     kind: Secret

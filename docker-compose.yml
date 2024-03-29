@@ -17,13 +17,9 @@ x-postgres-vars: &postgres-vars
 x-python-vars: &python-vars
   PIP_NO_CACHE_DIR: "off"
   PIP_DISABLE_PIP_VERSION_CHECK: "on"
-  PIP_DEFAULT_TIMEOUT: 100
-  PYTHONDONTWRITEBYTECODE: 1
-  PYTHONUNBUFFERED: 1
-  teste: "123"
-  test_mode: 1
-  vurl: "https://knox.io.nrs.gov.bc.ca/v1/groups/data/spar/test"
-  vtoken: ${vtoken}
+  PIP_DEFAULT_TIMEOUT: "100"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
 
 services:
   database:
@@ -40,6 +36,9 @@ services:
       context: ./sync
     container_name: sync
     environment:
+      test_mode: 1
+      ORACLE_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-password}
       <<: [*postgres-vars, *python-vars]
     volumes:
       - ./sync:/app

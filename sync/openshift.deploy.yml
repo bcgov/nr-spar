@@ -73,19 +73,19 @@ objects:
                   env:
                     - name: test_mode
                       value: "${TEST_MODE}"
-                    - name: DB_SERVICE
+                    - name: POSTGRES_HOST
                       value: ${REPO}-${ZONE}-database
-                    - name: DB_NAME
+                    - name: POSTGRES_DATABASE
                       valueFrom:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-database
                           key: database-name
-                    - name: DB_PASSWORD
+                    - name: POSTGRES_PASSWORD
                       valueFrom:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-database
                           key: database-password
-                    - name: DB_USER
+                    - name: POSTGRES_USER
                       valueFrom:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-database
