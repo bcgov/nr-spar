@@ -19,6 +19,9 @@ parameters:
   - name: REPO
     description: Repository name
     value: nr-spar-data
+  - name: TEST_MODE
+    description: "Run in test mode"
+    value: "1"
 
   ### Usually a bad idea - not recommended
   - name: CRON_MINUTES
@@ -67,7 +70,9 @@ objects:
               containers:
                 - name: ${REPO}-${ZONE}
                   image: "${REGISTRY}/${ORG}/${REPO}/${APP}:${TAG}"
-                  # env:
+                  env:
+                    - name: test_mode
+                      value: "${TEST_MODE}"
                   #   - name: POSTGRES_SERVICE
                   #     value: "${REPO}-${ZONE}-database"
                   resources:

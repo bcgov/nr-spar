@@ -21,12 +21,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  vars:
+    name: Set Variables
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      # Get PR number for squash merges to main
+      - name: PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
+
   deploy:
     name: Deploy and Run Job
+    needs: [vars]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
       environment: test
+      tag: ${{ needs.vars.outputs.pr }}
       target: test
       verify: false
 

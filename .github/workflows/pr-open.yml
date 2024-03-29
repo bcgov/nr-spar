@@ -13,11 +13,14 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-22.04
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     permissions:
       packages: write
     timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        id: build
         with:
           keep_versions: 50
           package: sync
@@ -26,12 +29,14 @@ jobs:
           triggers: ('sync/')
 
   deploy:
-    name: Deploy and Run Job
+    name: Deploy
     if: needs.build.outputs.digest != ''
     needs: [build]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
+      parameters: -p TEST_MODE=1
+      tag: ${{ github.event.number }}
       target: ${{ github.event.number }}
 
   results:

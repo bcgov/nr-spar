@@ -4,8 +4,13 @@ on:
   workflow_call:
     inputs:
       ### Required
+      tag:
+        description: GitHub package tag; e.g. PR number or PROD
+        required: false
+        type: string
+
       target:
-        description: PR number, test or prod
+        description: Deployment target; e.g. PR number, test or prod
         required: true
         type: string
 
@@ -15,8 +20,8 @@ on:
         required: false
         type: string
 
-      tag:
-        description: GitHub package tag; omit for PRs
+      parameters:
+        description: Template parameters/variables to pass (e.g. -p ZONE=...)
         required: false
         type: string
 
@@ -36,31 +41,8 @@ env:
   JOB_JOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync-${{ github.run_number }}
 
 jobs:
-  vars:
-    name: Set Variables
-    outputs:
-      tag: ${{ steps.vars.outputs.tag }}
-    runs-on: ubuntu-latest
-    steps:
-      # Get PR number for squash merges to main
-      - name: PR Number
-        id: pr
-        uses: bcgov-nr/action-get-pr@v0.0.1
-
-      - name: Set Variables
-        id: vars
-        run: |
-          if [ -z "${{ inputs.tag }}" ]; then
-            echo "No tag provided, using most recent PR merge number."
-            echo "tag=${{ steps.pr.outputs.pr }}" >> $GITHUB_ENV
-          else
-            echo "Tag provided and being used for deployment."
-            echo "tag=${{ inputs.tag }}" >> $GITHUB_ENV
-          fi
-
   deploy:
-    name: Deploy and Run Job
-    needs: [vars]
+    name: Deploy
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     steps:
@@ -73,7 +55,9 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           oc_version: 4.13
           overwrite: true
-          parameters: -p ZONE=${{ inputs.target }} -p TAG=${{ needs.vars.outputs.tag }}
+          parameters:
+            -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }}
+            ${{ inputs.parameters}}
           post_rollout: oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}
           triggers: ${{ inputs.triggers }}
 

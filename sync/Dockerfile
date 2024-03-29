@@ -5,8 +5,11 @@ RUN apt update && \
     apt install -y --no-install-recommends gcc libpq-dev python3-dev
 
 # Disable cache dir, disable upgrade message, create .venv in project dir
-ARG PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on
+ARG PIP_NO_CACHE_DIR="off" \
+    PIP_DISABLE_PIP_VERSION_CHECK="on" \
+    PIP_DEFAULT_TIMEOUT="100" \
+    PYTHONDONTWRITEBYTECODE="1" \
+    PYTHONUNBUFFERED="1"
 
 # Copy files and install requirements
 WORKDIR /app
