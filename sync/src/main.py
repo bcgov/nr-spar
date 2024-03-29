@@ -13,14 +13,6 @@ def required_variables_exists():
         print("Error: teste variable is None")
         ret = False
         
-    if os.environ.get("vtoken") is None:
-        print("Error: vtoken variable is None")
-        ret = False
-        
-    if os.environ.get("vurl") is None:
-        print("Error: vurl variable is None")
-        ret = False
-        
     if os.environ.get("test_mode") is None:
         print("Error: test mode variable is None")
         ret = False
@@ -31,6 +23,7 @@ def required_variables_exists():
         raise Exception("Not all required variables to execute a instance of Data Sync Engine exists.")
     
         
+# -- Vault is deprecated
 def testVault():  
     ret = True
     
@@ -81,7 +74,8 @@ if __name__ == '__main__':
     	if this_is_a_test in definitiion_of_yes:
             print("Executing in Test mode")
             required_variables_exists()
-            testVault()
+            # Vault disabled
+            # testVault()
         else:
             main()
 
