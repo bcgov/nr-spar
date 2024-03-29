@@ -1,7 +1,7 @@
 import React from 'react';
 
-import EditAClassApplication from '../../../views/Seedlot/EditAClassApplication';
-import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
+import EditAClassApplication from '../../../../views/Seedlot/EditAClassApplication';
+import { SeedlotRegFormType } from '../../../../types/SeedlotRegistrationTypes';
 
 type props = {
   applicantData: SeedlotRegFormType,

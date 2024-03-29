@@ -17,11 +17,13 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import PageTitle from '../../../components/PageTitle';
 import RowGap from '../../../components/RowGap';
-import ApplicantAndSeedlotRead from '../../../components/ApplicantAndSeedlot/Read';
-import ApplicantAndSeedlotEdit from '../../../components/ApplicantAndSeedlot/Edit';
+import ApplicantAndSeedlotRead from '../../../components/SeedlotReview/ApplicantAndSeedlot/Read';
+import ApplicantAndSeedlotEdit from '../../../components/SeedlotReview/ApplicantAndSeedlot/Edit';
 import ClassAContext from '../ContextContainerClassA/context';
 import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
+import CollectionReviewRead from '../../../components/SeedlotReview/Collection/Read';
+import CollectionReviewEdit from '../../../components/SeedlotReview/Collection/Edit';
 
 import ContextContainerClassA from '../ContextContainerClassA';
 
@@ -138,6 +140,17 @@ const SeedlotReview = () => {
         <Row className="section-title-row">
           <Column className="section-title-col">
             Collection
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            {
+              isReadMode
+                ? <CollectionReviewRead />
+                : (
+                  <CollectionReviewEdit />
+                )
+            }
           </Column>
         </Row>
 

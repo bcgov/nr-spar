@@ -24,7 +24,7 @@ import {
 } from '../../../config/TimeUnits';
 
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { SeedlotAClassSubmitType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
+import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
@@ -77,6 +77,7 @@ const ContextContainerClassA = ({ children }: props) => {
   const [lastSaveTimestamp, setLastSaveTimestamp] = useState<string>(() => DateTime.now().toISO());
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [saveDescription, setSaveDescription] = useState<string>('Save changes');
+  const [calculatedValues, setCalculatedValues] = useState<SeedlotCalculationsResultsType[]>([]);
   const numOfEdit = useRef(0);
 
   const vegCodeQuery = useQuery({
@@ -256,17 +257,6 @@ const ContextContainerClassA = ({ children }: props) => {
     return stepStatus;
   };
 
-  useEffect(() => {
-    if (getAllSeeedlotInfoQuery.status === 'success') {
-      const clonedStatus = structuredClone(progressStatus);
-      const stepNames = Object.keys(clonedStatus) as Array<keyof ProgressIndicatorConfig>;
-      stepNames.forEach((step) => {
-        clonedStatus[step].isComplete = true;
-      });
-      setProgressStatus(clonedStatus);
-    }
-  }, [getAllSeeedlotInfoQuery.isFetched]);
-
   const setStepData = (stepName: keyof AllStepData, stepData: any) => {
     const newData = { ...allStepData };
     // This check guarantee that every change on the collectors
@@ -293,6 +283,7 @@ const ContextContainerClassA = ({ children }: props) => {
   // form steps
   useEffect(() => {
     if (getAllSeeedlotInfoQuery.status === 'success') {
+      // Set seedlot data
       const { seedlotData } = getAllSeeedlotInfoQuery.data;
       const clientNumbersArray: string[] = [];
       clientNumbersArray.push(seedlotData.seedlotFormCollectionDto.collectionClientNumber);
@@ -303,8 +294,19 @@ const ContextContainerClassA = ({ children }: props) => {
       clientNumbersArray.push(seedlotData.seedlotFormExtractionDto.extractoryClientNumber);
       clientNumbersArray.push(seedlotData.seedlotFormExtractionDto.storageClientNumber);
       setClientNumbers(clientNumbersArray);
+
+      // Set calculated result
+      setCalculatedValues(getAllSeeedlotInfoQuery.data.calculatedValues);
+
+      // Set progress status
+      const clonedStatus = structuredClone(progressStatus);
+      const stepNames = Object.keys(clonedStatus) as Array<keyof ProgressIndicatorConfig>;
+      stepNames.forEach((step) => {
+        clonedStatus[step].isComplete = true;
+      });
+      setProgressStatus(clonedStatus);
     }
-  }, [getAllSeeedlotInfoQuery.isFetched]);
+  }, [getAllSeeedlotInfoQuery.status]);
 
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
@@ -607,6 +609,7 @@ const ContextContainerClassA = ({ children }: props) => {
     () => (
       {
         seedlotData: seedlotQuery.data,
+        calculatedValues,
         seedlotNumber,
         allStepData,
         setStepData,
@@ -644,7 +647,7 @@ const ContextContainerClassA = ({ children }: props) => {
         )
       }),
     [
-      seedlotNumber, allStepData, seedlotQuery.status,
+      seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
       vegCodeQuery.status, formStep, forestClientQuery.status,
       applicantAgencyQuery.status, isFormSubmitted, isFormIncomplete,
       saveStatus, saveDescription, lastSaveTimestamp, allStepCompleted,

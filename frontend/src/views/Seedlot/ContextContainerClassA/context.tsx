@@ -5,13 +5,14 @@ import { AxiosResponse } from 'axios';
 
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { SeedlotAClassSubmitType, SeedlotType } from '../../../types/SeedlotType';
+import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotType } from '../../../types/SeedlotType';
 
 import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
 
 type ContextType = {
   seedlotData: SeedlotType | undefined,
+  calculatedValues: SeedlotCalculationsResultsType[],
   seedlotNumber: string | undefined,
   allStepData: AllStepData,
   setStepData: (stepName: keyof AllStepData, stepData: any) => void,
@@ -44,6 +45,7 @@ type ContextType = {
 
 const ClassAContext = createContext<ContextType>({
   seedlotData: {} as SeedlotType,
+  calculatedValues: [],
   seedlotNumber: '',
   allStepData: {} as AllStepData,
   setStepData: (stepName: keyof AllStepData, stepData: any) => { },
