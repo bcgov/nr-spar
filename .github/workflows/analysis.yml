@@ -23,6 +23,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
       - uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
 
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
