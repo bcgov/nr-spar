@@ -10,6 +10,7 @@ x-var:
 
 x-postgres-vars: &postgres-vars
   POSTGRES_HOST: database
+  POSTGRES_PORT: 5432
   POSTGRES_USER: *POSTGRES_USER
   POSTGRES_PASSWORD: *POSTGRES_PASSWORD
   POSTGRES_DATABASE: *POSTGRES_DATABASE
@@ -37,6 +38,9 @@ services:
     container_name: sync
     environment:
       test_mode: 1
+      ORACLE_HOST: ${ORACLE_HOST}
+      ORACLE_SN: ${ORACLE_SN}
+      ORACLE_PORT: ${ORACLE_PORT}
       ORACLE_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
       ORACLE_PASSWORD: ${ORACLE_PASSWORD:-password}
       <<: [*postgres-vars, *python-vars]
