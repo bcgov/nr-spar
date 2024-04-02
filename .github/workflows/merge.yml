@@ -43,7 +43,7 @@ jobs:
       environment: test
       tag: ${{ inputs.tag || needs.vars.outputs.pr }}
       target: test
-      verify: false
+      verify: true
 
   promote:
     name: Promote Images
