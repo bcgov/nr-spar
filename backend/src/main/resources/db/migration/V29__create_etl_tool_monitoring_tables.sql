@@ -37,10 +37,10 @@ created_at  timestamp   default now() not null
 
 comment on table spar.ETL_EXECUTION_LOG is 'ETL Tool monitoring table to store execution current instance of batch processing interfaces';
 comment on column spar.ETL_EXECUTION_LOG.interface_id               is 'Unique interface name to represent a batch execution';
-comment on column spar.ETL_EXECUTION_MAP.last_run_ts                is 'Last timestamp this interface was executed for batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.current_run_ts             is 'Current timestamp this interface was executed of this batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.updated_at                 is 'Timestamp of the last time this record was updated'; 
-comment on column spar.ETL_EXECUTION_MAP.created_at                 is 'Timestamp of the time this record was created'; 
+comment on column spar.ETL_EXECUTION_LOG.last_run_ts                is 'Last timestamp this interface was executed for batch execution'; 
+comment on column spar.ETL_EXECUTION_LOG.current_run_ts             is 'Current timestamp this interface was executed of this batch execution'; 
+comment on column spar.ETL_EXECUTION_LOG.updated_at                 is 'Timestamp of the last time this record was updated'; 
+comment on column spar.ETL_EXECUTION_LOG.created_at                 is 'Timestamp of the time this record was created'; 
 
 create table spar.ETL_EXECUTION_LOG_HIST(
 interface_id varchar(100) not null,
