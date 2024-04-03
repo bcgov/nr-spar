@@ -16,11 +16,6 @@ export const INITIAL_GEO_INFO_VALS: GeoInfoValType = {
     isInvalid: false,
     value: ''
   },
-  description: {
-    id: 'geo-info-description',
-    isInvalid: false,
-    value: ''
-  },
   primarySpu: {
     id: 'geo-info-primary-spu',
     isInvalid: false,

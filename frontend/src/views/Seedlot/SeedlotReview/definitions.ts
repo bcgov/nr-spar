@@ -4,7 +4,6 @@ export type GeoInfoValType = {
   becZone: StringInputType,
   subZone: StringInputType,
   variant: StringInputType,
-  description: StringInputType,
   primarySpu: StringInputType,
   meanElevation: StringInputType,
   meanLatDeg: StringInputType,

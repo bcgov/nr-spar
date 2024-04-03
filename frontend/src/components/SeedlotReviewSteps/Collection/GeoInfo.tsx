@@ -32,7 +32,7 @@ const GeoInfo = ({ isRead }: props) => {
   };
 
   const renderLatLong = (isLat: boolean) => {
-    const latLongStr = isLat ? 'lat' : 'long';
+    const latLongStr = isLat ? 'latitude' : 'longitude';
     const degKey: keyof GeoInfoValType = isLat ? 'meanLatDeg' : 'meanLongDeg';
     const minuteKey: keyof GeoInfoValType = isLat ? 'meanLatMinute' : 'meanLongMinute';
     const secKey: keyof GeoInfoValType = isLat ? 'meanLatSec' : 'meanLongSec';
@@ -50,7 +50,7 @@ const GeoInfo = ({ isRead }: props) => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
             id={`geo-info-mean-${latLongStr}`}
-            labelText="Mean latitude of parent tree"
+            labelText={`Mean ${latLongStr} of parent tree`}
             defaultValue={formatLatLong(isLat)}
             readOnly={isRead}
           />
@@ -63,7 +63,7 @@ const GeoInfo = ({ isRead }: props) => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
             id={`geo-info-mean-${latLongStr}-deg`}
-            labelText="Mean latitude degree"
+            labelText={`Mean ${latLongStr} degree`}
             defaultValue={geoInfoVals[degKey].value}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
               setGeoInfoVal(degKey, e.target.value);
@@ -73,7 +73,7 @@ const GeoInfo = ({ isRead }: props) => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
             id={`geo-info-mean-${latLongStr}-minute`}
-            labelText="minute"
+            labelText={`Mean ${latLongStr} minute`}
             defaultValue={geoInfoVals[minuteKey].value}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
               setGeoInfoVal(minuteKey, e.target.value);
@@ -83,7 +83,7 @@ const GeoInfo = ({ isRead }: props) => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
             id={`geo-info-mean-${latLongStr}-sec`}
-            labelText="second"
+            labelText={`Mean ${latLongStr} second`}
             defaultValue={geoInfoVals[secKey].value}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
               setGeoInfoVal(secKey, e.target.value);
@@ -149,23 +149,6 @@ const GeoInfo = ({ isRead }: props) => {
                   readOnly={isRead}
                   onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                     setGeoInfoVal('variant', e.target.value);
-                  }}
-                />
-              )
-          }
-        </Column>
-        <Column className="info-col" sm={4} md={4} lg={4}>
-          {
-            isFetchingData
-              ? <TextInputSkeleton />
-              : (
-                <TextInput
-                  id={geoInfoVals.description.id}
-                  labelText="Description"
-                  defaultValue={formatEmptyStr(geoInfoVals.description.value, isRead ?? false)}
-                  readOnly={isRead}
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setGeoInfoVal('description', e.target.value);
                   }}
                 />
               )

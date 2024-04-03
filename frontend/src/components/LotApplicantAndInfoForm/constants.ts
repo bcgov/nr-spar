@@ -9,8 +9,8 @@ export const agencyFieldsProp: AgencyTextPropsType = {
     labelText: ''
   },
   agencyInput: {
-    titleText: 'Applicant agency name',
-    invalidText: 'Please select an agency'
+    titleText: 'Applicant agency acronym',
+    invalidText: 'Acronym that identifies the agency'
   },
   locationCode: {
     name: 'seedlotCreationLocationCode',
