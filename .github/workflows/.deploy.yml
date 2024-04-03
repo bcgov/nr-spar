@@ -95,9 +95,9 @@ jobs:
           oc get job ${{ env.JOB_JOB }}
 
           if [ $(oc get job ${{ env.JOB_JOB }} -o jsonpath='{.status.ready}') -eq 0 ]; then
-            echo "Job failed!"
-            exit 1
-          else
             echo "Job successful!"
             exit 0
+          else
+            echo "Job failed!"
+            exit 1
           fi
