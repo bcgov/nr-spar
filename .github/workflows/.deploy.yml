@@ -44,6 +44,8 @@ jobs:
   deploy:
     name: Deploy
     environment: ${{ inputs.environment }}
+    outputs:
+      triggered: ${{ steps.sync.outputs.triggered }}
     runs-on: ubuntu-latest
     steps:
       - name: Database and Init
@@ -58,9 +60,10 @@ jobs:
             -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }}
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
-          triggers: ('database/' 'sync/')
+          triggers: ${{ inputs.triggers }}
 
       - name: Sync
+        id: sync
         uses: bcgov-nr/action-deployer-openshift@v2.2.0
         with:
           file: sync/openshift.deploy.yml
@@ -71,11 +74,11 @@ jobs:
           overwrite: true
           parameters: -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }}
           post_rollout: oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}
-          triggers: ('database/' 'sync/')
+          triggers: ${{ inputs.triggers }}
 
   verify:
     name: Verify
-    if: inputs.verify == true
+    if: inputs.verify == true && needs.deploy.outputs.triggered == 'true'
     environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest

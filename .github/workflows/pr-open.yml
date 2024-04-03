@@ -13,8 +13,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-22.04
-    outputs:
-      digest: ${{ steps.build.outputs.digest }}
     permissions:
       packages: write
     strategy:
@@ -33,7 +31,6 @@ jobs:
 
   deploy:
     name: Deploy
-    if: needs.build.outputs.digest != ''
     needs: [build]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
@@ -41,6 +38,7 @@ jobs:
       parameters: -p TEST_MODE=1
       tag: ${{ github.event.number }}
       target: ${{ github.event.number }}
+      triggers: ('database/' 'sync/')
       verify: true
 
   results:
