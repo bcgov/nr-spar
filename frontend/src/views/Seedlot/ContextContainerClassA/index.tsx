@@ -30,8 +30,10 @@ import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSt
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import ROUTES from '../../../routes/constants';
+import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
+import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/constants';
 
-import ClassAContext from './context';
+import ClassAContext, { ClassAContextType } from './context';
 import {
   AllStepData, ProgressIndicatorConfig,
   ProgressStepStatus
@@ -119,7 +121,7 @@ const ContextContainerClassA = ({ children }: props) => {
     }
   }, [seedlotQuery.isFetched]);
 
-  const getAllSeeedlotInfoQuery = useQuery({
+  const getAllSeedlotInfoQuery = useQuery({
     queryKey: ['seedlot-full-form', seedlotNumber],
     queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? ''),
     onError: (err: AxiosError) => {
@@ -193,7 +195,7 @@ const ContextContainerClassA = ({ children }: props) => {
     queries: clientNumbers.map((client) => ({
       queryKey: ['forest-clients', client],
       queryFn: () => getForestClientByNumber(client),
-      enabled: getAllSeeedlotInfoQuery.isFetched,
+      enabled: getAllSeedlotInfoQuery.isFetched,
       staleTime: THREE_HOURS,
       cacheTime: THREE_HALF_HOURS
     }))
@@ -282,9 +284,9 @@ const ContextContainerClassA = ({ children }: props) => {
   // This useEffect fetchs all data regarding agencies on the
   // form steps
   useEffect(() => {
-    if (getAllSeeedlotInfoQuery.status === 'success') {
+    if (getAllSeedlotInfoQuery.status === 'success') {
       // Set seedlot data
-      const { seedlotData } = getAllSeeedlotInfoQuery.data;
+      const { seedlotData } = getAllSeedlotInfoQuery.data;
       const clientNumbersArray: string[] = [];
       clientNumbersArray.push(seedlotData.seedlotFormCollectionDto.collectionClientNumber);
       clientNumbersArray.push(seedlotData.seedlotFormInterimDto.intermStrgClientNumber);
@@ -296,7 +298,7 @@ const ContextContainerClassA = ({ children }: props) => {
       setClientNumbers(clientNumbersArray);
 
       // Set calculated result
-      setCalculatedValues(getAllSeeedlotInfoQuery.data.calculatedValues);
+      setCalculatedValues(getAllSeedlotInfoQuery.data.calculatedValues);
 
       // Set progress status
       const clonedStatus = structuredClone(progressStatus);
@@ -306,7 +308,7 @@ const ContextContainerClassA = ({ children }: props) => {
       });
       setProgressStatus(clonedStatus);
     }
-  }, [getAllSeeedlotInfoQuery.status]);
+  }, [getAllSeedlotInfoQuery.status]);
 
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
@@ -344,12 +346,12 @@ const ContextContainerClassA = ({ children }: props) => {
   });
 
   useEffect(() => {
-    if (getAllSeeedlotInfoQuery.status === 'success'
+    if (getAllSeedlotInfoQuery.status === 'success'
       && fundingSourcesQuery.status === 'success'
       && methodsOfPaymentQuery.status === 'success'
       && gameticMethodologyQuery.status === 'success'
       && orchardQuery.status === 'success') {
-      const fullFormData = getAllSeeedlotInfoQuery.data.seedlotData;
+      const fullFormData = getAllSeedlotInfoQuery.data.seedlotData;
       const defaultAgencyNumber = seedlotQuery.data?.applicantClientNumber;
       setAllStepData(
         resDataToState(
@@ -361,8 +363,8 @@ const ContextContainerClassA = ({ children }: props) => {
           gameticMethodologyQuery.data
         )
       );
-    } else if (getAllSeeedlotInfoQuery.status === 'error') {
-      const error = getAllSeeedlotInfoQuery.error as AxiosError;
+    } else if (getAllSeedlotInfoQuery.status === 'error') {
+      const error = getAllSeedlotInfoQuery.error as AxiosError;
       if (error.response?.status !== 404) {
         // eslint-disable-next-line no-alert
         alert(`Error retrieving seedlot data! ${error.message}`);
@@ -370,8 +372,8 @@ const ContextContainerClassA = ({ children }: props) => {
       }
     }
   }, [
-    getAllSeeedlotInfoQuery.status,
-    getAllSeeedlotInfoQuery.isFetched,
+    getAllSeedlotInfoQuery.status,
+    getAllSeedlotInfoQuery.isFetched,
     fundingSourcesQuery.isFetched,
     methodsOfPaymentQuery.isFetched,
     gameticMethodologyQuery.isFetched,
@@ -605,11 +607,64 @@ const ContextContainerClassA = ({ children }: props) => {
     }
   }, [getFormDraftQuery.status, getFormDraftQuery.isFetchedAfterMount, forestClientQuery.status]);
 
-  const contextData = useMemo(
+  const [geoInfoVals, setGeoInfoVals] = useState<GeoInfoValType>(() => INITIAL_GEO_INFO_VALS);
+  const [genWorthVals, setGenWorthVals] = useState<GenWorthValType>(() => INITIAL_GEN_WORTH_VALS);
+
+  const fillGenWorthVals = () => {
+    const keys = Object.keys(genWorthVals) as (keyof GenWorthValType)[];
+    const clonedGenWorth = structuredClone(genWorthVals);
+
+    keys.forEach((key) => {
+      const found = calculatedValues.find((calcedVal) => calcedVal.traitCode.toLowerCase() === key);
+      if (found) {
+        clonedGenWorth[key].value = found.calculatedValue.toString();
+      }
+    });
+
+    setGenWorthVals(clonedGenWorth);
+  };
+
+  /**
+   * Set a single gen worth val
+   */
+  const setGenWorthVal = (traitCode: keyof GenWorthValType, newVal: string) => {
+    setGenWorthVals((prevVals) => ({
+      ...prevVals,
+      [traitCode]: {
+        ...prevVals[traitCode],
+        value: newVal
+      }
+    }));
+  };
+
+  /**
+   * Set a single geo info val
+   */
+  const setGeoInfoVal = (infoName: keyof GeoInfoValType, newVal: string) => {
+    setGeoInfoVals((prevVals) => ({
+      ...prevVals,
+      [infoName]: {
+        ...prevVals[infoName],
+        value: newVal
+      }
+    }));
+  };
+
+  useEffect(() => {
+    if (calculatedValues.length) {
+      fillGenWorthVals();
+    }
+  }, [calculatedValues]);
+
+  const contextData: ClassAContextType = useMemo(
     () => (
       {
         seedlotData: seedlotQuery.data,
         calculatedValues,
+        geoInfoVals,
+        genWorthVals,
+        setGeoInfoVal,
+        setGenWorthVal,
         seedlotNumber,
         allStepData,
         setStepData,
@@ -638,7 +693,7 @@ const ContextContainerClassA = ({ children }: props) => {
         isFetchingData: (
           vegCodeQuery.isFetching
           || seedlotQuery.isFetching
-          || getAllSeeedlotInfoQuery.isFetching
+          || getAllSeedlotInfoQuery.isFetching
           || forestClientQuery.isFetching
           || methodsOfPaymentQuery.isFetching
           || orchardQuery.isFetching
@@ -651,9 +706,9 @@ const ContextContainerClassA = ({ children }: props) => {
       vegCodeQuery.status, formStep, forestClientQuery.status,
       applicantAgencyQuery.status, isFormSubmitted, isFormIncomplete,
       saveStatus, saveDescription, lastSaveTimestamp, allStepCompleted,
-      progressStatus, submitSeedlot, saveProgress.status, getAllSeeedlotInfoQuery.status,
+      progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,
       methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,
-      fundingSourcesQuery.status
+      fundingSourcesQuery.status, geoInfoVals, genWorthVals
     ]
   );
 

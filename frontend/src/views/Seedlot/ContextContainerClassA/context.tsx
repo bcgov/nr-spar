@@ -9,10 +9,15 @@ import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotType } 
 
 import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
+import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 
-type ContextType = {
+export type ClassAContextType = {
   seedlotData: SeedlotType | undefined,
   calculatedValues: SeedlotCalculationsResultsType[],
+  geoInfoVals: GeoInfoValType,
+  genWorthVals: GenWorthValType,
+  setGenWorthVal: (traitCode: keyof GenWorthValType, newVal: string) => void,
+  setGeoInfoVal: (infoName: keyof GeoInfoValType, newVal: string) => void,
   seedlotNumber: string | undefined,
   allStepData: AllStepData,
   setStepData: (stepName: keyof AllStepData, stepData: any) => void,
@@ -43,7 +48,7 @@ type ContextType = {
   isFetchingData: boolean
 }
 
-const ClassAContext = createContext<ContextType>({
+const ClassAContext = createContext<ClassAContextType>({
   seedlotData: {} as SeedlotType,
   calculatedValues: [],
   seedlotNumber: '',
@@ -70,7 +75,11 @@ const ClassAContext = createContext<ContextType>({
   getSeedlotPayload: () => ({} as SeedlotAClassSubmitType),
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => { },
   saveProgressStatus: 'idle',
-  isFetchingData: false
+  isFetchingData: false,
+  geoInfoVals: {} as GeoInfoValType,
+  genWorthVals: {} as GenWorthValType,
+  setGenWorthVal: () => { },
+  setGeoInfoVal: () => { }
 });
 
 export default ClassAContext;

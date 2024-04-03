@@ -139,9 +139,13 @@ const CollectionStep = ({ isReview }: props) => {
   return (
     <FlexGrid className="collection-step-container">
       <Row className="collection-step-row">
-        <Column sm={4} md={8} lg={16} xlg={16}>
-          <h2 className="section-title">{fieldsConfig.titleSection.title}</h2>
-          <Subtitle text={fieldsConfig.titleSection.subtitle} />
+        <Column className="section-title" sm={4} md={8} lg={16} xlg={16}>
+          <h2>{fieldsConfig.titleSection.title}</h2>
+          {
+            isReview
+              ? null
+              : <Subtitle text={fieldsConfig.titleSection.subtitle} />
+          }
         </Column>
       </Row>
       <ApplicantAgencyFields
@@ -166,9 +170,13 @@ const CollectionStep = ({ isReview }: props) => {
         maxInputColSize={6}
       />
       <Row className="collection-step-row">
-        <Column sm={4} md={8} lg={16} xlg={16}>
+        <Column className="section-title" sm={4} md={8} lg={16} xlg={16}>
           <h2>{fieldsConfig.collectionTitle.title}</h2>
-          <Subtitle text={fieldsConfig.collectionTitle.subtitle} />
+          {
+            isReview
+              ? null
+              : <Subtitle text={fieldsConfig.collectionTitle.subtitle} />
+          }
         </Column>
       </Row>
       <Row className="collection-step-row">
@@ -187,7 +195,7 @@ const CollectionStep = ({ isReview }: props) => {
               name={fieldsConfig.startDate.name}
               placeholder={fieldsConfig.startDate.placeholder}
               labelText={fieldsConfig.startDate.labelText}
-              helperText={fieldsConfig.startDate.helperText}
+              helperText={isReview ? null : fieldsConfig.startDate.helperText}
               invalid={state.startDate.isInvalid}
               invalidText={fieldsConfig.startDate.invalidText}
               size="md"
@@ -211,7 +219,7 @@ const CollectionStep = ({ isReview }: props) => {
               name={fieldsConfig.endDate.name}
               placeholder={fieldsConfig.endDate.placeholder}
               labelText={fieldsConfig.endDate.labelText}
-              helperText={fieldsConfig.endDate.helperText}
+              helperText={isReview ? null : fieldsConfig.endDate.helperText}
               invalid={state.endDate.isInvalid}
               invalidText={fieldsConfig.endDate.invalidText}
               size="md"
@@ -263,7 +271,7 @@ const CollectionStep = ({ isReview }: props) => {
             label={fieldsConfig.volumeOfCones.labelText}
             invalid={state.volumeOfCones.isInvalid}
             invalidText={fieldsConfig.volumeOfCones.invalidText}
-            helperText={fieldsConfig.volumeOfCones.helperText}
+            helperText={isReview ? null : fieldsConfig.volumeOfCones.helperText}
             warn={isCalcWrong}
             readOnly={isFormSubmitted && !isReview}
             warnText={fieldsConfig.volumeOfCones.warnText}
