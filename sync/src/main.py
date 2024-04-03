@@ -20,7 +20,7 @@ def db_config_test(type_,schema_):
             "password": os.environ.get("ORACLE_PASSWORD"),
             "host": os.environ.get("ORACLE_HOST"),
             "port": os.environ.get("ORACLE_PORT"),
-            "service_name": os.environ.get("ORACLE_SN"),
+            "service_name": os.environ.get("ORACLE_SERVICE"),
             "schema": schema_,
             "test_query": "SELECT 'SUCCESS' a FROM DUAL"
         }
@@ -51,7 +51,7 @@ def required_variables_exists():
        not env_var_is_filled("POSTGRES_PASSWORD") or \
        not env_var_is_filled("POSTGRES_DATABASE") or \
        not env_var_is_filled("ORACLE_HOST") or \
-       not env_var_is_filled("ORACLE_SN") or \
+       not env_var_is_filled("ORACLE_SERVICE") or \
        not env_var_is_filled("ORACLE_USER") or \
        not env_var_is_filled("ORACLE_PASSWORD"):
        ret = False        
@@ -62,14 +62,11 @@ def required_variables_exists():
         raise Exception("Not all required variables to execute a instance of Data Sync Engine exists.")
     
 def testOracleConnection():
+    print("-------------------------------------")
     print("-- 3. Checking if Oracle connection is available and reachable")
+    print("-------------------------------------")
+    from module.test_db_connection import test_db_connection
     dbConfig = db_config_test("ORACLE","THE") 
-    #response = os.system("ping -c 1 " + dbConfig["host"] )
-    #if response == 0:
-    #    print("ORACLE Host ("+dbConfig["host"]+") is reachable")
-    #else:
-    #    print("ORACLE Host ("+dbConfig["host"]+") is unreachable")
-    #    
     d = test_db_connection.do_test(dbConfig)
     print(d)
     
@@ -101,24 +98,16 @@ def testVault():
         print("Vault token value is not in the pattern requested")
     
     if ret:
-        # vault_url = 'https://knox.io.nrs.gov.bc.ca/v1/groups/data/spar/test'
         headers = {'X-Vault-Token': vault_token}
         res = requests.get(vault_url, headers=headers)
-        # print(res.text)    
         j = json.loads(res.text)
-        # print(j)
         
     else:
         print("Vault cannot be reached as required variables are not correctly informed")
 
-
 def main() -> None:
-    logging_config.fileConfig(os.path.join(os.path.dirname(__file__), "logging.ini"), 
-                              disable_existing_loggers=False)   
-    data_sync.data_sync()
-
-if __name__ == '__main__':
     definitiion_of_yes = ["Y","YES","1","T","TRUE"]
+    print(os.environ.get("test_mode"))
     if os.environ.get("test_mode") is None:
         print("Error: test mode variable is None")
     else:
@@ -127,9 +116,19 @@ if __name__ == '__main__':
             print("Executing in Test mode")
             required_variables_exists()
             testPostgresConnection()
+            testOracleConnection()
             # Vault disabled
             # testVault()
         else:            
             print("Starting main process ...")
-            # main()
+            #execute_etl()
+
+# MAIN Execution
+def execute_etl() -> None:
+    logging_config.fileConfig(os.path.join(os.path.dirname(__file__), "logging.ini"), 
+                              disable_existing_loggers=False)   
+    data_sync.data_sync()
+
+if __name__ == '__main__':
+    main()
 

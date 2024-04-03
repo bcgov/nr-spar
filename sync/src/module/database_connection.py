@@ -1,5 +1,6 @@
 import logging
-import cx_Oracle
+#import cx_Oracle
+import oracledb
 from sqlalchemy import create_engine, text
 
 logger = logging.getLogger(__name__)

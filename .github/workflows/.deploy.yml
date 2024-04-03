@@ -57,6 +57,7 @@ jobs:
           parameters:
             -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }}
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
+            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
           triggers: ('database/' 'sync/')
 
       - name: Sync

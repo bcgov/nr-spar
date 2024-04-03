@@ -38,11 +38,11 @@ services:
     container_name: sync
     environment:
       test_mode: 1
-      ORACLE_HOST: ${ORACLE_HOST}
-      ORACLE_SN: ${ORACLE_SN}
-      ORACLE_PORT: ${ORACLE_PORT}
-      ORACLE_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
+      ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
       ORACLE_PASSWORD: ${ORACLE_PASSWORD:-password}
+      ORACLE_PORT: ${ORACLE_PORT:-1543}
+      ORACLE_SERVICE: ${ORACLE_SERVICE:-dbq01.nrs.bcgov}
+      ORACLE_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
       <<: [*postgres-vars, *python-vars]
     volumes:
       - ./sync:/app
