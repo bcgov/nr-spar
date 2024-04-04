@@ -54,49 +54,69 @@ export const getDownloadUrl = (tabType: string) => {
   return SeedlotCsvTemplate;
 };
 
-const getTabDescription = (tabType: string) => (
+export const dataEntryInstructions = (
   <>
-    {
-      `Enter the ${tabType} manually or upload a spreadsheet file with the template for the ${tabType} table. `
-      + 'Remember to keep your orchard updated, you can '
-    }
-    <Link to="#TODO-orchard-management-link">go to orchard&apos;s management page</Link>
-    &nbsp;to edit the listed parent trees in your orchard.
+    <p>
+      <strong>1a. </strong>
+      Enter cone and pollen count and SMP data manually or;
+      <br />
+      <strong>1b. </strong>
+      Upload a spreadsheet file using the provided CSV template:
+    </p>
+    <ul className="donwload-templates-list">
+      <li>
+        <Link
+          type="text/csv"
+          className="notification-link"
+          to={SeedlotCsvTemplate}
+          target="_blank"
+          download="Seedlot_composition_template.csv"
+        >
+          Download cone and pollen count and SMP success on parent template.
+        </Link>
+      </li>
+      <li>
+        <Link
+          type="text/csv"
+          className="notification-link"
+          to={SmpMixCsvTemplate}
+          target="_blank"
+          download="SMP_Mix_Volume_template.csv"
+        >
+          Download calculation of SMP mix template.
+        </Link>
+      </li>
+    </ul>
+    <p>
+      When using the CSV template to upload data, keep the CSV format and column structure
+      provided.
+      <br />
+      To upload the filled-in template, click &quot;Upload from file&quot; and either
+      drag and drop, or select the
+      <br />
+      appropriate file.
+    </p>
   </>
 );
 
-const getNotificationSubtitle = (tabType: string) => {
-  let downloadName = 'seedlot composition';
-  if (tabType === 'Calculation of SMP mix') {
-    // make the first char lowercase
-    downloadName = tabType.charAt(0).toLowerCase() + tabType.slice(1);
-  }
-  return (
-    <>
-      {
-        `You can import one spreadsheet file for the ${tabType} table with the data you want to use. `
-      }
-      <br />
-      {
-        'For further guidance on how to organize the data, '
-        + "do use the SPAR's spreadsheet template. "
-      }
-      <Link
-        type="text/csv"
-        className="notification-link"
-        to={getDownloadUrl(tabType)}
-        target="_blank"
-        download={
-          (tabType === 'Calculation of SMP mix' || tabType === 'mixTab')
-            ? 'SMP_Mix_Volume_template.csv'
-            : 'Seedlot_composition_template.csv'
-        }
-      >
-        {`Download ${downloadName} template`}
-      </Link>
-    </>
-  );
-};
+export const reviewDataInstructions = (
+  <span>
+    Review data in the cone and pollen count and SMP tabs for accuracy.
+    If corrections are needed, cells
+    <br />
+    can be selected and edited manually. To clear the table,
+    click &quot;clear table data&quot;.
+  </span>
+);
+
+export const calculateInstructions = (
+  <span>
+    Click &quot;calculate metrics&quot; to initiate the calculation for seedlot metrics.
+    If data is changed in the tables,
+    <br />
+    click the button again to apply the changes.
+  </span>
+);
 
 const errorDescription = (
   <>
@@ -112,21 +132,19 @@ const getCleanTableDesc = (tableName: string) => (
 );
 
 const getPageText = () => ({
+  stepTitle: 'Cone and pollen count and SMP data',
+  stepSubtitle: 'Enter cone and pollen count (*required), SMP success on parent and SMP mix information ',
   notificationTitle: 'Upload spreadsheet to table',
   errorNotifTitle: 'No orchard ID linked yet!',
   errorDescription,
   coneTab: {
     tabTitle: 'Cone and pollen count',
-    tabDescription: getTabDescription('Cone and pollen count'),
-    notificationSubtitle: getNotificationSubtitle('Cone and pollen count'),
     tableDescription: "Enter the estimative of Cone and pollen count for the orchard's seedlot (*required)",
     toggleName: 'Show breeding value',
     cleanModalHeading: getCleanTableDesc('Cone and pollen count')
   },
   successTab: {
     tabTitle: 'SMP success on parent',
-    tabDescription: getTabDescription('SMP success on parent'),
-    notificationSubtitle: getNotificationSubtitle('SMP success on parent'),
     tableDescription: "Enter the estimative of SMP success for the orchard's seedlot",
     toggleName: 'Show SMP mix used on parent',
     cleanModalHeading: getCleanTableDesc('SMP success on parent'),
@@ -136,8 +154,6 @@ const getPageText = () => ({
   },
   mixTab: {
     tabTitle: 'Calculation of SMP mix',
-    tabDescription: getTabDescription('Calculation of SMP mix'),
-    notificationSubtitle: getNotificationSubtitle('Calculation of SMP mix'),
     tableDescription: 'Enter the estimative volume of SMP mix used for each clone',
     toggleName: 'Show breeding value',
     toggleNameBottom: 'Show weighted value',
