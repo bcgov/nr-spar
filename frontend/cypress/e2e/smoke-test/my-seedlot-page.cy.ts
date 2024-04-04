@@ -23,9 +23,16 @@ describe('Applicant and seedlot information page', () => {
       .children('h1')
       .should('have.text', 'My Seedlots');
 
-    // cy.get('.my-seedlot-data-table-row')
-    //   .find('.bx--pagination__items-count')
-    //   .contains('11 items');
+    // Arrow button test
+    cy.get('.bx--pagination__right')
+      .find('.bx--popover--top-right')
+      .find('button.bx--btn--icon-only')
+      .click();
+
+    // cy.get('table.seedlot-data-table tbody tr')
+    //   .should('have.length', 1);
+
+    cy.visit('/seedlots/my-seedlots');
 
     // Sorting test
     cy.get('table.seedlot-data-table')
@@ -51,6 +58,12 @@ describe('Applicant and seedlot information page', () => {
 
     cy.visit('/seedlots/my-seedlots');
 
+    // Dropdown test
+    cy.get('.bx--pagination__left')
+      .find('select')
+      .select('20')
+      .should('have.value', '20');
+
     // Click on a seedlot row
     cy.get('table.seedlot-data-table')
       .find('#seedlot-table-cell-63066-seedlotNumber')
@@ -59,6 +72,18 @@ describe('Applicant and seedlot information page', () => {
     cy.url().should('contains', '/seedlots/details/63066');
 
     cy.visit('/seedlots/my-seedlots');
+
+    //  Check total seedlots
+    cy.intercept('**/api/seedlots/users/**', {
+      statusCode: 200,
+      headers: {
+        'X-Total-Count': '11'
+      }
+    });
+
+    // cy.request('**/api/seedlots/users/**').as('total-count');
+    // cy.get('@total-count').its('headers').its('x-total-count')
+    //   .should('include', '11');
 
     // Button test
     cy.get('.my-seedlot-title')
