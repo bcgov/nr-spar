@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
 
-import Divider from '../../Divider';
-import ReadOnlyInput from '../../ReadOnlyInput';
-import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import EmailDisplay from '../../EmailDisplay';
+import Divider from '../../../Divider';
+import ReadOnlyInput from '../../../ReadOnlyInput';
+import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
+import EmailDisplay from '../../../EmailDisplay';
 
 const ApplicantAndSeedlotRead = () => {
   const {
@@ -22,7 +22,7 @@ const ApplicantAndSeedlotRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="applicant-and-seedlot-agency-name"
-            label="Agency name"
+            label="Applicant agency acronym"
             value={defaultAgencyObj.label}
             showSkeleton={isFetchingData}
           />

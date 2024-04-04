@@ -25,42 +25,41 @@ describe('Seedlot detail page', () => {
   });
 
   it('should render registration process section correctly', () => {
-
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(0)
       .find(`p.${prefix}--progress-label`)
-      .should('have.text', 'Collection')
+      .should('have.text', 'Collection');
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(1)
       .find(`p.${prefix}--progress-label`)
-      .should('have.text', 'Ownership')
+      .should('have.text', 'Ownership');
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(2)
       .find(`p.${prefix}--progress-label`)
-      .should('have.text', 'Interim storage')
+      .should('have.text', 'Interim storage');
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(3)
       .find(`p.${prefix}--progress-label`)
-      .should('have.text', 'Orchard')
+      .should('have.text', 'Orchard');
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(4)
       .find(`p.${prefix}--progress-label`)
-      .should('have.text', 'Parent tree and SMP')
+      .should('have.text', 'Parent tree and SMP');
 
     cy.get('.detail-section-grid')
       .find('.steps-box ul li')
       .eq(5)
       .find(`p.${prefix}--progress-label`)
-      .should('have.text', 'Extraction and storage')
+      .should('have.text', 'Extraction and storage');
 
     cy.get('.detail-section-grid')
       .children(`.${prefix}--row`)

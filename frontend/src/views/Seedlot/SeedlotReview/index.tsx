@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -6,8 +6,7 @@ import {
   Button,
   FlexGrid,
   Row,
-  Column,
-  Loading
+  Column
 } from '@carbon/react';
 import { Edit, Save } from '@carbon/icons-react';
 
@@ -17,11 +16,12 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import PageTitle from '../../../components/PageTitle';
 import RowGap from '../../../components/RowGap';
-import ApplicantAndSeedlotRead from '../../../components/ApplicantAndSeedlot/Read';
-import ApplicantAndSeedlotEdit from '../../../components/ApplicantAndSeedlot/Edit';
-import ClassAContext from '../ContextContainerClassA/context';
+import ApplicantAndSeedlotRead from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Read';
+import ApplicantAndSeedlotEdit from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Edit';
 import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
+import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collection/Read';
+import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
 
 import ContextContainerClassA from '../ContextContainerClassA';
 
@@ -63,11 +63,14 @@ const SeedlotReview = () => {
   // True if in view mode, false in edit mode.
   const [isReadMode, setIsReadMode] = useState(true);
 
-  const { isFetchingData } = useContext(ClassAContext);
-
-  if (isFetchingData) {
-    return (<Loading />);
-  }
+  useEffect(() => {
+    if (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'INC'
+      || seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND'
+    ) {
+      // Navigate back to the seedlot detail page if the seedlot is pending or incomplete
+      navigate(`/seedlots/details/${seedlotNumber}`);
+    }
+  }, [seedlotNumber]);
 
   /**
    * Applicant info data, form data should be accessed through context.
@@ -129,6 +132,17 @@ const SeedlotReview = () => {
         <Row className="section-title-row">
           <Column className="section-title-col">
             Collection
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            {
+              isReadMode
+                ? <CollectionReviewRead />
+                : (
+                  <CollectionReviewEdit />
+                )
+            }
           </Column>
         </Row>
 
