@@ -72,18 +72,25 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           oc_version: 4.13
           overwrite: true
-          parameters: -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }}
+          parameters: -p ZONE=${{ inputs.target }} -p TAG=${{ inputs.tag }} ${{ inputs.parameters }}
           post_rollout: oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}
           triggers: ${{ inputs.triggers }}
 
   verify:
     name: Verify
-    if: inputs.verify == true && needs.deploy.outputs.triggered == true
+    if: inputs.verify == true
     environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
+      # Send triggers to diff action
+      - id: diff
+        uses: bcgov-nr/action-diff-triggers@v0.2.0
+        with:
+          triggers: ${{ inputs.triggers }}
+
       - name: Verify
+        if: steps.diff.outputs.triggered == 'true'
         run: |
           # Check job logs
 
