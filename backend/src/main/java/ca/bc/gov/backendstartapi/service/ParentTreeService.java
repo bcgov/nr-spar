@@ -63,7 +63,7 @@ public class ParentTreeService {
 
       parentTreeDto.setLongitudeDegrees(parentTreeDto.getLongitudeDegrees() * -1);
 
-      // mean elevation = parent tree proportion * elevation
+      // weighted elevation = parent tree proportion * elevation
       BigDecimal weightedElevation =
           dto.proportion().multiply(new BigDecimal(parentTreeDto.getElevation()));
       parentTreeDto.setWeightedElevation(weightedElevation);

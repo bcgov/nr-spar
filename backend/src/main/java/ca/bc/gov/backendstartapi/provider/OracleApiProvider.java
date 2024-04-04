@@ -195,7 +195,7 @@ public class OracleApiProvider implements Provider {
 
   @Override
   public List<ParentTreeLocInfoDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
-    String oracleApiUrl = String.format("%s/api/parent-trees/lat-long-elevation", rootUri);
+    String oracleApiUrl = String.format("%s/api/parent-trees/geospatial-data", rootUri);
 
     SparLog.info(
         "Starting {} - {} request to {}", PROVIDER, "getParentTreeLatLongByIdList", oracleApiUrl);
