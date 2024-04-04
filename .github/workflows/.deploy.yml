@@ -78,7 +78,7 @@ jobs:
 
   verify:
     name: Verify
-    if: inputs.verify == true && needs.deploy.outputs.triggered == 'true'
+    if: inputs.verify == true && needs.deploy.outputs.triggered == true
     environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest

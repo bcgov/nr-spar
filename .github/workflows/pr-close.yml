@@ -18,4 +18,4 @@ jobs:
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       cleanup: label
-      packages: sync
+      packages: database sync
