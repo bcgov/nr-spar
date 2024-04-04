@@ -51,7 +51,7 @@ class ParentTreeEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/parent-trees/lat-long-elevation")
+            post("/api/parent-trees/geospatial-data")
                 .with(csrf().asHeader())
                 .content(postBody.toString())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -82,7 +82,7 @@ class ParentTreeEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/parent-trees/lat-long-elevation")
+            post("/api/parent-trees/geospatial-data")
                 .with(csrf().asHeader())
                 .content(postBody.toString())
                 .contentType(MediaType.APPLICATION_JSON)

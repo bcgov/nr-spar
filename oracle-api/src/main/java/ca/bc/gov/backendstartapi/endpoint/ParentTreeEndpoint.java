@@ -34,9 +34,9 @@ public class ParentTreeEndpoint {
    * @param ptIds The {@link ParentTreeEntity} identification list.
    * @return A List of {@link ParentTreeLatLongDto} containing the result rows.
    */
-  @PostMapping("/lat-long-elevation")
+  @PostMapping("/geospatial-data")
   @Operation(
-      summary = "Request lat long for a Parent Tree ID list",
+      summary = "Request geospatial data for a Parent Tree ID list",
       description = "Fetches all lat, long and elevation data given a list of Parent Tree IDs.",
       responses = {
         @ApiResponse(
@@ -49,7 +49,7 @@ public class ParentTreeEndpoint {
       })
   public List<ParentTreeLatLongDto> getLatLongParentTreeData(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description = "A list of Parent Tree id to fetch lat and long data.",
+              description = "A list of Parent Tree id to fetch geospatial data.",
               required = true)
           @RequestBody
           List<LatLongRequestDto> ptIds) {
