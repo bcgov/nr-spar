@@ -151,12 +151,8 @@ jobs:
       - id: trigger
         run: echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
-
-  cypress-test-coverage:
-    name: Cypress Test and Coverage
-    needs: [deploys, init]
-    if: needs.deploys.outputs.frontend == 'true'
-    runs-on: ubuntu-22.04
+  cypress:
+    name: Cypress Tests and Coverage
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
@@ -166,6 +162,9 @@ jobs:
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
       VITE_ZONE: TEST
+    if: needs.deploys.outputs.frontend == 'true'
+    needs: [deploys, init]
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Run Cypress CI
@@ -197,3 +196,11 @@ jobs:
         with:
           name: cypress-coverage
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress-coverage
+
+  results:
+    name: PR Results
+    if: always() && !failure()
+    needs: [cypress]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"
