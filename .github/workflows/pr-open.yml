@@ -39,7 +39,7 @@ jobs:
             [Oracle-API](https://${{ env.PREFIX }}-oracle-api.${{ env.DOMAIN }}/actuator/health)
 
             Once merged, code will be promoted and handed off to following workflow run.
-            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+            [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
 
       - name: OpenShift Init
         uses: bcgov-nr/action-deployer-openshift@v2.2.0
@@ -139,9 +139,7 @@ jobs:
           triggers: ${{ matrix.triggers || '("backend/" "common/" "database/" "frontend/" "oracle-api/")' }}
           verification_path: ${{ matrix.verification_path}}
       - id: trigger
-        run: |
-          echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}"
-          echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
+        run: echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
   cypress:
     name: Cypress Tests and Coverage
@@ -164,7 +162,7 @@ jobs:
         with:
           node_version: "18"
           commands: |
-            npm i
+            npm ci
             npm run cy:ci
           dir: frontend
           sonar_args: >
