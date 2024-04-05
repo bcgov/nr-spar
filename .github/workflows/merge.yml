@@ -136,7 +136,7 @@ jobs:
           verification_path: ${{ matrix.verification_path }}
           parameters:
             -p ZONE=test
-            -p TAG=${{ steps.vars.outputs.pr }}
+            -p TAG=${{ needs.vars.outputs.pr }}
             ${{ matrix.parameters }}
 
   # api-tests:
@@ -252,7 +252,7 @@ jobs:
           verification_path: ${{ matrix.verification_path }}
           parameters:
             -p ZONE=prod
-            -p TAG=${{ steps.vars.outputs.pr }}
+            -p TAG=${{ needs.vars.outputs.pr }}
             ${{ matrix.parameters }}
 
   image-promotions:
@@ -267,5 +267,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.component }}
-          target: ${{ steps.vars.outputs.pr }}
+          target: ${{ needs.vars.outputs.pr }}
           tags: prod
