@@ -4,7 +4,7 @@
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 #### Workflows
-[![Merge to Main](https://github.com/bcgov/nr-spar/actions/workflows/merge-main.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge-main.yml)
+[![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
 [![CI](https://github.com/bcgov/nr-spar/actions/workflows/ci.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/ci.yml)
 [![Cypress Nightly](https://github.com/bcgov/nr-spar/actions/workflows/cypress-nightly.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/cypress-nightly.yml)
 
