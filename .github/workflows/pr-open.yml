@@ -138,7 +138,9 @@ jobs:
           triggers: ${{ matrix.triggers || '("backend/" "common/" "database/" "frontend/" "oracle-api/")' }}
           verification_path: ${{ matrix.verification_path}}
       - id: trigger
-        run: echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
+        run: |
+          echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}"
+          echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
   cypress:
     name: Cypress Tests and Coverage
@@ -151,7 +153,7 @@ jobs:
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
       VITE_ZONE: TEST
-    if: needs.deploys.outputs.frontend == 'true'
+    if: needs.deploys.outputs.frontend == true
     needs: [deploys, init]
     runs-on: ubuntu-22.04
     steps:
