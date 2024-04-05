@@ -254,6 +254,7 @@ jobs:
           verification_path: ${{ matrix.verification_path }}
           parameters:
             -p ZONE=prod
+            -p TAG=${{ steps.vars.outputs.pr }}
             ${{ matrix.parameters }}
 
   image-promotions:
