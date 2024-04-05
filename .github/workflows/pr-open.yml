@@ -15,11 +15,15 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - name: Get PR Number Mod 50
+        id: mod-tag
+        run: echo "modded-tag=$(( ${{ github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
+
       - name: PR Greeting
         env:
           DOMAIN: apps.silver.devops.gov.bc.ca
           PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-          FRONT_END_PREFIX: ${{ github.event.repository.name }}-${{ $((github.event.number % 50)) }}
+          FRONT_END_PREFIX: ${{ github.event.repository.name }}-${{ steps.mod-tag.outputs.modded-tag }}
         uses: bcgov-nr/action-pr-description-add@v1.1.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -112,7 +116,7 @@ jobs:
   #           file: frontend/openshift.deploy.yml
   #           overwrite: true
   #           parameters:
-  #             -p FAM_MODDED_ZONE=${{ github.event.number % 50 }}
+  #             -p FAM_MODDED_ZONE=${{ needs.init.outputs.modded-tag }}
   #             -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
   #             -p VITE_NRSPARWEBAPP_VERSION=dev
   #             -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
