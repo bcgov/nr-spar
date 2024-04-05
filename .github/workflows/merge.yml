@@ -11,8 +11,9 @@ on:
   workflow_dispatch:
 
 concurrency:
+  # Do not interrupt previous workflows
   group: ${{ github.workflow }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   codeql:
