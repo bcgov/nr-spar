@@ -117,7 +117,7 @@ objects:
             deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           containers:
-            - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+            - image: ${NAME}-${ZONE}-${COMPONENT}:latest
               imagePullPolicy: Always
               name: ${NAME}
               volumeMounts:
