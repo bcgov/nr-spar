@@ -91,6 +91,9 @@ jobs:
     name: Deploys
     needs: [builds, init]
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    outputs:
+      frontend: ${{ steps.trigger.outputs.frontend }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
@@ -145,10 +148,14 @@ jobs:
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers || ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/) }}
           verification_path: ${{ matrix.verification_path}}
+      - id: trigger
+        run: echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
+
 
   cypress-test-coverage:
     name: Cypress Test and Coverage
     needs: [deploys, init]
+    if: needs.deploys.outputs.frontend == 'true'
     runs-on: ubuntu-22.04
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
