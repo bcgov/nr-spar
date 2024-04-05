@@ -1,9 +1,13 @@
 name: Merge
 
 on:
-  workflow_run:
-    workflows: [PR Closed]
-    types: [completed]
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - '.github/**'
+      - '.github/graphics/**'
+      - '!.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
@@ -67,9 +71,21 @@ jobs:
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
 
+  vars:
+    name: Set Variables
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      # Get PR number for squash merges to main
+      - name: PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
+
   deploy-test:
     name: TEST Deployment
-    needs: [init-test]
+    needs: [init-test, vars]
     environment: test
     runs-on: ubuntu-22.04
     strategy:
@@ -119,7 +135,7 @@ jobs:
           penetration_test: false
           verification_path: ${{ matrix.verification_path }}
           parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}
+            -p ZONE=test -p NAME=${{ github.event.repository.name }} -p TAG=${{ steps.vars.outputs.pr }}
             ${{ matrix.parameters }}
 
   # api-tests:
