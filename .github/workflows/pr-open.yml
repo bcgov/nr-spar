@@ -103,7 +103,6 @@ jobs:
           - name: fluentbit
             file: common/openshift.fluentbit.yml
             overwrite: true
-            triggers: ('common/openshift.fluentbit.yml')
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
