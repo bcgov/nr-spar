@@ -11,6 +11,8 @@ concurrency:
 jobs:
   init:
     name: Initialize
+    outputs:
+      modded-tag: ${{ steps.mod-tag.outputs.modded-tag }}
     runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
