@@ -125,7 +125,6 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-            triggers: ('common/' 'oracle-api/')
             verification_path: "actuator/health"
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v2.2.0
@@ -142,7 +141,7 @@ jobs:
             -p ZONE=${{ github.event.number }}
             -p TAG=${{ github.event.number }}
             ${{ matrix.parameters }}
-          triggers: ('${{ matrix.triggers }}/')
+          triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/)
           verification_path: ${{ matrix.verification_path}}
 
   cypress-test-coverage:
