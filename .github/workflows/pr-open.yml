@@ -39,7 +39,7 @@ jobs:
             [Oracle-API](https://${{ env.PREFIX }}-oracle-api.${{ env.DOMAIN }}/actuator/health)
 
             Once merged, code will be promoted and handed off to following workflow run.
-            [Main Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge-main.yml)
+            [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
 
       - name: OpenShift Init
         uses: bcgov-nr/action-deployer-openshift@v2.2.0
@@ -61,22 +61,12 @@ jobs:
 
   builds:
     name: Builds
-    needs: [init]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
     strategy:
       matrix:
         package: [database, backend, frontend, oracle-api]
-        include:
-          - package: database
-            triggers: ('database/')
-          - package: backend
-            triggers: ('backend/')
-          - package: frontend
-            triggers: ('frontend/')
-          - package: oracle-api
-            triggers: ('oracle-api/')
     steps:
       - uses: actions/checkout@v4
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
@@ -85,12 +75,15 @@ jobs:
           tag: ${{ github.event.number }}
           tag_fallback: latest
           token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ${{ matrix.triggers }}
+          triggers: ('${{ matrix.package }}/')
 
   deploys:
     name: Deploys
     needs: [builds, init]
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    outputs:
+      triggered: ${{ steps.trigger.outputs.frontend }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
@@ -125,10 +118,11 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-            triggers: ('common/' 'oracle-api/')
+            triggers: ('oracle-api/')
             verification_path: "actuator/health"
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.2.0
+      - uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        id: deploys
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -142,13 +136,15 @@ jobs:
             -p ZONE=${{ github.event.number }}
             -p TAG=${{ github.event.number }}
             ${{ matrix.parameters }}
-          triggers: ${{ matrix.triggers }}
+          triggers: ${{ matrix.triggers || '("backend/" "common/" "database/" "frontend/" "oracle-api/")' }}
           verification_path: ${{ matrix.verification_path}}
+      - id: trigger
+        run: echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
-  cypress-test-coverage:
-    name: Cypress Test and Coverage
+  cypress:
+    name: Cypress Tests and Coverage
+    if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys, init]
-    runs-on: ubuntu-22.04
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
@@ -158,6 +154,7 @@ jobs:
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
       VITE_ZONE: TEST
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Run Cypress CI
@@ -165,7 +162,7 @@ jobs:
         with:
           node_version: "18"
           commands: |
-            npm i
+            npm ci
             npm run cy:ci
           dir: frontend
           sonar_args: >
@@ -189,3 +186,11 @@ jobs:
         with:
           name: cypress-coverage
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress-coverage
+
+  results:
+    name: PR Results
+    if: always() && !failure()
+    needs: [cypress]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"
