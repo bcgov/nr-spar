@@ -96,7 +96,7 @@ objects:
               - ${NAME}
             from:
               kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:latest3
+              name: ${NAME}-${ZONE}-${COMPONENT}:latest
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
