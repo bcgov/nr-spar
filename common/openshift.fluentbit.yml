@@ -1,7 +1,5 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-labels:
-  app: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name
@@ -12,12 +10,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
+  - name: TAG
+    description: Dummy image tag, actually used in other templates
   - name: AWS_KINESIS_STREAM
     description: AWS Kinesis Stream identifier
-    required: false
   - name: AWS_KINESIS_ROLE_ARN
     description: AWS OpenSearch/Kinesis Resource Name
-    required: false
   - name: FLUENT_CONF_HOME
     description: FluentBit configuration home
     value: "/fluent-bit/etc"
