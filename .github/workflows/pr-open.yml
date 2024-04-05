@@ -140,7 +140,7 @@ jobs:
             -p ZONE=${{ github.event.number }}
             -p TAG=${{ github.event.number }}
             ${{ matrix.parameters }}
-          triggers: ${{ matrix.triggers || ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/') }}
+          triggers: ${{ matrix.triggers || "('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')" }}
           verification_path: ${{ matrix.verification_path}}
       - id: trigger
         run: echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
