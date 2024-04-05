@@ -121,7 +121,7 @@ jobs:
             triggers: ('oracle-api/')
             verification_path: "actuator/health"
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.2.0
+      - uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
