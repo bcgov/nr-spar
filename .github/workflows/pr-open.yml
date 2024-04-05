@@ -51,7 +51,6 @@ jobs:
           overwrite: false
           parameters:
             -p ZONE=${{ github.event.number }}
-            -p NAME=${{ github.event.repository.name }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
@@ -140,8 +139,8 @@ jobs:
           parameters:
             -p MIN_REPLICAS=1
             -p MAX_REPLICAS=2
-            -p NAME=${{ github.event.repository.name }}
             -p ZONE=${{ github.event.number }}
+            -p TAG=${{ github.event.number }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path}}

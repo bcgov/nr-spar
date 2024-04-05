@@ -1,9 +1,13 @@
 name: Merge
 
 on:
-  workflow_run:
-    workflows: [PR Closed]
-    types: [completed]
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - '.github/**'
+      - '.github/graphics/**'
+      - '!.github/workflows/**'
   workflow_dispatch:
 
 concurrency:
@@ -58,7 +62,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}
+            -p ZONE=test
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
@@ -67,9 +71,21 @@ jobs:
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
 
+  vars:
+    name: Set Variables
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    steps:
+      # Get PR number for squash merges to main
+      - name: PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
+
   deploy-test:
     name: TEST Deployment
-    needs: [init-test]
+    needs: [init-test, vars]
     environment: test
     runs-on: ubuntu-22.04
     strategy:
@@ -119,7 +135,8 @@ jobs:
           penetration_test: false
           verification_path: ${{ matrix.verification_path }}
           parameters:
-            -p ZONE=test -p NAME=${{ github.event.repository.name }}
+            -p ZONE=test
+            -p TAG=${{ steps.vars.outputs.pr }}
             ${{ matrix.parameters }}
 
   # api-tests:
@@ -158,8 +175,7 @@ jobs:
 
   init-prod:
     name: PROD Init
-    needs:
-      - deploy-test
+    needs: [deploy-test]
     environment: prod
     runs-on: ubuntu-22.04
     steps:
@@ -172,7 +188,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
+            -p ZONE=prod
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
@@ -183,8 +199,7 @@ jobs:
 
   deploy-prod:
     name: PROD Deployment
-    needs:
-      - init-prod
+    needs: [init-prod, vars]
     environment: prod
     runs-on: ubuntu-22.04
     strategy:
@@ -236,13 +251,13 @@ jobs:
           penetration_test: false
           verification_path: ${{ matrix.verification_path }}
           parameters:
-            -p ZONE=prod -p NAME=${{ github.event.repository.name }}
+            -p ZONE=prod
+            -p TAG=${{ steps.vars.outputs.pr }}
             ${{ matrix.parameters }}
 
   image-promotions:
     name: Promote Images to PROD
-    needs:
-      - deploy-prod
+    needs: [deploy-prod, vars]
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -252,5 +267,5 @@ jobs:
         with:
           registry: ghcr.io
           repository: ${{ github.repository }}/${{ matrix.component }}
-          target: test
+          target: ${{ steps.vars.outputs.pr }}
           tags: prod

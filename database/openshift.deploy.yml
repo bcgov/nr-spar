@@ -5,12 +5,15 @@ labels:
 parameters:
   - name: NAME
     description: Product name
-    value: nr-spar-backend
+    value: nr-spar
   - name: COMPONENT
     description: Component name
     value: database
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
+    required: true
+  - name: TAG
+    description: Image tag; e.g. PR number, latest or prod
     required: true
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
@@ -18,9 +21,6 @@ parameters:
   - name: ORG_NAME
     description: Organization name
     value: bcgov
-  - name: IMAGE_TAG
-    description: Image tag to use
-    value: latest
   - name: PVC_MOUNT_PATH
     description: Where to mount the PVC, subpath (e.g. data/)
     value: /var/lib/postgresql
@@ -64,10 +64,10 @@ objects:
       lookupPolicy:
         local: false
       tags:
-        - name: ${IMAGE_TAG}
+        - name: latest
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}
+            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${TAG}
           referencePolicy:
             type: Local
   - kind: DeploymentConfig
@@ -87,7 +87,7 @@ objects:
               - ${NAME}
             from:
               kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+              name: ${NAME}-${ZONE}-${COMPONENT}:latest
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
@@ -108,7 +108,7 @@ objects:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
             - name: ${NAME}
-              image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+              image: ${NAME}-${ZONE}-${COMPONENT}:latest
               ports:
                 - containerPort: 5432
                   protocol: TCP

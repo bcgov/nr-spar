@@ -11,12 +11,15 @@ labels:
 parameters:
   - name: NAME
     description: Module name
-    value: nr-spar-backend
+    value: nr-spar
   - name: COMPONENT
     description: Component name
     value: backend
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
+    required: true
+  - name: TAG
+    description: Image tag; e.g. PR number, latest or prod
     required: true
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
@@ -24,9 +27,6 @@ parameters:
   - name: ORG_NAME
     description: Organization name
     value: bcgov
-  - name: IMAGE_TAG
-    description: Image tag to use
-    value: latest
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: ALLOWED_ORIGINS
@@ -82,10 +82,10 @@ objects:
       lookupPolicy:
         local: false
       tags:
-        - name: ${IMAGE_TAG}
+        - name: latest
           from:
             kind: DockerImage
-            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${ZONE}
+            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${TAG}
           referencePolicy:
             type: Local
   - apiVersion: v1
@@ -105,7 +105,7 @@ objects:
               - ${NAME}
             from:
               kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+              name: ${NAME}-${ZONE}-${COMPONENT}:latest
       selector:
         deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
@@ -117,7 +117,7 @@ objects:
             deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           containers:
-            - image: ${NAME}-${ZONE}-${COMPONENT}:${IMAGE_TAG}
+            - image: ${NAME}-${ZONE}-${COMPONENT}:latest
               imagePullPolicy: Always
               name: ${NAME}
               volumeMounts:
