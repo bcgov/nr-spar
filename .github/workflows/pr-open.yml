@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api]
+        name: [database, backend, fluentbit, frontend, oracle-api]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -107,6 +107,10 @@ jobs:
               -p BUILD=snapshot-${{ github.event.number }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "actuator/health"
+          - name: fluentbit
+            file: common/openshift.fluentbit.yml
+            overwrite: true
+            triggers: ('common/openshift.fluentbit.yml')
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
@@ -138,7 +142,7 @@ jobs:
             -p ZONE=${{ github.event.number }}
             -p TAG=${{ github.event.number }}
             ${{ matrix.parameters }}
-          triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/)
+          triggers: ${{ matrix.triggers || ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/) }}
           verification_path: ${{ matrix.verification_path}}
 
   cypress-test-coverage:
