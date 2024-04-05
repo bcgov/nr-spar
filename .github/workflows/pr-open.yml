@@ -61,22 +61,12 @@ jobs:
 
   builds:
     name: Builds
-    needs: [init]
     runs-on: ubuntu-22.04
     permissions:
       packages: write
     strategy:
       matrix:
         package: [database, backend, frontend, oracle-api]
-        include:
-          - package: database
-            triggers: ('database/')
-          - package: backend
-            triggers: ('backend/')
-          - package: frontend
-            triggers: ('frontend/')
-          - package: oracle-api
-            triggers: ('oracle-api/')
     steps:
       - uses: actions/checkout@v4
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
@@ -85,7 +75,7 @@ jobs:
           tag: ${{ github.event.number }}
           tag_fallback: latest
           token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ${{ matrix.triggers }}
+          triggers: ('${{ matrix.package }}/')
 
   deploys:
     name: Deploys
