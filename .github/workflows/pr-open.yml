@@ -122,6 +122,7 @@ jobs:
             verification_path: "actuator/health"
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        id: deploys
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
