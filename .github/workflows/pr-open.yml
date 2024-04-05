@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     outputs:
-      frontend: ${{ steps.trigger.outputs.frontend }}
+      triggered: ${{ steps.trigger.outputs.frontend }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
@@ -145,6 +145,8 @@ jobs:
 
   cypress:
     name: Cypress Tests and Coverage
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys, init]
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
@@ -154,8 +156,6 @@ jobs:
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
       VITE_ZONE: TEST
-    if: needs.deploys.outputs.frontend == true
-    needs: [deploys, init]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
