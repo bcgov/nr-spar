@@ -142,7 +142,7 @@ jobs:
             -p ZONE=${{ github.event.number }}
             -p TAG=${{ github.event.number }}
             ${{ matrix.parameters }}
-          triggers: ${{ matrix.triggers }}
+          triggers: ('${{ matrix.triggers }}/')
           verification_path: ${{ matrix.verification_path}}
 
   cypress-test-coverage:
