@@ -5,7 +5,7 @@ labels:
 parameters:
   - name: NAME
     description: Module name
-    value: nr-spar-webapp
+    value: nr-spar
   - name: COMPONENT
     description: Component name
     value: frontend

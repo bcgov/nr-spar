@@ -5,7 +5,7 @@ labels:
 parameters:
   - name: NAME
     description: Product name
-    value: nr-spar-backend
+    value: nr-spar
   - name: COMPONENT
     description: Component name
     value: database
