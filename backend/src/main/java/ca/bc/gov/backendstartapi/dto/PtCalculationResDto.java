@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.math.BigDecimal;
 import java.util.List;
 
 /** This class represents the JSON that will be returned by the GW calculations. */
@@ -9,11 +8,9 @@ import java.util.List;
     description =
         """
         This class represents the JSON that will be returned when requesting the
-        Genetic Worth calculations.
+        various calculated values for a Class-A seedlot registration form.
         """)
-public record GeneticWorthSummaryDto(
+public record PtCalculationResDto(
     @Schema(description = "Contains a list of traits.") List<GeneticWorthTraitsDto> geneticTraits,
-    @Schema(
-            description = "The calculated value for the Effective Population Size.",
-            example = "2.97655")
-        BigDecimal neValue) {}
+    @Schema(description = "The calculated value for the Effective Population Size.")
+        CaculatedParentTreeValsDto calculatedPtVals) {}

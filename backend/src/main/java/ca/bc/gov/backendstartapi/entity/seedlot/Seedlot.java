@@ -333,6 +333,15 @@ public class Seedlot implements Serializable {
   @Column(name = "area_of_use_comment", length = 2000)
   private String areaOfUseComment;
 
+  @Column(name = "approved_userid")
+  private String approvedUserId;
+
+  @Column(name = "mean_latitude", precision = 8, scale = 5)
+  private BigDecimal meanLatitude;
+
+  @Column(name = "mean_longitude", precision = 8, scale = 5)
+  private BigDecimal meanLongitude;
+
   // end geographic
 
   public Seedlot(String id) {

@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
@@ -119,7 +119,7 @@ public class GeneticWorthEndpoint {
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
-   * @return A {@link GeneticWorthSummaryDto} containing all calculated values.
+   * @return A {@link PtCalculationResDto} containing all calculated values.
    */
   @PostMapping(path = "/calculate-all", consumes = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
@@ -153,7 +153,7 @@ public class GeneticWorthEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public GeneticWorthSummaryDto geneticTraitsCalculations(
+  public PtCalculationResDto geneticTraitsCalculations(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the traits and values to be used in the calculations",
               required = true)

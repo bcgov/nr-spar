@@ -1,8 +1,9 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
@@ -63,15 +64,15 @@ public class GeneticWorthService {
    *
    * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
    *     values to be calculated.
-   * @return A {@link GeneticWorthSummaryDto} containing all calculated values
+   * @return A {@link PtCalculationResDto} containing all calculated values
    */
-  public GeneticWorthSummaryDto calculateGeneticWorth(
+  public PtCalculationResDto calculateGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
     SparLog.info("Starting Genetic Worth calculations");
     BigDecimal minimumThreshold = new BigDecimal("0.7");
     BigDecimal neValue = calculateNe(traitsDto);
 
-    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(new ArrayList<>(), neValue);
+    PtCalculationResDto summaryDto = new PtCalculationResDto(new ArrayList<>(), new CaculatedParentTreeValsDto(neValue, null, null, null, null, null, null, null, null, null));
 
     // Iterate over all traits
     List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();

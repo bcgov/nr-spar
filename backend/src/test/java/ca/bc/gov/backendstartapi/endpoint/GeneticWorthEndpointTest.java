@@ -10,9 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
 import java.math.BigDecimal;
@@ -177,7 +178,11 @@ class GeneticWorthEndpointTest {
   @DisplayName("calculateAll_NoData")
   @WithMockUser(roles = "user_write")
   void calculateAll_NoData() throws Exception {
-    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of(), BigDecimal.ZERO);
+    PtCalculationResDto summaryDto =
+        new PtCalculationResDto(
+            List.of(),
+            new CaculatedParentTreeValsDto(
+                null, null, null, null, null, null, null, null, null, null));
     when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
 
     mockMvc
@@ -216,8 +221,11 @@ class GeneticWorthEndpointTest {
     GeneticWorthTraitsDto wwdTrait =
         new GeneticWorthTraitsDto("WWD", null, new BigDecimal("56"), new BigDecimal("68"));
     BigDecimal neValue = new BigDecimal("4.92586");
-    GeneticWorthSummaryDto summaryDto =
-        new GeneticWorthSummaryDto(List.of(gvoTrait, wwdTrait), neValue);
+    PtCalculationResDto summaryDto =
+        new PtCalculationResDto(
+            List.of(gvoTrait, wwdTrait),
+            new CaculatedParentTreeValsDto(
+                neValue, null, null, null, null, null, null, neValue, neValue, null));
     when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
 
     mockMvc

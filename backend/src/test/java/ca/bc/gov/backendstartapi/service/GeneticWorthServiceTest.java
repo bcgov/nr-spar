@@ -3,9 +3,9 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
@@ -209,7 +209,7 @@ class GeneticWorthServiceTest {
     GeneticWorthEntity wwdGw = new GeneticWorthEntity("WWD", "Wood quality", dateRange);
     when(geneticWorthRepository.findAll()).thenReturn(List.of(gvoGw, wwdGw));
 
-    GeneticWorthSummaryDto summaryDto = geneticWorthService.calculateGeneticWorth(requestList);
+    PtCalculationResDto summaryDto = geneticWorthService.calculateGeneticWorth(requestList);
 
     Assertions.assertNotNull(summaryDto);
     Assertions.assertEquals(2, summaryDto.geneticTraits().size());
@@ -220,16 +220,17 @@ class GeneticWorthServiceTest {
   void calculateGeneticWorthTest_emptyRequest_shouldNotThrowError() {
     LocalDate yesterday = LocalDate.now().minusDays(1L);
     LocalDate tomorrow = LocalDate.now().plusDays(1L);
+    BigDecimal neVal = BigDecimal.ZERO;
     EffectiveDateRange dateRange = new EffectiveDateRange(yesterday, tomorrow);
     GeneticWorthEntity gvoGw = new GeneticWorthEntity("GVO", "Volume Growth", dateRange);
     GeneticWorthEntity wwdGw = new GeneticWorthEntity("WWD", "Wood quality", dateRange);
     when(geneticWorthRepository.findAll()).thenReturn(List.of(gvoGw, wwdGw));
 
-    GeneticWorthSummaryDto summaryDto = geneticWorthService.calculateGeneticWorth(List.of());
+    PtCalculationResDto summaryDto = geneticWorthService.calculateGeneticWorth(List.of());
 
     Assertions.assertNotNull(summaryDto);
     Assertions.assertEquals(2, summaryDto.geneticTraits().size());
-    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.neValue());
+    Assertions.assertEquals(neVal, summaryDto.calculatedPtVals().neValue());
     Assertions.assertEquals("GVO", summaryDto.geneticTraits().get(0).traitCode());
     Assertions.assertNull(summaryDto.geneticTraits().get(0).traitValue());
     Assertions.assertNull(summaryDto.geneticTraits().get(0).calculatedValue());
