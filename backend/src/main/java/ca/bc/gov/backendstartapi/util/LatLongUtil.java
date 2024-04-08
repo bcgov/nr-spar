@@ -12,21 +12,19 @@ public class LatLongUtil {
    * @param decimalValue The decimal representation of a latitude or longitude.
    * @return An array of integer containing always 3 numbers.
    */
-  public static double[] decimalToDegree(BigDecimal decimalValue) {
-    decimalValue = decimalValue.abs();
+  public static Integer[] decimalToDegree(BigDecimal decimalValue) {
+    Integer degree = decimalValue.intValue();
+    BigDecimal remainVal = decimalValue.abs().subtract(new BigDecimal(degree).abs());
 
-    double degree = decimalValue.intValue();
-    decimalValue = decimalValue.subtract(new BigDecimal(degree));
+    remainVal = remainVal.multiply(new BigDecimal(60));
+    Integer minute = remainVal.intValue();
 
-    decimalValue = decimalValue.multiply(new BigDecimal(60));
-    double minutes = decimalValue.intValue();
+    remainVal = remainVal.subtract(new BigDecimal(minute));
+    remainVal = remainVal.multiply(new BigDecimal(60));
 
-    decimalValue = decimalValue.subtract(new BigDecimal(minutes));
-    decimalValue = decimalValue.multiply(new BigDecimal(60));
+    Integer second = remainVal.intValue();
 
-    double seconds = decimalValue.doubleValue();
-
-    return new double[] {degree, minutes, seconds};
+    return new Integer[] {degree, minute, second};
   }
 
   /**
@@ -35,16 +33,24 @@ public class LatLongUtil {
    * @param degreeLatLong An array of double values containing always 3 numbers.
    * @return The decimal representation of a latitude or longitude.
    */
-  public static BigDecimal degreeToDecimal(double[] degreeLatLong) {
-    BigDecimal degree = new BigDecimal(degreeLatLong[0]);
+  public static BigDecimal degreeToDecimal(Integer[] degreeLatLong) {
+    BigDecimal negativeMultiplier =
+        degreeLatLong[0] >= 0 ? BigDecimal.valueOf(1) : BigDecimal.valueOf(-1);
+
+    BigDecimal degree = new BigDecimal(degreeLatLong[0]).abs();
     BigDecimal minutes =
-        new BigDecimal(degreeLatLong[1]).divide(new BigDecimal(60), 10, RoundingMode.HALF_UP);
+        new BigDecimal(degreeLatLong[1]).divide(new BigDecimal(60), 30000, RoundingMode.HALF_UP);
     BigDecimal seconds =
-        new BigDecimal(degreeLatLong[2]).divide(new BigDecimal(3600), 10, RoundingMode.HALF_UP);
+        new BigDecimal(degreeLatLong[2]).divide(new BigDecimal(3600), 30000, RoundingMode.HALF_UP);
 
-    BigDecimal sum = degree.add(minutes).add(seconds).setScale(6, RoundingMode.HALF_UP);
+    BigDecimal decimalVal =
+        degree
+            .add(minutes)
+            .add(seconds)
+            .multiply(negativeMultiplier)
+            .setScale(6, RoundingMode.HALF_UP);
 
-    return sum;
+    return decimalVal;
   }
 
   /**

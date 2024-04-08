@@ -1,8 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
 import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.util.LatLongUtil;
 import java.math.BigDecimal;
@@ -24,13 +28,15 @@ public class ParentTreeService {
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
 
+  private final GeneticWorthService geneticWorthService;
+
   /**
    * Calculate lat long and elevation values given a list of {@link LatLongRequestDto}.
    *
    * @param ptreeIds List of parent trees and traits.
    * @return A List of {@link ParentTreeLocInfoDto}
    */
-  public List<ParentTreeLocInfoDto> getLatLongElevation(List<LatLongRequestDto> ptreeIds) {
+  public List<ParentTreeLocInfoDto> calculateGeospatial(List<LatLongRequestDto> ptreeIds) {
     SparLog.info(
         "{} parent tree record(s) received to calculate lat long and elevation", ptreeIds.size());
 
@@ -97,5 +103,28 @@ public class ParentTreeService {
     }
 
     return resultList;
+  }
+
+  /**
+   * Does the calculation for each genetic trait. PS: if the threshold of 70% of contribution from
+   * the parent tree is not met, the trait value will not be shown.
+   *
+   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   *     values to be calculated.
+   * @return A {@link PtCalculationResDto} containing all calculated values
+   */
+  public PtCalculationResDto calculatePtVals(List<GeneticWorthTraitsRequestDto> traitsDto) {
+    BigDecimal neValue = geneticWorthService.calculateNe(traitsDto);
+
+    List<GeneticWorthTraitsDto> calculatedGws =
+        geneticWorthService.calculateGeneticWorth(traitsDto);
+
+    PtCalculationResDto summaryDto =
+        new PtCalculationResDto(
+            calculatedGws,
+            new CaculatedParentTreeValsDto(
+                neValue, null, null, null, null, null, null, null, null, null));
+
+    return summaryDto;
   }
 }

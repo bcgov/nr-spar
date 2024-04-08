@@ -1,11 +1,10 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
@@ -66,13 +65,12 @@ public class GeneticWorthService {
    *     values to be calculated.
    * @return A {@link PtCalculationResDto} containing all calculated values
    */
-  public PtCalculationResDto calculateGeneticWorth(
+  public List<GeneticWorthTraitsDto> calculateGeneticWorth(
       List<GeneticWorthTraitsRequestDto> traitsDto) {
     SparLog.info("Starting Genetic Worth calculations");
     BigDecimal minimumThreshold = new BigDecimal("0.7");
-    BigDecimal neValue = calculateNe(traitsDto);
 
-    PtCalculationResDto summaryDto = new PtCalculationResDto(new ArrayList<>(), new CaculatedParentTreeValsDto(neValue, null, null, null, null, null, null, null, null, null));
+    List<GeneticWorthTraitsDto> calculated = new ArrayList<>();
 
     // Iterate over all traits
     List<CodeDescriptionDto> geneticWorths = getAllGeneticWorth();
@@ -91,10 +89,10 @@ public class GeneticWorthService {
 
       GeneticWorthTraitsDto traitResponse =
           new GeneticWorthTraitsDto(trait.code(), null, calculatedValue, percentage);
-      summaryDto.geneticTraits().add(traitResponse);
+      calculated.add(traitResponse);
     }
 
-    return summaryDto;
+    return calculated;
   }
 
   /**
@@ -104,7 +102,7 @@ public class GeneticWorthService {
    *     values to be calculated.
    * @return A {@link BigDecimal} representing the calculated value.
    */
-  private BigDecimal calculateNe(List<GeneticWorthTraitsRequestDto> traitsDto) {
+  public BigDecimal calculateNe(List<GeneticWorthTraitsRequestDto> traitsDto) {
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
     BigDecimal femaleConeSum = reduceConeCount(traitsDto);
 

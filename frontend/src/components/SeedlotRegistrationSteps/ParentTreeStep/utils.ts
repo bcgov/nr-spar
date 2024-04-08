@@ -509,7 +509,7 @@ export const fillCalculatedInfo = (
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
-  const { geneticTraits, neValue }: CalcPayloadResType = data;
+  const { geneticTraits, calculatedPtVals }: CalcPayloadResType = data;
   // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
@@ -531,8 +531,18 @@ export const fillCalculatedInfo = (
 
   // Fill in Ne value
   const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
-  newPopAndDiversityConfig.ne.value = neValue.toFixed(1);
+  newPopAndDiversityConfig.ne.value = calculatedPtVals.neValue ? calculatedPtVals.neValue.toFixed(1) : '';
   setPopSizeAndDiversityConfig(newPopAndDiversityConfig);
+};
+
+const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): number => {
+  const found = Object.values(state.allParentTreeData)
+    .find((pt) => pt.parentTreeNumber === ptNumber);
+
+  if (!found) {
+    throw Error(`Cannot find parent tree id with parent tree number: ${ptNumber}`);
+  }
+  return found.parentTreeId;
 };
 
 export const generateGenWorthPayload = (
@@ -546,6 +556,7 @@ export const generateGenWorthPayload = (
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code];
   rows.forEach((row) => {
     const newPayloadItem: GenWorthCalcPayload = {
+      parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
       parentTreeNumber: row.parentTreeNumber.value,
       coneCount: Number(row.coneCount.value),
       pollenCount: Number(row.pollenCount.value),

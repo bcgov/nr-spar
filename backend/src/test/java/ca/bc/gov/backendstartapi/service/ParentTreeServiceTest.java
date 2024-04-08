@@ -28,8 +28,8 @@ class ParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("getLatLongElevation success test should succeed")
-  void getLatLongElevation_successTest() {
+  @DisplayName("calculateGeospatial success test should succeed")
+  void calculateGeospatial_successTest() {
     ParentTreeLocInfoDto oracleDto = new ParentTreeLocInfoDto();
     oracleDto.setParentTreeId(4032);
     oracleDto.setLatitudeDegrees(49);
@@ -45,7 +45,7 @@ class ParentTreeServiceTest {
 
     LatLongRequestDto requestDto = new LatLongRequestDto(4032, new BigDecimal("0.5"));
 
-    List<ParentTreeLocInfoDto> resp = parentTreeService.getLatLongElevation(List.of(requestDto));
+    List<ParentTreeLocInfoDto> resp = parentTreeService.calculateGeospatial(List.of(requestDto));
 
     Assertions.assertFalse(resp.isEmpty());
     Assertions.assertEquals(1, resp.size());
@@ -67,14 +67,14 @@ class ParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("getLatLongElevation oracle empty test should succeed")
-  void getLatLongElevation_oracleEmptyTest() {
+  @DisplayName("calculateGeospatial oracle empty test should succeed")
+  void calculateGeospatial_oracleEmptyTest() {
     List<Integer> ptIds = List.of(4032);
     when(oracleApiProvider.getParentTreeLatLongByIdList(ptIds)).thenReturn(List.of());
 
     LatLongRequestDto requestDto = new LatLongRequestDto(4032, new BigDecimal("0.5"));
 
-    List<ParentTreeLocInfoDto> resp = parentTreeService.getLatLongElevation(List.of(requestDto));
+    List<ParentTreeLocInfoDto> resp = parentTreeService.calculateGeospatial(List.of(requestDto));
 
     Assertions.assertTrue(resp.isEmpty());
   }

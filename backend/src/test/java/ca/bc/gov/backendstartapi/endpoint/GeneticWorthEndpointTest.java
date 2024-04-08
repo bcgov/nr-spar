@@ -187,7 +187,7 @@ class GeneticWorthEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/genetic-worth/calculate-all")
+            post("/api/genetic-worth/calculate")
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON)
@@ -203,7 +203,7 @@ class GeneticWorthEndpointTest {
   void calculateAll_BadRequest() throws Exception {
     mockMvc
         .perform(
-            post("/api/genetic-worth/calculate-all")
+            post("/api/genetic-worth/calculate")
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON)
@@ -230,7 +230,7 @@ class GeneticWorthEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/genetic-worth/calculate-all")
+            post("/api/genetic-worth/calculate")
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON)

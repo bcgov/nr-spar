@@ -30,9 +30,9 @@ class ParentTreeEndpointTest {
   @MockBean ParentTreeService parentTreeService;
 
   @Test
-  @DisplayName("getLatLongElevationSuccessTest")
+  @DisplayName("calculateGeospatialSuccessTest")
   @WithMockUser(roles = "user_read")
-  void getLatLongElevationSuccessTest() throws Exception {
+  void calculateGeospatialSuccessTest() throws Exception {
     List<LatLongRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new LatLongRequestDto(4032, new BigDecimal("0.162")));
 
@@ -51,7 +51,7 @@ class ParentTreeEndpointTest {
     responseDto.setWeightedLongitude(new BigDecimal("-4118.729941539"));
     responseDto.setWeightedElevation(new BigDecimal("320.659491213"));
 
-    when(parentTreeService.getLatLongElevation(ptIds)).thenReturn(List.of(responseDto));
+    when(parentTreeService.calculateGeospatial(ptIds)).thenReturn(List.of(responseDto));
 
     StringBuilder postBody = new StringBuilder();
     postBody.append("[{\"parentTreeId\":4032,\"proportion\":0.162}]");
@@ -82,13 +82,13 @@ class ParentTreeEndpointTest {
   }
 
   @Test
-  @DisplayName("getLatLongElevationEmptyTest")
+  @DisplayName("calculateGeospatialEmptyTest")
   @WithMockUser(roles = "user_read")
-  void getLatLongElevationEmptyTest() throws Exception {
+  void calculateGeospatialEmptyTest() throws Exception {
     List<LatLongRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new LatLongRequestDto(4032, new BigDecimal("0.162")));
 
-    when(parentTreeService.getLatLongElevation(ptIds)).thenReturn(List.of());
+    when(parentTreeService.calculateGeospatial(ptIds)).thenReturn(List.of());
 
     StringBuilder postBody = new StringBuilder();
     postBody.append("[{\"parentTreeId\":4032,\"proportion\":0.162}]");
