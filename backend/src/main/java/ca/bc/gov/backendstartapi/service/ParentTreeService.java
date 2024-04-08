@@ -75,8 +75,8 @@ public class ParentTreeService {
       parentTreeDto.setWeightedElevation(weightedElevation);
 
       // latitude
-      double[] latDegree =
-          new double[] {
+      Integer[] latDegree =
+          new Integer[] {
             parentTreeDto.getLatitudeDegrees(),
             parentTreeDto.getLatitudeMinutes(),
             parentTreeDto.getLatitudeSeconds()

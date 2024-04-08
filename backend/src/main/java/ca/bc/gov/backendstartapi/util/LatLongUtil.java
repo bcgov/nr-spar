@@ -60,7 +60,7 @@ public class LatLongUtil {
    * @param degreeLatLong An array of integer containing always 3 numbers.
    * @return The minutes representation of a latitude or longitude.
    */
-  public static BigDecimal degreeToMinutes(double[] degreeLatLong) {
+  public static BigDecimal degreeToMinutes(Integer[] degreeLatLong) {
     BigDecimal degree = new BigDecimal(degreeLatLong[0] * 60);
     BigDecimal minutes = new BigDecimal(degreeLatLong[1]);
     BigDecimal seconds = new BigDecimal(degreeLatLong[2] / 60);

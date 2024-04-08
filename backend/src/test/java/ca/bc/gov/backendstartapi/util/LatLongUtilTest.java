@@ -38,10 +38,10 @@ class LatLongUtilTest {
 
   @Test
   void degreeToMinutes() {
-    BigDecimal decimalLat = LatLongUtil.degreeToMinutes(new double[] {26, 17, 46.2804});
-    BigDecimal decimalLong = LatLongUtil.degreeToMinutes(new double[] {48, 50, 42.6336});
+    BigDecimal decimalLat = LatLongUtil.degreeToMinutes(new Integer[] {26, 17, 46});
+    BigDecimal decimalLong = LatLongUtil.degreeToMinutes(new Integer[] {48, 50, 42});
 
-    Assertions.assertEquals(new BigDecimal("1577.771340"), decimalLat);
-    Assertions.assertEquals(new BigDecimal("2930.710560"), decimalLong);
+    Assertions.assertEquals(new BigDecimal("1577.000000"), decimalLat);
+    Assertions.assertEquals(new BigDecimal("2930.000000"), decimalLong);
   }
 }
