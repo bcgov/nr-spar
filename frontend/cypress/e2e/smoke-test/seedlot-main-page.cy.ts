@@ -6,6 +6,8 @@ describe('Seedlot Main page test', () => {
     subtitle: string,
     secondSectionTitle: string,
     secondSectionSubtitle: string,
+    emptySectionTitle: string,
+    emptySectionSubtitle: string
   };
 
   beforeEach(() => {
@@ -30,6 +32,12 @@ describe('Seedlot Main page test', () => {
     cy.get('.recent-seedlots-title')
       .find('.recent-seedlots-subtitle')
       .should('have.text', seedlotMainPageData.secondSectionSubtitle);
+    cy.get('.empty-recent-seedlots')
+      .find('p.empty-section-title')
+      .should('have.text', seedlotMainPageData.emptySectionTitle);
+    cy.get('.empty-recent-seedlots')
+      .find('.empty-section-subtitle')
+      .should('have.text', seedlotMainPageData.emptySectionSubtitle);
   });
 
   // it('should Check if 4 seedlots are being rendered at the bottom', () => {
