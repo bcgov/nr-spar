@@ -34,8 +34,7 @@ public class LatLongUtil {
    * @return The decimal representation of a latitude or longitude.
    */
   public static BigDecimal degreeToDecimal(Integer[] degreeLatLong) {
-    BigDecimal negativeMultiplier =
-        degreeLatLong[0] >= 0 ? BigDecimal.valueOf(1) : BigDecimal.valueOf(-1);
+    Boolean isNegative = degreeLatLong[0] < 0;
 
     BigDecimal degree = new BigDecimal(degreeLatLong[0]).abs();
     BigDecimal minutes =
@@ -43,14 +42,9 @@ public class LatLongUtil {
     BigDecimal seconds =
         new BigDecimal(degreeLatLong[2]).divide(new BigDecimal(3600), 30000, RoundingMode.HALF_UP);
 
-    BigDecimal decimalVal =
-        degree
-            .add(minutes)
-            .add(seconds)
-            .multiply(negativeMultiplier)
-            .setScale(6, RoundingMode.HALF_UP);
+    BigDecimal decimalVal = degree.add(minutes).add(seconds).setScale(6, RoundingMode.HALF_UP);
 
-    return decimalVal;
+    return isNegative ? decimalVal.negate() : decimalVal;
   }
 
   /**
