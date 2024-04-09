@@ -75,17 +75,6 @@ beforeEach(() => {
   cy.intercept(
     {
       method: 'GET',
-      url: '**/api/seedlots/users/**'
-    },
-    {
-      statusCode: 200,
-      fixture: 'user_seedlots.json'
-    }
-  ).as('GET_seedlots_by_user');
-
-  cy.intercept(
-    {
-      method: 'GET',
       url: '**/api/seedlots/63001'
     },
     {
@@ -115,5 +104,4 @@ beforeEach(() => {
       fixture: 'seedlot-source.json'
     }
   ).as('GET_seedlot_source_by_63001');
-
 });
