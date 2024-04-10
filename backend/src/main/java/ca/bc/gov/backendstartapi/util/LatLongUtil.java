@@ -12,7 +12,7 @@ public class LatLongUtil {
    * @param decimalValue The decimal representation of a latitude or longitude.
    * @return An array of integer containing always 3 numbers.
    */
-  public static Integer[] decimalToDegree(BigDecimal decimalValue) {
+  public static Integer[] decimalDegreeToDms(BigDecimal decimalValue) {
     Integer degree = decimalValue.intValue();
     BigDecimal remainVal = decimalValue.abs().subtract(new BigDecimal(degree).abs());
 
@@ -33,7 +33,7 @@ public class LatLongUtil {
    * @param degreeLatLong An array of double values containing always 3 numbers.
    * @return The decimal representation of a latitude or longitude.
    */
-  public static BigDecimal degreeToDecimal(Integer[] degreeLatLong) {
+  public static BigDecimal dmsToDecimalDegree(Integer[] degreeLatLong) {
     Boolean isNegative = degreeLatLong[0] < 0;
 
     BigDecimal degree = new BigDecimal(degreeLatLong[0]).abs();

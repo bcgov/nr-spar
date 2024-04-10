@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.service.ParentTreeService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,10 +33,10 @@ class ParentTreeEndpointTest {
   @DisplayName("calculateGeospatialSuccessTest")
   @WithMockUser(roles = "user_read")
   void calculateGeospatialSuccessTest() throws Exception {
-    List<LatLongRequestDto> ptIds = new ArrayList<>();
-    ptIds.add(new LatLongRequestDto(4032, new BigDecimal("0.162")));
+    List<GeospatialRequestDto> ptIds = new ArrayList<>();
+    ptIds.add(new GeospatialRequestDto(4032, new BigDecimal("0.162")));
 
-    ParentTreeLocInfoDto responseDto = new ParentTreeLocInfoDto();
+    GeospatialRespondDto responseDto = new GeospatialRespondDto();
     responseDto.setParentTreeId(4032);
     responseDto.setLatitudeDegrees(49);
     responseDto.setLatitudeMinutes(2);
@@ -58,7 +58,7 @@ class ParentTreeEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/parent-trees/location-info")
+            post("/api/parent-trees/geospatial-data")
                 .with(csrf().asHeader())
                 .content(postBody.toString())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -85,8 +85,8 @@ class ParentTreeEndpointTest {
   @DisplayName("calculateGeospatialEmptyTest")
   @WithMockUser(roles = "user_read")
   void calculateGeospatialEmptyTest() throws Exception {
-    List<LatLongRequestDto> ptIds = new ArrayList<>();
-    ptIds.add(new LatLongRequestDto(4032, new BigDecimal("0.162")));
+    List<GeospatialRequestDto> ptIds = new ArrayList<>();
+    ptIds.add(new GeospatialRequestDto(4032, new BigDecimal("0.162")));
 
     when(parentTreeService.calculateGeospatial(ptIds)).thenReturn(List.of());
 
@@ -95,7 +95,7 @@ class ParentTreeEndpointTest {
 
     mockMvc
         .perform(
-            post("/api/parent-trees/location-info")
+            post("/api/parent-trees/geospatial-data")
                 .with(csrf().asHeader())
                 .content(postBody.toString())
                 .contentType(MediaType.APPLICATION_JSON)

@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
-import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.service.ParentTreeService;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +29,13 @@ class ParentTreeEndpointTest {
   @MockBean ParentTreeService parentTreeService;
 
   @Test
-  @DisplayName("getLatLongParentTreeDataTest")
+  @DisplayName("getPtGeoSpatialDataTest")
   @WithMockUser(roles = "user_read")
-  void getLatLongParentTreeDataTest() throws Exception {
-    List<LatLongRequestDto> ptIds = new ArrayList<>();
-    ptIds.add(new LatLongRequestDto(4110L));
+  void getPtGeoSpatialDataTest() throws Exception {
+    List<GeospatialRequestDto> ptIds = new ArrayList<>();
+    ptIds.add(new GeospatialRequestDto(4110L));
 
-    ParentTreeLatLongDto dto = new ParentTreeLatLongDto();
+    GeospatialRespondDto dto = new GeospatialRespondDto();
     dto.setParentTreeId(4110L);
     dto.setLatitudeDegrees(49);
     dto.setLatitudeMinutes(52);
@@ -45,7 +45,7 @@ class ParentTreeEndpointTest {
     dto.setLongitudeSeconds(0);
     dto.setElevation(451);
 
-    when(parentTreeService.getLatLongParentTreeData(ptIds)).thenReturn(List.of(dto));
+    when(parentTreeService.getPtGeoSpatialData(ptIds)).thenReturn(List.of(dto));
 
     String postBody = "[{\"parentTreeId\":4110}]";
 
@@ -70,13 +70,13 @@ class ParentTreeEndpointTest {
   }
 
   @Test
-  @DisplayName("getLatLongParentTreeDataEmptyTest")
+  @DisplayName("getPtGeoSpatialDataEmptyTest")
   @WithMockUser(roles = "user_read")
-  void getLatLongParentTreeDataEmptyTest() throws Exception {
-    List<LatLongRequestDto> ptIds = new ArrayList<>();
-    ptIds.add(new LatLongRequestDto(4110L));
+  void getPtGeoSpatialDataEmptyTest() throws Exception {
+    List<GeospatialRequestDto> ptIds = new ArrayList<>();
+    ptIds.add(new GeospatialRequestDto(4110L));
 
-    when(parentTreeService.getLatLongParentTreeData(ptIds)).thenReturn(List.of());
+    when(parentTreeService.getPtGeoSpatialData(ptIds)).thenReturn(List.of());
 
     String postBody = "[{\"parentTreeId\":4110}]";
 

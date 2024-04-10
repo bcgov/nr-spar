@@ -4,13 +4,13 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
-import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.util.LatLongUtil;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,78 +31,87 @@ public class ParentTreeService {
   private final GeneticWorthService geneticWorthService;
 
   /**
-   * Calculate lat long and elevation values given a list of {@link LatLongRequestDto}.
+   * Calculate lat long and elevation values given a list of {@link GeospatialRequestDto}.
    *
    * @param ptreeIds List of parent trees and traits.
-   * @return A List of {@link ParentTreeLocInfoDto}
+   * @return A List of {@link GeospatialRespondDto}
    */
-  public List<ParentTreeLocInfoDto> calculateGeospatial(List<LatLongRequestDto> ptreeIds) {
+  public GeospatialRespondDto calculateGeospatial(
+      List<GeospatialRequestDto> ptreeIdAndProportions) {
     SparLog.info(
-        "{} parent tree record(s) received to calculate lat long and elevation", ptreeIds.size());
+        "{} parent tree record(s) received to calculate lat long and elevation",
+        ptreeIdAndProportions.size());
 
-    List<Integer> ptIds = ptreeIds.stream().map(LatLongRequestDto::parentTreeId).toList();
+    List<Integer> ptIds =
+        ptreeIdAndProportions.stream().map(GeospatialRequestDto::parentTreeId).toList();
 
-    List<ParentTreeLocInfoDto> oracleDtoList =
-        oracleApiProvider.getParentTreeLatLongByIdList(ptIds);
+    List<GeospatialOracleResDto> oracleDtoList =
+        oracleApiProvider.getPtGeospatialDataByIdList(ptIds);
 
     if (oracleDtoList.isEmpty()) {
       SparLog.info("No parent tree lat long data from Oracle for the given parent tree ids.");
-      return List.of();
+      // TODO: custom type
+      return new GeospatialRespondDto(null, null, null, null, null, null, null, null, null);
     }
 
-    Map<Integer, ParentTreeLocInfoDto> oracleMap =
+    Map<Integer, GeospatialOracleResDto> oracleMap =
         oracleDtoList.stream()
-            .collect(Collectors.toMap(ParentTreeLocInfoDto::getParentTreeId, Function.identity()));
+            .collect(Collectors.toMap(GeospatialOracleResDto::parentTreeId, Function.identity()));
 
-    List<ParentTreeLocInfoDto> resultList = new ArrayList<>();
+    // Accumulators
+    BigDecimal meanLatDegSum = BigDecimal.ZERO;
+    BigDecimal meanLatMinSum = BigDecimal.ZERO;
+    BigDecimal meanLatSecSum = BigDecimal.ZERO;
+    BigDecimal meanLongDegSum = BigDecimal.ZERO;
+    BigDecimal meanLongMinSum = BigDecimal.ZERO;
+    BigDecimal meanLongSecSum = BigDecimal.ZERO;
+    BigDecimal meanElevationSum = BigDecimal.ZERO;
 
-    // Second loop through list to calculate proportion and weight values.
-    for (LatLongRequestDto dto : ptreeIds) {
+    // Loop through list to calculate weighted values then sum them up.
+    for (GeospatialRequestDto dto : ptreeIdAndProportions) {
       // frontend already do this:
 
-      ParentTreeLocInfoDto parentTreeDto = oracleMap.get(dto.parentTreeId());
-      if (Objects.isNull(parentTreeDto)) {
+      GeospatialOracleResDto geospatialResDto = oracleMap.get(dto.parentTreeId());
+      if (Objects.isNull(geospatialResDto)) {
         SparLog.info(
             "Unable to calculate for parent tree {}, no data found on Oracle!", dto.parentTreeId());
         continue;
       }
 
-      parentTreeDto.setLongitudeDegrees(parentTreeDto.getLongitudeDegrees() * -1);
+      // weighted value = parent tree proportion * value
 
-      // weighted elevation = parent tree proportion * elevation
+
+
       BigDecimal weightedElevation =
-          dto.proportion().multiply(new BigDecimal(parentTreeDto.getElevation()));
-      parentTreeDto.setWeightedElevation(weightedElevation);
+          dto.proportion().multiply(new BigDecimal(geospatialResDto.elevation()));
 
-      // latitude
-      Integer[] latDegree =
-          new Integer[] {
-            parentTreeDto.getLatitudeDegrees(),
-            parentTreeDto.getLatitudeMinutes(),
-            parentTreeDto.getLatitudeSeconds()
-          };
-      BigDecimal collectionLat = LatLongUtil.degreeToMinutes(latDegree); // (degree*60)+min+(sec/60)
-      parentTreeDto.setLatitudeDegreesFmt(LatLongUtil.degreeToDecimal(latDegree));
-
-      // longitude
-      double[] longDegree =
-          new double[] {
-            parentTreeDto.getLongitudeDegrees(),
-            parentTreeDto.getLongitudeMinutes(),
-            parentTreeDto.getLongitudeSeconds()
-          };
-      BigDecimal collectionLong =
-          LatLongUtil.degreeToMinutes(longDegree); // (degree*60)+min+(sec/60)
-      parentTreeDto.setLongitudeDegreeFmt(LatLongUtil.degreeToDecimal(longDegree));
-
-      // parent tree weighted lat x long
-      parentTreeDto.setWeightedLatitude(dto.proportion().multiply(collectionLat));
-      parentTreeDto.setWeightedLongitude(dto.proportion().multiply(collectionLong));
-
-      resultList.add(parentTreeDto);
+      meanElevationSum.add(weightedElevation);
     }
 
-    return resultList;
+    // latitude
+    Integer[] latitudeDms =
+        new Integer[] {
+          meanLatDegSum.intValue(), meanLatMinSum.intValue(), meanLatSecSum.intValue()
+        };
+    BigDecimal latitudeDegreeDecimal = LatLongUtil.degreeToMinutes(latitudeDms);
+
+    // longitude
+    Integer[] longitudeDms =
+        new Integer[] {
+          meanLongDegSum.intValue(), meanLongMinSum.intValue(), meanLongSecSum.intValue()
+        };
+    BigDecimal longitudeDegreeDecimal = LatLongUtil.degreeToMinutes(longitudeDms);
+
+    return new GeospatialRespondDto(
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        latitudeDegreeDecimal,
+        longitudeDegreeDecimal,
+        meanElevationSum.intValue());
   }
 
   /**
@@ -123,7 +132,8 @@ public class ParentTreeService {
         new PtCalculationResDto(
             calculatedGws,
             new CaculatedParentTreeValsDto(
-                neValue, null, null, null, null, null, null, null, null, null));
+                neValue,
+                new GeospatialRespondDto(null, null, null, null, null, null, null, null, null)));
 
     return summaryDto;
   }

@@ -2,8 +2,8 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,7 +30,7 @@ class ParentTreeServiceTest {
   @Test
   @DisplayName("calculateGeospatial success test should succeed")
   void calculateGeospatial_successTest() {
-    ParentTreeLocInfoDto oracleDto = new ParentTreeLocInfoDto();
+    GeospatialRespondDto oracleDto = new GeospatialRespondDto();
     oracleDto.setParentTreeId(4032);
     oracleDto.setLatitudeDegrees(49);
     oracleDto.setLatitudeMinutes(2);
@@ -43,9 +43,9 @@ class ParentTreeServiceTest {
     List<Integer> ptIds = List.of(4032);
     when(oracleApiProvider.getParentTreeLatLongByIdList(ptIds)).thenReturn(List.of(oracleDto));
 
-    LatLongRequestDto requestDto = new LatLongRequestDto(4032, new BigDecimal("0.5"));
+    GeospatialRequestDto requestDto = new GeospatialRequestDto(4032, new BigDecimal("0.5"));
 
-    List<ParentTreeLocInfoDto> resp = parentTreeService.calculateGeospatial(List.of(requestDto));
+    List<GeospatialRespondDto> resp = parentTreeService.calculateGeospatial(List.of(requestDto));
 
     Assertions.assertFalse(resp.isEmpty());
     Assertions.assertEquals(1, resp.size());
@@ -72,9 +72,9 @@ class ParentTreeServiceTest {
     List<Integer> ptIds = List.of(4032);
     when(oracleApiProvider.getParentTreeLatLongByIdList(ptIds)).thenReturn(List.of());
 
-    LatLongRequestDto requestDto = new LatLongRequestDto(4032, new BigDecimal("0.5"));
+    GeospatialRequestDto requestDto = new GeospatialRequestDto(4032, new BigDecimal("0.5"));
 
-    List<ParentTreeLocInfoDto> resp = parentTreeService.calculateGeospatial(List.of(requestDto));
+    List<GeospatialRespondDto> resp = parentTreeService.calculateGeospatial(List.of(requestDto));
 
     Assertions.assertTrue(resp.isEmpty());
   }

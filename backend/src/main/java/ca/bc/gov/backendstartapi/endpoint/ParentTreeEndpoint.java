@@ -1,8 +1,8 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
-import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
@@ -34,29 +34,31 @@ public class ParentTreeEndpoint {
   /**
    * Gets latitude, longitude and elevation data for each parent tree given a list of orchard ids.
    *
-   * @param ptreeIds The {@link LatLongRequestDto} list with parent trees and all tab 3 data.
+   * @param ptreeIds The {@link GeospatialRequestDto} list with parent trees and all tab 3 data.
    * @return A List of {@link ParentTreeOrchardDto} containing the result rows.
    */
-  @PostMapping("/location-info")
+  @PostMapping("/geospatial-data")
   @Operation(
       summary = "",
       description = "",
       responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "List with found records or an empty list"),
+        @ApiResponse(responseCode = "200", description = "A record of mean geospatial data"),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Bad request, e.g. No geospatial data found for one of the parent trees.",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<ParentTreeLocInfoDto> getLatLongParentTreeData(
+  public GeospatialRespondDto getPtGeoSpatialData(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "A list of orchard id to fetch lat, long and elevation data.",
               required = true)
           @RequestBody
-          List<LatLongRequestDto> ptreeIds) {
-    return parentTreeService.calculateGeospatial(ptreeIds);
+          List<GeospatialRequestDto> ptreeIdAndProportion) {
+    return parentTreeService.calculateGeospatial(ptreeIdAndProportion);
   }
 
   /**

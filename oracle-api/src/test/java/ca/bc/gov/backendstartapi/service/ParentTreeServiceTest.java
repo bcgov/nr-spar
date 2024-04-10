@@ -2,8 +2,8 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import java.util.ArrayList;
@@ -29,8 +29,8 @@ class ParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("getLatLongParentTreeData_successTest")
-  void getLatLongParentTreeData_successTest() {
+  @DisplayName("getPtGeoSpatialData_successTest")
+  void getPtGeoSpatialData_successTest() {
     ParentTreeEntity ptreeEntity = new ParentTreeEntity();
     ptreeEntity.setId(4110L);
     ptreeEntity.setLatitudeDegrees(49);
@@ -43,10 +43,10 @@ class ParentTreeServiceTest {
 
     when(parentTreeRepository.findAllIn(List.of(4110L))).thenReturn(List.of(ptreeEntity));
 
-    List<LatLongRequestDto> ptIds = new ArrayList<>();
-    ptIds.add(new LatLongRequestDto(4110L));
+    List<GeospatialRequestDto> ptIds = new ArrayList<>();
+    ptIds.add(new GeospatialRequestDto(4110L));
 
-    List<ParentTreeLatLongDto> dtoList = parentTreeService.getLatLongParentTreeData(ptIds);
+    List<GeospatialRespondDto> dtoList = parentTreeService.getPtGeoSpatialData(ptIds);
 
     Assertions.assertFalse(dtoList.isEmpty());
     Assertions.assertEquals(ptreeEntity.getId(), dtoList.get(0).getParentTreeId());
@@ -63,14 +63,14 @@ class ParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("getLatLongParentTreeData_emptyTest")
-  void getLatLongParentTreeData_emptyTest() {
+  @DisplayName("getPtGeoSpatialData_emptyTest")
+  void getPtGeoSpatialData_emptyTest() {
     when(parentTreeRepository.findAllIn(List.of(4110L))).thenReturn(List.of());
 
-    List<LatLongRequestDto> ptIds = new ArrayList<>();
-    ptIds.add(new LatLongRequestDto(4110L));
+    List<GeospatialRequestDto> ptIds = new ArrayList<>();
+    ptIds.add(new GeospatialRequestDto(4110L));
 
-    List<ParentTreeLatLongDto> dtoList = parentTreeService.getLatLongParentTreeData(ptIds);
+    List<GeospatialRespondDto> dtoList = parentTreeService.getPtGeoSpatialData(ptIds);
 
     Assertions.assertTrue(dtoList.isEmpty());
   }
