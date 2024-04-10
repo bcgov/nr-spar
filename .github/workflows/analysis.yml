@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        # dir: [backend, oracle-api]
+        dir: [backend, oracle-api]
         include:
           - dir: backend
             token: SONAR_BACKEND
-          # - dir: oracle-api
-          #   token: SONAR_ORACLE_API
+          - dir: oracle-api
+            token: SONAR_ORACLE_API
     steps:
       - uses: actions/checkout@v4
       - uses: bcgov-nr/action-test-and-analyse-java@test
