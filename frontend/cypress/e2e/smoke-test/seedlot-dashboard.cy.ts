@@ -2,7 +2,7 @@ import { NavigationLabels } from '../../utils/labels';
 // import prefix from '../../../src/styles/classPrefix';
 
 describe('Seedlot Dashboard test', () => {
-  let seedlotMainPageData: {
+  let seedlotDashboardData: {
     subtitle: string,
     secondSectionTitle: string,
     secondSectionSubtitle: string,
@@ -12,8 +12,8 @@ describe('Seedlot Dashboard test', () => {
 
   beforeEach(() => {
     // Loading test data
-    cy.fixture('seedlot-main-page').then((fData) => {
-      seedlotMainPageData = fData;
+    cy.fixture('seedlot-dashboard').then((fData) => {
+      seedlotDashboardData = fData;
     });
 
     cy.login();
@@ -21,23 +21,27 @@ describe('Seedlot Dashboard test', () => {
     cy.url().should('contains', '/seedlots');
   });
 
-  it('should load and display seedlot main page correctly', () => {
+  it('should display seedlot dashboard page title and subtitle', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     cy.get('.title-section')
       .find('.subtitle-section')
-      .should('have.text', seedlotMainPageData.subtitle);
+      .should('have.text', seedlotDashboardData.subtitle);
     cy.get('.recent-seedlots-title')
       .find('h2')
-      .should('have.text', seedlotMainPageData.secondSectionTitle);
+      .should('have.text', seedlotDashboardData.secondSectionTitle);
     cy.get('.recent-seedlots-title')
       .find('.recent-seedlots-subtitle')
-      .should('have.text', seedlotMainPageData.secondSectionSubtitle);
+      .should('have.text', seedlotDashboardData.secondSectionSubtitle);
+  });
+
+  it('should display empty seedlot section', () => {
+    cy.isPageTitle(NavigationLabels.Seedlots);
     cy.get('.empty-recent-seedlots')
       .find('p.empty-section-title')
-      .should('have.text', seedlotMainPageData.emptySectionTitle);
+      .should('have.text', seedlotDashboardData.emptySectionTitle);
     cy.get('.empty-recent-seedlots')
       .find('.empty-section-subtitle')
-      .should('have.text', seedlotMainPageData.emptySectionSubtitle);
+      .should('have.text', seedlotDashboardData.emptySectionSubtitle);
   });
 
   // it('should Check if 4 seedlots are being rendered at the bottom', () => {
