@@ -1,7 +1,7 @@
 import { NavigationLabels } from '../../utils/labels';
 // import prefix from '../../../src/styles/classPrefix';
 
-describe('Seedlot Main page test', () => {
+describe('Seedlot Dashboard test', () => {
   let seedlotMainPageData: {
     subtitle: string,
     secondSectionTitle: string,
