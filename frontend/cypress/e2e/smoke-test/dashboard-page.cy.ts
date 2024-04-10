@@ -40,13 +40,18 @@ describe('Dashboard page test', () => {
     cy.get('.recent-activity-title-row')
       .find('.recent-activity-subtitle')
       .should('have.text', dashboardPageData.secondSectionSubtitle);
+  });
 
-    // Check for empty section in dashboard
-    cy.get('.empty-section-subtitle')
-      .contains(dashboardPageData.emptySectionSubtitle);
+  it('should load and display dashboard page correctly', () => {
+    cy.isPageTitle(NavigationLabels.Dashboard);
 
-    cy.get('.empty-section-title')
+    cy.get('.favourite-activities-cards')
+      .find('.empty-section-title')
       .contains(dashboardPageData.emptySectionTitle);
+
+    cy.get('.favourite-activities-cards')
+      .find('.empty-section-subtitle')
+      .contains(dashboardPageData.emptySectionSubtitle);
   });
 
   /**
@@ -118,7 +123,8 @@ describe('Dashboard page test', () => {
     cy.get('.fav-card-main-highlighted')
       .should('have.length', 0);
 
-    cy.get('.empty-section-title')
+    cy.get('.favourite-activities-cards')
+      .find('.empty-section-title')
       .should('have.text', dashboardPageData.emptySectionTitle);
   });
 });
