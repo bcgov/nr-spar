@@ -5,7 +5,7 @@ import {
   Row
 } from '@carbon/react';
 import { Notification } from '@carbon/icons-react';
-// import EmptySection from '../EmptySection';
+import EmptySection from '../EmptySection';
 
 const NotificationsCentral = () => (
   <div className="notifications-space">
@@ -16,11 +16,11 @@ const NotificationsCentral = () => (
     <hr />
     <div className="notifications-central-container">
       <div className="notifications-central-vertical-center">
-        {/* <EmptySection
+        <EmptySection
           icon="Sun"
           title="There is no new notifications!"
           description="You can go to all notifications to see older ones."
-        /> */}
+        />
         <Button
           renderIcon={Notification}
           size="md"
