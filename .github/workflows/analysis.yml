@@ -28,7 +28,7 @@ jobs:
             token: SONAR_ORACLE_API
     steps:
       - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-test-and-analyse-java@v1.0.1
+      - uses: bcgov-nr/action-test-and-analyse-java@test
         with:
           commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
           dir: ${{ matrix.dir }}
