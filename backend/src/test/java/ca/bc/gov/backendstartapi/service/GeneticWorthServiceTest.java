@@ -4,7 +4,7 @@
 
 // import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 // import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
-// import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
+// import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 // import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 // import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 // import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
@@ -124,37 +124,37 @@
 //   @Test
 //   @DisplayName("calculateGeneticWorth_Success")
 //   void calculateGeneticWorth_Success() {
-//     List<GeneticWorthTraitsRequestDto> requestList = new ArrayList<>();
+//     List<PtValsCalReqDto> requestList = new ArrayList<>();
 
 //     // 129
 //     GeneticWorthTraitsDto dto129gvo = createDto("gvo", "18");
 //     GeneticWorthTraitsDto dto129wwd = createDto("wwd", "-2.2");
-//     GeneticWorthTraitsRequestDto requestDto129 =
-//         new GeneticWorthTraitsRequestDto(
+//     PtValsCalReqDto requestDto129 =
+//         new PtValsCalReqDto(
 //             "129", new BigDecimal("13"), new BigDecimal("48.5"), List.of(dto129gvo, dto129wwd));
 //     requestList.add(requestDto129);
 
 //     // 212
 //     GeneticWorthTraitsDto dto212gvo = createDto("gvo", "20");
 //     GeneticWorthTraitsDto dto212wwd = createDto("wwd", "1.7");
-//     GeneticWorthTraitsRequestDto requestDto212 =
-//         new GeneticWorthTraitsRequestDto(
+//     PtValsCalReqDto requestDto212 =
+//         new PtValsCalReqDto(
 //             "212", new BigDecimal("8.5"), new BigDecimal("49"), List.of(dto212gvo, dto212wwd));
 //     requestList.add(requestDto212);
 
 //     // 300
 //     GeneticWorthTraitsDto dto300gvo = createDto("gvo", "15");
 //     GeneticWorthTraitsDto dto300wwd = createDto("wwd", "-0.8");
-//     GeneticWorthTraitsRequestDto requestDto300 =
-//         new GeneticWorthTraitsRequestDto(
+//     PtValsCalReqDto requestDto300 =
+//         new PtValsCalReqDto(
 //             "300", new BigDecimal("129.5"), new BigDecimal("93"), List.of(dto300gvo, dto300wwd));
 //     requestList.add(requestDto300);
 
 //     // 3141
 //     GeneticWorthTraitsDto dto3141gvo = createDto("gvo", "23");
 //     GeneticWorthTraitsDto dto3141wwd = createDto("wwd", "-2.1");
-//     GeneticWorthTraitsRequestDto requestDto3141 =
-//         new GeneticWorthTraitsRequestDto(
+//     PtValsCalReqDto requestDto3141 =
+//         new PtValsCalReqDto(
 //             "3141",
 //             new BigDecimal("71.20833333"),
 //             new BigDecimal("35"),
@@ -164,8 +164,8 @@
 //     // 3144
 //     GeneticWorthTraitsDto dto3144gvo = createDto("gvo", "25");
 //     GeneticWorthTraitsDto dto3144wwd = createDto("wwd", "-0.6");
-//     GeneticWorthTraitsRequestDto requestDto3144 =
-//         new GeneticWorthTraitsRequestDto(
+//     PtValsCalReqDto requestDto3144 =
+//         new PtValsCalReqDto(
 //             "3144",
 //             new BigDecimal("42.541666667"),
 //             new BigDecimal("92.5"),
@@ -175,8 +175,8 @@
 //     // 3169
 //     GeneticWorthTraitsDto dto3169gvo = createDto("gvo", "19");
 //     GeneticWorthTraitsDto dto3169wwd = createDto("wwd", "-2.3");
-//     GeneticWorthTraitsRequestDto requestDto3169 =
-//         new GeneticWorthTraitsRequestDto(
+//     PtValsCalReqDto requestDto3169 =
+//         new PtValsCalReqDto(
 //             "3169",
 //             new BigDecimal("30.083333333"),
 //             new BigDecimal("27"),
@@ -186,16 +186,16 @@
 //     // 3210
 //     GeneticWorthTraitsDto dto3210gvo = createDto("gvo", "17");
 //     GeneticWorthTraitsDto dto3210wwd = createDto("wwd", "1.1");
-//     GeneticWorthTraitsRequestDto requestDto3210 =
-//         new GeneticWorthTraitsRequestDto(
+//     PtValsCalReqDto requestDto3210 =
+//         new PtValsCalReqDto(
 //             "3210", new BigDecimal("6"), new BigDecimal("0"), List.of(dto3210gvo, dto3210wwd));
 //     requestList.add(requestDto3210);
 
 //     // 3245
 //     GeneticWorthTraitsDto dto3245gvo = createDto("gvo", "19");
 //     GeneticWorthTraitsDto dto3245wwd = createDto("wwd", "-2.3");
-//     GeneticWorthTraitsRequestDto requestDto3245 =
-//         new GeneticWorthTraitsRequestDto(
+//     PtValsCalReqDto requestDto3245 =
+//         new PtValsCalReqDto(
 //             "3245",
 //             new BigDecimal("152"),
 //             new BigDecimal("154.5"),

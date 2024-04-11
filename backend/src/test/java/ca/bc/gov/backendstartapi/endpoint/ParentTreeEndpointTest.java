@@ -58,7 +58,7 @@
 
 //     mockMvc
 //         .perform(
-//             post("/api/parent-trees/geospatial-data")
+//             post("/api/parent-trees/smp-mix/geospatial-data")
 //                 .with(csrf().asHeader())
 //                 .content(postBody.toString())
 //                 .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +95,7 @@
 
 //     mockMvc
 //         .perform(
-//             post("/api/parent-trees/geospatial-data")
+//             post("/api/parent-trees/smp-mix/geospatial-data")
 //                 .with(csrf().asHeader())
 //                 .content(postBody.toString())
 //                 .contentType(MediaType.APPLICATION_JSON)

@@ -15,7 +15,6 @@ import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import com.vividsolutions.jts.geom.Point;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -336,9 +335,6 @@ public class Seedlot implements Serializable {
 
   @Column(name = "approved_userid")
   private String approvedUserId;
-
-  @Column(name = "mean_geom")
-  private Point meanGeom;
 
   // end geographic
 

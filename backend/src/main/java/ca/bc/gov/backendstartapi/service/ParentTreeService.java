@@ -3,14 +3,16 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
+import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
+import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.util.LatLongUtil;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,9 +51,8 @@ public class ParentTreeService {
         oracleApiProvider.getPtGeospatialDataByIdList(ptIds);
 
     if (oracleDtoList.isEmpty()) {
-      SparLog.info("No parent tree lat long data from Oracle for the given parent tree ids.");
-      // TODO: custom type
-      return new GeospatialRespondDto(null, null, null, null, null, null, null, null, null);
+      SparLog.info("No parent tree geo data from Oracle for the given parent tree ids");
+      throw new PtGeoDataNotFoundException();
     }
 
     Map<Integer, GeospatialOracleResDto> oracleMap =
@@ -129,39 +130,103 @@ public class ParentTreeService {
         };
     BigDecimal longitudeDecimalDegree = LatLongUtil.dmsToDecimalDegree(longitudeDms);
 
-    return new GeospatialRespondDto(
-        latitudeDms[0],
-        latitudeDms[1],
-        latitudeDms[2],
-        longitudeDms[0],
-        longitudeDms[1],
-        longitudeDms[2],
-        latitudeDecimalDegree,
-        longitudeDecimalDegree,
-        meanElevationSum.intValue());
+    GeospatialRespondDto result = new GeospatialRespondDto();
+    /**
+     * latitudeDms[0], latitudeDms[1], latitudeDms[2], longitudeDms[0], longitudeDms[1],
+     * longitudeDms[2], latitudeDecimalDegree, longitudeDecimalDegree, meanElevationSum.intValue()
+     */
+    result.setMeanElevation(meanElevationSum.intValue());
+    result.setMeanLatitudeDegree(latitudeDms[0]);
+    result.setMeanLatitudeMinute(latitudeDms[1]);
+    result.setMeanLatitudeSecond(latitudeDms[2]);
+    result.setMeanLongitudeDegree(longitudeDms[0]);
+    result.setMeanLongitudeMinute(longitudeDms[1]);
+    result.setMeanLongitudeSecond(longitudeDms[2]);
+    result.setMeanLatitude(latitudeDecimalDegree);
+    result.setMeanLongitude(longitudeDecimalDegree);
+
+    return result;
   }
 
   /**
    * Does the calculation for each genetic trait. PS: if the threshold of 70% of contribution from
    * the parent tree is not met, the trait value will not be shown.
    *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
-   *     values to be calculated.
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and values to be
+   *     calculated.
    * @return A {@link PtCalculationResDto} containing all calculated values
    */
-  public PtCalculationResDto calculatePtVals(List<GeneticWorthTraitsRequestDto> traitsDto) {
+  public PtCalculationResDto calculatePtVals(List<PtValsCalReqDto> traitsDto) {
     BigDecimal neValue = geneticWorthService.calculateNe(traitsDto);
 
     List<GeneticWorthTraitsDto> calculatedGws =
         geneticWorthService.calculateGeneticWorth(traitsDto);
 
-    PtCalculationResDto summaryDto =
-        new PtCalculationResDto(
-            calculatedGws,
-            new CaculatedParentTreeValsDto(
-                neValue,
-                new GeospatialRespondDto(null, null, null, null, null, null, null, null, null)));
+    CaculatedParentTreeValsDto calculatedVals = new CaculatedParentTreeValsDto();
+    calculatedVals.setNeValue(neValue);
+    calculatedVals.setGeospatialData(calcSeedlotGeoData(traitsDto));
+
+    PtCalculationResDto summaryDto = new PtCalculationResDto(calculatedGws, calculatedVals);
 
     return summaryDto;
+  }
+
+  /**
+   * All reference to Certification Template Col is labled with an id such as AM, AN or AL Find
+   * these calculation definition in SPR01A_PTContribution.htm
+   */
+  private GeospatialRespondDto calcSeedlotGeoData(List<PtValsCalReqDto> ptValDtos) {
+    BigDecimal totalConeCount =
+        ptValDtos.stream().map(PtValsCalReqDto::coneCount).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    // Proportion: (v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
+
+    ptValDtos.forEach(
+        ptVal -> {
+          BigDecimal proportion = calcProportion(ptVal, totalConeCount);
+        });
+
+    // Mean Lat = SUM(Wtd Lat. with parent and SMP pollen)
+    // Wtd Lat. with parent and SMP pollen is defined in  w/ id = AM
+
+    // Mean Long = SUM(Wtd. Long. with parent and SMP pollen)
+    // Wtd Long. with parent and SMP pollen is defined in Certification Template Col w/ id = AN
+
+    // Mean Elev. = SUM(Wtd. elev with parent and SMP pollen)
+    // Wtd elev. with parent and SMP pollen is defined in Certification Template Col w/ id = AL
+
+    return new GeospatialRespondDto();
+  }
+
+  // DEF: prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
+  private BigDecimal calcProportion(PtValsCalReqDto ptValDto, BigDecimal totalConeCount) {
+    int DIVISION_SCALE = 6;
+    /*
+     * --col:V
+     * IF v_total_cone_count = 0 THEN
+     *   v_female_crop_pop := 0;
+     * ELSE
+     *    v_female_crop_pop := v_a_cone_count / v_total_cone_count;
+     */
+    BigDecimal femaleCropPop = BigDecimal.ZERO;
+
+    if (!totalConeCount.equals(BigDecimal.ZERO)) {
+      femaleCropPop =
+          ptValDto.coneCount().divide(totalConeCount, DIVISION_SCALE, RoundingMode.HALF_UP);
+    }
+
+    // Integer sum = integers.stream().reduce(0, (a, b) -> a + b);
+
+    /*
+     * --col:AE
+     * IF v_total_pollen_count = 0 THEN
+     *  v_p_prop_contrib := v_female_crop_pop;
+     * ELSE
+     *  v_p_prop_contrib := (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
+     */
+
+    BigDecimal prop = BigDecimal.ZERO;
+
+    return prop;
   }
 }

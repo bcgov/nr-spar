@@ -3,7 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
+import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
@@ -61,12 +61,12 @@ public class GeneticWorthService {
    * Does the calculation for each genetic trait. PS: if the threshold of 70% of contribution from
    * the parent tree is not met, the trait value will not be shown.
    *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and
    *     values to be calculated.
    * @return A {@link PtCalculationResDto} containing all calculated values
    */
   public List<GeneticWorthTraitsDto> calculateGeneticWorth(
-      List<GeneticWorthTraitsRequestDto> traitsDto) {
+      List<PtValsCalReqDto> traitsDto) {
     SparLog.info("Starting Genetic Worth calculations");
     BigDecimal minimumThreshold = new BigDecimal("0.7");
 
@@ -98,16 +98,16 @@ public class GeneticWorthService {
   /**
    * Does the Ne calculation (effective population size).
    *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and
    *     values to be calculated.
    * @return A {@link BigDecimal} representing the calculated value.
    */
-  public BigDecimal calculateNe(List<GeneticWorthTraitsRequestDto> traitsDto) {
+  public BigDecimal calculateNe(List<PtValsCalReqDto> traitsDto) {
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
     BigDecimal femaleConeSum = reduceConeCount(traitsDto);
 
     BigDecimal piSquareSum = BigDecimal.ZERO;
-    for (GeneticWorthTraitsRequestDto dto : traitsDto) {
+    for (PtValsCalReqDto dto : traitsDto) {
       BigDecimal pi = calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);
       BigDecimal piSquare = pi.multiply(pi);
 
@@ -129,17 +129,17 @@ public class GeneticWorthService {
    * Do the calculations for each Genetic Worth trait. Note that in the case the parent tree does
    * not attend the 70% threshold weight, the value for this trait will be zero.
    *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and
    *     values.
    * @return A {@link BigDecimal} representing the value.
    */
   private BigDecimal calculateTraitGeneticWorth(
-      List<GeneticWorthTraitsRequestDto> traitsDto, CodeDescriptionDto trait) {
+      List<PtValsCalReqDto> traitsDto, CodeDescriptionDto trait) {
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
     BigDecimal femaleConeSum = reduceConeCount(traitsDto);
     BigDecimal sumGw = BigDecimal.ZERO;
 
-    for (GeneticWorthTraitsRequestDto dto : traitsDto) {
+    for (PtValsCalReqDto dto : traitsDto) {
       BigDecimal traitBreedingValue = getTraitValue(dto, trait);
       if (!Objects.isNull(traitBreedingValue) && traitBreedingValue.floatValue() != 0) {
         BigDecimal pi =
@@ -156,13 +156,13 @@ public class GeneticWorthService {
    * Calculate the threshold of a genetic trait. To be used to check if a given trait mets the
    * minimum of 70% of parent tree contribution.
    *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and
    *     values to be calculated.
    * @param trait A {@link GeneticWorth} with the trait that should be considered.
    * @return A BigDecimal representing the trait threshold.
    */
   private BigDecimal calcGeneticTraitThreshold(
-      List<GeneticWorthTraitsRequestDto> traitsDto, CodeDescriptionDto trait) {
+      List<PtValsCalReqDto> traitsDto, CodeDescriptionDto trait) {
     SparLog.debug("Checking genetic trait threshold for {} trait", trait);
 
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
@@ -172,7 +172,7 @@ public class GeneticWorthService {
     SparLog.debug("femaleConeSum {}", femaleConeSum);
     SparLog.debug("malePollenSum {}", malePollenSum);
 
-    for (GeneticWorthTraitsRequestDto traitFor : traitsDto) {
+    for (PtValsCalReqDto traitFor : traitsDto) {
       BigDecimal traitBreedingValue = getTraitValue(traitFor, trait);
       if (!Objects.isNull(traitBreedingValue) && traitBreedingValue.floatValue() != 0) {
         BigDecimal pi =
@@ -189,12 +189,12 @@ public class GeneticWorthService {
   /**
    * Finds the genetic trait value given the request dto and the trait that should be found.
    *
-   * @param dto A {@link GeneticWorthTraitsRequestDto} instance with the traits value.
+   * @param dto A {@link PtValsCalReqDto} instance with the traits value.
    * @param trait A {@link GeneticWorth} with the trait that should be considered.
    * @return a BigDecimal representing the trait value or BigDecimal.ZERO otherwise.
    */
   private BigDecimal getTraitValue(
-      GeneticWorthTraitsRequestDto traitDto, CodeDescriptionDto trait) {
+      PtValsCalReqDto traitDto, CodeDescriptionDto trait) {
     List<GeneticWorthTraitsDto> geneticTraits = traitDto.geneticTraits();
     Optional<GeneticWorthTraitsDto> traitOptional =
         geneticTraits.stream()
@@ -233,22 +233,22 @@ public class GeneticWorthService {
   /**
    * Sums all the pollen count.
    *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and
    *     values
    * @return A BigDecimal representing the value
    */
-  private BigDecimal reducePollenCount(List<GeneticWorthTraitsRequestDto> traitsDto) {
+  private BigDecimal reducePollenCount(List<PtValsCalReqDto> traitsDto) {
     return traitsDto.stream().map(x -> x.pollenCount()).reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
   /**
    * Sums all the cone count.
    *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and
    *     values
    * @return A BigDecimal representing the value
    */
-  private BigDecimal reduceConeCount(List<GeneticWorthTraitsRequestDto> traitsDto) {
+  private BigDecimal reduceConeCount(List<PtValsCalReqDto> traitsDto) {
     return traitsDto.stream().map(x -> x.coneCount()).reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 }

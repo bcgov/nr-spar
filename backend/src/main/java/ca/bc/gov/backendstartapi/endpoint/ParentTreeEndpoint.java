@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
+import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
@@ -32,12 +32,12 @@ public class ParentTreeEndpoint {
   private final ParentTreeService parentTreeService;
 
   /**
-   * Gets latitude, longitude and elevation data for each parent tree given a list of orchard ids.
+   * Get the mean geospatial data for a list of parent tree in SMP mix.
    *
    * @param ptreeIds The {@link GeospatialRequestDto} list with parent trees and all tab 3 data.
    * @return A List of {@link ParentTreeOrchardDto} containing the result rows.
    */
-  @PostMapping("/geospatial-data")
+  @PostMapping("/smp-mix/geospatial-data")
   @Operation(
       summary = "",
       description = "",
@@ -64,7 +64,7 @@ public class ParentTreeEndpoint {
   /**
    * Do the calculations of all Genetic Traits, given a trait list.
    *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and
    *     values to be calculated.
    * @return A {@link PtCalculationResDto} containing all calculated values.
    */
@@ -106,7 +106,7 @@ public class ParentTreeEndpoint {
               required = true)
           @Valid
           @RequestBody
-          List<GeneticWorthTraitsRequestDto> traitsDto) {
+          List<PtValsCalReqDto> traitsDto) {
     return parentTreeService.calculatePtVals(traitsDto);
   }
 }

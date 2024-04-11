@@ -7,7 +7,7 @@ import java.util.List;
 
 /** This class represents the JSON request body when doing genetic worth calculations. */
 @Schema(description = "An object representing the request body for the genetic worth calculations.")
-public record GeneticWorthTraitsRequestDto(
+public record PtValsCalReqDto(
     @Schema(description = "The Parent Tree Id, the id in oracle of a parent tree.", example = "4423")
         @NotNull
         String parentTreeId,
