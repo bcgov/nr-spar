@@ -24,7 +24,6 @@ on:
 jobs:
   cypress:
     name: Cypress Tests and Coverage
-    needs: [diff]
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
