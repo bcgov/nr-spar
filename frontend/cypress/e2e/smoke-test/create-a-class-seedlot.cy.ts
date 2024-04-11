@@ -1,6 +1,7 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
 import { TYPE_DELAY } from '../../constants';
+import prefix from '../../../src/styles/classPrefix';
 
 describe('Create A-Class Seedlot', () => {
   let data: {
@@ -30,7 +31,7 @@ describe('Create A-Class Seedlot', () => {
     // Enter the applicant agency name
     cy.get('#applicant-info-combobox')
       .click();
-    cy.contains('.bx--list-box__menu-item__option', data.applicantAgency.name)
+    cy.contains(`${prefix}--list-box__menu-item__option`, data.applicantAgency.name)
       .click();
     // Enter the applicant agency number
     cy.get('#agency-number-input')
@@ -51,7 +52,7 @@ describe('Create A-Class Seedlot', () => {
     // Enter the seedlot species, wait for species data to load
     cy.get('#seedlot-species-combobox')
       .click();
-    cy.contains('.bx--list-box__menu-item__option', data.seedlotInformation.species)
+    cy.contains(`${prefix}--list-box__menu-item__option`, data.seedlotInformation.species)
       .scrollIntoView()
       .click();
     // Check checkbox behavior when Tested parent tree selected
@@ -63,8 +64,8 @@ describe('Create A-Class Seedlot', () => {
       .should('not.be.checked');
     // Check checkbox behavior when Custom seedlot selected
     cy.get('#seedlot-source-radio-btn-cus')
-      .siblings('.bx--radio-button__label')
-      .find('.bx--radio-button__appearance')
+      .siblings(`${prefix}--radio-button__label`)
+      .find(`${prefix}--radio-button__appearance`)
       .click();
     cy.get('#seedlot-source-radio-btn-tpt')
       .should('not.be.checked');
@@ -74,8 +75,8 @@ describe('Create A-Class Seedlot', () => {
       .should('be.checked');
     // Check checkbox behavior when Untested parent tree selected
     cy.get('#seedlot-source-radio-btn-upt')
-      .siblings('.bx--radio-button__label')
-      .find('.bx--radio-button__appearance')
+      .siblings(`${prefix}--radio-button__label`)
+      .find(`${prefix}--radio-button__appearance`)
       .click();
     cy.get('#seedlot-source-radio-btn-tpt')
       .should('not.be.checked');
