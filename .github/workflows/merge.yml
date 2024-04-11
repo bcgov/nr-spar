@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v2.2.0
+        uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -98,7 +98,7 @@ jobs:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=test
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.2.0
+      - uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -153,7 +153,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v2.2.0
+        uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -214,7 +214,7 @@ jobs:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=production
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.2.0
+      - uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           file: ${{ matrix.file }}
           oc_namespace: ${{ vars.OC_NAMESPACE }}

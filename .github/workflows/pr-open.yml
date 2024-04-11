@@ -42,7 +42,7 @@ jobs:
             [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
 
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v2.2.0
+        uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
