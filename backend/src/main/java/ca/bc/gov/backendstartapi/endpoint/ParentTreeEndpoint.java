@@ -58,7 +58,7 @@ public class ParentTreeEndpoint {
               required = true)
           @RequestBody
           List<GeospatialRequestDto> ptreeIdAndProportion) {
-    return parentTreeService.calculateGeospatial(ptreeIdAndProportion);
+    return parentTreeService.calcSmpMixGeospatial(ptreeIdAndProportion);
   }
 
   /**

@@ -33,16 +33,16 @@ public class LatLongUtil {
    * @param degreeLatLong An array of double values containing always 3 numbers.
    * @return The decimal representation of a latitude or longitude.
    */
-  public static BigDecimal dmsToDecimalDegree(Integer[] degreeLatLong) {
-    Boolean isNegative = degreeLatLong[0] < 0;
-
-    BigDecimal degree = new BigDecimal(degreeLatLong[0]).abs();
+  public static BigDecimal dmsToDecimalDegree(Integer[] dmsVals) {
+    BigDecimal degree = new BigDecimal(dmsVals[0]).abs();
     BigDecimal minutes =
-        new BigDecimal(degreeLatLong[1]).divide(new BigDecimal(60), 30000, RoundingMode.HALF_UP);
+        new BigDecimal(dmsVals[1]).divide(new BigDecimal(60), 30000, RoundingMode.HALF_UP);
     BigDecimal seconds =
-        new BigDecimal(degreeLatLong[2]).divide(new BigDecimal(3600), 30000, RoundingMode.HALF_UP);
+        new BigDecimal(dmsVals[2]).divide(new BigDecimal(3600), 30000, RoundingMode.HALF_UP);
 
     BigDecimal decimalVal = degree.add(minutes).add(seconds).setScale(6, RoundingMode.HALF_UP);
+
+    Boolean isNegative = dmsVals[0] < 0;
 
     return isNegative ? decimalVal.negate() : decimalVal;
   }

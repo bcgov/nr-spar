@@ -1,26 +1,12 @@
 /* Update Seedlot table */
-alter table
-  spar.seedlot
-add
-  mean_latitude decimal(8, 5),
-add
-  mean_longitude decimal(8, 5);
+alter table spar.seedlot add column mean_geom geometry(POINTZ, 4326);
 
-comment on column spar.seedlot.mean_latitude is 'A decimal value for mean latitude of the parent trees.';
-
-comment on column spar.seedlot.mean_longitude is 'A decimal value for mean longitude of the parent trees.';
+comment on column spar.seedlot.mean_geom is 'The 3D mean geom of parent trees.';
 
 /* Update Seedlot Audit table */
-alter table
-  spar.seedlot_audit
-add
-  column mean_latitude decimal(8, 5),
-add
-  column mean_longitude decimal(8, 5);
+alter table spar.seedlot_audit add column mean_geom geometry(POINTZ, 4326);
 
-comment on column spar.seedlot_audit.approved_timestamp is 'Referring value for spar.seedlot.mean_latitude column';
-
-comment on column spar.seedlot_audit.approved_userid is 'Referring value for spar.seedlot.mean_longitude column';
+comment on column spar.seedlot_audit.mean_geom is 'Referring value for spar.seedlot.mean_geom column';
 
 /* Update trigger */
 
@@ -131,8 +117,7 @@ BEGIN
     /*area_of_use_comment            */ NEW.area_of_use_comment,
     /*approved_timestamp             */ NEW.approved_timestamp,
     /*approved_userid                */ NEW.approved_userid,
-    /*mean_latitude                  */ NEW.mean_latitude,
-    /*mean_longitude                 */ NEW.mean_longitude,
+    /*mean_geom                  */ NEW.mean_geom,
 
     /*update_userid                  */ NEW.update_userid,
     /*update_timestamp               */ NEW.update_timestamp,
@@ -241,8 +226,7 @@ BEGIN
     /*area_of_use_comment            */ OLD.area_of_use_comment,
     /*approved_timestamp             */ OLD.approved_timestamp,
     /*approved_userid                */ OLD.approved_userid,
-    /*mean_latitude                  */ OLD.mean_latitude,
-    /*mean_longitude                 */ OLD.mean_longitude,
+    /*mean_geom                      */ OLD.mean_geom,
 
     /*update_userid                  */ OLD.update_userid,
     /*update_timestamp               */ OLD.update_timestamp,
@@ -347,8 +331,7 @@ BEGIN
     /*area_of_use_comment            */ NEW.area_of_use_comment,
     /*approved_timestamp             */ NEW.approved_timestamp,
     /*approved_userid                */ NEW.approved_userid,
-    /*mean_latitude                  */ NEW.mean_latitude,
-    /*mean_longitude                 */ NEW.mean_longitude,
+    /*mean_geom                  */ NEW.mean_geom,
 
     /*update_userid                  */ NEW.update_userid,
     /*update_timestamp               */ NEW.update_timestamp,

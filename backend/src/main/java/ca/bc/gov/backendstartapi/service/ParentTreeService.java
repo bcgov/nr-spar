@@ -36,7 +36,7 @@ public class ParentTreeService {
    * @param ptreeIds List of parent trees and traits.
    * @return A List of {@link GeospatialRespondDto}
    */
-  public GeospatialRespondDto calculateGeospatial(
+  public GeospatialRespondDto calcSmpMixGeospatial(
       List<GeospatialRequestDto> ptreeIdAndProportions) {
     SparLog.info(
         "{} parent tree record(s) received to calculate lat long and elevation",
@@ -58,7 +58,7 @@ public class ParentTreeService {
         oracleDtoList.stream()
             .collect(Collectors.toMap(GeospatialOracleResDto::parentTreeId, Function.identity()));
 
-    // Accumulators
+    // Accumulators of weigthed values, convert DMS to Decimal degrees in the end for max precision.
     BigDecimal meanLatDegSum = BigDecimal.ZERO;
     BigDecimal meanLatMinSum = BigDecimal.ZERO;
     BigDecimal meanLatSecSum = BigDecimal.ZERO;
@@ -68,6 +68,7 @@ public class ParentTreeService {
     BigDecimal meanElevationSum = BigDecimal.ZERO;
 
     // Loop through list to calculate weighted values then sum them up.
+    // Reference: legacy SPAR database/ddl/pkg/SPR_001A_SMP_CALCULATION.PKS
     for (GeospatialRequestDto dto : ptreeIdAndProportions) {
       // frontend already do this:
 
@@ -78,14 +79,40 @@ public class ParentTreeService {
         continue;
       }
 
-      // weighted value = parent tree proportion * value
+      // Definition: weighted value = proportion * value
 
+      BigDecimal proportion = dto.proportion().divide(new BigDecimal(100));
 
-
+      // Elevation
       BigDecimal weightedElevation =
-          dto.proportion().multiply(new BigDecimal(geospatialResDto.elevation()));
+          proportion.multiply(new BigDecimal(geospatialResDto.elevation()));
+      meanElevationSum = meanElevationSum.add(weightedElevation);
 
-      meanElevationSum.add(weightedElevation);
+      // Latitude
+      BigDecimal weightedLatDeg =
+          proportion.multiply(new BigDecimal(geospatialResDto.latitudeDegree()));
+      meanLatDegSum = meanLatDegSum.add(weightedLatDeg);
+
+      BigDecimal weightedLatMin =
+          proportion.multiply(new BigDecimal(geospatialResDto.latitudeMinute()));
+      meanLatMinSum = meanLatMinSum.add(weightedLatMin);
+
+      BigDecimal weightedLatSec =
+          proportion.multiply(new BigDecimal(geospatialResDto.latitudeSecond()));
+      meanLatSecSum = meanLatSecSum.add(weightedLatSec);
+
+      // Longitude
+      BigDecimal weightedLongDeg =
+          proportion.multiply(new BigDecimal(geospatialResDto.longitudeDegree()));
+      meanLongDegSum = meanLongDegSum.add(weightedLongDeg);
+
+      BigDecimal weightedLongMin =
+          proportion.multiply(new BigDecimal(geospatialResDto.longitudeMinute()));
+      meanLongMinSum = meanLongMinSum.add(weightedLongMin);
+
+      BigDecimal weightedLongSec =
+          proportion.multiply(new BigDecimal(geospatialResDto.longitudeSecond()));
+      meanLongSecSum = meanLongSecSum.add(weightedLongSec);
     }
 
     // latitude
@@ -93,24 +120,24 @@ public class ParentTreeService {
         new Integer[] {
           meanLatDegSum.intValue(), meanLatMinSum.intValue(), meanLatSecSum.intValue()
         };
-    BigDecimal latitudeDegreeDecimal = LatLongUtil.degreeToMinutes(latitudeDms);
+    BigDecimal latitudeDecimalDegree = LatLongUtil.dmsToDecimalDegree(latitudeDms);
 
     // longitude
     Integer[] longitudeDms =
         new Integer[] {
           meanLongDegSum.intValue(), meanLongMinSum.intValue(), meanLongSecSum.intValue()
         };
-    BigDecimal longitudeDegreeDecimal = LatLongUtil.degreeToMinutes(longitudeDms);
+    BigDecimal longitudeDecimalDegree = LatLongUtil.dmsToDecimalDegree(longitudeDms);
 
     return new GeospatialRespondDto(
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        latitudeDegreeDecimal,
-        longitudeDegreeDecimal,
+        latitudeDms[0],
+        latitudeDms[1],
+        latitudeDms[2],
+        longitudeDms[0],
+        longitudeDms[1],
+        longitudeDms[2],
+        latitudeDecimalDegree,
+        longitudeDecimalDegree,
         meanElevationSum.intValue());
   }
 
