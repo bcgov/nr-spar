@@ -19,6 +19,7 @@ on:
       target_oracle:
         description: Oracle-API target, defaults to test
         default: test
+        type: string
 
 jobs:
   diff:
