@@ -82,8 +82,6 @@ jobs:
     needs: [builds, init]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
-    outputs:
-      triggered: ${{ steps.trigger.outputs.frontend }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
@@ -138,54 +136,15 @@ jobs:
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers || '("backend/" "common/" "database/" "frontend/" "oracle-api/")' }}
           verification_path: ${{ matrix.verification_path}}
-      - id: trigger
-        run: echo "${{ matrix.name }}=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
-  cypress:
-    name: Cypress Tests and Coverage
-    if: needs.deploys.outputs.triggered == 'true'
-    needs: [deploys, init]
-    env:
-      CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-      CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
-      CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca
-      VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-      VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
-      VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-      VITE_ZONE: TEST
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Cypress CI
-        uses: bcgov-nr/action-test-and-analyse@v1.2.0
-        with:
-          node_version: "18"
-          commands: |
-            npm ci
-            npm run cy:ci
-          dir: frontend
-          sonar_args: >
-            -Dsonar.organization=bcgov-sonarcloud
-            -Dsonar.javascript.lcov.reportPaths=cypress-coverage/lcov.info
-            -Dsonar.projectKey=nr-spar_frontend
-            -Dsonar.sources=src/
-            -Dsonar.exclusions=src/__test__/**/*
-            -Dsonar.exclusions=src/mock-server/**/*
-            -Dsonar.test.inclusions=cypress/e2e/smoke-test/**/*
-          sonar_token: ${{ secrets.SONAR_FRONTEND }}
-      - name: Upload videos
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cypress-videos-chrome
-          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: cypress-coverage
-          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress-coverage
+  tests:
+    name: Tests
+    needs: [deploys]
+    secrets: inherit
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: ${{ github.event.number }}
+      triggers: ('frontend/')
 
   results:
     name: PR Results
