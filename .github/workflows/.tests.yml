@@ -4,18 +4,19 @@ on:
   workflow_call:
     inputs:
       ### Required
-      target:
-        description: PR number, test or prod
-        required: true
-        type: string
+
+      # Nothing!  Just make sure `secrets: inherit` is set in the caller
 
       ### Typical / recommended
+      target:
+        description: PR number, test or prod; defaults to PR number
+        default: ${{ github.event.number }}
+        type: string
       triggers:
         description: Bash array to diff for build triggering; omit to always fire
-        required: false
         type: string
 
-      ### Typical / recommended
+  ### Usually a bad idea / not recommended
       target_oracle:
         description: Oracle-API target, defaults to test
         default: test
@@ -23,12 +24,12 @@ on:
 
 jobs:
   cypress:
-    name: Cypress Tests and Coverage
+    name: Cypress
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
-      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ inputs.target || github.event.number }}-backend.apps.silver.devops.gov.bc.ca
+      VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://nr-spar-${{ inputs.target_oracle }}-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}

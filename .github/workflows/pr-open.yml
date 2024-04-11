@@ -148,8 +148,6 @@ jobs:
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ github.event.number }}
 
   results:
     name: PR Results
