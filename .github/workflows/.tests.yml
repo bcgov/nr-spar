@@ -22,20 +22,8 @@ on:
         type: string
 
 jobs:
-  diff:
-    name: Diff
-    runs-on: ubuntu-22.04
-    steps:
-      # Send triggers to diff action
-      - id: diff
-        uses: bcgov-nr/action-diff-triggers@v0.2.0
-        with:
-          triggers: ${{ inputs.triggers }}
-          diff_branch: ${{ inputs.diff_branch }}
-
   cypress:
     name: Cypress Tests and Coverage
-    if: needs.diff.outputs.triggered == 'true'
     needs: [diff]
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}

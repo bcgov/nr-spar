@@ -42,7 +42,7 @@ jobs:
             [Merge Workflow](https://github.com/${{ github.repository }}/actions/workflows/merge.yml)
 
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        uses: bcgov-nr/action-deployer-openshift@v2.2.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -82,6 +82,8 @@ jobs:
     needs: [builds, init]
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    outputs:
+      triggered: ${{ steps.trigger.outputs.triggered }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
@@ -136,20 +138,23 @@ jobs:
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers || '("backend/" "common/" "database/" "frontend/" "oracle-api/")' }}
           verification_path: ${{ matrix.verification_path}}
+      - id: trigger
+        if: matrix.name == 'frontend'
+        run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
   tests:
     name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
     with:
       target: ${{ github.event.number }}
-      triggers: ('frontend/')
 
   results:
     name: PR Results
     if: always() && !failure()
-    needs: [tests]
+    needs: [cypress]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
