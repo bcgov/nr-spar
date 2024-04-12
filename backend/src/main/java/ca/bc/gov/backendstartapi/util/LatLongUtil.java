@@ -6,6 +6,8 @@ import java.math.RoundingMode;
 /** This class contains methods for lat and long conversions. */
 public class LatLongUtil {
 
+  static int DECIMAL_SCALE = 5;
+
   /**
    * Convert a decimal latitude or longitude to a list of degrees, minutes and seconds.
    *
@@ -40,7 +42,7 @@ public class LatLongUtil {
     BigDecimal seconds =
         new BigDecimal(dmsVals[2]).divide(new BigDecimal(3600), 30000, RoundingMode.HALF_UP);
 
-    BigDecimal decimalVal = degree.add(minutes).add(seconds).setScale(6, RoundingMode.HALF_UP);
+    BigDecimal decimalVal = degree.add(minutes).add(seconds).setScale(DECIMAL_SCALE, RoundingMode.HALF_UP);
 
     Boolean isNegative = dmsVals[0] < 0;
 
@@ -59,7 +61,7 @@ public class LatLongUtil {
     BigDecimal minutes = new BigDecimal(degreeLatLong[1]);
     BigDecimal seconds = new BigDecimal(degreeLatLong[2] / 60);
 
-    BigDecimal sum = degree.add(minutes).add(seconds).setScale(6, RoundingMode.HALF_UP);
+    BigDecimal sum = degree.add(minutes).add(seconds).setScale(DECIMAL_SCALE, RoundingMode.HALF_UP);
 
     return sum;
   }
