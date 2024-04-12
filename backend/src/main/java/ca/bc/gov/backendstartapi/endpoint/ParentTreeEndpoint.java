@@ -1,9 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
-import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
-import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
+import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.service.ParentTreeService;
@@ -32,40 +30,10 @@ public class ParentTreeEndpoint {
   private final ParentTreeService parentTreeService;
 
   /**
-   * Get the mean geospatial data for a list of parent tree in SMP mix.
-   *
-   * @param ptreeIds The {@link GeospatialRequestDto} list with parent trees and all tab 3 data.
-   * @return A List of {@link ParentTreeOrchardDto} containing the result rows.
-   */
-  @PostMapping("/smp-mix/geospatial-data")
-  @Operation(
-      summary = "",
-      description = "",
-      responses = {
-        @ApiResponse(responseCode = "200", description = "A record of mean geospatial data"),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Access token is missing or invalid",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Bad request, e.g. No geospatial data found for one of the parent trees.",
-            content = @Content(schema = @Schema(implementation = Void.class)))
-      })
-  public GeospatialRespondDto getPtGeoSpatialData(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description = "A list of orchard id to fetch lat, long and elevation data.",
-              required = true)
-          @RequestBody
-          List<GeospatialRequestDto> ptreeIdAndProportion) {
-    return parentTreeService.calcSmpMixGeospatial(ptreeIdAndProportion);
-  }
-
-  /**
    * Do the calculations of all Genetic Traits, given a trait list.
    *
-   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and
-   *     values to be calculated.
+   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and values to be
+   *     calculated.
    * @return A {@link PtCalculationResDto} containing all calculated values.
    */
   @PostMapping(path = "/calculate", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -106,7 +74,7 @@ public class ParentTreeEndpoint {
               required = true)
           @Valid
           @RequestBody
-          List<PtValsCalReqDto> traitsDto) {
-    return parentTreeService.calculatePtVals(traitsDto);
+          PtValsCalReqDto ptVals) {
+    return parentTreeService.calculatePtVals(ptVals);
   }
 }

@@ -22,10 +22,21 @@ export type CalcPayloadResType = {
   }
 };
 
-export type GenWorthCalcPayload = {
+export type OrchardParentTreeValsType = {
   parentTreeId: number,
   parentTreeNumber: string,
+  smpSuccessPerc: number,
   coneCount: number,
   pollenCount: number,
   geneticTraits: GeneticTrait[]
+}
+
+export type GeospatialRequestDto = {
+  parentTreeId: number,
+  proportion: number
+}
+
+export type PtValsCalcReqPayload = {
+  orchardPtVals: OrchardParentTreeValsType[],
+  smpMixIdAndProps: GeospatialRequestDto[]
 }

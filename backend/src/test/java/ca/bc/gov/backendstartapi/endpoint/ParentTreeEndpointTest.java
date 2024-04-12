@@ -30,9 +30,9 @@
 //   @MockBean ParentTreeService parentTreeService;
 
 //   @Test
-//   @DisplayName("calcSmpMixGeospatialSuccessTest")
+//   @DisplayName("calcMeanGeospatialSuccessTest")
 //   @WithMockUser(roles = "user_read")
-//   void calcSmpMixGeospatialSuccessTest() throws Exception {
+//   void calcMeanGeospatialSuccessTest() throws Exception {
 //     List<GeospatialRequestDto> ptIds = new ArrayList<>();
 //     ptIds.add(new GeospatialRequestDto(4032, new BigDecimal("0.162")));
 
@@ -51,7 +51,7 @@
 //     responseDto.setWeightedLongitude(new BigDecimal("-4118.729941539"));
 //     responseDto.setWeightedElevation(new BigDecimal("320.659491213"));
 
-//     when(parentTreeService.calcSmpMixGeospatial(ptIds)).thenReturn(List.of(responseDto));
+//     when(parentTreeService.calcMeanGeospatial(ptIds)).thenReturn(List.of(responseDto));
 
 //     StringBuilder postBody = new StringBuilder();
 //     postBody.append("[{\"parentTreeId\":4032,\"proportion\":0.162}]");
@@ -82,13 +82,13 @@
 //   }
 
 //   @Test
-//   @DisplayName("calcSmpMixGeospatialEmptyTest")
+//   @DisplayName("calcMeanGeospatialEmptyTest")
 //   @WithMockUser(roles = "user_read")
-//   void calcSmpMixGeospatialEmptyTest() throws Exception {
+//   void calcMeanGeospatialEmptyTest() throws Exception {
 //     List<GeospatialRequestDto> ptIds = new ArrayList<>();
 //     ptIds.add(new GeospatialRequestDto(4032, new BigDecimal("0.162")));
 
-//     when(parentTreeService.calcSmpMixGeospatial(ptIds)).thenReturn(List.of());
+//     when(parentTreeService.calcMeanGeospatial(ptIds)).thenReturn(List.of());
 
 //     StringBuilder postBody = new StringBuilder();
 //     postBody.append("[{\"parentTreeId\":4032,\"proportion\":0.162}]");

@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,13 +37,14 @@ public class ParentTreeService {
           GeospatialRespondDto dto =
               new GeospatialRespondDto(
                   pt.getId().intValue(),
-                  pt.getLatitudeDegrees(),
-                  pt.getLatitudeMinutes(),
-                  pt.getLatitudeSeconds(),
-                  pt.getLongitudeDegrees(),
-                  pt.getLongitudeMinutes(),
-                  pt.getLongitudeSeconds(),
-                  pt.getElevation());
+                  Optional.ofNullable(pt.getLatitudeDegrees()).orElse(0),
+                  Optional.ofNullable(pt.getLatitudeMinutes()).orElse(0),
+                  Optional.ofNullable(pt.getLatitudeSeconds()).orElse(0),
+                  Optional.ofNullable(pt.getLongitudeDegrees()).orElse(0),
+                  Optional.ofNullable(pt.getLongitudeMinutes()).orElse(0),
+                  Optional.ofNullable(pt.getLongitudeSeconds()).orElse(0),
+                  Optional.ofNullable(pt.getElevation()).orElse(0));
+
           resultList.add(dto);
         });
 

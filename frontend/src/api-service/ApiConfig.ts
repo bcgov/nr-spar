@@ -45,7 +45,7 @@ const ApiConfig = {
 
   forestClient: `${serverHost}/api/forest-clients`,
 
-  geneticWorth: `${serverHost}/api/parent-trees/calculate`,
+  parentTreeValsCalc: `${serverHost}/api/parent-trees/calculate`,
 
   seedlotSources: `${serverHost}/api/seedlot-sources`,
 
