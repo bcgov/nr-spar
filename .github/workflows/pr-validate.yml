@@ -27,7 +27,7 @@ jobs:
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-      FRONTEND_PREFIX: ${{ github.event.repository.name }}-${{ steps.mod-tag.outputs.mod-tag }}
+      FRONTEND_PREFIX: ${{ github.event.repository.name }}-${{ needs.mod-tag.outputs.mod-tag }}
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.4.0
     with:
       markdown_links: |
