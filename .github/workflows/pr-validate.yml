@@ -1,0 +1,42 @@
+name: PR Validate
+
+on:
+  pull_request:
+    types: [edited, opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-edit-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  init:
+    name: Initialize
+    # if: (! github.event.pull_request.draft)
+    outputs:
+      mod-tag: ${{ steps.mod-tag.outputs.mod-tag }}
+    steps:
+      - name: Get PR Number Mod 50
+        id: mod-tag
+        run: echo "mod-tag=$(( ${{ github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
+
+  validate:
+    name: Validate PR
+    needs: [init]
+    # if: (! github.event.pull_request.draft)
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
+      FRONTEND_PREFIX: ${{ github.event.repository.name }}-${{ steps.mod-tag.outputs.mod-tag }}
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.4.0
+    with:
+      markdown_links: |
+        - [Frontend](https://${{ env.FRONTEND_PREFIX }}-frontend.${{ env.DOMAIN }}/)
+        - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/actuator/health)
+        - [Oracle-API](https://${{ env.PREFIX }}-oracle-api.${{ env.DOMAIN }}/actuator/health)
+
+  results:
+    name: Validate Results
+    needs: [validate]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"
