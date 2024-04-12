@@ -24,16 +24,12 @@ jobs:
     name: Validate PR
     needs: [init]
     # if: (! github.event.pull_request.draft)
-    env:
-      DOMAIN: apps.silver.devops.gov.bc.ca
-      PREFIX: ${{ github.event.repository.name }}-${{ github.event.number }}
-      FRONTEND_PREFIX: ${{ github.event.repository.name }}-${{ needs.mod-tag.outputs.mod-tag }}
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.4.0
     with:
       markdown_links: |
-        - [Frontend](https://${{ env.FRONTEND_PREFIX }}-frontend.${{ env.DOMAIN }}/)
-        - [Backend](https://${{ env.PREFIX }}-backend.${{ env.DOMAIN }}/actuator/health)
-        - [Oracle-API](https://${{ env.PREFIX }}-oracle-api.${{ env.DOMAIN }}/actuator/health)
+        - [Frontend](https://${{ github.event.repository.name }}-${{ needs.mod-tag.outputs.mod-tag }}-frontend.apps.silver.devops.gov.bc.ca/)
+        - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/actuator/health)
+        - [Oracle-API](https://${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca/actuator/health)
 
   results:
     name: Validate Results
