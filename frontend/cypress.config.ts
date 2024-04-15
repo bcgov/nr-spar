@@ -16,7 +16,7 @@ export default defineConfig({
     specPattern: [
       '**/login-page.cy.ts',
       '**/dashboard-page.cy.ts',
-      '**/seedlot-main-page.cy.ts',
+      '**/seedlot-dashboard.cy.ts',
       '**/create-a-class-seedlot.cy.ts',
       '**/seedlot-detail.cy.ts',
       '**/edit-applicant-seedlot-info.cy.ts'

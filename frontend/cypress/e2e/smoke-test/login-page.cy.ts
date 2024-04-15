@@ -22,8 +22,8 @@ describe('Login page test', () => {
   });
 
   it('should navigate to the IDIR login page', () => {
-    const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID' ?
-          Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
+    const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID'
+      ? Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
     cy.visit('/');
     cy.getByDataTest('landing-button__idir').click();
     cy.url().then((url) => {
@@ -38,8 +38,8 @@ describe('Login page test', () => {
   });
 
   it('should navigate to the BCeID login page', () => {
-    const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID' ?
-          Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
+    const loginUrl = Cypress.env('LOGIN_SERVICE') === 'BCeID'
+      ? Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
     cy.visit('/');
     cy.getByDataTest('landing-button__bceid').click();
     cy.url().then((url) => {

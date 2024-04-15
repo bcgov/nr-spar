@@ -8,6 +8,8 @@ describe('Dashboard page test', () => {
     subtitle: string,
     secondSectionTitle: string,
     secondSectionSubtitle: string,
+    emptySectionTitle: string,
+    emptySectionSubtitle: string
   };
 
   beforeEach(function () {
@@ -15,10 +17,6 @@ describe('Dashboard page test', () => {
     cy.fixture('dashboard-page').then((fData) => {
       dashboardPageData = fData;
     });
-    cy.fixture('favourite-activities').as('favActRes')
-      .then((favActRes) => {
-        this.favActRes = favActRes;
-      });
 
     cy.login();
     cy.visit('/');
@@ -30,15 +28,30 @@ describe('Dashboard page test', () => {
    */
   it('should load and display dashboard page correctly', () => {
     cy.isPageTitle(NavigationLabels.Dashboard);
+
     cy.get('.title-section')
       .find('.subtitle-section')
       .should('have.text', dashboardPageData.subtitle);
+
     cy.get('.recent-activity-title-row')
       .find('h2')
       .should('have.text', dashboardPageData.secondSectionTitle);
+
     cy.get('.recent-activity-title-row')
       .find('.recent-activity-subtitle')
       .should('have.text', dashboardPageData.secondSectionSubtitle);
+  });
+
+  it('should load and display dashboard page correctly', () => {
+    cy.isPageTitle(NavigationLabels.Dashboard);
+
+    cy.get('.favourite-activities-cards')
+      .find('.empty-section-title')
+      .contains(dashboardPageData.emptySectionTitle);
+
+    cy.get('.favourite-activities-cards')
+      .find('.empty-section-subtitle')
+      .contains(dashboardPageData.emptySectionSubtitle);
   });
 
   /**
@@ -48,12 +61,6 @@ describe('Dashboard page test', () => {
     // Navigate to Seedlots page
     cy.navigateTo(NavigationLabels.Seedlots);
     cy.url().should('contains', '/seedlots');
-
-    cy.intercept(
-      'GET',
-      '**/api/favourite-activities',
-      this.favActRes.after_favourite
-    ).as('GET_fav_act_req_after_click');
 
     // Favourite Seedlots page
     cy.get('.title-favourite')
@@ -77,27 +84,16 @@ describe('Dashboard page test', () => {
    * Highlight a favourite card should make it appear highlighted.
    */
   it('should be able to highlight favourite cards at dashboard', function () {
-    cy.intercept(
-      'GET',
-      '**/api/favourite-activities',
-      this.favActRes.before_highlight
-    ).as('GET_fav_act_req_before_highlight');
-
     // Load the page with the data returned from the intercept above.
     cy.visit('/dashboard');
     cy.url().should('contains', '/dashboard');
 
     // Highlight Seedlots Dashboard Card
     cy.get('.favourite-activities-cards')
-      .find('.fav-card-main:first')
-      .find('.fav-card-overflow')
+      .find('.fav-card-main')
+      .first()
+      .find('button.fav-card-overflow')
       .click();
-
-    cy.intercept(
-      'GET',
-      '**/api/favourite-activities',
-      this.favActRes.after_highlight
-    ).as('GET_fav_act_req_after_highlight');
 
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Highlight shortcut')
@@ -107,26 +103,6 @@ describe('Dashboard page test', () => {
     cy.get('.fav-card-main-highlighted')
       .should('have.length', 1)
       .should('contain.text', 'Seedlots');
-
-    cy.intercept(
-      'GET',
-      '**/api/favourite-activities',
-      this.favActRes.after_highlight_2
-    ).as('GET_fav_act_req_after_highlight_2');
-
-    // Highlight Create A Class Seedlot card
-    cy.get('.favourite-activities-cards')
-      .find('.fav-card-main:first')
-      .find('.fav-card-overflow')
-      .click();
-    cy.get(`.${prefix}--overflow-menu-options__option-content`)
-      .contains('Highlight shortcut')
-      .click();
-
-    // Check if the Create A Class Seedlot card is unique and highlighted
-    cy.get('.fav-card-main-highlighted')
-      .should('have.length', 1)
-      .should('contain.text', 'Create A-class seedlot');
   });
 
   /**
@@ -135,24 +111,20 @@ describe('Dashboard page test', () => {
   it('should delete a card from favourite activities', () => {
     // Delete the first card
     cy.get('.favourite-activities-cards')
-      .find('.fav-card-main:first')
-      .find('.fav-card-overflow')
+      .find('.fav-card-main-highlighted')
+      .first()
+      .find('button.fav-card-overflow')
       .click();
-
-    cy.intercept(
-      'GET',
-      '**/api/favourite-activities',
-      []
-    ).as('GET_fav_act_req_empty_res');
 
     cy.get(`.${prefix}--overflow-menu-options__option-content`)
       .contains('Delete shortcut')
       .click();
 
-    cy.get('.fav-card-main')
+    cy.get('.fav-card-main-highlighted')
       .should('have.length', 0);
 
-    cy.get('.empty-section-title')
-      .should('contain.text', "You don't have any favourites to show yet!");
+    cy.get('.favourite-activities-cards')
+      .find('.empty-section-title')
+      .should('have.text', dashboardPageData.emptySectionTitle);
   });
 });

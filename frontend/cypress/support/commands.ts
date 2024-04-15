@@ -23,8 +23,8 @@ Cypress.Commands.add('login', () => {
     () => {
       const loginBtnId = `landing-button__${config.loginService.toLowerCase()}`;
       const loginLogo = `#${config.loginService.toLowerCase()}Logo`;
-      const loginUrl = config.loginService === 'IDIR' ?
-          Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
+      const loginUrl = config.loginService === 'IDIR'
+        ? Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
       cy.clearAllCookies();
       cy.clearAllLocalStorage();
       cy.clearAllSessionStorage();
