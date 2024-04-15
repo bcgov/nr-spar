@@ -11,7 +11,8 @@ import java.util.List;
         various calculated values for a Class-A seedlot registration form.
         """)
 public record PtCalculationResDto(
-    @Schema(description = "Contains a list of traits.") List<GeneticWorthTraitsDto> geneticTraits,
+    @Schema(description = "Contains a list of calculated traits.")
+        List<GeneticWorthTraitsDto> geneticTraits,
     @Schema(description = "Various calculated value for the orchard parent trees.")
         CaculatedParentTreeValsDto calculatedPtVals,
     @Schema(description = "The calculated mean geospatial values for SMP mix.")

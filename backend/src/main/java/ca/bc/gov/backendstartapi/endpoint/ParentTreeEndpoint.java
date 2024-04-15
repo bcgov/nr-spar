@@ -38,12 +38,12 @@ public class ParentTreeEndpoint {
    */
   @PostMapping(path = "/calculate", consumes = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
-      summary = "Do the calculations of all Genetic Traits",
+      summary = "Return an object containing various calculated results.",
       description =
           """
-          This API is responsible for doing all Genetic Worth related calculations
-          given an user's input, like Pollen and Cone count, and Genetic values
-          for eah trait. This API is used in the 5th step of the Seedlot Registration
+          This endpoint calculates genetic worth and geospatial data
+          given an user's input, like parent tree id and genetic values.
+          This endpoint is used in the 5th step of the A-Class Seedlot Registration
           form on SPAR.
           """)
   @ApiResponses(
@@ -53,7 +53,7 @@ public class ParentTreeEndpoint {
             description = "A JSON containing all calculated values."),
         @ApiResponse(
             responseCode = "400",
-            description = "The request is missing the Parent Tree Number.",
+            description = "The request is missing one or more required properties.",
             content =
                 @Content(
                     mediaType = "application/json",
@@ -68,7 +68,7 @@ public class ParentTreeEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public PtCalculationResDto geneticTraitsCalculations(
+  public PtCalculationResDto parentTreeValsCalculation(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the traits and values to be used in the calculations",
               required = true)

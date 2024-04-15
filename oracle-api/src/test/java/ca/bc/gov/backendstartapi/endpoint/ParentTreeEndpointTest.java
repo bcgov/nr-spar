@@ -3,9 +3,9 @@ package ca.bc.gov.backendstartapi.endpoint;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
@@ -35,15 +35,7 @@ class ParentTreeEndpointTest {
     List<GeospatialRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new GeospatialRequestDto(4110L));
 
-    GeospatialRespondDto dto = new GeospatialRespondDto();
-    dto.setParentTreeId(4110L);
-    dto.setLatitudeDegrees(49);
-    dto.setLatitudeMinutes(52);
-    dto.setLatitudeSeconds(0);
-    dto.setLongitudeDegrees(124);
-    dto.setLongitudeMinutes(19);
-    dto.setLongitudeSeconds(0);
-    dto.setElevation(451);
+    GeospatialRespondDto dto = new GeospatialRespondDto(4110, 49, 52, 0, 124, 19, 0, 451);
 
     when(parentTreeService.getPtGeoSpatialData(ptIds)).thenReturn(List.of(dto));
 
@@ -58,14 +50,14 @@ class ParentTreeEndpointTest {
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].parentTreeId").value(dto.getParentTreeId()))
-        .andExpect(jsonPath("$[0].latitudeDegrees").value(dto.getLatitudeDegrees()))
-        .andExpect(jsonPath("$[0].latitudeMinutes").value(dto.getLatitudeMinutes()))
-        .andExpect(jsonPath("$[0].latitudeSeconds").value(dto.getLatitudeSeconds()))
-        .andExpect(jsonPath("$[0].longitudeDegrees").value(dto.getLongitudeDegrees()))
-        .andExpect(jsonPath("$[0].longitudeMinutes").value(dto.getLongitudeMinutes()))
-        .andExpect(jsonPath("$[0].longitudeSeconds").value(dto.getLongitudeSeconds()))
-        .andExpect(jsonPath("$[0].elevation").value(dto.getElevation()))
+        .andExpect(jsonPath("$[0].parentTreeId").value(dto.parentTreeId()))
+        .andExpect(jsonPath("$[0].latitudeDegrees").value(dto.latitudeDegree()))
+        .andExpect(jsonPath("$[0].latitudeMinutes").value(dto.latitudeMinute()))
+        .andExpect(jsonPath("$[0].latitudeSeconds").value(dto.latitudeSecond()))
+        .andExpect(jsonPath("$[0].longitudeDegrees").value(dto.longitudeDegree()))
+        .andExpect(jsonPath("$[0].longitudeMinutes").value(dto.longitudeMinute()))
+        .andExpect(jsonPath("$[0].longitudeSeconds").value(dto.longitudeSecond()))
+        .andExpect(jsonPath("$[0].elevation").value(dto.elevation()))
         .andReturn();
   }
 
@@ -90,7 +82,7 @@ class ParentTreeEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(content().string("[]") )
+        .andExpect(content().string("[]"))
         .andReturn();
   }
 }

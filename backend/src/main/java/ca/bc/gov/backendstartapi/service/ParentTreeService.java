@@ -70,9 +70,9 @@ public class ParentTreeService {
   }
 
   /**
-   * Calculate lat long and elevation values given a list of {@link GeospatialRequestDto}.
+   * Calculate mean geospatial values given a list of {@link GeospatialRequestDto}.
    *
-   * @param ptreeIds List of parent trees and traits.
+   * @param ptreeIdAndProportions List of parent tree id and proportion.
    * @return A List of {@link GeospatialRespondDto}
    */
   private GeospatialRespondDto calcMeanGeospatial(
@@ -87,8 +87,12 @@ public class ParentTreeService {
     List<GeospatialOracleResDto> oracleDtoList =
         oracleApiProvider.getPtGeospatialDataByIdList(ptIds);
 
-    if (oracleDtoList.isEmpty()) {
-      SparLog.info("No parent tree geo data from Oracle for the given parent tree ids");
+    if (oracleDtoList.isEmpty() && !ptreeIdAndProportions.isEmpty()) {
+      SparLog.info(
+          "Parent tree ids not found from Oracle for the given parent tree ids: {}",
+          ptreeIdAndProportions.stream()
+              .map(GeospatialRequestDto::parentTreeId)
+              .collect(Collectors.toList()));
       throw new PtGeoDataNotFoundException();
     }
 
@@ -271,7 +275,7 @@ public class ParentTreeService {
        *  NOTE: We use decimal degrees instead of converting everything to seconds.
        */
 
-      // Step 0 - v_lat
+      // Step 0 - smpMixLat is v_lat as the name v_lat is too generic
       BigDecimal smpMixLat = smpMixGeoData.getMeanLatitude();
 
       // Step 1
@@ -344,7 +348,9 @@ public class ParentTreeService {
     return result;
   }
 
-  // DEF: prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
+  /**
+   * @return prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
+   */
   private BigDecimal calcProportion(
       OrchardParentTreeValsDto ptValDto,
       BigDecimal femaleCropPop,

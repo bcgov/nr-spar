@@ -1,81 +1,186 @@
-// package ca.bc.gov.backendstartapi.service;
+package ca.bc.gov.backendstartapi.service;
 
-// import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
-// import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
-// import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
-// import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
-// import java.math.BigDecimal;
-// import java.util.List;
-// import org.junit.jupiter.api.Assertions;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.Mock;
-// import org.springframework.test.context.junit.jupiter.SpringExtension;
+import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
+import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
+import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
+import ca.bc.gov.backendstartapi.exception.PtGeoDataNotFoundException;
+import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
+import java.math.BigDecimal;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-// @ExtendWith(SpringExtension.class)
-// class ParentTreeServiceTest {
+@ExtendWith(SpringExtension.class)
+class ParentTreeServiceTest {
 
-//   @Mock OracleApiProvider oracleApiProvider;
+  @Mock GeneticWorthService geneticWorthService;
+  @Mock OracleApiProvider oracleApiProvider;
 
-//   private ParentTreeService parentTreeService;
+  private ParentTreeService parentTreeService;
 
-//   @BeforeEach
-//   void setup() {
-//     parentTreeService = new ParentTreeService(oracleApiProvider);
-//   }
+  @BeforeEach
+  void setup() {
+    parentTreeService = new ParentTreeService(oracleApiProvider, geneticWorthService);
+  }
 
-//   @Test
-//   @DisplayName("calculateGeospatial success test should succeed")
-//   void calculateGeospatial_successTest() {
-//     GeospatialRespondDto oracleDto = new GeospatialRespondDto();
-//     oracleDto.setParentTreeId(4032);
-//     oracleDto.setLatitudeDegrees(49);
-//     oracleDto.setLatitudeMinutes(2);
-//     oracleDto.setLatitudeSeconds(0);
-//     oracleDto.setLongitudeDegrees(-124);
-//     oracleDto.setLongitudeMinutes(3);
-//     oracleDto.setLongitudeSeconds(0);
-//     oracleDto.setElevation(549);
+  @Test
+  @DisplayName("Caculate parent tree values should succeed")
+  void calculatePtVals_successTest() {
+    // Using species FDC as example
 
-//     List<Integer> ptIds = List.of(4032);
-//     when(oracleApiProvider.getParentTreeLatLongByIdList(ptIds)).thenReturn(List.of(oracleDto));
+    List<Integer> smpPtIds = List.of(4033, 4079, 4080, 5197);
+    List<Integer> orchardPtIds = List.of(4032, 4033, 4079, 4080);
 
-//     GeospatialRequestDto requestDto = new GeospatialRequestDto(4032, new BigDecimal("0.5"));
+    /********** SERVICE REQUEST DATA **********/
+    GeospatialRequestDto smp4033 = new GeospatialRequestDto(smpPtIds.get(0), new BigDecimal(0.194));
+    GeospatialRequestDto smp4079 = new GeospatialRequestDto(smpPtIds.get(1), new BigDecimal(0.371));
+    GeospatialRequestDto smp4080 = new GeospatialRequestDto(smpPtIds.get(2), new BigDecimal(0.194));
+    GeospatialRequestDto smp5197 = new GeospatialRequestDto(smpPtIds.get(3), new BigDecimal(0.242));
+    List<GeospatialRequestDto> smpMixIdAndProps = List.of(smp4033, smp4079, smp4080, smp5197);
 
-//     List<GeospatialRespondDto> resp = parentTreeService.calculateGeospatial(List.of(requestDto));
+    OrchardParentTreeValsDto pt4032 =
+        new OrchardParentTreeValsDto(
+            orchardPtIds.get(0).toString(),
+            "37",
+            new BigDecimal(12),
+            new BigDecimal(33),
+            23,
+            List.of(
+                new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
+                new GeneticWorthTraitsDto("gvo", new BigDecimal("18"), null, null),
+                new GeneticWorthTraitsDto("wwd", new BigDecimal("0.1"), null, null)));
 
-//     Assertions.assertFalse(resp.isEmpty());
-//     Assertions.assertEquals(1, resp.size());
-//     // values kept
-//     Assertions.assertEquals(oracleDto.getParentTreeId(), resp.get(0).getParentTreeId());
-//     Assertions.assertEquals(oracleDto.getLatitudeDegrees(), resp.get(0).getLatitudeDegrees());
-//     Assertions.assertEquals(oracleDto.getLatitudeMinutes(), resp.get(0).getLatitudeMinutes());
-//     Assertions.assertEquals(oracleDto.getLatitudeSeconds(), resp.get(0).getLatitudeSeconds());
-//     Assertions.assertEquals(oracleDto.getLongitudeDegrees(), resp.get(0).getLongitudeDegrees());
-//     Assertions.assertEquals(oracleDto.getLongitudeMinutes(), resp.get(0).getLongitudeMinutes());
-//     Assertions.assertEquals(oracleDto.getLongitudeSeconds(), resp.get(0).getLongitudeSeconds());
-//     Assertions.assertEquals(oracleDto.getElevation(), resp.get(0).getElevation());
-//     // values added
-//     Assertions.assertEquals(new BigDecimal("49.033333"), resp.get(0).getLatitudeDegreesFmt());
-//     Assertions.assertEquals(new BigDecimal("124.050000"), resp.get(0).getLongitudeDegreeFmt());
-//     Assertions.assertEquals(new BigDecimal("1471.0000000"), resp.get(0).getWeightedLatitude());
-//     Assertions.assertEquals(new BigDecimal("3721.5000000"), resp.get(0).getWeightedLongitude());
-//     Assertions.assertEquals(new BigDecimal("274.5"), resp.get(0).getWeightedElevation());
-//   }
+    OrchardParentTreeValsDto pt4033 =
+        new OrchardParentTreeValsDto(
+            orchardPtIds.get(1).toString(),
+            "38",
+            new BigDecimal(12),
+            new BigDecimal(23),
+            12,
+            List.of(
+                new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
+                new GeneticWorthTraitsDto("gvo", new BigDecimal("27"), null, null),
+                new GeneticWorthTraitsDto("wwd", new BigDecimal("-2.6"), null, null)));
 
-//   @Test
-//   @DisplayName("calculateGeospatial oracle empty test should succeed")
-//   void calculateGeospatial_oracleEmptyTest() {
-//     List<Integer> ptIds = List.of(4032);
-//     when(oracleApiProvider.getParentTreeLatLongByIdList(ptIds)).thenReturn(List.of());
+    OrchardParentTreeValsDto pt4079 =
+        new OrchardParentTreeValsDto(
+            orchardPtIds.get(2).toString(),
+            "53",
+            new BigDecimal(32),
+            new BigDecimal(22),
+            12,
+            List.of(
+                new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
+                new GeneticWorthTraitsDto("gvo", new BigDecimal("19"), null, null),
+                new GeneticWorthTraitsDto("wwd", new BigDecimal("-4.7"), null, null)));
 
-//     GeospatialRequestDto requestDto = new GeospatialRequestDto(4032, new BigDecimal("0.5"));
+    OrchardParentTreeValsDto pt4080 =
+        new OrchardParentTreeValsDto(
+            orchardPtIds.get(3).toString(),
+            "54",
+            new BigDecimal(12),
+            new BigDecimal(45),
+            3,
+            List.of(
+                new GeneticWorthTraitsDto("dfw", new BigDecimal("0"), null, null),
+                new GeneticWorthTraitsDto("gvo", new BigDecimal("18"), null, null),
+                new GeneticWorthTraitsDto("wwd", new BigDecimal("-3"), null, null)));
 
-//     List<GeospatialRespondDto> resp = parentTreeService.calculateGeospatial(List.of(requestDto));
+    List<OrchardParentTreeValsDto> orchardPtVals = List.of(pt4032, pt4033, pt4079, pt4080);
 
-//     Assertions.assertTrue(resp.isEmpty());
-//   }
-// }
+    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
+
+    /********** ORACLE GEOSPATIAL MOCK DATA **********/
+    List<GeospatialOracleResDto> oracleMockSmpGeoData =
+        List.of(
+            new GeospatialOracleResDto(smpPtIds.get(0), 47, 55, 0, 121, 40, 0, 212),
+            new GeospatialOracleResDto(smpPtIds.get(1), 49, 18, 0, 122, 34, 0, 366),
+            new GeospatialOracleResDto(smpPtIds.get(2), 49, 16, 0, 121, 34, 0, 152),
+            new GeospatialOracleResDto(smpPtIds.get(3), 50, 31, 0, 122, 28, 0, 451));
+    when(oracleApiProvider.getPtGeospatialDataByIdList(smpPtIds)).thenReturn(oracleMockSmpGeoData);
+
+    List<GeospatialOracleResDto> oracleMockOrchardGeoData =
+        List.of(
+            new GeospatialOracleResDto(orchardPtIds.get(0), 49, 2, 0, 124, 3, 0, 579),
+            new GeospatialOracleResDto(orchardPtIds.get(1), 47, 55, 0, 121, 40, 0, 212),
+            new GeospatialOracleResDto(orchardPtIds.get(2), 49, 18, 0, 122, 34, 0, 366),
+            new GeospatialOracleResDto(orchardPtIds.get(3), 49, 16, 0, 122, 34, 0, 152));
+    when(oracleApiProvider.getPtGeospatialDataByIdList(orchardPtIds))
+        .thenReturn(oracleMockOrchardGeoData);
+
+    /********** GENETIC WORTH SERVICE MOCK DATA **********/
+    BigDecimal mockNeValue = new BigDecimal(3.8247490490);
+    when(geneticWorthService.calculateNe(reqDto.orchardPtVals())).thenReturn(mockNeValue);
+    when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
+
+    /********** SERVICE TESTS **********/
+
+    PtCalculationResDto resDtoToTest = parentTreeService.calculatePtVals(reqDto);
+
+    List<GeneticWorthTraitsDto> traitsToTest = resDtoToTest.geneticTraits();
+    assertTrue(traitsToTest.isEmpty());
+
+    CaculatedParentTreeValsDto ptValsToTest = resDtoToTest.calculatedPtVals();
+    assertTrue(mockNeValue.equals(ptValsToTest.getNeValue()));
+
+    GeospatialRespondDto ptGeoDataToTest = ptValsToTest.getGeospatialData();
+    assertEquals(346, ptGeoDataToTest.getMeanElevation());
+    assertTrue(ptGeoDataToTest.getMeanLatitude().equals(new BigDecimal("51.94257")));
+    assertTrue(ptGeoDataToTest.getMeanLongitude().equals(new BigDecimal("130.16470")));
+    assertEquals(51, ptGeoDataToTest.getMeanLatitudeDegree());
+    assertEquals(56, ptGeoDataToTest.getMeanLatitudeMinute());
+    assertEquals(33, ptGeoDataToTest.getMeanLatitudeSecond());
+    assertEquals(130, ptGeoDataToTest.getMeanLongitudeDegree());
+    assertEquals(9, ptGeoDataToTest.getMeanLongitudeMinute());
+    assertEquals(52, ptGeoDataToTest.getMeanLongitudeSecond());
+
+    GeospatialRespondDto smpGeoDataToTest = resDtoToTest.smpMixMeanGeoData();
+    assertEquals(315, smpGeoDataToTest.getMeanElevation());
+    assertTrue(smpGeoDataToTest.getMeanLatitude().equals(new BigDecimal("48.45000")));
+    assertTrue(smpGeoDataToTest.getMeanLongitude().equals(new BigDecimal("121.55000")));
+    assertEquals(48, smpGeoDataToTest.getMeanLatitudeDegree());
+    assertEquals(27, smpGeoDataToTest.getMeanLatitudeMinute());
+    assertEquals(0, smpGeoDataToTest.getMeanLatitudeSecond());
+    assertEquals(121, smpGeoDataToTest.getMeanLongitudeDegree());
+    assertEquals(33, smpGeoDataToTest.getMeanLongitudeMinute());
+    assertEquals(0, smpGeoDataToTest.getMeanLongitudeSecond());
+  }
+
+  @Test
+  @DisplayName("Invalid parent tree ID should throw error.")
+  void calculateGeospatial_oracleEmptyTest() {
+    // Although geo data for a parent tree can be null, parent tree id must exist in
+    // parent_tree_table.
+    // The only time it's does not exist in the table it's when the data is malformed.
+    Integer badPtID = 999999;
+    GeospatialRequestDto badSmp = new GeospatialRequestDto(badPtID, new BigDecimal(0.242));
+    List<GeospatialRequestDto> smpMixIdAndProps = List.of(badSmp);
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(badPtID))).thenReturn(List.of());
+
+    List<OrchardParentTreeValsDto> orchardPtVals = List.of();
+    PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
+
+    when(geneticWorthService.calculateNe(reqDto.orchardPtVals())).thenReturn(BigDecimal.ZERO);
+    when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
+
+    assertThrows(
+        PtGeoDataNotFoundException.class,
+        () -> {
+          parentTreeService.calculatePtVals(reqDto);
+        });
+  }
+}

@@ -49,17 +49,14 @@ class ParentTreeServiceTest {
     List<GeospatialRespondDto> dtoList = parentTreeService.getPtGeoSpatialData(ptIds);
 
     Assertions.assertFalse(dtoList.isEmpty());
-    Assertions.assertEquals(ptreeEntity.getId(), dtoList.get(0).getParentTreeId());
-    Assertions.assertEquals(ptreeEntity.getLatitudeDegrees(), dtoList.get(0).getLatitudeDegrees());
-    Assertions.assertEquals(ptreeEntity.getLatitudeMinutes(), dtoList.get(0).getLatitudeMinutes());
-    Assertions.assertEquals(ptreeEntity.getLatitudeSeconds(), dtoList.get(0).getLatitudeSeconds());
-    Assertions.assertEquals(
-        ptreeEntity.getLongitudeDegrees(), dtoList.get(0).getLongitudeDegrees());
-    Assertions.assertEquals(
-        ptreeEntity.getLongitudeMinutes(), dtoList.get(0).getLongitudeMinutes());
-    Assertions.assertEquals(
-        ptreeEntity.getLongitudeSeconds(), dtoList.get(0).getLongitudeSeconds());
-    Assertions.assertEquals(ptreeEntity.getElevation(), dtoList.get(0).getElevation());
+    Assertions.assertEquals(ptreeEntity.getId(), dtoList.get(0).parentTreeId());
+    Assertions.assertEquals(ptreeEntity.getLatitudeDegrees(), dtoList.get(0).latitudeDegree());
+    Assertions.assertEquals(ptreeEntity.getLatitudeMinutes(), dtoList.get(0).latitudeMinute());
+    Assertions.assertEquals(ptreeEntity.getLatitudeSeconds(), dtoList.get(0).latitudeSecond());
+    Assertions.assertEquals(ptreeEntity.getLongitudeDegrees(), dtoList.get(0).longitudeDegree());
+    Assertions.assertEquals(ptreeEntity.getLongitudeMinutes(), dtoList.get(0).longitudeMinute());
+    Assertions.assertEquals(ptreeEntity.getLongitudeSeconds(), dtoList.get(0).longitudeSecond());
+    Assertions.assertEquals(ptreeEntity.getElevation(), dtoList.get(0).elevation());
   }
 
   @Test
