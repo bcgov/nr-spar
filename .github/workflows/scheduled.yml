@@ -17,4 +17,4 @@ jobs:
       environment: test
       target: test
       tag: prod
-      verify: false
+      verify: true
