@@ -27,7 +27,7 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/seedlots');
   });
 
-  it('should register an A-Class Seedlot', () => {
+  it('should register an A-Class Seedlot 63001', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -102,10 +102,10 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    cy.get('h1').contains('654321');
+    cy.get('h1').contains('63001');
   });
 
-  it('should register an A-Class Seedlot 2', () => {
+  it('should register an A-Class Seedlot 63002', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -180,10 +180,10 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    // cy.get('h1').contains('654321');
+    cy.get('h1').contains('63002');
   });
 
-  it('should register an A-Class Seedlot 3', () => {
+  it('should register an A-Class Seedlot 63003', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -258,10 +258,10 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    // cy.get('h1').contains('654321');
+    cy.get('h1').contains('63003');
   });
 
-  it('should register an A-Class Seedlot 4', () => {
+  it('should register an A-Class Seedlot 63004', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -336,10 +336,10 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    // cy.get('h1').contains('654321');
+    cy.get('h1').contains('63004');
   });
 
-  it('should register an A-Class Seedlot 5', () => {
+  it('should register an A-Class Seedlot 63005', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -414,6 +414,6 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    // cy.get('h1').contains('654321');
+    cy.get('h1').contains('63005');
   });
 });
