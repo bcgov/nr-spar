@@ -5,10 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * This record contains values of a parent tree within user selected orchard(s).
- */
-@Schema(description = "This record contains values of a parent tree within user selected orchard(s).")
+/** This record contains values of a parent tree within user selected orchard(s). */
+@Schema(
+    description = "This record contains values of a parent tree within user selected orchard(s).")
 public record OrchardParentTreeValsDto(
     @Schema(
             description = "The Parent Tree Id, the id in oracle of a parent tree.",

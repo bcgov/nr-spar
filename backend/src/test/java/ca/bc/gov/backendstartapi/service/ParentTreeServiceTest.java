@@ -42,10 +42,12 @@ class ParentTreeServiceTest {
   void calculatePtVals_successTest() {
     // Using species FDC as example
 
-    List<Integer> smpPtIds = List.of(4033, 4079, 4080, 5197);
-    List<Integer> orchardPtIds = List.of(4032, 4033, 4079, 4080);
+    List<Long> smpPtIds =
+        List.of(Long.valueOf(4033), Long.valueOf(4079), Long.valueOf(4080), Long.valueOf(5197));
+    List<Long> orchardPtIds =
+        List.of(Long.valueOf(4032), Long.valueOf(4033), Long.valueOf(4079), Long.valueOf(4080));
 
-    /********** SERVICE REQUEST DATA **********/
+    /* ********* SERVICE REQUEST DATA ********* */
     GeospatialRequestDto smp4033 = new GeospatialRequestDto(smpPtIds.get(0), new BigDecimal(0.194));
     GeospatialRequestDto smp4079 = new GeospatialRequestDto(smpPtIds.get(1), new BigDecimal(0.371));
     GeospatialRequestDto smp4080 = new GeospatialRequestDto(smpPtIds.get(2), new BigDecimal(0.194));
@@ -104,7 +106,7 @@ class ParentTreeServiceTest {
 
     PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
 
-    /********** ORACLE GEOSPATIAL MOCK DATA **********/
+    /* ********* ORACLE GEOSPATIAL MOCK DATA ********* */
     List<GeospatialOracleResDto> oracleMockSmpGeoData =
         List.of(
             new GeospatialOracleResDto(smpPtIds.get(0), 47, 55, 0, 121, 40, 0, 212),
@@ -122,13 +124,12 @@ class ParentTreeServiceTest {
     when(oracleApiProvider.getPtGeospatialDataByIdList(orchardPtIds))
         .thenReturn(oracleMockOrchardGeoData);
 
-    /********** GENETIC WORTH SERVICE MOCK DATA **********/
+    /* ********* GENETIC WORTH SERVICE MOCK DATA ********* */
     BigDecimal mockNeValue = new BigDecimal(3.8247490490);
     when(geneticWorthService.calculateNe(reqDto.orchardPtVals())).thenReturn(mockNeValue);
     when(geneticWorthService.calculateGeneticWorth(reqDto.orchardPtVals())).thenReturn(List.of());
 
-    /********** SERVICE TESTS **********/
-
+    /* ********* SERVICE TESTS ********* */
     PtCalculationResDto resDtoToTest = parentTreeService.calculatePtVals(reqDto);
 
     List<GeneticWorthTraitsDto> traitsToTest = resDtoToTest.geneticTraits();
@@ -166,10 +167,10 @@ class ParentTreeServiceTest {
     // Although geo data for a parent tree can be null, parent tree id must exist in
     // parent_tree_table.
     // The only time it's does not exist in the table it's when the data is malformed.
-    Integer badPtID = 999999;
-    GeospatialRequestDto badSmp = new GeospatialRequestDto(badPtID, new BigDecimal(0.242));
+    Long badPtId = Long.valueOf(999999);
+    GeospatialRequestDto badSmp = new GeospatialRequestDto(badPtId, new BigDecimal(0.242));
     List<GeospatialRequestDto> smpMixIdAndProps = List.of(badSmp);
-    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(badPtID))).thenReturn(List.of());
+    when(oracleApiProvider.getPtGeospatialDataByIdList(List.of(badPtId))).thenReturn(List.of());
 
     List<OrchardParentTreeValsDto> orchardPtVals = List.of();
     PtValsCalReqDto reqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);

@@ -35,7 +35,8 @@ class ParentTreeEndpointTest {
     List<GeospatialRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new GeospatialRequestDto(4110L));
 
-    GeospatialRespondDto dto = new GeospatialRespondDto(4110, 49, 52, 0, 124, 19, 0, 451);
+    GeospatialRespondDto dto =
+        new GeospatialRespondDto(Long.valueOf(4110), 49, 52, 0, 124, 19, 0, 451);
 
     when(parentTreeService.getPtGeoSpatialData(ptIds)).thenReturn(List.of(dto));
 
@@ -51,12 +52,12 @@ class ParentTreeEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].parentTreeId").value(dto.parentTreeId()))
-        .andExpect(jsonPath("$[0].latitudeDegrees").value(dto.latitudeDegree()))
-        .andExpect(jsonPath("$[0].latitudeMinutes").value(dto.latitudeMinute()))
-        .andExpect(jsonPath("$[0].latitudeSeconds").value(dto.latitudeSecond()))
-        .andExpect(jsonPath("$[0].longitudeDegrees").value(dto.longitudeDegree()))
-        .andExpect(jsonPath("$[0].longitudeMinutes").value(dto.longitudeMinute()))
-        .andExpect(jsonPath("$[0].longitudeSeconds").value(dto.longitudeSecond()))
+        .andExpect(jsonPath("$[0].latitudeDegree").value(dto.latitudeDegree()))
+        .andExpect(jsonPath("$[0].latitudeMinute").value(dto.latitudeMinute()))
+        .andExpect(jsonPath("$[0].latitudeSecond").value(dto.latitudeSecond()))
+        .andExpect(jsonPath("$[0].longitudeDegree").value(dto.longitudeDegree()))
+        .andExpect(jsonPath("$[0].longitudeMinute").value(dto.longitudeMinute()))
+        .andExpect(jsonPath("$[0].longitudeSecond").value(dto.longitudeSecond()))
         .andExpect(jsonPath("$[0].elevation").value(dto.elevation()))
         .andReturn();
   }

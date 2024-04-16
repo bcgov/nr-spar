@@ -30,10 +30,10 @@ class LatLongUtilTest {
     BigDecimal negDecimalLat = LatLongUtil.dmsToDecimalDegree(new Integer[] {-26, 17, 46});
     BigDecimal negDecimalLong = LatLongUtil.dmsToDecimalDegree(new Integer[] {-48, 50, 42});
 
-    Assertions.assertEquals(new BigDecimal("26.296111"), decimalLat);
-    Assertions.assertEquals(new BigDecimal("48.845000"), decimalLong);
-    Assertions.assertEquals(new BigDecimal("-26.296111"), negDecimalLat);
-    Assertions.assertEquals(new BigDecimal("-48.845000"), negDecimalLong);
+    Assertions.assertEquals(new BigDecimal("26.29611"), decimalLat);
+    Assertions.assertEquals(new BigDecimal("48.84500"), decimalLong);
+    Assertions.assertEquals(new BigDecimal("-26.29611"), negDecimalLat);
+    Assertions.assertEquals(new BigDecimal("-48.84500"), negDecimalLong);
   }
 
   @Test
@@ -41,7 +41,7 @@ class LatLongUtilTest {
     BigDecimal decimalLat = LatLongUtil.degreeToMinutes(new Integer[] {26, 17, 46});
     BigDecimal decimalLong = LatLongUtil.degreeToMinutes(new Integer[] {48, 50, 42});
 
-    Assertions.assertEquals(new BigDecimal("1577.000000"), decimalLat);
-    Assertions.assertEquals(new BigDecimal("2930.000000"), decimalLong);
+    Assertions.assertEquals(new BigDecimal("1577.00000"), decimalLat);
+    Assertions.assertEquals(new BigDecimal("2930.00000"), decimalLong);
   }
 }

@@ -34,14 +34,7 @@ class ParentTreeEndpointTest {
   @DisplayName("calcMeanGeospatialSuccessTest")
   @WithMockUser(roles = "user_read")
   void calcMeanGeospatialSuccessTest() throws Exception {
-    /********** RESPONSE DATA **********/
-    List<GeneticWorthTraitsDto> genWorthResDrto =
-        List.of(
-            new GeneticWorthTraitsDto(
-                "GVO", new BigDecimal("17"), new BigDecimal("55"), new BigDecimal("67")),
-            new GeneticWorthTraitsDto(
-                "WWD", new BigDecimal("2"), new BigDecimal("32"), new BigDecimal("14")));
-
+    /* ********* RESPONSE DATA ********* */
     CaculatedParentTreeValsDto cacledPtValsDto = new CaculatedParentTreeValsDto();
     BigDecimal neValue = new BigDecimal("4.92586");
     cacledPtValsDto.setNeValue(neValue);
@@ -67,6 +60,13 @@ class ParentTreeEndpointTest {
     smpMixMeanDto.setMeanLongitudeDegree(131);
     smpMixMeanDto.setMeanLongitudeMinute(13);
     smpMixMeanDto.setMeanLongitudeSecond(52);
+
+    List<GeneticWorthTraitsDto> genWorthResDrto =
+        List.of(
+            new GeneticWorthTraitsDto(
+                "GVO", new BigDecimal("17"), new BigDecimal("55"), new BigDecimal("67")),
+            new GeneticWorthTraitsDto(
+                "WWD", new BigDecimal("2"), new BigDecimal("32"), new BigDecimal("14")));
 
     PtCalculationResDto responseDto =
         new PtCalculationResDto(genWorthResDrto, cacledPtValsDto, smpMixMeanDto);
@@ -126,7 +126,7 @@ class ParentTreeEndpointTest {
                 // .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        /*********** CALCULATED GENETIC WORTH VALUES ***********/
+        /* ********** CALCULATED GENETIC WORTH VALUES ********** */
         .andExpect(
             jsonPath("$.geneticTraits[0].traitCode")
                 .value(responseDto.geneticTraits().get(0).traitCode()))
@@ -136,7 +136,7 @@ class ParentTreeEndpointTest {
         .andExpect(
             jsonPath("$.geneticTraits[0].testedParentTreePerc")
                 .value(responseDto.geneticTraits().get(0).testedParentTreePerc().toString()))
-        /*********** CALCULATED PARENT TREE VALUES ***********/
+        /* ********** CALCULATED PARENT TREE VALUES ********** */
         .andExpect(
             jsonPath("$.calculatedPtVals.neValue")
                 .value(responseDto.calculatedPtVals().getNeValue().toString()))
@@ -182,7 +182,7 @@ class ParentTreeEndpointTest {
                         .getGeospatialData()
                         .getMeanElevation()
                         .toString()))
-        /*********** SMP MIX MEAN GEOSPATIAL DATA ***********/
+        /* ********** SMP MIX MEAN GEOSPATIAL DATA ********** */
         .andExpect(
             jsonPath("$.smpMixMeanGeoData.meanLatitudeDegree")
                 .value(responseDto.smpMixMeanGeoData().getMeanLatitudeDegree()))
@@ -219,36 +219,37 @@ class ParentTreeEndpointTest {
   void calcMeanGeospatial__noSmpMixField_error_test() throws Exception {
     String reqJson =
         """
-      {
-        "orchardPtVals": [
           {
-            "parentTreeId": "4423",
-            "parentTreeNumber": "4423",
-            "coneCount": 13,
-            "pollenCount": 48.5,
-            "smpSuccessPerc": 5,
-            "geneticTraits": [
+            "orchardPtVals": [
               {
-                "traitCode": "gvo",
-                "traitValue": 11.2
-              }
-            ]
-          },
-          {
-            "parentTreeId": "32",
-            "parentTreeNumber": "356",
-            "coneCount": 51,
-            "pollenCount": 21,
-            "smpSuccessPerc": 21,
-            "geneticTraits": [
+                "parentTreeId": "4423",
+                "parentTreeNumber": "4423",
+                "coneCount": 13,
+                "pollenCount": 48.5,
+                "smpSuccessPerc": 5,
+                "geneticTraits": [
+                  {
+                    "traitCode": "gvo",
+                    "traitValue": 11.2
+                  }
+                ]
+              },
               {
-                "traitCode": "gvo",
-                "traitValue": 11.2
+                "parentTreeId": "32",
+                "parentTreeNumber": "356",
+                "coneCount": 51,
+                "pollenCount": 21,
+                "smpSuccessPerc": 21,
+                "geneticTraits": [
+                  {
+                    "traitCode": "gvo",
+                    "traitValue": 11.2
+                  }
+                ]
               }
             ]
           }
-        ]
-    """;
+        """;
 
     mockMvc
         .perform(

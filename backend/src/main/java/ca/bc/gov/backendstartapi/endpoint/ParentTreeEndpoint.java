@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,8 +31,7 @@ public class ParentTreeEndpoint {
   /**
    * Do the calculations of all Genetic Traits, given a trait list.
    *
-   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and values to be
-   *     calculated.
+   * @param ptVals A {@link PtValsCalReqDto} required for calculation.
    * @return A {@link PtCalculationResDto} containing all calculated values.
    */
   @PostMapping(path = "/calculate", consumes = MediaType.APPLICATION_JSON_VALUE)

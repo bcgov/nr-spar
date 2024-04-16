@@ -36,7 +36,7 @@ public class ParentTreeService {
         (pt) -> {
           GeospatialRespondDto dto =
               new GeospatialRespondDto(
-                  pt.getId().intValue(),
+                  pt.getId(),
                   Optional.ofNullable(pt.getLatitudeDegrees()).orElse(0),
                   Optional.ofNullable(pt.getLatitudeMinutes()).orElse(0),
                   Optional.ofNullable(pt.getLatitudeSeconds()).orElse(0),

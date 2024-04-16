@@ -32,7 +32,7 @@ public class LatLongUtil {
   /**
    * Convert a list of degrees, minutes and seconds to decimal value.
    *
-   * @param degreeLatLong An array of double values containing always 3 numbers.
+   * @param dmsVals An array of integer values containing 3 numbers.
    * @return The decimal representation of a latitude or longitude.
    */
   public static BigDecimal dmsToDecimalDegree(Integer[] dmsVals) {
@@ -42,7 +42,8 @@ public class LatLongUtil {
     BigDecimal seconds =
         new BigDecimal(dmsVals[2]).divide(new BigDecimal(3600), 30000, RoundingMode.HALF_UP);
 
-    BigDecimal decimalVal = degree.add(minutes).add(seconds).setScale(DECIMAL_SCALE, RoundingMode.HALF_UP);
+    BigDecimal decimalVal =
+        degree.add(minutes).add(seconds).setScale(DECIMAL_SCALE, RoundingMode.HALF_UP);
 
     Boolean isNegative = dmsVals[0] < 0;
 

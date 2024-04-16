@@ -194,7 +194,7 @@ public class OracleApiProvider implements Provider {
   }
 
   @Override
-  public List<GeospatialOracleResDto> getPtGeospatialDataByIdList(List<Integer> ptIds) {
+  public List<GeospatialOracleResDto> getPtGeospatialDataByIdList(List<Long> ptIds) {
     String oracleApiUrl = String.format("%s/api/parent-trees/geospatial-data", rootUri);
 
     SparLog.info(

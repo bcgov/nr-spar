@@ -8,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 public class PtGeoDataNotFoundException extends ResponseStatusException {
 
+  /** Self-explanatory exception. */
   public PtGeoDataNotFoundException() {
     super(
         HttpStatus.FAILED_DEPENDENCY,

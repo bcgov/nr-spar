@@ -53,7 +53,7 @@ public interface Provider {
     return List.of();
   }
 
-  default List<GeospatialOracleResDto> getPtGeospatialDataByIdList(List<Integer> ptIds) {
+  default List<GeospatialOracleResDto> getPtGeospatialDataByIdList(List<Long> ptIds) {
     return List.of();
   }
 

@@ -46,8 +46,7 @@ public class ParentTreeService {
    * Does the calculation for each genetic trait. PS: if the threshold of 70% of contribution from
    * the parent tree is not met, the trait value will not be shown.
    *
-   * @param traitsDto A {@link List} of {@link PtValsCalReqDto} with the traits and values to be
-   *     calculated.
+   * @param ptVals A {@link PtValsCalReqDto} sent by an endpoint consumer for calculation
    * @return A {@link PtCalculationResDto} containing all calculated values
    */
   public PtCalculationResDto calculatePtVals(PtValsCalReqDto ptVals) {
@@ -81,7 +80,7 @@ public class ParentTreeService {
         "{} parent tree record(s) received to calculate lat long and elevation",
         ptreeIdAndProportions.size());
 
-    List<Integer> ptIds =
+    List<Long> ptIds =
         ptreeIdAndProportions.stream().map(GeospatialRequestDto::parentTreeId).toList();
 
     List<GeospatialOracleResDto> oracleDtoList =
@@ -96,7 +95,7 @@ public class ParentTreeService {
       throw new PtGeoDataNotFoundException();
     }
 
-    Map<Integer, GeospatialOracleResDto> oracleMap =
+    Map<Long, GeospatialOracleResDto> oracleMap =
         oracleDtoList.stream()
             .collect(Collectors.toMap(GeospatialOracleResDto::parentTreeId, Function.identity()));
 
@@ -179,10 +178,7 @@ public class ParentTreeService {
     BigDecimal longitudeDecimalDegree = LatLongUtil.dmsToDecimalDegree(longitudeDms);
 
     GeospatialRespondDto result = new GeospatialRespondDto();
-    /**
-     * latitudeDms[0], latitudeDms[1], latitudeDms[2], longitudeDms[0], longitudeDms[1],
-     * longitudeDms[2], latitudeDecimalDegree, longitudeDecimalDegree, meanElevationSum.intValue()
-     */
+
     result.setMeanElevation(meanElevationSum.intValue());
     result.setMeanLatitudeDegree(latitudeDms[0]);
     result.setMeanLatitudeMinute(latitudeDms[1]);
@@ -214,15 +210,15 @@ public class ParentTreeService {
             .map(OrchardParentTreeValsDto::pollenCount)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    List<Integer> orchardPtIds =
+    List<Long> orchardPtIds =
         orchardPtVals.stream()
             .map(OrchardParentTreeValsDto::parentTreeId)
-            .map(Integer::parseInt)
+            .map(Long::parseLong)
             .toList();
     List<GeospatialOracleResDto> orchardPtGeoData =
         oracleApiProvider.getPtGeospatialDataByIdList(orchardPtIds);
 
-    Map<Integer, GeospatialOracleResDto> orchardPtGeoDataMap =
+    Map<Long, GeospatialOracleResDto> orchardPtGeoDataMap =
         orchardPtGeoData.stream()
             .collect(Collectors.toMap(GeospatialOracleResDto::parentTreeId, Function.identity()));
 
@@ -233,7 +229,7 @@ public class ParentTreeService {
     for (OrchardParentTreeValsDto ptVal : orchardPtVals) {
 
       GeospatialOracleResDto ptGeoData =
-          orchardPtGeoDataMap.get(Integer.valueOf(ptVal.parentTreeId()));
+          orchardPtGeoDataMap.get(Long.valueOf(ptVal.parentTreeId()));
 
       if (Objects.isNull(ptGeoData)) {
         SparLog.info(
@@ -260,7 +256,8 @@ public class ParentTreeService {
        *
        *  STEP 2
        *  AG:
-       *  v_p_contrib_lat_no_smp_poll := v_coll_lat * (v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200));
+       *  v_p_contrib_lat_no_smp_poll :=
+       *      v_coll_lat * (v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200));
        *
        *  STEP 1
        *  AJ:
@@ -269,8 +266,9 @@ public class ParentTreeService {
        *  STEP 0
        *  T:
        *  v_lat := (v_a_smp_mix_latitude_degrees*3600) + (v_a_smp_mix_latitude_minutes*60);
-       *  Although smp_mix_latitude_degrees and smp_mix_minutes are individual values in the Oracle Seedlot_Parent_Tree table,
-       *  according to SPR_001A_SMP_CALCULATION.PKS, those values are the same for a given seedlot, calculated from v_sum_wtd_lat.
+       *  Although smp_mix_latitude_degrees and smp_mix_minutes are individual values
+       *  in the Oracle Seedlot_Parent_Tree table, according to SPR_001A_SMP_CALCULATION.PKS,
+       *  those values are the same for a given seedlot, calculated from v_sum_wtd_lat.
        *
        *  NOTE: We use decimal degrees instead of converting everything to seconds.
        */
@@ -335,20 +333,22 @@ public class ParentTreeService {
     result.setMeanLatitude(wtdLatSum.setScale(DECIMAL_DEGREE_SCALE, RoundingMode.HALF_UP));
     result.setMeanLongitude(wtdLongSum.setScale(DECIMAL_DEGREE_SCALE, RoundingMode.HALF_UP));
 
-    Integer[] latDMS = LatLongUtil.decimalDegreeToDms(wtdLatSum);
-    result.setMeanLatitudeDegree(latDMS[0]);
-    result.setMeanLatitudeMinute(latDMS[1]);
-    result.setMeanLatitudeSecond(latDMS[2]);
+    Integer[] latDms = LatLongUtil.decimalDegreeToDms(wtdLatSum);
+    result.setMeanLatitudeDegree(latDms[0]);
+    result.setMeanLatitudeMinute(latDms[1]);
+    result.setMeanLatitudeSecond(latDms[2]);
 
-    Integer[] longDMS = LatLongUtil.decimalDegreeToDms(wtdLongSum);
-    result.setMeanLongitudeDegree(longDMS[0]);
-    result.setMeanLongitudeMinute(longDMS[1]);
-    result.setMeanLongitudeSecond(longDMS[2]);
+    Integer[] longDms = LatLongUtil.decimalDegreeToDms(wtdLongSum);
+    result.setMeanLongitudeDegree(longDms[0]);
+    result.setMeanLongitudeMinute(longDms[1]);
+    result.setMeanLongitudeSecond(longDms[2]);
 
     return result;
   }
 
   /**
+   * Calculate the proportion for parent contribution without SMP Pollen.
+   *
    * @return prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
    */
   private BigDecimal calcProportion(
