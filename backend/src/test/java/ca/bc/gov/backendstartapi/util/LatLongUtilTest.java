@@ -37,11 +37,26 @@ class LatLongUtilTest {
   }
 
   @Test
-  void degreeToMinutes() {
-    BigDecimal decimalLat = LatLongUtil.degreeToMinutes(new Integer[] {26, 17, 46});
-    BigDecimal decimalLong = LatLongUtil.degreeToMinutes(new Integer[] {48, 50, 42});
+  void dmsToMinute() {
+    BigDecimal minute = LatLongUtil.dmsToMinute(new Integer[] {26, 17, 0});
+    Assertions.assertTrue(new BigDecimal("1577.00000").equals(minute));
 
-    Assertions.assertEquals(new BigDecimal("1577.00000"), decimalLat);
-    Assertions.assertEquals(new BigDecimal("2930.00000"), decimalLong);
+    BigDecimal negMinute = LatLongUtil.dmsToMinute(new Integer[] {-26, 17, 0});
+    Assertions.assertTrue(new BigDecimal("-1577.00000").equals(negMinute));
+  }
+
+  @Test
+  void minuteToDms() {
+    BigDecimal minute = new BigDecimal("1577");
+    Integer[] dms = LatLongUtil.minuteToDms(minute);
+    Assertions.assertEquals(26, dms[0]);
+    Assertions.assertEquals(17, dms[1]);
+    Assertions.assertEquals(0, dms[2]);
+
+    BigDecimal negMinute = new BigDecimal("-1577");
+    Integer[] negDms = LatLongUtil.minuteToDms(negMinute);
+    Assertions.assertEquals(-26, negDms[0]);
+    Assertions.assertEquals(17, negDms[1]);
+    Assertions.assertEquals(0, negDms[2]);
   }
 }

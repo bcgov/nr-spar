@@ -35,8 +35,7 @@ public class ParentTreeService {
 
   private final GeneticWorthService geneticWorthService;
 
-  static int DIVISION_SCALE = 6;
-  static int DECIMAL_DEGREE_SCALE = 5;
+  static int DIVISION_SCALE = 10;
   static BigDecimal PERC_DIVISOR = new BigDecimal(100);
   static BigDecimal HALF_DIVISOR = new BigDecimal(2);
   static BigDecimal PROP_DIVISOR = new BigDecimal(200);
@@ -99,13 +98,9 @@ public class ParentTreeService {
         oracleDtoList.stream()
             .collect(Collectors.toMap(GeospatialOracleResDto::parentTreeId, Function.identity()));
 
-    // Accumulators of weigthed values, convert DMS to Decimal degrees in the end for max precision.
-    BigDecimal meanLatDegSum = BigDecimal.ZERO;
+    // Accumulators of weigthed values, convert DMS to minutes (legacy algo) then sum it up.
     BigDecimal meanLatMinSum = BigDecimal.ZERO;
-    BigDecimal meanLatSecSum = BigDecimal.ZERO;
-    BigDecimal meanLongDegSum = BigDecimal.ZERO;
     BigDecimal meanLongMinSum = BigDecimal.ZERO;
-    BigDecimal meanLongSecSum = BigDecimal.ZERO;
     BigDecimal meanElevationSum = BigDecimal.ZERO;
 
     // Loop through list to calculate weighted values then sum them up.
@@ -137,44 +132,34 @@ public class ParentTreeService {
       meanElevationSum = meanElevationSum.add(weightedElevation);
 
       // Latitude
-      BigDecimal weightedLatDeg =
-          proportion.multiply(new BigDecimal(geospatialResDto.latitudeDegree()));
-      meanLatDegSum = meanLatDegSum.add(weightedLatDeg);
-
-      BigDecimal weightedLatMin =
-          proportion.multiply(new BigDecimal(geospatialResDto.latitudeMinute()));
+      Integer[] ptLatDms =
+          new Integer[] {
+            geospatialResDto.latitudeDegree(),
+            geospatialResDto.latitudeMinute(),
+            geospatialResDto.latitudeSecond()
+          };
+      BigDecimal latMinute = LatLongUtil.dmsToMinute(ptLatDms);
+      BigDecimal weightedLatMin = proportion.multiply(latMinute);
       meanLatMinSum = meanLatMinSum.add(weightedLatMin);
 
-      BigDecimal weightedLatSec =
-          proportion.multiply(new BigDecimal(geospatialResDto.latitudeSecond()));
-      meanLatSecSum = meanLatSecSum.add(weightedLatSec);
-
       // Longitude
-      BigDecimal weightedLongDeg =
-          proportion.multiply(new BigDecimal(geospatialResDto.longitudeDegree()));
-      meanLongDegSum = meanLongDegSum.add(weightedLongDeg);
-
-      BigDecimal weightedLongMin =
-          proportion.multiply(new BigDecimal(geospatialResDto.longitudeMinute()));
+      Integer[] ptLongDms =
+          new Integer[] {
+            geospatialResDto.longitudeDegree(),
+            geospatialResDto.longitudeMinute(),
+            geospatialResDto.longitudeSecond()
+          };
+      BigDecimal longMinute = LatLongUtil.dmsToMinute(ptLongDms);
+      BigDecimal weightedLongMin = proportion.multiply(longMinute);
       meanLongMinSum = meanLongMinSum.add(weightedLongMin);
-
-      BigDecimal weightedLongSec =
-          proportion.multiply(new BigDecimal(geospatialResDto.longitudeSecond()));
-      meanLongSecSum = meanLongSecSum.add(weightedLongSec);
     }
 
     // latitude
-    Integer[] latitudeDms =
-        new Integer[] {
-          meanLatDegSum.intValue(), meanLatMinSum.intValue(), meanLatSecSum.intValue()
-        };
+    Integer[] latitudeDms = LatLongUtil.minuteToDms(meanLatMinSum);
     BigDecimal latitudeDecimalDegree = LatLongUtil.dmsToDecimalDegree(latitudeDms);
 
     // longitude
-    Integer[] longitudeDms =
-        new Integer[] {
-          meanLongDegSum.intValue(), meanLongMinSum.intValue(), meanLongSecSum.intValue()
-        };
+    Integer[] longitudeDms = LatLongUtil.minuteToDms(meanLongMinSum);
     BigDecimal longitudeDecimalDegree = LatLongUtil.dmsToDecimalDegree(longitudeDms);
 
     GeospatialRespondDto result = new GeospatialRespondDto();
@@ -222,8 +207,8 @@ public class ParentTreeService {
         orchardPtGeoData.stream()
             .collect(Collectors.toMap(GeospatialOracleResDto::parentTreeId, Function.identity()));
 
-    BigDecimal wtdLatSum = BigDecimal.ZERO;
-    BigDecimal wtdLongSum = BigDecimal.ZERO;
+    BigDecimal wtdLatMinuteSum = BigDecimal.ZERO;
+    BigDecimal wtdLongMinuteSum = BigDecimal.ZERO;
     BigDecimal wtdElevSum = BigDecimal.ZERO;
 
     for (OrchardParentTreeValsDto ptVal : orchardPtVals) {
@@ -285,12 +270,12 @@ public class ParentTreeService {
           new Integer[] {
             ptGeoData.latitudeDegree(), ptGeoData.latitudeMinute(), ptGeoData.latitudeSecond()
           };
-      BigDecimal ptDecimalLat = LatLongUtil.dmsToDecimalDegree(latDms);
-      BigDecimal parentContribLatNoSmpPoll = ptDecimalLat.multiply(proportion);
+      BigDecimal ptLatMinute = LatLongUtil.dmsToMinute(latDms);
+      BigDecimal parentContribLatNoSmpPoll = ptLatMinute.multiply(proportion);
 
       // Step 3
       BigDecimal wtdParentLat = parentContribLatNoSmpPoll.add(smpPollWtdContribLat);
-      wtdLatSum = wtdLatSum.add(wtdParentLat);
+      wtdLatMinuteSum = wtdLatMinuteSum.add(wtdParentLat);
 
       // Mean Long = SUM(Wtd. Long. with parent and SMP pollen)
       // Wtd Long. with parent and SMP pollen is defined in Certification Template Col w/ id
@@ -305,11 +290,11 @@ public class ParentTreeService {
           new Integer[] {
             ptGeoData.longitudeDegree(), ptGeoData.longitudeMinute(), ptGeoData.longitudeSecond()
           };
-      BigDecimal ptDecimalLong = LatLongUtil.dmsToDecimalDegree(longDms);
-      BigDecimal parentContribLongNoSmpPoll = ptDecimalLong.multiply(proportion);
+      BigDecimal ptLongMinute = LatLongUtil.dmsToMinute(longDms);
+      BigDecimal parentContribLongNoSmpPoll = ptLongMinute.multiply(proportion);
 
       BigDecimal wtdParentLong = parentContribLongNoSmpPoll.add(smpPollWtdContribLong);
-      wtdLongSum = wtdLongSum.add(wtdParentLong);
+      wtdLongMinuteSum = wtdLongMinuteSum.add(wtdParentLong);
 
       // Mean Elev. = SUM(Wtd. elev with parent and SMP pollen)
       // Wtd elev. with parent and SMP pollen is defined in Certification Template Col w/ id
@@ -329,19 +314,19 @@ public class ParentTreeService {
 
     GeospatialRespondDto result = new GeospatialRespondDto();
 
-    result.setMeanElevation(wtdElevSum.intValue());
-    result.setMeanLatitude(wtdLatSum.setScale(DECIMAL_DEGREE_SCALE, RoundingMode.HALF_UP));
-    result.setMeanLongitude(wtdLongSum.setScale(DECIMAL_DEGREE_SCALE, RoundingMode.HALF_UP));
-
-    Integer[] latDms = LatLongUtil.decimalDegreeToDms(wtdLatSum);
+    Integer[] latDms = LatLongUtil.minuteToDms(wtdLatMinuteSum);
     result.setMeanLatitudeDegree(latDms[0]);
     result.setMeanLatitudeMinute(latDms[1]);
     result.setMeanLatitudeSecond(latDms[2]);
 
-    Integer[] longDms = LatLongUtil.decimalDegreeToDms(wtdLongSum);
+    Integer[] longDms = LatLongUtil.minuteToDms(wtdLongMinuteSum);
     result.setMeanLongitudeDegree(longDms[0]);
     result.setMeanLongitudeMinute(longDms[1]);
     result.setMeanLongitudeSecond(longDms[2]);
+
+    result.setMeanElevation(wtdElevSum.setScale(0, RoundingMode.HALF_UP).intValue());
+    result.setMeanLatitude(LatLongUtil.dmsToDecimalDegree(latDms));
+    result.setMeanLongitude(LatLongUtil.dmsToDecimalDegree(longDms));
 
     return result;
   }
