@@ -2,6 +2,7 @@ const ROUTES = {
   ALL_ROUTES: '*',
   LOGIN: '/login',
   ROOT: '/',
+  ROLE_SELECTION: '/role-selection',
   DASHBOARD: '/dashboard',
   SEEDLOTS: '/seedlots',
   SEEDLOTS_A_CLASS_CREATION: '/seedlots/register-a-class',

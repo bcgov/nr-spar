@@ -6,10 +6,11 @@ import React, {
 import type { CognitoUserSession } from 'amazon-cognito-identity-js';
 import { Auth } from 'aws-amplify';
 import axios from 'axios';
+import { UserRoleType } from '../types/UserRoleType';
 import { env } from '../env';
 import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
-import AuthContext from './AuthContext';
+import AuthContext, { AuthContextData } from './AuthContext';
 import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
 import { TWO_MINUTE } from '../config/TimeUnits';
 import ROUTES from '../routes/constants';
@@ -39,6 +40,12 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
   return [firstName, lastName];
 };
 
+const parseRole = (accessToken: { [id: string]: any }): UserRoleType[] => {
+  const cognitoGroups = accessToken['cognito:groups'];
+  console.log(cognitoGroups);
+  return [];
+};
+
 /**
  * Parses a CognitoUserSession into a JS object. For a deeper understanding
  * you can take a look on the attribute mapping reference at:
@@ -64,7 +71,7 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
     firstName,
     providerUsername: idpUsername, // E.g: RDECAMPO
     name: `${firstName} ${lastName}`,
-    roles: decodedAccessToken['cognito:groups'],
+    roles: parseRole(decodedAccessToken),
     provider: decodedIdToken['custom:idp_name'].toLocaleUpperCase(),
     jwtToken: authToken.getIdToken().getJwtToken(),
     refreshToken: authToken.getRefreshToken().getToken(),
@@ -80,6 +87,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const [user, setUser] = useState<FamUser | null>(null);
   const [provider, setProvider] = useState<string>('');
   const [intervalInstance, setIntervalInstance] = useState<NodeJS.Timeout | null>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRoleType | null>(null);
+
+  const setRole = (role: UserRoleType) => {
+    setSelectedRole(role);
+    window.location.href = '/';
+  };
 
   const fetchFamCurrentSession = async (pathname: string): Promise<FamUser | null> => {
     try {
@@ -116,7 +129,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
 
     // Workaround for the Business BCeID in TEST calling actually PROD
     const applyWorkaround = signInProvider === LoginProviders.BCEID_BUSINESS
-        && appEnv === 'TEST';
+      && appEnv === 'TEST';
     if (applyWorkaround) {
       appEnv = 'PROD';
     }
@@ -163,14 +176,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   }
 
   // memoize
-  const contextValue = useMemo(() => ({
+  const contextValue: AuthContextData = useMemo(() => ({
     signed,
     user,
     isCurrentAuthUser,
     signIn,
     signOut,
-    provider
-  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider]);
+    provider,
+    selectedRole,
+    setRole
+  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider, selectedRole]);
 
   return (
     <AuthContext.Provider value={contextValue}>
