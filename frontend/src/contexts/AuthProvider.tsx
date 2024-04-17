@@ -41,9 +41,29 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
 };
 
 const parseRole = (accessToken: { [id: string]: any }): UserRoleType[] => {
-  const cognitoGroups = accessToken['cognito:groups'];
-  console.log(cognitoGroups);
-  return [];
+  const separator = '_';
+  const cognitoGroups: string[] = accessToken['cognito:groups'];
+  const parsedRoles: UserRoleType[] = [];
+
+  cognitoGroups.forEach((roleClient) => {
+    if (!roleClient.includes(separator)) {
+      throw new Error(`Invalid role format with string: ${roleClient}`);
+    }
+    const lastUnderscoreIndex = roleClient.lastIndexOf(separator);
+    const role = roleClient.substring(0, lastUnderscoreIndex);
+    const clientId = roleClient.substring(lastUnderscoreIndex + 1);
+
+    if (Number.isNaN(clientId)) {
+      throw new Error(`Client ID parsing error with id = ${clientId}`);
+    }
+
+    parsedRoles.push({
+      role,
+      clientId
+    });
+  });
+
+  return parsedRoles;
 };
 
 /**
