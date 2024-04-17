@@ -103,6 +103,7 @@ public class GeneticWorthService {
    * @return A {@link BigDecimal} representing the calculated value.
    */
   public BigDecimal calculateNe(List<OrchardParentTreeValsDto> traitsDto) {
+    SparLog.info("Started Ne calculation");
     BigDecimal malePollenSum = reducePollenCount(traitsDto);
     BigDecimal femaleConeSum = reduceConeCount(traitsDto);
 

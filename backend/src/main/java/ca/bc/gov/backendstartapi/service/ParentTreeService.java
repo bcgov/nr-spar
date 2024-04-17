@@ -49,17 +49,25 @@ public class ParentTreeService {
    * @return A {@link PtCalculationResDto} containing all calculated values
    */
   public PtCalculationResDto calculatePtVals(PtValsCalReqDto ptVals) {
-    BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals());
+    SparLog.info(
+        "Started calculation for parent tree contribution values. Number of rchard parent received:"
+            + " {}. Number of SMP mix parent tree received: {}.",
+        ptVals.orchardPtVals().size(),
+        ptVals.smpMixIdAndProps().size());
 
-    List<GeneticWorthTraitsDto> calculatedGws =
-        geneticWorthService.calculateGeneticWorth(ptVals.orchardPtVals());
+    BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals());
 
     CaculatedParentTreeValsDto calculatedVals = new CaculatedParentTreeValsDto();
     calculatedVals.setNeValue(neValue);
 
     GeospatialRespondDto smpMixGeoData = calcMeanGeospatial(ptVals.smpMixIdAndProps());
+    SparLog.info("SMP mix mean geospatial calculation complete.");
 
     calculatedVals.setGeospatialData(calcSeedlotGeoData(ptVals, smpMixGeoData));
+    SparLog.info("Seedlot mean geospatial calculation complete.");
+
+    List<GeneticWorthTraitsDto> calculatedGws =
+        geneticWorthService.calculateGeneticWorth(ptVals.orchardPtVals());
 
     PtCalculationResDto summaryDto =
         new PtCalculationResDto(calculatedGws, calculatedVals, smpMixGeoData);

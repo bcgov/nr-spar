@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.util;
 
-import ca.bc.gov.backendstartapi.config.SparLog;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -43,7 +42,8 @@ public class LatLongUtil {
     BigDecimal minutes =
         new BigDecimal(dmsVals[1]).divide(new BigDecimal(60), DIVISION_SCALE, RoundingMode.HALF_UP);
     BigDecimal seconds =
-        new BigDecimal(dmsVals[2]).divide(new BigDecimal(3600), DIVISION_SCALE, RoundingMode.HALF_UP);
+        new BigDecimal(dmsVals[2])
+            .divide(new BigDecimal(3600), DIVISION_SCALE, RoundingMode.HALF_UP);
 
     BigDecimal decimalVal =
         degree.add(minutes).add(seconds).setScale(DECIMAL_SCALE, RoundingMode.HALF_UP);
@@ -65,7 +65,7 @@ public class LatLongUtil {
     BigDecimal second =
         new BigDecimal(dmsVals[2]).divide(CONVERSION_FACTOR, DIVISION_SCALE, RoundingMode.HALF_UP);
 
-    minute = minute.add(degree.abs()).add(second);
+    minute = minute.add(degree.abs()).add(second).setScale(DECIMAL_SCALE, RoundingMode.HALF_UP);
 
     // Return negative minute
     if (degree.compareTo(BigDecimal.ZERO) == -1) {
@@ -77,16 +77,15 @@ public class LatLongUtil {
   /**
    * Convert minute to a list of degrees, minutes and seconds.
    *
-   * @param dmsVals An array of integer values containing 3 numbers.
-   * @return The minutes representation of a latitude or longitude.
+   * @param minuteSum the total minutes of a DMS.
+   * @return An array of integer values containing 3 numbers.
    */
   public static Integer[] minuteToDms(BigDecimal minuteSum) {
-    BigDecimal decDegree = minuteSum.divide(CONVERSION_FACTOR, DIVISION_SCALE, RoundingMode.HALF_UP);
+    BigDecimal decDegree =
+        minuteSum.divide(CONVERSION_FACTOR, DIVISION_SCALE, RoundingMode.HALF_UP);
     Integer degree = decDegree.setScale(0, RoundingMode.HALF_UP).intValue();
     Integer minute =
         minuteSum.abs().remainder(CONVERSION_FACTOR).setScale(0, RoundingMode.HALF_UP).intValue();
-
-    SparLog.info("aiosjaofifs: {}, {}", minute, minuteSum.toString());
 
     // The system does not use second in reality, this is preserved as the legacy system
     // store this value regardless.

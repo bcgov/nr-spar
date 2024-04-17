@@ -48,10 +48,14 @@ class ParentTreeServiceTest {
         List.of(Long.valueOf(4032), Long.valueOf(4033), Long.valueOf(4079), Long.valueOf(4080));
 
     /* ********* SERVICE REQUEST DATA ********* */
-    GeospatialRequestDto smp4033 = new GeospatialRequestDto(smpPtIds.get(0), new BigDecimal(0.194));
-    GeospatialRequestDto smp4079 = new GeospatialRequestDto(smpPtIds.get(1), new BigDecimal(0.371));
-    GeospatialRequestDto smp4080 = new GeospatialRequestDto(smpPtIds.get(2), new BigDecimal(0.194));
-    GeospatialRequestDto smp5197 = new GeospatialRequestDto(smpPtIds.get(3), new BigDecimal(0.242));
+    GeospatialRequestDto smp4033 =
+        new GeospatialRequestDto(smpPtIds.get(0), new BigDecimal("0.1935"));
+    GeospatialRequestDto smp4079 =
+        new GeospatialRequestDto(smpPtIds.get(1), new BigDecimal("0.3710"));
+    GeospatialRequestDto smp4080 =
+        new GeospatialRequestDto(smpPtIds.get(2), new BigDecimal("0.1935"));
+    GeospatialRequestDto smp5197 =
+        new GeospatialRequestDto(smpPtIds.get(3), new BigDecimal("0.2419"));
     List<GeospatialRequestDto> smpMixIdAndProps = List.of(smp4033, smp4079, smp4080, smp5197);
 
     OrchardParentTreeValsDto pt4032 =
@@ -111,7 +115,7 @@ class ParentTreeServiceTest {
         List.of(
             new GeospatialOracleResDto(smpPtIds.get(0), 47, 55, 0, 121, 40, 0, 212),
             new GeospatialOracleResDto(smpPtIds.get(1), 49, 18, 0, 122, 34, 0, 366),
-            new GeospatialOracleResDto(smpPtIds.get(2), 49, 16, 0, 121, 34, 0, 152),
+            new GeospatialOracleResDto(smpPtIds.get(2), 49, 16, 0, 122, 34, 0, 152),
             new GeospatialOracleResDto(smpPtIds.get(3), 50, 31, 0, 122, 28, 0, 451));
     when(oracleApiProvider.getPtGeospatialDataByIdList(smpPtIds)).thenReturn(oracleMockSmpGeoData);
 
@@ -139,25 +143,25 @@ class ParentTreeServiceTest {
     assertTrue(mockNeValue.equals(ptValsToTest.getNeValue()));
 
     GeospatialRespondDto ptGeoDataToTest = ptValsToTest.getGeospatialData();
-    assertEquals(346, ptGeoDataToTest.getMeanElevation());
-    assertTrue(ptGeoDataToTest.getMeanLatitude().equals(new BigDecimal("51.94257")));
-    assertTrue(ptGeoDataToTest.getMeanLongitude().equals(new BigDecimal("130.16470")));
-    assertEquals(51, ptGeoDataToTest.getMeanLatitudeDegree());
-    assertEquals(56, ptGeoDataToTest.getMeanLatitudeMinute());
-    assertEquals(33, ptGeoDataToTest.getMeanLatitudeSecond());
-    assertEquals(130, ptGeoDataToTest.getMeanLongitudeDegree());
-    assertEquals(9, ptGeoDataToTest.getMeanLongitudeMinute());
-    assertEquals(52, ptGeoDataToTest.getMeanLongitudeSecond());
+    assertEquals(347, ptGeoDataToTest.getMeanElevation());
+    assertTrue(ptGeoDataToTest.getMeanLatitude().equals(new BigDecimal("49.00000")));
+    assertTrue(ptGeoDataToTest.getMeanLongitude().equals(new BigDecimal("123.78333")));
+    assertEquals(49, ptGeoDataToTest.getMeanLatitudeDegree());
+    assertEquals(0, ptGeoDataToTest.getMeanLatitudeMinute());
+    assertEquals(0, ptGeoDataToTest.getMeanLatitudeSecond());
+    assertEquals(123, ptGeoDataToTest.getMeanLongitudeDegree());
+    assertEquals(47, ptGeoDataToTest.getMeanLongitudeMinute());
+    assertEquals(0, ptGeoDataToTest.getMeanLongitudeSecond());
 
     GeospatialRespondDto smpGeoDataToTest = resDtoToTest.smpMixMeanGeoData();
     assertEquals(315, smpGeoDataToTest.getMeanElevation());
-    assertTrue(smpGeoDataToTest.getMeanLatitude().equals(new BigDecimal("48.45000")));
-    assertTrue(smpGeoDataToTest.getMeanLongitude().equals(new BigDecimal("121.55000")));
-    assertEquals(48, smpGeoDataToTest.getMeanLatitudeDegree());
-    assertEquals(27, smpGeoDataToTest.getMeanLatitudeMinute());
+    assertTrue(smpGeoDataToTest.getMeanLatitude().equals(new BigDecimal("49.31667")));
+    assertTrue(smpGeoDataToTest.getMeanLongitude().equals(new BigDecimal("122.35000")));
+    assertEquals(49, smpGeoDataToTest.getMeanLatitudeDegree());
+    assertEquals(19, smpGeoDataToTest.getMeanLatitudeMinute());
     assertEquals(0, smpGeoDataToTest.getMeanLatitudeSecond());
-    assertEquals(121, smpGeoDataToTest.getMeanLongitudeDegree());
-    assertEquals(33, smpGeoDataToTest.getMeanLongitudeMinute());
+    assertEquals(122, smpGeoDataToTest.getMeanLongitudeDegree());
+    assertEquals(21, smpGeoDataToTest.getMeanLongitudeMinute());
     assertEquals(0, smpGeoDataToTest.getMeanLongitudeSecond());
   }
 
