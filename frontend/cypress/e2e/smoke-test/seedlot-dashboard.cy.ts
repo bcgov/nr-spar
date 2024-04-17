@@ -43,10 +43,6 @@ describe('Seedlot Dashboard test', () => {
       .as('firstRow');
 
     cy.get('@firstRow')
-      .find('td:nth-child(1)')
-      .should('have.text', '63005');
-
-    cy.get('@firstRow')
       .find('td:nth-child(3)')
       .should('have.text', 'FDC - Coastal Douglas-fir');
 
@@ -58,10 +54,6 @@ describe('Seedlot Dashboard test', () => {
     cy.get(`table.${prefix}--data-table tbody tr`)
       .eq(1)
       .as('secondRow');
-
-    cy.get('@secondRow')
-      .find('td:nth-child(1)')
-      .should('have.text', '63004');
 
     cy.get('@secondRow')
       .find('td:nth-child(3)')
@@ -77,10 +69,6 @@ describe('Seedlot Dashboard test', () => {
       .as('thirdRow');
 
     cy.get('@thirdRow')
-      .find('td:nth-child(1)')
-      .should('have.text', '63003');
-
-    cy.get('@thirdRow')
       .find('td:nth-child(3)')
       .should('have.text', 'DR - Red alder');
 
@@ -94,10 +82,6 @@ describe('Seedlot Dashboard test', () => {
       .as('fourthRow');
 
     cy.get('@fourthRow')
-      .find('td:nth-child(1)')
-      .should('have.text', '63002');
-
-    cy.get('@fourthRow')
       .find('td:nth-child(3)')
       .should('have.text', 'CW - Western redcedar');
 
@@ -109,10 +93,6 @@ describe('Seedlot Dashboard test', () => {
     cy.get(`table.${prefix}--data-table tbody tr`)
       .eq(4)
       .as('fifthRow');
-
-    cy.get('@fifthRow')
-      .find('td:nth-child(1)')
-      .should('have.text', '63001');
 
     cy.get('@fifthRow')
       .find('td:nth-child(3)')

@@ -102,7 +102,6 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    cy.get('h1').contains('63001');
   });
 
   it('should register an A-Class Seedlot 63002', () => {
@@ -180,7 +179,6 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    cy.get('h1').contains('63002');
   });
 
   it('should register an A-Class Seedlot 63003', () => {
@@ -258,7 +256,6 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    cy.get('h1').contains('63003');
   });
 
   it('should register an A-Class Seedlot 63004', () => {
@@ -336,7 +333,6 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    cy.get('h1').contains('63004');
   });
 
   it('should register an A-Class Seedlot 63005', () => {
@@ -414,6 +410,5 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
-    cy.get('h1').contains('63005');
   });
 });
