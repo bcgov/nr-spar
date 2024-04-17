@@ -96,9 +96,7 @@ public class ParentTreeService {
     if (oracleDtoList.isEmpty() && !ptreeIdAndProportions.isEmpty()) {
       SparLog.info(
           "Parent tree ids not found from Oracle for the given parent tree ids: {}",
-          ptreeIdAndProportions.stream()
-              .map(GeospatialRequestDto::parentTreeId)
-              .collect(Collectors.toList()));
+          ptreeIdAndProportions.stream().map(GeospatialRequestDto::parentTreeId).toList());
       throw new PtGeoDataNotFoundException();
     }
 
@@ -233,8 +231,7 @@ public class ParentTreeService {
 
       BigDecimal femaleCropPop = calcFemaleCropPop(ptVal, totalConeCount);
 
-      BigDecimal proportion =
-          calcProportion(ptVal, femaleCropPop, totalConeCount, totalPollenCount);
+      BigDecimal proportion = calcProportion(ptVal, femaleCropPop, totalPollenCount);
 
       BigDecimal smpSuccessPerc = new BigDecimal(ptVal.smpSuccessPerc());
 
@@ -345,10 +342,7 @@ public class ParentTreeService {
    * @return prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
    */
   private BigDecimal calcProportion(
-      OrchardParentTreeValsDto ptValDto,
-      BigDecimal femaleCropPop,
-      BigDecimal totalConeCount,
-      BigDecimal totalPollenCount) {
+      OrchardParentTreeValsDto ptValDto, BigDecimal femaleCropPop, BigDecimal totalPollenCount) {
     /*
      * REFERENCE v_parent_prop_orch_poll
      * --col:W
@@ -371,7 +365,7 @@ public class ParentTreeService {
      * ELSE
      *  v_p_prop_contrib := (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
      */
-    BigDecimal parentPropContrib = BigDecimal.ZERO;
+    BigDecimal parentPropContrib;
     if (totalPollenCount.equals(BigDecimal.ZERO)) {
       parentPropContrib = femaleCropPop;
     } else {

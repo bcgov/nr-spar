@@ -48,7 +48,7 @@ public class LatLongUtil {
     BigDecimal decimalVal =
         degree.add(minutes).add(seconds).setScale(DECIMAL_SCALE, RoundingMode.HALF_UP);
 
-    Boolean isNegative = dmsVals[0] < 0;
+    boolean isNegative = dmsVals[0] < 0;
 
     return isNegative ? decimalVal.negate() : decimalVal;
   }
@@ -68,7 +68,7 @@ public class LatLongUtil {
     minute = minute.add(degree.abs()).add(second).setScale(DECIMAL_SCALE, RoundingMode.HALF_UP);
 
     // Return negative minute
-    if (degree.compareTo(BigDecimal.ZERO) == -1) {
+    if (degree.compareTo(BigDecimal.ZERO) < 0) {
       return minute.negate();
     }
     return minute;
