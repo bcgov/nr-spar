@@ -53,8 +53,8 @@ const parseRole = (accessToken: { [id: string]: any }): UserRoleType[] => {
     const role = roleClient.substring(0, lastUnderscoreIndex);
     const clientId = roleClient.substring(lastUnderscoreIndex + 1);
 
-    if (Number.isNaN(clientId)) {
-      throw new Error(`Client ID parsing error with id = ${clientId}`);
+    if (Number.isNaN(Number(clientId))) {
+      throw new Error(`Client ID parsing error with id: ${clientId}`);
     }
 
     parsedRoles.push({
@@ -118,6 +118,19 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     try {
       const currentSession: CognitoUserSession = await Auth.currentSession();
       const famUser = parseToken(currentSession);
+      // Check if selected role still exists on user profile
+      if (selectedRole) {
+        const foundRole = famUser.roles
+          .find((assignedRole) => (
+            assignedRole.role === selectedRole.role
+            && assignedRole.clientId === selectedRole.clientId
+          ));
+        if (!foundRole) {
+          setSigned(false);
+          throw new Error(`User role revoked for role: ${selectedRole.role} and client id: ${selectedRole.clientId}`);
+        }
+      }
+
       setSigned(true);
       return famUser;
     } catch (e) {
