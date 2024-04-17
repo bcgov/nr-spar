@@ -27,7 +27,7 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/seedlots');
   });
 
-  it('should register an A-Class Seedlot 63001', () => {
+  it('should register an A-Class Seedlot PLI', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -104,7 +104,7 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
   });
 
-  it('should register an A-Class Seedlot 63002', () => {
+  it('should register an A-Class Seedlot CW', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -181,7 +181,7 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
   });
 
-  it('should register an A-Class Seedlot 63003', () => {
+  it('should register an A-Class Seedlot DR', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -258,7 +258,7 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
   });
 
-  it('should register an A-Class Seedlot 63004', () => {
+  it('should register an A-Class Seedlot EP', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -335,7 +335,7 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
   });
 
-  it('should register an A-Class Seedlot 63005', () => {
+  it('should register an A-Class Seedlot FDC', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
