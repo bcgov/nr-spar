@@ -1,8 +1,11 @@
 import React from 'react';
 import { FlexGrid, Row, Column } from '@carbon/react';
 
-import './styles.scss';
+import RoleSelection from '../../components/RoleSelection';
+
 import { PAGE_TEXT } from './constants';
+
+import './styles.scss';
 
 const LoginRoleSelection = () => {
   const a = 'b';
@@ -22,8 +25,17 @@ const LoginRoleSelection = () => {
               {PAGE_TEXT.subtitlePtTwo}
             </p>
           </section>
+          <RoleSelection />
         </Column>
+
       </Row>
+      {/* <Row>
+        <Column>
+
+        </Column>
+      </Row> */}
+
+
     </FlexGrid>
   );
 };

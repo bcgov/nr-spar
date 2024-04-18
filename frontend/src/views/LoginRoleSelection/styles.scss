@@ -21,7 +21,7 @@
 
   .col-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     padding: min(4.63%, 2.5rem);
     border-radius: 0.5rem;
     background: #FFF;
