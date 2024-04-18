@@ -1,0 +1,20 @@
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.role-selection-grid {
+  padding: 0;
+  margin: 0;
+
+  .#{vars.$bcgov-prefix}--btn.#{vars.$bcgov-prefix}--skeleton {
+    inline-size: 100%;
+    max-width: 100%;
+  }
+
+  .search-row {
+    margin-bottom: 2rem;
+  }
+}
+
+.org-item-row{
+
+}

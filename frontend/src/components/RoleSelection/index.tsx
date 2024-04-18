@@ -1,20 +1,22 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   FlexGrid, Row, Column,
-  TextInputSkeleton
+  ButtonSkeleton, Search
 } from '@carbon/react';
-import { useIsFetching, useQueries } from '@tanstack/react-query';
+import { useIsFetching, useQueries, useQueryClient } from '@tanstack/react-query';
 
 import AuthContext from '../../contexts/AuthContext';
 import { getForestClientByNumber } from '../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 
 import './styles.scss';
+import { TEXT } from './constants';
+import OrganizationItem from './OrganizationItem';
 
 const RoleSelection = () => {
   const { user, setRole } = useContext(AuthContext);
 
-  const forestClientQueries = useQueries({
+  useQueries({
     queries: user!.roles.map((userRole) => ({
       queryKey: ['forest-clients', userRole.clientId],
       queryFn: () => getForestClientByNumber(userRole.clientId),
@@ -23,31 +25,35 @@ const RoleSelection = () => {
     }))
   });
 
+  const qc = useQueryClient();
+
+  // const filterClientsBySearchTerm = (searchTerm )
+
   return (
-    <FlexGrid>
+    <FlexGrid className="role-selection-grid">
+      <Row className="search-row">
+        <Column>
+          <Search
+            labelText={TEXT.searchLabel}
+            placeholder={TEXT.searchLabel}
+            onChange={(a) => console.log(a.target.value)}
+          />
+        </Column>
+      </Row>
       {
         user?.roles.map((roleClient) => (
           <Row key={`${roleClient.clientId}-${roleClient.role}`}>
             {
               useIsFetching(['forest-clients', roleClient.clientId])
                 ? (
+
                   <Column>
-                    <TextInputSkeleton />
+                    <ButtonSkeleton />
                   </Column>
+
                 )
                 : (
-                  <>
-                    <Column>
-                      {
-                        roleClient.role
-                      }
-                    </Column>
-                    <Column>
-                      {
-                        roleClient.clientId
-                      }
-                    </Column>
-                  </>
+                  <OrganizationItem forestClient={qc.getQueryData(['forest-clients', roleClient.clientId])} />
                 )
             }
           </Row>

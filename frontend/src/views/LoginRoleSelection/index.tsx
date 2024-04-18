@@ -11,9 +11,9 @@ const LoginRoleSelection = () => {
   const a = 'b';
 
   return (
-    <FlexGrid className="role-selection-grid">
+    <FlexGrid className="login-role-selection-grid">
       <Row className="row-container">
-        <Column className="col-container" sm={4} md={6} lg={12} xlg={8} max={6}>
+        <Column className="col-container" sm={4} md={6} lg={14} xlg={10} max={8}>
           <section className="title-section">
             <h2 className="title-text">
               Organization selection
@@ -27,15 +27,7 @@ const LoginRoleSelection = () => {
           </section>
           <RoleSelection />
         </Column>
-
       </Row>
-      {/* <Row>
-        <Column>
-
-        </Column>
-      </Row> */}
-
-
     </FlexGrid>
   );
 };
