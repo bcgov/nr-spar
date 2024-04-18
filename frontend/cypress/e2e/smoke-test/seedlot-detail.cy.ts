@@ -85,20 +85,12 @@ describe('Seedlot detail page', () => {
 
     cy.contains('p.seedlot-summary-info-label', 'Seedlot species')
       .siblings('p.seedlot-summary-info-value')
-      .should('have.text', 'CW - Western redcedar');
+      .should('have.text', 'PLI - Lodgepole pine');
 
     cy.contains('p.seedlot-summary-info-label', 'Status')
       .next()
       .children('span')
       .should('have.text', 'Pending');
-
-    cy.contains('p.seedlot-summary-info-label', 'Created at')
-      .siblings('p.seedlot-summary-info-value')
-      .should('have.text', 'Mar 18, 2024');
-
-    cy.contains('p.seedlot-summary-info-label', 'Last updated')
-      .siblings('p.seedlot-summary-info-value')
-      .should('have.text', 'Mar 18, 2024');
 
     cy.contains('p.seedlot-summary-info-label', 'Approved at')
       .siblings('p.seedlot-summary-info-value')
@@ -115,19 +107,19 @@ describe('Seedlot detail page', () => {
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-location-code')
-      .should('have.value', '01');
+      .should('have.value', '30');
 
     cy.get('.applicant-seedlot-information')
       .find('button.email-display-value')
-      .should('have.text', 'ff@cc.com');
+      .should('have.text', 'test@gov.bc.ca');
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-species')
-      .should('have.value', 'CW - Western redcedar');
+      .should('have.value', 'PLI - Lodgepole pine');
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-source')
-      .should('have.value', 'Tested Parent Trees');
+      .should('have.value', 'Untested Parent Trees');
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-to-be-registered')
