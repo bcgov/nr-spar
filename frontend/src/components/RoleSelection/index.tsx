@@ -3,7 +3,7 @@ import {
   FlexGrid, Row, Column,
   ButtonSkeleton, Search
 } from '@carbon/react';
-import { QueryKey, useIsFetching, useQueries, useQueryClient } from '@tanstack/react-query';
+import { useIsFetching, useQueries, useQueryClient } from '@tanstack/react-query';
 
 import AuthContext from '../../contexts/AuthContext';
 import { getForestClientByNumber } from '../../api-service/forestClientsAPI';
@@ -65,13 +65,14 @@ const RoleSelection = () => {
     // Render skeletons
     if (useIsFetching(['forest-clients', 'role', roleClient.clientId])) {
       return (
-        (
+        <Row key={`${roleClient.clientId}-${roleClient.role}`}>
           <Column>
             <ButtonSkeleton />
           </Column>
-        )
+        </Row>
       );
     }
+
     // Render Matched
     if (
       (
@@ -103,11 +104,7 @@ const RoleSelection = () => {
       {
         user?.roles
           .map((roleClient) => (
-            <Row key={`${roleClient.clientId}-${roleClient.role}`}>
-              {
-                renderOrgItem(roleClient)
-              }
-            </Row>
+            renderOrgItem(roleClient)
           ))
       }
     </FlexGrid>
