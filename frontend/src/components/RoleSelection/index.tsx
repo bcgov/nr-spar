@@ -27,7 +27,11 @@ const RoleSelection = () => {
 
   const qc = useQueryClient();
 
-  // const filterClientsBySearchTerm = (searchTerm )
+  const [matchedClients, setMatchedClients] = useState<string[]>();
+
+  const filterClientsBySearchTerm = (searchTerm: string) => {
+
+  };
 
   return (
     <FlexGrid className="role-selection-grid">
