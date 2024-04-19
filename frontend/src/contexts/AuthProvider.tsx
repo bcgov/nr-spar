@@ -141,18 +141,15 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       const famUser = parseToken(currentSession);
       // Check if selected role still exists on user profile
       if (selectedClientRoles) {
-        const found = famUser.clientRoles.find((famClientRole) => (
+        const foundFamClientRoles = famUser.clientRoles.find((famClientRole) => (
           famClientRole.clientId === selectedClientRoles.clientId
         ));
-
-        if (found) {
-          famUser.clientRoles.forEach((famClientRole) => {
-            selectedClientRoles.roles.forEach((selectedRole) => {
-              if (!famClientRole.roles.includes(selectedRole)) {
-                setSigned(false);
-                throw new Error(`User role revoked for role: ${selectedRole} and client id: ${famClientRole.clientId}`);
-              }
-            });
+        if (foundFamClientRoles) {
+          selectedClientRoles.roles.forEach((selectedRole) => {
+            if (!foundFamClientRoles.roles.includes(selectedRole)) {
+              setSigned(false);
+              throw new Error(`User role revoked for role: ${selectedRole} and client id: ${selectedClientRoles.clientId}`);
+            }
           });
         } else {
           setSigned(false);
