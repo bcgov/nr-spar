@@ -1,11 +1,47 @@
 {
-  "applicantAgency": {
+  "applicantAgency1": {
     "name": "00012797 - Ministry Of Forests - MOF",
     "number": "30",
     "email": "test@gov.bc.ca",
     "invalidEmail": "test.com.br"
   },
-  "seedlotInformation": {
+  "seedlotInformation1": {
     "species": "PLI - Lodgepole pine"
+  },
+  "applicantAgency2": {
+    "name": "00132184 - Timber Sales Manager Babine - TBA",
+    "number": "01",
+    "email": "apo@gov.bc.ca",
+    "invalidEmail": "apo.com.br"
+  },
+  "seedlotInformation2": {
+    "species": "CW - Western redcedar"
+  },
+  "applicantAgency3": {
+    "name": "00132197 - Timber Sales Manager Cariboo-Chilcotin - TCC",
+    "number": "01",
+    "email": "beane@gov.bc.ca",
+    "invalidEmail": "beane.com.br"
+  },
+  "seedlotInformation3": {
+    "species": "DR - Red alder"
+  },
+  "applicantAgency4": {
+    "name": "00132186 - Timber Sales Manager Chinook - TCH",
+    "number": "01",
+    "email": "cidaw@gov.bc.ca",
+    "invalidEmail": "cidaw.com.br"
+  },
+  "seedlotInformation4": {
+    "species": "EP - Paper birch"
+  },
+  "applicantAgency5": {
+    "name": "00149081 - Western Forest Products Inc. - WFP",
+    "number": "01",
+    "email": "dha@gov.bc.ca",
+    "invalidEmail": "dha.com.br"
+  },
+  "seedlotInformation5": {
+    "species": "FDC - Coastal Douglas-fir"
   }
 }
