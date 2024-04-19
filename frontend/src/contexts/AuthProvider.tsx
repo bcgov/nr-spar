@@ -43,6 +43,9 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
 const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] => {
   const separator = '_';
   const cognitoGroups: string[] = accessToken['cognito:groups'];
+  if (!cognitoGroups) {
+    return [];
+  }
   const parsedClientRoles: UserClientRolesType[] = [];
 
   cognitoGroups.forEach((cognaitoRole) => {
@@ -161,6 +164,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       return famUser;
     } catch (e) {
       console.warn(e);
+      // Clear stored client id and name
+      localStorage.clear();
       localStorage.setItem(SPAR_REDIRECT_PATH, pathname);
       setSigned(false);
     }

@@ -18,6 +18,7 @@ import { TEXT } from './constants';
 import OrganizationItem from './OrganizationItem';
 
 import './styles.scss';
+import EmptySection from '../EmptySection';
 
 const RoleSelection = () => {
   const navigate = useNavigate();
@@ -78,6 +79,13 @@ const RoleSelection = () => {
     }
   };
 
+  const continueToDashboard = () => {
+    if (clientRolesToSet) {
+      setClientRoles(clientRolesToSet);
+      navigate('/');
+    }
+  };
+
   const renderOrgItem = (clientRole: UserClientRolesType) => {
     const queryKey = ['forest-clients', 'role', clientRole.clientId];
     const queryState = qc.getQueryState(queryKey);
@@ -119,13 +127,59 @@ const RoleSelection = () => {
     return null;
   };
 
-  const continueToDashboard = () => {
-    if (clientRolesToSet) {
-      setClientRoles(clientRolesToSet);
-      navigate('/');
+  const renderListSection = () => {
+    if (user?.clientRoles.length === 0) {
+      return (
+        <Column>
+          <EmptySection
+            title="No organization found under your user"
+            description="Please contact your admin for access"
+            pictogram="DoorHandle"
+          />
+        </Column>
+      );
     }
+
+    if (searchTerm.length > 0 && matchedClients.length === 0) {
+      return (
+        <Column>
+          <EmptySection
+            title="No organization found"
+            icon="Windy"
+            description={(
+              <p>
+                Please check the spelling or try a different search term.
+                <br />
+                If you believe the organization should be listed,
+                please contact support for assistance.
+              </p>
+            )}
+          />
+        </Column>
+      );
+    }
+
+    return (
+      /*
+       * <ContainedList /> from Carbon cannot handle children being null
+       * so it's too painful to work with, hence the <ul>.
+       */
+      <Column className="org-items-col">
+        <ul aria-label="List of Organization">
+          {
+            user?.clientRoles
+              .map((clientRole) => (
+                renderOrgItem(clientRole)
+              ))
+          }
+        </ul>
+      </Column>
+    );
   };
 
+  /*
+   * MAIN COMPONENT
+   */
   return (
     <FlexGrid className="role-selection-grid">
       <Row className="search-row">
@@ -141,22 +195,9 @@ const RoleSelection = () => {
         </Column>
       </Row>
       <Row className="org-items-row">
-        <Column className="org-items-col">
-          {
-            /*
-             * <ContainedList /> from Carbon cannot handle children being null
-             * so it's too painful to work with, hence the <ul>.
-             */
-          }
-          <ul aria-label="List of Organization">
-            {
-              user?.clientRoles
-                .map((clientRole) => (
-                  renderOrgItem(clientRole)
-                ))
-            }
-          </ul>
-        </Column>
+        {
+          renderListSection()
+        }
       </Row>
       <Row className="btn-row">
         <Column>
