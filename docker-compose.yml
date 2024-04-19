@@ -47,10 +47,12 @@ services:
       FORESTCLIENTAPI_ADDRESS: https://nr-forest-client-api-prod.api.gov.bc.ca/api
       FORESTCLIENTAPI_KEY: "${FORESTCLIENTAPI_KEY}"
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-      POSTGRES_HOST: database
-      AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
+      POSTGRES_HOST: 172.18.0.2
+      AWS_COGNITO_ISSUER_URI: "http://localhost:3000"
+      AWS_COGNITO_ISSUER_JWK_URI: "http://localhost:3000/jwks-json"
       <<: *db-vars
-    ports: ["8090:8090", "5005:5005"]
+    #ports: ["8090:8090", "5005:5005"]
+    network_mode: host
     image: maven:3.9.6-eclipse-temurin-17
     entrypoint: sh -c './encora-cert.sh'
     working_dir: /app

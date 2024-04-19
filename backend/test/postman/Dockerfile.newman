@@ -1,0 +1,19 @@
+FROM node:18.20.1-bullseye-slim AS build
+
+COPY *.json .
+RUN npm i -g newman newman-reporter-htmlextra
+RUN mkdir -p testArtifacts
+
+ENTRYPOINT [ "newman",                                  \
+  "run",                                                \
+  "test/postman/starting-api.postman_collection.json",  \
+  "-e",                                                 \
+  "test/postman/starting-api.postman_environment.json", \
+  "--env-var",                                          \
+  "releaseVer=test=${{ env.NR_SPAR_BACKEND_VERSION }}", \
+  "--suppress-exit-code",                               \
+  "-r",                                                 \
+  "htmlextra",                                          \
+  "--reporter-htmlextra-export",                        \
+  "testArtifacts/api-tests-report.html"                 \
+]
