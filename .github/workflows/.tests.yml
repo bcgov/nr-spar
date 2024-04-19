@@ -44,10 +44,6 @@ jobs:
           commands: |
             npm ci
             npm run cy:ci
-            pwd
-            ls -la
-            ls -la cypress-coverage
-            cat cypress-coverage/lcov.info
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
