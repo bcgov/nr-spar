@@ -13,12 +13,12 @@ export const ClientTypeIconMap: Record<string, ClientTypeConfig> = {
   },
   // Corporation
   C: {
-    isIcon: false,
-    img: 'Banking'
+    isIcon: true,
+    img: 'Building'
   },
   // Ministry of Forests and Range
   F: {
-    isIcon: false,
+    isIcon: true,
     img: 'Tree'
   },
   // Government
