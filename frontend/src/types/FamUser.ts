@@ -1,4 +1,4 @@
-import { UserRoleType } from './UserRoleType';
+import { UserClientRolesType } from './UserRoleType';
 
 type FamUser = {
   displayName: string;
@@ -7,7 +7,7 @@ type FamUser = {
   firstName: string;
   providerUsername: string;
   name: string;
-  roles: UserRoleType[];
+  clientRoles: UserClientRolesType[];
   provider: string;
   jwtToken: string;
   refreshToken: string;

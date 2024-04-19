@@ -35,7 +35,7 @@ const App: React.FC = () => {
   const HTTP_STATUS_TO_NOT_RETRY = [400, 401, 403, 404];
   const MAX_RETRIES = 3;
 
-  const { signed, isCurrentAuthUser, selectedRole } = useContext(AuthContext);
+  const { signed, isCurrentAuthUser, selectedClientRoles } = useContext(AuthContext);
 
   useEffect(() => {
     isCurrentAuthUser(window.location.pathname);
@@ -97,7 +97,7 @@ const App: React.FC = () => {
   );
 
   const getBrowserRouter = () => {
-    if (selectedRole) {
+    if (selectedClientRoles) {
       return signedRouter;
     }
     if (!signed) {

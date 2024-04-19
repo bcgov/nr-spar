@@ -6,7 +6,7 @@ import React, {
 import type { CognitoUserSession } from 'amazon-cognito-identity-js';
 import { Auth } from 'aws-amplify';
 import axios from 'axios';
-import { UserRoleType } from '../types/UserRoleType';
+import { UserClientRolesType } from '../types/UserRoleType';
 import { env } from '../env';
 import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
@@ -40,30 +40,38 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
   return [firstName, lastName];
 };
 
-const parseRole = (accessToken: { [id: string]: any }): UserRoleType[] => {
+const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] => {
   const separator = '_';
   const cognitoGroups: string[] = accessToken['cognito:groups'];
-  const parsedRoles: UserRoleType[] = [];
+  const parsedClientRoles: UserClientRolesType[] = [];
 
-  cognitoGroups.forEach((roleClient) => {
-    if (!roleClient.includes(separator)) {
-      throw new Error(`Invalid role format with string: ${roleClient}`);
+  cognitoGroups.forEach((cognaitoRole) => {
+    if (!cognaitoRole.includes(separator)) {
+      throw new Error(`Invalid role format with string: ${cognaitoRole}`);
     }
-    const lastUnderscoreIndex = roleClient.lastIndexOf(separator);
-    const role = roleClient.substring(0, lastUnderscoreIndex);
-    const clientId = roleClient.substring(lastUnderscoreIndex + 1);
+    const lastUnderscoreIndex = cognaitoRole.lastIndexOf(separator);
+    const role = cognaitoRole.substring(0, lastUnderscoreIndex);
+    const clientId = cognaitoRole.substring(lastUnderscoreIndex + 1);
 
     if (Number.isNaN(Number(clientId))) {
       throw new Error(`Client ID parsing error with id: ${clientId}`);
     }
 
-    parsedRoles.push({
-      role,
-      clientId
-    });
+    // Check if a client id already exist in parsed client role
+    const found = parsedClientRoles.find((clientRoles) => clientRoles.clientId === clientId);
+
+    if (found) {
+      const idx = parsedClientRoles.findIndex((clientRoles) => clientRoles.clientId === clientId);
+      parsedClientRoles[idx].roles.push(role);
+    } else {
+      parsedClientRoles.push({
+        clientId,
+        roles: [role]
+      });
+    }
   });
 
-  return parsedRoles;
+  return parsedClientRoles;
 };
 
 /**
@@ -91,7 +99,7 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
     firstName,
     providerUsername: idpUsername, // E.g: RDECAMPO
     name: `${firstName} ${lastName}`,
-    roles: parseRole(decodedAccessToken),
+    clientRoles: parseRole(decodedAccessToken),
     provider: decodedIdToken['custom:idp_name'].toLocaleUpperCase(),
     jwtToken: authToken.getIdToken().getJwtToken(),
     refreshToken: authToken.getRefreshToken().getToken(),
@@ -102,16 +110,26 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
   return famUser;
 };
 
+const clientIdLocalStorageKey = 'selected-client-id';
+const clientNameLocalStorageKey = 'selected-client-name';
+
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Props) => {
   const [signed, setSigned] = useState<boolean>(false);
   const [user, setUser] = useState<FamUser | null>(null);
   const [provider, setProvider] = useState<string>('');
   const [intervalInstance, setIntervalInstance] = useState<NodeJS.Timeout | null>(null);
-  const [selectedRole, setSelectedRole] = useState<UserRoleType | null>(null);
+  const [selectedClientRoles, setSelectedClientRoles] = useState<UserClientRolesType | null>(null);
 
-  const setRole = (role: UserRoleType) => {
-    setSelectedRole(role);
-    window.location.href = '/';
+  const setClientRoles = (clientRoles: UserClientRolesType, reload?: boolean) => {
+    localStorage.setItem(clientIdLocalStorageKey, clientRoles.clientId);
+    if (clientRoles.clientName) {
+      localStorage.setItem(clientNameLocalStorageKey, clientRoles.clientName);
+    }
+
+    setSelectedClientRoles(clientRoles);
+    if (reload) {
+      window.location.href = '/';
+    }
   };
 
   const fetchFamCurrentSession = async (pathname: string): Promise<FamUser | null> => {
@@ -119,15 +137,23 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       const currentSession: CognitoUserSession = await Auth.currentSession();
       const famUser = parseToken(currentSession);
       // Check if selected role still exists on user profile
-      if (selectedRole) {
-        const foundRole = famUser.roles
-          .find((assignedRole) => (
-            assignedRole.role === selectedRole.role
-            && assignedRole.clientId === selectedRole.clientId
-          ));
-        if (!foundRole) {
+      if (selectedClientRoles) {
+        const found = famUser.clientRoles.find((famClientRole) => (
+          famClientRole.clientId === selectedClientRoles.clientId
+        ));
+
+        if (found) {
+          famUser.clientRoles.forEach((famClientRole) => {
+            selectedClientRoles.roles.forEach((selectedRole) => {
+              if (!famClientRole.roles.includes(selectedRole)) {
+                setSigned(false);
+                throw new Error(`User role revoked for role: ${selectedRole} and client id: ${famClientRole.clientId}`);
+              }
+            });
+          });
+        } else {
           setSigned(false);
-          throw new Error(`User role revoked for role: ${selectedRole.role} and client id: ${selectedRole.clientId}`);
+          throw new Error(`User roles revoked for client id: ${selectedClientRoles.clientId}`);
         }
       }
 
@@ -148,9 +174,25 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     };
   };
 
+  // Restore selected client on refresh
+  const restoreSelectedClient = (famUser: FamUser) => {
+    const selectedClientId = localStorage.getItem(clientIdLocalStorageKey);
+    if (selectedClientId) {
+      const foundClient = famUser.clientRoles.find((cr) => cr.clientId === selectedClientId);
+      if (foundClient) {
+        const restoredClientName = localStorage.getItem(clientNameLocalStorageKey);
+        if (restoredClientName) {
+          foundClient.clientName = restoredClientName;
+        }
+        setSelectedClientRoles(foundClient);
+      }
+    }
+  };
+
   const isCurrentAuthUser = async (pathname: string) => {
     const famUser = await fetchFamCurrentSession(pathname);
     if (famUser) {
+      restoreSelectedClient(famUser);
       updateUserFamSession(famUser);
       setUser(famUser);
       setProvider(famUser.provider);
@@ -158,14 +200,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const signIn = (signInProvider: LoginProviders): void => {
-    let appEnv = env.VITE_ZONE ?? 'DEV';
-
-    // Workaround for the Business BCeID in TEST calling actually PROD
-    const applyWorkaround = signInProvider === LoginProviders.BCEID_BUSINESS
-      && appEnv === 'TEST';
-    if (applyWorkaround) {
-      appEnv = 'PROD';
-    }
+    const appEnv = env.VITE_ZONE ?? 'DEV';
 
     Auth.federatedSignIn({
       customProvider: `${(appEnv).toLocaleUpperCase()}-${signInProvider.toString()}`
@@ -175,6 +210,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const signOut = (): void => {
     Auth.signOut()
       .then(() => {
+        localStorage.clear();
         setSigned(false);
         setUser(null);
         setProvider('');
@@ -216,9 +252,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     signIn,
     signOut,
     provider,
-    selectedRole,
-    setRole
-  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider, selectedRole]);
+    selectedClientRoles,
+    setClientRoles
+  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider, selectedClientRoles]);
 
   return (
     <AuthContext.Provider value={contextValue}>

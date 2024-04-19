@@ -1,10 +1,12 @@
-import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType'
+import { QueryState } from '@tanstack/react-query';
+import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 
-export type clientTypeConfig = {
+export type ClientTypeConfig = {
   isIcon: boolean,
   img: string
 }
 
 export type OrganizationItemProps = {
   forestClient?: ForestClientType
+  queryState?: QueryState<unknown, undefined>
 }

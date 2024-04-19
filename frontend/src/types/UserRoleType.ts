@@ -1,4 +1,5 @@
-export type UserRoleType = {
-  role: string,
-  clientId: string
+export type UserClientRolesType = {
+  clientId: string,
+  roles: string[],
+  clientName?: string
 };

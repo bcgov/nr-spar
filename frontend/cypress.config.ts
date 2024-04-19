@@ -11,7 +11,7 @@ export default defineConfig({
     experimentalWebKitSupport: true,
     env: {
       idirLoginUrl: 'https://logontest7.gov.bc.ca',
-      businessBceIdLoginUrl: 'https://logon7.gov.bc.ca'
+      businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
       '**/login-page.cy.ts',

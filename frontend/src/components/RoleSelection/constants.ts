@@ -1,6 +1,6 @@
-import { clientTypeConfig } from './definitions';
+import { ClientTypeConfig } from './definitions';
 
-export const clientTypeIconMap: Record<string, clientTypeConfig> = {
+export const ClientTypeIconMap: Record<string, ClientTypeConfig> = {
   // Association
   A: {
     isIcon: true,
@@ -64,5 +64,5 @@ export const clientTypeIconMap: Record<string, clientTypeConfig> = {
 };
 
 export const TEXT = {
-  searchLabel: 'Search by organization or ID'
+  searchLabel: 'Search by organization name or ID'
 };

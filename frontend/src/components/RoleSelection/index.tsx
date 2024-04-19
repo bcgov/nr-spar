@@ -1,34 +1,39 @@
 import React, { useContext, useState } from 'react';
 import {
   FlexGrid, Row, Column,
-  ButtonSkeleton, Search
+  ButtonSkeleton, Search, Button,
+  ContainedListItem
 } from '@carbon/react';
-import { useIsFetching, useQueries, useQueryClient } from '@tanstack/react-query';
+import { ArrowRight } from '@carbon/icons-react';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 import AuthContext from '../../contexts/AuthContext';
 import { getForestClientByNumber } from '../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
+import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
+import { UserClientRolesType } from '../../types/UserRoleType';
 
-import './styles.scss';
 import { TEXT } from './constants';
 import OrganizationItem from './OrganizationItem';
-import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
-import { UserRoleType } from '../../types/UserRoleType';
+
+import './styles.scss';
 
 const RoleSelection = () => {
-  const { user, setRole } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { user, setClientRoles, signOut } = useContext(AuthContext);
   // A list of matched client id
   const [matchedClients, setMatchedClients] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [roleToSet, setRoleToSet] = useState<UserRoleType | null>(null);
+  const [clientRolesToSet, setClientRolesToSet] = useState<UserClientRolesType | null>(null);
 
   useQueries({
-    queries: user!.roles.map((userRole) => ({
+    queries: user!.clientRoles.map((clientRole) => ({
       // Not a conventional query key,
       // be we need the 'role' here to distinguish the data is for roles only,
       // used later to retrieve data related roles only.
-      queryKey: ['forest-clients', 'role', userRole.clientId],
-      queryFn: () => getForestClientByNumber(userRole.clientId),
+      queryKey: ['forest-clients', 'role', clientRole.clientId],
+      queryFn: () => getForestClientByNumber(clientRole.clientId),
       staleTime: THREE_HOURS,
       cacheTime: THREE_HALF_HOURS
     }))
@@ -55,17 +60,33 @@ const RoleSelection = () => {
 
     const foundIds = foundCombined.map((fc) => fc.clientNumber);
 
-    console.log(foundIds, searchTerm);
-
     setSearchTerm(value);
     setMatchedClients(foundIds);
   };
 
-  const renderOrgItem = (roleClient: UserRoleType) => {
-    // Render skeletons
-    if (useIsFetching(['forest-clients', 'role', roleClient.clientId])) {
+  const setSelectedClientRoles = (clientId: string, clientName?: string) => {
+    if (clientId) {
+      const found = user!.clientRoles.find((uClientRole) => (
+        uClientRole.clientId === clientId
+      ));
+      if (found) {
+        setClientRolesToSet({
+          ...found,
+          clientName
+        });
+      }
+    }
+  };
+
+  const renderOrgItem = (clientRole: UserClientRolesType) => {
+    const queryKey = ['forest-clients', 'role', clientRole.clientId];
+    const queryState = qc.getQueryState(queryKey);
+    const queryData: ForestClientType | undefined = qc.getQueryData(queryKey);
+
+    // Render skeleton on load
+    if (queryState?.status === 'loading') {
       return (
-        <Row key={`${roleClient.clientId}-${roleClient.role}`}>
+        <Row className="org-item-skeleton-row" key={`${clientRole.clientId}-${clientRole.roles[0]}`}>
           <Column>
             <ButtonSkeleton />
           </Column>
@@ -73,19 +94,36 @@ const RoleSelection = () => {
       );
     }
 
-    // Render Matched
+    // Render matched
     if (
       (
         matchedClients.length === 0
         && searchTerm === ''
       )
-      || matchedClients.includes(roleClient.clientId)
+      || matchedClients.includes(clientRole.clientId)
     ) {
       return (
-        <OrganizationItem forestClient={qc.getQueryData(['forest-clients', 'role', roleClient.clientId])} />
+        <ContainedListItem
+          key={`${clientRole.clientId}-${clientRole.roles[0]}`}
+          disabled={queryState?.status === 'error'}
+          onClick={() => setSelectedClientRoles(clientRole.clientId, queryData?.clientName)}
+        >
+          <OrganizationItem
+            forestClient={queryData}
+            queryState={queryState}
+          />
+        </ContainedListItem>
       );
     }
+
     return null;
+  };
+
+  const continueToDashboard = () => {
+    if (clientRolesToSet) {
+      setClientRoles(clientRolesToSet);
+      navigate('/');
+    }
   };
 
   return (
@@ -93,6 +131,7 @@ const RoleSelection = () => {
       <Row className="search-row">
         <Column>
           <Search
+            className="search-bar"
             labelText={TEXT.searchLabel}
             placeholder={TEXT.searchLabel}
             onChange={
@@ -101,12 +140,47 @@ const RoleSelection = () => {
           />
         </Column>
       </Row>
-      {
-        user?.roles
-          .map((roleClient) => (
-            renderOrgItem(roleClient)
-          ))
-      }
+      <Row className="org-items-row">
+        <Column className="org-items-col">
+          {
+            /*
+             * <ContainedList /> from Carbon cannot handle children being null
+             * so it's too painful to work with, hence the <ul>.
+             */
+          }
+          <ul aria-label="List of Organization">
+            {
+              user?.clientRoles
+                .map((clientRole) => (
+                  renderOrgItem(clientRole)
+                ))
+            }
+          </ul>
+        </Column>
+      </Row>
+      <Row className="btn-row">
+        <Column>
+          <Button
+            className="action-btn"
+            kind="secondary"
+            size="lg"
+            onClick={signOut}
+          >
+            Cancel
+          </Button>
+        </Column>
+        <Column>
+          <Button
+            className="action-btn"
+            kind="primary"
+            size="lg"
+            onClick={continueToDashboard}
+            renderIcon={ArrowRight}
+          >
+            Continue
+          </Button>
+        </Column>
+      </Row>
     </FlexGrid>
   );
 };
