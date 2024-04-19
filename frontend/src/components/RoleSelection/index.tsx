@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   FlexGrid, Row, Column,
   ButtonSkeleton, Search, Button,
@@ -36,12 +36,16 @@ const RoleSelection = () => {
       queryKey: ['forest-clients', 'role', clientRole.clientId],
       queryFn: () => getForestClientByNumber(clientRole.clientId),
       staleTime: THREE_HOURS,
-      cacheTime: THREE_HALF_HOURS,
-      keepPreviousData: true
+      cacheTime: THREE_HALF_HOURS
     }))
   });
 
   const qc = useQueryClient();
+
+  // Queries data sometime disappear after awhile, maybe from token refresh, need to refetch them.
+  useEffect(() => {
+    qc.refetchQueries(['forest-clients', 'role']);
+  }, [user]);
 
   const filterClientsByValue = (value: string) => {
     const forestClientsQueriesData = qc.getQueriesData(['forest-clients', 'role']);
