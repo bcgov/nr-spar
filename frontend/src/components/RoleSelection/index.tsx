@@ -29,7 +29,7 @@ const RoleSelection = () => {
   const [clientRolesToSet, setClientRolesToSet] = useState<UserClientRolesType | null>(null);
 
   useQueries({
-    queries: user!.clientRoles.map((clientRole) => ({
+    queries: user?.clientRoles.map((clientRole) => ({
       // Not a conventional query key,
       // be we need the 'role' here to distinguish the data is for roles only,
       // used later to retrieve data related roles only.
@@ -37,7 +37,7 @@ const RoleSelection = () => {
       queryFn: () => getForestClientByNumber(clientRole.clientId),
       staleTime: THREE_HOURS,
       cacheTime: THREE_HALF_HOURS
-    }))
+    })) ?? []
   });
 
   const qc = useQueryClient();
