@@ -87,7 +87,7 @@ class TscAdminEndpointTest {
     when(tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, approved))
         .thenReturn(new Seedlot(seedlotNumber));
 
-    String url = String.format("/api/tsc-admin/seedlots/%s/approved/%s", seedlotNumber, approved);
+    String url = String.format("/api/tsc-admin/seedlots/%s/approve/%s", seedlotNumber, approved);
 
     mockMvc
         .perform(
@@ -109,7 +109,7 @@ class TscAdminEndpointTest {
     when(tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, approved))
         .thenThrow(new SeedlotNotFoundException());
 
-    String url = String.format("/api/tsc-admin/seedlots/%s/approved/%s", seedlotNumber, approved);
+    String url = String.format("/api/tsc-admin/seedlots/%s/approve/%s", seedlotNumber, approved);
 
     mockMvc
         .perform(
