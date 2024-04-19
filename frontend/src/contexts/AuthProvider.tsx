@@ -197,7 +197,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const isCurrentAuthUser = async (pathname: string) => {
     const famUser = await fetchFamCurrentSession(pathname);
     if (famUser) {
-      restoreSelectedClient(famUser);
+      if (famUser.clientRoles.length === 1) {
+        // If a user has only 1 client role then set it right away.
+        setSelectedClientRoles(famUser.clientRoles[0]);
+      } else {
+        restoreSelectedClient(famUser);
+      }
       updateUserFamSession(famUser);
       setUser(famUser);
       setProvider(famUser.provider);
