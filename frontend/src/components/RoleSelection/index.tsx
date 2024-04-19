@@ -36,7 +36,8 @@ const RoleSelection = () => {
       queryKey: ['forest-clients', 'role', clientRole.clientId],
       queryFn: () => getForestClientByNumber(clientRole.clientId),
       staleTime: THREE_HOURS,
-      cacheTime: THREE_HALF_HOURS
+      cacheTime: THREE_HALF_HOURS,
+      keepPreviousData: true
     }))
   });
 
