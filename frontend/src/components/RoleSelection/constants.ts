@@ -64,5 +64,7 @@ export const ClientTypeIconMap: Record<string, ClientTypeConfig> = {
 };
 
 export const TEXT = {
-  searchLabel: 'Search by organization name or ID'
+  searchLabel: 'Search by organization name or ID',
+  emptySearchPtOne: 'Please check the spelling or try a different search term.',
+  emptySearchPtTwo: 'If you believe the organization should be listed, please contact support for assistance.'
 };

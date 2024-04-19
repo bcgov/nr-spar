@@ -13,12 +13,12 @@ import { getForestClientByNumber } from '../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 import { UserClientRolesType } from '../../types/UserRoleType';
+import EmptySection from '../EmptySection';
 
 import { TEXT } from './constants';
 import OrganizationItem from './OrganizationItem';
 
 import './styles.scss';
-import EmptySection from '../EmptySection';
 
 const RoleSelection = () => {
   const navigate = useNavigate();
@@ -155,10 +155,9 @@ const RoleSelection = () => {
             icon="Windy"
             description={(
               <p>
-                Please check the spelling or try a different search term.
+                {TEXT.emptySearchPtOne}
                 <br />
-                If you believe the organization should be listed,
-                please contact support for assistance.
+                {TEXT.emptySearchPtTwo}
               </p>
             )}
           />
