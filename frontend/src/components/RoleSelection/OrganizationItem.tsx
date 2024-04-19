@@ -9,7 +9,7 @@ import { ClientTypeIconMap } from './constants';
 
 import './styles.scss';
 
-const OrganizationItem = ({ forestClient, queryState }: OrganizationItemProps) => {
+const OrganizationItem = ({ forestClient, queryState, selected }: OrganizationItemProps) => {
   if (queryState?.status === 'error') {
     return (
       <Column className="org-item-col-container">
@@ -37,6 +37,10 @@ const OrganizationItem = ({ forestClient, queryState }: OrganizationItemProps) =
   const renderIcon = () => {
     const clientTypeConfig = ClientTypeIconMap[forestClient.clientTypeCode];
     let Img = null;
+    if (selected) {
+      Img = Icons.CheckmarkFilled;
+      return <Img className="org-item-icon" />;
+    }
     if (clientTypeConfig) {
       Img = clientTypeConfig.isIcon
         ? Icons[clientTypeConfig.img]

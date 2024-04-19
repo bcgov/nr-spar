@@ -125,6 +125,7 @@ const RoleSelection = () => {
           <OrganizationItem
             forestClient={queryData}
             queryState={queryState}
+            selected={clientRolesToSet?.clientId === clientRole.clientId}
           />
         </ContainedListItem>
       );
