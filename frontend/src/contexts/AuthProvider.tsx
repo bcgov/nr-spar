@@ -6,10 +6,11 @@ import React, {
 import type { CognitoUserSession } from 'amazon-cognito-identity-js';
 import { Auth } from 'aws-amplify';
 import axios from 'axios';
+import { UserClientRolesType } from '../types/UserRoleType';
 import { env } from '../env';
 import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
-import AuthContext from './AuthContext';
+import AuthContext, { AuthContextData } from './AuthContext';
 import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
 import { TWO_MINUTE } from '../config/TimeUnits';
 import ROUTES from '../routes/constants';
@@ -39,6 +40,43 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
   return [firstName, lastName];
 };
 
+const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] => {
+  const separator = '_';
+  const cognitoGroups: string[] = accessToken['cognito:groups'];
+  if (!cognitoGroups) {
+    return [];
+  }
+  const parsedClientRoles: UserClientRolesType[] = [];
+
+  cognitoGroups.forEach((cognaitoRole) => {
+    if (!cognaitoRole.includes(separator)) {
+      throw new Error(`Invalid role format with string: ${cognaitoRole}`);
+    }
+    const lastUnderscoreIndex = cognaitoRole.lastIndexOf(separator);
+    const role = cognaitoRole.substring(0, lastUnderscoreIndex);
+    const clientId = cognaitoRole.substring(lastUnderscoreIndex + 1);
+
+    if (Number.isNaN(Number(clientId))) {
+      throw new Error(`Client ID parsing error with id: ${clientId}`);
+    }
+
+    // Check if a client id already exist in parsed client role
+    const found = parsedClientRoles.find((clientRoles) => clientRoles.clientId === clientId);
+
+    if (found) {
+      const idx = parsedClientRoles.findIndex((clientRoles) => clientRoles.clientId === clientId);
+      parsedClientRoles[idx].roles.push(role);
+    } else {
+      parsedClientRoles.push({
+        clientId,
+        roles: [role]
+      });
+    }
+  });
+
+  return parsedClientRoles;
+};
+
 /**
  * Parses a CognitoUserSession into a JS object. For a deeper understanding
  * you can take a look on the attribute mapping reference at:
@@ -64,7 +102,7 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
     firstName,
     providerUsername: idpUsername, // E.g: RDECAMPO
     name: `${firstName} ${lastName}`,
-    roles: decodedAccessToken['cognito:groups'],
+    clientRoles: parseRole(decodedAccessToken),
     provider: decodedIdToken['custom:idp_name'].toLocaleUpperCase(),
     jwtToken: authToken.getIdToken().getJwtToken(),
     refreshToken: authToken.getRefreshToken().getToken(),
@@ -75,20 +113,56 @@ const parseToken = (authToken: CognitoUserSession): FamUser => {
   return famUser;
 };
 
+const clientIdLocalStorageKey = 'selected-client-id';
+const clientNameLocalStorageKey = 'selected-client-name';
+
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Props) => {
   const [signed, setSigned] = useState<boolean>(false);
   const [user, setUser] = useState<FamUser | null>(null);
   const [provider, setProvider] = useState<string>('');
   const [intervalInstance, setIntervalInstance] = useState<NodeJS.Timeout | null>(null);
+  const [selectedClientRoles, setSelectedClientRoles] = useState<UserClientRolesType | null>(null);
+
+  const setClientRoles = (clientRoles: UserClientRolesType, reload?: boolean) => {
+    localStorage.setItem(clientIdLocalStorageKey, clientRoles.clientId);
+    if (clientRoles.clientName) {
+      localStorage.setItem(clientNameLocalStorageKey, clientRoles.clientName);
+    }
+
+    setSelectedClientRoles(clientRoles);
+    if (reload) {
+      window.location.href = '/';
+    }
+  };
 
   const fetchFamCurrentSession = async (pathname: string): Promise<FamUser | null> => {
     try {
       const currentSession: CognitoUserSession = await Auth.currentSession();
       const famUser = parseToken(currentSession);
+      // Check if selected role still exists on user profile
+      if (selectedClientRoles) {
+        const foundFamClientRoles = famUser.clientRoles.find((famClientRole) => (
+          famClientRole.clientId === selectedClientRoles.clientId
+        ));
+        if (foundFamClientRoles) {
+          selectedClientRoles.roles.forEach((selectedRole) => {
+            if (!foundFamClientRoles.roles.includes(selectedRole)) {
+              setSigned(false);
+              throw new Error(`User role revoked for role: ${selectedRole} and client id: ${selectedClientRoles.clientId}`);
+            }
+          });
+        } else {
+          setSigned(false);
+          throw new Error(`User roles revoked for client id: ${selectedClientRoles.clientId}`);
+        }
+      }
+
       setSigned(true);
       return famUser;
     } catch (e) {
       console.warn(e);
+      // Clear stored client id and name
+      localStorage.clear();
       localStorage.setItem(SPAR_REDIRECT_PATH, pathname);
       setSigned(false);
     }
@@ -102,9 +176,30 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     };
   };
 
+  // Restore selected client on refresh
+  const restoreSelectedClient = (famUser: FamUser) => {
+    const selectedClientId = localStorage.getItem(clientIdLocalStorageKey);
+    if (selectedClientId) {
+      const foundClient = famUser.clientRoles.find((cr) => cr.clientId === selectedClientId);
+      if (foundClient) {
+        const restoredClientName = localStorage.getItem(clientNameLocalStorageKey);
+        if (restoredClientName) {
+          foundClient.clientName = restoredClientName;
+        }
+        setSelectedClientRoles(foundClient);
+      }
+    }
+  };
+
   const isCurrentAuthUser = async (pathname: string) => {
     const famUser = await fetchFamCurrentSession(pathname);
     if (famUser) {
+      if (famUser.clientRoles.length === 1) {
+        // If a user has only 1 client role then set it right away.
+        setSelectedClientRoles(famUser.clientRoles[0]);
+      } else {
+        restoreSelectedClient(famUser);
+      }
       updateUserFamSession(famUser);
       setUser(famUser);
       setProvider(famUser.provider);
@@ -112,14 +207,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   };
 
   const signIn = (signInProvider: LoginProviders): void => {
-    let appEnv = env.VITE_ZONE ?? 'DEV';
-
-    // Workaround for the Business BCeID in TEST calling actually PROD
-    const applyWorkaround = signInProvider === LoginProviders.BCEID_BUSINESS
-        && appEnv === 'TEST';
-    if (applyWorkaround) {
-      appEnv = 'PROD';
-    }
+    const appEnv = env.VITE_ZONE ?? 'DEV';
 
     Auth.federatedSignIn({
       customProvider: `${(appEnv).toLocaleUpperCase()}-${signInProvider.toString()}`
@@ -129,6 +217,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const signOut = (): void => {
     Auth.signOut()
       .then(() => {
+        localStorage.clear();
         setSigned(false);
         setUser(null);
         setProvider('');
@@ -163,14 +252,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   }
 
   // memoize
-  const contextValue = useMemo(() => ({
+  const contextValue: AuthContextData = useMemo(() => ({
     signed,
     user,
     isCurrentAuthUser,
     signIn,
     signOut,
-    provider
-  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider]);
+    provider,
+    selectedClientRoles,
+    setClientRoles
+  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider, selectedClientRoles]);
 
   return (
     <AuthContext.Provider value={contextValue}>
