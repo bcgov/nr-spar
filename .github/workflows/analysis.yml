@@ -14,9 +14,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests-java:
+  tests:
     name: Java CI
-    # if: ${{ ! github.event.pull_request.draft }}
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -27,7 +27,6 @@ jobs:
           - dir: oracle-api
             token: SONAR_ORACLE_API
     steps:
-      - uses: actions/checkout@v4
       - uses: bcgov-nr/action-test-and-analyse-java@v1.0.2
         with:
           commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
@@ -43,6 +42,7 @@ jobs:
 
   codeql:
     name: Semantic Code Analysis
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-22.04
     permissions:
       actions: read
@@ -79,11 +79,10 @@ jobs:
   # https://github.com/marketplace/actions/aqua-security-trivy
   trivy:
     name: Security Scan
-    # if: ${{ ! github.event.pull_request.draft }}
+    if: ${{ ! github.event.pull_request.draft }}
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@0.19.0
         with:
@@ -98,3 +97,19 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: "trivy-results.sarif"
+
+  results:
+    name: Analysis Results
+    if: always()
+    needs: [tests, codeql, trivy]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          # View results
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+
+      - if: contains(needs.*.result, 'failure')
+        run: |
+          # Job failure found
+          echo "At least one job has failed"
+          exit 1
