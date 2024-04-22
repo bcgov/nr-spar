@@ -1,11 +1,12 @@
 import { env } from '../../env';
 import ROUTES from '../../routes/constants';
+import { RightPanelType } from './definitions';
 
 export const VERSION: string = `Version: ${env.VITE_NRSPARWEBAPP_VERSION}`;
 
 export const HOME_LINK = ROUTES.DASHBOARD;
 
-export const clearPanelState = {
+export const defaultPanelState: RightPanelType = {
   notifications: false,
   myProfile: false
 };

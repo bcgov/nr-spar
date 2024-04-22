@@ -217,7 +217,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const signOut = (): void => {
     Auth.signOut()
       .then(() => {
-        localStorage.clear();
+        setSelectedClientRoles(null);
         setSigned(false);
         setUser(null);
         setProvider('');
@@ -226,6 +226,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
           clearInterval(intervalInstance);
           setIntervalInstance(null);
         }
+        localStorage.clear();
       }).catch((err) => console.warn(err));
   };
 

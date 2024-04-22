@@ -22,7 +22,7 @@ import PanelSectionName from '../PanelSectionName';
 import {
   HOME_LINK,
   VERSION,
-  clearPanelState,
+  defaultPanelState,
   componentTexts,
   navItems,
   supportItems
@@ -32,27 +32,27 @@ import { RightPanelType, HearderContainerProps } from './definitions';
 import './styles.scss';
 
 const BCHeader = () => {
-  const [rightPanel, setRightPanel] = useState<RightPanelType>(clearPanelState);
+  const [rightPanel, setRightPanel] = useState<RightPanelType>(defaultPanelState);
   const [overlay, setOverlay] = useState<boolean>(false);
 
-  const handleRightPanel = (panel: string) => {
+  const handleRightPanel = (panel: keyof RightPanelType) => {
     // Using clearPanelState here so that it cleans all other
     // panel options before setting the one we actually want,
     // this solves the case where the user wants to open a new
     // panel, when other one is already open.
     if (rightPanel[panel]) {
       setOverlay(false);
-      setRightPanel(clearPanelState);
+      setRightPanel(defaultPanelState);
     } else {
       setOverlay(true);
       setRightPanel({
-        ...clearPanelState,
+        ...defaultPanelState,
         [panel]: true
       });
     }
   };
 
-  const closeRightPanel = (panel: string) => {
+  const closeRightPanel = (panel: keyof RightPanelType) => {
     setOverlay(false);
     setRightPanel({
       ...rightPanel,
@@ -97,13 +97,15 @@ const BCHeader = () => {
             <HeaderGlobalAction
               aria-label={componentTexts.searchAriaLabel}
               data-testid="header-button__search"
+              className="btn-disabled"
             >
               <Icons.Search size={20} />
             </HeaderGlobalAction>
             <HeaderGlobalAction
               aria-label={componentTexts.notifications.title}
               data-testid="header-button__notifications"
-              onClick={() => handleRightPanel('notifications')}
+              className="btn-disabled"
+              onClick={null}
               isActive={rightPanel.notifications}
             >
               <Icons.Notification size={20} />
