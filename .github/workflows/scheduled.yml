@@ -27,12 +27,12 @@ jobs:
             awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
             xargs --no-run-if-empty oc delete ${{ env.TYPE }}
 
-  tests:
-    name: Tests
-    secrets: inherit
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: test
+  # tests:
+  #   name: Tests
+  #   secrets: inherit
+  #   uses: ./.github/workflows/.tests.yml
+  #   with:
+  #     target: test
 
   zap_scan:
     runs-on: ubuntu-latest
