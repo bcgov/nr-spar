@@ -126,7 +126,6 @@ jobs:
     name: Tests
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
-    secrets: inherit
     uses: ./.github/workflows/.tests.yml
 
   results:
