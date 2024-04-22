@@ -11,7 +11,7 @@ concurrency:
 jobs:
   init:
     name: Initialize
-    # if: (! github.event.pull_request.draft)
+    if: (! github.event.pull_request.draft)
     outputs:
       mod-tag: ${{ steps.mod-tag.outputs.mod-tag }}
     runs-on: ubuntu-22.04
@@ -23,7 +23,7 @@ jobs:
   validate:
     name: Validate PR
     needs: [init]
-    # if: (! github.event.pull_request.draft)
+    if: (! github.event.pull_request.draft)
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.4.0
     with:
       markdown_links: |
@@ -33,7 +33,16 @@ jobs:
 
   results:
     name: Validate Results
+    if: always()
     needs: [validate]
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "Workflow completed successfully!"
+      - run: |
+          # View results
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+
+      - if: contains(needs.*.result, 'failure')
+        run: |
+          # Job failure found
+          echo "At least one job has failed"
+          exit 1
