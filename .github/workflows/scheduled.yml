@@ -30,6 +30,7 @@ jobs:
 
   tests:
     name: Tests
+    secrets: inherit
     uses: ./.github/workflows/.tests.yml
     with:
       target: test

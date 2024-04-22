@@ -1,7 +1,8 @@
 name: PR
 
 on:
-  pull_request:
+  # pull_request:
+  workflow_call:
 
 concurrency:
   # PR open and close use the same group, allowing only one at a time
@@ -126,6 +127,7 @@ jobs:
     name: Tests
     if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
+    secrets: inherit
     uses: ./.github/workflows/.tests.yml
 
   results:
