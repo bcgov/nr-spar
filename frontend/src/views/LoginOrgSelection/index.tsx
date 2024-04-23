@@ -3,7 +3,6 @@ import { FlexGrid, Row, Column } from '@carbon/react';
 
 import OrganizationSelection from '../../components/OrganizationSelection';
 import AuthContext from '../../contexts/AuthContext';
-import { TEXT } from './constants';
 
 import './styles.scss';
 
@@ -19,7 +18,7 @@ const LoginOrgSelection = () => {
               Organization selection
             </h2>
             <p className="subtitle-text">
-              {`${user?.firstName} ${user?.lastName} (${user?.providerUsername}) ${TEXT.subtitle}`}
+              {`${user?.firstName} ${user?.lastName} (${user?.providerUsername}) select which organization you're representing.`}
             </p>
           </section>
           <OrganizationSelection />
