@@ -141,12 +141,14 @@ def build_select_count_qry(table_metadata: str) -> str:
 
     select_qry = 'SELECT COUNT(1) FROM {}.{} WHERE '.format(table_metadata['schema'], table_metadata['table_name'] )
         
-    if len(primary_keys) > 1:
+    if len(primary_keys) >= 1:
         for i in range(len(primary_keys)):
             if i == 0:
                 primary_keys_str = ''.join([primary_keys[0], ' = :', primary_keys[0]])
             else:
                 primary_keys_str = ''.join([primary_keys_str, ' AND ', primary_keys[i], ' = :', primary_keys[i]])
+    else: #If no primary key exists, then all records are eligible to insert 
+        select_qry = ''.join([select_qry,'1=2'])
 
     select_qry = ''.join([
         select_qry, 
@@ -172,7 +174,7 @@ def build_insert_stm(table_metadata: str) -> str:
     insert_stm = 'INSERT INTO {}.{} ('.format(table_metadata['schema'], table_metadata['table_name'])
 
     for key in columns:
-        columns_str = ''.join([columns_str, key, ','])
+        columns_str = ''.join([columns_str, table_metadata['columns'][key], ','])
         columns_values_str = ''.join([columns_values_str, ':', key, ','])
         
     insert_stm = ''.join([

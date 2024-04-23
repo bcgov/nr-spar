@@ -6,3 +6,6 @@ class TransformException(Exception):
 
 class LoadException(Exception):
     pass
+    
+class ETLConfigurationException(Exception):
+    pass

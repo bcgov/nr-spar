@@ -1,5 +1,6 @@
 import time
 import logging
+import json
 import numpy as np
 import pandas as pd
 import module.metadata_handler as meta
@@ -8,14 +9,90 @@ import module.data_sync_control as data_sync_ctl
 import transformations as transf
 
 from typing import Tuple
-from os import listdir, path
+from os import listdir, path, sep as separator
 from datetime import timedelta
 from sqlalchemy.exc import SQLAlchemyError
-from module.custom_exception import TransformException, LoadException, ExtractException
+from module.custom_exception import TransformException, LoadException, ExtractException, ETLConfigurationException
 
 logger = logging.getLogger(__name__)
 
-def data_sync():
+"""
+    Execute data synchronization between 2 data sources
+    1. Gather what process will be executed in order
+    2. Execute source.sql from process to Load data in a in-memory dataframe
+    3. Create a TEMP table in the target connection
+    4. Execute the target.sql in target connection using the TEMP table
+"""
+def data_sync2(source_config, target_config, track_config, execution_id):
+    sync_start_time = time.time()
+    rows_from_source = 0
+    rows_target_processed = 0
+    time_conn_monitor = ""
+    time_conn_source = ""
+    time_conn_target = ""
+    time_source_extract = ""
+    time_target_load = ""
+    logger.info('***** Starting ETL Tool *****')
+    current_cwd = path.join(path.abspath(path.dirname(__file__).split('src')[0]) , "config")
+    logger.info('Initializing Tracking Database Connection')
+    with db_conn.database_connection(track_config) as track_db_conn:
+        temp_time = time.time()
+        time_conn_monitor = timedelta(seconds=(temp_time-sync_start_time))
+        logger.info('Getting Execution instructions for execution id {}'.format(str(execution_id)))
+        execution_map = data_sync_ctl.get_execution_map(track_db_conn,track_config['schema'],execution_id)
+
+        logger.info('Validating Execution instructions')
+        try:
+            if not data_sync_ctl.validate_execution_map(execution_map):
+                raise ETLConfigurationException ("ETL configuration validation failed")
+            
+            processes = data_sync_ctl.get_processes_execution_map(execution_map)
+            logger.info('Initializing Source Database Connection')
+
+            # All processes to be executed from configuration in ETL_EXECUTION_MAP
+            for process in processes:
+                with db_conn.database_connection(source_config) as source_db_conn:
+                    time_conn_source = timedelta(seconds=(time.time()-temp_time))
+                    temp_time = time.time()
+
+                    data_sync_ctl.print_process(process)
+                    load_file = current_cwd+process['source_file'].replace("/",separator)
+                    print ("Reading Extract query from: " + load_file)
+                    query_sql = open(load_file).read()
+                    # print ("Query is: "+ query_sql)
+                    table_df = pd.read_sql_query(query_sql, source_db_conn.engine)
+                    
+                    time_source_extract = timedelta(seconds=(time.time()-temp_time))
+                    rows_from_source = table_df.shape[0]
+                    temp_time = time.time()
+
+                    with db_conn.database_connection(target_config) as target_db_conn:
+                        time_conn_target = timedelta(seconds=(time.time()-temp_time))
+                        temp_time = time.time()
+                        
+                        table_df=table_df.convert_dtypes()
+                        
+                        rows_target_processed = target_db_conn.bulk_upsert(dataframe=table_df, table_name=process["target_table"],
+                                                                   table_pk=process["target_primary_key"], 
+                                                                   if_data_exists="append", index_data=False )
+                        # READ FROM TEMP TABLE:
+                        time_target_load = timedelta(seconds=(time.time()-temp_time))
+                        
+        
+        # Exception when validate_execution_map is false
+        except ETLConfigurationException:
+            print("ETLConfigurationException - Impossible to determine what process will be executed (or no process to be executed)")
+            logger.critical('ETLConfigurationException - Impossible to determine what process will be executed (or no process to be executed)')
+    sync_elapsed_time = time.time() - sync_start_time
+    logger.debug(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
+    logger.debug(f'ETL Tool monitoring database connection took {time_conn_monitor}')
+    logger.debug(f'ETL Tool source database connection took {time_conn_source}')
+    logger.debug(f'ETL Tool source extract data took {time_source_extract} gathering {rows_from_source} rows')
+    logger.debug(f'ETL Tool target database connection took {time_conn_target}')
+    logger.debug(f'ETL Tool target load data took {time_target_load} processing {rows_target_processed} rows')
+    logger.info('***** Finish Data Sync *****')
+
+def data_sync(source_config, target_config, track_config):
     """ 
     Runs the data synchronization between source and target databases for all defined domains - one at a time.
     """
@@ -27,8 +104,9 @@ def data_sync():
     db_config = meta.open_json_file(path.abspath(path.join(current_cwd, 'config', 'database_config.json')))
     
     # Loading source and target database connections parameters
-    source_db_config = db_config['postgres_local']
-    target_db_config = db_config['oracle_local']
+    source_db_config = source_config #db_config['postgres_local']
+    target_db_config = target_config #['oracle_local']
+    track_db_config = track_config 
     
     # Getting all the folders under domains folder and creating a sorted list of domains
     domains_path = path.abspath(path.join(current_cwd, 'domains'))
@@ -36,40 +114,60 @@ def data_sync():
     domain_loading_order = list(domains_folders.keys())
     domain_loading_order.sort()
     
-    logger.info('Initializing Source Database Connection')
-    with db_conn.database_connection(source_db_config) as source_db_conn:
+    logger.info('Initializing Tracking Database Connection')
+    with db_conn.database_connection(track_db_config) as track_db_conn:
+
+        logger.info('Getting Execution instructions')
+        execution_map = data_sync_ctl.get_execution_map(track_db_conn,track_db_config['schema'],0)
+
+        logger.info('Validating Execution instructions')
         try:
-            data_sync_id = data_sync_ctl.get_next_data_sync_id(source_db_conn, source_db_config['schema'])
-            data_sync_ctl.insert_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id)
-            
-            logger.info('Initializing Target Database Connection')
-            with db_conn.database_connection(target_db_config) as target_db_conn:
-                for i in domain_loading_order:
-                    domain_folder_path = path.abspath(path.join(domains_path, domains_folders[i]))
-                    domain_name = domains_folders[i].split('_', 1)[1]
-                    logger.info(f'Sync {domain_name} Domain ({i}/{len(domain_loading_order)})')
-                    sync_domain(source_db_conn, source_db_config['schema'], target_db_conn, domain_folder_path, domain_name)
-        
-        except ExtractException:
-            data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
-            logger.critical('ExtractException - A fatal error has occurred during data extraction')
-        except TransformException:
-            data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
-            logger.critical('TransformException - A fatal error has occurred during data transformation')
-        except LoadException:
-            data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
-            logger.critical('LoadException - A fatal error has occurred during data loading')
-        except Exception:
-            data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Failed')
-            logger.critical('A fatal error has occurred', exc_info = True)
-        else:        
-            data_sync_ctl.update_data_sync_control(source_db_conn, source_db_config['schema'], data_sync_id, 'Completed')
+            if not data_sync_ctl.validate_execution_map(execution_map):
+                raise ETLConfigurationException ("ETL configuration validation failed")
+
+            logger.info('Initializing Source Database Connection')        
+            with db_conn.database_connection(source_db_config) as source_db_conn:
+                
+                try:
+                    data_sync_id = data_sync_ctl.get_next_data_sync_id(track_db_conn, track_db_config['schema'])
+                    data_sync_ctl.insert_data_sync_control(track_db_conn, track_db_config['schema'], data_sync_id)
+                    
+                    logger.info('Initializing Target Database Connection')
+                    with db_conn.database_connection(target_db_config) as target_db_conn:
+
+                        for i in domain_loading_order:
+                            domain_folder_path = path.abspath(path.join(domains_path, domains_folders[i]))
+                            domain_name = domains_folders[i].split('_', 1)[1]
+                            logger.info(f'Sync {domain_name} Domain ({i}/{len(domain_loading_order)})')
+                            sync_domain(track_db_conn, track_db_config['schema'], source_db_conn, source_db_config['schema'], target_db_conn, domain_folder_path, domain_name)
+                
+                except ExtractException:
+                    data_sync_ctl.update_data_sync_control(track_db_conn, track_db_config['schema'], data_sync_id, 'Failed')
+                    logger.critical('ExtractException - A fatal error has occurred during data extraction')
+                except TransformException:
+                    data_sync_ctl.update_data_sync_control(track_db_conn, track_db_config['schema'], data_sync_id, 'Failed')
+                    logger.critical('TransformException - A fatal error has occurred during data transformation')
+                except LoadException:
+                    data_sync_ctl.update_data_sync_control(track_db_conn, track_db_config['schema'], data_sync_id, 'Failed')
+                    logger.critical('LoadException - A fatal error has occurred during data loading')
+                except Exception:
+                    data_sync_ctl.update_data_sync_control(track_db_conn, track_db_config['schema'], data_sync_id, 'Failed')
+                    logger.critical('A fatal error has occurred', exc_info = True)
+                else:        
+                    data_sync_ctl.update_data_sync_control(track_db_conn, track_db_config['schema'], data_sync_id, 'Completed')
+                    
+        # Exception when validate_execution_map is false
+        except ETLConfigurationException:
+            print("ETLConfigurationException - Impossible to determine what process will be executed (or no process to be executed)")
+            logger.critical('ETLConfigurationException - Impossible to determine what process will be executed (or no process to be executed)')
     
     sync_elapsed_time = time.time() - sync_start_time
     logger.debug(f'Data Sync process took {timedelta(seconds=sync_elapsed_time)}')
     logger.info('***** Finish Data Sync *****')
         
-def sync_domain(source_db_conn: object,
+def sync_domain(track_db_conn: object,
+                track_db_schema: str,
+                source_db_conn: object,
                 source_db_schema: str,
                 target_db_conn: object,
                 domain_folder_path: str,
@@ -92,7 +190,7 @@ def sync_domain(source_db_conn: object,
     tgt_domain_metadata = meta.open_json_file(path.abspath(path.join(domain_folder_path, 'target.json')))
     
     start_time = time.time()
-    domain_dfs, staging_dfs = extract_domain(source_db_conn, source_db_schema, query_files_path, domain_name, src_domain_metadata)
+    domain_dfs, staging_dfs = extract_domain(track_db_conn,track_db_schema, source_db_conn, source_db_schema,  query_files_path, domain_name, src_domain_metadata)
     elapsed_time = time.time() - start_time
     logger.debug(f'Extraction of {domain_name} took {timedelta(seconds=elapsed_time)}')
     
@@ -102,11 +200,13 @@ def sync_domain(source_db_conn: object,
     logger.debug(f'Transformation of {domain_name} took {timedelta(seconds=elapsed_time)}')
     
     start_time = time.time()
-    load_domain(source_db_conn, source_db_schema, target_db_conn, domain_dfs, domain_name, tgt_domain_metadata, src_domain_metadata.get('leading_column'))
+    load_domain(track_db_conn,track_db_schema,source_db_conn, source_db_schema, target_db_conn, domain_dfs, domain_name, tgt_domain_metadata, src_domain_metadata.get('leading_column'))
     elapsed_time = time.time() - start_time
     logger.debug(f'Loading of {domain_name} took {timedelta(seconds=elapsed_time)}')
     
-def extract_domain(database_conn: object,
+def extract_domain(track_db_conn: object,
+                   track_schema: str,
+                   database_conn: object,
                    database_schema: str,
                    query_files_path: str,
                    domain_name: str,
@@ -132,13 +232,18 @@ def extract_domain(database_conn: object,
     
     try:
         # Getting metadata for each extraction table defined in the domain metadata
-        tables_metadata = {table['file_name'].split('.')[0]: table for table in domain_metadata['tables'] if table['query_type'] == 'extract'}
+        tables_metadata = {table['reference_table']: table for table in domain_metadata['tables'] if table['query_type'] == 'extract'}
         # Getting incremental data to be used in the extraction
-        incremental_dt = data_sync_ctl.get_incrementa_dt(database_conn, database_schema)
+        print('--- DATABASE SCHEMA IS:' + track_schema)
+        incremental_dt = data_sync_ctl.get_incrementa_dt(track_db_conn, track_schema)
         params = {'incremental_dt': incremental_dt}
+        
+        print('--- incremental_dt IS:' + incremental_dt.strftime("%B %d, %Y"))
             
         for table_name in tables_metadata:
-            logger.info(f'{table_name} Table Extraction')
+            logger.info(f'{table_name} : Table Extraction')
+            print('----- Loading query: ')
+            print(path.abspath(path.join(query_files_path, tables_metadata[table_name]['file_name'])))
             # Extracting all data using incremental date from last completed execution
             table_df = pd.read_sql(meta.get_inc_dt_qry_from_file(tables_metadata[table_name],
                                                                 path.abspath(path.join(query_files_path, 
@@ -148,7 +253,10 @@ def extract_domain(database_conn: object,
         
             if domain_metadata.get('leading_column'):
                 # Extracting records that had some errors and were marked for retry based on the leading column defined for the domain
-                retry_df = extract_retry_records(database_conn,
+                print('----- Extracting records by leading column: ')
+                retry_df = extract_retry_records(track_db_conn,
+                                                track_schema,
+                                                database_conn,
                                                 database_schema,
                                                 domain_name,
                                                 meta.get_retry_records_qry_from_file(tables_metadata[table_name],
@@ -156,7 +264,10 @@ def extract_domain(database_conn: object,
                                                                                                             tables_metadata[table_name]['file_name']))))
             else:
                 # Extracting records that had some errors and were marked for retry based on the table's primary key
-                retry_df = extract_retry_records(database_conn,
+                print('----- Extracting records by PK: ')
+                retry_df = extract_retry_records(track_db_conn,
+                                                track_schema,
+                                                database_conn,
                                                 database_schema,
                                                 table_name.lower(),
                                                 meta.get_retry_records_qry_from_file(tables_metadata[table_name],
@@ -167,7 +278,8 @@ def extract_domain(database_conn: object,
             logger.info(f'{len(domain_dfs[table_name].index)} rows extracted')
         
         # Getting metadata for each stagging/lookup table defined in the domain metadata 
-        stagings_metadata = {table['file_name'].split('.')[0]: table for table in domain_metadata['tables'] if table['query_type'] in ('staging', 'lookup')}
+        print('--- Staging Dataframe gathering: ')
+        stagings_metadata = {table['reference_table']: table for table in domain_metadata['tables'] if table['query_type'] in ('staging', 'lookup')}
         staging_dfs = {}   
         
         for table_name in stagings_metadata:
@@ -200,7 +312,9 @@ def extract_domain(database_conn: object,
     else:
         return domain_dfs, staging_dfs
 
-def extract_retry_records(database_conn: object,
+def extract_retry_records(track_db_conn: object,
+                          track_schema: str,
+                          database_conn: object,
                           database_schema: str,
                           entity_name: str,
                           retry_records_qry: str) -> pd.DataFrame:
@@ -216,12 +330,13 @@ def extract_retry_records(database_conn: object,
     Returns:
         pd.DataFrame: Table data retrieved for retry records
     """
+    logger.info('-- Extract Retry records from old execution errors')
     retry_df = pd.DataFrame()
-    data_sync_id = data_sync_ctl.get_last_completed_data_sync_id(database_conn, database_schema)
+    data_sync_id = data_sync_ctl.get_last_completed_data_sync_id(track_db_conn, track_schema)
     
     if data_sync_id:
         # Getting all entity ids that were marked to be retrieved
-        entities = data_sync_ctl.get_entity_id_for_retry(database_conn, database_schema, data_sync_id, entity_name)       
+        entities = data_sync_ctl.get_entity_id_for_retry(track_db_conn, track_schema, data_sync_id, entity_name)       
         for entity_id in entities:
             # Retrieving data for each entity id, one at a time
             df = pd.read_sql(retry_records_qry, database_conn.engine, params=entity_id)
@@ -245,6 +360,7 @@ def transform_domain(domain_dfs: dict,
         dict: Dictionary with all target tables data transformed, ready to be loaded (as Pandas DataFrames objects)
     """
     logger.info('***** Start Transformation Session *****')
+    
     for key in domain_dfs:
         # Running transformations for each target table
         domain_dfs[key] = transf.run_transformations(domain_dfs[key], staging_dfs, key)
@@ -271,23 +387,30 @@ def adjust_columns(domain_dfs: dict,
         dict: Dictionary with all target tables columns adjusted (as Pandas DataFrames objects)
     """
     logger.info('Adjusting and Mapping Columns')
+    
+    # Check metadata
     try:
         for table_metadata in domain_metadata['tables']:
             columns_map = table_metadata['columns']
             rename_columns = {columns_map[key]: key for key in columns_map}
             # Renaming columns as mapped in the target domain metadata
             domain_dfs[table_metadata['table_name']].rename(columns=rename_columns, inplace=True)
-            # Removing unwanted columns as mapped in the target domain metadata
+            #domain_dfs[table_metadata['table_name']].rename(columns={"COLLECTION_CLI_NUMBER": "collection_client_number"}, inplace=True)
+          
+          # Removing unwanted columns as mapped in the target domain metadata
             domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']][list(columns_map)]
             domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']].sort_values(by=table_metadata['primary_key'])
             domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']].replace(np.nan, None)
+            domain_dfs[table_metadata['table_name']] = domain_dfs[table_metadata['table_name']].replace('NaT', '') # Include it specially for data/time structures
     except Exception:
         logger.critical('Error while Adjusting and Mapping Columns', exc_info=True)
         raise TransformException
     else:
         return domain_dfs
 
-def load_domain(source_database_conn: object,
+def load_domain(track_database_conn: object,
+                track_database_schema: str,
+                source_database_conn: object,
                 source_database_schema: str,
                 target_database_conn: object,
                 domain_dfs: dict,
@@ -330,8 +453,8 @@ def load_domain(source_database_conn: object,
                     target_database_conn.rollback()
                     # Marking the leading value that had an error for retry
                     entity_id = {src_leading_column: value}
-                    logger.error(f'Domain Loading ERROR - {leading_column} = {value} - Error message: {e}')
-                    data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
+                    logger.error(f'Domain Loading SQL ALCHEMY ERROR - {leading_column} = {value} - Error message: {e}')
+                    data_sync_ctl.insert_error_record(track_database_conn, track_database_schema, domain_name, entity_id)
                 else:        
                     target_database_conn.commit()
             else:
@@ -352,7 +475,7 @@ def load_domain(source_database_conn: object,
                         pk_values = meta.build_stm_pk_params(tables_metadata[i], row)
                         entity_id = {tables_metadata[i]['columns'][pk_column]: pk_values[pk_column] for pk_column in pk_values}
                         logger.error(f'Table Loading ERROR - {table_name} - Entity ID: {entity_id} - Error message: {e}')
-                        data_sync_ctl.insert_error_record(source_database_conn, source_database_schema, domain_name, entity_id)
+                        data_sync_ctl.insert_error_record(track_database_conn, source_database_schema, domain_name, entity_id)
                     else:
                         target_database_conn.commit()
             else:

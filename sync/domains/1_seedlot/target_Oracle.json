@@ -4,19 +4,14 @@
         {
             "table_name": "SEEDLOT",
             "loading_order": 1,
-            "schema": "spar",
+            "schema": "THE",
             "primary_key": ["SEEDLOT_NUMBER"],
-			"non_existing_columns":{
-				"NON_ORCHARD_POLLEN_CONTAM_PCT":"non_orchard_pollen_contam_pct"
-			},
             "columns":{        
                 "SEEDLOT_NUMBER": "seedlot_number",
                 "SEEDLOT_STATUS_CODE": "seedlot_status_code",
                 "VEGETATION_CODE": "vegetation_code",
                 "GENETIC_CLASS_CODE": "genetic_class_code",
                 "TO_BE_REGISTRD_IND": "to_be_registrd_ind",
-                "APPROVED_TIMESTAMP": "approved_timestamp",
-                "APPROVED_USERID": "approved_userid",
                 "BC_SOURCE_IND": "bc_source_ind",
                 "LONGITUDE_DEGREES": "longitude_degrees",
                 "LONGITUDE_MINUTES": "longitude_minutes",
@@ -40,11 +35,15 @@
                 "ELEVATION_MIN": "elevation_min",
                 "ELEVATION_MAX": "elevation_max",
                 "SEED_PLAN_UNIT_ID": "seed_plan_unit_id",
+                "ORCHARD_ID": "orchard_id",
+                "SECONDARY_ORCHARD_ID": "secondary_orchard_id",
                 "COLLECTION_CLI_NUMBER": "collection_client_number",
                 "COLLECTION_CLI_LOCN_CD": "collection_locn_code",
                 "COLLECTION_START_DATE": "collection_start_date",
                 "COLLECTION_END_DATE": "collection_end_date",
-				"COLLECTION_LAT_DEG": "collection_latitude_deg",
+                "CONE_COLLECTION_METHOD_CODE": "cone_collection_method_code",
+                "CONE_COLLECTION_METHOD2_CODE": "cone_collection_method2_code",
+                "COLLECTION_LAT_DEG": "collection_latitude_deg",
                 "COLLECTION_LAT_MIN": "collection_latitude_min",
                 "COLLECTION_LAT_SEC": "collection_latitude_sec",
                 "COLLECTION_LATITUDE_CODE": "collection_latitude_code",
@@ -101,6 +100,119 @@
                 "ENTRY_TIMESTAMP": "entry_timestamp",
                 "UPDATE_USERID": "update_userid",
                 "UPDATE_TIMESTAMP": "update_timestamp",
+                "REVISION_COUNT": "revision_count"
+            }
+        },
+        {
+            "table_name": "SEEDLOT_GENETIC_WORTH",
+            "loading_order": 2,
+            "schema": "THE",
+            "primary_key": ["SEEDLOT_NUMBER", "GENETIC_WORTH_CODE"],
+            "columns":{    
+                "SEEDLOT_NUMBER": "seedlot_number",    
+                "GENETIC_WORTH_CODE": "genetic_worth_code",
+                "GENETIC_WORTH_RTNG": "genetic_quality_value",
+                "ENTRY_USERID": "entry_userid",
+                "ENTRY_TIMESTAMP": "entry_timestamp",
+                "UPDATE_USERID": "update_userid",
+                "UPDATE_TIMESTAMP": "update_timestamp",
+                "REVISION_COUNT": "revision_count"
+            }
+        },
+        {
+            "table_name": "SEEDLOT_OWNER_QUANTITY",
+            "loading_order": 3,
+            "schema": "THE",
+            "primary_key": ["SEEDLOT_NUMBER", "CLIENT_NUMBER", "CLIENT_LOCN_CODE"],
+            "columns":{        
+                "SEEDLOT_NUMBER": "seedlot_number",
+                "CLIENT_NUMBER": "owner_client_number",
+                "CLIENT_LOCN_CODE": "owner_locn_code",
+                "ORIGINAL_PCT_OWNED": "original_pct_owned",
+                "ORIGINAL_PCT_RSRVD": "original_pct_rsrvd",
+                "ORIGINAL_PCT_SRPLS": "original_pct_srpls",
+                "METHOD_OF_PAYMENT_CODE": "method_of_payment_code",
+                "SPAR_FUND_SRCE_CODE": "spar_fund_srce_code",
+                "REVISION_COUNT": "revision_count",
+                "QTY_RESERVED": "QTY_RESERVED",
+                "QTY_RSRVD_CMTD_PLN": "QTY_RSRVD_CMTD_PLN",
+                "QTY_RSRVD_CMTD_APR": "QTY_RSRVD_CMTD_APR",
+                "QTY_SURPLUS": "QTY_SURPLUS",
+                "QTY_SRPLS_CMTD_PLN": "QTY_SRPLS_CMTD_PLN",
+                "QTY_SRPLS_CMTD_APR": "QTY_SRPLS_CMTD_APR"
+            }
+        },
+        {
+            "table_name": "SEEDLOT_PARENT_TREE",
+            "loading_order": 4,
+            "schema": "THE",
+            "primary_key": ["SEEDLOT_NUMBER", "PARENT_TREE_ID"],
+            "columns":{        
+                "SEEDLOT_NUMBER": "seedlot_number",
+                "PARENT_TREE_ID": "parent_tree_id",
+                "CONE_COUNT": "cone_count",
+                "POLLEN_COUNT": "pollen_count",
+                "SMP_SUCCESS_PCT": "smp_success_pct",
+                "NON_ORCHARD_POLLEN_CONTAM_PCT": "non_orchard_pollen_contam_pct",
+                "TOTAL_GENETIC_WORTH_CONTRIB": "TOTAL_GENETIC_WORTH_CONTRIB",
+                "REVISION_COUNT": "revision_count"
+            }
+        },
+        {
+            "table_name": "SEEDLOT_PARENT_TREE_GEN_QLTY",
+            "loading_order": 5,
+            "schema": "THE",
+            "primary_key": ["SEEDLOT_NUMBER", "PARENT_TREE_ID", "GENETIC_TYPE_CODE", "GENETIC_WORTH_CODE"],
+            "columns":{        
+                "SEEDLOT_NUMBER": "seedlot_number",
+                "PARENT_TREE_ID": "parent_tree_id",
+                "GENETIC_TYPE_CODE": "genetic_type_code",
+                "GENETIC_WORTH_CODE": "genetic_worth_code",
+                "SEED_PLAN_UNIT_ID": "seed_plan_unit_id",
+                "GENETIC_QUALITY_VALUE": "genetic_quality_value",
+                "ESTIMATED_IND": "estimated_ind",
+                "UNTESTED_IND": "untested_ind",
+                "REVISION_COUNT": "revision_count"
+            }
+        },
+        {
+            "table_name": "SEEDLOT_PARENT_TREE_SMP_MIX",
+            "loading_order": 6,
+            "schema": "THE",
+            "primary_key": ["SEEDLOT_NUMBER", "PARENT_TREE_ID", "GENETIC_TYPE_CODE", "GENETIC_WORTH_CODE"],
+            "columns":{        
+                "SEEDLOT_NUMBER": "seedlot_number",
+                "PARENT_TREE_ID": "parent_tree_id",
+                "GENETIC_TYPE_CODE": "genetic_type_code",
+                "GENETIC_WORTH_CODE": "genetic_worth_code",
+                "SMP_MIX_VALUE": "genetic_quality_value",
+                "REVISION_COUNT": "revision_count"
+            }
+        },
+        {
+            "table_name": "SMP_MIX",
+            "loading_order": 7,
+            "schema": "THE",
+            "primary_key": ["SEEDLOT_NUMBER", "PARENT_TREE_ID"],
+            "columns":{        
+                "SEEDLOT_NUMBER": "seedlot_number",
+                "PARENT_TREE_ID": "parent_tree_id",
+                "AMOUNT_OF_MATERIAL": "amount_of_material",
+                "REVISION_COUNT": "revision_count"
+            }
+        },
+        {
+            "table_name": "SMP_MIX_GEN_QLTY",
+            "loading_order": 8,
+            "schema": "THE",
+            "primary_key": ["SEEDLOT_NUMBER", "PARENT_TREE_ID", "GENETIC_TYPE_CODE", "GENETIC_WORTH_CODE"],
+            "columns":{        
+                "SEEDLOT_NUMBER": "seedlot_number",
+                "PARENT_TREE_ID": "parent_tree_id",
+                "GENETIC_TYPE_CODE": "genetic_type_code",
+                "GENETIC_WORTH_CODE": "genetic_worth_code",
+                "GENETIC_QUALITY_VALUE": "genetic_quality_value",
+                "ESTIMATED_IND": "estimated_ind",
                 "REVISION_COUNT": "revision_count"
             }
         }

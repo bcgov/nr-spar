@@ -6,7 +6,7 @@ x-var:
   - &POSTGRES_PASSWORD
     default
   - &POSTGRES_DATABASE
-    postgres
+    spar
 
 x-postgres-vars: &postgres-vars
   POSTGRES_HOST: database
@@ -26,6 +26,8 @@ services:
   database:
     image: postgres:15
     container_name: database
+    volumes:
+      - ./database/init_db:/docker-entrypoint-initdb.d
     environment:
       <<: *postgres-vars
     healthcheck:
@@ -37,7 +39,8 @@ services:
       context: ./sync
     container_name: sync
     environment:
-      test_mode: 1
+      test_mode: ${test_mode:-0}
+      EXECUTION_ID: ${EXECUTION_ID:-0}
       ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
       ORACLE_PASSWORD: ${ORACLE_PASSWORD:-password}
       ORACLE_PORT: ${ORACLE_PORT:-1543}
