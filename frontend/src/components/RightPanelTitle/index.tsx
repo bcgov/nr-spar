@@ -16,7 +16,7 @@ const RightPanelTitle = ({ title, closeFn }: RightPanelTitleProps) => (
       {title}
     </h4>
     <div className="right-title-buttons">
-      <IconButton kind="ghost" label="Close" onClick={closeFn} align="bottom">
+      <IconButton className="close-btn" kind="ghost" label="Close" onClick={closeFn} align="bottom">
         <Close />
       </IconButton>
     </div>

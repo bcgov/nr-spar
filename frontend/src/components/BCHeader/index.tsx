@@ -18,6 +18,8 @@ import RightPanelTitle from '../RightPanelTitle';
 import MyProfile from '../MyProfile';
 import NotificationsCentral from '../NotificationsCentral';
 import PanelSectionName from '../PanelSectionName';
+import useWindowSize from '../../hooks/UseWindowSize';
+import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 
 import {
   HOME_LINK,
@@ -28,12 +30,15 @@ import {
   supportItems
 } from './constants';
 import { RightPanelType, HearderContainerProps } from './definitions';
+import UserButton from './UserButton';
 
 import './styles.scss';
 
 const BCHeader = () => {
   const [rightPanel, setRightPanel] = useState<RightPanelType>(defaultPanelState);
   const [overlay, setOverlay] = useState<boolean>(false);
+
+  const windowSize = useWindowSize();
 
   const handleRightPanel = (panel: keyof RightPanelType) => {
     // Using clearPanelState here so that it cleans all other
@@ -97,27 +102,31 @@ const BCHeader = () => {
             <HeaderGlobalAction
               aria-label={componentTexts.searchAriaLabel}
               data-testid="header-button__search"
-              className="btn-disabled"
+              className="header-action-btn btn-disabled"
             >
               <Icons.Search size={20} />
             </HeaderGlobalAction>
             <HeaderGlobalAction
               aria-label={componentTexts.notifications.title}
               data-testid="header-button__notifications"
-              className="btn-disabled"
-              onClick={null}
+              className="header-action-btn btn-disabled"
               isActive={rightPanel.notifications}
             >
               <Icons.Notification size={20} />
             </HeaderGlobalAction>
             <HeaderGlobalAction
-              aria-label={componentTexts.profile.controllerAriaLabel}
-              tooltipAlignment="end"
+              className="user-header-global-action"
+              aria-label={componentTexts.profile.headerAriaLabel}
               data-testid="header-button__user"
+              tooltipAlignment={
+                windowSize.innerWidth > MEDIUM_SCREEN_WIDTH
+                  ? 'center'
+                  : 'end'
+              }
               onClick={() => handleRightPanel('myProfile')}
               isActive={rightPanel.myProfile}
             >
-              <Icons.UserAvatar size={20} />
+              <UserButton />
             </HeaderGlobalAction>
           </HeaderGlobalBar>
           <HeaderPanel

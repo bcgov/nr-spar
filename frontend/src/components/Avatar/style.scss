@@ -14,12 +14,21 @@
 .initial-avatar-sm {
   width: 2rem;
   height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+  color: var(--#{vars.$bcgov-prefix}-text-text-primary, colors.$gray-100);
 }
 
 .initial-avatar-md {
   width: 3rem;
   height: 3rem;
+  min-width: 3rem;
+  min-height: 3rem;
   @include type.type-style('heading-02');
+  color: var(--#{vars.$bcgov-prefix}-text-text-primary, colors.$gray-100);
 }
 
 .initial-bg-a {

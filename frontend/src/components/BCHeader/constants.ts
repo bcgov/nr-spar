@@ -120,7 +120,7 @@ export const componentTexts = {
   },
   profile: {
     title: 'My Profile',
-    headerAriaLabel: 'My Profile Tab',
+    headerAriaLabel: 'My Profile',
     controllerAriaLabel: 'User Settings'
   }
 };

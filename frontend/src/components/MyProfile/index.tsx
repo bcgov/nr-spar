@@ -39,7 +39,7 @@ const MyProfile = () => {
   };
 
   return (
-    <>
+    <div className="my-profile-container">
       <div className="user-info-section">
         <div className="user-avatar">
           <Avatar
@@ -49,18 +49,14 @@ const MyProfile = () => {
         </div>
         <div className="user-data">
           <p className="user-name">{`${user?.firstName} ${user?.lastName}`}</p>
-          {
-            user?.provider === LoginProviders.IDIR && (
-              <p>{`IDIR: ${user?.providerUsername}`}</p>
-            )
-          }
-          {
-            user?.provider === LoginProviders.BCEID_BUSINESS && (
-              <p>{`BCeID: ${user?.providerUsername}`}</p>
-            )
-          }
-          <p>{user?.email}</p>
-          <p>{selectedClientRoles!.clientName}</p>
+          <p className="user-info-seconday">
+            {
+              user?.provider === LoginProviders.IDIR
+                ? `IDIR: ${user?.providerUsername}`
+                : `BCeID: ${user?.providerUsername}`
+            }
+          </p>
+          <p className="user-info-seconday">{user?.email}</p>
         </div>
       </div>
       <hr className="divisory" />
@@ -76,7 +72,7 @@ const MyProfile = () => {
             Change theme
           </SideNavLink>
           <SideNavLink
-            renderIcon={Icons.UserFollow}
+            renderIcon={Icons.Exit}
             onClick={() => logOut()}
           >
             Log out
@@ -105,7 +101,7 @@ const MyProfile = () => {
           }
         </ul>
       </nav>
-    </>
+    </div>
   );
 };
 
