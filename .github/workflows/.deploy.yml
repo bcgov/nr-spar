@@ -31,6 +31,11 @@ on:
         required: false
         type: number
 
+    outputs:
+      triggered:
+        description: 'Has a deployment has been triggered?'
+        value: ${{ jobs.deploys.outputs.triggered }}
+
 jobs:
   init:
     name: Initialize

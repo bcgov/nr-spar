@@ -32,8 +32,6 @@ jobs:
     needs: [builds]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
-    outputs:
-      triggered: ${{ steps.trigger.outputs.triggered }}
 
   tests:
     name: Tests
