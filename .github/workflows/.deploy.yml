@@ -102,7 +102,7 @@ jobs:
             parameters:
               -p FAM_MODDED_ZONE=${{ inputs.target || needs.init.outputs.modded-tag }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
-              -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || 'dev' }}
+              -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
           - name: oracle-api
