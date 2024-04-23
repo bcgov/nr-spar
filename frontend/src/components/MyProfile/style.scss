@@ -3,12 +3,8 @@
 
 .my-profile-container {
   .user-info-section {
+    display: flex;
     padding: 1rem;
-    display: flex;
-  }
-
-  .user-info-section {
-    display: flex;
     flex-direction: row;
     align-items: center;
 

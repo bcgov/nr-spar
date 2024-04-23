@@ -64,6 +64,10 @@
   .#{vars.$bcgov-prefix}--header__action--active {
     background: var(--#{vars.$bcgov-prefix}-layer-02);
     border: 0;
+
+    .client-name{
+      color: var(--#{vars.$bcgov-prefix}-text-primary, colors.$gray-100);
+    }
   }
 
   .#{vars.$bcgov-prefix}--header-panel--expanded.notifications-panel,
@@ -122,10 +126,6 @@
     color: colors.$white;
   }
 
-  .#{vars.$bcgov-prefix}--header__action--active {
-    color: black;
-  }
-
   .#{vars.$bcgov-prefix}--header__menu-trigger svg,
   .user-header-global-action.#{vars.$bcgov-prefix}--btn.#{vars.$bcgov-prefix}--btn--icon-only:hover svg,
   .user-header-global-action.#{vars.$bcgov-prefix}--btn.#{vars.$bcgov-prefix}--btn--icon-only svg,
@@ -164,7 +164,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      text-overflow: ellipsis;
       @include type.type-style('body-compact-01');
       margin: 0 0.5rem;
     }
