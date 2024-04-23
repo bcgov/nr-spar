@@ -22,6 +22,7 @@ import ROUTES from './routes/constants';
 import FourOhFour from './views/FourOhFour';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { ThemePreference } from './utils/ThemePreference';
+import LoginRoleSelection from './views/LoginRoleSelection';
 
 Amplify.configure(awsconfig);
 
@@ -34,11 +35,18 @@ const App: React.FC = () => {
   const HTTP_STATUS_TO_NOT_RETRY = [400, 401, 403, 404];
   const MAX_RETRIES = 3;
 
-  const { signed, isCurrentAuthUser } = useContext(AuthContext);
+  const { signed, isCurrentAuthUser, selectedClientRoles } = useContext(AuthContext);
 
   useEffect(() => {
     isCurrentAuthUser(window.location.pathname);
   }, []);
+
+  const roleSelectionRouter = createBrowserRouter([
+    {
+      path: ROUTES.ALL_ROUTES,
+      element: <LoginRoleSelection />
+    }
+  ]);
 
   const signedRouter = createBrowserRouter([
     {
@@ -88,12 +96,22 @@ const App: React.FC = () => {
     }
   );
 
+  const getBrowserRouter = () => {
+    if (selectedClientRoles) {
+      return signedRouter;
+    }
+    if (!signed) {
+      return notSignedRouter;
+    }
+    return roleSelectionRouter;
+  };
+
   return (
     <ClassPrefix prefix={prefix}>
       <ThemePreference>
         <QueryClientProvider client={queryClient}>
           <ToastContainer />
-          <RouterProvider router={signed ? signedRouter : notSignedRouter} />
+          <RouterProvider router={getBrowserRouter()} />
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </ThemePreference>
