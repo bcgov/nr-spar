@@ -11,7 +11,7 @@ const LoginOrgSelection = () => {
   const { user } = useContext(AuthContext);
 
   return (
-    <FlexGrid className="login-role-selection-grid">
+    <FlexGrid className="login-org-selection-grid">
       <Row className="row-container">
         <Column className="col-container" sm={4} md={6} lg={14} xlg={10} max={8}>
           <section className="title-section">

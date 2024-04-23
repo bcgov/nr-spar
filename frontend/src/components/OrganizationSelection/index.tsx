@@ -196,7 +196,7 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
    * MAIN COMPONENT
    */
   return (
-    <FlexGrid className="role-selection-grid">
+    <FlexGrid className="org-selection-grid">
       {
         user!.clientRoles.length > MIN_CLIENTS_SHOW_SEARCH
           ? (
