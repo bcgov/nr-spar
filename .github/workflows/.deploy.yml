@@ -4,65 +4,47 @@ on:
   workflow_call:
     inputs:
       ### Required
-      release:
-        description: Deployment release; usually PR number, test or prod
+      target:
+        description: Deployment target; usually PR number, test or prod
         required: true
         type: string
 
-      # ### Typical / recommended
-      # autoscaling:
-      #   description: Autoscaling enabled or not for the deployments
-      #   required: false
-      #   type: boolean
-      #   default: true
-      # environment:
-      #   description: Environment name; omit for PRs
-      #   required: false
-      #   type: string
-      # tag:
-      #   description: Container tag; usually PR number
-      #   required: false
-      #   type: string
-      #   default: ${{ github.event.number }}
-      # triggers:
-      #   description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
-      #   required: false
-      #   type: string
+      ### Typical / recommended
+      environment:
+        description: Environment name; omit for PRs
+        required: false
+        type: string
+      tag:
+        description: Container tag; usually PR number
+        required: false
+        type: string
+        default: ${{ inputs.target || github.event.number }}
+      triggers:
+        description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
+        required: false
+        type: string
 
-      # ### Usually a bad idea / not recommended
-      # directory:
-      #   description: 'Chart directory'
-      #   default: 'charts/${{ github.event.repository.name }}'
-      #   required: false
-      #   type: string
-      # timeout-minutes:
-      #   description: 'Timeout minutes'
-      #   default: 10
-      #   required: false
-      #   type: number
-      # values:
-      #   description: 'Values file'
-      #   default: 'values.yaml'
-      #   required: false
-      #   type: string
-
-# env:
-#   repo_release: ${{ github.event.repository.name }}-${{ inputs.release }}
-#   package_tag: ${{ inputs.tag }}
+      ### Usually a bad idea / not recommended
+      timeout-minutes:
+        description: 'Timeout minutes'
+        default: 10
+        required: false
+        type: number
 
 jobs:
   init:
     name: Initialize
+    environment: ${{ inputs.environment }}
     outputs:
       modded-tag: ${{ steps.mod-tag.outputs.modded-tag }}
-    runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
+    runs-on: ubuntu-22.04
     steps:
       - name: Get PR Number Mod 50
         if: github.event_name == 'pull_request'
         id: mod-tag
-        run: echo "modded-tag=$(( ${{ github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
+        run: echo "modded-tag=$(( ${{ inputs.target || github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
 
       - name: OpenShift Init
         uses: bcgov-nr/action-deployer-openshift@v2.3.0
@@ -73,7 +55,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
-            -p ZONE=${{ inputs.release || github.event.number }}
+            -p ZONE=${{ inputs.target || github.event.number }}
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
@@ -84,11 +66,12 @@ jobs:
 
   deploys:
     name: Deploys
+    environment: ${{ inputs.environment }}
     needs: [builds, init]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: ${{ input.timeout-minutes }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
@@ -102,7 +85,7 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p BUILD=snapshot-${{ github.event.number }}
+              -p BUILD=snapshot-${{ inputs.target || github.event.number }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "actuator/health"
           - name: fluentbit
@@ -112,16 +95,16 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p FAM_MODDED_ZONE=${{ inputs.release || needs.init.outputs.modded-tag }}
-              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ github.event.number }}
-              -p VITE_NRSPARWEBAPP_VERSION=dev
+              -p FAM_MODDED_ZONE=${{ inputs.target || needs.init.outputs.modded-tag }}
+              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
+              -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || "dev" }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ github.event.number }}
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             triggers: ('oracle-api/')
             verification_path: "actuator/health"
@@ -138,11 +121,12 @@ jobs:
           parameters:
             -p MIN_REPLICAS=1
             -p MAX_REPLICAS=2
-            -p ZONE=${{ github.event.number }}
-            -p TAG=${{ github.event.number }}
+            -p ZONE=${{ inputs.target || github.event.number }}
+            -p TAG=${{ inputs.target || github.event.number }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers || '("backend/" "common/" "database/" "frontend/" "oracle-api/")' }}
           verification_path: ${{ matrix.verification_path}}
+
       - id: trigger
         if: matrix.name == 'frontend'
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
