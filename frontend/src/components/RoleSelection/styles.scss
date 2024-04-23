@@ -27,6 +27,10 @@
 
   .search-row {
     margin-bottom: 2rem;
+
+    input::placeholder {
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    }
   }
 
   .org-items-row {

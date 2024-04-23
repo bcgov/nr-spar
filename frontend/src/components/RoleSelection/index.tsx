@@ -228,7 +228,7 @@ const RoleSelection = ({ simpleView }: RoleSelectionProps) => {
               <Column>
                 <Button
                   className="action-btn"
-                  kind="secondary"
+                  kind="ghost"
                   size="lg"
                   onClick={signOut}
                 >
@@ -249,7 +249,6 @@ const RoleSelection = ({ simpleView }: RoleSelectionProps) => {
             </Row>
           )
       }
-
     </FlexGrid>
   );
 };
