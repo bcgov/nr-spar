@@ -6,20 +6,20 @@ import {
 import * as Icons from '@carbon/icons-react';
 
 import AuthContext from '../../contexts/AuthContext';
-import Avatar from '../Avatar';
 import PanelSectionName from '../PanelSectionName';
 import { useThemePreference } from '../../utils/ThemePreference';
 import LoginProviders from '../../types/LoginProviders';
 import { env } from '../../env';
+import RoleSelection from '../RoleSelection';
+import Avatar from '../Avatar';
 
 import './style.scss';
-import RoleSelection from '../RoleSelection';
 
 const MyProfile = () => {
   const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
 
   const { theme, setTheme } = useThemePreference();
-  const { user, signOut, selectedClientRoles } = useContext(AuthContext);
+  const { user, signOut } = useContext(AuthContext);
 
   const changeTheme = () => {
     if (theme === 'g10') {
