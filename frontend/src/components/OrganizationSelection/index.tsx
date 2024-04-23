@@ -21,7 +21,7 @@ import OrganizationItem from './OrganizationItem';
 
 import './styles.scss';
 
-const RoleSelection = ({ simpleView }: RoleSelectionProps) => {
+const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
   const navigate = useNavigate();
   const {
     user, setClientRoles, signOut, selectedClientRoles
@@ -253,4 +253,4 @@ const RoleSelection = ({ simpleView }: RoleSelectionProps) => {
   );
 };
 
-export default RoleSelection;
+export default OrganizationSelection;

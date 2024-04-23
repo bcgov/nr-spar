@@ -10,7 +10,7 @@ import PanelSectionName from '../PanelSectionName';
 import { useThemePreference } from '../../utils/ThemePreference';
 import LoginProviders from '../../types/LoginProviders';
 import { env } from '../../env';
-import RoleSelection from '../RoleSelection';
+import OrganizationSelection from '../OrganizationSelection';
 import Avatar from '../Avatar';
 
 import './style.scss';
@@ -66,7 +66,7 @@ const MyProfile = () => {
           <li>
             <PanelSectionName title="Select organization" light />
             <div className="org-selection-container">
-              <RoleSelection simpleView />
+              <OrganizationSelection simpleView />
             </div>
           </li>
           <li>

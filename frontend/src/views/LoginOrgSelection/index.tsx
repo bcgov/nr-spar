@@ -1,13 +1,13 @@
 import React, { useContext } from 'react';
 import { FlexGrid, Row, Column } from '@carbon/react';
 
-import RoleSelection from '../../components/RoleSelection';
+import OrganizationSelection from '../../components/OrganizationSelection';
 import AuthContext from '../../contexts/AuthContext';
 import { TEXT } from './constants';
 
 import './styles.scss';
 
-const LoginRoleSelection = () => {
+const LoginOrgSelection = () => {
   const { user } = useContext(AuthContext);
 
   return (
@@ -22,11 +22,11 @@ const LoginRoleSelection = () => {
               {`${user?.firstName} ${user?.lastName} (${user?.providerUsername}) ${TEXT.subtitle}`}
             </p>
           </section>
-          <RoleSelection />
+          <OrganizationSelection />
         </Column>
       </Row>
     </FlexGrid>
   );
 };
 
-export default LoginRoleSelection;
+export default LoginOrgSelection;
