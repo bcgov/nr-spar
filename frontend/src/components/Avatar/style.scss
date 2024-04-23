@@ -9,6 +9,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  color: var(--#{vars.$bcgov-prefix}-text-text-primary, colors.$gray-100);
 }
 
 .initial-avatar-sm {
@@ -19,7 +20,6 @@
   font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.125rem;
-  color: var(--#{vars.$bcgov-prefix}-text-text-primary, colors.$gray-100);
 }
 
 .initial-avatar-md {
@@ -28,7 +28,6 @@
   min-width: 3rem;
   min-height: 3rem;
   @include type.type-style('heading-02');
-  color: var(--#{vars.$bcgov-prefix}-text-text-primary, colors.$gray-100);
 }
 
 .initial-bg-a {
