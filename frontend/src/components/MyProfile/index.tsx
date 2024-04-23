@@ -13,6 +13,7 @@ import LoginProviders from '../../types/LoginProviders';
 import { env } from '../../env';
 
 import './style.scss';
+import RoleSelection from '../RoleSelection';
 
 const MyProfile = () => {
   const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
@@ -62,9 +63,16 @@ const MyProfile = () => {
       <hr className="divisory" />
       <nav className="account-nav">
         <ul>
-          <PanelSectionName title="Change account" light />
-          <div>haha</div>
-          <PanelSectionName title="Options" light />
+          <li>
+            <PanelSectionName title="Select organization" light />
+            <div className="org-selection-container">
+              <RoleSelection simpleView />
+            </div>
+          </li>
+          <li>
+            <hr className="divisory" />
+            <PanelSectionName title="Options" light />
+          </li>
           <SideNavLink
             renderIcon={Icons.DataEnrichment}
             onClick={() => changeTheme()}
@@ -81,7 +89,9 @@ const MyProfile = () => {
             appVersion === 'dev'
               ? (
                 <>
-                  <PanelSectionName title="Dev Zone" light />
+                  <li>
+                    <PanelSectionName title="Dev Zone" light />
+                  </li>
                   <SideNavLink
                     renderIcon={Icons.Pen}
                     // eslint-disable-next-line no-console

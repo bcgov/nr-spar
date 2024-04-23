@@ -12,6 +12,12 @@
     height: 20vh;
     overflow-y: scroll;
     padding: 0;
+
+    .empty-section-subtitle {
+      p {
+        font-size: 0.875rem;
+      }
+    }
   }
 
   .#{vars.$bcgov-prefix}--btn.#{vars.$bcgov-prefix}--skeleton {
@@ -92,6 +98,7 @@
   .icon-and-name-col {
     display: flex;
     flex-direction: row;
+    align-items: center;
 
     .org-item-icon,
     .org-item-pictogram,
@@ -117,6 +124,9 @@
       vertical-align: middle;
       font-size: 1rem;
       line-height: 1.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 

@@ -11,6 +11,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+
     .user-data {
       margin-left: 2rem;
 
@@ -38,6 +39,46 @@
       fill: var(--#{vars.$bcgov-prefix}-link-primary);
       width: 1rem;
       height: 1rem;
+    }
+
+    .org-selection-container {
+      padding: 0 1rem 1rem 1rem;
+
+      .role-selection-grid {
+        min-height: 0;
+
+        .org-items-col {
+          border: none;
+          max-height: 40vh;
+          margin-bottom: 0;
+        }
+
+        .search-row {
+          margin-bottom: 1rem;
+        }
+
+        .org-item-icon,
+        .org-item-pictogram,
+        .icon-error {
+          width: 1rem;
+          height: 1rem;
+          min-width: 1rem;
+          min-height: 1rem;
+        }
+
+        .client-name {
+          @include type.type-style('body-compact-02');
+          font-size: 1rem;
+          margin-left: 1rem;
+        }
+
+        .sub-info-col {
+          @include type.type-style('helper-text-02');
+          font-size: 0.75rem;
+          padding: 0;
+          margin-left: 3rem;
+        }
+      }
     }
   }
 }
