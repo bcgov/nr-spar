@@ -37,7 +37,7 @@ const MyProfile = () => {
   const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
 
   const { theme, setTheme } = useThemePreference();
-  const { user, signOut } = useContext(AuthContext);
+  const { user, signOut, selectedClientRoles } = useContext(AuthContext);
 
   const [goToURL, setGoToURL] = useState<string>('');
   const [goTo, setGoTo] = useState<boolean>(false);
@@ -84,6 +84,7 @@ const MyProfile = () => {
             <p>{`BCeID: ${user?.providerUsername}`}</p>
           )}
           <p>{user?.email}</p>
+          <p>{selectedClientRoles!.clientName}</p>
         </div>
       </div>
       <hr className="divisory" />

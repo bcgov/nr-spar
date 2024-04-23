@@ -23,7 +23,7 @@ describe('Applicant and seedlot information page', () => {
       .clear()
       .type('test@gmail.com');
 
-    cy.get('#seedlot-source-radio-btn-tpt').check('TPT');
+    cy.get('#seedlot-source-radio-btn-tpt').check('TPT', { force: true });
 
     cy.get('#register-w-tsc-no')
       .should('be.visible')

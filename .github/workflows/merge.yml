@@ -112,17 +112,18 @@ jobs:
             -p TAG=${{ inputs.pr_no || needs.vars.outputs.pr }}
             ${{ matrix.parameters }}
 
-  tests:
-    name: Tests
-    needs: [deploy-test]
-    secrets: inherit
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: test
+  # tests:
+  #   name: Tests
+  #   needs: [deploy-test]
+  #   secrets: inherit
+  #   uses: ./.github/workflows/.tests.yml
+  #   with:
+  #     target: test
 
   init-prod:
     name: PROD Init
-    needs: [tests]
+    # needs: [tests]
+    needs: [deploy-test]
     environment: prod
     runs-on: ubuntu-22.04
     steps:

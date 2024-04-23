@@ -13,19 +13,6 @@ beforeEach(() => {
 
   cy.intercept(
     {
-      method: 'POST',
-      url: '**/api/seedlots'
-    },
-    {
-      statusCode: 201,
-      body: {
-        seedlotNumber: '654321'
-      }
-    }
-  ).as('POST_submit_seedlot');
-
-  cy.intercept(
-    {
       method: 'GET',
       url: '**/api/vegetation-codes*'
     },
@@ -34,17 +21,6 @@ beforeEach(() => {
       fixture: 'vegetation-code.json'
     }
   ).as('GET_veg_codes');
-
-  cy.intercept(
-    {
-      method: 'GET',
-      url: '**/api/seedlots/63001'
-    },
-    {
-      statusCode: 200,
-      fixture: 'default-seedlot-detail.json'
-    }
-  ).as('GET_seedlot_detail_by_63001');
 
   cy.intercept(
     {

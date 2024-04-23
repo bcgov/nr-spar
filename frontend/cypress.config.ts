@@ -11,13 +11,13 @@ export default defineConfig({
     experimentalWebKitSupport: true,
     env: {
       idirLoginUrl: 'https://logontest7.gov.bc.ca',
-      businessBceIdLoginUrl: 'https://logon7.gov.bc.ca'
+      businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
       '**/login-page.cy.ts',
       '**/dashboard-page.cy.ts',
-      '**/seedlot-dashboard.cy.ts',
       '**/create-a-class-seedlot.cy.ts',
+      '**/seedlot-dashboard.cy.ts',
       '**/seedlot-detail.cy.ts',
       '**/edit-applicant-seedlot-info.cy.ts'
     ],
