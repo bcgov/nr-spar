@@ -214,7 +214,7 @@ class ParentTreeEndpointTest {
   }
 
   @Test
-  @DisplayName("Missing requst property error test")
+  @DisplayName("Missing request property error test")
   @WithMockUser(roles = "user_read")
   void calcMeanGeospatial__noSmpMixField_error_test() throws Exception {
     String reqJson =
