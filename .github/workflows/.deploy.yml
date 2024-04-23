@@ -76,7 +76,7 @@ jobs:
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
     runs-on: ubuntu-22.04
-    timeout-minutes: ${{ input.timeout-minutes }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
         name: [database, backend, fluentbit, frontend, oracle-api]
