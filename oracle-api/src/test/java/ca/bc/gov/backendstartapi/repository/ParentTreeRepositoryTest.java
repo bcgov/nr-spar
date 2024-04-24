@@ -56,8 +56,8 @@ class ParentTreeRepositoryTest {
   }
 
   @Test
-  @DisplayName("getLatLongParentTreeData_successTest")
-  void getLatLongParentTreeData_successTest() {
+  @DisplayName("getPtGeoSpatialData_successTest")
+  void getPtGeoSpatialData_successTest() {
     List<ParentTreeEntity> ptreeEntity = parentTreeRepository.findAllIn(List.of(4032L));
 
     assertFalse(ptreeEntity.isEmpty());

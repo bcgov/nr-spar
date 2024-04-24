@@ -159,6 +159,21 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- Geospatial -->
+    <!-- <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-spatial</artifactId>
+      <version>6.4.4.Final</version>
+      <type>pom</type>
+    </dependency> -->
+
+    <!-- <dependency>
+      <groupId>org.locationtech.jts</groupId>
+      <artifactId>jts-core</artifactId>
+      <version>1.18.2</version>
+    </dependency> -->
+
+
     <!-- Database -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -211,7 +226,7 @@
 
   <build>
     <plugins>
-      
+
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -462,7 +477,7 @@
     <finalName>nr-spar-backend</finalName>
   </build>
 
-  <!-- 
+  <!--
     Issue:
     - spring-boot-starter-oauth2-client (v3.1.1-latest) depends on
       - spring-security-oauth2-client (v6.1.1-latest) depends on
