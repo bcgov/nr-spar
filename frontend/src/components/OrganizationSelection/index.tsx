@@ -15,25 +15,31 @@ import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType
 import { UserClientRolesType } from '../../types/UserRoleType';
 import EmptySection from '../EmptySection';
 
-import { TEXT } from './constants';
+import { MIN_CLIENTS_SHOW_SEARCH, TEXT } from './constants';
+import { RoleSelectionProps } from './definitions';
 import OrganizationItem from './OrganizationItem';
 
 import './styles.scss';
 
-const RoleSelection = () => {
+const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
   const navigate = useNavigate();
-  const { user, setClientRoles, signOut } = useContext(AuthContext);
+  const {
+    user, setClientRoles, signOut, selectedClientRoles
+  } = useContext(AuthContext);
   // A list of matched client id
   const [matchedClients, setMatchedClients] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [clientRolesToSet, setClientRolesToSet] = useState<UserClientRolesType | null>(null);
+  const [
+    clientRolesToSet,
+    setClientRolesToSet
+  ] = useState<UserClientRolesType | null>(selectedClientRoles);
 
   useQueries({
     queries: user?.clientRoles.map((clientRole) => ({
       // Not a conventional query key,
       // be we need the 'role' here to distinguish the data is for roles only,
       // used later to retrieve data related roles only.
-      queryKey: ['forest-clients', 'role', clientRole.clientId],
+      queryKey: ['role', 'forest-clients', clientRole.clientId],
       queryFn: () => getForestClientByNumber(clientRole.clientId),
       staleTime: THREE_HOURS,
       cacheTime: THREE_HALF_HOURS,
@@ -45,11 +51,11 @@ const RoleSelection = () => {
 
   // Queries data sometime disappear after awhile, maybe from token refresh, need to refetch them.
   useEffect(() => {
-    qc.refetchQueries(['forest-clients', 'role']);
+    qc.refetchQueries(['role', 'forest-clients']);
   }, [user]);
 
   const filterClientsByValue = (value: string) => {
-    const forestClientsQueriesData = qc.getQueriesData(['forest-clients', 'role']);
+    const forestClientsQueriesData = qc.getQueriesData(['role', 'forest-clients']);
 
     const forestClients = forestClientsQueriesData.map((qData) => (
       qData.at(1) as ForestClientType
@@ -77,10 +83,15 @@ const RoleSelection = () => {
         uClientRole.clientId === clientId
       ));
       if (found) {
-        setClientRolesToSet({
+        const toSet: UserClientRolesType = {
           ...found,
           clientName
-        });
+        };
+        setClientRolesToSet(toSet);
+        if (simpleView) {
+          setClientRoles(toSet);
+          navigate('/');
+        }
       }
     }
   };
@@ -93,7 +104,7 @@ const RoleSelection = () => {
   };
 
   const renderOrgItem = (clientRole: UserClientRolesType) => {
-    const queryKey = ['forest-clients', 'role', clientRole.clientId];
+    const queryKey = ['role', 'forest-clients', clientRole.clientId];
     const queryState = qc.getQueryState(queryKey);
     const queryData: ForestClientType | undefined = qc.getQueryData(queryKey);
 
@@ -140,8 +151,8 @@ const RoleSelection = () => {
         <Column>
           <EmptySection
             title="No organization found under your user"
-            description="Please contact your admin for access"
-            pictogram="DoorHandle"
+            description={TEXT.emptyRole}
+            icon="SearchLocate"
           />
         </Column>
       );
@@ -151,13 +162,11 @@ const RoleSelection = () => {
       return (
         <Column>
           <EmptySection
-            title="No organization found"
-            icon="Windy"
+            title="Results not found"
+            icon="SearchLocate"
             description={(
               <p>
-                {TEXT.emptySearchPtOne}
-                <br />
-                {TEXT.emptySearchPtTwo}
+                {TEXT.emptySearch}
               </p>
             )}
           />
@@ -187,49 +196,61 @@ const RoleSelection = () => {
    * MAIN COMPONENT
    */
   return (
-    <FlexGrid className="role-selection-grid">
-      <Row className="search-row">
-        <Column>
-          <Search
-            className="search-bar"
-            labelText={TEXT.searchLabel}
-            placeholder={TEXT.searchLabel}
-            onChange={
-              (e: React.ChangeEvent<HTMLInputElement>) => filterClientsByValue(e.target.value)
-            }
-          />
-        </Column>
-      </Row>
+    <FlexGrid className="org-selection-grid">
+      {
+        user!.clientRoles.length > MIN_CLIENTS_SHOW_SEARCH
+          ? (
+            <Row className="search-row">
+              <Column>
+                <Search
+                  className="search-bar"
+                  labelText={TEXT.searchLabel}
+                  placeholder={TEXT.searchLabel}
+                  onChange={
+                    (e: React.ChangeEvent<HTMLInputElement>) => filterClientsByValue(e.target.value)
+                  }
+                />
+              </Column>
+            </Row>
+          )
+          : null
+      }
       <Row className="org-items-row">
         {
           renderListSection()
         }
       </Row>
-      <Row className="btn-row">
-        <Column>
-          <Button
-            className="action-btn"
-            kind="secondary"
-            size="lg"
-            onClick={signOut}
-          >
-            Cancel
-          </Button>
-        </Column>
-        <Column>
-          <Button
-            className="action-btn"
-            kind="primary"
-            size="lg"
-            onClick={continueToDashboard}
-            renderIcon={ArrowRight}
-          >
-            Continue
-          </Button>
-        </Column>
-      </Row>
+      {
+        simpleView
+          ? null
+          : (
+            <Row className="btn-row">
+              <Column>
+                <Button
+                  className="action-btn"
+                  kind="ghost"
+                  size="lg"
+                  onClick={signOut}
+                >
+                  Cancel
+                </Button>
+              </Column>
+              <Column>
+                <Button
+                  className="action-btn"
+                  kind="primary"
+                  size="lg"
+                  onClick={continueToDashboard}
+                  renderIcon={ArrowRight}
+                >
+                  Continue
+                </Button>
+              </Column>
+            </Row>
+          )
+      }
     </FlexGrid>
   );
 };
 
-export default RoleSelection;
+export default OrganizationSelection;

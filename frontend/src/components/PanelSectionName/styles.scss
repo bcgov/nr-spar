@@ -18,5 +18,6 @@
 .panel-section > span,
 .panel-section-light > span {
   @include type.type-style('label-01');
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
   user-select: none;
 }
