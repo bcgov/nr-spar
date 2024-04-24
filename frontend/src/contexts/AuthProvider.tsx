@@ -162,7 +162,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
           throw new Error(`User roles revoked for client id: ${selectedClientRoles.clientId}`);
         }
       }
-
       setSigned(true);
       return famUser;
     } catch (e) {
@@ -170,6 +169,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       // Clear stored client id and name
       localStorage.clear();
       localStorage.setItem(SPAR_REDIRECT_PATH, pathname);
+      setSelectedClientRoles(null);
+      setUser(null);
       setSigned(false);
     }
     return null;

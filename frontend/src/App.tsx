@@ -97,11 +97,11 @@ const App: React.FC = () => {
   );
 
   const getBrowserRouter = () => {
-    if (selectedClientRoles) {
-      return signedRouter;
-    }
     if (!signed) {
       return notSignedRouter;
+    }
+    if (selectedClientRoles) {
+      return signedRouter;
     }
     return roleSelectionRouter;
   };
