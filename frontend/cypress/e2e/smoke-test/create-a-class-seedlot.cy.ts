@@ -27,7 +27,7 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/seedlots');
   });
 
-  it('should register an A-Class Seedlot PLI', () => {
+  it.only('should register an A-Class Seedlot PLI', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -102,6 +102,13 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
+    // remember seedlot number
+    cy.get('#created-seedlot-number').invoke('text')
+      .then((text) => {
+        cy.session(Cypress.env('USERNAME'), () => {
+          cy.setCookie(data.seedlotInformation1.species, text);
+        });
+      });
   });
 
   it('should register an A-Class Seedlot CW', () => {

@@ -3,10 +3,22 @@
 import prefix from '../../../src/styles/classPrefix';
 
 describe('Seedlot detail page', () => {
+  let seedlotNumber: string;
+  let fixtureData: Record<string, any>;
+
   beforeEach(function () {
     cy.login();
-    cy.visit('/seedlots/details/63001');
-    cy.url().should('contains', '/seedlots/details/63001');
+    cy.fixture('aclass-seedlot').then((fData) => {
+      fixtureData = fData;
+      cy.session(Cypress.env('USERNAME'), () => {
+        cy.getCookie(fData.seedlotInformation1.species).then((cookie) => {
+          console.log('hahaah', cookie?.value);
+          seedlotNumber = cookie?.value ?? '';
+          cy.visit(`/seedlots/details/${seedlotNumber}`);
+          cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
+        });
+      });
+    });
   });
 
   /**
@@ -14,14 +26,14 @@ describe('Seedlot detail page', () => {
    */
   it('should render seedlot detail correctly', () => {
     cy.get('.title-favourite')
-      .should('have.text', 'Seedlot 63001');
+      .should('have.text', `Seedlot ${seedlotNumber}`);
 
     cy.get('.combo-button-container')
       .find('.combo-button')
       .should('have.text', 'Edit seedlot form')
       .click();
 
-    cy.url().should('contains', '/seedlots/a-class-registration/63001');
+    cy.url().should('contains', `/seedlots/a-class-registration/${seedlotNumber}`);
   });
 
   it('should render registration process section correctly', () => {
@@ -68,7 +80,7 @@ describe('Seedlot detail page', () => {
       .should('have.text', 'Edit seedlot form')
       .click();
 
-    cy.url().should('contains', '/seedlots/a-class-registration/63001');
+    cy.url().should('contains', `/seedlots/a-class-registration/${seedlotNumber}`);
   });
 
   it('renders Seedlot Summary section correctly', () => {
@@ -77,7 +89,7 @@ describe('Seedlot detail page', () => {
 
     cy.contains('p.seedlot-summary-info-label', 'Seedlot number')
       .siblings('p.seedlot-summary-info-value')
-      .should('have.text', '63001');
+      .should('have.text', seedlotNumber);
 
     cy.contains('p.seedlot-summary-info-label', 'Seedlot class')
       .siblings('p.seedlot-summary-info-value')
@@ -85,7 +97,7 @@ describe('Seedlot detail page', () => {
 
     cy.contains('p.seedlot-summary-info-label', 'Seedlot species')
       .siblings('p.seedlot-summary-info-value')
-      .should('have.text', 'PLI - Lodgepole pine');
+      .should('have.text', fixtureData.seedlotInformation1.species);
 
     cy.contains('p.seedlot-summary-info-label', 'Status')
       .next()
@@ -103,19 +115,19 @@ describe('Seedlot detail page', () => {
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-agency')
-      .should('have.value', '00012797 - MINISTRY OF FORESTS - MOF');
+      .should('have.value', fixtureData.applicantAgency1.name);
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-location-code')
-      .should('have.value', '30');
+      .should('have.value', fixtureData.applicantAgency1.number);
 
     cy.get('.applicant-seedlot-information')
       .find('button.email-display-value')
-      .should('have.text', 'test@gov.bc.ca');
+      .should('have.text', fixtureData.applicantAgency1.email);
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-species')
-      .should('have.value', 'PLI - Lodgepole pine');
+      .should('have.value', fixtureData.seedlotInformation1.species);
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-source')
