@@ -1,10 +1,17 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,11 +31,24 @@ class TscAdminServiceTest {
 
   @Mock SeedlotRepository seedlotRepository;
 
+  @Mock SeedlotStatusService seedlotStatusService;
+
   private TscAdminService tscAdminService;
+
+  private SeedlotStatusEntity createValidStatus(String status) {
+    SeedlotStatusEntity seedlotStatus = new SeedlotStatusEntity();
+    seedlotStatus.setSeedlotStatusCode(status);
+
+    LocalDate yesterday = LocalDate.now().minusDays(1L);
+    LocalDate tomorrow = yesterday.plusWeeks(1L);
+    seedlotStatus.setEffectiveDateRange(new EffectiveDateRange(yesterday, tomorrow));
+
+    return seedlotStatus;
+  }
 
   @BeforeEach
   void setup() {
-    tscAdminService = new TscAdminService(seedlotRepository);
+    tscAdminService = new TscAdminService(seedlotRepository, seedlotStatusService);
   }
 
   @Test
@@ -51,5 +71,78 @@ class TscAdminServiceTest {
     Assertions.assertNotNull(pageResult);
     Assertions.assertEquals("63712", pageResult.getContent().get(0).getId());
     Assertions.assertEquals("00012345", pageResult.getContent().get(0).getApplicantClientNumber());
+  }
+
+  @Test
+  @DisplayName("Approves a seedlot number")
+  void approveOrDisapproveSeedlot_approve_shouldSuceed() {
+    SeedlotStatusEntity seedlotStatus = createValidStatus("APP");
+
+    String seedlotNumber = "63123";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setSeedlotStatus(seedlotStatus);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotStatusService.getValidSeedlotStatus("APP")).thenReturn(Optional.of(seedlotStatus));
+    when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
+
+    Seedlot seedlotSaved = tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.TRUE);
+
+    Assertions.assertNotNull(seedlotSaved);
+    Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
+    Assertions.assertEquals("APP", seedlotSaved.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  @Test
+  @DisplayName("Disapproves a seedlot number")
+  void approveOrDisapproveSeedlot_disapprove_shouldSucceed() {
+    SeedlotStatusEntity seedlotStatus = createValidStatus("PND");
+
+    String seedlotNumber = "63124";
+
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setSeedlotStatus(seedlotStatus);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotStatusService.getValidSeedlotStatus("PND")).thenReturn(Optional.of(seedlotStatus));
+    when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
+
+    Seedlot seedlotSaved = tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+
+    Assertions.assertNotNull(seedlotSaved);
+    Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
+    Assertions.assertEquals("PND", seedlotSaved.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  @Test
+  @DisplayName("Seedlot approval attempt seedlot not found should fail")
+  void approveOrDisapproveSeedlot_seedlotNotFound_shouldFail() {
+    String seedlotNumber = "63125";
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+
+    Assertions.assertThrows(
+        SeedlotNotFoundException.class,
+        () -> {
+          tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+        });
+  }
+
+  @Test
+  @DisplayName("Seedlot approval attempt seedlot status not found should fail")
+  void approveOrDisapproveSeedlot_statusNotFound_shouldFail() {
+    String seedlotNumber = "63126";
+    SeedlotStatusEntity seedlotStatus = createValidStatus("PND");
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setSeedlotStatus(seedlotStatus);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotStatusService.getValidSeedlotStatus("APP")).thenReturn(Optional.empty());
+
+    Assertions.assertThrows(
+        SeedlotStatusNotFoundException.class,
+        () -> {
+          tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+        });
   }
 }

@@ -22,7 +22,7 @@ import ROUTES from './routes/constants';
 import FourOhFour from './views/FourOhFour';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { ThemePreference } from './utils/ThemePreference';
-import LoginRoleSelection from './views/LoginRoleSelection';
+import LoginOrgSelection from './views/LoginOrgSelection';
 
 Amplify.configure(awsconfig);
 
@@ -44,7 +44,7 @@ const App: React.FC = () => {
   const roleSelectionRouter = createBrowserRouter([
     {
       path: ROUTES.ALL_ROUTES,
-      element: <LoginRoleSelection />
+      element: <LoginOrgSelection />
     }
   ]);
 
@@ -97,11 +97,11 @@ const App: React.FC = () => {
   );
 
   const getBrowserRouter = () => {
-    if (selectedClientRoles) {
-      return signedRouter;
-    }
     if (!signed) {
       return notSignedRouter;
+    }
+    if (selectedClientRoles) {
+      return signedRouter;
     }
     return roleSelectionRouter;
   };
