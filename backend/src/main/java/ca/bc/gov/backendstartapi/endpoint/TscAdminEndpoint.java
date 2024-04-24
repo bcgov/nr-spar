@@ -78,9 +78,9 @@ public class TscAdminEndpoint {
    * Enables a {@link Seedlot} registration approval or disapproval by the TSC Admin.
    *
    * @param seedlotNumber The {@link Seedlot} identification.
-   * @param trueOrFalse Boolean option defining if it was approved.
+   * @param isApproved Boolean option defining if it was approved.
    */
-  @PostMapping("/seedlots/{seedlotNumber}/approve/{trueOrFalse}")
+  @PostMapping("/seedlots/{seedlotNumber}/approve/{isApproved}")
   @PreAuthorize("hasRole('SPAR_SPR_TREE_SEED_CENTRE_ADMIN')")
   @Operation(
       summary = "Enables a Seedlot registration approval or disapproval by the TSC Admin.",
@@ -109,15 +109,15 @@ public class TscAdminEndpoint {
           @PathVariable
           String seedlotNumber,
       @Parameter(
-              name = "trueOrFalse",
+              name = "isApproved",
               in = ParameterIn.PATH,
               description = "Boolean option defining if the seedlot approval.",
               required = true,
               example = "true",
               schema = @Schema(type = "boolean", example = "true"))
           @PathVariable
-          Boolean trueOrFalse) {
-    tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, trueOrFalse);
+          Boolean isApproved) {
+    tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, isApproved);
     return ResponseEntity.noContent().build();
   }
 }
