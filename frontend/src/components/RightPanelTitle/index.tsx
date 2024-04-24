@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { IconButton } from '@carbon/react';
-import { Settings, Close } from '@carbon/icons-react';
+import { Close } from '@carbon/icons-react';
 
 import './styles.scss';
 
@@ -16,10 +16,7 @@ const RightPanelTitle = ({ title, closeFn }: RightPanelTitleProps) => (
       {title}
     </h4>
     <div className="right-title-buttons">
-      <IconButton kind="ghost" label="Settings" align="bottom">
-        <Settings />
-      </IconButton>
-      <IconButton kind="ghost" label="Close" onClick={closeFn} align="bottom">
+      <IconButton className="close-btn" kind="ghost" label="Close" onClick={closeFn} align="bottom">
         <Close />
       </IconButton>
     </div>

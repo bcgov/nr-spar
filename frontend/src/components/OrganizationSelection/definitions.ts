@@ -11,3 +11,7 @@ export type OrganizationItemProps = {
   queryState?: QueryState<unknown, undefined>
   selected?: boolean
 }
+
+export type RoleSelectionProps = {
+  simpleView?: boolean;
+}
