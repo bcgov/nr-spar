@@ -81,7 +81,7 @@ public class TscAdminEndpoint {
    * @param isApproved Boolean option defining if it was approved.
    */
   @PostMapping("/seedlots/{seedlotNumber}/approve/{isApproved}")
-  @PreAuthorize("hasRole('SPAR_SPR_TREE_SEED_CENTRE_ADMIN')")
+  @PreAuthorize("hasRole('SPAR_TSC_ADMIN')")
   @Operation(
       summary = "Enables a Seedlot registration approval or disapproval by the TSC Admin.",
       description = "The TSC Admin can either approve or disapprove a `Seedlot` registration.",
