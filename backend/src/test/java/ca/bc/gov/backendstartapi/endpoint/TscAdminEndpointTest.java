@@ -3,12 +3,14 @@ package ca.bc.gov.backendstartapi.endpoint;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.service.TscAdminService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -72,6 +74,50 @@ class TscAdminEndpointTest {
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Approves a seedlot number")
+  @WithMockUser(roles = "SPAR_SPR_TREE_SEED_CENTRE_ADMIN")
+  void approveOrDisapproveSeedlot_approve_shouldSuceed() throws Exception {
+    String seedlotNumber = "63223";
+    Boolean approved = Boolean.TRUE;
+
+    when(tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, approved))
+        .thenReturn(new Seedlot(seedlotNumber));
+
+    String url = String.format("/api/tsc-admin/seedlots/%s/approve/%s", seedlotNumber, approved);
+
+    mockMvc
+        .perform(
+            post(url)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("Seedlot approval attempt seedlot not found should fail")
+  @WithMockUser(roles = "SPAR_SPR_TREE_SEED_CENTRE_ADMIN")
+  void approveOrDisapproveSeedlot_seedlotNotFound_shouldFail() throws Exception {
+    String seedlotNumber = "63223";
+    Boolean approved = Boolean.TRUE;
+
+    when(tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, approved))
+        .thenThrow(new SeedlotNotFoundException());
+
+    String url = String.format("/api/tsc-admin/seedlots/%s/approve/%s", seedlotNumber, approved);
+
+    mockMvc
+        .perform(
+            post(url)
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
         .andReturn();
   }
 }

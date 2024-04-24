@@ -3,6 +3,8 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.service.TscAdminService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +17,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,5 +72,52 @@ public class TscAdminEndpoint {
     responseHeaders.set("X-TOTAL-COUNT", totalCount);
 
     return ResponseEntity.ok().headers(responseHeaders).body(seedlots);
+  }
+
+  /**
+   * Enables a {@link Seedlot} registration approval or disapproval by the TSC Admin.
+   *
+   * @param seedlotNumber The {@link Seedlot} identification.
+   * @param isApproved Boolean option defining if it was approved.
+   */
+  @PostMapping("/seedlots/{seedlotNumber}/approve/{isApproved}")
+  @PreAuthorize("hasRole('SPAR_SPR_TREE_SEED_CENTRE_ADMIN')")
+  @Operation(
+      summary = "Enables a Seedlot registration approval or disapproval by the TSC Admin.",
+      description = "The TSC Admin can either approve or disapprove a `Seedlot` registration.",
+      responses = {
+        @ApiResponse(
+            responseCode = "204",
+            description = "The Seedlot was successfully approved or disapproved. No content body.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "The Seedlot was not found",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
+  public ResponseEntity<Void> approveOrDisapproveSeedlot(
+      @Parameter(
+              name = "seedlotNumber",
+              in = ParameterIn.PATH,
+              description = "The Seedlot identification.",
+              required = true,
+              example = "63112")
+          @PathVariable
+          String seedlotNumber,
+      @Parameter(
+              name = "isApproved",
+              in = ParameterIn.PATH,
+              description = "Boolean option defining if the seedlot approval.",
+              required = true,
+              example = "true",
+              schema = @Schema(type = "boolean", example = "true"))
+          @PathVariable
+          Boolean isApproved) {
+    tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, isApproved);
+    return ResponseEntity.noContent().build();
   }
 }
