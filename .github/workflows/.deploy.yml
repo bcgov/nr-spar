@@ -18,7 +18,6 @@ on:
         description: Container tag; usually PR number
         required: false
         type: string
-        default: ${{ inputs.target || github.event.number }}
       triggers:
         description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
         required: false
@@ -42,6 +41,7 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       modded-tag: ${{ steps.mod-tag.outputs.modded-tag }}
+      pr: ${{ steps.pr.outputs.pr }}
     permissions:
       pull-requests: write
     runs-on: ubuntu-22.04
@@ -50,6 +50,11 @@ jobs:
         if: github.event_name == 'pull_request'
         id: mod-tag
         run: echo "modded-tag=$(( ${{ inputs.target || github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
+
+      # Get PR number for squash merges to main
+      - name: PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
 
       - name: OpenShift Init
         uses: bcgov-nr/action-deployer-openshift@v2.3.0
@@ -84,7 +89,7 @@ jobs:
           - name: database
             file: database/openshift.deploy.yml
             parameters:
-              -p DB_PVC_SIZE=192Mi
+              ${{ github.event_name != 'pull_request' || '-p DB_PVC_SIZE=192Mi' }}
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
@@ -92,6 +97,7 @@ jobs:
             parameters:
               -p BUILD=snapshot-${{ inputs.target || github.event.number }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
             verification_path: "actuator/health"
           - name: fluentbit
             file: common/openshift.fluentbit.yml
@@ -111,6 +117,7 @@ jobs:
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
             triggers: ('oracle-api/')
             verification_path: "actuator/health"
     steps:
@@ -124,13 +131,13 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
-            -p MIN_REPLICAS=1
-            -p MAX_REPLICAS=2
+            ${{ github.event_name != 'pull_request' || '-p MIN_REPLICAS=1' }}
+            ${{ github.event_name != 'pull_request' || '-p MAX_REPLICAS=2' }}
             -p ZONE=${{ inputs.target || github.event.number }}
-            -p TAG=${{ inputs.target || github.event.number }}
+            -p TAG=${{ inputs.tag || needs.init.outputs.pr }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
-          verification_path: ${{ matrix.verification_path}}
+          verification_path: ${{ matrix.verification_path }}
 
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
