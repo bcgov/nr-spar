@@ -33,30 +33,6 @@ describe('Applicant and seedlot information page', () => {
       .should('be.visible')
       .click({ force: true });
 
-    // Intercept PATCH /api/seedlots/{seedlot_number}/application-info call
-    cy.intercept(
-      {
-        method: 'PATCH',
-        url: '**/api/seedlots/63001/application-info'
-      },
-      {
-        statusCode: 200,
-        fixture: 'applicant-info-change.json'
-      }
-    ).as('PATCH_applicant_info_change_63001');
-
-    // Intercept GET /api/seedlots/{seedlot_number} call, to reflect updated data
-    cy.intercept(
-      {
-        method: 'GET',
-        url: '**/api/seedlots/63001'
-      },
-      {
-        statusCode: 200,
-        fixture: 'applicant-info-change.json'
-      }
-    ).as('GET_applicant_info_change_63001');
-
     // Save edit
     cy.get('.submit-button').click();
 

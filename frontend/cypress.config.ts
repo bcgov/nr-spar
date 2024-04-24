@@ -9,6 +9,7 @@ export default defineConfig({
     viewportWidth: 1280,
     viewportHeight: 720,
     experimentalWebKitSupport: true,
+    supportFile: 'cypress/support/commands.ts',
     env: {
       idirLoginUrl: 'https://logontest7.gov.bc.ca',
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
