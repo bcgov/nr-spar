@@ -19,13 +19,13 @@ import { getAllParentTrees } from '../../../api-service/orchardAPI';
 import InfoSection from '../../InfoSection';
 import Subtitle from '../../Subtitle';
 import { postFile } from '../../../api-service/seedlotAPI';
-import postForCalculation from '../../../api-service/geneticWorthAPI';
+import postForCalculation from '../../../api-service/parentTreeAPI';
 import CheckboxType from '../../../types/CheckboxType';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import EmptySection from '../../EmptySection';
 import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
 import { recordValues } from '../../../utils/RecordUtils';
-import { GenWorthCalcPayload } from '../../../types/GeneticWorthTypes';
+import { PtValsCalcReqPayload } from '../../../types/PtCalcTypes';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 
@@ -51,7 +51,7 @@ import {
 import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
-  fillCalculatedInfo, generateGenWorthPayload, addNewMixRow, calcMixTabInfoItems,
+  fillCalculatedInfo, generatePtValCalcPayload, addNewMixRow, calcMixTabInfoItems,
   fillMixTable,
   hasParentTreesForSelectedOrchards
 } from './utils';
@@ -256,7 +256,7 @@ const ParentTreeStep = () => {
   });
 
   const calculateGenWorthQuery = useMutation({
-    mutationFn: (data: GenWorthCalcPayload[]) => postForCalculation(data),
+    mutationFn: (data: PtValsCalcReqPayload) => postForCalculation(data),
     onSuccess: (res) => fillCalculatedInfo(
       res.data,
       genWorthInfoItems,
@@ -564,7 +564,7 @@ const ParentTreeStep = () => {
                         }
                         disabled={disableOptions}
                         onClick={() => calculateGenWorthQuery.mutate(
-                          generateGenWorthPayload(state, geneticWorthDict, seedlotSpecies)
+                          generatePtValCalcPayload(state, geneticWorthDict, seedlotSpecies)
                         )}
                       >
                         Calculate Genetic worth and Effective population values

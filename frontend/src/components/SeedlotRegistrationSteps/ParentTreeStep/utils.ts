@@ -7,7 +7,7 @@ import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerCl
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
-import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
+import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType } from '../../../types/PtCalcTypes';
 
 import {
   getConeCountErrMsg, getNonOrchardContamErrMsg, getPollenCountErrMsg,
@@ -509,7 +509,7 @@ export const fillCalculatedInfo = (
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
-  const { geneticTraits, neValue }: CalcPayloadResType = data;
+  const { geneticTraits, calculatedPtVals }: CalcPayloadResType = data;
   // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
@@ -531,24 +531,39 @@ export const fillCalculatedInfo = (
 
   // Fill in Ne value
   const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
-  newPopAndDiversityConfig.ne.value = neValue.toFixed(1);
+  newPopAndDiversityConfig.ne.value = calculatedPtVals.neValue ? calculatedPtVals.neValue.toFixed(1) : '';
   setPopSizeAndDiversityConfig(newPopAndDiversityConfig);
 };
 
-export const generateGenWorthPayload = (
+const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): number => {
+  const found = Object.values(state.allParentTreeData)
+    .find((pt) => pt.parentTreeNumber === ptNumber);
+
+  if (!found) {
+    throw Error(`Cannot find parent tree id with parent tree number: ${ptNumber}`);
+  }
+  return found.parentTreeId;
+};
+
+export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
   geneticWorthDict: GeneticWorthDictType,
   seedlotSpecies: MultiOptionsObj
-): GenWorthCalcPayload[] => {
-  const { tableRowData } = state;
-  const payload: GenWorthCalcPayload[] = [];
+): PtValsCalcReqPayload => {
+  const { tableRowData, mixTabData } = state;
+  const payload: PtValsCalcReqPayload = {
+    orchardPtVals: [],
+    smpMixIdAndProps: []
+  };
   const rows = Object.values(tableRowData);
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code];
   rows.forEach((row) => {
-    const newPayloadItem: GenWorthCalcPayload = {
+    const newPayloadItem: OrchardParentTreeValsType = {
+      parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
       parentTreeNumber: row.parentTreeNumber.value,
       coneCount: Number(row.coneCount.value),
       pollenCount: Number(row.pollenCount.value),
+      smpSuccessPerc: Number(row.smpSuccessPerc.value),
       geneticTraits: []
     };
     // Populate geneticTraits array
@@ -558,7 +573,17 @@ export const generateGenWorthPayload = (
         traitValue: Number(row[gwType as keyof StrTypeRowItem].value)
       });
     });
-    payload.push(newPayloadItem);
+    payload.orchardPtVals.push(newPayloadItem);
+  });
+
+  const smpMixRows = Object.values(mixTabData);
+  smpMixRows.forEach((row) => {
+    if (row.parentTreeNumber.value) {
+      payload.smpMixIdAndProps.push({
+        parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
+        proportion: Number(row.proportion.value)
+      });
+    }
   });
 
   return payload;
