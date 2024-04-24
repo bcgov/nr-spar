@@ -32,6 +32,8 @@ jobs:
     needs: [builds]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
+    with:
+      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
 
   tests:
     name: Tests

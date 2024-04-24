@@ -129,9 +129,8 @@ jobs:
             -p ZONE=${{ inputs.target || github.event.number }}
             -p TAG=${{ inputs.target || github.event.number }}
             ${{ matrix.parameters }}
-          triggers: ${{ matrix.triggers || '("backend/" "common/" "database/" "frontend/" "oracle-api/")' }}
+          triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path}}
 
       - id: trigger
-        if: matrix.name == 'frontend'
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
