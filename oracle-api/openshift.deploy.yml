@@ -61,7 +61,7 @@ parameters:
     value: /usr/share/service/jssecacerts
   - name: AWS_COGNITO_ISSUER_URI
     description: AWS Cognito JWT Server URI
-    required: true
+    value: https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
 objects:
   - apiVersion: v1
     kind: ImageStream

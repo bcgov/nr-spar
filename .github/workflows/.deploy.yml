@@ -96,7 +96,6 @@ jobs:
             overwrite: true
             parameters:
               -p BUILD=snapshot-${{ inputs.target || github.event.number }}
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/ca-central-1_t2HSZBHur
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
               ${{ inputs.target != 'prod' && '' || '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' }}
             verification_path: "actuator/health"
@@ -117,7 +116,6 @@ jobs:
             overwrite: true
             parameters:
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/ca-central-1_t2HSZBHur
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
             triggers: ('oracle-api/')
             verification_path: "actuator/health"
