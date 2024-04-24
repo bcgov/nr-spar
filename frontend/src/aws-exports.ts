@@ -16,7 +16,7 @@ const signOutUrl = [
 
 const awsconfig = {
   aws_cognito_region: env.VITE_COGNITO_REGION || 'ca-central-1',
-  aws_user_pools_id: env.VITE_USER_POOLS_ID,
+  aws_user_pools_id: env.VITE_USER_POOLS_ID || 'ca-central-1_t2HSZBHur',
   aws_user_pools_web_client_id: env.VITE_USER_POOLS_WEB_CLIENT_ID,
   aws_mandatory_sign_in: 'enable',
   oauth: {

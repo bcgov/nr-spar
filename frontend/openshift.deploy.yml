@@ -55,9 +55,6 @@ parameters:
   - name: LOG_LEVEL
     description: Caddy log level (debug, info, warn, error, panic, fatal)
     value: "info"
-  - name: VITE_USER_POOLS_ID
-    description: AWS Cognito Pools ID
-    required: true
   - name: VITE_USER_POOLS_WEB_CLIENT_ID
     description: AWS Cognito Web Client ID
     required: true
@@ -126,8 +123,6 @@ objects:
                   value: ${VITE_ORACLE_SERVER_URL}
                 - name: LOG_LEVEL
                   value: ${LOG_LEVEL}
-                - name: VITE_USER_POOLS_ID
-                  value: ${VITE_USER_POOLS_ID}
                 - name: VITE_USER_POOLS_WEB_CLIENT_ID
                   value: ${VITE_USER_POOLS_WEB_CLIENT_ID}
                 - name: VITE_ZONE
