@@ -42,10 +42,13 @@ const findFindAndLastName = (displayName: string, provider: string): Array<strin
 
 const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] => {
   const separator = '_';
+  const minitryOfForestId = '00012797';
+
   const cognitoGroups: string[] = accessToken['cognito:groups'];
   if (!cognitoGroups) {
     return [];
   }
+
   const parsedClientRoles: UserClientRolesType[] = [];
 
   cognitoGroups.forEach((cognaitoRole) => {
@@ -53,11 +56,14 @@ const parseRole = (accessToken: { [id: string]: any }): UserClientRolesType[] =>
       throw new Error(`Invalid role format with string: ${cognaitoRole}`);
     }
     const lastUnderscoreIndex = cognaitoRole.lastIndexOf(separator);
-    const role = cognaitoRole.substring(0, lastUnderscoreIndex);
-    const clientId = cognaitoRole.substring(lastUnderscoreIndex + 1);
+    let role = cognaitoRole.substring(0, lastUnderscoreIndex);
+    let clientId = cognaitoRole.substring(lastUnderscoreIndex + 1);
 
+    // If the last substring after an underscore is not a number then it's a concrete role,
+    // we need to manually assign it a MoF client id for now.
     if (Number.isNaN(Number(clientId))) {
-      throw new Error(`Client ID parsing error with id: ${clientId}`);
+      clientId = minitryOfForestId;
+      role = cognaitoRole;
     }
 
     // Check if a client id already exist in parsed client role
