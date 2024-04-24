@@ -66,7 +66,7 @@ const OrganizationItem = ({ forestClient, queryState, selected }: OrganizationIt
       <Row>
         <Column className="sub-info-col">
           {
-            `ID: ${forestClient.clientNumber}`
+            `ID ${forestClient.clientNumber}`
           }
         </Column>
       </Row>

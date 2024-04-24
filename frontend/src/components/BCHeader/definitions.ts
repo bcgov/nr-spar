@@ -1,17 +1,18 @@
 export type ListItem = {
-  name: string;
-  icon: string;
-  link: string;
-  disabled: boolean;
+  name: string,
+  icon: string,
+  link: string,
+  disabled: boolean
 };
 
 export type ListItems = {
-  name: string;
-  items: ListItem[];
+  name: string,
+  items: ListItem[]
 };
 
 export type RightPanelType = {
-  [panel: string]: boolean;
+  myProfile: boolean,
+  notifications: boolean
 };
 
 export interface HearderContainerProps {
