@@ -13,18 +13,18 @@ export const cards = [
     emptyTitle: '',
     emptyDescription: ''
   },
-  {
-    id: '2',
-    image: 'Farm_01',
-    header: 'Register a B-class seedlot',
-    description:
-      'Register a seedlot which has been collected from a natural stand',
-    link: '#',
-    highlighted: false,
-    isEmpty: false,
-    emptyTitle: '',
-    emptyDescription: ''
-  },
+  // {
+  //   id: '2',
+  //   image: 'Farm_01',
+  //   header: 'Register a B-class seedlot',
+  //   description:
+  //     'Register a seedlot which has been collected from a natural stand',
+  //   link: '#',
+  //   highlighted: false,
+  //   isEmpty: false,
+  //   emptyTitle: '',
+  //   emptyDescription: ''
+  // },
   {
     id: '3',
     image: 'Sprout',

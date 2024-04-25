@@ -6,8 +6,6 @@ import prefix from '../../../src/styles/classPrefix';
 describe('Dashboard page test', () => {
   let dashboardPageData: {
     subtitle: string,
-    secondSectionTitle: string,
-    secondSectionSubtitle: string,
     emptySectionTitle: string,
     emptySectionSubtitle: string
   };
@@ -32,17 +30,9 @@ describe('Dashboard page test', () => {
     cy.get('.title-section')
       .find('.subtitle-section')
       .should('have.text', dashboardPageData.subtitle);
-
-    cy.get('.recent-activity-title-row')
-      .find('h2')
-      .should('have.text', dashboardPageData.secondSectionTitle);
-
-    cy.get('.recent-activity-title-row')
-      .find('.recent-activity-subtitle')
-      .should('have.text', dashboardPageData.secondSectionSubtitle);
   });
 
-  it('should load and display dashboard page correctly', () => {
+  it('should display empty favourite activities section correctly', () => {
     cy.isPageTitle(NavigationLabels.Dashboard);
 
     cy.get('.favourite-activities-cards')
