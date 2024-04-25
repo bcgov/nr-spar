@@ -10,10 +10,12 @@ import { fillCalculatedInfo, generatePtValCalcPayload } from './utils';
 import { geneticWorthDict } from './constants';
 
 type props = {
-  disableOptions: boolean
+  disableOptions: boolean,
+  name: string,
+  setShowInfoSections: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const CalculateMetrics = ({ disableOptions }: props) => {
+const CalculateMetrics = ({ disableOptions, name, setShowInfoSections }: props) => {
   const {
     allStepData: { parentTreeStep: state },
     genWorthInfoItems,
@@ -60,15 +62,24 @@ const CalculateMetrics = ({ disableOptions }: props) => {
           )
         }
         disabled={disableOptions}
-        onClick={() => calculateGenWorthQuery.mutate(
-          generatePtValCalcPayload(
-            state,
-            geneticWorthDict,
-            seedlotSpecies
-          )
-        )}
+        onClick={() => {
+          calculateGenWorthQuery.mutate(
+            generatePtValCalcPayload(
+              state,
+              geneticWorthDict,
+              seedlotSpecies
+            )
+          );
+
+          setShowInfoSections((show) => {
+            if (!show) {
+              return !show;
+            }
+            return show;
+          });
+        }}
       >
-        Calculate metrics
+        {name}
       </Button>
     </Row>
   );

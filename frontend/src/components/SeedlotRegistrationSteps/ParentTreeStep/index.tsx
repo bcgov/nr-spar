@@ -109,6 +109,7 @@ const ParentTreeStep = () => {
   // Array that stores invalid p.t. numbers uploaded from users from composition tabs
   const [invalidPTNumbers, setInvalidPTNumbers] = useState<string[]>([]);
   const [isOrchardEmpty, setIsOrchardEmpty] = useState<boolean>(false);
+  const [showInfoSections, setShowInfoSections] = useState<boolean>(false);
 
   const emptySectionDescription = getEmptySectionDescription(setStep);
 
@@ -253,6 +254,134 @@ const ParentTreeStep = () => {
       setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
     }
   });
+
+  const renderInfoSections = () => (
+    <Row className="info-sections-row">
+      <Column className="info-sections-col">
+        {
+          (currentTab === 'coneTab' || currentTab === 'successTab')
+            ? (
+              <>
+                {/* -------- Summary Section -------- */}
+                <DetailSection>
+                  <DescriptionBox
+                    header={summaryConfig[currentTab].title}
+                    description={summaryConfig[currentTab].description}
+                  />
+                  <InfoSection
+                    infoItems={
+                      combineObjectValues([
+                        summaryConfig.sharedItems,
+                        summaryConfig[currentTab].infoItems
+                      ])
+                    }
+                  />
+                </DetailSection>
+                {/* -------- Calculate Button Row -------- */}
+                <DetailSection>
+                  {
+                    !isFormSubmitted
+                      ? (
+                        <>
+                          <DescriptionBox header="Genetic worth, effective population size and geospatial data" />
+                          <CalculateMetrics name="Calculate metrics" disableOptions={disableOptions} setShowInfoSections={setShowInfoSections} />
+                        </>
+                      )
+                      : null
+                  }
+                  {
+                    showInfoSections
+                      ? (
+                        <>
+                          <InfoSectionDivider />
+                          {/* ------ Genetic worth and percent of tested parent trees ------ */}
+                          <Row className="info-section-sub-title">
+                            <Column>
+                              Genetic worth and percent of Tested parent tree contribution
+                            </Column>
+                          </Row>
+                          <InfoSection
+                            infoItems={[]}
+                          >
+                            {
+                              recordValues(genWorthInfoItems).map((gwTuple) => (
+                                <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
+                              ))
+                            }
+                          </InfoSection>
+                          <InfoSectionDivider />
+                          {/* -------- Effective population size and diversity -------- */}
+                          <Row className="info-section-sub-title">
+                            <Column>
+                              Effective population size and diversity
+                            </Column>
+                          </Row>
+                          <InfoSection
+                            infoItems={Object.values(popSizeAndDiversityConfig)}
+                          />
+                          <InfoSectionDivider />
+                          {/* -------- Seedlot mean geospatial data -------- */}
+                          <Row className="info-section-sub-title">
+                            <Column>
+                              Mean geospatial data
+                            </Column>
+                          </Row>
+                          <InfoSection
+                            infoItems={Object.values(meanGeomInfos.seedlot)}
+                          />
+                        </>
+                      )
+                      : null
+                  }
+                </DetailSection>
+              </>
+            )
+            : (
+              <>
+                <DetailSection>
+                  <DescriptionBox
+                    header="Breeding value SMP mix used"
+                    description="Check the breeding value of SMP mix used on parent"
+                  />
+                  <InfoSection
+                    infoItems={
+                      combineObjectValues([
+                        summaryConfig[currentTab].infoItems,
+                        weightedGwInfoItems
+                      ])
+                    }
+                  />
+                </DetailSection>
+                {
+                  showInfoSections
+                    ? (
+                      <DetailSection>
+                        {/* -------- SMP mix mean geospatial data -------- */}
+                        <Row className="info-section-sub-title">
+                          <Column>
+                            SMP Mix mean geospatial data
+                          </Column>
+                        </Row>
+                        {
+                          !isFormSubmitted
+                            ? (
+                              <CalculateMetrics name="Calculate" disableOptions={disableOptions} setShowInfoSections={setShowInfoSections} />
+                            )
+                            : null
+                        }
+                        <InfoSection
+                          infoItems={Object.values(meanGeomInfos.smpMix)}
+                        />
+                      </DetailSection>
+                    )
+                    : null
+                }
+              </>
+            )
+        }
+      </Column>
+    </Row>
+  );
 
   return (
     <FlexGrid className="parent-tree-step-container">
@@ -505,107 +634,9 @@ const ParentTreeStep = () => {
                   </TableContainer>
                 </Column>
               </Row>
-              <Row className="info-sections-row">
-                <Column className="info-sections-col">
-                  {
-                    (currentTab === 'coneTab' || currentTab === 'successTab')
-                      ? (
-                        <>
-                          {/* -------- Summary Section -------- */}
-                          <DetailSection>
-                            <DescriptionBox
-                              header={summaryConfig[currentTab].title}
-                              description={summaryConfig[currentTab].description}
-                            />
-                            <InfoSection
-                              infoItems={
-                                combineObjectValues([
-                                  summaryConfig.sharedItems,
-                                  summaryConfig[currentTab].infoItems
-                                ])
-                              }
-                            />
-                          </DetailSection>
-                          {/* -------- Calculate Button Row -------- */}
-                          <DetailSection>
-                            {
-                              !isFormSubmitted
-                                ? (
-                                  <>
-                                    <DescriptionBox header="Genetic worth, effective population size and geospatial data" />
-                                    <CalculateMetrics disableOptions={disableOptions} />
-                                  </>
-                                )
-                                : null
-                            }
-                            <InfoSectionDivider />
-                            {/* ------ Genetic worth and percent of tested parent trees ------ */}
-                            <Row className="info-section-sub-title">
-                              <Column>
-                                Genetic worth and percent of Tested parent tree contribution
-                              </Column>
-                            </Row>
-                            <InfoSection
-                              infoItems={[]}
-                            >
-                              {
-                                recordValues(genWorthInfoItems).map((gwTuple) => (
-                                  <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
-                                ))
-                              }
-                            </InfoSection>
-                            <InfoSectionDivider />
-                            {/* -------- Effective population size and diversity -------- */}
-                            <Row className="info-section-sub-title">
-                              <Column>
-                                Effective population size and diversity
-                              </Column>
-                            </Row>
-                            <InfoSection
-                              infoItems={Object.values(popSizeAndDiversityConfig)}
-                            />
-                            <InfoSectionDivider />
-                            {/* -------- Seedlot mean geospatial data -------- */}
-                            <Row className="info-section-sub-title">
-                              <Column>
-                                Mean geospatial data
-                              </Column>
-                            </Row>
-                            <InfoSection
-                              infoItems={Object.values(meanGeomInfos.seedlot)}
-                            />
-                          </DetailSection>
-                        </>
-                      )
-                      : (
-                        <DetailSection>
-                          <DescriptionBox
-                            header="Breeding value SMP mix used"
-                            description="Check the breeding value of SMP mix used on parent"
-                          />
-                          <InfoSection
-                            infoItems={
-                              combineObjectValues([
-                                summaryConfig[currentTab].infoItems,
-                                weightedGwInfoItems
-                              ])
-                            }
-                          />
-                          <InfoSectionDivider />
-                          {/* -------- SMP mix mean geospatial data -------- */}
-                          <Row className="info-section-sub-title">
-                            <Column>
-                              SMP Mix mean geospatial data
-                            </Column>
-                          </Row>
-                          <InfoSection
-                            infoItems={Object.values(meanGeomInfos.smpMix)}
-                          />
-                        </DetailSection>
-                      )
-                  }
-                </Column>
-              </Row>
+              {
+                renderInfoSections()
+              }
             </FlexGrid>
           </Tabs>
         </Column>
