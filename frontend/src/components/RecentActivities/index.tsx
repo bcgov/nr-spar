@@ -17,9 +17,6 @@ import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
 import RecentActivitiesTable from './RecentActivitiesTable';
 
-import getRecentActivities from '../../api-service/recentActivitiesAPI';
-import getFilesAndDocs from '../../api-service/filesAndDocsAPI';
-
 import {
   componentTexts,
   getEmptySectionDesc,
@@ -33,12 +30,12 @@ import './styles.scss';
 const RecentActivities = () => {
   const recentActivitiesQuery = useQuery({
     queryKey: ['recent-activities'],
-    queryFn: getRecentActivities
+    queryFn: () => []
   });
 
   const filesAndDocsQuery = useQuery({
     queryKey: ['files-docs'],
-    queryFn: getFilesAndDocs
+    queryFn: () => []
   });
 
   const navigate = useNavigate();
