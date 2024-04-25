@@ -185,8 +185,8 @@
 .parent-tree-tab-container {
   padding: 2.5rem 0 0.25rem 0;
   background-color: var(--#{vars.$bcgov-prefix}-layer-01);
-  margin-left: -2.5rem;
-  margin-right: -2.5rem;
+  margin-left: -2rem;
+  margin-right: -2rem;
 
   .description-box-container {
     padding-left: 0;
@@ -233,9 +233,13 @@
   }
 }
 
-.parent-tree-step-table-container {
+.parent-tree-step-table-co  ntainer {
   padding-left: 2.5rem;
   padding-right: 2.5rem;
+  margin: 0;
+  .parent-tree-step-table-container-col{
+    padding: 0;
+  }
 
   .#{vars.$bcgov-prefix}--data-table-container {
     border: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-02);

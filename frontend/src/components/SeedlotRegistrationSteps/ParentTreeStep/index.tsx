@@ -469,7 +469,7 @@ const ParentTreeStep = () => {
                   : null
               }
               <Row className="parent-tree-step-table-container">
-                <Column>
+                <Column className="parent-tree-step-table-container-col">
                   <TableContainer
                     title={pageText[currentTab].tabTitle}
                     description={pageText[currentTab].tableDescription}
