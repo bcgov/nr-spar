@@ -15,10 +15,9 @@ const InfoSectionRow = (
   <Row className="info-section-items-row">
     {
       items.map((item) => (
-        <Column>
+        <Column key={`${item.name.toLowerCase().replace(' ', '')}-key`}>
           <ReadOnlyInput
             id={item.name.toLowerCase().replace(' ', '')}
-            key={`${item.name.toLowerCase().replace(' ', '')}-key`}
             label={item.name}
             value={item.value}
           />

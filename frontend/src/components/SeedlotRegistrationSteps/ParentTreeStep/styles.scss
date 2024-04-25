@@ -6,6 +6,7 @@
   padding-left: 0rem;
   padding-right: 0rem;
   padding-bottom: 1rem;
+  position: relative;
 
   .title-row {
     h2 {
@@ -42,16 +43,12 @@
 
   .sticky-table-title {
     .#{vars.$bcgov-prefix}--data-table-header {
-      position: sticky;
-      top: 3rem;
       z-index: 1;
       background-color: colors.$white;
     }
   }
 
   .sticky-toolbar {
-    position: sticky;
-    top: 8.3rem;
     background: colors.$white;
     z-index: 1;
 
@@ -175,7 +172,7 @@
       border-left: 0;
     }
 
-    .info-section-sub-title{
+    .info-section-sub-title {
       @include type.type-style('heading-02');
     }
   }
@@ -236,6 +233,12 @@
   padding-left: 2.5rem;
   padding-right: 2.5rem;
 
+  .#{vars.$bcgov-prefix}--data-table-container {
+    border: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-02);
+    padding: 0;
+    border-radius: 0.25rem;
+  }
+
   .#{vars.$bcgov-prefix}--data-table {
     .#{vars.$bcgov-prefix}--text-input {
       background: transparent;
@@ -251,7 +254,6 @@
 
   .table-header {
     height: 4rem;
-    position: sticky;
     top: 11.3rem;
     z-index: 1;
 
@@ -264,6 +266,17 @@
   .table-pagination {
     z-index: 2;
     position: relative;
+    background: colors.$white;
+
+    .#{vars.$bcgov-prefix}--select-input--inline__wrapper {
+      border-left: 0;
+    }
+
+    .#{vars.$bcgov-prefix}--tooltip-trigger__wrapper {
+      button {
+        border-left: 0;
+      }
+    }
   }
 
   .#{vars.$bcgov-prefix}--data-table-content {
