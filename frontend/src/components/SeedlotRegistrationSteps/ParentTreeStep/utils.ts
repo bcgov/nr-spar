@@ -21,7 +21,7 @@ import { OrchardObj } from '../OrchardStep/definitions';
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
   HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType,
-  MixUploadResponse, HeaderObjId, StrTypeRowItem
+  MixUploadResponse, HeaderObjId, StrTypeRowItem, MeanGeomInfoSectionConfigType
 } from './definitions';
 import { DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate } from './constants';
 
@@ -502,11 +502,13 @@ export const fillCalculatedInfo = (
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: Function,
   popSizeAndDiversityConfig: Record<string, any>,
-  setPopSizeAndDiversityConfig: Function
+  setPopSizeAndDiversityConfig: Function,
+  meanGeomInfos: MeanGeomInfoSectionConfigType,
+  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
-  const { geneticTraits, calculatedPtVals }: CalcPayloadResType = data;
+  const { geneticTraits, calculatedPtVals, smpMixMeanGeoData }: CalcPayloadResType = data;
   // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
@@ -530,6 +532,39 @@ export const fillCalculatedInfo = (
   const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
   newPopAndDiversityConfig.ne.value = calculatedPtVals.neValue ? calculatedPtVals.neValue.toFixed(1) : '';
   setPopSizeAndDiversityConfig(newPopAndDiversityConfig);
+
+  // Fill in mean geom data
+  const seedlotMeanGeom = calculatedPtVals.geospatialData;
+  setMeanGeomInfos((prevGeomInfo) => ({
+    seedlot: {
+      meanLatitudeDm: {
+        ...prevGeomInfo.seedlot.meanLatitudeDm,
+        value: `${seedlotMeanGeom.meanLatitudeDegree}° ${seedlotMeanGeom.meanLatitudeMinute}'`
+      },
+      meanLongitudeDm: {
+        ...prevGeomInfo.seedlot.meanLongitudeDm,
+        value: `${seedlotMeanGeom.meanLongitudeDegree}° ${seedlotMeanGeom.meanLongitudeMinute}'`
+      },
+      meanElevation: {
+        ...prevGeomInfo.seedlot.meanElevation,
+        value: String(seedlotMeanGeom.meanElevation)
+      }
+    },
+    smpMix: {
+      meanLatitudeDm: {
+        ...prevGeomInfo.smpMix.meanLatitudeDm,
+        value: `${smpMixMeanGeoData.meanLatitudeDegree}° ${smpMixMeanGeoData.meanLatitudeMinute}'`
+      },
+      meanLongitudeDm: {
+        ...prevGeomInfo.smpMix.meanLongitudeDm,
+        value: `${smpMixMeanGeoData.meanLongitudeDegree}° ${smpMixMeanGeoData.meanLongitudeMinute}'`
+      },
+      meanElevation: {
+        ...prevGeomInfo.smpMix.meanElevation,
+        value: String(smpMixMeanGeoData.meanElevation)
+      }
+    }
+  }));
 };
 
 const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): number => {

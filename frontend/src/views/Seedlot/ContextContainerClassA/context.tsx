@@ -11,7 +11,7 @@ import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
 import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 import {
-  InfoSectionConfigType, PrimitiveRowItem, RowItem, StrTypeRowItem
+  InfoSectionConfigType, MeanGeomInfoSectionConfigType, PrimitiveRowItem, RowItem, StrTypeRowItem
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { SummarySectionConfig } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
@@ -62,7 +62,9 @@ export type ClassAContextType = {
   popSizeAndDiversityConfig: InfoSectionConfigType,
   setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
   summaryConfig: typeof SummarySectionConfig,
-  setSummaryConfig: React.Dispatch<React.SetStateAction<typeof SummarySectionConfig>>
+  setSummaryConfig: React.Dispatch<React.SetStateAction<typeof SummarySectionConfig>>,
+  meanGeomInfos: MeanGeomInfoSectionConfigType,
+  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -104,7 +106,9 @@ const ClassAContext = createContext<ClassAContextType>({
   popSizeAndDiversityConfig: {} as InfoSectionConfigType,
   setPopSizeAndDiversityConfig: () => { },
   summaryConfig: {} as typeof SummarySectionConfig,
-  setSummaryConfig: () => { }
+  setSummaryConfig: () => { },
+  meanGeomInfos: {} as MeanGeomInfoSectionConfigType,
+  setMeanGeomInfos: () => { }
 });
 
 export default ClassAContext;

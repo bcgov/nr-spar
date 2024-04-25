@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@carbon/react';
 import {
   HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType,
-  InfoSectionConfigType, FileConfigType
+  InfoSectionConfigType, FileConfigType, MeanGeomInfoSectionConfigType
 } from './definitions';
 
 // eslint-disable-next-line import/no-unresolved
@@ -808,3 +808,34 @@ export const noParentTreeDescription = (
     No parent tree found under selected orchard(s)
   </span>
 );
+
+export const defaultMeanGeomConfig: MeanGeomInfoSectionConfigType = {
+  seedlot: {
+    meanLatitudeDm: {
+      name: 'Mean latitude',
+      value: ''
+    },
+    meanLongitudeDm: {
+      name: 'Mean longitude',
+      value: ''
+    },
+    meanElevation: {
+      name: 'Mean elevation',
+      value: ''
+    }
+  },
+  smpMix: {
+    meanLatitudeDm: {
+      name: 'Mean latitude',
+      value: ''
+    },
+    meanLongitudeDm: {
+      name: 'Mean longitude',
+      value: ''
+    },
+    meanElevation: {
+      name: 'Mean elevation',
+      value: ''
+    }
+  }
+};

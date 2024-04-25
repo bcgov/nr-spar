@@ -21,7 +21,9 @@ const CalculateMetrics = ({ disableOptions }: props) => {
     seedlotSpecies,
     isFormSubmitted,
     popSizeAndDiversityConfig,
-    setPopSizeAndDiversityConfig
+    setPopSizeAndDiversityConfig,
+    meanGeomInfos,
+    setMeanGeomInfos
   } = useContext(ClassAContext);
 
   if (isFormSubmitted) {
@@ -35,7 +37,9 @@ const CalculateMetrics = ({ disableOptions }: props) => {
       genWorthInfoItems,
       setGenWorthInfoItems,
       popSizeAndDiversityConfig,
-      setPopSizeAndDiversityConfig
+      setPopSizeAndDiversityConfig,
+      meanGeomInfos,
+      setMeanGeomInfos
     )
   });
 

@@ -71,7 +71,8 @@ const ParentTreeStep = () => {
     setGenWorthInfoItems,
     popSizeAndDiversityConfig,
     summaryConfig,
-    setSummaryConfig
+    setSummaryConfig,
+    meanGeomInfos
   } = useContext(ClassAContext);
 
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
@@ -561,14 +562,28 @@ const ParentTreeStep = () => {
                                 <hr />
                               </Column>
                             </Row>
+                            {/* -------- Effective population size and diversity -------- */}
                             <Row className="info-section-sub-title">
                               <Column>
                                 Effective population size and diversity
                               </Column>
                             </Row>
-                            {/* -------- Effective population size and diversity -------- */}
                             <InfoSection
                               infoItems={Object.values(popSizeAndDiversityConfig)}
+                            />
+                            <Row className="info-section-divider">
+                              <Column>
+                                <hr />
+                              </Column>
+                            </Row>
+                            {/* -------- Seedlot mean geospatial data -------- */}
+                            <Row className="info-section-sub-title">
+                              <Column>
+                                Mean geospatial data
+                              </Column>
+                            </Row>
+                            <InfoSection
+                              infoItems={Object.values(meanGeomInfos.seedlot)}
                             />
                           </DetailSection>
                         </>

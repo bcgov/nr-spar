@@ -26,13 +26,15 @@ import {
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
-import { DEFAULT_MIX_PAGE_ROWS, PopSizeAndDiversityConfig, SummarySectionConfig } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import {
+  DEFAULT_MIX_PAGE_ROWS, PopSizeAndDiversityConfig, SummarySectionConfig, defaultMeanGeomConfig
+} from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import ROUTES from '../../../routes/constants';
 import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/constants';
-import { RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import { MeanGeomInfoSectionConfigType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 
 import ClassAContext, { ClassAContextType } from './context';
@@ -98,6 +100,9 @@ const ContextContainerClassA = ({ children }: props) => {
   );
   const [summaryConfig, setSummaryConfig] = useState<typeof SummarySectionConfig>(
     () => structuredClone(SummarySectionConfig)
+  );
+  const [meanGeomInfos, setMeanGeomInfos] = useState<MeanGeomInfoSectionConfigType>(
+    () => structuredClone(defaultMeanGeomConfig)
   );
 
   const vegCodeQuery = useQuery({
@@ -725,7 +730,9 @@ const ContextContainerClassA = ({ children }: props) => {
         popSizeAndDiversityConfig,
         setPopSizeAndDiversityConfig,
         summaryConfig,
-        setSummaryConfig
+        setSummaryConfig,
+        meanGeomInfos,
+        setMeanGeomInfos
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
@@ -735,7 +742,7 @@ const ContextContainerClassA = ({ children }: props) => {
       progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,
       methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,
       fundingSourcesQuery.status, geoInfoVals, genWorthVals, genWorthInfoItems, weightedGwInfoItems,
-      popSizeAndDiversityConfig, summaryConfig
+      popSizeAndDiversityConfig, summaryConfig, meanGeomInfos
     ]
   );
 
