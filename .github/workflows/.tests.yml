@@ -30,6 +30,7 @@ jobs:
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: BCeID
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-backend.apps.silver.devops.gov.bc.ca
+      VITE_USER_POOLS_ID: ca-central-1_t2HSZBHur
       VITE_ORACLE_SERVER_URL: https://nr-spar-${{ inputs.target_oracle }}-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
       VITE_ZONE: TEST
