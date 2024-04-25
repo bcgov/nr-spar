@@ -432,7 +432,6 @@ class SeedlotEndpointTest {
   @DisplayName("getSingleSeedlotAclassFullInfoTest")
   @WithMockUser(roles = "user_read")
   void getSingleSeedlotAclassFullInfoTest() throws Exception {
-    Seedlot seedlotEntity = new Seedlot("0000000");
 
     SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(
         null,

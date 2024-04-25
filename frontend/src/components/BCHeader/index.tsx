@@ -18,41 +18,46 @@ import RightPanelTitle from '../RightPanelTitle';
 import MyProfile from '../MyProfile';
 import NotificationsCentral from '../NotificationsCentral';
 import PanelSectionName from '../PanelSectionName';
+import useWindowSize from '../../hooks/UseWindowSize';
+import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 
 import {
   HOME_LINK,
   VERSION,
-  clearPanelState,
+  defaultPanelState,
   componentTexts,
   navItems,
   supportItems
 } from './constants';
 import { RightPanelType, HearderContainerProps } from './definitions';
+import UserButton from './UserButton';
 
 import './styles.scss';
 
 const BCHeader = () => {
-  const [rightPanel, setRightPanel] = useState<RightPanelType>(clearPanelState);
+  const [rightPanel, setRightPanel] = useState<RightPanelType>(defaultPanelState);
   const [overlay, setOverlay] = useState<boolean>(false);
 
-  const handleRightPanel = (panel: string) => {
+  const windowSize = useWindowSize();
+
+  const handleRightPanel = (panel: keyof RightPanelType) => {
     // Using clearPanelState here so that it cleans all other
     // panel options before setting the one we actually want,
     // this solves the case where the user wants to open a new
     // panel, when other one is already open.
     if (rightPanel[panel]) {
       setOverlay(false);
-      setRightPanel(clearPanelState);
+      setRightPanel(defaultPanelState);
     } else {
       setOverlay(true);
       setRightPanel({
-        ...clearPanelState,
+        ...defaultPanelState,
         [panel]: true
       });
     }
   };
 
-  const closeRightPanel = (panel: string) => {
+  const closeRightPanel = (panel: keyof RightPanelType) => {
     setOverlay(false);
     setRightPanel({
       ...rightPanel,
@@ -97,25 +102,31 @@ const BCHeader = () => {
             <HeaderGlobalAction
               aria-label={componentTexts.searchAriaLabel}
               data-testid="header-button__search"
+              className="header-action-btn btn-disabled"
             >
               <Icons.Search size={20} />
             </HeaderGlobalAction>
             <HeaderGlobalAction
               aria-label={componentTexts.notifications.title}
               data-testid="header-button__notifications"
-              onClick={() => handleRightPanel('notifications')}
+              className="header-action-btn btn-disabled"
               isActive={rightPanel.notifications}
             >
               <Icons.Notification size={20} />
             </HeaderGlobalAction>
             <HeaderGlobalAction
-              aria-label={componentTexts.profile.controllerAriaLabel}
-              tooltipAlignment="end"
+              className="user-header-global-action"
+              aria-label={componentTexts.profile.headerAriaLabel}
               data-testid="header-button__user"
+              tooltipAlignment={
+                windowSize.innerWidth > MEDIUM_SCREEN_WIDTH
+                  ? 'center'
+                  : 'end'
+              }
               onClick={() => handleRightPanel('myProfile')}
               isActive={rightPanel.myProfile}
             >
-              <Icons.UserAvatar size={20} />
+              <UserButton />
             </HeaderGlobalAction>
           </HeaderGlobalBar>
           <HeaderPanel

@@ -333,6 +333,9 @@ public class Seedlot implements Serializable {
   @Column(name = "area_of_use_comment", length = 2000)
   private String areaOfUseComment;
 
+  @Column(name = "approved_userid")
+  private String approvedUserId;
+
   // end geographic
 
   public Seedlot(String id) {

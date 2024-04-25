@@ -1,8 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +21,8 @@ import org.springframework.stereotype.Service;
 public class TscAdminService {
 
   private final SeedlotRepository seedlotRepository;
+
+  private final SeedlotStatusService seedlotStatusService;
 
   /**
    * Retrieve a paginated list of seedlot for a given user.
@@ -40,5 +46,46 @@ public class TscAdminService {
     Page<Seedlot> seedlotPage = seedlotRepository.findAll(sortedPageable);
     SparLog.info("{} results and {} pages", seedlotPage.getNumber(), seedlotPage.getTotalPages());
     return seedlotPage;
+  }
+
+  /**
+   * Method for approving or disapproving a {@link Seedlot} registration.
+   *
+   * @param seedlotNumber The {@link Seedlot} identification.
+   * @param approved Boolean option defined if it was approved.
+   */
+  public Seedlot approveOrDisapproveSeedlot(String seedlotNumber, Boolean approved) {
+    SparLog.info("Received Seedlot number {} for approval or disappoval", seedlotNumber);
+
+    Optional<Seedlot> seedlot = seedlotRepository.findById(seedlotNumber);
+    if (seedlot.isEmpty()) {
+      SparLog.warn("Seedlot number not found!");
+      throw new SeedlotNotFoundException();
+    }
+
+    Seedlot seedlotEntity = seedlot.get();
+    String statucCode = null;
+
+    if (Boolean.TRUE.equals(approved)) {
+      SparLog.info("Seedlot number {} approved! Updating it to Approved", seedlotNumber);
+      statucCode = "APP";
+    } else {
+      SparLog.info("Seedlot number {} disapproved! Sending it back to Pending", seedlotNumber);
+      statucCode = "PND";
+    }
+
+    Optional<SeedlotStatusEntity> seedlotStatus =
+        seedlotStatusService.getValidSeedlotStatus(statucCode);
+    if (seedlotStatus.isEmpty()) {
+      SparLog.warn("Seedlot status {} not found!", statucCode);
+      throw new SeedlotStatusNotFoundException();
+    }
+
+    seedlotEntity.setSeedlotStatus(seedlotStatus.get());
+
+    Seedlot seedlotSaved = seedlotRepository.saveAndFlush(seedlotEntity);
+    SparLog.info("Seedlot number {} approval or disapproval request finished!", seedlotNumber);
+
+    return seedlotSaved;
   }
 }
