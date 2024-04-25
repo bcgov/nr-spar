@@ -133,7 +133,6 @@
       "src/*"
     ],
     "exclude": [
-      "**/mock-server/*",
       "**/Users/**"
     ],
     "excludeNodeModules": true,
