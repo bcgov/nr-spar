@@ -771,10 +771,10 @@ export const PopSizeAndDiversityConfig: InfoSectionConfigType = {
     name: 'Effective population size (Ne)',
     value: EMPTY_NUMBER_STRING
   },
-  coancestry: {
-    name: 'Coancestry (Sum PiPj * Cij)',
-    value: EMPTY_NUMBER_STRING
-  },
+  // coancestry: {
+  //   name: 'Coancestry (Sum PiPj * Cij)',
+  //   value: EMPTY_NUMBER_STRING
+  // },
   outsideSMPParent: {
     name: 'Number of SMP parents from outside',
     value: EMPTY_NUMBER_STRING

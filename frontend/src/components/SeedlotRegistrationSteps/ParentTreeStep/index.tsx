@@ -71,6 +71,7 @@ const ParentTreeStep = () => {
     genWorthInfoItems,
     setGenWorthInfoItems,
     popSizeAndDiversityConfig,
+    setPopSizeAndDiversityConfig,
     summaryConfig,
     setSummaryConfig,
     meanGeomInfos
@@ -161,6 +162,8 @@ const ParentTreeStep = () => {
         applicableGenWorths,
         weightedGwInfoItems,
         setWeightedGwInfoItems,
+        popSizeAndDiversityConfig,
+        setPopSizeAndDiversityConfig,
         state
       );
     },
@@ -284,7 +287,10 @@ const ParentTreeStep = () => {
                       ? (
                         <>
                           <DescriptionBox header="Genetic worth, effective population size and geospatial data" />
-                          <CalculateMetrics name="Calculate metrics" disableOptions={disableOptions} setShowInfoSections={setShowInfoSections} />
+                          <CalculateMetrics
+                            disableOptions={disableOptions}
+                            setShowInfoSections={setShowInfoSections}
+                          />
                         </>
                       )
                       : null
@@ -323,7 +329,7 @@ const ParentTreeStep = () => {
                           {/* -------- Seedlot mean geospatial data -------- */}
                           <Row className="info-section-sub-title">
                             <Column>
-                              Mean geospatial data
+                              Orchard parent tree geospatial summary
                             </Column>
                           </Row>
                           <InfoSection
@@ -340,7 +346,7 @@ const ParentTreeStep = () => {
               <>
                 <DetailSection>
                   <DescriptionBox
-                    header="Breeding value SMP mix used"
+                    header="Breeding value of SMP mix used"
                     description="Check the breeding value of SMP mix used on parent"
                   />
                   <InfoSection
@@ -353,28 +359,33 @@ const ParentTreeStep = () => {
                   />
                 </DetailSection>
                 {
-                  showInfoSections
-                    ? (
-                      <DetailSection>
-                        {/* -------- SMP mix mean geospatial data -------- */}
-                        <Row className="info-section-sub-title">
-                          <Column>
-                            SMP Mix mean geospatial data
-                          </Column>
-                        </Row>
-                        {
-                          !isFormSubmitted
-                            ? (
-                              <CalculateMetrics name="Calculate" disableOptions={disableOptions} setShowInfoSections={setShowInfoSections} />
-                            )
-                            : null
-                        }
-                        <InfoSection
-                          infoItems={Object.values(meanGeomInfos.smpMix)}
-                        />
-                      </DetailSection>
-                    )
-                    : null
+                  <DetailSection>
+                    {/* -------- SMP mix mean geospatial data -------- */}
+                    <Row className="info-section-sub-title">
+                      <DescriptionBox
+                        header="SMP Mix geospatial summary"
+                      />
+                    </Row>
+                    {
+                      !isFormSubmitted
+                        ? (
+                          <CalculateMetrics
+                            disableOptions={disableOptions}
+                            setShowInfoSections={setShowInfoSections}
+                          />
+                        )
+                        : null
+                    }
+                    {
+                      showInfoSections
+                        ? (
+                          <InfoSection
+                            infoItems={Object.values(meanGeomInfos.smpMix)}
+                          />
+                        )
+                        : null
+                    }
+                  </DetailSection>
                 }
               </>
             )

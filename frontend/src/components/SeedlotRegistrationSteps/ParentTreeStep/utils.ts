@@ -163,6 +163,8 @@ export const calcMixTabInfoItems = (
   applicableGenWorths: string[],
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
+  popSizeAndDiversityConfig: InfoSectionConfigType,
+  setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
   state: ParentTreeStepDataObj
 ) => {
   if (!disableOptions) {
@@ -170,7 +172,15 @@ export const calcMixTabInfoItems = (
     const tableRows = Object.values(state.mixTabData);
 
     // Calc number of SMP parents from outside
-    modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = getOutsideParentTreeNum(state);
+    const numOfOutsidePt = getOutsideParentTreeNum(state);
+    modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = numOfOutsidePt;
+    setPopSizeAndDiversityConfig((prevPop) => ({
+      ...prevPop,
+      outsideSMPParent: {
+        ...prevPop.outsideSMPParent,
+        value: numOfOutsidePt
+      }
+    }));
 
     // Total volume (ml)
     modifiedSummaryConfig.mixTab.infoItems.totalVolume.value = calcSum(tableRows, 'volume');

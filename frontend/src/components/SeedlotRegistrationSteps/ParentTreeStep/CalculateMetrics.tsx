@@ -11,11 +11,10 @@ import { geneticWorthDict } from './constants';
 
 type props = {
   disableOptions: boolean,
-  name: string,
   setShowInfoSections: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const CalculateMetrics = ({ disableOptions, name, setShowInfoSections }: props) => {
+const CalculateMetrics = ({ disableOptions, setShowInfoSections }: props) => {
   const {
     allStepData: { parentTreeStep: state },
     genWorthInfoItems,
@@ -79,7 +78,7 @@ const CalculateMetrics = ({ disableOptions, name, setShowInfoSections }: props) 
           });
         }}
       >
-        {name}
+        Calculate metrics
       </Button>
     </Row>
   );
