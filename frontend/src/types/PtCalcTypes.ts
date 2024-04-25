@@ -6,20 +6,25 @@ type GeneticTrait = {
   testedParentTreePerc?: number
 }
 
+type MeanGeomDataType = {
+  meanLatitudeDegree: number,
+  meanLatitudeMinute: number,
+  meanLatitudeSecond: number,
+  meanLongitudeDegree: number,
+  meanLongitudeMinute: number,
+  meanLongitudeSecond: number,
+  meanLatitude: number,
+  meanLongitude: number,
+  meanElevation: number
+};
+
 export type CalcPayloadResType = {
   geneticTraits: GeneticTrait[],
   calculatedPtVals: {
     neValue: number | null,
-    meanLatitudeDegree: number | null,
-    meanLatitudeMinute: number | null,
-    meanLatitudeSecond: number | null,
-    meanLongitudeDegree: number | null,
-    meanLongitudeMinute: number | null,
-    meanLongitudeSecond: number | null,
-    meanLatitude: number | null,
-    meanLongitude: number | null,
-    meanElevation: number | null
-  }
+    geospatialData: MeanGeomDataType
+  },
+  smpMixMeanGeoData: MeanGeomDataType
 };
 
 export type OrchardParentTreeValsType = {
