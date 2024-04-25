@@ -547,7 +547,7 @@ export const fillCalculatedInfo = (
       },
       meanElevation: {
         ...prevGeomInfo.seedlot.meanElevation,
-        value: String(seedlotMeanGeom.meanElevation)
+        value: `${seedlotMeanGeom.meanElevation} m`
       }
     },
     smpMix: {
@@ -561,7 +561,7 @@ export const fillCalculatedInfo = (
       },
       meanElevation: {
         ...prevGeomInfo.smpMix.meanElevation,
-        value: String(smpMixMeanGeoData.meanElevation)
+        value: `${smpMixMeanGeoData.meanElevation} m`
       }
     }
   }));
