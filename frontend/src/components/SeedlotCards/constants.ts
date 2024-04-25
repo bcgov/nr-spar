@@ -36,17 +36,5 @@ export const cards = [
     isEmpty: false,
     emptyTitle: '',
     emptyDescription: ''
-  },
-  {
-    id: '4',
-    image: 'TimeLapse',
-    header: 'Activity history',
-    description:
-      'Get updates your latest seedlot related activities',
-    link: '#',
-    highlighted: false,
-    isEmpty: false,
-    emptyTitle: '',
-    emptyDescription: ''
   }
 ];

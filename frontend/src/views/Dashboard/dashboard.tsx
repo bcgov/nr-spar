@@ -8,7 +8,6 @@ import {
 
 import PageTitle from '../../components/PageTitle';
 import FavouriteActivities from '../../components/FavouriteActivities';
-import RecentActivities from '../../components/RecentActivities';
 
 import './styles.scss';
 
@@ -29,13 +28,13 @@ const Dashboard = () => (
         </section>
       </Column>
     </Row>
-    <Row className="dashboard-row">
+    {/* <Row className="dashboard-row">
       <Column>
         <section title="Recent activities">
           <RecentActivities />
         </section>
       </Column>
-    </Row>
+    </Row> */}
   </FlexGrid>
 );
 

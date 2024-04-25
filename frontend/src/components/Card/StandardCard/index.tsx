@@ -6,9 +6,6 @@ import { Tile, IconButton } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 import * as Pictograms from '@carbon/pictograms-react';
 
-import ActivityHistory from '../../ActivityHistory';
-
-import ActivityHistoryItems from '../../../mock-server/fixtures/ActivityHistoryItems';
 import useWindowSize from '../../../hooks/UseWindowSize';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
@@ -22,14 +19,13 @@ interface StandardCardProps {
   description: string;
   url: string;
   image: string;
-  type: string;
   isEmpty: boolean;
   emptyTitle: string;
   emptyDescription: string;
 }
 
 const StandardCard = ({
-  header, description, url, image, type, isEmpty, emptyTitle, emptyDescription
+  header, description, url, image, isEmpty, emptyTitle, emptyDescription
 }: StandardCardProps) => {
   const navigate = useNavigate();
   const Image = image ? Pictograms[image] : null;
@@ -76,17 +72,7 @@ const StandardCard = ({
       {
         isEmpty
           ? <EmptySection pictogram={image} title={emptyTitle} description={emptyDescription} />
-          : (
-            <div>
-              {type !== '4' ? (
-                <Image className="std-card-pictogram" />
-              ) : (
-                <ActivityHistory
-                  history={ActivityHistoryItems}
-                />
-              )}
-            </div>
-          )
+          : <Image className="std-card-pictogram" />
       }
     </Tile>
   );
