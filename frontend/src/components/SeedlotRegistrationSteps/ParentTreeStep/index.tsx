@@ -25,9 +25,13 @@ import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUt
 import { recordValues } from '../../../utils/RecordUtils';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import DetailSection from '../../DetailSection';
+import DescriptionBox from '../../DescriptionBox';
 
 import InputErrorNotification from './InputErrorNotification';
 import UploadWarnNotification from './UploadWarnNotification';
+import CalculateMetrics from './CalculateMetrics';
+import InfoSectionDivider from './InfoSectionDivider';
 import {
   renderColOptions, renderTableBody, renderNotification,
   renderDefaultInputs, renderPagination
@@ -53,9 +57,6 @@ import {
 } from './utils';
 
 import './styles.scss';
-import DetailSection from '../../DetailSection';
-import DescriptionBox from '../../DescriptionBox';
-import CalculateMetrics from './CalculateMetrics';
 
 const ParentTreeStep = () => {
   const {
@@ -537,11 +538,7 @@ const ParentTreeStep = () => {
                                 )
                                 : null
                             }
-                            <Row className="info-section-divider">
-                              <Column>
-                                <hr />
-                              </Column>
-                            </Row>
+                            <InfoSectionDivider />
                             {/* ------ Genetic worth and percent of tested parent trees ------ */}
                             <Row className="info-section-sub-title">
                               <Column>
@@ -557,11 +554,7 @@ const ParentTreeStep = () => {
                                 ))
                               }
                             </InfoSection>
-                            <Row className="info-section-divider">
-                              <Column>
-                                <hr />
-                              </Column>
-                            </Row>
+                            <InfoSectionDivider />
                             {/* -------- Effective population size and diversity -------- */}
                             <Row className="info-section-sub-title">
                               <Column>
@@ -571,11 +564,7 @@ const ParentTreeStep = () => {
                             <InfoSection
                               infoItems={Object.values(popSizeAndDiversityConfig)}
                             />
-                            <Row className="info-section-divider">
-                              <Column>
-                                <hr />
-                              </Column>
-                            </Row>
+                            <InfoSectionDivider />
                             {/* -------- Seedlot mean geospatial data -------- */}
                             <Row className="info-section-sub-title">
                               <Column>
@@ -601,6 +590,16 @@ const ParentTreeStep = () => {
                                 weightedGwInfoItems
                               ])
                             }
+                          />
+                          <InfoSectionDivider />
+                          {/* -------- SMP mix mean geospatial data -------- */}
+                          <Row className="info-section-sub-title">
+                            <Column>
+                              SMP Mix mean geospatial data
+                            </Column>
+                          </Row>
+                          <InfoSection
+                            infoItems={Object.values(meanGeomInfos.smpMix)}
                           />
                         </DetailSection>
                       )
