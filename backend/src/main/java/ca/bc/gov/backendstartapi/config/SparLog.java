@@ -18,7 +18,8 @@ public class SparLog {
     if (Objects.isNull(correlationId)) {
       return message;
     }
-    return correlationId + " " + message;
+    //return correlationId + " " + message;
+    return message;
   }
 
   private static boolean isThrowable(Object... args) {

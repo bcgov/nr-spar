@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -31,46 +32,73 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
       @NonNull Object handler)
       throws Exception {
     String requestUri = request.getRequestURI();
-    SparLog.info("Request Uri: {}", requestUri);
-    SparLog.info("request: {}", request.toString());
-    SparLog.info("response: {}", response.toString());
-    SparLog.info("handler: {}", handler.toString());
 
-    String[] resourceHandler = handler.toString().split("#");
-    List<String> operations = getResourceOperations(resourceHandler);
-    Map<String, String[]> rolesConfigMap = getResourceRolesMatrix(resourceHandler, requestUri);
-    List<String> userRoles = getUserRoles(request);
-
-    // Validation algorithm
-
-    // Finds the most required role
-
-    // Finds the highest role of the user
-    String higherRole = null;
-    Integer higherSum = 0;
-    for (Map.Entry<String, String[]> entry : rolesConfigMap.entrySet()) {
-      String resourceRoleName = entry.getKey();
-      String[] resourcesOperations = entry.getValue();
-
-      Integer currentRoleSum = 0;
-      for (String op : resourcesOperations) {
-        int intVal = (int) op.charAt(0);
-        currentRoleSum += intVal;
-      }
-
-      if (currentRoleSum > higherSum) {
-        higherSum = currentRoleSum;
-        higherRole = resourceRoleName;
-      }
-    }
-
-    // If the user has the higher role, allows it
-    if (userRoles.contains(higherRole)) {
-      SparLog.info("Request allowed by role {}", higherRole);
+    // Bypass other handlers - internal spring boot handlers
+    if (!handler.toString().contains("ca.bc.gov.backendstartapi")) {
       return true;
     }
 
-    SparLog.info("Request denied. Role missing {}", higherRole);
+    // Gets the resource handler (class name and method name)
+    String[] resourceHandler = handler.toString().split("#");
+
+    List<String> resourceOperations = getResourceOperations(resourceHandler);
+
+    // Gets the allowed roles (declared) and its allowed operations for the resource
+    Map<String, String[]> rolesConfigMap =
+        getResourceRolesMatrix(resourceHandler, requestUri, resourceOperations);
+
+    /*
+     * Gets roles from the resource that can operate given the resource operation. Allow me to hightlight
+     * that only roles that are allowed to do the operation (C,R,U,D) will be returned.
+     * Returns something like:
+     * R - [SPAR_TSC_ADMIN, SPAR_MINISTRY_ORCHARD, SPAR_NONMINISTRY_ORCHARD]
+     */
+    List<String> requiredRolesList =
+        getResourceRequiredRoles(resourceHandler, rolesConfigMap, resourceOperations);
+
+    // Get the current user roles (from the request bearer token)
+    List<String> userRoles = getUserRoles(request);
+
+    boolean allowed = matchUserRoleWithResourceRoles(requiredRolesList, userRoles);
+    if (!allowed) {
+      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    return allowed;
+  }
+
+  private List<String> getResourceRequiredRoles(
+      String[] resourceHandler,
+      Map<String, String[]> rolesConfigMap,
+      List<String> resourceOperations) {
+    List<String> resultList = new ArrayList<>();
+    for (Map.Entry<String, String[]> entry : rolesConfigMap.entrySet()) {
+      int rolesRequired = resourceOperations.size();
+      int matchedSum = 0;
+      for (String rolesOperation : entry.getValue()) {
+        if (resourceOperations.contains(rolesOperation)) {
+          matchedSum++;
+        }
+      }
+      if (matchedSum == rolesRequired) {
+        resultList.add(entry.getKey());
+      }
+    }
+
+    SparLog.info("Roles allowed for this endpoint: {}", resultList);
+
+    return resultList;
+  }
+
+  private boolean matchUserRoleWithResourceRoles(
+      List<String> requiredRolesList, List<String> userRoles) {
+    for (String requiredRole : requiredRolesList) {
+      if (userRoles.contains(requiredRole)) {
+        SparLog.info("Request allowed by user role: {}", requiredRole);
+        return true;
+      }
+    }
+    SparLog.info("Request denied. No enough access levels!");
     return false;
   }
 
@@ -99,6 +127,7 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
         }
       }
 
+      SparLog.info("User roles: {}", roles);
       return new ArrayList<>(roles);
     }
     return List.of();
@@ -150,7 +179,8 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
    * @param uri Request URI.
    * @return A Map containing the declared roles and resources, or empty map.
    */
-  private Map<String, String[]> getResourceRolesMatrix(String[] classNameWithMethod, String uri) {
+  private Map<String, String[]> getResourceRolesMatrix(
+      String[] classNameWithMethod, String uri, List<String> resourceOperations) {
     List<String> combination = getClassAndMethodNames(classNameWithMethod);
 
     if (combination.isEmpty()) {
@@ -171,11 +201,11 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
         }
 
         CrudMatrixFilterConfig[] configs = annotation.config();
-        SparLog.info("Role config declared for {}", uri);
+        SparLog.info("Access level required for {}: {}", uri, resourceOperations);
+        SparLog.info("Roles declared and its permissions:");
         Map<String, String[]> roleMap = new HashMap<>();
         for (CrudMatrixFilterConfig config : configs) {
-          SparLog.info(
-              "Role: {}, operationsAllowed: {}", config.role(), config.operationsAllowed());
+          SparLog.info("Role={} accessLevel={}", config.role(), config.operationsAllowed());
           roleMap.put(config.role(), config.operationsAllowed());
         }
 
@@ -201,8 +231,8 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
     }
     String methodName = null;
     if (classNameWithMethod.length > 1) {
-      int len = classNameWithMethod[1].length();
-      methodName = classNameWithMethod[1].substring(0, len - 2);
+      int indexOfParent = classNameWithMethod[1].indexOf("(");
+      methodName = classNameWithMethod[1].substring(0, indexOfParent);
     }
 
     if (Objects.isNull(className) || !className.startsWith("ca.bc.gov.backendstartapi")) {

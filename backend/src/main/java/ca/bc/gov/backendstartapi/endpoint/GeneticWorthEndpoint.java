@@ -4,6 +4,9 @@ import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
+import ca.bc.gov.backendstartapi.filter.CrudMatrixFilterConfig;
+import ca.bc.gov.backendstartapi.filter.CrudMatrixFilterConfigs;
+import ca.bc.gov.backendstartapi.filter.CrudOperationsConfig;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
@@ -80,6 +83,19 @@ public class GeneticWorthEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @CrudMatrixFilterConfigs(
+      config = {
+        @CrudMatrixFilterConfig(
+            role = "SPAR_TSC_ADMIN",
+            operationsAllowed = {"R", "U", "C"}),
+        @CrudMatrixFilterConfig(
+            role = "SPAR_MINISTRY_ORCHARD",
+            operationsAllowed = {"R"}),
+        @CrudMatrixFilterConfig(
+            role = "SPAR_NONMINISTRY_ORCHARD",
+            operationsAllowed = {"R"})
+      })
+  @CrudOperationsConfig(operations = {"C", "R", "U"})
   public List<CodeDescriptionDto> getAllGeneticWorth() {
     return geneticWorthService.getAllGeneticWorth();
   }
@@ -110,7 +126,8 @@ public class GeneticWorthEndpoint {
               in = ParameterIn.PATH,
               description = "Identifier of the genetic worth.",
               required = true)
-          @NonNull String code) {
+          @NonNull
+          String code) {
     return geneticWorthService.getGeneticWorthByCode(code);
   }
 
