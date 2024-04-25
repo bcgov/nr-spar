@@ -7,13 +7,12 @@ import { cards } from './constants';
 
 import './styles.scss';
 
-const SeedlotActivities = () => (
+const SeedlotCards = () => (
   <Row className="seedlot-activities-cards">
     {
       cards.map((card) => (
         <Column sm={4} md={4} lg={8} xlg={8} max={4} key={card.id}>
           <StandardCard
-            type={card.id}
             image={card.image}
             header={card.header}
             description={card.description}
@@ -28,4 +27,4 @@ const SeedlotActivities = () => (
   </Row>
 );
 
-export default SeedlotActivities;
+export default SeedlotCards;

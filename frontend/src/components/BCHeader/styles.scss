@@ -79,6 +79,7 @@
     color: var(--#{vars.$bcgov-prefix}-text-primary);
     transition: width 0.11s cubic-bezier(0.2, 0, 1, 0.9);
     will-change: width;
+    overflow-y: scroll;
   }
 
   .overlay-element {

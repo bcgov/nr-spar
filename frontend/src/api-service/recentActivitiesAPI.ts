@@ -1,5 +1,3 @@
-import RecentActivityItems from '../mock-server/fixtures/RecentActivityItems';
-
-const getRecentActivities = () => RecentActivityItems;
+const getRecentActivities = () => [];
 
 export default getRecentActivities;
