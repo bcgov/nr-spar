@@ -1,7 +1,7 @@
 name: PR
 
 on:
-  # pull_request:
+  pull_request:
   workflow_dispatch:
 
 concurrency:
@@ -10,23 +10,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  builds:
-    name: Builds
-    runs-on: ubuntu-22.04
-    permissions:
-      packages: write
-    strategy:
-      matrix:
-        package: [database, backend, frontend, oracle-api]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-        with:
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: latest
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ('${{ matrix.package }}/')
+  # builds:
+  #   name: Builds
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     packages: write
+  #   strategy:
+  #     matrix:
+  #       package: [database, backend, frontend, oracle-api]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+  #       with:
+  #         package: ${{ matrix.package }}
+  #         tag: ${{ github.event.number }}
+  #         tag_fallback: latest
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         triggers: ('${{ matrix.package }}/')
 
   deploys:
     name: Deploys

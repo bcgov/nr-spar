@@ -89,7 +89,7 @@ jobs:
           - name: database
             file: database/openshift.deploy.yml
             parameters:
-              ${{ github.event_name != 'pull_request' || '-p DB_PVC_SIZE=192Mi' }}
+              ${{ github.event_name != 'pull_request' && '' || '-p DB_PVC_SIZE=192Mi' }}
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
@@ -131,8 +131,8 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
-            ${{ github.event_name != 'pull_request' || '-p MIN_REPLICAS=1' }}
-            ${{ github.event_name != 'pull_request' || '-p MAX_REPLICAS=2' }}
+            ${{ github.event_name != 'pull_request' && '' || '-p MIN_REPLICAS=1' }}
+            ${{ github.event_name != 'pull_request' && '' || '-p MAX_REPLICAS=2' }}
             -p ZONE=${{ inputs.target || github.event.number }}
             -p TAG=${{ inputs.tag || needs.init.outputs.pr }}
             ${{ matrix.parameters }}

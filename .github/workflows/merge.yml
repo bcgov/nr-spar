@@ -27,6 +27,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
+      environment: test
       target: test
 
   # tests:
@@ -36,6 +37,15 @@ jobs:
   #   uses: ./.github/workflows/.tests.yml
   #   with:
   #     target: test
+
+  deploy-prod:
+    name: PROD Deployment
+    # needs: [deploy-test]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: prod
+      target: prod
 
   # init-prod:
   #   name: PROD Init
