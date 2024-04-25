@@ -43,6 +43,8 @@
 
   .sticky-table-title {
     .#{vars.$bcgov-prefix}--data-table-header {
+      position: sticky;
+      top: 3rem;
       z-index: 1;
       background-color: colors.$white;
     }
@@ -51,6 +53,8 @@
   .sticky-toolbar {
     background: colors.$white;
     z-index: 1;
+    position: sticky;
+    top: 8.375rem;
 
     .#{vars.$bcgov-prefix}--table-toolbar {
       background: colors.$white;
@@ -256,7 +260,7 @@
     height: 4rem;
     top: 11.3rem;
     z-index: 1;
-
+    position: sticky;
     th {
       vertical-align: baseline;
       padding-top: 1rem;
