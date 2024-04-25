@@ -3300,6 +3300,8 @@ alter table spar.etl_execution_map  add column execution_parent_id integer;
 alter table spar.etl_execution_map  add column execution_order integer;
 alter table spar.etl_execution_map  add column group_executor boolean default false;
 alter table spar.etl_execution_map  add column target_primary_key varchar(200);
+alter table spar.etl_execution_map  add column source_db_type varchar(200);
+alter table spar.etl_execution_map  add column target_db_type varchar(200);
 
 /* 
 -- DML for Generic interface_id for generic running
@@ -3309,38 +3311,86 @@ alter table spar.etl_execution_map  add column target_primary_key varchar(200);
 /* 
 -- INCLUDING MAIN RUN and SEEDLOT SYNC FROM ORACLE
 */  
-insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table,
-                                   target_file,target_name, target_table,target_primary_key, truncate_before_run , execution_order, group_executor)
+
+/* ORACLE TO POSTGRES ORCHESTRATION: */
+insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
+								   truncate_before_run , execution_order, group_executor)
 select 0 				as execution_id, 
        null 			as execution_parent_id ,
-       'ETL-RUN' 		as interface_id, 
+       'ETL-RUN-ORACLE-TO-POSTGRES' 		as interface_id, 
        null 			as source_file,
        'MAIN PROCESS FROM ORACLE' 	as source_name, 
        null 			as source_table,
+       null 			as source_db_type,
        null 			as target_file,
        'MAIN PROCESS TO POSTGRES' 	as target_name, 
        null 			as target_table, 
+       null 			as target_db_type,
        null 			as target_primary_key, 
        false 			as truncate_before_run ,
 	   0 				as execution_order,
 	   true             as group_executor
-where not exists (select 1 from spar.etl_execution_map where interface_id = 'ETL-RUN');
+where not exists (select 1 from spar.etl_execution_map where interface_id = 'ETL-RUN-ORACLE-TO-POSTGRES');
 
-insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table,
-                                   target_file,target_name, target_table,target_primary_key, truncate_before_run, execution_order )
+insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
+								   truncate_before_run , execution_order)
 select 1 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-ORACLE-TO-POSTGRES' 	    as interface_id, 
        '/SQL/SPAR/ORACLE_SEEDLOT_EXTRACT.sql'   as source_file,
        'ORACLE THE'                 			as source_name, 
        'SEEDLOT'               	    			as source_table,
+       'ORACLE'               	    			as source_db_type,
        '/SQL/SPAR/POSTGRES_SEEDLOT_UPSERT.sql' 	as target_file,
        'NEW SPAR' 								as target_name, 
        'spar.seedlot' 							as target_table, 
+       'POSTGRES' 								as target_db_type, 
        'seedlot_number' 						as target_primary_key, 
        false 									as truncate_before_run ,
 	   1 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-ORACLE-TO-POSTGRES');
+
+/* POSTGRES TO ORACLE ORCHESTRATION: */
+insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
+								   truncate_before_run , execution_order, group_executor)
+select 2 				as execution_id, 
+       null 			as execution_parent_id ,
+       'ETL-RUN-POSTGRES-TO-ORACLE' 		as interface_id, 
+       null 			as source_file,
+       'MAIN PROCESS FROM ORACLE' 	as source_name, 
+       null 			as source_table,
+       null 			as source_db_type,
+       null 			as target_file,
+       'MAIN PROCESS TO POSTGRES' 	as target_name, 
+       null 			as target_table, 
+       null 			as target_db_type, 
+       null 			as target_primary_key, 
+       false 			as truncate_before_run ,
+	   0 				as execution_order,
+	   true             as group_executor
+where not exists (select 1 from spar.etl_execution_map where interface_id = 'ETL-RUN-POSTGRES-TO-ORACLE');
+
+insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
+								   truncate_before_run , execution_order)
+select 3 										as execution_id, 
+       2 										as execution_parent_id ,
+       'SEEDLOT-ORACLE-TO-SPAR-POSTGRES' 	    as interface_id, 
+       '/SQL/SPAR/POSTGRES_SEEDLOT_EXTRACT.sql' as source_file,
+       'NEW SPAR'                    			as source_name, 
+       'spar.seedlot'          	    			as source_table,
+       'POSTGRES'          	    				as source_db_type,
+       '/SQL/SPAR/ORACLE_SEEDLOT_LOAD.sql' 	    as target_file,
+       'ORACLE THE' 							as target_name, 
+       'SEEDLOT' 							    as target_table, 
+       'ORACLE' 							    as target_db_type, 
+       'seedlot_number' 						as target_primary_key, 
+       false 									as truncate_before_run ,
+	   1 										as execution_order
+where not exists (select 1 from spar.etl_execution_map where interface_id = 'SEEDLOT-ORACLE-TO-SPAR-POSTGRES');
 
 /* Only for back compatibility */
 create table spar.data_sync_control (data_sync_id integer, status varchar, start_dt timestamp, end_dt timestamp);

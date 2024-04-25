@@ -2,6 +2,7 @@ import logging
 #import cx_Oracle
 import oracledb
 import csv
+import numpy
 
 from io import StringIO
 from sqlalchemy import create_engine, text
@@ -23,6 +24,7 @@ class database_connection(object):
         else:
             self.engine = create_engine(self.conn_string)
         self.conn = self.engine.connect().execution_options(autocommit=False)
+       
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -98,8 +100,17 @@ class database_connection(object):
         print("TEMP TABLE {} created: {}".format(table_name, query) )
         self.conn.execute(text(query), None)
 
+    def execute_upsert(self, dataframe:object, table_name:str, table_pk:str, db_type: str) -> int:
+        if db_type=="POSTGRES":
+            return self.bulk_upsert_postgres(dataframe=dataframe,table_name=table_name,table_pk=table_pk,if_data_exists="append",index_data=False)
+        
+        if db_type=="ORACLE":
+            orcldataframe = convertTypesToOracle(dataframe)
+            return self.bulk_upsert_oracle(dataframe=orcldataframe, table_name=table_name,table_pk=table_pk)
+        
+        return None
 
-    def bulk_upsert(self, dataframe:object, table_name:str, table_pk:str, if_data_exists: str, index_data:bool ) -> int:
+    def bulk_upsert_postgres(self, dataframe:object, table_name:str, table_pk:str, if_data_exists: str, index_data:bool ) -> int:
         onconflictstatement = ""
         if table_pk != "":
             columnspk = table_pk.split(",")
@@ -116,9 +127,54 @@ class database_connection(object):
         result = self.conn.execute(text(sql_text), dataframe.to_dict('records'))
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
+
+    def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str ) -> int:
+        onconflictstatement = ""
+        for row in dataframe.itertuples():
+            params = {}
+            for column in dataframe.columns.values:
+                params[column] = getattr(row,column)
+            if table_pk != "":
+                columnspk = table_pk.split(",")
+                whStatement = "WHERE 1=1"
+                for column in columnspk:
+                    params["p_"+column] = getattr(row,column)
+                    whStatement = f"""{whStatement}  AND  {column} = :p_{column}"""
+
+                df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation 
+                for column in dataframe.columns.values:
+                    params["s_"+column] = getattr(row,column)
+                onconflictstatement = f"""
+                EXCEPTION
+                WHEN DUP_VAL_ON_INDEX THEN
+                    UPDATE  {table_name} 
+                    SET {' , '.join(df2.columns.values + '= :s_'+df2.columns.values)} 
+                    {whStatement};"""
+        
+            sql_text = f""" 
+            BEGIN
+                INSERT INTO {table_name}({', '.join(dataframe.columns.values)}) 
+                    VALUES(:{', :'.join(dataframe.columns.values)})   ;
+                {onconflictstatement}
+            END; """
+            result = self.conn.execute(text(sql_text), params)
+        
+        self.commit()  # If everything is ok, a commit will be executed.
+        return result.rowcount  # Number of rows affected
+    
     
     def bulk_load(self, dataframe:object, table_name:str, if_data_exists: str, index_data:bool ) -> int:
         return dataframe.to_sql(name=table_name,con=self.conn.engine,if_exists=if_data_exists, index=index_data, method=psql_insert_copy)
+     
+def convertTypesToOracle(dataframe):
+    dataframe = dataframe.fillna(numpy.nan).replace([numpy.nan], [None])
+    for column in dataframe.columns.values:
+        if dataframe[column].dtype =='Int64':
+            dataframe=dataframe.astype({column:int},errors="ignore")
+    
+    return dataframe
+
+
 
 def psql_insert_copy(table, conn, keys, data_iter):
     """

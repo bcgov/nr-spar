@@ -17,8 +17,8 @@ def get_execution_map (track_db_conn: object,
                        execution_id: int) -> list:
     
     select_sync_id_stm = "select interface_id , execution_id, execution_order, group_executor,  \
-                              source_name, source_file, source_table, \
-                              target_name, target_file, target_table, target_primary_key, \
+                              source_name, source_file, source_table, source_db_type, \
+                              target_name, target_file, target_table, target_db_type, target_primary_key, \
                               truncate_before_run, case when group_executor then 'ORCHESTRATION' else 'PROCESS' end as process_type \
                               from {}.etl_execution_map \
                               where (execution_id = {} or execution_parent_id = {} )  and execution_order >= 0 \
@@ -42,7 +42,9 @@ def validate_execution_map (execution_map) -> bool:
     print("-- Validating the execution process to be executed")
     for row in execution_map:
         if row["group_executor"]:
+            print("--------------------------")
             print("-- Executing group executor: " + row["interface_id"])
+            print("--------------------------")
         else:
             exist_process = True
             if row["source_file"] == "":
@@ -51,8 +53,26 @@ def validate_execution_map (execution_map) -> bool:
             if row["target_file"] == "":
                 print("[EXECUTION MAP ERROR] Target file does not exist in Interface Id " + row["interface_id"])
                 ret = False
+            if row["source_db_type"] == "":
+                print("[EXECUTION MAP ERROR] Source DB Type is not filled for Interface Id " + row["interface_id"])
+                ret = False
+            if row["target_db_type"] == "":
+                print("[EXECUTION MAP ERROR] Target DB Type is not filled for Interface Id " + row["interface_id"])
+                ret = False
+            if not row["source_db_type"] in ['ORACLE','POSTGRES']:
+                print(f"[EXECUTION MAP ERROR] Source DB Type is {row['source_db_type']} and not 'ORACLE' or 'POSTGRES' for Interface Id {row['interface_id']}" )
+                ret = False
+            if not row["target_db_type"] in ['ORACLE','POSTGRES']:
+                print(f"[EXECUTION MAP ERROR] Target DB Type is {row['target_db_type']} and not 'ORACLE' or 'POSTGRES' for Interface Id  {row['interface_id']}")
+                ret = False
+            if row["target_file"] == "":
+                print("[EXECUTION MAP ERROR] Target file does not exist in Interface Id " + row["interface_id"])
+                ret = False
             if row["truncate_before_run"] and row["target_table"]=="":
                 print("[EXECUTION MAP ERROR] Target table is not filled for truncate statement in Interface Id" + row["interface_id"])
+                ret = False
+            if row["truncate_before_run"] and row["target_db_type"]=="ORACLE":
+                print("[EXECUTION MAP ERROR] Target table is not allowed to be truncated because is in Oracle database. Check Interface Id" + row["interface_id"])
                 ret = False
     return (ret and exist_process)
 
@@ -71,7 +91,6 @@ def get_processes_execution_map (execution_map) -> list:
     for row in execution_map:
         if row["process_type"] == "PROCESS":
             processes.append(row)
-
     return processes
 
 def print_process(process):
@@ -81,6 +100,14 @@ def print_process(process):
     print("--Process Source: {} (table: {}, file: {}):".format(process["source_name"], process["source_table"],process["source_file"]) )
     print("--Process Target: {} (table: {}, file: {}):".format(process["target_name"], process["target_table"],process["target_file"]) )
     print("--------------------------")
+
+def get_config(oracle_config, postgres_config, db_type):
+    if db_type=="ORACLE":
+        return oracle_config
+    elif db_type=="POSTGRES":
+        return postgres_config
+    else:
+        return None
     
        
 def get_running_data_sync_id(database_conn: object, 

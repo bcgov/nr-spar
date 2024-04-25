@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
     3. Create a TEMP table in the target connection
     4. Execute the target.sql in target connection using the TEMP table
 """
-def data_sync2(source_config, target_config, track_config, execution_id):
+def data_sync2(oracle_config, postgres_config, track_config, execution_id):
     sync_start_time = time.time()
     rows_from_source = 0
     rows_target_processed = 0
@@ -51,6 +51,9 @@ def data_sync2(source_config, target_config, track_config, execution_id):
 
             # All processes to be executed from configuration in ETL_EXECUTION_MAP
             for process in processes:
+                source_config = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["source_db_type"])
+                target_config = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["target_db_type"])
+                
                 with db_conn.database_connection(source_config) as source_db_conn:
                     time_conn_source = timedelta(seconds=(time.time()-temp_time))
                     temp_time = time.time()
@@ -72,9 +75,12 @@ def data_sync2(source_config, target_config, track_config, execution_id):
                         
                         table_df=table_df.convert_dtypes()
                         
-                        rows_target_processed = target_db_conn.bulk_upsert(dataframe=table_df, table_name=process["target_table"],
-                                                                   table_pk=process["target_primary_key"], 
-                                                                   if_data_exists="append", index_data=False )
+                        rows_target_processed = target_db_conn.execute_upsert(dataframe=table_df, 
+                                                                              table_name=process["target_table"],
+                                                                              table_pk=process["target_primary_key"], 
+                                                                              db_type=process["target_db_type"])
+
+
                         # READ FROM TEMP TABLE:
                         time_target_load = timedelta(seconds=(time.time()-temp_time))
                         
