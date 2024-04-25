@@ -26,7 +26,7 @@ import {
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
-import { DEFAULT_MIX_PAGE_ROWS, PopSizeAndDiversityConfig } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { DEFAULT_MIX_PAGE_ROWS, PopSizeAndDiversityConfig, SummarySectionConfig } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import ROUTES from '../../../routes/constants';
@@ -95,6 +95,9 @@ const ContextContainerClassA = ({ children }: props) => {
   ] = useState<Record<keyof RowItem, InfoDisplayObj>>({} as Record<keyof RowItem, InfoDisplayObj>);
   const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
     () => structuredClone(PopSizeAndDiversityConfig)
+  );
+  const [summaryConfig, setSummaryConfig] = useState<typeof SummarySectionConfig>(
+    () => structuredClone(SummarySectionConfig)
   );
 
   const vegCodeQuery = useQuery({
@@ -720,7 +723,9 @@ const ContextContainerClassA = ({ children }: props) => {
         weightedGwInfoItems,
         setWeightedGwInfoItems,
         popSizeAndDiversityConfig,
-        setPopSizeAndDiversityConfig
+        setPopSizeAndDiversityConfig,
+        summaryConfig,
+        setSummaryConfig
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
@@ -730,7 +735,7 @@ const ContextContainerClassA = ({ children }: props) => {
       progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,
       methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,
       fundingSourcesQuery.status, geoInfoVals, genWorthVals, genWorthInfoItems, weightedGwInfoItems,
-      popSizeAndDiversityConfig
+      popSizeAndDiversityConfig, summaryConfig
     ]
   );
 

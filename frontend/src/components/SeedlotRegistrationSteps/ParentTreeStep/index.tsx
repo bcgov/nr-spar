@@ -36,7 +36,7 @@ import { OrchardObj } from '../OrchardStep/definitions';
 import UploadFileModal from './UploadFileModal';
 import InfoSectionRow from '../../InfoSection/InfoSectionRow';
 import {
-  pageText, headerTemplate, geneticWorthDict, SummarySectionConfig,
+  pageText, headerTemplate, geneticWorthDict,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, DEFAULT_MIX_PAGE_SIZE,
   getDownloadUrl, fileConfigTemplate, getEmptySectionDescription,
   noParentTreeDescription, dataEntryInstructions,
@@ -69,7 +69,9 @@ const ParentTreeStep = () => {
     setWeightedGwInfoItems,
     genWorthInfoItems,
     setGenWorthInfoItems,
-    popSizeAndDiversityConfig
+    popSizeAndDiversityConfig,
+    summaryConfig,
+    setSummaryConfig
   } = useContext(ClassAContext);
 
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
@@ -89,12 +91,15 @@ const ParentTreeStep = () => {
   const [slicedMixRows, setSlicedMixRows] = useState<Array<RowItem>>(
     () => sortAndSliceRows(Object.values(state.mixTabData), currentMixPage, currMixPageSize, true, 'parentTreeNumber')
   );
-  const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
-  const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));
-  const resetFileUploadConfig = () => setFileUploadConfig(structuredClone(fileConfigTemplate));
+  const [fileUploadConfig, setFileUploadConfig] = useState(
+    () => structuredClone(fileConfigTemplate)
+  );
+  const resetFileUploadConfig = () => setFileUploadConfig(
+    () => structuredClone(fileConfigTemplate)
+  );
   const [isSMPDefaultValChecked, setIsSMPDefaultValChecked] = useState(false);
   // Options are disabled if users have not typed in one or more valid orchards
   const [disableOptions, setDisableOptions] = useState(true);
@@ -121,16 +126,16 @@ const ParentTreeStep = () => {
   // Effects for 'Cone and Pollen' and 'SMP Success' tabs
   useEffect(
     () => {
+      const tableRows = Object.values(state.tableRowData);
       sliceTableRowData(
-        Object.values(state.tableRowData),
+        tableRows,
         currentPage,
         currPageSize,
         true,
         'parentTreeNumber',
         setSlicedRows
       );
-      const tableRows = Object.values(state.tableRowData);
-      calcSummaryItems(disableOptions, setSummaryConfig, summaryConfig, tableRows);
+      calcSummaryItems(setSummaryConfig, summaryConfig, tableRows);
     },
     [state.tableRowData]
   );

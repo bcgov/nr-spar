@@ -14,6 +14,7 @@ import {
   InfoSectionConfigType, PrimitiveRowItem, RowItem, StrTypeRowItem
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import { SummarySectionConfig } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
 export type ClassAContextType = {
   seedlotData: SeedlotType | undefined,
@@ -59,7 +60,9 @@ export type ClassAContextType = {
     React.SetStateAction<Record<keyof PrimitiveRowItem | keyof StrTypeRowItem, InfoDisplayObj>>
   >,
   popSizeAndDiversityConfig: InfoSectionConfigType,
-  setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>
+  setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
+  summaryConfig: typeof SummarySectionConfig,
+  setSummaryConfig: React.Dispatch<React.SetStateAction<typeof SummarySectionConfig>>
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -99,7 +102,9 @@ const ClassAContext = createContext<ClassAContextType>({
   weightedGwInfoItems: {} as Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: () => { },
   popSizeAndDiversityConfig: {} as InfoSectionConfigType,
-  setPopSizeAndDiversityConfig: () => { }
+  setPopSizeAndDiversityConfig: () => { },
+  summaryConfig: {} as typeof SummarySectionConfig,
+  setSummaryConfig: () => { }
 });
 
 export default ClassAContext;

@@ -105,36 +105,33 @@ export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem):
 };
 
 export const calcSummaryItems = (
-  disableOptions: boolean,
   setSummaryConfig: Function,
   summaryConfig: Record<string, any>,
   tableRows: RowItem[]
 ) => {
-  if (!disableOptions) {
-    const modifiedSummaryConfig = { ...summaryConfig };
+  const modifiedSummaryConfig = { ...summaryConfig };
 
-    // Calc Total Number of Parent Trees
-    modifiedSummaryConfig.sharedItems
-      .totalParentTree.value = tableRows.length.toString();
+  // Calc Total Number of Parent Trees
+  modifiedSummaryConfig.sharedItems
+    .totalParentTree.value = tableRows.length.toString();
 
-    // Calc Total number of cone count
-    modifiedSummaryConfig.coneTab
-      .infoItems.totalCone.value = calcSum(tableRows, 'coneCount');
+  // Calc Total number of cone count
+  modifiedSummaryConfig.coneTab
+    .infoItems.totalCone.value = calcSum(tableRows, 'coneCount');
 
-    // Calc Total number of pollen count
-    modifiedSummaryConfig.coneTab
-      .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
+  // Calc Total number of pollen count
+  modifiedSummaryConfig.coneTab
+    .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
 
-    // Calc AVG of SMP Success
-    modifiedSummaryConfig.successTab
-      .infoItems.avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
+  // Calc AVG of SMP Success
+  modifiedSummaryConfig.successTab
+    .infoItems.avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
 
-    // Calc AVG of of non-orchard pollen contam.
-    modifiedSummaryConfig.successTab
-      .infoItems.avgNonOrchardContam.value = calcAverage(tableRows, 'nonOrchardPollenContam');
+  // Calc AVG of of non-orchard pollen contam.
+  modifiedSummaryConfig.successTab
+    .infoItems.avgNonOrchardContam.value = calcAverage(tableRows, 'nonOrchardPollenContam');
 
-    setSummaryConfig(modifiedSummaryConfig);
-  }
+  setSummaryConfig(modifiedSummaryConfig);
 };
 
 const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
