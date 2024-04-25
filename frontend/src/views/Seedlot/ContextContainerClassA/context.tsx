@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { createContext } from 'react';
+import React, { createContext } from 'react';
 import { UseMutationResult } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 
@@ -10,6 +10,10 @@ import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotType } 
 import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
 import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
+import {
+  InfoSectionConfigType, PrimitiveRowItem, RowItem, StrTypeRowItem
+} from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import InfoDisplayObj from '../../../types/InfoDisplayObj';
 
 export type ClassAContextType = {
   seedlotData: SeedlotType | undefined,
@@ -45,7 +49,17 @@ export type ClassAContextType = {
   ) => SeedlotAClassSubmitType,
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => void,
   saveProgressStatus: MutationStatusType,
-  isFetchingData: boolean
+  isFetchingData: boolean,
+  genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
+  setGenWorthInfoItems: React.Dispatch<
+    React.SetStateAction<Record<keyof PrimitiveRowItem | keyof StrTypeRowItem, InfoDisplayObj[]>>
+  >,
+  weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
+  setWeightedGwInfoItems: React.Dispatch<
+    React.SetStateAction<Record<keyof PrimitiveRowItem | keyof StrTypeRowItem, InfoDisplayObj>>
+  >,
+  popSizeAndDiversityConfig: InfoSectionConfigType,
+  setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -79,7 +93,13 @@ const ClassAContext = createContext<ClassAContextType>({
   geoInfoVals: {} as GeoInfoValType,
   genWorthVals: {} as GenWorthValType,
   setGenWorthVal: () => { },
-  setGeoInfoVal: () => { }
+  setGeoInfoVal: () => { },
+  genWorthInfoItems: {} as Record<keyof RowItem, InfoDisplayObj[]>,
+  setGenWorthInfoItems: () => { },
+  weightedGwInfoItems: {} as Record<keyof RowItem, InfoDisplayObj>,
+  setWeightedGwInfoItems: () => { },
+  popSizeAndDiversityConfig: {} as InfoSectionConfigType,
+  setPopSizeAndDiversityConfig: () => { }
 });
 
 export default ClassAContext;

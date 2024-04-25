@@ -9,23 +9,20 @@ import {
   TableContainer, TableToolbar, Checkbox,
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
-  DataTableSkeleton, DefinitionTooltip, Modal, Loading,
+  DataTableSkeleton, DefinitionTooltip, Modal,
   Accordion, AccordionItem
 } from '@carbon/react';
 import {
-  View, Settings, Upload, Renew, Add
+  View, Settings, Upload, Add
 } from '@carbon/icons-react';
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
 import InfoSection from '../../InfoSection';
 import Subtitle from '../../Subtitle';
 import { postFile } from '../../../api-service/seedlotAPI';
-import postForCalculation from '../../../api-service/parentTreeAPI';
 import CheckboxType from '../../../types/CheckboxType';
-import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import EmptySection from '../../EmptySection';
 import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
 import { recordValues } from '../../../utils/RecordUtils';
-import { PtValsCalcReqPayload } from '../../../types/PtCalcTypes';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 
@@ -41,8 +38,8 @@ import InfoSectionRow from '../../InfoSection/InfoSectionRow';
 import {
   pageText, headerTemplate, geneticWorthDict, SummarySectionConfig,
   DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER, DEFAULT_MIX_PAGE_SIZE,
-  PopSizeAndDiversityConfig, getDownloadUrl, fileConfigTemplate,
-  getEmptySectionDescription, noParentTreeDescription, dataEntryInstructions,
+  getDownloadUrl, fileConfigTemplate, getEmptySectionDescription,
+  noParentTreeDescription, dataEntryInstructions,
   reviewDataInstructions, calculateInstructions
 } from './constants';
 import {
@@ -51,12 +48,14 @@ import {
 import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
-  fillCalculatedInfo, generatePtValCalcPayload, addNewMixRow, calcMixTabInfoItems,
-  fillMixTable,
+  addNewMixRow, calcMixTabInfoItems, fillMixTable,
   hasParentTreesForSelectedOrchards
 } from './utils';
 
 import './styles.scss';
+import DetailSection from '../../DetailSection';
+import DescriptionBox from '../../DescriptionBox';
+import CalculateMetrics from './CalculateMetrics';
 
 const ParentTreeStep = () => {
   const {
@@ -65,7 +64,12 @@ const ParentTreeStep = () => {
     setStepData,
     setStep,
     seedlotSpecies,
-    isFormSubmitted
+    isFormSubmitted,
+    weightedGwInfoItems,
+    setWeightedGwInfoItems,
+    genWorthInfoItems,
+    setGenWorthInfoItems,
+    popSizeAndDiversityConfig
   } = useContext(ClassAContext);
 
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
@@ -86,19 +90,7 @@ const ParentTreeStep = () => {
     () => sortAndSliceRows(Object.values(state.mixTabData), currentMixPage, currMixPageSize, true, 'parentTreeNumber')
   );
   const [summaryConfig, setSummaryConfig] = useState(structuredClone(SummarySectionConfig));
-  const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
-    structuredClone(PopSizeAndDiversityConfig)
-  );
-  const [
-    genWorthInfoItems,
-    setGenWorthInfoItems
-  ] = useState<Record<keyof RowItem, InfoDisplayObj[]>>(
-    {} as Record<keyof RowItem, InfoDisplayObj[]>
-  );
-  const [
-    weightedGwInfoItems,
-    setWeightedGwInfoItems
-  ] = useState<Record<keyof RowItem, InfoDisplayObj>>({} as Record<keyof RowItem, InfoDisplayObj>);
+
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCleanWarnOpen, setIsCleanWarnOpen] = useState(false);
   const [fileUploadConfig, setFileUploadConfig] = useState(structuredClone(fileConfigTemplate));
@@ -253,17 +245,6 @@ const ParentTreeStep = () => {
       const msg = (err.response as AxiosResponse).data.message;
       setFileUploadConfig({ ...fileUploadConfig, errorSub: msg, invalidFile: true });
     }
-  });
-
-  const calculateGenWorthQuery = useMutation({
-    mutationFn: (data: PtValsCalcReqPayload) => postForCalculation(data),
-    onSuccess: (res) => fillCalculatedInfo(
-      res.data,
-      genWorthInfoItems,
-      setGenWorthInfoItems,
-      popSizeAndDiversityConfig,
-      setPopSizeAndDiversityConfig
-    )
   });
 
   return (
@@ -517,88 +498,99 @@ const ParentTreeStep = () => {
                   </TableContainer>
                 </Column>
               </Row>
+              <Row className="info-sections-row">
+                <Column className="info-sections-col">
+                  {
+                    (currentTab === 'coneTab' || currentTab === 'successTab')
+                      ? (
+                        <>
+                          {/* -------- Summary Section -------- */}
+                          <DetailSection>
+                            <DescriptionBox
+                              header={summaryConfig[currentTab].title}
+                              description={summaryConfig[currentTab].description}
+                            />
+                            <InfoSection
+                              infoItems={
+                                combineObjectValues([
+                                  summaryConfig.sharedItems,
+                                  summaryConfig[currentTab].infoItems
+                                ])
+                              }
+                            />
+                          </DetailSection>
+                          {/* -------- Calculate Button Row -------- */}
+                          <DetailSection>
+                            {
+                              !isFormSubmitted
+                                ? (
+                                  <>
+                                    <DescriptionBox header="Genetic worth, effective population size and geospatial data" />
+                                    <CalculateMetrics disableOptions={disableOptions} />
+                                  </>
+                                )
+                                : null
+                            }
+                            <Row className="info-section-divider">
+                              <Column>
+                                <hr />
+                              </Column>
+                            </Row>
+                            {/* ------ Genetic worth and percent of tested parent trees ------ */}
+                            <Row className="info-section-sub-title">
+                              <Column>
+                                Genetic worth and percent of Tested parent tree contribution
+                              </Column>
+                            </Row>
+                            <InfoSection
+                              infoItems={[]}
+                            >
+                              {
+                                recordValues(genWorthInfoItems).map((gwTuple) => (
+                                  <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
+                                ))
+                              }
+                            </InfoSection>
+                            <Row className="info-section-divider">
+                              <Column>
+                                <hr />
+                              </Column>
+                            </Row>
+                            <Row className="info-section-sub-title">
+                              <Column>
+                                Effective population size and diversity
+                              </Column>
+                            </Row>
+                            {/* -------- Effective population size and diversity -------- */}
+                            <InfoSection
+                              infoItems={Object.values(popSizeAndDiversityConfig)}
+                            />
+                          </DetailSection>
+                        </>
+                      )
+                      : (
+                        <DetailSection>
+                          <DescriptionBox
+                            header="Breeding value SMP mix used"
+                            description="Check the breeding value of SMP mix used on parent"
+                          />
+                          <InfoSection
+                            infoItems={
+                              combineObjectValues([
+                                summaryConfig[currentTab].infoItems,
+                                weightedGwInfoItems
+                              ])
+                            }
+                          />
+                        </DetailSection>
+                      )
+                  }
+                </Column>
+              </Row>
             </FlexGrid>
           </Tabs>
         </Column>
       </Row>
-      {
-        (currentTab === 'coneTab' || currentTab === 'successTab')
-          ? (
-            <>
-              {/* -------- Genetic worth and percent of tested parent trees -------- */}
-              <InfoSection
-                title={pageText.gwAndTestedPerc.title}
-                description={pageText.gwAndTestedPerc.description}
-                infoItems={[]}
-              >
-                {
-                  recordValues(genWorthInfoItems).map((gwTuple) => (
-                    <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
-                  ))
-                }
-              </InfoSection>
-              {/* -------- Effective population size and diversity -------- */}
-              <InfoSection
-                title={pageText.popSizeAndDiverse.title}
-                description={pageText.popSizeAndDiverse.description}
-                infoItems={Object.values(popSizeAndDiversityConfig)}
-              />
-              {/* -------- Calculate Button Row -------- */}
-              {
-                !isFormSubmitted
-                  ? (
-                    <Row className="gen-worth-cal-row">
-                      <Button
-                        size="md"
-                        kind="tertiary"
-                        renderIcon={
-                          () => (
-                            <div className="gw-calc-loading-icon">
-                              {
-                                calculateGenWorthQuery.isLoading
-                                  ? <Loading withOverlay={false} small />
-                                  : <Renew />
-                              }
-                            </div>
-                          )
-                        }
-                        disabled={disableOptions}
-                        onClick={() => calculateGenWorthQuery.mutate(
-                          generatePtValCalcPayload(state, geneticWorthDict, seedlotSpecies)
-                        )}
-                      >
-                        Calculate Genetic worth and Effective population values
-                      </Button>
-                    </Row>
-                  )
-                  : null
-              }
-              {/* -------- Summary Section -------- */}
-              <InfoSection
-                title={summaryConfig[currentTab].title}
-                description={summaryConfig[currentTab].description}
-                infoItems={
-                  combineObjectValues([
-                    summaryConfig.sharedItems,
-                    summaryConfig[currentTab].infoItems
-                  ])
-                }
-              />
-            </>
-          )
-          : (
-            <InfoSection
-              title={summaryConfig[currentTab].title}
-              description={summaryConfig[currentTab].description}
-              infoItems={
-                combineObjectValues([
-                  summaryConfig[currentTab].infoItems,
-                  weightedGwInfoItems
-                ])
-              }
-            />
-          )
-      }
       <UploadFileModal
         open={isUploadOpen}
         setOpen={setIsUploadOpen}

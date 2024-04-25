@@ -12,6 +12,7 @@
       @include type.type-style('heading-03');
       margin-bottom: 0.2rem;
     }
+
     margin-bottom: 1rem;
   }
 
@@ -151,6 +152,33 @@
     min-height: fit-content;
     text-decoration: underline;
   }
+
+  .info-sections-row {
+    margin: 0 0.5rem;
+
+    .info-sections-col {
+      padding: 3rem 2rem;
+    }
+
+    .detail-section-grid {
+      margin-top: 3rem;
+      margin-bottom: 0;
+
+      .info-section-desc-row {
+        padding-top: 0;
+      }
+    }
+
+    hr {
+      margin: 3rem 0;
+      border-top: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle-02);
+      border-left: 0;
+    }
+
+    .info-section-sub-title{
+      @include type.type-style('heading-02');
+    }
+  }
 }
 
 .parent-tree-tab-container {
@@ -207,6 +235,7 @@
 .parent-tree-step-table-container {
   padding-left: 2.5rem;
   padding-right: 2.5rem;
+
   .#{vars.$bcgov-prefix}--data-table {
     .#{vars.$bcgov-prefix}--text-input {
       background: transparent;
@@ -235,6 +264,7 @@
   .table-pagination {
     z-index: 2;
     position: relative;
+    padding-bottom: 2rem;
   }
 
   .#{vars.$bcgov-prefix}--data-table-content {
