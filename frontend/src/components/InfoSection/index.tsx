@@ -1,15 +1,11 @@
 import React from 'react';
-import { Row, Column } from '@carbon/react';
 import InfoDisplayObj from '../../types/InfoDisplayObj';
-import DescriptionBox from '../DescriptionBox';
 import InfoSectionRow from './InfoSectionRow';
 import JsxChildren from '../../types/JsxChildren';
 
 import './styles.scss';
 
 interface InfoSectionProps {
-  title: string
-  description: string;
   infoItems: Array<InfoDisplayObj>;
   children?: JsxChildren;
 }
@@ -21,15 +17,10 @@ interface InfoSectionProps {
  */
 const InfoSection = (
   {
-    title, description, infoItems, children
+    infoItems, children
   }: InfoSectionProps
 ) => (
   <>
-    <Row className="info-section-desc-row">
-      <Column>
-        <DescriptionBox header={title} description={description} />
-      </Column>
-    </Row>
     {
       infoItems.length === 0
         ? null
