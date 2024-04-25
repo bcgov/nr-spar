@@ -1,7 +1,7 @@
 import React, {
   useState, useRef, useContext
 } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Accordion,
   AccordionItem,
@@ -9,9 +9,11 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
+import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
@@ -23,8 +25,7 @@ import {
   StateReturnObj,
   AccordionCtrlObj,
   AccordionItemHeadClick,
-  SingleOwnerForm,
-  OwnersAgenciesType
+  SingleOwnerForm
 } from './definitions';
 import {
   insertOwnerForm,
@@ -118,14 +119,29 @@ const OwnershipStep = () => {
     setStepData('ownershipStep', newOwnerArr);
   };
 
-  const [ownersAgencies, setOwnersAgencies] = useState<OwnersAgenciesType>({});
+  useQueries({
+    queries: state.map((owner) => owner.ownerAgency.value.code).map(
+      (client) => ({
+        queryKey: ['forest-clients', client],
+        queryFn: () => getForestClientByNumber(client),
+        enabled: isFormSubmitted,
+        staleTime: THREE_HOURS,
+        cacheTime: THREE_HALF_HOURS
+      })
+    )
+  });
+
+  const qc = useQueryClient();
 
   const getOwnerAgencyTitle = (ownerAgency: MultiOptionsObj) => {
+    if (isFormSubmitted) {
+      const clientData: ForestClientType | undefined = qc.getQueryData(['forest-clients', ownerAgency.code]);
+      if (clientData) {
+        return clientData.clientName;
+      }
+    }
     if (ownerAgency.label === '') {
       return 'Owner agency name';
-    }
-    if (ownerAgency.description === '' && isFormSubmitted) {
-      return ownersAgencies[ownerAgency.code];
     }
     return ownerAgency.description;
   };
@@ -183,11 +199,6 @@ const OwnershipStep = () => {
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
-                  setOwnersAgencies={(owner: OwnersAgenciesType) => {
-                    const ownersClone = structuredClone(ownersAgencies);
-                    const newOwners = Object.assign(ownersClone, owner);
-                    setOwnersAgencies(newOwners);
-                  }}
                   readOnly={isFormSubmitted}
                 />
               </AccordionItem>

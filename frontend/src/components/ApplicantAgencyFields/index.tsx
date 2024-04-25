@@ -25,7 +25,7 @@ import './styles.scss';
 
 const ApplicantAgencyFields = ({
   checkboxId, isDefault, agency, locationCode, fieldsProps, agencyOptions,
-  defaultAgency, defaultCode, setAgencyAndCode, setOwners, readOnly,
+  defaultAgency, defaultCode, setAgencyAndCode, readOnly,
   showCheckbox, maxInputColSize, isFormSubmitted
 }: ApplicantAgencyFieldsProps) => {
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
@@ -160,11 +160,6 @@ const ApplicantAgencyFields = ({
         description: forestClientQuery.data?.clientName ?? '',
         label: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`
       });
-      if (setOwners !== undefined) {
-        setOwners({
-          [forestClientQuery.data?.clientNumber]: forestClientQuery.data?.clientName
-        });
-      }
     }
   }, [forestClientQuery.isFetched]);
 
