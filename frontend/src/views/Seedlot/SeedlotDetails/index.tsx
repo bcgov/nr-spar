@@ -138,7 +138,7 @@ const SeedlotDetails = () => {
         ]}
         />
       </Row>
-      <Row>
+      <Row className="page-title">
         <Column className={windowSize.innerWidth < MEDIUM_SCREEN_WIDTH ? 'summary-title-flex-col' : 'summary-title-flex-row'}>
           {
             seedlotQuery.isFetched
@@ -160,8 +160,11 @@ const SeedlotDetails = () => {
           }
         </Column>
       </Row>
-
-      <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
+      <Row>
+        <Column>
+          <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
+        </Column>
+      </Row>
 
       <Row className="seedlot-details-content">
         <Column>

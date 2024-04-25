@@ -26,12 +26,16 @@ import {
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
-import { DEFAULT_MIX_PAGE_ROWS } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import {
+  DEFAULT_MIX_PAGE_ROWS, PopSizeAndDiversityConfig, SummarySectionConfig, defaultMeanGeomConfig
+} from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import ROUTES from '../../../routes/constants';
 import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/constants';
+import { MeanGeomInfoSectionConfigType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import InfoDisplayObj from '../../../types/InfoDisplayObj';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
@@ -81,6 +85,25 @@ const ContextContainerClassA = ({ children }: props) => {
   const [saveDescription, setSaveDescription] = useState<string>('Save changes');
   const [calculatedValues, setCalculatedValues] = useState<SeedlotCalculationsResultsType[]>([]);
   const numOfEdit = useRef(0);
+  const [
+    genWorthInfoItems,
+    setGenWorthInfoItems
+  ] = useState<Record<keyof RowItem, InfoDisplayObj[]>>(
+    {} as Record<keyof RowItem, InfoDisplayObj[]>
+  );
+  const [
+    weightedGwInfoItems,
+    setWeightedGwInfoItems
+  ] = useState<Record<keyof RowItem, InfoDisplayObj>>({} as Record<keyof RowItem, InfoDisplayObj>);
+  const [popSizeAndDiversityConfig, setPopSizeAndDiversityConfig] = useState(
+    () => structuredClone(PopSizeAndDiversityConfig)
+  );
+  const [summaryConfig, setSummaryConfig] = useState<typeof SummarySectionConfig>(
+    () => structuredClone(SummarySectionConfig)
+  );
+  const [meanGeomInfos, setMeanGeomInfos] = useState<MeanGeomInfoSectionConfigType>(
+    () => structuredClone(defaultMeanGeomConfig)
+  );
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -699,7 +722,17 @@ const ContextContainerClassA = ({ children }: props) => {
           || orchardQuery.isFetching
           || gameticMethodologyQuery.isFetching
           || fundingSourcesQuery.isFetching
-        )
+        ),
+        genWorthInfoItems,
+        setGenWorthInfoItems,
+        weightedGwInfoItems,
+        setWeightedGwInfoItems,
+        popSizeAndDiversityConfig,
+        setPopSizeAndDiversityConfig,
+        summaryConfig,
+        setSummaryConfig,
+        meanGeomInfos,
+        setMeanGeomInfos
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
@@ -708,7 +741,8 @@ const ContextContainerClassA = ({ children }: props) => {
       saveStatus, saveDescription, lastSaveTimestamp, allStepCompleted,
       progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,
       methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,
-      fundingSourcesQuery.status, geoInfoVals, genWorthVals
+      fundingSourcesQuery.status, geoInfoVals, genWorthVals, genWorthInfoItems, weightedGwInfoItems,
+      popSizeAndDiversityConfig, summaryConfig, meanGeomInfos
     ]
   );
 

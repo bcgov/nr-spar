@@ -21,7 +21,7 @@ import { OrchardObj } from '../OrchardStep/definitions';
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
   HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType,
-  MixUploadResponse, HeaderObjId, StrTypeRowItem
+  MixUploadResponse, HeaderObjId, StrTypeRowItem, MeanGeomInfoSectionConfigType
 } from './definitions';
 import { DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate } from './constants';
 
@@ -105,36 +105,33 @@ export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem):
 };
 
 export const calcSummaryItems = (
-  disableOptions: boolean,
   setSummaryConfig: Function,
   summaryConfig: Record<string, any>,
   tableRows: RowItem[]
 ) => {
-  if (!disableOptions) {
-    const modifiedSummaryConfig = { ...summaryConfig };
+  const modifiedSummaryConfig = { ...summaryConfig };
 
-    // Calc Total Number of Parent Trees
-    modifiedSummaryConfig.sharedItems
-      .totalParentTree.value = tableRows.length.toString();
+  // Calc Total Number of Parent Trees
+  modifiedSummaryConfig.sharedItems
+    .totalParentTree.value = tableRows.length.toString();
 
-    // Calc Total number of cone count
-    modifiedSummaryConfig.coneTab
-      .infoItems.totalCone.value = calcSum(tableRows, 'coneCount');
+  // Calc Total number of cone count
+  modifiedSummaryConfig.coneTab
+    .infoItems.totalCone.value = calcSum(tableRows, 'coneCount');
 
-    // Calc Total number of pollen count
-    modifiedSummaryConfig.coneTab
-      .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
+  // Calc Total number of pollen count
+  modifiedSummaryConfig.coneTab
+    .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
 
-    // Calc AVG of SMP Success
-    modifiedSummaryConfig.successTab
-      .infoItems.avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
+  // Calc AVG of SMP Success
+  modifiedSummaryConfig.successTab
+    .infoItems.avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
 
-    // Calc AVG of of non-orchard pollen contam.
-    modifiedSummaryConfig.successTab
-      .infoItems.avgNonOrchardContam.value = calcAverage(tableRows, 'nonOrchardPollenContam');
+  // Calc AVG of of non-orchard pollen contam.
+  modifiedSummaryConfig.successTab
+    .infoItems.avgNonOrchardContam.value = calcAverage(tableRows, 'nonOrchardPollenContam');
 
-    setSummaryConfig(modifiedSummaryConfig);
-  }
+  setSummaryConfig(modifiedSummaryConfig);
 };
 
 const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
@@ -166,6 +163,8 @@ export const calcMixTabInfoItems = (
   applicableGenWorths: string[],
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
+  popSizeAndDiversityConfig: InfoSectionConfigType,
+  setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
   state: ParentTreeStepDataObj
 ) => {
   if (!disableOptions) {
@@ -173,7 +172,15 @@ export const calcMixTabInfoItems = (
     const tableRows = Object.values(state.mixTabData);
 
     // Calc number of SMP parents from outside
-    modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = getOutsideParentTreeNum(state);
+    const numOfOutsidePt = getOutsideParentTreeNum(state);
+    modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = numOfOutsidePt;
+    setPopSizeAndDiversityConfig((prevPop) => ({
+      ...prevPop,
+      outsideSMPParent: {
+        ...prevPop.outsideSMPParent,
+        value: numOfOutsidePt
+      }
+    }));
 
     // Total volume (ml)
     modifiedSummaryConfig.mixTab.infoItems.totalVolume.value = calcSum(tableRows, 'volume');
@@ -505,11 +512,13 @@ export const fillCalculatedInfo = (
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: Function,
   popSizeAndDiversityConfig: Record<string, any>,
-  setPopSizeAndDiversityConfig: Function
+  setPopSizeAndDiversityConfig: Function,
+  meanGeomInfos: MeanGeomInfoSectionConfigType,
+  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
-  const { geneticTraits, calculatedPtVals }: CalcPayloadResType = data;
+  const { geneticTraits, calculatedPtVals, smpMixMeanGeoData }: CalcPayloadResType = data;
   // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
@@ -533,6 +542,39 @@ export const fillCalculatedInfo = (
   const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
   newPopAndDiversityConfig.ne.value = calculatedPtVals.neValue ? calculatedPtVals.neValue.toFixed(1) : '';
   setPopSizeAndDiversityConfig(newPopAndDiversityConfig);
+
+  // Fill in mean geom data
+  const seedlotMeanGeom = calculatedPtVals.geospatialData;
+  setMeanGeomInfos((prevGeomInfo) => ({
+    seedlot: {
+      meanLatitudeDm: {
+        ...prevGeomInfo.seedlot.meanLatitudeDm,
+        value: `${seedlotMeanGeom.meanLatitudeDegree}° ${seedlotMeanGeom.meanLatitudeMinute}'`
+      },
+      meanLongitudeDm: {
+        ...prevGeomInfo.seedlot.meanLongitudeDm,
+        value: `${seedlotMeanGeom.meanLongitudeDegree}° ${seedlotMeanGeom.meanLongitudeMinute}'`
+      },
+      meanElevation: {
+        ...prevGeomInfo.seedlot.meanElevation,
+        value: `${seedlotMeanGeom.meanElevation} m`
+      }
+    },
+    smpMix: {
+      meanLatitudeDm: {
+        ...prevGeomInfo.smpMix.meanLatitudeDm,
+        value: `${smpMixMeanGeoData.meanLatitudeDegree}° ${smpMixMeanGeoData.meanLatitudeMinute}'`
+      },
+      meanLongitudeDm: {
+        ...prevGeomInfo.smpMix.meanLongitudeDm,
+        value: `${smpMixMeanGeoData.meanLongitudeDegree}° ${smpMixMeanGeoData.meanLongitudeMinute}'`
+      },
+      meanElevation: {
+        ...prevGeomInfo.smpMix.meanElevation,
+        value: `${smpMixMeanGeoData.meanElevation} m`
+      }
+    }
+  }));
 };
 
 const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): number => {
