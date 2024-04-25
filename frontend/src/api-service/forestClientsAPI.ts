@@ -1,7 +1,7 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
-import ApplicantAgenciesItems from '../mock-server/fixtures/ApplicantAgenciesItems';
+import ApplicantAgenciesItems from './fixtures/ApplicantAgenciesItems';
 import { ForestClientSearchType } from '../types/ForestClientTypes/ForestClientSearchType';
 import { ClientSearchOptions } from '../components/ApplicantAgencyFields/ClientSearchModal/definitions';
 

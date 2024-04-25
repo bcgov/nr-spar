@@ -1,5 +1,5 @@
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
-import ApplicantAgenciesItems from '../mock-server/fixtures/ApplicantAgenciesItems';
+import ApplicantAgenciesItems from './fixtures/ApplicantAgenciesItems';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 
 const getApplicantAgenciesOptions = (): MultiOptionsObj[] => {
