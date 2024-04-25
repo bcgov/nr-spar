@@ -20,7 +20,8 @@ import { validatePerc } from '../utils';
 
 import {
   SingleOwnerForm,
-  NumStepperVal
+  NumStepperVal,
+  OwnersAgenciesType
 } from '../definitions';
 import { inputText, DEFAULT_INDEX, agencyFieldsProps } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/FilterUtils';
@@ -37,12 +38,14 @@ interface SingleOwnerInfoProps {
   methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>,
   checkPortionSum: Function,
   setState: Function,
+  setOwnersAgencies: Function,
   readOnly?: boolean
 }
 
 const SingleOwnerInfo = ({
   ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSourcesQuery,
-  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState, readOnly
+  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState,
+  setOwnersAgencies, readOnly
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>(
     inputText.portion.invalidText
@@ -158,6 +161,9 @@ const SingleOwnerInfo = ({
                 ) => setAgencyAndCode(isDefault, agency, locationCode)
               }
               showCheckbox={ownerInfo.id === DEFAULT_INDEX}
+              setOwners={(owner: OwnersAgenciesType) => {
+                setOwnersAgencies(owner);
+              }}
               readOnly={readOnly ?? false}
               isFormSubmitted={readOnly}
             />

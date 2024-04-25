@@ -1,4 +1,6 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, {
+  useState, useRef, useContext
+} from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Accordion,
@@ -21,7 +23,8 @@ import {
   StateReturnObj,
   AccordionCtrlObj,
   AccordionItemHeadClick,
-  SingleOwnerForm
+  SingleOwnerForm,
+  OwnersAgenciesType
 } from './definitions';
 import {
   insertOwnerForm,
@@ -115,6 +118,18 @@ const OwnershipStep = () => {
     setStepData('ownershipStep', newOwnerArr);
   };
 
+  const [ownersAgencies, setOwnersAgencies] = useState<OwnersAgenciesType>({});
+
+  const getOwnerAgencyTitle = (ownerAgency: MultiOptionsObj) => {
+    if (ownerAgency.label === '') {
+      return 'Owner agency name';
+    }
+    if (ownerAgency.description === '' && isFormSubmitted) {
+      return ownersAgencies[ownerAgency.code];
+    }
+    return ownerAgency.description;
+  };
+
   return (
     <div>
       <div className="ownership-header">
@@ -147,9 +162,7 @@ const OwnershipStep = () => {
                 }
                 title={(
                   <TitleAccordion
-                    title={singleOwnerInfo.ownerAgency.value.label === ''
-                      ? 'Owner agency name'
-                      : singleOwnerInfo.ownerAgency.value.description}
+                    title={getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value)}
                     description={`${formatPortionPerc(singleOwnerInfo.ownerPortion.value)}% owner portion`}
                   />
                 )}
@@ -170,6 +183,11 @@ const OwnershipStep = () => {
                   checkPortionSum={
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
+                  setOwnersAgencies={(owner: OwnersAgenciesType) => {
+                    const ownersClone = structuredClone(ownersAgencies);
+                    const newOwners = Object.assign(ownersClone, owner);
+                    setOwnersAgencies(newOwners);
+                  }}
                   readOnly={isFormSubmitted}
                 />
               </AccordionItem>

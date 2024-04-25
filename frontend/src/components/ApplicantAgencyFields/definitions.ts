@@ -13,6 +13,7 @@ interface ApplicantAgencyFieldsProps {
   defaultAgency?: MultiOptionsObj;
   defaultCode?: string;
   showCheckbox?: boolean;
+  setOwners?: Function;
   readOnly?: boolean;
   maxInputColSize?: number;
   isFormSubmitted?: boolean;
