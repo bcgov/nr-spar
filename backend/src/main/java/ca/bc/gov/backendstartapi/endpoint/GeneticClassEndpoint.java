@@ -104,6 +104,11 @@ public class GeneticClassEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+  })
   public CodeDescriptionDto getOrchardById(
       @PathVariable
           @Parameter(

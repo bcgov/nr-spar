@@ -112,6 +112,12 @@ public class GeneticWorthEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+  })
+  @AccessLevelRequired("R")
   public CodeDescriptionDto getGeneticWorthByCode(
       @PathVariable
           @Parameter(
@@ -163,6 +169,18 @@ public class GeneticWorthEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U", "D"})
+  })
+  @AccessLevelRequired("R")
   public GeneticWorthSummaryDto geneticTraitsCalculations(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the traits and values to be used in the calculations",
