@@ -35,6 +35,7 @@ def data_sync2(oracle_config, postgres_config, track_config, execution_id):
     logger.info('***** Starting ETL Tool *****')
     current_cwd = path.join(path.abspath(path.dirname(__file__).split('src')[0]) , "config")
     logger.info('Initializing Tracking Database Connection')
+    is_error = False
     with db_conn.database_connection(track_config) as track_db_conn:
         temp_time = time.time()
         time_conn_monitor = timedelta(seconds=(temp_time-sync_start_time))
@@ -87,16 +88,24 @@ def data_sync2(oracle_config, postgres_config, track_config, execution_id):
         
         # Exception when validate_execution_map is false
         except ETLConfigurationException:
-            print("ETLConfigurationException - Impossible to determine what process will be executed (or no process to be executed)")
-            logger.critical('ETLConfigurationException - Impossible to determine what process will be executed (or no process to be executed)')
+            is_error = True
+            print("ETLConfigurationException - Impossible to execute or determine what process will be executed (or no process to be executed)")
+            logger.critical('ETLConfigurationException - Impossible to execute or determine what process will be executed (or no process to be executed)')
     sync_elapsed_time = time.time() - sync_start_time
-    logger.debug(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
-    logger.debug(f'ETL Tool monitoring database connection took {time_conn_monitor}')
-    logger.debug(f'ETL Tool source database connection took {time_conn_source}')
-    logger.debug(f'ETL Tool source extract data took {time_source_extract} gathering {rows_from_source} rows')
-    logger.debug(f'ETL Tool target database connection took {time_conn_target}')
-    logger.debug(f'ETL Tool target load data took {time_target_load} processing {rows_target_processed} rows')
-    logger.info('***** Finish Data Sync *****')
+    if is_error:
+        logger.info('***** ETL Process finished with error *****')
+        logger.info(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
+    else:
+        logger.info('***** ETL Process finished successfully *****')
+        logger.info(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
+        logger.info(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
+        logger.info(f'ETL Tool monitoring database connection took {time_conn_monitor}')
+        logger.info(f'ETL Tool source database connection took {time_conn_source}')
+        logger.info(f'ETL Tool source extract data took {time_source_extract} gathering {rows_from_source} rows')
+        logger.info(f'ETL Tool target database connection took {time_conn_target}')
+        logger.info(f'ETL Tool target load data took {time_target_load} processing {rows_target_processed} rows')
+    
+    logger.info('***** Finish ETL Run *****')
 
 def data_sync(source_config, target_config, track_config):
     """ 

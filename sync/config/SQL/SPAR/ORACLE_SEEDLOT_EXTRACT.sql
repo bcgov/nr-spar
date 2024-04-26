@@ -87,7 +87,6 @@ select --SYSTIMESTAMP CURRENT_TS,
 	--,s.NAD_DATUM_CODE                              -- NOT found in POSTGRES   
 	--,s.NMBR_TREES_FROM_CODE                        -- NOT found in POSTGRES   
 	,s.NO_OF_CONTAINERS
-	, NULL as non_orchard_pollen_contam_pct 		 -- NO column found in ORACLE  
 	,s.ORCHARD_COMMENT                  as area_of_use_comment
 	--,s.ORCHARD_CONTAMINATION_PCT  				 -- NO column found in Postgres  
 	--,s.ORCHARD_ID                              	 -- NO column found in Postgres  
@@ -141,7 +140,8 @@ collection_longitude_sec, collection_start_date, contaminant_pollen_bv, controll
 elevation_min, entry_timestamp, entry_userid, extraction_end_date, extraction_st_date, extractory_client_number, extractory_locn_code, female_gametic_mthd_code, genetic_class_code, 
 interm_facility_code, interm_strg_locn_code, interm_strg_client_number, interm_strg_end_date, interm_strg_locn, interm_strg_st_date, latitude_deg_max, latitude_deg_min, latitude_degrees, 
 latitude_min_max, latitude_min_min, latitude_minutes, latitude_sec_max, latitude_sec_min, latitude_seconds, longitude_deg_max, longitude_deg_min, longitude_degrees, longitude_min_max,
-longitude_min_min, longitude_minutes, longitude_sec_max, longitude_sec_min, longitude_seconds, male_gametic_mthd_code, no_of_containers, non_orchard_pollen_contam_pct, area_of_use_comment,pollen_contamination_ind, pollen_contamination_mthd_code, pollen_contamination_pct, revision_count, seed_plan_unit_id, seedlot_comment, 
+longitude_min_min, longitude_minutes, longitude_sec_max, longitude_sec_min, longitude_seconds, male_gametic_mthd_code, no_of_containers, area_of_use_comment, 
+pollen_contamination_ind, pollen_contamination_mthd_code, pollen_contamination_pct, revision_count, seed_plan_unit_id, seedlot_comment, 
 seedlot_number, 
 seedlot_source_code, seedlot_status_code,
 temporary_strg_locn_code, temporary_strg_client_number, smp_mean_bv_growth, smp_parents_outside, smp_success_pct, temporary_strg_end_date, temporary_strg_start_date, to_be_registrd_ind, 
