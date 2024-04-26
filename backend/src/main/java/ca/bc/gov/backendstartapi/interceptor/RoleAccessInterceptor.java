@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,10 +42,10 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
     String[] resourceHandler = handler.toString().split("#");
 
     // Gets the operations declared for the resource
-    List<String> resourceOperations = getResourceOperations(resourceHandler);
+    List<Character> resourceOperations = getResourceOperations(resourceHandler);
 
     // Gets the allowed roles (declared) and its allowed operations for the resource
-    Map<String, String[]> rolesConfigMap =
+    Map<String, char[]> rolesConfigMap =
         getResourceRolesMatrix(resourceHandler, requestUri, resourceOperations);
 
     /*
@@ -68,15 +67,23 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
     return allowed;
   }
 
+  /**
+   * Gets the access level to the requested resource.
+   *
+   * @param resourceHandler Array with both class and method names.
+   * @param rolesConfigMap Matrix with roles and theirs access levels.
+   * @param resourceOperations Access level requried for the resource.
+   * @return A list of roles authorized for this resource.
+   */
   private List<String> getResourceRequiredRoles(
       String[] resourceHandler,
-      Map<String, String[]> rolesConfigMap,
-      List<String> resourceOperations) {
+      Map<String, char[]> rolesConfigMap,
+      List<Character> resourceOperations) {
     List<String> resultList = new ArrayList<>();
-    for (Map.Entry<String, String[]> entry : rolesConfigMap.entrySet()) {
+    for (Map.Entry<String, char[]> entry : rolesConfigMap.entrySet()) {
       int rolesRequired = resourceOperations.size();
       int matchedSum = 0;
-      for (String rolesOperation : entry.getValue()) {
+      for (char rolesOperation : entry.getValue()) {
         if (resourceOperations.contains(rolesOperation)) {
           matchedSum++;
         }
@@ -91,6 +98,13 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
     return resultList;
   }
 
+  /**
+   * Matches the required roles with user roles.
+   *
+   * @param requiredRolesList List of roles quired for this resource.
+   * @param userRoles List of user roles.
+   * @return True if allowed, if found a matching user role, false otherwise.
+   */
   private boolean matchUserRoleWithResourceRoles(
       List<String> requiredRolesList, List<String> userRoles) {
     for (String requiredRole : requiredRolesList) {
@@ -142,7 +156,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
    * @param classNameWithMethod String Array containing handlers
    * @return String array containing all the operations declared. E.g.: [R], [C,R]
    */
-  private List<String> getResourceOperations(String[] classNameWithMethod) {
+  private List<Character> getResourceOperations(String[] classNameWithMethod) {
     List<String> combination = getClassAndMethodNames(classNameWithMethod);
 
     if (combination.isEmpty()) {
@@ -162,10 +176,13 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
           return List.of();
         }
 
-        String[] operations = config.value();
-        SparLog.info(
-            "Operations for {}#{}: {}", className, methodName, Arrays.toString(operations));
-        return Arrays.asList(operations);
+        // char[] operations = config.value();
+        List<Character> operations = new ArrayList<>();
+        for (char op : config.value()) {
+          operations.add(op);
+        }
+        SparLog.info("Operations for {}#{}: {}", className, methodName, operations);
+        return operations;
       }
     } catch (Exception e) {
       SparLog.warn("Exception when getting resource operations for {}#{}", className, methodName);
@@ -180,8 +197,8 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
    * @param uri Request URI.
    * @return A Map containing the declared roles and resources, or empty map.
    */
-  private Map<String, String[]> getResourceRolesMatrix(
-      String[] classNameWithMethod, String uri, List<String> resourceOperations) {
+  private Map<String, char[]> getResourceRolesMatrix(
+      String[] classNameWithMethod, String uri, List<Character> resourceOperations) {
     List<String> combination = getClassAndMethodNames(classNameWithMethod);
 
     if (combination.isEmpty()) {
@@ -204,7 +221,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
         AccessLevel[] configs = annotation.value();
         SparLog.info("Access level required for {}: {}", uri, resourceOperations);
         SparLog.info("Roles declared and its permissions:");
-        Map<String, String[]> roleMap = new HashMap<>();
+        Map<String, char[]> roleMap = new HashMap<>();
         for (AccessLevel config : configs) {
           SparLog.info("Role={} accessLevel={}", config.role(), config.crudAccess());
           roleMap.put(config.role(), config.crudAccess());

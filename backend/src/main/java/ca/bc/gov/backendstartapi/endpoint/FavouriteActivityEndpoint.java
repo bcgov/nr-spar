@@ -86,15 +86,15 @@ public class FavouriteActivityEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U", "D"})
+        crudAccess = {'C', 'R', 'U', 'D'})
   })
-  @AccessLevelRequired({"C", "R"})
+  @AccessLevelRequired({'C', 'R'})
   public ResponseEntity<FavouriteActivityEntity> createUserActivity(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the activity name that will be created",
@@ -134,11 +134,11 @@ public class FavouriteActivityEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public List<FavouriteActivityEntity> getUserActivities() {
     return favouriteActivityService.getAllUserFavoriteActivities();
   }
@@ -177,15 +177,15 @@ public class FavouriteActivityEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U", "D"})
+        crudAccess = {'C', 'R', 'U', 'D'})
   })
-  @AccessLevelRequired({"R", "U"})
+  @AccessLevelRequired({'R', 'U'})
   public FavouriteActivityEntity updateFavoriteActivity(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the activity enabled and highlighted property values",
@@ -233,15 +233,15 @@ public class FavouriteActivityEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U", "D"})
+        crudAccess = {'C', 'R', 'U', 'D'})
   })
-  @AccessLevelRequired({"R", "D"})
+  @AccessLevelRequired({'R', 'D'})
   public void deleteFavoriteActivity(
       @Parameter(
               name = "id",

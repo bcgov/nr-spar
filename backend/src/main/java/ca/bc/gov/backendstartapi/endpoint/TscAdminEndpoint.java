@@ -60,11 +60,11 @@ public class TscAdminEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public ResponseEntity<List<Seedlot>> getSeedlotsForReviewing(
       @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
@@ -111,11 +111,11 @@ public class TscAdminEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"R", "U"}),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+        crudAccess = {'R', 'U'}),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
   })
-  @AccessLevelRequired({"R", "U"})
+  @AccessLevelRequired({'R', 'U'})
   public ResponseEntity<Void> approveOrDisapproveSeedlot(
       @Parameter(
               name = "seedlotNumber",

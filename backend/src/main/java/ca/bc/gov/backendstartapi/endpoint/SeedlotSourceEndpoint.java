@@ -79,11 +79,11 @@ public class SeedlotSourceEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public List<SeedlotSourceDto> getAllSeedlotSource() {
     return seedlotSourceService.getAllSeedlotSource();
   }

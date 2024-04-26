@@ -22,5 +22,5 @@ public @interface AccessLevel {
    *
    * @return An array containing the access level.
    */
-  String[] crudAccess();
+  char[] crudAccess();
 }

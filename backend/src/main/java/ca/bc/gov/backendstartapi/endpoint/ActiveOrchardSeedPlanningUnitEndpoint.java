@@ -38,11 +38,11 @@ public class ActiveOrchardSeedPlanningUnitEndpoint {
             description = "A list of the associations between the orchard and seed plan units.")
       })
   @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   @GetMapping(path = "/{orchardId}/seed-plan-units")
   public List<ActiveOrchardSpuEntity> findByOrchard(
       @Parameter(description = "The identifier of an orchard") @PathVariable(name = "orchardId")

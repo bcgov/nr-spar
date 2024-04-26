@@ -15,5 +15,5 @@ public @interface AccessLevelRequired {
    *
    * @return An array containing the levels.
    */
-  String[] value();
+  char[] value();
 }

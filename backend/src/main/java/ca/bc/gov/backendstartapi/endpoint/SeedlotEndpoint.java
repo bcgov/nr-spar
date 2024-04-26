@@ -99,15 +99,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public ResponseEntity<List<ConeAndPollenCount>> handleConeAndPollenCountTableUpload(
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
@@ -148,15 +148,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public ResponseEntity<List<SmpMixVolume>> handleSmpCalculationTableUpload(
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
@@ -221,15 +221,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired({"C", "R"})
+  @AccessLevelRequired({'C', 'R'})
   public ResponseEntity<SeedlotCreateResponseDto> createSeedlot(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing minimum required fields to create a seedlot",
@@ -264,15 +264,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public ResponseEntity<List<Seedlot>> getUserSeedlots(
       @PathVariable
           @Parameter(
@@ -319,15 +319,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public Seedlot getSingleSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
@@ -374,15 +374,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public SeedlotAclassFormDto getFullSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
@@ -436,15 +436,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired("R, U")
+  @AccessLevelRequired({'R', 'U'})
   public Seedlot patchApplicantAndSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
@@ -499,11 +499,11 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U"}),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+        crudAccess = {'C', 'R', 'U'}),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
   })
-  @AccessLevelRequired({"C", "R", "U "})
+  @AccessLevelRequired({'C', 'R', 'U'})
   public ResponseEntity<SeedlotCreateResponseDto> submitSeedlotForm(
       @Parameter(
               name = "seedlotNumber",
@@ -541,15 +541,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired({"C", "R", "U "})
+  @AccessLevelRequired({'C', 'R', 'U'})
   public ResponseEntity<Void> saveFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
@@ -585,11 +585,11 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public SaveSeedlotFormDtoClassA getFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
@@ -625,15 +625,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public JsonNode getFormProgressStatusClassA(
       @Parameter(
               name = "seedlotNumber",
@@ -675,15 +675,15 @@ public class SeedlotEndpoint {
   @RoleAccessConfig({
     @AccessLevel(
         role = "SPAR_TSC_ADMIN",
-        crudAccess = {"C", "R", "U", "D"}),
+        crudAccess = {'C', 'R', 'U', 'D'}),
     @AccessLevel(
         role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"}),
+        crudAccess = {'C', 'R', 'U'}),
     @AccessLevel(
         role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {"C", "R", "U"})
+        crudAccess = {'C', 'R', 'U'})
   })
-  @AccessLevelRequired("R")
+  @AccessLevelRequired('R')
   public List<SeedPlanZoneDto> getSeedPlanZoneData(
       @Parameter(
               name = "seedlotNumber",
