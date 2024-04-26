@@ -1,6 +1,9 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.security.AccessLevel;
+import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.TscAdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,6 +59,12 @@ public class TscAdminEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+  })
+  @AccessLevelRequired("R")
   public ResponseEntity<List<Seedlot>> getSeedlotsForReviewing(
       @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
@@ -99,6 +108,14 @@ public class TscAdminEndpoint {
             description = "The Seedlot was not found",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"R", "U"}),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+  })
+  @AccessLevelRequired({"R", "U"})
   public ResponseEntity<Void> approveOrDisapproveSeedlot(
       @Parameter(
               name = "seedlotNumber",
