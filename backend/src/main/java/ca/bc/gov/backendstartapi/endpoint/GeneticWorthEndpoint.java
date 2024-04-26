@@ -4,11 +4,11 @@ import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
-import ca.bc.gov.backendstartapi.filter.CrudMatrixFilterConfig;
-import ca.bc.gov.backendstartapi.filter.CrudMatrixFilterConfigs;
-import ca.bc.gov.backendstartapi.filter.CrudOperationsConfig;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.security.AccessLevel;
+import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -83,19 +83,12 @@ public class GeneticWorthEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  @CrudMatrixFilterConfigs(
-      config = {
-        @CrudMatrixFilterConfig(
-            role = "SPAR_TSC_ADMIN",
-            operationsAllowed = {"R", "U", "C"}),
-        @CrudMatrixFilterConfig(
-            role = "SPAR_MINISTRY_ORCHARD",
-            operationsAllowed = {"R"}),
-        @CrudMatrixFilterConfig(
-            role = "SPAR_NONMINISTRY_ORCHARD",
-            operationsAllowed = {"R"})
-      })
-  @CrudOperationsConfig(operations = {"C", "R", "U"})
+  @RoleAccessConfig({
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+  })
+  @AccessLevelRequired("R")
   public List<CodeDescriptionDto> getAllGeneticWorth() {
     return geneticWorthService.getAllGeneticWorth();
   }

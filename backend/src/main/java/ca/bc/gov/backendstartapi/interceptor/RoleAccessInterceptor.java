@@ -1,9 +1,9 @@
 package ca.bc.gov.backendstartapi.interceptor;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.filter.CrudMatrixFilterConfig;
-import ca.bc.gov.backendstartapi.filter.CrudMatrixFilterConfigs;
-import ca.bc.gov.backendstartapi.filter.CrudOperationsConfig;
+import ca.bc.gov.backendstartapi.security.AccessLevel;
+import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
@@ -22,8 +22,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+/** This class represents a request interceptor resposible for ensuring RBAC. */
 @Component
-public class CrudMatrixInterceptor implements HandlerInterceptor {
+public class RoleAccessInterceptor implements HandlerInterceptor {
 
   @Override
   public boolean preHandle(
@@ -41,6 +42,7 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
     // Gets the resource handler (class name and method name)
     String[] resourceHandler = handler.toString().split("#");
 
+    // Gets the operations declared for the resource
     List<String> resourceOperations = getResourceOperations(resourceHandler);
 
     // Gets the allowed roles (declared) and its allowed operations for the resource
@@ -48,10 +50,9 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
         getResourceRolesMatrix(resourceHandler, requestUri, resourceOperations);
 
     /*
-     * Gets roles from the resource that can operate given the resource operation. Allow me to hightlight
-     * that only roles that are allowed to do the operation (C,R,U,D) will be returned.
-     * Returns something like:
-     * R - [SPAR_TSC_ADMIN, SPAR_MINISTRY_ORCHARD, SPAR_NONMINISTRY_ORCHARD]
+     * Gets roles from the resource that can operate given the resource operation. Allow me to
+     * hightlight that only roles that are allowed to do the operation (C,R,U,D) will be returned.
+     * So, only roles that have full access on that endpoint will be returned.
      */
     List<String> requiredRolesList =
         getResourceRequiredRoles(resourceHandler, rolesConfigMap, resourceOperations);
@@ -135,7 +136,7 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
 
   /**
    * Gets the CRUD resources from a class and method handlers annotated with {@link
-   * CrudOperationsConfig}. This config should container which CRUD operations that endpoint will be
+   * AccessLevelRequired}. This config should container which CRUD operations that endpoint will be
    * doing.
    *
    * @param classNameWithMethod String Array containing handlers
@@ -155,13 +156,13 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
       Class<?> handlerClass = Class.forName(className);
       if (!Objects.isNull(handlerClass)) {
         Method method = handlerClass.getMethod(methodName);
-        CrudOperationsConfig config = method.getAnnotation(CrudOperationsConfig.class);
+        AccessLevelRequired config = method.getAnnotation(AccessLevelRequired.class);
         if (Objects.isNull(config)) {
           SparLog.warn("API missing CrudOperationsConfig {}#{}", className, methodName);
           return List.of();
         }
 
-        String[] operations = config.operations();
+        String[] operations = config.value();
         SparLog.info(
             "Operations for {}#{}: {}", className, methodName, Arrays.toString(operations));
         return Arrays.asList(operations);
@@ -194,19 +195,19 @@ public class CrudMatrixInterceptor implements HandlerInterceptor {
       Class<?> handlerClass = Class.forName(className);
       if (!Objects.isNull(handlerClass)) {
         Method method = handlerClass.getMethod(methodName);
-        CrudMatrixFilterConfigs annotation = method.getAnnotation(CrudMatrixFilterConfigs.class);
+        RoleAccessConfig annotation = method.getAnnotation(RoleAccessConfig.class);
         if (Objects.isNull(annotation)) {
           SparLog.warn("API missing CrudMatrixFilterConfigs {}#{}", className, methodName);
           return Map.of();
         }
 
-        CrudMatrixFilterConfig[] configs = annotation.config();
+        AccessLevel[] configs = annotation.value();
         SparLog.info("Access level required for {}: {}", uri, resourceOperations);
         SparLog.info("Roles declared and its permissions:");
         Map<String, String[]> roleMap = new HashMap<>();
-        for (CrudMatrixFilterConfig config : configs) {
-          SparLog.info("Role={} accessLevel={}", config.role(), config.operationsAllowed());
-          roleMap.put(config.role(), config.operationsAllowed());
+        for (AccessLevel config : configs) {
+          SparLog.info("Role={} accessLevel={}", config.role(), config.crudAccess());
+          roleMap.put(config.role(), config.crudAccess());
         }
 
         return roleMap;
