@@ -2,6 +2,9 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
+import ca.bc.gov.backendstartapi.security.AccessLevel;
+import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.SeedlotSourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -75,6 +78,12 @@ public class SeedlotSourceEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+  })
+  @AccessLevelRequired("R")
   public List<SeedlotSourceDto> getAllSeedlotSource() {
     return seedlotSourceService.getAllSeedlotSource();
   }

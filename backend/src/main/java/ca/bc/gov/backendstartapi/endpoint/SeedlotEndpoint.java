@@ -11,6 +11,9 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.security.AccessLevel;
+import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
@@ -93,6 +96,18 @@ public class SeedlotEndpoint {
   @PostMapping(
       path = "/parent-trees-contribution/cone-pollen-count-table/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired("R")
   public ResponseEntity<List<ConeAndPollenCount>> handleConeAndPollenCountTableUpload(
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
@@ -130,6 +145,18 @@ public class SeedlotEndpoint {
   @PostMapping(
       path = "/parent-trees-contribution/smp-calculation-table/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired("R")
   public ResponseEntity<List<SmpMixVolume>> handleSmpCalculationTableUpload(
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
@@ -191,6 +218,18 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired({"C", "R"})
   public ResponseEntity<SeedlotCreateResponseDto> createSeedlot(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing minimum required fields to create a seedlot",
@@ -222,6 +261,18 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired("R")
   public ResponseEntity<List<Seedlot>> getUserSeedlots(
       @PathVariable
           @Parameter(
@@ -265,6 +316,18 @@ public class SeedlotEndpoint {
             responseCode = "404",
             description = "Could not find information for the given seedlot number")
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired("R")
   public Seedlot getSingleSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
@@ -278,12 +341,12 @@ public class SeedlotEndpoint {
   }
 
   /**
-   * Get full information from a single seedlot, including parent trees and
-   * calculation results, divided by registration steps.
+   * Get full information from a single seedlot, including parent trees and calculation results,
+   * divided by registration steps.
    *
    * @param seedlotNumber the seedlot number to fetch the info for
-   * @return A {@link SeedlotAclassFormDto} with all the current information for
-   *         the seedlot and parent tree data.
+   * @return A {@link SeedlotAclassFormDto} with all the current information for the seedlot and
+   *     parent tree data.
    */
   @GetMapping("/{seedlotNumber}/a-class-full-form")
   @Operation(
@@ -308,6 +371,18 @@ public class SeedlotEndpoint {
             responseCode = "404",
             description = "Could not find information for the given seedlot number")
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired("R")
   public SeedlotAclassFormDto getFullSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
@@ -319,7 +394,6 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
     return seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
   }
-
 
   /**
    * PATCH an entry on the Seedlot table.
@@ -359,6 +433,18 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired("R, U")
   public Seedlot patchApplicantAndSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
@@ -410,6 +496,14 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+  })
+  @AccessLevelRequired({"C", "R", "U "})
   public ResponseEntity<SeedlotCreateResponseDto> submitSeedlotForm(
       @Parameter(
               name = "seedlotNumber",
@@ -444,6 +538,18 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired({"C", "R", "U "})
   public ResponseEntity<Void> saveFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
@@ -478,6 +584,12 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = "R"),
+    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = "R")
+  })
+  @AccessLevelRequired("R")
   public SaveSeedlotFormDtoClassA getFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
@@ -510,6 +622,18 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired("R")
   public JsonNode getFormProgressStatusClassA(
       @Parameter(
               name = "seedlotNumber",
@@ -548,6 +672,18 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({
+    @AccessLevel(
+        role = "SPAR_TSC_ADMIN",
+        crudAccess = {"C", "R", "U", "D"}),
+    @AccessLevel(
+        role = "SPAR_MINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"}),
+    @AccessLevel(
+        role = "SPAR_NONMINISTRY_ORCHARD",
+        crudAccess = {"C", "R", "U"})
+  })
+  @AccessLevelRequired("R")
   public List<SeedPlanZoneDto> getSeedPlanZoneData(
       @Parameter(
               name = "seedlotNumber",
