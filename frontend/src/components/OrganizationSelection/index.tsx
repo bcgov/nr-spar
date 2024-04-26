@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   FlexGrid, Row, Column,
   ButtonSkeleton, Search, Button,
@@ -48,11 +48,6 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
   });
 
   const qc = useQueryClient();
-
-  // Queries data sometime disappear after awhile, maybe from token refresh, need to refetch them.
-  useEffect(() => {
-    qc.refetchQueries(['role', 'forest-clients']);
-  }, [user]);
 
   const filterClientsByValue = (value: string) => {
     const forestClientsQueriesData = qc.getQueriesData(['role', 'forest-clients']);
