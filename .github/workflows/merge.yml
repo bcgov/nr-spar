@@ -35,6 +35,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: false
           parameters:
+            -p TAG=latest
             -p ZONE=test
             -p ORACLE_DB_USER=${{ secrets.DB_USER }}
             -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
