@@ -2,6 +2,9 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
+import ca.bc.gov.backendstartapi.filter.CrudMatrixFilterConfig;
+import ca.bc.gov.backendstartapi.filter.CrudMatrixFilterConfigs;
+import ca.bc.gov.backendstartapi.filter.CrudOperationsConfig;
 import ca.bc.gov.backendstartapi.service.ConeCollectionMethodService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -70,6 +73,19 @@ public class ConeCollectionMethodEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @CrudMatrixFilterConfigs(
+      config = {
+        @CrudMatrixFilterConfig(
+            role = "SPAR_TSC_ADMIN",
+            operationsAllowed = {"R"}),
+        @CrudMatrixFilterConfig(
+            role = "SPAR_MINISTRY_ORCHARD",
+            operationsAllowed = {"R"}),
+        @CrudMatrixFilterConfig(
+            role = "SPAR_NONMINISTRY_ORCHARD",
+            operationsAllowed = {"R"})
+      })
+  @CrudOperationsConfig(operations = {"R"})
   public List<CodeDescriptionDto> getAllConeCollectionMethods() {
     return coneCollectionMethodService.getAllConeCollectionMethods();
   }
