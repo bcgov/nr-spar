@@ -14,7 +14,8 @@ parameters:
     required: true
   - name: TAG
     description: Image tag; e.g. PR number, latest or prod
-    required: true
+    required: false
+    default: latest
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io

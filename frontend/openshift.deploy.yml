@@ -14,7 +14,8 @@ parameters:
     required: true
   - name: TAG
     description: Image tag; e.g. PR number, latest or prod
-    required: true
+    required: false
+    default: latest
   - name: FAM_MODDED_ZONE
     description: ZONE modded by 50 to work with FAM
     required: true
