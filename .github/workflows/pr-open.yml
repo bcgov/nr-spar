@@ -9,43 +9,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     packages: write
-  #   strategy:
-  #     matrix:
-  #       package: [database, backend, frontend, oracle-api]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-  #       with:
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.event.number }}
-  #         tag_fallback: latest
-  #         token: ${{ secrets.GITHUB_TOKEN }}
-  #         triggers: ('${{ matrix.package }}/')
+  builds:
+    name: Builds
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [database, backend, frontend, oracle-api]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        with:
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          token: ${{ secrets.GITHUB_TOKEN }}
+          triggers: ('${{ matrix.package }}/')
 
   deploys:
     name: Deploys
-    # needs: [builds]
+    needs: [builds]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
+      test: true
       triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
-
-  tests:
-    name: Tests
-    if: needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    secrets: inherit
-    uses: ./.github/workflows/.tests.yml
 
   results:
     name: PR Results
     if: always() && !failure()
-    needs: [tests]
+    needs: [builds, deploys]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
