@@ -18,6 +18,10 @@ on:
         description: Container tag; usually PR number
         required: false
         type: string
+      test:
+        description: Run Cypress tests after deployment?  [true|false]
+        required: false
+        type: string
       triggers:
         description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
         required: false
@@ -143,3 +147,10 @@ jobs:
 
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
+
+  tests:
+    name: Tests
+    if: inputs.test == 'true' && needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    secrets: inherit
+    uses: ./.github/workflows/.tests.yml
