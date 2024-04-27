@@ -4,10 +4,7 @@ on:
   workflow_call:
     inputs:
       ### Required
-      target:
-        description: Deployment target; usually PR number, test or prod
-        required: false
-        type: string
+      # Nothing! Only `secrets: inherit` is required
 
       ### Typical / recommended
       environment:
@@ -16,6 +13,10 @@ on:
         type: string
       tag:
         description: Container tag; usually PR number
+        required: false
+        type: string
+      target:
+        description: Deployment target; usually PR number, test or prod
         required: false
         type: string
       test:
@@ -33,11 +34,6 @@ on:
         default: 10
         required: false
         type: number
-
-    outputs:
-      triggered:
-        description: 'Has a deployment has been triggered?'
-        value: ${{ jobs.deploys.outputs.triggered }}
 
 jobs:
   init:
@@ -154,3 +150,4 @@ jobs:
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
+      target: ${{ inputs.target || github.event.number }}
