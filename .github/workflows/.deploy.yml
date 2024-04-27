@@ -110,6 +110,7 @@ jobs:
               -p FAM_MODDED_ZONE=${{ inputs.target || needs.init.outputs.modded-tag }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || github.event.number }}
+              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
               ${{ inputs.target != 'prod' && '' || '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' }}
           - name: oracle-api
