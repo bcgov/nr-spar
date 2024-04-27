@@ -97,6 +97,7 @@ jobs:
             parameters:
               -p BUILD=snapshot-${{ inputs.target || github.event.number }}
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               ${{ inputs.target != 'prod' && '' || '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' }}
             verification_path: "actuator/health"
           - name: fluentbit
@@ -109,6 +110,8 @@ jobs:
               -p FAM_MODDED_ZONE=${{ inputs.target || needs.init.outputs.modded-tag }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || github.event.number }}
+              -p BUILD=snapshot-${{ github.event.number }}
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
               ${{ inputs.target != 'prod' && '' || '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' }}
           - name: oracle-api
