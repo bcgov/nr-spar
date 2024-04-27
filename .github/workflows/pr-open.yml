@@ -62,7 +62,6 @@ jobs:
     needs: [builds]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
-    secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
       triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
