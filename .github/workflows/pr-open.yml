@@ -30,7 +30,6 @@ jobs:
   deploys:
     name: Deploys
     needs: [builds]
-    secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
       test: true
