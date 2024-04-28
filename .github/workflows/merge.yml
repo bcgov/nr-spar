@@ -21,199 +21,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  init-test:
-    name: TEST Init
-    environment: test
-    runs-on: ubuntu-22.04
-    steps:
-      - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v2.3.0
-        with:
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          file: common/openshift.init.yml
-          overwrite: false
-          parameters:
-            -p ZONE=test
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
-            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
-            -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
-            -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
-            -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-
-  vars:
-    name: Set Variables
-    outputs:
-      pr: ${{ steps.pr.outputs.pr }}
-    runs-on: ubuntu-22.04
-    timeout-minutes: 1
-    steps:
-      # Get PR number for squash merges to main
-      - name: PR Number
-        id: pr
-        uses: bcgov-nr/action-get-pr@v0.0.1
-
-  deploy-test:
-    name: TEST Deployment
-    needs: [init-test, vars]
-    environment: test
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name: [database, backend, fluentbit, frontend, oracle-api]
-        include:
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            verification_path: "actuator/health"
-            parameters:
-              -p BUILD=test
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=test
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-          - name: fluentbit
-            file: common/openshift.fluentbit.yml
-            overwrite: true
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-            parameters:
-              -p FAM_MODDED_ZONE=test
-              -p VITE_SPAR_BUILD_VERSION=snapshot-test
-              -p VITE_NRSPARWEBAPP_VERSION=test
-              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
-              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-          - name: oracle-api
-            file: oracle-api/openshift.deploy.yml
-            overwrite: true
-            verification_path: "actuator/health"
-            parameters:
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-test
-              -p SERVICE_NAME=dbq01.nrs.bcgov
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=test
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.3.0
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
-          verification_path: ${{ matrix.verification_path }}
-          parameters:
-            -p ZONE=test
-            -p TAG=${{ inputs.pr_no || needs.vars.outputs.pr }}
-            ${{ matrix.parameters }}
+  deploys-test:
+    name: TEST
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: test
+      target: test
+      test: true
 
   # tests:
   #   name: Tests
-  #   needs: [deploy-test]
+  #   needs: [deploys-test]
   #   secrets: inherit
   #   uses: ./.github/workflows/.tests.yml
   #   with:
   #     target: test
 
-  init-prod:
-    name: PROD Init
-    # needs: [tests]
-    needs: [deploy-test]
-    environment: prod
-    runs-on: ubuntu-22.04
-    steps:
-      - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v2.3.0
-        with:
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          file: common/openshift.init.yml
-          overwrite: false
-          parameters:
-            -p ZONE=prod
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
-            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
-            -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
-            -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
-            -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-
-  deploy-prod:
-    name: PROD Deployment
-    needs: [init-prod, vars]
-    environment: prod
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        name: [database, backend, fluentbit, frontend, oracle-api]
-        include:
-          - name: database
-            file: database/openshift.deploy.yml
-            overwrite: false
-          - name: backend
-            file: backend/openshift.deploy.yml
-            overwrite: true
-            verification_path: "actuator/health"
-            parameters:
-              -p BUILD=prod
-              -p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=production
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-          - name: fluentbit
-            file: common/openshift.fluentbit.yml
-            overwrite: true
-          - name: frontend
-            file: frontend/openshift.deploy.yml
-            overwrite: true
-            parameters:
-              -p FAM_MODDED_ZONE=prod
-              -p VITE_SPAR_BUILD_VERSION=snapshot-prod
-              -p VITE_NRSPARWEBAPP_VERSION=prod
-              -p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca
-              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
-              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-          - name: oracle-api
-            file: oracle-api/openshift.deploy.yml
-            overwrite: true
-            verification_path: "actuator/health"
-            parameters:
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-prod
-              -p SERVICE_NAME=dbq01.nrs.bcgov
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=production
-    steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.3.0
-        with:
-          file: ${{ matrix.file }}
-          oc_namespace: ${{ vars.OC_NAMESPACE }}
-          oc_server: ${{ vars.OC_SERVER }}
-          oc_token: ${{ secrets.OC_TOKEN }}
-          overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
-          verification_path: ${{ matrix.verification_path }}
-          parameters:
-            -p ZONE=prod
-            -p TAG=${{ inputs.pr_no || needs.vars.outputs.pr }}
-            ${{ matrix.parameters }}
-
-  image-promotions:
-    name: Promote Images to PROD
-    needs: [deploy-prod, vars]
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        component: [backend, database, frontend, oracle-api]
-    steps:
-      - uses: shrink/actions-docker-registry-tag@v4
-        with:
-          registry: ghcr.io
-          repository: ${{ github.repository }}/${{ matrix.component }}
-          target: ${{ inputs.pr_no || needs.vars.outputs.pr }}
-          tags: prod
+  deploys-prod:
+    name: PROD
+    needs: [deploys-test]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: prod
+      target: prod
+      test: false
