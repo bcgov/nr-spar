@@ -79,8 +79,8 @@ jobs:
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
 
-  deploys:
-    name: Deploys
+  deploy:
+    name: Deploy
     environment: ${{ inputs.environment }}
     needs: [init]
     outputs:
