@@ -1,20 +1,19 @@
 name: Merge
 
 on:
-  pull_request:
-  # push:
-  #   branches: [main]
-  #   paths-ignore:
-  #     - '*.md'
-  #     - '.github/**'
-  #     - '.github/graphics/**'
-  #     - '!.github/workflows/**'
-  # workflow_dispatch:
-  #   inputs:
-  #     pr_no:
-  #       description: "PR-numbered container set to deploy"
-  #       type: number
-  #       required: true
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - '.github/**'
+      - '.github/graphics/**'
+      - '!.github/workflows/**'
+  workflow_dispatch:
+    inputs:
+      pr_no:
+        description: "PR-numbered container set to deploy"
+        type: number
+        required: true
 
 concurrency:
   # Do not interrupt previous workflows
