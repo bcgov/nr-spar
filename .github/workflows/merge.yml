@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   deploys-test:
-    name: TEST Deploys
+    name: TEST
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
@@ -40,7 +40,7 @@ jobs:
   #     target: test
 
   deploys-prod:
-    name: PROD Deploys
+    name: PROD
     needs: [deploys-test]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
