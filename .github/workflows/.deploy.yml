@@ -4,10 +4,7 @@ on:
   workflow_call:
     inputs:
       ### Required
-      target:
-        description: Deployment target; usually PR number, test or prod
-        required: false
-        type: string
+      # Nothing! Only `secrets: inherit` is required
 
       ### Typical / recommended
       environment:
@@ -16,6 +13,10 @@ on:
         type: string
       tag:
         description: Container tag; usually PR number
+        required: false
+        type: string
+      target:
+        description: Deployment target; usually PR number, test or prod
         required: false
         type: string
       test:
@@ -78,8 +79,8 @@ jobs:
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
 
-  deploys:
-    name: Deploys
+  deploy:
+    name: Deploy
     environment: ${{ inputs.environment }}
     needs: [init]
     outputs:
@@ -93,7 +94,7 @@ jobs:
           - name: database
             file: database/openshift.deploy.yml
             parameters:
-              ${{ github.event_name != 'pull_request' || '-p DB_PVC_SIZE=192Mi' }}
+              ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
             overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
@@ -102,7 +103,7 @@ jobs:
               -p BUILD=snapshot-${{ inputs.target || github.event.number }}
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              ${{ inputs.target != 'prod' && '' || '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' }}
+              ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
             verification_path: "actuator/health"
           - name: fluentbit
             file: common/openshift.fluentbit.yml
@@ -116,14 +117,15 @@ jobs:
               -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-              ${{ inputs.target != 'prod' && '' || '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' }}
+              ${{ inputs.target == 'prod' && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
+              ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
             triggers: ('oracle-api/')
             verification_path: "actuator/health"
     steps:
@@ -147,10 +149,3 @@ jobs:
 
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
-
-  tests:
-    name: Tests
-    if: inputs.test == 'true' && needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    secrets: inherit
-    uses: ./.github/workflows/.tests.yml
