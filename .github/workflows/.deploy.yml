@@ -35,6 +35,11 @@ on:
         required: false
         type: number
 
+    outputs:
+      triggered:
+        description: 'Has a deployment has been triggered?'
+        value: ${{ jobs.deploys.outputs.triggered }}
+
 jobs:
   init:
     name: Initialize
@@ -144,12 +149,3 @@ jobs:
 
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
-
-  tests:
-    name: Tests
-    if: inputs.test == 'true' && needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    secrets: inherit
-    uses: ./.github/workflows/.tests.yml
-    with:
-      target: ${{ inputs.target || github.event.number }}
