@@ -139,10 +139,10 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
-            ${{ github.event_name != 'pull_request' || '-p MIN_REPLICAS=1' }}
-            ${{ github.event_name != 'pull_request' || '-p MAX_REPLICAS=2' }}
             -p TAG=${{ inputs.tag || needs.init.outputs.pr }}
             -p ZONE=${{ inputs.target || github.event.number }}
+            ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
+            ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
             ${{ matrix.parameters }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path }}
