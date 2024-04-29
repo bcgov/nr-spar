@@ -25,8 +25,8 @@ import './styles.scss';
 
 const ApplicantAgencyFields = ({
   checkboxId, isDefault, agency, locationCode, fieldsProps, agencyOptions,
-  defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize,
-  isFormSubmitted
+  defaultAgency, defaultCode, setAgencyAndCode, readOnly,
+  showCheckbox, maxInputColSize, isFormSubmitted
 }: ApplicantAgencyFieldsProps) => {
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCode.isInvalid && agency.value

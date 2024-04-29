@@ -1,5 +1,7 @@
-import React, { useState, useRef, useContext } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, {
+  useState, useRef, useContext
+} from 'react';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Accordion,
   AccordionItem,
@@ -7,9 +9,11 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
+import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
@@ -115,6 +119,33 @@ const OwnershipStep = () => {
     setStepData('ownershipStep', newOwnerArr);
   };
 
+  useQueries({
+    queries: state.map((owner) => owner.ownerAgency.value.code).map(
+      (client) => ({
+        queryKey: ['forest-clients', client],
+        queryFn: () => getForestClientByNumber(client),
+        enabled: isFormSubmitted,
+        staleTime: THREE_HOURS,
+        cacheTime: THREE_HALF_HOURS
+      })
+    )
+  });
+
+  const qc = useQueryClient();
+
+  const getOwnerAgencyTitle = (ownerAgency: MultiOptionsObj) => {
+    if (isFormSubmitted) {
+      const clientData: ForestClientType | undefined = qc.getQueryData(['forest-clients', ownerAgency.code]);
+      if (clientData) {
+        return clientData.clientName;
+      }
+    }
+    if (ownerAgency.label === '') {
+      return 'Owner agency name';
+    }
+    return ownerAgency.description;
+  };
+
   return (
     <div>
       <div className="ownership-header">
@@ -147,9 +178,7 @@ const OwnershipStep = () => {
                 }
                 title={(
                   <TitleAccordion
-                    title={singleOwnerInfo.ownerAgency.value.label === ''
-                      ? 'Owner agency name'
-                      : singleOwnerInfo.ownerAgency.value.description}
+                    title={getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value)}
                     description={`${formatPortionPerc(singleOwnerInfo.ownerPortion.value)}% owner portion`}
                   />
                 )}
