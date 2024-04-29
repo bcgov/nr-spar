@@ -104,8 +104,8 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
     // remember seedlot number
     cy.get('#created-seedlot-number').invoke('text')
-      .then((text) => {
-        cy.task('setData', [data.seedlotInformation1.species, text]);
+      .then((seedlotNumber) => {
+        cy.task('setData', [data.seedlotInformation1.species, seedlotNumber]);
       });
   });
 
@@ -186,8 +186,8 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
     // remember seedlot number
     cy.get('#created-seedlot-number').invoke('text')
-      .then((text) => {
-        cy.task('setData', [data.seedlotInformation2.species, text]);
+      .then((seedlotNumber) => {
+        cy.task('setData', [data.seedlotInformation2.species, seedlotNumber]);
       });
   });
 
@@ -268,8 +268,8 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
     // remember seedlot number
     cy.get('#created-seedlot-number').invoke('text')
-      .then((text) => {
-        cy.task('setData', [data.seedlotInformation3.species, text]);
+      .then((seedlotNumber) => {
+        cy.task('setData', [data.seedlotInformation3.species, seedlotNumber]);
       });
   });
 
@@ -350,8 +350,8 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
     // remember seedlot number
     cy.get('#created-seedlot-number').invoke('text')
-      .then((text) => {
-        cy.task('setData', [data.seedlotInformation4.species, text]);
+      .then((seedlotNumber) => {
+        cy.task('setData', [data.seedlotInformation4.species, seedlotNumber]);
       });
   });
 
@@ -432,8 +432,8 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/creation-success');
     // remember seedlot number
     cy.get('#created-seedlot-number').invoke('text')
-      .then((text) => {
-        cy.task('setData', [data.seedlotInformation5.species, text]);
+      .then((seedlotNumber) => {
+        cy.task('setData', [data.seedlotInformation5.species, seedlotNumber]);
       });
   });
 });
