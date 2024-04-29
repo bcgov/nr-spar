@@ -77,7 +77,7 @@ const calculateSmpRow = (
       rowVolume = rowVolume === '' ? '0' : rowVolume;
       const proportion = volumeSum === '0'
         ? '0'
-        : (Number(rowVolume) / Number(volumeSum)).toFixed(3);
+        : (Number(rowVolume) / Number(volumeSum)).toFixed(4);
       updatedRow.proportion.value = proportion;
     } else {
       updatedRow.proportion.value = '';
@@ -94,7 +94,7 @@ const calculateSmpRow = (
         const gwColName = gw as keyof StrTypeRowItem;
         const weightedColName = `w_${gw}` as keyof StrTypeRowItem;
         updatedRow[weightedColName]
-          .value = (Number(updatedRow[gwColName].value) * Number(proportion.value)).toFixed(3);
+          .value = (Number(updatedRow[gwColName].value) * Number(proportion.value)).toFixed(4);
       });
       clonedData[updatedRow.rowId] = updatedRow;
     }

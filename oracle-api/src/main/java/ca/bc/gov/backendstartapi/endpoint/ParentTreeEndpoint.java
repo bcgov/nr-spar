@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.LatLongRequestDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLatLongDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.service.ParentTreeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +32,7 @@ public class ParentTreeEndpoint {
    * ids.
    *
    * @param ptIds The {@link ParentTreeEntity} identification list.
-   * @return A List of {@link ParentTreeLatLongDto} containing the result rows.
+   * @return A List of {@link GeospatialRespondDto} containing the result rows.
    */
   @PostMapping("/geospatial-data")
   @Operation(
@@ -47,12 +47,12 @@ public class ParentTreeEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<ParentTreeLatLongDto> getLatLongParentTreeData(
+  public List<GeospatialRespondDto> getPtGeoSpatialData(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "A list of Parent Tree id to fetch geospatial data.",
               required = true)
           @RequestBody
-          List<LatLongRequestDto> ptIds) {
-    return parentTreeService.getLatLongParentTreeData(ptIds);
+          List<GeospatialRequestDto> ptIds) {
+    return parentTreeService.getPtGeoSpatialData(ptIds);
   }
 }

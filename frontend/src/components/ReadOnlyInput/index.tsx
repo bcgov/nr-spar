@@ -31,7 +31,7 @@ const ReadOnlyInput = (
         helperText={helperText}
         labelText={label}
         hideLabel={hideLabel}
-        value={value}
+        value={value.length ? value : '--'}
       />
     )
 );

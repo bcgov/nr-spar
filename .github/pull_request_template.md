@@ -1,5 +1,5 @@
 # Description
-Closes #(issue)
+Closes #issue
 
 ### Changelog
 #### New
