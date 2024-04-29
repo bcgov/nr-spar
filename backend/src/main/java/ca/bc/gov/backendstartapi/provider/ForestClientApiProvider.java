@@ -190,13 +190,7 @@ public class ForestClientApiProvider implements Provider {
           return responseBody;
         }
 
-        totalCount = 0;
-        if (response.getHeaders().containsKey("x-total-count")) {
-          List<String> counts = response.getHeaders().get("x-total-count");
-          if (!Objects.isNull(counts)) {
-            totalCount = Integer.parseInt(counts.get(0));
-          }
-        }
+        totalCount = getHeaderTotalCount(response.getHeaders());
 
         totalFetched += responseSize;
 
@@ -315,13 +309,7 @@ public class ForestClientApiProvider implements Provider {
           return result;
         }
 
-        totalCount = 0;
-        if (response.getHeaders().containsKey("x-total-count")) {
-          List<String> counts = response.getHeaders().get("x-total-count");
-          if (!Objects.isNull(counts)) {
-            totalCount = Integer.parseInt(counts.get(0));
-          }
-        }
+        totalCount = getHeaderTotalCount(response.getHeaders());
 
         totalFetched += responseSize;
 
@@ -366,7 +354,7 @@ public class ForestClientApiProvider implements Provider {
   private boolean shouldMock() {
     if (Arrays.stream(environment.getActiveProfiles())
         .anyMatch(env -> !env.equalsIgnoreCase("prod"))) {
-      String byPass = System.getenv("BYPASS_FOREST_CLIENT");
+      String byPass = environment.getProperty("BYPASS_FOREST_CLIENT");
       boolean shouldMockValue = "Y".equals(byPass);
       SparLog.info("Should mock ForestClient API request: {}", shouldMockValue);
       return shouldMockValue;
@@ -408,5 +396,15 @@ public class ForestClientApiProvider implements Provider {
         ForestClientExpiredEnum.Y,
         "",
         "");
+  }
+
+  private int getHeaderTotalCount(HttpHeaders headers) {
+    if (headers.containsKey("x-total-count")) {
+      List<String> counts = headers.get("x-total-count");
+      if (!Objects.isNull(counts)) {
+        return Integer.parseInt(counts.get(0));
+      }
+    }
+    return 0;
   }
 }
