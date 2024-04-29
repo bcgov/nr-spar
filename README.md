@@ -5,8 +5,9 @@
 
 #### Workflows
 [![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
-[![CI](https://github.com/bcgov/nr-spar/actions/workflows/ci.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/ci.yml)
+[![Analysis](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml)
 [![Cypress Nightly](https://github.com/bcgov/nr-spar/actions/workflows/cypress-nightly.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/cypress-nightly.yml)
+[![Scheduled](https://github.com/bcgov/nr-spar/actions/workflows/scheduled.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/scheduled.yml)
 
 #### Frontend
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nr-spar_frontend)
