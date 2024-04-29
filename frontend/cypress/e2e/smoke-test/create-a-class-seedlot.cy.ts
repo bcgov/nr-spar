@@ -27,7 +27,7 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/seedlots');
   });
 
-  it.only('should register an A-Class Seedlot PLI', () => {
+  it('should register an A-Class Seedlot PLI', () => {
     cy.isPageTitle(NavigationLabels.Seedlots);
     // Select the “Seedlots” section from the left-hand panel
     // Click on the register seedlot an A-class seedlot card
@@ -105,9 +105,7 @@ describe('Create A-Class Seedlot', () => {
     // remember seedlot number
     cy.get('#created-seedlot-number').invoke('text')
       .then((text) => {
-        cy.session(Cypress.env('USERNAME'), () => {
-          cy.setCookie(data.seedlotInformation1.species, text);
-        });
+        cy.task('setData', [data.seedlotInformation1.species, text]);
       });
   });
 
@@ -186,6 +184,11 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
+    // remember seedlot number
+    cy.get('#created-seedlot-number').invoke('text')
+      .then((text) => {
+        cy.task('setData', [data.seedlotInformation2.species, text]);
+      });
   });
 
   it('should register an A-Class Seedlot DR', () => {
@@ -263,6 +266,11 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
+    // remember seedlot number
+    cy.get('#created-seedlot-number').invoke('text')
+      .then((text) => {
+        cy.task('setData', [data.seedlotInformation3.species, text]);
+      });
   });
 
   it('should register an A-Class Seedlot EP', () => {
@@ -340,6 +348,11 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
+    // remember seedlot number
+    cy.get('#created-seedlot-number').invoke('text')
+      .then((text) => {
+        cy.task('setData', [data.seedlotInformation4.species, text]);
+      });
   });
 
   it('should register an A-Class Seedlot FDC', () => {
@@ -417,5 +430,10 @@ describe('Create A-Class Seedlot', () => {
     cy.get('.submit-button')
       .click();
     cy.url().should('contains', '/creation-success');
+    // remember seedlot number
+    cy.get('#created-seedlot-number').invoke('text')
+      .then((text) => {
+        cy.task('setData', [data.seedlotInformation5.species, text]);
+      });
   });
 });

@@ -66,6 +66,7 @@ Cypress.Commands.add('login', () => {
 
       cy.url().should('contains', '/dashboard');
       cy.setCookie('is-cypress-logged-in', 'true');
+      cy.setCookie('PLI - Lodgepole pine', '');
     },
     {
       validate: () => {

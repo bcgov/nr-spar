@@ -10,13 +10,10 @@ describe('Seedlot detail page', () => {
     cy.login();
     cy.fixture('aclass-seedlot').then((fData) => {
       fixtureData = fData;
-      cy.session(Cypress.env('USERNAME'), () => {
-        cy.getCookie(fData.seedlotInformation1.species).then((cookie) => {
-          console.log('hahaah', cookie?.value);
-          seedlotNumber = cookie?.value ?? '';
-          cy.visit(`/seedlots/details/${seedlotNumber}`);
-          cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
-        });
+      cy.task('getData', fData.seedlotInformation1.species).then((sNumber) => {
+        seedlotNumber = sNumber as string;
+        cy.visit(`/seedlots/details/${seedlotNumber}`);
+        cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
       });
     });
   });
