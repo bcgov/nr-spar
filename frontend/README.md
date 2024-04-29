@@ -31,7 +31,6 @@ test and deploy.
   - TypeScript
   - Context API
   - React Query
-  - MirageJS
   - React Testing Library
   - Jest
   - Cypress

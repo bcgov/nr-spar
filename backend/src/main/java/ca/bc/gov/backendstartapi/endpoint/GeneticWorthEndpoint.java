@@ -1,11 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
-import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
-import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.security.AccessLevel;
 import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
@@ -20,14 +16,10 @@ import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -128,66 +120,5 @@ public class GeneticWorthEndpoint {
           @NonNull
           String code) {
     return geneticWorthService.getGeneticWorthByCode(code);
-  }
-
-  /**
-   * Do the calculations of all Genetic Traits, given a trait list.
-   *
-   * @param traitsDto A {@link List} of {@link GeneticWorthTraitsRequestDto} with the traits and
-   *     values to be calculated.
-   * @return A {@link GeneticWorthSummaryDto} containing all calculated values.
-   */
-  @PostMapping(path = "/calculate-all", consumes = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(
-      summary = "Do the calculations of all Genetic Traits",
-      description =
-          """
-          This API is responsible for doing all Genetic Worth related calculations
-          given an user's input, like Pollen and Cone count, and Genetic values
-          for eah trait. This API is used in the 5th step of the Seedlot Registration
-          form on SPAR.
-          """)
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "A JSON containing all calculated values."),
-        @ApiResponse(
-            responseCode = "400",
-            description = "The request is missing the Parent Tree Number.",
-            content =
-                @Content(
-                    mediaType = "application/json",
-                    schema =
-                        @Schema(
-                            oneOf = {
-                              ValidationExceptionResponse.class,
-                              DefaultSpringExceptionResponse.class
-                            }))),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Access token is missing or invalid",
-            content = @Content(schema = @Schema(implementation = Void.class)))
-      })
-  @RoleAccessConfig({
-    @AccessLevel(
-        role = "SPAR_TSC_ADMIN",
-        crudAccess = {'C', 'R', 'U', 'D'}),
-    @AccessLevel(
-        role = "SPAR_MINISTRY_ORCHARD",
-        crudAccess = {'C', 'R', 'U', 'D'}),
-    @AccessLevel(
-        role = "SPAR_NONMINISTRY_ORCHARD",
-        crudAccess = {'C', 'R', 'U', 'D'})
-  })
-  @AccessLevelRequired('R')
-  public GeneticWorthSummaryDto geneticTraitsCalculations(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              description = "Body containing the traits and values to be used in the calculations",
-              required = true)
-          @Valid
-          @RequestBody
-          List<GeneticWorthTraitsRequestDto> traitsDto) {
-    return geneticWorthService.calculateGeneticWorth(traitsDto);
   }
 }

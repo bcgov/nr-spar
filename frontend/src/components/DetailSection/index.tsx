@@ -4,7 +4,7 @@ import { FlexGrid, Column, Row } from '@carbon/react';
 import './styles.scss';
 
 type DetailSectionProps = {
-  title: string,
+  title?: string,
   children: React.ReactNode
 }
 
@@ -14,13 +14,20 @@ type DetailSectionProps = {
  */
 const DetailSection = ({ title, children }: DetailSectionProps) => (
   <FlexGrid className="detail-section-grid">
-    <Row className="title-row">
-      <Column>
-        <p className="title-text">
-          {title}
-        </p>
-      </Column>
-    </Row>
+    {
+      title
+        ? (
+          <Row className="title-row">
+            <Column>
+              <p className="title-text">
+                {title}
+              </p>
+            </Column>
+          </Row>
+        )
+        : null
+    }
+
     {children}
   </FlexGrid>
 );

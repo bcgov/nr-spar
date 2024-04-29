@@ -1,0 +1,135 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@carbon/type';
+
+.initial-avatar-sm,
+.initial-avatar-md {
+  border-radius: 50%;
+  border: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-strong-02, colors.$gray-60);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--#{vars.$bcgov-prefix}-text-text-primary, colors.$gray-100);
+}
+
+.initial-avatar-sm {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.125rem;
+}
+
+.initial-avatar-md {
+  width: 3rem;
+  height: 3rem;
+  min-width: 3rem;
+  min-height: 3rem;
+  @include type.type-style('heading-02');
+}
+
+.initial-bg-a {
+  background: colors.$blue-10;
+}
+
+.initial-bg-b {
+  background: colors.$red-10;
+}
+
+.initial-bg-c {
+  background: colors.$orange-10;
+}
+
+.initial-bg-d {
+  background: colors.$yellow-10;
+}
+
+.initial-bg-e {
+  background: colors.$green-10;
+}
+
+.initial-bg-f {
+  background: colors.$lime-10;
+}
+
+.initial-bg-g {
+  background: colors.$teal-10;
+}
+
+.initial-bg-h {
+  background: colors.$cyan-10;
+}
+
+.initial-bg-i {
+  background: colors.$violet-10;
+}
+
+.initial-bg-j {
+  background: colors.$pink-10;
+}
+
+.initial-bg-k {
+  background: colors.$blue-20;
+}
+
+.initial-bg-l {
+  background: colors.$red-20;
+}
+
+.initial-bg-m {
+  background: colors.$orange-20;
+}
+
+.initial-bg-n {
+  background: colors.$yellow-20;
+}
+
+.initial-bg-o {
+  background: colors.$green-20;
+}
+
+.initial-bg-p {
+  background: colors.$lime-20;
+}
+
+.initial-bg-q {
+  background: colors.$teal-20;
+}
+
+.initial-bg-r {
+  background: colors.$cyan-20;
+}
+
+.initial-bg-s {
+  background: colors.$violet-20;
+}
+
+.initial-bg-t {
+  background: colors.$pink-20;
+}
+
+.initial-bg-u {
+  background: colors.$blue-30;
+}
+
+.initial-bg-v {
+  background: colors.$red-30;
+}
+
+.initial-bg-w {
+  background: colors.$orange-30;
+}
+
+.initial-bg-x {
+  background: colors.$yellow-30;
+}
+
+.initial-bg-y {
+  background: colors.$green-30;
+}
+
+.initial-bg-z {
+  background: colors.$lime-30;
+}

@@ -1,27 +1,10 @@
 import { env } from '../env';
-import mockServerConfig from '../mock-server/config';
 
-const serverHost = env.VITE_SERVER_URL || mockServerConfig.namespace;
+const serverHost = env.VITE_SERVER_URL;
 
-const oracleServerHost = env.VITE_ORACLE_SERVER_URL || mockServerConfig.namespace;
-
-const isProdEnv = env.VITE_NRSPARWEBAPP_VERSION?.startsWith('prod');
-
-// The API host should never be mock server in PROD
-const mockServerHost = isProdEnv ? env.VITE_SERVER_URL : mockServerConfig.namespace;
+const oracleServerHost = env.VITE_ORACLE_SERVER_URL;
 
 const ApiConfig = {
-  /**
-   * MOCK API
-   */
-  seedlotOrchardStep: `${mockServerHost}/api/seedlot/orchard`,
-
-  recentActivities: `${mockServerHost}/api/recent-activities`,
-
-  filesAndDocs: `${mockServerHost}/api/recent-files`,
-
-  applicantAgencies: `${mockServerHost}/api/applicant-agencies`,
-
   /**
    * Backend API
    */
@@ -45,7 +28,7 @@ const ApiConfig = {
 
   forestClient: `${serverHost}/api/forest-clients`,
 
-  geneticWorth: `${serverHost}/api/genetic-worth/calculate-all`,
+  parentTreeValsCalc: `${serverHost}/api/parent-trees/calculate`,
 
   seedlotSources: `${serverHost}/api/seedlot-sources`,
 

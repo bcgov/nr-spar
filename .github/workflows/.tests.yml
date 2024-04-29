@@ -4,7 +4,6 @@ on:
   workflow_call:
     inputs:
       ### Required
-
       # Nothing!  Just make sure `secrets: inherit` is set in the caller
 
       ### Typical / recommended
@@ -12,11 +11,8 @@ on:
         description: PR number, test or prod; defaults to PR number
         default: ${{ github.event.number }}
         type: string
-      triggers:
-        description: Bash array to diff for build triggering; omit to always fire
-        type: string
 
-  ### Usually a bad idea / not recommended
+      ### Usually a bad idea / not recommended
       target_oracle:
         description: Oracle-API target, defaults to test
         default: test
@@ -60,9 +56,3 @@ jobs:
         with:
           name: cypress-videos-chrome
           path: /home/runner/work/nr-spar/nr-spar/frontend/cypress/videos/
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: cypress-coverage
-          path: /home/runner/work/nr-spar/nr-spar/frontend/cypress-coverage

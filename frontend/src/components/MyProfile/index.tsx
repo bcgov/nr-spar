@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext } from 'react';
 
 import {
   SideNavLink
@@ -7,42 +6,20 @@ import {
 import * as Icons from '@carbon/icons-react';
 
 import AuthContext from '../../contexts/AuthContext';
-import AvatarImage from '../AvatarImage';
 import PanelSectionName from '../PanelSectionName';
 import { useThemePreference } from '../../utils/ThemePreference';
 import LoginProviders from '../../types/LoginProviders';
 import { env } from '../../env';
+import OrganizationSelection from '../OrganizationSelection';
+import Avatar from '../Avatar';
 
 import './style.scss';
-
-const accountOptions = [
-  {
-    icon: 'UserAvatar',
-    header: 'My nursery account',
-    url: '#'
-  },
-  {
-    icon: 'UserAvatar',
-    header: 'My orchard account',
-    url: '#'
-  },
-  {
-    icon: 'UserFollow',
-    header: 'Add a different profile',
-    url: '#'
-  }
-];
 
 const MyProfile = () => {
   const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
 
   const { theme, setTheme } = useThemePreference();
-  const { user, signOut, selectedClientRoles } = useContext(AuthContext);
-
-  const [goToURL, setGoToURL] = useState<string>('');
-  const [goTo, setGoTo] = useState<boolean>(false);
-
-  const navigate = useNavigate();
+  const { user, signOut } = useContext(AuthContext);
 
   const changeTheme = () => {
     if (theme === 'g10') {
@@ -55,75 +32,66 @@ const MyProfile = () => {
     }
   };
 
-  const goOut = (): void => {
+  const logOut = (): void => {
     if (theme === 'g100') {
       changeTheme();
     }
     signOut();
   };
 
-  useEffect(() => {
-    if (goTo) {
-      setGoTo(false);
-      navigate(goToURL);
-    }
-  }, [goTo]);
-
   return (
-    <>
+    <div className="my-profile-container">
       <div className="user-info-section">
-        <div className="user-image">
-          <AvatarImage userName={`${user?.firstName} ${user?.lastName}`} size="large" />
+        <div className="user-avatar">
+          <Avatar
+            size="md"
+            initial={`${user?.firstName.charAt(0).toUpperCase()}${user?.lastName.charAt(0).toUpperCase()}`}
+          />
         </div>
         <div className="user-data">
           <p className="user-name">{`${user?.firstName} ${user?.lastName}`}</p>
-          {user?.provider === LoginProviders.IDIR && (
-            <p>{`IDIR: ${user?.providerUsername}`}</p>
-          )}
-          {user?.provider === LoginProviders.BCEID_BUSINESS && (
-            <p>{`BCeID: ${user?.providerUsername}`}</p>
-          )}
-          <p>{user?.email}</p>
-          <p>{selectedClientRoles!.clientName}</p>
+          <p className="user-info-seconday">
+            {
+              user?.provider === LoginProviders.IDIR
+                ? `IDIR: ${user?.providerUsername}`
+                : `BCeID: ${user?.providerUsername}`
+            }
+          </p>
+          <p className="user-info-seconday">{user?.email}</p>
         </div>
       </div>
       <hr className="divisory" />
       <nav className="account-nav">
         <ul>
-          <PanelSectionName title="Change account" light />
-          {accountOptions.map((option) => {
-            const IconComponent = Icons[option.icon];
-            return (
-              <SideNavLink
-                key={option.header}
-                renderIcon={IconComponent || ''}
-                onClick={() => {
-                  setGoToURL(option.url);
-                  setGoTo(true);
-                }}
-              >
-                {option.header}
-              </SideNavLink>
-            );
-          })}
-          <PanelSectionName title="Options" light />
+          <li>
+            <PanelSectionName title="Select organization" light />
+            <div className="org-selection-container">
+              <OrganizationSelection simpleView />
+            </div>
+          </li>
+          <li>
+            <hr className="divisory" />
+            <PanelSectionName title="Options" light />
+          </li>
           <SideNavLink
             renderIcon={Icons.DataEnrichment}
-            onClick={() => { changeTheme(); }}
+            onClick={() => changeTheme()}
           >
             Change theme
           </SideNavLink>
           <SideNavLink
-            renderIcon={Icons.UserFollow}
-            onClick={() => { goOut(); }}
+            renderIcon={Icons.Exit}
+            onClick={() => logOut()}
           >
-            Sign out
+            Log out
           </SideNavLink>
           {
             appVersion === 'dev'
               ? (
                 <>
-                  <PanelSectionName title="Dev Zone" light />
+                  <li>
+                    <PanelSectionName title="Dev Zone" light />
+                  </li>
                   <SideNavLink
                     renderIcon={Icons.Pen}
                     // eslint-disable-next-line no-console
@@ -143,7 +111,7 @@ const MyProfile = () => {
           }
         </ul>
       </nav>
-    </>
+    </div>
   );
 };
 
