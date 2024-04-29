@@ -58,7 +58,8 @@ def execute_instance(oracle_config, postgres_config, track_config, execution_id)
                 source_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["source_db_type"])
                 target_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["target_db_type"])
                 # Get Deltas to filter source
-                schedule_times = data_sync_ctl.get_scheduler(track_db_conn,track_config['schema'],execution_id,process['interface_id'])
+                schedule_times = data_sync_ctl.get_scheduler(track_db_conn,track_config['schema'],process['execution_id'],process['interface_id'])
+                schedule_param = {"start_time": schedule_times[0]['current_start_time'], "end_time": schedule_times[0]['current_end_time']}
 
                 process_start_time = time.time()
 
@@ -68,10 +69,12 @@ def execute_instance(oracle_config, postgres_config, track_config, execution_id)
 
                     data_sync_ctl.print_process(process)
                     load_file = current_cwd+process['source_file'].replace("/",separator)
-                    print ("Reading Extract query from: " + load_file)
+                    logger.debug(f"Reading Extract query from: {load_file}")
+                    
                     query_sql = open(load_file).read()
-                    # print ("Query is: "+ query_sql)
-                    table_df = pd.read_sql_query(query_sql, source_db_conn.engine)
+                    # logger.debug(f"Query to be executed in Source database is: {query_sql}")
+                    
+                    table_df = pd.read_sql_query(sql=query_sql, con=source_db_conn.engine, params=schedule_param)
                     
                     time_source_extract = timedelta(seconds=(time.time()-temp_time))
                     rows_from_source = table_df.shape[0]
@@ -110,8 +113,8 @@ def execute_instance(oracle_config, postgres_config, track_config, execution_id)
                                                                                 process_delta,
                                                                                 log_message,
                                                                                 'SUCCESS')
-                            data_sync_ctl.save_execution_log   (track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
                             data_sync_ctl.update_schedule_times(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],schedule_times[0])
+                            data_sync_ctl.save_execution_log   (track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
                     else:
                         process_delta = timedelta(seconds=(time.time()-process_start_time))
                         process_log = data_sync_ctl.include_process_log_info(ts_conn_source=time_conn_source,
