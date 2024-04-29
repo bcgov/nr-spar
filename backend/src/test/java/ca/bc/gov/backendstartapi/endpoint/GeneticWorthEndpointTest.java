@@ -27,6 +27,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(GeneticWorthEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class GeneticWorthEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -105,7 +106,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("getAllGeneticWorthTest")
-  @WithMockUser(roles = "user_read")
   void getAllGeneticWorthTest() throws Exception {
 
     CodeDescriptionDto firstMethod =
@@ -133,7 +133,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("getGeneticWorthByCodeTest")
-  @WithMockUser(roles = "user_read")
   void getGeneticWorthByCodeTest() throws Exception {
     var testCode = "AD";
     var testDescription = "Animal browse resistance (deer)";
@@ -158,7 +157,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("getGeneticWorthByCodeEmptyTest")
-  @WithMockUser(roles = "user_read")
   void getGeneticWorthByCodeEmptyTest() throws Exception {
     var testCode = "WWE";
     when(geneticWorthService.getGeneticWorthByCode(testCode))
@@ -175,7 +173,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("calculateAll_NoData")
-  @WithMockUser(roles = "user_write")
   void calculateAll_NoData() throws Exception {
     GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of(), BigDecimal.ZERO);
     when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
@@ -194,7 +191,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("calculateAll_BadRequest")
-  @WithMockUser(roles = "user_write")
   void calculateAll_BadRequest() throws Exception {
     mockMvc
         .perform(
@@ -209,7 +205,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("calculateAll_Success")
-  @WithMockUser(roles = "user_write")
   void calculateAll_Success() throws Exception {
     GeneticWorthTraitsDto gvoTrait =
         new GeneticWorthTraitsDto("GVO", null, new BigDecimal("55"), new BigDecimal("67"));

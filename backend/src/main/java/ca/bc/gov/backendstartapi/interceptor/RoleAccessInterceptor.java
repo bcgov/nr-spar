@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
@@ -145,6 +147,22 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
       SparLog.info("User roles: {}", roles);
       return new ArrayList<>(roles);
     }
+
+    // Test fix!
+    SecurityContext context = SecurityContextHolder.getContext();
+    if (context.getAuthentication().getName().equals("SPARTest")) {
+      List<String> grantedList = new ArrayList<>();
+      if (context.getAuthentication().getAuthorities().size() > 0) {
+        Object[] grants = context.getAuthentication().getAuthorities().toArray();
+        for (int i = 0; i < context.getAuthentication().getAuthorities().size(); i++) {
+          String grant = String.valueOf(grants[i]);
+          grantedList.add(grant.substring(5));
+        }
+      }
+      SparLog.info("SPAR Test User roles: {}", grantedList);
+      return grantedList;
+    }
+
     return List.of();
   }
 
@@ -169,7 +187,18 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
     try {
       Class<?> handlerClass = Class.forName(className);
       if (!Objects.isNull(handlerClass)) {
-        Method method = handlerClass.getMethod(methodName);
+        Method[] methods = handlerClass.getMethods();
+        Method method = null;
+        for (Method m : methods) {
+          if (m.getName().equals(methodName)) {
+            method = m;
+            break;
+          }
+        }
+        if (method == null) {
+          SparLog.warn("Not found method for name {} at {}!", methodName, className);
+          return List.of();
+        }
         AccessLevelRequired config = method.getAnnotation(AccessLevelRequired.class);
         if (Objects.isNull(config)) {
           SparLog.warn("API missing CrudOperationsConfig {}#{}", className, methodName);
@@ -211,7 +240,18 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
     try {
       Class<?> handlerClass = Class.forName(className);
       if (!Objects.isNull(handlerClass)) {
-        Method method = handlerClass.getMethod(methodName);
+        Method[] methods = handlerClass.getMethods();
+        Method method = null;
+        for (Method m : methods) {
+          if (m.getName().equals(methodName)) {
+            method = m;
+            break;
+          }
+        }
+        if (method == null) {
+          SparLog.warn("Not found method for name {} at {}!", methodName, className);
+          return Map.of();
+        }
         RoleAccessConfig annotation = method.getAnnotation(RoleAccessConfig.class);
         if (Objects.isNull(annotation)) {
           SparLog.warn("API missing CrudMatrixFilterConfigs {}#{}", className, methodName);

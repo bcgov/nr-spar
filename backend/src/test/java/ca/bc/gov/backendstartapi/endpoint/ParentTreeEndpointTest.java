@@ -23,6 +23,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ParentTreeEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class ParentTreeEndpointTest {
 
   @Autowired MockMvc mockMvc;
@@ -31,7 +32,6 @@ class ParentTreeEndpointTest {
 
   @Test
   @DisplayName("getLatLongElevationSuccessTest")
-  @WithMockUser(roles = "user_read")
   void getLatLongElevationSuccessTest() throws Exception {
     List<LatLongRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new LatLongRequestDto(4032, new BigDecimal("0.162")));
@@ -83,7 +83,6 @@ class ParentTreeEndpointTest {
 
   @Test
   @DisplayName("getLatLongElevationEmptyTest")
-  @WithMockUser(roles = "user_read")
   void getLatLongElevationEmptyTest() throws Exception {
     List<LatLongRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new LatLongRequestDto(4032, new BigDecimal("0.162")));
