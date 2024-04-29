@@ -42,10 +42,11 @@ def required_variables_exists():
     
     print("-------------------------------------")
     print("----- ETL Tool: Unit test Execution  ")
-    print("-- 1. Checking if required variables are defined")
+    print("----- 1. Checking if required variables are defined")
     print("-------------------------------------")
     
     if not env_var_is_filled("test_mode") or \
+       not env_var_is_filled("EXECUTION_ID") or  \
        not env_var_is_filled("POSTGRES_HOST") or  \
        not env_var_is_filled("POSTGRES_PORT") or  \
        not env_var_is_filled("POSTGRES_USER") or \
@@ -83,8 +84,7 @@ def testPostgresConnection():
         
 # -- Vault is deprecated
 def testVault():  
-    ret = True
-        
+    ret = True        
     vault_url = os.environ['vurl']  # Vault url
     if vault_url.startswith('https://'):
         print("Vault URL looks good")
@@ -141,7 +141,7 @@ def execute_etl(dbPostgres, dbOracle, execution_id) -> None:
     #logging_config.fileConfig(os.path.join(os.path.dirname(__file__), "logging.ini"), disable_existing_loggers=False)   
     loggingBasicConfig(level=loggingDEBUG, stream=sys.stdout)
     # data_sync.data_sync( source_config = dbOracle, target_config = dbPostgres ,track_config = dbPostgres )
-    data_sync.data_sync2( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres, execution_id = execution_id )
+    data_sync.execute_instance( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres, execution_id = execution_id )
 
 if __name__ == '__main__':
     main()

@@ -147,4 +147,4 @@ seedlot_source_code, seedlot_status_code,
 temporary_strg_locn_code, temporary_strg_client_number, smp_mean_bv_growth, smp_parents_outside, smp_success_pct, temporary_strg_end_date, temporary_strg_start_date, to_be_registrd_ind, 
 total_parent_trees, update_timestamp, update_userid, variant, vegetation_code, vol_per_container
 FROM CTE_SEEDLOT C
- --WHERE ROWNUM < 100
+WHERE ROWNUM < 10

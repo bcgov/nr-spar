@@ -110,5 +110,5 @@ seedlot_source_code, seedlot_status_code,
 SEED_STORE_CLIENT_LOCN, SEED_STORE_CLIENT_NUMBER, smp_mean_bv_growth, smp_parents_outside, smp_success_pct, TEMPORARY_STORAGE_END_DATE, TEMPORARY_STORAGE_START_DATE, to_be_registrd_ind, 
 total_parent_trees, update_timestamp, update_userid, variant, vegetation_code, vol_per_container
 FROM CTE_SEEDLOT C
---ORDER BY SEEDLOT_NUMBER DESC
---LIMIT 2
+ORDER BY SEEDLOT_NUMBER DESC
+LIMIT 3

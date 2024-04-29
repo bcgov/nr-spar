@@ -10,7 +10,7 @@ import transformations as transf
 
 from typing import Tuple
 from os import listdir, path, sep as separator
-from datetime import timedelta
+from datetime import timedelta, datetime
 from sqlalchemy.exc import SQLAlchemyError
 from module.custom_exception import TransformException, LoadException, ExtractException, ETLConfigurationException
 
@@ -18,13 +18,14 @@ logger = logging.getLogger(__name__)
 
 """
     Execute data synchronization between 2 data sources
-    1. Gather what process will be executed in order
+    1. Gather what process will be executed in order (SEE ETL_EXECUTION MAP TABLE)
     2. Execute source.sql from process to Load data in a in-memory dataframe
-    3. Create a TEMP table in the target connection
-    4. Execute the target.sql in target connection using the TEMP table
+    3. Execute bulk Upserts in the target connection using 
+    4. Store metrics and other execution info in the ETL_EXECUTION_LOG_HIST table
 """
-def data_sync2(oracle_config, postgres_config, track_config, execution_id):
+def execute_instance(oracle_config, postgres_config, track_config, execution_id):
     sync_start_time = time.time()
+    record_start_time = datetime.now()
     rows_from_source = 0
     rows_target_processed = 0
     time_conn_monitor = ""
@@ -40,7 +41,7 @@ def data_sync2(oracle_config, postgres_config, track_config, execution_id):
         temp_time = time.time()
         time_conn_monitor = timedelta(seconds=(temp_time-sync_start_time))
         logger.info('Getting Execution instructions for execution id {}'.format(str(execution_id)))
-        execution_map = data_sync_ctl.get_execution_map(track_db_conn,track_config['schema'],execution_id)
+        execution_map  = data_sync_ctl.get_execution_map(track_db_conn,track_config['schema'],execution_id)
 
         logger.info('Validating Execution instructions')
         try:
@@ -52,9 +53,15 @@ def data_sync2(oracle_config, postgres_config, track_config, execution_id):
 
             # All processes to be executed from configuration in ETL_EXECUTION_MAP
             for process in processes:
-                source_config = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["source_db_type"])
-                target_config = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["target_db_type"])
-                
+                process_stop = False
+                log_message = ""
+                source_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["source_db_type"])
+                target_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["target_db_type"])
+                # Get Deltas to filter source
+                schedule_times = data_sync_ctl.get_scheduler(track_db_conn,track_config['schema'],execution_id,process['interface_id'])
+
+                process_start_time = time.time()
+
                 with db_conn.database_connection(source_config) as source_db_conn:
                     time_conn_source = timedelta(seconds=(time.time()-temp_time))
                     temp_time = time.time()
@@ -68,23 +75,57 @@ def data_sync2(oracle_config, postgres_config, track_config, execution_id):
                     
                     time_source_extract = timedelta(seconds=(time.time()-temp_time))
                     rows_from_source = table_df.shape[0]
+                    if rows_from_source < 1:
+                        process_stop = True
+                        log_message = f"There is no data to extract from source for execution id: {process['execution_id']} and interface id: {process['interface_id']}. Process will stop."
+                        logger.warning(log_message)
+
                     temp_time = time.time()
+                    if not process_stop:
+                        with db_conn.database_connection(target_config) as target_db_conn:
+                            time_conn_target = timedelta(seconds=(time.time()-temp_time))
+                            temp_time = time.time()
+                            
+                            table_df=table_df.convert_dtypes()
+                            
+                            rows_target_processed = target_db_conn.execute_upsert(dataframe=table_df, 
+                                                                                table_name=process["target_table"],
+                                                                                table_pk=process["target_primary_key"], 
+                                                                                db_type=process["target_db_type"])
 
-                    with db_conn.database_connection(target_config) as target_db_conn:
-                        time_conn_target = timedelta(seconds=(time.time()-temp_time))
-                        temp_time = time.time()
-                        
-                        table_df=table_df.convert_dtypes()
-                        
-                        rows_target_processed = target_db_conn.execute_upsert(dataframe=table_df, 
-                                                                              table_name=process["target_table"],
-                                                                              table_pk=process["target_primary_key"], 
-                                                                              db_type=process["target_db_type"])
+                            # READ FROM TEMP TABLE:
+                            time_target_load = timedelta(seconds=(time.time()-temp_time))
 
-
-                        # READ FROM TEMP TABLE:
-                        time_target_load = timedelta(seconds=(time.time()-temp_time))
-                        
+                            #RECORD LOG
+                            log_message="Execution finished successfully"
+                            process_delta = timedelta(seconds=(time.time()-process_start_time))
+                            process_log = data_sync_ctl.include_process_log_info(time_conn_source,
+                                                                                time_source_extract,
+                                                                                rows_from_source,
+                                                                                time_conn_target,
+                                                                                time_target_load,
+                                                                                rows_target_processed,
+                                                                                record_start_time, 
+                                                                                datetime.now(),
+                                                                                process_delta,
+                                                                                log_message,
+                                                                                'SUCCESS')
+                            data_sync_ctl.save_execution_log   (track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
+                            data_sync_ctl.update_schedule_times(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],schedule_times[0])
+                    else:
+                        process_delta = timedelta(seconds=(time.time()-process_start_time))
+                        process_log = data_sync_ctl.include_process_log_info(ts_conn_source=time_conn_source,
+                                                                            ts_source_extract=time_source_extract,
+                                                                            rows_from_source=rows_from_source,
+                                                                            ts_conn_target=None,
+                                                                            ts_target_load=None,
+                                                                            rows_target_processed=0,
+                                                                            ts_process_start=record_start_time, 
+                                                                            ts_process_end=datetime.now(),
+                                                                            ts_process_delta=process_delta,
+                                                                            log_message=log_message,
+                                                                            execution_status='SUCCESS')
+                        data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
         
         # Exception when validate_execution_map is false
         except ETLConfigurationException:
