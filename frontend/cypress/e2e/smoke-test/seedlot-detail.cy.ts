@@ -15,8 +15,7 @@ describe('Seedlot detail page', () => {
       // Pick a random species to test
       const speciesKeys = Object.keys(fixtureData);
       speciesKey = speciesKeys[Math.floor(Math.random() * speciesKeys.length)];
-
-      cy.task('getData', fData.pli.species).then((sNumber) => {
+      cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNumber = sNumber as string;
         cy.visit(`/seedlots/details/${seedlotNumber}`);
         cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
