@@ -1,13 +1,23 @@
 /* eslint-disable cypress/no-force */
 /* eslint-disable func-names */
 /* eslint-disable prefer-arrow-callback */
+import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('Applicant and seedlot information page', () => {
   let seedlotNumber: string;
+  let fixtureData: SeedlotRegFixtureType;
+  let speciesKey: string;
 
   before(function () {
-    cy.task('getData', 'PLI - Lodgepole pine').then((sNumber) => {
-      seedlotNumber = sNumber as string;
+    cy.fixture('aclass-seedlot-example').then((fData) => {
+      fixtureData = fData;
+      // Pick a random species to test
+      const speciesKeys = Object.keys(fixtureData);
+      // eslint-disable-next-line prefer-destructuring
+      speciesKey = speciesKeys[0];
+      cy.task('getData', fData[speciesKey].species).then((sNumber) => {
+        seedlotNumber = sNumber as string;
+      });
     });
   });
 
