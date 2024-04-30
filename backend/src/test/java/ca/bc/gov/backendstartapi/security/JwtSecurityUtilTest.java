@@ -46,4 +46,43 @@ class JwtSecurityUtilTest {
 
     Assertions.assertTrue(rolesSet.isEmpty());
   }
+
+  @Test
+  @DisplayName("Get user roles from JWT no roles should succeed")
+  void getUserRolesFromJwt_bigRoles_shouldSucceed() {
+    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
+    builder.subject("BAGGINGS");
+    builder.header("alg", "HS256");
+    builder.header("typ", "JWT");
+    builder.claim("email", "bilbo.baggings@gov.bc.ca");
+    builder.claim("custom:idp_display_name", "Baggings, Bilbo LWRS:EX");
+    builder.claim("custom:idp_username", "BAGGINGS");
+    builder.claim("custom:idp_name", "idir");
+    builder.claim("cognito:groups", List.of("ROLE1_ADMIN_00112233", "ROLE2_USER_00112234"));
+
+    Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(builder.build());
+
+    Assertions.assertFalse(rolesSet.isEmpty());
+    Assertions.assertEquals(2, rolesSet.size());
+    Assertions.assertTrue(rolesSet.contains("ROLE1_ADMIN"));
+    Assertions.assertTrue(rolesSet.contains("ROLE2_USER"));
+  }
+
+  @Test
+  @DisplayName("Get user roles from JWT empty roles should succeed")
+  void getUserRolesFromJwt_emptyRoles_shouldSucceed() {
+    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
+    builder.subject("BAGGINGS");
+    builder.header("alg", "HS256");
+    builder.header("typ", "JWT");
+    builder.claim("email", "bilbo.baggings@gov.bc.ca");
+    builder.claim("custom:idp_display_name", "Baggings, Bilbo LWRS:EX");
+    builder.claim("custom:idp_username", "BAGGINGS");
+    builder.claim("custom:idp_name", "idir");
+    builder.claim("cognito:groups", new String[]{});
+
+    Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(builder.build());
+
+    Assertions.assertTrue(rolesSet.isEmpty());
+  }
 }
