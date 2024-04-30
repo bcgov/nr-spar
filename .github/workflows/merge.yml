@@ -27,12 +27,12 @@ concurrency:
 
 env:
   # Input, test (if ref=main) or demo
-  target: ${{ inputs.target || github.ref == ${{ github.event.repository.default_branch }} && 'test' || 'demo' }}
+  target: ${{ inputs.target || github.ref == github.event.repository.default_branch && 'test' || 'demo' }}
 
 jobs:
   # Deploy to TEST or DEMO (both use TEST namespace)
   deploys:
-    name: ${{ toUpperCase(env.target) }} # Uppercase by convention
+    name: ${{ inputs.target == 'demo' && 'DEMO' || 'TEST' }} # Uppercase by convention
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
