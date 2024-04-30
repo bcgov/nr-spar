@@ -37,7 +37,7 @@ jobs:
           sonar_args:
             -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_${{ matrix.dir }}
             -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
-            -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
+            -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/filter/**,**/interceptor/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
           sonar_token: ${{ secrets[matrix.token] }}
 
   codeql:

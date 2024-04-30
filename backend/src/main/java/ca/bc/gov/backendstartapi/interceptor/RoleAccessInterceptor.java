@@ -3,13 +3,13 @@ package ca.bc.gov.backendstartapi.interceptor;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.security.AccessLevel;
 import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
+import ca.bc.gov.backendstartapi.security.JwtSecurityUtil;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -127,23 +126,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
    */
   private List<String> getUserRoles(HttpServletRequest request) {
     if (request.getUserPrincipal() instanceof JwtAuthenticationToken jwtToken) {
-      Jwt jwtPrincipal = jwtToken.getToken();
-      Set<String> roles = new HashSet<>();
-      if (jwtPrincipal.getClaims().containsKey("cognito:groups")) {
-        Object clientRolesObj = jwtPrincipal.getClaims().get("cognito:groups");
-        if (clientRolesObj instanceof List<?> list) {
-          for (Object item : list) {
-            String role = String.valueOf(item);
-            // Removes Client Number
-            String clientNumber = role.substring(role.length() - 8);
-            if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
-              role = role.substring(0, role.length() - 9); // Removes dangling underscore
-            }
-            roles.add(role);
-          }
-        }
-      }
-
+      Set<String> roles = JwtSecurityUtil.getUserRolesFromJwt(jwtToken.getToken());
       SparLog.info("User roles: {}", roles);
       return new ArrayList<>(roles);
     }

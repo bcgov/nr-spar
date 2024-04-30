@@ -2,8 +2,6 @@ package ca.bc.gov.backendstartapi.security;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -33,22 +31,6 @@ public class UserAuthenticationHelper {
 
     if (authentication.isAuthenticated()) {
       if (authentication.getPrincipal() instanceof Jwt jwtPrincipal) {
-        Set<String> roles = new HashSet<>();
-        if (jwtPrincipal.getClaims().containsKey("cognito:groups")) {
-          Object clientRolesObj = jwtPrincipal.getClaims().get("cognito:groups");
-          if (clientRolesObj instanceof List<?> list) {
-            for (Object item : list) {
-              String role = String.valueOf(item);
-              // Removes Client Number
-              String clientNumber = role.substring(role.length() - 8);
-              if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
-                role = role.substring(0, role.length() - 9); // Removes dangling underscore
-              }
-              roles.add(role);
-            }
-          }
-        }
-
         // Provider IDIR or BCeID & username
         String provider = jwtPrincipal.getClaimAsString("custom:idp_name");
         boolean isIdirProvider = provider.equals("idir");
@@ -99,7 +81,7 @@ public class UserAuthenticationHelper {
                 isIdirProvider ? idpUsername : null,
                 isIdirProvider ? null : idpUsername,
                 IdentityProvider.fromClaim(provider).orElseThrow(),
-                roles,
+                JwtSecurityUtil.getUserRolesFromJwt(jwtPrincipal),
                 jwtPrincipal.getTokenValue());
 
         return Optional.of(userInfo);
