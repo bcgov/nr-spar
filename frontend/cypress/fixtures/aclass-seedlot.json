@@ -1,6 +1,6 @@
 {
   "applicantAgency1": {
-    "name": "00012797 - Ministry Of Forests - MOF",
+    "name": "00012797 - MINISTRY OF FORESTS - MOF",
     "number": "30",
     "email": "test@gov.bc.ca",
     "invalidEmail": "test.com.br"
@@ -9,7 +9,7 @@
     "species": "PLI - Lodgepole pine"
   },
   "applicantAgency2": {
-    "name": "00132184 - Timber Sales Manager Babine - TBA",
+    "name": "00132184 - TIMBER SALES MANAGER BABINE - TBA",
     "number": "01",
     "email": "apo@gov.bc.ca",
     "invalidEmail": "apo.com.br"
@@ -18,7 +18,7 @@
     "species": "CW - Western redcedar"
   },
   "applicantAgency3": {
-    "name": "00132197 - Timber Sales Manager Cariboo-Chilcotin - TCC",
+    "name": "00132197 - TIMBER SALES MANAGER CARIBOO-CHILCOTIN - TCC",
     "number": "01",
     "email": "beane@gov.bc.ca",
     "invalidEmail": "beane.com.br"
@@ -27,7 +27,7 @@
     "species": "DR - Red alder"
   },
   "applicantAgency4": {
-    "name": "00132186 - Timber Sales Manager Chinook - TCH",
+    "name": "00132186 - TIMBER SALES MANAGER CHINOOK - TCH",
     "number": "01",
     "email": "cidaw@gov.bc.ca",
     "invalidEmail": "cidaw.com.br"
@@ -36,7 +36,7 @@
     "species": "EP - Paper birch"
   },
   "applicantAgency5": {
-    "name": "00149081 - Western Forest Products Inc. - WFP",
+    "name": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
     "number": "01",
     "email": "dha@gov.bc.ca",
     "invalidEmail": "dha.com.br"

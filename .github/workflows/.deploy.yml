@@ -38,7 +38,7 @@ on:
     outputs:
       triggered:
         description: 'Has a deployment has been triggered?'
-        value: ${{ jobs.deploys.outputs.triggered }}
+        value: ${{ jobs.deploy.outputs.triggered }}
 
 jobs:
   init:
