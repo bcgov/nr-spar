@@ -15,7 +15,10 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
@@ -28,6 +31,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestClientTest(ForestClientApiProvider.class)
+@TestMethodOrder(OrderAnnotation.class)
 class ForestClientApiProviderTest {
 
   @Autowired private ForestClientApiProvider forestClientApiProvider;
@@ -39,6 +43,7 @@ class ForestClientApiProviderTest {
   @Mock private Environment environment;
 
   @Test
+  @Order(1)
   @DisplayName("fetchExistentClientByNumber")
   void fetchExistentClientByNumber() {
     String clientNumber = "00012797";
@@ -79,6 +84,7 @@ class ForestClientApiProviderTest {
   }
 
   @Test
+  @Order(2)
   @DisplayName("fetchInexistentClientByNumber")
   void fetchInexistentClientByNumber() {
     String clientNumber = "00012797";
@@ -97,48 +103,7 @@ class ForestClientApiProviderTest {
   }
 
   @Test
-  @DisplayName("fetch client by number mock should succeed")
-  void fetchClientByNumber_mock_shouldSucceed() {
-    String clientNumber = "00012797";
-    String url = "/null/clients/findByClientNumber/" + clientNumber;
-
-    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
-    when(environment.getActiveProfiles()).thenReturn(new String[] {"dev"});
-    when(environment.getProperty("BYPASS_FOREST_CLIENT")).thenReturn("Y");
-
-    String json =
-        """
-        {
-          "clientNumber": "00012797",
-          "clientName": "MINISTRY OF FORESTS",
-          "legalFirstName": null,
-          "legalMiddleName": null,
-          "clientStatusCode": "ACT",
-          "clientTypeCode": "F",
-          "acronym": "MOF"
-        }
-        """;
-
-    mockRestServiceServer
-        .expect(requestTo(url))
-        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
-
-    Optional<ForestClientDto> clientDto =
-        forestClientApiProvider.fetchClientByIdentifier(clientNumber);
-
-    Assertions.assertTrue(clientDto.isPresent());
-
-    ForestClientDto forestClient = clientDto.get();
-    Assertions.assertEquals("00012797", forestClient.clientNumber());
-    Assertions.assertEquals("MINISTRY OF FORESTS", forestClient.clientName());
-    Assertions.assertNull(forestClient.legalFirstName());
-    Assertions.assertNull(forestClient.legalMiddleName());
-    Assertions.assertEquals(ForestClientStatusEnum.ACT, forestClient.clientStatusCode());
-    Assertions.assertEquals(ForestClientTypeEnum.F, forestClient.clientTypeCode());
-    Assertions.assertEquals("MOF", forestClient.acronym());
-  }
-
-  @Test
+  @Order(3)
   @DisplayName("fetchExistentClientByAcronym")
   void fetchExistentClientByAcronym() {
     String identifier = "MOF";
@@ -179,6 +144,7 @@ class ForestClientApiProviderTest {
   }
 
   @Test
+  @Order(4)
   @DisplayName("fetchInexistentClientByAcronym")
   void fetchInexistentClientByAcronym() {
     String identifier = "MOFF";
@@ -197,48 +163,7 @@ class ForestClientApiProviderTest {
   }
 
   @Test
-  @DisplayName("fetch client by acronym mock should succeed")
-  void fetchClientByAcronym_mock_shouldSucceed() {
-    String identifier = "MOF";
-    String url = "/null/clients/findByAcronym?acronym=" + identifier;
-
-    String json =
-        """
-        [{
-          "clientNumber": "00012797",
-          "clientName": "MINISTRY OF FORESTS",
-          "legalFirstName": null,
-          "legalMiddleName": null,
-          "clientStatusCode": "ACT",
-          "clientTypeCode": "F",
-          "acronym": "MOF"
-        }]
-        """;
-
-    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
-    when(environment.getActiveProfiles()).thenReturn(new String[] {"dev"});
-    when(environment.getProperty("BYPASS_FOREST_CLIENT")).thenReturn("Y");
-
-    mockRestServiceServer
-        .expect(requestTo(url))
-        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
-
-    Optional<ForestClientDto> clientDto =
-        forestClientApiProvider.fetchClientByIdentifier(identifier);
-
-    Assertions.assertTrue(clientDto.isPresent());
-
-    ForestClientDto forestClient = clientDto.get();
-    Assertions.assertEquals("00012797", forestClient.clientNumber());
-    Assertions.assertEquals("MINISTRY OF FORESTS", forestClient.clientName());
-    Assertions.assertNull(forestClient.legalFirstName());
-    Assertions.assertNull(forestClient.legalMiddleName());
-    Assertions.assertEquals(ForestClientStatusEnum.ACT, forestClient.clientStatusCode());
-    Assertions.assertEquals(ForestClientTypeEnum.F, forestClient.clientTypeCode());
-    Assertions.assertEquals("MOF", forestClient.acronym());
-  }
-
-  @Test
+  @Order(5)
   @DisplayName("fetchExistentClientLocation")
   void fetchExistentClientLocation() {
     String number = "00030064";
@@ -316,7 +241,88 @@ class ForestClientApiProviderTest {
     Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.trusted());
   }
 
+
   @Test
+  @Order(6)
+  @DisplayName("fetchExistentClientLocation")
+  void fetchLocationsByClientNumber_fetchAll_shouldSucceed() {
+    String number = "00030064";
+    String url = "/null/clients/" + number + "/locations?page=0&size=50";
+
+    String json =
+        """
+          [
+            {
+                "clientNumber": "00030064",
+                "locationCode": "00",
+                "companyCode": "30064",
+                "address1": "MINISTRY OF FORESTS",
+                "address2": "100 MILE HOUSE FOREST DISTRICT",
+                "address3": "PO BOX 129",
+                "city": "100 MILE HOUSE",
+                "province": "BC",
+                "postalCode": "V0K2E0",
+                "country": "CANADA",
+                "businessPhone": "2503957800",
+                "expired": "N",
+                "trusted": "N"
+            },
+            {
+                "clientNumber": "00030064",
+                "locationCode": "01",
+                "companyCode": " ",
+                "address1": "PO BOX 129",
+                "city": "100 MILE HOUSE",
+                "province": "BC",
+                "postalCode": "V0E2K0",
+                "country": "CANADA",
+                "expired": "N",
+                "trusted": "N"
+            }
+          ]
+        """;
+
+    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    List<ForestClientLocationDto> locationDto =
+        forestClientApiProvider.fetchLocationsByClientNumber(number, true);
+
+    Assertions.assertFalse(locationDto.isEmpty());
+
+    ForestClientLocationDto clientLocation = locationDto.get(0);
+    Assertions.assertEquals("00030064", clientLocation.clientNumber());
+    Assertions.assertEquals("00", clientLocation.locationCode());
+    Assertions.assertEquals("30064", clientLocation.companyCode());
+    Assertions.assertEquals("MINISTRY OF FORESTS", clientLocation.address1());
+    Assertions.assertEquals("100 MILE HOUSE FOREST DISTRICT", clientLocation.address2());
+    Assertions.assertEquals("PO BOX 129", clientLocation.address3());
+    Assertions.assertEquals("100 MILE HOUSE", clientLocation.city());
+    Assertions.assertEquals("BC", clientLocation.province());
+    Assertions.assertEquals("V0K2E0", clientLocation.postalCode());
+    Assertions.assertEquals("CANADA", clientLocation.country());
+    Assertions.assertEquals("2503957800", clientLocation.businessPhone());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.expired());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.trusted());
+
+    clientLocation = locationDto.get(1);
+    Assertions.assertEquals("00030064", clientLocation.clientNumber());
+    Assertions.assertEquals("01", clientLocation.locationCode());
+    Assertions.assertEquals(" ", clientLocation.companyCode());
+    Assertions.assertEquals("PO BOX 129", clientLocation.address1());
+    Assertions.assertEquals("100 MILE HOUSE", clientLocation.city());
+    Assertions.assertEquals("BC", clientLocation.province());
+    Assertions.assertEquals("V0E2K0", clientLocation.postalCode());
+    Assertions.assertEquals("CANADA", clientLocation.country());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.expired());
+    Assertions.assertEquals(ForestClientExpiredEnum.N, clientLocation.trusted());
+  }
+
+  @Test
+  @Order(7)
   @DisplayName("fetchNonExistentClientLocation")
   void fetchNonExistentClientLocation() {
     String number = "00000000";
@@ -337,6 +343,7 @@ class ForestClientApiProviderTest {
   }
 
   @Test
+  @Order(8)
   @DisplayName("fetchExistentSinglelientLocation")
   void fetchExistentSinglelientLocation() {
     String number = "00012797";
@@ -395,6 +402,7 @@ class ForestClientApiProviderTest {
   }
 
   @Test
+  @Order(9)
   @DisplayName("fetchNonExistentSingleClientLocation")
   void fetchNonExistentSingleClientLocation() {
     String number = "00000000";
@@ -418,6 +426,7 @@ class ForestClientApiProviderTest {
   }
 
   @Test
+  @Order(10)
   @DisplayName("Search clients by name bad request")
   void searchClientsByNameBadRequest() {
     String clientName = "AlDente";
@@ -441,6 +450,7 @@ class ForestClientApiProviderTest {
   }
 
   @Test
+  @Order(11)
   @DisplayName("Search clients by name success request")
   void searchClientByNameOkRequest() {
     String clientName = "AlDente";
@@ -476,39 +486,70 @@ class ForestClientApiProviderTest {
   }
 
   @Test
+  @Order(12)
   @DisplayName("fetch client by client name mock should succeed")
   void fetchClientsByClientName_mock_shouldSucceed() {
     String clientName = "AlDente";
 
-    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
+    System.setProperty("BYPASS_FOREST_CLIENT", "Y");
 
-    String url = "/null/clients/findByNames?page=0&size=50&clientName=" + clientName;
+    List<ForestClientDto> fc = forestClientApiProvider.fetchClientsByClientName(clientName);
 
-    String json =
-        """
-          [{
-            "clientNumber": "00012797",
-            "clientName": "AlDente",
-            "legalFirstName": null,
-            "legalMiddleName": null,
-            "clientStatusCode": "ACT",
-            "clientTypeCode": "F",
-            "acronym": "MOF"
-          }]
-        """;
+    Assertions.assertFalse(fc.isEmpty());
 
-    when(providersConfig.getForestClientApiKey()).thenReturn("1z2x2a4s5d5");
-    when(environment.getActiveProfiles()).thenReturn(new String[] {"dev"});
-    when(environment.getProperty("BYPASS_FOREST_CLIENT")).thenReturn("Y");
+    ForestClientDto forestClient = fc.get(0);
+    Assertions.assertEquals("000012345", forestClient.clientNumber());
+    Assertions.assertEquals("name", forestClient.clientName());
+    Assertions.assertEquals("firstName", forestClient.legalFirstName());
+    Assertions.assertEquals("legalMiddleName", forestClient.legalMiddleName());
+    Assertions.assertEquals(ForestClientStatusEnum.ACT, forestClient.clientStatusCode());
+    Assertions.assertEquals(ForestClientTypeEnum.A, forestClient.clientTypeCode());
+    Assertions.assertEquals("acronym", forestClient.acronym());
+  }
 
-    mockRestServiceServer
-        .expect(requestTo(url))
-        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON).header("x-total-count", "1"));
+  @Test
+  @Order(13)
+  @DisplayName("fetch client by number mock should succeed")
+  void fetchClientByNumber_mock_shouldSucceed() {
+    String clientNumber = "00012797";
 
-    ForestClientDto fc = forestClientApiProvider.fetchClientsByClientName(clientName).get(0);
+    System.setProperty("BYPASS_FOREST_CLIENT", "Y");
 
-    Assertions.assertNotNull(fc);
+    Optional<ForestClientDto> clientDto =
+        forestClientApiProvider.fetchClientByIdentifier(clientNumber);
 
-    Assertions.assertEquals(clientName, fc.clientName());
+    Assertions.assertTrue(clientDto.isPresent());
+
+    ForestClientDto forestClient = clientDto.get();
+    Assertions.assertEquals("00012797", forestClient.clientNumber());
+    Assertions.assertEquals("name", forestClient.clientName());
+    Assertions.assertEquals("firstName", forestClient.legalFirstName());
+    Assertions.assertEquals("legalMiddleName", forestClient.legalMiddleName());
+    Assertions.assertEquals(ForestClientStatusEnum.ACT, forestClient.clientStatusCode());
+    Assertions.assertEquals(ForestClientTypeEnum.A, forestClient.clientTypeCode());
+    Assertions.assertEquals("acronym", forestClient.acronym());
+  }
+
+  @Test
+  @Order(14)
+  @DisplayName("fetch client by acronym mock should succeed")
+  void fetchClientByAcronym_mock_shouldSucceed() {
+    String identifier = "MOF";
+
+    System.setProperty("BYPASS_FOREST_CLIENT", "Y");
+
+    Optional<ForestClientDto> clientDto =
+        forestClientApiProvider.fetchClientByIdentifier(identifier);
+
+    Assertions.assertTrue(clientDto.isPresent());
+
+    ForestClientDto forestClient = clientDto.get();
+    Assertions.assertEquals(identifier, forestClient.clientNumber());
+    Assertions.assertEquals("name", forestClient.clientName());
+    Assertions.assertEquals("firstName", forestClient.legalFirstName());
+    Assertions.assertEquals("legalMiddleName", forestClient.legalMiddleName());
+    Assertions.assertEquals(ForestClientStatusEnum.ACT, forestClient.clientStatusCode());
+    Assertions.assertEquals(ForestClientTypeEnum.A, forestClient.clientTypeCode());
+    Assertions.assertEquals("acronym", forestClient.acronym());
   }
 }
