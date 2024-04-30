@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.enums.ForestClientTypeEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -176,13 +177,20 @@ public class ForestClientApiProvider implements Provider {
             "fetchLocationsByClientNumber",
             page);
 
-        int responseSize = response.getBody().size();
-
-        if (!shouldFetchAll || responseSize == 0) {
-          return response.getBody();
+        List<ForestClientLocationDto> responseBody = List.of();
+        int responseSize = 0;
+        if (response.hasBody()) {
+          responseBody = response.getBody();
+          if (!Objects.isNull(responseBody)) {
+            responseSize = responseBody.size();
+          }
         }
 
-        totalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
+        if (!shouldFetchAll || responseSize == 0) {
+          return responseBody;
+        }
+
+        totalCount = getHeaderTotalCount(response.getHeaders());
 
         totalFetched += responseSize;
 
@@ -287,14 +295,21 @@ public class ForestClientApiProvider implements Provider {
             "fetchClientsByClientName",
             page);
 
-        int responseSize = response.getBody().size();
+        int responseSize = 0;
+
+        if (response.hasBody()) {
+          List<ForestClientDto> dtos = response.getBody();
+          if (!Objects.isNull(dtos)) {
+            responseSize = dtos.size();
+          }
+        }
 
         // Empty response will not have a x-total-count header so we return the empty array here.
         if (responseSize == 0) {
           return result;
         }
 
-        totalCount = Integer.parseInt(response.getHeaders().get("x-total-count").get(0));
+        totalCount = getHeaderTotalCount(response.getHeaders());
 
         totalFetched += responseSize;
 
@@ -339,7 +354,8 @@ public class ForestClientApiProvider implements Provider {
   private boolean shouldMock() {
     if (Arrays.stream(environment.getActiveProfiles())
         .anyMatch(env -> !env.equalsIgnoreCase("prod"))) {
-      String byPass = System.getenv("BYPASS_FOREST_CLIENT");
+      String byPass = environment.getProperty("BYPASS_FOREST_CLIENT");
+      SparLog.info("BYPASS_FOREST_CLIENT={}", byPass);
       boolean shouldMockValue = "Y".equals(byPass);
       SparLog.info("Should mock ForestClient API request: {}", shouldMockValue);
       return shouldMockValue;
@@ -381,5 +397,15 @@ public class ForestClientApiProvider implements Provider {
         ForestClientExpiredEnum.Y,
         "",
         "");
+  }
+
+  private int getHeaderTotalCount(HttpHeaders headers) {
+    if (headers.containsKey("x-total-count")) {
+      List<String> counts = headers.get("x-total-count");
+      if (!Objects.isNull(counts)) {
+        return Integer.parseInt(counts.get(0));
+      }
+    }
+    return 0;
   }
 }
