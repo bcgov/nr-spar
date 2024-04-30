@@ -10,7 +10,7 @@ describe('Seedlot detail page', () => {
 
   beforeEach(function () {
     cy.login();
-    cy.fixture('aclass-seedlot-example').then((fData) => {
+    cy.fixture('aclass-seedlot').then((fData) => {
       fixtureData = fData;
       // Pick a random species to test
       const speciesKeys = Object.keys(fixtureData);

@@ -17,7 +17,7 @@ describe('Seedlot Dashboard test', () => {
     cy.fixture('seedlot-dashboard').then((fData) => {
       seedlotDashboardData = fData;
     });
-    cy.fixture('aclass-seedlot-example').then((jsonData) => {
+    cy.fixture('aclass-seedlot').then((jsonData) => {
       seedlotTableData = jsonData;
     });
 

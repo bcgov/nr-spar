@@ -7,7 +7,7 @@ import { SeedlotRegFixtureType } from '../../definitions';
 describe('Create A-Class Seedlot', () => {
   let fixtureData: SeedlotRegFixtureType = {};
   beforeEach(() => {
-    cy.fixture('aclass-seedlot-example').then((jsonData) => {
+    cy.fixture('aclass-seedlot').then((jsonData) => {
       fixtureData = jsonData;
     });
 
