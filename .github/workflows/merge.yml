@@ -32,7 +32,7 @@ env:
 jobs:
   # Deploy to TEST or DEMO (both use TEST namespace)
   deploys:
-    name: ${{ inputs.target == 'demo' && 'DEMO' || 'DEMO' }} # Uppercase by convention
+    name: ${{ inputs.target == 'demo' && 'DEMO' || 'TEST' }} # Uppercase by convention
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
