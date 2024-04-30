@@ -1,3 +1,4 @@
+/* eslint-disable cypress/no-force */
 /* eslint-disable func-names */
 /* eslint-disable prefer-arrow-callback */
 

@@ -1,7 +1,10 @@
+/* eslint-disable prefer-destructuring */
 import { defineConfig } from 'cypress';
 import { TEN_SECONDS } from './cypress/constants';
 
 declare const require: any;
+
+let CypressData: { [k: string]: any } = {};
 
 export default defineConfig({
   e2e: {
@@ -37,6 +40,22 @@ export default defineConfig({
           // eslint-disable-next-line no-console
           console.log(...args);
           return null;
+        },
+        setData(keyValuePair) {
+          if (!Array.isArray(keyValuePair) || keyValuePair.length !== 2) {
+            return null;
+          }
+          const key = keyValuePair[0];
+          const value = keyValuePair[1];
+          CypressData = Object.assign(CypressData, { [key]: value });
+
+          return null;
+        },
+        getData(key) {
+          if (CypressData[key]) {
+            return CypressData[key];
+          }
+          return '';
         }
       });
 
