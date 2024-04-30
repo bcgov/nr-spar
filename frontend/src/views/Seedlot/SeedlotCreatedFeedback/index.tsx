@@ -33,7 +33,9 @@ const SeedlotCreatedFeedback = () => {
                   {seedlotClass}
                   -class
                   {' '}
-                  {seedlotNumber}
+                  <span id="created-seedlot-number">
+                    {seedlotNumber}
+                  </span>
                   {' '}
                   seedlot created
                 </h1>

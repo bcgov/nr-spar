@@ -1,0 +1,11 @@
+{
+  "pli": {
+    "agencyName": "00012797 - MINISTRY OF FORESTS - MOF",
+    "agencyNumber": "30",
+    "email": "test@gov.bc.ca",
+    "species": "PLI - Lodgepole pine",
+    "source": "tpt",
+    "toBeRegistered": true,
+    "withinBc": true
+  }
+}
