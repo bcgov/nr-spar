@@ -112,6 +112,6 @@ total_parent_trees, update_timestamp, update_userid, variant, vegetation_code, v
 FROM 
 	CTE_SEEDLOT C
 WHERE 
-	update_timestamp between :start_time and :end_time
+	update_timestamp between %(start_time)s AND %(end_time)s 
 ORDER BY 
 	SEEDLOT_NUMBER DESC

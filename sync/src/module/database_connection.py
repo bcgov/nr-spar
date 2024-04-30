@@ -112,12 +112,15 @@ class database_connection(object):
 
     def bulk_upsert_postgres(self, dataframe:object, table_name:str, table_pk:str, if_data_exists: str, index_data:bool ) -> int:
         onconflictstatement = ""
+        table_clean = clean_table_from_schema(table_name)
         if table_pk != "":
             columnspk = table_pk.split(",")
             df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation   
             onconflictstatement = f"""
             ON CONFLICT ({table_pk})               
-            DO UPDATE SET {' , '.join(df2.columns.values + '= EXCLUDED.'+df2.columns.values)} """
+            DO UPDATE SET {' , '.join(df2.columns.values + '= EXCLUDED.'+df2.columns.values)} 
+            WHERE {' OR '.join(table_clean+"."+df2.columns.values + '!= EXCLUDED.'+df2.columns.values)}
+            """
        
         sql_text = f"""         
         INSERT INTO {table_name}({', '.join(dataframe.columns.values)})                
@@ -139,17 +142,19 @@ class database_connection(object):
                 whStatement = "WHERE 1=1"
                 for column in columnspk:
                     params["p_"+column] = getattr(row,column)
-                    whStatement = f"""{whStatement}  AND  {column} = :p_{column}"""
+                    whStatement = f"""{whStatement}  AND  {column} = :p_{column}"""                
 
                 df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation 
+                whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
                 for column in dataframe.columns.values:
                     params["s_"+column] = getattr(row,column)
+                    params["q_"+column] = getattr(row,column)
                 onconflictstatement = f"""
                 EXCEPTION
                 WHEN DUP_VAL_ON_INDEX THEN
                     UPDATE  {table_name} 
                     SET {' , '.join(df2.columns.values + '= :s_'+df2.columns.values)} 
-                    {whStatement};"""
+                    {whStatement} {whStatement2};"""
         
             sql_text = f""" 
             BEGIN
@@ -205,3 +210,10 @@ def psql_insert_copy(table, conn, keys, data_iter):
 
         sql_text = 'COPY {} ({}) FROM STDIN WITH CSV'.format(table_name, columns)
         cur.copy_expert(sql=sql_text, file=s_buf)
+
+def clean_table_from_schema(table_name:str) -> str:
+    if(table_name.find("."))==-1:
+        return table_name
+    
+    idx = table_name.find(".")+1
+    return table_name[idx:]
