@@ -15,7 +15,7 @@ jobs:
       TEST: "test"
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "${{ toLowerCase(env.TEST)}}"
+      - run: echo "${{ env.TEST }}"
 
   # builds:
   #   name: Builds
