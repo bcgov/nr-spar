@@ -7,6 +7,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import validator from 'validator';
 
 import ClientSearchModal from './ClientSearchModal';
+import VerificationInput from '../VerificationInput';
 
 import { getForestClientByNumber, getForestClientLocation } from '../../api-service/forestClientsAPI';
 
@@ -183,6 +184,11 @@ const ApplicantAgencyFields = ({
           )
           : null
       }
+      <Row className="agency-information-row">
+        <Column sm={4} md={8} lg={8} xlg={8}>
+          <VerificationInput inputLabel="test label" helperText="test helper" />
+        </Column>
+      </Row>
       <Row className="agency-information-row">
         <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
           <TextInput
