@@ -10,40 +10,9 @@
     margin-bottom: 1.5rem;
   }
 
-  .#{vars.$bcgov-prefix}--combo-box--readonly {
-    border-block-end: 0;
-
-    input[role=combobox] {
-      background-color: transparent;
-      padding-inline-end: 0;
-      --#{vars.$bcgov-prefix}-layout-density-padding-inline-local: 0;
-      border-block-end: 0;
-    }
-
-    button,
-    &+.#{vars.$bcgov-prefix}--form__helper-text {
-      display: none;
-    }
-
-    &.#{vars.$bcgov-prefix}--list-box--invalid input[role=combobox].#{vars.$bcgov-prefix}--text-input {
-      outline-offset: 0;
-    }
-  }
-
-
   .#{vars.$bcgov-prefix}--text-input:disabled {
     border-block-end: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle);
   }
-
-  .#{vars.$bcgov-prefix}--combo-box {
-
-    li,
-    .#{vars.$bcgov-prefix}--list-box__menu-item__option {
-      white-space: normal;
-      block-size: auto;
-    }
-  }
-
 
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
     input[type=number] {

@@ -1,6 +1,5 @@
 const supportTexts = {
   agency: {
-    placeholder: 'Enter or choose your agency',
     helperText: 'You can enter the agency number, name or acronym',
     invalidTextInterimSpecific: 'Please specify a collector agency to proceed'
   },

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Row, Column, TextInput, Checkbox,
-  ComboBox, InlineLoading, FlexGrid
+  InlineLoading, FlexGrid
 } from '@carbon/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import validator from 'validator';
@@ -10,11 +10,9 @@ import ClientSearchModal from './ClientSearchModal';
 
 import { getForestClientByNumber, getForestClientLocation } from '../../api-service/forestClientsAPI';
 
-import ComboBoxEvent from '../../types/ComboBoxEvent';
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
-import { FilterObj, filterInput } from '../../utils/FilterUtils';
 import { getForestClientLabel } from '../../utils/ForestClientUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
@@ -24,7 +22,7 @@ import { formatLocationCode } from './utils';
 import './styles.scss';
 
 const ApplicantAgencyFields = ({
-  checkboxId, isDefault, agency, locationCode, fieldsProps, agencyOptions,
+  checkboxId, isDefault, agency, locationCode, fieldsProps,
   defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize,
   isFormSubmitted
 }: ApplicantAgencyFieldsProps) => {
@@ -86,26 +84,26 @@ const ApplicantAgencyFields = ({
     setAgencyAndCode(updatedIsDefault, updatedAgency, updatedLocationCode);
   };
 
-  const handleAgencyInput = (value: MultiOptionsObj) => {
-    setLocationCodeHelperText(
-      value
-        ? supportTexts.locationCode.helperTextEnabled
-        : supportTexts.locationCode.helperTextDisabled
-    );
+  // const handleAgencyInput = (value: MultiOptionsObj) => {
+  //   setLocationCodeHelperText(
+  //     value
+  //       ? supportTexts.locationCode.helperTextEnabled
+  //       : supportTexts.locationCode.helperTextDisabled
+  //   );
 
-    const updatedAgency = {
-      ...agency,
-      value: value ?? EmptyMultiOptObj,
-      isInvalid: false
-    };
+  //   const updatedAgency = {
+  //     ...agency,
+  //     value: value ?? EmptyMultiOptObj,
+  //     isInvalid: false
+  //   };
 
-    const updatedLocationCode = {
-      ...locationCode,
-      value: value ? locationCode.value : ''
-    };
+  //   const updatedLocationCode = {
+  //     ...locationCode,
+  //     value: value ? locationCode.value : ''
+  //   };
 
-    setAgencyAndCode(isDefault, updatedAgency, updatedLocationCode);
-  };
+  //   setAgencyAndCode(isDefault, updatedAgency, updatedLocationCode);
+  // };
 
   const handleLocationCodeChange = (value: string) => {
     const updatedValue = value.slice(0, LOCATION_CODE_LIMIT);
@@ -187,26 +185,27 @@ const ApplicantAgencyFields = ({
       }
       <Row className="agency-information-row">
         <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
-          <ComboBox
-            className="agency-combo-box"
+          <TextInput
+            className="agency-input"
             id={agency.id}
-            placeholder={supportTexts.agency.placeholder}
-            titleText={fieldsProps.agencyInput.titleText}
+            labelText={fieldsProps.agencyInput.titleText}
             helperText={readOnly ? null : supportTexts.agency.helperText}
+            invalid={agency.isInvalid}
             invalidText={(isDefault.value && agency.value.code !== '')
               ? fieldsProps.agencyInput.invalidText
               : supportTexts.agency.invalidTextInterimSpecific}
-            items={agencyOptions}
             readOnly={isDefault.value || readOnly}
             // If the value set is empty, the field continues
             // interactive on read only mode, so we disable it instead
             disabled={(isDefault.value && agency.value.code === '')}
-            selectedItem={isFormSubmitted ? queriedAgency : agency.value}
-            onChange={(e: ComboBoxEvent) => handleAgencyInput(e.selectedItem)}
-            invalid={agency.isInvalid}
-            shouldFilterItem={
-              ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-            }
+            // eslint-disable-next-line max-len
+            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAgencyInput(e.target.value)}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              if (!e.target.readOnly) {
+                handleLocationCodeBlur(e.target.value);
+              }
+            }}
             size="md"
           />
         </Column>
