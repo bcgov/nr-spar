@@ -1,0 +1,21 @@
+.test_wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+
+  .tooltip_class {
+    position: absolute;
+    right: 0.3125rem;
+    top: calc(50% - 0.8125rem);
+  }
+
+  button.tooltip-trigger {
+    background: none;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font: inherit;
+    outline: inherit;
+  }
+}
