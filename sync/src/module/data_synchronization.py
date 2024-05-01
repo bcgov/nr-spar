@@ -24,22 +24,23 @@ logger = logging.getLogger(__name__)
     4. Store metrics and other execution info in the ETL_EXECUTION_LOG_HIST table
 """
 def execute_instance(oracle_config, postgres_config, track_config, execution_id):
-    sync_start_time = time.time()
-    record_start_time = datetime.now()
-    rows_from_source = 0
-    rows_target_processed = 0
-    time_conn_monitor = ""
-    time_conn_source = ""
-    time_conn_target = ""
-    time_source_extract = ""
-    time_target_load = ""
-    logger.info('***** Starting ETL Tool *****')
+    stored_metrics = {}
+    stored_metrics['sync_start_time'] = time.time()
+    stored_metrics['record_start_time'] = datetime.now()
+    stored_metrics['rows_from_source'] = 0
+    stored_metrics['rows_target_processed'] = 0
+    stored_metrics['time_conn_monitor'] = ""
+    stored_metrics['time_conn_source'] = ""
+    stored_metrics['time_conn_target'] = ""
+    stored_metrics['time_source_extract'] = ""
+    stored_metrics['time_target_load'] = ""
+    logger.info('Starting ETL Tool execution instance')
     current_cwd = path.join(path.abspath(path.dirname(__file__).split('src')[0]) , "config")
     logger.info('Initializing Tracking Database Connection')
     is_error = False
     with db_conn.database_connection(track_config) as track_db_conn:
         temp_time = time.time()
-        time_conn_monitor = timedelta(seconds=(temp_time-sync_start_time))
+        stored_metrics['time_conn_monitor'] = timedelta(seconds=(temp_time-stored_metrics['sync_start_time']))
         logger.info('Getting Execution instructions for execution id {}'.format(str(execution_id)))
         execution_map  = data_sync_ctl.get_execution_map(track_db_conn,track_config['schema'],execution_id)
 
@@ -53,104 +54,172 @@ def execute_instance(oracle_config, postgres_config, track_config, execution_id)
 
             # All processes to be executed from configuration in ETL_EXECUTION_MAP
             for process in processes:
-                process_stop = False
-                log_message = ""
-                source_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["source_db_type"])
-                target_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["target_db_type"])
-                # Get Deltas to filter source
+                #1. There are old instances to execute?
+                reprocess_logged_executions(track_db_conn,
+                                            track_config['schema'],
+                                            process, 
+                                            current_cwd, 
+                                            oracle_config, 
+                                            postgres_config, 
+                                            stored_metrics)
+
+                #2. Process current instances 
                 schedule_times = data_sync_ctl.get_scheduler(track_db_conn,track_config['schema'],process['execution_id'],process['interface_id'])
-                schedule_param = {"start_time": schedule_times[0]['current_start_time'], "end_time": schedule_times[0]['current_end_time']}
+                stored_metrics = execute_process(base_dir=current_cwd, 
+                                                 track_db_conn=track_db_conn, 
+                                                 track_db_schema=track_config['schema'], 
+                                                 process=process, 
+                                                 oracle_config=oracle_config, 
+                                                 postgres_config=postgres_config, 
+                                                 stored_metrics=stored_metrics, 
+                                                 schedule_times=schedule_times[0],
+                                                 is_reprocess=False)
 
-                process_start_time = time.time()
-
-                with db_conn.database_connection(source_config) as source_db_conn:
-                    time_conn_source = timedelta(seconds=(time.time()-temp_time))
-                    temp_time = time.time()
-
-                    data_sync_ctl.print_process(process)
-                    load_file = current_cwd+process['source_file'].replace("/",separator)
-                    logger.debug(f"Reading Extract query from: {load_file}")
-                    
-                    query_sql = open(load_file).read()
-                    # logger.debug(f"Query to be executed in Source database is: {query_sql}")
-                    
-                    table_df = pd.read_sql_query(sql=query_sql, con=source_db_conn.engine, params=schedule_param)
-                    
-                    time_source_extract = timedelta(seconds=(time.time()-temp_time))
-                    rows_from_source = table_df.shape[0]
-                    if rows_from_source < 1:
-                        process_stop = True
-                        log_message = f"There is no data to extract from source for execution id: {process['execution_id']} and interface id: {process['interface_id']}. Process will stop."
-                        logger.warning(log_message)
-
-                    temp_time = time.time()
-                    if not process_stop:
-                        with db_conn.database_connection(target_config) as target_db_conn:
-                            time_conn_target = timedelta(seconds=(time.time()-temp_time))
-                            temp_time = time.time()
-                            
-                            table_df=table_df.convert_dtypes()
-                            
-                            rows_target_processed = target_db_conn.execute_upsert(dataframe=table_df, 
-                                                                                table_name=process["target_table"],
-                                                                                table_pk=process["target_primary_key"], 
-                                                                                db_type=process["target_db_type"])
-
-                            # READ FROM TEMP TABLE:
-                            time_target_load = timedelta(seconds=(time.time()-temp_time))
-
-                            #RECORD LOG
-                            log_message="Execution finished successfully"
-                            process_delta = timedelta(seconds=(time.time()-process_start_time))
-                            process_log = data_sync_ctl.include_process_log_info(time_conn_source,
-                                                                                time_source_extract,
-                                                                                rows_from_source,
-                                                                                time_conn_target,
-                                                                                time_target_load,
-                                                                                rows_target_processed,
-                                                                                record_start_time, 
-                                                                                datetime.now(),
-                                                                                process_delta,
-                                                                                log_message,
-                                                                                'SUCCESS')
-                            data_sync_ctl.update_schedule_times(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],schedule_times[0])
-                            data_sync_ctl.save_execution_log   (track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
-                    else:
-                        process_delta = timedelta(seconds=(time.time()-process_start_time))
-                        process_log = data_sync_ctl.include_process_log_info(ts_conn_source=time_conn_source,
-                                                                            ts_source_extract=time_source_extract,
-                                                                            rows_from_source=rows_from_source,
-                                                                            ts_conn_target=None,
-                                                                            ts_target_load=None,
-                                                                            rows_target_processed=0,
-                                                                            ts_process_start=record_start_time, 
-                                                                            ts_process_end=datetime.now(),
-                                                                            ts_process_delta=process_delta,
-                                                                            log_message=log_message,
-                                                                            execution_status='SUCCESS')
-                        data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
+                #3. There are any errors to be retried?                
         
         # Exception when validate_execution_map is false
         except ETLConfigurationException:
             is_error = True
             print("ETLConfigurationException - Impossible to execute or determine what process will be executed (or no process to be executed)")
             logger.critical('ETLConfigurationException - Impossible to execute or determine what process will be executed (or no process to be executed)')
-    sync_elapsed_time = time.time() - sync_start_time
+
+        except Exception as err:
+            is_error = True
+            logger.critical(f"A fatal error has occurred ({type(err)}): {err}", exc_info = True)            
+
+    sync_elapsed_time = time.time() - stored_metrics['sync_start_time']
     if is_error:
         logger.info('***** ETL Process finished with error *****')
         logger.info(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
     else:
-        logger.info('***** ETL Process finished successfully *****')
-        logger.info(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
-        logger.info(f'ETL Tool whole process took {timedelta(seconds=sync_elapsed_time)}')
-        logger.info(f'ETL Tool monitoring database connection took {time_conn_monitor}')
-        logger.info(f'ETL Tool source database connection took {time_conn_source}')
-        logger.info(f'ETL Tool source extract data took {time_source_extract} gathering {rows_from_source} rows')
-        logger.info(f'ETL Tool target database connection took {time_conn_target}')
-        logger.info(f'ETL Tool target load data took {time_target_load} processing {rows_target_processed} rows')
+        stored_metrics["time_process"]=timedelta(seconds=sync_elapsed_time)
+        print_process_metrics(stored_metrics)
     
     logger.info('***** Finish ETL Run *****')
 
+def reprocess_logged_executions(track_db_conn,track_db_schema,process, current_cwd, oracle_config, postgres_config, stored_metrics):
+    schedules = data_sync_ctl.get_log_hist_schedules_to_process(track_db_conn,track_db_schema,process['execution_id'],process['interface_id'])
+    for schedule in schedules:
+        execute_process(base_dir=current_cwd, 
+                        track_db_conn=track_db_conn, 
+                        track_db_schema=track_db_schema, 
+                        process=process, 
+                        oracle_config=oracle_config, 
+                        postgres_config=postgres_config, 
+                        stored_metrics=stored_metrics, 
+                        schedule_times=schedule,
+                        is_reprocess=True)
+        data_sync_ctl.unset_reprocess(track_db_conn,track_db_schema,process['execution_id'],process['interface_id'],schedule)
+
+
+def print_process_metrics(stored_metrics):
+    logger.info(f"ETL Tool whole process took {stored_metrics['time_process']}")
+    logger.info(f"ETL Tool monitoring database connection took {stored_metrics['time_conn_monitor']}")
+    logger.info(f"ETL Tool source database connection took {stored_metrics['time_conn_source']}")
+    logger.info(f"ETL Tool source extract data took {stored_metrics['time_source_extract']} gathering {stored_metrics['rows_from_source']} rows")
+    logger.info(f"ETL Tool target database connection took {stored_metrics['time_conn_target']}")
+    logger.info(f"ETL Tool target load data took {stored_metrics['time_target_load']} processing {stored_metrics['rows_target_processed']} rows")
+
+
+def execute_process(base_dir, track_db_conn, track_db_schema, process, oracle_config, postgres_config, stored_metrics,schedule_times, is_reprocess):
+    process_stop = False
+    log_message = ""
+    source_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["source_db_type"])
+    target_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["target_db_type"])
+    # Get Deltas to filter source
+    #
+    schedule_param = {"start_time": schedule_times['current_start_time'], "end_time": schedule_times['current_end_time']}
+    
+    # Initializing metric variables
+    stored_metrics['process_start_time'] = time.time()
+    stored_metrics['time_source_extract'] = None
+    stored_metrics['rows_from_source'] = 0
+    stored_metrics['time_conn_target'] = None
+    stored_metrics['rows_target_processed'] = 0
+    stored_metrics['time_target_load'] = None
+    retry=False
+    tag_reprocess = ''
+    if is_reprocess:
+        tag_reprocess = '[REPROCESSED] '
+
+    try:
+        with db_conn.database_connection(source_config) as source_db_conn:
+            stored_metrics['time_conn_source'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
+            temp_time = time.time()
+
+            data_sync_ctl.print_process(process)
+            load_file = base_dir+process['source_file'].replace("/",separator)
+            logger.debug(f"Reading Extract query from: {load_file}")
+            
+            query_sql = open(load_file).read()
+            # logger.debug(f"Query to be executed in Source database is: {query_sql}")
+            
+            table_df = pd.read_sql_query(sql=query_sql, con=source_db_conn.engine, params=schedule_param)
+            
+            stored_metrics['time_source_extract'] = timedelta(seconds=(time.time()-temp_time))
+            stored_metrics['rows_from_source'] = table_df.shape[0]
+            if stored_metrics['rows_from_source'] < 1:
+                process_stop = True
+                log_message = f"{tag_reprocess}There is no data to extract from source for execution id: {process['execution_id']} and interface id: {process['interface_id']}. Process will be skipped."
+                logger.warning(log_message)
+
+            temp_time = time.time()
+            if not process_stop:
+                with db_conn.database_connection(target_config) as target_db_conn:
+                    stored_metrics['time_conn_target'] = timedelta(seconds=(time.time()-temp_time))
+                    temp_time = time.time()
+                    
+                    table_df=table_df.convert_dtypes()
+                    
+                    stored_metrics['rows_target_processed'] = target_db_conn.execute_upsert(dataframe=table_df, 
+                                                                        table_name=process["target_table"],
+                                                                        table_pk=process["target_primary_key"], 
+                                                                        db_type=process["target_db_type"])
+
+                    # READ FROM TEMP TABLE:
+                    stored_metrics['time_target_load'] = timedelta(seconds=(time.time()-temp_time))
+
+                    #RECORD LOG
+
+                    log_message=f"{tag_reprocess}Execution finished successfully"
+                    stored_metrics['process_end_time']=datetime.now()
+                    stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
+                    retry=False #Execution processed with success don't need to be reprocessed
+                    process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
+                                                                        log_message=log_message,
+                                                                        execution_status='SUCCESS', 
+                                                                        retry=retry)
+                    data_sync_ctl.update_schedule_times(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],schedule_times[0])
+                    data_sync_ctl.save_execution_log   (track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
+            else:
+                stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
+                stored_metrics['process_end_time'] = datetime.now()
+                retry=False #Process just don't have any source data to work with, so no need to be reprocessed
+
+                process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
+                                                                    log_message=log_message,
+                                                                    execution_status='SKIPPED', ## No error, but
+                                                                    retry = retry)
+                data_sync_ctl.save_execution_log(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
+    except Exception as err:
+        logger.critical(f"{tag_reprocess}A fatal error has occurred", exc_info = True)
+        log_message =f"{tag_reprocess}Error type: {type(err)}: {err}" 
+        stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
+        stored_metrics['process_end_time'] = datetime.now()
+        #Process is mapped to retry errors, so it will be tagged to be reprocessed in next instance execution, except when a retry raised an error
+        if process['retry_errors'] and not is_reprocess:
+            retry=True 
+
+        process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
+                                                            log_message=log_message,
+                                                            execution_status='ERROR',
+                                                            retry = retry)
+        data_sync_ctl.save_execution_log(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
+
+    return stored_metrics
+
+
+# OLD EXECUTION APPROACH            
 def data_sync(source_config, target_config, track_config):
     """ 
     Runs the data synchronization between source and target databases for all defined domains - one at a time.

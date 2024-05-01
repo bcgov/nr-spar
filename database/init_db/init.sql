@@ -3309,6 +3309,7 @@ target_name 		  varchar(100),
 target_table 		  varchar(100),
 target_primary_key 	  varchar(100),
 truncate_before_run   boolean     default false not null,
+retry_errors   		  boolean     default false not null,
 updated_at  		  timestamp   default now() not null,
 created_at  		  timestamp   default now() not null,
 constraint etl_execution_map_pk
@@ -3330,6 +3331,7 @@ comment on column spar.ETL_EXECUTION_MAP.target_name                is 'Target n
 comment on column spar.ETL_EXECUTION_MAP.target_table               is 'Target table (if it is a single table) of this batch execution'; 
 comment on column spar.ETL_EXECUTION_MAP.target_primary_key         is 'Primary key of the target table of this batch execution'; 
 comment on column spar.ETL_EXECUTION_MAP.truncate_before_run        is 'If the target table should be truncated before the batch execution'; 
+comment on column spar.ETL_EXECUTION_MAP.retry_errors        		is 'If true, this process will execute again old instances with errors in ETL_EXECUTION_LOG_HIST'; 
 comment on column spar.ETL_EXECUTION_MAP.updated_at                 is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_MAP.created_at                 is 'Timestamp of the time this record was created'; 
 
@@ -3369,6 +3371,7 @@ process_finished_at 		timestamp,
 process_timedelta   		interval,
 last_run_ts 				timestamp,
 current_run_ts 				timestamp,
+retry_process				boolean 	default false,
 updated_at  				timestamp   default now() not null,
 created_at  				timestamp   default now() not null
 );
@@ -3390,6 +3393,7 @@ comment on column spar.ETL_EXECUTION_LOG_HIST.process_finished_at       is 'Time
 comment on column spar.ETL_EXECUTION_LOG_HIST.process_timedelta         is 'Timedelta referring how much time was spent to execute the whole process.'; 
 comment on column spar.ETL_EXECUTION_LOG_HIST.last_run_ts               is 'Last timestamp this interface instance was executed for batch execution'; 
 comment on column spar.ETL_EXECUTION_LOG_HIST.current_run_ts            is 'Current timestamp this interface instance was executed of this batch execution'; 
+comment on column spar.ETL_EXECUTION_LOG_HIST.retry_process             is 'If true, this log instance will be processed again (with last_run_ts and current_run_ts parameters)'; 
 comment on column spar.ETL_EXECUTION_LOG_HIST.updated_at                is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_LOG_HIST.created_at                is 'Timestamp of the time this record was created'; 
 
@@ -3420,7 +3424,7 @@ where not exists (select 1 from spar.etl_execution_map where interface_id = 'ETL
 
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
                                    target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run , execution_order)
+								   truncate_before_run ,retry_errors, execution_order)
 select 1 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-ORACLE-TO-POSTGRES' 	    as interface_id, 
@@ -3433,7 +3437,8 @@ select 1 										as execution_id,
        'spar.seedlot' 							as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number' 						as target_primary_key, 
-       false 									as truncate_before_run ,
+       true 									as truncate_before_run ,
+       false 									as retry_errors ,
 	   1 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-ORACLE-TO-POSTGRES');
 
@@ -3459,7 +3464,7 @@ where not exists (select 1 from spar.etl_execution_map where interface_id = 'ETL
 
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
                                    target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run , execution_order)
+								   truncate_before_run , retry_errors, execution_order)
 select 3 										as execution_id, 
        2 										as execution_parent_id ,
        'SEEDLOT-ORACLE-TO-SPAR-POSTGRES' 	    as interface_id, 
@@ -3473,6 +3478,7 @@ select 3 										as execution_id,
        'ORACLE' 							    as target_db_type, 
        'seedlot_number' 						as target_primary_key, 
        false 									as truncate_before_run ,
+       true 									as retry_errors ,
 	   1 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SEEDLOT-ORACLE-TO-SPAR-POSTGRES');
 

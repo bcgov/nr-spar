@@ -21,7 +21,7 @@ def get_execution_map (track_db_conn: object,
        select interface_id , execution_id, execution_order,
               source_name, source_file, source_table,source_db_type,
               target_name, target_file, target_table,target_primary_key,target_db_type,
-              truncate_before_run,
+              truncate_before_run,retry_errors,
               case when execution_parent_id is null then 'ORCHESTRATION' else 'PROCESS' end as process_type
         from  {database_schema}.etl_execution_map
         where (execution_id = {execution_id} or execution_parent_id = {execution_id})
@@ -29,6 +29,36 @@ def get_execution_map (track_db_conn: object,
         order by process_type , execution_order"""    
     records = track_db_conn.select(select_sync_id_stm)        
     return records.mappings().all()
+
+def get_scheduler(track_db_conn:object, database_schema:str, execution_id:int, interface_id:str) -> list:
+    select_sync_id_stm = f"""
+       select es.last_run_ts    as last_start_time,
+	        es.current_run_ts as current_start_time,
+	        CURRENT_TIMESTAMP as current_end_time
+        from {database_schema}.etl_execution_schedule es
+        where  execution_id = {execution_id} and interface_id = '{interface_id}'
+        union all 
+        select '1900-01-01'::timestamp as last_start_time,
+            '1900-01-01'::timestamp as current_start_time,
+            CURRENT_TIMESTAMP as current_end_time
+        where not exists(select 1 from {database_schema}.etl_execution_schedule es 
+                         where execution_id = {execution_id} and interface_id = '{interface_id}') """    
+    records = track_db_conn.select(select_sync_id_stm)
+    return records.mappings().all()
+
+
+def get_log_hist_schedules_to_process(track_db_conn,database_schema,execution_id,interface_id) -> list:
+    select_sync_id_stm = f"""
+       select es.last_run_ts    as last_start_time,
+	        es.current_run_ts as current_start_time,
+	        CURRENT_TIMESTAMP as current_end_time
+        from {database_schema}.etl_execution_log_hist es
+        where  execution_id = {execution_id} and interface_id = '{interface_id}' 
+          AND retry_process = true
+        ORDER BY 1,2 """    
+    records = track_db_conn.select(select_sync_id_stm)
+    return records.mappings().all()
+
 
 def get_scheduler(track_db_conn:object, database_schema:str, execution_id:int, interface_id:str) -> list:
     select_sync_id_stm = f"""
@@ -115,10 +145,11 @@ def get_processes_execution_map (execution_map) -> list:
 
 def print_process(process):
     print("--------------------------")
-    print("--Process Execution ID: ({}):".format(process["interface_id"]) )
-    print("--Process Execution order: {} , truncate_before_run:".format(process["execution_order"], str(process["truncate_before_run"])) )
-    print("--Process Source: {} (table: {}, file: {}):".format(process["source_name"], process["source_table"],process["source_file"]) )
-    print("--Process Target: {} (table: {}, file: {}):".format(process["target_name"], process["target_table"],process["target_file"]) )
+    print(f"--Process Execution ID: ({process['interface_id']}):")
+    print(f"--Process Execution order: {process['execution_order']} ")
+    print(f"--        truncate_before_run:{process['truncate_before_run']}, Retry_errors:{process['truncate_before_run']}." )
+    print(f"--Process Source: {process['source_name']} (table: {process['source_table']}, file: {process['retry_errors']}." )
+    print(f"--Process Target: {process['target_name']} (table: {process['target_table']}, file: {process['target_file']}.") 
     print("--------------------------")
 
 def get_config(oracle_config, postgres_config, db_type):
@@ -130,19 +161,20 @@ def get_config(oracle_config, postgres_config, db_type):
         return None
     
        
-def include_process_log_info(ts_conn_source,ts_source_extract,rows_from_source,ts_conn_target,ts_target_load,rows_target_processed,ts_process_start, ts_process_end, ts_process_delta, log_message,execution_status):
+def include_process_log_info(stored_metrics, log_message,execution_status, retry):
     process_log = {} 
-    process_log["source_connect_timedelta"]=ts_conn_source
-    process_log["source_extract_timedelta"]=ts_source_extract
-    process_log["source_extract_row_count"]=rows_from_source
-    process_log["target_connect_timedelta"]=ts_conn_target
-    process_log["target_load_timedelta"]   =ts_target_load
-    process_log["target_load_row_count"]   =rows_target_processed
+    process_log["source_connect_timedelta"]=stored_metrics['time_conn_source']
+    process_log["source_extract_timedelta"]=stored_metrics['time_source_extract']
+    process_log["source_extract_row_count"]=stored_metrics['rows_from_source']
+    process_log["target_connect_timedelta"]=stored_metrics['time_conn_target']
+    process_log["target_load_timedelta"]   =stored_metrics['time_target_load']
+    process_log["target_load_row_count"]   =stored_metrics['rows_target_processed']
     process_log["execution_details"]       =log_message
     process_log["execution_status"]        =execution_status
-    process_log["process_started_at"]      =ts_process_start
-    process_log["process_finished_at"]     =ts_process_end
-    process_log["process_timedelta"]       =ts_process_delta 
+    process_log["process_started_at"]      =stored_metrics['record_start_time']
+    process_log["process_finished_at"]     =stored_metrics['process_end_time']
+    process_log["process_timedelta"]       =stored_metrics['process_delta'] 
+    process_log["retry_process"]           =retry 
     return process_log
 
 
@@ -183,8 +215,23 @@ def save_execution_log(db_conn, db_schema, interface_id, execution_id, process_l
     result = db_conn.execute(sql_text, process_log)
     db_conn.commit()  # If everything is ok, a commit will be executed.
     
+def unset_reprocess(db_conn,db_schema,execution_id,interface_id,schedule):
+    params = {}
+    params['interface_id'] = interface_id
+    params['execution_id'] = execution_id
+    params['last_run_ts'] = schedule['last_start_time']
+    params['current_run_ts'] = schedule['current_start_time']
 
-
+    sql_text = f"""UPDATE {db_schema}.etl_execution_log_hist
+    SET retry_process = false
+    where interface_id = :interface_id
+    and execution_id = :execution_id
+    and last_run_ts = :last_run_ts
+    and current_run_ts =:current_run_ts
+    and retry_process=true
+    """
+    result = db_conn.execute(sql_text, params)
+    db_conn.commit()  # If everything is ok, a commit will be executed.
 
 
 
