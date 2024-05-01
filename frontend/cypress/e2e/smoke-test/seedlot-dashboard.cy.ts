@@ -39,6 +39,21 @@ describe('Seedlot Dashboard test', () => {
       .should('have.text', seedlotDashboardData.secondSectionSubtitle);
   });
 
+  it('the newly regiestered seedlot w/ species PLI should exist in the table', () => {
+    const { species } = seedlotTableData.pli;
+    let pliSlNumber = '';
+    cy.task('getData', species).then((sNumber) => {
+      pliSlNumber = sNumber as string;
+    });
+
+    cy.get(`#seedlot-table-cell-${pliSlNumber}-seedlotSpecies`).should('have.text', species);
+
+    // TODO: the rest of things to check
+  });
+
+  // TODO: do the same for rest of the species
+
+  // TODO: remove below
   it('should Check if 5 seedlots are being rendered at the bottom', () => {
     cy.get(`table.${prefix}--data-table`)
       .should('be.visible');
