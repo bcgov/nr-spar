@@ -1,5 +1,5 @@
 import { NavigationLabels } from '../../utils/labels';
-// import prefix from '../../../src/styles/classPrefix';
+import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('Seedlot Dashboard test', () => {
   let seedlotDashboardData: {
@@ -9,11 +9,17 @@ describe('Seedlot Dashboard test', () => {
     emptySectionTitle: string,
     emptySectionSubtitle: string
   };
+  let seedlotTableData: SeedlotRegFixtureType = {};
+  let speciesKeys: Array<string> = [];
 
   beforeEach(() => {
     // Loading test data
     cy.fixture('seedlot-dashboard').then((fData) => {
       seedlotDashboardData = fData;
+    });
+    cy.fixture('aclass-seedlot').then((jsonData) => {
+      seedlotTableData = jsonData;
+      speciesKeys = Object.keys(jsonData);
     });
 
     cy.login();
@@ -34,73 +40,18 @@ describe('Seedlot Dashboard test', () => {
       .should('have.text', seedlotDashboardData.secondSectionSubtitle);
   });
 
-  // it('should Check if 5 seedlots are being rendered at the bottom', () => {
-  //   cy.get(`table.${prefix}--data-table`)
-  //     .should('be.visible');
+  it('all seedlot species should exist in the table', () => {
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < speciesKeys.length; i++) {
+      // eslint-disable-next-line prefer-destructuring
+      const species = seedlotTableData[speciesKeys[i]].species;
 
-  //   cy.get(`table.${prefix}--data-table tbody tr`)
-  //     .eq(0)
-  //     .as('firstRow');
+      cy.task('getData', species).then((sNumber) => {
+        const seedlotNumber = sNumber as string;
 
-  //   cy.get('@firstRow')
-  //     .find('td:nth-child(3)')
-  //     .should('have.text', 'FDC - Coastal Douglas-fir');
-
-  //   cy.get('@firstRow')
-  //     .find('td:nth-child(4)')
-  //     .children()
-  //     .should('have.text', 'Pending');
-
-  //   cy.get(`table.${prefix}--data-table tbody tr`)
-  //     .eq(1)
-  //     .as('secondRow');
-
-  //   cy.get('@secondRow')
-  //     .find('td:nth-child(3)')
-  //     .should('have.text', 'EP - Paper birch');
-
-  //   cy.get('@secondRow')
-  //     .find('td:nth-child(4)')
-  //     .children()
-  //     .should('have.text', 'Pending');
-
-  //   cy.get(`table.${prefix}--data-table tbody tr`)
-  //     .eq(2)
-  //     .as('thirdRow');
-
-  //   cy.get('@thirdRow')
-  //     .find('td:nth-child(3)')
-  //     .should('have.text', 'DR - Red alder');
-
-  //   cy.get('@thirdRow')
-  //     .find('td:nth-child(4)')
-  //     .children()
-  //     .should('have.text', 'Pending');
-
-  //   cy.get(`table.${prefix}--data-table tbody tr`)
-  //     .eq(3)
-  //     .as('fourthRow');
-
-  //   cy.get('@fourthRow')
-  //     .find('td:nth-child(3)')
-  //     .should('have.text', 'CW - Western redcedar');
-
-  //   cy.get('@fourthRow')
-  //     .find('td:nth-child(4)')
-  //     .children()
-  //     .should('have.text', 'Pending');
-
-  //   cy.get(`table.${prefix}--data-table tbody tr`)
-  //     .eq(4)
-  //     .as('fifthRow');
-
-  //   cy.get('@fifthRow')
-  //     .find('td:nth-child(3)')
-  //     .should('have.text', 'PLI - Lodgepole pine');
-
-  //   cy.get('@fifthRow')
-  //     .find('td:nth-child(4)')
-  //     .children()
-  //     .should('have.text', 'Pending');
-  // });
+        cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotSpecies`).should('have.text', species);
+        cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotStatus`).should('have.text', 'Pending');
+      });
+    }
+  });
 });
