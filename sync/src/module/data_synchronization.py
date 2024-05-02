@@ -137,6 +137,7 @@ def execute_process(base_dir, track_db_conn, track_db_schema, process, oracle_co
     stored_metrics['time_conn_target'] = None
     stored_metrics['rows_target_processed'] = 0
     stored_metrics['time_target_load'] = None
+    stored_metrics['time_conn_source'] = None
     retry=False
     tag_reprocess = ''
     if is_reprocess:
