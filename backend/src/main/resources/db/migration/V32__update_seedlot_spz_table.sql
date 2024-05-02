@@ -27,5 +27,5 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER ensure_single_primary_ind_trigger
-BEFORE INSERT ON spar.seedlot_seed_plan_zone
+BEFORE INSERT OR UPDATE ON spar.seedlot_seed_plan_zone
 FOR EACH ROW EXECUTE FUNCTION ensure_single_primary_ind();
