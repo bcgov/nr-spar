@@ -1,5 +1,4 @@
 import { NavigationLabels } from '../../utils/labels';
-import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('Seedlot Dashboard test', () => {
@@ -11,6 +10,7 @@ describe('Seedlot Dashboard test', () => {
     emptySectionSubtitle: string
   };
   let seedlotTableData: SeedlotRegFixtureType = {};
+  let speciesKeys: Array<string> = [];
 
   beforeEach(() => {
     // Loading test data
@@ -19,6 +19,7 @@ describe('Seedlot Dashboard test', () => {
     });
     cy.fixture('aclass-seedlot').then((jsonData) => {
       seedlotTableData = jsonData;
+      speciesKeys = Object.keys(jsonData);
     });
 
     cy.login();
@@ -39,88 +40,18 @@ describe('Seedlot Dashboard test', () => {
       .should('have.text', seedlotDashboardData.secondSectionSubtitle);
   });
 
-  it('the newly regiestered seedlot w/ species PLI should exist in the table', () => {
-    const { species } = seedlotTableData.pli;
-    let pliSlNumber = '';
-    cy.task('getData', species).then((sNumber) => {
-      pliSlNumber = sNumber as string;
-    });
+  it('all seedlot species should exist in the table', () => {
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < speciesKeys.length; i++) {
+      // eslint-disable-next-line prefer-destructuring
+      const species = seedlotTableData[speciesKeys[i]].species;
 
-    cy.get(`#seedlot-table-cell-${pliSlNumber}-seedlotSpecies`).should('have.text', species);
+      cy.task('getData', species).then((sNumber) => {
+        const seedlotNumber = sNumber as string;
 
-    // TODO: the rest of things to check
-  });
-
-  // TODO: do the same for rest of the species
-
-  // TODO: remove below
-  it('should Check if 5 seedlots are being rendered at the bottom', () => {
-    cy.get(`table.${prefix}--data-table`)
-      .should('be.visible');
-
-    cy.get(`table.${prefix}--data-table tbody tr`)
-      .eq(0)
-      .as('firstRow');
-
-    cy.get('@firstRow')
-      .find('td:nth-child(3)')
-      .should('have.text', seedlotTableData.fdc.species);
-
-    cy.get('@firstRow')
-      .find('td:nth-child(4)')
-      .children()
-      .should('have.text', 'Pending');
-
-    cy.get(`table.${prefix}--data-table tbody tr`)
-      .eq(1)
-      .as('secondRow');
-
-    cy.get('@secondRow')
-      .find('td:nth-child(3)')
-      .should('have.text', seedlotTableData.ep.species);
-
-    cy.get('@secondRow')
-      .find('td:nth-child(4)')
-      .children()
-      .should('have.text', 'Pending');
-
-    cy.get(`table.${prefix}--data-table tbody tr`)
-      .eq(2)
-      .as('thirdRow');
-
-    cy.get('@thirdRow')
-      .find('td:nth-child(3)')
-      .should('have.text', seedlotTableData.dr.species);
-
-    cy.get('@thirdRow')
-      .find('td:nth-child(4)')
-      .children()
-      .should('have.text', 'Pending');
-
-    cy.get(`table.${prefix}--data-table tbody tr`)
-      .eq(3)
-      .as('fourthRow');
-
-    cy.get('@fourthRow')
-      .find('td:nth-child(3)')
-      .should('have.text', seedlotTableData.cw.species);
-
-    cy.get('@fourthRow')
-      .find('td:nth-child(4)')
-      .children()
-      .should('have.text', 'Pending');
-
-    cy.get(`table.${prefix}--data-table tbody tr`)
-      .eq(4)
-      .as('fifthRow');
-
-    cy.get('@fifthRow')
-      .find('td:nth-child(3)')
-      .should('have.text', seedlotTableData.pli.species);
-
-    cy.get('@fifthRow')
-      .find('td:nth-child(4)')
-      .children()
-      .should('have.text', 'Pending');
+        cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotSpecies`).should('have.text', species);
+        cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotStatus`).should('have.text', 'Pending');
+      });
+    }
   });
 });
