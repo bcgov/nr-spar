@@ -10,13 +10,12 @@ describe('Seedlot detail page', () => {
 
   beforeEach(function () {
     cy.login();
-    cy.fixture('aclass-seedlot-example').then((fData) => {
+    cy.fixture('aclass-seedlot').then((fData) => {
       fixtureData = fData;
       // Pick a random species to test
       const speciesKeys = Object.keys(fixtureData);
       speciesKey = speciesKeys[Math.floor(Math.random() * speciesKeys.length)];
-
-      cy.task('getData', fData.pli.species).then((sNumber) => {
+      cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNumber = sNumber as string;
         cy.visit(`/seedlots/details/${seedlotNumber}`);
         cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
