@@ -1,5 +1,6 @@
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
+import { NUM_OF_LOOPS } from '../../constants';
 
 describe('Applicant and seedlot information page', () => {
   let fixtureData: SeedlotRegFixtureType;
@@ -73,7 +74,7 @@ describe('Applicant and seedlot information page', () => {
     // //  Check total seedlots
     cy.get(`.${prefix}--pagination__left`)
       .find(`.${prefix}--pagination__items-count`)
-      .should('contain.text', 3 * speciesKeys.length);
+      .should('contain.text', NUM_OF_LOOPS * speciesKeys.length);
 
     // Button test
     cy.get('.my-seedlot-title')
