@@ -4,10 +4,8 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
-import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOrchardId;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,10 +38,16 @@ public class SeedlotOrchardService {
     seedlot.setPollenContaminationMethodCode(formStep4.pollenContaminationMthdCode());
 
     SparLog.info(
-        "Received {} SeedlotOrchard record(s) for seedlot number {}",
-        formStep4.orchardsId().size(),
+        "Received primary orchard id {} for seedlot number {}",
+        formStep4.primaryOrchardId(),
         seedlot.getId());
 
+    if (formStep4.secondaryOrchardId() != null) {
+      SparLog.info(
+          "Received secondary orchard id {} for seedlot number {}",
+          formStep4.secondaryOrchardId(),
+          seedlot.getId());
+    }
     List<SeedlotOrchard> seedlotOrchards = getAllSeedlotOrchardBySeedlotNumber(seedlot.getId());
 
     if (!seedlotOrchards.isEmpty()) {
@@ -52,42 +56,32 @@ public class SeedlotOrchardService {
           seedlotOrchards.size(),
           seedlot.getId());
 
-      List<String> existingSeedlotOrchardList =
-          new ArrayList<>(seedlotOrchards.stream().map(SeedlotOrchard::getOrchard).toList());
-
-      List<SeedlotOrchardId> idsToDelete = new ArrayList<>();
-      existingSeedlotOrchardList.forEach(
-          orchardId -> {
-            idsToDelete.add(new SeedlotOrchardId(seedlot.getId(), orchardId));
-          });
-
-      seedlotOrchardRepository.deleteAllById(idsToDelete);
+      seedlotOrchardRepository.deleteAllBySeedlot_id(seedlot.getId());
     }
 
-    saveSeedlotOrchards(seedlot, formStep4.orchardsId());
+    saveSeedlotOrchards(seedlot, formStep4.primaryOrchardId(), formStep4.secondaryOrchardId());
   }
 
-  private void saveSeedlotOrchards(Seedlot seedlot, List<String> orchardIdList) {
-    if (orchardIdList.isEmpty()) {
-      SparLog.info(
-          "No new records to be inserted on the SeedlotOrchard table for seedlot number {}",
-          seedlot.getId());
-      return;
-    }
+  private void saveSeedlotOrchards(
+      Seedlot seedlot, String primaryOrchardId, String secondaryOrchardId) {
 
+    SeedlotOrchard primary = new SeedlotOrchard(seedlot, true, primaryOrchardId);
+    primary.setAuditInformation(loggedUserService.createAuditCurrentUser());
+    seedlotOrchardRepository.save(primary);
     SparLog.info(
-        "{} record(s) to be inserted on the SeedlotOrchard table for seedlot number {}",
-        orchardIdList.size(),
+        "Primary orchard id {} inserted on Seedlot_Orchard table for seedlot number {}",
+        primaryOrchardId,
         seedlot.getId());
 
-    List<SeedlotOrchard> seedlotOrchards = new ArrayList<>();
-    for (String orchardId : orchardIdList) {
-      SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, orchardId);
-      seedlotOrchard.setAuditInformation(loggedUserService.createAuditCurrentUser());
-      seedlotOrchards.add(seedlotOrchard);
+    if (secondaryOrchardId != null) {
+      SeedlotOrchard secondary = new SeedlotOrchard(seedlot, false, secondaryOrchardId);
+      secondary.setAuditInformation(loggedUserService.createAuditCurrentUser());
+      seedlotOrchardRepository.save(secondary);
+      SparLog.info(
+          "Secondary orchard id {} inserted on Seedlot_Orchard table for seedlot number {}",
+          secondaryOrchardId,
+          seedlot.getId());
     }
-
-    seedlotOrchardRepository.saveAll(seedlotOrchards);
   }
 
   /**

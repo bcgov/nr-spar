@@ -131,7 +131,7 @@ class SeedlotFormPutTest {
     // step 4
     SeedlotFormOrchardDto orchardDto =
         new SeedlotFormOrchardDto(
-            List.of("405"), "F3", "M3", false, true, false, 22, new BigDecimal("45.6"), "true");
+            "405", null, "F3", "M3", false, true, false, 22, new BigDecimal("45.6"), "true");
 
     // step 5
     ParentTreeGeneticQualityDto ptgqDto =

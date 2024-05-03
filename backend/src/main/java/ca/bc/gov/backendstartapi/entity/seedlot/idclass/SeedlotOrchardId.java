@@ -19,5 +19,5 @@ public class SeedlotOrchardId implements Serializable {
 
   @NonNull private String seedlot;
 
-  @NonNull private String orchard;
+  @NonNull private Boolean isPrimary;
 }

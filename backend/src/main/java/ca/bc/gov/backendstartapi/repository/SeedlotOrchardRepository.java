@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SeedlotOrchardRepository extends JpaRepository<SeedlotOrchard, SeedlotOrchardId> {
 
   List<SeedlotOrchard> findAllBySeedlot_id(String seedlotNumber);
+
+  void deleteAllBySeedlot_id(String seedlotNumber);
 }

@@ -195,7 +195,8 @@ export type InterimFormSubmitType = {
 }
 
 export type OrchardFormSubmitType = {
-  orchardsId: Array<string>,
+  primaryOrchardId: string,
+  secondaryOrchardId: string | null,
   femaleGameticMthdCode: string,
   maleGameticMthdCode: string,
   controlledCrossInd: boolean,

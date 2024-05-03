@@ -2,16 +2,16 @@
 ALTER TABLE spar.seedlot_orchard
 ADD COLUMN primary_ind boolean NOT NULL DEFAULT false;
 
--- Step 2: Update 'primary_ind' for existing rows based on the most recent update_timestamp
+-- Step 2: Update 'primary_ind' for existing rows based on the least recent update_timestamp
 UPDATE spar.seedlot_orchard AS s1
 SET primary_ind = TRUE
 FROM (
-    SELECT seedlot_number, MAX(update_timestamp) AS max_update_time
+    SELECT seedlot_number, MIN(update_timestamp) AS min_update_time
     FROM spar.seedlot_orchard
     GROUP BY seedlot_number
 ) AS s2
 WHERE s1.seedlot_number = s2.seedlot_number
-AND s1.update_timestamp = s2.max_update_time;
+AND s1.update_timestamp = s2.min_update_time;
 
 -- Step 3: Change the primary key to (seedlot_number, primary_ind)
 ALTER TABLE spar.seedlot_orchard

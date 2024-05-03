@@ -228,17 +228,14 @@ public class SeedlotService {
   }
 
   /**
-   * Auxiliar function to get the genetic quality for each seedlot's parent
-   * tree.
+   * Auxiliar function to get the genetic quality for each seedlot's parent tree.
    *
    * @param parentTreeId the parent tree id to get the genetic quality
    * @param seedlotNumber the seedlot that the current parent tree is
    * @return a list of {@link ParentTreeGeneticQualityDto}
    */
   private List<ParentTreeGeneticQualityDto> getParentTreeGenQual(
-      Integer parentTreeId,
-      String seedlotNumber
-  ) {
+      Integer parentTreeId, String seedlotNumber) {
     List<SeedlotParentTreeGeneticQuality> genQualityData =
         seedlotParentTreeGeneticQualityService.getAllBySeedlotNumber(seedlotNumber);
 
@@ -249,10 +246,9 @@ public class SeedlotService {
       if (curParentTreeId == parentTreeId) {
         ParentTreeGeneticQualityDto parentTreeGenQualDto =
             new ParentTreeGeneticQualityDto(
-              parentTreeGenQual.getGeneticTypeCode(),
-              parentTreeGenQual.getGeneticWorth().getGeneticWorthCode(),
-              parentTreeGenQual.getGeneticQualityValue()
-            );
+                parentTreeGenQual.getGeneticTypeCode(),
+                parentTreeGenQual.getGeneticWorth().getGeneticWorthCode(),
+                parentTreeGenQual.getGeneticQualityValue());
         parentTreeGenQualList.add(parentTreeGenQualDto);
       }
     }
@@ -261,20 +257,16 @@ public class SeedlotService {
   }
 
   /**
-   * Auxiliar function to get the genetic quality for each seedlot's SMP Mix
-   * parent tree.
+   * Auxiliar function to get the genetic quality for each seedlot's SMP Mix parent tree.
    *
    * @param mixTabInfo the Smp mix parent tree information
    * @param seedlotNumber the seedlot that the current parent tree is
-   * @param sptMap a map of each parent tree in the orchard, to check if
-   *               any smp mix parent tree is in the orchard or not
+   * @param sptMap a map of each parent tree in the orchard, to check if any smp mix parent tree is
+   *     in the orchard or not
    * @return a list of {@link ParentTreeGeneticQualityDto}
    */
   private List<ParentTreeGeneticQualityDto> getSmpMixParentTreeGenQual(
-      SmpMix mixTabInfo,
-      String seedlotNumber,
-      Map<SeedlotParentTreeId, SeedlotParentTree> sptMap
-  ) {
+      SmpMix mixTabInfo, String seedlotNumber, Map<SeedlotParentTreeId, SeedlotParentTree> sptMap) {
     List<SmpMixGeneticQuality> smpMixGenQualData =
         smpMixGeneticQualityService.getAllBySeedlotNumber(seedlotNumber);
 
@@ -292,10 +284,9 @@ public class SeedlotService {
         if (parentTreeId == mixTabInfo.getParentTreeId()) {
           ParentTreeGeneticQualityDto parentTreeGenQualDto =
               new ParentTreeGeneticQualityDto(
-                sptSmpMixGenQual.getGeneticTypeCode(),
-                sptSmpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
-                sptSmpMixGenQual.getGeneticQualityValue()
-              );
+                  sptSmpMixGenQual.getGeneticTypeCode(),
+                  sptSmpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
+                  sptSmpMixGenQual.getGeneticQualityValue());
           smpMixGenQualList.add(parentTreeGenQualDto);
         }
       }
@@ -305,10 +296,9 @@ public class SeedlotService {
         if (parentTreeId.equals(mixTabInfo.getParentTreeId())) {
           ParentTreeGeneticQualityDto parentTreeGenQualDto =
               new ParentTreeGeneticQualityDto(
-                smpMixGenQual.getGeneticTypeCode(),
-                smpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
-                smpMixGenQual.getGeneticQualityValue()
-              );
+                  smpMixGenQual.getGeneticTypeCode(),
+                  smpMixGenQual.getGeneticWorth().getGeneticWorthCode(),
+                  smpMixGenQual.getGeneticQualityValue());
           smpMixGenQualList.add(parentTreeGenQualDto);
         }
       }
@@ -322,7 +312,7 @@ public class SeedlotService {
    *
    * @param seedlotNumber the seedlot number of the seedlot to fetch the information
    * @return A {@link SeedlotAclassFormDto} containing the number and the status of the created
-   *         seedlot.
+   *     seedlot.
    * @throws SeedlotNotFoundException in case of errors.
    */
   public SeedlotAclassFormDto getAclassSeedlotFormInfo(@NonNull String seedlotNumber) {
@@ -341,18 +331,18 @@ public class SeedlotService {
     // Iterate thru the seedlot parent tree list and get these
     // seedlot data
     for (SeedlotParentTree parentTree : parentTreeData) {
-      SeedlotFormParentTreeSmpDto curParentTree = new SeedlotFormParentTreeSmpDto(
-          seedlotNumber,
-          parentTree.getParentTreeId(),
-          parentTree.getParentTreeNumber(),
-          parentTree.getConeCount(),
-          parentTree.getPollenCount(),
-          parentTree.getSmpSuccessPercentage(),
-          parentTree.getNonOrchardPollenContaminationCount(),
-          null,
-          null,
-          getParentTreeGenQual(parentTree.getParentTreeId(), seedlotNumber)
-      );
+      SeedlotFormParentTreeSmpDto curParentTree =
+          new SeedlotFormParentTreeSmpDto(
+              seedlotNumber,
+              parentTree.getParentTreeId(),
+              parentTree.getParentTreeNumber(),
+              parentTree.getConeCount(),
+              parentTree.getPollenCount(),
+              parentTree.getSmpSuccessPercentage(),
+              parentTree.getNonOrchardPollenContaminationCount(),
+              null,
+              null,
+              getParentTreeGenQual(parentTree.getParentTreeId(), seedlotNumber));
 
       parentTreesInfo.add(curParentTree);
     }
@@ -363,22 +353,22 @@ public class SeedlotService {
       // This map is used to see if any SMPMix parent tree
       // are in the current orchard
       Map<SeedlotParentTreeId, SeedlotParentTree> sptMap =
-          parentTreeData.stream().collect(Collectors
-          .toMap(SeedlotParentTree::getId, Function.identity()));
+          parentTreeData.stream()
+              .collect(Collectors.toMap(SeedlotParentTree::getId, Function.identity()));
 
       for (SmpMix mixTabInfo : smpMixsData) {
-        SeedlotFormParentTreeSmpDto curSmpMix = new SeedlotFormParentTreeSmpDto(
-            seedlotNumber,
-            mixTabInfo.getParentTreeId(),
-            mixTabInfo.getParentTreeNumber(),
-            null,
-            null,
-            null,
-            null,
-            mixTabInfo.getAmountOfMaterial(),
-            mixTabInfo.getProportion(),
-            getSmpMixParentTreeGenQual(mixTabInfo, seedlotNumber, sptMap)
-        );
+        SeedlotFormParentTreeSmpDto curSmpMix =
+            new SeedlotFormParentTreeSmpDto(
+                seedlotNumber,
+                mixTabInfo.getParentTreeId(),
+                mixTabInfo.getParentTreeNumber(),
+                null,
+                null,
+                null,
+                null,
+                mixTabInfo.getAmountOfMaterial(),
+                mixTabInfo.getProportion(),
+                getSmpMixParentTreeGenQual(mixTabInfo, seedlotNumber, sptMap));
         smpMixParentTreesInfo.add(curSmpMix);
       }
     }
@@ -386,12 +376,12 @@ public class SeedlotService {
     List<GeneticWorthTraitsDto> calculatedGenWorth = new ArrayList<>();
 
     for (SeedlotGeneticWorth genWorth : genWorthData) {
-      GeneticWorthTraitsDto curGenWorth = new GeneticWorthTraitsDto(
-          genWorth.getGeneticWorthCode(),
-          null,
-          genWorth.getGeneticQualityValue(),
-          genWorth.getTestedParentTreeContributionPercentage()
-      );
+      GeneticWorthTraitsDto curGenWorth =
+          new GeneticWorthTraitsDto(
+              genWorth.getGeneticWorthCode(),
+              null,
+              genWorth.getGeneticQualityValue(),
+              genWorth.getTestedParentTreeContributionPercentage());
       calculatedGenWorth.add(curGenWorth);
     }
 
@@ -401,81 +391,96 @@ public class SeedlotService {
 
     List<Integer> seedlotCollectionList =
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
-        .map(col -> col.getConeCollectionMethod().getConeCollectionMethodCode())
-        .collect(Collectors.toList());
+            .map(col -> col.getConeCollectionMethod().getConeCollectionMethodCode())
+            .collect(Collectors.toList());
 
     // Divide the seedlot data to each respective step
-    SeedlotFormCollectionDto collectionStep = new SeedlotFormCollectionDto(
-        seedlotInfo.getCollectionClientNumber(),
-        seedlotInfo.getCollectionLocationCode(),
-        seedlotInfo.getCollectionStartDate(),
-        seedlotInfo.getCollectionEndDate(),
-        seedlotInfo.getNumberOfContainers(),
-        seedlotInfo.getContainerVolume(),
-        seedlotInfo.getTotalConeVolume(),
-        seedlotInfo.getComment(),
-        seedlotCollectionList
-    );
+    SeedlotFormCollectionDto collectionStep =
+        new SeedlotFormCollectionDto(
+            seedlotInfo.getCollectionClientNumber(),
+            seedlotInfo.getCollectionLocationCode(),
+            seedlotInfo.getCollectionStartDate(),
+            seedlotInfo.getCollectionEndDate(),
+            seedlotInfo.getNumberOfContainers(),
+            seedlotInfo.getContainerVolume(),
+            seedlotInfo.getTotalConeVolume(),
+            seedlotInfo.getComment(),
+            seedlotCollectionList);
 
     List<SeedlotFormOwnershipDto> ownershipStep =
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
-        .map(owner -> new SeedlotFormOwnershipDto(
-            owner.getOwnerClientNumber(),
-            owner.getOwnerLocationCode(),
-            owner.getOriginalPercentageOwned(),
-            owner.getOriginalPercentageReserved(),
-            owner.getOriginalPercentageSurplus(),
-            owner.getMethodOfPayment().getMethodOfPaymentCode(),
-            owner.getFundingSourceCode()
-        ))
-        .collect(Collectors.toList());
+            .map(
+                owner ->
+                    new SeedlotFormOwnershipDto(
+                        owner.getOwnerClientNumber(),
+                        owner.getOwnerLocationCode(),
+                        owner.getOriginalPercentageOwned(),
+                        owner.getOriginalPercentageReserved(),
+                        owner.getOriginalPercentageSurplus(),
+                        owner.getMethodOfPayment().getMethodOfPaymentCode(),
+                        owner.getFundingSourceCode()))
+            .collect(Collectors.toList());
 
-    SeedlotFormInterimDto interimStep = new SeedlotFormInterimDto(
-        seedlotInfo.getInterimStorageClientNumber(),
-        seedlotInfo.getInterimStorageLocationCode(),
-        seedlotInfo.getInterimStorageStartDate(),
-        seedlotInfo.getInterimStorageEndDate(),
-        seedlotInfo.getInterimStorageOtherFacilityDesc(),
-        seedlotInfo.getInterimStorageFacilityCode());
+    SeedlotFormInterimDto interimStep =
+        new SeedlotFormInterimDto(
+            seedlotInfo.getInterimStorageClientNumber(),
+            seedlotInfo.getInterimStorageLocationCode(),
+            seedlotInfo.getInterimStorageStartDate(),
+            seedlotInfo.getInterimStorageEndDate(),
+            seedlotInfo.getInterimStorageOtherFacilityDesc(),
+            seedlotInfo.getInterimStorageFacilityCode());
 
-    List<String> seedlotOrchards =
-        seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotInfo.getId()).stream()
-            .map(SeedlotOrchard::getOrchard)
-            .toList();;
+    List<SeedlotOrchard> seedlotOrchards =
+        seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotInfo.getId());
 
-    SeedlotFormOrchardDto orchardStep = new SeedlotFormOrchardDto(
-        seedlotOrchards,
-        seedlotInfo.getFemaleGameticContributionMethod(),
-        seedlotInfo.getMaleGameticContributionMethod(),
-        seedlotInfo.getProducedThroughControlledCross(),
-        seedlotInfo.getProducedWithBiotechnologicalProcesses(),
-        seedlotInfo.getPollenContaminationPresentInOrchard(),
-        seedlotInfo.getPollenContaminationPercentage(),
-        seedlotInfo.getPollenContaminantBreedingValue(),
-        seedlotInfo.getPollenContaminationMethodCode());
+    List<SeedlotOrchard> filteredPrimaryOrchard =
+        seedlotOrchards.stream().filter((so) -> so.getIsPrimary()).collect(Collectors.toList());
 
-    SeedlotFormExtractionDto extractionStep = new SeedlotFormExtractionDto(
-        seedlotInfo.getExtractionClientNumber(),
-        seedlotInfo.getExtractionLocationCode(),
-        seedlotInfo.getExtractionStartDate(),
-        seedlotInfo.getExtractionEndDate(),
-        seedlotInfo.getStorageClientNumber(),
-        seedlotInfo.getStorageLocationCode(),
-        seedlotInfo.getTemporaryStorageStartDate(),
-        seedlotInfo.getTemporaryStorageEndDate());
+    String primaryOrchardId =
+        filteredPrimaryOrchard.size() > 0
+            ? filteredPrimaryOrchard.get(0).getOrchardId()
+            : seedlotOrchards.get(0).getOrchardId();
 
-    SeedlotAclassFormDto seedlotAclassFullInfo = new SeedlotAclassFormDto(
-        new SeedlotFormSubmissionDto(
-            collectionStep,
-            ownershipStep,
-            interimStep,
-            orchardStep,
-            parentTreesInfo,
-            smpMixParentTreesInfo,
-            extractionStep
-        ),
-        calculatedGenWorth
-    );
+    Optional<String> secondaryOrchardId =
+        seedlotOrchards.size() > 1
+            ? Optional.of(seedlotOrchards.get(1).getOrchardId())
+            : Optional.empty();
+
+    SeedlotFormOrchardDto orchardStep =
+        new SeedlotFormOrchardDto(
+            primaryOrchardId,
+            secondaryOrchardId.orElse(null),
+            seedlotInfo.getFemaleGameticContributionMethod(),
+            seedlotInfo.getMaleGameticContributionMethod(),
+            seedlotInfo.getProducedThroughControlledCross(),
+            seedlotInfo.getProducedWithBiotechnologicalProcesses(),
+            seedlotInfo.getPollenContaminationPresentInOrchard(),
+            seedlotInfo.getPollenContaminationPercentage(),
+            seedlotInfo.getPollenContaminantBreedingValue(),
+            seedlotInfo.getPollenContaminationMethodCode());
+
+    SeedlotFormExtractionDto extractionStep =
+        new SeedlotFormExtractionDto(
+            seedlotInfo.getExtractionClientNumber(),
+            seedlotInfo.getExtractionLocationCode(),
+            seedlotInfo.getExtractionStartDate(),
+            seedlotInfo.getExtractionEndDate(),
+            seedlotInfo.getStorageClientNumber(),
+            seedlotInfo.getStorageLocationCode(),
+            seedlotInfo.getTemporaryStorageStartDate(),
+            seedlotInfo.getTemporaryStorageEndDate());
+
+    SeedlotAclassFormDto seedlotAclassFullInfo =
+        new SeedlotAclassFormDto(
+            new SeedlotFormSubmissionDto(
+                collectionStep,
+                ownershipStep,
+                interimStep,
+                orchardStep,
+                parentTreesInfo,
+                smpMixParentTreesInfo,
+                extractionStep),
+            calculatedGenWorth);
 
     SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
     return seedlotAclassFullInfo;
@@ -590,7 +595,7 @@ public class SeedlotService {
     SparLog.info("Fetching seedlot orchard entity");
     List<String> orchardIdList =
         seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber).stream()
-            .map(SeedlotOrchard::getOrchard)
+            .map(SeedlotOrchard::getOrchardId)
             .toList();
 
     if (orchardIdList.isEmpty()) {
@@ -652,13 +657,13 @@ public class SeedlotService {
 
     for (SeedlotOrchard orchard : seedlotOrchards) {
       Optional<ActiveOrchardSpuEntity> spuEntity =
-          orchardService.findSpuIdByOrchardWithActive(orchard.getOrchard(), true);
+          orchardService.findSpuIdByOrchardWithActive(orchard.getOrchardId(), true);
       if (spuEntity.isPresent()) {
         Integer spuId = spuEntity.get().getSeedPlanningUnitId();
 
         SparLog.info("Adding SPU id to fetch from Oracle {}", spuId);
         spuIds.add(spuId);
-        orchardIdSpuIdMap.put(orchard.getOrchard(), spuId);
+        orchardIdSpuIdMap.put(orchard.getOrchardId(), spuId);
       } else {
         SparLog.info("No SPU id found for orchard");
       }

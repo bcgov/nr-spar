@@ -10,6 +10,7 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,7 +21,9 @@ import lombok.Setter;
 
 /** Relational entity between a {@link Seedlot} and an orchard. */
 @Entity
-@Table(name = "seedlot_orchard")
+@Table(
+    name = "seedlot_orchard",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"seedlot_number", "orchard_id"})})
 @IdClass(SeedlotOrchardId.class)
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
@@ -36,9 +39,14 @@ public class SeedlotOrchard {
   private Seedlot seedlot;
 
   @Id
+  @Column(name = "primary_ind", length = 3, nullable = false)
+  @NonNull
+  private Boolean isPrimary;
+
   @Column(name = "orchard_id", length = 3, nullable = false)
   @NonNull
-  private String orchard;
+  private String orchardId;
+
   // endregion
 
   @Embedded private AuditInformation auditInformation;
