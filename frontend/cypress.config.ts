@@ -22,7 +22,6 @@ export default defineConfig({
       '**/dashboard-page.cy.ts',
       '**/create-a-class-seedlot.cy.ts',
       '**/seedlot-dashboard.cy.ts',
-      // TODO '**/my-seedlots.cy.ts',
       '**/seedlot-detail.cy.ts',
       '**/edit-applicant-seedlot-info.cy.ts',
       '**/my-seedlot-page.cy.ts'
