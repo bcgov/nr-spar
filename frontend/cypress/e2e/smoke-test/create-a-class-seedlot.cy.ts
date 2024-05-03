@@ -1,10 +1,8 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
-import { TYPE_DELAY, INVALID_EMAIL } from '../../constants';
+import { TYPE_DELAY, INVALID_EMAIL, NUM_OF_LOOPS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
-
-const NUM_OF_LOOPS = 3;
 
 Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
   describe(`Create A-Class Seedlot run number ${currentLoop + 1}`, () => {
@@ -131,6 +129,7 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .then((seedlotNumber) => {
           cy.task('setData', [regData.species, seedlotNumber]);
         });
+      cy.log('A-Class seedlot created with species', regData.species);
     });
 
     it('should register an A-Class Seedlot with species cw', () => {
@@ -245,6 +244,7 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .then((seedlotNumber) => {
           cy.task('setData', [regData.species, seedlotNumber]);
         });
+      cy.log('A-Class seedlot created with species', regData.species);
     });
 
     it('should register an A-Class Seedlot with species dr', () => {
@@ -359,6 +359,7 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .then((seedlotNumber) => {
           cy.task('setData', [regData.species, seedlotNumber]);
         });
+      cy.log('A-Class seedlot created with species', regData.species);
     });
 
     it('should register an A-Class Seedlot with species ep', () => {
@@ -473,6 +474,7 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .then((seedlotNumber) => {
           cy.task('setData', [regData.species, seedlotNumber]);
         });
+      cy.log('A-Class seedlot created with species', regData.species);
     });
 
     it('should register an A-Class Seedlot with species fdc', () => {
@@ -587,6 +589,7 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .then((seedlotNumber) => {
           cy.task('setData', [regData.species, seedlotNumber]);
         });
+      cy.log('A-Class seedlot created with species', regData.species);
     });
   });
 });
