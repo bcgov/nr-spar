@@ -1,20 +1,33 @@
+import prefix from '../../../src/styles/classPrefix';
+import { SeedlotRegFixtureType } from '../../definitions';
+
 describe('Applicant and seedlot information page', () => {
-  it('should edit a seedlot applicant info', () => {
+  let fixtureData: SeedlotRegFixtureType;
+  let speciesKeys: string[];
+
+  before(() => {
     // Login
     cy.login();
     // Go to my seedlot page
     cy.visit('/seedlots/my-seedlots');
     cy.url().should('contains', '/seedlots/my-seedlots');
+    cy.fixture('aclass-seedlot').then((fData) => {
+      fixtureData = fData;
+      // Pick a random species to test
+      speciesKeys = Object.keys(fixtureData);
+    });
+  });
 
+  it('should edit a seedlot applicant info', () => {
     cy.get('.my-seedlot-title')
       .find('.title-favourite')
       .children('h1')
       .should('have.text', 'My Seedlots');
 
     // Arrow button test
-    cy.get('.bx--pagination__right')
-      .find('.bx--popover--top-right')
-      .find('button.bx--btn--icon-only')
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`.${prefix}--popover--top-right`)
+      .find(`button.${prefix}--btn--icon-only`)
       .click({ force: true });
 
     cy.visit('/seedlots/my-seedlots');
@@ -31,7 +44,7 @@ describe('Applicant and seedlot information page', () => {
       .should('have.text', '63001');
 
     // Search bar test
-    cy.get('.bx--search')
+    cy.get(`.${prefix}--search`)
       .find('input')
       .type('PLI');
 
@@ -43,7 +56,7 @@ describe('Applicant and seedlot information page', () => {
     cy.visit('/seedlots/my-seedlots');
 
     // Dropdown test
-    cy.get('.bx--pagination__left')
+    cy.get(`.${prefix}--pagination__left`)
       .find('select')
       .select('20')
       .should('have.value', '20');
@@ -58,16 +71,9 @@ describe('Applicant and seedlot information page', () => {
     cy.visit('/seedlots/my-seedlots');
 
     // //  Check total seedlots
-    // cy.intercept('**/api/seedlots/users/**', {
-    //   statusCode: 200,
-    //   headers: {
-    //     'X-Total-Count': '11'
-    //   }
-    // });
-
-    // cy.request('**/api/seedlots/users/**').as('total-count');
-    // cy.get('@total-count').its('headers').its('x-total-count')
-    //   .should('include', '11');
+    cy.get(`.${prefix}--pagination__left`)
+      .find(`.${prefix}--pagination__items-count`)
+      .should('contain.text', 3 * speciesKeys.length);
 
     // Button test
     cy.get('.my-seedlot-title')
