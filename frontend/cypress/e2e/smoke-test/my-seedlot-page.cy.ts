@@ -19,7 +19,7 @@ describe('Applicant and seedlot information page', () => {
     });
   });
 
-  it('should edit a seedlot applicant info', () => {
+  it('should render seedlot table and all the functionalities are working', () => {
     cy.get('.my-seedlot-title')
       .find('.title-favourite')
       .children('h1')
