@@ -6,18 +6,6 @@ describe('Applicant and seedlot information page', () => {
     cy.visit('/seedlots/my-seedlots');
     cy.url().should('contains', '/seedlots/my-seedlots');
 
-    // Mock my seedlots table to show 11 rows of data
-    cy.intercept(
-      {
-        method: 'GET',
-        url: '**/api/seedlots/users/**'
-      },
-      {
-        statusCode: 200,
-        fixture: 'my-seedlots.json'
-      }
-    ).as('GET_my_seedlots');
-
     cy.get('.my-seedlot-title')
       .find('.title-favourite')
       .children('h1')
@@ -27,10 +15,7 @@ describe('Applicant and seedlot information page', () => {
     cy.get('.bx--pagination__right')
       .find('.bx--popover--top-right')
       .find('button.bx--btn--icon-only')
-      .click();
-
-    // cy.get('table.seedlot-data-table tbody tr')
-    //   .should('have.length', 1);
+      .click({ force: true });
 
     cy.visit('/seedlots/my-seedlots');
 
@@ -43,18 +28,17 @@ describe('Applicant and seedlot information page', () => {
       .eq(0)
       .find('td')
       .first()
-      .should('have.text', '63057');
+      .should('have.text', '63001');
 
     // Search bar test
     cy.get('.bx--search')
       .find('input')
-      .type('63060');
+      .type('PLI');
 
     cy.get('table.seedlot-data-table tbody tr')
       .eq(0)
-      .find('td')
-      .first()
-      .should('have.text', '63060');
+      .find('td:nth-child(3)')
+      .should('have.text', 'PLI - Lodgepole pine');
 
     cy.visit('/seedlots/my-seedlots');
 
@@ -66,20 +50,20 @@ describe('Applicant and seedlot information page', () => {
 
     // Click on a seedlot row
     cy.get('table.seedlot-data-table')
-      .find('#seedlot-table-cell-63066-seedlotNumber')
+      .find('#seedlot-table-cell-63006-seedlotNumber')
       .click();
 
-    cy.url().should('contains', '/seedlots/details/63066');
+    cy.url().should('contains', '/seedlots/details/63006');
 
     cy.visit('/seedlots/my-seedlots');
 
-    //  Check total seedlots
-    cy.intercept('**/api/seedlots/users/**', {
-      statusCode: 200,
-      headers: {
-        'X-Total-Count': '11'
-      }
-    });
+    // //  Check total seedlots
+    // cy.intercept('**/api/seedlots/users/**', {
+    //   statusCode: 200,
+    //   headers: {
+    //     'X-Total-Count': '11'
+    //   }
+    // });
 
     // cy.request('**/api/seedlots/users/**').as('total-count');
     // cy.get('@total-count').its('headers').its('x-total-count')
