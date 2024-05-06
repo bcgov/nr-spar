@@ -9,7 +9,7 @@ import validator from 'validator';
 import ClientSearchModal from './ClientSearchModal';
 import VerificationInput from '../VerificationInput';
 
-import { getForestClientByNumber, getForestClientLocation } from '../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym, getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
@@ -27,6 +27,7 @@ const ApplicantAgencyFields = ({
   defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize,
   isFormSubmitted
 }: ApplicantAgencyFieldsProps) => {
+  const [invalidClientAcronym, setInvalidClientAcronym] = useState<string>('');
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCode.isInvalid && agency.value
       ? supportTexts.locationCode.invalidLocationForSelectedAgency
@@ -37,6 +38,14 @@ const ApplicantAgencyFields = ({
     supportTexts.locationCode.helperTextDisabled
   );
 
+  const updateAfterAgencyValidation = (isInvalid: boolean) => {
+    const updatedAgency = {
+      ...agency,
+      isInvalid
+    };
+    setAgencyAndCode(isDefault, updatedAgency, locationCode);
+  };
+
   const updateAfterLocValidation = (isInvalid: boolean) => {
     const updatedLocationCode = {
       ...locationCode,
@@ -45,6 +54,20 @@ const ApplicantAgencyFields = ({
     setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
     setAgencyAndCode(isDefault, agency, updatedLocationCode);
   };
+
+  const validateAgencyAcronymMutation = useMutation({
+    mutationFn: (queryParams: string[]) => getForestClientByNumberOrAcronym(
+      queryParams[0]
+    ),
+    onError: () => {
+      setInvalidClientAcronym(supportTexts.agency.invalidAcronym);
+      updateAfterAgencyValidation(true);
+    },
+    onSuccess: (res) => {
+      console.log(res);
+      updateAfterAgencyValidation(false);
+    }
+  });
 
   const validateLocationCodeMutation = useMutation({
     mutationFn: (queryParams: string[]) => getForestClientLocation(
@@ -85,32 +108,50 @@ const ApplicantAgencyFields = ({
     setAgencyAndCode(updatedIsDefault, updatedAgency, updatedLocationCode);
   };
 
-  // const handleAgencyInput = (value: MultiOptionsObj) => {
-  //   setLocationCodeHelperText(
-  //     value
-  //       ? supportTexts.locationCode.helperTextEnabled
-  //       : supportTexts.locationCode.helperTextDisabled
-  //   );
+  const updateAgencyFn = (value: string) => (
+    {
+      ...agency,
+      value: value
+        ? {
+          ...EmptyMultiOptObj,
+          description: value
+        }
+        : EmptyMultiOptObj,
+      isInvalid: false
+    }
+  );
 
-  //   const updatedAgency = {
-  //     ...agency,
-  //     value: value ?? EmptyMultiOptObj,
-  //     isInvalid: false
-  //   };
+  const handleAgencyInput = (value: string) => {
+    setLocationCodeHelperText(
+      value
+        ? supportTexts.locationCode.helperTextEnabled
+        : supportTexts.locationCode.helperTextDisabled
+    );
 
-  //   const updatedLocationCode = {
-  //     ...locationCode,
-  //     value: value ? locationCode.value : ''
-  //   };
+    // Create a "mock" MultiOptObj, just to display
+    // the correct acronym
+    const updatedAgency = updateAgencyFn(value);
 
-  //   setAgencyAndCode(isDefault, updatedAgency, updatedLocationCode);
-  // };
+    const updatedLocationCode = {
+      ...locationCode,
+      value: value ? locationCode.value : ''
+    };
+
+    setAgencyAndCode(isDefault, updatedAgency, updatedLocationCode);
+  };
+
+  const handleAgencyBlur = (value: string) => {
+    const updatedAgency = updateAgencyFn(value);
+    setAgencyAndCode(isDefault, updatedAgency, locationCode);
+
+    if (value === '') return;
+
+    validateAgencyAcronymMutation.mutate([value]);
+  };
 
   const handleLocationCodeChange = (value: string) => {
     const updatedValue = value.slice(0, LOCATION_CODE_LIMIT);
-
     const isInRange = validator.isInt(value, { min: 0, max: 99 });
-
     let updatedIsInvalid = locationCode.isInvalid;
 
     if (!isInRange) {
@@ -128,25 +169,24 @@ const ApplicantAgencyFields = ({
   };
 
   const handleLocationCodeBlur = (value: string) => {
-    const formattedCode = value.length ? formatLocationCode(value) : '';
-
+    const formatedCode = value.length ? formatLocationCode(value) : '';
     const updatedLocationCode = {
       ...locationCode,
-      value: formattedCode,
-      isInValid: true
+      value: formatedCode,
+      isInvalid: true
     };
 
     setAgencyAndCode(isDefault, agency, updatedLocationCode);
 
-    if (formattedCode === '') return;
+    if (formatedCode === '') return;
 
     setLocationCodeHelperText('');
-    validateLocationCodeMutation.mutate([agency.value.code, formattedCode]);
+    validateLocationCodeMutation.mutate([agency.value.code, formatedCode]);
   };
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', agency.value.code],
-    queryFn: () => getForestClientByNumber(agency.value.code),
+    queryFn: () => getForestClientByNumberOrAcronym(agency.value.code),
     enabled: isFormSubmitted && agency.value.code !== ''
   });
 
@@ -197,19 +237,16 @@ const ApplicantAgencyFields = ({
             labelText={fieldsProps.agencyInput.titleText}
             helperText={readOnly ? null : supportTexts.agency.helperText}
             invalid={agency.isInvalid}
-            invalidText={(isDefault.value && agency.value.code !== '')
-              ? fieldsProps.agencyInput.invalidText
-              : supportTexts.agency.invalidTextInterimSpecific}
+            invalidText={invalidClientAcronym}
             readOnly={isDefault.value || readOnly}
             // If the value set is empty, the field continues
             // interactive on read only mode, so we disable it instead
             disabled={(isDefault.value && agency.value.code === '')}
-            // eslint-disable-next-line max-len
-            // onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAgencyInput(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAgencyInput(e.target.value)}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
               if (!e.target.readOnly) {
-                handleLocationCodeBlur(e.target.value);
+                handleAgencyBlur(e.target.value);
               }
             }}
             size="md"

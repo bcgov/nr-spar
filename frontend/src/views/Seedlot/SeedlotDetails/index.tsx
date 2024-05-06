@@ -24,7 +24,7 @@ import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
-import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
@@ -106,7 +106,7 @@ const SeedlotDetails = () => {
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', applicantClientNumber],
-    queryFn: () => getForestClientByNumber(applicantClientNumber!),
+    queryFn: () => getForestClientByNumberOrAcronym(applicantClientNumber!),
     enabled: !!applicantClientNumber,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS

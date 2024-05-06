@@ -1,6 +1,7 @@
 const supportTexts = {
   agency: {
     helperText: 'You can enter the agency number, name or acronym',
+    invalidAcronym: 'Please enter a valid acronym that identifies the agency',
     invalidTextInterimSpecific: 'Please specify a collector agency to proceed'
   },
   locationCode: {
