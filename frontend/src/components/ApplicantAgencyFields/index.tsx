@@ -23,8 +23,8 @@ import { formatLocationCode } from './utils';
 import './styles.scss';
 
 const ApplicantAgencyFields = ({
-  checkboxId, isDefault, agency, locationCode, fieldsProps,
-  defaultAgency, defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize,
+  checkboxId, isDefault, agency, locationCode, fieldsProps, defaultAgency,
+  defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize,
   isFormSubmitted
 }: ApplicantAgencyFieldsProps) => {
   const [invalidClientAcronym, setInvalidClientAcronym] = useState<string>('');
