@@ -15,11 +15,14 @@ import SmallCard from '../SmallCard';
 import './styles.scss';
 
 interface FavouriteCardProps {
-  favObject: FavActivityType
+  favObject: FavActivityType,
+  index: number
 }
 
 const FavouriteCard = ({
-  favObject
+  favObject,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  index
 }: FavouriteCardProps) => {
   const Icon = Icons[favObject.image];
   const navigate = useNavigate();
