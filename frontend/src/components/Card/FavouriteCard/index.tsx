@@ -3,25 +3,23 @@ import { useNavigate } from 'react-router-dom';
 
 import { Tile, OverflowMenu, OverflowMenuItem } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { FavActivityType } from '../../../types/FavActivityTypes';
 import { patchFavAct, deleteFavAct } from '../../../api-service/favouriteActivitiesAPI';
-
 import useWindowSize from '../../../hooks/UseWindowSize';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
+
 import SmallCard from '../SmallCard';
 
 import './styles.scss';
 
-interface FavouriteCardProps {
-  favObject: FavActivityType,
-  index: number
+type FavouriteCardProps = {
+  favObject: FavActivityType
 }
 
 const FavouriteCard = ({
-  favObject,
-  index
+  favObject
 }: FavouriteCardProps) => {
   const Icon = Icons[favObject.image];
   const navigate = useNavigate();
