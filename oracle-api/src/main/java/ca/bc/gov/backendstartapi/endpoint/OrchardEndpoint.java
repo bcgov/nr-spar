@@ -5,7 +5,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SpzSpuGeoDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -188,13 +188,13 @@ public class OrchardEndpoint {
   }
 
   /**
-   * Gets all SPZ information given a list of SPU IDs.
+   * Get SPZ and SPU-geospatial information
    *
-   * @param spuIds A list of SPU ID to be fetched.
-   * @return A list of {@link SeedPlanZoneDto} containing the results or an empty list.
+   * @param spuId A seed plan unit id.
+   * @return A {@link SpzSpuGeoDto} containing the results or an empty list.
    */
   @GetMapping(
-      path = "/spz-information-by-spu-ids/{spuIds}",
+      path = "/seed-plan-zone/{spuId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
       summary = "Get SPZ (Seed Plan Zone) information given a list of SPU IDs",
@@ -208,7 +208,7 @@ public class OrchardEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<SeedPlanZoneDto> getSpzInformation(
+  public List<SpzSpuGeoDto> getSpzInformation(
       @Parameter(description = "The SPU (Seed Planning Unit) ID list") @PathVariable("spuIds")
           Integer[] spuIds) {
     return orchardService.getSpzInformationBySpu(Arrays.asList(spuIds));

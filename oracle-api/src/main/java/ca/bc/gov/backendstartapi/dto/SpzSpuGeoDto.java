@@ -7,27 +7,14 @@ import lombok.Setter;
 /** This class represents a JSON response when requesting SPZ information from a SPU. */
 @Getter
 @Setter
-@Schema(description = "Represents a JSON response when requesting SPZ information from a SPU.")
-public class SeedPlanZoneDto {
-
+@Schema(
+    description =
+        "Represents a JSON response when requesting SPZ + SPU-geospatial information from a SPU.")
+public class SpzSpuGeoDto {
   @Schema(
       description = "A unique identifier which is assigned to a Seed Planning Unit.",
       example = "7")
-  private Integer seedPlanUnitId;
-
-  @Schema(
-      description = "A unique identifier which is assigned to a Seed Planning Zone.",
-      example = "40")
-  private Integer seedPlanZoneId;
-
-  @Schema(description = "A code describing various Genetic Classes.", example = "A")
-  private Character geneticClassCode;
-
-  @Schema(description = "A code describing various Seed Planning Zones.", example = "M")
-  private String seedPlanZoneCode;
-
-  @Schema(description = "A code describing various Vegetation Species.", example = "FDC")
-  private String vegetationCode;
+  private Integer spuId;
 
   @Schema(
       description =
@@ -40,4 +27,10 @@ public class SeedPlanZoneDto {
           "Maximum elevation (metres) for a specific elevation band for the Seed Planning Unit",
       example = "700")
   private Integer elevationMax;
+
+  @Schema(
+      description =
+          "Maximum elevation (metres) for a specific elevation band for the Seed Planning Unit",
+      example = "700")
+  private Integer a;
 }

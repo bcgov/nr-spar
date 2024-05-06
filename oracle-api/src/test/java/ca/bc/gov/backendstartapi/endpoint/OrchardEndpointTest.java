@@ -13,7 +13,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SpzSpuGeoDto;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -280,7 +280,7 @@ class OrchardEndpointTest {
   @DisplayName("getSpzInformationBySpu_sucessTest")
   @WithMockUser(roles = "user_read")
   void getSpzInformationBySpu_sucessTest() throws Exception {
-    SeedPlanZoneDto responseDto = new SeedPlanZoneDto();
+    SpzSpuGeoDto responseDto = new SpzSpuGeoDto();
     responseDto.setSeedPlanUnitId(7);
     responseDto.setSeedPlanZoneId(40);
     responseDto.setGeneticClassCode('A');

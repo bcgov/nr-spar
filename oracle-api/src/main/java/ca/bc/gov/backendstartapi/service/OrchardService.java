@@ -6,7 +6,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SpzSpuGeoDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
@@ -339,9 +339,9 @@ public class OrchardService {
    * Get SPZ information given a list of SPU Ids.
    *
    * @param spuIds A list of SPU ID to be fetched.
-   * @return A List of {@link SeedPlanZoneDto}
+   * @return A List of {@link SpzSpuGeoDto}
    */
-  public List<SeedPlanZoneDto> getSpzInformationBySpu(List<Integer> spuIds) {
+  public List<SpzSpuGeoDto> getSpzInformationBySpu(List<Integer> spuIds) {
     SparLog.info("Getting SPZ information for SPU IDs {}", spuIds);
 
     List<TestedPtAreaOfUse> testedList =
@@ -352,7 +352,7 @@ public class OrchardService {
       return List.of();
     }
 
-    List<SeedPlanZoneDto> seedPlanZoneDtoList = new ArrayList<>();
+    List<SpzSpuGeoDto> seedPlanZoneDtoList = new ArrayList<>();
     for (TestedPtAreaOfUse testedEntity : testedList) {
       final Integer spuId = testedEntity.getSeedPlanUnitId();
       final Integer testedPtAreaId = testedEntity.getTestedPtAreaOfUseId();
@@ -371,7 +371,7 @@ public class OrchardService {
         throw new TestedPtAreaOfUseException();
       }
 
-      SeedPlanZoneDto responseDto = new SeedPlanZoneDto();
+      SpzSpuGeoDto responseDto = new SpzSpuGeoDto();
       responseDto.setSeedPlanUnitId(spuId);
 
       Optional<SeedPlanUnit> seedPlanUnitOp = seedPlanUnitRepository.findById(spuId);
