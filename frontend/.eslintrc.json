@@ -62,7 +62,6 @@
     "jsx-a11y/label-has-associated-control": [ 2, {
       "depth": 3
     }],
-    "semi":"warn",
     "no-shadow": "off",
     "no-unused-vars": "off",
     "@typescript-eslint/no-shadow": ["error"],
