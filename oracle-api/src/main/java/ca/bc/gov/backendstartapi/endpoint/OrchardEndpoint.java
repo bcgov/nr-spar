@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -188,29 +187,27 @@ public class OrchardEndpoint {
   }
 
   /**
-   * Get SPZ and SPU-geospatial information
+   * Get SPZ and SPU-geospatial information.
    *
    * @param spuId A seed plan unit id.
-   * @return A {@link SpzSpuGeoDto} containing the results or an empty list.
+   * @return A {@link SpzSpuGeoDto} containing the results.
    */
-  @GetMapping(
-      path = "/seed-plan-zone/{spuId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/area-of-use/spu/{spuId}/spz", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
-      summary = "Get SPZ (Seed Plan Zone) information given a list of SPU IDs",
-      description = "Gets all SPZ information for one or more SPU IDs.",
+      summary = "Get area of use information given a SPU id",
+      description = "Fetch geospatial data for the SPU along with a list of SPZ information.",
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "List with found records or an empty list"),
+            description = "A data object containing information found."),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public List<SpzSpuGeoDto> getSpzInformation(
-      @Parameter(description = "The SPU (Seed Planning Unit) ID list") @PathVariable("spuIds")
-          Integer[] spuIds) {
-    return orchardService.getSpzInformationBySpu(Arrays.asList(spuIds));
+  public SpzSpuGeoDto getSpzInformation(
+      @Parameter(description = "The SPU (Seed Planning Unit) ID") @PathVariable("spuId")
+          Integer spuId) {
+    return orchardService.getSpzInformationBySpu(spuId);
   }
 }

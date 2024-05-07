@@ -18,11 +18,11 @@ public class SpzDto {
   private Character geneticClassCode;
 
   @Schema(description = "The SPZ code", example = "M")
-  private String spzCode;
+  private String code;
 
   @Schema(description = "A code describing various Seed Planning Zones.", example = "M")
-  private String spzDescription;
+  private String description;
 
   @Schema(description = "Whether this spz is the primary spz.", example = "true")
-  private String isSpzPrimary;
+  private String isPrimary;
 }

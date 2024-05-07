@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.dto;
 
+import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,9 +29,18 @@ public class SpzSpuGeoDto {
       example = "700")
   private Integer elevationMax;
 
-  @Schema(
-      description =
-          "Maximum elevation (metres) for a specific elevation band for the Seed Planning Unit",
-      example = "700")
-  private Integer a;
+  @Schema(description = "The elevation band", example = "HIGH")
+  private String elevationBand;
+
+  @Schema(description = "The minimum latitude degree", example = "0")
+  private Integer latitudeDegreeMin;
+
+  @Schema(description = "The maximum latitude degree", example = "100")
+  private Integer latitudeDegreeMax;
+
+  @Schema(description = "The latitude band", example = "SOUTH")
+  private String latitudeBand;
+
+  @Schema(description = "A list of SPU")
+  private List<SpzDto> spus;
 }
