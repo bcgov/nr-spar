@@ -23,19 +23,19 @@ describe('My seedlots page', () => {
 
   // TODO separate each test out in its own it()
   // Test DESC sorting as well
-  it('should render seedlot table and all the functionalities are working', () => {
+  it('should render my seedlot page heading', () => {
     cy.get('.my-seedlot-title')
       .find('.title-favourite')
       .children('h1')
       .should('have.text', 'My Seedlots');
+  });
 
+  it('should sort table columns in ascending and descinding order', () => {
     // Arrow button test
     cy.get(`.${prefix}--pagination__right`)
       .find(`.${prefix}--popover--top-right`)
       .find(`button.${prefix}--btn--icon-only`)
       .click({ force: true });
-
-    cy.visit('/seedlots/my-seedlots');
 
     // Sorting test
     cy.get('table.seedlot-data-table')
@@ -47,7 +47,9 @@ describe('My seedlots page', () => {
     //   .find('td')
     //   .first()
     //   .should('have.text', '63001');
+  });
 
+  it('can use search bar to give correct results', () => {
     // Search bar test
     cy.get('.my-seedlot-data-table-row').children(`.${prefix}--search`).find('input')
       .type('PLI');
@@ -56,29 +58,33 @@ describe('My seedlots page', () => {
       .eq(0)
       .find('td:nth-child(3)')
       .should('have.text', 'PLI - Lodgepole pine');
+  });
 
-    cy.visit('/seedlots/my-seedlots');
-
+  it('dropdown button functionality', () => {
     // Dropdown test
     cy.get(`.${prefix}--pagination__left`)
       .find('select')
-      .select('20')
-      .should('have.value', '20');
+      .select('30')
+      .should('have.value', '30');
+  });
 
+  it('should be able to select a seedlot row and redirect to its page', () => {
     // Click on a seedlot row
     cy.get('table.seedlot-data-table')
       .find('#seedlot-table-cell-63006-seedlotNumber')
       .click();
 
     cy.url().should('contains', '/seedlots/details/63006');
+  });
 
-    cy.visit('/seedlots/my-seedlots');
-
+  it('should have correct number of seedlots', () => {
     //  Check total seedlots
     cy.get(`.${prefix}--pagination__left`)
       .find(`.${prefix}--pagination__items-count`)
       .should('contain.text', NUM_OF_LOOPS * speciesKeys.length);
+  });
 
+  it('should click register-a-class button', () => {
     // Button test
     cy.get('.my-seedlot-title')
       .find('button.reg-seedlot-btn')
