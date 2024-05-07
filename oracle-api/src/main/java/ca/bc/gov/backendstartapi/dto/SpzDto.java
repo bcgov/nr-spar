@@ -9,14 +9,6 @@ import lombok.Setter;
 @Setter
 @Schema(description = "A dto object that contains info of a seed plan zone.")
 public class SpzDto {
-  @Schema(
-      description = "A unique identifier which is assigned to a Seed Planning Zone.",
-      example = "40")
-  private Integer spzId;
-
-  @Schema(description = "A code describing various Genetic Classes.", example = "A")
-  private Character geneticClassCode;
-
   @Schema(description = "The SPZ code", example = "M")
   private String code;
 
@@ -24,5 +16,5 @@ public class SpzDto {
   private String description;
 
   @Schema(description = "Whether this spz is the primary spz.", example = "true")
-  private String isPrimary;
+  private Boolean isPrimary;
 }

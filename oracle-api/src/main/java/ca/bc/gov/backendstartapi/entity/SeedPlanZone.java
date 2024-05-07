@@ -3,6 +3,8 @@ package ca.bc.gov.backendstartapi.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +15,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "SEED_PLAN_ZONE")
 public class SeedPlanZone {
-
   @Id
   @Column(name = "SEED_PLAN_ZONE_ID")
   private Integer seedPlanZoneId;
@@ -21,9 +22,11 @@ public class SeedPlanZone {
   @Column(name = "GENETIC_CLASS_CODE", nullable = false)
   private Character geneticClassCode;
 
-  @Column(name = "SEED_PLAN_ZONE_CODE", length = 3, nullable = false)
-  private String seedPlanZoneCode;
+  @ManyToOne
+  @JoinColumn(name = "SEED_PLAN_ZONE_CODE")
+  private SeedPlanZoneCode seedPlanZoneCode;
 
-  @Column(name = "VEGETATION_CODE", length = 8)
-  private String vegetationCode;
+  @ManyToOne
+  @JoinColumn(name = "VEGETATION_CODE")
+  private VegetationCode vegetationCode;
 }

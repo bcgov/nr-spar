@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TestedPtAreaofUseRepository extends JpaRepository<TestedPtAreaOfUse, Integer> {
 
   public List<TestedPtAreaOfUse> findAllBySeedPlanUnitIdIn(List<Integer> spuIds);
+
+  public List<TestedPtAreaOfUse> findAllBySeedPlanUnitId(Integer spuId);
 }

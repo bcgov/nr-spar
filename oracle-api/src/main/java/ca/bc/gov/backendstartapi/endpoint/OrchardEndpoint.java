@@ -5,7 +5,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpzSpuGeoDto;
+import ca.bc.gov.backendstartapi.dto.SpzSpuDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -205,9 +205,9 @@ public class OrchardEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public SpzSpuGeoDto getSpzInformation(
+  public SpzSpuDto getSpzSpuData(
       @Parameter(description = "The SPU (Seed Planning Unit) ID") @PathVariable("spuId")
           Integer spuId) {
-    return orchardService.getSpzInformationBySpu(spuId);
+    return orchardService.fetchSpzSpuData(spuId);
   }
 }

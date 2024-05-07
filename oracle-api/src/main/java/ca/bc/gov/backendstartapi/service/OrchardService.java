@@ -6,21 +6,28 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpzSpuGeoDto;
+import ca.bc.gov.backendstartapi.dto.SpuDto;
+import ca.bc.gov.backendstartapi.dto.SpzDto;
+import ca.bc.gov.backendstartapi.dto.SpzSpuDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
+import ca.bc.gov.backendstartapi.entity.SeedPlanUnit;
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUse;
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpz;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
 import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
+import ca.bc.gov.backendstartapi.exception.SpuNotFoundException;
+import ca.bc.gov.backendstartapi.exception.TestedAreaOfUseNotFound;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
 import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
-import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpuRepository;
+import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
 import ca.bc.gov.backendstartapi.util.ModelMapper;
 import java.time.Instant;
@@ -45,7 +52,7 @@ public class OrchardService {
 
   private TestedPtAreaofUseRepository testedPtAreaofUseRepository;
 
-  private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
+  private TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
 
   private SeedPlanUnitRepository seedPlanUnitRepository;
 
@@ -57,7 +64,7 @@ public class OrchardService {
       ParentTreeRepository parentTreeRepository,
       ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
       TestedPtAreaofUseRepository testedPtAreaofUseRepository,
-      TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository,
+      TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository,
       SeedPlanUnitRepository seedPlanUnitRepository,
       SeedPlanZoneRepository seedPlanZoneRepository) {
     this.orchardRepository = orchardRepository;
@@ -65,7 +72,7 @@ public class OrchardService {
     this.parentTreeRepository = parentTreeRepository;
     this.parentTreeGeneticQualityRepository = parentTreeGeneticQualityRepository;
     this.testedPtAreaofUseRepository = testedPtAreaofUseRepository;
-    this.testedPtAreaOfUseSpuRepository = testedPtAreaOfUseSpuRepository;
+    this.testedPtAreaOfUseSpzRepository = testedPtAreaOfUseSpzRepository;
     this.seedPlanUnitRepository = seedPlanUnitRepository;
     this.seedPlanZoneRepository = seedPlanZoneRepository;
   }
@@ -336,11 +343,65 @@ public class OrchardService {
    * @param spuIds A SPU id.
    * @return A {@link SpzSpuGeoDto}
    */
-  public SpzSpuGeoDto getSpzInformationBySpu(Integer spuId) {
-    SparLog.info("Getting SPZ and SPU-geo information for SPU ID {}", spuId);
+  public SpzSpuDto fetchSpzSpuData(Integer spuId) {
+    SparLog.info("Getting SPZ and SPU information for SPU ID {}", spuId);
 
-    SpzSpuGeoDto result = new SpzSpuGeoDto();
+    SpzSpuDto result = new SpzSpuDto();
+    // Step 1: Get spu data
+    result.setSpu(getSpuData(spuId));
+    SparLog.info("SPU data set for id {}", spuId);
+
+    // Step 2: Get tested_pt_area_of_use_id by spuId
+    Integer testedPtAreaOfUseId = getTestedPtAreaOfUseId(spuId);
+
+    // Step 3: Get SPZs under a testedPtAreaOfUseId
+    List<TestedPtAreaOfUseSpz> testedPtAoUspzs =
+        testedPtAreaOfUseSpzRepository.findAllByTestedPtAreaOfUse_testedPtAreaOfUseId(
+            testedPtAreaOfUseId);
+
+    List<SpzDto> spzList =
+        testedPtAoUspzs.stream()
+            .map(
+                testedPtSpz -> {
+                  SpzDto spzToAdd = new SpzDto();
+                  spzToAdd.setCode(testedPtSpz.getSeedPlanZoneCode().getSpzCode());
+                  spzToAdd.setDescription(testedPtSpz.getSeedPlanZoneCode().getSpzDescription());
+                  spzToAdd.setIsPrimary(testedPtSpz.getIsPrimary());
+                  return spzToAdd;
+                })
+            .toList();
+
+    result.setSpzList(spzList);
 
     return result;
+  }
+
+  private Integer getTestedPtAreaOfUseId(Integer spuId) {
+    List<TestedPtAreaOfUse> testedAoU = testedPtAreaofUseRepository.findAllBySeedPlanUnitId(spuId);
+    if (testedAoU.isEmpty()) {
+      throw new TestedAreaOfUseNotFound();
+    }
+    // Assuming 1-to-1 relation ship between TestedPtAreaOfUseId and SpuId
+    return testedAoU.get(0).getTestedPtAreaOfUseId();
+  }
+
+  private SpuDto getSpuData(Integer spuId) {
+    SeedPlanUnit spuEntity =
+        seedPlanUnitRepository.findById(spuId).orElseThrow(SpuNotFoundException::new);
+
+    SpuDto spuDto = new SpuDto();
+    spuDto.setSpuId(spuEntity.getSeedPlanUnitId());
+    // Set Elevation data
+    spuDto.setElevationBand(spuEntity.getElevationBand());
+    spuDto.setElevationMax(spuEntity.getElevationMax());
+    spuDto.setElevationMin(spuEntity.getElevationMin());
+    // Set Latitude data
+    spuDto.setLatitudeBand(spuEntity.getLatitudeBand());
+    spuDto.setLatitudeDegreesMax(spuEntity.getLatitudeDegreesMax());
+    spuDto.setLatitudeDegreesMin(spuEntity.getLatitudeDegreesMin());
+    spuDto.setLatitudeMinutesMax(spuEntity.getLatitudeMinutesMax());
+    spuDto.setLatitudeMinutesMin(spuEntity.getLatitudeMinutesMin());
+
+    return spuDto;
   }
 }
