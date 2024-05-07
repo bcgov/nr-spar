@@ -2,8 +2,6 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.MethodOfPaymentDto;
 import ca.bc.gov.backendstartapi.entity.MethodOfPaymentEntity;
-import ca.bc.gov.backendstartapi.security.AccessLevel;
-import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.MethodOfPaymentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,12 +69,7 @@ public class MethodOfPaymentEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<MethodOfPaymentDto> getAllMethodOfPayment() {
     return methodOfPaymentService.getAllMethodOfPayment();
   }

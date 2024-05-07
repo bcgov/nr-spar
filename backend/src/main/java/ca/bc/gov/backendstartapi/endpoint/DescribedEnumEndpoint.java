@@ -3,8 +3,6 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.DescribedEnumDto;
 import ca.bc.gov.backendstartapi.enums.DescribedEnum;
-import ca.bc.gov.backendstartapi.security.AccessLevel;
-import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,12 +46,7 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
             responseCode = "200",
             description = "A list of all the codes and their descriptions.")
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   default ResponseEntity<List<DescribedEnumDto<E>>> fetchAll() {
     String simpleName = enumClass().getSimpleName();
     SparLog.info("Fetching all codes and descriptions for {} class", simpleName);
@@ -78,12 +71,7 @@ interface DescribedEnumEndpoint<E extends Enum<E> & DescribedEnum> {
             description = "No code was found",
             content = @Content(schema = @Schema(hidden = true)))
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   default ResponseEntity<DescribedEnumDto<E>> fetch(
       @Parameter(description = "The code to be fetched.") @PathVariable("code") String code) {
     SparLog.info(

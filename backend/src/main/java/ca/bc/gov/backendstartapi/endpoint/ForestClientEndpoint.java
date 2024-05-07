@@ -4,8 +4,6 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
-import ca.bc.gov.backendstartapi.security.AccessLevel;
-import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,12 +59,7 @@ public class ForestClientEndpoint {
             content = @Content(schema = @Schema(implementation = ForestClientDto.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ResponseEntity<Serializable> fetchClient(
       @PathVariable("identifier")
           @Pattern(regexp = "^\\d{8}$|^\\w{1,8}$")
@@ -101,12 +94,7 @@ public class ForestClientEndpoint {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<ForestClientLocationDto> fetchClientLocations(
       @PathVariable("clientNumber")
           @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
@@ -144,12 +132,7 @@ public class ForestClientEndpoint {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ForestClientLocationDto fetchSingleClientLocation(
       @PathVariable("clientNumber")
           @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
@@ -183,12 +166,7 @@ public class ForestClientEndpoint {
         @ApiResponse(responseCode = "400"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<ForestClientSearchDto> searchForestClients(
       @RequestParam(defaultValue = "acronym")
           @Parameter(

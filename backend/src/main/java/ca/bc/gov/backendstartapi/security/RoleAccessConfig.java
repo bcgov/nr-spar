@@ -5,15 +5,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** This interface holds a list of roles and its allowed operations, access levels. */
+/** This interface holds a list of roles to be used for each endpoint access level. */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RoleAccessConfig {
 
   /**
-   * Defines an array with one or more {@link AccessLevel}.
+   * Defines an array with one or more roles.
    *
-   * @return An array of {@link AccessLevel}
+   * @return An array containing the roles
    */
-  AccessLevel[] value();
+  String[] value();
 }
