@@ -21,6 +21,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(GeneticWorthEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class GeneticWorthEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -35,7 +36,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("getAllGeneticWorthTest")
-  @WithMockUser(roles = "user_read")
   void getAllGeneticWorthTest() throws Exception {
 
     CodeDescriptionDto firstMethod =
@@ -63,7 +63,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("getGeneticWorthByCodeTest")
-  @WithMockUser(roles = "user_read")
   void getGeneticWorthByCodeTest() throws Exception {
     var testCode = "AD";
     var testDescription = "Animal browse resistance (deer)";
@@ -88,7 +87,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("getGeneticWorthByCodeEmptyTest")
-  @WithMockUser(roles = "user_read")
   void getGeneticWorthByCodeEmptyTest() throws Exception {
     var testCode = "WWE";
     when(geneticWorthService.getGeneticWorthByCode(testCode))
