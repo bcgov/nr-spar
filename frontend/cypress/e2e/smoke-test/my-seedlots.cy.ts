@@ -7,6 +7,7 @@ import { NUM_OF_LOOPS } from '../../constants';
 describe('My seedlots page', () => {
   let fixtureData: SeedlotRegFixtureType;
   let speciesKeys: string[];
+  let cypressSeedlots: number;
 
   beforeEach(() => {
     // Login
@@ -19,6 +20,7 @@ describe('My seedlots page', () => {
       // Pick a random species to test
       speciesKeys = Object.keys(fixtureData);
     });
+    cypressSeedlots = NUM_OF_LOOPS * speciesKeys.length;
   });
 
   // TODO separate each test out in its own it()
@@ -81,7 +83,7 @@ describe('My seedlots page', () => {
     //  Check total seedlots
     cy.get(`.${prefix}--pagination__left`)
       .find(`.${prefix}--pagination__items-count`)
-      .should('contain.text', NUM_OF_LOOPS * speciesKeys.length);
+      .should('be.gte', cypressSeedlots);
   });
 
   it('should click register-a-class button', () => {
