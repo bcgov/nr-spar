@@ -27,6 +27,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(FavouriteActivityEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class FavouriteActivityEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -57,7 +58,6 @@ class FavouriteActivityEndpointTest {
 
   @Test
   @DisplayName("createFavoriteActivitySuccessTest")
-  @WithMockUser(roles = "user_write")
   void createFavoriteActivitySuccessTest() throws Exception {
     FavouriteActivityEntity activityEntity = createEntity("CREATE_A_CLASS_SEEDLOT");
     when(favouriteActivityService.createUserActivity(any())).thenReturn(activityEntity);
@@ -77,7 +77,6 @@ class FavouriteActivityEndpointTest {
 
   @Test
   @DisplayName("createFavoriteActivityNotFoundTest")
-  @WithMockUser(roles = "user_write")
   void createFavoriteActivityNotFoundTest() throws Exception {
     when(favouriteActivityService.createUserActivity(any()))
         .thenThrow(new InvalidActivityException());
@@ -95,7 +94,6 @@ class FavouriteActivityEndpointTest {
 
   @Test
   @DisplayName("createFavoriteActivityDuplicatedTest")
-  @WithMockUser(roles = "user_write")
   void createFavoriteActivityDuplicatedTest() throws Exception {
     String contentString = stringifyCreate("CREATE_A_CLASS_SEEDLOT");
     FavouriteActivityEntity activityEntity = createEntity("CREATE_A_CLASS_SEEDLOT");
@@ -129,7 +127,6 @@ class FavouriteActivityEndpointTest {
 
   @Test
   @DisplayName("getAllUsersActivityTest")
-  @WithMockUser(roles = "user_write")
   void getAllUsersActivityTest() throws Exception {
 
     FavouriteActivityEntity activityEntityOne = createEntity("CREATE_A_CLASS_SEEDLOT");
@@ -155,7 +152,6 @@ class FavouriteActivityEndpointTest {
 
   @Test
   @DisplayName("updateUserFavoriteActivity")
-  @WithMockUser(roles = "user_write")
   void updateUserFavoriteActivity() throws Exception {
     FavouriteActivityEntity activityEntity = createEntity("EXISTING_SEEDLOTS");
     activityEntity.setId(10000L);
@@ -194,7 +190,6 @@ class FavouriteActivityEndpointTest {
 
   @Test
   @DisplayName("deleteUserFavoriteActivity")
-  @WithMockUser(roles = "user_write")
   void deleteUserFavoriteActivity() throws Exception {
     FavouriteActivityEntity activityEntity = createEntity("EXISTING_SEEDLOTS");
     activityEntity.setId(10000L);

@@ -24,6 +24,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ParentTreeEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class ParentTreeEndpointTest {
 
   @Autowired MockMvc mockMvc;
@@ -32,7 +33,6 @@ class ParentTreeEndpointTest {
 
   @Test
   @DisplayName("calcMeanGeospatialSuccessTest")
-  @WithMockUser(roles = "user_read")
   void calcMeanGeospatialSuccessTest() throws Exception {
     /* ********* RESPONSE DATA ********* */
     CaculatedParentTreeValsDto cacledPtValsDto = new CaculatedParentTreeValsDto();
@@ -215,7 +215,6 @@ class ParentTreeEndpointTest {
 
   @Test
   @DisplayName("Missing request property error test")
-  @WithMockUser(roles = "user_read")
   void calcMeanGeospatial__noSmpMixField_error_test() throws Exception {
     String reqJson =
         """

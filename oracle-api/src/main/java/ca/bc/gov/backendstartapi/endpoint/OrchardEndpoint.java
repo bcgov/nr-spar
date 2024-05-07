@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SpzSpuDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -63,6 +64,7 @@ public class OrchardEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public OrchardLotTypeDescriptionDto getOrchardById(
       @PathVariable
           @Parameter(name = "id", in = ParameterIn.PATH, description = "Identifier of the orchard.")
@@ -98,6 +100,7 @@ public class OrchardEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public OrchardParentTreeDto getParentTreeGeneticQualityData(
       @PathVariable
           @Parameter(
@@ -144,6 +147,7 @@ public class OrchardEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<OrchardLotTypeDescriptionDto> getOrchardsByVegCode(
       @PathVariable("vegCode") @Parameter(description = "The vegetation code of an orchard.")
           String vegCode) {
@@ -168,6 +172,7 @@ public class OrchardEndpoint {
       path = "/parent-trees/vegetation-codes/{vegCode}",
       consumes = "application/json",
       produces = "application/json")
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ResponseEntity<List<SameSpeciesTreeDto>> findParentTreesWithVegCode(
       @PathVariable("vegCode")
           @Parameter(description = "The vegetation code of an orchard.")
@@ -205,6 +210,7 @@ public class OrchardEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public SpzSpuDto getSpzSpuData(
       @Parameter(description = "The SPU (Seed Planning Unit) ID") @PathVariable("spuId")
           Integer spuId) {

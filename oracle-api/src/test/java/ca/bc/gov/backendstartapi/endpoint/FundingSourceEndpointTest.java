@@ -17,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(FundingSourceEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class FundingSourceEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -29,7 +31,6 @@ class FundingSourceEndpointTest {
 
   @Test
   @DisplayName("findAllSuccessTest")
-  @WithMockUser(roles = "user_read")
   void findAllSuccessTest() throws Exception {
     FundingSource fundingSourceBct = new FundingSource();
     fundingSourceBct.setCode("BCT");
@@ -80,6 +81,7 @@ class FundingSourceEndpointTest {
 
   @Test
   @DisplayName("findAllNoAuthorizedTest")
+  @WithAnonymousUser
   void findAllNoAuthorizedTest() throws Exception {
     mockMvc
         .perform(
@@ -87,8 +89,7 @@ class FundingSourceEndpointTest {
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(401))
+        .andExpect(status().isUnauthorized())
         .andReturn();
   }
-
 }

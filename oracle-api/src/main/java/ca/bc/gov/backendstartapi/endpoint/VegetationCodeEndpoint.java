@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.endpoint.parameters.PaginatedViaQuery;
 import ca.bc.gov.backendstartapi.endpoint.parameters.PaginationParameters;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
 import ca.bc.gov.backendstartapi.repository.VegetationCodeRepository;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -59,6 +60,7 @@ public class VegetationCodeEndpoint {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public VegetationCode findByCode(
       @PathVariable("code")
           @Parameter(
@@ -101,6 +103,7 @@ public class VegetationCodeEndpoint {
                 "An array with the vegetation codes found, ordered by their identifiers."),
         @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   @PaginatedViaQuery
   public List<VegetationCode> findEffectiveByCodeOrDescription(
       @RequestParam(name = "search", defaultValue = "")
