@@ -15,5 +15,5 @@ public @interface RoleAccessConfig {
    *
    * @return An array of {@link AccessLevel}
    */
-  AccessLevel[] value();
+  String[] value();
 }
