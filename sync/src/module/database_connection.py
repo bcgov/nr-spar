@@ -112,6 +112,7 @@ class database_connection(object):
 
     def bulk_upsert_postgres(self, dataframe:object, table_name:str, table_pk:str, if_data_exists: str, index_data:bool ) -> int:
         onconflictstatement = ""
+        logger.debug('Starting UPSERT statement in Postgres Database')
         table_clean = clean_table_from_schema(table_name)
         if table_pk != "":
             columnspk = table_pk.split(",")
@@ -130,10 +131,15 @@ class database_connection(object):
         result = self.conn.execute(text(sql_text), dataframe.to_dict('records'))
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
+    
 
     def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str ) -> int:
         onconflictstatement = ""
+        logger.debug('Starting UPSERT statement in Oracle Database')
+        i = 0
         for row in dataframe.itertuples():
+            i = i + 1
+            logger.debug(f'---Including row {i}')
             params = {}
             for column in dataframe.columns.values:
                 params[column] = getattr(row,column)
@@ -162,6 +168,7 @@ class database_connection(object):
                     VALUES(:{', :'.join(dataframe.columns.values)})   ;
                 {onconflictstatement}
             END; """
+            logger.debug(f'---Executing statement for row {i}')
             result = self.conn.execute(text(sql_text), params)
         
         self.commit()  # If everything is ok, a commit will be executed.
