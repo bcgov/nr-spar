@@ -32,6 +32,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(OrchardEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class OrchardEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -40,7 +41,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findByIdPrdSuccessTest")
-  @WithMockUser(roles = "user_read")
   void findByIdPrdSuccessTest() throws Exception {
     OrchardLotTypeDescriptionDto descriptionDto =
         new OrchardLotTypeDescriptionDto("337", "GRANDVIEW", "PLI", 'S', "Seed Lot", "PRD");
@@ -66,7 +66,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findByIdNotFoundTest")
-  @WithMockUser(roles = "user_read")
   void findByIdNotFoundTest() throws Exception {
     when(orchardService.findNotRetiredOrchardValidLotType(any())).thenReturn(Optional.empty());
 
@@ -82,7 +81,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findParentTreeGeneticQualitySuccessTest")
-  @WithMockUser(roles = "user_read")
   void findParentTreeGeneticQualitySuccessTest() throws Exception {
     OrchardParentTreeDto orchardParentTreeDto = new OrchardParentTreeDto();
     orchardParentTreeDto.setOrchardId("405");
@@ -149,7 +147,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findParentTreeGeneticQualityNotFoundTest")
-  @WithMockUser(roles = "user_read")
   void findParentTreeGeneticQualityNotFoundTest() throws Exception {
     when(orchardService.findParentTreeGeneticQualityData(any(), any()))
         .thenReturn(Optional.empty());
@@ -168,7 +165,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findOrchardsWithVegCodeSuccessEndpointTest")
-  @WithMockUser(roles = "user_read")
   void findOrchardsWithVegCodeSuccessEndpointTest() throws Exception {
     String vegCode = "PLI";
 
@@ -205,7 +201,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findOrchardsWithVegCodeNotFoundEndpointTest")
-  @WithMockUser(roles = "user_read")
   void findOrchardsWithVegCodeNotFoundEndpointTest() throws Exception {
     String vegCode = "BEEF";
 
@@ -223,7 +218,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getAllParentTreeByVegCodeTest")
-  @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeTest() throws Exception {
 
     SameSpeciesTreeDto firstDto =
@@ -256,7 +250,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getAllParentTreeByVegCodeErrorTest")
-  @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeErrorTest() throws Exception {
     String vegCode = "FDI";
 
@@ -278,7 +271,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getSpzInformationBySpu_sucessTest")
-  @WithMockUser(roles = "user_read")
   void getSpzInformationBySpu_sucessTest() throws Exception {
     SeedPlanZoneDto responseDto = new SeedPlanZoneDto();
     responseDto.setSeedPlanUnitId(7);

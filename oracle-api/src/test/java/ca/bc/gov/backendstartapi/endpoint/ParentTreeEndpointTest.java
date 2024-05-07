@@ -22,6 +22,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ParentTreeEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class ParentTreeEndpointTest {
 
   @Autowired MockMvc mockMvc;
@@ -30,7 +31,6 @@ class ParentTreeEndpointTest {
 
   @Test
   @DisplayName("getPtGeoSpatialDataTest")
-  @WithMockUser(roles = "user_read")
   void getPtGeoSpatialDataTest() throws Exception {
     List<GeospatialRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new GeospatialRequestDto(4110L));
@@ -64,7 +64,6 @@ class ParentTreeEndpointTest {
 
   @Test
   @DisplayName("getPtGeoSpatialDataEmptyTest")
-  @WithMockUser(roles = "user_read")
   void getPtGeoSpatialDataEmptyTest() throws Exception {
     List<GeospatialRequestDto> ptIds = new ArrayList<>();
     ptIds.add(new GeospatialRequestDto(4110L));

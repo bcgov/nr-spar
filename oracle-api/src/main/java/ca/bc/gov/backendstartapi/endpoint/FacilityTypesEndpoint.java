@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.entity.FacilityTypes;
 import ca.bc.gov.backendstartapi.repository.FacilityTypesRepository;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -53,6 +54,7 @@ public class FacilityTypesEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<FacilityTypes> getAllValidFacilityTypes() {
     SparLog.info("Fetching all valid facility types");
 

@@ -212,6 +212,7 @@
 					<excludes>
 						<exclude>**/config/**</exclude>
             <exclude>**/filter/**</exclude>
+            <exclude>**/interceptor/**</exclude>
 						<exclude>**/*$*Builder*</exclude>
 						<exclude>**/BackendStartApiApplication.*</exclude>
 					</excludes>

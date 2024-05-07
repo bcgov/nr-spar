@@ -1,8 +1,9 @@
 package ca.bc.gov.backendstartapi.config;
 
-import java.util.ArrayList;
+import ca.bc.gov.backendstartapi.security.JwtSecurityUtil;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,17 +71,11 @@ public class SecurityConfig {
 
   private final Converter<Jwt, Collection<GrantedAuthority>> roleConverter =
       jwt -> {
-        if (!jwt.getClaims().containsKey("client_roles")) {
+        if (!jwt.getClaims().containsKey("cognito:groups")) {
           return List.of();
         }
-        Object clientRolesObj = jwt.getClaims().get("client_roles");
-        final List<String> realmAccess = new ArrayList<>();
-        if (clientRolesObj instanceof List<?> list) {
-          for (Object item : list) {
-            realmAccess.add(String.valueOf(item));
-          }
-        }
-        return realmAccess.stream()
+        Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(jwt);
+        return rolesSet.stream()
             .map(roleName -> "ROLE_" + roleName)
             .map(roleName -> (GrantedAuthority) new SimpleGrantedAuthority(roleName))
             .toList();
