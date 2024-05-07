@@ -2,8 +2,6 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
-import ca.bc.gov.backendstartapi.security.AccessLevel;
-import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,12 +35,7 @@ public class ActiveOrchardSeedPlanningUnitEndpoint {
             responseCode = "200",
             description = "A list of the associations between the orchard and seed plan units.")
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   @GetMapping(path = "/{orchardId}/seed-plan-units")
   public List<ActiveOrchardSpuEntity> findByOrchard(
       @Parameter(description = "The identifier of an orchard") @PathVariable(name = "orchardId")

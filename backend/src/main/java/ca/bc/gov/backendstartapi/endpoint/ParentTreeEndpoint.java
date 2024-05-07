@@ -4,8 +4,6 @@ import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
-import ca.bc.gov.backendstartapi.security.AccessLevel;
-import ca.bc.gov.backendstartapi.security.AccessLevelRequired;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.ParentTreeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,12 +67,7 @@ public class ParentTreeEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  @RoleAccessConfig({
-    @AccessLevel(role = "SPAR_TSC_ADMIN", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_MINISTRY_ORCHARD", crudAccess = 'R'),
-    @AccessLevel(role = "SPAR_NONMINISTRY_ORCHARD", crudAccess = 'R')
-  })
-  @AccessLevelRequired('R')
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public PtCalculationResDto parentTreeValsCalculation(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the traits and values to be used in the calculations",
