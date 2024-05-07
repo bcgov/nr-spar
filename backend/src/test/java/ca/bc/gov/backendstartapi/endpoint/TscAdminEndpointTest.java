@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(TscAdminEndpoint.class)
 @ContextConfiguration
 @ExtendWith(SpringExtension.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
 class TscAdminEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -39,7 +40,6 @@ class TscAdminEndpointTest {
 
   @Test
   @DisplayName("getSeedlotsForReviewing_successTest")
-  @WithMockUser(roles = "SPAR_SPR_TREE_SEED_CENTRE_ADMIN")
   void getSeedlotsForReviewing_successTest() throws Exception {
     Integer page = 0;
     Integer size = 10;
@@ -79,7 +79,6 @@ class TscAdminEndpointTest {
 
   @Test
   @DisplayName("Approves a seedlot number")
-  @WithMockUser(roles = "SPAR_SPR_TREE_SEED_CENTRE_ADMIN")
   void approveOrDisapproveSeedlot_approve_shouldSuceed() throws Exception {
     String seedlotNumber = "63223";
     Boolean approved = Boolean.TRUE;
@@ -101,7 +100,6 @@ class TscAdminEndpointTest {
 
   @Test
   @DisplayName("Seedlot approval attempt seedlot not found should fail")
-  @WithMockUser(roles = "SPAR_SPR_TREE_SEED_CENTRE_ADMIN")
   void approveOrDisapproveSeedlot_seedlotNotFound_shouldFail() throws Exception {
     String seedlotNumber = "63223";
     Boolean approved = Boolean.TRUE;

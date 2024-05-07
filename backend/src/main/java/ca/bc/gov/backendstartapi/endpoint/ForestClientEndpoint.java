@@ -4,6 +4,7 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.ForestClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,6 +59,7 @@ public class ForestClientEndpoint {
             content = @Content(schema = @Schema(implementation = ForestClientDto.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ResponseEntity<Serializable> fetchClient(
       @PathVariable("identifier")
           @Pattern(regexp = "^\\d{8}$|^\\w{1,8}$")
@@ -92,6 +94,7 @@ public class ForestClientEndpoint {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<ForestClientLocationDto> fetchClientLocations(
       @PathVariable("clientNumber")
           @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
@@ -129,6 +132,7 @@ public class ForestClientEndpoint {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ForestClientLocationDto fetchSingleClientLocation(
       @PathVariable("clientNumber")
           @Pattern(regexp = "^\\d{8}$", message = "The value must be an 8-digit number")
@@ -146,16 +150,23 @@ public class ForestClientEndpoint {
     return forestClientService.fetchSingleClientLocation(clientNumber, locationCode);
   }
 
+  /**
+   * Searchs for clients given a type and a query term.
+   *
+   * @param type One of: [acronym | client_number | client_name].
+   * @param query The term to be searched for.
+   * @return A list of {@link ForestClientSearchDto} containing the result.
+   */
   @GetMapping(path = "/search")
   @Operation(
-      summary = "",
-      description = """
-             """,
+      summary = "Searchs for clients given a type and a query term",
+      description = "Allows searching for Forest Clients given a type and a search term",
       responses = {
         @ApiResponse(responseCode = "200"),
         @ApiResponse(responseCode = "400"),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<ForestClientSearchDto> searchForestClients(
       @RequestParam(defaultValue = "acronym")
           @Parameter(

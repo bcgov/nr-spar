@@ -50,6 +50,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @WebMvcTest(SeedlotEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class SeedlotEndpointTest {
 
   private final ClassLoader classLoader = getClass().getClassLoader();
@@ -326,7 +327,6 @@ class SeedlotEndpointTest {
 
   @Test
   @DisplayName("getUserSeedlotInfoTestDefaultPagination")
-  @WithMockUser(roles = "user_read")
   void getUserSeedlotInfoTestDefaultPagination() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000000");
     List<Seedlot> userSeedlots = new ArrayList<>();
@@ -346,7 +346,6 @@ class SeedlotEndpointTest {
 
   @Test
   @DisplayName("getUserSeedlotInfoTestChangePageNumber")
-  @WithMockUser(roles = "user_read")
   void getUserSeedlotInfoTestChangePageNumber() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000001");
     List<Seedlot> userSeedlots = new ArrayList<>();
@@ -366,7 +365,6 @@ class SeedlotEndpointTest {
 
   @Test
   @DisplayName("getUserSeedlotInfoTestChangePageSize")
-  @WithMockUser(roles = "user_read")
   void getUserSeedlotInfoTestChangePageSize() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000002");
     List<Seedlot> userSeedlots = new ArrayList<>();
@@ -404,7 +402,6 @@ class SeedlotEndpointTest {
 
   @Test
   @DisplayName("getSingleSeedlotInfoTest")
-  @WithMockUser(roles = "user_read")
   void getSingleSeedlotInfoTest() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000000");
 
@@ -430,9 +427,7 @@ class SeedlotEndpointTest {
 
   @Test
   @DisplayName("getSingleSeedlotAclassFullInfoTest")
-  @WithMockUser(roles = "user_read")
   void getSingleSeedlotAclassFullInfoTest() throws Exception {
-
     SeedlotAclassFormDto seedlotFullInfo = new SeedlotAclassFormDto(
         null,
         null
@@ -516,6 +511,7 @@ class SeedlotEndpointTest {
 
   @Test
   @DisplayName("Seedlot Form submitted with not found seedlot")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
   void submitSeedlotForm_notFoundSeedlot_shouldThrowException() throws Exception {
     when(seedlotService.submitSeedlotForm(any(), any())).thenThrow(new SeedlotNotFoundException());
 
@@ -532,6 +528,7 @@ class SeedlotEndpointTest {
 
   @Test
   @DisplayName("Seedlot Form subbmited with success")
+  @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
   void submitSeedlotForm_happyPath_shouldSucceed() throws Exception {
     SeedlotCreateResponseDto createResponseDto = new SeedlotCreateResponseDto("123", "PND");
 
