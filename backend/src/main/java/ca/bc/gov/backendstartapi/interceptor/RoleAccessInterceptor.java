@@ -108,7 +108,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
    *
    * @param classNameWithMethod String Array containing handlers
    * @param uri Request URI.
-   * @return A Map containing the declared roles and resources, or empty map.
+   * @return A List containing the declared roles, or an empty list.
    */
   private List<String> getResourceRolesRequired(String[] classNameWithMethod, String uri) {
     List<String> combination = getClassAndMethodNames(classNameWithMethod);
