@@ -30,7 +30,7 @@ describe('My seedlots page', () => {
       .should('have.text', 'My Seedlots');
   });
 
-  it.only('should sort table columns in ascending and descinding order', () => {
+  it('should sort table columns in ascending and descinding order - Seedlot number', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
     // Arrow button test
@@ -75,6 +75,35 @@ describe('My seedlots page', () => {
       .find('td:nth-child(1)').then(($seedlotNum) => {
         const descendingSecondRow: string = $seedlotNum.text();
         expect(parseInt(descendingFirstRow, 10)).to.be.greaterThan(parseInt(descendingSecondRow, 10));
+      });
+  });
+
+  it.only('should sort table columns in ascending and descinding order - Seedlot species', () => {
+    let ascendingFirstRow: string;
+
+    // Sorting test
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-seedlotSpecies')
+      .click();
+
+    cy.get('table.seedlot-data-table tbody tr')
+      .as('tableContent');
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(3)').then(($seedlotSpecies) => {
+        ascendingFirstRow = $seedlotSpecies.text();
+      });
+
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-seedlotNumber')
+      .click();
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(3)').then(($seedlotSpecies) => {
+        const descendingFirstRow: string = $seedlotSpecies.text();
+        expect(ascendingFirstRow.charCodeAt(0)).to.be.at.most(descendingFirstRow.charCodeAt(0));
       });
   });
 
