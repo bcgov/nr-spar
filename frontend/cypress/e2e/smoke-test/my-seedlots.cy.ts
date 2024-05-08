@@ -78,7 +78,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it.only('should sort table columns in ascending and descinding order - Seedlot species', () => {
+  it('should sort table columns in ascending and descinding order - Seedlot species', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -107,7 +107,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('should sort table columns in ascending and descinding order - Seedlot species', () => {
+  it('should sort table columns in ascending and descinding order - Seedlot status', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -133,6 +133,37 @@ describe('My seedlots page', () => {
       .find('td:nth-child(4)').then(($seedlotStatus) => {
         const descendingFirstRow: string = $seedlotStatus.text();
         expect(ascendingFirstRow.charCodeAt(0)).to.be.at.most(descendingFirstRow.charCodeAt(0));
+      });
+  });
+
+  it.only('should sort table columns in ascending and descinding order - Created At', () => {
+    let ascendingFirstRow: string;
+
+    // Sorting test
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-createdAt')
+      .click();
+
+    cy.get('table.seedlot-data-table tbody tr')
+      .as('tableContent');
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(5)').then(($seedlotDate) => {
+        ascendingFirstRow = $seedlotDate.text();
+      });
+
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-createdAt')
+      .click();
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(5)').then(($seedlotDate) => {
+        const descendingFirstRow: string = $seedlotDate.text();
+        const ascendingDate = new Date(ascendingFirstRow);
+        const descendingDate = new Date(descendingFirstRow);
+        expect(ascendingDate).to.be.at.most(descendingDate);
       });
   });
 
