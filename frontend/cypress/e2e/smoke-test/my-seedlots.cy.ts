@@ -96,13 +96,42 @@ describe('My seedlots page', () => {
       });
 
     cy.get('table.seedlot-data-table')
-      .find('#seedlot-table-header-seedlotNumber')
+      .find('#seedlot-table-header-seedlotSpecies')
       .click();
 
     cy.get('@tableContent')
       .eq(0)
       .find('td:nth-child(3)').then(($seedlotSpecies) => {
         const descendingFirstRow: string = $seedlotSpecies.text();
+        expect(ascendingFirstRow.charCodeAt(0)).to.be.at.most(descendingFirstRow.charCodeAt(0));
+      });
+  });
+
+  it('should sort table columns in ascending and descinding order - Seedlot species', () => {
+    let ascendingFirstRow: string;
+
+    // Sorting test
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-seedlotStatus')
+      .click();
+
+    cy.get('table.seedlot-data-table tbody tr')
+      .as('tableContent');
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(4)').then(($seedlotStatus) => {
+        ascendingFirstRow = $seedlotStatus.text();
+      });
+
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-seedlotStatus')
+      .click();
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(4)').then(($seedlotStatus) => {
+        const descendingFirstRow: string = $seedlotStatus.text();
         expect(ascendingFirstRow.charCodeAt(0)).to.be.at.most(descendingFirstRow.charCodeAt(0));
       });
   });
