@@ -61,6 +61,14 @@
     }
   }
 
+  .applicant-error-row {
+    .applicant-error-notification {
+      max-inline-size: none;
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+    }
+  }
+
   .applicant-client-search-row {
     margin-bottom: 3rem;
 

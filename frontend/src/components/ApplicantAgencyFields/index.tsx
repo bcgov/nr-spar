@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { AxiosError } from 'axios';
 import {
   Row, Column, TextInput, Checkbox, Tooltip,
-  InlineLoading, FlexGrid
+  InlineLoading, ActionableNotification, FlexGrid
 } from '@carbon/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import validator from 'validator';
@@ -17,7 +18,7 @@ import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/sh
 import { getForestClientLabel } from '../../utils/ForestClientUtils';
 
 import ApplicantAgencyFieldsProps from './definitions';
-import supportTexts from './constants';
+import supportTexts, { getErrorMessageTitle } from './constants';
 import { formatLocationCode } from './utils';
 
 import './styles.scss';
@@ -29,6 +30,9 @@ const ApplicantAgencyFields = ({
 }: ApplicantAgencyFieldsProps) => {
   const [showSuccessIconAgency, setShowSuccessIconAgency] = useState<boolean>(true);
   const [showSuccessIconLocCode, setShowSuccessIconLocCode] = useState<boolean>(false);
+
+  const [showErrorBanner, setShowErrorBanner] = useState<boolean>(true);
+
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCode.isInvalid && agency.value
       ? supportTexts.locationCode.invalidLocationForSelectedAgency
@@ -78,21 +82,33 @@ const ApplicantAgencyFields = ({
       queryParams[0],
       queryParams[1]
     ),
-    onError: () => {
+    onError: (err: AxiosError) => {
+      // Request failed
+      if (err.response?.status !== 404) {
+        setShowErrorBanner(true);
+      }
       setInvalidLocationMessage(supportTexts.locationCode.invalidLocationForSelectedAgency);
       updateAfterLocValidation(true);
     },
-    onSuccess: () => updateAfterLocValidation(false)
+    onSuccess: () => {
+      setShowErrorBanner(false);
+      updateAfterLocValidation(false);
+    }
   });
 
   const validateAgencyAcronymMutation = useMutation({
     mutationFn: (queryParams: string[]) => getForestClientByNumberOrAcronym(
       queryParams[0]
     ),
-    onError: () => {
+    onError: (err: AxiosError) => {
+      // Request failed
+      if (err.response?.status !== 404) {
+        setShowErrorBanner(true);
+      }
       updateAfterAgencyValidation(true);
     },
     onSuccess: (res) => {
+      setShowErrorBanner(false);
       updateAfterAgencyValidation(false, res);
       if (locationCode.value !== '') {
         validateLocationCodeMutation.mutate([res.clientNumber, locationCode.value]);
@@ -212,6 +228,11 @@ const ApplicantAgencyFields = ({
 
   const handleLocationCodeBlur = (value: string) => {
     const formatedCode = value.length ? formatLocationCode(value) : '';
+    const updatedLocationCode = {
+      ...locationCode,
+      isInvalid: false
+    };
+    setAgencyAndCode(isDefault, agency, updatedLocationCode);
     if (formatedCode === '') return;
     setShowSuccessIconLocCode(true);
     validateLocationCodeMutation.mutate([agency.value.code, formatedCode]);
@@ -328,6 +349,33 @@ const ApplicantAgencyFields = ({
           </div>
         </Column>
       </Row>
+      {
+        showErrorBanner
+          ? (
+            <Row className="applicant-error-row">
+              <Column sm={4} md={4} lg={12} xlg={12}>
+                <ActionableNotification
+                  className="applicant-error-notification"
+                  lowContrast
+                  inline
+                  kind="error"
+                  title={getErrorMessageTitle(validateAgencyAcronymMutation.isError ? 'Agency acronym' : 'Location code')}
+                  subtitle="something fucked up"
+                  actionButtonLabel="Retry"
+                  onActionButtonClick={() => {
+                    if (validateAgencyAcronymMutation.isError) {
+                      handleAgencyBlur(agency.value.label);
+                    } else {
+                      handleLocationCodeBlur(locationCode.value);
+                    }
+                  }}
+                  onCloseButtonClick={() => { setShowErrorBanner(false); }}
+                />
+              </Column>
+            </Row>
+          )
+          : null
+      }
       {
         !isDefault.value && !readOnly
           ? (
