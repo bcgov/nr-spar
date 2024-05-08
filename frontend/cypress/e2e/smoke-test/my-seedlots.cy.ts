@@ -136,7 +136,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it.only('should sort table columns in ascending and descinding order - Created At', () => {
+  it('should sort table columns in ascending and descinding order - Created at', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -149,8 +149,8 @@ describe('My seedlots page', () => {
 
     cy.get('@tableContent')
       .eq(0)
-      .find('td:nth-child(5)').then(($seedlotDate) => {
-        ascendingFirstRow = $seedlotDate.text();
+      .find('td:nth-child(5)').then(($createdDate) => {
+        ascendingFirstRow = $createdDate.text();
       });
 
     cy.get('table.seedlot-data-table')
@@ -159,8 +159,39 @@ describe('My seedlots page', () => {
 
     cy.get('@tableContent')
       .eq(0)
-      .find('td:nth-child(5)').then(($seedlotDate) => {
-        const descendingFirstRow: string = $seedlotDate.text();
+      .find('td:nth-child(5)').then(($createdDate) => {
+        const descendingFirstRow: string = $createdDate.text();
+        const ascendingDate = new Date(ascendingFirstRow);
+        const descendingDate = new Date(descendingFirstRow);
+        expect(ascendingDate).to.be.at.most(descendingDate);
+      });
+  });
+
+  it.only('should sort table columns in ascending and descinding order - Last updated', () => {
+    let ascendingFirstRow: string;
+
+    // Sorting test
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-lastUpdatedAt')
+      .click();
+
+    cy.get('table.seedlot-data-table tbody tr')
+      .as('tableContent');
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(6)').then(($updatedDate) => {
+        ascendingFirstRow = $updatedDate.text();
+      });
+
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-lastUpdatedAt')
+      .click();
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(6)').then(($updatedDate) => {
+        const descendingFirstRow: string = $updatedDate.text();
         const ascendingDate = new Date(ascendingFirstRow);
         const descendingDate = new Date(descendingFirstRow);
         expect(ascendingDate).to.be.at.most(descendingDate);
