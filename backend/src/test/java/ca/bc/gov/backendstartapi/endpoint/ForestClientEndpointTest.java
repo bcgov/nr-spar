@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(ForestClientEndpoint.class)
-@WithMockUser(roles = "user_read")
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class ForestClientEndpointTest {
 
   @Autowired private MockMvc mockMvc;

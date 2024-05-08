@@ -20,6 +20,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(MethodOfPaymentEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class MethodOfPaymentEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -34,7 +35,6 @@ class MethodOfPaymentEndpointTest {
 
   @Test
   @DisplayName("getAllMethodOfPaymentTest")
-  @WithMockUser(roles = "user_read")
   void getAllMethodOfPaymentTest() throws Exception {
 
     MethodOfPaymentDto firstMethod =

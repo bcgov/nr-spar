@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.TscAdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,6 +57,7 @@ public class TscAdminEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ResponseEntity<List<Seedlot>> getSeedlotsForReviewing(
       @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
       @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
@@ -81,7 +83,6 @@ public class TscAdminEndpoint {
    * @param isApproved Boolean option defining if it was approved.
    */
   @PostMapping("/seedlots/{seedlotNumber}/approve/{isApproved}")
-  @PreAuthorize("hasRole('SPAR_TSC_ADMIN')")
   @Operation(
       summary = "Enables a Seedlot registration approval or disapproval by the TSC Admin.",
       description = "The TSC Admin can either approve or disapprove a `Seedlot` registration.",
@@ -99,6 +100,7 @@ public class TscAdminEndpoint {
             description = "The Seedlot was not found",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig("SPAR_TSC_ADMIN")
   public ResponseEntity<Void> approveOrDisapproveSeedlot(
       @Parameter(
               name = "seedlotNumber",

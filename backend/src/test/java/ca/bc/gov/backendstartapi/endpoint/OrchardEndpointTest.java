@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(OrchardEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class OrchardEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -34,7 +35,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getParentTreeGeneticQualityDataSuccessTest")
-  @WithMockUser(roles = "user_read")
   void getParentTreeGeneticQualityDataSuccessTest() throws Exception {
     String orchardId = "123";
 
@@ -57,7 +57,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getParentTreeGeneticQualityDataNotFoundTest")
-  @WithMockUser(roles = "user_read")
   void getParentTreeGeneticQualityDataNotFoundTest() throws Exception {
     String orchardId = "222";
 
@@ -77,7 +76,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getParentTreeGeneticQualityDataNoSpuTest")
-  @WithMockUser(roles = "user_read")
   void getParentTreeGeneticQualityDataNoSpuTest() throws Exception {
     String orchardId = "222";
 
@@ -97,7 +95,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findOrchardsWithVegCodeSuccessTest")
-  @WithMockUser(roles = "user_read")
   void findOrchardsWithVegCodeTest() throws Exception {
     String vegCode = "PLI";
 
@@ -132,7 +129,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findOrchardsWithVegCodeNotFoundTest")
-  @WithMockUser(roles = "user_read")
   void findOrchardsWithVegCodeNotFoundTest() throws Exception {
     String vegCode = "BEEF";
 
@@ -150,7 +146,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getAllParentTreeByVegCodeTest")
-  @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeTest() throws Exception {
     String vegCode = "PLI";
 
@@ -179,7 +174,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getAllParentTreeByVegCodeErrorTest")
-  @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeErrorTest() throws Exception {
     String vegCode = "LAMB";
 

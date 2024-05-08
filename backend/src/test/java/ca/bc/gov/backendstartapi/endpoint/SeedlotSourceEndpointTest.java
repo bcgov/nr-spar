@@ -20,6 +20,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(SeedlotSourceEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class SeedlotSourceEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -34,7 +35,6 @@ class SeedlotSourceEndpointTest {
 
   @Test
   @DisplayName("getAllSeedlotSource")
-  @WithMockUser(roles = "user_read")
   void getAllSeedlotSource() throws Exception {
 
     SeedlotSourceDto firstMethod = new SeedlotSourceDto("CUS", "Custom Lot", null);
