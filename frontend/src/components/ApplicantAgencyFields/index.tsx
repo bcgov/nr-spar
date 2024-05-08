@@ -32,6 +32,9 @@ const ApplicantAgencyFields = ({
   const [showSuccessIconLocCode, setShowSuccessIconLocCode] = useState<boolean>(false);
 
   const [showErrorBanner, setShowErrorBanner] = useState<boolean>(true);
+  const [invalidAcronymMessage, setInvalidAcronymMessage] = useState<string>(
+    supportTexts.agency.invalidAcronym
+  );
 
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCode.isInvalid && agency.value
@@ -86,8 +89,10 @@ const ApplicantAgencyFields = ({
       // Request failed
       if (err.response?.status !== 404) {
         setShowErrorBanner(true);
+        setInvalidLocationMessage(supportTexts.locationCode.requestErrorHelper);
+      } else {
+        setInvalidLocationMessage(supportTexts.locationCode.invalidLocationForSelectedAgency);
       }
-      setInvalidLocationMessage(supportTexts.locationCode.invalidLocationForSelectedAgency);
       updateAfterLocValidation(true);
     },
     onSuccess: () => {
@@ -104,6 +109,9 @@ const ApplicantAgencyFields = ({
       // Request failed
       if (err.response?.status !== 404) {
         setShowErrorBanner(true);
+        setInvalidAcronymMessage(supportTexts.agency.requestErrorHelper);
+      } else {
+        setInvalidAcronymMessage(supportTexts.agency.invalidAcronym);
       }
       updateAfterAgencyValidation(true);
     },
@@ -288,7 +296,7 @@ const ApplicantAgencyFields = ({
               value={isFormSubmitted ? queriedAgency.label : agency.value.label}
               helperText={(readOnly || isDefault.value) ? null : supportTexts.agency.helperText}
               invalid={agency.isInvalid}
-              invalidText={supportTexts.agency.invalidAcronym}
+              invalidText={invalidAcronymMessage}
               readOnly={isDefault.value || readOnly}
               enableCounter
               maxCount={8}
