@@ -226,8 +226,8 @@ const ContextContainerClassA = ({ children }: props) => {
 
   const getAgencyObj = (): MultiOptionsObj => ({
     code: forestClientQuery.data?.clientNumber ?? '',
-    description: forestClientQuery.data?.clientName ?? '',
-    label: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`
+    description: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`,
+    label: forestClientQuery.data?.acronym ?? ''
   });
 
   const getDefaultLocationCode = (): string => (seedlotQuery.data?.applicantLocationCode ?? '');

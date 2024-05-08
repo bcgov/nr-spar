@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Row, Column, TextInput, Checkbox,
+  Row, Column, TextInput, Checkbox, Tooltip,
   InlineLoading, FlexGrid
 } from '@carbon/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import validator from 'validator';
 
 import ClientSearchModal from './ClientSearchModal';
-import VerificationInput from '../VerificationInput';
 
 import { getForestClientByNumberOrAcronym, getForestClientLocation } from '../../api-service/forestClientsAPI';
 
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
+import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { getForestClientLabel } from '../../utils/ForestClientUtils';
 
@@ -27,22 +27,40 @@ const ApplicantAgencyFields = ({
   defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize,
   isFormSubmitted
 }: ApplicantAgencyFieldsProps) => {
-  const [invalidClientAcronym, setInvalidClientAcronym] = useState<string>('');
+  const [showSuccessIconAgency, setShowSuccessIconAgency] = useState<boolean>(true);
+  const [showSuccessIconLocCode, setShowSuccessIconLocCode] = useState<boolean>(false);
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
     locationCode.isInvalid && agency.value
       ? supportTexts.locationCode.invalidLocationForSelectedAgency
       : supportTexts.locationCode.invalidText
   );
-
   const [locationCodeHelperText, setLocationCodeHelperText] = useState<string>(
     supportTexts.locationCode.helperTextDisabled
   );
 
-  const updateAfterAgencyValidation = (isInvalid: boolean) => {
-    const updatedAgency = {
-      ...agency,
-      isInvalid
-    };
+  const updateAfterAgencyValidation = (isInvalid: boolean, clientData?: ForestClientType) => {
+    let updatedAgency;
+    if (clientData) {
+      updatedAgency = {
+        ...agency,
+        value: {
+          label: clientData.acronym,
+          code: clientData.clientNumber,
+          description: `${clientData.clientNumber} - ${clientData.clientName} - ${clientData.acronym}`
+        },
+        isInvalid
+      };
+    } else {
+      updatedAgency = {
+        ...agency,
+        isInvalid
+      };
+    }
+    setLocationCodeHelperText(
+      clientData
+        ? supportTexts.locationCode.helperTextEnabled
+        : supportTexts.locationCode.helperTextDisabled
+    );
     setAgencyAndCode(isDefault, updatedAgency, locationCode);
   };
 
@@ -55,20 +73,6 @@ const ApplicantAgencyFields = ({
     setAgencyAndCode(isDefault, agency, updatedLocationCode);
   };
 
-  const validateAgencyAcronymMutation = useMutation({
-    mutationFn: (queryParams: string[]) => getForestClientByNumberOrAcronym(
-      queryParams[0]
-    ),
-    onError: () => {
-      setInvalidClientAcronym(supportTexts.agency.invalidAcronym);
-      updateAfterAgencyValidation(true);
-    },
-    onSuccess: (res) => {
-      console.log(res);
-      updateAfterAgencyValidation(false);
-    }
-  });
-
   const validateLocationCodeMutation = useMutation({
     mutationFn: (queryParams: string[]) => getForestClientLocation(
       queryParams[0],
@@ -79,6 +83,21 @@ const ApplicantAgencyFields = ({
       updateAfterLocValidation(true);
     },
     onSuccess: () => updateAfterLocValidation(false)
+  });
+
+  const validateAgencyAcronymMutation = useMutation({
+    mutationFn: (queryParams: string[]) => getForestClientByNumberOrAcronym(
+      queryParams[0]
+    ),
+    onError: () => {
+      updateAfterAgencyValidation(true);
+    },
+    onSuccess: (res) => {
+      updateAfterAgencyValidation(false, res);
+      if (locationCode.value !== '') {
+        validateLocationCodeMutation.mutate([res.clientNumber, locationCode.value]);
+      }
+    }
   });
 
   const handleDefaultCheckBox = (checked: boolean) => {
@@ -105,39 +124,61 @@ const ApplicantAgencyFields = ({
       value: checked
     };
 
+    setShowSuccessIconAgency(checked);
+    setShowSuccessIconLocCode(checked);
     setAgencyAndCode(updatedIsDefault, updatedAgency, updatedLocationCode);
   };
 
   const updateAgencyFn = (value: string) => (
     {
       ...agency,
+      isInvalid: false,
       value: value
         ? {
           ...EmptyMultiOptObj,
-          description: value
+          label: value
         }
-        : EmptyMultiOptObj,
-      isInvalid: false
+        : EmptyMultiOptObj
     }
   );
 
-  const handleAgencyInput = (value: string) => {
-    setLocationCodeHelperText(
-      value
-        ? supportTexts.locationCode.helperTextEnabled
-        : supportTexts.locationCode.helperTextDisabled
-    );
+  const renderLoading = (
+    isLoading: boolean,
+    isSuccess: boolean,
+    showSuccessControl: boolean
+  ) => {
+    if (
+      (isLoading || isSuccess)
+      && showSuccessControl
+      && !isDefault.value
+    ) {
+      const tooltipLabel = isSuccess ? 'Verified!' : 'Loading';
+      const loadingStatus = isSuccess ? 'finished' : 'active';
+      return (
+        <Tooltip
+          className="input-loading-tooltip"
+          label={tooltipLabel}
+        >
+          {
+            // eslint-disable-next-line jsx-a11y/control-has-associated-label
+            <button className="tooltip-trigger" type="button">
+              <InlineLoading
+                status={loadingStatus}
+              />
+            </button>
+          }
+        </Tooltip>
+      );
+    }
+    return null;
+  };
 
+  const handleAgencyInput = (value: string) => {
     // Create a "mock" MultiOptObj, just to display
     // the correct acronym
     const updatedAgency = updateAgencyFn(value);
 
-    const updatedLocationCode = {
-      ...locationCode,
-      value: value ? locationCode.value : ''
-    };
-
-    setAgencyAndCode(isDefault, updatedAgency, updatedLocationCode);
+    setAgencyAndCode(isDefault, updatedAgency, locationCode);
   };
 
   const handleAgencyBlur = (value: string) => {
@@ -146,13 +187,14 @@ const ApplicantAgencyFields = ({
 
     if (value === '') return;
 
+    setShowSuccessIconAgency(true);
     validateAgencyAcronymMutation.mutate([value]);
   };
 
   const handleLocationCodeChange = (value: string) => {
     const updatedValue = value.slice(0, LOCATION_CODE_LIMIT);
     const isInRange = validator.isInt(value, { min: 0, max: 99 });
-    let updatedIsInvalid = locationCode.isInvalid;
+    let updatedIsInvalid = false;
 
     if (!isInRange) {
       setInvalidLocationMessage(supportTexts.locationCode.invalidText);
@@ -170,17 +212,8 @@ const ApplicantAgencyFields = ({
 
   const handleLocationCodeBlur = (value: string) => {
     const formatedCode = value.length ? formatLocationCode(value) : '';
-    const updatedLocationCode = {
-      ...locationCode,
-      value: formatedCode,
-      isInvalid: true
-    };
-
-    setAgencyAndCode(isDefault, agency, updatedLocationCode);
-
     if (formatedCode === '') return;
-
-    setLocationCodeHelperText('');
+    setShowSuccessIconLocCode(true);
     validateLocationCodeMutation.mutate([agency.value.code, formatedCode]);
   };
 
@@ -196,8 +229,8 @@ const ApplicantAgencyFields = ({
     if (forestClientQuery.status === 'success') {
       setQueriedAgency({
         code: forestClientQuery.data?.clientNumber ?? '',
-        description: forestClientQuery.data?.clientName ?? '',
-        label: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`
+        description: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}` ?? '',
+        label: forestClientQuery.data?.acronym
       });
     }
   }, [forestClientQuery.isFetched]);
@@ -225,64 +258,74 @@ const ApplicantAgencyFields = ({
           : null
       }
       <Row className="agency-information-row">
-        <Column sm={4} md={8} lg={8} xlg={8}>
-          <VerificationInput inputLabel="test label" helperText="test helper" />
-        </Column>
-      </Row>
-      <Row className="agency-information-row">
         <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
-          <TextInput
-            className="agency-input"
-            id={agency.id}
-            labelText={fieldsProps.agencyInput.titleText}
-            helperText={readOnly ? null : supportTexts.agency.helperText}
-            invalid={agency.isInvalid}
-            invalidText={invalidClientAcronym}
-            readOnly={isDefault.value || readOnly}
-            // If the value set is empty, the field continues
-            // interactive on read only mode, so we disable it instead
-            disabled={(isDefault.value && agency.value.code === '')}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAgencyInput(e.target.value)}
-            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (!e.target.readOnly) {
-                handleAgencyBlur(e.target.value);
+          <div className="loading-input-wrapper">
+            <TextInput
+              className="agency-input"
+              id={agency.id}
+              labelText={fieldsProps.agencyInput.titleText}
+              value={isFormSubmitted ? queriedAgency.label : agency.value.label}
+              helperText={(readOnly || isDefault.value) ? null : supportTexts.agency.helperText}
+              invalid={agency.isInvalid}
+              invalidText={supportTexts.agency.invalidAcronym}
+              readOnly={isDefault.value || readOnly}
+              enableCounter
+              maxCount={8}
+              onChange={
+                (e: React.ChangeEvent<HTMLInputElement>) => handleAgencyInput(e.target.value)
               }
-            }}
-            size="md"
-          />
+              onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+              onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (!e.target.readOnly) {
+                  handleAgencyBlur(e.target.value);
+                }
+              }}
+              size="md"
+            />
+            {
+              renderLoading(
+                validateAgencyAcronymMutation.isLoading,
+                validateAgencyAcronymMutation.isSuccess,
+                showSuccessIconAgency
+              )
+            }
+          </div>
         </Column>
         <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
-          <TextInput
-            className={readOnly ? 'spar-display-only-input' : 'location-code-input'}
-            id={locationCode.id}
-            name={fieldsProps.locationCode.name}
-            value={locationCode.value}
-            type="number"
-            placeholder={!agency.value.code ? '' : supportTexts.locationCode.placeholder}
-            labelText={fieldsProps.locationCode.labelText}
-            helperText={(readOnly || isDefault.value) ? null : locationCodeHelperText}
-            invalid={locationCode.isInvalid}
-            invalidText={(isDefault.value && locationCode.value === '')
-              ? supportTexts.locationCode.invalidTextInterimSpecific
-              : invalidLocationMessage}
-            readOnly={(isDefault.value && locationCode.value !== '') || readOnly}
-            disabled={!agency.value.code || (isDefault.value && locationCode.value === '')}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              handleLocationCodeChange(e.target.value);
-            }}
-            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (!e.target.readOnly) {
-                handleLocationCodeBlur(e.target.value);
-              }
-            }}
-          />
-          {
-            validateLocationCodeMutation.isLoading
-              ? <InlineLoading description="Validating..." />
-              : null
-          }
+          <div className="loading-input-wrapper">
+            <TextInput
+              className={readOnly ? 'spar-display-only-input' : 'location-code-input'}
+              id={locationCode.id}
+              name={fieldsProps.locationCode.name}
+              value={locationCode.value}
+              type="number"
+              placeholder={!agency.value.code ? '' : supportTexts.locationCode.placeholder}
+              labelText={fieldsProps.locationCode.labelText}
+              helperText={(readOnly || isDefault.value) ? null : locationCodeHelperText}
+              invalid={locationCode.isInvalid}
+              invalidText={(isDefault.value && locationCode.value === '')
+                ? supportTexts.locationCode.invalidTextInterimSpecific
+                : invalidLocationMessage}
+              readOnly={(isDefault.value && locationCode.value !== '') || readOnly}
+              disabled={!agency.value.code || (isDefault.value && locationCode.value === '')}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                handleLocationCodeChange(e.target.value);
+              }}
+              onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+              onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (!e.target.readOnly) {
+                  handleLocationCodeBlur(e.target.value);
+                }
+              }}
+            />
+            {
+              renderLoading(
+                validateLocationCodeMutation.isLoading,
+                validateLocationCodeMutation.isSuccess,
+                showSuccessIconLocCode
+              )
+            }
+          </div>
         </Column>
       </Row>
       {
@@ -299,8 +342,8 @@ const ApplicantAgencyFields = ({
                     applySelectedClient={(client: ForestClientSearchType) => {
                       const agencyObj: MultiOptionsObj = {
                         code: client.clientNumber,
-                        label: getForestClientLabel(client),
-                        description: client.clientName
+                        label: client.acronym,
+                        description: getForestClientLabel(client)
                       };
 
                       const selectedAgency = {
