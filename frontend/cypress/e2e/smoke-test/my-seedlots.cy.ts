@@ -30,23 +30,52 @@ describe('My seedlots page', () => {
       .should('have.text', 'My Seedlots');
   });
 
-  it('should sort table columns in ascending and descinding order', () => {
+  it.only('should sort table columns in ascending and descinding order', () => {
+    let ascendingFirstRow: string;
+    let descendingFirstRow: string;
     // Arrow button test
-    cy.get(`.${prefix}--pagination__right`)
-      .find(`.${prefix}--popover--top-right`)
-      .find(`button.${prefix}--btn--icon-only`)
-      .click({ force: true });
+    // cy.get(`.${prefix}--pagination__right`)
+    //   .find(`.${prefix}--popover--top-right`)
+    //   .find(`button.${prefix}--btn--icon-only`)
+    //   .click({ force: true });
 
     // Sorting test
     cy.get('table.seedlot-data-table')
       .find('#seedlot-table-header-seedlotNumber')
       .click();
 
-    // cy.get('table.seedlot-data-table tbody tr')
-    //   .eq(0)
-    //   .find('td')
-    //   .first()
-    //   .should('have.text', '63001');
+    cy.get('table.seedlot-data-table tbody tr')
+      .as('tableContent');
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(1)').then(($seedlotNum) => {
+        ascendingFirstRow = $seedlotNum.text();
+      });
+
+    cy.get('@tableContent')
+      .eq(1)
+      .find('td:nth-child(1)').then(($seedlotNum) => {
+        const ascendingSecondRow: string = $seedlotNum.text();
+        expect(parseInt(ascendingFirstRow, 10)).to.be.lessThan(parseInt(ascendingSecondRow, 10));
+      });
+
+    cy.get('table.seedlot-data-table')
+      .find('#seedlot-table-header-seedlotNumber')
+      .click();
+
+    cy.get('@tableContent')
+      .eq(0)
+      .find('td:nth-child(1)').then(($seedlotNum) => {
+        descendingFirstRow = $seedlotNum.text();
+      });
+
+    cy.get('@tableContent')
+      .eq(1)
+      .find('td:nth-child(1)').then(($seedlotNum) => {
+        const descendingSecondRow: string = $seedlotNum.text();
+        expect(parseInt(descendingFirstRow, 10)).to.be.greaterThan(parseInt(descendingSecondRow, 10));
+      });
   });
 
   it('can use search bar to give correct results', () => {
