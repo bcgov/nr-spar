@@ -30,14 +30,17 @@ describe('My seedlots page', () => {
       .should('have.text', 'My Seedlots');
   });
 
+  it('arrow button works correctly', () => {
+    // Arrow button test
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`.${prefix}--popover--top-right`)
+      .find(`button.${prefix}--btn--icon-only`)
+      .click({ force: true });
+  });
+
   it('should sort table columns in ascending and descinding order - Seedlot number', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
-    // Arrow button test
-    // cy.get(`.${prefix}--pagination__right`)
-    //   .find(`.${prefix}--popover--top-right`)
-    //   .find(`button.${prefix}--btn--icon-only`)
-    //   .click({ force: true });
 
     // Sorting test
     cy.get('table.seedlot-data-table')
@@ -167,7 +170,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it.only('should sort table columns in ascending and descinding order - Last updated', () => {
+  it('should sort table columns in ascending and descinding order - Last updated', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -213,8 +216,11 @@ describe('My seedlots page', () => {
     // Dropdown test
     cy.get(`.${prefix}--pagination__left`)
       .find('select')
-      .select('30')
-      .should('have.value', '30');
+      .as('dropdownBtn')
+      .select('10');
+
+    cy.get('@dropdownBtn')
+      .should('have.value', '10');
   });
 
   it('should be able to select a seedlot row and redirect to its page', () => {
