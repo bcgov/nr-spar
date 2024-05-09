@@ -207,7 +207,7 @@ describe('My seedlots page', () => {
     cy.get('table.seedlot-data-table tbody tr')
       .eq(0)
       .find('td:nth-child(3)')
-      .should('have.text', 'PLI - Lodgepole pine');
+      .should('have.text', fixtureData.pli.species);
   });
 
   it('dropdown button and next page functionality', () => {
@@ -238,7 +238,6 @@ describe('My seedlots page', () => {
   });
 
   it('should be able to select a seedlot row and redirect to its page', () => {
-    // Click on a seedlot row
     cy.get('table.seedlot-data-table tbody tr')
       .as('tableContent');
 
@@ -246,6 +245,7 @@ describe('My seedlots page', () => {
       .eq(3)
       .find('td:nth-child(1)').then(($seedlotRow) => {
         const seedlotNum: string = $seedlotRow.text();
+        // Click on a seedlot row
         cy.get('@tableContent')
           .find(`#seedlot-table-cell-${seedlotNum}-seedlotNumber`)
           .click();
@@ -262,8 +262,8 @@ describe('My seedlots page', () => {
       .invoke('text')
       .then((text) => {
         // Perform further manipulations on the text to get substring
-        const startIndex = text.indexOf('f') + 1; // Index after "of" plus 1 for the space
-        const endIndex = text.indexOf('i'); // Index before "items" minus 1 for the space
+        const startIndex = text.indexOf('f') + 1;
+        const endIndex = text.indexOf('i');
         const substring = text.substring(startIndex, endIndex).trim();
         expect(parseInt(substring, 10)).to.be.gte(cypressSeedlots);
       });
