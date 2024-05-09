@@ -4,6 +4,7 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -25,7 +26,8 @@ public class SeedlotOrchardService {
    * @param seedlot The {@link Seedlot} related
    * @param formStep4 The {@link SeedlotFormOrchardDto} to be saved
    */
-  public void saveSeedlotFormStep4(Seedlot seedlot, SeedlotFormOrchardDto formStep4) {
+  public void saveSeedlotFormStep4(
+      Seedlot seedlot, SeedlotFormOrchardDto formStep4, Boolean canDelete) {
     SparLog.info("Saving Seedlot Form Step 4-Orchard for seedlot number {}", seedlot.getId());
 
     seedlot.setFemaleGameticContributionMethod(formStep4.femaleGameticMthdCode());
@@ -50,13 +52,16 @@ public class SeedlotOrchardService {
     }
     List<SeedlotOrchard> seedlotOrchards = getAllSeedlotOrchardBySeedlotNumber(seedlot.getId());
 
-    if (!seedlotOrchards.isEmpty()) {
+    if (!seedlotOrchards.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SeedlotOrchard table for seedlot number {}",
           seedlotOrchards.size(),
           seedlot.getId());
 
       seedlotOrchardRepository.deleteAllBySeedlot_id(seedlot.getId());
+    } else if (!seedlotOrchards.isEmpty() && !canDelete) {
+      SparLog.info("Update seedlot {} orchard data failed due to conflict.", seedlot.getId());
+      throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     saveSeedlotOrchards(seedlot, formStep4.primaryOrchardId(), formStep4.secondaryOrchardId());

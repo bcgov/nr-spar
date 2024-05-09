@@ -27,13 +27,16 @@ public class SmpMixService {
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
   public List<SmpMix> saveSeedlotFormStep5(
-      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
+      Boolean canDelete) {
     SparLog.info("Saving SmpMix for seedlot number {}", seedlot.getId());
 
-    return addSmpMix(seedlot, seedlotFormParentTreeDtoList);
+    return addSmpMix(seedlot, seedlotFormParentTreeDtoList, canDelete);
   }
 
-  private List<SmpMix> addSmpMix(Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> formDtos) {
+  private List<SmpMix> addSmpMix(
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> formDtos, Boolean canDelete) {
     if (formDtos.isEmpty()) {
       SparLog.info(
           "No new records to be inserted on the SmpMix table for seedlot number {}",

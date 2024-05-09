@@ -26,7 +26,6 @@ import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
-import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
 import ca.bc.gov.backendstartapi.util.ModelMapper;
@@ -56,8 +55,6 @@ public class OrchardService {
 
   private SeedPlanUnitRepository seedPlanUnitRepository;
 
-  private SeedPlanZoneRepository seedPlanZoneRepository;
-
   OrchardService(
       OrchardRepository orchardRepository,
       ParentTreeOrchardRepository parentTreeOrchardRepository,
@@ -65,8 +62,7 @@ public class OrchardService {
       ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
       TestedPtAreaofUseRepository testedPtAreaofUseRepository,
       TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository,
-      SeedPlanUnitRepository seedPlanUnitRepository,
-      SeedPlanZoneRepository seedPlanZoneRepository) {
+      SeedPlanUnitRepository seedPlanUnitRepository) {
     this.orchardRepository = orchardRepository;
     this.parentTreeOrchardRepository = parentTreeOrchardRepository;
     this.parentTreeRepository = parentTreeRepository;
@@ -74,7 +70,6 @@ public class OrchardService {
     this.testedPtAreaofUseRepository = testedPtAreaofUseRepository;
     this.testedPtAreaOfUseSpzRepository = testedPtAreaOfUseSpzRepository;
     this.seedPlanUnitRepository = seedPlanUnitRepository;
-    this.seedPlanZoneRepository = seedPlanZoneRepository;
   }
 
   /**

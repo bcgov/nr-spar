@@ -84,7 +84,8 @@ class SmpMixGeneticQualityServiceTest {
             new BigDecimal("0.7"),
             List.of(qualityDto));
 
-    smpMixGeneticQualityService.saveSeedlotFormStep5(seedlot, List.of(seedlotFormParentTreeDto));
+    smpMixGeneticQualityService.saveSeedlotFormStep5(
+        seedlot, List.of(seedlotFormParentTreeDto), false);
 
     verify(smpMixGeneticQualityRepository, times(1)).saveAll(any());
   }

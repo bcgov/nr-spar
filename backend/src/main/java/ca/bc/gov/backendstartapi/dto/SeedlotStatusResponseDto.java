@@ -2,9 +2,9 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/** This class represents the response body returned when creating a Seedlot. */
-@Schema(description = "This class represents the response body returned when creating a Seedlot.")
-public record SeedlotCreateResponseDto(
+/** This class represents the response body returned when udpating a Seedlot. */
+@Schema(description = "This class represents the response body returned when udpating a Seedlot.")
+public record SeedlotStatusResponseDto(
     @Schema(
             description =
                 """

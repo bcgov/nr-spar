@@ -72,7 +72,7 @@ class SmpMixServiceTest {
             0);
     when(smpMixRepository.saveAll(any())).thenReturn(List.of(smpMix));
 
-    List<SmpMix> list = smpMixService.saveSeedlotFormStep5(seedlot, List.of(formStep5));
+    List<SmpMix> list = smpMixService.saveSeedlotFormStep5(seedlot, List.of(formStep5), false);
 
     Assertions.assertFalse(list.isEmpty());
     Assertions.assertEquals(1, list.size());
@@ -98,7 +98,8 @@ class SmpMixServiceTest {
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
     when(smpMixRepository.saveAll(any())).thenReturn(List.of(smpMix));
 
-    List<SmpMix> list = smpMixService.saveSeedlotFormStep5(seedlot, List.of(createFormDto(4024)));
+    List<SmpMix> list =
+        smpMixService.saveSeedlotFormStep5(seedlot, List.of(createFormDto(4024)), false);
 
     Assertions.assertFalse(list.isEmpty());
     Assertions.assertEquals(1, list.size());

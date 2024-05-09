@@ -7,7 +7,7 @@ import ApiConfig from './ApiConfig';
 import api from './api';
 
 export const putAClassSeedlot = (seedlotNumber: string, payload: SeedlotAClassSubmitType) => {
-  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-submission`;
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-submission`;
   return api.put(url, payload);
 };
 

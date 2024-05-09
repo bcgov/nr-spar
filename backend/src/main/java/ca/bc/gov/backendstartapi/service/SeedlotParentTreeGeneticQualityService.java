@@ -41,14 +41,18 @@ public class SeedlotParentTreeGeneticQualityService {
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
   public void saveSeedlotFormStep5(
-      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
+      Boolean canDelete) {
     SparLog.info("Saving SeedlotParentTreeGeneticQuality for seedlot number {}", seedlot.getId());
 
-    addSeedlotParentTreeGenQlty(seedlot, seedlotFormParentTreeDtoList);
+    addSeedlotParentTreeGenQlty(seedlot, seedlotFormParentTreeDtoList, canDelete);
   }
 
   private void addSeedlotParentTreeGenQlty(
-      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert) {
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert,
+      Boolean canDelete) {
     if (seedlotPtGenQltyToInsert.isEmpty()) {
       SparLog.info(
           "No new records to be inserted on the SeedlotParentTreeGeneticQuality table for seedlot"
@@ -109,7 +113,7 @@ public class SeedlotParentTreeGeneticQualityService {
    * @return A List of {@link SeedlotParentTreeGeneticQuality}
    */
   public List<SeedlotParentTreeGeneticQuality> getAllBySeedlotNumber(String seedlotNumber) {
-    return seedlotParentTreeGeneticQualityRepository
-        .findAllBySeedlotParentTree_Seedlot_id(seedlotNumber);
+    return seedlotParentTreeGeneticQualityRepository.findAllBySeedlotParentTree_Seedlot_id(
+        seedlotNumber);
   }
 }

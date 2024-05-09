@@ -4,11 +4,9 @@ import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
@@ -16,13 +14,12 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
-import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
+import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
-import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
@@ -31,11 +28,9 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
-import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotSeedPlanZoneId;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
-import ca.bc.gov.backendstartapi.exception.SeedlotOrchardNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
@@ -49,7 +44,6 @@ import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -116,11 +110,11 @@ public class SeedlotService {
    * Creates a Seedlot in the database.
    *
    * @param createDto A {@link SeedlotCreateDto} with required fields to create a seedlot.
-   * @return A {@link SeedlotCreateResponseDto} containing the number and the status of the created
+   * @return A {@link SeedlotStatusResponseDto} containing the number and the status of the created
    *     seedlot.
    */
   @Transactional
-  public SeedlotCreateResponseDto createSeedlot(SeedlotCreateDto createDto) {
+  public SeedlotStatusResponseDto createSeedlot(SeedlotCreateDto createDto) {
     SparLog.info("Create Seedlot started.");
 
     Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
@@ -152,7 +146,7 @@ public class SeedlotService {
 
     SparLog.info("New seedlot saved with success!");
 
-    return new SeedlotCreateResponseDto(
+    return new SeedlotStatusResponseDto(
         seedlot.getId(), seedlot.getSeedlotStatus().getSeedlotStatusCode());
   }
 
@@ -523,181 +517,78 @@ public class SeedlotService {
   }
 
   /**
-   * Saved the entire {@link Seedlot} form with all steps.
+   * Save or edit the entire {@link Seedlot} form with all steps.
    *
    * @param seedlotNumber The Seedlot identification
    * @param form The {@link SeedlotFormSubmissionDto} containing all form fields
-   * @return A {@link SeedlotCreateResponseDto} with the seedlot number and status
+   * @param isTscAdmin determines whether this operation is initiated by a tsc admin
+   * @return A {@link SeedlotStatusResponseDto} with the seedlot number and status
    */
   @Transactional
-  public SeedlotCreateResponseDto submitSeedlotForm(
-      String seedlotNumber, SeedlotFormSubmissionDto form) {
-    SparLog.info("Seedlot number {} submitted for saving!", seedlotNumber);
+  public SeedlotStatusResponseDto updateSeedlotWithForm(
+      String seedlotNumber, SeedlotFormSubmissionDto form, Boolean isTscAdmin) {
+
+    if (isTscAdmin) {
+      SparLog.info("Received request by TSC admin to update seedlot {}", seedlotNumber);
+    } else {
+      SparLog.info("Received request to update seedlot {}", seedlotNumber);
+    }
+
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
+
+    String currentSeedlotStauts = seedlot.getSeedlotStatus().getSeedlotStatusCode();
+
+    /*
+     * This determines whether delete actions can be performed
+     * non-tsc users can perform delete actions when the seedlot is in pending or incomplete status
+     * TSC admins can perform delete actions without regard of the seedlot's status
+     */
+    Boolean canDelete =
+        currentSeedlotStauts == "PND" || currentSeedlotStauts == "INC" || isTscAdmin;
 
     /*
      * Merging entities script:
      * 1. Finds all for that seedlot
      * 2. Iterate over the result list
-     * 3. Remove all existing entries except the seedlot row in the seedlot table
-     * 5. Add new ones
+     * 3. If isEdit = true, Remove all existing entries except the seedlot row in the seedlot table
+     * 4. Add new ones
      */
 
     // Collection step 1
-    seedlotCollectionMethodService.saveSeedlotFormStep1(seedlot, form.seedlotFormCollectionDto());
+    seedlotCollectionMethodService.saveSeedlotFormStep1(
+        seedlot, form.seedlotFormCollectionDto(), canDelete);
     // Owner step 2
-    seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, form.seedlotFormOwnershipDtoList());
+    seedlotOwnerQuantityService.saveSeedlotFormStep2(
+        seedlot, form.seedlotFormOwnershipDtoList(), canDelete);
     // Interim Step 3
     saveSeedlotFormStep3(seedlot, form.seedlotFormInterimDto());
     // Orchard Step 4
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto());
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto(), canDelete);
     // Parent Tree Step 5
     saveSeedlotFormStep5(
-        seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+        seedlot,
+        form.seedlotFormParentTreeDtoList(),
+        form.seedlotFormParentTreeSmpDtoList(),
+        canDelete);
     // Extraction Step 6
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
 
+    setAreaOfUse(seedlot);
+
     String submittedStatus = "SUB";
     setSeedlotStatus(seedlot, submittedStatus);
-
-    setSeedlotSpzInformation(seedlot);
 
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
 
     SparLog.info("Seedlot entity and related tables successfully saved.");
-    return new SeedlotCreateResponseDto(
+    return new SeedlotStatusResponseDto(
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
   }
 
-  /**
-   * Get all the seed plan zone information given a seedlot number.
-   *
-   * @param seedlotNumber the Seedlot id
-   * @return A list of {@link SeedPlanZoneDto} containing all records.
-   * @throws SeedlotNotFoundException if seedlot was not found.
-   * @throws SeedlotOrchardNotFoundException if no orchard found for the seedlot.
-   */
-  public List<SeedPlanZoneDto> getSeedPlanZoneData(String seedlotNumber) {
-    SparLog.info("Getting Seed Plan Zone data for seedlot number {}", seedlotNumber);
-
-    SparLog.info("Fetching seedlot entity");
-    Optional<Seedlot> seedlotOp = seedlotRepository.findById(seedlotNumber);
-    if (seedlotOp.isEmpty()) {
-      throw new SeedlotNotFoundException();
-    }
-
-    SparLog.info("Fetching seedlot seed plan zone entity");
-    List<SeedlotSeedPlanZoneEntity> sspzList =
-        seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber);
-
-    SparLog.info("Fetching seedlot orchard entity");
-    List<String> orchardIdList =
-        seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotNumber).stream()
-            .map(SeedlotOrchard::getOrchardId)
-            .toList();
-
-    if (orchardIdList.isEmpty()) {
-      SparLog.warn("No orchard record found for the seedlot");
-      throw new SeedlotOrchardNotFoundException();
-    }
-
-    List<SeedPlanZoneDto> spzDtoList = new ArrayList<>();
-
-    for (String orchardId : orchardIdList) {
-      SparLog.info("Fetching active orchard seed plannining unit entity");
-
-      Optional<ActiveOrchardSpuEntity> spuOp =
-          orchardService.findSpuIdByOrchardWithActive(orchardId, true);
-      if (spuOp.isEmpty()) {
-        SparLog.warn("No ActiveOrchardSpuEntity record found for orchard id {}", orchardId);
-        continue;
-      }
-
-      Optional<SeedlotSeedPlanZoneEntity> sspzOp = sspzList.stream().findFirst();
-
-      if (sspzOp.isPresent()) {
-        SparLog.info("Creating Seed Plan Zone dto response");
-        spzDtoList.add(
-            new SeedPlanZoneDto(
-                spuOp.get().getSeedPlanningUnitId(),
-                sspzOp.get().getSeedPlanZoneId(),
-                sspzOp.get().getGeneticClass().getGeneticClassCode().charAt(0),
-                sspzOp.get().getSeedPlanZoneCode(),
-                seedlotOp.get().getVegetationCode(),
-                seedlotOp.get().getElevationMin(),
-                seedlotOp.get().getElevationMax()));
-      } else {
-        SparLog.warn("No Seed plan Zone found for spu id {}", spuOp.get().getSeedPlanningUnitId());
-      }
-    }
-
-    if (spzDtoList.isEmpty()) {
-      SparLog.warn("ActiveOrchardSpuEntity record not found for any seedlot orchard");
-      throw new SeedlotOrchardNotFoundException();
-    }
-
-    return spzDtoList;
-  }
-
-  private void setSeedlotSpzInformation(Seedlot seedlot) {
-    if (!seedlot.getSeedlotSource().getSeedlotSourceCode().equals("TPT")) {
-      SparLog.warn(
-          "Skipping SPZ information for seedlot {}, due the seedlot source code not being tested!",
-          seedlot.getId());
-      return;
-    }
-
-    List<SeedlotOrchard> seedlotOrchards =
-        seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlot.getId());
-
-    List<Integer> spuIds = new ArrayList<>();
-    Map<String, Integer> orchardIdSpuIdMap = new HashMap<>();
-
-    for (SeedlotOrchard orchard : seedlotOrchards) {
-      Optional<ActiveOrchardSpuEntity> spuEntity =
-          orchardService.findSpuIdByOrchardWithActive(orchard.getOrchardId(), true);
-      if (spuEntity.isPresent()) {
-        Integer spuId = spuEntity.get().getSeedPlanningUnitId();
-
-        SparLog.info("Adding SPU id to fetch from Oracle {}", spuId);
-        spuIds.add(spuId);
-        orchardIdSpuIdMap.put(orchard.getOrchardId(), spuId);
-      } else {
-        SparLog.info("No SPU id found for orchard");
-      }
-    }
-
-    List<SeedPlanZoneDto> seedPlanZoneResp = oracleApiProvider.getSpzInformationBySpuIds(spuIds);
-
-    for (SeedPlanZoneDto spz : seedPlanZoneResp) {
-      SeedlotSeedPlanZoneId spzId =
-          new SeedlotSeedPlanZoneId(seedlot.getId(), spz.getSeedPlanZoneCode());
-      Optional<SeedlotSeedPlanZoneEntity> spzEntityOp =
-          seedlotSeedPlanZoneRepository.findById(spzId);
-
-      if (spzEntityOp.isPresent()) {
-        seedlotSeedPlanZoneRepository.deleteById(spzId);
-        seedlotSeedPlanZoneRepository.flush();
-      }
-
-      Optional<GeneticClassEntity> classEntity =
-          geneticClassRepository.findById(spz.getGeneticClassCode().toString());
-
-      SeedlotSeedPlanZoneEntity spzEntity =
-          new SeedlotSeedPlanZoneEntity(
-              seedlot,
-              spz.getSeedPlanZoneCode(),
-              spz.getSeedPlanZoneId(),
-              classEntity.orElseThrow(InvalidSeedlotRequestException::new));
-      spzEntity.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
-
-      seedlotSeedPlanZoneRepository.saveAndFlush(spzEntity);
-
-      seedlot.setElevationMin(spz.getElevationMin());
-      seedlot.setElevationMax(spz.getElevationMax());
-    }
+  private void setAreaOfUse(Seedlot seedlot) {
+    return;
   }
 
   private void setSeedlotStatus(Seedlot seedlot, String newStatus) {
@@ -736,21 +627,25 @@ public class SeedlotService {
   private void saveSeedlotFormStep5(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList) {
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList,
+      Boolean canDelete) {
     SparLog.info(
-        "Saving Seedlot Form Step 5-Parent Tree SMP Mix for seedlot number {}", seedlot.getId());
+        "Saving Seedlot Form Step-5 Parent Tree SMP Mix for seedlot number {}", seedlot.getId());
 
-    seedlotParentTreeService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+    seedlotParentTreeService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList, canDelete);
     seedlotParentTreeGeneticQualityService.saveSeedlotFormStep5(
-        seedlot, seedlotFormParentTreeDtoList);
-    seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList);
+        seedlot, seedlotFormParentTreeDtoList, canDelete);
+    seedlotGeneticWorthService.saveSeedlotFormStep5(
+        seedlot, seedlotFormParentTreeDtoList, canDelete);
 
     // SMP Mix information is optional, so the array may be empty,
     // in this case there is no need to save the list
     if (!seedlotFormParentTreeSmpDtoList.isEmpty()) {
-      smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
-      smpMixGeneticQualityService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
-      seedlotParentTreeSmpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
+      smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList, canDelete);
+      smpMixGeneticQualityService.saveSeedlotFormStep5(
+          seedlot, seedlotFormParentTreeSmpDtoList, canDelete);
+      seedlotParentTreeSmpMixService.saveSeedlotFormStep5(
+          seedlot, seedlotFormParentTreeSmpDtoList, canDelete);
     } else {
       SparLog.info("No SmpMix data for seedlot number {}", seedlot.getId());
     }
