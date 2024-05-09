@@ -3,7 +3,10 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
@@ -102,6 +105,8 @@ public class SeedlotService {
   private final OrchardService orchardService;
 
   private final SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
+
+  private final ParentTreeService parentTreeService;
 
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
@@ -574,6 +579,9 @@ public class SeedlotService {
     // Extraction Step 6
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
 
+    setParentTreeContribution(
+        seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+
     setAreaOfUse(seedlot);
 
     String submittedStatus = "SUB";
@@ -585,6 +593,56 @@ public class SeedlotService {
     SparLog.info("Seedlot entity and related tables successfully saved.");
     return new SeedlotStatusResponseDto(
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  private void setParentTreeContribution(
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> orchardPtDtoList,
+      List<SeedlotFormParentTreeSmpDto> smpPtDtoList) {
+
+    List<OrchardParentTreeValsDto> orchardPtVals = convertToPtVals(orchardPtDtoList);
+    List<GeospatialRequestDto> smpMixIdAndProps = List.of();
+
+    PtValsCalReqDto ptValsCalReqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
+
+    parentTreeService.calculatePtVals(null);
+  }
+
+  private List<OrchardParentTreeValsDto> convertToPtVals(
+      List<SeedlotFormParentTreeSmpDto> orchardPtDtoList) {
+    List<OrchardParentTreeValsDto> converted = new ArrayList<>();
+
+    orchardPtDtoList.stream()
+        .forEach(
+            orchardPtDto -> {
+              OrchardParentTreeValsDto toAdd =
+                  new OrchardParentTreeValsDto(
+                      orchardPtDto.parentTreeId().toString(),
+                      orchardPtDto.parentTreeNumber(),
+                      orchardPtDto.coneCount(),
+                      orchardPtDto.pollenCount(),
+                      orchardPtDto.smpSuccessPct(),
+                      getGeneticTraitList(orchardPtDto.parentTreeGeneticQualities()));
+              converted.add(toAdd);
+            });
+
+    return converted;
+  }
+
+  private List<GeneticWorthTraitsDto> getGeneticTraitList(
+      List<ParentTreeGeneticQualityDto> genQualList) {
+    List<GeneticWorthTraitsDto> genTraitList = new ArrayList<>();
+
+    genQualList.stream()
+        .forEach(
+            genQual -> {
+              GeneticWorthTraitsDto toAdd =
+                  new GeneticWorthTraitsDto(
+                      genQual.geneticTypeCode(), genQual.geneticQualityValue(), null, null);
+              genTraitList.add(toAdd);
+            });
+
+    return genTraitList;
   }
 
   private void setAreaOfUse(Seedlot seedlot) {
