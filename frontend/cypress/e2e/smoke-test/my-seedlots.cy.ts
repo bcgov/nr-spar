@@ -212,7 +212,7 @@ describe('My seedlots page', () => {
       .should('have.text', 'PLI - Lodgepole pine');
   });
 
-  it('dropdown button functionality', () => {
+  it('dropdown button and next page functionality', () => {
     // Dropdown test
     cy.get(`.${prefix}--pagination__left`)
       .find('select')
@@ -221,15 +221,39 @@ describe('My seedlots page', () => {
 
     cy.get('@dropdownBtn')
       .should('have.value', '10');
+    // Next page test
+    cy.get(`.${prefix}--pagination__control-buttons`)
+      .find(`button.${prefix}--pagination__button--forward`)
+      .click();
+
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`select.${prefix}--select-input`)
+      .should('have.value', '2');
+
+    cy.get(`.${prefix}--pagination__control-buttons`)
+      .find(`button.${prefix}--pagination__button--backward`)
+      .click();
+
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`select.${prefix}--select-input`)
+      .should('have.value', '1');
   });
 
   it('should be able to select a seedlot row and redirect to its page', () => {
     // Click on a seedlot row
-    cy.get('table.seedlot-data-table')
-      .find('#seedlot-table-cell-63006-seedlotNumber')
-      .click();
+    cy.get('table.seedlot-data-table tbody tr')
+      .as('tableContent');
 
-    cy.url().should('contains', '/seedlots/details/63006');
+    cy.get('@tableContent')
+      .eq(3)
+      .find('td:nth-child(1)').then(($seedlotRow) => {
+        const seedlotNum: string = $seedlotRow.text();
+        cy.get('@tableContent')
+          .find(`#seedlot-table-cell-${seedlotNum}-seedlotNumber`)
+          .click();
+
+        cy.url().should('contains', `/seedlots/details/${seedlotNum}`);
+      });
   });
 
   it('should have correct number of seedlots', () => {
