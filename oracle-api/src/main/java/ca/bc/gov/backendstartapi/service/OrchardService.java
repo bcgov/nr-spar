@@ -1,12 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDt;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpuDto;
 import ca.bc.gov.backendstartapi.dto.SpzDto;
 import ca.bc.gov.backendstartapi.dto.SpzSpuDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
@@ -16,21 +16,23 @@ import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import ca.bc.gov.backendstartapi.entity.SeedPlanUnit;
 import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUse;
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpu;
 import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpz;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
 import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
-import ca.bc.gov.backendstartapi.exception.SpuNotFoundException;
 import ca.bc.gov.backendstartapi.exception.TestedAreaOfUseNotFound;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
+import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpuRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
 import ca.bc.gov.backendstartapi.util.ModelMapper;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,6 +57,8 @@ public class OrchardService {
 
   private SeedPlanUnitRepository seedPlanUnitRepository;
 
+  private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
+
   OrchardService(
       OrchardRepository orchardRepository,
       ParentTreeOrchardRepository parentTreeOrchardRepository,
@@ -62,7 +66,8 @@ public class OrchardService {
       ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
       TestedPtAreaofUseRepository testedPtAreaofUseRepository,
       TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository,
-      SeedPlanUnitRepository seedPlanUnitRepository) {
+      SeedPlanUnitRepository seedPlanUnitRepository,
+      TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository) {
     this.orchardRepository = orchardRepository;
     this.parentTreeOrchardRepository = parentTreeOrchardRepository;
     this.parentTreeRepository = parentTreeRepository;
@@ -70,6 +75,7 @@ public class OrchardService {
     this.testedPtAreaofUseRepository = testedPtAreaofUseRepository;
     this.testedPtAreaOfUseSpzRepository = testedPtAreaOfUseSpzRepository;
     this.seedPlanUnitRepository = seedPlanUnitRepository;
+    this.testedPtAreaOfUseSpuRepository = testedPtAreaOfUseSpuRepository;
   }
 
   /**
@@ -342,12 +348,19 @@ public class OrchardService {
     SparLog.info("Getting SPZ and SPU information for SPU ID {}", spuId);
 
     SpzSpuDto result = new SpzSpuDto();
-    // Step 1: Get spu data
-    result.setSpu(getSpuData(spuId));
-    SparLog.info("SPU data set for id {}", spuId);
 
-    // Step 2: Get tested_pt_area_of_use_id by spuId
+    // Step 1: Get tested_pt_area_of_use_id by spuId
     Integer testedPtAreaOfUseId = getTestedPtAreaOfUseId(spuId);
+
+    // Step 2: Get additional SPUs using the tested_pt_area_of_use_id from the
+    // tested_pt_area_of_use_spu table
+    List<Integer> spuList =
+        testedPtAreaOfUseSpuRepository.findByTestedPtAreaOfUseId(testedPtAreaOfUseId).stream()
+            .map(TestedPtAreaOfUseSpu::getSeedPlanUnitId)
+            .toList();
+
+    // Step 3: Get area of use spu geo data
+    result.setAreaOfUseSpuGeoDt(setCalculatedSpuGeoData(spuList));
 
     // Step 3: Get SPZs under a testedPtAreaOfUseId
     List<TestedPtAreaOfUseSpz> testedPtAoUspzs =
@@ -380,23 +393,84 @@ public class OrchardService {
     return testedAoU.get(0).getTestedPtAreaOfUseId();
   }
 
-  private SpuDto getSpuData(Integer spuId) {
-    SeedPlanUnit spuEntity =
-        seedPlanUnitRepository.findById(spuId).orElseThrow(SpuNotFoundException::new);
+  private AreaOfUseSpuGeoDt setCalculatedSpuGeoData(List<Integer> spuIds) {
+    List<SeedPlanUnit> spuEntityList = seedPlanUnitRepository.findBySeedPlanUnitIdIn(spuIds);
 
-    SpuDto spuDto = new SpuDto();
-    spuDto.setSpuId(spuEntity.getSeedPlanUnitId());
-    // Set Elevation data
-    spuDto.setElevationBand(spuEntity.getElevationBand());
-    spuDto.setElevationMax(spuEntity.getElevationMax());
-    spuDto.setElevationMin(spuEntity.getElevationMin());
-    // Set Latitude data
-    spuDto.setLatitudeBand(spuEntity.getLatitudeBand());
-    spuDto.setLatitudeDegreesMax(spuEntity.getLatitudeDegreesMax());
-    spuDto.setLatitudeDegreesMin(spuEntity.getLatitudeDegreesMin());
-    spuDto.setLatitudeMinutesMax(spuEntity.getLatitudeMinutesMax());
-    spuDto.setLatitudeMinutesMin(spuEntity.getLatitudeMinutesMin());
+    AreaOfUseSpuGeoDt areaOfUseSpuGeoDt = new AreaOfUseSpuGeoDt();
 
-    return spuDto;
+    // Max Elevation
+    // Filter out null values first so it can be used with the Stream.max()
+    List<SeedPlanUnit> filteredMaxElevSpu =
+        spuEntityList.stream().filter(spu -> spu.getElevationMax() != null).toList();
+    Integer maxElevation =
+        filteredMaxElevSpu.size() > 0
+            ? filteredMaxElevSpu.stream()
+                .max(Comparator.comparing(SeedPlanUnit::getElevationMax))
+                .get()
+                .getElevationMax()
+            : null;
+    areaOfUseSpuGeoDt.setElevationMax(maxElevation);
+
+    // Min Elevation
+    List<SeedPlanUnit> filteredMinElevSpu =
+        spuEntityList.stream().filter(spu -> spu.getElevationMin() != null).toList();
+    Integer minElevation =
+        filteredMinElevSpu.size() > 0
+            ? filteredMinElevSpu.stream()
+                .min(Comparator.comparing(SeedPlanUnit::getElevationMin))
+                .get()
+                .getElevationMin()
+            : null;
+    areaOfUseSpuGeoDt.setElevationMin(minElevation);
+
+    // Max Lat Degree
+    List<SeedPlanUnit> filteredMaxLatDegSpu =
+        spuEntityList.stream().filter(spu -> spu.getLatitudeDegreesMax() != null).toList();
+    Integer maxLatDeg =
+        filteredMaxLatDegSpu.size() > 0
+            ? filteredMaxLatDegSpu.stream()
+                .max(Comparator.comparing(SeedPlanUnit::getLatitudeDegreesMax))
+                .get()
+                .getLatitudeDegreesMax()
+            : null;
+    areaOfUseSpuGeoDt.setLatitudeDegreesMax(maxLatDeg);
+
+    // Min Lat Degree
+    List<SeedPlanUnit> filteredMinLatDegSpu =
+        spuEntityList.stream().filter(spu -> spu.getLatitudeDegreesMin() != null).toList();
+    Integer minLatDeg =
+        filteredMinLatDegSpu.size() > 0
+            ? filteredMinLatDegSpu.stream()
+                .min(Comparator.comparing(SeedPlanUnit::getLatitudeDegreesMin))
+                .get()
+                .getLatitudeDegreesMin()
+            : null;
+    areaOfUseSpuGeoDt.setLatitudeDegreesMin(minLatDeg);
+
+    // Max Lat Minute
+    List<SeedPlanUnit> filteredMaxLatMinuteSpu =
+        spuEntityList.stream().filter(spu -> spu.getLatitudeMinutesMax() != null).toList();
+    Integer maxLatMinute =
+        filteredMaxLatMinuteSpu.size() > 0
+            ? filteredMaxLatMinuteSpu.stream()
+                .max(Comparator.comparing(SeedPlanUnit::getLatitudeMinutesMax))
+                .get()
+                .getLatitudeMinutesMax()
+            : null;
+    areaOfUseSpuGeoDt.setLatitudeMinutesMax(maxLatMinute);
+
+    // Min Lat Minute
+    List<SeedPlanUnit> filteredMinLatMiunteSpu =
+        spuEntityList.stream().filter(spu -> spu.getLatitudeMinutesMin() != null).toList();
+    Integer minLatMinute =
+        filteredMinLatMiunteSpu.size() > 0
+            ? filteredMinLatMiunteSpu.stream()
+                .min(Comparator.comparing(SeedPlanUnit::getLatitudeMinutesMin))
+                .get()
+                .getLatitudeMinutesMin()
+            : null;
+    areaOfUseSpuGeoDt.setLatitudeMinutesMin(minLatMinute);
+
+    return areaOfUseSpuGeoDt;
   }
 }
