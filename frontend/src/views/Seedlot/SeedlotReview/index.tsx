@@ -22,6 +22,7 @@ import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 import { InitialSeedlotFormData } from '../CreateAClass/constants';
 import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collection/Read';
 import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
+import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownership/Read';
 
 import ContextContainerClassA from '../ContextContainerClassA';
 
@@ -159,6 +160,11 @@ const SeedlotReview = () => {
         <Row className="section-title-row">
           <Column className="section-title-col">
             Ownership
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            <OwnershipReviewRead />
           </Column>
         </Row>
 
