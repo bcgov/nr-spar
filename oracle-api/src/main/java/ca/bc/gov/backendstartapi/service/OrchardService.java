@@ -1,14 +1,14 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDt;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SpzDto;
-import ca.bc.gov.backendstartapi.dto.SpzSpuDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
@@ -344,10 +344,10 @@ public class OrchardService {
    * @param spuIds A SPU id.
    * @return A {@link SpzSpuGeoDto}
    */
-  public SpzSpuDto fetchSpzSpuData(Integer spuId) {
+  public AreaOfUseDto calcAreaOfUseData(Integer spuId) {
     SparLog.info("Getting SPZ and SPU information for SPU ID {}", spuId);
 
-    SpzSpuDto result = new SpzSpuDto();
+    AreaOfUseDto result = new AreaOfUseDto();
 
     // Step 1: Get tested_pt_area_of_use_id by spuId
     Integer testedPtAreaOfUseId = getTestedPtAreaOfUseId(spuId);
@@ -360,7 +360,7 @@ public class OrchardService {
             .toList();
 
     // Step 3: Get area of use spu geo data
-    result.setAreaOfUseSpuGeoDt(setCalculatedSpuGeoData(spuList));
+    result.setAreaOfUseSpuGeoDto(setCalculatedSpuGeoData(spuList));
 
     // Step 3: Get SPZs under a testedPtAreaOfUseId
     List<TestedPtAreaOfUseSpz> testedPtAoUspzs =
@@ -393,10 +393,10 @@ public class OrchardService {
     return testedAoU.get(0).getTestedPtAreaOfUseId();
   }
 
-  private AreaOfUseSpuGeoDt setCalculatedSpuGeoData(List<Integer> spuIds) {
+  private AreaOfUseSpuGeoDto setCalculatedSpuGeoData(List<Integer> spuIds) {
     List<SeedPlanUnit> spuEntityList = seedPlanUnitRepository.findBySeedPlanUnitIdIn(spuIds);
 
-    AreaOfUseSpuGeoDt areaOfUseSpuGeoDt = new AreaOfUseSpuGeoDt();
+    AreaOfUseSpuGeoDto areaOfUseSpuGeoDto = new AreaOfUseSpuGeoDto();
 
     // Max Elevation
     // Filter out null values first so it can be used with the Stream.max()
@@ -409,7 +409,7 @@ public class OrchardService {
                 .get()
                 .getElevationMax()
             : null;
-    areaOfUseSpuGeoDt.setElevationMax(maxElevation);
+    areaOfUseSpuGeoDto.setElevationMax(maxElevation);
 
     // Min Elevation
     List<SeedPlanUnit> filteredMinElevSpu =
@@ -421,7 +421,7 @@ public class OrchardService {
                 .get()
                 .getElevationMin()
             : null;
-    areaOfUseSpuGeoDt.setElevationMin(minElevation);
+    areaOfUseSpuGeoDto.setElevationMin(minElevation);
 
     // Max Lat Degree
     List<SeedPlanUnit> filteredMaxLatDegSpu =
@@ -433,7 +433,7 @@ public class OrchardService {
                 .get()
                 .getLatitudeDegreesMax()
             : null;
-    areaOfUseSpuGeoDt.setLatitudeDegreesMax(maxLatDeg);
+    areaOfUseSpuGeoDto.setLatitudeDegreesMax(maxLatDeg);
 
     // Min Lat Degree
     List<SeedPlanUnit> filteredMinLatDegSpu =
@@ -445,7 +445,7 @@ public class OrchardService {
                 .get()
                 .getLatitudeDegreesMin()
             : null;
-    areaOfUseSpuGeoDt.setLatitudeDegreesMin(minLatDeg);
+    areaOfUseSpuGeoDto.setLatitudeDegreesMin(minLatDeg);
 
     // Max Lat Minute
     List<SeedPlanUnit> filteredMaxLatMinuteSpu =
@@ -457,7 +457,7 @@ public class OrchardService {
                 .get()
                 .getLatitudeMinutesMax()
             : null;
-    areaOfUseSpuGeoDt.setLatitudeMinutesMax(maxLatMinute);
+    areaOfUseSpuGeoDto.setLatitudeMinutesMax(maxLatMinute);
 
     // Min Lat Minute
     List<SeedPlanUnit> filteredMinLatMiunteSpu =
@@ -469,8 +469,8 @@ public class OrchardService {
                 .get()
                 .getLatitudeMinutesMin()
             : null;
-    areaOfUseSpuGeoDt.setLatitudeMinutesMin(minLatMinute);
+    areaOfUseSpuGeoDto.setLatitudeMinutesMin(minLatMinute);
 
-    return areaOfUseSpuGeoDt;
+    return areaOfUseSpuGeoDto;
   }
 }

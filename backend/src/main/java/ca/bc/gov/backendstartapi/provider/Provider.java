@@ -3,10 +3,10 @@ package ca.bc.gov.backendstartapi.provider;
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
+import ca.bc.gov.backendstartapi.dto.Oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +49,12 @@ public interface Provider {
     return List.of();
   }
 
-  default List<SeedPlanZoneDto> getSpzInformationBySpuIds(List<Integer> spuIds) {
+  default List<GeospatialOracleResDto> getPtGeospatialDataByIdList(List<Long> ptIds) {
     return List.of();
   }
 
-  default List<GeospatialOracleResDto> getPtGeospatialDataByIdList(List<Long> ptIds) {
-    return List.of();
+  default AreaOfUseDto getAreaOfUseData(Integer spuId) {
+    return null;
   }
 
   // Common methods

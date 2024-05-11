@@ -4,8 +4,11 @@ import ca.bc.gov.backendstartapi.config.Constants;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
+import ca.bc.gov.backendstartapi.dto.Oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
@@ -18,6 +21,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
@@ -32,6 +36,7 @@ import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
@@ -582,7 +587,7 @@ public class SeedlotService {
     setParentTreeContribution(
         seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
 
-    setAreaOfUse(seedlot);
+    setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
     String submittedStatus = "SUB";
     setSeedlotStatus(seedlot, submittedStatus);
@@ -601,11 +606,27 @@ public class SeedlotService {
       List<SeedlotFormParentTreeSmpDto> smpPtDtoList) {
 
     List<OrchardParentTreeValsDto> orchardPtVals = convertToPtVals(orchardPtDtoList);
-    List<GeospatialRequestDto> smpMixIdAndProps = List.of();
+    List<GeospatialRequestDto> smpMixIdAndProps = convertToGeoRes(smpPtDtoList);
 
     PtValsCalReqDto ptValsCalReqDto = new PtValsCalReqDto(orchardPtVals, smpMixIdAndProps);
 
-    parentTreeService.calculatePtVals(null);
+    PtCalculationResDto ptCalculationResDto = parentTreeService.calculatePtVals(ptValsCalReqDto);
+
+    GeospatialRespondDto collectionGeoData =
+        ptCalculationResDto.calculatedPtVals().getGeospatialData();
+
+    // Elevation
+    seedlot.setCollectionElevation(collectionGeoData.getMeanElevation());
+
+    // Latitude DMS
+    seedlot.setCollectionLatitudeDeg(collectionGeoData.getMeanLatitudeDegree());
+    seedlot.setCollectionLatitudeMin(collectionGeoData.getMeanLatitudeMinute());
+    seedlot.setCollectionLatitudeSec(collectionGeoData.getMeanLatitudeSecond());
+
+    // Longitude DMS
+    seedlot.setCollectionLongitudeDeg(collectionGeoData.getMeanLongitudeDegree());
+    seedlot.setCollectionLongitudeMin(collectionGeoData.getMeanLongitudeMinute());
+    seedlot.setCollectionLongitudeSec(collectionGeoData.getMeanLongitudeSecond());
   }
 
   private List<OrchardParentTreeValsDto> convertToPtVals(
@@ -629,6 +650,22 @@ public class SeedlotService {
     return converted;
   }
 
+  private List<GeospatialRequestDto> convertToGeoRes(
+      List<SeedlotFormParentTreeSmpDto> smpPtDtoList) {
+    List<GeospatialRequestDto> geoList = new ArrayList<>();
+
+    smpPtDtoList.stream()
+        .forEach(
+            smpDto -> {
+              GeospatialRequestDto toAdd =
+                  new GeospatialRequestDto(
+                      Long.valueOf(smpDto.parentTreeId()), smpDto.proportion());
+              geoList.add(toAdd);
+            });
+
+    return geoList;
+  }
+
   private List<GeneticWorthTraitsDto> getGeneticTraitList(
       List<ParentTreeGeneticQualityDto> genQualList) {
     List<GeneticWorthTraitsDto> genTraitList = new ArrayList<>();
@@ -645,7 +682,17 @@ public class SeedlotService {
     return genTraitList;
   }
 
-  private void setAreaOfUse(Seedlot seedlot) {
+  private void setAreaOfUse(Seedlot seedlot, String primaryOrchardId) {
+    ActiveOrchardSpuEntity activeSpuEntity =
+        orchardService
+            .findSpuIdByOrchardWithActive(primaryOrchardId, true)
+            .orElseThrow(NoSpuForOrchardException::new);
+    Integer activeSpuId = activeSpuEntity.getSeedPlanningUnitId();
+    AreaOfUseDto areaOfUseDto = oracleApiProvider.getAreaOfUseData(activeSpuId);
+
+    // Elevation
+    seedlot.setElevationMax(areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMax());
+    seedlot.setElevationMin(areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMin());
     return;
   }
 

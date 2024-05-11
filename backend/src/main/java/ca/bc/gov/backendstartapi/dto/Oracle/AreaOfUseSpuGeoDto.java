@@ -1,4 +1,4 @@
-package ca.bc.gov.backendstartapi.dto;
+package ca.bc.gov.backendstartapi.dto.Oracle;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import lombok.Setter;
 @Schema(
     description =
         "Represents a JSON response when requesting Geo information from a SPU id for Area of Use.")
-public class AreaOfUseSpuGeoDt {
+public class AreaOfUseSpuGeoDto {
   @Schema(
       description =
           "Minimum elevation (metres) for a specific elevation band for the Seed Planning Unit",

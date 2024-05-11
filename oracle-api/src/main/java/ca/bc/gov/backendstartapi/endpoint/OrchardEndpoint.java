@@ -1,11 +1,11 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpzSpuDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.OrchardService;
@@ -197,9 +197,9 @@ public class OrchardEndpoint {
    * @param spuId A seed plan unit id.
    * @return A {@link SpzSpuGeoDto} containing the results.
    */
-  @GetMapping(path = "/area-of-use/spu/{spuId}/spz", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/area-of-use/spu/{spuId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
-      summary = "Get area of use information given a SPU id",
+      summary = "Get area of use information given an SPU id",
       description = "Fetch geospatial data for the SPU along with a list of SPZ information.",
       responses = {
         @ApiResponse(
@@ -211,9 +211,9 @@ public class OrchardEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public SpzSpuDto getSpzSpuData(
+  public AreaOfUseDto getAreaOfUseData(
       @Parameter(description = "The SPU (Seed Planning Unit) ID") @PathVariable("spuId")
           Integer spuId) {
-    return orchardService.fetchSpzSpuData(spuId);
+    return orchardService.calcAreaOfUseData(spuId);
   }
 }

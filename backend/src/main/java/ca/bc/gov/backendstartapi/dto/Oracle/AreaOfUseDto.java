@@ -1,4 +1,4 @@
-package ca.bc.gov.backendstartapi.dto;
+package ca.bc.gov.backendstartapi.dto.Oracle;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -10,9 +10,9 @@ import lombok.Setter;
 @Setter
 @Schema(
     description = "Represents a JSON response when requesting SPZ + SPU information from a SPU id.")
-public class SpzSpuDto {
+public class AreaOfUseDto {
   @Schema(description = "A record of SPU.", example = "7")
-  private AreaOfUseSpuGeoDt areaOfUseSpuGeoDt;
+  private AreaOfUseSpuGeoDto areaOfUseSpuGeoDto;
 
   @Schema(description = "A list of SPZ")
   private List<SpzDto> spzList;
