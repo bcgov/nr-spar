@@ -37,10 +37,14 @@ import { MAX_OWNERS } from './constants';
 
 import './styles.scss';
 
+type OwnershipStepProps = {
+  isReview?: boolean
+}
+
 /*
   Component
 */
-const OwnershipStep = () => {
+const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
@@ -200,6 +204,7 @@ const OwnershipStep = () => {
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
                   readOnly={isFormSubmitted}
+                  isReview={isReview}
                 />
               </AccordionItem>
             ))

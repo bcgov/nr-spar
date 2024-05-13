@@ -37,12 +37,13 @@ interface SingleOwnerInfoProps {
   methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>,
   checkPortionSum: Function,
   setState: Function,
-  readOnly?: boolean
+  readOnly?: boolean,
+  isReview?: boolean
 }
 
 const SingleOwnerInfo = ({
   ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSourcesQuery,
-  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState, readOnly
+  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState, readOnly, isReview
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>(
     inputText.portion.invalidText
