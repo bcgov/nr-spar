@@ -1,6 +1,7 @@
 {
   "pli": {
     "agencyAcronym": "MOF",
+    "agencyName": "00012797 - MINISTRY OF FORESTS - MOF",
     "agencyNumber": "30",
     "email": "test@gov.bc.ca",
     "species": "PLI - Lodgepole pine",
@@ -10,6 +11,7 @@
   },
   "cw": {
     "agencyAcronym": "TBA",
+    "agencyName": "00132184 - TIMBER SALES MANAGER BABINE - TBA",
     "agencyNumber": "01",
     "email": "apo@gov.bc.ca",
     "species": "CW - Western redcedar",
@@ -19,6 +21,7 @@
   },
   "dr": {
     "agencyAcronym": "TCC",
+    "agencyName": "00132197 - TIMBER SALES MANAGER CARIBOO-CHILCOTIN - TCC",
     "agencyNumber": "01",
     "email": "beane@gov.bc.ca",
     "species": "DR - Red alder",
@@ -28,6 +31,7 @@
   },
   "ep": {
     "agencyAcronym": "TCH",
+    "agencyName": "00132186 - TIMBER SALES MANAGER CHINOOK - TCH",
     "agencyNumber": "01",
     "email": "cidaw@gov.bc.ca",
     "species": "EP - Paper birch",
@@ -37,6 +41,7 @@
   },
   "fdc": {
     "agencyAcronym": "WFP",
+    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
     "agencyNumber": "01",
     "email": "dha@gov.bc.ca",
     "species": "FDC - Coastal Douglas-fir",

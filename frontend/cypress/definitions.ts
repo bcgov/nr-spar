@@ -1,5 +1,6 @@
 export type SeedlotRegType = {
   agencyAcronym: string,
+  agencyName: string,
   agencyNumber: string,
   email: string,
   species: string,
