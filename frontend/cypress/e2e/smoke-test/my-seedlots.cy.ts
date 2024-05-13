@@ -1,5 +1,3 @@
-// TODO Get rid of this eslint-disable
-/* eslint-disable max-len */
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 import { NUM_OF_LOOPS } from '../../constants';
