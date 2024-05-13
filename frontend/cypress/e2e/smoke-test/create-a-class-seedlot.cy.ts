@@ -26,7 +26,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // To do - validate after to be fixed
       // Enter the applicant agency name
       cy.get('#applicant-info-combobox')
         .click();
@@ -141,7 +140,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // To do - validate after to be fixed
       // Enter the applicant agency name
       cy.get('#applicant-info-combobox')
         .click();
@@ -256,7 +254,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // To do - validate after to be fixed
       // Enter the applicant agency name
       cy.get('#applicant-info-combobox')
         .click();
@@ -371,7 +368,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // To do - validate after to be fixed
       // Enter the applicant agency name
       cy.get('#applicant-info-combobox')
         .click();
@@ -486,7 +482,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // To do - validate after to be fixed
       // Enter the applicant agency name
       cy.get('#applicant-info-combobox')
         .click();
