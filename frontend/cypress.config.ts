@@ -18,12 +18,12 @@ export default defineConfig({
       businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
-      // '**/login-page.cy.ts',
-      // '**/dashboard-page.cy.ts',
-      // '**/create-a-class-seedlot.cy.ts',
-      // '**/seedlot-dashboard.cy.ts',
-      // '**/seedlot-detail.cy.ts',
-      // '**/edit-applicant-seedlot-info.cy.ts',
+      '**/login-page.cy.ts',
+      '**/dashboard-page.cy.ts',
+      '**/create-a-class-seedlot.cy.ts',
+      '**/seedlot-dashboard.cy.ts',
+      '**/seedlot-detail.cy.ts',
+      '**/edit-applicant-seedlot-info.cy.ts',
       '**/my-seedlots.cy.ts'
     ],
     chromeWebSecurity: false,
