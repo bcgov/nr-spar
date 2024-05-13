@@ -346,7 +346,7 @@ public class OrchardService {
    * @param spuIds A SPU id.
    * @return A {@link SpzSpuGeoDto}
    */
-  public AreaOfUseDto calcAreaOfUseData(Integer spuId, String vegCode) {
+  public AreaOfUseDto calcAreaOfUseData(Integer spuId) {
     SparLog.info("Getting SPZ and SPU information for SPU ID {}", spuId);
 
     AreaOfUseDto result = new AreaOfUseDto();
@@ -364,7 +364,7 @@ public class OrchardService {
     // Step 3: Get area of use spu geo data
     result.setAreaOfUseSpuGeoDto(setCalculatedSpuGeoData(spuList));
 
-    // Step 3: Get SPZs under a testedPtAreaOfUseId
+    // Step 4: Get SPZs under a testedPtAreaOfUseId
     List<TestedPtAreaOfUseSpz> testedPtAoUspzs =
         testedPtAreaOfUseSpzRepository.findAllByTestedPtAreaOfUse_testedPtAreaOfUseId(
             testedPtAreaOfUseId);

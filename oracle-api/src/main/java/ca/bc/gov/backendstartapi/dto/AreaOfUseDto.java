@@ -11,7 +11,7 @@ import lombok.Setter;
 @Schema(
     description = "Represents a JSON response when requesting SPZ + SPU information from a SPU id.")
 public class AreaOfUseDto {
-  @Schema(description = "A record of SPU.", example = "7")
+  @Schema(description = "Geographical data wrangled from a list of spu data.")
   private AreaOfUseSpuGeoDto areaOfUseSpuGeoDto;
 
   @Schema(description = "A list of SPZ")

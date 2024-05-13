@@ -213,9 +213,7 @@ public class OrchardEndpoint {
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public AreaOfUseDto getAreaOfUseData(
       @Parameter(description = "The SPU (Seed Planning Unit) ID") @PathVariable("spuId")
-          Integer spuId,
-          @Parameter(description = "The vegetation code") @PathVariable("spuId")
-          String vegCode) {
-    return orchardService.calcAreaOfUseData(spuId, vegCode);
+          Integer spuId) {
+    return orchardService.calcAreaOfUseData(spuId);
   }
 }

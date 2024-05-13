@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.entity;
 
-import org.hibernate.type.YesNoConverter;
 import ca.bc.gov.backendstartapi.entity.idclass.TestedPtAreaOfUseSpzId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -10,14 +9,19 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import org.hibernate.type.YesNoConverter;
 
 /** This class represents a Tested Parent Tree Area of Use SPZ record in the database. */
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @IdClass(TestedPtAreaOfUseSpzId.class)
 @Table(name = "TESTED_PT_AREA_OF_USE_SPZ")
 public class TestedPtAreaOfUseSpz {
