@@ -31,7 +31,7 @@ const ApplicantAgencyFields = ({
   const [showSuccessIconAgency, setShowSuccessIconAgency] = useState<boolean>(true);
   const [showSuccessIconLocCode, setShowSuccessIconLocCode] = useState<boolean>(false);
 
-  const [showErrorBanner, setShowErrorBanner] = useState<boolean>(true);
+  const [showErrorBanner, setShowErrorBanner] = useState<boolean>(false);
   const [invalidAcronymMessage, setInvalidAcronymMessage] = useState<string>(
     supportTexts.agency.invalidAcronym
   );
