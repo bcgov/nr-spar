@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 @Schema(description = "A dto object that contains info of a seed plan zone.")
 public class SpzDto {
-  @Schema(description = "The SPZ code", example = "M")
+  @Schema(description = "The SPZ code", example = "EK")
   private String code;
 
-  @Schema(description = "A code describing various Seed Planning Zones.", example = "M")
+  @Schema(description = "A code describing various Seed Planning Zones.", example = "East Kootenay")
   private String description;
 
   @Schema(description = "Whether this spz is the primary spz.", example = "true")

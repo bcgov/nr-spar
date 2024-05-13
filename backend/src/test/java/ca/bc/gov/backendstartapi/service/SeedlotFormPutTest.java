@@ -171,31 +171,32 @@ class SeedlotFormPutTest {
         extractionDto);
   }
 
-  @BeforeEach
-  void setup() {
-    seedlotService =
-        new SeedlotService(
-            seedlotRepository,
-            seedlotSourceRepository,
-            seedlotStatusRepository,
-            geneticClassRepository,
-            loggedUserService,
-            seedlotCollectionMethodService,
-            seedlotCollectionMethodRepository,
-            seedlotOwnerQuantityService,
-            seedlotOwnerQuantityRepository,
-            seedlotOrchardService,
-            seedlotParentTreeService,
-            seedlotParentTreeGeneticQualityService,
-            seedlotGeneticWorthService,
-            smpMixService,
-            smpMixGeneticQualityService,
-            seedlotParentTreeSmpMixService,
-            seedlotStatusService,
-            orchardService,
-            seedlotSeedPlanZoneRepository,
-            oracleApiProvider);
-  }
+  // TODO
+//   @BeforeEach
+//   void setup() {
+//     seedlotService =
+//         new SeedlotService(
+//             seedlotRepository,
+//             seedlotSourceRepository,
+//             seedlotStatusRepository,
+//             geneticClassRepository,
+//             loggedUserService,
+//             seedlotCollectionMethodService,
+//             seedlotCollectionMethodRepository,
+//             seedlotOwnerQuantityService,
+//             seedlotOwnerQuantityRepository,
+//             seedlotOrchardService,
+//             seedlotParentTreeService,
+//             seedlotParentTreeGeneticQualityService,
+//             seedlotGeneticWorthService,
+//             smpMixService,
+//             smpMixGeneticQualityService,
+//             seedlotParentTreeSmpMixService,
+//             seedlotStatusService,
+//             orchardService,
+//             seedlotSeedPlanZoneRepository,
+//             oracleApiProvider);
+//   }
 
   @Test
   @DisplayName("Seedlot form submit - Seedlot not found")

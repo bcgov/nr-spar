@@ -2,6 +2,8 @@ ALTER TABLE
   spar.seedlot_seed_plan_zone
 ADD
   COLUMN primary_ind boolean default false,
+ADD
+  COLUMN seed_plan_zone_description varchar(120),
 ALTER
   COLUMN entry_timestamp DROP NOT NULL,
 ALTER

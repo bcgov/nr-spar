@@ -27,6 +27,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
@@ -35,6 +36,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
+import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
@@ -589,6 +591,7 @@ public class SeedlotService {
 
     setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
+    // TODO
     String submittedStatus = "SUB";
     setSeedlotStatus(seedlot, submittedStatus);
 
@@ -693,7 +696,74 @@ public class SeedlotService {
     // Elevation
     seedlot.setElevationMax(areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMax());
     seedlot.setElevationMin(areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMin());
-    return;
+
+    // Latitude Degree, use collection mean if value is null
+    Integer testedLatDegMax = areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMax();
+    Integer collectionLatDegMean = seedlot.getCollectionLatitudeDeg();
+    if (testedLatDegMax == null) {
+      seedlot.setLatitudeDegMax(collectionLatDegMean);
+    } else {
+      seedlot.setLatitudeDegMax(testedLatDegMax);
+    }
+
+    Integer testedLatDegMin = areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMin();
+    if (testedLatDegMin == null) {
+      seedlot.setLatitudeDegMin(collectionLatDegMean);
+    } else {
+      seedlot.setLatitudeDegMin(testedLatDegMin);
+    }
+
+    // Latitude Minute, use collection mean if value is null
+    Integer testedLatMinutesMax = areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMax();
+    Integer collectionLatMinMean = seedlot.getCollectionLatitudeMin();
+    if (testedLatMinutesMax == null) {
+      seedlot.setLatitudeMinMax(collectionLatMinMean);
+    } else {
+      seedlot.setLatitudeMinMax(testedLatMinutesMax);
+    }
+
+    Integer testedLatMinutesMin = areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMin();
+    if (testedLatMinutesMin == null) {
+      seedlot.setLatitudeMinMin(collectionLatMinMean);
+    } else {
+      seedlot.setLatitudeMinMin(testedLatMinutesMin);
+    }
+
+    // Latitude second = 0, legacy spar does not provide a min max for seconds, collection
+    // lat/long second is not calculated and is defaulted to 0 since it's not accurate to use.
+    seedlot.setLatitudeSecMax(0);
+    seedlot.setLatitudeSecMin(0);
+
+    // Longitude data is not provided in A-Class tested parent tree area of use, default to
+    // collection data
+    seedlot.setLongitudeDegMax(seedlot.getCollectionLongitudeDeg());
+    seedlot.setLongitudeDegMin(seedlot.getCollectionLongitudeDeg());
+
+    seedlot.setLongitudeMinMax(seedlot.getCollectionLongitudeMin());
+    seedlot.setLongitudeMinMin(seedlot.getCollectionLongitudeMin());
+    // Seconds default to 0
+    seedlot.setLongitudeSecMax(0);
+    seedlot.setLongitudeSecMin(0);
+
+    // Set SPZs
+    List<SeedlotSeedPlanZoneEntity> spzSaveList = new ArrayList<>();
+    GeneticClassEntity aClass =
+        geneticClassRepository.findById("A").orElseThrow(GeneticClassNotFoundException::new);
+    areaOfUseDto.getSpzList().stream()
+        .forEach(
+            spzDto -> {
+              SeedlotSeedPlanZoneEntity sspzToSave =
+                  new SeedlotSeedPlanZoneEntity(
+                      seedlot,
+                      spzDto.getCode(),
+                      aClass,
+                      spzDto.getIsPrimary(),
+                      spzDto.getDescription());
+              sspzToSave.setAuditInformation(
+                  new AuditInformation(loggedUserService.getLoggedUserId()));
+              spzSaveList.add(sspzToSave);
+            });
+    seedlotSeedPlanZoneRepository.saveAll(spzSaveList);
   }
 
   private void setSeedlotStatus(Seedlot seedlot, String newStatus) {

@@ -26,6 +26,7 @@ import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
+import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpuRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
@@ -67,7 +68,8 @@ public class OrchardService {
       TestedPtAreaofUseRepository testedPtAreaofUseRepository,
       TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository,
       SeedPlanUnitRepository seedPlanUnitRepository,
-      TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository) {
+      TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository,
+      SeedPlanZoneRepository seedPlanZoneRepository) {
     this.orchardRepository = orchardRepository;
     this.parentTreeOrchardRepository = parentTreeOrchardRepository;
     this.parentTreeRepository = parentTreeRepository;
@@ -344,7 +346,7 @@ public class OrchardService {
    * @param spuIds A SPU id.
    * @return A {@link SpzSpuGeoDto}
    */
-  public AreaOfUseDto calcAreaOfUseData(Integer spuId) {
+  public AreaOfUseDto calcAreaOfUseData(Integer spuId, String vegCode) {
     SparLog.info("Getting SPZ and SPU information for SPU ID {}", spuId);
 
     AreaOfUseDto result = new AreaOfUseDto();
