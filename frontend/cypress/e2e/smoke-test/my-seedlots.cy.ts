@@ -73,6 +73,7 @@ describe('My seedlots page', () => {
       .eq(1)
       .find('td:nth-child(1)').then(($seedlotNum) => {
         const descendingSecondRow: string = $seedlotNum.text();
+        // eslint-disable-next-line max-len
         expect(parseInt(descendingFirstRow, 10)).to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
   });
