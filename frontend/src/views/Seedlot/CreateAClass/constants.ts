@@ -3,7 +3,7 @@ import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 
 export const InitialSeedlotFormData: SeedlotRegFormType = {
   client: {
-    id: 'applicant-info-combobox',
+    id: 'applicant-info-input',
     isInvalid: false,
     value: EmptyMultiOptObj
   },

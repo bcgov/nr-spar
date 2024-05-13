@@ -1,6 +1,6 @@
 import { SeedlotRegistrationSelectors } from '../../utils/selectors';
 import { NavigationLabels, SeedlotActivities } from '../../utils/labels';
-import { TYPE_DELAY, INVALID_EMAIL } from '../../constants';
+import { TYPE_DELAY, INVALID_EMAIL, FIVE_SECONDS } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
@@ -27,10 +27,11 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/register-a-class');
     // To do - validate after to be fixed
     // Enter the applicant agency name
-    cy.get('#applicant-info-combobox')
-      .click();
-    cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-      .click();
+    cy.get('#applicant-info-input')
+      .clear()
+      .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+      .blur();
+    cy.wait(FIVE_SECONDS);
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
@@ -141,10 +142,11 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/register-a-class');
     // To do - validate after to be fixed
     // Enter the applicant agency name
-    cy.get('#applicant-info-combobox')
-      .click();
-    cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-      .click();
+    cy.get('#applicant-info-input')
+      .clear()
+      .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+      .blur();
+    cy.wait(FIVE_SECONDS);
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
@@ -255,10 +257,11 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/register-a-class');
     // To do - validate after to be fixed
     // Enter the applicant agency name
-    cy.get('#applicant-info-combobox')
-      .click();
-    cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-      .click();
+    cy.get('#applicant-info-input')
+      .clear()
+      .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+      .blur();
+    cy.wait(FIVE_SECONDS);
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
@@ -369,10 +372,11 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/register-a-class');
     // To do - validate after to be fixed
     // Enter the applicant agency name
-    cy.get('#applicant-info-combobox')
-      .click();
-    cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-      .click();
+    cy.get('#applicant-info-input')
+      .clear()
+      .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+      .blur();
+    cy.wait(FIVE_SECONDS);
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
@@ -483,10 +487,11 @@ describe('Create A-Class Seedlot', () => {
     cy.url().should('contains', '/register-a-class');
     // To do - validate after to be fixed
     // Enter the applicant agency name
-    cy.get('#applicant-info-combobox')
-      .click();
-    cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-      .click();
+    cy.get('#applicant-info-input')
+      .clear()
+      .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+      .blur();
+    cy.wait(FIVE_SECONDS);
     // Enter the applicant agency number
     cy.get('#agency-number-input')
       .clear()
