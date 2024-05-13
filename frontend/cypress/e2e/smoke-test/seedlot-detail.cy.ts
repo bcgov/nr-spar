@@ -117,7 +117,7 @@ describe('Seedlot detail page', () => {
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-agency')
-      .should('have.value', fixtureData[speciesKey].agencyAcronym);
+      .should('have.value', fixtureData[speciesKey].agencyName);
 
     cy.get('.applicant-seedlot-information')
       .find('#seedlot-applicant-location-code')
