@@ -368,7 +368,7 @@ const ApplicantAgencyFields = ({
                   inline
                   kind="error"
                   title={getErrorMessageTitle(validateAgencyAcronymMutation.isError ? 'Agency acronym' : 'Location code')}
-                  subtitle="something went wrong"
+                  subtitle="Please retry verification"
                   actionButtonLabel="Retry"
                   onActionButtonClick={() => {
                     if (validateAgencyAcronymMutation.isError) {

@@ -16,6 +16,6 @@ const supportTexts = {
   }
 };
 
-export const getErrorMessageTitle = (field: string) => `${field} verification failed:`;
+export const getErrorMessageTitle = (field: string) => `${field} verification failed: `;
 
 export default supportTexts;
