@@ -1,0 +1,218 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  app: ${REPO}-${ZONE}
+parameters:
+  ### Required - do not hard code
+  - name: TAG
+    description: Docker tag; e.g. PR-### or prod
+    required: true
+  - name: ZONE
+    description: Deployment zone, e.g. pr-###, test or prod
+    required: true
+  - name: ORACLE_PASSWORD
+    description: Oracle database password for API
+    required: true
+
+  ### Recommended - suggest hard coding
+  - name: APP
+    description: Application/component name
+    value: database
+  - name: ORACLE_HOST
+    description: Oracle database host
+    value: nrcdb03.bcgov
+  - name: ORACLE_PORT
+    description: Oracle database port
+    value: "1543"
+  - name: ORACLE_SERVICE
+    description: Oracle service name
+    value: dbq01.nrs.bcgov
+  - name: ORACLE_USER
+    description: Oracle database username for API
+    value: proxy_fsa_spar_read_only_user
+  - name: ORG
+    description: GitHub organization name
+    value: bcgov
+  - name: POSTGRES_PORT
+    description: Postgres database port
+    value: "5432"
+  - name: REPO
+    description: Repository name
+    value: nr-spar-data
+
+  ### Usually a bad idea - not recommended
+  - name: POSTGRES_PASSWORD
+    description: Password for the PostgreSQL connection user.
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
+  - name: REGISTRY
+    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
+    value: ghcr.io
+  - name: PVC_MOUNT_PATH
+    description: Where to mount the PVC, subpath (e.g. data/)
+    value: /var/lib/postgresql
+  - name: CPU_REQUEST
+    value: 50m
+  - name: CPU_LIMIT
+    value: 115m
+  - name: MEMORY_REQUEST
+    value: 150Mi
+  - name: MEMORY_LIMIT
+    value: 250Mi
+  - name: DB_PVC_SIZE
+    description: Volume space available for data, e.g. 512Mi, 2Gi.
+    displayName: Database Volume Capacity
+    required: true
+    value: 256Mi
+  - name: MIN_REPLICAS
+    description: Dummy value for workflow convenience
+  - name: MAX_REPLICAS
+    description: Dummy value for workflow convenience
+objects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${REPO}-${ZONE}-${APP}
+      labels:
+        app: ${REPO}-${ZONE}
+    stringData:
+      database-name: ${APP}
+      database-password: ${POSTGRES_PASSWORD}
+      database-port: ${POSTGRES_PORT}
+      database-user: ${APP}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${REPO}-${ZONE}-oracle
+      labels:
+        app: ${REPO}-${ZONE}
+    stringData:
+      oracle-host: ${ORACLE_HOST}
+      oracle-password: ${ORACLE_PASSWORD}
+      oracle-port: ${ORACLE_PORT}
+      oracle-service: ${ORACLE_SERVICE}
+      oracle-user: ${ORACLE_USER}
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: ${REPO}-${ZONE}-${APP}
+      labels:
+        app: ${REPO}-${ZONE}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: ${DB_PVC_SIZE}
+      storageClassName: netapp-file-standard
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: ${REPO}-${ZONE}-${APP}
+      labels:
+        app: ${REPO}-${ZONE}
+    spec:
+      replicas: 1
+      selector:
+        deploymentconfig: ${REPO}-${ZONE}-${APP}
+      strategy:
+        type: Recreate
+        recreateParams:
+          timeoutSeconds: 600
+        activeDeadlineSeconds: 21600
+      template:
+        metadata:
+          name: ${REPO}-${ZONE}-${APP}
+          labels:
+            app: ${REPO}-${ZONE}
+            deploymentconfig: ${REPO}-${ZONE}-${APP}
+        spec:
+          volumes:
+            - name: ${REPO}-${ZONE}-${APP}
+              persistentVolumeClaim:
+                claimName: ${REPO}-${ZONE}-${APP}
+          containers:
+            - name: ${REPO}-${ZONE}
+              image: "${REGISTRY}/${ORG}/${REPO}/${APP}:${TAG}"
+              ports:
+                - containerPort: 5432
+                  protocol: TCP
+              resources:
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - "-c"
+                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                successThreshold: 1
+                failureThreshold: 5
+                initialDelaySeconds: 10
+                periodSeconds: 15
+                timeoutSeconds: 10
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/bin/env
+                    - bash
+                    - "-c"
+                    - psql -q $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
+                successThreshold: 1
+                failureThreshold: 5
+                initialDelaySeconds: 10
+                periodSeconds: 15
+                timeoutSeconds: 10
+              env:
+                - name: POSTGRES_DB
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${REPO}-${ZONE}-${APP}
+                      key: database-name
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${REPO}-${ZONE}-${APP}
+                      key: database-password
+                - name: POSTGRES_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${REPO}-${ZONE}-${APP}
+                      key: database-port
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${REPO}-${ZONE}-${APP}
+                      key: database-user
+              volumeMounts:
+                - name: ${REPO}-${ZONE}-${APP}
+                  mountPath: ${PVC_MOUNT_PATH}
+              terminationMessagePath: "/dev/termination-log"
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          restartPolicy: Always
+          terminationGracePeriodSeconds: 30
+          dnsPolicy: ClusterFirst
+          schedulerName: default-scheduler
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: ${REPO}-${ZONE}
+      name: ${REPO}-${ZONE}-${APP}
+    spec:
+      ports:
+        - name: postgresql
+          nodePort: 0
+          port: 5432
+          protocol: TCP
+          targetPort: 5432
+      selector:
+        deploymentconfig: ${REPO}-${ZONE}-${APP}
+      sessionAffinity: None
+      type: ClusterIP

@@ -1,0 +1,54 @@
+---
+
+x-var:
+  - &POSTGRES_USER
+    postgres
+  - &POSTGRES_PASSWORD
+    default
+  - &POSTGRES_DATABASE
+    spar
+
+x-postgres-vars: &postgres-vars
+  POSTGRES_HOST: database
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: *POSTGRES_USER
+  POSTGRES_PASSWORD: *POSTGRES_PASSWORD
+  POSTGRES_DATABASE: *POSTGRES_DATABASE
+
+x-python-vars: &python-vars
+  PIP_NO_CACHE_DIR: "off"
+  PIP_DISABLE_PIP_VERSION_CHECK: "on"
+  PIP_DEFAULT_TIMEOUT: "100"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+
+services:
+  database:
+    image: postgres:15
+    container_name: database
+    volumes:
+      - ./database/init_db:/docker-entrypoint-initdb.d
+    environment:
+      <<: *postgres-vars
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", *POSTGRES_USER]
+    ports: ["5432:5432"]
+
+  sync:
+    build:
+      context: ./sync
+    container_name: sync
+    environment:
+      test_mode: ${test_mode:-0}
+      EXECUTION_ID: ${EXECUTION_ID:-0}
+      ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-password}
+      ORACLE_PORT: ${ORACLE_PORT:-1543}
+      ORACLE_SERVICE: ${ORACLE_SERVICE:-dbq01.nrs.bcgov}
+      ORACLE_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
+      <<: [*postgres-vars, *python-vars]
+    volumes:
+      - ./sync:/app
+    depends_on:
+      database:
+        condition: service_healthy

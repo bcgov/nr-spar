@@ -1,0 +1,7 @@
+#cx-Oracle==8.3.0
+oracledb
+numpy==1.26.4
+pandas==2.2.2
+psycopg2==2.9.9
+SQLAlchemy==2.0.30
+requests
