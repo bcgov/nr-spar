@@ -47,9 +47,9 @@ on:
         description: 'Has a deployment has been triggered?'
         value: ${{ jobs.deploy.outputs.triggered }}
 
-# env:
-#   CRONJOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync
-#   JOB_JOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync-${{ github.run_number }}
+env:
+  CRONJOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync
+  JOB_JOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync-${{ github.run_number }}
 
 jobs:
   init:
@@ -191,6 +191,9 @@ jobs:
           # Login
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ secrets.oc_namespace }} #Safeguard!
+
+          # Create job
+          oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}
 
           # Follow
           oc wait --for=jsonpath='{.status.failed}'=4 job/${{ env.JOB_JOB }} --timeout=1m || true
