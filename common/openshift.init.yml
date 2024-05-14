@@ -59,6 +59,7 @@ objects:
     stringData:
       database-name: ${NAME}
       database-password: ${DB_PASSWORD}
+      database-port: ${POSTGRES_PORT}
       database-user: ${NAME}
   - apiVersion: v1
     kind: Secret

@@ -18,18 +18,11 @@ parameters:
   - name: ORG
     description: GitHub organization name
     value: bcgov
-  - name: POSTGRES_PORT
-    description: Postgres database port
-    value: "5432"
   - name: REPO
     description: Repository name
     value: nr-spar
 
   ### Usually a bad idea - not recommended
-  - name: POSTGRES_PASSWORD
-    description: Password for the PostgreSQL connection user.
-    from: "[a-zA-Z0-9]{16}"
-    generate: expression
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
@@ -54,17 +47,6 @@ parameters:
   - name: MAX_REPLICAS
     description: Dummy value for workflow convenience
 objects:
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${REPO}-${ZONE}-${APP}
-      labels:
-        app: ${REPO}-${ZONE}
-    stringData:
-      database-name: ${APP}
-      database-password: ${POSTGRES_PASSWORD}
-      database-port: ${POSTGRES_PORT}
-      database-user: ${APP}
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
