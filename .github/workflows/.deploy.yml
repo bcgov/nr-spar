@@ -11,6 +11,11 @@ on:
         description: Environment name; omit for PRs
         required: false
         type: string
+      etl:
+        description: Run the cronjob and verify results?  [true|false]
+        required: false
+        type: boolean
+        default: false
       tag:
         description: Container tag; usually PR number
         required: false
@@ -19,24 +24,12 @@ on:
         description: Deployment target; usually PR number, test or prod
         required: false
         type: string
-      # triggers:
-      #   description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
-      #   required: false
-      #   type: string
-
       ### Usually a bad idea / not recommended
       timeout-minutes:
         description: 'Timeout minutes'
         default: 10
         required: false
         type: number
-
-      ### Not ready yet
-      etl:
-        description: Run the cronjob and verify results?  [true|false]
-        required: false
-        type: boolean
-        default: false
 
     outputs:
       triggered:
@@ -84,103 +77,101 @@ jobs:
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
 
-  # deploy:
-  #   name: Deploy
-  #   environment: ${{ inputs.environment }}
-  #   needs: [init]
-  #   outputs:
-  #     triggered: ${{ steps.trigger.outputs.triggered }}
-  #   runs-on: ubuntu-22.04
-  #   timeout-minutes: ${{ inputs.timeout-minutes }}
-  #   strategy:
-  #     matrix:
-  #       name: [database, backend, fluentbit, frontend, oracle-api, sync]
-  #       include:
-  #         - name: database
-  #           file: database/openshift.deploy.yml
-  #           parameters:
-  #             ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
-  #           overwrite: false
-  #         - name: backend
-  #           file: backend/openshift.deploy.yml
-  #           overwrite: true
-  #           parameters:
-  #             -p BUILD=snapshot-${{ inputs.target || github.event.number }}
-  #             -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
-  #             -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-  #             ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
-  #           verification_path: "actuator/health"
-  #         - name: fluentbit
-  #           file: common/openshift.fluentbit.yml
-  #           overwrite: true
-  #         - name: frontend
-  #           file: frontend/openshift.deploy.yml
-  #           overwrite: true
-  #           parameters:
-  #             -p FAM_MODDED_ZONE=${{ inputs.target || needs.init.outputs.modded-tag }}
-  #             -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
-  #             -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || github.event.number }}
-  #             -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
-  #             -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-  #             ${{ inputs.target == 'prod' && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
-  #         - name: oracle-api
-  #           file: oracle-api/openshift.deploy.yml
-  #           overwrite: true
-  #           parameters:
-  #             -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-  #             -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
-  #             -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
-  #             ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
-  #           triggers: ('oracle-api/')
-  #           verification_path: "actuator/health"
-  #         - name: sync
-  #           file: sync/openshift.deploy.yml
-  #           overwrite: true
-  #           # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
-  #           # triggers: ('sync/')
+  deploy:
+    name: Deploy
+    environment: ${{ inputs.environment }}
+    needs: [init]
+    outputs:
+      triggered: ${{ steps.trigger.outputs.triggered }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    strategy:
+      matrix:
+        name: [database, backend, fluentbit, frontend, oracle-api, sync]
+        include:
+          - name: database
+            file: database/openshift.deploy.yml
+            parameters:
+              ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
+            overwrite: false
+          - name: backend
+            file: backend/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p BUILD=snapshot-${{ inputs.target || github.event.number }}
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+              ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
+            verification_path: "actuator/health"
+          - name: fluentbit
+            file: common/openshift.fluentbit.yml
+            overwrite: true
+          - name: frontend
+            file: frontend/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p FAM_MODDED_ZONE=${{ inputs.target || needs.init.outputs.modded-tag }}
+              -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
+              -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || github.event.number }}
+              -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
+              -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
+              ${{ inputs.target == 'prod' && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
+          - name: oracle-api
+            file: oracle-api/openshift.deploy.yml
+            overwrite: true
+            parameters:
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
+              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
+              ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
+            triggers: ('oracle-api/')
+            verification_path: "actuator/health"
+          - name: sync
+            file: sync/openshift.deploy.yml
+            overwrite: true
+            # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
+            # triggers: ('sync/')
 
-  #   steps:
-  #     - uses: bcgov-nr/action-deployer-openshift@v2.3.0
-  #       id: deploys
-  #       with:
-  #         file: ${{ matrix.file }}
-  #         oc_namespace: ${{ vars.OC_NAMESPACE }}
-  #         oc_server: ${{ vars.OC_SERVER }}
-  #         oc_token: ${{ secrets.OC_TOKEN }}
-  #         overwrite: ${{ matrix.overwrite }}
-  #         penetration_test: false
-  #         parameters:
-  #           -p TAG=${{ inputs.tag || needs.init.outputs.pr }}
-  #           -p ZONE=${{ inputs.target || github.event.number }}
-  #           ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
-  #           ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
-  #           ${{ matrix.parameters }}
-  #         post_rollout: ${{ matrix.post_rollout }}
-  #         triggers: ${{ matrix.triggers }}
-  #         verification_path: ${{ matrix.verification_path }}
+    steps:
+      - uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        id: deploys
+        with:
+          file: ${{ matrix.file }}
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          overwrite: ${{ matrix.overwrite }}
+          penetration_test: false
+          parameters:
+            -p TAG=${{ inputs.tag || needs.init.outputs.pr }}
+            -p ZONE=${{ inputs.target || github.event.number }}
+            ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
+            ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
+            ${{ matrix.parameters }}
+          post_rollout: ${{ matrix.post_rollout }}
+          triggers: ${{ matrix.triggers }}
+          verification_path: ${{ matrix.verification_path }}
 
-  #     - id: trigger
-  #       run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
+      - id: trigger
+        run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
   verify:
     name: Verify ETL
     # if: inputs.etl == 'true' #&& needs.deploy.outputs.triggered == 'true'
-    env:
-      OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
     environment: ${{ inputs.environment }}
-    # needs: [deploy]
-    needs: [init]
+    needs: [deploy]
     runs-on: ubuntu-latest
     steps:
-      - name: Verify
+      - name: Override OpenShift version
+        env:
+          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
         run: |
-          # Check job
-
-          # Override OpenShift version
-          pushd /usr/local/bin/
           curl --silent ${{ env.OC }} | tar -xzvf - oc
           oc version
-          popd
+
+      - name: Job
+        run: |
+          # Run and verify job
 
           # Login
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
