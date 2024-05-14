@@ -278,7 +278,7 @@ class SeedlotFormPutTest {
 
     doThrow(new SeedlotParentTreeNotFoundException())
         .when(seedlotParentTreeGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), any());
+        .saveSeedlotFormStep5(any(), any());
 
     Assertions.assertThrows(
         SeedlotParentTreeNotFoundException.class,
@@ -300,16 +300,14 @@ class SeedlotFormPutTest {
         .thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
     when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
-    doNothing()
-        .when(seedlotParentTreeGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), any());
+    doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
     when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
         .thenReturn(List.of());
-    when(smpMixService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
 
     doThrow(new SmpMixNotFoundException())
         .when(smpMixGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), any());
+        .saveSeedlotFormStep5(any(), any());
 
     Assertions.assertThrows(
         SmpMixNotFoundException.class,
@@ -331,13 +329,11 @@ class SeedlotFormPutTest {
         .thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
     when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
-    doNothing()
-        .when(seedlotParentTreeGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), any());
+    doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
     when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
         .thenReturn(List.of());
-    when(smpMixService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
-    doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any(), any());
+    when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
+    doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
     doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), any());
 
     SeedlotStatusEntity ssEntity = new SeedlotStatusEntity();
@@ -373,13 +369,11 @@ class SeedlotFormPutTest {
         .thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
     when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
-    doNothing()
-        .when(seedlotParentTreeGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), any());
+    doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
     when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
         .thenReturn(List.of());
-    when(smpMixService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
-    doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any(), any());
+    when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
+    doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
     doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), any());
 
     SeedlotStatusEntity ssEntity = new SeedlotStatusEntity();
