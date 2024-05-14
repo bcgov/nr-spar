@@ -38,7 +38,7 @@ parameters:
     value: "5432"
   - name: REPO
     description: Repository name
-    value: nr-spar-data
+    value: nr-spar
 
   ### Usually a bad idea - not recommended
   - name: POSTGRES_PASSWORD

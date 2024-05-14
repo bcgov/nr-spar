@@ -94,6 +94,8 @@ jobs:
           - name: database
             file: database/openshift.deploy.yml
             parameters:
+              -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
+              -p ORACLE_USER='${{ vars.ORACLE_USER }}'
               ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
             overwrite: false
           - name: backend
