@@ -11,12 +11,11 @@ concurrency:
 
 jobs:
   cleanup:
-    name: Cleanup and Images
+    name: Cleanup
     uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-close.yml@v0.4.1
     secrets:
-      oc_namespace: ${{ vars.OC_NAMESPACE }}
+      oc_namespace: ${{ secrets.OC_NAMESPACE }}
       oc_token: ${{ secrets.OC_TOKEN }}
     with:
       cleanup: label
-      packages: database backend frontend oracle-api
-
+      packages: database sync

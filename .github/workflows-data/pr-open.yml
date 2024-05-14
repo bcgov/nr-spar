@@ -4,48 +4,47 @@ on:
   pull_request:
 
 concurrency:
-  # PR open and close use the same group, allowing only one at a time
+  # Cancel in progress for PR open and close
   group: ${{ github.event.number }}
   cancel-in-progress: true
 
 jobs:
-  builds:
-    name: Builds
+  # https://github.com/bcgov-nr/action-builder-ghcr
+  build:
+    name: Build
     runs-on: ubuntu-22.04
     permissions:
       packages: write
     strategy:
       matrix:
-        package: [database, backend, frontend, oracle-api]
+        package: [database, sync]
+    timeout-minutes: 10
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        id: build
         with:
+          keep_versions: 50
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
-  deploys:
-    name: Deploys
-    needs: [builds]
+  deploy:
+    name: Deploy
+    needs: [build]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
-      test: true
-      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
-
-  tests:
-    name: Tests
-    if: needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    secrets: inherit
-    uses: ./.github/workflows/.tests.yml
+      parameters: -p TEST_MODE=1
+      tag: ${{ github.event.number }}
+      target: ${{ github.event.number }}
+      triggers: ('database/' 'sync/')
+      verify: true
 
   results:
     name: PR Results
-    if: always() && (!failure()) && (!cancelled())
-    # Include all needs that could have failures!
-    needs: [builds, deploys, tests]
+    if: always() && !failure()
+    needs: [deploy]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
