@@ -1,0 +1,20 @@
+name: Scheduled
+
+on:
+  schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy and Run Job
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: test
+      target: test
+      tag: prod
+      verify: true
