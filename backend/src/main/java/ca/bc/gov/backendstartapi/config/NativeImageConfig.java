@@ -8,6 +8,7 @@ import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
+import org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect;
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportRuntimeHints;
@@ -22,7 +23,8 @@ import org.springframework.context.annotation.ImportRuntimeHints;
   ConeAndPollenCount.class,
   SeedPlanZoneDto.class,
   SmpMixVolume.class,
-  GeospatialOracleResDto.class
+  GeospatialOracleResDto.class,
+  PostgisPG95Dialect.class
 })
 @ImportRuntimeHints(value = {HttpServletRequestRuntimeHint.class})
 public class NativeImageConfig {}
