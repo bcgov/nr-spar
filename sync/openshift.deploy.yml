@@ -1,0 +1,146 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+parameters:
+  ### Required - do not hard code
+  - name: TAG
+    description: Docker tag; e.g. PR-### or prod
+    required: true
+  - name: ZONE
+    description: Deployment zone, e.g. pr-###, test or prod
+    required: true
+
+  ### Recommended - suggest hard coding
+  - name: APP
+    description: Application/component name
+    value: sync
+  - name: EXECUTION_ID
+    description: Process execution ID for running ETL Tool
+    value: "0"
+  - name: ORG
+    description: GitHub organization name
+    value: bcgov
+  - name: REPO
+    description: Repository name
+    value: nr-spar
+  - name: TEST_MODE
+    description: "Run in test mode"
+    value: "1"
+
+  ### Usually a bad idea - not recommended
+  - name: CRON_MINUTES
+    description: Random number, 0-60, for scheduling cronjobs
+    from: "[0-5]{1}[0-9]{1}"
+    generate: expression
+  - name: JOB_BACKOFF_LIMIT
+    description: "The number of attempts to try for a successful job outcome"
+    value: "3"
+  - name: JOB_HISTORY_FAIL
+    description: "The number of failed jobs that will be retained"
+    value: "2"
+  - name: JOB_HISTORY_SUCCESS
+    description: "The number of successful jobs that will be retained"
+    value: "5"
+  - name: REGISTRY
+    description: Source container registry
+    value: ghcr.io
+
+  ### Dummy values for workflow convenience
+  - name: MIN_REPLICAS
+  - name: MAX_REPLICAS
+objects:
+  - kind: CronJob
+    apiVersion: "batch/v1"
+    metadata:
+      name: ${REPO}-${ZONE}-${APP}
+      labels:
+        app: ${REPO}-${ZONE}
+        cronjob: ${REPO}-${ZONE}
+    spec:
+      schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
+      startingDeadlineSeconds: 60
+      concurrencyPolicy: "Replace"
+      successfulJobsHistoryLimit: "${{JOB_HISTORY_SUCCESS}}"
+      failedJobsHistoryLimit: "${{JOB_HISTORY_FAIL}}"
+      jobTemplate:
+        metadata:
+          labels:
+            app: ${REPO}-${ZONE}
+            cronjob: ${REPO}-${ZONE}
+        spec:
+          backoffLimit: ${{JOB_BACKOFF_LIMIT}}
+          template:
+            metadata:
+              labels:
+                app: ${REPO}-${ZONE}
+                cronjob: ${REPO}-${ZONE}
+            spec:
+              containers:
+                - name: ${REPO}-${ZONE}
+                  image: "${REGISTRY}/${ORG}/${REPO}/${APP}:${TAG}"
+                  env:
+                    - name: test_mode
+                      value: "${TEST_MODE}"
+                    - name: EXECUTION_ID
+                      value: "${EXECUTION_ID}"
+                    - name: ORACLE_HOST
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-oracle
+                          key: oracle-host
+                    - name: ORACLE_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-oracle
+                          key: oracle-password
+                    - name: ORACLE_PORT
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-oracle
+                          key: oracle-port
+                    - name: ORACLE_SERVICE
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-oracle
+                          key: oracle-service
+                    - name: ORACLE_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-oracle
+                          key: oracle-user
+                    - name: POSTGRES_HOST
+                      value: ${REPO}-${ZONE}-database
+                    - name: POSTGRES_DATABASE
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-database
+                          key: database-name
+                    - name: POSTGRES_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-database
+                          key: database-password
+                    - name: POSTGRES_PORT
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-database
+                          key: database-port
+                    - name: POSTGRES_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-database
+                          key: database-user
+                  resources:
+                    limits:
+                      cpu: 250m
+                    requests:
+                      cpu: 50m
+                  terminationMessagePath: /dev/termination-log
+                  terminationMessagePolicy: File
+                  imagePullPolicy: Always
+              restartPolicy: Never
+              terminationGracePeriodSeconds: 30
+              activeDeadlineSeconds: 1600
+              dnsPolicy: ClusterFirst
+              serviceAccountName: pipeline
+              schedulerName: default-scheduler
+
