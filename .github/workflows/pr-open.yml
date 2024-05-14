@@ -32,7 +32,7 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     with:
       etl: true
-      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/' 'sync/')
+      # triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/' 'sync/')
 
   # tests:
   #   name: Tests
