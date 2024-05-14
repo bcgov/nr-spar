@@ -139,8 +139,8 @@ def main() -> None:
 # MAIN Execution
 def execute_etl(dbPostgres, dbOracle, execution_id) -> None:
     #logging_config.fileConfig(os.path.join(os.path.dirname(__file__), "logging.ini"), disable_existing_loggers=False)   
-    loggingBasicConfig(level=loggingDEBUG, stream=sys.stdout)
-    #loggingBasicConfig(level=loggingINFO, stream=sys.stdout)
+    #loggingBasicConfig(level=loggingDEBUG, stream=sys.stdout)
+    loggingBasicConfig(level=loggingINFO, stream=sys.stdout)
     # data_sync.data_sync( source_config = dbOracle, target_config = dbPostgres ,track_config = dbPostgres )
     data_sync.execute_instance( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres, execution_id = execution_id )
 
