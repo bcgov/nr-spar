@@ -160,19 +160,11 @@
     </dependency>
 
     <!-- Geospatial -->
-    <!-- <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-spatial</artifactId>
-      <version>6.4.4.Final</version>
-      <type>pom</type>
-    </dependency> -->
-
-    <!-- <dependency>
-      <groupId>org.locationtech.jts</groupId>
-      <artifactId>jts-core</artifactId>
-      <version>1.18.2</version>
-    </dependency> -->
-
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-spatial</artifactId>
+        <version>${hibernate.version}</version>
+    </dependency>
 
     <!-- Database -->
     <dependency>
