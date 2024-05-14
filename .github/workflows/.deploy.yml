@@ -42,6 +42,13 @@ on:
         type: boolean
         default: false
 
+      ### Not ready yet
+      verify:
+        description: Run the cronjob and verify results?  [true|false]
+        required: false
+        type: boolean
+        default: false
+
     outputs:
       triggered:
         description: 'Has a deployment has been triggered?'
@@ -89,8 +96,6 @@ jobs:
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-            # -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
-            # -p ORACLE_USER='${{ vars.ORACLE_USER }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
 
