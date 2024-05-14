@@ -16,7 +16,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        package: [database, backend, frontend, oracle-api]
+        package: [database, backend, frontend, oracle-api, sync]
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
         with:
@@ -43,7 +43,7 @@ jobs:
 
   results:
     name: PR Results
-    if: always() && !failure()
+    if: always() && (!failure()) && (!cancelled())
     # Include all needs that could have failures!
     needs: [builds, deploys, tests]
     runs-on: ubuntu-22.04
