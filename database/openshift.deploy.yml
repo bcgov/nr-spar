@@ -1,31 +1,26 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
-  app: ${REPO}-${ZONE}
+  app: ${NAME}-${ZONE}
 parameters:
-  ### Required - do not hard code
-  - name: TAG
-    description: Docker tag; e.g. PR-### or prod
-    required: true
-  - name: ZONE
-    description: Deployment zone, e.g. pr-###, test or prod
-    required: true
-
-  ### Recommended - suggest hard coding
-  - name: APP
-    description: Application/component name
-    value: database
-  - name: ORG
-    description: GitHub organization name
-    value: bcgov
-  - name: REPO
-    description: Repository name
+  - name: NAME
+    description: Product name
     value: nr-spar
-
-  ### Usually a bad idea - not recommended
+  - name: COMPONENT
+    description: Component name
+    value: database
+  - name: ZONE
+    description: Deployment zone, e.g. pr-### or prod
+    required: true
+  - name: TAG
+    description: Image tag; e.g. PR number, latest or prod
+    required: true
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
+  - name: ORG_NAME
+    description: Organization name
+    value: bcgov
   - name: PVC_MOUNT_PATH
     description: Where to mount the PVC, subpath (e.g. data/)
     value: /var/lib/postgresql
@@ -40,7 +35,6 @@ parameters:
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
-    required: true
     value: 256Mi
   - name: MIN_REPLICAS
     description: Dummy value for workflow convenience
@@ -50,9 +44,9 @@ objects:
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: ${REPO}-${ZONE}-${APP}
+      name: ${NAME}-${ZONE}-${COMPONENT}
       labels:
-        app: ${REPO}-${ZONE}
+        app: ${NAME}-${ZONE}
     spec:
       accessModes:
         - ReadWriteOnce
@@ -60,16 +54,42 @@ objects:
         requests:
           storage: ${DB_PVC_SIZE}
       storageClassName: netapp-file-standard
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
+      labels:
+        app: ${NAME}-${ZONE}
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+        - name: latest
+          from:
+            kind: DockerImage
+            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${TAG}
+          referencePolicy:
+            type: Local
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
-      name: ${REPO}-${ZONE}-${APP}
+      name: ${NAME}-${ZONE}-${COMPONENT}
       labels:
-        app: ${REPO}-${ZONE}
+        app: ${NAME}-${ZONE}
     spec:
       replicas: 1
+      triggers:
+        - type: ConfigChange
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - ${NAME}
+            from:
+              kind: ImageStreamTag
+              name: ${NAME}-${ZONE}-${COMPONENT}:latest
       selector:
-        deploymentconfig: ${REPO}-${ZONE}-${APP}
+        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
         type: Recreate
         recreateParams:
@@ -77,18 +97,18 @@ objects:
         activeDeadlineSeconds: 21600
       template:
         metadata:
-          name: ${REPO}-${ZONE}-${APP}
+          name: ${NAME}-${ZONE}-${COMPONENT}
           labels:
-            app: ${REPO}-${ZONE}
-            deploymentconfig: ${REPO}-${ZONE}-${APP}
+            app: ${NAME}-${ZONE}
+            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           volumes:
-            - name: ${REPO}-${ZONE}-${APP}
+            - name: ${NAME}-${ZONE}-${COMPONENT}
               persistentVolumeClaim:
-                claimName: ${REPO}-${ZONE}-${APP}
+                claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
-            - name: ${REPO}-${ZONE}
-              image: "${REGISTRY}/${ORG}/${REPO}/${APP}:${TAG}"
+            - name: ${NAME}
+              image: ${NAME}-${ZONE}-${COMPONENT}:latest
               ports:
                 - containerPort: 5432
                   protocol: TCP
@@ -127,25 +147,20 @@ objects:
                 - name: POSTGRES_DB
                   valueFrom:
                     secretKeyRef:
-                      name: ${REPO}-${ZONE}-${APP}
+                      name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-name
                 - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${REPO}-${ZONE}-${APP}
+                      name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-password
-                - name: POSTGRES_PORT
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${REPO}-${ZONE}-${APP}
-                      key: database-port
                 - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
-                      name: ${REPO}-${ZONE}-${APP}
+                      name: ${NAME}-${ZONE}-${COMPONENT}
                       key: database-user
               volumeMounts:
-                - name: ${REPO}-${ZONE}-${APP}
+                - name: ${NAME}-${ZONE}-${COMPONENT}
                   mountPath: ${PVC_MOUNT_PATH}
               terminationMessagePath: "/dev/termination-log"
               terminationMessagePolicy: File
@@ -158,8 +173,8 @@ objects:
     kind: Service
     metadata:
       labels:
-        app: ${REPO}-${ZONE}
-      name: ${REPO}-${ZONE}-${APP}
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       ports:
         - name: postgresql
@@ -168,6 +183,6 @@ objects:
           protocol: TCP
           targetPort: 5432
       selector:
-        deploymentconfig: ${REPO}-${ZONE}-${APP}
+        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
       sessionAffinity: None
       type: ClusterIP
