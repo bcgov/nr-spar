@@ -40,6 +40,10 @@ on:
         description: 'Has a deployment has been triggered?'
         value: ${{ jobs.deploy.outputs.triggered }}
 
+# env:
+#   CRONJOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync
+#   JOB_JOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync-${{ github.run_number }}
+
 jobs:
   init:
     name: Initialize
@@ -78,8 +82,8 @@ jobs:
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-            # -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
-            # -p ORACLE_USER='${{ vars.ORACLE_USER }}'
+            -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
+            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
 
   deploy:
     name: Deploy
