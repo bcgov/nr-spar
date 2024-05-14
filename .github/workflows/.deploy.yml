@@ -19,10 +19,6 @@ on:
         description: Deployment target; usually PR number, test or prod
         required: false
         type: string
-      test:
-        description: Run Cypress tests after deployment?  [true|false]
-        required: false
-        type: string
       triggers:
         description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
         required: false
@@ -168,7 +164,7 @@ jobs:
 
   verify:
     name: Verify ETL
-    if: inputs.etl == 'true' #&& needs.deploy.outputs.triggered == 'true'
+    # if: inputs.etl == 'true' #&& needs.deploy.outputs.triggered == 'true'
     environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest
