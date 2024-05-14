@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -507,7 +508,7 @@ class SeedlotEndpointTest {
   @DisplayName("Seedlot Form submitted with not found seedlot")
   @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
   void submitSeedlotForm_notFoundSeedlot_shouldThrowException() throws Exception {
-    when(seedlotService.updateSeedlotWithForm(any(), any(), any(), any()))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
     mockMvc
@@ -527,7 +528,7 @@ class SeedlotEndpointTest {
   void submitSeedlotForm_happyPath_shouldSucceed() throws Exception {
     SeedlotStatusResponseDto createResponseDto = new SeedlotStatusResponseDto("123", "PND");
 
-    when(seedlotService.updateSeedlotWithForm(any(), any(), any(), any()))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
         .thenReturn(createResponseDto);
 
     mockMvc

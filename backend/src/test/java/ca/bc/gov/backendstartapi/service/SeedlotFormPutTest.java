@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -226,13 +227,15 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Cone Collection Method not found")
   void submitSeedlotForm_coneCollectionMethodNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
-    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
+    SeedlotStatusEntity seedlotStatus = new SeedlotStatusEntity();
+    seedlotStatus.setSeedlotStatusCode("PND");
+    seedlot.setSeedlotStatus(seedlotStatus);
 
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
     doThrow(new ConeCollectionMethodNotFoundException())
         .when(seedlotCollectionMethodService)
-        .saveSeedlotFormStep1(any(), any(), any());
+        .saveSeedlotFormStep1(any(), any(), anyBoolean());
 
     Assertions.assertThrows(
         ConeCollectionMethodNotFoundException.class,
@@ -246,14 +249,16 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Method of Payment not found")
   void submitSeedlotForm_methodOfPaymentNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
-    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
+    SeedlotStatusEntity seedlotStatus = new SeedlotStatusEntity();
+    seedlotStatus.setSeedlotStatusCode("PND");
+    seedlot.setSeedlotStatus(seedlotStatus);
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
+    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), anyBoolean());
 
     doThrow(new MethodOfPaymentNotFoundException())
         .when(seedlotOwnerQuantityService)
-        .saveSeedlotFormStep2(any(), any(), any());
+        .saveSeedlotFormStep2(any(), any(), anyBoolean());
 
     Assertions.assertThrows(
         MethodOfPaymentNotFoundException.class,
@@ -267,14 +272,18 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Seedlot Parent Tree not found")
   void submitSeedlotForm_seedlotParentTreeNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
-    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
+    SeedlotStatusEntity seedlotStatus = new SeedlotStatusEntity();
+    seedlotStatus.setSeedlotStatusCode("PND");
+    seedlot.setSeedlotStatus(seedlotStatus);
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveSeedlotFormStep1(any(), any(), anyBoolean());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), anyBoolean()))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), anyBoolean());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean())).thenReturn(List.of());
 
     doThrow(new SeedlotParentTreeNotFoundException())
         .when(seedlotParentTreeGeneticQualityService)
@@ -292,16 +301,21 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Smp Mix not found")
   void submitSeedlotForm_smpMixNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
-    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
+    SeedlotStatusEntity seedlotStatus = new SeedlotStatusEntity();
+    seedlotStatus.setSeedlotStatusCode("PND");
+    seedlot.setSeedlotStatus(seedlotStatus);
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveSeedlotFormStep1(any(), any(), anyBoolean());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), anyBoolean()))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), anyBoolean());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
+        .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
+    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
         .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
 
@@ -321,20 +335,27 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Facility type description not found")
   void submitSeedlotForm_facilityDescNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
-    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
+    SeedlotStatusEntity seedlotStatus = new SeedlotStatusEntity();
+    seedlotStatus.setSeedlotStatusCode("PND");
+    seedlot.setSeedlotStatus(seedlotStatus);
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveSeedlotFormStep1(any(), any(), anyBoolean());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), anyBoolean()))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), anyBoolean());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
+        .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
+    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
         .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), any());
+    doNothing()
+        .when(seedlotParentTreeSmpMixService)
+        .saveSeedlotFormStep5(any(), any(), anyBoolean());
 
     SeedlotStatusEntity ssEntity = new SeedlotStatusEntity();
     ssEntity.setSeedlotStatusCode("SUB");
@@ -358,23 +379,31 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Success")
   void submitSeedlotForm_happyPath_shouldSucceed() {
     Seedlot seedlot = new Seedlot("5432");
-    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
+    SeedlotStatusEntity seedlotStatus = new SeedlotStatusEntity();
+    seedlotStatus.setSeedlotStatusCode("PND");
+    seedlot.setSeedlotStatus(seedlotStatus);
+
     SeedlotSourceEntity seedSource = new SeedlotSourceEntity();
     seedSource.setSeedlotSourceCode("UNT");
     seedlot.setSeedlotSource(seedSource);
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveSeedlotFormStep1(any(), any(), anyBoolean());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), anyBoolean()))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), anyBoolean());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
+        .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
+    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
         .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), any());
+    doNothing()
+        .when(seedlotParentTreeSmpMixService)
+        .saveSeedlotFormStep5(any(), any(), anyBoolean());
 
     SeedlotStatusEntity ssEntity = new SeedlotStatusEntity();
     ssEntity.setSeedlotStatusCode("SUB");

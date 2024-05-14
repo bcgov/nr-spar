@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -45,7 +46,7 @@ class TscAdminEndpointTest {
   @MockBean private SeedlotService seedlotService;
 
   private static final String WHOLE_SEEDLOT_FORM_JSON =
-        """
+      """
         {
         "seedlotFormCollectionDto": {
           "collectionClientNumber": "00012797",
@@ -207,7 +208,7 @@ class TscAdminEndpointTest {
   void editSeedlot_shouldSucceed() throws Exception {
     String seedlotNumber = "63012";
     SeedlotStatusResponseDto res = new SeedlotStatusResponseDto(seedlotNumber, "SUB");
-    when(seedlotService.updateSeedlotWithForm(any(), any(), any(), any())).thenReturn(res);
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any())).thenReturn(res);
     mockMvc
         .perform(
             put(
@@ -226,7 +227,7 @@ class TscAdminEndpointTest {
   @DisplayName("Edit seedlot should fail upon seedlot not found.")
   void editSeedlot_shouldFail() throws Exception {
     String seedlotNumber = "63999";
-    when(seedlotService.updateSeedlotWithForm(any(), any(), any(), any()))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
     mockMvc
@@ -247,7 +248,7 @@ class TscAdminEndpointTest {
   @DisplayName("Edit seedlot should fail with invalid seedlot status.")
   void editSeedlot_invalidStatus_shouldFail() throws Exception {
     String seedlotNumber = "63999";
-    when(seedlotService.updateSeedlotWithForm(any(), any(), any(), any()))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
     mockMvc
