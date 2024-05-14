@@ -159,7 +159,7 @@ const SingleOwnerInfo = ({
                 ) => setAgencyAndCode(isDefault, agency, locationCode)
               }
               showCheckbox={ownerInfo.id === DEFAULT_INDEX}
-              readOnly={readOnly ?? false}
+              readOnly={readOnly && !isReview}
               isFormSubmitted={readOnly}
             />
           </Column>
@@ -193,7 +193,7 @@ const SingleOwnerInfo = ({
                   }
                 }
               }
-              readOnly={readOnly}
+              readOnly={readOnly && !isReview}
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
@@ -224,7 +224,7 @@ const SingleOwnerInfo = ({
                       }
                     }
                   }
-                  readOnly={readOnly}
+                  readOnly={readOnly && !isReview}
                 />
               </div>
               <div className="reserved-surplus-input">
@@ -253,7 +253,7 @@ const SingleOwnerInfo = ({
                       }
                     }
                   }
-                  readOnly={readOnly}
+                  readOnly={readOnly && !isReview}
                 />
               </div>
             </div>
@@ -280,7 +280,7 @@ const SingleOwnerInfo = ({
                     onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
                     invalid={ownerInfo.fundingSource.isInvalid}
                     invalidText={inputText.funding.invalidText}
-                    readOnly={readOnly}
+                    readOnly={readOnly && !isReview}
                   />
                 )
             }
@@ -305,14 +305,14 @@ const SingleOwnerInfo = ({
                     onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
                     invalid={ownerInfo.methodOfPayment.isInvalid}
                     invalidText={inputText.payment.invalidText}
-                    readOnly={readOnly}
+                    readOnly={readOnly && !isReview}
                   />
 
                 )
             }
           </Column>
         </Row>
-        {(!readOnly) && (
+        {(!readOnly && !isReview) && (
           <Row>
             {
               ownerInfo.id !== DEFAULT_INDEX

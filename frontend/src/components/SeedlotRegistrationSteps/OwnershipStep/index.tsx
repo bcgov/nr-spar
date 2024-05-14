@@ -154,13 +154,21 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     <div>
       <div className="ownership-header">
         <div className="ownership-step-title-box">
-          <h3>
-            Ownership
-          </h3>
-          <p>
-            Enter the seedlot&apos;s ownership information, the agencies listed as
-            owners are the ones who are charged for cone and seed processing fees
-          </p>
+          {
+            isReview
+              ? null
+              : (
+                <>
+                  <h3>
+                    Ownership
+                  </h3>
+                  <p>
+                    Enter the seedlot&apos;s ownership information, the agencies listed as
+                    owners are the ones who are charged for cone and seed processing fees
+                  </p>
+                </>
+              )
+          }
         </div>
       </div>
       <div className="ownership-form-container">

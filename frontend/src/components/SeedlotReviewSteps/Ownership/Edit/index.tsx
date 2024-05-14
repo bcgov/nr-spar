@@ -1,12 +1,12 @@
 import React from 'react';
 import { FlexGrid } from '@carbon/react';
 
-import CollectionStep from '../../../SeedlotRegistrationSteps/CollectionStep';
+import OwnershipStep from '../../../SeedlotRegistrationSteps/OwnershipStep';
 
-const CollectionReviewEdit = () => (
+const OwnershipReviewEdit = () => (
   <FlexGrid className="sub-section-grid">
-    <CollectionStep isReview />
+    <OwnershipStep isReview />
   </FlexGrid>
 );
 
-export default CollectionReviewEdit;
+export default OwnershipReviewEdit;
