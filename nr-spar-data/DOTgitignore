@@ -22,6 +22,7 @@ lib-cov
 coverage
 *.lcov
 lcov.*
+.coverage
 
 # nyc test coverage
 .nyc_output
@@ -37,10 +38,22 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
-target/
+
+# Dependency directories
+node_modules/
+jspm_packages/
 
 # TypeScript v1 declaration files
 typings/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
 
 # Microbundle cache
 .rpt2_cache/
@@ -53,6 +66,13 @@ typings/
 
 # Output of 'npm pack'
 *.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -88,75 +108,23 @@ dist
 # Jest
 test-report.xml
 
-# Snyk
-snyk.sarif
-
 # Docker/Podman volumes
 .volumes
-
-# Jetbrains IntelliJ IDEA
-.idea/
-
-# Environment variables file
-*.env
-
-# VS Code
-.vscode
-
-# Artifacts
-*.jar
-
-# Cypress
-frontend/cypress/videos
-frontend/cypress/screenshots
-frontend/cypress/downloads
-frontend/cypress-coverage
-*.cer
-jssecacerts
-InstallCert.class
-InstallCert$SavingTrustManager.class
-*.der
-*.pem
-
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-**/node_modules
-**/.pnp
-.pnp.js
-
-# testing
-**/coverage
-**/cypress/videos
-**/cypress/screenshots
-**/cypress/downloads
-
-# production
+.idea
+*.iml
+**/bin
 **/build
+**/dist
+**/out
+**/target
 
-# VS Code
-*.code-workspace
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+# VSCode
+.vscode/
 
-## Local History for Visual Studio Code
-.history/
+# Python
+**/venv
+**/.venv
 
-## Built Visual Studio Code Extensions
-*.vsix
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Data
+sync/data/
+**/__pycache__

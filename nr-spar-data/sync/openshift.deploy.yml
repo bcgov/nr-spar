@@ -21,7 +21,7 @@ parameters:
     value: bcgov
   - name: REPO
     description: Repository name
-    value: nr-spar
+    value: nr-spar-data
   - name: TEST_MODE
     description: "Run in test mode"
     value: "1"
