@@ -168,6 +168,7 @@ jobs:
         run: |
           curl --silent ${{ env.OC }} | tar -xzvf - oc
           oc version
+        working-directory: /usr/local/bin/
 
       - name: Job
         run: |
