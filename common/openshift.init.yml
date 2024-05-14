@@ -63,9 +63,9 @@ objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${REPO}-${ZONE}-oracle
+      name: ${NAME}-${ZONE}-oracle
       labels:
-        app: ${REPO}-${ZONE}
+        app: ${NAME}-${ZONE}
     stringData:
       oracle-host: ${ORACLE_HOST}
       oracle-password: ${ORACLE_PASSWORD}
