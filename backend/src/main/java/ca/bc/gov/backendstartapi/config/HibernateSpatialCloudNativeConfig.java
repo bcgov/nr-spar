@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+/** This class provides configurations for the logger of Hibernate Spatial. */
 @Configuration
 @ImportRuntimeHints(HibernateSpatialCloudNativeConfig.class)
 public class HibernateSpatialCloudNativeConfig implements RuntimeHintsRegistrar {
