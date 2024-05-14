@@ -179,7 +179,7 @@ jobs:
 
           # Create job
           CRONJOB=${{ github.event.repository.name }}-${{ inputs.target || github.event.number }}-sync
-          JOB_JOB=${CRONJOB}-${{ github.num_number }}
+          JOB_JOB=${CRONJOB}-${{ github.run_number }}
           oc create job ${JOB_JOB} --from=cronjob/${CRONJOB}
 
           # Follow
