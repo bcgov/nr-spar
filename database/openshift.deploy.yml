@@ -1,26 +1,53 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
-  app: ${NAME}-${ZONE}
+  app: ${REPO}-${ZONE}
 parameters:
-  - name: NAME
-    description: Product name
-    value: nr-spar
-  - name: COMPONENT
-    description: Component name
-    value: database
-  - name: ZONE
-    description: Deployment zone, e.g. pr-### or prod
-    required: true
+  ### Required - do not hard code
   - name: TAG
-    description: Image tag; e.g. PR number, latest or prod
+    description: Docker tag; e.g. PR-### or prod
     required: true
+  - name: ZONE
+    description: Deployment zone, e.g. pr-###, test or prod
+    required: true
+  - name: ORACLE_PASSWORD
+    description: Oracle database password for API
+    required: true
+
+  ### Recommended - suggest hard coding
+  - name: APP
+    description: Application/component name
+    value: database
+  - name: ORACLE_HOST
+    description: Oracle database host
+    value: nrcdb03.bcgov
+  - name: ORACLE_PORT
+    description: Oracle database port
+    value: "1543"
+  - name: ORACLE_SERVICE
+    description: Oracle service name
+    value: dbq01.nrs.bcgov
+  - name: ORACLE_USER
+    description: Oracle database username for API
+    value: proxy_fsa_spar_read_only_user
+  - name: ORG
+    description: GitHub organization name
+    value: bcgov
+  - name: POSTGRES_PORT
+    description: Postgres database port
+    value: "5432"
+  - name: REPO
+    description: Repository name
+    value: nr-spar-data
+
+  ### Usually a bad idea - not recommended
+  - name: POSTGRES_PASSWORD
+    description: Password for the PostgreSQL connection user.
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
-  - name: ORG_NAME
-    description: Organization name
-    value: bcgov
   - name: PVC_MOUNT_PATH
     description: Where to mount the PVC, subpath (e.g. data/)
     value: /var/lib/postgresql
@@ -35,18 +62,42 @@ parameters:
   - name: DB_PVC_SIZE
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
+    required: true
     value: 256Mi
   - name: MIN_REPLICAS
     description: Dummy value for workflow convenience
   - name: MAX_REPLICAS
     description: Dummy value for workflow convenience
 objects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${REPO}-${ZONE}-${APP}
+      labels:
+        app: ${REPO}-${ZONE}
+    stringData:
+      database-name: ${APP}
+      database-password: ${POSTGRES_PASSWORD}
+      database-port: ${POSTGRES_PORT}
+      database-user: ${APP}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${REPO}-${ZONE}-oracle
+      labels:
+        app: ${REPO}-${ZONE}
+    stringData:
+      oracle-host: ${ORACLE_HOST}
+      oracle-password: ${ORACLE_PASSWORD}
+      oracle-port: ${ORACLE_PORT}
+      oracle-service: ${ORACLE_SERVICE}
+      oracle-user: ${ORACLE_USER}
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
+      name: ${REPO}-${ZONE}-${APP}
       labels:
-        app: ${NAME}-${ZONE}
+        app: ${REPO}-${ZONE}
     spec:
       accessModes:
         - ReadWriteOnce
@@ -54,42 +105,16 @@ objects:
         requests:
           storage: ${DB_PVC_SIZE}
       storageClassName: netapp-file-standard
-  - kind: ImageStream
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-    spec:
-      lookupPolicy:
-        local: false
-      tags:
-        - name: latest
-          from:
-            kind: DockerImage
-            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${TAG}
-          referencePolicy:
-            type: Local
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
+      name: ${REPO}-${ZONE}-${APP}
       labels:
-        app: ${NAME}-${ZONE}
+        app: ${REPO}-${ZONE}
     spec:
       replicas: 1
-      triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - ${NAME}
-            from:
-              kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:latest
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        deploymentconfig: ${REPO}-${ZONE}-${APP}
       strategy:
         type: Recreate
         recreateParams:
@@ -97,18 +122,18 @@ objects:
         activeDeadlineSeconds: 21600
       template:
         metadata:
-          name: ${NAME}-${ZONE}-${COMPONENT}
+          name: ${REPO}-${ZONE}-${APP}
           labels:
-            app: ${NAME}-${ZONE}
-            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+            app: ${REPO}-${ZONE}
+            deploymentconfig: ${REPO}-${ZONE}-${APP}
         spec:
           volumes:
-            - name: ${NAME}-${ZONE}-${COMPONENT}
+            - name: ${REPO}-${ZONE}-${APP}
               persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}
+                claimName: ${REPO}-${ZONE}-${APP}
           containers:
-            - name: ${NAME}
-              image: ${NAME}-${ZONE}-${COMPONENT}:latest
+            - name: ${REPO}-${ZONE}
+              image: "${REGISTRY}/${ORG}/${REPO}/${APP}:${TAG}"
               ports:
                 - containerPort: 5432
                   protocol: TCP
@@ -147,20 +172,25 @@ objects:
                 - name: POSTGRES_DB
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: ${REPO}-${ZONE}-${APP}
                       key: database-name
                 - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: ${REPO}-${ZONE}-${APP}
                       key: database-password
+                - name: POSTGRES_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${REPO}-${ZONE}-${APP}
+                      key: database-port
                 - name: POSTGRES_USER
                   valueFrom:
                     secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      name: ${REPO}-${ZONE}-${APP}
                       key: database-user
               volumeMounts:
-                - name: ${NAME}-${ZONE}-${COMPONENT}
+                - name: ${REPO}-${ZONE}-${APP}
                   mountPath: ${PVC_MOUNT_PATH}
               terminationMessagePath: "/dev/termination-log"
               terminationMessagePolicy: File
@@ -173,8 +203,8 @@ objects:
     kind: Service
     metadata:
       labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+        app: ${REPO}-${ZONE}
+      name: ${REPO}-${ZONE}-${APP}
     spec:
       ports:
         - name: postgresql
@@ -183,6 +213,6 @@ objects:
           protocol: TCP
           targetPort: 5432
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        deploymentconfig: ${REPO}-${ZONE}-${APP}
       sessionAffinity: None
       type: ClusterIP
