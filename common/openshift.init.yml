@@ -1,188 +1,98 @@
 apiVersion: template.openshift.io/v1
 kind: Template
-labels:
-  app: ${NAME}-${ZONE}
 parameters:
   - name: NAME
     description: Product name
     value: nr-spar
-  - name: COMPONENT
-    description: Component name
-    value: database
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: TAG
-    description: Image tag; e.g. PR number, latest or prod
+  - name: PG_DATABASE
+    description: Postgres database name
+    value: database
+  - name: DB_PASSWORD
+    description: Password for the PostgreSQL connection user.
+    from: "[a-zA-Z0-9]{16}"
+    generate: expression
+  - name: FORESTCLIENTAPI_KEY
     required: true
-  - name: REGISTRY
-    description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
-    value: ghcr.io
-  - name: ORG_NAME
-    description: Organization name
-    value: bcgov
-  - name: PVC_MOUNT_PATH
-    description: Where to mount the PVC, subpath (e.g. data/)
-    value: /var/lib/postgresql
-  - name: CPU_REQUEST
-    value: 50m
-  - name: CPU_LIMIT
-    value: 115m
-  - name: MEMORY_REQUEST
-    value: 150Mi
-  - name: MEMORY_LIMIT
-    value: 250Mi
-  - name: DB_PVC_SIZE
-    description: Volume space available for data, e.g. 512Mi, 2Gi.
-    displayName: Database Volume Capacity
-    value: 256Mi
-  - name: MIN_REPLICAS
-    description: Dummy value for workflow convenience
-  - name: MAX_REPLICAS
-    description: Dummy value for workflow convenience
+  - name: ORACLE_DB_USER
+    description: Oracle database username for API
+    required: true
+  - name: ORACLE_DB_PASSWORD
+    description: Oracle database password for API
+    required: true
+  - name: AWS_ACCESS_KEY_ID
+    description: AWS Access Key ID
+    required: true
+  - name: AWS_ACCESS_KEY_SECRET
+    description: AWS Access Key Secret
+    required: true
+  - name: AWS_KINESIS_STREAM
+    description: AWS Kinesis stream name
+    required: true
+  - name: AWS_KINESIS_ROLE_ARN
+    description: AWS Kinesis Role ARN
+    required: true
 objects:
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-    spec:
-      accessModes:
-        - ReadWriteOnce
-      resources:
-        requests:
-          storage: ${DB_PVC_SIZE}
-      storageClassName: netapp-file-standard
-  - kind: ImageStream
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-    spec:
-      lookupPolicy:
-        local: false
-      tags:
-        - name: latest
-          from:
-            kind: DockerImage
-            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${TAG}
-          referencePolicy:
-            type: Local
-  - kind: DeploymentConfig
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-    spec:
-      replicas: 1
-      triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - ${NAME}
-            from:
-              kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:latest
-      selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
-      strategy:
-        type: Recreate
-        recreateParams:
-          timeoutSeconds: 600
-        activeDeadlineSeconds: 21600
-      template:
-        metadata:
-          name: ${NAME}-${ZONE}-${COMPONENT}
-          labels:
-            app: ${NAME}-${ZONE}
-            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
-        spec:
-          volumes:
-            - name: ${NAME}-${ZONE}-${COMPONENT}
-              persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-${COMPONENT}
-          containers:
-            - name: ${NAME}
-              image: ${NAME}-${ZONE}-${COMPONENT}:latest
-              ports:
-                - containerPort: 5432
-                  protocol: TCP
-              resources:
-                requests:
-                  cpu: ${CPU_REQUEST}
-                  memory: ${MEMORY_REQUEST}
-                limits:
-                  cpu: ${CPU_LIMIT}
-                  memory: ${MEMORY_LIMIT}
-              readinessProbe:
-                exec:
-                  command:
-                    - /usr/bin/env
-                    - bash
-                    - "-c"
-                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-                successThreshold: 1
-                failureThreshold: 5
-                initialDelaySeconds: 10
-                periodSeconds: 15
-                timeoutSeconds: 10
-              livenessProbe:
-                exec:
-                  command:
-                    - /usr/bin/env
-                    - bash
-                    - "-c"
-                    - psql -q $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-                successThreshold: 1
-                failureThreshold: 5
-                initialDelaySeconds: 10
-                periodSeconds: 15
-                timeoutSeconds: 10
-              env:
-                - name: POSTGRES_DB
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: database-name
-                - name: POSTGRES_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: database-password
-                - name: POSTGRES_USER
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: database-user
-              volumeMounts:
-                - name: ${NAME}-${ZONE}-${COMPONENT}
-                  mountPath: ${PVC_MOUNT_PATH}
-              terminationMessagePath: "/dev/termination-log"
-              terminationMessagePolicy: File
-              imagePullPolicy: Always
-          restartPolicy: Always
-          terminationGracePeriodSeconds: 30
-          dnsPolicy: ClusterFirst
-          schedulerName: default-scheduler
   - apiVersion: v1
-    kind: Service
+    kind: Secret
     metadata:
+      name: ${NAME}-${ZONE}-${PG_DATABASE}
       labels:
         app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
+    stringData:
+      database-name: ${NAME}
+      database-password: ${DB_PASSWORD}
+      database-user: ${NAME}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-oracle-api
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      oracle-user: ${ORACLE_DB_USER}
+      oracle-password: ${ORACLE_DB_PASSWORD}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-backend
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      forest-client-api-key: ${FORESTCLIENTAPI_KEY}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-fluentbit
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      aws-access-key-id: ${AWS_ACCESS_KEY_ID}
+      aws-access-key-secret: ${AWS_ACCESS_KEY_SECRET}
+      aws-kinesis-stream: ${AWS_KINESIS_STREAM}
+      aws-kinesis-role-arn: ${AWS_KINESIS_ROLE_ARN}
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-from-openshift-ingress
+      labels:
+        template: openshift-test
     spec:
-      ports:
-        - name: postgresql
-          nodePort: 0
-          port: 5432
-          protocol: TCP
-          targetPort: 5432
-      selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
-      sessionAffinity: None
-      type: ClusterIP
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  network.openshift.io/policy-group: ingress
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-same-namespace
+      labels:
+        template: nr-spar-backend-network-security-policy
+    spec:
+      policyTypes:
+        - Ingress
