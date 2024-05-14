@@ -129,7 +129,7 @@ jobs:
           - name: sync
             file: sync/openshift.deploy.yml
             overwrite: true
-            # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
+            # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.RUN_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
             # triggers: ('sync/')
 
     steps:
@@ -179,17 +179,17 @@ jobs:
 
           # Create job
           CRONJOB=${{ github.event.repository.name }}-${{ inputs.target || github.event.number }}-sync
-          JOB_JOB=${CRONJOB}-${{ github.run_number }}
-          oc create job ${JOB_JOB} --from=cronjob/${CRONJOB}
+          RUN_JOB=${CRONJOB}-${{ github.run_number }}
+          oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
           # Follow
-          oc wait --for=jsonpath='{.status.failed}'=4 job/${JOB_JOB} --timeout=1m || true
-          oc logs -l job-name=${JOB_JOB} --tail=50 --follow
+          oc wait --for=jsonpath='{.status.failed}'=4 job/${RUN_JOB} --timeout=1m || true
+          oc logs -l job-name=${RUN_JOB} --tail=50 --follow
 
           # Results and exit code
-          oc get job ${JOB_JOB}
+          oc get job ${RUN_JOB}
 
-          if [ $(oc get job ${JOB_JOB} -o jsonpath='{.status.ready}') -eq 0 ]; then
+          if [ $(oc get job ${RUN_JOB} -o jsonpath='{.status.ready}') -eq 0 ]; then
             echo "Job successful!"
           else
             echo "Job failed!"
