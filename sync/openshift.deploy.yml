@@ -43,6 +43,10 @@ parameters:
   - name: REGISTRY
     description: Source container registry
     value: ghcr.io
+
+  ### Dummy values for workflow convenience
+  - name: MIN_REPLICAS
+  - name: MAX_REPLICAS
 objects:
   - kind: CronJob
     apiVersion: "batch/v1"
