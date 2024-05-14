@@ -95,6 +95,7 @@ jobs:
   deploy:
     name: Deploy
     environment: ${{ inputs.environment }}
+    needs: [init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
     runs-on: ubuntu-22.04
