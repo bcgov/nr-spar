@@ -165,13 +165,21 @@ jobs:
   verify:
     name: Verify ETL
     # if: inputs.etl == 'true' #&& needs.deploy.outputs.triggered == 'true'
-    environment: ${{ inputs.environment }}
+    env:
+        OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
+     environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
       - name: Verify
         run: |
-          # Check job logs
+          # Check job
+
+          # Override OpenShift version
+          pushd /usr/local/bin/
+          curl --silent ${{ env.OC }} | tar -xzvf - oc
+          oc version
+          popd
 
           # Login
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
