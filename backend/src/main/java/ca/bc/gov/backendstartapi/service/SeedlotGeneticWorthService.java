@@ -36,7 +36,7 @@ public class SeedlotGeneticWorthService {
   public List<SeedlotGeneticWorth> saveSeedlotFormStep5(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-      Boolean canDelete) {
+      boolean canDelete) {
     SparLog.info("Saving SeedlotGeneticWorth for seedlot number {}", seedlot.getId());
 
     List<SeedlotGeneticWorth> sgwList =

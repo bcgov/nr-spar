@@ -41,12 +41,10 @@ public class SmpMixGeneticQualityService {
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
   public void saveSeedlotFormStep5(
-      Seedlot seedlot,
-      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-      Boolean canDelete) {
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     SparLog.info("Saving SmpMixGeneticQuality for seedlot number {}", seedlot.getId());
 
-    addSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList, canDelete);
+    addSmpMixGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
 
   /**
@@ -61,9 +59,7 @@ public class SmpMixGeneticQualityService {
 
   // Form Step 5 SMP Mix Genetic Quality related
   private void addSmpMixGenQlty(
-      Seedlot seedlot,
-      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-      Boolean canDelete) {
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     if (seedlotFormParentTreeDtoList.isEmpty()) {
       SparLog.info(
           "No new records to be inserted on the SmpMixGeneticQuality table for seedlot number {}",

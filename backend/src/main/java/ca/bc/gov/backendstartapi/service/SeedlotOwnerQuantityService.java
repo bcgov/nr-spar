@@ -38,7 +38,7 @@ public class SeedlotOwnerQuantityService {
    * @return A list of {@link SeedlotOwnerQuantity} created, if any
    */
   public List<SeedlotOwnerQuantity> saveSeedlotFormStep2(
-      Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List, Boolean canDelete) {
+      Seedlot seedlot, List<SeedlotFormOwnershipDto> formStep2List, boolean canDelete) {
     SparLog.info("Saving Seedlot Form Step 2-Ownership for seedlot number {}", seedlot.getId());
 
     SparLog.info(

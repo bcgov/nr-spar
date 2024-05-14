@@ -41,18 +41,14 @@ public class SeedlotParentTreeGeneticQualityService {
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
   public void saveSeedlotFormStep5(
-      Seedlot seedlot,
-      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-      Boolean canDelete) {
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
     SparLog.info("Saving SeedlotParentTreeGeneticQuality for seedlot number {}", seedlot.getId());
 
-    addSeedlotParentTreeGenQlty(seedlot, seedlotFormParentTreeDtoList, canDelete);
+    addSeedlotParentTreeGenQlty(seedlot, seedlotFormParentTreeDtoList);
   }
 
   private void addSeedlotParentTreeGenQlty(
-      Seedlot seedlot,
-      List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert,
-      Boolean canDelete) {
+      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotPtGenQltyToInsert) {
     if (seedlotPtGenQltyToInsert.isEmpty()) {
       SparLog.info(
           "No new records to be inserted on the SeedlotParentTreeGeneticQuality table for seedlot"

@@ -41,7 +41,7 @@ public class SeedlotParentTreeSmpMixService {
   public void saveSeedlotFormStep5(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-      Boolean canDelete) {
+      boolean canDelete) {
     SparLog.info("Saving SeedlotParentTreeSmpMix for seedlot number {}", seedlot.getId());
 
     addSeedlotPtSmpMix(seedlot, seedlotFormParentTreeDtoList, canDelete);
@@ -51,7 +51,7 @@ public class SeedlotParentTreeSmpMixService {
   private void addSeedlotPtSmpMix(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-      Boolean canDelete) {
+      boolean canDelete) {
     if (seedlotFormParentTreeDtoList.isEmpty()) {
       SparLog.info(
           "No new records to be inserted on the SeedlotParentTreeSmpMix table for seedlot number"

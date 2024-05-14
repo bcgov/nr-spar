@@ -37,7 +37,7 @@ public class SeedlotCollectionMethodService {
    * @param formStep1 The {@link SeedlotFormCollectionDto} to be saved
    */
   public void saveSeedlotFormStep1(
-      Seedlot seedlot, SeedlotFormCollectionDto formStep1, Boolean canDelete) {
+      Seedlot seedlot, SeedlotFormCollectionDto formStep1, boolean canDelete) {
     SparLog.info("Saving Seedlot Form Step 1-Collection for seedlot number {}", seedlot.getId());
 
     seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());

@@ -440,10 +440,10 @@ public class SeedlotService {
         seedlotOrchardService.getAllSeedlotOrchardBySeedlotNumber(seedlotInfo.getId());
 
     List<SeedlotOrchard> filteredPrimaryOrchard =
-        seedlotOrchards.stream().filter((so) -> so.getIsPrimary()).collect(Collectors.toList());
+        seedlotOrchards.stream().filter(so -> so.getIsPrimary()).toList();
 
     String primaryOrchardId =
-        filteredPrimaryOrchard.size() > 0
+        filteredPrimaryOrchard.isEmpty()
             ? filteredPrimaryOrchard.get(0).getOrchardId()
             : seedlotOrchards.get(0).getOrchardId();
 
@@ -541,7 +541,7 @@ public class SeedlotService {
   public SeedlotStatusResponseDto updateSeedlotWithForm(
       String seedlotNumber,
       SeedlotFormSubmissionDto form,
-      Boolean isTscAdmin,
+      boolean isTscAdmin,
       String statusOnSuccess) {
 
     if (isTscAdmin) {
@@ -560,8 +560,8 @@ public class SeedlotService {
      * non-tsc users can perform delete actions when the seedlot is in pending or incomplete status
      * TSC admins can perform delete actions without regard of the seedlot's status
      */
-    Boolean canDelete =
-        currentSeedlotStauts == "PND" || currentSeedlotStauts == "INC" || isTscAdmin;
+    boolean canDelete =
+        currentSeedlotStauts.equals("PND") || currentSeedlotStauts.equals("INC") || isTscAdmin;
 
     /*
      * Merging entities script:
@@ -811,22 +811,21 @@ public class SeedlotService {
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
       List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeSmpDtoList,
-      Boolean canDelete) {
+      boolean canDelete) {
     SparLog.info(
         "Saving Seedlot Form Step-5 Parent Tree SMP Mix for seedlot number {}", seedlot.getId());
 
     seedlotParentTreeService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList, canDelete);
     seedlotParentTreeGeneticQualityService.saveSeedlotFormStep5(
-        seedlot, seedlotFormParentTreeDtoList, canDelete);
+        seedlot, seedlotFormParentTreeDtoList);
     seedlotGeneticWorthService.saveSeedlotFormStep5(
         seedlot, seedlotFormParentTreeDtoList, canDelete);
 
     // SMP Mix information is optional, so the array may be empty,
     // in this case there is no need to save the list
     if (!seedlotFormParentTreeSmpDtoList.isEmpty()) {
-      smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList, canDelete);
-      smpMixGeneticQualityService.saveSeedlotFormStep5(
-          seedlot, seedlotFormParentTreeSmpDtoList, canDelete);
+      smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
+      smpMixGeneticQualityService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
       seedlotParentTreeSmpMixService.saveSeedlotFormStep5(
           seedlot, seedlotFormParentTreeSmpDtoList, canDelete);
     } else {

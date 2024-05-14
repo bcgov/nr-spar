@@ -27,7 +27,7 @@ public class SeedlotOrchardService {
    * @param formStep4 The {@link SeedlotFormOrchardDto} to be saved
    */
   public void saveSeedlotFormStep4(
-      Seedlot seedlot, SeedlotFormOrchardDto formStep4, Boolean canDelete) {
+      Seedlot seedlot, SeedlotFormOrchardDto formStep4, boolean canDelete) {
     SparLog.info("Saving Seedlot Form Step 4-Orchard for seedlot number {}", seedlot.getId());
 
     seedlot.setFemaleGameticContributionMethod(formStep4.femaleGameticMthdCode());

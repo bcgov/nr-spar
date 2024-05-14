@@ -63,7 +63,7 @@ public class SeedlotParentTreeService {
   public List<SeedlotParentTree> saveSeedlotFormStep5(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
-      Boolean canDelete) {
+      boolean canDelete) {
     SparLog.info("Saving SeedlotParentTree for seedlot number {}", seedlot.getId());
 
     List<SeedlotParentTreeGeneticQuality> sptgqList =

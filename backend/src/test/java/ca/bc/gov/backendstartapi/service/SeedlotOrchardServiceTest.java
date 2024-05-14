@@ -28,7 +28,7 @@ class SeedlotOrchardServiceTest {
 
   private SeedlotOrchardService seedlotOrchardService;
 
-  private SeedlotFormOrchardDto createFormDto(int size) {
+  private SeedlotFormOrchardDto createFormDto() {
 
     return new SeedlotFormOrchardDto(
         "405", "406", "F3", "M3", false, true, false, 22, new BigDecimal("45.6"), "true");
@@ -50,7 +50,7 @@ class SeedlotOrchardServiceTest {
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
     Seedlot seedlot = new Seedlot("54321");
-    SeedlotFormOrchardDto formStep4 = createFormDto(1);
+    SeedlotFormOrchardDto formStep4 = createFormDto();
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, false);
 
     Assertions.assertEquals(
@@ -84,7 +84,7 @@ class SeedlotOrchardServiceTest {
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    SeedlotFormOrchardDto formStep4 = createFormDto(2);
+    SeedlotFormOrchardDto formStep4 = createFormDto();
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
@@ -118,7 +118,7 @@ class SeedlotOrchardServiceTest {
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    SeedlotFormOrchardDto formStep4 = createFormDto(2);
+    SeedlotFormOrchardDto formStep4 = createFormDto();
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
@@ -152,7 +152,7 @@ class SeedlotOrchardServiceTest {
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    SeedlotFormOrchardDto formStep4 = createFormDto(1);
+    SeedlotFormOrchardDto formStep4 = createFormDto();
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
