@@ -31,8 +31,9 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
+      etl: true
       test: true
-      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
+      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/' 'sync/')
 
   tests:
     name: Tests
