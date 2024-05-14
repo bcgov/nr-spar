@@ -3,6 +3,7 @@ import logging
 import oracledb
 import csv
 import numpy
+import math
 
 from io import StringIO
 from sqlalchemy import create_engine, text
@@ -102,7 +103,18 @@ class database_connection(object):
 
     def execute_upsert(self, dataframe:object, table_name:str, table_pk:str, db_type: str) -> int:
         if db_type=="POSTGRES":
-            return self.bulk_upsert_postgres(dataframe=dataframe,table_name=table_name,table_pk=table_pk,if_data_exists="append",index_data=False)
+            n = 1000
+            i = 0
+            k = 0 
+            list_df = numpy.array_split(dataframe, math.ceil(len(dataframe)/n))
+            logger.debug(f"Dataframe being processed into Postgres by chunks of {n} rows.")
+            # Splitting dataframe in small chunks to improve performance
+            for df in list_df:
+                k = k + 1
+                logger.debug(f"Dataframe being processed into Postgres chunks {k} / {len(list_df)}.")
+                i = i + self.bulk_upsert_postgres(dataframe=df,table_name=table_name,table_pk=table_pk,if_data_exists="append",index_data=False)
+
+            return i
         
         if db_type=="ORACLE":
             orcldataframe = convertTypesToOracle(dataframe)
@@ -132,7 +144,6 @@ class database_connection(object):
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
     
-
     def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str ) -> int:
         onconflictstatement = ""
         logger.debug('Starting UPSERT statement in Oracle Database')
@@ -155,6 +166,48 @@ class database_connection(object):
                 for column in dataframe.columns.values:
                     params["s_"+column] = getattr(row,column)
                     params["q_"+column] = getattr(row,column)
+                onconflictstatement = f"""
+                EXCEPTION
+                WHEN DUP_VAL_ON_INDEX THEN
+                    UPDATE  {table_name} 
+                    SET {' , '.join(df2.columns.values + '= :s_'+df2.columns.values)} 
+                    {whStatement} {whStatement2};"""
+        
+            sql_text = f""" 
+            BEGIN
+                INSERT INTO {table_name}({', '.join(dataframe.columns.values)}) 
+                    VALUES(:{', :'.join(dataframe.columns.values)})   ;
+                {onconflictstatement}
+            END; """
+            logger.debug(f'---Executing statement for row {i}')
+            result = self.conn.execute(text(sql_text), params)
+        
+        self.commit()  # If everything is ok, a commit will be executed.
+        return result.rowcount  # Number of rows affected
+
+    def slow_bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str ) -> int:
+        onconflictstatement = ""
+        logger.debug('Starting UPSERT statement in Oracle Database')
+        i = 0
+        for row in dataframe.itertuples():
+            i = i + 1
+            logger.debug(f'---Including row {i}')
+            params = {}
+            whStatement2 = ''
+            for column in dataframe.columns.values:
+                params[column] = getattr(row,column)
+            if table_pk != "":
+                columnspk = table_pk.split(",")
+                whStatement = "WHERE 1=1"
+                for column in columnspk:
+                    params["p_"+column] = getattr(row,column)
+                    whStatement = f"""{whStatement}  AND  {column} = :p_{column}"""                
+
+                df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation 
+                #whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
+                for column in dataframe.columns.values:
+                    params["s_"+column] = getattr(row,column)
+                   # params["q_"+column] = getattr(row,column)
                 onconflictstatement = f"""
                 EXCEPTION
                 WHEN DUP_VAL_ON_INDEX THEN
