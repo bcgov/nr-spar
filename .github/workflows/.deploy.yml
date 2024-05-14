@@ -47,10 +47,6 @@ on:
         description: 'Has a deployment has been triggered?'
         value: ${{ jobs.deploy.outputs.triggered }}
 
-env:
-  CRONJOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync
-  JOB_JOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync-${{ github.run_number }}
-
 jobs:
   init:
     name: Initialize
@@ -144,7 +140,7 @@ jobs:
           - name: sync
             file: sync/openshift.deploy.yml
             overwrite: true
-            post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
+            # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
             triggers: ('sync/')
 
     steps:
@@ -172,17 +168,11 @@ jobs:
 
   verify:
     name: Verify ETL
-    if: inputs.etl == true
+    if: inputs.etl == 'true' #&& needs.deploy.outputs.triggered == 'true'
     environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
-      # Send triggers to diff action
-      - id: diff
-        uses: bcgov-nr/action-diff-triggers@v0.2.0
-        with:
-          triggers: ${{ inputs.triggers }}
-
       - name: Verify
         run: |
           # Check job logs
@@ -192,16 +182,18 @@ jobs:
           oc project ${{ secrets.oc_namespace }} #Safeguard!
 
           # Create job
-          oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}
+          CRONJOB=${{ github.event.repository.name }}-${{ inputs.target || github.event.number }}-sync
+          JOB_JOB=${CRONJOB}-${{ github.num_number }}
+          oc create job ${JOB_JOB} --from=cronjob/${CRONJOB}
 
           # Follow
-          oc wait --for=jsonpath='{.status.failed}'=4 job/${{ env.JOB_JOB }} --timeout=1m || true
-          oc logs -l job-name=${{ env.JOB_JOB }} --tail=50 --follow
+          oc wait --for=jsonpath='{.status.failed}'=4 job/${JOB_JOB} --timeout=1m || true
+          oc logs -l job-name=${JOB_JOB} --tail=50 --follow
 
           # Results and exit code
-          oc get job ${{ env.JOB_JOB }}
+          oc get job ${JOB_JOB}
 
-          if [ $(oc get job ${{ env.JOB_JOB }} -o jsonpath='{.status.ready}') -eq 0 ]; then
+          if [ $(oc get job ${JOB_JOB} -o jsonpath='{.status.ready}') -eq 0 ]; then
             echo "Job successful!"
           else
             echo "Job failed!"
