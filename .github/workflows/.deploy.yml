@@ -11,6 +11,11 @@ on:
         description: Environment name; omit for PRs
         required: false
         type: string
+      etl:
+        description: Run the cronjob and verify results?  [true|false]
+        required: false
+        type: boolean
+        default: false
       tag:
         description: Container tag; usually PR number
         required: false
@@ -19,15 +24,6 @@ on:
         description: Deployment target; usually PR number, test or prod
         required: false
         type: string
-      test:
-        description: Run Cypress tests after deployment?  [true|false]
-        required: false
-        type: string
-      triggers:
-        description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
-        required: false
-        type: string
-
       ### Usually a bad idea / not recommended
       timeout-minutes:
         description: 'Timeout minutes'
@@ -35,21 +31,10 @@ on:
         required: false
         type: number
 
-      ### Not ready yet
-      verify:
-        description: Run the cronjob and verify results?  [true|false]
-        required: false
-        type: boolean
-        default: false
-
     outputs:
       triggered:
         description: 'Has a deployment has been triggered?'
         value: ${{ jobs.deploy.outputs.triggered }}
-
-# env:
-#   CRONJOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync
-#   JOB_JOB: ${{ github.event.repository.name }}-${{ inputs.target }}-sync-${{ github.run_number }}
 
 jobs:
   init:
@@ -144,8 +129,8 @@ jobs:
           - name: sync
             file: sync/openshift.deploy.yml
             overwrite: true
-            # post_rollout: oc create job ${{ env.JOB_JOB }} --from=cronjob/${{ env.CRONJOB }}
-            triggers: ('sync/')
+            # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.RUN_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
+            # triggers: ('sync/')
 
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v2.3.0
@@ -171,35 +156,41 @@ jobs:
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
   verify:
-    name: Verify
-    if: inputs.verify == true
+    name: Verify ETL
+    # if: inputs.etl == 'true' #&& needs.deploy.outputs.triggered == 'true'
     environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
-      # Send triggers to diff action
-      - id: diff
-        uses: bcgov-nr/action-diff-triggers@v0.2.0
-        with:
-          triggers: ${{ inputs.triggers }}
-
-      - name: Verify
-        if: steps.diff.outputs.triggered == 'true'
+      - name: Override OpenShift version
+        env:
+          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
         run: |
-          # Check job logs
+          curl --silent ${{ env.OC }} | tar -xzvf - oc
+          oc version
+        working-directory: /usr/local/bin/
+
+      - name: Job
+        run: |
+          # Run and verify job
 
           # Login
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ secrets.oc_namespace }} #Safeguard!
 
+          # Create job
+          CRONJOB=${{ github.event.repository.name }}-${{ inputs.target || github.event.number }}-sync
+          RUN_JOB=${CRONJOB}-${{ github.run_number }}
+          oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
+
           # Follow
-          oc wait --for=jsonpath='{.status.failed}'=4 job/${{ env.JOB_JOB }} --timeout=1m || true
-          oc logs -l job-name=${{ env.JOB_JOB }} --tail=50 --follow
+          oc wait --for=jsonpath='{.status.failed}'=4 job/${RUN_JOB} --timeout=1m || true
+          oc logs -l job-name=${RUN_JOB} --tail=50 --follow
 
           # Results and exit code
-          oc get job ${{ env.JOB_JOB }}
+          oc get job ${RUN_JOB}
 
-          if [ $(oc get job ${{ env.JOB_JOB }} -o jsonpath='{.status.ready}') -eq 0 ]; then
+          if [ $(oc get job ${RUN_JOB} -o jsonpath='{.status.ready}') -eq 0 ]; then
             echo "Job successful!"
           else
             echo "Job failed!"
