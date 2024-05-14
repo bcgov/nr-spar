@@ -1,8 +1,0 @@
-{
-  "sonarlint.connectedMode.project": {
-    "connectionId": "bcgov-sonarcloud",
-    "projectKey": "nr-spar_backend"
-  },
-  "java.compile.nullAnalysis.mode": "disabled",
-  "java.configuration.updateBuildConfiguration": "automatic"
-}
