@@ -1,7 +1,9 @@
-package ca.bc.gov.backendstartapi.dto.Oracle;
+package ca.bc.gov.backendstartapi.dto.oracle;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -10,6 +12,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(
     description =
         "Represents a JSON response when requesting Geo information from a SPU id for Area of Use.")

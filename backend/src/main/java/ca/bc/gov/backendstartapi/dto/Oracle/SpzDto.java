@@ -1,12 +1,16 @@
-package ca.bc.gov.backendstartapi.dto.Oracle;
+package ca.bc.gov.backendstartapi.dto.oracle;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /** This class represents a JSON response when requesting SPZ information from a SPU. */
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "A dto object that contains info of a seed plan zone.")
 public class SpzDto {
   @Schema(description = "The SPZ code", example = "EK")

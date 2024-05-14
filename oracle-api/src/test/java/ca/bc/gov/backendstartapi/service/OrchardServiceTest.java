@@ -1,5 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +25,7 @@ import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpu;
 import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpz;
 import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
 import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
+import ca.bc.gov.backendstartapi.exception.TestedAreaOfUseNotFound;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
@@ -418,22 +421,45 @@ class OrchardServiceTest {
     SpzDto spzDto1 = new SpzDto("GL", "Georgia Lowlands", false);
     SpzDto spzDto2 = new SpzDto("M", "Maritime", true);
 
-    areaOfUseDto.setSpzList(List.of(spzDto1, spzDto2));
+    List<SpzDto> spzList = List.of(spzDto1, spzDto2);
 
+    areaOfUseDto.setSpzList(spzList);
+
+    AreaOfUseDto dtoToTest = orchardService.calcAreaOfUseData(spuId);
+
+    // Geo data test
+    assertEquals(
+        areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMax(),
+        dtoToTest.getAreaOfUseSpuGeoDto().getElevationMax());
+    assertEquals(
+        areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMin(),
+        dtoToTest.getAreaOfUseSpuGeoDto().getElevationMin());
+    assertEquals(
+        areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMax(),
+        dtoToTest.getAreaOfUseSpuGeoDto().getLatitudeDegreesMax());
+    assertEquals(
+        areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMin(),
+        dtoToTest.getAreaOfUseSpuGeoDto().getLatitudeDegreesMin());
+    assertEquals(
+        areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMax(),
+        dtoToTest.getAreaOfUseSpuGeoDto().getLatitudeMinutesMax());
+    assertEquals(
+        areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMin(),
+        dtoToTest.getAreaOfUseSpuGeoDto().getLatitudeMinutesMin());
+    // SPZ List test
+    for (int i = 0; i < spzList.size(); i++) {
+      assertEquals(spzList.get(i).getCode(), dtoToTest.getSpzList().get(i).getCode());
+      assertEquals(spzList.get(i).getDescription(), dtoToTest.getSpzList().get(i).getDescription());
+      assertEquals(spzList.get(i).getIsPrimary(), dtoToTest.getSpzList().get(i).getIsPrimary());
+    }
   }
 
   @Test
-  @DisplayName("getOrchardSpuSpzInformation_emptyTest")
-  void getOrchardSpuSpzInformation_emptyTest() {
+  @DisplayName("calcAreaOfUseData_errorTest")
+  void calcAreaOfUseData_errorTest() {
+    when(testedPtAreaofUseRepository.findAllBySeedPlanUnitId(any()))
+        .thenThrow(new TestedAreaOfUseNotFound());
 
-    List<Integer> spuIdList = List.of(7);
-    TestedPtAreaOfUse testedPt = new TestedPtAreaOfUse();
-    testedPt.setSeedPlanUnitId(7);
-    testedPt.setTestedPtAreaOfUseId(40);
-    when(testedPtAreaofUseRepository.findAllBySeedPlanUnitIdIn(spuIdList)).thenReturn(List.of());
-
-    // List<SpzSpuGeoDto> dto = orchardService.getSpzInformationBySpu(List.of(7));
-
-    // Assertions.assertTrue(dto.isEmpty());
+    assertThrows(TestedAreaOfUseNotFound.class, () -> orchardService.calcAreaOfUseData(7));
   }
 }

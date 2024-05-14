@@ -111,8 +111,7 @@ class SeedlotEndpointTest {
         "intermFacilityCode": "OCV"
       },
       "seedlotFormOrchardDto": {
-        "orchardsId": ["405"],
-        "primaryOrchardId": "",
+        "primaryOrchardId": "405",
         "femaleGameticMthdCode": "F3",
         "maleGameticMthdCode": "M3",
         "controlledCrossInd": false,
@@ -508,12 +507,12 @@ class SeedlotEndpointTest {
   @DisplayName("Seedlot Form submitted with not found seedlot")
   @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
   void submitSeedlotForm_notFoundSeedlot_shouldThrowException() throws Exception {
-    when(seedlotService.updateSeedlotWithForm(any(), any(), false))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), any(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
     mockMvc
         .perform(
-            put("/api/seedlots/{seedlotNumber}/a-class-form-submission", 123)
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 123)
                 .with(csrf().asHeader())
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -528,11 +527,12 @@ class SeedlotEndpointTest {
   void submitSeedlotForm_happyPath_shouldSucceed() throws Exception {
     SeedlotStatusResponseDto createResponseDto = new SeedlotStatusResponseDto("123", "PND");
 
-    when(seedlotService.updateSeedlotWithForm(any(), any(), false)).thenReturn(createResponseDto);
+    when(seedlotService.updateSeedlotWithForm(any(), any(), any(), any()))
+        .thenReturn(createResponseDto);
 
     mockMvc
         .perform(
-            put("/api/seedlots/{seedlotNumber}/a-class-form-submission", 123)
+            put("/api/seedlots/{seedlotNumber}/a-class-submission", 123)
                 .with(csrf().asHeader())
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
@@ -635,57 +635,4 @@ class SeedlotEndpointTest {
         .andExpect(status().isOk())
         .andReturn();
   }
-
-  // TODO
-  // @Test
-  // @DisplayName("Get seed plan zone data success path should succeed")
-  // void getSeedPlanZoneData_success_shouldSucceed() throws Exception {
-  //   List<SeedPlanZoneDto> sspzDtoList = new ArrayList<>();
-  //   sspzDtoList.add(new SeedPlanZoneDto(1, 35, 'A', "M", "FDC", 1, 700));
-
-  //   String seedlotNumber = "63022";
-  //   when(seedlotService.getSeedPlanZoneData(seedlotNumber)).thenReturn(sspzDtoList);
-
-  //   mockMvc
-  //       .perform(
-  //           get("/api/seedlots/{seedlotNumber}/seed-plan-zone-data", seedlotNumber)
-  //               .header("Content-Type", MediaType.APPLICATION_JSON)
-  //               .accept(MediaType.APPLICATION_JSON))
-  //       .andExpect(status().isOk())
-  //       .andReturn();
-  // }
-
-  // TODO
-  // @Test
-  // @DisplayName("Get seed plan zone data no seedlot record found should fail")
-  // void getSeedPlanZoneData_seedlotNotFound_shouldFail() throws Exception {
-  //   String seedlotNumber = "63022";
-  //   when(seedlotService.getSeedPlanZoneData(seedlotNumber))
-  //       .thenThrow(new SeedlotOrchardNotFoundException());
-
-  //   mockMvc
-  //       .perform(
-  //           get("/api/seedlots/{seedlotNumber}/seed-plan-zone-data", seedlotNumber)
-  //               .header("Content-Type", MediaType.APPLICATION_JSON)
-  //               .accept(MediaType.APPLICATION_JSON))
-  //       .andExpect(status().isNotFound())
-  //       .andReturn();
-  // }
-
-  // TODO
-  // @Test
-  // @DisplayName("Get seed plan zone data no seedlot orchard record found should fail")
-  // void getSeedPlanZoneData_seedlotOrchardNotFound_shouldFail() throws Exception {
-  //   String seedlotNumber = "63022";
-  //   when(seedlotService.getSeedPlanZoneData(seedlotNumber))
-  //       .thenThrow(new SeedlotOrchardNotFoundException());
-
-  //   mockMvc
-  //       .perform(
-  //           get("/api/seedlots/{seedlotNumber}/seed-plan-zone-data", seedlotNumber)
-  //               .header("Content-Type", MediaType.APPLICATION_JSON)
-  //               .accept(MediaType.APPLICATION_JSON))
-  //       .andExpect(status().isNotFound())
-  //       .andReturn();
-  // }
 }

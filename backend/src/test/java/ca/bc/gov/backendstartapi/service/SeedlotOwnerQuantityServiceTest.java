@@ -109,7 +109,7 @@ class SeedlotOwnerQuantityServiceTest {
     when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq, soq2));
 
     List<SeedlotOwnerQuantity> soqList =
-        seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(2), false);
+        seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(2), true);
 
     Assertions.assertFalse(soqList.isEmpty());
     Assertions.assertEquals(2, soqList.size());
@@ -138,7 +138,7 @@ class SeedlotOwnerQuantityServiceTest {
     when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq, soq2));
 
     List<SeedlotOwnerQuantity> soqList =
-        seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(2), false);
+        seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(2), true);
 
     Assertions.assertFalse(soqList.isEmpty());
   }
@@ -166,7 +166,7 @@ class SeedlotOwnerQuantityServiceTest {
     when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq));
 
     List<SeedlotOwnerQuantity> soqList =
-        seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(1), false);
+        seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, createFormDto(1), true);
 
     Assertions.assertTrue(soqList.size() == 1);
   }

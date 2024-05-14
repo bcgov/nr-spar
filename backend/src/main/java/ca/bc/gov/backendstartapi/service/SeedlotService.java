@@ -5,7 +5,6 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
-import ca.bc.gov.backendstartapi.dto.Oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
@@ -21,6 +20,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
@@ -534,11 +534,15 @@ public class SeedlotService {
    * @param seedlotNumber The Seedlot identification
    * @param form The {@link SeedlotFormSubmissionDto} containing all form fields
    * @param isTscAdmin determines whether this operation is initiated by a tsc admin
+   * @param statusOnSuccess the status to set if the operation is successful
    * @return A {@link SeedlotStatusResponseDto} with the seedlot number and status
    */
   @Transactional
   public SeedlotStatusResponseDto updateSeedlotWithForm(
-      String seedlotNumber, SeedlotFormSubmissionDto form, Boolean isTscAdmin) {
+      String seedlotNumber,
+      SeedlotFormSubmissionDto form,
+      Boolean isTscAdmin,
+      String statusOnSuccess) {
 
     if (isTscAdmin) {
       SparLog.info("Received request by TSC admin to update seedlot {}", seedlotNumber);
@@ -591,9 +595,7 @@ public class SeedlotService {
 
     setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
-    // TODO
-    String submittedStatus = "SUB";
-    setSeedlotStatus(seedlot, submittedStatus);
+    setSeedlotStatus(seedlot, statusOnSuccess);
 
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
@@ -753,7 +755,7 @@ public class SeedlotService {
 
     // Set SPZs
     List<SeedlotSeedPlanZoneEntity> spzSaveList = new ArrayList<>();
-    GeneticClassEntity aClass =
+    GeneticClassEntity genAclass =
         geneticClassRepository.findById("A").orElseThrow(GeneticClassNotFoundException::new);
     areaOfUseDto.getSpzList().stream()
         .forEach(
@@ -762,7 +764,7 @@ public class SeedlotService {
                   new SeedlotSeedPlanZoneEntity(
                       seedlot,
                       spzDto.getCode(),
-                      aClass,
+                      genAclass,
                       spzDto.getIsPrimary(),
                       spzDto.getDescription());
               sspzToSave.setAuditInformation(

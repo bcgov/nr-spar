@@ -1,4 +1,4 @@
-package ca.bc.gov.backendstartapi.dto.Oracle;
+package ca.bc.gov.backendstartapi.dto.oracle;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;

@@ -104,7 +104,7 @@ class SeedlotCollectionMethodServiceTest {
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
     SeedlotFormCollectionDto formDto = createFormDto(1, 2);
-    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto, false);
+    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto, true);
 
     Assertions.assertNotNull(seedlot);
     Assertions.assertEquals(formDto.collectionClientNumber(), seedlot.getCollectionClientNumber());
@@ -143,7 +143,7 @@ class SeedlotCollectionMethodServiceTest {
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
     SeedlotFormCollectionDto formDto = createFormDto(1, 2);
-    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto, false);
+    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto, true);
 
     Assertions.assertNotNull(seedlot);
     Assertions.assertEquals(formDto.collectionClientNumber(), seedlot.getCollectionClientNumber());
@@ -180,7 +180,7 @@ class SeedlotCollectionMethodServiceTest {
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
     SeedlotFormCollectionDto formDto = createFormDto();
-    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto, false);
+    seedCollectionMethodService.saveSeedlotFormStep1(seedlot, formDto, true);
 
     Assertions.assertNotNull(seedlot);
     Assertions.assertEquals(formDto.collectionClientNumber(), seedlot.getCollectionClientNumber());

@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.InvalidSeedlotStatusException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
@@ -173,9 +174,23 @@ public class TscAdminEndpoint {
               schema = @Schema(type = "integer", format = "int64"))
           @PathVariable
           String seedlotNumber,
+      @Parameter(
+              name = "statusOnSave",
+              in = ParameterIn.QUERY,
+              description = "The status to set if the seedlot can be saved, one of [PND, SUB, APP]",
+              required = true,
+              example = "APP",
+              schema = @Schema(type = "string"))
+          @RequestParam
+          String statusOnSave,
       @RequestBody SeedlotFormSubmissionDto form) {
+    String formattedStatus = statusOnSave.toUpperCase();
+    if (!List.of("PND", "SUB", "APP").contains(formattedStatus)) {
+      throw new InvalidSeedlotStatusException(formattedStatus);
+    }
+
     SeedlotStatusResponseDto updatedDto =
-        seedlotService.updateSeedlotWithForm(seedlotNumber, form, true);
+        seedlotService.updateSeedlotWithForm(seedlotNumber, form, true, formattedStatus);
     return ResponseEntity.status(HttpStatus.OK).body(updatedDto);
   }
 }

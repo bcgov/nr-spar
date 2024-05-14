@@ -432,7 +432,7 @@ public class SeedlotEndpoint {
           String seedlotNumber,
       @RequestBody SeedlotFormSubmissionDto form) {
     SeedlotStatusResponseDto createDto =
-        seedlotService.updateSeedlotWithForm(seedlotNumber, form, false);
+        seedlotService.updateSeedlotWithForm(seedlotNumber, form, false, "SUB");
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 

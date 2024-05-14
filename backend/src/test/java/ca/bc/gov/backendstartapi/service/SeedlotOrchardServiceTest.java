@@ -85,7 +85,7 @@ class SeedlotOrchardServiceTest {
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
     SeedlotFormOrchardDto formStep4 = createFormDto(2);
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, false);
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
         formStep4.femaleGameticMthdCode(), seedlot.getFemaleGameticContributionMethod());
@@ -119,7 +119,7 @@ class SeedlotOrchardServiceTest {
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
     SeedlotFormOrchardDto formStep4 = createFormDto(2);
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, false);
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
         formStep4.femaleGameticMthdCode(), seedlot.getFemaleGameticContributionMethod());
@@ -153,7 +153,7 @@ class SeedlotOrchardServiceTest {
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
     SeedlotFormOrchardDto formStep4 = createFormDto(1);
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, false);
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
         formStep4.femaleGameticMthdCode(), seedlot.getFemaleGameticContributionMethod());

@@ -1,11 +1,15 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
+import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
@@ -14,6 +18,11 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseSpuGeoDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpzDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
+import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -85,7 +94,36 @@ class SeedlotFormPutTest {
 
   @Mock SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
 
+  @Mock ParentTreeService parentTreeService;
+
   @Mock Provider oracleApiProvider;
+
+  @BeforeEach
+  void setup() {
+    seedlotService =
+        new SeedlotService(
+            seedlotRepository,
+            seedlotSourceRepository,
+            seedlotStatusRepository,
+            geneticClassRepository,
+            loggedUserService,
+            seedlotCollectionMethodService,
+            seedlotCollectionMethodRepository,
+            seedlotOwnerQuantityService,
+            seedlotOwnerQuantityRepository,
+            seedlotOrchardService,
+            seedlotParentTreeService,
+            seedlotParentTreeGeneticQualityService,
+            seedlotGeneticWorthService,
+            smpMixService,
+            smpMixGeneticQualityService,
+            seedlotParentTreeSmpMixService,
+            seedlotStatusService,
+            orchardService,
+            seedlotSeedPlanZoneRepository,
+            parentTreeService,
+            oracleApiProvider);
+  }
 
   private SeedlotService seedlotService;
 
@@ -171,33 +209,6 @@ class SeedlotFormPutTest {
         extractionDto);
   }
 
-  // TODO
-//   @BeforeEach
-//   void setup() {
-//     seedlotService =
-//         new SeedlotService(
-//             seedlotRepository,
-//             seedlotSourceRepository,
-//             seedlotStatusRepository,
-//             geneticClassRepository,
-//             loggedUserService,
-//             seedlotCollectionMethodService,
-//             seedlotCollectionMethodRepository,
-//             seedlotOwnerQuantityService,
-//             seedlotOwnerQuantityRepository,
-//             seedlotOrchardService,
-//             seedlotParentTreeService,
-//             seedlotParentTreeGeneticQualityService,
-//             seedlotGeneticWorthService,
-//             smpMixService,
-//             smpMixGeneticQualityService,
-//             seedlotParentTreeSmpMixService,
-//             seedlotStatusService,
-//             orchardService,
-//             seedlotSeedPlanZoneRepository,
-//             oracleApiProvider);
-//   }
-
   @Test
   @DisplayName("Seedlot form submit - Seedlot not found")
   void submitSeedlotForm_seedlotNotFound_shouldFail() {
@@ -206,7 +217,8 @@ class SeedlotFormPutTest {
     Assertions.assertThrows(
         SeedlotNotFoundException.class,
         () -> {
-          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto(null, null), false);
+          seedlotService.updateSeedlotWithForm(
+              "5432", mockSeedlotFormDto(null, null), false, "SUB");
         });
   }
 
@@ -214,16 +226,19 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Cone Collection Method not found")
   void submitSeedlotForm_coneCollectionMethodNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
+    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
+
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
     doThrow(new ConeCollectionMethodNotFoundException())
         .when(seedlotCollectionMethodService)
-        .saveSeedlotFormStep1(any(), any(), false);
+        .saveSeedlotFormStep1(any(), any(), any());
 
     Assertions.assertThrows(
         ConeCollectionMethodNotFoundException.class,
         () -> {
-          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto(null, null), false);
+          seedlotService.updateSeedlotWithForm(
+              "5432", mockSeedlotFormDto(null, null), false, "SUB");
         });
   }
 
@@ -231,18 +246,20 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Method of Payment not found")
   void submitSeedlotForm_methodOfPaymentNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
+    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), false);
+    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
 
     doThrow(new MethodOfPaymentNotFoundException())
         .when(seedlotOwnerQuantityService)
-        .saveSeedlotFormStep2(any(), any(), false);
+        .saveSeedlotFormStep2(any(), any(), any());
 
     Assertions.assertThrows(
         MethodOfPaymentNotFoundException.class,
         () -> {
-          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto(null, null), false);
+          seedlotService.updateSeedlotWithForm(
+              "5432", mockSeedlotFormDto(null, null), false, "SUB");
         });
   }
 
@@ -250,22 +267,24 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Seedlot Parent Tree not found")
   void submitSeedlotForm_seedlotParentTreeNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
+    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), false);
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), false))
+    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), false);
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), false)).thenReturn(List.of());
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
 
     doThrow(new SeedlotParentTreeNotFoundException())
         .when(seedlotParentTreeGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), false);
+        .saveSeedlotFormStep5(any(), any(), any());
 
     Assertions.assertThrows(
         SeedlotParentTreeNotFoundException.class,
         () -> {
-          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto(null, null), false);
+          seedlotService.updateSeedlotWithForm(
+              "5432", mockSeedlotFormDto(null, null), false, "SUB");
         });
   }
 
@@ -273,28 +292,30 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Smp Mix not found")
   void submitSeedlotForm_smpMixNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
+    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), false);
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), false))
+    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), false);
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), false)).thenReturn(List.of());
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
     doNothing()
         .when(seedlotParentTreeGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), false);
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), false))
+        .saveSeedlotFormStep5(any(), any(), any());
+    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
         .thenReturn(List.of());
-    when(smpMixService.saveSeedlotFormStep5(any(), any(), false)).thenReturn(List.of());
+    when(smpMixService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
 
     doThrow(new SmpMixNotFoundException())
         .when(smpMixGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), false);
+        .saveSeedlotFormStep5(any(), any(), any());
 
     Assertions.assertThrows(
         SmpMixNotFoundException.class,
         () -> {
-          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto(null, null), false);
+          seedlotService.updateSeedlotWithForm(
+              "5432", mockSeedlotFormDto(null, null), false, "SUB");
         });
   }
 
@@ -302,21 +323,22 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Facility type description not found")
   void submitSeedlotForm_facilityDescNotFound_shouldFail() {
     Seedlot seedlot = new Seedlot("5432");
+    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), false);
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), false))
+    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), false);
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), false)).thenReturn(List.of());
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
     doNothing()
         .when(seedlotParentTreeGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), false);
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), false))
+        .saveSeedlotFormStep5(any(), any(), any());
+    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
         .thenReturn(List.of());
-    when(smpMixService.saveSeedlotFormStep5(any(), any(), false)).thenReturn(List.of());
-    doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any(), false);
-    doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), false);
+    when(smpMixService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any(), any());
+    doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), any());
 
     SeedlotStatusEntity ssEntity = new SeedlotStatusEntity();
     ssEntity.setSeedlotStatusCode("SUB");
@@ -325,13 +347,14 @@ class SeedlotFormPutTest {
     Assertions.assertThrows(
         SeedlotFormValidationException.class,
         () -> {
-          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto(null, "OTH"), false);
+          seedlotService.updateSeedlotWithForm(
+              "5432", mockSeedlotFormDto(null, "OTH"), false, "SUB");
         });
 
     Assertions.assertThrows(
         SeedlotFormValidationException.class,
         () -> {
-          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto("", "OTH"), false);
+          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto("", "OTH"), false, "SUB");
         });
   }
 
@@ -339,32 +362,77 @@ class SeedlotFormPutTest {
   @DisplayName("Seedlot form submit - Success")
   void submitSeedlotForm_happyPath_shouldSucceed() {
     Seedlot seedlot = new Seedlot("5432");
+    seedlot.setSeedlotStatus(new SeedlotStatusEntity());
     SeedlotSourceEntity seedSource = new SeedlotSourceEntity();
     seedSource.setSeedlotSourceCode("UNT");
     seedlot.setSeedlotSource(seedSource);
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), false);
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), false))
+    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), false);
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), false)).thenReturn(List.of());
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
     doNothing()
         .when(seedlotParentTreeGeneticQualityService)
-        .saveSeedlotFormStep5(any(), any(), false);
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), false))
+        .saveSeedlotFormStep5(any(), any(), any());
+    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
         .thenReturn(List.of());
-    when(smpMixService.saveSeedlotFormStep5(any(), any(), false)).thenReturn(List.of());
-    doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any(), false);
-    doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), false);
+    when(smpMixService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any(), any());
+    doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), any());
 
     SeedlotStatusEntity ssEntity = new SeedlotStatusEntity();
     ssEntity.setSeedlotStatusCode("SUB");
     when(seedlotStatusService.getValidSeedlotStatus(any())).thenReturn(Optional.of(ssEntity));
 
+    // Parent tree contribution mock
+    CaculatedParentTreeValsDto caculatedParentTreeValsDto = new CaculatedParentTreeValsDto();
+    caculatedParentTreeValsDto.setNeValue(BigDecimal.valueOf(0));
+    GeospatialRespondDto geospatialRespondDto =
+        new GeospatialRespondDto(
+            120, 12, 0, 23, 4, 0, BigDecimal.valueOf(120.22), BigDecimal.valueOf(23.44), 750);
+    caculatedParentTreeValsDto.setGeospatialData(geospatialRespondDto);
+    PtCalculationResDto ptCalculationResDto =
+        new PtCalculationResDto(List.of(), caculatedParentTreeValsDto, geospatialRespondDto);
+    when(parentTreeService.calculatePtVals(any())).thenReturn(ptCalculationResDto);
+
     SeedlotFormSubmissionDto mockedForm = mockSeedlotFormDto(null, null);
+
+    // Set area of use mocks
+    int activeSpuId = 3;
+    Optional<ActiveOrchardSpuEntity> activeSpuOptional =
+        Optional.of(
+            new ActiveOrchardSpuEntity(
+                mockedForm.seedlotFormOrchardDto().primaryOrchardId(),
+                activeSpuId,
+                true,
+                false,
+                false));
+    when(orchardService.findSpuIdByOrchardWithActive(
+            mockedForm.seedlotFormOrchardDto().primaryOrchardId(), true))
+        .thenReturn(activeSpuOptional);
+
+    AreaOfUseDto areaOfUseDto = new AreaOfUseDto();
+    AreaOfUseSpuGeoDto areaOfUseSpuGeoDto = new AreaOfUseSpuGeoDto(1, 100, null, null, 3, 5);
+    areaOfUseDto.setAreaOfUseSpuGeoDto(areaOfUseSpuGeoDto);
+
+    SpzDto spzDto1 = new SpzDto("GL", "Georgia Lowlands", false);
+    SpzDto spzDto2 = new SpzDto("M", "Maritime", true);
+    List<SpzDto> spzList = List.of(spzDto1, spzDto2);
+    areaOfUseDto.setSpzList(spzList);
+
+    when(oracleApiProvider.getAreaOfUseData(activeSpuId)).thenReturn(areaOfUseDto);
+
+    Optional<GeneticClassEntity> genClassOptional = Optional.of(new GeneticClassEntity());
+    when(geneticClassRepository.findById("A")).thenReturn(genClassOptional);
+
+    when(loggedUserService.getLoggedUserId()).thenReturn("meatball@Pasta");
+
+    when(seedlotSeedPlanZoneRepository.saveAll(any())).thenReturn(List.of());
+
     SeedlotStatusResponseDto scDto =
-        seedlotService.updateSeedlotWithForm("5432", mockedForm, false);
+        seedlotService.updateSeedlotWithForm("5432", mockedForm, false, "SUB");
 
     Assertions.assertNotNull(scDto);
     Assertions.assertEquals("5432", scDto.seedlotNumber());
@@ -408,5 +476,20 @@ class SeedlotFormPutTest {
     Assertions.assertEquals(
         mockedForm.seedlotFormExtractionDto().temporaryStrgEndDate(),
         seedlot.getTemporaryStorageEndDate());
+    // Area of use test
+    assertEquals(areaOfUseSpuGeoDto.getElevationMax(), seedlot.getElevationMax());
+    assertEquals(areaOfUseSpuGeoDto.getElevationMin(), seedlot.getElevationMin());
+    assertEquals(geospatialRespondDto.getMeanLatitudeDegree(), seedlot.getLatitudeDegMax());
+    assertEquals(geospatialRespondDto.getMeanLatitudeDegree(), seedlot.getLatitudeDegMin());
+    assertEquals(areaOfUseSpuGeoDto.getLatitudeMinutesMax(), seedlot.getLatitudeMinMax());
+    assertEquals(areaOfUseSpuGeoDto.getLatitudeMinutesMin(), seedlot.getLatitudeMinMin());
+    assertEquals(0, seedlot.getLatitudeSecMax());
+    assertEquals(0, seedlot.getLatitudeSecMin());
+    assertEquals(geospatialRespondDto.getMeanLongitudeDegree(), seedlot.getLongitudeDegMax());
+    assertEquals(geospatialRespondDto.getMeanLongitudeDegree(), seedlot.getLongitudeDegMin());
+    assertEquals(geospatialRespondDto.getMeanLongitudeMinute(), seedlot.getLongitudeMinMax());
+    assertEquals(geospatialRespondDto.getMeanLongitudeMinute(), seedlot.getLongitudeMinMin());
+    assertEquals(0, seedlot.getLongitudeSecMax());
+    assertEquals(0, seedlot.getLongitudeSecMin());
   }
 }

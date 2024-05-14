@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /** This class holds methods for retrieving {@link TestedPtAreaOfUseSpz} data from the database. */
 public interface TestedPtAreaOfUseSpzRepository
     extends JpaRepository<TestedPtAreaOfUseSpz, TestedPtAreaOfUseSpzId> {
-   List<TestedPtAreaOfUseSpz> findAllByTestedPtAreaOfUse_testedPtAreaOfUseId(Integer testedPtAreaOfUseId);
+  List<TestedPtAreaOfUseSpz> findAllByTestedPtAreaOfUse_testedPtAreaOfUseId(
+      Integer testedPtAreaOfUseId);
 }

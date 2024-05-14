@@ -343,16 +343,18 @@ public class OrchardService {
   /**
    * Get SPZ and SPU geographical information given a SPU id.
    *
-   * @param spuIds A SPU id.
+   * @param spuId A SPU id.
    * @return A {@link SpzSpuGeoDto}
    */
   public AreaOfUseDto calcAreaOfUseData(Integer spuId) {
-    SparLog.info("Getting SPZ and SPU information for SPU ID {}", spuId);
+    SparLog.info("Getting area of use data for SPU ID {}", spuId);
 
     AreaOfUseDto result = new AreaOfUseDto();
 
     // Step 1: Get tested_pt_area_of_use_id by spuId
     Integer testedPtAreaOfUseId = getTestedPtAreaOfUseId(spuId);
+    SparLog.info(
+        "Tested parent tree area of used ID {} found with spu ID {}", testedPtAreaOfUseId, spuId);
 
     // Step 2: Get additional SPUs using the tested_pt_area_of_use_id from the
     // tested_pt_area_of_use_spu table
@@ -360,14 +362,23 @@ public class OrchardService {
         testedPtAreaOfUseSpuRepository.findByTestedPtAreaOfUseId(testedPtAreaOfUseId).stream()
             .map(TestedPtAreaOfUseSpu::getSeedPlanUnitId)
             .toList();
+    SparLog.info(
+        "{} spu found with tested parent tree area of used ID {}",
+        spuList.size(),
+        testedPtAreaOfUseId);
 
     // Step 3: Get area of use spu geo data
     result.setAreaOfUseSpuGeoDto(setCalculatedSpuGeoData(spuList));
+    SparLog.info("SPU min/max data calculated and set");
 
     // Step 4: Get SPZs under a testedPtAreaOfUseId
     List<TestedPtAreaOfUseSpz> testedPtAoUspzs =
         testedPtAreaOfUseSpzRepository.findAllByTestedPtAreaOfUse_testedPtAreaOfUseId(
             testedPtAreaOfUseId);
+    SparLog.info(
+        "{} spz found under tested parent tree area of use id {}",
+        testedPtAoUspzs.size(),
+        testedPtAreaOfUseId);
 
     List<SpzDto> spzList =
         testedPtAoUspzs.stream()
@@ -382,6 +393,7 @@ public class OrchardService {
             .toList();
 
     result.setSpzList(spzList);
+    SparLog.info("SPZ list set in area of use DTO.");
 
     return result;
   }

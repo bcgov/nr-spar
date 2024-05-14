@@ -3,11 +3,11 @@ package ca.bc.gov.backendstartapi.provider;
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
-import ca.bc.gov.backendstartapi.dto.Oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -220,7 +220,7 @@ public class OracleApiProvider implements Provider {
   /**
    * Finds all orchards with the provided vegCode from oracle-api.
    *
-   * @param vegCode The vegetation code of a seedlot.
+   * @param spuId The seed plan unit id.
    * @return An {@link List} of {@link OrchardDto}
    */
   @Override
