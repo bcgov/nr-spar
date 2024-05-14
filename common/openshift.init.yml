@@ -14,6 +14,9 @@ parameters:
     description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
     generate: expression
+  - name: DB_PORT
+    description: Postgres database port
+    value: "5432"
   - name: FORESTCLIENTAPI_KEY
     required: true
   - name: ORACLE_DB_USER
@@ -59,13 +62,14 @@ objects:
     stringData:
       database-name: ${NAME}
       database-password: ${DB_PASSWORD}
+      database-port: ${DB_PORT}
       database-user: ${NAME}
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${REPO}-${ZONE}-oracle
+      name: ${NAME}-${ZONE}-oracle
       labels:
-        app: ${REPO}-${ZONE}
+        app: ${NAME}-${ZONE}
     stringData:
       oracle-host: ${ORACLE_HOST}
       oracle-password: ${ORACLE_PASSWORD}
