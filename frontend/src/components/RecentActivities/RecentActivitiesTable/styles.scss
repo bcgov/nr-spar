@@ -1,0 +1,37 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.activity-table {
+  margin-bottom: 2.5rem;
+
+  tr > th:first-child,
+  tr > td:first-child {
+    padding-left: 2.5rem;
+  }
+
+  tr > th:last-child,
+  tr > td:last-child {
+    padding-right: 2.5rem;
+  }
+
+  tr > th:last-child div,
+  tr > td:last-child {
+    text-align: center;
+  }
+
+  .activities-table-cell svg {
+    position: relative;
+    margin-right: 0.5rem;
+    top: 0.1875rem;
+  }
+}
+
+@media only screen and (max-width: 672px) {
+  .#{vars.$bcgov-prefix}--data-table-content {
+    width: 100%;
+    overflow-x: scroll;
+  }
+
+  .activity-table {
+    width: 56.25rem;
+  }
+}

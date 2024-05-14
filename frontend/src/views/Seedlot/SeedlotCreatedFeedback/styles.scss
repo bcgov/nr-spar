@@ -1,0 +1,41 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.seedlot-created-feedback-page {
+  width: 80%;
+  margin: 0 auto;
+  padding-top: 10%;
+
+  .scf-pictogram {
+    width: 100%;
+    height: 100%;
+    color: var(--#{vars.$bcgov-prefix}-button-primary);
+  }
+
+  .scf-info-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    h1 {
+      @include type.type-style('fluid-heading-05', true);
+      color: var(--#{vars.$bcgov-prefix}-text-primary)
+    }
+
+    h2 {
+      padding-top: 1.5rem;
+      @include type.type-style('fluid-paragraph-01', true);
+      color: var(--#{vars.$bcgov-prefix}-text-secondary)
+    }
+
+    .navigate-btn {
+      padding-top: 2rem;
+    }
+  }
+
+  .btn-scf {
+    width: 100%;
+    margin-bottom: 1rem;
+    max-width: none;
+  }
+}

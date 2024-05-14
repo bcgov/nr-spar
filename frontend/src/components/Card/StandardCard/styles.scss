@@ -1,0 +1,72 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.std-card-header {
+  display: inline-flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+p.std-card-title {
+  @include type.type-style('heading-03');
+}
+
+.std-card-main {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1rem;
+  width: 100%;
+  height: 22.5625rem;
+  background: var(--#{vars.$bcgov-prefix}-layer-02);
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-02);
+  border-radius: 4px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  margin-top: 1rem;
+}
+
+.std-card-main:hover {
+  outline: 2px solid var(--#{vars.$bcgov-prefix}-focus);
+  cursor: pointer;
+}
+
+.std-card-description {
+  display: inline-block;
+}
+
+.std-card-header>h5 {
+  font-weight: 700;
+  display: block;
+}
+
+.std-card-description>p {
+  font-size: 0.875rem;
+  margin-bottom: auto;
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
+  display: -webkit-box;
+  max-width: 14.5rem;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.std-card-pictogram {
+  width: 9.75rem;
+  height: 9.75rem;
+  padding: 0rem;
+  margin-bottom: 1.25rem;
+  color: var(--#{vars.$bcgov-prefix}-focus);
+  position: absolute;
+  bottom: 0;
+}
+
+.#{vars.$bcgov-prefix}--overflow-menu.#{vars.$bcgov-prefix}--overflow-menu--open>svg {
+  fill: var(--#{vars.$bcgov-prefix}-icon-primary);
+}
+
+.std-card-header .#{vars.$bcgov-prefix}--popover-container {
+  height: 2.5rem;
+}

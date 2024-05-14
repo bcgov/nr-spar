@@ -1,0 +1,67 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "plugin:react/recommended",
+        "airbnb",
+        "plugin:jsdoc/recommended"
+    ],
+    "globals": {
+      "JSX": true,
+      "RequestInit": true,
+      "BodyInit": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "settings": {
+      "import/resolver": {
+        "node": {
+          "extensions": [".js", ".jsx", ".ts", ".tsx"]
+        }
+      }
+    },
+    "plugins": [
+        "react",
+        "@typescript-eslint",
+        "jsdoc"
+    ],
+    "rules": {
+      "react/require-default-props": "off",
+      "linebreak-style": 0,
+      "react/jsx-filename-extension": [2, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
+      "comma-dangle": ["error", "never"],
+      "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
+      "import/extensions": [
+        "error",
+        "ignorePackages",
+        {
+          "js": "never",
+          "jsx": "never",
+          "ts": "never",
+          "tsx": "never"
+        }
+      ],
+      "react/function-component-definition": [
+        "error",
+        {
+          "namedComponents": ["function-declaration", "arrow-function"],
+          "unnamedComponents": "arrow-function"
+        }
+      ],
+      "jsx-a11y/label-has-associated-control": [ 2, {
+        "depth": 3
+      }],
+      "no-shadow": "off",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-shadow": ["error"],
+      "@typescript-eslint/no-unused-vars": "error"
+    }
+}

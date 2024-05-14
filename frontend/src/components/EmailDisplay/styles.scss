@@ -1,0 +1,9 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.email-display-value{
+  color: var(--#{vars.$bcgov-prefix}-link-primary);
+  text-decoration: underline;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}

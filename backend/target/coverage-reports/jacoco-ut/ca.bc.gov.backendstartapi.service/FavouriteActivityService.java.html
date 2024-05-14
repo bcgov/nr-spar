@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FavouriteActivityService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.service</a> &gt; <span class="el_source">FavouriteActivityService.java</span></div><h1>FavouriteActivityService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.service;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.FavouriteActivityCreateDto;
+import ca.bc.gov.backendstartapi.dto.FavouriteActivityUpdateDto;
+import ca.bc.gov.backendstartapi.entity.FavouriteActivityEntity;
+import ca.bc.gov.backendstartapi.exception.FavoriteActivityExistsToUser;
+import ca.bc.gov.backendstartapi.exception.InvalidActivityException;
+import ca.bc.gov.backendstartapi.repository.FavouriteActivityRepository;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
+
+/** This class contains all routines and database access to a users' favorite activity. */
+@Service
+public class FavouriteActivityService {
+
+  private FavouriteActivityRepository favouriteActivityRepository;
+
+  private LoggedUserService loggedUserService;
+
+  /**
+   * Create a {@link FavouriteActivityService} instance.
+   *
+   * @param loggedUserService a {@link LoggedUserService} instance
+   * @param favouriteActivityRepository a {@link FavouriteActivityRepository} instance
+   */
+  public FavouriteActivityService(
+      LoggedUserService loggedUserService,
+<span class="fc" id="L34">      FavouriteActivityRepository favouriteActivityRepository) {</span>
+<span class="fc" id="L35">    this.loggedUserService = loggedUserService;</span>
+<span class="fc" id="L36">    this.favouriteActivityRepository = favouriteActivityRepository;</span>
+<span class="fc" id="L37">  }</span>
+
+  /**
+   * Create a user's activity in the database.
+   *
+   * @param activityDto a {@link FavouriteActivityCreateDto} containing the activity title
+   * @return the {@link FavouriteActivityEntity} created
+   */
+  public FavouriteActivityEntity createUserActivity(FavouriteActivityCreateDto activityDto) {
+<span class="fc" id="L46">    String userId = loggedUserService.getLoggedUserId();</span>
+<span class="fc" id="L47">    SparLog.info(&quot;Creating activity {} for user {}&quot;, activityDto.activity(), userId);</span>
+
+<span class="pc bpc" id="L49" title="1 of 4 branches missed.">    if (Objects.isNull(activityDto.activity()) || activityDto.activity().isBlank()) {</span>
+<span class="fc" id="L50">      throw new InvalidActivityException();</span>
+    }
+
+<span class="fc" id="L53">    List&lt;FavouriteActivityEntity&gt; userFavList = favouriteActivityRepository.findAllByUserId(userId);</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    if (userFavList.stream().anyMatch(ac -&gt; ac.getActivity().equals(activityDto.activity()))) {</span>
+<span class="fc" id="L55">      SparLog.info(&quot;Activity {} already exists for user {}!&quot;, activityDto.activity(), userId);</span>
+<span class="fc" id="L56">      throw new FavoriteActivityExistsToUser();</span>
+    }
+
+<span class="fc" id="L59">    FavouriteActivityEntity activityEntity = new FavouriteActivityEntity();</span>
+<span class="fc" id="L60">    activityEntity.setUserId(userId);</span>
+<span class="fc" id="L61">    activityEntity.setActivity(activityDto.activity());</span>
+
+<span class="fc" id="L63">    FavouriteActivityEntity activityEntitySaved = favouriteActivityRepository.save(activityEntity);</span>
+<span class="fc" id="L64">    SparLog.info(&quot;Activity {} created for user {}&quot;, activityDto.activity(), userId);</span>
+<span class="fc" id="L65">    return activityEntitySaved;</span>
+  }
+
+  /**
+   * Retrieve all favorite activities to a specific user.
+   *
+   * @return a list of FavoriteActivityEntity or an empty list
+   */
+  public List&lt;FavouriteActivityEntity&gt; getAllUserFavoriteActivities() {
+<span class="fc" id="L74">    String userId = loggedUserService.getLoggedUserId();</span>
+<span class="fc" id="L75">    SparLog.info(&quot;Retrieving all favorite activities for user {}&quot;, userId);</span>
+
+<span class="fc" id="L77">    List&lt;FavouriteActivityEntity&gt; list = favouriteActivityRepository.findAllByUserId(userId);</span>
+<span class="fc" id="L78">    SparLog.info(&quot;{} favourite activity(ies) for user {}&quot;, list.size(), userId);</span>
+
+<span class="fc" id="L80">    return list;</span>
+  }
+
+  /**
+   * Updates a user activity.
+   *
+   * @param id the {@link Long} value as the id of the activity to be updated
+   * @param updateDto a {@link FavouriteActivityUpdateDto} containing the values to be updated
+   * @return a {@link FavouriteActivityEntity} updated
+   * @throws InvalidActivityException if the activity doesn't exist
+   */
+  @Transactional
+  public FavouriteActivityEntity updateUserActivity(
+      @NonNull Long id, FavouriteActivityUpdateDto updateDto) {
+<span class="fc" id="L94">    String userId = loggedUserService.getLoggedUserId();</span>
+
+<span class="fc" id="L96">    SparLog.info(&quot;Updating activity id {} for user {}&quot;, id, userId);</span>
+
+<span class="fc" id="L98">    FavouriteActivityEntity activityEntity =</span>
+<span class="fc" id="L99">        favouriteActivityRepository.findById(id).orElseThrow(InvalidActivityException::new);</span>
+
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">    if (updateDto.highlighted()) {</span>
+<span class="fc" id="L102">      favouriteActivityRepository.removeAllHighlightedByUser(userId);</span>
+    }
+
+<span class="fc" id="L105">    activityEntity.setHighlighted(updateDto.highlighted());</span>
+
+<span class="fc" id="L107">    FavouriteActivityEntity activityEntitySaved = favouriteActivityRepository.save(activityEntity);</span>
+<span class="fc" id="L108">    SparLog.info(&quot;Activity id {} updated for user {}&quot;, id, userId);</span>
+
+<span class="fc" id="L110">    return activityEntitySaved;</span>
+  }
+
+  /**
+   * Deletes a user activity by the activity id number.
+   *
+   * @param id A {@link Long} value as the id of the activity
+   */
+  public void deleteUserActivity(@NonNull Long id) {
+<span class="fc" id="L119">    String userId = loggedUserService.getLoggedUserId();</span>
+
+<span class="fc" id="L121">    SparLog.info(&quot;Deleting activity id {} for user {}&quot;, id, userId);</span>
+<span class="fc" id="L122">    Optional&lt;FavouriteActivityEntity&gt; activityEntity = favouriteActivityRepository.findById(id);</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">    if (activityEntity.isEmpty()) {</span>
+<span class="fc" id="L124">      throw new InvalidActivityException();</span>
+    }
+
+<span class="fc" id="L127">    favouriteActivityRepository.deleteById(id);</span>
+<span class="fc" id="L128">    SparLog.info(&quot;Activity id {} deleted for user {}&quot;, id, userId);</span>
+<span class="fc" id="L129">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,39 @@
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.submit-modal-btn {
+  min-width: 100%;
+  max-width: fit-content;
+  margin-top: 1rem;
+  white-space: nowrap;
+}
+
+.seedlot-registration-modal {
+  .#{vars.$bcgov-prefix}--modal-content {
+    p {
+      @include type.type-style('body-01');
+      color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    }
+
+    p,
+    .#{vars.$bcgov-prefix}--checkbox-label {
+      margin-bottom: 1.5rem;
+    }
+
+    .#{vars.$bcgov-prefix}--toast-notification {
+      width: 100%;
+    }
+
+    .#{vars.$bcgov-prefix}--toast-notification__title {
+      font-weight: 700;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--btn {
+    padding-bottom: 1rem;
+  }
+
+  .#{vars.$bcgov-prefix}--modal-footer .#{vars.$bcgov-prefix}--btn {
+    height: 0;
+  }
+}

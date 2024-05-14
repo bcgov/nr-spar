@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property name="LOGS" value="/logs" />
+  <springProperty scope="context" name="serviceEnv" source="nr-spar-oracle-api-env-opensearch" />
+  <springProperty scope="context" name="applicationName" source="spring.application.name" />
+  <springProperty scope="context" name="sparTeamEmail" source="nr-spar-team-email-address" />
+  <springProperty scope="context" name="ecsVersion" source="nr-spar-ecs-version" />
+
+  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- https://logback.qos.ch/manual/layouts.html -->
+    <!-- %d = 2006-10-20 14:06:49,812 or we can use like %date{yyyy-MM-dd HH:mm:ss.SSS}, or %d{ISO8601} -->
+    <!-- %p = level -->
+    <!-- %C{length} = fully qualified class name of the caller -->
+    <!-- %t = thread name -->
+    <!-- %m = message -->
+    <!-- %n = new line -->
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <Pattern>
+        %date{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%blue(%t)] %yellow(%c): %msg%n%throwable
+      </Pattern>
+    </layout>
+  </appender>
+
+  <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOGS}/oracle-api.log</file>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <Pattern>{%nopex"labels.project":"${applicationName}","service.environment":"${serviceEnv}","@timestamp":"%date{yyyy-MM-dd HH:mm:ss.SSS}","log.level":"%p","log.logger":"%logger{36}","message":"%replace(%msg){'\"','\\"'}","ecs.version":"${ecsVersion}","event.category":"web","event.dataset":"application.log.utc","event.ingested":"diagnostic","event.kind":"event","organization.id":"${sparTeamEmail}","organization.name":"TeamSPAR"}%n</Pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- rollover daily and when the file reaches 10 MegaBytes -->
+      <fileNamePattern>${LOGS}/archived/oracle-api-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <maxFileSize>10MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+    </rollingPolicy>
+  </appender>
+
+  <springProfile name="dev,all-tests,integration-test,test">
+    <!-- LOG everything at INFO level -->
+    <root level="info">
+      <appender-ref ref="Console" />
+    </root>
+    <!-- LOG "ca.bc.gov.backendstartapi*" at TRACE level -->
+    <logger name="ca.bc.gov.backendstartapi" level="trace" additivity="false">
+      <appender-ref ref="Console" />
+    </logger>
+  </springProfile>
+
+  <springProfile name="default,prod,native">
+    <!-- LOG everything at WARN level -->
+    <root level="warn">
+      <appender-ref ref="RollingFile" />
+      <appender-ref ref="Console" />
+    </root>
+    <!-- LOG "ca.bc.gov.backendstartapi*" at TRACE level -->
+    <logger name="ca.bc.gov.backendstartapi" level="trace" additivity="false">
+      <appender-ref ref="RollingFile" />
+      <appender-ref ref="Console" />
+    </logger>
+  </springProfile>
+
+</configuration>

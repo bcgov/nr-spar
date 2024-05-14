@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SeedlotStatusService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.service</a> &gt; <span class="el_source">SeedlotStatusService.java</span></div><h1>SeedlotStatusService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.service;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.stereotype.Service;
+
+/** This class contains all routines and database access to a list of seedlot status. */
+@Service
+public class SeedlotStatusService {
+  private SeedlotStatusRepository seedlotStatusRepository;
+
+<span class="fc" id="L17">  public SeedlotStatusService(SeedlotStatusRepository seedlotStatusRepository) {</span>
+<span class="fc" id="L18">    this.seedlotStatusRepository = seedlotStatusRepository;</span>
+<span class="fc" id="L19">  }</span>
+
+  /** Fetch all valid seedlot status from the repository. */
+  public List&lt;CodeDescriptionDto&gt; getAllValidSeedlotStatusDto() {
+<span class="fc" id="L23">    SparLog.info(&quot;Get all valid Seedlot Statuses for CodeDescriptionDto&quot;);</span>
+<span class="fc" id="L24">    List&lt;CodeDescriptionDto&gt; resultList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">    getAllValidSeedlotStatusEntity()</span>
+<span class="fc" id="L26">        .forEach(</span>
+            method -&gt; {
+<span class="fc" id="L28">              CodeDescriptionDto methodToAdd =</span>
+<span class="fc" id="L29">                  new CodeDescriptionDto(method.getSeedlotStatusCode(), method.getDescription());</span>
+<span class="fc" id="L30">              resultList.add(methodToAdd);</span>
+<span class="fc" id="L31">            });</span>
+
+<span class="fc" id="L33">    SparLog.info(&quot;{} valid seedlot statuses found for CodeDescriptionDto&quot;, resultList.size());</span>
+<span class="fc" id="L34">    return resultList;</span>
+  }
+
+  /**
+   * Gets all valid Seedlot Status Entities.
+   *
+   * @return A List of {@link SeedlotStatusEntity}
+   */
+  public List&lt;SeedlotStatusEntity&gt; getAllValidSeedlotStatusEntity() {
+<span class="fc" id="L43">    SparLog.info(&quot;Fetching all seedlot statuses for SeedlotStatusEntity&quot;);</span>
+
+<span class="fc" id="L45">    List&lt;SeedlotStatusEntity&gt; list =</span>
+<span class="fc" id="L46">        seedlotStatusRepository.findAll().stream().filter(method -&gt; method.isValid()).toList();</span>
+<span class="fc" id="L47">    SparLog.info(&quot;{} valid seedlot statuses found for SeedlotStatusEntity&quot;, list.size());</span>
+
+<span class="fc" id="L49">    return list;</span>
+  }
+
+  /**
+   * Get a single valid Seedlot Status by its code.
+   *
+   * @param statusCode The Status code to be considered.
+   * @return An Optional of {@link SeedlotStatusEntity}
+   */
+  public Optional&lt;SeedlotStatusEntity&gt; getValidSeedlotStatus(String statusCode) {
+<span class="nc" id="L59">    SparLog.info(&quot;Get a single valid seedlot status for SeedlotStatusEntity code {}&quot;, statusCode);</span>
+
+<span class="nc" id="L61">    Optional&lt;SeedlotStatusEntity&gt; optionalSeedlot =</span>
+<span class="nc" id="L62">        getAllValidSeedlotStatusEntity().stream()</span>
+<span class="nc" id="L63">            .filter(x -&gt; x.getSeedlotStatusCode().equals(statusCode))</span>
+<span class="nc" id="L64">            .findFirst();</span>
+
+<span class="nc" id="L66">    String empty = &quot;&quot;;</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">    if (optionalSeedlot.isEmpty()) {</span>
+<span class="nc" id="L68">      empty = &quot;not&quot;;</span>
+    }
+
+<span class="nc" id="L71">    SparLog.info(&quot;Single seedlot status &quot; + empty + &quot; found for code {}&quot;, statusCode);</span>
+
+<span class="nc" id="L73">    return optionalSeedlot;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,59 @@
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.interim-agency-storage-form {
+  h2 {
+    @include type.type-style('heading-03');
+  }
+
+  &.#{vars.$bcgov-prefix}--grid {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .interim-title-row,
+  .agency-information.#{vars.$bcgov-prefix}--row {
+    margin-bottom: 2.5rem;
+  }
+
+  .interim-agency-checkbox-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .storage-facility-type {
+    margin-top: 0.5625rem;
+    padding-left: 1.75rem;
+  }
+
+  .interim-storage-row {
+    padding-top: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .storage-type-radio {
+    margin-bottom: 1rem;
+  }
+
+  .#{vars.$bcgov-prefix}--date-picker .#{vars.$bcgov-prefix}--date-picker--single,
+  .#{vars.$bcgov-prefix}--date-picker-container,
+  .#{vars.$bcgov-prefix}--date-picker .#{vars.$bcgov-prefix}--date-picker__input,
+  .#{vars.$bcgov-prefix}--date-picker--single {
+    width: 100%;
+  }
+
+  .storage-location-row {
+    margin: 2rem -1rem;
+  }
+
+  .agency-number-location-code {
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    #agency-number-input {
+      @include type.type-style('code-02');
+    }
+  }
+}

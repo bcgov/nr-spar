@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserAuthenticationHelper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.security</a> &gt; <span class="el_source">UserAuthenticationHelper.java</span></div><h1>UserAuthenticationHelper.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.security;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
+
+/** This class contains helper methods to retrieved authenticated user. */
+@Component
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
+public class UserAuthenticationHelper {
+
+  @Autowired private Environment environment;
+
+  /**
+   * Get the logged user information.
+   *
+   * @return An Optional of {@link UserInfo} with all information from JWT token, if logged in or
+   *     empty Optional otherwise.
+   */
+  public Optional&lt;UserInfo&gt; getUserInfo() {
+<span class="fc" id="L32">    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();</span>
+
+<span class="fc bfc" id="L34" title="All 2 branches covered.">    if (authentication.isAuthenticated()) {</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">      if (authentication.getPrincipal() instanceof Jwt jwtPrincipal) {</span>
+<span class="fc" id="L36">        Set&lt;String&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if (jwtPrincipal.getClaims().containsKey(&quot;cognito:groups&quot;)) {</span>
+<span class="nc" id="L38">          Object clientRolesObj = jwtPrincipal.getClaims().get(&quot;cognito:groups&quot;);</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">          if (clientRolesObj instanceof List&lt;?&gt; list) {</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            for (Object item : list) {</span>
+<span class="nc" id="L41">              String role = String.valueOf(item);</span>
+              // Removes Client Number
+<span class="nc" id="L43">              String clientNumber = role.substring(role.length() - 8);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">              if (clientNumber.replaceAll(&quot;[0-9]&quot;, &quot;&quot;).isEmpty()) {</span>
+<span class="nc" id="L45">                role = role.substring(0, role.length() - 9); // Removes dangling underscore</span>
+              }
+<span class="nc" id="L47">              roles.add(role);</span>
+<span class="nc" id="L48">            }</span>
+          }
+        }
+
+        // Provider IDIR or BCeID &amp; username
+<span class="fc" id="L53">        String provider = jwtPrincipal.getClaimAsString(&quot;custom:idp_name&quot;);</span>
+<span class="fc" id="L54">        boolean isIdirProvider = provider.equals(&quot;idir&quot;);</span>
+<span class="fc" id="L55">        String idpUsername = jwtPrincipal.getClaimAsString(&quot;custom:idp_username&quot;);</span>
+
+        // User name
+<span class="fc" id="L58">        String displayName = jwtPrincipal.getClaimAsString(&quot;custom:idp_display_name&quot;);</span>
+<span class="fc" id="L59">        String firstName = &quot;&quot;;</span>
+<span class="fc" id="L60">        String lastName = &quot;&quot;;</span>
+
+        // Usually only IDIR contains comma.
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (displayName.contains(&quot;,&quot;)) {</span>
+<span class="fc" id="L64">          String[] parts = displayName.split(&quot;,&quot;);</span>
+<span class="fc" id="L65">          firstName = parts[1].trim();</span>
+
+          // Remove WLRS:EX or any additional info
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">          if (firstName.contains(&quot; &quot;)) {</span>
+<span class="fc" id="L69">            firstName = firstName.split(&quot; &quot;)[0].trim();</span>
+          }
+
+<span class="fc" id="L72">          lastName = parts[0].trim();</span>
+          // Remove 'de' or other starting characteres before space
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">          if (lastName.contains(&quot; &quot;)) {</span>
+<span class="nc" id="L75">            lastName = lastName.split(&quot; &quot;)[1].trim();</span>
+          }
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        } else if (displayName.contains(&quot; &quot;)) {</span>
+          // Usually BCeID contains space. E.g.: NRS Load Test-3
+<span class="fc" id="L79">          int indexFirstSpace = displayName.indexOf(' ');</span>
+<span class="fc" id="L80">          firstName = displayName.substring(0, indexFirstSpace);</span>
+<span class="fc" id="L81">          lastName = displayName.substring(indexFirstSpace).trim();</span>
+        }
+
+        // User id {IDIR@USERNAME}
+<span class="fc" id="L85">        String cappedUsername = idpUsername.toUpperCase();</span>
+<span class="fc" id="L86">        String cappedProvider = provider.toUpperCase();</span>
+<span class="fc" id="L87">        String userId = String.format(&quot;%s@%s&quot;, cappedProvider, cappedUsername);</span>
+
+        // Email will be empty, until next FAM release
+<span class="fc" id="L90">        String email = jwtPrincipal.getClaimAsString(&quot;email&quot;);</span>
+
+<span class="fc" id="L92">        UserInfo userInfo =</span>
+            new UserInfo(
+                userId,
+                firstName,
+                lastName,
+                email,
+                displayName,
+<span class="fc bfc" id="L99" title="All 2 branches covered.">                isIdirProvider ? idpUsername : null,</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">                isIdirProvider ? null : idpUsername,</span>
+<span class="fc" id="L101">                IdentityProvider.fromClaim(provider).orElseThrow(),</span>
+                roles,
+<span class="fc" id="L103">                jwtPrincipal.getTokenValue());</span>
+
+<span class="fc" id="L105">        return Optional.of(userInfo);</span>
+      }
+    }
+
+<span class="fc" id="L109">    SparLog.info(&quot;User not authenticated!&quot;);</span>
+
+    // Checks if it's the 'docker-compose' profile enabled (local dev env)
+<span class="fc" id="L112">    boolean isDockerComposeProfile = false;</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">    if (!Objects.isNull(environment)) {</span>
+<span class="nc" id="L114">      String[] profiles = environment.getActiveProfiles();</span>
+<span class="nc" id="L115">      isDockerComposeProfile = Arrays.asList(profiles).contains(&quot;docker-compose&quot;);</span>
+    }
+
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">    if (isDockerComposeProfile) {</span>
+<span class="nc" id="L119">      SparLog.info(&quot;Local development environment found! Using dev user!&quot;);</span>
+
+<span class="nc" id="L121">      UserInfo devUserInfo =</span>
+          new UserInfo(
+              &quot;FSTACK&quot;,
+              &quot;FullStack&quot;,
+              &quot;Developer&quot;,
+              &quot;fullstack-dev@email.com&quot;,
+              &quot;Developer, FullStack LRWS:EX&quot;,
+              &quot;DEV-IDIR&quot;,
+              null,
+              IdentityProvider.IDIR,
+<span class="nc" id="L131">              Set.of(),</span>
+              &quot;abcdef123456&quot;);
+
+<span class="nc" id="L134">      return Optional.of(devUserInfo);</span>
+    }
+
+<span class="fc" id="L137">    return Optional.empty();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

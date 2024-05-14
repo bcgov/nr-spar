@@ -1,0 +1,40 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.seedlot-activity-history {
+  background: white;
+  width: auto;
+  border: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.seedlot-activity-history-title {
+  @include type.type-style('heading-02');
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.seedlot-activity-history-title-section {
+  margin-bottom: 2rem;
+}
+
+.seedlot-activity-history-dropdown {
+  width: 23.75rem;
+  margin-bottom: 2rem;
+}
+
+.seedlot-activity-history-box > li.#{vars.$bcgov-prefix}--progress-step,
+.seedlot-activity-history-box > li > button.#{vars.$bcgov-prefix}--progress-step-button {
+  min-height: 5.375rem;
+}
+
+.seedlot-activity-history-box .#{vars.$bcgov-prefix}--progress-label {
+  min-width: 25rem;
+}
+
+.seedlot-activity-history-box .#{vars.$bcgov-prefix}--progress-label:hover {
+  cursor: pointer;
+  color: var(--#{vars.$bcgov-prefix}-link-primary);
+  text-decoration-line: underline;
+}

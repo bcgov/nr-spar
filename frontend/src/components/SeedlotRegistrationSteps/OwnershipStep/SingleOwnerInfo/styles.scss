@@ -1,0 +1,97 @@
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.single-owner-info-container {
+  padding: 1rem;
+  width: 100%;
+
+  .#{vars.$bcgov-prefix}--grid {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .single-owner-info-col {
+    margin: 0;
+    padding-bottom: 1rem;
+
+    input {
+      background-color: var(--#{vars.$bcgov-prefix}-field-02);
+    }
+
+    button {
+      border: none;
+    }
+
+    button::before {
+      background-color: var(--#{vars.$bcgov-prefix}-field-02);
+    }
+
+    button::after {
+      background-color: var(--#{vars.$bcgov-prefix}-field-02);
+    }
+
+    &.default-owner-col {
+      padding-top: 3.05rem
+    }
+
+    &.other-owners-col {
+      padding-top: 0.1rem;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--list-box__menu-item {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-02);
+  }
+
+  .#{vars.$bcgov-prefix}--list-box__menu-item--highlighted {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-hover-02);
+  }
+
+  .#{vars.$bcgov-prefix}--list-box__menu-item--active {
+    background-color: var(--#{vars.$bcgov-prefix}-layer-hover-02);
+  }
+
+  .#{vars.$bcgov-prefix}--form__helper-text--disabled {
+    color: var(--#{vars.$bcgov-prefix}-text-secondary);
+  }
+
+  .single-owner-combobox {
+    ::placeholder {
+      color: var(--#{vars.$bcgov-prefix}-text-primary);
+    }
+
+    // Not having this will cause the bottom border lines not lining up for some reasons
+    margin-top: -0.125rem;
+  }
+
+  .reserved-perc-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+
+    input[type=number] {
+      min-inline-size: auto;
+    }
+  }
+
+  .reserved-surplus-input {
+    width: 49.75%;
+  }
+
+  .owner-mod-btn {
+    margin-left: 1rem;
+  }
+
+  .owner-code-text-input {
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    #agency-number-input {
+      @include type.type-style('code-02');
+    }
+  }
+}

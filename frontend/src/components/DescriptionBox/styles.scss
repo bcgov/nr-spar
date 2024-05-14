@@ -1,0 +1,22 @@
+@use '@carbon/type';
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.description-box-container{
+  width: 100%;
+
+  .description-box-header{
+    @include type.type-style('heading-03');
+    color: var(--#{vars.$bcgov-prefix}-text-primary);
+  }
+
+  .description-box-description{
+    @include type.type-style('body-01');
+    color: var(--#{vars.$bcgov-prefix}-text-secondary);
+    margin-top: 0.5rem;
+
+    a{
+      color: var(--#{vars.$bcgov-prefix}-link-primary);
+      text-decoration: underline;
+    }
+  }
+}

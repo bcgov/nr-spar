@@ -1,0 +1,23 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.panel-section,
+.panel-section-light {
+  height: 3rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.94rem 1rem;
+  background: var(--#{vars.$bcgov-prefix}-background-left-panel);
+}
+
+.panel-section-light {
+  background: var(--#{vars.$bcgov-prefix}-layer-02);
+}
+
+.panel-section > span,
+.panel-section-light > span {
+  @include type.type-style('label-01');
+  color: var(--#{vars.$bcgov-prefix}-text-secondary);
+  user-select: none;
+}

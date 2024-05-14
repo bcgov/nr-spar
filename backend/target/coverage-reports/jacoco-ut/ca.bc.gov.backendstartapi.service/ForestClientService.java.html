@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ForestClientService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">nr-spar-backend</a> &gt; <a href="index.source.html" class="el_package">ca.bc.gov.backendstartapi.service</a> &gt; <span class="el_source">ForestClientService.java</span></div><h1>ForestClientService.java</h1><pre class="source lang-java linenums">package ca.bc.gov.backendstartapi.service;
+
+import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.ForestClientDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.dto.ForestClientSearchDto;
+import ca.bc.gov.backendstartapi.provider.Provider;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
+
+/** Service to deal with {@link ForestClientDto ForestClients}. */
+@Service
+public class ForestClientService {
+
+  @Qualifier(&quot;forestClientApi&quot;)
+  private Provider forestClientApiProvider;
+
+<span class="fc" id="L24">  ForestClientService(Provider forestClientApiProvider) {</span>
+<span class="fc" id="L25">    this.forestClientApiProvider = forestClientApiProvider;</span>
+<span class="fc" id="L26">  }</span>
+
+  /**
+   * Fetch a ForestClient by its number or its acronym.
+   *
+   * @param identifier the client number or acronym to search for
+   * @return the ForestClient with client number or acronym {@code identifier}, if one exists
+   */
+  public Optional&lt;ForestClientDto&gt; fetchClient(String identifier) {
+<span class="fc" id="L35">    SparLog.info(&quot;Fetching a Forest Client by its number or acronym {}&quot;, identifier);</span>
+    try {
+<span class="fc" id="L37">      return forestClientApiProvider.fetchClientByIdentifier(identifier);</span>
+<span class="nc" id="L38">    } catch (HttpClientErrorException.NotFound e) {</span>
+<span class="nc" id="L39">      SparLog.info(String.format(&quot;Client %s not found&quot;, identifier), e);</span>
+<span class="nc" id="L40">      return Optional.empty();</span>
+    }
+  }
+
+  /**
+   * Fetch up to the 10 first ForestClient location by its number.
+   *
+   * @param clientNumber the ForestClient identifier to fetch their locations
+   * @return a list of {@link ForestClientLocationDto} containing the client's locations data
+   */
+  public List&lt;ForestClientLocationDto&gt; fetchClientLocations(
+      String clientNumber, Boolean shouldFetchAll) {
+<span class="fc" id="L52">    SparLog.info(</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        &quot;Fetching {} Forest Clients by its number {}&quot;, shouldFetchAll ? &quot;all&quot; : &quot;10&quot;, clientNumber);</span>
+<span class="fc" id="L54">    return forestClientApiProvider.fetchLocationsByClientNumber(clientNumber, shouldFetchAll);</span>
+  }
+
+  /**
+   * Fetch a single location of a ForestClient its number and location code.
+   *
+   * @param clientNumber the ForestClient identifier to fetch their location
+   * @param locationCode the location code that identifies the location to be fetched
+   * @return {@link ForestClientLocationDto} containing the client's location data
+   */
+  public ForestClientLocationDto fetchSingleClientLocation(
+      String clientNumber, String locationCode) {
+<span class="fc" id="L66">    SparLog.info(</span>
+        &quot;Fetching a single ForestClient location for clientNumber {} and locationCode {}&quot;,
+        clientNumber,
+        locationCode);
+<span class="fc" id="L70">    return forestClientApiProvider.fetchSingleClientLocation(clientNumber, locationCode);</span>
+  }
+
+  /**
+   * Search for clients by either the acronym, client number or client name.
+   *
+   * @param type the type of the search query: acronym, client number or client name.
+   * @param query the keyword to search
+   * @return a list of {@link ForestClientSearchDto}
+   */
+  public List&lt;ForestClientSearchDto&gt; searchClients(String type, String query) {
+<span class="fc" id="L81">    List&lt;String&gt; validTypes = List.of(&quot;acronym&quot;, &quot;client_number&quot;, &quot;client_name&quot;);</span>
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">    if (!validTypes.contains(type)) {</span>
+<span class="fc" id="L84">      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Invalid search type.&quot;);</span>
+    }
+
+<span class="pc bpc" id="L87" title="2 of 4 branches missed.">    if (type.equals(&quot;acronym&quot;) || type.equals(&quot;client_number&quot;)) {</span>
+<span class="nc" id="L88">      return searchClientsByIdentifier(query);</span>
+    }
+
+<span class="fc" id="L91">    return searchClientsByFullName(query);</span>
+  }
+
+  private List&lt;ForestClientSearchDto&gt; searchClientsByFullName(String query) {
+<span class="fc" id="L95">    List&lt;ForestClientSearchDto&gt; mappedList = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L97">    List&lt;ForestClientDto&gt; clientsFound = forestClientApiProvider.fetchClientsByClientName(query);</span>
+
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">    if (clientsFound.isEmpty()) {</span>
+<span class="nc" id="L100">      return mappedList;</span>
+    }
+
+<span class="fc" id="L103">    clientsFound.forEach(</span>
+        client -&gt; {
+<span class="fc" id="L105">          List&lt;ForestClientLocationDto&gt; fcLocations =</span>
+<span class="fc" id="L106">              forestClientApiProvider.fetchLocationsByClientNumber(client.clientNumber(), true);</span>
+<span class="fc" id="L107">          fcLocations.forEach(</span>
+              fcl -&gt; {
+<span class="fc" id="L109">                mappedList.add(combineClientAndLocationRecord(client, fcl));</span>
+<span class="fc" id="L110">              });</span>
+<span class="fc" id="L111">        });</span>
+
+<span class="fc" id="L113">    return mappedList;</span>
+  }
+
+  private List&lt;ForestClientSearchDto&gt; searchClientsByIdentifier(String query) {
+    // Fetch the Forest client
+<span class="nc" id="L118">    Optional&lt;ForestClientDto&gt; optionalForestClient =</span>
+<span class="nc" id="L119">        forestClientApiProvider.fetchClientByIdentifier(query);</span>
+
+<span class="nc bnc" id="L121" title="All 2 branches missed.">    if (optionalForestClient.isEmpty()) {</span>
+<span class="nc" id="L122">      return List.of();</span>
+    }
+
+<span class="nc" id="L125">    ForestClientDto fc = optionalForestClient.get();</span>
+
+    // Fetch location codes with client number
+<span class="nc" id="L128">    String clientNumber = fc.clientNumber();</span>
+
+<span class="nc" id="L130">    List&lt;ForestClientLocationDto&gt; fcLocations =</span>
+<span class="nc" id="L131">        forestClientApiProvider.fetchLocationsByClientNumber(clientNumber, true);</span>
+
+<span class="nc" id="L133">    List&lt;ForestClientSearchDto&gt; mappedList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L135">    fcLocations.forEach(</span>
+        fcl -&gt; {
+<span class="nc" id="L137">          mappedList.add(combineClientAndLocationRecord(fc, fcl));</span>
+<span class="nc" id="L138">        });</span>
+
+<span class="nc" id="L140">    return mappedList;</span>
+  }
+
+  private ForestClientSearchDto combineClientAndLocationRecord(
+      ForestClientDto fc, ForestClientLocationDto fcl) {
+<span class="fc" id="L145">    return new ForestClientSearchDto(</span>
+<span class="fc" id="L146">        fc.clientNumber(),</span>
+<span class="fc" id="L147">        fc.clientName(),</span>
+<span class="fc" id="L148">        fc.legalFirstName(),</span>
+<span class="fc" id="L149">        fc.legalMiddleName(),</span>
+<span class="fc" id="L150">        fc.clientStatusCode(),</span>
+<span class="fc" id="L151">        fc.clientTypeCode(),</span>
+<span class="fc" id="L152">        fc.acronym(),</span>
+<span class="fc" id="L153">        fcl.locationCode(),</span>
+<span class="fc" id="L154">        fcl.locationName(),</span>
+<span class="fc" id="L155">        fcl.companyCode(),</span>
+<span class="fc" id="L156">        fcl.address1(),</span>
+<span class="fc" id="L157">        fcl.address2(),</span>
+<span class="fc" id="L158">        fcl.address3(),</span>
+<span class="fc" id="L159">        fcl.city(),</span>
+<span class="fc" id="L160">        fcl.province(),</span>
+<span class="fc" id="L161">        fcl.postalCode(),</span>
+<span class="fc" id="L162">        fcl.country(),</span>
+<span class="fc" id="L163">        fcl.businessPhone(),</span>
+<span class="fc" id="L164">        fcl.homePhone(),</span>
+<span class="fc" id="L165">        fcl.cellPhone(),</span>
+<span class="fc" id="L166">        fcl.faxNumber(),</span>
+<span class="fc" id="L167">        fcl.email(),</span>
+<span class="fc" id="L168">        fcl.expired(),</span>
+<span class="fc" id="L169">        fcl.trusted(),</span>
+<span class="fc" id="L170">        fcl.returnedMailDate(),</span>
+<span class="fc" id="L171">        fcl.comment());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

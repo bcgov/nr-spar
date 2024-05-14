@@ -1,0 +1,33 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.edit-a-class-seedlot-page{
+  .breadcrumb-row{
+    padding: 0 1rem;
+  }
+
+  .title-row{
+    margin-top: 0.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .submit-button{
+    width: 100%;
+  }
+
+  .error-row {
+    margin-bottom: 2rem;
+
+    button {
+      display: none;
+    }
+
+    #edit-seedlot-error-banner {
+      max-width: none;
+      border-radius: 0.25rem;
+    }
+
+    .#{vars.$bcgov-prefix}--actionable-notification__content {
+      flex-direction: column;
+    }
+  }
+}

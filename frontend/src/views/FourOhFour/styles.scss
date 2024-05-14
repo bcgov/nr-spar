@@ -1,0 +1,61 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.fof-container {
+  margin: 0;
+  max-width: 100%;
+  min-height: 100vh;
+  padding: 1rem;
+  background-color: rgb(131, 217, 200);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    width: 25%;
+    min-width: 21.875rem;
+  }
+
+  .list {
+    li {
+      list-style-type: none;
+    }
+
+    margin-top: 2rem;
+  }
+
+  .link {
+    margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+    transition: color var(--#{vars.$bcgov-prefix}-transition-base);
+    color: var(--#{vars.$bcgov-prefix}-text-01);
+    text-decoration: none;
+    margin-left: 1rem;
+
+    &:before {
+      content: '\21B3'; //"↳"
+      position: absolute;
+      left: -1rem;
+      color: var(--#{vars.$bcgov-prefix}-text-01);
+      cursor: pointer;
+    }
+  }
+
+  .fof-text {
+    text-align: center;
+    font-family: cursive;
+    font-weight: 700;
+    font-size: 13rem;
+    transform: translate(0, -20%);
+    letter-spacing: 0.02em;
+    color: #F9f1cc;
+    text-shadow: 5px 5px 0px #FFB650,
+      10px 10px 0px #FFD662,
+      15px 15px 0px #FF80BF,
+      20px 20px 0px #EF5097,
+      25px 25px 0px #6868AC,
+      30px 30px 0px #90B1E0;
+  }
+}

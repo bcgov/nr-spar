@@ -1,0 +1,90 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
+@use '@carbon/type';
+
+.agency-information-section {
+  padding: 0;
+  width: 100%;
+
+  .agency-information-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .#{vars.$bcgov-prefix}--combo-box--readonly {
+    border-block-end: 0;
+
+    input[role=combobox] {
+      background-color: transparent;
+      padding-inline-end: 0;
+      --#{vars.$bcgov-prefix}-layout-density-padding-inline-local: 0;
+      border-block-end: 0;
+    }
+
+    button,
+    &+.#{vars.$bcgov-prefix}--form__helper-text {
+      display: none;
+    }
+
+    &.#{vars.$bcgov-prefix}--list-box--invalid input[role=combobox].#{vars.$bcgov-prefix}--text-input {
+      outline-offset: 0;
+    }
+  }
+
+
+  .#{vars.$bcgov-prefix}--text-input:disabled {
+    border-block-end: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle);
+  }
+
+  .#{vars.$bcgov-prefix}--combo-box {
+
+    li,
+    .#{vars.$bcgov-prefix}--list-box__menu-item__option {
+      white-space: normal;
+      block-size: auto;
+    }
+  }
+
+
+  .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
+    input[type=number] {
+      background-color: transparent;
+      padding: 0;
+      border-block-end: 0;
+    }
+  }
+
+  .location-code-input {
+    padding-top: 0.1rem;
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    #agency-number-input {
+      @include type.type-style('code-02');
+    }
+  }
+
+  .applicant-client-search-row {
+    margin-bottom: 3rem;
+
+    p {
+      color: colors.$gray-70;
+      font-size: 0.875rem;
+    }
+
+    .client-search-toggle-btn {
+      padding: 0;
+      height: auto;
+      min-height: 0;
+      background: transparent;
+      border: none;
+
+      p {
+        color: var(--#{vars.$bcgov-prefix}-link-primary);
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.seedlot-details-page {
+  padding: 0;
+
+  .#{vars.$bcgov-prefix}--row {
+    margin-inline: 0;
+  }
+
+  .#{vars.$bcgov-prefix}--col {
+    padding: 0;
+  }
+
+  .title-section {
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .page-title {
+    padding: 0 2.5rem;
+  }
+
+  .seedlot-details-breadcrumb {
+    padding-left: 2.5rem;
+    margin-bottom: 0.5rem;
+    margin-inline: 0;
+  }
+
+  .seedlot-details-breadcrumb .#{vars.$bcgov-prefix}--link {
+    cursor: pointer;
+  }
+
+  .summary-title-flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .summary-title-flex-col {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+
+    .combo-button-container {
+      margin-top: 1rem;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--tabs {
+    padding-left: 1.5rem;
+  }
+
+  .seedlot-details-content .#{vars.$bcgov-prefix}--tab-content {
+    // Stupid nr-theme has a !important on tab content, so we have to use !important here.
+    padding: 2.5rem !important;
+    background-color: var(--#{vars.$bcgov-prefix}-layer-01);
+  }
+
+  .seedlot-submitted-notification {
+    margin-bottom: 2rem;
+    max-inline-size: none;
+
+    .#{vars.$bcgov-prefix}--inline-notification__title {
+      font-weight: bold;
+    }
+  }
+
+  .section-btn {
+    width: fit-content;
+  }
+}
+
+
+.edit-seedlot-form {
+  width: fit-content;
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options {
+    width: fit-content;
+    max-width: none;
+  }
+
+  .#{vars.$bcgov-prefix}--overflow-menu-options__btn {
+    width: fit-content;
+    max-width: none;
+  }
+}

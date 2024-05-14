@@ -1,0 +1,46 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@carbon/type';
+
+.notifications-space {
+  .notifications-button-row {
+    margin: 0rem;
+  }
+
+  .btn-viewed {
+    padding-right: 3.75rem;
+    border: 0;
+  }
+
+  .btn-all-notifications {
+    padding-right: 3.13rem;
+    border: 0;
+  }
+
+  .notifications-central-vertical-center .empty-section-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .empty-section-container p.subtitle-section {
+    @include type.type-style('body-compact-01');
+  }
+
+  hr {
+    border-top: 1px solid var(--#{vars.$bcgov-prefix}-border-subtle-00);
+    margin: 0;
+  }
+
+  .notifications-central-container {
+    height: 60rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .notifications-central-vertical-center {
+    text-align: center;
+    margin: 0;
+    position: relative;
+    top: 40%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+}
