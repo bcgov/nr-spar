@@ -1,0 +1,50 @@
+name: PR
+
+on:
+  pull_request:
+
+concurrency:
+  # Cancel in progress for PR open and close
+  group: ${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  # https://github.com/bcgov-nr/action-builder-ghcr
+  build:
+    name: Build
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [database, sync]
+    timeout-minutes: 10
+    steps:
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        id: build
+        with:
+          keep_versions: 50
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          triggers: ('${{ matrix.package }}/')
+
+  deploy:
+    name: Deploy
+    needs: [build]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      parameters: -p TEST_MODE=1
+      tag: ${{ github.event.number }}
+      target: ${{ github.event.number }}
+      triggers: ('database/' 'sync/')
+      verify: true
+
+  results:
+    name: PR Results
+    if: always() && !failure()
+    needs: [deploy]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"
