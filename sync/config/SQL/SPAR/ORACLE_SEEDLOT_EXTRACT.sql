@@ -148,4 +148,5 @@ temporary_strg_locn_code, temporary_strg_client_number, smp_mean_bv_growth, smp_
 total_parent_trees, update_timestamp, update_userid, variant, vegetation_code, vol_per_container
 FROM CTE_SEEDLOT C
 WHERE update_timestamp between :start_time and :end_time 
+--AND ROWNUM < 11
 ORDER BY seedlot_number
