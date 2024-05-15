@@ -31,7 +31,7 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import './styles.scss';
 
-const InterimStorage = () => {
+const InterimStep = () => {
   const {
     allStepData: { interimStep: state },
     allStepData: { collectionStep: { collectorAgency } },
@@ -263,4 +263,4 @@ const InterimStorage = () => {
   );
 };
 
-export default InterimStorage;
+export default InterimStep;
