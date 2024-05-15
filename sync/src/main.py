@@ -45,7 +45,7 @@ def required_variables_exists():
     print("----- 1. Checking if required variables are defined")
     print("-------------------------------------")
     
-    if not env_var_is_filled("test_mode") or \
+    if not env_var_is_filled("TEST_MODE") or \
        not env_var_is_filled("EXECUTION_ID") or  \
        not env_var_is_filled("POSTGRES_HOST") or  \
        not env_var_is_filled("POSTGRES_PORT") or  \
@@ -109,13 +109,13 @@ def testVault():
 
 def main() -> None:
     definition_of_yes = ["Y","YES","1","T","TRUE"]
-    # print(os.environ.get("test_mode"))
-    if os.environ.get("test_mode") is None:
+    # print(os.environ.get("TEST_MODE"))
+    if os.environ.get("TEST_MODE") is None:
         print("Error: test mode variable is None")
     elif os.environ.get("EXECUTION_ID") is None:
         print("Error: EXECUTION_ID is None, no execution defined to be executed in this run.")
     else:
-        this_is_a_test = os.environ.get("test_mode")
+        this_is_a_test = os.environ.get("TEST_MODE")
         if this_is_a_test in definition_of_yes:
             print("Executing in Test mode")
             required_variables_exists()
