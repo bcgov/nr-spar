@@ -23,6 +23,8 @@ import { InitialSeedlotFormData } from '../CreateAClass/constants';
 import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collection/Read';
 import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
 
+import InterimReviewRead from '../../../components/SeedlotReviewSteps/Interim/Read';
+
 import ContextContainerClassA from '../ContextContainerClassA';
 
 import { getBreadcrumbs } from './utils';
@@ -167,6 +169,17 @@ const SeedlotReview = () => {
         <Row className="section-title-row">
           <Column className="section-title-col">
             Interim storage
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            {
+              isReadMode
+                ? <InterimReviewRead />
+                : (
+                  <CollectionReviewEdit />
+                )
+            }
           </Column>
         </Row>
 
