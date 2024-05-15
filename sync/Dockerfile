@@ -13,11 +13,10 @@ ARG PIP_NO_CACHE_DIR="off" \
 
 # Copy files and install requirements
 WORKDIR /app
-COPY requirements.txt .
+COPY . .
 RUN pip install -r ./requirements.txt
 
 # Start the app
 WORKDIR /app/src
-COPY src .
 USER 1001
 CMD python3 main.py
