@@ -160,19 +160,11 @@
     </dependency>
 
     <!-- Geospatial -->
-    <!-- <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-spatial</artifactId>
-      <version>6.4.4.Final</version>
-      <type>pom</type>
-    </dependency> -->
-
-    <!-- <dependency>
-      <groupId>org.locationtech.jts</groupId>
-      <artifactId>jts-core</artifactId>
-      <version>1.18.2</version>
-    </dependency> -->
-
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-spatial</artifactId>
+        <version>${hibernate.version}</version>
+    </dependency>
 
     <!-- Database -->
     <dependency>
@@ -451,7 +443,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.15.0</version>
+            <version>10.16.0</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -498,7 +490,7 @@
       <dependency>
         <groupId>com.nimbusds</groupId>
         <artifactId>nimbus-jose-jwt</artifactId>
-        <version>9.37.3</version>
+        <version>9.39</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

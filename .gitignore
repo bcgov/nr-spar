@@ -22,6 +22,7 @@ lib-cov
 coverage
 *.lcov
 lcov.*
+.coverage
 
 # nyc test coverage
 .nyc_output
@@ -93,6 +94,13 @@ snyk.sarif
 
 # Docker/Podman volumes
 .volumes
+.idea
+*.iml
+**/bin
+**/build
+**/dist
+**/out
+**/target
 
 # Jetbrains IntelliJ IDEA
 .idea/
@@ -121,6 +129,7 @@ InstallCert$SavingTrustManager.class
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
+jspm_packages/
 **/node_modules
 **/.pnp
 .pnp.js
@@ -160,3 +169,37 @@ InstallCert$SavingTrustManager.class
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# VSCode
+.vscode/
+
+# Python
+**/venv
+**/.venv
+
+# Data
+sync/data/
+**/__pycache__
