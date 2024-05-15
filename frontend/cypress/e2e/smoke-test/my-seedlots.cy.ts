@@ -197,7 +197,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it.only('should sort table columns in ascending and descinding order - Last updated', () => {
+  it('should sort table columns in ascending and descinding order - Last updated', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -219,12 +219,6 @@ describe('My seedlots page', () => {
         ascendingFirstRow = $updatedDate.text();
       });
 
-    // cy.get('@tableContent')
-    //   .eq(0)
-    //   .find('td:nth-child(6)').then(($updatedDate) => {
-    //     ascendingFirstRow = $updatedDate.text();
-    //   });
-
     cy.get('table.seedlot-data-table')
       .find('#seedlot-table-header-lastUpdatedAt')
       .click();
@@ -242,15 +236,6 @@ describe('My seedlots page', () => {
         const descendingDate = new Date(descendingFirstRow);
         expect(ascendingDate).to.be.at.most(descendingDate);
       });
-
-    // cy.get('@tableContent')
-    //   .eq(0)
-    //   .find('td:nth-child(6)').then(($updatedDate) => {
-    //     const descendingFirstRow: string = $updatedDate.text();
-    //     const ascendingDate = new Date(ascendingFirstRow);
-    //     const descendingDate = new Date(descendingFirstRow);
-    //     expect(ascendingDate).to.be.at.most(descendingDate);
-    //   });
   });
 
   it('can use search bar to give correct results', () => {
@@ -260,8 +245,14 @@ describe('My seedlots page', () => {
 
     cy.get('table.seedlot-data-table tbody tr')
       .eq(0)
-      .find('td:nth-child(3)')
-      .should('have.text', fixtureData.pli.species);
+      .find('td:nth-child(1)')
+      .then(($seedlot) => {
+        const seedlotNum = $seedlot.text();
+        return cy.get(`#seedlot-table-cell-${seedlotNum}-seedlotSpecies`);
+      })
+      .then(($seedlotSpecies) => {
+        expect($seedlotSpecies.text()).to.have.string(fixtureData.pli.species);
+      });
   });
 
   it('dropdown button and next page functionality', () => {
