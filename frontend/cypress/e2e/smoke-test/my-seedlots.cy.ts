@@ -130,7 +130,12 @@ describe('My seedlots page', () => {
 
     cy.get('@tableContent')
       .eq(0)
-      .find('td:nth-child(4)').then(($seedlotStatus) => {
+      .find('td:nth-child(1)')
+      .then(($seedlotNum) => {
+        const ascendingFirstSeedlot = $seedlotNum.text();
+        return cy.get(`#seedlot-table-cell-${ascendingFirstSeedlot}-seedlotStatus`);
+      })
+      .then(($seedlotStatus) => {
         ascendingFirstRow = $seedlotStatus.text();
       });
 
@@ -140,7 +145,12 @@ describe('My seedlots page', () => {
 
     cy.get('@tableContent')
       .eq(0)
-      .find('td:nth-child(4)').then(($seedlotStatus) => {
+      .find('td:nth-child(1)')
+      .then(($seedlotNum) => {
+        const descendingFirstSeedlot = $seedlotNum.text();
+        return cy.get(`#seedlot-table-cell-${descendingFirstSeedlot}-seedlotStatus`);
+      })
+      .then(($seedlotStatus) => {
         const descendingFirstRow: string = $seedlotStatus.text();
         expect(ascendingFirstRow.charCodeAt(0)).to.be.at.most(descendingFirstRow.charCodeAt(0));
       });
