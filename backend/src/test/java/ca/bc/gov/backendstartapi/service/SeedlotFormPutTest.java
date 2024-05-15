@@ -254,7 +254,9 @@ class SeedlotFormPutTest {
     seedlot.setSeedlotStatus(seedlotStatus);
     when(seedlotRepository.findById("5432")).thenReturn(Optional.of(seedlot));
 
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), anyBoolean());
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveSeedlotFormStep1(any(), any(), anyBoolean());
 
     doThrow(new MethodOfPaymentNotFoundException())
         .when(seedlotOwnerQuantityService)
@@ -283,7 +285,8 @@ class SeedlotFormPutTest {
     when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), anyBoolean()))
         .thenReturn(List.of());
     doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), anyBoolean());
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean())).thenReturn(List.of());
+    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
+        .thenReturn(List.of());
 
     doThrow(new SeedlotParentTreeNotFoundException())
         .when(seedlotParentTreeGeneticQualityService)
