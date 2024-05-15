@@ -209,7 +209,10 @@ const ApplicantAgencyFields = ({
     const updatedAgency = updateAgencyFn(value);
     setAgencyAndCode(isDefault, updatedAgency, locationCode);
 
-    if (value === '') return;
+    if (value === '') {
+      setShowSuccessIconAgency(false);
+      return;
+    }
 
     setShowSuccessIconAgency(true);
     validateAgencyAcronymMutation.mutate([value]);
@@ -219,6 +222,10 @@ const ApplicantAgencyFields = ({
     const updatedValue = value.slice(0, LOCATION_CODE_LIMIT);
     const isInRange = validator.isInt(value, { min: 0, max: 99 });
     let updatedIsInvalid = false;
+
+    if (value === '') {
+      setShowSuccessIconLocCode(false);
+    }
 
     if (!isInRange) {
       setInvalidLocationMessage(supportTexts.locationCode.invalidText);
@@ -242,7 +249,10 @@ const ApplicantAgencyFields = ({
       isInvalid: false
     };
     setAgencyAndCode(isDefault, agency, updatedLocationCode);
-    if (formatedCode === '') return;
+    if (formatedCode === '') {
+      setShowSuccessIconLocCode(false);
+      return;
+    }
     setShowSuccessIconLocCode(true);
     validateLocationCodeMutation.mutate([agency.value.code, formatedCode]);
   };
