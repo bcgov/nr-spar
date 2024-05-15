@@ -1,6 +1,41 @@
-test/
-target/
-# .mvn
-# mvnw*
+### Base set
+# Deployment
+*.md
+.dockerignore
+.git/
+.gitignore
+.github/
+Containerfile
+Dockerfile
+openshift.*.y*ml
+docker-compose*.y*ml
+
+# Node
+**/node_modules/
+.eslint*
+.prettier*
+nodemon*.json
+npm-debug.*
+
+# Env
 .env
-*.yml
+.env.*
+
+# Generated
+**/.build/
+**/.dist/
+**/build/
+**/coverage/
+**/cypress/
+**/dist/
+**/test/
+**/target/
+*.sarif
+cypress.*
+jest.*
+
+# System
+.DS_Store
+.vscode
+.ps1
+thumbs.db
