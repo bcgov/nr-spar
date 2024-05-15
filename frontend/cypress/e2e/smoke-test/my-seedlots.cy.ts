@@ -169,7 +169,12 @@ describe('My seedlots page', () => {
 
     cy.get('@tableContent')
       .eq(0)
-      .find('td:nth-child(5)').then(($createdDate) => {
+      .find('td:nth-child(1)')
+      .then(($seedlotNum) => {
+        const ascendingFirstSeedlot = $seedlotNum.text();
+        return cy.get(`#seedlot-table-cell-${ascendingFirstSeedlot}-createdAt`);
+      })
+      .then(($createdDate) => {
         ascendingFirstRow = $createdDate.text();
       });
 
@@ -179,7 +184,12 @@ describe('My seedlots page', () => {
 
     cy.get('@tableContent')
       .eq(0)
-      .find('td:nth-child(5)').then(($createdDate) => {
+      .find('td:nth-child(1)')
+      .then(($seedlotNum) => {
+        const descendingFirstSeedlot = $seedlotNum.text();
+        return cy.get(`#seedlot-table-cell-${descendingFirstSeedlot}-createdAt`);
+      })
+      .then(($createdDate) => {
         const descendingFirstRow: string = $createdDate.text();
         const ascendingDate = new Date(ascendingFirstRow);
         const descendingDate = new Date(descendingFirstRow);
