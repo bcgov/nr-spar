@@ -11,6 +11,11 @@ on:
         description: Environment name; omit for PRs
         required: false
         type: string
+      etl:
+        description: Run the cronjob and verify results?  [true|false]
+        required: false
+        type: boolean
+        default: false
       tag:
         description: Container tag; usually PR number
         required: false
@@ -19,15 +24,6 @@ on:
         description: Deployment target; usually PR number, test or prod
         required: false
         type: string
-      test:
-        description: Run Cypress tests after deployment?  [true|false]
-        required: false
-        type: string
-      triggers:
-        description: Paths to trigger a deploy; omit=always; e.g. ('backend/' 'frontend/')
-        required: false
-        type: string
-
       ### Usually a bad idea / not recommended
       timeout-minutes:
         description: 'Timeout minutes'
@@ -78,6 +74,8 @@ jobs:
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
+            -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
+            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
 
   deploy:
     name: Deploy
@@ -89,7 +87,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
-        name: [database, backend, fluentbit, frontend, oracle-api]
+        name: [database, backend, fluentbit, frontend, oracle-api, sync]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -128,6 +126,12 @@ jobs:
               ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
             triggers: ('oracle-api/')
             verification_path: "actuator/health"
+          - name: sync
+            file: sync/openshift.deploy.yml
+            overwrite: true
+            # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.RUN_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
+            # triggers: ('sync/')
+
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v2.3.0
         id: deploys
@@ -144,8 +148,51 @@ jobs:
             ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
             ${{ matrix.parameters }}
+          post_rollout: ${{ matrix.post_rollout }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path }}
 
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
+
+  verify:
+    name: Verify ETL
+    # if: inputs.etl == 'true' #&& needs.deploy.outputs.triggered == 'true'
+    environment: ${{ inputs.environment }}
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Override OpenShift version
+        env:
+          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
+        run: |
+          curl --silent ${{ env.OC }} | tar -xzvf - oc
+          oc version
+        working-directory: /usr/local/bin/
+
+      - name: Job
+        run: |
+          # Run and verify job
+
+          # Login
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ secrets.oc_namespace }} #Safeguard!
+
+          # Create job
+          CRONJOB=${{ github.event.repository.name }}-${{ inputs.target || github.event.number }}-sync
+          RUN_JOB=${CRONJOB}-${{ github.run_number }}
+          oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
+
+          # Follow
+          oc wait --for=jsonpath='{.status.failed}'=4 job/${RUN_JOB} --timeout=1m || true
+          oc logs -l job-name=${RUN_JOB} --tail=50 --follow
+
+          # Results and exit code
+          oc get job ${RUN_JOB}
+
+          if [ $(oc get job ${RUN_JOB} -o jsonpath='{.status.ready}') -eq 0 ]; then
+            echo "Job successful!"
+          else
+            echo "Job failed!"
+            exit 1
+          fi
