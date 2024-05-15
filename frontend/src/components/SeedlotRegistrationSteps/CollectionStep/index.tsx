@@ -34,11 +34,11 @@ import { calcVolume, isNumNotInRange } from './utils';
 
 import './styles.scss';
 
-type props = {
+type CollectionStepProps = {
   isReview?: boolean
 }
 
-const CollectionStep = ({ isReview }: props) => {
+const CollectionStep = ({ isReview }: CollectionStepProps) => {
   const {
     allStepData: { collectionStep: state },
     setStepData,

@@ -31,7 +31,11 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
 import './styles.scss';
 
-const InterimStep = () => {
+type InterimStepProps = {
+  isReview?: boolean
+}
+
+const InterimStep = ({ isReview }:InterimStepProps) => {
   const {
     allStepData: { interimStep: state },
     allStepData: { collectionStep: { collectorAgency } },
@@ -137,9 +141,16 @@ const InterimStep = () => {
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
       <Row className="interim-title-row">
-        <Column sm={4} md={8} lg={16}>
+        <Column className="section-title" sm={4} md={8} lg={16}>
           <h2>{pageTexts.interimTitleSection.title}</h2>
-          <Subtitle text={pageTexts.interimTitleSection.subtitle} />
+          {
+            !isReview
+              ? (
+                <Subtitle text={pageTexts.interimTitleSection.subtitle} />
+              )
+              : null
+          }
+
         </Column>
       </Row>
       <ApplicantAgencyFields
@@ -157,8 +168,8 @@ const InterimStep = () => {
           agency: OptionsInputType,
           locationCode: StringInputType
         ) => setAgencyAndCode(agency, locationCode, isDefault)}
-        readOnly={isFormSubmitted}
         isFormSubmitted={isFormSubmitted}
+        readOnly={isFormSubmitted && !isReview}
         maxInputColSize={6}
       />
       <Row className="interim-storage-row">
@@ -171,7 +182,7 @@ const InterimStep = () => {
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(true, selectedDate);
             }}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <DatePickerInput
               id="start-date-input"
@@ -195,7 +206,7 @@ const InterimStep = () => {
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(false, selectedDate);
             }}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <DatePickerInput
               id="end-date-input"
@@ -218,7 +229,7 @@ const InterimStep = () => {
             orientation="vertical"
             defaultSelected={state.facilityType.value}
             onChange={(e: string) => handleFacilityType(e)}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             {
               facilityTypesQuery.isFetching
@@ -250,7 +261,7 @@ const InterimStep = () => {
                   onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleOtherFacilityTypeInput(e.target.value);
                   }}
-                  readOnly={isFormSubmitted}
+                  readOnly={isFormSubmitted && !isReview}
                   enableCounter
                   maxCount={MAX_FACILITY_DESC_CHAR}
                 />
