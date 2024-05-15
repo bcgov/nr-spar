@@ -238,6 +238,7 @@ const ApplicantAgencyFields = ({
     const formatedCode = value.length ? formatLocationCode(value) : '';
     const updatedLocationCode = {
       ...locationCode,
+      value: formatedCode,
       isInvalid: false
     };
     setAgencyAndCode(isDefault, agency, updatedLocationCode);
