@@ -27,10 +27,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .click();
       cy.url().should('contains', '/register-a-class');
       // Enter the applicant agency name
-      cy.get('#applicant-info-combobox')
-        .click();
-      cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-        .click();
+      cy.get('#applicant-info-input')
+        .clear()
+        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+        .blur();
+      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -141,10 +142,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .click();
       cy.url().should('contains', '/register-a-class');
       // Enter the applicant agency name
-      cy.get('#applicant-info-combobox')
-        .click();
-      cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-        .click();
+      cy.get('#applicant-info-input')
+        .clear()
+        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+        .blur();
+      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -255,10 +257,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .click();
       cy.url().should('contains', '/register-a-class');
       // Enter the applicant agency name
-      cy.get('#applicant-info-combobox')
-        .click();
-      cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-        .click();
+      cy.get('#applicant-info-input')
+        .clear()
+        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+        .blur();
+      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -369,10 +372,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .click();
       cy.url().should('contains', '/register-a-class');
       // Enter the applicant agency name
-      cy.get('#applicant-info-combobox')
-        .click();
-      cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-        .click();
+      cy.get('#applicant-info-input')
+        .clear()
+        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+        .blur();
+      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -483,10 +487,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .click();
       cy.url().should('contains', '/register-a-class');
       // Enter the applicant agency name
-      cy.get('#applicant-info-combobox')
-        .click();
-      cy.contains(`.${prefix}--list-box__menu-item__option`, regData.agencyName)
-        .click();
+      cy.get('#applicant-info-input')
+        .clear()
+        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
+        .blur();
+      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
