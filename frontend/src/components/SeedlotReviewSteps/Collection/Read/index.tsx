@@ -7,7 +7,7 @@ import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
-import { getForestClientByNumber } from '../../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 import getConeCollectionMethod from '../../../../api-service/coneCollectionMethodAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
@@ -25,7 +25,7 @@ const CollectionReviewRead = () => {
   const agencyQuery = useQuery(
     {
       queryKey: ['forest-clients', clientNumber],
-      queryFn: () => getForestClientByNumber(clientNumber!),
+      queryFn: () => getForestClientByNumberOrAcronym(clientNumber!),
       enabled: !!clientNumber
     }
   );
