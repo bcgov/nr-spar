@@ -13,7 +13,7 @@ import {
   putAClassSeedlot, putAClassSeedlotProgress
 } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
-import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
@@ -208,7 +208,7 @@ const ContextContainerClassA = ({ children }: props) => {
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', clientNumber],
-    queryFn: () => getForestClientByNumber(clientNumber),
+    queryFn: () => getForestClientByNumberOrAcronym(clientNumber),
     enabled: seedlotQuery.isFetched && clientNumber !== '',
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
@@ -217,7 +217,7 @@ const ContextContainerClassA = ({ children }: props) => {
   useQueries({
     queries: clientNumbers.map((client) => ({
       queryKey: ['forest-clients', client],
-      queryFn: () => getForestClientByNumber(client),
+      queryFn: () => getForestClientByNumberOrAcronym(client),
       enabled: getAllSeedlotInfoQuery.isFetched,
       staleTime: THREE_HOURS,
       cacheTime: THREE_HALF_HOURS
@@ -226,8 +226,8 @@ const ContextContainerClassA = ({ children }: props) => {
 
   const getAgencyObj = (): MultiOptionsObj => ({
     code: forestClientQuery.data?.clientNumber ?? '',
-    description: forestClientQuery.data?.clientName ?? '',
-    label: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`
+    description: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`,
+    label: forestClientQuery.data?.acronym ?? ''
   });
 
   const getDefaultLocationCode = (): string => (seedlotQuery.data?.applicantLocationCode ?? '');

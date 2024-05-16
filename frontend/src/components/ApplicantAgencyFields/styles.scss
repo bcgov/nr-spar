@@ -8,54 +8,48 @@
 
   .agency-information-row {
     margin-bottom: 1.5rem;
-  }
 
-  .#{vars.$bcgov-prefix}--combo-box--readonly {
-    border-block-end: 0;
-
-    input[role=combobox] {
-      background-color: transparent;
-      padding-inline-end: 0;
-      --#{vars.$bcgov-prefix}-layout-density-padding-inline-local: 0;
-      border-block-end: 0;
-    }
-
-    button,
-    &+.#{vars.$bcgov-prefix}--form__helper-text {
+    .#{vars.$bcgov-prefix}--text-input__label-counter {
       display: none;
     }
-
-    &.#{vars.$bcgov-prefix}--list-box--invalid input[role=combobox].#{vars.$bcgov-prefix}--text-input {
-      outline-offset: 0;
-    }
   }
 
+  .loading-input-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+
+    .input-loading-tooltip {
+      position: absolute;
+      right: 0.3125rem;
+      top: calc(50% - 0.8125rem);
+    }
+
+    button.tooltip-trigger {
+      background: none;
+      color: inherit;
+      border: none;
+      padding: 0;
+      font: inherit;
+      outline: inherit;
+    }
+
+    .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
+      input {
+        background-color: transparent;
+        padding: 0;
+        border-block-end: 0;
+      }
+    }
+  }
 
   .#{vars.$bcgov-prefix}--text-input:disabled {
     border-block-end: 0.0625rem solid var(--#{vars.$bcgov-prefix}-border-subtle);
   }
 
-  .#{vars.$bcgov-prefix}--combo-box {
-
-    li,
-    .#{vars.$bcgov-prefix}--list-box__menu-item__option {
-      white-space: normal;
-      block-size: auto;
-    }
-  }
-
-
-  .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
-    input[type=number] {
-      background-color: transparent;
-      padding: 0;
-      border-block-end: 0;
-    }
-  }
 
   .location-code-input {
-    padding-top: 0.1rem;
-
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
       -webkit-appearance: none;
@@ -64,6 +58,14 @@
 
     #agency-number-input {
       @include type.type-style('code-02');
+    }
+  }
+
+  .applicant-error-row {
+    .applicant-error-notification {
+      max-inline-size: none;
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
     }
   }
 

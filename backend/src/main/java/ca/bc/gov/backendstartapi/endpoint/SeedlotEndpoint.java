@@ -1,12 +1,11 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
@@ -164,7 +163,7 @@ public class SeedlotEndpoint {
    *
    * @param createDto A {@link SeedlotCreateDto} containig all required field to get a new
    *     registration started.
-   * @return A {@link SeedlotCreateResponseDto} with all created values.
+   * @return A {@link SeedlotStatusResponseDto} with all created values.
    */
   @PostMapping(consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @Operation(
@@ -195,14 +194,14 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public ResponseEntity<SeedlotCreateResponseDto> createSeedlot(
+  public ResponseEntity<SeedlotStatusResponseDto> createSeedlot(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing minimum required fields to create a seedlot",
               required = true)
           @RequestBody
           @Valid
           SeedlotCreateDto createDto) {
-    SeedlotCreateResponseDto response = seedlotService.createSeedlot(createDto);
+    SeedlotStatusResponseDto response = seedlotService.createSeedlot(createDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
@@ -389,11 +388,11 @@ public class SeedlotEndpoint {
    * Saves the Seedlot submit form once submitted on step 6.
    *
    * @param form A {@link SeedlotFormSubmissionDto} containing all the form information
-   * @return A {@link SeedlotCreateResponseDto} containing the seedlot number and status
+   * @return A {@link SeedlotStatusResponseDto} containing the seedlot number and status
    */
-  @PutMapping("/{seedlotNumber}/a-class-form-submission")
+  @PutMapping("/{seedlotNumber}/a-class-submission")
   @Operation(
-      summary = "Saves the Seedlot form when submitted or edited",
+      summary = "Saves the Seedlot form when submitted",
       description =
           "This API is responsible for receiving the entire seedlot form, once submitted or"
               + " edited.")
@@ -415,10 +414,14 @@ public class SeedlotEndpoint {
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Data conflict while saving, usually caused by existing rows in table",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  @RoleAccessConfig("SPAR_TSC_ADMIN")
-  public ResponseEntity<SeedlotCreateResponseDto> submitSeedlotForm(
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public ResponseEntity<SeedlotStatusResponseDto> submitSeedlotForm(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -428,7 +431,8 @@ public class SeedlotEndpoint {
           @PathVariable
           String seedlotNumber,
       @RequestBody SeedlotFormSubmissionDto form) {
-    SeedlotCreateResponseDto createDto = seedlotService.submitSeedlotForm(seedlotNumber, form);
+    SeedlotStatusResponseDto createDto =
+        seedlotService.updateSeedlotWithForm(seedlotNumber, form, false, "SUB");
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 
@@ -532,44 +536,5 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
 
     return saveSeedlotFormService.getFormStatusClassA(seedlotNumber);
-  }
-
-  /**
-   * Get all the seed plan zone information given a seedlot number.
-   *
-   * @param seedlotNumber the Seedlot id
-   * @return A list of {@link SeedPlanZoneDto} containing all records.
-   */
-  @GetMapping("/{seedlotNumber}/seed-plan-zone-data")
-  @Operation(
-      summary = "Get SPZ (Seed Plan Zone) data given a seedlot number.",
-      description = "Fetches all the seed plan zone information to a particular seedlot number")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description =
-                "A list of `SeedPlanZoneDto` containing all the SPZ information if found."),
-        @ApiResponse(
-            responseCode = "404",
-            description = "If no seedlot record found, or if no Orchard Seedlot record found.",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Access token is missing or invalid",
-            content = @Content(schema = @Schema(implementation = Void.class)))
-      })
-  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<SeedPlanZoneDto> getSeedPlanZoneData(
-      @Parameter(
-              name = "seedlotNumber",
-              in = ParameterIn.PATH,
-              description = "Seedlot number",
-              required = true,
-              schema = @Schema(type = "integer", format = "int64"))
-          @PathVariable
-          @NonNull
-          String seedlotNumber) {
-    return seedlotService.getSeedPlanZoneData(seedlotNumber);
   }
 }

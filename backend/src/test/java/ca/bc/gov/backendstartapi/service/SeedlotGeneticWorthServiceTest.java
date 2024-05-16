@@ -77,7 +77,7 @@ class SeedlotGeneticWorthServiceTest {
     SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
 
     List<SeedlotGeneticWorth> list =
-        seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, List.of(formStep5));
+        seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, List.of(formStep5), false);
 
     Assertions.assertFalse(list.isEmpty());
     Assertions.assertEquals(1, list.size());
@@ -99,7 +99,8 @@ class SeedlotGeneticWorthServiceTest {
     when(seedlotGeneticWorthRepository.saveAllAndFlush(any())).thenReturn(List.of(sgw));
 
     List<SeedlotGeneticWorth> list =
-        seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, List.of(createFormDto(4025)));
+        seedlotGeneticWorthService.saveSeedlotFormStep5(
+            seedlot, List.of(createFormDto(4025)), false);
 
     Assertions.assertTrue(list.isEmpty());
   }

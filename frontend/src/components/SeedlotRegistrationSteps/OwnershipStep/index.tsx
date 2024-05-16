@@ -9,7 +9,7 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
@@ -127,7 +127,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     queries: state.map((owner) => owner.ownerAgency.value.code).map(
       (client) => ({
         queryKey: ['forest-clients', client],
-        queryFn: () => getForestClientByNumber(client),
+        queryFn: () => getForestClientByNumberOrAcronym(client),
         enabled: isFormSubmitted,
         staleTime: THREE_HOURS,
         cacheTime: THREE_HALF_HOURS

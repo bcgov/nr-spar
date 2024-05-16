@@ -1,13 +1,14 @@
 package ca.bc.gov.backendstartapi.repository;
 
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUse;
 import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpu;
-import java.util.Optional;
+import ca.bc.gov.backendstartapi.entity.idclass.TestedPtAreaOfUseSpuId;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/** This class holds methods for retrieving {@link TestedPtAreaOfUseSpu} data from the database. */
+/** This class holds methods for retrieving {@link TestedPtAreaOfUse} data from the database. */
 public interface TestedPtAreaOfUseSpuRepository
-    extends JpaRepository<TestedPtAreaOfUseSpu, Integer> {
+    extends JpaRepository<TestedPtAreaOfUseSpu, TestedPtAreaOfUseSpuId> {
 
-  Optional<TestedPtAreaOfUseSpu> findByTestedPtAreaOfUseIdAndSeedPlanUnitId(
-      Integer testedPtAreaOfUseId, Integer seedPlanUnitId);
+  List<TestedPtAreaOfUseSpu> findByTestedPtAreaOfUseId(Integer testedPtAreaOfUseId);
 }

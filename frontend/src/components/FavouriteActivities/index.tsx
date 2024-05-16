@@ -9,7 +9,7 @@ import {
 } from '@carbon/react';
 import { Information } from '@carbon/icons-react';
 
-import Card from '../Card/FavouriteCard';
+import FavouriteCard from '../Card/FavouriteCard';
 import EmptySection from '../EmptySection';
 import Subtitle from '../Subtitle';
 import { getFavAct } from '../../api-service/favouriteActivitiesAPI';
@@ -65,11 +65,10 @@ const FavouriteActivities = () => {
                     description="You can favourite your most used
                     activities by clicking on the heart icon inside each page"
                   />
-                ) : favActQuery.data.map((favObject, index) => (
-                  <Card
+                ) : favActQuery.data.map((favObject) => (
+                  <FavouriteCard
                     key={favObject.type}
                     favObject={favObject}
-                    index={index}
                   />
                 ))
             )

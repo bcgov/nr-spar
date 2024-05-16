@@ -1,24 +1,26 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SpzDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
 import ca.bc.gov.backendstartapi.entity.SeedPlanUnit;
-import ca.bc.gov.backendstartapi.entity.SeedPlanZone;
 import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUse;
 import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpu;
+import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpz;
 import ca.bc.gov.backendstartapi.entity.VegetationCode;
 import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
-import ca.bc.gov.backendstartapi.exception.TestedPtAreaOfUseException;
+import ca.bc.gov.backendstartapi.exception.TestedAreaOfUseNotFound;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
@@ -26,10 +28,12 @@ import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
 import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpuRepository;
+import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
 import ca.bc.gov.backendstartapi.util.ModelMapper;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,11 +54,11 @@ public class OrchardService {
 
   private TestedPtAreaofUseRepository testedPtAreaofUseRepository;
 
-  private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
+  private TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
 
   private SeedPlanUnitRepository seedPlanUnitRepository;
 
-  private SeedPlanZoneRepository seedPlanZoneRepository;
+  private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
 
   OrchardService(
       OrchardRepository orchardRepository,
@@ -62,17 +66,18 @@ public class OrchardService {
       ParentTreeRepository parentTreeRepository,
       ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
       TestedPtAreaofUseRepository testedPtAreaofUseRepository,
-      TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository,
+      TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository,
       SeedPlanUnitRepository seedPlanUnitRepository,
+      TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository,
       SeedPlanZoneRepository seedPlanZoneRepository) {
     this.orchardRepository = orchardRepository;
     this.parentTreeOrchardRepository = parentTreeOrchardRepository;
     this.parentTreeRepository = parentTreeRepository;
     this.parentTreeGeneticQualityRepository = parentTreeGeneticQualityRepository;
     this.testedPtAreaofUseRepository = testedPtAreaofUseRepository;
-    this.testedPtAreaOfUseSpuRepository = testedPtAreaOfUseSpuRepository;
+    this.testedPtAreaOfUseSpzRepository = testedPtAreaOfUseSpzRepository;
     this.seedPlanUnitRepository = seedPlanUnitRepository;
-    this.seedPlanZoneRepository = seedPlanZoneRepository;
+    this.testedPtAreaOfUseSpuRepository = testedPtAreaOfUseSpuRepository;
   }
 
   /**
@@ -336,71 +341,150 @@ public class OrchardService {
   }
 
   /**
-   * Get SPZ information given a list of SPU Ids.
+   * Get SPZ and SPU geographical information given a SPU id.
    *
-   * @param spuIds A list of SPU ID to be fetched.
-   * @return A List of {@link SeedPlanZoneDto}
+   * @param spuId A SPU id.
+   * @return A {@link SpzSpuGeoDto}
    */
-  public List<SeedPlanZoneDto> getSpzInformationBySpu(List<Integer> spuIds) {
-    SparLog.info("Getting SPZ information for SPU IDs {}", spuIds);
+  public AreaOfUseDto calcAreaOfUseData(Integer spuId) {
+    SparLog.info("Getting area of use data for SPU ID {}", spuId);
 
-    List<TestedPtAreaOfUse> testedList =
-        testedPtAreaofUseRepository.findAllBySeedPlanUnitIdIn(spuIds);
+    AreaOfUseDto result = new AreaOfUseDto();
 
-    if (testedList.isEmpty()) {
-      SparLog.info("No testes parent tree area of use found!");
-      return List.of();
+    // Step 1: Get tested_pt_area_of_use_id by spuId
+    Integer testedPtAreaOfUseId = getTestedPtAreaOfUseId(spuId);
+    SparLog.info(
+        "Tested parent tree area of used ID {} found with spu ID {}", testedPtAreaOfUseId, spuId);
+
+    // Step 2: Get additional SPUs using the tested_pt_area_of_use_id from the
+    // tested_pt_area_of_use_spu table
+    List<Integer> spuList =
+        testedPtAreaOfUseSpuRepository.findByTestedPtAreaOfUseId(testedPtAreaOfUseId).stream()
+            .map(TestedPtAreaOfUseSpu::getSeedPlanUnitId)
+            .toList();
+    SparLog.info(
+        "{} spu found with tested parent tree area of used ID {}",
+        spuList.size(),
+        testedPtAreaOfUseId);
+
+    // Step 3: Get area of use spu geo data
+    result.setAreaOfUseSpuGeoDto(setCalculatedSpuGeoData(spuList));
+    SparLog.info("SPU min/max data calculated and set");
+
+    // Step 4: Get SPZs under a testedPtAreaOfUseId
+    List<TestedPtAreaOfUseSpz> testedPtAoUspzs =
+        testedPtAreaOfUseSpzRepository.findAllByTestedPtAreaOfUse_testedPtAreaOfUseId(
+            testedPtAreaOfUseId);
+    SparLog.info(
+        "{} spz found under tested parent tree area of use id {}",
+        testedPtAoUspzs.size(),
+        testedPtAreaOfUseId);
+
+    List<SpzDto> spzList =
+        testedPtAoUspzs.stream()
+            .map(
+                testedPtSpz -> {
+                  SpzDto spzToAdd = new SpzDto();
+                  spzToAdd.setCode(testedPtSpz.getSeedPlanZoneCode().getSpzCode());
+                  spzToAdd.setDescription(testedPtSpz.getSeedPlanZoneCode().getSpzDescription());
+                  spzToAdd.setIsPrimary(testedPtSpz.getIsPrimary());
+                  return spzToAdd;
+                })
+            .toList();
+
+    result.setSpzList(spzList);
+    SparLog.info("SPZ list set in area of use DTO.");
+
+    return result;
+  }
+
+  private Integer getTestedPtAreaOfUseId(Integer spuId) {
+    List<TestedPtAreaOfUse> testedAoU = testedPtAreaofUseRepository.findAllBySeedPlanUnitId(spuId);
+    if (testedAoU.isEmpty()) {
+      throw new TestedAreaOfUseNotFound();
     }
+    // Assuming 1-to-1 relation ship between TestedPtAreaOfUseId and SpuId
+    return testedAoU.get(0).getTestedPtAreaOfUseId();
+  }
 
-    List<SeedPlanZoneDto> seedPlanZoneDtoList = new ArrayList<>();
-    for (TestedPtAreaOfUse testedEntity : testedList) {
-      final Integer spuId = testedEntity.getSeedPlanUnitId();
-      final Integer testedPtAreaId = testedEntity.getTestedPtAreaOfUseId();
+  private AreaOfUseSpuGeoDto setCalculatedSpuGeoData(List<Integer> spuIds) {
+    List<SeedPlanUnit> spuEntityList = seedPlanUnitRepository.findBySeedPlanUnitIdIn(spuIds);
 
-      SparLog.info("Tested PT area of use id {} found for spu id {}", testedPtAreaId, spuId);
+    AreaOfUseSpuGeoDto areaOfUseSpuGeoDto = new AreaOfUseSpuGeoDto();
 
-      Optional<TestedPtAreaOfUseSpu> testedSpu =
-          testedPtAreaOfUseSpuRepository.findByTestedPtAreaOfUseIdAndSeedPlanUnitId(
-              testedPtAreaId, spuId);
+    // Max Elevation
+    // Filter out null values first so it can be used with the Stream.max()
+    List<SeedPlanUnit> filteredMaxElevSpu =
+        spuEntityList.stream().filter(spu -> spu.getElevationMax() != null).toList();
+    Integer maxElevation =
+        filteredMaxElevSpu.size() > 0
+            ? filteredMaxElevSpu.stream()
+                .max(Comparator.comparing(SeedPlanUnit::getElevationMax))
+                .get()
+                .getElevationMax()
+            : null;
+    areaOfUseSpuGeoDto.setElevationMax(maxElevation);
 
-      if (testedSpu.isEmpty()) {
-        SparLog.warn(
-            "Broken relationship between TESTED_PT_AREA_OF_USE_SPU and TESTED_PT_AREA_OF_USE for"
-                + " SPU id {}",
-            spuId);
-        throw new TestedPtAreaOfUseException();
-      }
+    // Min Elevation
+    List<SeedPlanUnit> filteredMinElevSpu =
+        spuEntityList.stream().filter(spu -> spu.getElevationMin() != null).toList();
+    Integer minElevation =
+        filteredMinElevSpu.size() > 0
+            ? filteredMinElevSpu.stream()
+                .min(Comparator.comparing(SeedPlanUnit::getElevationMin))
+                .get()
+                .getElevationMin()
+            : null;
+    areaOfUseSpuGeoDto.setElevationMin(minElevation);
 
-      SeedPlanZoneDto responseDto = new SeedPlanZoneDto();
-      responseDto.setSeedPlanUnitId(spuId);
+    // Max Lat Degree
+    List<SeedPlanUnit> filteredMaxLatDegSpu =
+        spuEntityList.stream().filter(spu -> spu.getLatitudeDegreesMax() != null).toList();
+    Integer maxLatDeg =
+        filteredMaxLatDegSpu.size() > 0
+            ? filteredMaxLatDegSpu.stream()
+                .max(Comparator.comparing(SeedPlanUnit::getLatitudeDegreesMax))
+                .get()
+                .getLatitudeDegreesMax()
+            : null;
+    areaOfUseSpuGeoDto.setLatitudeDegreesMax(maxLatDeg);
 
-      Optional<SeedPlanUnit> seedPlanUnitOp = seedPlanUnitRepository.findById(spuId);
-      if (seedPlanUnitOp.isEmpty()) {
-        SparLog.warn("No Seed Plan Unit record found for spu id {}", spuId);
-      } else {
-        SparLog.info("Seed Plan Unit record found for SPU id {}", spuId);
+    // Min Lat Degree
+    List<SeedPlanUnit> filteredMinLatDegSpu =
+        spuEntityList.stream().filter(spu -> spu.getLatitudeDegreesMin() != null).toList();
+    Integer minLatDeg =
+        filteredMinLatDegSpu.size() > 0
+            ? filteredMinLatDegSpu.stream()
+                .min(Comparator.comparing(SeedPlanUnit::getLatitudeDegreesMin))
+                .get()
+                .getLatitudeDegreesMin()
+            : null;
+    areaOfUseSpuGeoDto.setLatitudeDegreesMin(minLatDeg);
 
-        responseDto.setSeedPlanZoneId(seedPlanUnitOp.get().getSeedPlanZoneId());
-        responseDto.setElevationMin(seedPlanUnitOp.get().getElevationMin());
-        responseDto.setElevationMax(seedPlanUnitOp.get().getElevationMax());
+    // Max Lat Minute
+    List<SeedPlanUnit> filteredMaxLatMinuteSpu =
+        spuEntityList.stream().filter(spu -> spu.getLatitudeMinutesMax() != null).toList();
+    Integer maxLatMinute =
+        filteredMaxLatMinuteSpu.size() > 0
+            ? filteredMaxLatMinuteSpu.stream()
+                .max(Comparator.comparing(SeedPlanUnit::getLatitudeMinutesMax))
+                .get()
+                .getLatitudeMinutesMax()
+            : null;
+    areaOfUseSpuGeoDto.setLatitudeMinutesMax(maxLatMinute);
 
-        final Integer spzId = seedPlanUnitOp.get().getSeedPlanZoneId();
+    // Min Lat Minute
+    List<SeedPlanUnit> filteredMinLatMiunteSpu =
+        spuEntityList.stream().filter(spu -> spu.getLatitudeMinutesMin() != null).toList();
+    Integer minLatMinute =
+        filteredMinLatMiunteSpu.size() > 0
+            ? filteredMinLatMiunteSpu.stream()
+                .min(Comparator.comparing(SeedPlanUnit::getLatitudeMinutesMin))
+                .get()
+                .getLatitudeMinutesMin()
+            : null;
+    areaOfUseSpuGeoDto.setLatitudeMinutesMin(minLatMinute);
 
-        Optional<SeedPlanZone> seedPlanZoneOp = seedPlanZoneRepository.findById(spzId);
-        if (seedPlanZoneOp.isEmpty()) {
-          SparLog.warn("No Seed Plan Zone record found for SPZ id {}", spzId);
-        } else {
-          SparLog.info("Seed Plan Zone record found for SPZ id {}", spzId);
-
-          responseDto.setGeneticClassCode(seedPlanZoneOp.get().getGeneticClassCode());
-          responseDto.setSeedPlanZoneCode(seedPlanZoneOp.get().getSeedPlanZoneCode());
-          responseDto.setVegetationCode(seedPlanZoneOp.get().getVegetationCode());
-        }
-      }
-
-      seedPlanZoneDtoList.add(responseDto);
-    }
-
-    return seedPlanZoneDtoList;
+    return areaOfUseSpuGeoDto;
   }
 }

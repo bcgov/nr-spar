@@ -3,7 +3,6 @@ package ca.bc.gov.backendstartapi.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.List;
 
 /** This record represents the seedlot form step 4. */
 @Schema(description = "Seedlot orchard information. Form step 4")
@@ -11,12 +10,19 @@ public record SeedlotFormOrchardDto(
     @Schema(
             description =
                 """
-              The unique number (key) assigned to a quantity of seed of a particular species and
-              quality from a given location collected at a given time.
+              The primary Orchard ID selected by user.
               """,
-            example = "[\"125\", \"129\"]")
+            example = "125")
         @NotNull
-        List<String> orchardsId,
+        String primaryOrchardId,
+    @Schema(
+            description =
+                """
+              The secondary Orchard ID selected by user.
+              """,
+            example = "129",
+            nullable = true)
+        String secondaryOrchardId,
     @Schema(
             description =
                 """
