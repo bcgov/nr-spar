@@ -491,7 +491,8 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .clear()
         .type(regData.agencyAcronym, { delay: TYPE_DELAY })
         .blur();
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);      // Enter the applicant agency number
+      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+      // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
         .type(regData.agencyNumber, { delay: TYPE_DELAY });
