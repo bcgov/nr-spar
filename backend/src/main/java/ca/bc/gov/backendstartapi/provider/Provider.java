@@ -53,8 +53,8 @@ public interface Provider {
     return List.of();
   }
 
-  default AreaOfUseDto getAreaOfUseData(Integer spuId) {
-    return null;
+  default Optional<AreaOfUseDto> getAreaOfUseData(Integer spuId) {
+    return Optional.empty();
   }
 
   // Common methods

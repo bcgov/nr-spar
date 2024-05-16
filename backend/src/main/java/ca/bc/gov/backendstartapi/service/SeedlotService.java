@@ -39,6 +39,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
+import ca.bc.gov.backendstartapi.exception.OracleApiProviderException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
@@ -699,7 +700,10 @@ public class SeedlotService {
             .findSpuIdByOrchardWithActive(primaryOrchardId, true)
             .orElseThrow(NoSpuForOrchardException::new);
     Integer activeSpuId = activeSpuEntity.getSeedPlanningUnitId();
-    AreaOfUseDto areaOfUseDto = oracleApiProvider.getAreaOfUseData(activeSpuId);
+    AreaOfUseDto areaOfUseDto =
+        oracleApiProvider
+            .getAreaOfUseData(activeSpuId)
+            .orElseThrow(OracleApiProviderException::new);
 
     // Elevation
     seedlot.setElevationMax(areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMax());

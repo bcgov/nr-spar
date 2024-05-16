@@ -448,7 +448,7 @@ class SeedlotFormPutTest {
     List<SpzDto> spzList = List.of(spzDto1, spzDto2);
     areaOfUseDto.setSpzList(spzList);
 
-    when(oracleApiProvider.getAreaOfUseData(activeSpuId)).thenReturn(areaOfUseDto);
+    when(oracleApiProvider.getAreaOfUseData(activeSpuId)).thenReturn(Optional.of(areaOfUseDto));
 
     Optional<GeneticClassEntity> genClassOptional = Optional.of(new GeneticClassEntity());
     when(geneticClassRepository.findById("A")).thenReturn(genClassOptional);

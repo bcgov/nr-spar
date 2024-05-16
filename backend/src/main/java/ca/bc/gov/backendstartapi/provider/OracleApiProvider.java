@@ -224,7 +224,7 @@ public class OracleApiProvider implements Provider {
    * @return An {@link List} of {@link OrchardDto}
    */
   @Override
-  public AreaOfUseDto getAreaOfUseData(Integer spuId) {
+  public Optional<AreaOfUseDto> getAreaOfUseData(Integer spuId) {
     String oracleApiUrl = String.format("%s/api/orchards/area-of-use/spu/{spuId}", rootUri);
 
     SparLog.info("Starting {} - {} request to {}", PROVIDER, "getAreaOfUseData", oracleApiUrl);
@@ -238,12 +238,12 @@ public class OracleApiProvider implements Provider {
               new ParameterizedTypeReference<AreaOfUseDto>() {},
               createParamsMap("spuId", spuId.toString()));
       SparLog.info("GET orchards by vegCode from oracle - Success response!");
-      return areaOfUseRes.getBody();
+      return Optional.of(areaOfUseRes.getBody());
     } catch (HttpClientErrorException httpExc) {
       SparLog.error(
           "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
     }
 
-    return null;
+    return Optional.empty();
   }
 }
