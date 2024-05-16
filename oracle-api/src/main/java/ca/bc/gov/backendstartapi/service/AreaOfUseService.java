@@ -16,10 +16,16 @@ public class AreaOfUseService {
 
   private final SeedPlanZoneCodeRepository seedPlanZoneCodeRepository;
 
+  /**
+   * Find all spz under tested parent tree area of use.
+   *
+   * @return a list of {@link SpzDto}
+   */
   public List<SpzDto> getAllSpz() {
     List<String> spzCodeList = testedPtAreaOfUseSpzRepository.findAllDistinctSpz();
 
-    List<SeedPlanZoneCode> spzCodeEntityList = seedPlanZoneCodeRepository.findBySpzCodeIn(spzCodeList);
+    List<SeedPlanZoneCode> spzCodeEntityList =
+        seedPlanZoneCodeRepository.findBySpzCodeIn(spzCodeList);
 
     return spzCodeEntityList.stream()
         .map(spzEntity -> new SpzDto(spzEntity.getSpzCode(), spzEntity.getSpzDescription(), null))
