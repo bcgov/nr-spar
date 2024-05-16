@@ -1,11 +1,11 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.OrchardService;
@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -193,30 +192,28 @@ public class OrchardEndpoint {
   }
 
   /**
-   * Gets all SPZ information given a list of SPU IDs.
+   * Get SPZ and SPU-geospatial information.
    *
-   * @param spuIds A list of SPU ID to be fetched.
-   * @return A list of {@link SeedPlanZoneDto} containing the results or an empty list.
+   * @param spuId A seed plan unit id.
+   * @return A {@link SpzSpuGeoDto} containing the results.
    */
-  @GetMapping(
-      path = "/spz-information-by-spu-ids/{spuIds}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/area-of-use/spu/{spuId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
-      summary = "Get SPZ (Seed Plan Zone) information given a list of SPU IDs",
-      description = "Gets all SPZ information for one or more SPU IDs.",
+      summary = "Get area of use information given an SPU id",
+      description = "Fetch geospatial data for the SPU along with a list of SPZ information.",
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "List with found records or an empty list"),
+            description = "A data object containing information found."),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<SeedPlanZoneDto> getSpzInformation(
-      @Parameter(description = "The SPU (Seed Planning Unit) ID list") @PathVariable("spuIds")
-          Integer[] spuIds) {
-    return orchardService.getSpzInformationBySpu(Arrays.asList(spuIds));
+  public AreaOfUseDto getAreaOfUseData(
+      @Parameter(description = "The SPU (Seed Planning Unit) ID") @PathVariable("spuId")
+          Integer spuId) {
+    return orchardService.calcAreaOfUseData(spuId);
   }
 }

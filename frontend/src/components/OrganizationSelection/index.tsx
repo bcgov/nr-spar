@@ -9,7 +9,7 @@ import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import AuthContext from '../../contexts/AuthContext';
-import { getForestClientByNumber } from '../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 import { UserClientRolesType } from '../../types/UserRoleType';
@@ -40,7 +40,7 @@ const OrganizationSelection = ({ simpleView }: RoleSelectionProps) => {
       // be we need the 'role' here to distinguish the data is for roles only,
       // used later to retrieve data related roles only.
       queryKey: ['role', 'forest-clients', clientRole.clientId],
-      queryFn: () => getForestClientByNumber(clientRole.clientId),
+      queryFn: () => getForestClientByNumberOrAcronym(clientRole.clientId),
       staleTime: THREE_HOURS,
       cacheTime: THREE_HALF_HOURS,
       refetchOnReconnect: false

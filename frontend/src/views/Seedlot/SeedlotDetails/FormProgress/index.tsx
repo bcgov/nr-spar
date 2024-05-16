@@ -57,7 +57,7 @@ const FormProgress = (
   });
 
   useEffect(() => {
-    if (formProgressStatusQuery.status === 'success') {
+    if (formProgressStatusQuery.status === 'success' && (seedlotStatusCode === 'PND' || seedlotStatusCode === 'INC')) {
       const retrievedProgress = formProgressStatusQuery.data
         .data as unknown as ProgressIndicatorConfig;
       setProgressStatus(retrievedProgress);

@@ -13,6 +13,7 @@ import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixGeneticQualityId;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeSmpMixRepository;
@@ -60,7 +61,9 @@ public class SeedlotParentTreeService {
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
   public List<SeedlotParentTree> saveSeedlotFormStep5(
-      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
+      boolean canDelete) {
     SparLog.info("Saving SeedlotParentTree for seedlot number {}", seedlot.getId());
 
     List<SeedlotParentTreeGeneticQuality> sptgqList =
@@ -68,7 +71,7 @@ public class SeedlotParentTreeService {
             seedlot.getId());
 
     // Delete Foreign Keys Dependencies in SeedlotParentTreeGeneticQuality
-    if (!sptgqList.isEmpty()) {
+    if (!sptgqList.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SeedlotParentTreeGeneticQuality table for seedlot"
               + " number {}",
@@ -79,6 +82,10 @@ public class SeedlotParentTreeService {
           sptgqList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
       seedlotParentTreeGeneticQualityRepository.deleteAllById(existingSeedlotPtGenQltyIdList);
+    } else if (!sptgqList.isEmpty() && !canDelete) {
+      SparLog.info(
+          "Update seedlot {} genetic quality data failed due to conflict.", seedlot.getId());
+      throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     // Delete Foreign Keys Dependencies in SmpMixGeneticQuality
@@ -95,6 +102,11 @@ public class SeedlotParentTreeService {
           smpMixGenQltyList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
       smpMixGeneticQualityRepository.deleteAllById(existingSmpMixGenQltyIdList);
+    } else if (!smpMixGenQltyList.isEmpty() && !canDelete) {
+      SparLog.info(
+          "Update seedlot {} smp mix genetic quality data failed due to conflict.",
+          seedlot.getId());
+      throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     // Delete Foreign Keys Dependencies in SmpMix
@@ -116,6 +128,9 @@ public class SeedlotParentTreeService {
       }
 
       smpMixRepository.deleteAllById(smpMixIdsToRemove);
+    } else if (!smpMixs.isEmpty() && !canDelete) {
+      SparLog.info("Update seedlot {} smp mix data failed due to conflict.", seedlot.getId());
+      throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     // Delete Foreign Keys Dependencies in SeedlotParentTreeSmpMix
@@ -132,6 +147,10 @@ public class SeedlotParentTreeService {
           sptsmList.stream().map(x -> x.getId()).collect(Collectors.toList());
 
       seedlotParentTreeSmpMixRepository.deleteAllById(sptsmExistingList);
+    } else if (!sptsmList.isEmpty() && !canDelete) {
+      SparLog.info(
+          "Update seedlot {} parent tree smp mix data failed due to conflict.", seedlot.getId());
+      throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     List<SeedlotParentTree> sptList =
@@ -152,6 +171,9 @@ public class SeedlotParentTreeService {
       }
 
       seedlotParentTreeRepository.deleteAllById(idsToDelete);
+    } else if (!sptList.isEmpty() && !canDelete) {
+      SparLog.info("Update seedlot {} parent tree data failed due to conflict.", seedlot.getId());
+      throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     return addSeedlotParentTree(seedlot, seedlotFormParentTreeDtoList);

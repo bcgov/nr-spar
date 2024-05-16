@@ -24,7 +24,7 @@ parameters:
     value: nr-spar
   - name: TEST_MODE
     description: "Run in test mode"
-    value: "1"
+    value: "0"
 
   ### Usually a bad idea - not recommended
   - name: CRON_MINUTES
@@ -78,7 +78,7 @@ objects:
                 - name: ${REPO}-${ZONE}
                   image: "${REGISTRY}/${ORG}/${REPO}/${APP}:${TAG}"
                   env:
-                    - name: test_mode
+                    - name: TEST_MODE
                       value: "${TEST_MODE}"
                     - name: EXECUTION_ID
                       value: "${EXECUTION_ID}"

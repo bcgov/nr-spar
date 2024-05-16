@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.locationtech.jts.geom.Point;
 
 /** A registered seedlot. */
 @Entity
@@ -335,6 +336,9 @@ public class Seedlot implements Serializable {
 
   @Column(name = "approved_userid")
   private String approvedUserId;
+
+  @Column(name = "mean_geom")
+  private Point meanGeom;
 
   // end geographic
 
