@@ -1,8 +1,8 @@
 name: PR Validate
 
 on:
-  # pull_request:
-  #   types: [edited, opened, synchronize, reopened, ready_for_review]
+  pull_request:
+    types: [edited, opened, synchronize, reopened, ready_for_review]
 
 concurrency:
   group: ${{ github.workflow }}-edit-${{ github.event.number }}
