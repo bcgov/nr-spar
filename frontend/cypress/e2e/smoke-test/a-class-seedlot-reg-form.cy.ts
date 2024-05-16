@@ -20,6 +20,14 @@ describe('My seedlots page', () => {
         seedlotNum = $seedlot.text();
         cy.get(`#seedlot-table-cell-${seedlotNum}-seedlotSpecies`)
           .click();
+        cy.url().should('contains', `/seedlots/details/${seedlotNum}`);
       });
+  });
+
+  it('has edit seedlot form button', () => {
+    cy.get('.detail-section-grid')
+      .find(`.${prefix}--col`)
+      .children('button.section-btn')
+      .should('have.text', 'Edit seedlot form');
   });
 });
