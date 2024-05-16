@@ -130,7 +130,8 @@ export const emptyInterimStep: InterimFormSubmitType = {
 };
 
 export const emptyOrchardStep: OrchardFormSubmitType = {
-  orchardsId: [],
+  primaryOrchardId: '',
+  secondaryOrchardId: null,
   femaleGameticMthdCode: '',
   maleGameticMthdCode: '',
   controlledCrossInd: false,

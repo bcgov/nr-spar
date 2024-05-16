@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodId;
 import ca.bc.gov.backendstartapi.exception.ConeCollectionMethodNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
@@ -35,7 +36,8 @@ public class SeedlotCollectionMethodService {
    * @param seedlot The {@link Seedlot} related
    * @param formStep1 The {@link SeedlotFormCollectionDto} to be saved
    */
-  public void saveSeedlotFormStep1(Seedlot seedlot, SeedlotFormCollectionDto formStep1) {
+  public void saveSeedlotFormStep1(
+      Seedlot seedlot, SeedlotFormCollectionDto formStep1, boolean canDelete) {
     SparLog.info("Saving Seedlot Form Step 1-Collection for seedlot number {}", seedlot.getId());
 
     seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
@@ -55,7 +57,7 @@ public class SeedlotCollectionMethodService {
     List<SeedlotCollectionMethod> seedlotCollectionList =
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
 
-    if (!seedlotCollectionList.isEmpty()) {
+    if (!seedlotCollectionList.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SeedlotCollectionMethod table for seedlot number {}",
           seedlotCollectionList.size(),
@@ -71,6 +73,9 @@ public class SeedlotCollectionMethodService {
       }
 
       seedlotCollectionMethodRepository.deleteAllById(idsToDelete);
+    } else if (!seedlotCollectionList.isEmpty() && !canDelete) {
+      SparLog.info("Update seedlot {} collection data failed due to conflict.", seedlot.getId());
+      throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());

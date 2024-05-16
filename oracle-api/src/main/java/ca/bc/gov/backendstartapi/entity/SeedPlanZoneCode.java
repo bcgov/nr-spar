@@ -9,18 +9,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/** This class represents a Tested Parent Tree Area of Use SPU record in the database. */
+/** This class represents a Seed Plan Zone record in the database. */
 @Getter
 @Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "TESTED_PT_AREA_OF_USE")
-public class TestedPtAreaOfUse {
+@Table(name = "SEED_PLAN_ZONE_CODE")
+public class SeedPlanZoneCode {
   @Id
-  @Column(name = "TESTED_PT_AREA_OF_USE_ID")
-  private Integer testedPtAreaOfUseId;
+  @Column(name = "SEED_PLAN_ZONE_CODE")
+  private String spzCode;
 
-  @Column(name = "SEED_PLAN_UNIT_ID")
-  private Integer seedPlanUnitId;
+  @Column(name = "DESCRIPTION", nullable = false)
+  private String spzDescription;
 }

@@ -19,5 +19,5 @@ public class SeedlotSeedPlanZoneId {
 
   @NonNull private String seedlot;
 
-  @NonNull private String seedPlanZoneCode;
+  @NonNull private String spzCode;
 }

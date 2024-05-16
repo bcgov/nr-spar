@@ -183,9 +183,14 @@ export const initInterimState = (
 
 const convertToOrchardsType = (
   orchards: Array<MultiOptionsObj> | undefined,
-  orchardsIds: Array<string>
+  primaryOrchardId: string,
+  secondaryOrchardId: string | null
 ): Array<OrchardObj> => {
   if (orchards) {
+    const orchardsIds: string[] = [primaryOrchardId];
+    if (secondaryOrchardId) {
+      orchardsIds.push(secondaryOrchardId);
+    }
     const filteredOrchards = orchards.filter((curOrch) => orchardsIds.includes(curOrch.code));
     return filteredOrchards.map((curFilteredOrch, index) => ({
       inputId: index,
@@ -209,7 +214,7 @@ export const initOrchardState = (
   gameticMethodology?: Array<MultiOptionsObj>
 ): OrchardForm => (
   {
-    orchards: convertToOrchardsType(possibleOrchards, orchardStepData.orchardsId),
+    orchards: convertToOrchardsType(possibleOrchards, orchardStepData.primaryOrchardId, orchardStepData.secondaryOrchardId),
     femaleGametic: {
       id: 'orchard-female-gametic',
       value: gameticMethodology
@@ -706,26 +711,33 @@ export const convertInterim = (interimData: InterimForm): InterimFormSubmitType 
   intermFacilityCode: interimData.facilityType.value
 });
 
-export const convertOrchard = (orchardData: OrchardForm, parentTreeRows: RowDataDictType): OrchardFormSubmitType => ({
-  // This is a way of dealing with duplicated orchards
-  // and make sure the value is not null
-  orchardsId: processOrchards(orchardData.orchards).map((orchard: OrchardObj) => {
-    if (orchard.selectedItem) {
-      return orchard.selectedItem.code;
-    }
-    return '';
-  }),
-  femaleGameticMthdCode: orchardData.femaleGametic.value.code,
-  maleGameticMthdCode: orchardData.maleGametic.value.code,
-  controlledCrossInd: orchardData.isControlledCross.value,
-  biotechProcessesInd: orchardData.hasBiotechProcess.value,
-  pollenContaminationInd: orchardData.hasPollenContamination.value,
-  pollenContaminationPct: +calcAverage(Object.values(parentTreeRows), 'nonOrchardPollenContam'),
-  contaminantPollenBv: +orchardData.breedingPercentage.value,
-  // This is a fixed field (for now at least) with the regional code,
-  // so the methodology code is always set to 'REG'
-  pollenContaminationMthdCode: 'REG'
-});
+export const convertOrchard = (orchardData: OrchardForm, parentTreeRows: RowDataDictType): OrchardFormSubmitType => {
+  const deDuppedOrchards = processOrchards(orchardData.orchards);
+  let primaryOrchardId: string = '';
+  let secondaryOrchardId = null;
+
+  if (deDuppedOrchards.length > 0) {
+    primaryOrchardId = deDuppedOrchards[0].selectedItem!.code;
+  }
+  if (deDuppedOrchards.length > 1) {
+    secondaryOrchardId = deDuppedOrchards[1].selectedItem!.code;
+  }
+
+  return ({
+    primaryOrchardId,
+    secondaryOrchardId,
+    femaleGameticMthdCode: orchardData.femaleGametic.value.code,
+    maleGameticMthdCode: orchardData.maleGametic.value.code,
+    controlledCrossInd: orchardData.isControlledCross.value,
+    biotechProcessesInd: orchardData.hasBiotechProcess.value,
+    pollenContaminationInd: orchardData.hasPollenContamination.value,
+    pollenContaminationPct: +calcAverage(Object.values(parentTreeRows), 'nonOrchardPollenContam'),
+    contaminantPollenBv: +orchardData.breedingPercentage.value,
+    // This is a fixed field (for now at least) with the regional code,
+    // so the methodology code is always set to 'REG'
+    pollenContaminationMthdCode: 'REG'
+  });
+};
 
 export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlotNumber: string): Array<ParentTreeFormSubmitType> => {
   const parentTreePayload: Array<ParentTreeFormSubmitType> = [];
