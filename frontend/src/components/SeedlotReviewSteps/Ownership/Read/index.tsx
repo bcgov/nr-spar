@@ -8,7 +8,7 @@ import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import { ForestClientType } from '../../../../types/ForestClientTypes/ForestClientType';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import { THREE_HOURS, THREE_HALF_HOURS } from '../../../../config/TimeUnits';
-import { getForestClientByNumber } from '../../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { SingleOwnerForm } from '../../../SeedlotRegistrationSteps/OwnershipStep/definitions';
 
 const OwnershipReviewRead = () => {
@@ -20,7 +20,7 @@ const OwnershipReviewRead = () => {
     queries: state.map((owner) => owner.ownerAgency.value.code).map(
       (client) => ({
         queryKey: ['forest-clients', client],
-        queryFn: () => getForestClientByNumber(client),
+        queryFn: () => getForestClientByNumberOrAcronym(client),
         enabled: !isFetchingData,
         staleTime: THREE_HOURS,
         cacheTime: THREE_HALF_HOURS
