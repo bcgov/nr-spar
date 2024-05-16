@@ -30,4 +30,20 @@ describe('My seedlots page', () => {
       .children('button.section-btn')
       .should('have.text', 'Edit seedlot form');
   });
+
+  it('edit seedlot form button should display page details correctly', () => {
+    cy.get('.detail-section-grid')
+      .find(`.${prefix}--col`)
+      .children('button.section-btn')
+      .click();
+    cy.url().should('contains', `seedlots/a-class-registration/${seedlotNum}`);
+
+    cy.get('.seedlot-registration-title')
+      .find('h1')
+      .should('have.text', 'Seedlot Registration');
+
+    cy.get('.seedlot-registration-title')
+      .find('.seedlot-form-subtitle')
+      .should('contain.text', 'Seedlot 63011');
+  });
 });
