@@ -41,10 +41,8 @@ describe('Seedlot Dashboard test', () => {
   });
 
   it('all seedlot species should exist in the table', () => {
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < speciesKeys.length; i++) {
-      // eslint-disable-next-line prefer-destructuring
-      const species = seedlotTableData[speciesKeys[i]].species;
+    Cypress._.times((speciesKeys.length), (i) => {
+      const { species } = seedlotTableData[speciesKeys[i]];
 
       cy.task('getData', species).then((sNumber) => {
         const seedlotNumber = sNumber as string;
@@ -52,6 +50,6 @@ describe('Seedlot Dashboard test', () => {
         cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotSpecies`).should('have.text', species);
         cy.get(`#seedlot-table-cell-${seedlotNumber}-seedlotStatus`).should('have.text', 'Pending');
       });
-    }
+    });
   });
 });

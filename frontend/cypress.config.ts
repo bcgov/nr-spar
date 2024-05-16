@@ -23,7 +23,8 @@ export default defineConfig({
       '**/create-a-class-seedlot.cy.ts',
       '**/seedlot-dashboard.cy.ts',
       '**/seedlot-detail.cy.ts',
-      '**/edit-applicant-seedlot-info.cy.ts'
+      '**/edit-applicant-seedlot-info.cy.ts',
+      '**/my-seedlots.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
