@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import { getMultiOptList } from '../../../../utils/MultiOptionsUtils';
-import { getForestClientByNumber } from '../../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import getFacilityTypes from '../../../../api-service/facilityTypesAPI';
 import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
@@ -21,7 +21,7 @@ const InterimReviewRead = () => {
   const agencyQuery = useQuery(
     {
       queryKey: ['forest-clients', clientNumber],
-      queryFn: () => getForestClientByNumber(clientNumber!),
+      queryFn: () => getForestClientByNumberOrAcronym(clientNumber!),
       enabled: !!clientNumber
     }
   );
