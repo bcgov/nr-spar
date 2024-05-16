@@ -135,7 +135,7 @@ public class TscAdminEndpoint {
   }
 
   /**
-   * Saves the Seedlot submit form once submitted on step 6.
+   * Edit a submitted seedlot, change the seedlot status to the specified value in the query param.
    *
    * @param form A {@link SeedlotFormSubmissionDto} containing all the form information
    * @return A {@link SeedlotStatusResponseDto} containing the seedlot number and status

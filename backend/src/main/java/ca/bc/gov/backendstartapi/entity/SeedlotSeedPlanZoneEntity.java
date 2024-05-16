@@ -47,15 +47,15 @@ public class SeedlotSeedPlanZoneEntity {
   @NonNull
   private GeneticClassEntity geneticClass;
 
-  @Column(name = "primary_ind")
+  @Column(name = "primary_ind", nullable = false)
   @NonNull
   private Boolean isPrimary;
 
-  @Column(name = "seed_plan_zone_description")
+  @Column(name = "seed_plan_zone_description", nullable = false)
   @NonNull
   private String spzDescription;
 
-  @Column(name = "seed_plan_zone_id", nullable = true)
+  @Column(name = "seed_plan_zone_id")
   private Integer seedPlanZoneId;
 
   @Embedded private AuditInformation auditInformation;
