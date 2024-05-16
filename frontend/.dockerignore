@@ -1,45 +1,41 @@
-# Git
-.git
-.github
-
-# Dev
-.vscode
-coverage
-*.sarif
-.eslint*
-.prettier*
-
-# Testing
-**/test/test
-**/cypress/
-cypress.*
-jest.*
-
-# Pipeline and containers
-.pipeline
-docker
-openshift
-Dockerfile
-Containerfile
-docker-compose.y*ml
-openshift*.yml
-
-# Docs
+### Base set
+# Deployment
 *.md
-
-# Environments and secrets
-.env
-.env.local
-.ps1
+.dockerignore
+.git/
+.gitignore
+.github/
+Containerfile
+Dockerfile
+openshift.*.y*ml
+docker-compose*.y*ml
 
 # Node
 **/node_modules/
+.eslint*
+.prettier*
 nodemon*.json
-npm-debug.log
-npm-debug.log.*
+npm-debug.*
 
-# Generated/transpiled files
-**/build/
+# Env
+.env
+.env.*
+
+# Generated
 **/.build/
-**/dist/
 **/.dist/
+**/build/
+**/coverage/
+**/cypress/
+**/dist/
+**/test/
+**/target/
+*.sarif
+cypress.*
+jest.*
+
+# System
+.DS_Store
+.vscode
+.ps1
+thumbs.db

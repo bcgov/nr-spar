@@ -39,7 +39,7 @@ services:
       context: ./sync
     container_name: sync
     environment:
-      test_mode: ${test_mode:-0}
+      TEST_MODE: ${TEST_MODE:-0}
       EXECUTION_ID: ${EXECUTION_ID:-0}
       ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
       ORACLE_PASSWORD: ${ORACLE_PASSWORD:-password}
