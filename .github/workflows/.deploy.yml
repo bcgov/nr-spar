@@ -184,7 +184,7 @@ jobs:
           oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
           # Follow
-          oc wait --for=jsonpath='{.status.failed}'=4 job/${RUN_JOB} --timeout=1m || true
+          oc wait --for=jsonpath='{.status.failed}'=4 job/${RUN_JOB} --timeout=10m || true
           oc logs -l job-name=${RUN_JOB} --tail=50 --follow
 
           # Results and exit code
