@@ -1,7 +1,6 @@
 name: Merge
 
 on:
-  pull_request:
   push:
     branches: [main]
     paths-ignore:
@@ -27,7 +26,6 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
-      environment: test
       tag: ${{ inputs.tag }} # Uses PR number if blank
       target: test
 
@@ -38,5 +36,5 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
-      environment: prod
+      tag: ${{ inputs.tag }} # Uses PR number if blank
       target: prod
