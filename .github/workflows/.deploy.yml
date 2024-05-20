@@ -7,10 +7,6 @@ on:
       # Nothing! Only `secrets: inherit` is required
 
       ### Typical / recommended
-      environment:
-        description: Environment name; omit for PRs
-        required: false
-        type: string
       etl:
         description: Run the cronjob and verify results?  [true|false]
         required: false
@@ -79,7 +75,7 @@ jobs:
 
   deploy:
     name: Deploy
-    environment: ${{ inputs.environment }}
+    environment: ${{ github.event_name == 'pull_request' && '' || inputs.target }}
     needs: [init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
@@ -157,8 +153,8 @@ jobs:
 
   verify:
     name: Verify ETL
-    # if: inputs.etl == 'true' #&& needs.deploy.outputs.triggered == 'true'
-    environment: ${{ inputs.environment }}
+    if: inputs.etl == 'true'
+    environment: ${{ github.event_name == 'pull_request' && '' || inputs.target }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
