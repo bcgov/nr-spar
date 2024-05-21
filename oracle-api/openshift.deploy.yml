@@ -84,9 +84,9 @@ objects:
             deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           containers:
-            - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
+            - name: ${NAME}-${ZONE}
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               imagePullPolicy: Always
-              name: ${NAME}
               volumeMounts:
                 - name: ${NAME}-${ZONE}-fluentbit-logs
                   mountPath: /logs

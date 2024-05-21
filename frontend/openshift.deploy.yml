@@ -83,9 +83,9 @@ objects:
             deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           containers:
-            - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
+            - name: ${NAME}-${ZONE}
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               imagePullPolicy: Always
-              name: ${NAME}
               securityContext:
                 capabilities:
                   add: ["NET_BIND_SERVICE"]
