@@ -35,7 +35,7 @@ public class AreaOfUseEndpoint {
    */
   @GetMapping(path = "/tested-parent-trees/spz-list", produces = "application/json")
   @Operation(
-      summary = "Retrieve non-expired funding sources",
+      summary = "Get a list of Seed Plan Zone",
       description = "Retrieve a list of SPZ under tested parent tree area of use.")
   @ApiResponses(
       value = {
@@ -54,7 +54,7 @@ public class AreaOfUseEndpoint {
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<SpzDto> getAllSpz() {
-    SparLog.info("Fetching all SPZs for tested parent trees.");
+    SparLog.info("Recevied request to fetch all SPZs for tested parent trees.");
 
     return areaOfUseService.getAllSpz();
   }
