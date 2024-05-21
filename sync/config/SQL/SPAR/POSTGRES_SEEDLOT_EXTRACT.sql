@@ -5,7 +5,7 @@ select --SYSTIMESTAMP CURRENT_TS,
 	,s.APPLICANT_EMAIL_ADDRESS
 	,s.applicant_locn_code          			as APPLICANT_CLIENT_LOCN
 	,s.APPROVED_TIMESTAMP
-	,s.APPROVED_USERID
+	,REPLACE(s.APPROVED_USERID,'\', '@') APPROVED_USERID  -- 'Replacing @ to \ for Provider@User
 	,CASE WHEN s.BC_SOURCE_IND THEN 'Y' ELSE 'N' END as BC_SOURCE_IND
 	,s.BEC_VERSION_ID
 	,s.BGC_SUBZONE_CODE
@@ -22,7 +22,6 @@ select --SYSTIMESTAMP CURRENT_TS,
 	,s.collection_latitude_deg			   		as COLLECTION_LAT_DEG
 	,s.collection_latitude_min             		as COLLECTION_LAT_MIN
 	,s.collection_latitude_sec             		as COLLECTION_LAT_SEC
-	--,s.COLLECTION_LOCN_DESC                        -- NOT found in POSTGRES
 	,s.COLLECTION_LONGITUDE_CODE
 	,s.collection_longitude_deg            		as COLLECTION_LONG_DEG
 	,s.collection_longitude_min            		as COLLECTION_LONG_MIN
@@ -31,13 +30,13 @@ select --SYSTIMESTAMP CURRENT_TS,
 	,s.CONTAMINANT_POLLEN_BV
 	,case when s.CONTROLLED_CROSS_IND = True then 'Y' when  CONTROLLED_CROSS_IND = False then 'N' else '' end as CONTROLLED_CROSS_IND
 	,s.DECLARED_TIMESTAMP
-	,s.DECLARED_USERID
+	,REPLACE(s.DECLARED_USERID,'\', '@') DECLARED_USERID  -- 'Replacing @ to \ for Provider@User
 	,s.EFFECTIVE_POP_SIZE
 	,s.ELEVATION
 	,s.ELEVATION_MAX
 	,s.ELEVATION_MIN
 	,s.ENTRY_TIMESTAMP
-	,s.ENTRY_USERID
+	,REPLACE(s.ENTRY_USERID,'\', '@') ENTRY_USERID  -- 'Replacing @ to \ for Provider@User
 	,s.EXTRACTION_END_DATE
 	,s.EXTRACTION_ST_DATE
 	,s.extractory_client_number                 as EXTRCT_CLI_NUMBER
@@ -90,7 +89,7 @@ select --SYSTIMESTAMP CURRENT_TS,
 	,CASE WHEN s.TO_BE_REGISTRD_IND THEN 'Y' ELSE 'N' END AS TO_BE_REGISTRD_IND
 	,s.TOTAL_PARENT_TREES	
 	,s.UPDATE_TIMESTAMP
-	,s.UPDATE_USERID
+	,REPLACE(s.UPDATE_USERID,'\', '@') UPDATE_USERID  -- 'Replacing @ to \ for Provider@User
 	,s.VARIANT                                          
 	,s.VEGETATION_CODE
 	,s.VOL_PER_CONTAINER
