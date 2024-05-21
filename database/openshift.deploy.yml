@@ -84,7 +84,7 @@ objects:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
             - name: ${NAME}
-              image: ${NAME}-${ZONE}-${COMPONENT}:latest
+            - image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               ports:
                 - containerPort: 5432
                   protocol: TCP
