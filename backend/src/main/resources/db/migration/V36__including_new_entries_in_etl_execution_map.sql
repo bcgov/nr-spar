@@ -49,7 +49,7 @@ insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_
 select 6 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-PARENT-TREE-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
-       '/SQL/SPAR/ORACLE_SEEDLOT_PARENT_TREE_EXTRACT.sql'   as source_file, -- SAME AS SMP_MIX_GEN_QLTY Extract (same structure)
+       '/SQL/SPAR/ORACLE_SEEDLOT_PARENT_TREE_EXTRACT.sql'   as source_file, 
        'ORACLE THE'                 			as source_name, 
        'SEEDLOT_PARENT_TREE'               	    as source_table,
        'ORACLE'               	    			as source_db_type,
@@ -70,7 +70,7 @@ insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_
 select 7 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-PARENT-TREE-SMPMIX-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
-       '/SQL/SPAR/ORACLE_PARENT_TREE_SMPMIX_EXTRACT.sql'   as source_file, -- SAME AS SMP_MIX_GEN_QLTY Extract (same structure)
+       '/SQL/SPAR/ORACLE_PARENT_TREE_SMPMIX_EXTRACT.sql'   as source_file, 
        'ORACLE THE'                 			as source_name, 
        'SMP_MIX_GEN_QLTY'               	   	as source_table,
        'ORACLE'               	    			as source_db_type,
@@ -83,3 +83,45 @@ select 7 										as execution_id,
        false 									as retry_errors ,
 	   5 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-PARENT-TREE-SMPMIX-ORACLE-TO-POSTGRES-TEST');
+
+-- INCLUDING PROCESS SEEDLOT_ORCHARD from Oracle to Postgres in EXECUTION_ID=0  
+insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
+								   truncate_before_run ,retry_errors, execution_order)
+select 8 										as execution_id, 
+       0 										as execution_parent_id ,
+       'SPAR-SEEDLOT-ORCHARD-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
+       '/SQL/SPAR/ORACLE_SEEDLOT_ORCHARD_EXTRACT.sql'   as source_file, 
+       'ORACLE THE'                 			as source_name, 
+       'SEEDLOT'               	    			as source_table,
+       'ORACLE'               	    			as source_db_type,
+       '/SQL/SPAR/POSTGRES_SEEDLOT_ORCHARD_UPSERT.sql' 	as target_file,
+       'NEW SPAR' 								as target_name, 
+       'spar.seedlot_orchard' 							as target_table, 
+       'POSTGRES' 								as target_db_type, 
+       'seedlot_number,orchard_id' 				as target_primary_key, 
+       false 									as truncate_before_run ,
+       false 									as retry_errors ,
+	   6 										as execution_order
+where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-ORCHARD-ORACLE-TO-POSTGRES-TEST');
+
+-- INCLUDING PROCESS SEEDLOT_GENETIC_WORTH from Oracle to Postgres in EXECUTION_ID=0  
+insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
+								   truncate_before_run ,retry_errors, execution_order)
+select 9 										as execution_id, 
+       0 										as execution_parent_id ,
+       'SPAR-SEEDLOT-GENETIC-WORTH-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
+       '/SQL/SPAR/ORACLE_SEEDLOT_GENETIC_WORTH_EXTRACT.sql'   as source_file, 
+       'ORACLE THE'                 			as source_name, 
+       'SMP_MIX_GEN_QLTY'           			as source_table,
+       'ORACLE'               	    			as source_db_type,
+       '/SQL/SPAR/POSTGRES_SEEDLOT_GENETIC_WORTH_UPSERT.sql' 	as target_file,
+       'NEW SPAR' 								as target_name, 
+       'spar.seedlot_genetic_worth' 			as target_table, 
+       'POSTGRES' 								as target_db_type, 
+       'seedlot_number,genetic_worth_code' 		as target_primary_key, 
+       false 									as truncate_before_run ,
+       false 									as retry_errors ,
+	   7 										as execution_order
+where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-GENETIC-WORTH-ORACLE-TO-POSTGRES-TEST');
