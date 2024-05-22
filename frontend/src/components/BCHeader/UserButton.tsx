@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import AuthContext from '../../contexts/AuthContext';
 import useWindowSize from '../../hooks/UseWindowSize';
 import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
-import { getForestClientByNumber } from '../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import Avatar from '../Avatar';
 
@@ -19,7 +19,7 @@ const UserButton = () => {
   // if user has only 1 org and is logged in without selecting a role
   const forestClientRoleQuery = useQuery({
     queryKey: ['role', 'forest-clients', selectedClientRoles!.clientId],
-    queryFn: () => getForestClientByNumber(selectedClientRoles!.clientId),
+    queryFn: () => getForestClientByNumberOrAcronym(selectedClientRoles!.clientId),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS,
     enabled: !selectedClientRoles?.clientName,

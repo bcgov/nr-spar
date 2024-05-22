@@ -19,7 +19,7 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
 import { SeedlotType } from '../../../types/SeedlotType';
 import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
-import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
@@ -74,7 +74,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', applicantClientNumber],
-    queryFn: () => getForestClientByNumber(applicantClientNumber!),
+    queryFn: () => getForestClientByNumberOrAcronym(applicantClientNumber!),
     enabled: !!applicantClientNumber,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
