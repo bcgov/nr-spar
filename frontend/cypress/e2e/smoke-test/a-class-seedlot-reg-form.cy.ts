@@ -139,5 +139,35 @@ describe('A Class Seedlot Registration form', () => {
       .find(`.${prefix}--form-requirement`)
       .should('have.length', 2)
       .and('contain.text', 'Please enter a valid date');
+
+    cy.get('#collection-start-date')
+      .clear()
+      .type('2024-05-27')
+      .blur();
+
+    cy.get('#collection-num-of-container')
+      .clear()
+      .type('10001')
+      .blur();
+
+    cy.get('@outsideClick')
+      .click();
+
+    cy.get('#collection-num-of-container-error-msg')
+      .should('have.text', 'Invalid entry. Number must be between 0 and 10,000 and up to 3 decimal places.');
+
+    cy.get('#collection-vol-per-container')
+      .clear()
+      .type('10001')
+      .blur();
+
+    cy.get('@outsideClick')
+      .click();
+
+    cy.get('#collection-vol-per-container-error-msg')
+      .should('have.text', 'Invalid entry. Number must be between 0 and 10,000 and up to 3 decimal places.');
+
+    cy.get('#collection-vol-of-cones')
+      .should('have.value', '100020001.000');
   });
 });
