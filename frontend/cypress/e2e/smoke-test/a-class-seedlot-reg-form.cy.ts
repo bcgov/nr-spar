@@ -145,6 +145,7 @@ describe('A Class Seedlot Registration form', () => {
       .type('2024-05-27')
       .blur();
 
+    // Invalid collection test
     cy.get('#collection-num-of-container')
       .clear()
       .type('10001')
@@ -169,5 +170,47 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#collection-vol-of-cones')
       .should('have.value', '100020001.000');
+
+    cy.get('#collection-vol-of-cones')
+      .clear()
+      .type('10')
+      .blur();
+
+    cy.get('#collection-vol-of-cones-warn-msg')
+      .should('have.text', 'The total volume of cones does not equal, please note that this value must be the "Volume per container" x "Number of containers"');
+
+    // Input correct values in collection field
+
+    cy.get('#collection-num-of-container')
+      .clear()
+      .type('15')
+      .blur();
+
+    cy.get('#collection-vol-per-container')
+      .clear()
+      .type('2')
+      .blur();
+
+    cy.get('#collection-vol-of-cones')
+      .should('have.value', '30.000');
+
+    cy.get('#cone-collection-method-checkbox-1')
+      .check({ force: true })
+      .blur();
+
+    cy.get('#collection-comments')
+      .clear()
+      .type('Test comment')
+      .blur();
+
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Next')
+      .click();
+
+    // Check svg with complete checkmark on Step 1
+    cy.get('ul.spar-seedlot-reg-progress-bar li')
+      .eq(0)
+      .should('have.class', `${prefix}--progress-step--complete`);
   });
 });
