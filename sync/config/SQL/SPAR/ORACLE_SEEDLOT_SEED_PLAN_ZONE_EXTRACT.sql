@@ -23,7 +23,7 @@ SELECT seedlot_number,
 	   primary_ind,  
 	   revision_count,
 	   entry_userid, 				 -- NOT NULL IN DOWNSTREAM
-	   entry_userid as update_userid -- NOT NULL IN DOWNSTREAM
+	   entry_userid as update_userid, -- NOT NULL IN DOWNSTREAM
 	   entry_timestamp
 FROM CTE_SPAR
 --WHERE  ROWNUM < 11
