@@ -7,7 +7,7 @@ describe('A Class Seedlot Registration form', () => {
   let species: string;
   let fixtureData: SeedlotRegFixtureType;
 
-  beforeEach(() => {
+  before(() => {
     // Login
     cy.login();
     // Go to my seedlot page
@@ -31,7 +31,6 @@ describe('A Class Seedlot Registration form', () => {
       .then(($data) => {
         const seedlotSpecies = $data.text();
         species = (seedlotSpecies.substring(0, seedlotSpecies.indexOf('-') - 1)).toLowerCase();
-        cy.visit(`/seedlots/details/${seedlotNum}`);
       });
 
     cy.fixture('aclass-seedlot').then((fData) => {
@@ -39,18 +38,13 @@ describe('A Class Seedlot Registration form', () => {
     });
   });
 
-  it('has edit seedlot form button', () => {
-    cy.get('.detail-section-grid')
-      .find(`.${prefix}--col`)
-      .children('button.section-btn')
-      .should('have.text', 'Edit seedlot form');
+  beforeEach(() => {
+    // Login
+    cy.login();
+    cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
   });
 
   it('edit seedlot form button should display page details correctly', () => {
-    cy.get('.detail-section-grid')
-      .find(`.${prefix}--col`)
-      .children('button.section-btn')
-      .click();
     cy.url().should('contains', `seedlots/a-class-registration/${seedlotNum}`);
 
     cy.get('.seedlot-registration-title')
@@ -63,11 +57,6 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   it('check collector agency section details are correct', () => {
-    cy.get('.detail-section-grid')
-      .find(`.${prefix}--col`)
-      .children('button.section-btn')
-      .click();
-
     cy.get('#collection-step-default-checkbox')
       .should('be.checked');
 
@@ -108,16 +97,16 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#collection-collector-agency')
       .clear()
-      .type(fixtureData.cw.agencyAcronym, { force: true });
+      .type(fixtureData.cw.agencyAcronym)
+      .blur();
 
-    cy.get('#collection-collector-agency-helper-text')
-      .click();
+    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+      .should('be.visible');
 
+    // This error msg is not visible in DOM
     cy.get('#collection-location-code')
-      .type('96', { force: true, delay: TYPE_DELAY });
-
-    cy.get('#collection-collector-agency-helper-text')
-      .click();
+      .type('96', { delay: TYPE_DELAY })
+      .blur();
 
     cy.get('#collection-location-code-error-msg')
       .should('have.text', 'This location code is not valid for the selected agency, please enter a valid one or change the agency');
@@ -131,21 +120,19 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   it.only('check collector information section details are correct', () => {
-    cy.get('.detail-section-grid')
-      .find(`.${prefix}--col`)
-      .children('button.section-btn')
-      .click();
-
     cy.get('#collection-end-date')
       .clear()
-      .type('2024-05-28');
+      .type('2024-05-28')
+      .blur();
 
     cy.get('#collection-start-date')
       .clear()
-      .type('2024-05-29');
+      .type('2024-05-29')
+      .blur();
 
     cy.get(`label.${prefix}--label`)
       .contains('Collection start date')
+      .as('outsideClick')
       .click();
 
     cy.get(`.${prefix}--date-picker`)
