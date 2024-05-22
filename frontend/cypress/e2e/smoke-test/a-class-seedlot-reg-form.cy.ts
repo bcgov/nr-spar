@@ -130,11 +130,6 @@ describe('A Class Seedlot Registration form', () => {
       .type('2024-05-29')
       .blur();
 
-    cy.get(`label.${prefix}--label`)
-      .contains('Collection start date')
-      .as('outsideClick')
-      .click();
-
     cy.get(`.${prefix}--date-picker`)
       .find(`.${prefix}--form-requirement`)
       .should('have.length', 2)
@@ -151,9 +146,6 @@ describe('A Class Seedlot Registration form', () => {
       .type('10001')
       .blur();
 
-    cy.get('@outsideClick')
-      .click();
-
     cy.get('#collection-num-of-container-error-msg')
       .should('have.text', 'Invalid entry. Number must be between 0 and 10,000 and up to 3 decimal places.');
 
@@ -161,9 +153,6 @@ describe('A Class Seedlot Registration form', () => {
       .clear()
       .type('10001')
       .blur();
-
-    cy.get('@outsideClick')
-      .click();
 
     cy.get('#collection-vol-per-container-error-msg')
       .should('have.text', 'Invalid entry. Number must be between 0 and 10,000 and up to 3 decimal places.');
