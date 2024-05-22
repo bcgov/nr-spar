@@ -9,25 +9,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-22.04
-  #   permissions:
-  #     packages: write
-  #   strategy:
-  #     matrix:
-  #       package: [database, backend, frontend, oracle-api, sync]
-  #   steps:
-  #     - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-  #       with:
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.event.number }}
-  #         tag_fallback: latest
-  #         triggers: ('${{ matrix.package }}/')
+  builds:
+    name: Builds
+    runs-on: ubuntu-22.04
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [database, backend, frontend, oracle-api, sync]
+    steps:
+      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        with:
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          triggers: ('${{ matrix.package }}/')
 
   deploys:
     name: Deploys
-    # needs: [builds]
+    needs: [builds]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
@@ -40,11 +40,11 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
 
-  # results:
-  #   name: PR Results
-  #   if: always() && (!failure()) && (!cancelled())
-  #   # Include all needs that could have failures!
-  #   needs: [builds, deploys, tests]
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - run: echo "Workflow completed successfully!"
+  results:
+    name: PR Results
+    if: always() && (!failure()) && (!cancelled())
+    # Include all needs that could have failures!
+    needs: [builds, deploys, tests]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"
