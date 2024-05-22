@@ -71,7 +71,8 @@ objects:
     spec:
       replicas: 1
       selector:
-        deployment: ${NAME}-${ZONE}-${COMPONENT}
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
         type: RollingUpdate
       template:
