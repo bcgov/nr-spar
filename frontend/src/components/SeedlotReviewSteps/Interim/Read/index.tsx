@@ -46,7 +46,7 @@ const InterimReviewRead = () => {
     <FlexGrid className="sub-section-grid">
       <Row>
         <Column className="sub-section-title-col">
-          Interim storage
+          Interim agency
         </Column>
       </Row>
       <Row>
