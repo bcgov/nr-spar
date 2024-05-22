@@ -130,6 +130,27 @@ describe('A Class Seedlot Registration form', () => {
       .click();
   });
 
-  // it('check collector information section details are coorect', () => {
-  // });
+  it.only('check collector information section details are correct', () => {
+    cy.get('.detail-section-grid')
+      .find(`.${prefix}--col`)
+      .children('button.section-btn')
+      .click();
+
+    cy.get('#collection-end-date')
+      .clear()
+      .type('2024-05-28');
+
+    cy.get('#collection-start-date')
+      .clear()
+      .type('2024-05-29');
+
+    cy.get(`label.${prefix}--label`)
+      .contains('Collection start date')
+      .click();
+
+    cy.get(`.${prefix}--date-picker`)
+      .find(`.${prefix}--form-requirement`)
+      .should('have.length', 2)
+      .and('contain.text', 'Please enter a valid date');
+  });
 });
