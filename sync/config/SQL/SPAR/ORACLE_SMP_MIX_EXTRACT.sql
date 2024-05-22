@@ -8,14 +8,26 @@ WITH CTE_SMP_MIX AS (
 	FROM SMP_MIX s, 
          PARENT_TREE p 
     WHERE s.PARENT_TREE_ID = p.PARENT_TREE_ID
+     AND s.PARENT_TREE_ID  IS NOT NULL
+),
+CTE_NUMBERS AS (
+    SELECT 
+        s1.SEEDLOT_NUMBER,
+        COUNT(DISTINCT S1.PARENT_TREE_ID) TOTAL_PARENT_TREES,
+        SUM(AMOUNT_OF_MATERIAL) SUM_AMOUNT_OF_MATERIAL
+    FROM SMP_MIX s1
+    WHERE s1.PARENT_TREE_ID IS NOT NULL
+    GROUP BY s1.SEEDLOT_NUMBER
 )
-SELECT seedlot_number, 
-	   parent_tree_id, 
-	   parent_tree_number,
-	   amount_of_material, 
-	   revision_count,
+SELECT CTE_SMP_MIX.seedlot_number, 
+	   CTE_SMP_MIX.parent_tree_id, 
+	   CTE_SMP_MIX.parent_tree_number,
+	   CTE_SMP_MIX.amount_of_material, 
+	   CTE_SMP_MIX.revision_count,
+       CASE WHEN SUM_AMOUNT_OF_MATERIAL = 0 THEN 0 ELSE ROUND(CTE_SMP_MIX.amount_of_material/SUM_AMOUNT_OF_MATERIAL,10) END proportion,
 	   'LEGACY SPAR' as entry_userid, -- NOT NULL IN DOWNSTREAM
 	   'LEGACY SPAR' as update_userid -- NOT NULL IN DOWNSTREAM
-FROM CTE_SMP_MIX
---WHERE  ROWNUM < 11
+FROM CTE_SMP_MIX, CTE_NUMBERS 
+WHERE CTE_SMP_MIX.SEEDLOT_NUMBER = CTE_NUMBERS.SEEDLOT_NUMBER
+ --AND CTE_SMP_MIX.SEEDLOT_NUMBER IN ('61250','63311')
 ORDER BY seedlot_number

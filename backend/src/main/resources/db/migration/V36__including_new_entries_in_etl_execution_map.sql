@@ -1,3 +1,6 @@
+alter table spar.seedlot_orchard drop CONSTRAINT unique_seedlot_orchard_key;
+alter table spar.seedlot_orchard add  CONSTRAINT unique_seedlot_orchard_key UNIQUE (seedlot_number, orchard_id,primary_ind);
+
 -- Processes gathering data from Oracle to Postgres (First to bring all historical data)
 
 -- INCLUDING PROCESS SMP_MIX from Oracle to Postgres in EXECUTION_ID=0 
@@ -91,15 +94,15 @@ insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_
 select 8 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-ORCHARD-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
-       '/SQL/SPAR/ORACLE_SEEDLOT_ORCHARD_EXTRACT.sql'   as source_file, 
+       '/SQL/SPAR/ORACLE_SEEDLOT_ORCHARD_EXTRACT.sql'   as source_file, -- SAME AS SMP_MIX_GEN_QLTY Extract (same structure)
        'ORACLE THE'                 			as source_name, 
        'SEEDLOT'               	    			as source_table,
        'ORACLE'               	    			as source_db_type,
        '/SQL/SPAR/POSTGRES_SEEDLOT_ORCHARD_UPSERT.sql' 	as target_file,
        'NEW SPAR' 								as target_name, 
-       'spar.seedlot_orchard' 							as target_table, 
+       'spar.seedlot_orchard' 					as target_table, 
        'POSTGRES' 								as target_db_type, 
-       'seedlot_number,orchard_id' 				as target_primary_key, 
+       'seedlot_number,primary_ind' 			as target_primary_key, 
        false 									as truncate_before_run ,
        false 									as retry_errors ,
 	   6 										as execution_order
