@@ -1,4 +1,4 @@
-WITH CTE_SEEDLOT AS (
+WITH CTE_SMP AS (
 	SELECT 
 		   SEEDLOT_NUMBER, 
 		   PARENT_TREE_ID, 
@@ -7,7 +7,7 @@ WITH CTE_SEEDLOT AS (
 		   GENETIC_QUALITY_VALUE, 
 		   ESTIMATED_IND, 
 		   REVISION_COUNT
-	FROM smp_mix_gen_qlty 
+	FROM SMP_MIX_GEN_QLTY 
 )
 SELECT seedlot_number, 
 	   parent_tree_id, 
@@ -18,6 +18,6 @@ SELECT seedlot_number,
 	   revision_count,
 	   'LEGACY SPAR' as entry_userid, -- NOT NULL IN DOWNSTREAM
 	   'LEGACY SPAR' as update_userid -- NOT NULL IN DOWNSTREAM
-FROM CTE_SEEDLOT
+FROM CTE_SMP
 --WHERE  ROWNUM < 11
 ORDER BY seedlot_number
