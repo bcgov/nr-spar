@@ -103,7 +103,6 @@ describe('A Class Seedlot Registration form', () => {
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
-    // This error msg is not visible in DOM
     cy.get('#collection-location-code')
       .type('96', { delay: TYPE_DELAY })
       .blur();
@@ -119,7 +118,7 @@ describe('A Class Seedlot Registration form', () => {
       .click();
   });
 
-  it.only('check collector information section details are correct', () => {
+  it('check collector information section details are correct', () => {
     cy.get('#collection-end-date')
       .clear()
       .type('2024-05-28')
@@ -192,6 +191,7 @@ describe('A Class Seedlot Registration form', () => {
       .type('Test comment')
       .blur();
 
+    // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
       .contains('Next')
@@ -200,6 +200,107 @@ describe('A Class Seedlot Registration form', () => {
     // Check svg with complete checkmark on Step 1
     cy.get('ul.spar-seedlot-reg-progress-bar li')
       .eq(0)
+      .should('have.class', `${prefix}--progress-step--complete`);
+  });
+
+  it('check interim storage information section details are correct', () => {
+    cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
+      .click();
+
+    cy.get('.interim-agency-storage-form')
+      .find('h2')
+      .should('have.text', 'Interim agency');
+
+    cy.get('.interim-agency-storage-form')
+      .find('.subtitle-section')
+      .should('have.text', 'Enter the interim agency and storage information');
+
+    cy.get('#interim-use-collection-agency')
+      .should('be.checked');
+
+    cy.get('#interim-use-collection-agency')
+      .uncheck({ force: true });
+
+    cy.get('#interim-agency')
+      .clear()
+      .type('ggg', { force: true })
+      .blur();
+
+    cy.get('#interim-agency-error-msg')
+      .should('have.text', 'Please enter a valid acronym that identifies the agency');
+
+    cy.get('#interim-agency')
+      .clear()
+      .type(fixtureData.cw.agencyAcronym)
+      .blur();
+
+    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+      .should('be.visible');
+
+    cy.get('#interim-location-code')
+      .type('96', { delay: TYPE_DELAY })
+      .blur();
+
+    cy.get('#interim-location-code-error-msg')
+      .should('have.text', 'This location code is not valid for the selected agency, please enter a valid one or change the agency');
+
+    cy.get('#interim-location-code')
+      .clear()
+      .type('02', { force: true })
+      .blur();
+
+    // Check invalid date error msg
+    cy.get('#end-date-input')
+      .clear()
+      .type('2024-05-28')
+      .blur();
+
+    cy.get('#start-date-input')
+      .clear()
+      .type('2024-05-29')
+      .blur();
+
+    cy.get(`.${prefix}--date-picker`)
+      .find(`.${prefix}--form-requirement`)
+      .should('have.length', 2)
+      .and('contain.text', 'Please enter a valid date');
+
+    // Enter valid dates
+    cy.get('#start-date-input')
+      .clear()
+      .type('2024-05-25')
+      .blur();
+
+    cy.get('#end-date-input')
+      .clear()
+      .type('2024-05-26')
+      .blur();
+
+    // Radio button test
+    cy.get('#facility-type-radio-btn-ocv')
+      .should('be.checked');
+
+    cy.get('#facility-type-radio-btn-oth')
+      .check({ force: true })
+      .blur();
+
+    cy.get('#storage-other-type-input')
+      .should('be.visible');
+
+    cy.get('#storage-other-type-input')
+      .clear()
+      .type('Test comment')
+      .blur();
+
+    // Press next button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Next')
+      .click();
+
+    // Check svg with complete checkmark on Step 3
+    cy.get('ul.spar-seedlot-reg-progress-bar li')
+      .eq(2)
       .should('have.class', `${prefix}--progress-step--complete`);
   });
 });
