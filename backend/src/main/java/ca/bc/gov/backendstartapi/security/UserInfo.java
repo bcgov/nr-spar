@@ -58,7 +58,7 @@ public record UserInfo(
     clientIds = Collections.unmodifiableList(clientIds);
   }
 
-  /** Mocks a dev user for testing purposes */
+  /** Mocks a dev user for testing purposes. */
   public static UserInfo createDevUser() {
     return new UserInfo(
         "FSTACK",

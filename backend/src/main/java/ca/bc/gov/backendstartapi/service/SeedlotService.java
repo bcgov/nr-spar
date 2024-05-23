@@ -206,7 +206,7 @@ public class SeedlotService {
     if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
       throw new ClientIdForbiddenException();
     }
-    
+
     SparLog.info("Retrieving paginated list of seedlots for the user {}", clientId);
     if (pageSize == 0) {
       SparLog.info("No given value for the page size, using default 10.");
@@ -218,7 +218,8 @@ public class SeedlotService {
         PageRequest.of(
             pageNumber, pageSize, Sort.by(Direction.DESC, "AuditInformation_UpdateTimestamp"));
 
-    Page<Seedlot> seedlotPage = seedlotRepository.findAllByApplicantClientNumber(clientId, sortedPageable);
+    Page<Seedlot> seedlotPage =
+        seedlotRepository.findAllByApplicantClientNumber(clientId, sortedPageable);
     SparLog.info("{} results and {} pages", seedlotPage.getNumber(), seedlotPage.getTotalPages());
     return Optional.of(seedlotPage);
   }

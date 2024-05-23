@@ -208,7 +208,7 @@ public class SeedlotEndpoint {
   /**
    * Resource to fetch all seedlots to a given user id.
    *
-   * @param userId user identification to fetch seedlots to
+   * @param clientId client id to fetch seedlots to
    * @return A {@link List} of {@link Seedlot} populated or empty
    */
   @GetMapping("/users/{clientId}")
