@@ -33,6 +33,7 @@ import {
 } from './constants';
 import {
   AllStepData,
+  ClientAgenciesByCode,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
 
@@ -115,17 +116,14 @@ export const initOwnershipState = (
   useDefault?: boolean,
   methodsOfPayment?: Array<MultiOptionsObj>,
   fundingSource?: Array<MultiOptionsObj>,
+  clientData?: ClientAgenciesByCode,
   defaultAgencyNumber = ''
 ): Array<SingleOwnerForm> => {
   const seedlotOwners: Array<SingleOwnerForm> = ownersStepData.map((curOwner, index) => {
     const ownerState = createOwnerTemplate(index, curOwner);
-    ownerState.ownerAgency.value = useDefault
-      ? defaultAgency
-      : {
-        code: curOwner.ownerClientNumber,
-        description: '',
-        label: curOwner.ownerClientNumber
-      };
+    ownerState.ownerAgency.value = clientData && !useDefault
+      ? clientData[curOwner.ownerClientNumber]
+      : defaultAgency;
     ownerState.useDefaultAgencyInfo.value = ownerState.ownerAgency.value.code === defaultAgencyNumber;
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
     if (methodsOfPayment && fundingSource) {
@@ -878,15 +876,12 @@ export const resDataToState = (
   methodsOfPaymentData: MultiOptionsObj[],
   fundingSourcesData: MultiOptionsObj[],
   orchardQueryData: MultiOptionsObj[],
-  gameticMethodologyData: MultiOptionsObj[]
+  gameticMethodologyData: MultiOptionsObj[],
+  clientData: ClientAgenciesByCode
 ): AllStepData => (
   {
     collectionStep: initCollectionState(
-      {
-        code: fullFormData.seedlotFormCollectionDto.collectionClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormCollectionDto.collectionClientNumber
-      },
+      clientData[fullFormData.seedlotFormCollectionDto.collectionClientNumber],
       fullFormData.seedlotFormCollectionDto,
       fullFormData.seedlotFormCollectionDto.collectionClientNumber === defaultAgencyNumber
     ),
@@ -896,14 +891,11 @@ export const resDataToState = (
       false,
       methodsOfPaymentData,
       fundingSourcesData,
+      clientData,
       defaultAgencyNumber
     ),
     interimStep: initInterimState(
-      {
-        code: fullFormData.seedlotFormInterimDto.intermStrgClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormInterimDto.intermStrgClientNumber
-      },
+      clientData[fullFormData.seedlotFormInterimDto.intermStrgClientNumber],
       fullFormData.seedlotFormInterimDto,
       // eslint-disable-next-line max-len
       fullFormData.seedlotFormInterimDto.intermStrgClientNumber === fullFormData.seedlotFormCollectionDto.collectionClientNumber
@@ -918,16 +910,8 @@ export const resDataToState = (
       fullFormData.seedlotFormParentTreeSmpDtoList
     ),
     extractionStorageStep: initExtractionStorageState(
-      {
-        code: fullFormData.seedlotFormExtractionDto.extractoryClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormExtractionDto.extractoryClientNumber
-      },
-      {
-        code: fullFormData.seedlotFormExtractionDto.storageClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormExtractionDto.storageClientNumber
-      },
+      clientData[fullFormData.seedlotFormExtractionDto.extractoryClientNumber],
+      clientData[fullFormData.seedlotFormExtractionDto.storageClientNumber],
       fullFormData.seedlotFormExtractionDto,
       '',
       '',

@@ -5,9 +5,10 @@ import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
 export type ParentTreeStepDataObj = {
-  tableRowData: RowDataDictType, // able row data used in Cone & Pollen and the SMP Success tabs
+  tableRowData: RowDataDictType, // table row data used in Cone & Pollen and the SMP Success tabs
   allParentTreeData: AllParentTreeMap // Contains all parent tree numbers under a species
   mixTabData: RowDataDictType, // table row data used exclusively for SMP mix tab
   notifCtrl: NotifCtrlType
@@ -51,4 +52,8 @@ export type SaveTooltipProps = {
 
 export type RegFormProps = {
   cleanParentTables: Function
+};
+
+export type ClientAgenciesByCode = {
+  [key: string]: MultiOptionsObj
 };
