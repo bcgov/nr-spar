@@ -124,8 +124,6 @@ export const initOwnershipState = (
     ownerState.ownerAgency.value = clientData && !useDefault
       ? clientData[curOwner.ownerClientNumber]
       : defaultAgency;
-    // // eslint-disable-next-line no-debugger
-    // debugger;
     ownerState.useDefaultAgencyInfo.value = ownerState.ownerAgency.value.code === defaultAgencyNumber;
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
     if (methodsOfPayment && fundingSource) {
