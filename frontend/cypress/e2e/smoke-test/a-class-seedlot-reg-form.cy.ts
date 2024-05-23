@@ -56,7 +56,7 @@ describe('A Class Seedlot Registration form', () => {
       .should('contain.text', `Seedlot ${seedlotNum}`);
   });
 
-  it('check collector agency section details are correct', () => {
+  it.only('check collector agency section details are correct', () => {
     cy.get('#collection-step-default-checkbox')
       .should('be.checked');
 
@@ -75,17 +75,6 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('#collection-step-default-checkbox')
       .uncheck({ force: true });
 
-    // cy.get('.agency-information-section')
-    //   .find('button.client-search-toggle-btn')
-    //   .click();
-
-    // cy.get(`#${prefix}--modal-body--modal-478`)
-    //   .should('exist');
-
-    // cy.get('#client-search-dropdown')
-    //   .find(`button.${prefix}--list-box__field`)
-    //   .click();
-
     cy.get('#collection-collector-agency')
       .type('ggg', { force: true });
 
@@ -95,15 +84,44 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('#collection-collector-agency-error-msg')
       .should('have.text', 'Please enter a valid acronym that identifies the agency');
 
-    cy.get('#collection-collector-agency')
+    // Popup test
+    cy.get('.agency-information-section')
+      .find('button.client-search-toggle-btn')
+      .click();
+
+    cy.get('#client-search-dropdown')
+      .find(`button.${prefix}--list-box__field`)
+      .click();
+
+    cy.get('#client-search-dropdown')
+      .find('li')
+      .contains('Acronym')
+      .click();
+
+    cy.get('#client-search-input')
       .clear()
-      .type(fixtureData.cw.agencyAcronym)
+      .type(fixtureData.dr.agencyAcronym, { force: true })
       .blur();
+
+    cy.get('button.client-search-button')
+      .contains('Search')
+      .click();
+
+    cy.get(`table.${prefix}--data-table tbody tr`)
+      .eq(0)
+      .find('td:nth-child(1)')
+      .find(`input.${prefix}--radio-button`)
+      .check({ force: true });
+
+    cy.get(`button.${prefix}--btn--primary`)
+      .contains('Apply selected client')
+      .click();
 
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     cy.get('#collection-location-code')
+      .clear()
       .type('96', { delay: TYPE_DELAY })
       .blur();
 
