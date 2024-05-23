@@ -1,6 +1,3 @@
-alter table spar.seedlot_orchard drop CONSTRAINT unique_seedlot_orchard_key;
-alter table spar.seedlot_orchard add  CONSTRAINT unique_seedlot_orchard_key UNIQUE (seedlot_number, orchard_id,primary_ind);
-
 -- Processes gathering data from Oracle to Postgres (First to bring all historical data)
 
 -- INCLUDING PROCESS SMP_MIX from Oracle to Postgres in EXECUTION_ID=0 
@@ -197,7 +194,6 @@ select 12 										as execution_id,
        false 									as retry_errors ,
 	   10 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-PARENT-TREE-GEN-QLTY-ORACLE-TO-POSTGRES-TEST');
-
 
 
 -- INCLUDING PROCESS SEEDLOT_SEED_PLAN_ZONE from Oracle to Postgres in EXECUTION_ID=0  
