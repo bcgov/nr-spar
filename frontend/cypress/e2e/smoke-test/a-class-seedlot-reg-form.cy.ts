@@ -56,7 +56,7 @@ describe('A Class Seedlot Registration form', () => {
       .should('contain.text', `Seedlot ${seedlotNum}`);
   });
 
-  it.only('check collector agency section details are correct', () => {
+  it('check collector agency section details are correct', () => {
     cy.get('#collection-step-default-checkbox')
       .should('be.checked');
 
@@ -233,6 +233,12 @@ describe('A Class Seedlot Registration form', () => {
       .find('.subtitle-section')
       .should('have.text', 'Enter the interim agency and storage information');
 
+    cy.get('#interim-agency')
+      .should('have.value', fixtureData.dr.agencyAcronym);
+
+    cy.get('#interim-location-code')
+      .should('have.value', '02');
+
     cy.get('#interim-use-collection-agency')
       .should('be.checked');
 
@@ -264,7 +270,7 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#interim-location-code')
       .clear()
-      .type('02', { force: true })
+      .type('01', { force: true })
       .blur();
 
     // Check invalid date error msg
