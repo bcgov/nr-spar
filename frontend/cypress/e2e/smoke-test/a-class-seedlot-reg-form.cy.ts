@@ -253,15 +253,44 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('#interim-agency-error-msg')
       .should('have.text', 'Please enter a valid acronym that identifies the agency');
 
-    cy.get('#interim-agency')
+    // Popup test
+    cy.get('.agency-information-section')
+      .find('button.client-search-toggle-btn')
+      .click();
+
+    cy.get('#client-search-dropdown')
+      .find(`button.${prefix}--list-box__field`)
+      .click();
+
+    cy.get('#client-search-dropdown')
+      .find('li')
+      .contains('Acronym')
+      .click();
+
+    cy.get('#client-search-input')
       .clear()
-      .type(fixtureData.cw.agencyAcronym)
+      .type(fixtureData.cw.agencyAcronym, { force: true })
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
-      .should('be.visible');
+    cy.get('button.client-search-button')
+      .contains('Search')
+      .click();
+
+    cy.get(`table.${prefix}--data-table tbody tr`)
+      .eq(0)
+      .find('td:nth-child(1)')
+      .find(`input.${prefix}--radio-button`)
+      .check({ force: true });
+
+    cy.get(`button.${prefix}--btn--primary`)
+      .contains('Apply selected client')
+      .click();
+
+    cy.get('#interim-agency')
+      .should('have.value', fixtureData.cw.agencyAcronym);
 
     cy.get('#interim-location-code')
+      .clear()
       .type('96', { delay: TYPE_DELAY })
       .blur();
 
