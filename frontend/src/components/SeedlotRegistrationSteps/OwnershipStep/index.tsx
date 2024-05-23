@@ -29,7 +29,8 @@ import {
   insertOwnerForm,
   deleteOwnerForm,
   formatPortionPerc,
-  arePortionsValid
+  arePortionsValid,
+  getOwnerAgencyTitle
 } from './utils';
 import { MAX_OWNERS } from './constants';
 
@@ -121,16 +122,6 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     setStepData('ownershipStep', newOwnerArr);
   };
 
-  const getOwnerAgencyTitle = (ownerAgency: MultiOptionsObj) => {
-    if (ownerAgency.label === '') {
-      return 'Owner agency name';
-    }
-    return ownerAgency.description.substring(
-      ownerAgency.description.indexOf('-') + 1,
-      ownerAgency.description.lastIndexOf('-')
-    ).trim();
-  };
-
   return (
     <div>
       <div className="ownership-header">
@@ -171,7 +162,11 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
                 }
                 title={(
                   <TitleAccordion
-                    title={getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value)}
+                    title={
+                      singleOwnerInfo.ownerAgency.value.label === ''
+                        ? 'Owner agency name'
+                        : getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value.description)
+                    }
                     description={`${formatPortionPerc(singleOwnerInfo.ownerPortion.value)}% owner portion`}
                   />
                 )}
@@ -200,7 +195,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
           }
         </Accordion>
         {
-          !isFormSubmitted
+          !isFormSubmitted || isReview
             ? (
               <Button
                 kind="tertiary"

@@ -1,54 +1,16 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
-import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
-import MultiOptionsObj from '../../../../types/MultiOptionsObject';
-import { ForestClientType } from '../../../../types/ForestClientTypes/ForestClientType';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
-import { THREE_HOURS, THREE_HALF_HOURS } from '../../../../config/TimeUnits';
-import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { SingleOwnerForm } from '../../../SeedlotRegistrationSteps/OwnershipStep/definitions';
+import { getOwnerAgencyTitle } from '../../../SeedlotRegistrationSteps/OwnershipStep/utils';
 
 const OwnershipReviewRead = () => {
   const {
     isFetchingData, allStepData: { ownershipStep: state }
   } = useContext(ClassAContext);
-
-  useQueries({
-    queries: state.map((owner) => owner.ownerAgency.value.code).map(
-      (client) => ({
-        queryKey: ['forest-clients', client],
-        queryFn: () => getForestClientByNumberOrAcronym(client),
-        enabled: !isFetchingData,
-        staleTime: THREE_HOURS,
-        cacheTime: THREE_HALF_HOURS
-      })
-    )
-  });
-
-  const qc = useQueryClient();
-
-  const getOwnerAgencyTitle = (ownerAgency: MultiOptionsObj) => {
-    const clientData: ForestClientType | undefined = qc.getQueryData(['forest-clients', ownerAgency.code]);
-    if (clientData) {
-      return clientData.clientName
-        .toLowerCase()
-        .split(' ')
-        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    }
-    return '';
-  };
-
-  const getOwnerAgencyAcronym = (ownerAgency: MultiOptionsObj) => {
-    const clientData: ForestClientType | undefined = qc.getQueryData(['forest-clients', ownerAgency.code]);
-    if (clientData) {
-      return clientData.acronym;
-    }
-    return '';
-  };
 
   return (
     <FlexGrid className="sub-section-grid">
@@ -58,7 +20,7 @@ const OwnershipReviewRead = () => {
             <Row>
               <Column className="sub-section-title-col">
                 {
-                  getOwnerAgencyTitle(curOwner.ownerAgency.value)
+                  getOwnerAgencyTitle(curOwner.ownerAgency.value.description)
                 }
               </Column>
             </Row>
@@ -67,7 +29,7 @@ const OwnershipReviewRead = () => {
                 <ReadOnlyInput
                   id={`owner-${curOwner.id}-agency`}
                   label="Owner agency acronym"
-                  value={getOwnerAgencyAcronym(curOwner.ownerAgency.value)}
+                  value={curOwner.ownerAgency.value.label}
                   showSkeleton={isFetchingData}
                 />
               </Column>
