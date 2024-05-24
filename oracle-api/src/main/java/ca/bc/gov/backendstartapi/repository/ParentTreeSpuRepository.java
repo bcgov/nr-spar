@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /** This class holds methods for retrieving {@link ParentTreeSpuEntity} data from the database. */
 public interface ParentTreeSpuRepository
     extends JpaRepository<ParentTreeSpuEntity, ParentTreeSpuId> {
+
   List<ParentTreeSpuEntity> findByIdSpuIdIn(List<Integer> spuId);
 }

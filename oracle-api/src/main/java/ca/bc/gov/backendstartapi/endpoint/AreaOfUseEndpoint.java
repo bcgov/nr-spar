@@ -33,7 +33,7 @@ public class AreaOfUseEndpoint {
    *
    * @return A list of {@link SpzDto} with all found result.
    */
-  @GetMapping(path = "/tested-parent-trees/spz-list", produces = "application/json")
+  @GetMapping("/tested-parent-trees/spz-list")
   @Operation(
       summary = "Get a list of Seed Plan Zone",
       description = "Retrieve a list of SPZ under tested parent tree area of use.")

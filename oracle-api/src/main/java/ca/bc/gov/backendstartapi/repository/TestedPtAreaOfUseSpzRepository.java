@@ -12,8 +12,6 @@ public interface TestedPtAreaOfUseSpzRepository
   List<TestedPtAreaOfUseSpz> findAllByTestedPtAreaOfUse_testedPtAreaOfUseId(
       Integer testedPtAreaOfUseId);
 
-  @Query(
-      value = "SELECT DISTINCT t.seed_plan_zone_code FROM tested_pt_area_of_use_spz t",
-      nativeQuery = true)
+  @Query("SELECT DISTINCT t.seedPlanZoneCode.spzCode FROM TestedPtAreaOfUseSpz t")
   List<String> findAllDistinctSpz();
 }

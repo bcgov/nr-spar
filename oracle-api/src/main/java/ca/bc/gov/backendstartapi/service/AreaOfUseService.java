@@ -24,10 +24,18 @@ public class AreaOfUseService {
    * @return a list of {@link SpzDto}
    */
   public List<SpzDto> getAllSpz() {
+    SparLog.info("Begin to query tested_pt_area_of_use_spz table for a list of unique spz code");
+
     List<String> spzCodeList = testedPtAreaOfUseSpzRepository.findAllDistinctSpz();
+
+    SparLog.info("Found {} unique spz codes", spzCodeList.size());
+
+    SparLog.info("Begin to query seed_plan_zone_code table with the unique spz codes");
 
     List<SeedPlanZoneCode> spzCodeEntityList =
         seedPlanZoneCodeRepository.findBySpzCodeIn(spzCodeList);
+
+    SparLog.info("Found {} SPZ code entities", spzCodeEntityList.size());
 
     SparLog.info("Returning a list of SPZ with {} items", spzCodeEntityList.size());
 
