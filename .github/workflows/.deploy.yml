@@ -153,7 +153,7 @@ jobs:
 
   verify:
     name: Verify ETL
-    if: inputs.etl == 'true' && needs.deploy.outputs.triggered == 'true'
+    if: inputs.etl == true # && needs.deploy.outputs.triggered == true
     environment: ${{ github.event_name == 'pull_request' && '' || inputs.target }}
     needs: [deploy]
     runs-on: ubuntu-latest
