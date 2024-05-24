@@ -115,6 +115,14 @@ def reprocess_logged_executions(track_db_conn,track_db_schema,process, current_c
                         is_reprocess=True)
         data_sync_ctl.unset_reprocess(track_db_conn,track_db_schema,process['execution_id'],process['interface_id'],schedule)
 
+def identifyQueryParams(query, db_type, params) -> object: 
+    if db_type == 'ORACLE':
+        if ':start_time' not in query or ':end_time' not in query:
+            return {}
+    if db_type == 'POSTGRES':
+        if '%(start_time)' not in query or '%(end_time)' not in query:
+            return {}
+    return params
 
 def print_process_metrics(stored_metrics):
     logger.info(f"ETL Tool whole process took {stored_metrics['time_process']}")
@@ -161,7 +169,9 @@ def execute_process(base_dir, track_db_conn, track_db_schema, process, oracle_co
             query_sql = open(load_file).read()
             # logger.debug(f"Query to be executed in Source database is: {query_sql}")
             
-            table_df = pd.read_sql_query(sql=query_sql, con=source_db_conn.engine, params=schedule_param)
+            params = identifyQueryParams(query_sql, process["source_db_type"],  schedule_param)
+
+            table_df = pd.read_sql_query(sql=query_sql, con=source_db_conn.engine, params=params)
             logger.debug('Source Database data loaded on in-memory dataframe')
             
             stored_metrics['time_source_extract'] = timedelta(seconds=(time.time()-temp_time))
