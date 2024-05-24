@@ -35,4 +35,16 @@ public class Orchard {
 
   @Column(name = "ORCHARD_STAGE_CODE", length = 3)
   private String stageCode;
+
+  @Column(name = "BGC_ZONE", length = 4)
+  private String bgcZoneCode;
+
+  @Column(name = "BGC_SUBZONE", length = 3)
+  private String bgcSubzoneCode;
+
+  @Column(name = "VARIANT", length = 1)
+  private String variant;
+
+  @Column(name = "BEC_VERSION_ID")
+  private Integer becVersionId;
 }

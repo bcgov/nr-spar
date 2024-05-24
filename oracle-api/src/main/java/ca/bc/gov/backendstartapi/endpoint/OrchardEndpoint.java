@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
-import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
@@ -65,11 +65,11 @@ public class OrchardEndpoint {
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public OrchardLotTypeDescriptionDto getOrchardById(
+  public OrchardDto getOrchardById(
       @PathVariable
           @Parameter(name = "id", in = ParameterIn.PATH, description = "Identifier of the orchard.")
           String id) {
-    Optional<OrchardLotTypeDescriptionDto> orchardLotType =
+    Optional<OrchardDto> orchardLotType =
         orchardService.findNotRetiredOrchardValidLotType(id);
 
     return orchardLotType.orElseThrow(
@@ -130,7 +130,7 @@ public class OrchardEndpoint {
    * Consumed by backend (postgres) service to retrieve a list of orchards with a vegCode.
    *
    * @param vegCode an {@link Orchard}'s vegCode
-   * @return an {@link List} of {@link OrchardLotTypeDescriptionDto}
+   * @return an {@link List} of {@link OrchardDto}
    * @throws ResponseStatusException if error occurs
    */
   @GetMapping(path = "/vegetation-code/{vegCode}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -148,7 +148,7 @@ public class OrchardEndpoint {
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<OrchardLotTypeDescriptionDto> getOrchardsByVegCode(
+  public List<OrchardDto> getOrchardsByVegCode(
       @PathVariable("vegCode") @Parameter(description = "The vegetation code of an orchard.")
           String vegCode) {
     SparLog.info("Received GET request for orchards with vegCode: " + vegCode);

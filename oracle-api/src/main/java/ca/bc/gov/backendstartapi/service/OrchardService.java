@@ -3,7 +3,7 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
-import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
@@ -84,30 +84,37 @@ public class OrchardService {
    * Find a not retired {@link Orchard} with a valid {@link OrchardLotTypeCode} by Orchard's ID.
    *
    * @param id The Orchard's identification
-   * @return Optional of {@link OrchardLotTypeDescriptionDto}
+   * @return Optional of {@link OrchardDto}
    */
-  public Optional<OrchardLotTypeDescriptionDto> findNotRetiredOrchardValidLotType(String id) {
+  public Optional<OrchardDto> findNotRetiredOrchardValidLotType(String id) {
     SparLog.info("Finding valid not retired Orchard by id: {}", id);
     Optional<Orchard> orchard = orchardRepository.findNotRetiredById(id);
 
     if (orchard.isPresent()) {
-      OrchardLotTypeCode orchardLotTypeCode = orchard.get().getOrchardLotTypeCode();
+      Orchard orchardEntity = orchard.get();
+
+      OrchardLotTypeCode orchardLotTypeCode = orchardEntity.getOrchardLotTypeCode();
       if (Objects.isNull(orchardLotTypeCode) || !orchardLotTypeCode.isValid()) {
         SparLog.warn("Orchard lot type is not valid!");
         return Optional.empty();
       }
 
-      OrchardLotTypeDescriptionDto descriptionDto =
-          new OrchardLotTypeDescriptionDto(
-              orchard.get().getId(),
-              orchard.get().getName(),
-              orchard.get().getVegetationCode(),
+      OrchardDto orchardDto =
+          new OrchardDto(
+              orchardEntity.getId(),
+              orchardEntity.getName(),
+              orchardEntity.getVegetationCode(),
               orchardLotTypeCode.getCode(),
               orchardLotTypeCode.getDescription(),
-              orchard.get().getStageCode());
+              orchardEntity.getStageCode(),
+              orchardEntity.getBgcZoneCode(),
+              null, // TODO
+              orchardEntity.getBgcSubzoneCode(),
+              orchardEntity.getVariant(),
+              orchardEntity.getBecVersionId());
 
       SparLog.info("Valid not retired Orchard found for id: {}", id);
-      return Optional.of(descriptionDto);
+      return Optional.of(orchardDto);
     }
 
     SparLog.info("Valid not retired Orchard not found for id: {}", id);
@@ -164,10 +171,10 @@ public class OrchardService {
    * @param vegCode {@link VegetationCode} identification
    * @return {@link Optional} of a {@link List} of {@link OrchardParentTreeDto}
    */
-  public Optional<List<OrchardLotTypeDescriptionDto>> findNotRetOrchardsByVegCode(String vegCode) {
+  public Optional<List<OrchardDto>> findNotRetOrchardsByVegCode(String vegCode) {
     SparLog.info("Finding not retired Orchard by VegCode: {}", vegCode);
 
-    List<OrchardLotTypeDescriptionDto> resultList = new ArrayList<>();
+    List<OrchardDto> resultList = new ArrayList<>();
 
     List<Orchard> orchardList =
         orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode.toUpperCase(), "RET");
@@ -176,8 +183,8 @@ public class OrchardService {
         orchard -> {
           OrchardLotTypeCode orchardLotTypeCode = orchard.getOrchardLotTypeCode();
           if (orchardLotTypeCode.isValid()) {
-            OrchardLotTypeDescriptionDto objToAdd =
-                new OrchardLotTypeDescriptionDto(
+            OrchardDto objToAdd =
+                new OrchardDto(
                     orchard.getId(),
                     orchard.getName(),
                     orchard.getVegetationCode(),

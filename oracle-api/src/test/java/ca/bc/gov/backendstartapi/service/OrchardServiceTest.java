@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
-import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
@@ -96,7 +96,7 @@ class OrchardServiceTest {
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
 
-    Optional<OrchardLotTypeDescriptionDto> descriptionDto =
+    Optional<OrchardDto> descriptionDto =
         orchardService.findNotRetiredOrchardValidLotType("337");
 
     Assertions.assertTrue(descriptionDto.isPresent());
@@ -129,7 +129,7 @@ class OrchardServiceTest {
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
 
-    Optional<OrchardLotTypeDescriptionDto> descriptionDto =
+    Optional<OrchardDto> descriptionDto =
         orchardService.findNotRetiredOrchardValidLotType("820");
 
     Assertions.assertTrue(descriptionDto.isPresent());
@@ -162,7 +162,7 @@ class OrchardServiceTest {
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
 
-    Optional<OrchardLotTypeDescriptionDto> descriptionDto =
+    Optional<OrchardDto> descriptionDto =
         orchardService.findNotRetiredOrchardValidLotType("612");
 
     Assertions.assertTrue(descriptionDto.isEmpty());
@@ -319,7 +319,7 @@ class OrchardServiceTest {
     when(orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, "RET"))
         .thenReturn(repoResult);
 
-    List<OrchardLotTypeDescriptionDto> listToTest =
+    List<OrchardDto> listToTest =
         orchardService.findNotRetOrchardsByVegCode(vegCode).get();
 
     Assertions.assertEquals(2, listToTest.size());

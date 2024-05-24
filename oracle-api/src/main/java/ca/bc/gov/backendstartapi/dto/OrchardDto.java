@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * {@link ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode}.
  */
 @Schema(description = "Represents an Orchard object with an Orchard Lot Type.")
-public record OrchardLotTypeDescriptionDto(
+public record OrchardDto(
     @Schema(
             description =
                 """
@@ -41,4 +41,10 @@ public record OrchardLotTypeDescriptionDto(
     @Schema(
             description = "A code which represents the current stage or status of an orchard.",
             example = "PRD")
-        String stageCode) {}
+        String stageCode,
+    @Schema(description = "The bgc zone code", example = "SBS") String bgcZoneCode,
+    @Schema(description = "The description of a bgc zone code", example = "Sub-Boreal Spruce")
+        String bgcZoneDescripiton,
+    @Schema(description = "The bgc sub-zone code", example = "wk") String bgcSubzoneCode,
+    @Schema(description = "The variant.", example = "1") String variant,
+    @Schema(description = "The bec version id.", example = "5") Integer becVersionId) {}

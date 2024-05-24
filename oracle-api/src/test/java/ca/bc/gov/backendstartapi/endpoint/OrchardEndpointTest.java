@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
-import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
@@ -45,8 +45,8 @@ class OrchardEndpointTest {
   @Test
   @DisplayName("findByIdPrdSuccessTest")
   void findByIdPrdSuccessTest() throws Exception {
-    OrchardLotTypeDescriptionDto descriptionDto =
-        new OrchardLotTypeDescriptionDto("337", "GRANDVIEW", "PLI", 'S', "Seed Lot", "PRD");
+    OrchardDto descriptionDto =
+        new OrchardDto("337", "GRANDVIEW", "PLI", 'S', "Seed Lot", "PRD");
 
     when(orchardService.findNotRetiredOrchardValidLotType(any()))
         .thenReturn(Optional.of(descriptionDto));
@@ -171,12 +171,12 @@ class OrchardEndpointTest {
   void findOrchardsWithVegCodeSuccessEndpointTest() throws Exception {
     String vegCode = "PLI";
 
-    OrchardLotTypeDescriptionDto firstOrchard =
-        new OrchardLotTypeDescriptionDto("123", "smOrchard", vegCode, 'S', "Seed lot", "PRD");
-    OrchardLotTypeDescriptionDto secondOrchard =
-        new OrchardLotTypeDescriptionDto("456", "xlOrchard", vegCode, 'S', "Seed lot", "TEST");
+    OrchardDto firstOrchard =
+        new OrchardDto("123", "smOrchard", vegCode, 'S', "Seed lot", "PRD");
+    OrchardDto secondOrchard =
+        new OrchardDto("456", "xlOrchard", vegCode, 'S', "Seed lot", "TEST");
 
-    List<OrchardLotTypeDescriptionDto> testList =
+    List<OrchardDto> testList =
         new ArrayList<>() {
           {
             add(firstOrchard);
