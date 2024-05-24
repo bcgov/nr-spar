@@ -5,12 +5,21 @@
 PROJECT="b9d53b-test"
 PORT=15432
 
+# Prod option: Just call the script with "./pg-test-portforward.sh prod"
+if [ "$1" == "prod" ] || [ "$1" == "PROD" ]; then
+  echo "Switching to PROD instead of TEST!"
+  PROJECT="b9d53b-prod"
+else
+  echo "Starting port-forward script for TEST. You also can do './pg-test-portforward.sh prod'"
+fi
+
 # Check for VPN
 echo "Looking for VPN..."
 if ping -c1 api.silver.devops.gov.bc.ca &> /dev/null; then
   echo "VPN OK!"
 else
   echo "Oops. You need the VPN for this. Leaving!"
+  exit
 fi
 
 # Check for oc login
