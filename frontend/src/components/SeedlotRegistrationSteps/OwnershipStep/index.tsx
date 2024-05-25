@@ -29,16 +29,21 @@ import {
   insertOwnerForm,
   deleteOwnerForm,
   formatPortionPerc,
-  arePortionsValid
+  arePortionsValid,
+  getOwnerAgencyTitle
 } from './utils';
 import { MAX_OWNERS } from './constants';
 
 import './styles.scss';
 
+type OwnershipStepProps = {
+  isReview?: boolean
+}
+
 /*
   Component
 */
-const OwnershipStep = () => {
+const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
@@ -117,27 +122,25 @@ const OwnershipStep = () => {
     setStepData('ownershipStep', newOwnerArr);
   };
 
-  const getOwnerAgencyTitle = (ownerAgency: MultiOptionsObj) => {
-    if (ownerAgency.label === '') {
-      return 'Owner agency name';
-    }
-    return ownerAgency.description.substring(
-      ownerAgency.description.indexOf('-') + 1,
-      ownerAgency.description.lastIndexOf('-')
-    ).trim();
-  };
-
   return (
     <div>
       <div className="ownership-header">
         <div className="ownership-step-title-box">
-          <h3>
-            Ownership
-          </h3>
-          <p>
-            Enter the seedlot&apos;s ownership information, the agencies listed as
-            owners are the ones who are charged for cone and seed processing fees
-          </p>
+          {
+            isReview
+              ? null
+              : (
+                <>
+                  <h3>
+                    Ownership
+                  </h3>
+                  <p>
+                    Enter the seedlot&apos;s ownership information, the agencies listed as
+                    owners are the ones who are charged for cone and seed processing fees
+                  </p>
+                </>
+              )
+          }
         </div>
       </div>
       <div className="ownership-form-container">
@@ -159,7 +162,11 @@ const OwnershipStep = () => {
                 }
                 title={(
                   <TitleAccordion
-                    title={getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value)}
+                    title={
+                      singleOwnerInfo.ownerAgency.value.label === ''
+                        ? 'Owner agency name'
+                        : getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value.description)
+                    }
                     description={`${formatPortionPerc(singleOwnerInfo.ownerPortion.value)}% owner portion`}
                   />
                 )}
@@ -181,13 +188,14 @@ const OwnershipStep = () => {
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
                   readOnly={isFormSubmitted}
+                  isReview={isReview}
                 />
               </AccordionItem>
             ))
           }
         </Accordion>
         {
-          !isFormSubmitted
+          !isFormSubmitted || isReview
             ? (
               <Button
                 kind="tertiary"
