@@ -13,8 +13,6 @@ else
   echo "Starting port-forward script for TEST. You also can do './pg-test-portforward.sh prod'"
 fi
 
-PROJECT="b9d53b-$TARGET_ENV"
-
 # Check for VPN
 echo "Looking for VPN..."
 if ping -c1 api.silver.devops.gov.bc.ca &> /dev/null; then
@@ -35,6 +33,7 @@ else
 fi
 
 # 1. Set the project
+PROJECT="b9d53b-$TARGET_ENV"
 echo "Setting project..."
 oc project $PROJECT
 
