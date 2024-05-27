@@ -70,7 +70,7 @@ describe('A Class Seedlot Registration form', () => {
     cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
   });
 
-  // Step 3
+  // Step 1
   it('edit seedlot form button should display page details correctly', () => {
     const regData = regFormData.collector;
     cy.url().should('contains', `seedlots/a-class-registration/${seedlotNum}`);
