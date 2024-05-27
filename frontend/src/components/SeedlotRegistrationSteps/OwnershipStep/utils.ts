@@ -91,3 +91,8 @@ export const arePortionsValid = (ownershipArray: Array<SingleOwnerForm>): boolea
   });
   return Number(sum.toFixed(2)) === 100;
 };
+
+export const getOwnerAgencyTitle = (desc: string): string => desc.substring(
+  desc.indexOf('-') + 1,
+  desc.lastIndexOf('-')
+).trim();
