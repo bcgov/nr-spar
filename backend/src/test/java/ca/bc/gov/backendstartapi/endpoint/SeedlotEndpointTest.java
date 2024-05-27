@@ -339,7 +339,8 @@ class SeedlotEndpointTest {
 
     mockMvc
         .perform(get(url).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0))
         .andReturn();
   }
 
@@ -426,7 +427,7 @@ class SeedlotEndpointTest {
 
     mockMvc
         .perform(get(url).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent())
+        .andExpect(status().isOk())
         .andReturn();
   }
 

@@ -221,8 +221,9 @@ public class SeedlotEndpoint {
           should be present on the user organization.
           """,
       responses = {
-        @ApiResponse(responseCode = "200", description = "A list containing the found Seedlots"),
-        @ApiResponse(responseCode = "204", description = "No seedlots found the client id."),
+        @ApiResponse(
+            responseCode = "200",
+            description = "A list containing the found Seedlots or an empty list"),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
@@ -248,11 +249,14 @@ public class SeedlotEndpoint {
       clientId = "0" + clientId;
     }
     Optional<Page<Seedlot>> optionalResult = seedlotService.getUserSeedlots(clientId, page, size);
-    if (optionalResult.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    String totalCount = "0";
+    List<Seedlot> result = List.of();
+
+    if (!optionalResult.isEmpty()) {
+      totalCount = String.valueOf(optionalResult.get().getTotalElements());
+      result = optionalResult.get().getContent();
     }
-    List<Seedlot> result = optionalResult.get().getContent();
-    String totalCount = String.valueOf(optionalResult.get().getTotalElements());
+
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set("X-TOTAL-COUNT", totalCount);
     return ResponseEntity.ok().headers(responseHeaders).body(result);
