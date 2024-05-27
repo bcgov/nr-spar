@@ -44,11 +44,12 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  cleanParentTables: Function
+  cleanParentTables: Function;
+  isReview: boolean;
 }
 
 const OrchardStep = ({
-  cleanParentTables
+  cleanParentTables, isReview
 }: OrchardStepProps) => {
   const {
     allStepData: { orchardStep: state },
@@ -68,7 +69,7 @@ const OrchardStep = ({
     queryKey: ['gametic-methodologies'],
     queryFn: getGameticMethodology,
     select: (data) => getMultiOptList(data, true, false, true, ['isFemaleMethodology', 'isPliSpecies']),
-    enabled: !isFormSubmitted,
+    enabled: !isFormSubmitted || isReview,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -292,7 +293,7 @@ const OrchardStep = ({
                             } else setOrchard(orchard.inputId, e.selectedItem);
                           }
                         }
-                        readOnly={isFormSubmitted}
+                        readOnly={isFormSubmitted || isReview}
                       />
                       {
                         orchardQuery.isError && !isFormSubmitted
@@ -349,7 +350,7 @@ const OrchardStep = ({
                   invalid={state.femaleGametic.isInvalid}
                   invalidText={orchardStepText.gameteSection.femaleGametic.invalid}
                   onChange={(e: ComboBoxEvent) => setGametic(e, true)}
-                  readOnly={isFormSubmitted}
+                  readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.femaleGametic.value}
                 />
               )
@@ -375,7 +376,7 @@ const OrchardStep = ({
                   invalid={state.maleGametic.isInvalid}
                   invalidText={orchardStepText.gameteSection.maleGametic.invalid}
                   onChange={(e: ComboBoxEvent) => setGametic(e, false)}
-                  readOnly={isFormSubmitted}
+                  readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.maleGametic.value}
                 />
               )
@@ -390,7 +391,7 @@ const OrchardStep = ({
             name="controlled-cross-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('isControlledCross', selected === 'Yes')}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <RadioButton
               id="controlled-cross-yes"
@@ -415,7 +416,7 @@ const OrchardStep = ({
             name="biotech-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('hasBiotechProcess', selected === 'Yes')}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <RadioButton
               id="biotech-yes"
@@ -446,7 +447,7 @@ const OrchardStep = ({
             name="pollen-contam-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('hasPollenContamination', selected === 'Yes')}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <RadioButton
               id="pollen-contam-yes"
@@ -495,7 +496,7 @@ const OrchardStep = ({
                         }
                       }
                     }
-                    readOnly={isFormSubmitted}
+                    readOnly={isFormSubmitted && !isReview}
                   />
                 </Column>
               </Row>
