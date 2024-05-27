@@ -116,6 +116,7 @@ describe('A Class Seedlot Registration form', () => {
     cy.get(`button.${prefix}--btn--primary`)
       .contains('Apply selected client')
       .click();
+    // End Popup test
 
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
@@ -186,7 +187,6 @@ describe('A Class Seedlot Registration form', () => {
       .should('have.text', 'The total volume of cones does not equal, please note that this value must be the "Volume per container" x "Number of containers"');
 
     // Input correct values in collection field
-
     cy.get('#collection-num-of-container')
       .clear()
       .type('15')
@@ -285,6 +285,7 @@ describe('A Class Seedlot Registration form', () => {
     cy.get(`button.${prefix}--btn--primary`)
       .contains('Apply selected client')
       .click();
+    // End Popup test
 
     cy.get('#interim-agency')
       .should('have.value', fixtureData.cw.agencyAcronym);
