@@ -124,10 +124,8 @@ describe('A Class Seedlot Registration form', () => {
       .uncheck({ force: true });
 
     cy.get('#collection-collector-agency')
-      .type('ggg', { force: true });
-
-    cy.get('#collection-collector-agency-helper-text')
-      .click();
+      .type('ggg', { force: true })
+      .blur();
 
     cy.get('#collection-collector-agency-error-msg')
       .should('have.text', regData.acronymErrorMsg);
@@ -179,10 +177,8 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#collection-location-code')
       .clear()
-      .type('02', { force: true });
-
-    cy.get('#collection-collector-agency-helper-text')
-      .click();
+      .type('02', { force: true })
+      .blur();
   });
 
   it('check collector information section details are correct', () => {
