@@ -45,7 +45,7 @@ type NumStepperVal = {
 
 interface OrchardStepProps {
   cleanParentTables: Function;
-  isReview: boolean;
+  isReview?: boolean;
 }
 
 const OrchardStep = ({
