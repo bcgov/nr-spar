@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { AxiosError } from 'axios';
 import {
   Row, Column, TextInput, Checkbox, Tooltip,
   InlineLoading, ActionableNotification, FlexGrid
 } from '@carbon/react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import validator from 'validator';
 
 import ClientSearchModal from './ClientSearchModal';
@@ -25,8 +25,7 @@ import './styles.scss';
 
 const ApplicantAgencyFields = ({
   checkboxId, isDefault, agency, locationCode, fieldsProps, defaultAgency,
-  defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize,
-  isFormSubmitted
+  defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize
 }: ApplicantAgencyFieldsProps) => {
   const [showSuccessIconAgency, setShowSuccessIconAgency] = useState<boolean>(true);
   const [showSuccessIconLocCode, setShowSuccessIconLocCode] = useState<boolean>(false);
@@ -257,24 +256,6 @@ const ApplicantAgencyFields = ({
     validateLocationCodeMutation.mutate([agency.value.code, formatedCode]);
   };
 
-  const forestClientQuery = useQuery({
-    queryKey: ['forest-clients', agency.value.code],
-    queryFn: () => getForestClientByNumberOrAcronym(agency.value.code),
-    enabled: isFormSubmitted && agency.value.code !== ''
-  });
-
-  const [queriedAgency, setQueriedAgency] = useState<MultiOptionsObj>(EmptyMultiOptObj);
-
-  useEffect(() => {
-    if (forestClientQuery.status === 'success') {
-      setQueriedAgency({
-        code: forestClientQuery.data?.clientNumber ?? '',
-        description: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}` ?? '',
-        label: forestClientQuery.data?.acronym
-      });
-    }
-  }, [forestClientQuery.isFetched]);
-
   return (
     <FlexGrid className="agency-information-section">
       {
@@ -304,7 +285,7 @@ const ApplicantAgencyFields = ({
               className="agency-input"
               id={agency.id}
               labelText={fieldsProps.agencyInput.titleText}
-              value={isFormSubmitted ? queriedAgency.label : agency.value.label}
+              value={agency.value.label}
               helperText={(readOnly || isDefault.value) ? null : supportTexts.agency.helperText}
               invalid={agency.isInvalid}
               invalidText={invalidAcronymMessage}

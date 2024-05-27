@@ -1,7 +1,7 @@
 import React, {
   useState, useRef, useContext
 } from 'react';
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Accordion,
   AccordionItem,
@@ -9,11 +9,9 @@ import {
 } from '@carbon/react';
 import { Add } from '@carbon/icons-react';
 
-import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
@@ -31,16 +29,21 @@ import {
   insertOwnerForm,
   deleteOwnerForm,
   formatPortionPerc,
-  arePortionsValid
+  arePortionsValid,
+  getOwnerAgencyTitle
 } from './utils';
 import { MAX_OWNERS } from './constants';
 
 import './styles.scss';
 
+type OwnershipStepProps = {
+  isReview?: boolean
+}
+
 /*
   Component
 */
-const OwnershipStep = () => {
+const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
@@ -119,44 +122,25 @@ const OwnershipStep = () => {
     setStepData('ownershipStep', newOwnerArr);
   };
 
-  useQueries({
-    queries: state.map((owner) => owner.ownerAgency.value.code).map(
-      (client) => ({
-        queryKey: ['forest-clients', client],
-        queryFn: () => getForestClientByNumberOrAcronym(client),
-        enabled: isFormSubmitted,
-        staleTime: THREE_HOURS,
-        cacheTime: THREE_HALF_HOURS
-      })
-    )
-  });
-
-  const qc = useQueryClient();
-
-  const getOwnerAgencyTitle = (ownerAgency: MultiOptionsObj) => {
-    if (isFormSubmitted) {
-      const clientData: ForestClientType | undefined = qc.getQueryData(['forest-clients', ownerAgency.code]);
-      if (clientData) {
-        return clientData.clientName;
-      }
-    }
-    if (ownerAgency.label === '') {
-      return 'Owner agency name';
-    }
-    return ownerAgency.description;
-  };
-
   return (
     <div>
       <div className="ownership-header">
         <div className="ownership-step-title-box">
-          <h3>
-            Ownership
-          </h3>
-          <p>
-            Enter the seedlot&apos;s ownership information, the agencies listed as
-            owners are the ones who are charged for cone and seed processing fees
-          </p>
+          {
+            isReview
+              ? null
+              : (
+                <>
+                  <h3>
+                    Ownership
+                  </h3>
+                  <p>
+                    Enter the seedlot&apos;s ownership information, the agencies listed as
+                    owners are the ones who are charged for cone and seed processing fees
+                  </p>
+                </>
+              )
+          }
         </div>
       </div>
       <div className="ownership-form-container">
@@ -178,7 +162,11 @@ const OwnershipStep = () => {
                 }
                 title={(
                   <TitleAccordion
-                    title={getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value)}
+                    title={
+                      singleOwnerInfo.ownerAgency.value.label === ''
+                        ? 'Owner agency name'
+                        : getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value.description)
+                    }
                     description={`${formatPortionPerc(singleOwnerInfo.ownerPortion.value)}% owner portion`}
                   />
                 )}
@@ -200,13 +188,14 @@ const OwnershipStep = () => {
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
                   readOnly={isFormSubmitted}
+                  isReview={isReview}
                 />
               </AccordionItem>
             ))
           }
         </Accordion>
         {
-          !isFormSubmitted
+          !isFormSubmitted || isReview
             ? (
               <Button
                 kind="tertiary"
