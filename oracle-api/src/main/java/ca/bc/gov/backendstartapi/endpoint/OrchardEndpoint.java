@@ -6,7 +6,6 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.entity.Orchard;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,8 +68,7 @@ public class OrchardEndpoint {
       @PathVariable
           @Parameter(name = "id", in = ParameterIn.PATH, description = "Identifier of the orchard.")
           String id) {
-    Optional<OrchardDto> orchardLotType =
-        orchardService.findNotRetiredOrchardValidLotType(id);
+    Optional<OrchardDto> orchardLotType = orchardService.findNotRetiredOrchardValidLotType(id);
 
     return orchardLotType.orElseThrow(
         () ->

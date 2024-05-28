@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "ORCHARD")
-public class Orchard {
+public class OrchardEntity {
 
   @Id
   @Column(name = "ORCHARD_ID", length = 3)
@@ -36,11 +36,11 @@ public class Orchard {
   @Column(name = "ORCHARD_STAGE_CODE", length = 3)
   private String stageCode;
 
-  @Column(name = "BGC_ZONE", length = 4)
-  private String bgcZoneCode;
+  @Column(name = "BEC_ZONE", length = 4)
+  private String becZoneCode;
 
-  @Column(name = "BGC_SUBZONE", length = 3)
-  private String bgcSubzoneCode;
+  @Column(name = "BEC_SUBZONE", length = 3)
+  private String becSubzoneCode;
 
   @Column(name = "VARIANT", length = 1)
   private String variant;

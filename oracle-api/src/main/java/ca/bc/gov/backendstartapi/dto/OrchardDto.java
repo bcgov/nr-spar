@@ -42,9 +42,9 @@ public record OrchardDto(
             description = "A code which represents the current stage or status of an orchard.",
             example = "PRD")
         String stageCode,
-    @Schema(description = "The bgc zone code", example = "SBS") String bgcZoneCode,
+    @Schema(description = "The bgc zone code", example = "SBS") String becZoneCode,
     @Schema(description = "The description of a bgc zone code", example = "Sub-Boreal Spruce")
-        String bgcZoneDescripiton,
-    @Schema(description = "The bgc sub-zone code", example = "wk") String bgcSubzoneCode,
+        String becZoneDescription,
+    @Schema(description = "The bgc sub-zone code", example = "wk") String becSubzoneCode,
     @Schema(description = "The variant.", example = "1") String variant,
     @Schema(description = "The bec version id.", example = "5") Integer becVersionId) {}

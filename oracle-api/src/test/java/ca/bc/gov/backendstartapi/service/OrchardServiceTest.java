@@ -13,7 +13,7 @@ import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SpzDto;
-import ca.bc.gov.backendstartapi.entity.Orchard;
+import ca.bc.gov.backendstartapi.entity.OrchardEntity;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
@@ -73,16 +73,22 @@ class OrchardServiceTest {
 
   @Mock private TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
 
+  @Mock BecZoneCodeService becZoneCodeService;
+
   @Autowired @InjectMocks private OrchardService orchardService;
 
   @Test
   @DisplayName("findNotRetiredOrchardValidLotTypeTest_Prd")
   void findNotRetiredOrchardValidLotTypeTest_Prd() {
-    Orchard orchard = new Orchard();
+    OrchardEntity orchard = new OrchardEntity();
     orchard.setId("337");
     orchard.setName("GRANDVIEW");
     orchard.setVegetationCode("PLI");
     orchard.setStageCode("PRD");
+    orchard.setBecZoneCode("ICH");
+    orchard.setBecSubzoneCode("dw");
+    orchard.setVariant("4");
+    orchard.setBecVersionId(5);
 
     LocalDate now = LocalDate.now();
 
@@ -96,8 +102,10 @@ class OrchardServiceTest {
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
 
-    Optional<OrchardDto> descriptionDto =
-        orchardService.findNotRetiredOrchardValidLotType("337");
+    when(becZoneCodeService.getBecDescriptionByCode(orchard.getBecZoneCode()))
+        .thenReturn("Interior Cedar -- Hemlock");
+
+    Optional<OrchardDto> descriptionDto = orchardService.findNotRetiredOrchardValidLotType("337");
 
     Assertions.assertTrue(descriptionDto.isPresent());
     Assertions.assertEquals("337", descriptionDto.get().id());
@@ -106,16 +114,25 @@ class OrchardServiceTest {
     Assertions.assertEquals("PRD", descriptionDto.get().stageCode());
     Assertions.assertEquals('S', descriptionDto.get().lotTypeCode());
     Assertions.assertEquals("Seed Lot", descriptionDto.get().lotTypeDescription());
+    Assertions.assertEquals(orchard.getBecZoneCode(), descriptionDto.get().becZoneCode());
+    Assertions.assertEquals(orchard.getBecSubzoneCode(), descriptionDto.get().becSubzoneCode());
+    Assertions.assertEquals(orchard.getVariant(), descriptionDto.get().variant());
+    Assertions.assertEquals(orchard.getBecVersionId(), descriptionDto.get().becVersionId());
+    Assertions.assertEquals("Interior Cedar -- Hemlock", descriptionDto.get().becZoneDescription());
   }
 
   @Test
   @DisplayName("findNotRetiredOrchardValidLotTypeTest_Esb")
   void findNotRetiredOrchardValidLotTypeTest_Esb() {
-    Orchard orchard = new Orchard();
+    OrchardEntity orchard = new OrchardEntity();
     orchard.setId("820");
     orchard.setName("FERNDALE INSTITUTE");
     orchard.setVegetationCode("AX");
     orchard.setStageCode("ESB");
+    orchard.setBecZoneCode("ICH");
+    orchard.setBecSubzoneCode("dw");
+    orchard.setVariant("4");
+    orchard.setBecVersionId(5);
 
     LocalDate now = LocalDate.now();
 
@@ -128,9 +145,10 @@ class OrchardServiceTest {
     orchard.setOrchardLotTypeCode(lotTypeCode);
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
+    when(becZoneCodeService.getBecDescriptionByCode(orchard.getBecZoneCode()))
+        .thenReturn("Interior Cedar -- Hemlock");
 
-    Optional<OrchardDto> descriptionDto =
-        orchardService.findNotRetiredOrchardValidLotType("820");
+    Optional<OrchardDto> descriptionDto = orchardService.findNotRetiredOrchardValidLotType("820");
 
     Assertions.assertTrue(descriptionDto.isPresent());
     Assertions.assertEquals("820", descriptionDto.get().id());
@@ -139,12 +157,17 @@ class OrchardServiceTest {
     Assertions.assertEquals("ESB", descriptionDto.get().stageCode());
     Assertions.assertEquals('C', descriptionDto.get().lotTypeCode());
     Assertions.assertEquals("Cutting Lot", descriptionDto.get().lotTypeDescription());
+    Assertions.assertEquals(orchard.getBecZoneCode(), descriptionDto.get().becZoneCode());
+    Assertions.assertEquals(orchard.getBecSubzoneCode(), descriptionDto.get().becSubzoneCode());
+    Assertions.assertEquals(orchard.getVariant(), descriptionDto.get().variant());
+    Assertions.assertEquals(orchard.getBecVersionId(), descriptionDto.get().becVersionId());
+    Assertions.assertEquals("Interior Cedar -- Hemlock", descriptionDto.get().becZoneDescription());
   }
 
   @Test
   @DisplayName("findNotRetiredOrchardValidLotTypeTest_Ret")
   void findNotRetiredOrchardValidLotTypeTest_Ret() {
-    Orchard orchard = new Orchard();
+    OrchardEntity orchard = new OrchardEntity();
     orchard.setId("612");
     orchard.setName("E.KOOTENAY BREED A");
     orchard.setVegetationCode("SX");
@@ -162,8 +185,7 @@ class OrchardServiceTest {
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
 
-    Optional<OrchardDto> descriptionDto =
-        orchardService.findNotRetiredOrchardValidLotType("612");
+    Optional<OrchardDto> descriptionDto = orchardService.findNotRetiredOrchardValidLotType("612");
 
     Assertions.assertTrue(descriptionDto.isEmpty());
   }
@@ -186,7 +208,7 @@ class OrchardServiceTest {
     String orchardId = "407";
 
     // Orchard
-    Orchard orchard = new Orchard();
+    OrchardEntity orchard = new OrchardEntity();
     orchard.setId(orchardId);
     orchard.setName("Test");
     orchard.setVegetationCode("FDC");
@@ -279,7 +301,7 @@ class OrchardServiceTest {
     firstLotTypeCode.setExpiryDate(now.plusDays(3L));
     firstLotTypeCode.setUpdateTimestamp(now);
     String vegCode = "SX";
-    Orchard firstOrchard = new Orchard();
+    OrchardEntity firstOrchard = new OrchardEntity();
     firstOrchard.setId("612");
     firstOrchard.setName("E.KOOTENAY BREED A");
     firstOrchard.setVegetationCode(vegCode);
@@ -293,7 +315,7 @@ class OrchardServiceTest {
     secondLotTypeCode.setEffectiveDate(now.minusDays(1L));
     secondLotTypeCode.setExpiryDate(now.plusDays(1L));
     secondLotTypeCode.setUpdateTimestamp(now);
-    Orchard secondOrchard = new Orchard();
+    OrchardEntity secondOrchard = new OrchardEntity();
     secondOrchard.setId("613");
     secondOrchard.setName("BURNABY TOWERS");
     secondOrchard.setVegetationCode(vegCode);
@@ -307,20 +329,19 @@ class OrchardServiceTest {
     expiredlotTypeCode.setEffectiveDate(now.minusDays(3L));
     expiredlotTypeCode.setExpiryDate(now.minusDays(1L));
     expiredlotTypeCode.setUpdateTimestamp(now);
-    Orchard expiredOrchard = new Orchard();
+    OrchardEntity expiredOrchard = new OrchardEntity();
     expiredOrchard.setId("666");
     expiredOrchard.setName("EXPIRED AND STINKS");
     expiredOrchard.setVegetationCode(vegCode);
     expiredOrchard.setStageCode("ESB");
     expiredOrchard.setOrchardLotTypeCode(expiredlotTypeCode);
 
-    List<Orchard> repoResult = List.of(firstOrchard, secondOrchard, expiredOrchard);
+    List<OrchardEntity> repoResult = List.of(firstOrchard, secondOrchard, expiredOrchard);
 
     when(orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, "RET"))
         .thenReturn(repoResult);
 
-    List<OrchardDto> listToTest =
-        orchardService.findNotRetOrchardsByVegCode(vegCode).get();
+    List<OrchardDto> listToTest = orchardService.findNotRetOrchardsByVegCode(vegCode).get();
 
     Assertions.assertEquals(2, listToTest.size());
     listToTest.forEach(
