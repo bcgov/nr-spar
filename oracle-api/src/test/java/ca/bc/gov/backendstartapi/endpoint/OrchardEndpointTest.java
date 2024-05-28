@@ -56,7 +56,7 @@ class OrchardEndpointTest {
             "ICH",
             "Interior Cedar -- Hemlock",
             "dw",
-            "4",
+            '4',
             5);
 
     when(orchardService.findNotRetiredOrchardValidLotType(any()))
@@ -198,7 +198,7 @@ class OrchardEndpointTest {
             "ICH",
             "Interior Cedar -- Hemlock",
             "dw",
-            "4",
+            '4',
             5);
     OrchardDto secondOrchard =
         new OrchardDto(
@@ -211,7 +211,7 @@ class OrchardEndpointTest {
             "IDF",
             "Interior Douglas-fir",
             "mk",
-            "1",
+            '1',
             5);
 
     List<OrchardDto> testList =

@@ -43,7 +43,7 @@ public class OrchardEntity {
   private String becSubzoneCode;
 
   @Column(name = "VARIANT", length = 1)
-  private String variant;
+  private Character variant;
 
   @Column(name = "BEC_VERSION_ID")
   private Integer becVersionId;

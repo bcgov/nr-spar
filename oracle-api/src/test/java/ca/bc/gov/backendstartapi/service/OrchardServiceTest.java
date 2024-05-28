@@ -87,7 +87,7 @@ class OrchardServiceTest {
     orchard.setStageCode("PRD");
     orchard.setBecZoneCode("ICH");
     orchard.setBecSubzoneCode("dw");
-    orchard.setVariant("4");
+    orchard.setVariant('4');
     orchard.setBecVersionId(5);
 
     LocalDate now = LocalDate.now();
@@ -131,7 +131,7 @@ class OrchardServiceTest {
     orchard.setStageCode("ESB");
     orchard.setBecZoneCode("ICH");
     orchard.setBecSubzoneCode("dw");
-    orchard.setVariant("4");
+    orchard.setVariant('4');
     orchard.setBecVersionId(5);
 
     LocalDate now = LocalDate.now();

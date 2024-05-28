@@ -46,5 +46,5 @@ public record OrchardDto(
     @Schema(description = "The description of a bgc zone code", example = "Sub-Boreal Spruce")
         String becZoneDescription,
     @Schema(description = "The bgc sub-zone code", example = "wk") String becSubzoneCode,
-    @Schema(description = "The variant.", example = "1") String variant,
+    @Schema(description = "The variant.", example = "1") Character variant,
     @Schema(description = "The bec version id.", example = "5") Integer becVersionId) {}
