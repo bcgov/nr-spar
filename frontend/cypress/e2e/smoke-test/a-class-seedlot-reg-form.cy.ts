@@ -5,10 +5,10 @@ import { SeedlotRegFixtureType } from '../../definitions';
 describe('A Class Seedlot Registration form', () => {
   let regFormData: {
     collector: {
-      titleAgency: string;
-      subtitleAgency: string;
-      titleInformation: string;
-      subtitleInformation: string;
+      agencyTitle: string;
+      agencySubtitle: string;
+      informationTitle: string;
+      informationSubtitle: string;
       checkboxText: string;
       acronymErrorMsg: string;
       locationErrorMsg: string;
@@ -90,22 +90,22 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('.collection-step-row')
       .find('h2')
       .eq(0)
-      .should('have.text', fixtureData.titleAgency);
+      .should('have.text', fixtureData.agencyTitle);
 
     cy.get('.collection-step-row')
       .find('.subtitle-section')
       .eq(0)
-      .should('have.text', fixtureData.subtitleAgency);
+      .should('have.text', fixtureData.agencySubtitle);
 
     cy.get('.collection-step-row')
       .find('h2')
       .eq(1)
-      .should('have.text', fixtureData.titleInformation);
+      .should('have.text', fixtureData.informationTitle);
 
     cy.get('.collection-step-row')
       .find('.subtitle-section')
       .eq(1)
-      .should('have.text', fixtureData.subtitleInformation);
+      .should('have.text', fixtureData.informationSubtitle);
   });
 
   it('check collector agency section details are correct', () => {
