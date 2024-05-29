@@ -24,7 +24,6 @@ import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collect
 import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
 import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownership/Read';
 import OwnershipReviewEdit from '../../../components/SeedlotReviewSteps/Ownership/Edit';
-
 import InterimReviewRead from '../../../components/SeedlotReviewSteps/Interim/Read';
 import InterimReviewEdit from '../../../components/SeedlotReviewSteps/Interim/Edit';
 

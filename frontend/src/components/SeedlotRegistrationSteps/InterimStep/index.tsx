@@ -21,6 +21,7 @@ import getFacilityTypes from '../../../api-service/facilityTypesAPI';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { EmptyBooleanInputType } from '../../../shared-constants/shared-constants';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import InterimForm from './definitions';
@@ -154,9 +155,9 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
         </Column>
       </Row>
       <ApplicantAgencyFields
-        showCheckbox
+        showCheckbox={!isReview}
         checkboxId={state.useCollectorAgencyInfo.id}
-        isDefault={state.useCollectorAgencyInfo}
+        isDefault={isReview ? EmptyBooleanInputType : state.useCollectorAgencyInfo}
         agency={state.agencyName}
         locationCode={state.locationCode}
         fieldsProps={agencyFieldsProps}
