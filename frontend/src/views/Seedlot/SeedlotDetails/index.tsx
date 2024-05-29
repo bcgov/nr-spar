@@ -93,7 +93,8 @@ const SeedlotDetails = () => {
       if (err.response?.status === 404) {
         navigate('/404');
       }
-    }
+    },
+    select: (data) => data.seedlot
   });
 
   useEffect(() => {

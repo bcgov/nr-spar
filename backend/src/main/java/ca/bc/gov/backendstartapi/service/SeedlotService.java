@@ -10,9 +10,11 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
@@ -225,14 +227,56 @@ public class SeedlotService {
    * @return A Seedlot entity.
    * @throws SeedlotNotFoundException in case of errors.
    */
-  public Seedlot getSingleSeedlotInfo(@NonNull String seedlotNumber) {
+  public SeedlotDto getSingleSeedlotInfo(@NonNull String seedlotNumber) {
     SparLog.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
-    Seedlot seedlotInfo =
+    Seedlot seedlotEntity =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
-    return seedlotInfo;
+
+    SeedlotDto seedlotDto = new SeedlotDto();
+
+    seedlotDto.setSeedlot(seedlotEntity);
+
+    SparLog.info("Finding associated seedlot SPZs for seedlot {}", seedlotNumber);
+
+    List<SeedlotSeedPlanZoneEntity> spzList =
+        seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber);
+
+    SparLog.info("Found {} SPZs for seedlot {}", spzList.size(), seedlotNumber);
+
+    SeedPlanZoneDto primarySpz = null;
+
+    List<SeedPlanZoneDto> additionalSpzList = new ArrayList<>();
+
+    if (spzList.size() > 0) {
+      List<SeedlotSeedPlanZoneEntity> primarySpzList =
+          spzList.stream().filter(spz -> spz.getIsPrimary()).toList();
+
+      if (primarySpzList.size() > 0) {
+        SeedlotSeedPlanZoneEntity primarySpzEntity = primarySpzList.get(0);
+        primarySpz =
+            new SeedPlanZoneDto(
+                primarySpzEntity.getSpzCode(),
+                primarySpzEntity.getSpzDescription(),
+                primarySpzEntity.getIsPrimary());
+      }
+
+      additionalSpzList =
+          spzList.stream()
+              .filter(spz -> !spz.getIsPrimary())
+              .map(
+                  spz ->
+                      new SeedPlanZoneDto(
+                          spz.getSpzCode(), spz.getSpzDescription(), spz.getIsPrimary()))
+              .toList();
+    }
+
+    seedlotDto.setPriamrySpz(primarySpz);
+
+    seedlotDto.setAdditionalSpzList(additionalSpzList);
+    return seedlotDto;
   }
 
   /**

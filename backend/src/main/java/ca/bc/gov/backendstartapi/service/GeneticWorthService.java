@@ -80,15 +80,15 @@ public class GeneticWorthService {
       BigDecimal percentage = calcGeneticTraitThreshold(traitsDto, trait);
 
       if (percentage.compareTo(minimumThreshold) >= 0) {
-        SparLog.info("Calculating Genetic Worth for {} trait", trait.code());
+        SparLog.info("Calculating Genetic Worth for {} trait", trait.getCode());
         calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);
       } else {
         SparLog.info(
-            "No Genetic Worth calculations for trait {}, threshold not met.", trait.code());
+            "No Genetic Worth calculations for trait {}, threshold not met.", trait.getCode());
       }
 
       GeneticWorthTraitsDto traitResponse =
-          new GeneticWorthTraitsDto(trait.code(), null, calculatedValue, percentage);
+          new GeneticWorthTraitsDto(trait.getCode(), null, calculatedValue, percentage);
       calculated.add(traitResponse);
     }
 
@@ -197,7 +197,7 @@ public class GeneticWorthService {
     List<GeneticWorthTraitsDto> geneticTraits = traitDto.geneticTraits();
     Optional<GeneticWorthTraitsDto> traitOptional =
         geneticTraits.stream()
-            .filter(x -> x.traitCode().equalsIgnoreCase(trait.code()))
+            .filter(x -> x.traitCode().equalsIgnoreCase(trait.getCode()))
             .findFirst();
     return traitOptional.isEmpty() ? BigDecimal.ZERO : traitOptional.get().traitValue();
   }

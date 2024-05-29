@@ -1,5 +1,6 @@
 import { StatusColourMap } from '../components/StatusTag/definitions';
 import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/ContextContainerClassA/definitions';
+import { CodeDescResType } from './CodeDescResType';
 import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
 
 type EffectiveDateRange = {
@@ -114,6 +115,7 @@ export type SeedlotType = {
   revisionCount: number,
   seedPlanUnitId: number,
   bgcZoneCode: string,
+  bgcZoneDescription: string,
   bgcSubzoneCode: string,
   variant: string,
   becVersionId: number,
@@ -151,6 +153,20 @@ export type SeedlotType = {
   longitudeSecMax: number,
   smpMeanBvGrowth: number,
   areaOfUseComment: string
+}
+
+export type SeedPlanZoneDto = {
+  isPrimary: boolean
+} & CodeDescResType;
+
+/**
+ * The seedlot data returned from backend that contains additional information
+ * such as seed plan zone.
+ */
+export type RichSeedlotType = {
+  seedlot: SeedlotType,
+  priamrySpz: SeedPlanZoneDto | null,
+  additionalSpzList: SeedPlanZoneDto[]
 }
 
 export type SeedlotsReturnType = {

@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
@@ -403,7 +404,13 @@ class SeedlotEndpointTest {
   void getSingleSeedlotInfoTest() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000000");
 
-    when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(seedlotEntity);
+    SeedlotDto seedlotDto = new SeedlotDto();
+
+    seedlotDto.setSeedlot(seedlotEntity);
+    seedlotDto.setPriamrySpz(null);
+    seedlotDto.setAdditionalSpzList(List.of());
+
+    when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(seedlotDto);
 
     mockMvc
         .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))

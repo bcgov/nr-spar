@@ -4,6 +4,7 @@ import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -270,7 +271,7 @@ public class SeedlotEndpoint {
             description = "Could not find information for the given seedlot number")
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public Seedlot getSingleSeedlotInfo(
+  public SeedlotDto getSingleSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,

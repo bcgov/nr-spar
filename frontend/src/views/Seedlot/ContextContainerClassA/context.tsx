@@ -5,7 +5,10 @@ import { AxiosResponse } from 'axios';
 
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotType } from '../../../types/SeedlotType';
+import {
+  RichSeedlotType, SeedlotAClassSubmitType,
+  SeedlotCalculationsResultsType, SeedlotType
+} from '../../../types/SeedlotType';
 
 import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
@@ -18,6 +21,7 @@ import { SummarySectionConfig } from '../../../components/SeedlotRegistrationSte
 
 export type ClassAContextType = {
   seedlotData: SeedlotType | undefined,
+  richSeedlotData: RichSeedlotType | undefined,
   calculatedValues: SeedlotCalculationsResultsType[],
   geoInfoVals: GeoInfoValType,
   genWorthVals: GenWorthValType,
@@ -69,6 +73,7 @@ export type ClassAContextType = {
 
 const ClassAContext = createContext<ClassAContextType>({
   seedlotData: {} as SeedlotType,
+  richSeedlotData: {} as RichSeedlotType,
   calculatedValues: [],
   seedlotNumber: '',
   allStepData: {} as AllStepData,
