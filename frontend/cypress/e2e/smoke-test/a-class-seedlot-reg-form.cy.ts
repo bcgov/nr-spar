@@ -101,15 +101,22 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('#collection-location-code')
 <<<<<<< HEAD
       .should('have.value', seedlotData[species].agencyNumber);
+<<<<<<< HEAD
 =======
       .should('have.value', seedlotData[speciesKey].agencyNumber);
   });
 >>>>>>> d0e877b8 (feat: use task to get seedlot number, remove force option)
+=======
+  });
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
 
+  it('change collector agency section details', () => {
+    const fixtureData = regFormData.collector;
     // Change inputs
     cy.get('#collection-step-default-checkbox')
       .uncheck({ force: true });
 
+    // Enter invalid acronym
     cy.get('#collection-collector-agency')
       .type('ggg')
       .blur();
@@ -118,12 +125,19 @@ describe('A Class Seedlot Registration form', () => {
       .should('have.text', regData.acronymErrorMsg);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Popup test
 =======
     // Enter valid test acronym
     cy.get('#collection-collector-agency')
       .clear()
       .type(testAcronym)
+=======
+    // Enter valid test acronym
+    cy.get('#collection-collector-agency')
+      .clear()
+      .type(testAcronym, { force: true })
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
       .blur();
 
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
@@ -141,16 +155,24 @@ describe('A Class Seedlot Registration form', () => {
     // Enter valid location code
     cy.get('#collection-location-code')
       .clear()
+<<<<<<< HEAD
       .type('02')
+=======
+      .type('02', { force: true })
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
       .blur();
   });
 
   it('collector agency popup test', () => {
+<<<<<<< HEAD
 >>>>>>> d0e877b8 (feat: use task to get seedlot number, remove force option)
+=======
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
     cy.get('.agency-information-section')
       .find('button.client-search-toggle-btn')
       .click();
 
+    // Enter popup test
     cy.get('#client-search-dropdown')
       .find(`button.${prefix}--list-box__field`)
       .click();
@@ -163,10 +185,14 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('#client-search-input')
       .clear()
 <<<<<<< HEAD
+<<<<<<< HEAD
       .type(seedlotData.dr.agencyAcronym, { force: true })
 =======
       .type(testPopupAcronym)
 >>>>>>> d0e877b8 (feat: use task to get seedlot number, remove force option)
+=======
+      .type(testPopupAcronym, { force: true })
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
       .blur();
 
     cy.get('button.client-search-button')
@@ -184,6 +210,7 @@ describe('A Class Seedlot Registration form', () => {
       .click();
     // End Popup test
 
+<<<<<<< HEAD
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
@@ -195,19 +222,28 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('#collection-location-code-error-msg')
       .should('have.text', regData.locationErrorMsg);
 
+=======
+    // Enter location code for linkage test
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
     cy.get('#collection-location-code')
       .clear()
       .type('02')
       .blur();
   });
 
+<<<<<<< HEAD
   it('check collector information section details are correct', () => {
     const regData = regFormData.collector;
+=======
+  it('check collector information section date inputs', () => {
+    const fixtureData = regFormData.collector;
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
     cy.get('#collection-end-date')
       .clear()
       .type('2024-05-28')
       .blur();
 
+    // Invalid start date
     cy.get('#collection-start-date')
       .clear()
       .type('2024-05-29')
@@ -218,11 +254,20 @@ describe('A Class Seedlot Registration form', () => {
       .should('have.length', 2)
       .and('contain.text', regData.invalidDateErrorMsg);
 
+    // Valid start date
     cy.get('#collection-start-date')
       .clear()
       .type('2024-05-27')
       .blur();
 
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
+  });
+
+  it('check collector information section containers input', () => {
+    const fixtureData = regFormData.collector;
     // Invalid collection test
     cy.get('#collection-num-of-container')
       .clear()
@@ -264,7 +309,9 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#collection-vol-of-cones')
       .should('have.value', '30.000');
+  });
 
+  it('check collector information section checkbox input', () => {
     cy.get('#cone-collection-method-checkbox-1')
       .check({ force: true })
       .blur();
@@ -287,8 +334,13 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   // Step 3
+<<<<<<< HEAD
   it('check interim storage information section details are correct', () => {
     const regData = regFormData.interimStorage;
+=======
+  it('check interim storage information title and subtitle are correct', () => {
+    const fixtureData = regFormData.interimStorage;
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
 
@@ -298,20 +350,39 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('.interim-agency-storage-form')
       .find('.subtitle-section')
+<<<<<<< HEAD
       .should('have.text', regData.subtitle);
 
     cy.get('#interim-agency')
       .should('have.value', seedlotData.dr.agencyAcronym);
+=======
+      .should('have.text', fixtureData.subtitle);
+  });
+
+  it('check Step 1 and Step 3 linkage', () => {
+    cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
+      .click();
+
+    cy.get('#interim-agency')
+      .should('have.value', testPopupAcronym);
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
 
     cy.get('#interim-location-code')
       .should('have.value', '02');
 
     cy.get('#interim-use-collection-agency')
       .should('be.checked');
+  });
+
+  it('change interim agency details', () => {
+    const fixtureData = regFormData.interimStorage;
+    cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
+      .click();
 
     cy.get('#interim-use-collection-agency')
       .uncheck({ force: true });
 
+    // Enter invalid acronym
     cy.get('#interim-agency')
       .clear()
       .type('ggg')
@@ -326,7 +397,11 @@ describe('A Class Seedlot Registration form', () => {
     // Enter valid acronym
     cy.get('#interim-agency')
       .clear()
+<<<<<<< HEAD
       .type(testAcronym)
+=======
+      .type(testAcronym, { force: true })
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
       .blur();
 
     // Enter invalid location code
@@ -341,20 +416,29 @@ describe('A Class Seedlot Registration form', () => {
     // Enter valid location code
     cy.get('#interim-location-code')
       .clear()
+<<<<<<< HEAD
       .type('01')
+=======
+      .type('01', { force: true })
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
       .blur();
   });
 
   it('interim storage popup test', () => {
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
+<<<<<<< HEAD
 >>>>>>> d0e877b8 (feat: use task to get seedlot number, remove force option)
 
     // Popup test
+=======
+
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
     cy.get('.agency-information-section')
       .find('button.client-search-toggle-btn')
       .click();
 
+    // Enter popup test
     cy.get('#client-search-dropdown')
       .find(`button.${prefix}--list-box__field`)
       .click();
@@ -389,6 +473,7 @@ describe('A Class Seedlot Registration form', () => {
     // End Popup test
 
     cy.get('#interim-agency')
+<<<<<<< HEAD
       .should('have.value', seedlotData.cw.agencyAcronym);
 
     cy.get('#interim-location-code')
@@ -403,6 +488,15 @@ describe('A Class Seedlot Registration form', () => {
       .clear()
       .type('01', { force: true })
       .blur();
+=======
+      .should('have.value', testPopupAcronym);
+  });
+
+  it('interim storage date test', () => {
+    const fixtureData = regFormData.interimStorage;
+    cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
+      .click();
+>>>>>>> 7c3272d3 (feat: separate it blocks and add comments)
 
     // Check invalid date error msg
     cy.get('#end-date-input')
@@ -430,6 +524,16 @@ describe('A Class Seedlot Registration form', () => {
       .clear()
       .type('2024-05-26')
       .blur();
+
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
+  });
+
+  it('interim storage radio button test', () => {
+    cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
+      .click();
 
     // Radio button test
     cy.get('#facility-type-radio-btn-ocv')
