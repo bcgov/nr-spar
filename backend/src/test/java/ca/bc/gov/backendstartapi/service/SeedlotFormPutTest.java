@@ -530,7 +530,7 @@ class SeedlotFormPutTest {
     assertEquals(0, seedlot.getLongitudeSecMin());
     // BEC values
     assertEquals(oracleOrchardRet.becZoneCode(), seedlot.getBgcZoneCode());
-    assertEquals(oracleOrchardRet.becZoneDescription(), seedlot.getBgcZoneDecription());
+    assertEquals(oracleOrchardRet.becZoneDescription(), seedlot.getBgcZoneDescription());
     assertEquals(oracleOrchardRet.becSubzoneCode(), seedlot.getBgcSubzoneCode());
     assertEquals(oracleOrchardRet.variant(), seedlot.getVariant());
     assertEquals(oracleOrchardRet.becVersionId(), seedlot.getBecVersionId());
