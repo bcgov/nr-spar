@@ -1,9 +1,9 @@
 {
   "collector": {
-    "titleAgency": "Collector agency",
-    "subtitleAgency": "Enter the collector agency information",
-    "titleInformation": "Collection information",
-    "subtitleInformation": "Enter the collection information about this seedlot",
+    "agencyTitle": "Collector agency",
+    "agencySubtitle": "Enter the collector agency information",
+    "informationTitle": "Collection information",
+    "informationSubtitle": "Enter the collection information about this seedlot",
     "checkboxText": "Use applicant agency as collector agency",
     "acronymErrorMsg": "Please enter a valid acronym that identifies the agency",
     "locationErrorMsg": "This location code is not valid for the selected agency, please enter a valid one or change the agency",
