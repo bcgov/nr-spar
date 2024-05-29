@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
@@ -427,16 +428,10 @@ class SeedlotFormPutTest {
 
     // Set area of use mocks
     int activeSpuId = 3;
+    String primaryOrchardId = mockedForm.seedlotFormOrchardDto().primaryOrchardId();
     Optional<ActiveOrchardSpuEntity> activeSpuOptional =
-        Optional.of(
-            new ActiveOrchardSpuEntity(
-                mockedForm.seedlotFormOrchardDto().primaryOrchardId(),
-                activeSpuId,
-                true,
-                false,
-                false));
-    when(orchardService.findSpuIdByOrchardWithActive(
-            mockedForm.seedlotFormOrchardDto().primaryOrchardId(), true))
+        Optional.of(new ActiveOrchardSpuEntity(primaryOrchardId, activeSpuId, true, false, false));
+    when(orchardService.findSpuIdByOrchardWithActive(primaryOrchardId, true))
         .thenReturn(activeSpuOptional);
 
     AreaOfUseDto areaOfUseDto = new AreaOfUseDto();
@@ -447,6 +442,22 @@ class SeedlotFormPutTest {
     SpzDto spzDto2 = new SpzDto("M", "Maritime", true);
     List<SpzDto> spzList = List.of(spzDto1, spzDto2);
     areaOfUseDto.setSpzList(spzList);
+
+    OrchardDto oracleOrchardRet =
+        new OrchardDto(
+            primaryOrchardId,
+            "Primary Orchard",
+            seedlot.getVegetationCode(),
+            'S',
+            "Seed Lot",
+            "PRD",
+            "SBS",
+            "Sub-Boreal Spruce",
+            "mk",
+            '1',
+            5);
+    when(oracleApiProvider.findOrchardById(primaryOrchardId))
+        .thenReturn(Optional.of(oracleOrchardRet));
 
     when(oracleApiProvider.getAreaOfUseData(activeSpuId)).thenReturn(Optional.of(areaOfUseDto));
 
@@ -517,5 +528,11 @@ class SeedlotFormPutTest {
     assertEquals(geospatialRespondDto.getMeanLongitudeMinute(), seedlot.getLongitudeMinMin());
     assertEquals(0, seedlot.getLongitudeSecMax());
     assertEquals(0, seedlot.getLongitudeSecMin());
+    // BEC values
+    assertEquals(oracleOrchardRet.becZoneCode(), seedlot.getBgcZoneCode());
+    assertEquals(oracleOrchardRet.becZoneDescription(), seedlot.getBgcZoneDecription());
+    assertEquals(oracleOrchardRet.becSubzoneCode(), seedlot.getBgcSubzoneCode());
+    assertEquals(oracleOrchardRet.variant(), seedlot.getVariant());
+    assertEquals(oracleOrchardRet.becVersionId(), seedlot.getBecVersionId());
   }
 }
