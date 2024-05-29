@@ -5,10 +5,10 @@ import { SeedlotRegFixtureType } from '../../definitions';
 describe('A Class Seedlot Registration form', () => {
   let regFormData: {
     collector: {
-      titleAgency: string;
-      subtitleAgency: string;
-      titleInformation: string;
-      subtitleInformation: string;
+      agencyTitle: string;
+      agencySubtitle: string;
+      informationTitle: string;
+      informationSubtitle: string;
       checkboxText: string;
       acronymErrorMsg: string;
       locationErrorMsg: string;
@@ -68,22 +68,38 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('.collection-step-row')
       .find('h2')
       .eq(0)
+<<<<<<< HEAD
       .should('have.text', regData.titleAgency);
+=======
+      .should('have.text', fixtureData.agencyTitle);
+>>>>>>> a77b2bb8 (feat: change title and subtitle variables for collector(Step 1))
 
     cy.get('.collection-step-row')
       .find('.subtitle-section')
       .eq(0)
+<<<<<<< HEAD
       .should('have.text', regData.subtitleAgency);
+=======
+      .should('have.text', fixtureData.agencySubtitle);
+>>>>>>> a77b2bb8 (feat: change title and subtitle variables for collector(Step 1))
 
     cy.get('.collection-step-row')
       .find('h2')
       .eq(1)
+<<<<<<< HEAD
       .should('have.text', regData.titleInformation);
+=======
+      .should('have.text', fixtureData.informationTitle);
+>>>>>>> a77b2bb8 (feat: change title and subtitle variables for collector(Step 1))
 
     cy.get('.collection-step-row')
       .find('.subtitle-section')
       .eq(1)
+<<<<<<< HEAD
       .should('have.text', regData.subtitleInformation);
+=======
+      .should('have.text', fixtureData.informationSubtitle);
+>>>>>>> a77b2bb8 (feat: change title and subtitle variables for collector(Step 1))
   });
 
   it('check collector agency section details are correct', () => {
