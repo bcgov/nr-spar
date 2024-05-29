@@ -28,6 +28,8 @@ describe('A Class Seedlot Registration form', () => {
   let seedlotNum: string;
   let species: string;
   let seedlotData: SeedlotRegFixtureType;
+  let testAcronym: string;
+  let testPopupAcronym: string;
 
   before(() => {
     // Login
@@ -61,6 +63,8 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.fixture('aclass-seedlot').then((fData) => {
       seedlotData = fData;
+      testAcronym = seedlotData.dr.agencyAcronym;
+      testPopupAcronym = seedlotData.cw.agencyAcronym;
     });
   });
 
@@ -71,8 +75,8 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   // Step 1
-  it('edit seedlot form button should display page details correctly', () => {
-    const regData = regFormData.collector;
+  it('check collection title and subtitles', () => {
+    const fixtureData = regFormData.collector;
     cy.url().should('contains', `seedlots/a-class-registration/${seedlotNum}`);
 
     cy.get('.seedlot-registration-title')
@@ -86,32 +90,32 @@ describe('A Class Seedlot Registration form', () => {
     cy.get('.collection-step-row')
       .find('h2')
       .eq(0)
-      .should('have.text', regData.titleAgency);
+      .should('have.text', fixtureData.titleAgency);
 
     cy.get('.collection-step-row')
       .find('.subtitle-section')
       .eq(0)
-      .should('have.text', regData.subtitleAgency);
+      .should('have.text', fixtureData.subtitleAgency);
 
     cy.get('.collection-step-row')
       .find('h2')
       .eq(1)
-      .should('have.text', regData.titleInformation);
+      .should('have.text', fixtureData.titleInformation);
 
     cy.get('.collection-step-row')
       .find('.subtitle-section')
       .eq(1)
-      .should('have.text', regData.subtitleInformation);
+      .should('have.text', fixtureData.subtitleInformation);
   });
 
   it('check collector agency section details are correct', () => {
-    const regData = regFormData.collector;
+    const fixtureData = regFormData.collector;
     cy.get('#collection-step-default-checkbox')
       .should('be.checked');
 
     cy.get('.agency-information-section')
       .find(`.${prefix}--checkbox-wrapper`)
-      .should('have.text', regData.checkboxText);
+      .should('have.text', fixtureData.checkboxText);
 
     cy.get('#collection-collector-agency')
       .should('have.value', seedlotData[species].agencyAcronym);
@@ -128,7 +132,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
 
     cy.get('#collection-collector-agency-error-msg')
-      .should('have.text', regData.acronymErrorMsg);
+      .should('have.text', fixtureData.acronymErrorMsg);
 
     // Popup test
     cy.get('.agency-information-section')
@@ -146,7 +150,7 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#client-search-input')
       .clear()
-      .type(seedlotData.dr.agencyAcronym, { force: true })
+      .type(testAcronym, { force: true })
       .blur();
 
     cy.get('button.client-search-button')
@@ -173,7 +177,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
 
     cy.get('#collection-location-code-error-msg')
-      .should('have.text', regData.locationErrorMsg);
+      .should('have.text', fixtureData.locationErrorMsg);
 
     cy.get('#collection-location-code')
       .clear()
@@ -182,7 +186,7 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   it('check collector information section details are correct', () => {
-    const regData = regFormData.collector;
+    const fixtureData = regFormData.collector;
     cy.get('#collection-end-date')
       .clear()
       .type('2024-05-28')
@@ -196,7 +200,7 @@ describe('A Class Seedlot Registration form', () => {
     cy.get(`.${prefix}--date-picker`)
       .find(`.${prefix}--form-requirement`)
       .should('have.length', 2)
-      .and('contain.text', regData.invalidDateErrorMsg);
+      .and('contain.text', fixtureData.invalidDateErrorMsg);
 
     cy.get('#collection-start-date')
       .clear()
@@ -210,7 +214,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
 
     cy.get('#collection-num-of-container-error-msg')
-      .should('have.text', regData.numOfContainerErrorMsg);
+      .should('have.text', fixtureData.numOfContainerErrorMsg);
 
     cy.get('#collection-vol-per-container')
       .clear()
@@ -218,7 +222,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
 
     cy.get('#collection-vol-per-container-error-msg')
-      .should('have.text', regData.numOfContainerErrorMsg);
+      .should('have.text', fixtureData.numOfContainerErrorMsg);
 
     cy.get('#collection-vol-of-cones')
       .should('have.value', '100020001.000');
@@ -229,7 +233,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
 
     cy.get('#collection-vol-of-cones-warn-msg')
-      .should('have.text', regData.volOfConesErrorMsg);
+      .should('have.text', fixtureData.volOfConesErrorMsg);
 
     // Input correct values in collection field
     cy.get('#collection-num-of-container')
@@ -268,20 +272,20 @@ describe('A Class Seedlot Registration form', () => {
 
   // Step 3
   it('check interim storage information section details are correct', () => {
-    const regData = regFormData.interimStorage;
+    const fixtureData = regFormData.interimStorage;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
 
     cy.get('.interim-agency-storage-form')
       .find('h2')
-      .should('have.text', regData.title);
+      .should('have.text', fixtureData.title);
 
     cy.get('.interim-agency-storage-form')
       .find('.subtitle-section')
-      .should('have.text', regData.subtitle);
+      .should('have.text', fixtureData.subtitle);
 
     cy.get('#interim-agency')
-      .should('have.value', seedlotData.dr.agencyAcronym);
+      .should('have.value', testAcronym);
 
     cy.get('#interim-location-code')
       .should('have.value', '02');
@@ -298,7 +302,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
 
     cy.get('#interim-agency-error-msg')
-      .should('have.text', regData.acronymErrorMsg);
+      .should('have.text', fixtureData.acronymErrorMsg);
 
     // Popup test
     cy.get('.agency-information-section')
@@ -316,7 +320,7 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#client-search-input')
       .clear()
-      .type(seedlotData.cw.agencyAcronym, { force: true })
+      .type(testPopupAcronym, { force: true })
       .blur();
 
     cy.get('button.client-search-button')
@@ -335,7 +339,7 @@ describe('A Class Seedlot Registration form', () => {
     // End Popup test
 
     cy.get('#interim-agency')
-      .should('have.value', seedlotData.cw.agencyAcronym);
+      .should('have.value', testPopupAcronym);
 
     cy.get('#interim-location-code')
       .clear()
@@ -343,7 +347,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
 
     cy.get('#interim-location-code-error-msg')
-      .should('have.text', regData.locationErrorMsg);
+      .should('have.text', fixtureData.locationErrorMsg);
 
     cy.get('#interim-location-code')
       .clear()
@@ -364,7 +368,7 @@ describe('A Class Seedlot Registration form', () => {
     cy.get(`.${prefix}--date-picker`)
       .find(`.${prefix}--form-requirement`)
       .should('have.length', 2)
-      .and('contain.text', regData.invalidDateErrorMsg);
+      .and('contain.text', fixtureData.invalidDateErrorMsg);
 
     // Enter valid dates
     cy.get('#start-date-input')
