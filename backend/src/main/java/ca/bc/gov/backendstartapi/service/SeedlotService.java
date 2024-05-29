@@ -619,7 +619,7 @@ public class SeedlotService {
 
     // Not sure why it's called Bgc in seedlot instead of Bec in orchard
     seedlot.setBgcZoneCode(orchardDto.becZoneCode());
-    seedlot.setBgcZoneDecription(orchardDto.becZoneDescription());
+    seedlot.setBgcZoneDescription(orchardDto.becZoneDescription());
     seedlot.setBgcSubzoneCode(orchardDto.becSubzoneCode());
     seedlot.setVariant(orchardDto.variant());
     seedlot.setBecVersionId(orchardDto.becVersionId());
