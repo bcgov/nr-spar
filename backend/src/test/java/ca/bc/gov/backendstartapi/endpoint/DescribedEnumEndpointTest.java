@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@WithMockUser(roles = "user_read")
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 abstract class DescribedEnumEndpointTest<E extends Enum<E> & DescribedEnum> {
 
   protected Class<E> enumClass;

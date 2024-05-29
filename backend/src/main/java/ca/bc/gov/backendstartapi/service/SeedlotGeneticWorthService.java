@@ -8,6 +8,7 @@ import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotGeneticWorthId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
@@ -33,7 +34,9 @@ public class SeedlotGeneticWorthService {
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
   public List<SeedlotGeneticWorth> saveSeedlotFormStep5(
-      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
+      boolean canDelete) {
     SparLog.info("Saving SeedlotGeneticWorth for seedlot number {}", seedlot.getId());
 
     List<SeedlotGeneticWorth> sgwList =
@@ -56,6 +59,8 @@ public class SeedlotGeneticWorthService {
       }
 
       seedlotGeneticWorthRepository.deleteAllById(sgwiList);
+    } else if (!sgwList.isEmpty() && !canDelete) {
+      throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {

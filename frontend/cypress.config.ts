@@ -1,7 +1,10 @@
+/* eslint-disable prefer-destructuring */
 import { defineConfig } from 'cypress';
 import { TEN_SECONDS } from './cypress/constants';
 
 declare const require: any;
+
+let CypressData: { [k: string]: any } = {};
 
 export default defineConfig({
   e2e: {
@@ -9,17 +12,19 @@ export default defineConfig({
     viewportWidth: 1280,
     viewportHeight: 720,
     experimentalWebKitSupport: true,
+    supportFile: 'cypress/support/commands.ts',
     env: {
       idirLoginUrl: 'https://logontest7.gov.bc.ca',
-      businessBceIdLoginUrl: 'https://logon7.gov.bc.ca'
+      businessBceIdLoginUrl: 'https://logontest7.gov.bc.ca'
     },
     specPattern: [
       '**/login-page.cy.ts',
       '**/dashboard-page.cy.ts',
-      '**/seedlot-main-page.cy.ts',
       '**/create-a-class-seedlot.cy.ts',
+      '**/seedlot-dashboard.cy.ts',
       '**/seedlot-detail.cy.ts',
-      '**/edit-applicant-seedlot-info.cy.ts'
+      '**/edit-applicant-seedlot-info.cy.ts',
+      '**/my-seedlots.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
@@ -36,6 +41,22 @@ export default defineConfig({
           // eslint-disable-next-line no-console
           console.log(...args);
           return null;
+        },
+        setData(keyValuePair) {
+          if (!Array.isArray(keyValuePair) || keyValuePair.length !== 2) {
+            return null;
+          }
+          const key = keyValuePair[0];
+          const value = keyValuePair[1];
+          CypressData = Object.assign(CypressData, { [key]: value });
+
+          return null;
+        },
+        getData(key) {
+          if (CypressData[key]) {
+            return CypressData[key];
+          }
+          return '';
         }
       });
 

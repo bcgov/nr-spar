@@ -2,12 +2,12 @@ package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -157,44 +157,7 @@ public class OracleApiProvider implements Provider {
   }
 
   @Override
-  public List<SeedPlanZoneDto> getSpzInformationBySpuIds(List<Integer> spuIds) {
-    String oracleApiUrl =
-        String.format("%s/api/orchards/spz-information-by-spu-ids/{spuIds}", rootUri);
-
-    SparLog.info(
-        "Starting {} - {} request to {}", PROVIDER, "getSpzInformationBySpuIds", oracleApiUrl);
-
-    try {
-      StringBuilder sb = new StringBuilder();
-      for (Integer id : spuIds) {
-        if (!sb.isEmpty()) {
-          sb.append(",");
-        }
-        sb.append(id);
-      }
-
-      ResponseEntity<List<SeedPlanZoneDto>> seedPlanZoneResult =
-          restTemplate.exchange(
-              oracleApiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
-              new ParameterizedTypeReference<List<SeedPlanZoneDto>>() {},
-              createParamsMap("spuIds", sb.toString()));
-      List<SeedPlanZoneDto> list = seedPlanZoneResult.getBody();
-      int size = list == null ? 0 : list.size();
-      SparLog.info("GET SPZ from Oracle - Success response with {} record(s)!", size);
-      return list;
-    } catch (HttpClientErrorException httpExc) {
-      SparLog.error(
-          "GET SPZ from Oracle - Response code error: {}, {}",
-          httpExc.getStatusCode(),
-          httpExc.getMessage());
-      throw new ResponseStatusException(httpExc.getStatusCode(), httpExc.getMessage());
-    }
-  }
-
-  @Override
-  public List<ParentTreeLocInfoDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
+  public List<GeospatialOracleResDto> getPtGeospatialDataByIdList(List<Long> ptIds) {
     String oracleApiUrl = String.format("%s/api/parent-trees/geospatial-data", rootUri);
 
     SparLog.info(
@@ -212,14 +175,14 @@ public class OracleApiProvider implements Provider {
       sb.append("]");
       HttpEntity<String> requestEntity = new HttpEntity<>(sb.toString(), addHttpHeaders());
 
-      ResponseEntity<List<ParentTreeLocInfoDto>> ptreeResponse =
+      ResponseEntity<List<GeospatialOracleResDto>> ptreeResponse =
           restTemplate.exchange(
               oracleApiUrl,
               HttpMethod.POST,
               requestEntity,
-              new ParameterizedTypeReference<List<ParentTreeLocInfoDto>>() {});
+              new ParameterizedTypeReference<List<GeospatialOracleResDto>>() {});
 
-      List<ParentTreeLocInfoDto> list = ptreeResponse.getBody();
+      List<GeospatialOracleResDto> list = ptreeResponse.getBody();
       int size = list == null ? 0 : list.size();
       SparLog.info(
           "GET parent tree lat long from Oracle - Success response with {} record(s)!", size);
@@ -252,5 +215,35 @@ public class OracleApiProvider implements Provider {
     headers.set(RequestCorrelation.CORRELATION_ID_HEADER, correlationId);
 
     return headers;
+  }
+
+  /**
+   * Finds all orchards with the provided vegCode from oracle-api.
+   *
+   * @param spuId The seed plan unit id.
+   * @return An {@link List} of {@link OrchardDto}
+   */
+  @Override
+  public Optional<AreaOfUseDto> getAreaOfUseData(Integer spuId) {
+    String oracleApiUrl = String.format("%s/api/orchards/area-of-use/spu/{spuId}", rootUri);
+
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "getAreaOfUseData", oracleApiUrl);
+
+    try {
+      ResponseEntity<AreaOfUseDto> areaOfUseRes =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<AreaOfUseDto>() {},
+              createParamsMap("spuId", spuId.toString()));
+      SparLog.info("GET orchards by vegCode from oracle - Success response!");
+      return Optional.of(areaOfUseRes.getBody());
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
+    }
+
+    return Optional.empty();
   }
 }

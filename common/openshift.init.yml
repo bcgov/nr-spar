@@ -14,6 +14,9 @@ parameters:
     description: Password for the PostgreSQL connection user.
     from: "[a-zA-Z0-9]{16}"
     generate: expression
+  - name: DB_PORT
+    description: Postgres database port
+    value: "5432"
   - name: FORESTCLIENTAPI_KEY
     required: true
   - name: ORACLE_DB_USER
@@ -34,6 +37,21 @@ parameters:
   - name: AWS_KINESIS_ROLE_ARN
     description: AWS Kinesis Role ARN
     required: true
+  - name: ORACLE_PASSWORD
+    description: Oracle database password for API
+    required: true
+  - name: ORACLE_HOST
+    description: Oracle database host
+    value: nrcdb03.bcgov
+  - name: ORACLE_PORT
+    description: Oracle database port
+    value: "1543"
+  - name: ORACLE_SERVICE
+    description: Oracle service name
+    value: dbq01.nrs.bcgov
+  - name: ORACLE_USER
+    description: Oracle database username for API
+    value: proxy_fsa_spar_read_only_user
 objects:
   - apiVersion: v1
     kind: Secret
@@ -44,7 +62,20 @@ objects:
     stringData:
       database-name: ${NAME}
       database-password: ${DB_PASSWORD}
+      database-port: ${DB_PORT}
       database-user: ${NAME}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-oracle
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      oracle-host: ${ORACLE_HOST}
+      oracle-password: ${ORACLE_PASSWORD}
+      oracle-port: ${ORACLE_PORT}
+      oracle-service: ${ORACLE_SERVICE}
+      oracle-user: ${ORACLE_USER}
   - apiVersion: v1
     kind: Secret
     metadata:

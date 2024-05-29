@@ -27,6 +27,10 @@ const EmptySection = ({
     Img = Pictograms[pictogram];
   }
 
+  if (!Img) {
+    Img = Icons.Help;
+  }
+
   return (
     <div className="empty-section-container">
       <Img className="empty-section-icon" />

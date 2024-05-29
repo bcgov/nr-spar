@@ -1,4 +1,6 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, {
+  useState, useRef, useContext
+} from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Accordion,
@@ -27,16 +29,21 @@ import {
   insertOwnerForm,
   deleteOwnerForm,
   formatPortionPerc,
-  arePortionsValid
+  arePortionsValid,
+  getOwnerAgencyTitle
 } from './utils';
 import { MAX_OWNERS } from './constants';
 
 import './styles.scss';
 
+type OwnershipStepProps = {
+  isReview?: boolean
+}
+
 /*
   Component
 */
-const OwnershipStep = () => {
+const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   const {
     allStepData: { ownershipStep: state },
     setStepData,
@@ -119,13 +126,21 @@ const OwnershipStep = () => {
     <div>
       <div className="ownership-header">
         <div className="ownership-step-title-box">
-          <h3>
-            Ownership
-          </h3>
-          <p>
-            Enter the seedlot&apos;s ownership information, the agencies listed as
-            owners are the ones who are charged for cone and seed processing fees
-          </p>
+          {
+            isReview
+              ? null
+              : (
+                <>
+                  <h3>
+                    Ownership
+                  </h3>
+                  <p>
+                    Enter the seedlot&apos;s ownership information, the agencies listed as
+                    owners are the ones who are charged for cone and seed processing fees
+                  </p>
+                </>
+              )
+          }
         </div>
       </div>
       <div className="ownership-form-container">
@@ -147,9 +162,11 @@ const OwnershipStep = () => {
                 }
                 title={(
                   <TitleAccordion
-                    title={singleOwnerInfo.ownerAgency.value.label === ''
-                      ? 'Owner agency name'
-                      : singleOwnerInfo.ownerAgency.value.description}
+                    title={
+                      singleOwnerInfo.ownerAgency.value.label === ''
+                        ? 'Owner agency name'
+                        : getOwnerAgencyTitle(singleOwnerInfo.ownerAgency.value.description)
+                    }
                     description={`${formatPortionPerc(singleOwnerInfo.ownerPortion.value)}% owner portion`}
                   />
                 )}
@@ -171,13 +188,14 @@ const OwnershipStep = () => {
                     (updtEntry: SingleOwnerForm, id: number) => checkPortionSum(updtEntry, id)
                   }
                   readOnly={isFormSubmitted}
+                  isReview={isReview}
                 />
               </AccordionItem>
             ))
           }
         </Accordion>
         {
-          !isFormSubmitted
+          !isFormSubmitted || isReview
             ? (
               <Button
                 kind="tertiary"

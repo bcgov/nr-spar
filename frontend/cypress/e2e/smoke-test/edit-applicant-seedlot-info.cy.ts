@@ -1,13 +1,32 @@
+/* eslint-disable cypress/no-force */
 /* eslint-disable func-names */
 /* eslint-disable prefer-arrow-callback */
+import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('Applicant and seedlot information page', () => {
+  let seedlotNumber: string;
+  let fixtureData: SeedlotRegFixtureType;
+  let speciesKey: string;
+
+  before(function () {
+    cy.fixture('aclass-seedlot').then((fData) => {
+      fixtureData = fData;
+      // Pick a random species to test
+      const speciesKeys = Object.keys(fixtureData);
+      // eslint-disable-next-line prefer-destructuring
+      speciesKey = speciesKeys[0];
+      cy.task('getData', fData[speciesKey].species).then((sNumber) => {
+        seedlotNumber = sNumber as string;
+      });
+    });
+  });
+
   it('should edit a seedlot applicant info', () => {
     // Login
     cy.login();
     // Go to seedlot detail
-    cy.visit('/seedlots/details/63001');
-    cy.url().should('contains', '/seedlots/details/63001');
+    cy.visit(`/seedlots/details/${seedlotNumber}`);
+    cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
 
     // Click on Edit applicant and seedlot button
     cy.get('.applicant-seedlot-information')
@@ -16,14 +35,14 @@ describe('Applicant and seedlot information page', () => {
       .click();
 
     // Verify it's at the edit-a-class-application/{seedlot_number} page
-    cy.url().should('contains', '/seedlots/edit-a-class-application/63001');
+    cy.url().should('contains', `/seedlots/edit-a-class-application/${seedlotNumber}`);
 
     // Change some entries
     cy.get('#edit-seedlot-email')
       .clear()
       .type('test@gmail.com');
 
-    cy.get('#seedlot-source-radio-btn-tpt').check('TPT');
+    cy.get('#seedlot-source-radio-btn-tpt').check('TPT', { force: true });
 
     cy.get('#register-w-tsc-no')
       .should('be.visible')
@@ -33,35 +52,11 @@ describe('Applicant and seedlot information page', () => {
       .should('be.visible')
       .click({ force: true });
 
-    // Intercept PATCH /api/seedlots/{seedlot_number}/application-info call
-    cy.intercept(
-      {
-        method: 'PATCH',
-        url: '**/api/seedlots/63001/application-info'
-      },
-      {
-        statusCode: 200,
-        fixture: 'applicant-info-change.json'
-      }
-    ).as('PATCH_applicant_info_change_63001');
-
-    // Intercept GET /api/seedlots/{seedlot_number} call, to reflect updated data
-    cy.intercept(
-      {
-        method: 'GET',
-        url: '**/api/seedlots/63001'
-      },
-      {
-        statusCode: 200,
-        fixture: 'applicant-info-change.json'
-      }
-    ).as('GET_applicant_info_change_63001');
-
     // Save edit
     cy.get('.submit-button').click();
 
     // Verify it's redirected to seedlot detail
-    cy.url().should('contains', '/seedlots/details/63001');
+    cy.url().should('contains', `/seedlots/details/${seedlotNumber}`);
 
     // Verify the stuff you changed are being displayed
     cy.get('.applicant-seedlot-information')

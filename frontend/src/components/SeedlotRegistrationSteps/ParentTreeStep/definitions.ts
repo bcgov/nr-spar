@@ -136,3 +136,16 @@ export type EditableCellProps = {
   seedlotSpecies: MultiOptionsObj,
   readOnly: boolean
 };
+
+export type MeanGeomInfoSectionConfigType = {
+  seedlot: {
+    meanLatitudeDm: InfoDisplayObj,
+    meanLongitudeDm: InfoDisplayObj,
+    meanElevation: InfoDisplayObj
+  },
+  smpMix: {
+    meanLatitudeDm: InfoDisplayObj,
+    meanLongitudeDm: InfoDisplayObj,
+    meanElevation: InfoDisplayObj
+  }
+}

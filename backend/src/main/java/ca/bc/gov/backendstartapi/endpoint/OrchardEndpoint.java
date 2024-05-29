@@ -4,6 +4,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -54,6 +55,7 @@ public class OrchardEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public OrchardSpuDto getParentTreeGeneticQualityData(
       @PathVariable
           @Parameter(
@@ -85,6 +87,7 @@ public class OrchardEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<OrchardDto> getOrchardsByVegCode(
       @PathVariable("vegCode")
           @Pattern(regexp = "^[a-zA-Z]{1,8}$")
@@ -120,6 +123,7 @@ public class OrchardEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<SameSpeciesTreeDto> getAllParentTreeByVegCode(
       @PathVariable("vegCode")
           @Pattern(regexp = "^[a-zA-Z]{1,8}$")

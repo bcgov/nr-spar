@@ -5,7 +5,7 @@ import {
 } from '@carbon/react';
 
 import PageTitle from '../../../components/PageTitle';
-import SeedlotActivities from '../../../components/SeedlotActivities';
+import SeedlotActivities from '../../../components/SeedlotCards';
 import RecentSeedlots from './RecentSeedlots';
 
 import './styles.scss';

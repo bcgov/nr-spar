@@ -33,6 +33,7 @@ import {
 } from './constants';
 import {
   AllStepData,
+  ClientAgenciesByCode,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
 
@@ -115,17 +116,14 @@ export const initOwnershipState = (
   useDefault?: boolean,
   methodsOfPayment?: Array<MultiOptionsObj>,
   fundingSource?: Array<MultiOptionsObj>,
+  clientData?: ClientAgenciesByCode,
   defaultAgencyNumber = ''
 ): Array<SingleOwnerForm> => {
   const seedlotOwners: Array<SingleOwnerForm> = ownersStepData.map((curOwner, index) => {
     const ownerState = createOwnerTemplate(index, curOwner);
-    ownerState.ownerAgency.value = useDefault
-      ? defaultAgency
-      : {
-        code: curOwner.ownerClientNumber,
-        description: '',
-        label: curOwner.ownerClientNumber
-      };
+    ownerState.ownerAgency.value = clientData && !useDefault
+      ? clientData[curOwner.ownerClientNumber]
+      : defaultAgency;
     ownerState.useDefaultAgencyInfo.value = ownerState.ownerAgency.value.code === defaultAgencyNumber;
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
     if (methodsOfPayment && fundingSource) {
@@ -183,9 +181,14 @@ export const initInterimState = (
 
 const convertToOrchardsType = (
   orchards: Array<MultiOptionsObj> | undefined,
-  orchardsIds: Array<string>
+  primaryOrchardId: string,
+  secondaryOrchardId: string | null
 ): Array<OrchardObj> => {
   if (orchards) {
+    const orchardsIds: string[] = [primaryOrchardId];
+    if (secondaryOrchardId) {
+      orchardsIds.push(secondaryOrchardId);
+    }
     const filteredOrchards = orchards.filter((curOrch) => orchardsIds.includes(curOrch.code));
     return filteredOrchards.map((curFilteredOrch, index) => ({
       inputId: index,
@@ -209,7 +212,7 @@ export const initOrchardState = (
   gameticMethodology?: Array<MultiOptionsObj>
 ): OrchardForm => (
   {
-    orchards: convertToOrchardsType(possibleOrchards, orchardStepData.orchardsId),
+    orchards: convertToOrchardsType(possibleOrchards, orchardStepData.primaryOrchardId, orchardStepData.secondaryOrchardId),
     femaleGametic: {
       id: 'orchard-female-gametic',
       value: gameticMethodology
@@ -706,26 +709,33 @@ export const convertInterim = (interimData: InterimForm): InterimFormSubmitType 
   intermFacilityCode: interimData.facilityType.value
 });
 
-export const convertOrchard = (orchardData: OrchardForm, parentTreeRows: RowDataDictType): OrchardFormSubmitType => ({
-  // This is a way of dealing with duplicated orchards
-  // and make sure the value is not null
-  orchardsId: processOrchards(orchardData.orchards).map((orchard: OrchardObj) => {
-    if (orchard.selectedItem) {
-      return orchard.selectedItem.code;
-    }
-    return '';
-  }),
-  femaleGameticMthdCode: orchardData.femaleGametic.value.code,
-  maleGameticMthdCode: orchardData.maleGametic.value.code,
-  controlledCrossInd: orchardData.isControlledCross.value,
-  biotechProcessesInd: orchardData.hasBiotechProcess.value,
-  pollenContaminationInd: orchardData.hasPollenContamination.value,
-  pollenContaminationPct: +calcAverage(Object.values(parentTreeRows), 'nonOrchardPollenContam'),
-  contaminantPollenBv: +orchardData.breedingPercentage.value,
-  // This is a fixed field (for now at least) with the regional code,
-  // so the methodology code is always set to 'REG'
-  pollenContaminationMthdCode: 'REG'
-});
+export const convertOrchard = (orchardData: OrchardForm, parentTreeRows: RowDataDictType): OrchardFormSubmitType => {
+  const deDuppedOrchards = processOrchards(orchardData.orchards);
+  let primaryOrchardId: string = '';
+  let secondaryOrchardId = null;
+
+  if (deDuppedOrchards.length > 0) {
+    primaryOrchardId = deDuppedOrchards[0].selectedItem!.code;
+  }
+  if (deDuppedOrchards.length > 1) {
+    secondaryOrchardId = deDuppedOrchards[1].selectedItem!.code;
+  }
+
+  return ({
+    primaryOrchardId,
+    secondaryOrchardId,
+    femaleGameticMthdCode: orchardData.femaleGametic.value.code,
+    maleGameticMthdCode: orchardData.maleGametic.value.code,
+    controlledCrossInd: orchardData.isControlledCross.value,
+    biotechProcessesInd: orchardData.hasBiotechProcess.value,
+    pollenContaminationInd: orchardData.hasPollenContamination.value,
+    pollenContaminationPct: +calcAverage(Object.values(parentTreeRows), 'nonOrchardPollenContam'),
+    contaminantPollenBv: +orchardData.breedingPercentage.value,
+    // This is a fixed field (for now at least) with the regional code,
+    // so the methodology code is always set to 'REG'
+    pollenContaminationMthdCode: 'REG'
+  });
+};
 
 export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlotNumber: string): Array<ParentTreeFormSubmitType> => {
   const parentTreePayload: Array<ParentTreeFormSubmitType> = [];
@@ -866,15 +876,12 @@ export const resDataToState = (
   methodsOfPaymentData: MultiOptionsObj[],
   fundingSourcesData: MultiOptionsObj[],
   orchardQueryData: MultiOptionsObj[],
-  gameticMethodologyData: MultiOptionsObj[]
+  gameticMethodologyData: MultiOptionsObj[],
+  clientData: ClientAgenciesByCode
 ): AllStepData => (
   {
     collectionStep: initCollectionState(
-      {
-        code: fullFormData.seedlotFormCollectionDto.collectionClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormCollectionDto.collectionClientNumber
-      },
+      clientData[fullFormData.seedlotFormCollectionDto.collectionClientNumber],
       fullFormData.seedlotFormCollectionDto,
       fullFormData.seedlotFormCollectionDto.collectionClientNumber === defaultAgencyNumber
     ),
@@ -884,14 +891,11 @@ export const resDataToState = (
       false,
       methodsOfPaymentData,
       fundingSourcesData,
+      clientData,
       defaultAgencyNumber
     ),
     interimStep: initInterimState(
-      {
-        code: fullFormData.seedlotFormInterimDto.intermStrgClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormInterimDto.intermStrgClientNumber
-      },
+      clientData[fullFormData.seedlotFormInterimDto.intermStrgClientNumber],
       fullFormData.seedlotFormInterimDto,
       // eslint-disable-next-line max-len
       fullFormData.seedlotFormInterimDto.intermStrgClientNumber === fullFormData.seedlotFormCollectionDto.collectionClientNumber
@@ -906,16 +910,8 @@ export const resDataToState = (
       fullFormData.seedlotFormParentTreeSmpDtoList
     ),
     extractionStorageStep: initExtractionStorageState(
-      {
-        code: fullFormData.seedlotFormExtractionDto.extractoryClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormExtractionDto.extractoryClientNumber
-      },
-      {
-        code: fullFormData.seedlotFormExtractionDto.storageClientNumber,
-        description: '',
-        label: fullFormData.seedlotFormExtractionDto.storageClientNumber
-      },
+      clientData[fullFormData.seedlotFormExtractionDto.extractoryClientNumber],
+      clientData[fullFormData.seedlotFormExtractionDto.storageClientNumber],
       fullFormData.seedlotFormExtractionDto,
       '',
       '',

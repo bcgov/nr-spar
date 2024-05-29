@@ -20,6 +20,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ConeCollectionMethodEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class ConeCollectionMethodEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -34,7 +35,6 @@ class ConeCollectionMethodEndpointTest {
 
   @Test
   @DisplayName("getAllConeCollectionMethodsTest")
-  @WithMockUser(roles = "user_read")
   void getAllConeCollectionMethodsTest() throws Exception {
 
     CodeDescriptionDto firstMethod = new CodeDescriptionDto("1", "Aerial raking");

@@ -17,10 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(FacilityTypesEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class FacilityTypesEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -29,7 +31,6 @@ class FacilityTypesEndpointTest {
 
   @Test
   @DisplayName("findAllSuccessTest")
-  @WithMockUser(roles = "user_read")
   void findAllSuccessTest() throws Exception {
     FacilityTypes facilityTypeOcv = new FacilityTypes();
     facilityTypeOcv.setCode("OCV");
@@ -58,7 +59,6 @@ class FacilityTypesEndpointTest {
     facilityTypeVrm.setEffectiveDate(LocalDate.parse("1905-01-01"));
     facilityTypeVrm.setExpiryDate(LocalDate.parse("9999-12-31"));
     facilityTypeVrm.setUpdateTimeStamp(LocalDate.parse("2004-02-03"));
-
 
     List<FacilityTypes> types = new ArrayList<>();
     types.add(facilityTypeOcv);
@@ -100,6 +100,7 @@ class FacilityTypesEndpointTest {
 
   @Test
   @DisplayName("findAllNoAuthorizedTest")
+  @WithAnonymousUser
   void findAllNoAuthorizedTest() throws Exception {
     mockMvc
         .perform(
@@ -107,8 +108,7 @@ class FacilityTypesEndpointTest {
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().is(401))
+        .andExpect(status().isUnauthorized())
         .andReturn();
   }
-
 }

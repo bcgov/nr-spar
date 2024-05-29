@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { createContext } from 'react';
+import React, { createContext } from 'react';
 import { UseMutationResult } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 
@@ -10,6 +10,11 @@ import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotType } 
 import { AllStepData, ProgressIndicatorConfig } from './definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
 import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
+import {
+  InfoSectionConfigType, MeanGeomInfoSectionConfigType, PrimitiveRowItem, RowItem, StrTypeRowItem
+} from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import { SummarySectionConfig } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 
 export type ClassAContextType = {
   seedlotData: SeedlotType | undefined,
@@ -45,7 +50,21 @@ export type ClassAContextType = {
   ) => SeedlotAClassSubmitType,
   updateProgressStatus: (currentStepNum: number, prevStepNum: number) => void,
   saveProgressStatus: MutationStatusType,
-  isFetchingData: boolean
+  isFetchingData: boolean,
+  genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
+  setGenWorthInfoItems: React.Dispatch<
+    React.SetStateAction<Record<keyof PrimitiveRowItem | keyof StrTypeRowItem, InfoDisplayObj[]>>
+  >,
+  weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
+  setWeightedGwInfoItems: React.Dispatch<
+    React.SetStateAction<Record<keyof PrimitiveRowItem | keyof StrTypeRowItem, InfoDisplayObj>>
+  >,
+  popSizeAndDiversityConfig: InfoSectionConfigType,
+  setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
+  summaryConfig: typeof SummarySectionConfig,
+  setSummaryConfig: React.Dispatch<React.SetStateAction<typeof SummarySectionConfig>>,
+  meanGeomInfos: MeanGeomInfoSectionConfigType,
+  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -79,7 +98,17 @@ const ClassAContext = createContext<ClassAContextType>({
   geoInfoVals: {} as GeoInfoValType,
   genWorthVals: {} as GenWorthValType,
   setGenWorthVal: () => { },
-  setGeoInfoVal: () => { }
+  setGeoInfoVal: () => { },
+  genWorthInfoItems: {} as Record<keyof RowItem, InfoDisplayObj[]>,
+  setGenWorthInfoItems: () => { },
+  weightedGwInfoItems: {} as Record<keyof RowItem, InfoDisplayObj>,
+  setWeightedGwInfoItems: () => { },
+  popSizeAndDiversityConfig: {} as InfoSectionConfigType,
+  setPopSizeAndDiversityConfig: () => { },
+  summaryConfig: {} as typeof SummarySectionConfig,
+  setSummaryConfig: () => { },
+  meanGeomInfos: {} as MeanGeomInfoSectionConfigType,
+  setMeanGeomInfos: () => { }
 });
 
 export default ClassAContext;

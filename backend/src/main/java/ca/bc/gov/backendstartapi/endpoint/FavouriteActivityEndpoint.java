@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.dto.FavouriteActivityUpdateDto;
 import ca.bc.gov.backendstartapi.entity.FavouriteActivityEntity;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.FavouriteActivityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -80,6 +81,7 @@ public class FavouriteActivityEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ResponseEntity<FavouriteActivityEntity> createUserActivity(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the activity name that will be created",
@@ -118,6 +120,7 @@ public class FavouriteActivityEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<FavouriteActivityEntity> getUserActivities() {
     return favouriteActivityService.getAllUserFavoriteActivities();
   }
@@ -153,6 +156,7 @@ public class FavouriteActivityEndpoint {
             description = "The FavouriteActivityEntity was not found",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public FavouriteActivityEntity updateFavoriteActivity(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing the activity enabled and highlighted property values",
@@ -197,6 +201,7 @@ public class FavouriteActivityEndpoint {
             description = "The FavouriteActivityEntity was not found",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public void deleteFavoriteActivity(
       @Parameter(
               name = "id",

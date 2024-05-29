@@ -20,6 +20,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(SeedlotStatusEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class SeedlotStatusEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -34,7 +35,6 @@ class SeedlotStatusEndpointTest {
 
   @Test
   @DisplayName("getAllSeedlotStatus")
-  @WithMockUser(roles = "user_read")
   void getAllSeedlotStatus() throws Exception {
 
     CodeDescriptionDto firstMethod = new CodeDescriptionDto("APP", "Approved");

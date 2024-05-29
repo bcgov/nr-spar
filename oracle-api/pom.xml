@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.4</version>
+		<version>3.2.5</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ca.bc.gov</groupId>
@@ -212,6 +212,7 @@
 					<excludes>
 						<exclude>**/config/**</exclude>
             <exclude>**/filter/**</exclude>
+            <exclude>**/interceptor/**</exclude>
 						<exclude>**/*$*Builder*</exclude>
 						<exclude>**/BackendStartApiApplication.*</exclude>
 					</excludes>
@@ -369,7 +370,7 @@
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>10.15.0</version>
+						<version>10.16.0</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -416,7 +417,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.37.3</version>
+				<version>9.39</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

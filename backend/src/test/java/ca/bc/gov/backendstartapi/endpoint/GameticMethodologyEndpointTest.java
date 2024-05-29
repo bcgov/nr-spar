@@ -20,6 +20,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(GameticMethodologyEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class GameticMethodologyEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -28,7 +29,6 @@ class GameticMethodologyEndpointTest {
 
   @Test
   @DisplayName("getAllConeCollectionMethodsTest")
-  @WithMockUser(roles = "user_read")
   void getAllConeCollectionMethodsTest() throws Exception {
     GameticMethodologyDto firstMethod =
         new GameticMethodologyDto("F1", "Visual Estimate", true, false);

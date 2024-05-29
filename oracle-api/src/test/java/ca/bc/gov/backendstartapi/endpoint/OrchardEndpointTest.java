@@ -8,12 +8,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SpzDto;
+import ca.bc.gov.backendstartapi.exception.SpuNotFoundException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -32,6 +35,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(OrchardEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class OrchardEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -40,7 +44,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findByIdPrdSuccessTest")
-  @WithMockUser(roles = "user_read")
   void findByIdPrdSuccessTest() throws Exception {
     OrchardLotTypeDescriptionDto descriptionDto =
         new OrchardLotTypeDescriptionDto("337", "GRANDVIEW", "PLI", 'S', "Seed Lot", "PRD");
@@ -66,7 +69,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findByIdNotFoundTest")
-  @WithMockUser(roles = "user_read")
   void findByIdNotFoundTest() throws Exception {
     when(orchardService.findNotRetiredOrchardValidLotType(any())).thenReturn(Optional.empty());
 
@@ -82,7 +84,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findParentTreeGeneticQualitySuccessTest")
-  @WithMockUser(roles = "user_read")
   void findParentTreeGeneticQualitySuccessTest() throws Exception {
     OrchardParentTreeDto orchardParentTreeDto = new OrchardParentTreeDto();
     orchardParentTreeDto.setOrchardId("405");
@@ -149,7 +150,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findParentTreeGeneticQualityNotFoundTest")
-  @WithMockUser(roles = "user_read")
   void findParentTreeGeneticQualityNotFoundTest() throws Exception {
     when(orchardService.findParentTreeGeneticQualityData(any(), any()))
         .thenReturn(Optional.empty());
@@ -168,7 +168,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findOrchardsWithVegCodeSuccessEndpointTest")
-  @WithMockUser(roles = "user_read")
   void findOrchardsWithVegCodeSuccessEndpointTest() throws Exception {
     String vegCode = "PLI";
 
@@ -205,7 +204,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findOrchardsWithVegCodeNotFoundEndpointTest")
-  @WithMockUser(roles = "user_read")
   void findOrchardsWithVegCodeNotFoundEndpointTest() throws Exception {
     String vegCode = "BEEF";
 
@@ -223,7 +221,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getAllParentTreeByVegCodeTest")
-  @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeTest() throws Exception {
 
     SameSpeciesTreeDto firstDto =
@@ -256,7 +253,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getAllParentTreeByVegCodeErrorTest")
-  @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeErrorTest() throws Exception {
     String vegCode = "FDI";
 
@@ -277,37 +273,76 @@ class OrchardEndpointTest {
   }
 
   @Test
-  @DisplayName("getSpzInformationBySpu_sucessTest")
-  @WithMockUser(roles = "user_read")
-  void getSpzInformationBySpu_sucessTest() throws Exception {
-    SeedPlanZoneDto responseDto = new SeedPlanZoneDto();
-    responseDto.setSeedPlanUnitId(7);
-    responseDto.setSeedPlanZoneId(40);
-    responseDto.setGeneticClassCode('A');
-    responseDto.setSeedPlanZoneCode("M");
-    responseDto.setVegetationCode("FDC");
-    responseDto.setElevationMin(1);
-    responseDto.setElevationMax(700);
+  @DisplayName("getAreaOfUseDataBySpu_sucessTest")
+  void getAreaOfUseDataBySpu_sucessTest() throws Exception {
+    AreaOfUseDto responseDto = new AreaOfUseDto();
+    AreaOfUseSpuGeoDto aouSpuGeoDto = new AreaOfUseSpuGeoDto(11, 1200, 12, 130, 2, 45);
+    responseDto.setAreaOfUseSpuGeoDto(aouSpuGeoDto);
 
-    List<Integer> spuIds = List.of(7);
-    when(orchardService.getSpzInformationBySpu(spuIds)).thenReturn(List.of(responseDto));
+    SpzDto spzDto1 = new SpzDto("GL", "Georgia Lowlands", false);
+    SpzDto spzDto2 = new SpzDto("M", "Maritime", true);
+
+    responseDto.setSpzList(List.of(spzDto1, spzDto2));
+
+    Integer spu = 1;
+    when(orchardService.calcAreaOfUseData(spu)).thenReturn(responseDto);
 
     mockMvc
         .perform(
-            get("/api/orchards/spz-information-by-spu-ids/{spuIds}", spuIds.toArray())
+            get("/api/orchards/area-of-use/spu/{spuId}", spu)
                 .with(csrf().asHeader())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].seedPlanUnitId").value(responseDto.getSeedPlanUnitId()))
-        .andExpect(jsonPath("$[0].seedPlanZoneId").value(responseDto.getSeedPlanZoneId()))
         .andExpect(
-            jsonPath("$[0].geneticClassCode").value(responseDto.getGeneticClassCode().toString()))
-        .andExpect(jsonPath("$[0].seedPlanZoneCode").value(responseDto.getSeedPlanZoneCode()))
-        .andExpect(jsonPath("$[0].vegetationCode").value(responseDto.getVegetationCode()))
-        .andExpect(jsonPath("$[0].elevationMin").value(responseDto.getElevationMin()))
-        .andExpect(jsonPath("$[0].elevationMax").value(responseDto.getElevationMax()))
+            jsonPath("$.areaOfUseSpuGeoDto.elevationMin")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getElevationMin()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.elevationMax")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getElevationMax()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.latitudeDegreesMin")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMin()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.latitudeDegreesMax")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMax()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.latitudeMinutesMin")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMin()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.latitudeMinutesMax")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMax()))
+        // SPZ list test
+        .andExpect(jsonPath("$.spzList[0].code").value(responseDto.getSpzList().get(0).getCode()))
+        .andExpect(
+            jsonPath("$.spzList[0].description")
+                .value(responseDto.getSpzList().get(0).getDescription()))
+        .andExpect(
+            jsonPath("$.spzList[0].isPrimary")
+                .value(responseDto.getSpzList().get(0).getIsPrimary()))
+        .andExpect(jsonPath("$.spzList[1].code").value(responseDto.getSpzList().get(1).getCode()))
+        .andExpect(
+            jsonPath("$.spzList[1].description")
+                .value(responseDto.getSpzList().get(1).getDescription()))
+        .andExpect(
+            jsonPath("$.spzList[1].isPrimary")
+                .value(responseDto.getSpzList().get(1).getIsPrimary()))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAreaOfUseDataBySpu_errorTest")
+  void getAreaOfUseDataBySpu_errorTest() throws Exception {
+    when(orchardService.calcAreaOfUseData(any())).thenThrow(new SpuNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/orchards/area-of-use/spu/{spuId}", "420")
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
         .andReturn();
   }
 }
