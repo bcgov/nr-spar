@@ -26,6 +26,8 @@ import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownershi
 import OwnershipReviewEdit from '../../../components/SeedlotReviewSteps/Ownership/Edit';
 import InterimReviewRead from '../../../components/SeedlotReviewSteps/Interim/Read';
 import InterimReviewEdit from '../../../components/SeedlotReviewSteps/Interim/Edit';
+import OrchardReviewRead from '../../../components/SeedlotReviewSteps/Orchard/Read';
+import OrchardReviewEdit from '../../../components/SeedlotReviewSteps/Orchard/Edit';
 
 import ContextContainerClassA from '../ContextContainerClassA';
 
@@ -201,6 +203,17 @@ const SeedlotReview = () => {
         <Row className="section-title-row">
           <Column className="section-title-col">
             Orchard
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            {
+              isReadMode
+                ? <OrchardReviewRead />
+                : (
+                  <OrchardReviewEdit />
+                )
+            }
           </Column>
         </Row>
 

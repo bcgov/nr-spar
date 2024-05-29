@@ -29,6 +29,7 @@
 
   .pollen-contam-row {
     margin-top: 2rem;
+    margin-bottom: 2rem;
   }
 
   .seedlot-orchard-title-row {
@@ -38,5 +39,12 @@
   .seedlot-orchard-add-orchard,
   .pollen-methodology-checkbox {
     margin-bottom: 1rem;
+  }
+
+  .orchard-fields-review-only {
+    .#{vars.$bcgov-prefix}--row:last-child {
+      padding-top: 2rem;
+      padding-bottom: 2.5rem;
+    }
   }
 }

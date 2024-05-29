@@ -29,6 +29,7 @@ import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import Subtitle from '../../Subtitle';
+import ReadOnlyInput from '../../ReadOnlyInput';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 
 import { OrchardForm, OrchardObj } from './definitions';
@@ -44,11 +45,12 @@ type NumStepperVal = {
 }
 
 interface OrchardStepProps {
-  cleanParentTables: Function
+  cleanParentTables: Function;
+  isReview?: boolean;
 }
 
 const OrchardStep = ({
-  cleanParentTables
+  cleanParentTables, isReview
 }: OrchardStepProps) => {
   const {
     allStepData: { orchardStep: state },
@@ -68,7 +70,7 @@ const OrchardStep = ({
     queryKey: ['gametic-methodologies'],
     queryFn: getGameticMethodology,
     select: (data) => getMultiOptList(data, true, false, true, ['isFemaleMethodology', 'isPliSpecies']),
-    enabled: !isFormSubmitted,
+    enabled: !isFormSubmitted || isReview,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -204,7 +206,7 @@ const OrchardStep = ({
   };
 
   const renderOrchardButtons = () => {
-    if (!isFormSubmitted) {
+    if (!isFormSubmitted && !isReview) {
       return state.orchards.length !== 1
         ? (
           <Row className="seedlot-orchard-add-orchard">
@@ -244,6 +246,91 @@ const OrchardStep = ({
     return null;
   };
 
+  const renderOrchardFields = () => {
+    if (isFormSubmitted && isReview) {
+      return (
+        <div className="orchard-fields-review-only">
+          {
+            state.orchards.map((orchard: OrchardObj, index: number) => (
+              <Row key={`orchard-${index + 1}`}>
+                <Column sm={4} md={4} lg={4}>
+                  <ReadOnlyInput
+                    id={`orchard-${index + 1}-number`}
+                    label="Orchard ID or number"
+                    value={orchard.selectedItem?.code ?? ''}
+                  />
+                </Column>
+                <Column sm={4} md={4} lg={4}>
+                  <ReadOnlyInput
+                    id={`orchard-${index + 1}-name`}
+                    label="Orchard name"
+                    value={orchard.selectedItem?.label ?? ''}
+                  />
+                </Column>
+              </Row>
+            ))
+          }
+        </div>
+      );
+    }
+    return (state.orchards.map((orchard: OrchardObj) => (
+      <Row className="orchard-row" key={orchard.inputId}>
+        <Column sm={4} md={4} lg={8} xlg={6}>
+          {
+            orchardQuery.isFetching ? (
+              <TextInputSkeleton />
+            )
+              : (
+                <>
+                  <ComboBox
+                    id={`orchard-combobox-${orchard.inputId}`}
+                    placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
+                    items={
+                      orchardQuery.isSuccess
+                        ? removeSelectedOption(orchardQuery.data)
+                        : []
+                    }
+                    selectedItem={orchard.selectedItem}
+                    titleText={
+                      orchard.inputId === 0
+                        ? orchardStepText.orchardSection.orchardInput.label
+                        : orchardStepText.orchardSection.orchardInput.optLabel
+                    }
+                    shouldFilterItem={
+                      ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                    }
+                    onChange={
+                      (e: ComboBoxEvent) => {
+                        if (!isTableEmpty) {
+                          setModalType('change');
+                          setStagedOrchard({
+                            inputId: orchard.inputId,
+                            selectedItem: e.selectedItem,
+                            isInvalid: orchard.isInvalid
+                          });
+                          setModalOpen(true);
+                        } else setOrchard(orchard.inputId, e.selectedItem);
+                      }
+                    }
+                    readOnly={isFormSubmitted || isReview}
+                  />
+                  {
+                    orchardQuery.isError && !isFormSubmitted
+                      ? (
+                        <InputErrorText
+                          description={orchardStepText.orchardSection.orchardInput.fetchError}
+                        />
+                      )
+                      : null
+                  }
+                </>
+              )
+          }
+        </Column>
+      </Row>
+    )));
+  };
+
   return (
     <FlexGrid className="seedlot-orchard-step-form">
       <Row className="seedlot-orchard-title-row">
@@ -253,62 +340,7 @@ const OrchardStep = ({
         </Column>
       </Row>
       {
-        state.orchards.map((orchard) => (
-          <Row className="orchard-row" key={orchard.inputId}>
-            <Column sm={4} md={4} lg={8} xlg={6}>
-              {
-                orchardQuery.isFetching ? (
-                  <TextInputSkeleton />
-                )
-                  : (
-                    <>
-                      <ComboBox
-                        id={`orchard-combobox-${orchard.inputId}`}
-                        placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
-                        items={
-                          orchardQuery.isSuccess
-                            ? removeSelectedOption(orchardQuery.data)
-                            : []
-                        }
-                        selectedItem={orchard.selectedItem}
-                        titleText={
-                          orchard.inputId === 0
-                            ? orchardStepText.orchardSection.orchardInput.label
-                            : orchardStepText.orchardSection.orchardInput.optLabel
-                        }
-                        shouldFilterItem={
-                          ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
-                        }
-                        onChange={
-                          (e: ComboBoxEvent) => {
-                            if (!isTableEmpty) {
-                              setModalType('change');
-                              setStagedOrchard({
-                                inputId: orchard.inputId,
-                                selectedItem: e.selectedItem,
-                                isInvalid: orchard.isInvalid
-                              });
-                              setModalOpen(true);
-                            } else setOrchard(orchard.inputId, e.selectedItem);
-                          }
-                        }
-                        readOnly={isFormSubmitted}
-                      />
-                      {
-                        orchardQuery.isError && !isFormSubmitted
-                          ? (
-                            <InputErrorText
-                              description={orchardStepText.orchardSection.orchardInput.fetchError}
-                            />
-                          )
-                          : null
-                      }
-                    </>
-                  )
-              }
-            </Column>
-          </Row>
-        ))
+        renderOrchardFields()
       }
       {
         renderOrchardButtons()
@@ -349,7 +381,7 @@ const OrchardStep = ({
                   invalid={state.femaleGametic.isInvalid}
                   invalidText={orchardStepText.gameteSection.femaleGametic.invalid}
                   onChange={(e: ComboBoxEvent) => setGametic(e, true)}
-                  readOnly={isFormSubmitted}
+                  readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.femaleGametic.value}
                 />
               )
@@ -375,7 +407,7 @@ const OrchardStep = ({
                   invalid={state.maleGametic.isInvalid}
                   invalidText={orchardStepText.gameteSection.maleGametic.invalid}
                   onChange={(e: ComboBoxEvent) => setGametic(e, false)}
-                  readOnly={isFormSubmitted}
+                  readOnly={isFormSubmitted && !isReview}
                   selectedItem={state.maleGametic.value}
                 />
               )
@@ -390,7 +422,7 @@ const OrchardStep = ({
             name="controlled-cross-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('isControlledCross', selected === 'Yes')}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <RadioButton
               id="controlled-cross-yes"
@@ -415,7 +447,7 @@ const OrchardStep = ({
             name="biotech-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('hasBiotechProcess', selected === 'Yes')}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <RadioButton
               id="biotech-yes"
@@ -446,7 +478,7 @@ const OrchardStep = ({
             name="pollen-contam-radio-btn-group"
             orientation="vertical"
             onChange={(selected: string) => setBooleanValue('hasPollenContamination', selected === 'Yes')}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <RadioButton
               id="pollen-contam-yes"
@@ -495,7 +527,7 @@ const OrchardStep = ({
                         }
                       }
                     }
-                    readOnly={isFormSubmitted}
+                    readOnly={isFormSubmitted && !isReview}
                   />
                 </Column>
               </Row>
