@@ -147,6 +147,7 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   it('[Collection] check client search modal', () => {
+    let locationCode: string;
     cy.get('.agency-information-section')
       .find('button.client-search-toggle-btn')
       .click();
@@ -176,10 +177,27 @@ describe('A Class Seedlot Registration form', () => {
       .find(`input.${prefix}--radio-button`)
       .check({ force: true });
 
+    cy.get(`table.${prefix}--data-table tbody tr`)
+      .eq(0)
+      .find('td[id*="locationCode"]')
+      .invoke('text')
+      .then((text) => {
+        locationCode = text;
+      });
+
     cy.get(`button.${prefix}--btn--primary`)
       .contains('Apply selected client')
       .click();
     // End Popup test
+
+    cy.get('#collection-collector-agency')
+      .should('have.value', testPopupAcronym);
+
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(2000).then(() => {
+      cy.get('#collection-location-code')
+        .should('have.value', locationCode);
+    });
 
     // Enter location code for linkage test
     cy.get('#collection-location-code')
