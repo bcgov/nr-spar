@@ -26,52 +26,29 @@ describe('A Class Seedlot Registration form', () => {
   };
 
   let seedlotNum: string;
-  let species: string;
+  const speciesKey = 'pli';
   let seedlotData: SeedlotRegFixtureType;
   let testAcronym: string;
   let testPopupAcronym: string;
 
-  before(() => {
+  beforeEach(() => {
     // Login
     cy.login();
-    // Go to my seedlot page
-    cy.visit('/seedlots/my-seedlots');
-    cy.url().should('contains', '/seedlots/my-seedlots');
 
     cy.fixture('aclass-reg-form').then((fData) => {
       regFormData = fData;
     });
 
-    cy.get('.my-seedlot-data-table-row').children(`.${prefix}--search`).find('input')
-      .type('PLI');
-
-    cy.get('table.seedlot-data-table tbody tr')
-      .eq(0)
-      .find('td:nth-child(1)')
-      .then(($seedlot) => {
-        seedlotNum = $seedlot.text();
-        cy.get(`#seedlot-table-cell-${seedlotNum}-seedlotSpecies`)
-          .click();
-        cy.url().should('contains', `/seedlots/details/${seedlotNum}`);
-        cy.visit('/seedlots/my-seedlots');
-        return cy.get(`#seedlot-table-cell-${seedlotNum}-seedlotSpecies`);
-      })
-      .then(($data) => {
-        const seedlotSpecies = $data.text();
-        species = (seedlotSpecies.substring(0, seedlotSpecies.indexOf('-') - 1)).toLowerCase();
-      });
-
     cy.fixture('aclass-seedlot').then((fData) => {
       seedlotData = fData;
+      cy.task('getData', fData[speciesKey].species).then((sNumber) => {
+        seedlotNum = sNumber as string;
+        cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
+        cy.url().should('contains', `/seedlots/a-class-registration/${seedlotNum}`);
+      });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
     });
-  });
-
-  beforeEach(() => {
-    // Login
-    cy.login();
-    cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
   });
 
   // Step 1
@@ -118,10 +95,10 @@ describe('A Class Seedlot Registration form', () => {
       .should('have.text', fixtureData.checkboxText);
 
     cy.get('#collection-collector-agency')
-      .should('have.value', seedlotData[species].agencyAcronym);
+      .should('have.value', seedlotData[speciesKey].agencyAcronym);
 
     cy.get('#collection-location-code')
-      .should('have.value', seedlotData[species].agencyNumber);
+      .should('have.value', seedlotData[speciesKey].agencyNumber);
   });
 
   it('change collector agency section details', () => {
@@ -132,7 +109,7 @@ describe('A Class Seedlot Registration form', () => {
 
     // Enter invalid acronym
     cy.get('#collection-collector-agency')
-      .type('ggg', { force: true })
+      .type('ggg')
       .blur();
 
     cy.get('#collection-collector-agency-error-msg')
@@ -141,7 +118,7 @@ describe('A Class Seedlot Registration form', () => {
     // Enter valid test acronym
     cy.get('#collection-collector-agency')
       .clear()
-      .type(testAcronym, { force: true })
+      .type(testAcronym)
       .blur();
 
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
@@ -159,7 +136,7 @@ describe('A Class Seedlot Registration form', () => {
     // Enter valid location code
     cy.get('#collection-location-code')
       .clear()
-      .type('02', { force: true })
+      .type('02')
       .blur();
   });
 
@@ -180,7 +157,7 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#client-search-input')
       .clear()
-      .type(testPopupAcronym, { force: true })
+      .type(testPopupAcronym)
       .blur();
 
     cy.get('button.client-search-button')
@@ -201,7 +178,7 @@ describe('A Class Seedlot Registration form', () => {
     // Enter location code for linkage test
     cy.get('#collection-location-code')
       .clear()
-      .type('02', { force: true })
+      .type('02')
       .blur();
   });
 
@@ -342,7 +319,7 @@ describe('A Class Seedlot Registration form', () => {
     // Enter invalid acronym
     cy.get('#interim-agency')
       .clear()
-      .type('ggg', { force: true })
+      .type('ggg')
       .blur();
 
     cy.get('#interim-agency-error-msg')
@@ -351,7 +328,7 @@ describe('A Class Seedlot Registration form', () => {
     // Enter valid acronym
     cy.get('#interim-agency')
       .clear()
-      .type(testAcronym, { force: true })
+      .type(testAcronym)
       .blur();
 
     // Enter invalid location code
@@ -366,7 +343,7 @@ describe('A Class Seedlot Registration form', () => {
     // Enter valid location code
     cy.get('#interim-location-code')
       .clear()
-      .type('01', { force: true })
+      .type('01')
       .blur();
   });
 
@@ -390,7 +367,7 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#client-search-input')
       .clear()
-      .type(testPopupAcronym, { force: true })
+      .type(testPopupAcronym)
       .blur();
 
     cy.get('button.client-search-button')
