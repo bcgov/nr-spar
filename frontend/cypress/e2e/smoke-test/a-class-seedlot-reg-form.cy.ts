@@ -31,7 +31,7 @@ describe('A Class Seedlot Registration form', () => {
   let testAcronym: string;
   let testPopupAcronym: string;
 
-  before(() => {
+  beforeEach(() => {
     // Login
     cy.login();
 
@@ -49,11 +49,6 @@ describe('A Class Seedlot Registration form', () => {
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
     });
-  });
-
-  beforeEach(() => {
-    cy.login();
-    cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
   });
 
   // Step 1
