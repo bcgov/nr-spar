@@ -350,6 +350,14 @@ describe('A Class Seedlot Registration form', () => {
       .clear()
       .type('01')
       .blur();
+
+    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+      .should('be.visible');
+
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
   });
 
   it('interim storage popup test', () => {
