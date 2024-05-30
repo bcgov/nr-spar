@@ -52,7 +52,7 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   // Step 1
-  it('check collection title and subtitles', () => {
+  it('[Collection] check title and subtitles', () => {
     const fixtureData = regFormData.collector;
     cy.url().should('contains', `seedlots/a-class-registration/${seedlotNum}`);
 
@@ -85,7 +85,7 @@ describe('A Class Seedlot Registration form', () => {
       .should('have.text', fixtureData.informationSubtitle);
   });
 
-  it('check collector agency section details are correct', () => {
+  it('[Collection] check collector agency section details', () => {
     const fixtureData = regFormData.collector;
     cy.get('#collection-step-default-checkbox')
       .should('be.checked');
@@ -101,7 +101,7 @@ describe('A Class Seedlot Registration form', () => {
       .should('have.value', seedlotData[speciesKey].agencyNumber);
   });
 
-  it('change collector agency section details', () => {
+  it('[Collection] change collector agency section details', () => {
     const fixtureData = regFormData.collector;
     // Change inputs
     cy.get('#collection-step-default-checkbox')
@@ -140,7 +140,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
   });
 
-  it('collector agency popup test', () => {
+  it('[Collection] check client search modal', () => {
     cy.get('.agency-information-section')
       .find('button.client-search-toggle-btn')
       .click();
@@ -182,7 +182,7 @@ describe('A Class Seedlot Registration form', () => {
       .blur();
   });
 
-  it('check collector information section date inputs', () => {
+  it('[Collection] check date inputs', () => {
     const fixtureData = regFormData.collector;
     cy.get('#collection-end-date')
       .clear()
@@ -212,7 +212,7 @@ describe('A Class Seedlot Registration form', () => {
       .click();
   });
 
-  it('check collector information section containers input', () => {
+  it('[Collection] check containers input', () => {
     const fixtureData = regFormData.collector;
     // Invalid collection test
     cy.get('#collection-num-of-container')
@@ -257,7 +257,7 @@ describe('A Class Seedlot Registration form', () => {
       .should('have.value', '30.000');
   });
 
-  it('check collector information section checkbox input', () => {
+  it('[Collection] check checkbox input', () => {
     cy.get('#cone-collection-method-checkbox-1')
       .check({ force: true })
       .blur();
@@ -280,7 +280,7 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   // Step 3
-  it('check interim storage information title and subtitle are correct', () => {
+  it('[Interim storage] check title and subtitle are correct', () => {
     const fixtureData = regFormData.interimStorage;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
@@ -308,7 +308,7 @@ describe('A Class Seedlot Registration form', () => {
       .should('be.checked');
   });
 
-  it('change interim agency details', () => {
+  it('[Interim storage] change interim agency details', () => {
     const fixtureData = regFormData.interimStorage;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
@@ -355,7 +355,7 @@ describe('A Class Seedlot Registration form', () => {
       .click();
   });
 
-  it('interim storage popup test', () => {
+  it('[Interim storage] check client search modal', () => {
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
 
@@ -397,7 +397,7 @@ describe('A Class Seedlot Registration form', () => {
       .should('have.value', testPopupAcronym);
   });
 
-  it('interim storage date test', () => {
+  it('[Interim storage] check date input', () => {
     const fixtureData = regFormData.interimStorage;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
@@ -435,7 +435,7 @@ describe('A Class Seedlot Registration form', () => {
       .click();
   });
 
-  it('interim storage radio button test', () => {
+  it('[Interim storage] check radio button', () => {
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
 
