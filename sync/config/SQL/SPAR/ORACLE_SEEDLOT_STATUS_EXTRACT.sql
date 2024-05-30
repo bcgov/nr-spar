@@ -7,6 +7,7 @@ WITH CTE_SPAR AS (
 		TO_CHAR(UPDATE_TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') UPDATE_TIMESTAMP
 	FROM 
 		SEEDLOT_STATUS_CODE 
+	WHERE update_timestamp BETWEEN :start_time AND :end_time 
 )
 SELECT seedlot_status_code, 
 	   description,  
