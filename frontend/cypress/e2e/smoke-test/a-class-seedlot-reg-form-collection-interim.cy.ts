@@ -214,7 +214,7 @@ describe('A Class Seedlot Registration form', () => {
 
   it('[Collection] check containers input', () => {
     const fixtureData = regFormData.collector;
-    // Invalid collection test
+    // Invalid collection test, number > 10,000
     cy.get('#collection-num-of-container')
       .clear()
       .type('10001')
@@ -241,6 +241,40 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#collection-vol-of-cones-warn-msg')
       .should('have.text', fixtureData.volOfConesErrorMsg);
+
+    // Invalid collection test, number has more than 3 decimal place
+    cy.get('#collection-num-of-container')
+      .clear()
+      .type('2.9999')
+      .blur();
+
+    cy.get('#collection-num-of-container-error-msg')
+      .should('have.text', fixtureData.numOfContainerErrorMsg);
+
+    cy.get('#collection-vol-per-container')
+      .clear()
+      .type('2.9999')
+      .blur();
+
+    cy.get('#collection-vol-per-container-error-msg')
+      .should('have.text', fixtureData.numOfContainerErrorMsg);
+
+    // Invalid collection test, number < 0
+    cy.get('#collection-num-of-container')
+      .clear()
+      .type('-1')
+      .blur();
+
+    cy.get('#collection-num-of-container-error-msg')
+      .should('have.text', fixtureData.numOfContainerErrorMsg);
+
+    cy.get('#collection-vol-per-container')
+      .clear()
+      .type('-1')
+      .blur();
+
+    cy.get('#collection-vol-per-container-error-msg')
+      .should('have.text', fixtureData.numOfContainerErrorMsg);
 
     // Input correct values in collection field
     cy.get('#collection-num-of-container')
