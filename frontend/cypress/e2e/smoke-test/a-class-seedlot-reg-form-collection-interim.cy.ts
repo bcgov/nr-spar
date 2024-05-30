@@ -138,6 +138,12 @@ describe('A Class Seedlot Registration form', () => {
       .clear()
       .type('02')
       .blur();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
   });
 
   it('[Collection] check client search modal', () => {
@@ -180,6 +186,12 @@ describe('A Class Seedlot Registration form', () => {
       .clear()
       .type('02')
       .blur();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
   });
 
   it('[Collection] check date inputs', () => {
@@ -206,6 +218,7 @@ describe('A Class Seedlot Registration form', () => {
       .type('2024-05-27')
       .blur();
 
+    // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
       .contains('Save changes')
@@ -289,10 +302,17 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#collection-vol-of-cones')
       .should('have.value', '30.000');
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
   });
 
   it('[Collection] check checkbox input', () => {
     cy.get('#cone-collection-method-checkbox-1')
+      .focus()
       .check({ force: true })
       .blur();
 
@@ -390,6 +410,7 @@ describe('A Class Seedlot Registration form', () => {
   });
 
   it('[Interim storage] check client search modal', () => {
+    let locationCode: string;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
 
@@ -422,6 +443,14 @@ describe('A Class Seedlot Registration form', () => {
       .find(`input.${prefix}--radio-button`)
       .check({ force: true });
 
+    cy.get(`table.${prefix}--data-table tbody tr`)
+      .eq(0)
+      .find('td[id*="locationCode"]')
+      .invoke('text')
+      .then((text) => {
+        locationCode = text;
+      });
+
     cy.get(`button.${prefix}--btn--primary`)
       .contains('Apply selected client')
       .click();
@@ -429,6 +458,12 @@ describe('A Class Seedlot Registration form', () => {
 
     cy.get('#interim-agency')
       .should('have.value', testPopupAcronym);
+
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(2000).then(() => {
+      cy.get('#interim-location-code')
+        .should('have.value', locationCode);
+    });
   });
 
   it('[Interim storage] check date input', () => {
@@ -463,6 +498,7 @@ describe('A Class Seedlot Registration form', () => {
       .type('2024-05-26')
       .blur();
 
+    // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
       .contains('Save changes')
