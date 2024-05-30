@@ -4,6 +4,7 @@ import { FlexGrid, Row, Column } from '@carbon/react';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import { formatSpz, formatSpzList } from '../utils';
+import Divider from '../../../Divider';
 
 const AreaOfUseRead = () => {
   const {
@@ -43,6 +44,14 @@ const AreaOfUseRead = () => {
             }
             showSkeleton={isFetchingData}
           />
+        </Column>
+      </Row>
+
+      <Divider />
+
+      <Row>
+        <Column className="sub-section-title-col">
+          Elevation, Latitude and longitude
         </Column>
       </Row>
     </FlexGrid>
