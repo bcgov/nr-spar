@@ -2,7 +2,7 @@ import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
-describe('A Class Seedlot Registration form', () => {
+describe('A Class Seedlot Registration form, Container and Interim storage', () => {
   let regFormData: {
     collector: {
       agencyTitle: string;
