@@ -45,6 +45,28 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     });
   });
   it('check title and subtitles', () => {
+    cy.get('.seedlot-registration-title')
+      .find('h1')
+      .should('have.text', 'Seedlot Registration');
 
+    cy.get('.seedlot-registration-title')
+      .find('.seedlot-form-subtitle')
+      .should('contain.text', `Seedlot ${seedlotNum}`);
+
+    cy.get('.ownership-header')
+      .find('h3')
+      .should('have.text', regFormData.title);
+
+    cy.get('.ownership-header')
+      .find('p')
+      .should('have.text', regFormData.subtitle);
+
+    cy.get(`.${prefix}--accordion__title`)
+      .find('.item-title-section')
+      .should('have.text', regFormData.agencyTitle);
+
+    cy.get(`.${prefix}--accordion__title`)
+      .find('.item-description-section')
+      .should('have.text', regFormData.agencySubtitle);
   });
 });
