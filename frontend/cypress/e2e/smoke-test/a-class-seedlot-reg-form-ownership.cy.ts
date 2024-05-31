@@ -69,4 +69,13 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .find('.item-description-section')
       .should('have.text', regFormData.agencySubtitle);
   });
+
+  it('check owner agency section visibility', () => {
+    cy.get('.ownership-form-container')
+      .find(`button.${prefix}--accordion__heading`)
+      .click();
+
+    cy.get('.single-owner-info-container')
+      .should('not.be.visible');
+  });
 });
