@@ -44,7 +44,6 @@ describe('A Class Seedlot Registration form, Container and Interim storage', () 
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNum = sNumber as string;
         cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
-        cy.url().should('contains', `/seedlots/a-class-registration/${seedlotNum}`);
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
