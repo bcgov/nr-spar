@@ -130,4 +130,58 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .type('02')
       .blur();
   });
+
+  it('check owner portion %, reserved % and surplus % default values', () => {
+    cy.get('#ownership-portion-0')
+      .should('have.value', '100');
+
+    cy.get('#ownership-reserved-0')
+      .should('have.value', '100');
+
+    cy.get('#ownership-surplus-0')
+      .should('have.value', '100');
+  });
+
+  it('change owner portion %, reserved % and surplus % values', () => {
+    cy.get('#ownership-reserved-0')
+      .clear()
+      .type('02')
+      .blur();
+
+    cy.get('#ownership-surplus-0')
+      .should('have.value', '98');
+
+    cy.get('#ownership-surplus-0')
+      .clear()
+      .type('52')
+      .blur();
+
+    cy.get('#ownership-surplus-0')
+      .should('have.value', '48');
+
+    // Invalid owner portion % error msg test
+    cy.get('#ownership-portion-0')
+      .clear()
+      .type('-1')
+      .blur();
+
+    cy.get('#ownership-portion-0-error-msg')
+      .should('have.text', regFormData.ownerPortionBelowLimitError);
+
+    cy.get('#ownership-portion-0')
+      .clear()
+      .type('0.0439')
+      .blur();
+
+    cy.get('#ownership-portion-0-error-msg')
+      .should('have.text', regFormData.ownerPortionDecimalError);
+
+    cy.get('#ownership-portion-0')
+      .clear()
+      .type('102')
+      .blur();
+
+    cy.get('#ownership-portion-0-error-msg')
+      .should('have.text', regFormData.ownerPortionAboveLimitError);
+  });
 });
