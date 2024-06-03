@@ -35,6 +35,7 @@ import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
 import AreaOfUseRead from '../../../components/SeedlotReviewSteps/AreaOfUse/Read';
+import AreaOfUseEdit from '../../../components/SeedlotReviewSteps/AreaOfUse/Edit';
 
 const SeedlotReview = () => {
   const navigate = useNavigate();
@@ -165,7 +166,7 @@ const SeedlotReview = () => {
             {
               isReadMode
                 ? <AreaOfUseRead />
-                : null
+                : <AreaOfUseEdit />
             }
           </Column>
         </Row>
