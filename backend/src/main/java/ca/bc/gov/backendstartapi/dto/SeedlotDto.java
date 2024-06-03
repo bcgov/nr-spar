@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.dto;
 
-import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
