@@ -1,13 +1,16 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
-import ApplicantAgenciesItems from './fixtures/ApplicantAgenciesItems';
+import MockForestClients from './fixtures/MockForestClients';
 import { ForestClientSearchType } from '../types/ForestClientTypes/ForestClientSearchType';
 import { ClientSearchOptions } from '../components/ApplicantAgencyFields/ClientSearchModal/definitions';
 
 export const getForestClientLocation = (clientNumber: string, locationCode: string) => {
-  const url = `${ApiConfig.forestClient}/${clientNumber}/location/${locationCode}`;
-  return api.get(url).then((res) => res.data);
+  // TODO: restore this once forest client is back up
+  // const url = `${ApiConfig.forestClient}/${clientNumber}/location/${locationCode}`;
+  // return api.get(url).then((res) => res.data);
+
+  return MockForestClients.find((fc) => (fc.acronym))
 };
 
 export const getForestClientByNumberOrAcronym = (clientNumber: string) => {
@@ -17,10 +20,10 @@ export const getForestClientByNumberOrAcronym = (clientNumber: string) => {
 
 export const getAllAgencies = (): string[] => {
   const options: string[] = [];
-  ApplicantAgenciesItems.sort(
+  MockForestClients.sort(
     (a: ForestClientType, b: ForestClientType) => (a.clientName < b.clientName ? -1 : 1)
   );
-  ApplicantAgenciesItems.forEach((agency: ForestClientType) => {
+  MockForestClients.forEach((agency: ForestClientType) => {
     let clientName = agency.clientName
       .toLowerCase()
       .split(' ')
