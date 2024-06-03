@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.repository;
 
-import ca.bc.gov.backendstartapi.entity.Orchard;
+import ca.bc.gov.backendstartapi.entity.OrchardEntity;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import java.util.List;
 import java.util.Optional;
@@ -23,10 +23,10 @@ class OrchardRepositoryTest {
   @Test
   @DisplayName("findByIdSuccessTest")
   void findByIdSuccessTest() {
-    Optional<Orchard> orchardPrd = orchardRepository.findNotRetiredById("337");
+    Optional<OrchardEntity> orchardPrd = orchardRepository.findNotRetiredById("337");
 
     Assertions.assertTrue(orchardPrd.isPresent());
-    Orchard orchardOne = orchardPrd.get();
+    OrchardEntity orchardOne = orchardPrd.get();
     OrchardLotTypeCode orchardLotTypeCodeOne = orchardOne.getOrchardLotTypeCode();
 
     Assertions.assertNotNull(orchardLotTypeCodeOne);
@@ -36,10 +36,10 @@ class OrchardRepositoryTest {
     Assertions.assertEquals("Seed Lot", orchardLotTypeCodeOne.getDescription());
     Assertions.assertEquals("PRD", orchardOne.getStageCode());
 
-    Optional<Orchard> orchardEsb = orchardRepository.findNotRetiredById("820");
+    Optional<OrchardEntity> orchardEsb = orchardRepository.findNotRetiredById("820");
 
     Assertions.assertTrue(orchardEsb.isPresent());
-    Orchard orchardTwo = orchardEsb.get();
+    OrchardEntity orchardTwo = orchardEsb.get();
     OrchardLotTypeCode orchardLotTypeCodeTwo = orchardTwo.getOrchardLotTypeCode();
 
     Assertions.assertNotNull(orchardLotTypeCodeTwo);
@@ -53,7 +53,7 @@ class OrchardRepositoryTest {
   @Test
   @DisplayName("findByIdNotFoundTest")
   void findByIdNotFoundTest() {
-    Optional<Orchard> orchardRet = orchardRepository.findNotRetiredById("612");
+    Optional<OrchardEntity> orchardRet = orchardRepository.findNotRetiredById("612");
 
     Assertions.assertTrue(orchardRet.isEmpty());
   }
@@ -63,7 +63,7 @@ class OrchardRepositoryTest {
   void findOrchardByVegCodeRepoSuccessTest() {
     String vegCode = "PLI";
     String stageCode = "RET";
-    List<Orchard> orchardRet =
+    List<OrchardEntity> orchardRet =
         orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, stageCode);
 
     Assertions.assertFalse(orchardRet.isEmpty());
@@ -77,7 +77,7 @@ class OrchardRepositoryTest {
   @Test
   @DisplayName("findOrchardByVegCodeRepoErrorTest")
   void findOrchardByVegCodeRepoErrorTest() {
-    List<Orchard> orchardRet =
+    List<OrchardEntity> orchardRet =
         orchardRepository.findAllByVegetationCodeAndStageCodeNot("SX", "RET");
 
     Assertions.assertTrue(orchardRet.isEmpty());
