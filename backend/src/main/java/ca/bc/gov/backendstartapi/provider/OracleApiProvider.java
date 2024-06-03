@@ -246,4 +246,28 @@ public class OracleApiProvider implements Provider {
 
     return Optional.empty();
   }
+
+  @Override
+  public Optional<OrchardDto> findOrchardById(String orchardId) {
+    String oracleApiUrl = String.format("%s/api/orchards/{orchardId}", rootUri);
+
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "findOrchardById", oracleApiUrl);
+
+    try {
+      ResponseEntity<OrchardDto> areaOfUseRes =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<OrchardDto>() {},
+              createParamsMap("orchardId", orchardId));
+      SparLog.info("GET orchard by id - Success response!");
+      return Optional.of(areaOfUseRes.getBody());
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error(
+          "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
+    }
+
+    return Optional.empty();
+  }
 }

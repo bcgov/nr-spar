@@ -1,0 +1,23 @@
+WITH CTE_SPAR AS (
+	SELECT 
+		GAMETIC_MTHD_CODE,
+		DESCRIPTION,
+		CASE WHEN SUBSTR(GAMETIC_MTHD_CODE,1,1) ='F' then 'Y' ELSE 'N' END AS FEMALE_METHODOLOGY_IND,
+		CASE WHEN INSTR(UPPER(DESCRIPTION),'RAMET') > 0  then 'Y' ELSE 'N' END AS PLI_SPECIES_IND,
+		TO_CHAR(EFFECTIVE_DATE,'YYYY-MM-DD HH24:MI:SS') EFFECTIVE_DATE,
+		TO_CHAR(EXPIRY_DATE,'YYYY-MM-DD HH24:MI:SS') EXPIRY_DATE,
+		TO_CHAR(UPDATE_TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') UPDATE_TIMESTAMP
+	FROM 
+		GAMETIC_MTHD_CODE
+	WHERE update_timestamp BETWEEN :start_time AND :end_time 
+)
+SELECT GAMETIC_MTHD_CODE as gametic_methodology_code, 
+	   description,  
+	   female_methodology_ind,
+	   pli_species_ind,
+	   effective_date,  
+	   expiry_date,
+	   update_timestamp
+FROM CTE_SPAR
+ORDER BY 1
+

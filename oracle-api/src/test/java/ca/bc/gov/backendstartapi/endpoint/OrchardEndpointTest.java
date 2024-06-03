@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
-import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
@@ -45,8 +45,19 @@ class OrchardEndpointTest {
   @Test
   @DisplayName("findByIdPrdSuccessTest")
   void findByIdPrdSuccessTest() throws Exception {
-    OrchardLotTypeDescriptionDto descriptionDto =
-        new OrchardLotTypeDescriptionDto("337", "GRANDVIEW", "PLI", 'S', "Seed Lot", "PRD");
+    OrchardDto descriptionDto =
+        new OrchardDto(
+            "337",
+            "GRANDVIEW",
+            "PLI",
+            'S',
+            "Seed Lot",
+            "PRD",
+            "ICH",
+            "Interior Cedar -- Hemlock",
+            "dw",
+            '4',
+            5);
 
     when(orchardService.findNotRetiredOrchardValidLotType(any()))
         .thenReturn(Optional.of(descriptionDto));
@@ -64,6 +75,11 @@ class OrchardEndpointTest {
         .andExpect(jsonPath("$.lotTypeCode").value("S"))
         .andExpect(jsonPath("$.lotTypeDescription").value("Seed Lot"))
         .andExpect(jsonPath("$.stageCode").value("PRD"))
+        .andExpect(jsonPath("$.becZoneCode").value("ICH"))
+        .andExpect(jsonPath("$.becZoneDescription").value("Interior Cedar -- Hemlock"))
+        .andExpect(jsonPath("$.becSubzoneCode").value("dw"))
+        .andExpect(jsonPath("$.variant").value("4"))
+        .andExpect(jsonPath("$.becVersionId").value(5))
         .andReturn();
   }
 
@@ -171,12 +187,34 @@ class OrchardEndpointTest {
   void findOrchardsWithVegCodeSuccessEndpointTest() throws Exception {
     String vegCode = "PLI";
 
-    OrchardLotTypeDescriptionDto firstOrchard =
-        new OrchardLotTypeDescriptionDto("123", "smOrchard", vegCode, 'S', "Seed lot", "PRD");
-    OrchardLotTypeDescriptionDto secondOrchard =
-        new OrchardLotTypeDescriptionDto("456", "xlOrchard", vegCode, 'S', "Seed lot", "TEST");
+    OrchardDto firstOrchard =
+        new OrchardDto(
+            "123",
+            "smOrchard",
+            vegCode,
+            'S',
+            "Seed lot",
+            "PRD",
+            "ICH",
+            "Interior Cedar -- Hemlock",
+            "dw",
+            '4',
+            5);
+    OrchardDto secondOrchard =
+        new OrchardDto(
+            "456",
+            "xlOrchard",
+            vegCode,
+            'S',
+            "Seed lot",
+            "TEST",
+            "IDF",
+            "Interior Douglas-fir",
+            "mk",
+            '1',
+            5);
 
-    List<OrchardLotTypeDescriptionDto> testList =
+    List<OrchardDto> testList =
         new ArrayList<>() {
           {
             add(firstOrchard);
@@ -196,9 +234,19 @@ class OrchardEndpointTest {
         .andExpect(jsonPath("$[0].id").value("123"))
         .andExpect(jsonPath("$[0].vegetationCode").value(vegCode))
         .andExpect(jsonPath("$[0].name").value("smOrchard"))
+        .andExpect(jsonPath("$[0].becZoneCode").value("ICH"))
+        .andExpect(jsonPath("$[0].becZoneDescription").value("Interior Cedar -- Hemlock"))
+        .andExpect(jsonPath("$[0].becSubzoneCode").value("dw"))
+        .andExpect(jsonPath("$[0].variant").value("4"))
+        .andExpect(jsonPath("$[0].becVersionId").value(5))
         .andExpect(jsonPath("$[1].id").value("456"))
         .andExpect(jsonPath("$[1].vegetationCode").value(vegCode))
         .andExpect(jsonPath("$[1].name").value("xlOrchard"))
+        .andExpect(jsonPath("$[1].becZoneCode").value("IDF"))
+        .andExpect(jsonPath("$[1].becZoneDescription").value("Interior Douglas-fir"))
+        .andExpect(jsonPath("$[1].becSubzoneCode").value("mk"))
+        .andExpect(jsonPath("$[1].variant").value("1"))
+        .andExpect(jsonPath("$[1].becVersionId").value(5))
         .andReturn();
   }
 
