@@ -1,21 +1,28 @@
 import ApiConfig from './ApiConfig';
 import api from './api';
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
-import MockForestClients from './fixtures/MockForestClients';
+import { MockForestClients, UNKOWN_FC } from './fixtures/MockForestClients';
 import { ForestClientSearchType } from '../types/ForestClientTypes/ForestClientSearchType';
 import { ClientSearchOptions } from '../components/ApplicantAgencyFields/ClientSearchModal/definitions';
 
+// eslint-disable-next-line arrow-body-style, @typescript-eslint/no-unused-vars
 export const getForestClientLocation = (clientNumber: string, locationCode: string) => {
   // TODO: restore this once forest client is back up
   // const url = `${ApiConfig.forestClient}/${clientNumber}/location/${locationCode}`;
   // return api.get(url).then((res) => res.data);
 
-  return MockForestClients.find((fc) => (fc.acronym))
+  return Promise.resolve();
 };
 
+// eslint-disable-next-line arrow-body-style
 export const getForestClientByNumberOrAcronym = (clientNumber: string) => {
-  const url = `${ApiConfig.forestClient}/${clientNumber}`;
-  return api.get(url).then((res): ForestClientType => res.data);
+  // TODO: restore this once forest client is back up
+  // const url = `${ApiConfig.forestClient}/${clientNumber}`;
+  // return api.get(url).then((res): ForestClientType => res.data);
+
+  return Promise.resolve(
+    MockForestClients.find((fc) => fc.clientNumber === clientNumber) ?? UNKOWN_FC
+  );
 };
 
 export const getAllAgencies = (): string[] => {

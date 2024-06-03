@@ -1,6 +1,6 @@
 import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 
-const MockForestClients: ForestClientType[] = [
+export const MockForestClients: ForestClientType[] = [
   {
     clientNumber: '00149081',
     clientName: 'WESTERN FOREST PRODUCTS INC.',
@@ -48,4 +48,12 @@ const MockForestClients: ForestClientType[] = [
   }
 ];
 
-export default MockForestClients;
+export const UNKOWN_FC: ForestClientType = {
+  clientNumber: '88888888',
+  clientName: 'MOCKED UNKNOWN',
+  legalFirstName: 'John',
+  legalMiddleName: 'Doe',
+  clientStatusCode: 'ACT',
+  clientTypeCode: 'F',
+  acronym: 'UNKNOWN'
+};
