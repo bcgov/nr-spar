@@ -13,6 +13,7 @@ import { TrashCan } from '@carbon/icons-react';
 import ApplicantAgencyFields from '../../../ApplicantAgencyFields';
 
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../../types/FormInputType';
+import { EmptyBooleanInputType } from '../../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 
@@ -51,7 +52,7 @@ const SingleOwnerInfo = ({
   const [reservedInvalidText, setReservedInvalidText] = useState<string>('');
   const [surplusInvalidText, setSurplusPortionInvalidText] = useState<string>('');
 
-  const colsClass = ownerInfo.id === DEFAULT_INDEX ? 'default-owner-col' : 'other-owners-col';
+  const colsClass = ownerInfo.id === DEFAULT_INDEX && !isReview ? 'default-owner-col' : 'other-owners-col';
 
   const setAgencyAndCode = (
     isDefault: BooleanInputType,
@@ -143,8 +144,9 @@ const SingleOwnerInfo = ({
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
             <ApplicantAgencyFields
+              showCheckbox={ownerInfo.id === DEFAULT_INDEX && !isReview}
               checkboxId={ownerInfo.id === DEFAULT_INDEX ? 'default-owner-checkbox' : ''}
-              isDefault={ownerInfo.useDefaultAgencyInfo}
+              isDefault={isReview ? EmptyBooleanInputType : ownerInfo.useDefaultAgencyInfo}
               agency={ownerInfo.ownerAgency}
               locationCode={ownerInfo.ownerCode}
               fieldsProps={agencyFieldsProps}
@@ -158,7 +160,6 @@ const SingleOwnerInfo = ({
                   locationCode: StringInputType
                 ) => setAgencyAndCode(isDefault, agency, locationCode)
               }
-              showCheckbox={ownerInfo.id === DEFAULT_INDEX}
               readOnly={readOnly && !isReview}
               isFormSubmitted={readOnly}
             />
@@ -312,7 +313,7 @@ const SingleOwnerInfo = ({
             }
           </Column>
         </Row>
-        {(!readOnly && !isReview) && (
+        {((!readOnly) || (readOnly && isReview)) && (
           <Row>
             {
               ownerInfo.id !== DEFAULT_INDEX

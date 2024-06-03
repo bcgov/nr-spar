@@ -24,6 +24,8 @@ import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collect
 import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
 import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownership/Read';
 import OwnershipReviewEdit from '../../../components/SeedlotReviewSteps/Ownership/Edit';
+import InterimReviewRead from '../../../components/SeedlotReviewSteps/Interim/Read';
+import InterimReviewEdit from '../../../components/SeedlotReviewSteps/Interim/Edit';
 import OrchardReviewRead from '../../../components/SeedlotReviewSteps/Orchard/Read';
 import OrchardReviewEdit from '../../../components/SeedlotReviewSteps/Orchard/Edit';
 
@@ -192,6 +194,17 @@ const SeedlotReview = () => {
         <Row className="section-title-row">
           <Column className="section-title-col">
             Interim storage
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            {
+              isReadMode
+                ? <InterimReviewRead />
+                : (
+                  <InterimReviewEdit />
+                )
+            }
           </Column>
         </Row>
 
