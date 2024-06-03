@@ -99,6 +99,8 @@ jobs:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
             verification_path: "actuator/health"
+            verification_retry_attempts: "5"
+            verification_retry_seconds: "15"
           - name: fluentbit
             file: common/openshift.fluentbit.yml
             overwrite: true
@@ -146,7 +148,8 @@ jobs:
           post_rollout: ${{ matrix.post_rollout }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path }}
-
+          verification_retry_attempts: ${{ matrix.verification_retry_attempts }}
+          verification_retry_seconds: ${{ matrix.verification_retry_seconds }}
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
