@@ -223,6 +223,9 @@ public class Seedlot implements Serializable {
   @Column(name = "bgc_zone_code", length = 4)
   private String bgcZoneCode;
 
+  @Column(name = "bgc_zone_description", length = 120)
+  private String bgcZoneDescription;
+
   @Column(name = "bgc_subzone_code", length = 3)
   private String bgcSubzoneCode;
 

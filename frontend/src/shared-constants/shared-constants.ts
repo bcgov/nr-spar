@@ -1,3 +1,4 @@
+import { BooleanInputType } from '../types/FormInputType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 
 export const LOCATION_CODE_LIMIT = 2;
@@ -6,6 +7,11 @@ export const EmptyMultiOptObj: MultiOptionsObj = {
   code: '',
   label: '',
   description: ''
+};
+export const EmptyBooleanInputType: BooleanInputType = {
+  id: '',
+  isInvalid: false,
+  value: false
 };
 
 export const SMALL_SCREEN_WIDTH = 320;

@@ -17,6 +17,7 @@ import validator from 'validator';
 
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { EmptyBooleanInputType } from '../../../shared-constants/shared-constants';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 
 import Subtitle from '../../Subtitle';
@@ -34,11 +35,11 @@ import { calcVolume, isNumNotInRange } from './utils';
 
 import './styles.scss';
 
-type props = {
+type CollectionStepProps = {
   isReview?: boolean
 }
 
-const CollectionStep = ({ isReview }: props) => {
+const CollectionStep = ({ isReview }: CollectionStepProps) => {
   const {
     allStepData: { collectionStep: state },
     setStepData,
@@ -149,8 +150,8 @@ const CollectionStep = ({ isReview }: props) => {
         </Column>
       </Row>
       <ApplicantAgencyFields
-        showCheckbox
-        isDefault={state.useDefaultAgencyInfo}
+        showCheckbox={!isReview}
+        isDefault={isReview ? EmptyBooleanInputType : state.useDefaultAgencyInfo}
         checkboxId="collection-step-default-checkbox"
         agency={state.collectorAgency}
         locationCode={state.locationCode}

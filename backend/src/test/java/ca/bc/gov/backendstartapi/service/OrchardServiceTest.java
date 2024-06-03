@@ -158,8 +158,32 @@ class OrchardServiceTest {
   void findOrchardByVegCodeSuccessServiceTest() {
     String vegCode = "FDI";
 
-    OrchardDto firstOrchard = new OrchardDto("123", "smOrchard", vegCode, 'S', "Seed lot", "PRD");
-    OrchardDto secondOrchard = new OrchardDto("456", "xlOrchard", vegCode, 'S', "Seed lot", "TEST");
+    OrchardDto firstOrchard =
+        new OrchardDto(
+            "123",
+            "smOrchard",
+            vegCode,
+            'S',
+            "Seed lot",
+            "PRD",
+            "ICH",
+            "Interior Cedar -- Hemlock",
+            "dw",
+            '4',
+            5);
+    OrchardDto secondOrchard =
+        new OrchardDto(
+            "456",
+            "xlOrchard",
+            vegCode,
+            'S',
+            "Seed lot",
+            "TEST",
+            "IDF",
+            "Interior Douglas-fir",
+            "mk",
+            '1',
+            5);
 
     List<OrchardDto> testList =
         new ArrayList<>() {

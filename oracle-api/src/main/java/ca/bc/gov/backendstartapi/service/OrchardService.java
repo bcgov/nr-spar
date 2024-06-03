@@ -3,13 +3,13 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
-import ca.bc.gov.backendstartapi.dto.OrchardLotTypeDescriptionDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.SpzDto;
-import ca.bc.gov.backendstartapi.entity.Orchard;
+import ca.bc.gov.backendstartapi.entity.OrchardEntity;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
@@ -26,7 +26,6 @@ import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
-import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpuRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
 import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
@@ -38,76 +37,67 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /** This class contains methods to handle orchards. */
 @Service
+@RequiredArgsConstructor
 public class OrchardService {
 
-  private OrchardRepository orchardRepository;
+  private final OrchardRepository orchardRepository;
 
-  private ParentTreeOrchardRepository parentTreeOrchardRepository;
+  private final ParentTreeOrchardRepository parentTreeOrchardRepository;
 
-  private ParentTreeRepository parentTreeRepository;
+  private final ParentTreeRepository parentTreeRepository;
 
-  private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
+  private final ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
 
-  private TestedPtAreaofUseRepository testedPtAreaofUseRepository;
+  private final TestedPtAreaofUseRepository testedPtAreaofUseRepository;
 
-  private TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
+  private final TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
 
-  private SeedPlanUnitRepository seedPlanUnitRepository;
+  private final SeedPlanUnitRepository seedPlanUnitRepository;
 
-  private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
+  private final TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
 
-  OrchardService(
-      OrchardRepository orchardRepository,
-      ParentTreeOrchardRepository parentTreeOrchardRepository,
-      ParentTreeRepository parentTreeRepository,
-      ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository,
-      TestedPtAreaofUseRepository testedPtAreaofUseRepository,
-      TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository,
-      SeedPlanUnitRepository seedPlanUnitRepository,
-      TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository,
-      SeedPlanZoneRepository seedPlanZoneRepository) {
-    this.orchardRepository = orchardRepository;
-    this.parentTreeOrchardRepository = parentTreeOrchardRepository;
-    this.parentTreeRepository = parentTreeRepository;
-    this.parentTreeGeneticQualityRepository = parentTreeGeneticQualityRepository;
-    this.testedPtAreaofUseRepository = testedPtAreaofUseRepository;
-    this.testedPtAreaOfUseSpzRepository = testedPtAreaOfUseSpzRepository;
-    this.seedPlanUnitRepository = seedPlanUnitRepository;
-    this.testedPtAreaOfUseSpuRepository = testedPtAreaOfUseSpuRepository;
-  }
+  private final BecZoneCodeService becZoneCodeService;
 
   /**
    * Find a not retired {@link Orchard} with a valid {@link OrchardLotTypeCode} by Orchard's ID.
    *
    * @param id The Orchard's identification
-   * @return Optional of {@link OrchardLotTypeDescriptionDto}
+   * @return Optional of {@link OrchardDto}
    */
-  public Optional<OrchardLotTypeDescriptionDto> findNotRetiredOrchardValidLotType(String id) {
+  public Optional<OrchardDto> findNotRetiredOrchardValidLotType(String id) {
     SparLog.info("Finding valid not retired Orchard by id: {}", id);
-    Optional<Orchard> orchard = orchardRepository.findNotRetiredById(id);
+    Optional<OrchardEntity> orchard = orchardRepository.findNotRetiredById(id);
 
     if (orchard.isPresent()) {
-      OrchardLotTypeCode orchardLotTypeCode = orchard.get().getOrchardLotTypeCode();
+      OrchardEntity orchardEntity = orchard.get();
+
+      OrchardLotTypeCode orchardLotTypeCode = orchardEntity.getOrchardLotTypeCode();
       if (Objects.isNull(orchardLotTypeCode) || !orchardLotTypeCode.isValid()) {
         SparLog.warn("Orchard lot type is not valid!");
         return Optional.empty();
       }
 
-      OrchardLotTypeDescriptionDto descriptionDto =
-          new OrchardLotTypeDescriptionDto(
-              orchard.get().getId(),
-              orchard.get().getName(),
-              orchard.get().getVegetationCode(),
+      OrchardDto orchardDto =
+          new OrchardDto(
+              orchardEntity.getId(),
+              orchardEntity.getName(),
+              orchardEntity.getVegetationCode(),
               orchardLotTypeCode.getCode(),
               orchardLotTypeCode.getDescription(),
-              orchard.get().getStageCode());
+              orchardEntity.getStageCode(),
+              orchardEntity.getBecZoneCode(),
+              becZoneCodeService.getBecDescriptionByCode(orchardEntity.getBecZoneCode()),
+              orchardEntity.getBecSubzoneCode(),
+              orchardEntity.getVariant(),
+              orchardEntity.getBecVersionId());
 
       SparLog.info("Valid not retired Orchard found for id: {}", id);
-      return Optional.of(descriptionDto);
+      return Optional.of(orchardDto);
     }
 
     SparLog.info("Valid not retired Orchard not found for id: {}", id);
@@ -129,7 +119,7 @@ public class OrchardService {
         spuId);
 
     long starting = Instant.now().toEpochMilli();
-    Optional<Orchard> orchard = orchardRepository.findById(orchardId);
+    Optional<OrchardEntity> orchard = orchardRepository.findById(orchardId);
     long endingOne = Instant.now().toEpochMilli();
     SparLog.debug("Time elapsed querying orchard by id: {}", endingOne - starting);
 
@@ -164,26 +154,31 @@ public class OrchardService {
    * @param vegCode {@link VegetationCode} identification
    * @return {@link Optional} of a {@link List} of {@link OrchardParentTreeDto}
    */
-  public Optional<List<OrchardLotTypeDescriptionDto>> findNotRetOrchardsByVegCode(String vegCode) {
+  public Optional<List<OrchardDto>> findNotRetOrchardsByVegCode(String vegCode) {
     SparLog.info("Finding not retired Orchard by VegCode: {}", vegCode);
 
-    List<OrchardLotTypeDescriptionDto> resultList = new ArrayList<>();
+    List<OrchardDto> resultList = new ArrayList<>();
 
-    List<Orchard> orchardList =
+    List<OrchardEntity> orchardList =
         orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode.toUpperCase(), "RET");
 
     orchardList.forEach(
         orchard -> {
           OrchardLotTypeCode orchardLotTypeCode = orchard.getOrchardLotTypeCode();
           if (orchardLotTypeCode.isValid()) {
-            OrchardLotTypeDescriptionDto objToAdd =
-                new OrchardLotTypeDescriptionDto(
+            OrchardDto objToAdd =
+                new OrchardDto(
                     orchard.getId(),
                     orchard.getName(),
                     orchard.getVegetationCode(),
                     orchardLotTypeCode.getCode(),
                     orchardLotTypeCode.getDescription(),
-                    orchard.getStageCode());
+                    orchard.getStageCode(),
+                    orchard.getBecZoneCode(),
+                    becZoneCodeService.getBecDescriptionByCode(orchard.getBecZoneCode()),
+                    orchard.getBecSubzoneCode(),
+                    orchard.getVariant(),
+                    orchard.getBecVersionId());
             resultList.add(objToAdd);
           }
         });
