@@ -1,5 +1,6 @@
 import { SeedlotRegFixtureType } from '../../definitions';
 import prefix from '../../../src/styles/classPrefix';
+import { TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Ownership', () => {
   let regFormData: {
@@ -7,14 +8,16 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     subtitle: string;
     agencyTitle: string;
     agencySubtitle: string;
-    informationTitle: string;
-    informationSubtitle: string;
-    checkboxText: string;
-    acronymErrorMsg: string;
-    locationErrorMsg: string;
-    invalidDateErrorMsg: string;
-    numOfContainerErrorMsg: string;
-    volOfConesErrorMsg: string;
+    ownerAgencyError: string;
+    ownerAgencyValidationError: string;
+    locationCodeError: string;
+    ownerPortionSumError: string;
+    ownerPortionAboveLimitError: string;
+    ownerPortionBelowLimitError: string;
+    ownerPortionDecimalError: string;
+    reservedAboveLimitError: string;
+    reservedBelowLimitError: string;
+    reservedDecimalError: string;
   };
 
   let seedlotNum: string;
@@ -77,5 +80,54 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('.single-owner-info-container')
       .should('not.be.visible');
+  });
+
+  it('check owner agency and owner location code default values', () => {
+    cy.get('#default-owner-checkbox')
+      .should('be.checked');
+
+    cy.get('#ownership-agency-0')
+      .should('have.value', seedlotData[speciesKey].agencyAcronym);
+
+    cy.get('#ownership-location-code-0')
+      .should('have.value', seedlotData[speciesKey].agencyNumber);
+  });
+
+  it('change owner agency and owner location code', () => {
+    // Change inputs
+    cy.get('#default-owner-checkbox')
+      .uncheck();
+
+    // Enter invalid acronym
+    cy.get('#ownership-agency-0')
+      .type('ggg')
+      .blur();
+
+    cy.get('#collection-collector-agency-error-msg')
+      .should('have.text', regFormData.ownerAgencyError);
+
+    // Enter valid test acronym
+    cy.get('#ownership-location-code-0')
+      .clear()
+      .type(testAcronym)
+      .blur();
+
+    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+      .should('be.visible');
+
+    // Enter invalid location code
+    cy.get('#ownership-location-code-0')
+      .clear()
+      .type('96', { delay: TYPE_DELAY })
+      .blur();
+
+    cy.get('#collection-location-code-error-msg')
+      .should('have.text', regFormData.locationCodeError);
+
+    // Enter valid location code
+    cy.get('#ownership-location-code-0')
+      .clear()
+      .type('02')
+      .blur();
   });
 });
