@@ -184,4 +184,52 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-portion-0-error-msg')
       .should('have.text', regFormData.ownerPortionAboveLimitError);
   });
+
+  it('check funding source and method of payment default values and change the values', () => {
+    cy.get('#ownership-funding-source-0')
+      .should('have.value', '');
+
+    cy.get('.single-owner-info-col')
+      .eq(0)
+      .find(`button.${prefix}--list-box__menu-icon`)
+      .click();
+
+    cy.get('li#downshift-1-item-5')
+      .click();
+
+    cy.get('#ownership-funding-source-0')
+      .should('have.value', 'FTM - Forests for Tomorrow MOF Admin');
+
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', '');
+
+    cy.get('.single-owner-info-col')
+      .eq(1)
+      .find(`button.${prefix}--list-box__menu-icon`)
+      .click();
+
+    cy.get('li#downshift-3-item-1')
+      .click();
+
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', 'CSH - Cash Sale');
+
+    cy.get('.single-owner-info-col')
+      .eq(0)
+      .find('[aria-label="Clear selected item"]')
+      .click()
+      .blur();
+
+    cy.get('#ownership-funding-source-0')
+      .should('have.value', '');
+
+    cy.get('.single-owner-info-col')
+      .eq(1)
+      .find('[aria-label="Clear selected item"]')
+      .click()
+      .blur();
+
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', '');
+  });
 });
