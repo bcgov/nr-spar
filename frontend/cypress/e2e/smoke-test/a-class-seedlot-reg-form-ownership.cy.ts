@@ -232,4 +232,26 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-method-payment-0')
       .should('have.value', '');
   });
+
+  it('create and delete new owner agency section', () => {
+    cy.get('button.owner-add-btn')
+      .click();
+
+    cy.get(`ul.${prefix}--accordion`)
+      .find(`li.${prefix}--accordion__item`)
+      .as('ownerAgencySection')
+      .should('have.length', 2);
+
+    cy.get('.single-owner-info-container')
+      .find('button.owner-mod-btn')
+      .contains('Delete owner')
+      .as('deleteButton')
+      .should('exist');
+
+    cy.get('@deleteButton')
+      .click();
+
+    cy.get('@ownerAgencySection')
+      .should('have.length', 1);
+  });
 });
