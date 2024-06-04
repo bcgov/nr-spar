@@ -963,9 +963,9 @@ export const fillAreaOfUseData = (
   }
   // Additional SPZs
   if (seedlotData.additionalSpzList) {
-    clonedAreaOfUse.additionalSpzList = seedlotData.additionalSpzList.map((spz) => (
+    clonedAreaOfUse.additionalSpzList = seedlotData.additionalSpzList.map((spz, index) => (
       getOptionsInputObj(
-        `area-of-use-additional-spz-${spz.code}`,
+        `area-of-use-additional-spz-${index}`,
         {
           code: spz.code,
           description: spz.description,

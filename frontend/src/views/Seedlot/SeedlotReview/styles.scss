@@ -38,6 +38,21 @@
     padding-top: 2rem;
   }
 
+  .additional-spz-combobox-and-button {
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
+
+    .#{vars.$bcgov-prefix}--list-box__wrapper {
+      flex-grow: 1;
+    }
+
+    .#{vars.$bcgov-prefix}--popover-container {
+      margin-left: 1rem;
+    }
+  }
+
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
     .#{vars.$bcgov-prefix}--text-input {
       padding: 0;

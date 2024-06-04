@@ -1,8 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
-  FlexGrid, Row, Column, ComboBox, TextInputSkeleton
+  FlexGrid, Row, Column, ComboBox,
+  Button, TextInputSkeleton
 } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
+import { Add } from '@carbon/icons-react';
 
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import Divider from '../../../Divider';
@@ -14,6 +16,9 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { filterSpzListItem, spzListToMultiObj } from '../utils';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../../../../shared-constants/shared-constants';
+import AdditionalSpzItem from '../AddtionalSpzItem';
+import { OptionsInputType } from '../../../../types/FormInputType';
+import { getOptionsInputObj } from '../../../../utils/FormInputUtils';
 
 const AreaOfUseEdit = () => {
   const {
@@ -56,6 +61,38 @@ const AreaOfUseEdit = () => {
     }));
   };
 
+  const setAdditionalSpz = (oldSpz: OptionsInputType, newSpz: MultiOptionsObj | null) => {
+    // Add the spz item if it does not exist
+    const index = areaOfUseData.additionalSpzList.findIndex((spz) => spz.id === oldSpz.id);
+
+    const areaOfUseClone = structuredClone(areaOfUseData);
+
+    // if it exists then replace the value
+    if (index > -1) {
+      areaOfUseClone.additionalSpzList[index].value = newSpz ?? EmptyMultiOptObj;
+      setAreaOfUseData(areaOfUseClone);
+    }
+  };
+
+  const addEmptyAdditionalSpz = () => {
+    const nextIndex = Math
+      .max(...areaOfUseData.additionalSpzList.map((spz) => Number(spz.id.slice(-1)))) + 1;
+    setAreaOfUseData((prev) => ({
+      ...prev,
+      additionalSpzList: [
+        ...prev.additionalSpzList,
+        getOptionsInputObj(`area-of-use-additional-spz-${nextIndex}`, EmptyMultiOptObj)
+      ]
+    }));
+  };
+
+  const deleteAdditionalSpz = (optionInputId: string) => {
+    setAreaOfUseData((prev) => ({
+      ...prev,
+      additionalSpzList: prev.additionalSpzList.filter((spz) => spz.id !== optionInputId)
+    }));
+  };
+
   return (
     <FlexGrid className="sub-section-grid">
       <Row>
@@ -90,6 +127,36 @@ const AreaOfUseEdit = () => {
                 />
               )
           }
+        </Column>
+      </Row>
+      {
+        areaOfUseData.additionalSpzList
+          .map((additionalSpz) => (
+            <AdditionalSpzItem
+              key={additionalSpz.id}
+              spz={additionalSpz}
+              dropDownItems={
+                filterSpzListItem(
+                  spzListQuery.data,
+                  [areaOfUseData.primarySpz.value]
+                    .concat(areaOfUseData.additionalSpzList.map((extraSpz) => extraSpz.value))
+                )
+              }
+              setAdditionalSpz={setAdditionalSpz}
+              deleteAdditionalSpz={deleteAdditionalSpz}
+            />
+          ))
+      }
+      <Row>
+        <Column className="info-col">
+          <Button
+            kind="tertiary"
+            renderIcon={Add}
+            iconDescription="Delete this additional spz"
+            onClick={addEmptyAdditionalSpz}
+          >
+            Add seed planning zone
+          </Button>
         </Column>
       </Row>
       <Divider />
