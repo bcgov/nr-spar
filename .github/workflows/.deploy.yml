@@ -120,7 +120,6 @@ jobs:
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
               ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
-            triggers: ('oracle-api/')
             verification_path: "actuator/health"
           - name: sync
             file: sync/openshift.deploy.yml
@@ -147,7 +146,8 @@ jobs:
           post_rollout: ${{ matrix.post_rollout }}
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path }}
-
+          verification_retry_attempts: "5"
+          verification_retry_seconds: "15"
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
