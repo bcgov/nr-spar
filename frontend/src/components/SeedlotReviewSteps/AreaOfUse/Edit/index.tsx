@@ -7,8 +7,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Add } from '@carbon/icons-react';
 
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
-import Divider from '../../../Divider';
-import SeedMapSection from '../SeedMapSection';
 import { FilterObj, filterInput } from '../../../../utils/FilterUtils';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import { getSpzList } from '../../../../api-service/areaOfUseAPI';
@@ -16,9 +14,12 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { filterSpzListItem, spzListToMultiObj } from '../utils';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../../../../shared-constants/shared-constants';
-import AdditionalSpzItem from '../AddtionalSpzItem';
 import { OptionsInputType } from '../../../../types/FormInputType';
 import { getOptionsInputObj } from '../../../../utils/FormInputUtils';
+import Divider from '../../../Divider';
+
+import AdditionalSpzItem from '../AddtionalSpzItem';
+import SeedMapSection from '../SeedMapSection';
 
 const AreaOfUseEdit = () => {
   const {
@@ -144,6 +145,7 @@ const AreaOfUseEdit = () => {
               }
               setAdditionalSpz={setAdditionalSpz}
               deleteAdditionalSpz={deleteAdditionalSpz}
+              isFetching={isFetching}
             />
           ))
       }

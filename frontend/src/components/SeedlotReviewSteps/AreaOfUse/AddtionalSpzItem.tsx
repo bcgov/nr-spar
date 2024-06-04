@@ -4,9 +4,11 @@ import {
   ComboBox, TextInputSkeleton
 } from '@carbon/react';
 import { TrashCan } from '@carbon/icons-react';
-import { AdditionalSpzItemProps } from './definitions';
+
 import { FilterObj, filterInput } from '../../../utils/FilterUtils';
 import ComboBoxEvent from '../../../types/ComboBoxEvent';
+
+import { AdditionalSpzItemProps } from './definitions';
 
 const AdditionalSpzItem = (
   {
