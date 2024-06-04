@@ -42,8 +42,8 @@ import InfoDisplayObj from '../../../types/InfoDisplayObj';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
-  AllStepData, ClientAgenciesByCode, ProgressIndicatorConfig,
-  ProgressStepStatus
+  AllStepData, AreaOfUseDataType, ClientAgenciesByCode,
+  ProgressIndicatorConfig, ProgressStepStatus
 } from './definitions';
 import {
   initProgressBar, getSpeciesOptionByCode, validateCollectionStep, verifyCollectionStepCompleteness,
@@ -51,10 +51,11 @@ import {
   verifyInterimStepCompleteness, validateOrchardStep, verifyOrchardStepCompleteness,
   validateExtractionStep, verifyExtractionStepCompleteness, validateParentStep,
   verifyParentStepCompleteness, checkAllStepsCompletion, getSeedlotPayload,
-  initEmptySteps, resDataToState
+  initEmptySteps, resDataToState,
+  fillAreaOfUseData
 } from './utils';
 import {
-  MAX_EDIT_BEFORE_SAVE,
+  MAX_EDIT_BEFORE_SAVE, initialAreaOfUseData,
   initialProgressConfig, smartSaveText, stepMap
 } from './constants';
 
@@ -107,6 +108,7 @@ const ContextContainerClassA = ({ children }: props) => {
   const [meanGeomInfos, setMeanGeomInfos] = useState<MeanGeomInfoSectionConfigType>(
     () => structuredClone(defaultMeanGeomConfig)
   );
+  const [areaOfUseData, setAreaOfUseData] = useState<AreaOfUseDataType>(() => initialAreaOfUseData);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -206,8 +208,13 @@ const ContextContainerClassA = ({ children }: props) => {
   const [clientNumbers, setClientNumbers] = useState<string[]>([]);
 
   useEffect(() => {
-    setClientNumber(seedlotQuery.data?.seedlot.applicantClientNumber ?? '');
-  }, [seedlotQuery.isFetched]);
+    if (seedlotQuery.status === 'success') {
+      setClientNumber(seedlotQuery.data.seedlot.applicantClientNumber ?? '');
+
+      // Set area of use data
+      setAreaOfUseData(fillAreaOfUseData(seedlotQuery.data, areaOfUseData));
+    }
+  }, [seedlotQuery.status]);
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', clientNumber],
@@ -762,7 +769,9 @@ const ContextContainerClassA = ({ children }: props) => {
         summaryConfig,
         setSummaryConfig,
         meanGeomInfos,
-        setMeanGeomInfos
+        setMeanGeomInfos,
+        areaOfUseData,
+        setAreaOfUseData
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
@@ -772,7 +781,7 @@ const ContextContainerClassA = ({ children }: props) => {
       progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,
       methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,
       fundingSourcesQuery.status, geoInfoVals, genWorthVals, genWorthInfoItems, weightedGwInfoItems,
-      popSizeAndDiversityConfig, summaryConfig, meanGeomInfos
+      popSizeAndDiversityConfig, summaryConfig, meanGeomInfos, areaOfUseData
     ]
   );
 

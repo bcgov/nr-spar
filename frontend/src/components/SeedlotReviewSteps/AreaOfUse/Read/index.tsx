@@ -5,7 +5,7 @@ import {
 
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import ReadOnlyInput from '../../../ReadOnlyInput';
-import { formatLatLong, formatSpz, formatSpzList } from '../utils';
+import { formatLatLong, formatSpz, spzListToString } from '../utils';
 import Divider from '../../../Divider';
 import SeedMapSection from '../SeedMapSection';
 
@@ -43,7 +43,7 @@ const AreaOfUseRead = () => {
             label="Additional seed planning zone(s)"
             value={
               richSeedlotData?.additionalSpzList
-                ? formatSpzList(richSeedlotData.additionalSpzList)
+                ? spzListToString(richSeedlotData.additionalSpzList)
                 : ''
             }
             showSkeleton={isFetchingData}
@@ -65,7 +65,7 @@ const AreaOfUseRead = () => {
             id="min-elevation-input-readonly"
             label="Minimum Elevation (m):"
             value={
-              richSeedlotData?.seedlot.elevationMin.toString()
+              richSeedlotData?.seedlot.elevationMin?.toString()
             }
             showSkeleton={isFetchingData}
           />
@@ -75,7 +75,7 @@ const AreaOfUseRead = () => {
             id="max-elevation-input-readonly"
             label="Maximum Elevation (m):"
             value={
-              richSeedlotData?.seedlot.elevationMax.toString()
+              richSeedlotData?.seedlot.elevationMax?.toString()
             }
             showSkeleton={isFetchingData}
           />
@@ -151,7 +151,7 @@ const AreaOfUseRead = () => {
             id="area-of-use-comment-input-readonly"
             label="Area of use comment:"
             value={
-              richSeedlotData?.seedlot.areaOfUseComment
+              richSeedlotData?.seedlot.areaOfUseComment ?? ''
             }
             showSkeleton={isFetchingData}
           />

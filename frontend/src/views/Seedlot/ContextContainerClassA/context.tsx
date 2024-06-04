@@ -10,7 +10,7 @@ import {
   SeedlotCalculationsResultsType, SeedlotType
 } from '../../../types/SeedlotType';
 
-import { AllStepData, ProgressIndicatorConfig } from './definitions';
+import { AllStepData, AreaOfUseDataType, ProgressIndicatorConfig } from './definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
 import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 import {
@@ -68,7 +68,9 @@ export type ClassAContextType = {
   summaryConfig: typeof SummarySectionConfig,
   setSummaryConfig: React.Dispatch<React.SetStateAction<typeof SummarySectionConfig>>,
   meanGeomInfos: MeanGeomInfoSectionConfigType,
-  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>
+  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>,
+  areaOfUseData: AreaOfUseDataType,
+  setAreaOfUseData: React.Dispatch<React.SetStateAction<AreaOfUseDataType>>
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -113,7 +115,9 @@ const ClassAContext = createContext<ClassAContextType>({
   summaryConfig: {} as typeof SummarySectionConfig,
   setSummaryConfig: () => { },
   meanGeomInfos: {} as MeanGeomInfoSectionConfigType,
-  setMeanGeomInfos: () => { }
+  setMeanGeomInfos: () => { },
+  areaOfUseData: {} as AreaOfUseDataType,
+  setAreaOfUseData: () => { }
 });
 
 export default ClassAContext;
