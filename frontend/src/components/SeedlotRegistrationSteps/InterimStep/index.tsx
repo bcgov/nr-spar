@@ -151,7 +151,6 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
               )
               : null
           }
-
         </Column>
       </Row>
       <ApplicantAgencyFields

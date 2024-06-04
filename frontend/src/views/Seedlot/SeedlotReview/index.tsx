@@ -29,6 +29,7 @@ import InterimReviewEdit from '../../../components/SeedlotReviewSteps/Interim/Ed
 import OrchardReviewRead from '../../../components/SeedlotReviewSteps/Orchard/Read';
 import OrchardReviewEdit from '../../../components/SeedlotReviewSteps/Orchard/Edit';
 import ExtractionStorageReviewRead from '../../../components/SeedlotReviewSteps/ExtractionStorage/Read';
+import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/ExtractionStorage/Edit';
 
 import ContextContainerClassA from '../ContextContainerClassA';
 
@@ -239,7 +240,7 @@ const SeedlotReview = () => {
               isReadMode
                 ? <ExtractionStorageReviewRead />
                 : (
-                  <InterimReviewEdit />
+                  <ExtractionStorageReviewEdit />
                 )
             }
           </Column>
