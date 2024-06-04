@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import ApiConfig from './ApiConfig';
 import api from './api';
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
@@ -11,17 +12,24 @@ export const getForestClientLocation = (clientNumber: string, locationCode: stri
   // const url = `${ApiConfig.forestClient}/${clientNumber}/location/${locationCode}`;
   // return api.get(url).then((res) => res.data);
 
+  // default mocked false number
+  if (locationCode === '99') {
+    return Promise.reject(new AxiosError("don't worry it's fine"));
+  }
+
   return Promise.resolve();
 };
 
 // eslint-disable-next-line arrow-body-style
-export const getForestClientByNumberOrAcronym = (clientNumber: string) => {
+export const getForestClientByNumberOrAcronym = (numberOrAcronym: string) => {
   // TODO: restore this once forest client is back up
   // const url = `${ApiConfig.forestClient}/${clientNumber}`;
   // return api.get(url).then((res): ForestClientType => res.data);
 
   return Promise.resolve(
-    MockForestClients.find((fc) => fc.clientNumber === clientNumber) ?? UNKOWN_FC
+    MockForestClients.find(
+      (fc) => fc.clientNumber === numberOrAcronym || fc.acronym === numberOrAcronym
+    ) ?? UNKOWN_FC
   );
 };
 
