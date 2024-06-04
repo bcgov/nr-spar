@@ -297,4 +297,17 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .contains(regFormData.ownerPortionSumError)
       .should('not.exist');
   });
+
+  it('check complete checkmark for Ownership step', () => {
+    // Press next button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Next')
+      .click();
+
+    // Check svg with complete checkmark on Step 3
+    cy.get('ul.spar-seedlot-reg-progress-bar li')
+      .eq(1)
+      .should('have.class', `${prefix}--progress-step--complete`);
+  });
 });
