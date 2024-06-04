@@ -254,4 +254,47 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('@ownerAgencySection')
       .should('have.length', 1);
   });
+
+  it('check owner portion % for 3 owner agencies', () => {
+    cy.get('button.owner-add-btn')
+      .click()
+      .blur();
+
+    cy.get('button.owner-add-btn')
+      .click()
+      .blur();
+
+    // Check 3 sections created
+    cy.get(`ul.${prefix}--accordion`)
+      .find(`li.${prefix}--accordion__item`)
+      .should('have.length', 3);
+
+    cy.get('#ownership-portion-0')
+      .blur();
+
+    // Check error message on all 3 sections
+    cy.get(`div.${prefix}--form-requirement`)
+      .should('have.length', 3)
+      .and('contain.text', regFormData.ownerPortionSumError);
+
+    cy.get('#ownership-portion-0')
+      .clear()
+      .type('90')
+      .blur();
+
+    cy.get('#ownership-portion-1')
+      .clear()
+      .type('5')
+      .blur();
+
+    cy.get('#ownership-portion-2')
+      .clear()
+      .type('5')
+      .blur();
+
+    // Check no error message on any 3 sections
+    cy.get(`div.${prefix}--form-requirement`)
+      .contains(regFormData.ownerPortionSumError)
+      .should('not.exist');
+  });
 });
