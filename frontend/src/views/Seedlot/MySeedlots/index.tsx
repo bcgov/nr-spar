@@ -18,14 +18,14 @@ import ROUTES from '../../../routes/constants';
 import useWindowSize from '../../../hooks/UseWindowSize';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 
-import { tableText } from './constants';
+import { getSubTitle, getTitle, tableText } from './constants';
 
 import './styles.scss';
 
 const MySeedlots = () => {
   const navigate = useNavigate();
   const windowSize = useWindowSize();
-  const { user } = useContext(AuthContext);
+  const { user, isTscAdmin } = useContext(AuthContext);
 
   const userId = user?.userId ?? '';
 
@@ -39,23 +39,29 @@ const MySeedlots = () => {
       <Row className="my-seedlot-title">
         <Column className="no-padding-col" sm={4} md={6} lg={12} xlg={12}>
           <PageTitle
-            title={tableText.pageTitle}
-            subtitle={tableText.pageSubtitle}
+            title={getTitle(isTscAdmin)}
+            subtitle={getSubTitle(isTscAdmin)}
             enableFavourite
             activity="mySeedlots"
           />
         </Column>
-        <Column className="no-padding-col" sm={4} md={2} lg={4} xlg={4}>
-          <Button
-            kind="primary"
-            onClick={() => { navigate(ROUTES.SEEDLOTS_A_CLASS_CREATION); }}
-            size="lg"
-            className={`reg-seedlot-btn ${windowSize.innerWidth >= MEDIUM_SCREEN_WIDTH ? 'reg-btn-float-right' : null}`}
-            renderIcon={Add}
-          >
-            {tableText.buttonText}
-          </Button>
-        </Column>
+        {
+          !isTscAdmin
+            ? (
+              <Column className="no-padding-col" sm={4} md={2} lg={4} xlg={4}>
+                <Button
+                  kind="primary"
+                  onClick={() => { navigate(ROUTES.SEEDLOTS_A_CLASS_CREATION); }}
+                  size="lg"
+                  className={`reg-seedlot-btn ${windowSize.innerWidth >= MEDIUM_SCREEN_WIDTH ? 'reg-btn-float-right' : null}`}
+                  renderIcon={Add}
+                >
+                  {tableText.buttonText}
+                </Button>
+              </Column>
+            )
+            : null
+        }
       </Row>
       <Row className="my-seedlot-data-table-row">
         <SeedlotTable userId={userId} isSortable showSearch showPagination defaultPageSize={20} />
