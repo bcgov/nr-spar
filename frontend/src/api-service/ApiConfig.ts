@@ -34,6 +34,8 @@ const ApiConfig = {
 
   seedlots: `${serverHost}/api/seedlots`,
 
+  tscAdmin: `${serverHost}/api/tsc-admin`,
+
   /**
    * ORACLE API
    */
