@@ -38,12 +38,6 @@ const SeedlotDataTable = (
     setProcessedData(seedlotData);
   }, [seedlotData]);
 
-  useEffect(() => {
-    if (!isTscAdmin) {
-      HeaderConfig.filter((header) => !ExclusiveAdminRows.includes(header.id));
-    }
-  }, []);
-
   const handleSort = (headerId: keyof SeedlotDisplayType) => {
     let newDirection = 'NONE';
     if (sortThisHeader !== headerId || sortDirection === 'NONE') {
@@ -103,7 +97,11 @@ const SeedlotDataTable = (
         <TableHead>
           <TableRow>
             {
-              HeaderConfig.map((header) => (
+              HeaderConfig.filter(
+                (header) => (isTscAdmin
+                  ? true
+                  : !ExclusiveAdminRows.includes(header.id))
+              ).map((header) => (
                 <TableHeader
                   key={header.id}
                   id={`seedlot-table-header-${header.id}`}
@@ -127,7 +125,11 @@ const SeedlotDataTable = (
                 onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlot.seedlotNumber ?? ''))}
               >
                 {
-                  HeaderConfig.map((header) => (
+                  HeaderConfig.filter(
+                    (header) => (isTscAdmin
+                      ? true
+                      : !ExclusiveAdminRows.includes(header.id))
+                  ).map((header) => (
                     <TableCell
                       id={`seedlot-table-cell-${seedlot.seedlotNumber}-${header.id}`}
                       key={header.id}
