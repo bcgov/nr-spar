@@ -1,0 +1,21 @@
+{
+  "collector": {
+    "agencyTitle": "Collector agency",
+    "agencySubtitle": "Enter the collector agency information",
+    "informationTitle": "Collection information",
+    "informationSubtitle": "Enter the collection information about this seedlot",
+    "checkboxText": "Use applicant agency as collector agency",
+    "acronymErrorMsg": "Please enter a valid acronym that identifies the agency",
+    "locationErrorMsg": "This location code is not valid for the selected agency, please enter a valid one or change the agency",
+    "invalidDateErrorMsg": "Please enter a valid date",
+    "numOfContainerErrorMsg": "Invalid entry. Number must be between 0 and 10,000 and up to 3 decimal places.",
+    "volOfConesErrorMsg": "The total volume of cones does not equal, please note that this value must be the \"Volume per container\" x \"Number of containers\""
+  },
+  "interimStorage": {
+    "title": "Interim agency",
+    "subtitle": "Enter the interim agency and storage information",
+    "acronymErrorMsg": "Please enter a valid acronym that identifies the agency",
+    "locationErrorMsg": "This location code is not valid for the selected agency, please enter a valid one or change the agency",
+    "invalidDateErrorMsg": "Please enter a valid date"
+  }
+}
