@@ -334,7 +334,7 @@ class SeedlotServiceTest {
     SeedlotDto responseFromService = seedlotService.getSingleSeedlotInfo(seedlotId);
 
     Assertions.assertNotNull(responseFromService);
-    Assertions.assertEquals(seedlotEntity, responseFromService);
+    Assertions.assertEquals(seedlotEntity, responseFromService.getSeedlot());
   }
 
   @Test
