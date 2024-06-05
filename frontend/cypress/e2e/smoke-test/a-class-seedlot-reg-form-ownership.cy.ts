@@ -66,7 +66,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-title-section')
-      .should('have.text', regFormData.agencyTitle);
+      .should('have.text', seedlotData[speciesKey].agencyName);
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-description-section')
@@ -106,9 +106,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#collection-collector-agency-error-msg')
       .should('have.text', regFormData.ownerAgencyError);
 
-    // Enter valid test acronym
-    cy.get('#ownership-location-code-0')
-      .clear()
+    // Enter valid acronym
+    cy.get('#ownership-agency-0')
       .type(testAcronym)
       .blur();
 
@@ -118,7 +117,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Enter invalid location code
     cy.get('#ownership-location-code-0')
       .clear()
-      .type('96', { delay: TYPE_DELAY })
+      .type('99', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#collection-location-code-error-msg')
@@ -129,6 +128,9 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .clear()
       .type('02')
       .blur();
+
+    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+      .should('be.visible');
   });
 
   it('check owner portion %, reserved % and surplus % default values', () => {
@@ -268,6 +270,17 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get(`ul.${prefix}--accordion`)
       .find(`li.${prefix}--accordion__item`)
       .should('have.length', 3);
+
+    // Check default title and subtitle created
+    cy.get(`.${prefix}--accordion__title`)
+      .eq(1)
+      .find('.item-title-section')
+      .should('have.text', regFormData.agencyTitle);
+
+    cy.get(`.${prefix}--accordion__title`)
+      .eq(1)
+      .find('.item-description-section')
+      .should('have.text', regFormData.agencySubtitle);
 
     cy.get('#ownership-portion-0')
       .blur();
