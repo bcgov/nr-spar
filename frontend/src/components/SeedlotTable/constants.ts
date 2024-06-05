@@ -18,6 +18,22 @@ export const HeaderConfig: HeaderObj[] = [
     label: 'Status'
   },
   {
+    id: 'entryUserId',
+    label: 'Submitted by'
+  },
+  {
+    id: 'entryTimestamp',
+    label: 'Submitted at'
+  },
+  {
+    id: 'applicantAgency',
+    label: 'Applicant agency'
+  },
+  {
+    id: 'locationCode',
+    label: ''
+  },
+  {
     id: 'createdAt',
     label: 'Created at'
   },
@@ -44,4 +60,11 @@ export const TableText = {
 
 export const PageSizesConfig = [
   10, 20, 30, 40, 50
+];
+
+export const ExclusiveAdminRows: Array<string> = [
+  'entryUserId',
+  'entryTimestamp',
+  'applicantAgency',
+  'locationCode'
 ];
