@@ -106,6 +106,17 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#collection-collector-agency-error-msg')
       .should('have.text', regFormData.ownerAgencyError);
 
+    cy.get('#ownership-agency-0')
+      .type('-1')
+      .blur();
+
+    cy.get('#collection-collector-agency-error-msg')
+      .should('have.text', regFormData.ownerAgencyValidationError);
+
+    // Check error msg block is visible
+    cy.get('.applicant-error-notification')
+      .should('exist');
+
     // Enter valid acronym
     cy.get('#ownership-agency-0')
       .type(testAcronym)
