@@ -14,6 +14,7 @@ import Divider from '../Divider';
 import ApplicantAgencyFields from '../ApplicantAgencyFields';
 import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../types/FormInputType';
+import { EmptyBooleanInputType } from '../../shared-constants/shared-constants';
 
 import SeedlotInformation from './SeedlotInformation';
 import { FormProps } from './definitions';
@@ -79,7 +80,7 @@ const LotApplicantAndInfoForm = ({
       </Row>
       <ApplicantAgencyFields
         showCheckbox={false}
-        isDefault={{ id: '', isInvalid: false, value: false }}
+        isDefault={EmptyBooleanInputType}
         checkboxId="lot-information-default-checkbox"
         agency={isSeedlot && seedlotFormData ? seedlotFormData.client : vegLotAgency}
         locationCode={

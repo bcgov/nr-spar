@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
+import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
@@ -591,6 +592,8 @@ public class SeedlotService {
     // Extraction Step 6
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
 
+    setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+
     setParentTreeContribution(
         seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
 
@@ -606,11 +609,30 @@ public class SeedlotService {
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
   }
 
+  private void setBecValues(Seedlot seedlot, String primaryOrchardId) {
+    SparLog.info("Begin to set BEC values");
+
+    OrchardDto orchardDto =
+        oracleApiProvider
+            .findOrchardById(primaryOrchardId)
+            .orElseThrow(OracleApiProviderException::new);
+
+    // Not sure why it's called Bgc in seedlot instead of Bec in orchard
+    seedlot.setBgcZoneCode(orchardDto.becZoneCode());
+    seedlot.setBgcZoneDescription(orchardDto.becZoneDescription());
+    seedlot.setBgcSubzoneCode(orchardDto.becSubzoneCode());
+    seedlot.setVariant(orchardDto.variant());
+    seedlot.setBecVersionId(orchardDto.becVersionId());
+
+    SparLog.info("BEC values set");
+  }
+
   private void setParentTreeContribution(
       Seedlot seedlot,
       List<SeedlotFormParentTreeSmpDto> orchardPtDtoList,
       List<SeedlotFormParentTreeSmpDto> smpPtDtoList) {
 
+    SparLog.info("Begin to set parent trees contribution");
     List<OrchardParentTreeValsDto> orchardPtVals = convertToPtVals(orchardPtDtoList);
     List<GeospatialRequestDto> smpMixIdAndProps = convertToGeoRes(smpPtDtoList);
 
@@ -633,6 +655,7 @@ public class SeedlotService {
     seedlot.setCollectionLongitudeDeg(collectionGeoData.getMeanLongitudeDegree());
     seedlot.setCollectionLongitudeMin(collectionGeoData.getMeanLongitudeMinute());
     seedlot.setCollectionLongitudeSec(collectionGeoData.getMeanLongitudeSecond());
+    SparLog.info("Parent trees contribution set");
   }
 
   private List<OrchardParentTreeValsDto> convertToPtVals(
@@ -695,6 +718,7 @@ public class SeedlotService {
    * @param primaryOrchardId the primary orchard Id to find the spu for
    */
   private void setAreaOfUse(Seedlot seedlot, String primaryOrchardId) {
+    SparLog.info("Begin to set Area of Use values");
     ActiveOrchardSpuEntity activeSpuEntity =
         orchardService
             .findSpuIdByOrchardWithActive(primaryOrchardId, true)
@@ -776,6 +800,8 @@ public class SeedlotService {
               spzSaveList.add(sspzToSave);
             });
     seedlotSeedPlanZoneRepository.saveAll(spzSaveList);
+
+    SparLog.info("Area of Use values set");
   }
 
   private void setSeedlotStatus(Seedlot seedlot, String newStatus) {

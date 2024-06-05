@@ -57,6 +57,10 @@ public interface Provider {
     return Optional.empty();
   }
 
+  default Optional<OrchardDto> findOrchardById(String orchardId) {
+    return Optional.empty();
+  }
+
   // Common methods
   String[] addAuthorizationHeader();
 
