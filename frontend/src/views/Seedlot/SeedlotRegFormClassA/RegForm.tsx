@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import CollectionStep from '../../../components/SeedlotRegistrationSteps/CollectionStep';
 import OwnershipStep from '../../../components/SeedlotRegistrationSteps/OwnershipStep';
-import InterimStorage from '../../../components/SeedlotRegistrationSteps/InterimStep';
+import InterimStep from '../../../components/SeedlotRegistrationSteps/InterimStep';
 import OrchardStep from '../../../components/SeedlotRegistrationSteps/OrchardStep';
 import ParentTreeStep from '../../../components/SeedlotRegistrationSteps/ParentTreeStep';
 import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/ExtractionAndStorageStep';
@@ -32,7 +32,7 @@ const RegForm = (
     // Interim Storage
     case 2:
       return (
-        <InterimStorage />
+        <InterimStep />
       );
     // Orchard
     case 3:

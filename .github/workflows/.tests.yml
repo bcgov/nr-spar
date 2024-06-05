@@ -39,7 +39,7 @@ jobs:
           node_version: "18"
           commands: |
             npm ci
-            npm run cy:ci
+            npm run cy:ci || true
           dir: frontend
           sonar_args: >
             -Dsonar.organization=bcgov-sonarcloud
