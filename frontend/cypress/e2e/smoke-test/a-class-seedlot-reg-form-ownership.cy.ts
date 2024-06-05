@@ -4,20 +4,22 @@ import { TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Ownership', () => {
   let regFormData: {
-    title: string;
-    subtitle: string;
-    agencyTitle: string;
-    agencySubtitle: string;
-    ownerAgencyError: string;
-    ownerAgencyValidationError: string;
-    locationCodeError: string;
-    ownerPortionSumError: string;
-    ownerPortionAboveLimitError: string;
-    ownerPortionBelowLimitError: string;
-    ownerPortionDecimalError: string;
-    reservedAboveLimitError: string;
-    reservedBelowLimitError: string;
-    reservedDecimalError: string;
+    collector: {
+      title: string;
+      subtitle: string;
+      agencyTitle: string;
+      agencySubtitle: string;
+      ownerAgencyError: string;
+      ownerAgencyValidationError: string;
+      locationCodeError: string;
+      ownerPortionSumError: string;
+      ownerPortionAboveLimitError: string;
+      ownerPortionBelowLimitError: string;
+      ownerPortionDecimalError: string;
+      reservedAboveLimitError: string;
+      reservedBelowLimitError: string;
+      reservedDecimalError: string;
+    }
   };
 
   let seedlotNum: string;
@@ -30,7 +32,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Login
     cy.login();
 
-    cy.fixture('a-class-reg-form-ownership').then((fData) => {
+    cy.fixture('aclass-reg-form').then((fData) => {
       regFormData = fData;
     });
 
@@ -58,11 +60,11 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('.ownership-header')
       .find('h3')
-      .should('have.text', regFormData.title);
+      .should('have.text', regFormData.collector.title);
 
     cy.get('.ownership-header')
       .find('p')
-      .should('have.text', regFormData.subtitle);
+      .should('have.text', regFormData.collector.subtitle);
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-title-section')
@@ -70,7 +72,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-description-section')
-      .should('have.text', regFormData.agencySubtitle);
+      .should('have.text', regFormData.collector.agencySubtitle);
   });
 
   it('check owner agency section visibility', () => {
@@ -104,14 +106,14 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     cy.get('#collection-collector-agency-error-msg')
-      .should('have.text', regFormData.ownerAgencyError);
+      .should('have.text', regFormData.collector.ownerAgencyError);
 
     cy.get('#ownership-agency-0')
       .type('-1')
       .blur();
 
     cy.get('#collection-collector-agency-error-msg')
-      .should('have.text', regFormData.ownerAgencyValidationError);
+      .should('have.text', regFormData.collector.ownerAgencyValidationError);
 
     // Check error msg block is visible
     cy.get('.applicant-error-notification')
@@ -132,7 +134,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     cy.get('#collection-location-code-error-msg')
-      .should('have.text', regFormData.locationCodeError);
+      .should('have.text', regFormData.collector.locationCodeError);
 
     // Enter valid location code
     cy.get('#ownership-location-code-0')
@@ -233,7 +235,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
-      .should('have.text', regFormData.ownerPortionBelowLimitError);
+      .should('have.text', regFormData.collector.ownerPortionBelowLimitError);
 
     cy.get('#ownership-portion-0')
       .clear()
@@ -241,7 +243,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
-      .should('have.text', regFormData.ownerPortionDecimalError);
+      .should('have.text', regFormData.collector.ownerPortionDecimalError);
 
     cy.get('#ownership-portion-0')
       .clear()
@@ -249,7 +251,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
-      .should('have.text', regFormData.ownerPortionAboveLimitError);
+      .should('have.text', regFormData.collector.ownerPortionAboveLimitError);
   });
 
   it('check funding source and method of payment default values and change the values', () => {
@@ -340,12 +342,12 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get(`.${prefix}--accordion__title`)
       .eq(1)
       .find('.item-title-section')
-      .should('have.text', regFormData.agencyTitle);
+      .should('have.text', regFormData.collector.agencyTitle);
 
     cy.get(`.${prefix}--accordion__title`)
       .eq(1)
       .find('.item-description-section')
-      .should('have.text', regFormData.agencySubtitle);
+      .should('have.text', regFormData.collector.agencySubtitle);
 
     cy.get('#ownership-portion-0')
       .blur();
@@ -353,7 +355,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Check error message on all 3 sections
     cy.get(`div.${prefix}--form-requirement`)
       .should('have.length', 3)
-      .and('contain.text', regFormData.ownerPortionSumError);
+      .and('contain.text', regFormData.collector.ownerPortionSumError);
 
     cy.get('#ownership-portion-0')
       .clear()
@@ -372,7 +374,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     // Check no error message on any 3 sections
     cy.get(`div.${prefix}--form-requirement`)
-      .contains(regFormData.ownerPortionSumError)
+      .contains(regFormData.collector.ownerPortionSumError)
       .should('not.exist');
   });
 
