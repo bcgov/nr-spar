@@ -25,6 +25,7 @@ export default defineConfig({
       '**/seedlot-detail.cy.ts',
       '**/edit-applicant-seedlot-info.cy.ts',
       '**/my-seedlots.cy.ts',
+      '**/a-class-seedlot-reg-form-collection-interim.cy.ts',
       '**/a-class-seedlot-reg-form-ownership.cy.ts'
     ],
     chromeWebSecurity: false,
