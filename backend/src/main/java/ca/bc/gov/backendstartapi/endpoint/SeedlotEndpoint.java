@@ -208,38 +208,55 @@ public class SeedlotEndpoint {
   /**
    * Resource to fetch all seedlots to a given user id.
    *
-   * @param userId user identification to fetch seedlots to
+   * @param clientId client id to fetch seedlots to
    * @return A {@link List} of {@link Seedlot} populated or empty
    */
-  @GetMapping("/users/{userId}")
+  @GetMapping("/users/{clientId}")
   @CrossOrigin(exposedHeaders = "X-TOTAL-COUNT")
   @Operation(
-      summary = "Fetch all seedlots registered by a given user.",
-      description = "Returns a paginated list containing the seedlots",
+      summary = "Fetch all seedlots registered by a given client id.",
+      description =
+          """
+          Returns a paginated list containing the seedlots. Note that the requested client id
+          should be present on the user organization.
+          """,
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "A list containing found Seedlots or an empty list"),
+            description = "A list containing the found Seedlots or an empty list"),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ResponseEntity<List<Seedlot>> getUserSeedlots(
       @PathVariable
           @Parameter(
-              name = "userId",
+              name = "clientId",
               in = ParameterIn.PATH,
-              description = "User's identification",
-              example = "dev-abcdef123456@idir")
-          String userId,
+              description = "Client's identification",
+              required = true,
+              example = "12797")
+          String clientId,
       @RequestParam(value = "page", required = false, defaultValue = "0") int page,
       @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-    Optional<Page<Seedlot>> optionalResult = seedlotService.getUserSeedlots(userId, page, size);
-    List<Seedlot> result = optionalResult.isEmpty() ? List.of() : optionalResult.get().getContent();
-    String totalCount =
-        optionalResult.isEmpty() ? "0" : String.valueOf(optionalResult.get().getTotalElements());
+    while (clientId.length() < 8) {
+      clientId = "0" + clientId;
+    }
+    Optional<Page<Seedlot>> optionalResult = seedlotService.getUserSeedlots(clientId, page, size);
+    String totalCount = "0";
+    List<Seedlot> result = List.of();
+
+    if (!optionalResult.isEmpty()) {
+      totalCount = String.valueOf(optionalResult.get().getTotalElements());
+      result = optionalResult.get().getContent();
+    }
+
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set("X-TOTAL-COUNT", totalCount);
     return ResponseEntity.ok().headers(responseHeaders).body(result);

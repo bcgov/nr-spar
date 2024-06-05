@@ -37,6 +37,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
+import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
@@ -54,6 +55,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -193,15 +195,20 @@ public class SeedlotService {
   }
 
   /**
-   * Retrieve a paginated list of seedlot for a given user.
+   * Retrieve a paginated list of seedlot for the user selected client.
    *
-   * @param userId the id of the user to fetch the seedlots for
+   * @param clientId the id of the client to fetch the seedlots for
    * @param pageNumber the page number for the paginated search
    * @param pageSize the size of the page
    * @return a list of the user's seedlots
    */
-  public Optional<Page<Seedlot>> getUserSeedlots(String userId, int pageNumber, int pageSize) {
-    SparLog.info("Retrieving paginated list of seedlots for the user {}", userId);
+  public Optional<Page<Seedlot>> getUserSeedlots(String clientId, int pageNumber, int pageSize) {
+    Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
+    if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
+      throw new ClientIdForbiddenException();
+    }
+
+    SparLog.info("Retrieving paginated list of seedlots for the user {}", clientId);
     if (pageSize == 0) {
       SparLog.info("No given value for the page size, using default 10.");
       pageSize = 10;
@@ -213,7 +220,7 @@ public class SeedlotService {
             pageNumber, pageSize, Sort.by(Direction.DESC, "AuditInformation_UpdateTimestamp"));
 
     Page<Seedlot> seedlotPage =
-        seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable);
+        seedlotRepository.findAllByApplicantClientNumber(clientId, sortedPageable);
     SparLog.info("{} results and {} pages", seedlotPage.getNumber(), seedlotPage.getTotalPages());
     return Optional.of(seedlotPage);
   }
