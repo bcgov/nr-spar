@@ -17,7 +17,7 @@ const SeedMapSection = () => (
           renderIcon={MapBoundaryVegetation}
           iconDescription="map icon"
           onClick={
-            () => window.open('https://www2.gov.bc.ca', '_blank')
+            () => window.open('https://www2.gov.bc.ca', '_blank', 'noopener')
           }
         >
           View Tested Parent Tree Areas of Use
