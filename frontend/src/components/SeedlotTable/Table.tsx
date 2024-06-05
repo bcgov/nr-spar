@@ -12,7 +12,7 @@ import {
 import StatusTag from '../StatusTag';
 import { SeedlotDisplayType } from '../../types/SeedlotType';
 
-import { HeaderConfig } from './constants';
+import { ExclusiveAdminRows, HeaderConfig } from './constants';
 import { sortByKey } from './utils';
 import { SeedlotDataTableProps } from './definitions';
 import ROUTES from '../../routes/constants';
@@ -25,7 +25,8 @@ const SeedlotDataTable = (
     isSortable,
     showSearch,
     showPagination,
-    tablePagination
+    tablePagination,
+    isTscAdmin
   }: SeedlotDataTableProps
 ) => {
   const [sortThisHeader, setSortThisHeader] = useState<keyof SeedlotDisplayType | null>(null);
@@ -36,6 +37,12 @@ const SeedlotDataTable = (
   useEffect(() => {
     setProcessedData(seedlotData);
   }, [seedlotData]);
+
+  useEffect(() => {
+    if (!isTscAdmin) {
+      HeaderConfig.filter((header) => !ExclusiveAdminRows.includes(header.id));
+    }
+  }, []);
 
   const handleSort = (headerId: keyof SeedlotDisplayType) => {
     let newDirection = 'NONE';
