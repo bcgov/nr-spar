@@ -248,7 +248,8 @@ public class SeedlotEndpoint {
     while (clientId.length() < 8) {
       clientId = "0" + clientId;
     }
-    Optional<Page<Seedlot>> optionalResult = seedlotService.getSeedlotByClientId(clientId, page, size);
+    Optional<Page<Seedlot>> optionalResult =
+        seedlotService.getSeedlotByClientId(clientId, page, size);
     String totalCount = "0";
     List<Seedlot> result = List.of();
 
