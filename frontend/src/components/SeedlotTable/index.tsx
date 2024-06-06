@@ -150,8 +150,8 @@ const SeedlotTable = (
       <div className="empty-recent-seedlots">
         <EmptySection
           pictogram={TableText.emptyPictogram}
-          title={TableText.emptyTitle}
-          description={TableText.emptyDescription}
+          title={isTscAdmin ? TableText.admin.emptyTitle : TableText.emptyTitle}
+          description={isTscAdmin ? TableText.admin.emptyDescription : TableText.emptyDescription}
         />
       </div>
     );

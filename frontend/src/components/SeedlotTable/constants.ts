@@ -55,7 +55,11 @@ export const TableText = {
   errorDescription: 'Could not display seedlot data',
   errorIcon: 'InProgressError',
   unknownIcon: 'WatsonHealthImageAvailabilityUnavailable',
-  unknownTitle: 'Something went wrong...'
+  unknownTitle: 'Something went wrong...',
+  admin: {
+    emptyTitle: 'All seedlots reviewed!',
+    emptyDescription: 'All seedlots have been reviewed, good job! Seedltos that are waiting for approval will be show here once they are submitted.'
+  }
 };
 
 export const PageSizesConfig = [
