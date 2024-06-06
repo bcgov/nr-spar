@@ -324,8 +324,6 @@ export const initExtractionStorageState = (
   defaultExtractAgency: MultiOptionsObj,
   defaultStorageAgency: MultiOptionsObj,
   extractionStepData: ExtractionFormSubmitType,
-  defaultExtractLoc?: string,
-  defaultStorageLoc?: string,
   useTSCExtract = true,
   useTSCStorage = true
 ): ExtractionStorageForm => (
@@ -343,7 +341,7 @@ export const initExtractionStorageState = (
       },
       locationCode: {
         id: 'ext-location-code',
-        value: defaultExtractLoc ?? extractionStepData.extractoryLocnCode,
+        value: useTSCExtract ? tscLocationCode : extractionStepData.extractoryLocnCode,
         isInvalid: false
       },
       startDate: {
@@ -370,7 +368,7 @@ export const initExtractionStorageState = (
       },
       locationCode: {
         id: 'str-location-code',
-        value: defaultStorageLoc ?? extractionStepData.storageLocnCode,
+        value: useTSCStorage ? tscLocationCode : extractionStepData.storageLocnCode,
         isInvalid: false
       },
       startDate: {
@@ -864,9 +862,7 @@ export const initEmptySteps = () => ({
   extractionStorageStep: initExtractionStorageState(
     tscAgencyObj,
     tscAgencyObj,
-    emptyExtractionStep,
-    tscLocationCode,
-    tscLocationCode
+    emptyExtractionStep
   )
 });
 
@@ -913,8 +909,6 @@ export const resDataToState = (
       clientData[fullFormData.seedlotFormExtractionDto.extractoryClientNumber],
       clientData[fullFormData.seedlotFormExtractionDto.storageClientNumber],
       fullFormData.seedlotFormExtractionDto,
-      '',
-      '',
       fullFormData.seedlotFormExtractionDto.extractoryClientNumber === tscAgencyObj.code,
       fullFormData.seedlotFormExtractionDto.storageClientNumber === tscAgencyObj.code
     )

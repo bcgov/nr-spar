@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DataTableSkeleton, Pagination } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
 
 import EmptySection from '../EmptySection';
+import AuthContext from '../../contexts/AuthContext';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { covertRawToDisplayObjArray } from '../../utils/SeedlotUtils';
-import { getSeedlotByUser } from '../../api-service/seedlotAPI';
 import { getSeedlotToReview } from '../../api-service/tscAdminAPI';
+import { getSeedlotByClientId } from '../../api-service/seedlotAPI';
 import { SeedlotDisplayType, SeedlotType } from '../../types/SeedlotType';
 import PaginationChangeType from '../../types/PaginationChangeType';
 
@@ -31,6 +32,8 @@ const SeedlotTable = (
 ) => {
   const navigate = useNavigate();
 
+  const { selectedClientRoles } = useContext(AuthContext);
+
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
   const [currPageNumber, setCurrPageNumber] = useState<number>(0);
   const [currPageSize, setCurrPageSize] = useState<number>(defaultPageSize ?? 10);
@@ -51,14 +54,14 @@ const SeedlotTable = (
 
   const queryKey = isTscAdmin
     ? ['seedlots', { pageNumber: currPageNumber, pageSize: currPageSize }]
-    : ['seedlots', 'users', userId, { pageNumber: currPageNumber, pageSize: currPageSize }];
+    : ['seedlots', 'users', selectedClientRoles?.clientId, { pageNumber: currPageNumber, pageSize: currPageSize }];
 
   const getAllSeedlotQueryByUser = useQuery({
     queryKey,
     queryFn: () => (
       isTscAdmin
         ? getSeedlotToReview(currPageNumber, currPageSize)
-        : getSeedlotByUser(userId, currPageNumber, currPageSize)
+        : getSeedlotByClientId(selectedClientRoles!.clientId, currPageNumber, currPageSize)
     ),
     enabled: userId.length > 0 && vegCodeQuery.isFetched,
     refetchOnMount: 'always'
