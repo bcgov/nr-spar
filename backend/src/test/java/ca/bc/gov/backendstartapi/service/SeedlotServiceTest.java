@@ -271,8 +271,8 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserWithTwoSeedlots")
-  void getUserSeedlots_findsTwoSeedlots_shouldSucceed() {
+  @DisplayName("findSeedlotsByClientIdWithTwoSeedlots")
+  void getClientSeedlots_findsTwoSeedlots_shouldSucceed() {
     String clientId = "00011223";
 
     List<Seedlot> testList = List.of(new Seedlot("63001"), new Seedlot("63002"));
@@ -282,8 +282,10 @@ class SeedlotServiceTest {
     when(seedlotRepository.findAllByApplicantClientNumber(anyString(), any()))
         .thenReturn(pagedResult);
 
+    when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
     List<Seedlot> responseFromService =
-        seedlotService.getUserSeedlots(clientId, 0, 10).get().getContent();
+        seedlotService.getSeedlotByClientId(clientId, 0, 10).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(2, responseFromService.size());
@@ -292,7 +294,7 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserNoSeedlots")
+  @DisplayName("findSeedlotsByClientIdNoSeedlots")
   void getUserSeedlots_noSeedlots_shouldSucceed() {
     String clientId = "00011223";
 
@@ -300,15 +302,17 @@ class SeedlotServiceTest {
     when(seedlotRepository.findAllByApplicantClientNumber(anyString(), any()))
         .thenReturn(pagedResult);
 
+    when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
     List<Seedlot> responseFromService =
-        seedlotService.getUserSeedlots(clientId, 0, 10).get().getContent();
+        seedlotService.getSeedlotByClientId(clientId, 0, 10).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertTrue(responseFromService.isEmpty());
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserNoPageSize")
+  @DisplayName("findSeedlotsByClientIdNoPageSize")
   void getUserSeedlots_noPageSize_shouldSucceed() {
     String clientId = "00011223";
 
@@ -316,8 +320,10 @@ class SeedlotServiceTest {
     when(seedlotRepository.findAllByApplicantClientNumber(anyString(), any()))
         .thenReturn(pagedResult);
 
+    when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
     List<Seedlot> responseFromService =
-        seedlotService.getUserSeedlots(clientId, 0, 0).get().getContent();
+        seedlotService.getSeedlotByClientId(clientId, 0, 0).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertTrue(responseFromService.isEmpty());
@@ -331,7 +337,7 @@ class SeedlotServiceTest {
     Assertions.assertThrows(
         ClientIdForbiddenException.class,
         () -> {
-          seedlotService.getUserSeedlots("1234", 0, 0);
+          seedlotService.getSeedlotByClientId("1234", 0, 0);
         });
   }
 

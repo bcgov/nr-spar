@@ -70,7 +70,7 @@ public record UserInfo(
         null,
         IdentityProvider.IDIR,
         Set.of(),
-        List.of(),
+        List.of("00011223"),
         "abcdef123456");
   }
 }
