@@ -73,7 +73,7 @@ class OrchardServiceTest {
 
   @Mock private TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
 
-  @Mock BecZoneCodeService becZoneCodeService;
+  @Mock SparBecCatalogueService sparBecCatalogueService;
 
   @Autowired @InjectMocks private OrchardService orchardService;
 
@@ -102,7 +102,7 @@ class OrchardServiceTest {
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
 
-    when(becZoneCodeService.getBecDescriptionByCode(orchard.getBecZoneCode()))
+    when(sparBecCatalogueService.getBecDescriptionByCode(orchard.getBecZoneCode()))
         .thenReturn("Interior Cedar -- Hemlock");
 
     Optional<OrchardDto> descriptionDto = orchardService.findNotRetiredOrchardValidLotType("337");
@@ -145,7 +145,7 @@ class OrchardServiceTest {
     orchard.setOrchardLotTypeCode(lotTypeCode);
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
-    when(becZoneCodeService.getBecDescriptionByCode(orchard.getBecZoneCode()))
+    when(sparBecCatalogueService.getBecDescriptionByCode(orchard.getBecZoneCode()))
         .thenReturn("Interior Cedar -- Hemlock");
 
     Optional<OrchardDto> descriptionDto = orchardService.findNotRetiredOrchardValidLotType("820");

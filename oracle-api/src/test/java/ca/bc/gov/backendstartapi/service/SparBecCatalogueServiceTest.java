@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.entity.BecZoneCodeEntity;
-import ca.bc.gov.backendstartapi.repository.BecZoneCodeRepository;
-import java.util.Optional;
+import ca.bc.gov.backendstartapi.entity.SparBecCatalogueEntity;
+import ca.bc.gov.backendstartapi.repository.SparBecCatalogueRepository;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,24 +17,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /** The test class for BEC zone code Service. */
 @ExtendWith(MockitoExtension.class)
-public class BecZoneCodeServiceTest {
+public class SparBecCatalogueServiceTest {
 
-  @Mock BecZoneCodeRepository becZoneCodeRepository;
+  @Mock SparBecCatalogueRepository sparBecCatalogueRepository;
 
-  @Autowired @InjectMocks private BecZoneCodeService becZoneCodeService;
+  @Autowired @InjectMocks private SparBecCatalogueService sparBecCatalogueService;
 
   @Test
   @DisplayName("Get a description of a BEC zone, success")
   void getBecZoneDescription_shouldSucceed() {
     String becZoneCode = "ICH";
     String becZoneDescription = "Interior Cedar -- Hemlock";
-    BecZoneCodeEntity becZone = new BecZoneCodeEntity();
-    becZone.setCode(becZoneCode);
-    becZone.setDescription(becZoneDescription);
+    SparBecCatalogueEntity becCatEntity = new SparBecCatalogueEntity();
+    becCatEntity.setBecCode(becZoneCode);
+    becCatEntity.setBecZoneDescription(becZoneDescription);
 
-    when(becZoneCodeRepository.findById(becZoneCode)).thenReturn(Optional.of(becZone));
+    when(sparBecCatalogueRepository.findAllByBecCodeOrderByUpdateTimeStampDesc(becZoneCode))
+        .thenReturn(List.of(becCatEntity));
 
-    String retVal = becZoneCodeService.getBecDescriptionByCode(becZoneCode);
+    String retVal = sparBecCatalogueService.getBecDescriptionByCode(becZoneCode);
 
     assertEquals(becZoneDescription, retVal);
   }
@@ -42,13 +43,14 @@ public class BecZoneCodeServiceTest {
   @Test
   @DisplayName("Get a description of a null BEC zone code should return null")
   void getDescriptionWithNull() {
-    assertEquals(null, becZoneCodeService.getBecDescriptionByCode(null));
+    assertEquals(null, sparBecCatalogueService.getBecDescriptionByCode(null));
   }
 
   @Test
   @DisplayName("Get a description of a BEC zone should return null if entity not found")
   void getDescriptionReturnNull__ifNotFound() {
-    when(becZoneCodeRepository.findById(any())).thenReturn(Optional.empty());
-    assertEquals(null, becZoneCodeService.getBecDescriptionByCode("ICH"));
+    when(sparBecCatalogueRepository.findAllByBecCodeOrderByUpdateTimeStampDesc(any()))
+        .thenReturn(List.of());
+    assertEquals(null, sparBecCatalogueService.getBecDescriptionByCode("ICH"));
   }
 }
