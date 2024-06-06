@@ -194,6 +194,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
         if (restoredClientName) {
           foundClient.clientName = restoredClientName;
         }
+        setIsTscAdmin(foundClient.roles.includes(TSC_ADMIN_ROLE));
         setSelectedClientRoles(foundClient);
       }
     }
