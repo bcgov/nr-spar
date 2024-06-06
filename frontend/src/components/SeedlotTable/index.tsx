@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DataTableSkeleton, Pagination } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
 
 import EmptySection from '../EmptySection';
-import AuthContext from '../../contexts/AuthContext';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { covertRawToDisplayObjArray } from '../../utils/SeedlotUtils';
@@ -23,6 +22,7 @@ import './styles.scss';
 const SeedlotTable = (
   {
     userId,
+    isTscAdmin,
     isSortable,
     showSearch,
     showPagination,
@@ -34,8 +34,6 @@ const SeedlotTable = (
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
   const [currPageNumber, setCurrPageNumber] = useState<number>(0);
   const [currPageSize, setCurrPageSize] = useState<number>(defaultPageSize ?? 10);
-
-  const { isTscAdmin } = useContext(AuthContext);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],

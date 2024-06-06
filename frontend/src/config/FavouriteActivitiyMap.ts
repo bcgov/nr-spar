@@ -29,6 +29,15 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     link: ROUTES.MY_SEEDLOTS,
     highlighted: false
   },
+  reviewSeedlots: {
+    id: -1,
+    type: 'reviewSeedlots',
+    image: 'TableSplit',
+    header: 'Review Seedlots',
+    description: 'Check all seedlots that are waiting for approval',
+    link: ROUTES.REVIEW_SEEDLOTS,
+    highlighted: false
+  },
   unknown: {
     id: -1,
     type: 'default',

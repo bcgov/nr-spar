@@ -2,6 +2,7 @@ import { SeedlotDisplayType } from '../../types/SeedlotType';
 
 export interface TableProps {
   userId: string,
+  isTscAdmin?: boolean
   isSortable?: boolean
   showSearch?: boolean
   showPagination?: boolean
