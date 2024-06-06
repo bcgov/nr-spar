@@ -61,7 +61,7 @@ public class OrchardService {
 
   private final TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
 
-  private final BecZoneCodeService becZoneCodeService;
+  private final SparBecCatalogueService sparBecCatalogueService;
 
   /**
    * Find a not retired {@link Orchard} with a valid {@link OrchardLotTypeCode} by Orchard's ID.
@@ -91,7 +91,7 @@ public class OrchardService {
               orchardLotTypeCode.getDescription(),
               orchardEntity.getStageCode(),
               orchardEntity.getBecZoneCode(),
-              becZoneCodeService.getBecDescriptionByCode(orchardEntity.getBecZoneCode()),
+              sparBecCatalogueService.getBecDescriptionByCode(orchardEntity.getBecZoneCode()),
               orchardEntity.getBecSubzoneCode(),
               orchardEntity.getVariant(),
               orchardEntity.getBecVersionId());
@@ -175,7 +175,7 @@ public class OrchardService {
                     orchardLotTypeCode.getDescription(),
                     orchard.getStageCode(),
                     orchard.getBecZoneCode(),
-                    becZoneCodeService.getBecDescriptionByCode(orchard.getBecZoneCode()),
+                    sparBecCatalogueService.getBecDescriptionByCode(orchard.getBecZoneCode()),
                     orchard.getBecSubzoneCode(),
                     orchard.getVariant(),
                     orchard.getBecVersionId());
