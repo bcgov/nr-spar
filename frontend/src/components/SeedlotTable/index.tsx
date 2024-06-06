@@ -49,15 +49,16 @@ const SeedlotTable = (
     }
   };
 
-  const queryKeyUser = ['seedlots', 'users', userId, { pageNumber: currPageNumber, pageSize: currPageSize }];
-  const queryKeyAdmin = ['seedlots', { pageNumber: currPageNumber, pageSize: currPageSize }];
+  const queryKey = isTscAdmin
+    ? ['seedlots', { pageNumber: currPageNumber, pageSize: currPageSize }]
+    : ['seedlots', 'users', userId, { pageNumber: currPageNumber, pageSize: currPageSize }];
 
   const getAllSeedlotQueryByUser = useQuery({
-    queryKey: isTscAdmin ? queryKeyAdmin : queryKeyUser,
+    queryKey,
     queryFn: () => (
       isTscAdmin
-        ? getSeedlotByUser(userId, currPageNumber, currPageSize)
-        : getSeedlotToReview(currPageNumber, currPageSize)
+        ? getSeedlotToReview(currPageNumber, currPageSize)
+        : getSeedlotByUser(userId, currPageNumber, currPageSize)
     ),
     enabled: userId.length > 0 && vegCodeQuery.isFetched,
     refetchOnMount: 'always'
