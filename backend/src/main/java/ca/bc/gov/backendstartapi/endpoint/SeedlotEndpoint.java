@@ -206,12 +206,12 @@ public class SeedlotEndpoint {
   }
 
   /**
-   * Resource to fetch all seedlots to a given user id.
+   * Resource to fetch all seedlots to a given client ID.
    *
    * @param clientId client id to fetch seedlots to
    * @return A {@link List} of {@link Seedlot} populated or empty
    */
-  @GetMapping("/users/{clientId}")
+  @GetMapping("/clients/{clientId}")
   @CrossOrigin(exposedHeaders = "X-TOTAL-COUNT")
   @Operation(
       summary = "Fetch all seedlots registered by a given client id.",
@@ -234,12 +234,12 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public ResponseEntity<List<Seedlot>> getUserSeedlots(
+  public ResponseEntity<List<Seedlot>> getSeedlotByClientId(
       @PathVariable
           @Parameter(
               name = "clientId",
               in = ParameterIn.PATH,
-              description = "Client's identification",
+              description = "Seedlot applicant's Forest Client ID",
               required = true,
               example = "12797")
           String clientId,
@@ -248,7 +248,7 @@ public class SeedlotEndpoint {
     while (clientId.length() < 8) {
       clientId = "0" + clientId;
     }
-    Optional<Page<Seedlot>> optionalResult = seedlotService.getUserSeedlots(clientId, page, size);
+    Optional<Page<Seedlot>> optionalResult = seedlotService.getSeedlotByClientId(clientId, page, size);
     String totalCount = "0";
     List<Seedlot> result = List.of();
 

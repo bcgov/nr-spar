@@ -202,13 +202,19 @@ public class SeedlotService {
    * @param pageSize the size of the page
    * @return a list of the user's seedlots
    */
-  public Optional<Page<Seedlot>> getUserSeedlots(String clientId, int pageNumber, int pageSize) {
+  public Optional<Page<Seedlot>> getSeedlotByClientId(
+      String clientId, int pageNumber, int pageSize) {
     Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
+
     if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
       throw new ClientIdForbiddenException();
     }
 
-    SparLog.info("Retrieving paginated list of seedlots for the user {}", clientId);
+    SparLog.info(
+        "Retrieving paginated list of seedlots for the user: {} with client id: {}",
+        userInfo.get().id(),
+        clientId);
+
     if (pageSize == 0) {
       SparLog.info("No given value for the page size, using default 10.");
       pageSize = 10;
