@@ -102,7 +102,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     // Enter invalid acronym
     cy.get('#ownership-agency-0')
-      .type('ggg')
+      .type('ggg', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-agency-0-error-msg')
@@ -110,7 +110,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('#ownership-agency-0')
       .clear()
-      .type('-1')
+      .type('-1', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-agency-0-error-msg')
@@ -123,7 +123,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Enter valid acronym
     cy.get('#ownership-agency-0')
       .clear()
-      .type(testAcronym)
+      .type(testAcronym, { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
@@ -141,7 +141,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Enter valid location code
     cy.get('#ownership-location-code-0')
       .clear()
-      .type('02')
+      .type('02', { delay: TYPE_DELAY })
       .blur();
 
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
@@ -166,7 +166,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('#client-search-input')
       .clear()
-      .type(testPopupAcronym)
+      .type(testPopupAcronym, { delay: TYPE_DELAY })
       .blur();
 
     cy.get('button.client-search-button')
@@ -216,7 +216,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
   it('change owner portion %, reserved % and surplus % values', () => {
     cy.get('#ownership-reserved-0')
       .clear()
-      .type('02')
+      .type('02', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-surplus-0')
@@ -224,7 +224,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('#ownership-surplus-0')
       .clear()
-      .type('52')
+      .type('52', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-reserved-0')
@@ -233,7 +233,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Invalid owner portion % error msg test
     cy.get('#ownership-portion-0')
       .clear()
-      .type('-1')
+      .type('-1', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
@@ -241,7 +241,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('#ownership-portion-0')
       .clear()
-      .type('0.0439')
+      .type('0.0439', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
@@ -249,7 +249,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('#ownership-portion-0')
       .clear()
-      .type('102')
+      .type('102', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
@@ -258,7 +258,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Enter valid owner portion %
     cy.get('#ownership-portion-0')
       .clear()
-      .type('100')
+      .type('100', { delay: TYPE_DELAY })
       .blur();
 
     // Save changes
@@ -362,12 +362,10 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
   it('check owner portion % for 3 owner agencies', () => {
     cy.get('button.owner-add-btn')
-      .click()
-      .blur();
+      .click();
 
     cy.get('button.owner-add-btn')
-      .click()
-      .blur();
+      .click();
 
     // Check 3 sections created
     cy.get(`ul.${prefix}--accordion`)
@@ -396,17 +394,17 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('#ownership-portion-0')
       .clear()
-      .type('90')
+      .type('90', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-portion-1')
       .clear()
-      .type('5')
+      .type('5', { delay: TYPE_DELAY })
       .blur();
 
     cy.get('#ownership-portion-2')
       .clear()
-      .type('5')
+      .type('5', { delay: TYPE_DELAY })
       .blur();
 
     // Check no error message on any 3 sections
@@ -429,7 +427,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Enter correct owner portion % to remove error
     cy.get('#ownership-portion-0')
       .clear()
-      .type('100')
+      .type('100', { delay: TYPE_DELAY })
       .blur();
 
     // Save changes
