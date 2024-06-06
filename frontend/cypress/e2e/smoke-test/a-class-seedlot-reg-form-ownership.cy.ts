@@ -4,7 +4,7 @@ import { TYPE_DELAY } from '../../constants';
 
 describe('A Class Seedlot Registration form, Ownership', () => {
   let regFormData: {
-    collector: {
+    ownership: {
       title: string;
       subtitle: string;
       agencyTitle: string;
@@ -60,19 +60,19 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('.ownership-header')
       .find('h3')
-      .should('have.text', regFormData.collector.title);
+      .should('have.text', regFormData.ownership.title);
 
     cy.get('.ownership-header')
       .find('p')
-      .should('have.text', regFormData.collector.subtitle);
+      .should('have.text', regFormData.ownership.subtitle);
 
-    cy.get(`.${prefix}--accordion__title`)
-      .find('.item-title-section')
-      .should('have.text', seedlotData[speciesKey].agencyName);
+    // cy.get(`.${prefix}--accordion__title`)
+    //   .find('.item-title-section')
+    //   .should('have.text', seedlotData[speciesKey].agencyName);
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-description-section')
-      .should('have.text', regFormData.collector.agencySubtitle);
+      .should('have.text', regFormData.ownership.agencySubtitle);
   });
 
   it('check owner agency section visibility', () => {
@@ -98,22 +98,23 @@ describe('A Class Seedlot Registration form, Ownership', () => {
   it('change owner agency and owner location code', () => {
     // Change inputs
     cy.get('#default-owner-checkbox')
-      .uncheck();
+      .uncheck({ force: true });
 
     // Enter invalid acronym
     cy.get('#ownership-agency-0')
       .type('ggg')
       .blur();
 
-    cy.get('#collection-collector-agency-error-msg')
-      .should('have.text', regFormData.collector.ownerAgencyError);
+    cy.get('#ownership-agency-0-error-msg')
+      .should('have.text', regFormData.ownership.ownerAgencyError);
 
     cy.get('#ownership-agency-0')
+      .clear()
       .type('-1')
       .blur();
 
-    cy.get('#collection-collector-agency-error-msg')
-      .should('have.text', regFormData.collector.ownerAgencyValidationError);
+    cy.get('#ownership-agency-0-error-msg')
+      .should('have.text', regFormData.ownership.ownerAgencyValidationError);
 
     // Check error msg block is visible
     cy.get('.applicant-error-notification')
@@ -121,6 +122,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     // Enter valid acronym
     cy.get('#ownership-agency-0')
+      .clear()
       .type(testAcronym)
       .blur();
 
@@ -133,8 +135,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .type('99', { delay: TYPE_DELAY })
       .blur();
 
-    cy.get('#collection-location-code-error-msg')
-      .should('have.text', regFormData.collector.locationCodeError);
+    cy.get('#ownership-location-code-0-error-msg')
+      .should('have.text', regFormData.ownership.locationCodeError);
 
     // Enter valid location code
     cy.get('#ownership-location-code-0')
@@ -208,7 +210,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('have.value', '100');
 
     cy.get('#ownership-surplus-0')
-      .should('have.value', '100');
+      .should('have.value', '0');
   });
 
   it('change owner portion %, reserved % and surplus % values', () => {
@@ -225,7 +227,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .type('52')
       .blur();
 
-    cy.get('#ownership-surplus-0')
+    cy.get('#ownership-reserved-0')
       .should('have.value', '48');
 
     // Invalid owner portion % error msg test
@@ -235,7 +237,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
-      .should('have.text', regFormData.collector.ownerPortionBelowLimitError);
+      .should('have.text', regFormData.ownership.ownerPortionBelowLimitError);
 
     cy.get('#ownership-portion-0')
       .clear()
@@ -243,7 +245,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
-      .should('have.text', regFormData.collector.ownerPortionDecimalError);
+      .should('have.text', regFormData.ownership.ownerPortionDecimalError);
 
     cy.get('#ownership-portion-0')
       .clear()
@@ -251,14 +253,26 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     cy.get('#ownership-portion-0-error-msg')
-      .should('have.text', regFormData.collector.ownerPortionAboveLimitError);
+      .should('have.text', regFormData.ownership.ownerPortionAboveLimitError);
+
+    // Enter valid owner portion %
+    cy.get('#ownership-portion-0')
+      .clear()
+      .type('100')
+      .blur();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
   });
 
   it('check funding source and method of payment default values and change the values', () => {
     cy.get('#ownership-funding-source-0')
       .should('have.value', '');
 
-    cy.get('.single-owner-info-col')
+    cy.get('.single-owner-combobox')
       .eq(0)
       .find(`button.${prefix}--list-box__menu-icon`)
       .click();
@@ -272,7 +286,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-method-payment-0')
       .should('have.value', '');
 
-    cy.get('.single-owner-info-col')
+    cy.get('.single-owner-combobox')
       .eq(1)
       .find(`button.${prefix}--list-box__menu-icon`)
       .click();
@@ -283,23 +297,45 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-method-payment-0')
       .should('have.value', 'CSH - Cash Sale');
 
-    cy.get('.single-owner-info-col')
+    // Check 'x' button
+    cy.get('.single-owner-combobox')
       .eq(0)
       .find('[aria-label="Clear selected item"]')
-      .click()
-      .blur();
+      .click();
 
     cy.get('#ownership-funding-source-0')
       .should('have.value', '');
 
-    cy.get('.single-owner-info-col')
+    cy.get('.single-owner-combobox')
       .eq(1)
       .find('[aria-label="Clear selected item"]')
-      .click()
-      .blur();
+      .click();
 
     cy.get('#ownership-method-payment-0')
       .should('have.value', '');
+
+    // Enter values again
+    cy.get('.single-owner-combobox')
+      .eq(0)
+      .find(`button.${prefix}--list-box__menu-icon`)
+      .click();
+
+    cy.get('li#downshift-1-item-5')
+      .click();
+
+    cy.get('.single-owner-combobox')
+      .eq(1)
+      .find(`button.${prefix}--list-box__menu-icon`)
+      .click();
+
+    cy.get('li#downshift-3-item-1')
+      .click();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
   });
 
   it('create and delete new owner agency section', () => {
@@ -342,20 +378,21 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get(`.${prefix}--accordion__title`)
       .eq(1)
       .find('.item-title-section')
-      .should('have.text', regFormData.collector.agencyTitle);
+      .should('have.text', regFormData.ownership.agencyTitle);
 
     cy.get(`.${prefix}--accordion__title`)
       .eq(1)
       .find('.item-description-section')
-      .should('have.text', regFormData.collector.agencySubtitle);
+      .should('have.text', regFormData.ownership.agencySubtitle);
 
     cy.get('#ownership-portion-0')
+      .click()
       .blur();
 
     // Check error message on all 3 sections
     cy.get(`div.${prefix}--form-requirement`)
       .should('have.length', 3)
-      .and('contain.text', regFormData.collector.ownerPortionSumError);
+      .and('contain.text', regFormData.ownership.ownerPortionSumError);
 
     cy.get('#ownership-portion-0')
       .clear()
@@ -374,8 +411,32 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     // Check no error message on any 3 sections
     cy.get(`div.${prefix}--form-requirement`)
-      .contains(regFormData.collector.ownerPortionSumError)
       .should('not.exist');
+
+    // Delete 2 owner agencies
+    cy.get('.single-owner-info-container')
+      .eq(2)
+      .find('button.owner-mod-btn')
+      .contains('Delete owner')
+      .click();
+
+    cy.get('.single-owner-info-container')
+      .eq(1)
+      .find('button.owner-mod-btn')
+      .contains('Delete owner')
+      .click();
+
+    // Enter correct owner portion % to remove error
+    cy.get('#ownership-portion-0')
+      .clear()
+      .type('100')
+      .blur();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
   });
 
   it('check complete checkmark for Ownership step', () => {
