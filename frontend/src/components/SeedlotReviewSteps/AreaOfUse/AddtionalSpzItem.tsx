@@ -36,8 +36,9 @@ const AdditionalSpzItem = (
                 invalidText="Required"
               />
               <Button
+                className="danger-tertiary-btn"
                 hasIconOnly
-                kind="danger--tertiary"
+                kind="tertiary"
                 renderIcon={TrashCan}
                 iconDescription="Delete this additional spz"
                 onClick={
