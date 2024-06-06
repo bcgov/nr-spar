@@ -268,7 +268,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains('Save changes')
+      .contains(/Save changes|Changes saved!/g)
       .click();
   });
 
@@ -338,7 +338,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains('Save changes')
+      .contains(/Save changes|Changes saved!/g)
       .click();
   });
 
@@ -437,7 +437,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains('Save changes')
+      .contains(/Save changes|Changes saved!/g)
       .click();
   });
 
