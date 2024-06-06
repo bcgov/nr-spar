@@ -273,7 +273,7 @@ public class SeedlotService {
               .toList();
     }
 
-    seedlotDto.setPriamrySpz(primarySpz);
+    seedlotDto.setPrimarySpz(primarySpz);
 
     seedlotDto.setAdditionalSpzList(additionalSpzList);
     return seedlotDto;

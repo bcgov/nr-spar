@@ -28,8 +28,8 @@ const AreaOfUseRead = () => {
             id="primary-spz-input-readonly"
             label="Primary seed planning zone"
             value={
-              richSeedlotData?.priamrySpz
-                ? formatSpz(richSeedlotData.priamrySpz)
+              richSeedlotData?.primarySpz
+                ? formatSpz(richSeedlotData.primarySpz)
                 : ''
             }
             showSkeleton={isFetchingData}
@@ -55,7 +55,7 @@ const AreaOfUseRead = () => {
 
       <Row>
         <Column className="sub-section-title-col">
-          Elevation, Latitude and longitude
+          Elevation, Latitude and Longitude
         </Column>
       </Row>
       {/* Elevation */}

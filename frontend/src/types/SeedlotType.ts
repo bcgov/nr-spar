@@ -170,7 +170,7 @@ export type SeedPlanZoneOracleDto = {
  */
 export type RichSeedlotType = {
   seedlot: SeedlotType,
-  priamrySpz: SeedPlanZoneDto | null,
+  primarySpz: SeedPlanZoneDto | null,
   additionalSpzList: SeedPlanZoneDto[]
 }
 

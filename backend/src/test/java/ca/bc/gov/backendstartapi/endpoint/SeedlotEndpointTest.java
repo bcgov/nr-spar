@@ -407,7 +407,7 @@ class SeedlotEndpointTest {
     SeedlotDto seedlotDto = new SeedlotDto();
 
     seedlotDto.setSeedlot(seedlotEntity);
-    seedlotDto.setPriamrySpz(null);
+    seedlotDto.setPrimarySpz(null);
     seedlotDto.setAdditionalSpzList(List.of());
 
     when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(seedlotDto);

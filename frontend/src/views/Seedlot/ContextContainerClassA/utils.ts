@@ -956,10 +956,10 @@ export const fillAreaOfUseData = (
 ): AreaOfUseDataType => {
   const clonedAreaOfUse = structuredClone(areaOfUseData);
   // Primary SPZ
-  if (seedlotData.priamrySpz) {
-    clonedAreaOfUse.primarySpz.value.code = seedlotData.priamrySpz.code;
-    clonedAreaOfUse.primarySpz.value.description = seedlotData.priamrySpz.description;
-    clonedAreaOfUse.primarySpz.value.label = `${seedlotData.priamrySpz.code} - ${seedlotData.priamrySpz.description}`;
+  if (seedlotData.primarySpz) {
+    clonedAreaOfUse.primarySpz.value.code = seedlotData.primarySpz.code;
+    clonedAreaOfUse.primarySpz.value.description = seedlotData.primarySpz.description;
+    clonedAreaOfUse.primarySpz.value.label = `${seedlotData.primarySpz.code} - ${seedlotData.primarySpz.description}`;
   }
   // Additional SPZs
   if (seedlotData.additionalSpzList) {

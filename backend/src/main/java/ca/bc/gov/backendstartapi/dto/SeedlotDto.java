@@ -19,7 +19,7 @@ public class SeedlotDto {
   private Seedlot seedlot;
 
   @Schema(description = "The pirmary seed plan zone")
-  private SeedPlanZoneDto priamrySpz;
+  private SeedPlanZoneDto primarySpz;
 
   @Schema(description = "A list of additional seed plan zones")
   private List<SeedPlanZoneDto> additionalSpzList;
