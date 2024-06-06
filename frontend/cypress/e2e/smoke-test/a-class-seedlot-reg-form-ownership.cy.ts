@@ -27,6 +27,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
   let seedlotData: SeedlotRegFixtureType;
   let testAcronym: string;
   let testPopupAcronym: string;
+  let seedlotTitle: string;
 
   beforeEach(() => {
     // Login
@@ -45,6 +46,9 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
+      // Get title from agencyName like 'WESTERN FOREST PRODUCTS INC.'
+      // eslint-disable-next-line prefer-destructuring
+      seedlotTitle = seedlotData[speciesKey].agencyName.split(' - ')[1];
       cy.get(`button.${prefix}--progress-step-button[title="Ownership"]`)
         .click();
     });
@@ -66,9 +70,9 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .find('p')
       .should('have.text', regFormData.ownership.subtitle);
 
-    // cy.get(`.${prefix}--accordion__title`)
-    //   .find('.item-title-section')
-    //   .should('have.text', seedlotData[speciesKey].agencyName);
+    cy.get(`.${prefix}--accordion__title`)
+      .find('.item-title-section')
+      .should('have.text', seedlotTitle);
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-description-section')
