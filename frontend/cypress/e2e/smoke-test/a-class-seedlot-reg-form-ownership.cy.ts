@@ -32,7 +32,6 @@ describe('A Class Seedlot Registration form, Ownership', () => {
   beforeEach(() => {
     // Login
     cy.login();
-
     cy.fixture('aclass-reg-form').then((fData) => {
       regFormData = fData;
     });
@@ -53,6 +52,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
         .click();
     });
   });
+
   it('check title and subtitles', () => {
     cy.get('.seedlot-registration-title')
       .find('h1')
@@ -318,7 +318,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-method-payment-0')
       .should('have.value', '');
 
-    // Enter values again
+    // Enter funding source and method payment values again
     cy.get('.single-owner-combobox')
       .eq(0)
       .find(`button.${prefix}--list-box__menu-icon`)
