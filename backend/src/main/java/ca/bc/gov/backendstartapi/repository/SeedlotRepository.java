@@ -18,11 +18,11 @@ public interface SeedlotRepository extends JpaRepository<Seedlot, String> {
   Integer findNextSeedlotNumber(Integer min, Integer max);
 
   /**
-   * Finds all {@link Seedlot} given a user's identification in a paginated search.
+   * Finds all {@link Seedlot} given an applicant client number in a paginated search.
    *
-   * @param userId user identification to fetch seedlots to
+   * @param clientId applicant client number to fetch seedlots to
    * @param pageable the pagination and sorting specifications
    * @return A {@link List} of {@link Seedlot} populated or empty
    */
-  Page<Seedlot> findAllByAuditInformation_EntryUserId(String userId, Pageable pageable);
+  Page<Seedlot> findAllByApplicantClientNumber(String clientId, Pageable pageable);
 }

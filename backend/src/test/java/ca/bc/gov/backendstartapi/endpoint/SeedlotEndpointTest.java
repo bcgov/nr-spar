@@ -20,6 +20,7 @@ import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
@@ -66,7 +67,7 @@ class SeedlotEndpointTest {
 
   private final WebApplicationContext webApplicationContext;
 
-  private static final String USER_ID = "dev-123456789abcdef@idir";
+  private static final String CLIENT_ID = "00112233";
 
   private static final String TEST_PATCH_SEEDLOT_JSON =
       """
@@ -324,7 +325,7 @@ class SeedlotEndpointTest {
   }
 
   @Test
-  @DisplayName("getUserSeedlotInfoTestDefaultPagination")
+  @DisplayName("getClientSeedlotInfoTestDefaultPagination")
   void getUserSeedlotInfoTestDefaultPagination() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000000");
     List<Seedlot> userSeedlots = new ArrayList<>();
@@ -332,27 +333,60 @@ class SeedlotEndpointTest {
 
     Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
 
-    String url = String.format("/api/seedlots/users/%s", USER_ID);
+    String url = String.format("/api/seedlots/clients/%s", CLIENT_ID);
 
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
+    when(seedlotService.getSeedlotByClientId(CLIENT_ID, 1, 10)).thenReturn(pagedResult);
 
     mockMvc
         .perform(get(url).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0))
         .andReturn();
   }
 
   @Test
-  @DisplayName("getUserSeedlotInfoTestChangePageNumber")
+  @DisplayName("getUserSeedlotInfoTestShortClientIds")
+  void getUserSeedlotInfoTestShortClientIds() throws Exception {
+    Seedlot seedlotEntity = new Seedlot("0000000");
+    seedlotEntity.setApplicantClientNumber("00011223");
+    List<Seedlot> userSeedlots = new ArrayList<>();
+    userSeedlots.add(seedlotEntity);
+
+    Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
+
+    String url = "/api/seedlots/clients/11223";
+
+    when(seedlotService.getSeedlotByClientId("00011223", 0, 10)).thenReturn(pagedResult);
+
+    mockMvc
+        .perform(get(url).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getSingleSeedlotInfoForbidden")
+  void getSingleSeedlotInfoForbidden() throws Exception {
+    when(seedlotService.getSingleSeedlotInfo(any())).thenThrow(new ClientIdForbiddenException());
+
+    mockMvc
+        .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getClientSeedlotInfoTestChangePageNumber")
   void getUserSeedlotInfoTestChangePageNumber() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000001");
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
 
     Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
+    when(seedlotService.getSeedlotByClientId(CLIENT_ID, 1, 10)).thenReturn(pagedResult);
 
-    String url = String.format("/api/seedlots/users/%s?page={page}", USER_ID);
+    String url = String.format("/api/seedlots/clients/%s?page={page}", CLIENT_ID);
     int page = 1;
 
     mockMvc
@@ -362,18 +396,18 @@ class SeedlotEndpointTest {
   }
 
   @Test
-  @DisplayName("getUserSeedlotInfoTestChangePageSize")
+  @DisplayName("getClientSeedlotInfoTestChangePageSize")
   void getUserSeedlotInfoTestChangePageSize() throws Exception {
     Seedlot seedlotEntity = new Seedlot("0000002");
     List<Seedlot> userSeedlots = new ArrayList<>();
     userSeedlots.add(seedlotEntity);
     userSeedlots.add(seedlotEntity);
 
-    String url = String.format("/api/seedlots/users/%s?page=1&size={size}", USER_ID);
+    String url = String.format("/api/seedlots/clients/%s?page=1&size={size}", CLIENT_ID);
     int pageSize = 2;
 
     Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(userSeedlots));
-    when(seedlotService.getUserSeedlots(USER_ID, 1, pageSize)).thenReturn(pagedResult);
+    when(seedlotService.getSeedlotByClientId(CLIENT_ID, 1, pageSize)).thenReturn(pagedResult);
 
     mockMvc
         .perform(get(url, pageSize).accept(MediaType.APPLICATION_JSON))
@@ -387,14 +421,13 @@ class SeedlotEndpointTest {
   void getSingleSeedlotInfoNotFoundNoPageTest() throws Exception {
 
     Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(List.of()));
-    when(seedlotService.getUserSeedlots(USER_ID, 1, 10)).thenReturn(pagedResult);
+    when(seedlotService.getSeedlotByClientId(CLIENT_ID, 1, 10)).thenReturn(pagedResult);
 
-    String url = String.format("/api/seedlots/users/%s", USER_ID);
+    String url = String.format("/api/seedlots/clients/%s", CLIENT_ID);
 
     mockMvc
         .perform(get(url).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.length()").value(0))
         .andReturn();
   }
 

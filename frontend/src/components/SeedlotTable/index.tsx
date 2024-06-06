@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DataTableSkeleton, Pagination } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
 
 import EmptySection from '../EmptySection';
+import AuthContext from '../../contexts/AuthContext';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { covertRawToDisplayObjArray } from '../../utils/SeedlotUtils';
-import { getSeedlotByUser } from '../../api-service/seedlotAPI';
+import { getSeedlotByClientId } from '../../api-service/seedlotAPI';
 import { SeedlotDisplayType, SeedlotType } from '../../types/SeedlotType';
 import PaginationChangeType from '../../types/PaginationChangeType';
 
@@ -29,6 +30,8 @@ const SeedlotTable = (
 ) => {
   const navigate = useNavigate();
 
+  const { selectedClientRoles } = useContext(AuthContext);
+
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType[]>([]);
   const [currPageNumber, setCurrPageNumber] = useState<number>(0);
   const [currPageSize, setCurrPageSize] = useState<number>(defaultPageSize ?? 10);
@@ -48,8 +51,12 @@ const SeedlotTable = (
   };
 
   const getAllSeedlotQuery = useQuery({
-    queryKey: ['seedlots', 'users', userId, { pageNumber: currPageNumber, pageSize: currPageSize }],
-    queryFn: () => getSeedlotByUser(userId, currPageNumber, currPageSize),
+    queryKey: ['seedlots', 'users', selectedClientRoles?.clientId, { pageNumber: currPageNumber, pageSize: currPageSize }],
+    queryFn: () => getSeedlotByClientId(
+      selectedClientRoles!.clientId,
+      currPageNumber,
+      currPageSize
+    ),
     enabled: userId.length > 0 && vegCodeQuery.isFetched,
     refetchOnMount: 'always'
   });

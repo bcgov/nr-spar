@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.security;
 
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +22,7 @@ class UserInfoTest {
             null,
             IdentityProvider.IDIR,
             Set.of(),
+            List.of(),
             "abcdef123456789");
 
     Assertions.assertNotNull(userInfo);
@@ -32,5 +34,6 @@ class UserInfoTest {
     Assertions.assertNull(userInfo.businessName());
     Assertions.assertEquals(IdentityProvider.IDIR, userInfo.identityProvider());
     Assertions.assertTrue(userInfo.roles().isEmpty());
+    Assertions.assertTrue(userInfo.clientIds().isEmpty());
   }
 }

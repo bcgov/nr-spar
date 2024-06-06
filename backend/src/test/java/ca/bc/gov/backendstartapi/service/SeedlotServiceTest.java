@@ -36,6 +36,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
+import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
@@ -48,6 +49,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.UserInfo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -269,19 +271,21 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserWithTwoSeedlots")
-  void getUserSeedlots_findsTwoSeedlots_shouldSucceed() {
-    String userId = "123456abcde@idir";
+  @DisplayName("findSeedlotsByClientIdWithTwoSeedlots")
+  void getClientSeedlots_findsTwoSeedlots_shouldSucceed() {
+    String clientId = "00011223";
 
     List<Seedlot> testList = List.of(new Seedlot("63001"), new Seedlot("63002"));
 
     Page<Seedlot> pagedResult = new PageImpl<>(testList);
 
-    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+    when(seedlotRepository.findAllByApplicantClientNumber(anyString(), any()))
         .thenReturn(pagedResult);
 
+    when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
     List<Seedlot> responseFromService =
-        seedlotService.getUserSeedlots(userId, 0, 10).get().getContent();
+        seedlotService.getSeedlotByClientId(clientId, 0, 10).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(2, responseFromService.size());
@@ -290,35 +294,51 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserNoSeedlots")
+  @DisplayName("findSeedlotsByClientIdNoSeedlots")
   void getUserSeedlots_noSeedlots_shouldSucceed() {
-    String userId = "userId";
+    String clientId = "00011223";
 
     Page<Seedlot> pagedResult = new PageImpl<>(List.of());
-    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+    when(seedlotRepository.findAllByApplicantClientNumber(anyString(), any()))
         .thenReturn(pagedResult);
 
+    when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
     List<Seedlot> responseFromService =
-        seedlotService.getUserSeedlots(userId, 0, 10).get().getContent();
+        seedlotService.getSeedlotByClientId(clientId, 0, 10).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertTrue(responseFromService.isEmpty());
   }
 
   @Test
-  @DisplayName("findSeedlotsByUserNoPageSize")
+  @DisplayName("findSeedlotsByClientIdNoPageSize")
   void getUserSeedlots_noPageSize_shouldSucceed() {
-    String userId = "userId";
+    String clientId = "00011223";
 
     Page<Seedlot> pagedResult = new PageImpl<>(List.of());
-    when(seedlotRepository.findAllByAuditInformation_EntryUserId(anyString(), any()))
+    when(seedlotRepository.findAllByApplicantClientNumber(anyString(), any()))
         .thenReturn(pagedResult);
 
+    when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
     List<Seedlot> responseFromService =
-        seedlotService.getUserSeedlots(userId, 0, 0).get().getContent();
+        seedlotService.getSeedlotByClientId(clientId, 0, 0).get().getContent();
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertTrue(responseFromService.isEmpty());
+  }
+
+  @Test
+  @DisplayName("findSeedlotsByUserClientIdForbidden")
+  void getUserSeedlots_forbidden_shouldFail() {
+    when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
+    Assertions.assertThrows(
+        ClientIdForbiddenException.class,
+        () -> {
+          seedlotService.getSeedlotByClientId("1234", 0, 0);
+        });
   }
 
   @Test
