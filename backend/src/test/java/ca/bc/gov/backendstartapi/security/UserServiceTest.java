@@ -4,6 +4,7 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.exception.UserNotFoundException;
 import ca.bc.gov.backendstartapi.repository.UserProfileRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
@@ -38,6 +39,7 @@ class UserServiceTest {
         !isIdir ? "user-my-bceid" : null,
         provider,
         Set.of(),
+        List.of(),
         "abcdef123456789");
   }
 

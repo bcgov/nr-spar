@@ -26,8 +26,8 @@ export const postFile = (
   return api.post(url, formData, true);
 };
 
-export const getSeedlotByUser = (userId: string, pageNumber: number, pageSize: number) => {
-  const url = `${ApiConfig.seedlots}/users/${userId}?page=${pageNumber}&size=${pageSize}`;
+export const getSeedlotByClientId = (clientId: string, pageNumber: number, pageSize: number) => {
+  const url = `${ApiConfig.seedlots}/clients/${clientId}?page=${pageNumber}&size=${pageSize}`;
   return api.get(url).then((res): SeedlotsReturnType => (
     {
       seedlots: res.data,
