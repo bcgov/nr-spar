@@ -1013,6 +1013,10 @@ export const fillAreaOfUseData = (
   if (seedlotData.seedlot.longitudeSecMax !== null) {
     clonedAreaOfUse.maxLongSec.value = seedlotData.seedlot.longitudeSecMax.toString();
   }
+  // Comment
+  if (seedlotData.seedlot.areaOfUseComment !== null) {
+    clonedAreaOfUse.comment.value = seedlotData.seedlot.areaOfUseComment;
+  }
 
   return clonedAreaOfUse;
 };

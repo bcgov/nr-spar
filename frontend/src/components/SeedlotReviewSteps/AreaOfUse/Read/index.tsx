@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import {
-  FlexGrid, Row, Column
+  FlexGrid, Row, Column,
+  TextArea, TextAreaSkeleton
 } from '@carbon/react';
 
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
@@ -147,14 +148,20 @@ const AreaOfUseRead = () => {
       {/* Area of Use Comment */}
       <Row>
         <Column className="info-col" sm={4} md={8} lg={8}>
-          <ReadOnlyInput
-            id="area-of-use-comment-input-readonly"
-            label="Area of use comment:"
-            value={
-              richSeedlotData?.seedlot.areaOfUseComment ?? ''
-            }
-            showSkeleton={isFetchingData}
-          />
+          {
+            isFetchingData
+              ? <TextAreaSkeleton />
+              : (
+                <TextArea
+                  id="area-of-use-comment-input-readonly"
+                  labelText="Area of use comment:"
+                  readOnly
+                  value={
+                    richSeedlotData?.seedlot.areaOfUseComment ?? ''
+                  }
+                />
+              )
+          }
         </Column>
       </Row>
 

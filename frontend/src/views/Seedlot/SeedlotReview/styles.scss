@@ -36,6 +36,15 @@
 
   .info-col {
     padding-top: 2rem;
+
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
   }
 
   .additional-spz-combobox-and-button {
@@ -58,6 +67,12 @@
       padding: 0;
       border: none;
       text-overflow: ellipsis;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--text-area__wrapper--readonly {
+    .#{vars.$bcgov-prefix}--text-area {
+      padding: 0;
     }
   }
 }

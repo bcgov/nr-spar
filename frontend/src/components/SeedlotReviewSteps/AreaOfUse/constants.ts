@@ -17,3 +17,7 @@ export const MIN_MINUTE_AND_SECOND_LIMIT = 0;
 export const MAX_MINUTE_AND_SECOND_LIMIT = 59;
 
 export const MINUTE_AND_SECOND_OUT_OF_RANGE_ERR_MSG = `Must be between ${MIN_MINUTE_AND_SECOND_LIMIT} and ${MAX_MINUTE_AND_SECOND_LIMIT}`;
+
+export const MAX_COMMENT_LENGTH = 400;
+
+export const COMMENT_ERR_MSG = `Must be fewer or equal to ${MAX_COMMENT_LENGTH} characters`;

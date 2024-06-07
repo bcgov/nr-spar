@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
   FlexGrid, Row, Column, ComboBox,
-  Button, TextInputSkeleton, TextInput
+  Button, TextInputSkeleton, TextInput,
+  TextArea
 } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
 import { Add } from '@carbon/icons-react';
@@ -24,6 +25,7 @@ import {
 } from '../utils';
 import AdditionalSpzItem from '../AddtionalSpzItem';
 import SeedMapSection from '../SeedMapSection';
+import { COMMENT_ERR_MSG, MAX_COMMENT_LENGTH } from '../constants';
 
 const AreaOfUseEdit = () => {
   const {
@@ -146,6 +148,22 @@ const AreaOfUseEdit = () => {
       maxKey,
       validatedTuple.maxReturnObj
     );
+  };
+
+  const handleCommentInput = (value: string) => {
+    const { comment } = areaOfUseData;
+    // Comment length will most likely not exceed the TextArea's max count
+    // but we do the check here just in case
+    comment.isInvalid = value.length > MAX_COMMENT_LENGTH;
+    if (comment.isInvalid) {
+      return;
+    }
+    comment.value = value ?? '';
+
+    setAreaOfUseData((prev) => ({
+      ...prev,
+      comment
+    }));
   };
 
   return (
@@ -430,6 +448,23 @@ const AreaOfUseEdit = () => {
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
               handleMinMaxInput(e.target.value, false, 'minLongSec', 'maxLongSec')
+            )}
+          />
+        </Column>
+      </Row>
+
+      <Row>
+        <Column className="info-col" sm={4} md={8} lg={12}>
+          <TextArea
+            id={areaOfUseData.comment.id}
+            labelText="Area of use comment"
+            enableCounter
+            maxCount={MAX_COMMENT_LENGTH}
+            defaultValue={areaOfUseData.comment.value}
+            invalid={areaOfUseData.comment.isInvalid}
+            invalidText={COMMENT_ERR_MSG}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleCommentInput(e.target.value)
             )}
           />
         </Column>
