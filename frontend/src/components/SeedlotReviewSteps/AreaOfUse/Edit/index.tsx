@@ -1,23 +1,27 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
   FlexGrid, Row, Column, ComboBox,
-  Button, TextInputSkeleton
+  Button, TextInputSkeleton, TextInput
 } from '@carbon/react';
 import { useQuery } from '@tanstack/react-query';
 import { Add } from '@carbon/icons-react';
 
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
+import { AreaOfUseDataType } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
 import { FilterObj, filterInput } from '../../../../utils/FilterUtils';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 import { getSpzList } from '../../../../api-service/areaOfUseAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
-import { filterSpzListItem, spzListToMultiObj } from '../utils';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../../../../shared-constants/shared-constants';
-import { OptionsInputType } from '../../../../types/FormInputType';
+import { OptionsInputType, StringInputType } from '../../../../types/FormInputType';
 import { getOptionsInputObj } from '../../../../utils/FormInputUtils';
 import Divider from '../../../Divider';
-
+import {
+  filterSpzListItem, spzListToMultiObj,
+  validateDegreeRange, validateElevatioRange,
+  validateMinMaxPair, validateMinuteOrSecondRange
+} from '../utils';
 import AdditionalSpzItem from '../AddtionalSpzItem';
 import SeedMapSection from '../SeedMapSection';
 
@@ -94,6 +98,56 @@ const AreaOfUseEdit = () => {
     }));
   };
 
+  const setMinMaxInputs = (
+    minKey: keyof AreaOfUseDataType,
+    minObj: StringInputType,
+    maxKey: keyof AreaOfUseDataType,
+    maxObj: StringInputType
+  ) => {
+    setAreaOfUseData((prev) => ({
+      ...prev,
+      [minKey]: minObj,
+      [maxKey]: maxObj
+    }));
+  };
+
+  const handleMinMaxInput = (
+    value: string,
+    isMin: boolean,
+    minKey: keyof AreaOfUseDataType,
+    maxKey: keyof AreaOfUseDataType
+  ) => {
+    const minObj = areaOfUseData[minKey] as StringInputType;
+    const maxObj = areaOfUseData[maxKey] as StringInputType;
+
+    if (isMin) {
+      minObj.value = value ?? '';
+    } else {
+      maxObj.value = value ?? '';
+    }
+
+    let rangeValidator: (inputObj: StringInputType) => StringInputType;
+
+    if (minKey === 'minElevation') {
+      rangeValidator = validateElevatioRange;
+    }
+    if (minKey === 'minLatDeg' || minKey === 'minLongDeg') {
+      rangeValidator = validateDegreeRange;
+    }
+    if (minKey === 'minLatMinute' || minKey === 'minLongMinute' || minKey === 'minLatSec' || minKey === 'minLongSec') {
+      rangeValidator = validateMinuteOrSecondRange;
+    }
+
+    const validatedTuple = validateMinMaxPair(minObj, maxObj, rangeValidator!);
+
+    setMinMaxInputs(
+      minKey,
+      validatedTuple.minReturnObj,
+      maxKey,
+      validatedTuple.maxReturnObj
+    );
+  };
+
   return (
     <FlexGrid className="sub-section-grid">
       <Row>
@@ -161,6 +215,226 @@ const AreaOfUseEdit = () => {
           </Button>
         </Column>
       </Row>
+
+      <Divider />
+
+      <Row>
+        <Column className="sub-section-title-col">
+          Elevation, Latitude and Longitude
+        </Column>
+      </Row>
+
+      <Row>
+        <Column className="info-col" sm={2} md={4} lg={4}>
+          <TextInput
+            id={areaOfUseData.minElevation.id}
+            type="number"
+            labelText="Minimum elevation (m):"
+            defaultValue={areaOfUseData.minElevation.value}
+            invalid={areaOfUseData.minElevation.isInvalid}
+            invalidText={areaOfUseData.minElevation.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, true, 'minElevation', 'maxElevation')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={2} md={4} lg={4}>
+          <TextInput
+            id={areaOfUseData.maxElevation.id}
+            type="number"
+            labelText="Maximum elevation (m):"
+            defaultValue={areaOfUseData.maxElevation.value}
+            invalid={areaOfUseData.maxElevation.isInvalid}
+            invalidText={areaOfUseData.maxElevation.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, false, 'minElevation', 'maxElevation')
+            )}
+          />
+        </Column>
+      </Row>
+      {/* Min Latitude */}
+      <Row>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.minLatDeg.id}
+            type="number"
+            labelText="Minimum latitude degree (°)"
+            defaultValue={areaOfUseData.minLatDeg.value}
+            invalid={areaOfUseData.minLatDeg.isInvalid}
+            invalidText={areaOfUseData.minLatDeg.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, true, 'minLatDeg', 'maxLatDeg')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.minLatMinute.id}
+            type="number"
+            labelText="minute (')"
+            defaultValue={areaOfUseData.minLatMinute.value}
+            invalid={areaOfUseData.minLatMinute.isInvalid}
+            invalidText={areaOfUseData.minLatMinute.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, true, 'minLatMinute', 'maxLatMinute')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.minLatSec.id}
+            type="number"
+            labelText='second (")'
+            defaultValue={areaOfUseData.minLatSec.value}
+            invalid={areaOfUseData.minLatSec.isInvalid}
+            invalidText={areaOfUseData.minLatSec.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, true, 'minLatSec', 'maxLatSec')
+            )}
+          />
+        </Column>
+      </Row>
+      {/* Max Latitude */}
+      <Row>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.maxLatDeg.id}
+            type="number"
+            labelText="Maximum latitude degree (°)"
+            defaultValue={areaOfUseData.maxLatDeg.value}
+            invalid={areaOfUseData.maxLatDeg.isInvalid}
+            invalidText={areaOfUseData.maxLatDeg.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, false, 'minLatDeg', 'maxLatDeg')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.maxLatMinute.id}
+            type="number"
+            labelText="minute (')"
+            defaultValue={areaOfUseData.maxLatMinute.value}
+            invalid={areaOfUseData.maxLatMinute.isInvalid}
+            invalidText={areaOfUseData.maxLatMinute.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, false, 'minLatMinute', 'maxLatMinute')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.maxLatSec.id}
+            type="number"
+            labelText='second (")'
+            defaultValue={areaOfUseData.maxLatSec.value}
+            invalid={areaOfUseData.maxLatSec.isInvalid}
+            invalidText={areaOfUseData.maxLatSec.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, false, 'minLatSec', 'maxLatSec')
+            )}
+          />
+        </Column>
+      </Row>
+      {/* Min Longitude */}
+      <Row>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.minLongDeg.id}
+            type="number"
+            labelText="Minimum longitude degree (°)"
+            defaultValue={areaOfUseData.minLongDeg.value}
+            invalid={areaOfUseData.minLongDeg.isInvalid}
+            invalidText={areaOfUseData.minLongDeg.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, true, 'minLongDeg', 'maxLongDeg')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.minLongMinute.id}
+            type="number"
+            labelText="minute (')"
+            defaultValue={areaOfUseData.minLongMinute.value}
+            invalid={areaOfUseData.minLongMinute.isInvalid}
+            invalidText={areaOfUseData.minLongMinute.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, true, 'minLongMinute', 'maxLongMinute')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.minLongSec.id}
+            type="number"
+            labelText='second (")'
+            defaultValue={areaOfUseData.minLongSec.value}
+            invalid={areaOfUseData.minLongSec.isInvalid}
+            invalidText={areaOfUseData.minLongSec.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, true, 'minLongSec', 'maxLongSec')
+            )}
+          />
+        </Column>
+      </Row>
+      {/* Max Longitude */}
+      <Row>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.maxLongDeg.id}
+            type="number"
+            labelText="Maximum longitude degree (°)"
+            defaultValue={areaOfUseData.maxLongDeg.value}
+            invalid={areaOfUseData.maxLongDeg.isInvalid}
+            invalidText={areaOfUseData.maxLongDeg.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, false, 'minLongDeg', 'maxLongDeg')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.maxLongMinute.id}
+            type="number"
+            labelText="minute (')"
+            defaultValue={areaOfUseData.maxLongMinute.value}
+            invalid={areaOfUseData.maxLongMinute.isInvalid}
+            invalidText={areaOfUseData.maxLongMinute.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, false, 'minLongMinute', 'maxLongMinute')
+            )}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={8} lg={4}>
+          <TextInput
+            id={areaOfUseData.maxLongSec.id}
+            type="number"
+            labelText='second (")'
+            defaultValue={areaOfUseData.maxLongSec.value}
+            invalid={areaOfUseData.maxLongSec.isInvalid}
+            invalidText={areaOfUseData.maxLongSec.errMsg}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
+              handleMinMaxInput(e.target.value, false, 'minLongSec', 'maxLongSec')
+            )}
+          />
+        </Column>
+      </Row>
+
       <Divider />
 
       <SeedMapSection />
