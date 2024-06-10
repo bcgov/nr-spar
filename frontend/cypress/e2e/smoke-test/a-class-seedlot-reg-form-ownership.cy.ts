@@ -7,8 +7,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     ownership: {
       title: string;
       subtitle: string;
-      agencyTitle: string;
-      agencySubtitle: string;
+      accordionTitle: string;
+      accordionSubtitle: string;
       ownerAgencyError: string;
       ownerAgencyValidationError: string;
       locationCodeError: string;
@@ -27,7 +27,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
   let seedlotData: SeedlotRegFixtureType;
   let testAcronym: string;
   let testPopupAcronym: string;
-  let seedlotTitle: string;
+  let initialAccordionTitle: string;
 
   beforeEach(() => {
     // Login
@@ -40,20 +40,20 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       seedlotData = fData;
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNum = sNumber as string;
-        cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
-        cy.url().should('contains', `/seedlots/a-class-registration/${seedlotNum}`);
+        const url = `/seedlots/a-class-registration/${seedlotNum}/?step=2`;
+        cy.visit(url);
+        cy.url().should('contains', url);
+        cy.get('.ownership-header').contains('Ownership');
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
       // Get title from agencyName like 'WESTERN FOREST PRODUCTS INC.'
       // eslint-disable-next-line prefer-destructuring
-      seedlotTitle = seedlotData[speciesKey].agencyName.split(' - ')[1];
-      cy.get(`button.${prefix}--progress-step-button[title="Ownership"]`)
-        .click();
+      initialAccordionTitle = seedlotData[speciesKey].agencyName.split(' - ')[1];
     });
   });
 
-  it('check title and subtitles', () => {
+  it('Page title and accordion title', () => {
     cy.get('.seedlot-registration-title')
       .find('h1')
       .should('have.text', 'Seedlot Registration');
@@ -72,20 +72,27 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-title-section')
-      .should('have.text', seedlotTitle);
+      .should('have.text', initialAccordionTitle);
 
     cy.get(`.${prefix}--accordion__title`)
       .find('.item-description-section')
-      .should('have.text', regFormData.ownership.agencySubtitle);
+      .should('have.text', regFormData.ownership.accordionSubtitle);
   });
 
-  it('check owner agency section visibility', () => {
+  it('Collapse and Expand accordion', () => {
     cy.get('.ownership-form-container')
       .find(`button.${prefix}--accordion__heading`)
       .click();
 
     cy.get('.single-owner-info-container')
       .should('not.be.visible');
+
+    cy.get('.ownership-form-container')
+      .find(`button.${prefix}--accordion__heading`)
+      .click();
+
+    cy.get('.single-owner-info-container')
+      .should('be.visible');
   });
 
   it('check owner agency and owner location code default values', () => {
@@ -380,12 +387,12 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get(`.${prefix}--accordion__title`)
       .eq(1)
       .find('.item-title-section')
-      .should('have.text', regFormData.ownership.agencyTitle);
+      .should('have.text', regFormData.ownership.accordionTitle);
 
     cy.get(`.${prefix}--accordion__title`)
       .eq(1)
       .find('.item-description-section')
-      .should('have.text', regFormData.ownership.agencySubtitle);
+      .should('have.text', regFormData.ownership.accordionSubtitle);
 
     cy.get('#ownership-portion-0')
       .click()
