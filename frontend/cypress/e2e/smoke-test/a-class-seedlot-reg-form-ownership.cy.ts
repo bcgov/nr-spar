@@ -95,7 +95,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('be.visible');
   });
 
-  it('check owner agency and owner location code default values', () => {
+  it('Owner agency and owner location code display default values', () => {
     cy.get('#default-owner-checkbox')
       .should('be.checked');
 
@@ -106,7 +106,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('have.value', seedlotData[speciesKey].agencyNumber);
   });
 
-  it('change owner agency and owner location code', () => {
+  it('Edit owner agency and owner location code', () => {
     // Change inputs
     cy.get('#default-owner-checkbox')
       .uncheck({ force: true });
@@ -159,7 +159,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('be.visible');
   });
 
-  it.only('Client search modal', () => {
+  it('Client search modal', () => {
     cy.get('.agency-information-section')
       .find('button.client-search-toggle-btn')
       .click();
@@ -209,7 +209,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       });
   });
 
-  it('check owner portion %, reserved % and surplus % default values', () => {
+  it('Owner portion %, reserved % and surplus % display default values', () => {
     cy.get('#ownership-portion-0')
       .should('have.value', '100');
 
@@ -220,7 +220,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('have.value', '0');
   });
 
-  it('change owner portion %, reserved % and surplus % values', () => {
+  it('Edit owner portion %, reserved % and surplus % values', () => {
     cy.get('#ownership-reserved-0')
       .clear()
       .type('02', { delay: TYPE_DELAY })
@@ -275,7 +275,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
   });
 
-  it('check funding source and method of payment default values and change the values', () => {
+  it('Funding source and method of payment default values and change the values', () => {
     cy.get('#ownership-funding-source-0')
       .should('have.value', '');
 
@@ -345,7 +345,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
   });
 
-  it('create and delete new owner agency section', () => {
+  it('Create and delete new owner agency section', () => {
     cy.get('button.owner-add-btn')
       .click();
 
@@ -367,7 +367,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('have.length', 1);
   });
 
-  it('check owner portion % for 3 owner agencies', () => {
+  it('Owner portion % for 3 owner agencies', () => {
     cy.get('button.owner-add-btn')
       .click();
 
@@ -444,7 +444,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
   });
 
-  it('check complete checkmark for Ownership step', () => {
+  it('Complete checkmark for Ownership step', () => {
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
