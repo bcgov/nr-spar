@@ -57,7 +57,6 @@ import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -842,10 +841,10 @@ public class SeedlotService {
     seedlot.setDeclarationOfTrueInformationTimestamp(curDateTime);
 
     SparLog.info(
-      "Declaration data set, for {} for user {} at {}",
-      seedlot.getId(),
-      seedlot.getDeclarationOfTrueInformationUserId(),
-      dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp())
+        "Declaration data set, for {} for user {} at {}",
+        seedlot.getId(),
+        seedlot.getDeclarationOfTrueInformationUserId(),
+        dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp())
     );
   }
 
