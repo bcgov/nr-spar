@@ -57,6 +57,9 @@ import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -614,6 +617,11 @@ public class SeedlotService {
 
     setSeedlotStatus(seedlot, statusOnSuccess);
 
+    // Only set declaration info for pending seedlots
+    if (currentSeedlotStauts.equals("PND")) {
+      setSeedlotDeclaredInfo(seedlot);
+    }
+
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
 
@@ -824,6 +832,21 @@ public class SeedlotService {
       throw new SeedlotStatusNotFoundException();
     }
     seedlot.setSeedlotStatus(sseOptional.get());
+  }
+
+  private void setSeedlotDeclaredInfo(Seedlot seedlot) {
+    String userId = loggedUserService.getLoggedUserId();
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    LocalDateTime curDateTime = LocalDateTime.now();
+    seedlot.setDeclarationOfTrueInformationUserId(userId);
+    seedlot.setDeclarationOfTrueInformationTimestamp(curDateTime);
+
+    SparLog.info(
+      "Declaration data set, for {} for user {} at {}",
+      seedlot.getId(),
+      seedlot.getDeclarationOfTrueInformationUserId(),
+      dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp())
+    );
   }
 
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
