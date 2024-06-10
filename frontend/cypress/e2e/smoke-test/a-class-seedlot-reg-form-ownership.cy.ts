@@ -159,13 +159,11 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('be.visible');
   });
 
-  it('check client search modal', () => {
-    let locationCode: string;
+  it.only('Client search modal', () => {
     cy.get('.agency-information-section')
       .find('button.client-search-toggle-btn')
       .click();
 
-    // Enter popup test
     cy.get('#client-search-dropdown')
       .find(`button.${prefix}--list-box__field`)
       .click();
@@ -184,6 +182,9 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .contains('Search')
       .click();
 
+    // Wait for data is fetched and table is filled
+    cy.contains(`[class=${prefix}--table-header-label]`, 'Acronym');
+
     cy.get(`table.${prefix}--data-table tbody tr`)
       .eq(0)
       .find('td:nth-child(1)')
@@ -195,22 +196,17 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .find('td[id*="locationCode"]')
       .invoke('text')
       .then((text) => {
-        locationCode = text;
+        const locationCode = text;
+        cy.get(`button.${prefix}--btn--primary`)
+          .contains('Apply selected client')
+          .click();
+
+        cy.get('#ownership-agency-0')
+          .should('have.value', testPopupAcronym);
+
+        cy.get('#ownership-location-code-0')
+          .should('have.value', locationCode);
       });
-
-    cy.get(`button.${prefix}--btn--primary`)
-      .contains('Apply selected client')
-      .click();
-    // End Popup test
-
-    cy.get('#ownership-agency-0')
-      .should('have.value', testPopupAcronym);
-
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(2000).then(() => {
-      cy.get('#ownership-location-code-0')
-        .should('have.value', locationCode);
-    });
   });
 
   it('check owner portion %, reserved % and surplus % default values', () => {

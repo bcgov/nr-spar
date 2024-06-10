@@ -146,12 +146,10 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
   });
 
   it('[Collection] check client search modal', () => {
-    let locationCode: string;
     cy.get('.agency-information-section')
       .find('button.client-search-toggle-btn')
       .click();
 
-    // Enter popup test
     cy.get('#client-search-dropdown')
       .find(`button.${prefix}--list-box__field`)
       .click();
@@ -181,22 +179,17 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .find('td[id*="locationCode"]')
       .invoke('text')
       .then((text) => {
-        locationCode = text;
+        const locationCode = text;
+        cy.get(`button.${prefix}--btn--primary`)
+          .contains('Apply selected client')
+          .click();
+
+        cy.get('#collection-collector-agency')
+          .should('have.value', testPopupAcronym);
+
+        cy.get('#collection-location-code')
+          .should('have.value', locationCode);
       });
-
-    cy.get(`button.${prefix}--btn--primary`)
-      .contains('Apply selected client')
-      .click();
-    // End Popup test
-
-    cy.get('#collection-collector-agency')
-      .should('have.value', testPopupAcronym);
-
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(2000).then(() => {
-      cy.get('#collection-location-code')
-        .should('have.value', locationCode);
-    });
 
     // Enter location code for linkage test
     cy.get('#collection-location-code')
@@ -427,7 +420,6 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
   });
 
   it('[Interim storage] check client search modal', () => {
-    let locationCode: string;
     cy.get(`button.${prefix}--progress-step-button[title="Interim storage"]`)
       .click();
 
@@ -435,7 +427,6 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .find('button.client-search-toggle-btn')
       .click();
 
-    // Enter popup test
     cy.get('#client-search-dropdown')
       .find(`button.${prefix}--list-box__field`)
       .click();
@@ -465,22 +456,18 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .find('td[id*="locationCode"]')
       .invoke('text')
       .then((text) => {
-        locationCode = text;
+        const locationCode = text;
+
+        cy.get(`button.${prefix}--btn--primary`)
+          .contains('Apply selected client')
+          .click();
+
+        cy.get('#interim-agency')
+          .should('have.value', testPopupAcronym);
+
+        cy.get('#interim-location-code')
+          .should('have.value', locationCode);
       });
-
-    cy.get(`button.${prefix}--btn--primary`)
-      .contains('Apply selected client')
-      .click();
-    // End Popup test
-
-    cy.get('#interim-agency')
-      .should('have.value', testPopupAcronym);
-
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(2000).then(() => {
-      cy.get('#interim-location-code')
-        .should('have.value', locationCode);
-    });
   });
 
   it('[Interim storage] check date input', () => {
