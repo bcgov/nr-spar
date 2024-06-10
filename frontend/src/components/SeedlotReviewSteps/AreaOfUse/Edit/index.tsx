@@ -100,27 +100,23 @@ const AreaOfUseEdit = () => {
     }));
   };
 
-  const setMinMaxInputs = (
-    minKey: keyof AreaOfUseDataType,
+  const setElevationInputs = (
     minObj: StringInputType,
-    maxKey: keyof AreaOfUseDataType,
     maxObj: StringInputType
   ) => {
     setAreaOfUseData((prev) => ({
       ...prev,
-      [minKey]: minObj,
-      [maxKey]: maxObj
+      minElevation: minObj,
+      maxElevation: maxObj
     }));
   };
 
-  const handleMinMaxInput = (
+  const handleElevationInput = (
     value: string,
-    isMin: boolean,
-    minKey: keyof AreaOfUseDataType,
-    maxKey: keyof AreaOfUseDataType
+    isMin: boolean
   ) => {
-    const minObj = areaOfUseData[minKey] as StringInputType;
-    const maxObj = areaOfUseData[maxKey] as StringInputType;
+    const minObj = areaOfUseData.minElevation;
+    const maxObj = areaOfUseData.maxElevation;
 
     if (isMin) {
       minObj.value = value ?? '';
@@ -128,26 +124,22 @@ const AreaOfUseEdit = () => {
       maxObj.value = value ?? '';
     }
 
-    let rangeValidator: (inputObj: StringInputType) => StringInputType;
+    const validatedTuple = validateMinMaxPair(minObj, maxObj, validateElevatioRange);
 
-    if (minKey === 'minElevation') {
-      rangeValidator = validateElevatioRange;
-    }
-    if (minKey === 'minLatDeg' || minKey === 'minLongDeg') {
-      rangeValidator = validateDegreeRange;
-    }
-    if (minKey === 'minLatMinute' || minKey === 'minLongMinute' || minKey === 'minLatSec' || minKey === 'minLongSec') {
-      rangeValidator = validateMinuteOrSecondRange;
-    }
-
-    const validatedTuple = validateMinMaxPair(minObj, maxObj, rangeValidator!);
-
-    setMinMaxInputs(
-      minKey,
+    setElevationInputs(
       validatedTuple.minReturnObj,
-      maxKey,
       validatedTuple.maxReturnObj
     );
+  };
+
+  const handleDmsInput = (key: keyof AreaOfUseDataType, value: string) => {
+    let areaData = areaOfUseData;
+
+    (areaData[key] as StringInputType).value = value;
+
+    areaData = validateDmsMinMax(areaData);
+
+    setAreaOfUseData(() => areaData);
   };
 
   const handleCommentInput = (value: string) => {
@@ -253,7 +245,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.minElevation.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, true, 'minElevation', 'maxElevation')
+              handleElevationInput(e.target.value, true)
             )}
           />
         </Column>
@@ -267,7 +259,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.maxElevation.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, false, 'minElevation', 'maxElevation')
+              handleElevationInput(e.target.value, false)
             )}
           />
         </Column>
