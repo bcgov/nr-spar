@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
@@ -344,14 +345,16 @@ class SeedlotServiceTest {
   @Test
   @DisplayName("findSingleSeedlotSuccessTest")
   void findSingleSeedlotSuccessTest() {
-    Seedlot seedlotEntity = new Seedlot("0000000");
+    String seedlotId = "0000000";
+    Seedlot seedlotEntity = new Seedlot(seedlotId);
 
-    when(seedlotRepository.findById("0000000")).thenReturn(Optional.of(seedlotEntity));
+    when(seedlotRepository.findById(seedlotId)).thenReturn(Optional.of(seedlotEntity));
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId)).thenReturn(List.of());
 
-    Seedlot responseFromService = seedlotService.getSingleSeedlotInfo("0000000");
+    SeedlotDto responseFromService = seedlotService.getSingleSeedlotInfo(seedlotId);
 
     Assertions.assertNotNull(responseFromService);
-    Assertions.assertEquals(seedlotEntity, responseFromService);
+    Assertions.assertEquals(seedlotEntity, responseFromService.getSeedlot());
   }
 
   @Test

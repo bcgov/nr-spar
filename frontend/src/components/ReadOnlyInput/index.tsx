@@ -7,7 +7,7 @@ import './styles.scss';
 type props = {
   id: string,
   label: string,
-  value: string,
+  value: string | undefined,
   helperText?: string,
   hideLabel?: boolean
   showSkeleton?: boolean
@@ -31,7 +31,7 @@ const ReadOnlyInput = (
         helperText={helperText}
         labelText={label}
         hideLabel={hideLabel}
-        value={value.length ? value : '--'}
+        value={value?.length ? value : '--'}
       />
     )
 );
