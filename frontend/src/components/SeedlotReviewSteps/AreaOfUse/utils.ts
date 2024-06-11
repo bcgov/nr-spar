@@ -7,13 +7,18 @@ import { StringInputType } from '../../../types/FormInputType';
 import {
   MIN_MAX_ERR_MSG, ELEVATION_OUT_OF_RANGE_ERR_MSG,
   MAX_ELEVATION_LIMIT, MIN_ELEVATION_LIMIT,
-  MIN_DEGREE_LIMIT,
-  MAX_DEGREE_LIMIT,
+  MIN_LAT_DEG_LIMIT,
+  MAX_LAT_DEG_LIMIT,
+  MIN_LONG_DEG_LIMIT,
+  MAX_LONG_DEG_LIMIT,
   MIN_MINUTE_AND_SECOND_LIMIT,
   MAX_MINUTE_AND_SECOND_LIMIT,
-  DEGREE_OUT_OF_RANGE_ERR_MSG,
+  LAT_DEG_OUT_OF_RANGE_ERR_MSG,
+  LONG_DEG_OUT_OF_RANGE_ERR_MSG,
   MINUTE_AND_SECOND_OUT_OF_RANGE_ERR_MSG
 } from './constants';
+import { AreaOfUseDataType } from '../../../views/Seedlot/ContextContainerClassA/definitions';
+import { dmsToSecond } from '../../../utils/GeospatialUtils';
 
 export const formatSpz = (spzDto: SeedPlanZoneDto) => (
   `${spzDto.code} - ${spzDto.description}`
@@ -74,7 +79,7 @@ const isMinMaxInvalid = (minVal: string, maxVal: string) => (
   !validator.isInt(minVal, { min: Number(minVal), max: Number(maxVal) })
 );
 
-export const validateElevatioRange = (inputObj: StringInputType): StringInputType => {
+export const validateElevationRange = (inputObj: StringInputType): StringInputType => {
   const returnObj = inputObj;
 
   if (isElevationOutOfRange(inputObj.value)) {
@@ -88,15 +93,14 @@ export const validateElevatioRange = (inputObj: StringInputType): StringInputTyp
   return returnObj;
 };
 
-export const validateMinMaxPair = (
+export const validateElevationPair = (
   minObj: StringInputType,
-  maxObj: StringInputType,
-  rangeValidator: (inputObj: StringInputType) => StringInputType
+  maxObj: StringInputType
 ): {
   minReturnObj: StringInputType, maxReturnObj: StringInputType
 } => {
-  const minReturnObj = rangeValidator(minObj);
-  const maxReturnObj = rangeValidator(maxObj);
+  const minReturnObj = validateElevationRange(minObj);
+  const maxReturnObj = validateElevationRange(maxObj);
 
   if (!minReturnObj.isInvalid && !maxReturnObj.isInvalid) {
     const isInvalid = isMinMaxInvalid(minObj.value, maxObj.value);
@@ -115,16 +119,22 @@ export const validateMinMaxPair = (
   return { minReturnObj, maxReturnObj };
 };
 
-const isDegreeOutOfRange = (value: string) => (
-  !validator.isInt(value, { min: MIN_DEGREE_LIMIT, max: MAX_DEGREE_LIMIT })
+const isDegreeOutOfRange = (value: string, isLat: boolean) => (
+  !validator.isInt(
+    value,
+    {
+      min: isLat ? MIN_LAT_DEG_LIMIT : MIN_LONG_DEG_LIMIT,
+      max: isLat ? MAX_LAT_DEG_LIMIT : MAX_LONG_DEG_LIMIT
+    }
+  )
 );
 
-export const validateDegreeRange = (inputObj: StringInputType): StringInputType => {
+const validateDegreeRange = (inputObj: StringInputType, isLat: boolean): StringInputType => {
   const validatedObj = inputObj;
-  validatedObj.isInvalid = isDegreeOutOfRange(inputObj.value);
+  validatedObj.isInvalid = isDegreeOutOfRange(inputObj.value, isLat);
 
   if (validatedObj.isInvalid) {
-    validatedObj.errMsg = DEGREE_OUT_OF_RANGE_ERR_MSG;
+    validatedObj.errMsg = isLat ? LAT_DEG_OUT_OF_RANGE_ERR_MSG : LONG_DEG_OUT_OF_RANGE_ERR_MSG;
   } else {
     validatedObj.errMsg = undefined;
   }
@@ -136,7 +146,7 @@ const isMinuteOrSecondOutOfRange = (value: string) => (
   !validator.isInt(value, { min: MIN_MINUTE_AND_SECOND_LIMIT, max: MAX_MINUTE_AND_SECOND_LIMIT })
 );
 
-export const validateMinuteOrSecondRange = (inputObj: StringInputType): StringInputType => {
+const validateMinuteOrSecondRange = (inputObj: StringInputType): StringInputType => {
   const validatedObj = inputObj;
   validatedObj.isInvalid = isMinuteOrSecondOutOfRange(inputObj.value);
 
@@ -147,4 +157,128 @@ export const validateMinuteOrSecondRange = (inputObj: StringInputType): StringIn
   }
 
   return validatedObj;
+};
+
+/**
+ * Validate the minimum and maximum latitude longitude degree, minute, second
+ */
+export const validateDmsMinMax = (areaOfUseData: AreaOfUseDataType): AreaOfUseDataType => {
+  let {
+    minLatDeg, maxLatDeg,
+    minLatMinute, maxLatMinute,
+    minLatSec, maxLatSec,
+    minLongDeg, maxLongDeg,
+    minLongMinute, maxLongMinute,
+    minLongSec, maxLongSec
+  } = areaOfUseData;
+
+  // Validate range limit of degrees
+  minLatDeg = validateDegreeRange(minLatDeg, true);
+  maxLatDeg = validateDegreeRange(maxLatDeg, true);
+  minLongDeg = validateDegreeRange(minLongDeg, false);
+  maxLongDeg = validateDegreeRange(maxLongDeg, false);
+
+  // Validate range limit of minute and second
+  minLatMinute = validateMinuteOrSecondRange(minLatMinute);
+  maxLatMinute = validateMinuteOrSecondRange(maxLatMinute);
+  minLatSec = validateMinuteOrSecondRange(minLatSec);
+  maxLatSec = validateMinuteOrSecondRange(maxLatSec);
+
+  minLongMinute = validateMinuteOrSecondRange(minLongMinute);
+  maxLongMinute = validateMinuteOrSecondRange(maxLongMinute);
+  minLongSec = validateMinuteOrSecondRange(minLongSec);
+  maxLongSec = validateMinuteOrSecondRange(maxLongSec);
+
+  const objList = [
+    minLatDeg, maxLatDeg,
+    minLatMinute, maxLatMinute,
+    minLatSec, maxLatSec,
+    minLongDeg, maxLongDeg,
+    minLongMinute, maxLongMinute,
+    minLongSec, maxLongSec
+  ];
+
+  const invalidList = objList.filter((inputObj) => inputObj.isInvalid);
+
+  // If all DMS are valid
+  // Then Validate the min max pair e.g. Min lat DMS vs Max DMS
+  if (invalidList.length === 0) {
+    // Latitude
+    const minLatTotalSecond = dmsToSecond({
+      degree: Number(minLatDeg.value),
+      minute: Number(minLatMinute.value),
+      second: Number(minLatSec.value)
+    });
+
+    const maxLatTotalSecond = dmsToSecond({
+      degree: Number(maxLatDeg.value),
+      minute: Number(maxLatMinute.value),
+      second: Number(maxLatSec.value)
+    });
+
+    const isLatInvalid = (maxLatTotalSecond - minLatTotalSecond) < 0;
+    minLatDeg.isInvalid = isLatInvalid;
+    maxLatDeg.isInvalid = isLatInvalid;
+    minLatMinute.isInvalid = isLatInvalid;
+    maxLatMinute.isInvalid = isLatInvalid;
+    minLatSec.isInvalid = isLatInvalid;
+    maxLatSec.isInvalid = isLatInvalid;
+
+    if (isLatInvalid) {
+      minLatDeg.errMsg = MIN_MAX_ERR_MSG;
+      maxLatDeg.errMsg = MIN_MAX_ERR_MSG;
+      // only provide degree inputs with error message so it's not overwhelming to users
+      minLatMinute.errMsg = undefined;
+      maxLatMinute.errMsg = undefined;
+      minLatSec.errMsg = undefined;
+      maxLatSec.errMsg = undefined;
+    }
+
+    // Longitude
+    const minLongTotalSecond = dmsToSecond({
+      degree: Number(minLongDeg.value),
+      minute: Number(minLongMinute.value),
+      second: Number(minLongSec.value)
+    });
+
+    const maxLongTotalSecond = dmsToSecond({
+      degree: Number(maxLongDeg.value),
+      minute: Number(maxLongMinute.value),
+      second: Number(maxLongSec.value)
+    });
+
+    const isLongInvalid = (maxLongTotalSecond - minLongTotalSecond) < 0;
+    minLongDeg.isInvalid = isLongInvalid;
+    maxLongDeg.isInvalid = isLongInvalid;
+    minLongMinute.isInvalid = isLongInvalid;
+    maxLongMinute.isInvalid = isLongInvalid;
+    minLongSec.isInvalid = isLongInvalid;
+    maxLongSec.isInvalid = isLongInvalid;
+
+    if (isLongInvalid) {
+      minLongDeg.errMsg = MIN_MAX_ERR_MSG;
+      maxLongDeg.errMsg = MIN_MAX_ERR_MSG;
+      // only provide degree inputs with error message so it's not overwhelming to users
+      minLongMinute.errMsg = undefined;
+      maxLongMinute.errMsg = undefined;
+      minLongSec.errMsg = undefined;
+      maxLongSec.errMsg = undefined;
+    }
+  }
+
+  return {
+    ...areaOfUseData,
+    minLatDeg,
+    maxLatDeg,
+    minLatMinute,
+    maxLatMinute,
+    minLatSec,
+    maxLatSec,
+    minLongDeg,
+    maxLongDeg,
+    minLongMinute,
+    maxLongMinute,
+    minLongSec,
+    maxLongSec
+  };
 };

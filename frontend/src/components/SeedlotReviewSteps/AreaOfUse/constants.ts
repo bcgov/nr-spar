@@ -6,11 +6,17 @@ export const ELEVATION_OUT_OF_RANGE_ERR_MSG = `Must be between ${MIN_ELEVATION_L
 
 export const MIN_MAX_ERR_MSG = 'Min value should be <= Max value';
 
-export const MIN_DEGREE_LIMIT = -90;
+export const MIN_LAT_DEG_LIMIT = -90;
 
-export const MAX_DEGREE_LIMIT = 90;
+export const MAX_LAT_DEG_LIMIT = 90;
 
-export const DEGREE_OUT_OF_RANGE_ERR_MSG = `Must be between ${MIN_DEGREE_LIMIT} and ${MAX_DEGREE_LIMIT}`;
+export const LAT_DEG_OUT_OF_RANGE_ERR_MSG = `Must be between ${MIN_LAT_DEG_LIMIT} and ${MAX_LAT_DEG_LIMIT}`;
+
+export const MIN_LONG_DEG_LIMIT = -180;
+
+export const MAX_LONG_DEG_LIMIT = 180;
+
+export const LONG_DEG_OUT_OF_RANGE_ERR_MSG = `Must be between ${MIN_LONG_DEG_LIMIT} and ${MAX_LONG_DEG_LIMIT}`;
 
 export const MIN_MINUTE_AND_SECOND_LIMIT = 0;
 

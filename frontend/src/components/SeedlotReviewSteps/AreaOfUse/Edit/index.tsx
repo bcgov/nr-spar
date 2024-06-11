@@ -20,8 +20,7 @@ import { getOptionsInputObj } from '../../../../utils/FormInputUtils';
 import Divider from '../../../Divider';
 import {
   filterSpzListItem, spzListToMultiObj,
-  validateDegreeRange, validateElevatioRange,
-  validateMinMaxPair, validateMinuteOrSecondRange
+  validateDmsMinMax, validateElevationPair
 } from '../utils';
 import AdditionalSpzItem from '../AddtionalSpzItem';
 import SeedMapSection from '../SeedMapSection';
@@ -124,7 +123,7 @@ const AreaOfUseEdit = () => {
       maxObj.value = value ?? '';
     }
 
-    const validatedTuple = validateMinMaxPair(minObj, maxObj, validateElevatioRange);
+    const validatedTuple = validateElevationPair(minObj, maxObj);
 
     setElevationInputs(
       validatedTuple.minReturnObj,
@@ -276,7 +275,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.minLatDeg.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, true, 'minLatDeg', 'maxLatDeg')
+              handleDmsInput('minLatDeg', e.target.value)
             )}
           />
         </Column>
@@ -290,7 +289,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.minLatMinute.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, true, 'minLatMinute', 'maxLatMinute')
+              handleDmsInput('minLatMinute', e.target.value)
             )}
           />
         </Column>
@@ -304,7 +303,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.minLatSec.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, true, 'minLatSec', 'maxLatSec')
+              handleDmsInput('minLatSec', e.target.value)
             )}
           />
         </Column>
@@ -321,7 +320,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.maxLatDeg.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, false, 'minLatDeg', 'maxLatDeg')
+              handleDmsInput('maxLatDeg', e.target.value)
             )}
           />
         </Column>
@@ -335,7 +334,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.maxLatMinute.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, false, 'minLatMinute', 'maxLatMinute')
+              handleDmsInput('maxLatMinute', e.target.value)
             )}
           />
         </Column>
@@ -349,7 +348,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.maxLatSec.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, false, 'minLatSec', 'maxLatSec')
+              handleDmsInput('maxLatSec', e.target.value)
             )}
           />
         </Column>
@@ -366,7 +365,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.minLongDeg.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, true, 'minLongDeg', 'maxLongDeg')
+              handleDmsInput('minLongDeg', e.target.value)
             )}
           />
         </Column>
@@ -380,7 +379,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.minLongMinute.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, true, 'minLongMinute', 'maxLongMinute')
+              handleDmsInput('minLongMinute', e.target.value)
             )}
           />
         </Column>
@@ -394,7 +393,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.minLongSec.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, true, 'minLongSec', 'maxLongSec')
+              handleDmsInput('minLongSec', e.target.value)
             )}
           />
         </Column>
@@ -411,7 +410,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.maxLongDeg.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, false, 'minLongDeg', 'maxLongDeg')
+              handleDmsInput('maxLongDeg', e.target.value)
             )}
           />
         </Column>
@@ -425,7 +424,7 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.maxLongMinute.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, false, 'minLongMinute', 'maxLongMinute')
+              handleDmsInput('maxLongMinute', e.target.value)
             )}
           />
         </Column>
@@ -439,12 +438,12 @@ const AreaOfUseEdit = () => {
             invalidText={areaOfUseData.maxLongSec.errMsg}
             onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => (
-              handleMinMaxInput(e.target.value, false, 'minLongSec', 'maxLongSec')
+              handleDmsInput('maxLongSec', e.target.value)
             )}
           />
         </Column>
       </Row>
-
+      {/* Comment */}
       <Row>
         <Column className="info-col" sm={4} md={8} lg={12}>
           <TextArea
