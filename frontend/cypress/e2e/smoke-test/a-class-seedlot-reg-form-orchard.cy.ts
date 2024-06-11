@@ -108,5 +108,37 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-male-gametic')
       .should('have.value', 'M3 - Pollen Volume Estimate by 100% Survey');
+
+    cy.get('#controlled-cross-yes')
+      .check({ force: true });
+
+    cy.get('#controlled-cross-yes')
+      .should('be.checked');
+
+    cy.get('#biotech-yes')
+      .check({ force: true });
+
+    cy.get('#biotech-yes')
+      .should('be.checked');
+  });
+
+  it('check and change pollen information', () => {
+    cy.get('#pollen-contam-no')
+      .should('be.checked');
+
+    cy.get('#pollen-contam-yes')
+      .check({ force: true });
+
+    cy.get('#pollen-contam-yes')
+      .should('be.checked');
+
+    cy.get('#orchard-breading-perc')
+      .should('be.visible');
+
+    cy.get('#orchard-is-regional')
+      .should('be.visible');
+
+    cy.get('#orchard-is-regional')
+      .should('be.checked');
   });
 });
