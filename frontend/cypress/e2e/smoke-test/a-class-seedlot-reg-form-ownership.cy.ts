@@ -237,6 +237,16 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-reserved-0')
       .should('have.value', '48');
 
+    // Check accordian subtitle reflects change in ownership portion
+    cy.get('#ownership-portion-0')
+      .clear()
+      .type('80', { delay: TYPE_DELAY })
+      .blur();
+
+    cy.get(`.${prefix}--accordion__title`)
+      .find('.item-description-section')
+      .should('have.text', '80% owner portion');
+
     // Invalid owner portion % error msg test
     cy.get('#ownership-portion-0')
       .clear()
