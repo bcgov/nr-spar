@@ -83,4 +83,24 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#biotech-no')
       .should('be.checked');
   });
+
+  it('change gamete information', () => {
+    // Select female gametic contribution methodology
+    cy.get('.gametic-combobox')
+      .eq(0)
+      .find(`button.${prefix}--list-box__menu-icon`)
+      .click();
+
+    cy.get('#downshift-37-item-1')
+      .click();
+
+    // Select male gametic contribution methodology
+    cy.get('.gametic-combobox')
+      .eq(1)
+      .find(`button.${prefix}--list-box__menu-icon`)
+      .click();
+
+    cy.get('#downshift-39-item-2')
+      .click();
+  });
 });
