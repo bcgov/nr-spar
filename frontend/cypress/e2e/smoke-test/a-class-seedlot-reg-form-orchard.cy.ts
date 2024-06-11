@@ -1,3 +1,4 @@
+import prefix from '../../../src/styles/classPrefix';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
@@ -64,5 +65,22 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .find('.subtitle-section')
       .eq(2)
       .should('have.text', regFormData.orchard.pollenSubtitle);
+  });
+
+  it('check default gamete information', () => {
+    cy.get('#seedlot-species-text-input')
+      .should('have.value', seedlotData[speciesKey].species);
+
+    cy.get('#orchard-female-gametic')
+      .should('have.value', '');
+
+    cy.get('#orchard-male-gametic')
+      .should('have.value', '');
+
+    cy.get('#controlled-cross-no')
+      .should('be.checked');
+
+    cy.get('#biotech-no')
+      .should('be.checked');
   });
 });
