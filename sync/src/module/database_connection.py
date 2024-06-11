@@ -1,5 +1,4 @@
 import logging
-#import cx_Oracle
 import oracledb
 import csv
 import numpy
@@ -66,6 +65,8 @@ class database_connection(object):
         import ssl
         import oracledb
         dbc = self.database_config # alias
+        if dbc['ssl_required']!='Y':
+            logger.warn("Oracle DATABASE connection is only available with SSL required mode. Ignoring ETL Tool settings.yml configuration (oracle.ssl_required).")
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
         ssl_context.set_ciphers('DEFAULT@SECLEVEL=1')
         return create_engine(f'oracle+oracledb://:@',
@@ -76,20 +77,26 @@ class database_connection(object):
                             "externalauth":False,
                             "ssl_context": ssl_context
                         })
-        
+
     def format_connection_string(self, database_config: str):
         """ Formats the connection string based on the database type and the connection configuration. """
         if database_config['type'] == 'ORACLE':
             return 'ORACLE'
 
         if database_config['type'] == 'POSTGRES':
-            connection_string = 'postgresql+psycopg2://{}:{}@{}:{}/{}'.format(
+            con_str  = 'postgresql+psycopg2://{}:{}@{}:{}/{}{}'
+            req= ''
+            if database_config['ssl_required']=='Y':
+                con_str  = 'postgresql+psycopg2://{}:{}@{}:{}/{}?sslmode={}'
+                req = 'require'
+            connection_string = con_str.format(
                 database_config['username'], 
                 database_config['password'], 
                 database_config['host'], 
                 database_config['port'],
-                database_config['database'])
-
+                database_config['database'],
+                req)
+        
         return connection_string
     
     def create_temp_table(self, table_name:str, from_what_table:str, only_structure:bool):

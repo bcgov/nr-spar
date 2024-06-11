@@ -1,6 +1,5 @@
 import time
 import logging
-import json
 import numpy as np
 import pandas as pd
 import module.metadata_handler as meta
@@ -38,6 +37,7 @@ def execute_instance(oracle_config, postgres_config, track_config, execution_id)
     current_cwd = path.join(path.abspath(path.dirname(__file__).split('src')[0]) , "config")
     logger.info('Initializing Tracking Database Connection')
     is_error = False
+    
     with db_conn.database_connection(track_config) as track_db_conn:
         temp_time = time.time()
         stored_metrics['time_conn_monitor'] = timedelta(seconds=(temp_time-stored_metrics['sync_start_time']))
