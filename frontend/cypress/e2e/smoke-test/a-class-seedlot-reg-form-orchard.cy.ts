@@ -94,6 +94,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#downshift-37-item-1')
       .click();
 
+    cy.get('#orchard-female-gametic')
+      .should('have.value', 'F2 - Measured Cone Volume');
+
     // Select male gametic contribution methodology
     cy.get('.gametic-combobox')
       .eq(1)
@@ -102,5 +105,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#downshift-39-item-2')
       .click();
+
+    cy.get('#orchard-male-gametic')
+      .should('have.value', 'M3 - Pollen Volume Estimate by 100% Survey');
   });
 });
