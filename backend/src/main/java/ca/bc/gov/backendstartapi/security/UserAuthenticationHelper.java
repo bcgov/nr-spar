@@ -4,7 +4,6 @@ import ca.bc.gov.backendstartapi.config.SparLog;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -82,6 +81,7 @@ public class UserAuthenticationHelper {
                 isIdirProvider ? null : idpUsername,
                 IdentityProvider.fromClaim(provider).orElseThrow(),
                 JwtSecurityUtil.getUserRolesFromJwt(jwtPrincipal),
+                JwtSecurityUtil.getClientIdsFromJwt(jwtPrincipal),
                 jwtPrincipal.getTokenValue());
 
         return Optional.of(userInfo);
@@ -99,21 +99,7 @@ public class UserAuthenticationHelper {
 
     if (isDockerComposeProfile) {
       SparLog.info("Local development environment found! Using dev user!");
-
-      UserInfo devUserInfo =
-          new UserInfo(
-              "FSTACK",
-              "FullStack",
-              "Developer",
-              "fullstack-dev@email.com",
-              "Developer, FullStack LRWS:EX",
-              "DEV-IDIR",
-              null,
-              IdentityProvider.IDIR,
-              Set.of(),
-              "abcdef123456");
-
-      return Optional.of(devUserInfo);
+      return Optional.of(UserInfo.createDevUser());
     }
 
     return Optional.empty();

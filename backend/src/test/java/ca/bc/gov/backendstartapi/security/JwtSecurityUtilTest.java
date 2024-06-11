@@ -48,7 +48,7 @@ class JwtSecurityUtilTest {
   }
 
   @Test
-  @DisplayName("Get user roles from JWT no roles should succeed")
+  @DisplayName("Get user roles from JWT with big role names should succeed")
   void getUserRolesFromJwt_bigRoles_shouldSucceed() {
     Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
     builder.subject("BAGGINGS");
@@ -84,5 +84,22 @@ class JwtSecurityUtilTest {
     Set<String> rolesSet = JwtSecurityUtil.getUserRolesFromJwt(builder.build());
 
     Assertions.assertTrue(rolesSet.isEmpty());
+  }
+
+  @Test
+  @DisplayName("Get user client ids from JWT happy path should succeed")
+  void getClientIdsFromJwt_happyPath_shouldSucceed() {
+    Jwt.Builder builder = Jwt.withTokenValue("myTokenValue");
+    builder.subject("BAGGINGS");
+    builder.header("alg", "HS256");
+    builder.header("typ", "JWT");
+    builder.claim("cognito:groups", List.of("ROLE1_ADMIN_00112233", "ROLE2_USER_00112234"));
+
+    List<String> clientIds = JwtSecurityUtil.getClientIdsFromJwt(builder.build());
+
+    Assertions.assertFalse(clientIds.isEmpty());
+    Assertions.assertEquals(2, clientIds.size());
+    Assertions.assertTrue(clientIds.contains("00112233"));
+    Assertions.assertTrue(clientIds.contains("00112234"));
   }
 }
