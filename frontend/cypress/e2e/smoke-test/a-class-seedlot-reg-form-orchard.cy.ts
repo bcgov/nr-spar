@@ -111,6 +111,41 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#orchard-male-gametic')
       .should('have.value', 'M3 - Pollen Volume Estimate by 100% Survey');
 
+    // Check 'x' button
+    cy.get('.gametic-combobox')
+      .eq(0)
+      .find(`button.${prefix}--list-box__selection[title="Increment number"]`)
+      .click();
+
+    cy.get('#orchard-female-gametic')
+      .should('have.value', '');
+
+    cy.get('.gametic-combobox')
+      .eq(1)
+      .find(`button.${prefix}--list-box__selection[title="Increment number"]`)
+      .click();
+
+    cy.get('#orchard-male-gametic')
+      .should('have.value', '');
+
+    // Enter female and male gametic contribution methodology again
+    cy.get('.gametic-combobox')
+      .eq(0)
+      .find(`button.${prefix}--list-box__menu-icon`)
+      .click();
+
+    cy.get('#downshift-37-item-1')
+      .click();
+
+    cy.get('.gametic-combobox')
+      .eq(1)
+      .find(`button.${prefix}--list-box__menu-icon`)
+      .click();
+
+    cy.get('#downshift-39-item-2')
+      .click();
+
+    // Change radio inputs of gamete section
     cy.get('#controlled-cross-yes')
       .check({ force: true });
 
