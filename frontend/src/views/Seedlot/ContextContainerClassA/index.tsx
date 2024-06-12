@@ -42,8 +42,8 @@ import InfoDisplayObj from '../../../types/InfoDisplayObj';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
-  AllStepData, ClientAgenciesByCode, ProgressIndicatorConfig,
-  ProgressStepStatus
+  AllStepData, AreaOfUseDataType, ClientAgenciesByCode,
+  ProgressIndicatorConfig, ProgressStepStatus
 } from './definitions';
 import {
   initProgressBar, getSpeciesOptionByCode, validateCollectionStep, verifyCollectionStepCompleteness,
@@ -51,10 +51,11 @@ import {
   verifyInterimStepCompleteness, validateOrchardStep, verifyOrchardStepCompleteness,
   validateExtractionStep, verifyExtractionStepCompleteness, validateParentStep,
   verifyParentStepCompleteness, checkAllStepsCompletion, getSeedlotPayload,
-  initEmptySteps, resDataToState
+  initEmptySteps, resDataToState,
+  fillAreaOfUseData
 } from './utils';
 import {
-  MAX_EDIT_BEFORE_SAVE,
+  MAX_EDIT_BEFORE_SAVE, initialAreaOfUseData,
   initialProgressConfig, smartSaveText, stepMap
 } from './constants';
 
@@ -107,6 +108,7 @@ const ContextContainerClassA = ({ children }: props) => {
   const [meanGeomInfos, setMeanGeomInfos] = useState<MeanGeomInfoSectionConfigType>(
     () => structuredClone(defaultMeanGeomConfig)
   );
+  const [areaOfUseData, setAreaOfUseData] = useState<AreaOfUseDataType>(() => initialAreaOfUseData);
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
@@ -132,7 +134,7 @@ const ContextContainerClassA = ({ children }: props) => {
    * if true then users can save a draft of their forms,
    * otherwise the form will be populated with data directly from the seedlot table.
    */
-  const isFormIncomplete = seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND' || seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'INC';
+  const isFormIncomplete = seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'PND' || seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'INC';
 
   /**
    * Determine if the form is already submitted for review,
@@ -142,7 +144,7 @@ const ContextContainerClassA = ({ children }: props) => {
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
 
   useEffect(() => {
-    if (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'SUB') {
+    if (seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'SUB') {
       setIsFormSubmitted(true);
     }
   }, [seedlotQuery.isFetched]);
@@ -206,8 +208,13 @@ const ContextContainerClassA = ({ children }: props) => {
   const [clientNumbers, setClientNumbers] = useState<string[]>([]);
 
   useEffect(() => {
-    setClientNumber(seedlotQuery.data?.applicantClientNumber ?? '');
-  }, [seedlotQuery.isFetched]);
+    if (seedlotQuery.status === 'success') {
+      setClientNumber(seedlotQuery.data.seedlot.applicantClientNumber ?? '');
+
+      // Set area of use data
+      setAreaOfUseData(fillAreaOfUseData(seedlotQuery.data, areaOfUseData));
+    }
+  }, [seedlotQuery.status]);
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', clientNumber],
@@ -237,7 +244,7 @@ const ContextContainerClassA = ({ children }: props) => {
     label: forestClientQuery.data?.acronym ?? ''
   });
 
-  const getDefaultLocationCode = (): string => (seedlotQuery.data?.applicantLocationCode ?? '');
+  const getDefaultLocationCode = (): string => (seedlotQuery.data?.seedlot.applicantLocationCode ?? '');
 
   const applicantAgencyQuery = useQuery({
     queryKey: ['applicant-agencies'],
@@ -365,7 +372,7 @@ const ContextContainerClassA = ({ children }: props) => {
   });
 
   const seedlotSpecies = getSpeciesOptionByCode(
-    seedlotQuery.data?.vegetationCode,
+    seedlotQuery.data?.seedlot.vegetationCode,
     vegCodeQuery.data
   );
 
@@ -386,7 +393,7 @@ const ContextContainerClassA = ({ children }: props) => {
       && clientNumbers.length
     ) {
       const fullFormData = getAllSeedlotInfoQuery.data.seedlotData;
-      const defaultAgencyNumber = seedlotQuery.data?.applicantClientNumber;
+      const defaultAgencyNumber = seedlotQuery.data?.seedlot.applicantClientNumber;
       let clientAgencies: ClientAgenciesByCode = {};
 
       clientNumbers.forEach((curNumber) => {
@@ -711,7 +718,8 @@ const ContextContainerClassA = ({ children }: props) => {
   const contextData: ClassAContextType = useMemo(
     () => (
       {
-        seedlotData: seedlotQuery.data,
+        seedlotData: seedlotQuery.data?.seedlot,
+        richSeedlotData: seedlotQuery.data,
         calculatedValues,
         geoInfoVals,
         genWorthVals,
@@ -721,7 +729,7 @@ const ContextContainerClassA = ({ children }: props) => {
         allStepData,
         setStepData,
         seedlotSpecies: getSpeciesOptionByCode(
-          seedlotQuery.data?.vegetationCode,
+          seedlotQuery.data?.seedlot.vegetationCode,
           vegCodeQuery.data
         ),
         formStep,
@@ -761,7 +769,9 @@ const ContextContainerClassA = ({ children }: props) => {
         summaryConfig,
         setSummaryConfig,
         meanGeomInfos,
-        setMeanGeomInfos
+        setMeanGeomInfos,
+        areaOfUseData,
+        setAreaOfUseData
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
@@ -771,7 +781,7 @@ const ContextContainerClassA = ({ children }: props) => {
       progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,
       methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,
       fundingSourcesQuery.status, geoInfoVals, genWorthVals, genWorthInfoItems, weightedGwInfoItems,
-      popSizeAndDiversityConfig, summaryConfig, meanGeomInfos
+      popSizeAndDiversityConfig, summaryConfig, meanGeomInfos, areaOfUseData
     ]
   );
 

@@ -31,7 +31,6 @@ import org.locationtech.jts.geom.Point;
 @Setter
 @ToString
 public class Seedlot implements Serializable {
-
   @Id
   @Column(name = "seedlot_number", length = 5)
   @NonNull
