@@ -45,7 +45,7 @@ const ApiConfig = {
 
   oracleOrchards: `${oracleServerHost}/api/orchards`,
 
-  areaOfUseTestedPtSpz: `${oracleServerHost}/api/area-of-use/tested-parent-trees/spz-list`
+  areaOfUseSpzList: `${oracleServerHost}/api/area-of-use/spz-list/vegetation-code`
 };
 
 export default ApiConfig;
