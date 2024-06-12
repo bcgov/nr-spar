@@ -1,40 +1,24 @@
 package ca.bc.gov.backendstartapi.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
-import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpzDto;
 import ca.bc.gov.backendstartapi.entity.OrchardEntity;
 import ca.bc.gov.backendstartapi.entity.OrchardLotTypeCode;
 import ca.bc.gov.backendstartapi.entity.ParentTreeEntity;
 import ca.bc.gov.backendstartapi.entity.ParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.ParentTreeOrchard;
-import ca.bc.gov.backendstartapi.entity.SeedPlanUnit;
-import ca.bc.gov.backendstartapi.entity.SeedPlanZoneCode;
-import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUse;
-import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpu;
-import ca.bc.gov.backendstartapi.entity.TestedPtAreaOfUseSpz;
 import ca.bc.gov.backendstartapi.entity.idclass.ParentTreeOrchardId;
 import ca.bc.gov.backendstartapi.entity.projection.ParentTreeProj;
-import ca.bc.gov.backendstartapi.exception.TestedAreaOfUseNotFound;
 import ca.bc.gov.backendstartapi.repository.OrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeGeneticQualityRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.backendstartapi.repository.ParentTreeRepository;
-import ca.bc.gov.backendstartapi.repository.SeedPlanUnitRepository;
-import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
-import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpuRepository;
-import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
-import ca.bc.gov.backendstartapi.repository.TestedPtAreaofUseRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -62,16 +46,6 @@ class OrchardServiceTest {
   @Mock private ParentTreeRepository parentTreeRepository;
 
   @Mock private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
-
-  @Mock private TestedPtAreaofUseRepository testedPtAreaofUseRepository;
-
-  @Mock private SeedPlanUnitRepository seedPlanUnitRepository;
-
-  @Mock private SeedPlanZoneRepository seedPlanZoneRepository;
-
-  @Mock private TestedPtAreaOfUseSpuRepository testedPtAreaOfUseSpuRepository;
-
-  @Mock private TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
 
   @Mock SparBecCatalogueService sparBecCatalogueService;
 
@@ -395,92 +369,5 @@ class OrchardServiceTest {
         repoResult.get(1).getParentTreeId(), listToTest.get(1).getParentTreeId());
     Assertions.assertEquals(
         repoResult.get(1).getParentTreeNumber(), listToTest.get(1).getParentTreeNumber());
-  }
-
-  @Test
-  @DisplayName("calcAreaOfUseData_successTest")
-  void calcAreaOfUseData_successTest() {
-    Integer spuId = 7;
-    Integer testedPtAoUid = 30;
-
-    // Step 1 Mock
-    TestedPtAreaOfUse testedPtAreaOfUse = new TestedPtAreaOfUse(testedPtAoUid, spuId);
-    when(testedPtAreaofUseRepository.findAllBySeedPlanUnitId(7))
-        .thenReturn(List.of(testedPtAreaOfUse));
-
-    // Step 2 Mock
-    TestedPtAreaOfUseSpu testedPtSpu = new TestedPtAreaOfUseSpu(testedPtAoUid, spuId);
-    when(testedPtAreaOfUseSpuRepository.findByTestedPtAreaOfUseId(testedPtAoUid))
-        .thenReturn(List.of(testedPtSpu));
-
-    // Step 3 Mock
-    SeedPlanUnit spu = new SeedPlanUnit(spuId, true, 1284, "Low", 700, 1, null, null, 48, 0, 52, 0);
-    when(seedPlanUnitRepository.findBySeedPlanUnitIdIn(List.of(spuId))).thenReturn(List.of(spu));
-
-    // Step 4 Mock
-    SeedPlanZoneCode spzCode1 = new SeedPlanZoneCode("GL", "Georgia Lowlands");
-    SeedPlanZoneCode spzCode2 = new SeedPlanZoneCode("M", "Maritime");
-    TestedPtAreaOfUseSpz testedSpzDto1 =
-        new TestedPtAreaOfUseSpz(testedPtAreaOfUse, spzCode1, false);
-    TestedPtAreaOfUseSpz testedSpzDto2 =
-        new TestedPtAreaOfUseSpz(testedPtAreaOfUse, spzCode2, true);
-    when(testedPtAreaOfUseSpzRepository.findAllByTestedPtAreaOfUse_testedPtAreaOfUseId(
-            testedPtAoUid))
-        .thenReturn(List.of(testedSpzDto1, testedSpzDto2));
-
-    AreaOfUseDto areaOfUseDto = new AreaOfUseDto();
-    AreaOfUseSpuGeoDto areaOfUseSpuGeoDto =
-        new AreaOfUseSpuGeoDto(
-            spu.getElevationMin(),
-            spu.getElevationMax(),
-            spu.getLatitudeDegreesMin(),
-            spu.getLatitudeDegreesMax(),
-            spu.getLatitudeMinutesMin(),
-            spu.getLatitudeMinutesMin());
-    areaOfUseDto.setAreaOfUseSpuGeoDto(areaOfUseSpuGeoDto);
-
-    SpzDto spzDto1 = new SpzDto("GL", "Georgia Lowlands", false);
-    SpzDto spzDto2 = new SpzDto("M", "Maritime", true);
-
-    List<SpzDto> spzList = List.of(spzDto1, spzDto2);
-
-    areaOfUseDto.setSpzList(spzList);
-
-    AreaOfUseDto dtoToTest = orchardService.calcAreaOfUseData(spuId);
-
-    // Geo data test
-    assertEquals(
-        areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMax(),
-        dtoToTest.getAreaOfUseSpuGeoDto().getElevationMax());
-    assertEquals(
-        areaOfUseDto.getAreaOfUseSpuGeoDto().getElevationMin(),
-        dtoToTest.getAreaOfUseSpuGeoDto().getElevationMin());
-    assertEquals(
-        areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMax(),
-        dtoToTest.getAreaOfUseSpuGeoDto().getLatitudeDegreesMax());
-    assertEquals(
-        areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMin(),
-        dtoToTest.getAreaOfUseSpuGeoDto().getLatitudeDegreesMin());
-    assertEquals(
-        areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMax(),
-        dtoToTest.getAreaOfUseSpuGeoDto().getLatitudeMinutesMax());
-    assertEquals(
-        areaOfUseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMin(),
-        dtoToTest.getAreaOfUseSpuGeoDto().getLatitudeMinutesMin());
-    // SPZ List test
-    for (int i = 0; i < spzList.size(); i++) {
-      assertEquals(spzList.get(i).getCode(), dtoToTest.getSpzList().get(i).getCode());
-      assertEquals(spzList.get(i).getDescription(), dtoToTest.getSpzList().get(i).getDescription());
-      assertEquals(spzList.get(i).getIsPrimary(), dtoToTest.getSpzList().get(i).getIsPrimary());
-    }
-  }
-
-  @Test
-  @DisplayName("calcAreaOfUseData_errorTest")
-  void calcAreaOfUseData_errorTest() {
-    when(testedPtAreaofUseRepository.findAllBySeedPlanUnitId(any()))
-        .thenThrow(new TestedAreaOfUseNotFound());
-
-    assertThrows(TestedAreaOfUseNotFound.class, () -> orchardService.calcAreaOfUseData(7));
   }
 }
