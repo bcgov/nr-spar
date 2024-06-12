@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
@@ -534,5 +535,12 @@ class SeedlotFormPutTest {
     assertEquals(oracleOrchardRet.becSubzoneCode(), seedlot.getBgcSubzoneCode());
     assertEquals(oracleOrchardRet.variant(), seedlot.getVariant());
     assertEquals(oracleOrchardRet.becVersionId(), seedlot.getBecVersionId());
+    // Declared Seedlot Value
+    assertEquals(
+        loggedUserService.getLoggedUserId(),
+        seedlot.getDeclarationOfTrueInformationUserId());
+    assertTrue(
+        LocalDateTime.now().minusSeconds(15L).isBefore(
+            seedlot.getDeclarationOfTrueInformationTimestamp()));
   }
 }
