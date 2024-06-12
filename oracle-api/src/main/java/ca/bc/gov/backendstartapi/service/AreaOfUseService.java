@@ -2,9 +2,10 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.SpzDto;
+import ca.bc.gov.backendstartapi.entity.SeedPlanZone;
 import ca.bc.gov.backendstartapi.entity.SeedPlanZoneCode;
 import ca.bc.gov.backendstartapi.repository.SeedPlanZoneCodeRepository;
-import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
+import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,23 +15,31 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AreaOfUseService {
 
-  private final TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
+  private final SeedPlanZoneRepository seedPlanZoneRepository;
 
   private final SeedPlanZoneCodeRepository seedPlanZoneCodeRepository;
 
   /**
-   * Find all spz under tested parent tree area of use.
+   * Find all spz under a vegCode for A-Class.
    *
    * @return a list of {@link SpzDto}
    */
-  public List<SpzDto> getAllSpz() {
+  public List<SpzDto> getSpzByVegCode(String vegCode) {
     SparLog.info("Begin to query tested_pt_area_of_use_spz table for a list of unique spz code");
 
-    List<String> spzCodeList = testedPtAreaOfUseSpzRepository.findAllDistinctSpz();
+    List<SeedPlanZone> seedPlanZoneList =
+        seedPlanZoneRepository.findAllByGeneticClassCode_AndVegetationCode_id('A', vegCode);
 
-    SparLog.info("Found {} unique spz codes", spzCodeList.size());
+    SparLog.info("Found {} spu for vegetation code {}", seedPlanZoneList.size(), vegCode);
 
-    SparLog.info("Begin to query seed_plan_zone_code table with the unique spz codes");
+    if (seedPlanZoneList.isEmpty()) {
+      return List.of();
+    }
+
+    SparLog.info("Begin to query seed_plan_zone_code table for spz description");
+
+    List<String> spzCodeList =
+        seedPlanZoneList.stream().map(spz -> spz.getSeedPlanZoneCode().getSpzCode()).toList();
 
     List<SeedPlanZoneCode> spzCodeEntityList =
         seedPlanZoneCodeRepository.findBySpzCodeIn(spzCodeList);
@@ -40,7 +49,9 @@ public class AreaOfUseService {
     SparLog.info("Returning a list of SPZ with {} items", spzCodeEntityList.size());
 
     return spzCodeEntityList.stream()
-        .map(spzEntity -> new SpzDto(spzEntity.getSpzCode(), spzEntity.getSpzDescription(), null))
+        .map(
+            spzCodeEntity ->
+                new SpzDto(spzCodeEntity.getSpzCode(), spzCodeEntity.getSpzDescription(), null))
         .toList();
   }
 }

@@ -35,11 +35,12 @@ class AreaOfUseEndpointTest {
     SpzDto spzCp = new SpzDto("CP", "Central Plateau", null);
     List<SpzDto> spzList = List.of(spzBv, spzCp);
 
-    when(areaOfUseService.getAllSpz()).thenReturn(spzList);
+    String vegCode = "FDC";
+    when(areaOfUseService.getSpzByVegCode(vegCode)).thenReturn(spzList);
 
     mockMvc
         .perform(
-            get("/api/area-of-use/tested-parent-trees/spz-list")
+            get("/api/area-of-use/spz-list/vegetation-code/{vegCode}", vegCode)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
@@ -56,12 +57,14 @@ class AreaOfUseEndpointTest {
   @Test
   @DisplayName("Get a list of SPZ endpoint should be able to handle erros.")
   void getSpzListShouldHandleError() throws Exception {
-    when(areaOfUseService.getAllSpz())
+    String vegCode = "FDC";
+
+    when(areaOfUseService.getSpzByVegCode(vegCode))
         .thenThrow(new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT));
 
     mockMvc
         .perform(
-            get("/api/area-of-use/tested-parent-trees/spz-list")
+            get("/api/area-of-use/spz-list/vegetation-code/{vegCode}", vegCode)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))

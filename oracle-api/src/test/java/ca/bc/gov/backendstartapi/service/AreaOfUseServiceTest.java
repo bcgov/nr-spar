@@ -2,12 +2,15 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.SpzDto;
+import ca.bc.gov.backendstartapi.entity.SeedPlanZone;
 import ca.bc.gov.backendstartapi.entity.SeedPlanZoneCode;
+import ca.bc.gov.backendstartapi.entity.VegetationCode;
 import ca.bc.gov.backendstartapi.repository.SeedPlanZoneCodeRepository;
-import ca.bc.gov.backendstartapi.repository.TestedPtAreaOfUseSpzRepository;
+import ca.bc.gov.backendstartapi.repository.SeedPlanZoneRepository;
 import java.sql.SQLException;
 import java.util.List;
 import org.hibernate.exception.JDBCConnectionException;
@@ -23,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ExtendWith(MockitoExtension.class)
 public class AreaOfUseServiceTest {
 
-  @Mock TestedPtAreaOfUseSpzRepository testedPtAreaOfUseSpzRepository;
+  @Mock SeedPlanZoneRepository seedPlanZoneRepository;
   @Mock SeedPlanZoneCodeRepository seedPlanZoneCodeRepository;
 
   @Autowired @InjectMocks private AreaOfUseService areaOfUseService;
@@ -31,21 +34,31 @@ public class AreaOfUseServiceTest {
   @Test
   @DisplayName("Get a list of SPZ should succeed")
   void getListOfSpz_shouldSucceed() {
-    SeedPlanZoneCode spz1 = new SeedPlanZoneCode("BV", "Bulkley Valley");
-    SeedPlanZoneCode spz2 = new SeedPlanZoneCode("CP", "Central Plateau");
-    SeedPlanZoneCode spz3 = new SeedPlanZoneCode("DK", "Dease Klappan");
-    SeedPlanZoneCode spz4 = new SeedPlanZoneCode("EK", "East Kootenay");
+    SeedPlanZoneCode spzCode1 = new SeedPlanZoneCode("BV", "Bulkley Valley");
+    SeedPlanZoneCode spzCode2 = new SeedPlanZoneCode("CP", "Central Plateau");
+    SeedPlanZoneCode spzCode3 = new SeedPlanZoneCode("DK", "Dease Klappan");
+    SeedPlanZoneCode spzCode4 = new SeedPlanZoneCode("EK", "East Kootenay");
 
-    List<String> distinctSpzCodeList =
-        List.of(spz1.getSpzCode(), spz2.getSpzCode(), spz3.getSpzCode(), spz4.getSpzCode());
-    when(testedPtAreaOfUseSpzRepository.findAllDistinctSpz()).thenReturn(distinctSpzCodeList);
+    String vegCode = "FDC";
+    VegetationCode vegetationCode = new VegetationCode("99", vegCode, null, null, null);
 
-    List<SeedPlanZoneCode> spzCodeEntityList = List.of(spz1, spz2, spz3, spz4);
+    SeedPlanZone spz1 = new SeedPlanZone(1, 'A', spzCode1, vegetationCode);
+    SeedPlanZone spz2 = new SeedPlanZone(2, 'A', spzCode2, vegetationCode);
+    SeedPlanZone spz3 = new SeedPlanZone(3, 'A', spzCode3, vegetationCode);
+    SeedPlanZone spz4 = new SeedPlanZone(4, 'A', spzCode4, vegetationCode);
 
-    when(seedPlanZoneCodeRepository.findBySpzCodeIn(distinctSpzCodeList))
-        .thenReturn(spzCodeEntityList);
+    List<SeedPlanZone> spzList = List.of(spz1, spz2, spz3, spz4);
 
-    List<SpzDto> testList = areaOfUseService.getAllSpz();
+    when(seedPlanZoneRepository.findAllByGeneticClassCode_AndVegetationCode_id('A', vegCode))
+        .thenReturn(spzList);
+
+    List<SeedPlanZoneCode> spzCodeEntityList = List.of(spzCode1, spzCode2, spzCode3, spzCode4);
+    List<String> spzCodeList =
+        spzList.stream().map(spz -> spz.getSeedPlanZoneCode().getSpzCode()).toList();
+
+    when(seedPlanZoneCodeRepository.findBySpzCodeIn(spzCodeList)).thenReturn(spzCodeEntityList);
+
+    List<SpzDto> testList = areaOfUseService.getSpzByVegCode(vegCode);
 
     for (int i = 0; i < spzCodeEntityList.size(); i++) {
       assertEquals(spzCodeEntityList.get(i).getSpzCode(), testList.get(i).getCode());
@@ -57,11 +70,12 @@ public class AreaOfUseServiceTest {
   @Test
   @DisplayName("Get spz list should be able to throw encountered exception")
   void getSpzList_canThrowException() {
-    when(testedPtAreaOfUseSpzRepository.findAllDistinctSpz())
+    when(seedPlanZoneRepository.findAllByGeneticClassCode_AndVegetationCode_id(any(), any()))
         .thenThrow(
             new JDBCConnectionException(
                 "Oracle DB is down", new SQLException("Threatened by postgres", "Scared", 0)));
 
-    assertThrows(JDBCConnectionException.class, () -> areaOfUseService.getAllSpz());
+    String vegCode = "FDC";
+    assertThrows(JDBCConnectionException.class, () -> areaOfUseService.getSpzByVegCode(vegCode));
   }
 }
