@@ -658,12 +658,12 @@ public class SeedlotService {
 
     setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
-    setSeedlotStatus(seedlot, statusOnSuccess);
-
     // Only set declaration info for pending seedlots
     if (currentSeedlotStauts.equals("PND")) {
       setSeedlotDeclaredInfo(seedlot);
     }
+
+    setSeedlotStatus(seedlot, statusOnSuccess);
 
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
@@ -880,12 +880,11 @@ public class SeedlotService {
   private void setSeedlotDeclaredInfo(Seedlot seedlot) {
     String userId = loggedUserService.getLoggedUserId();
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    LocalDateTime curDateTime = LocalDateTime.now();
     seedlot.setDeclarationOfTrueInformationUserId(userId);
-    seedlot.setDeclarationOfTrueInformationTimestamp(curDateTime);
+    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
 
     SparLog.info(
-        "Declaration data set, for {} for user {} at {}",
+        "Declaration data set, for seedlot {} for user {} at {}",
         seedlot.getId(),
         seedlot.getDeclarationOfTrueInformationUserId(),
         dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp())

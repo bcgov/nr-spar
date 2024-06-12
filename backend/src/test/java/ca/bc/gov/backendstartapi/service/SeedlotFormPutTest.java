@@ -466,6 +466,9 @@ class SeedlotFormPutTest {
 
     when(loggedUserService.getLoggedUserId()).thenReturn("meatball@Pasta");
 
+    LocalDateTime mockLocalDateTime = LocalDateTime.parse("2024-01-01T00:00:00.000");
+    when(LocalDateTime.now()).thenReturn(mockLocalDateTime);
+
     when(seedlotSeedPlanZoneRepository.saveAll(any())).thenReturn(List.of());
 
     SeedlotStatusResponseDto scDto =
@@ -534,5 +537,12 @@ class SeedlotFormPutTest {
     assertEquals(oracleOrchardRet.becSubzoneCode(), seedlot.getBgcSubzoneCode());
     assertEquals(oracleOrchardRet.variant(), seedlot.getVariant());
     assertEquals(oracleOrchardRet.becVersionId(), seedlot.getBecVersionId());
+    // Declared Seedlot Value
+    assertEquals(
+        loggedUserService.getLoggedUserId(),
+        seedlot.getDeclarationOfTrueInformationUserId());
+    assertEquals(
+        mockLocalDateTime,
+        seedlot.getDeclarationOfTrueInformationTimestamp());
   }
 }
