@@ -24,6 +24,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
@@ -252,6 +253,8 @@ public class SeedlotService {
 
     seedlotDto.setSeedlot(seedlotEntity);
 
+    fillPrimarySpu(seedlotDto);
+
     SparLog.info("Finding associated seedlot SPZs for seedlot {}", seedlotNumber);
 
     List<SeedlotSeedPlanZoneEntity> spzList =
@@ -290,6 +293,50 @@ public class SeedlotService {
 
     seedlotDto.setAdditionalSpzList(additionalSpzList);
     return seedlotDto;
+  }
+
+  /**
+   * Find spu data from oracle and set it in the dto.
+   *
+   * @param seedlotDto the dto to set data in.
+   */
+  private void fillPrimarySpu(SeedlotDto seedlotDto) {
+    Seedlot seedlot = seedlotDto.getSeedlot();
+    String seedlotNumber = seedlot.getId();
+
+    SparLog.info("Finding primary SPU data for seedlot {}", seedlotNumber);
+
+    Optional<SeedlotOrchard> optionalSeedlotOrchard =
+        seedlotOrchardService.getPrimarySeedlotOrchard(seedlotNumber);
+
+    // Do nothing if this seedlot does not have a primary orchard
+    if (optionalSeedlotOrchard.isEmpty()) {
+      SparLog.info("No seedlot orchard found for seedlot: {}", seedlotNumber);
+      return;
+    }
+
+    String orchardId = optionalSeedlotOrchard.get().getOrchardId();
+
+    SparLog.info("Seedlot {} has primary orchard {}", seedlotNumber, orchardId);
+
+    // Find the active SPU id associated with this seedlot ochard
+    Optional<ActiveOrchardSpuEntity> optActiveSpu = orchardService.findSpuIdByOrchard(orchardId);
+
+    if (optActiveSpu.isEmpty()) {
+      SparLog.info("No active spu found for orchard id: {}", orchardId);
+      return;
+    }
+
+    Integer spuId = optActiveSpu.get().getSeedPlanningUnitId();
+
+    Optional<SpuDto> optSpuDto = oracleApiProvider.getSpuById(spuId);
+
+    if (optSpuDto.isEmpty()) {
+      SparLog.info("Cannot find SpuDto from Oracle for spu ", spuId);
+      return;
+    }
+
+    seedlotDto.setPrimarySpu(optSpuDto.get());
   }
 
   /**
