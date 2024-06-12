@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
@@ -466,9 +467,6 @@ class SeedlotFormPutTest {
 
     when(loggedUserService.getLoggedUserId()).thenReturn("meatball@Pasta");
 
-    LocalDateTime mockLocalDateTime = LocalDateTime.parse("2024-01-01T00:00:00.000");
-    when(LocalDateTime.now()).thenReturn(mockLocalDateTime);
-
     when(seedlotSeedPlanZoneRepository.saveAll(any())).thenReturn(List.of());
 
     SeedlotStatusResponseDto scDto =
@@ -541,8 +539,8 @@ class SeedlotFormPutTest {
     assertEquals(
         loggedUserService.getLoggedUserId(),
         seedlot.getDeclarationOfTrueInformationUserId());
-    assertEquals(
-        mockLocalDateTime,
-        seedlot.getDeclarationOfTrueInformationTimestamp());
+    assertTrue(
+        LocalDateTime.now().minusSeconds(15L).isBefore(
+            seedlot.getDeclarationOfTrueInformationTimestamp()));
   }
 }
