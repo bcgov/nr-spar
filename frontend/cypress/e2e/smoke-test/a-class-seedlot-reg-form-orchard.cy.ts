@@ -10,6 +10,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       gameteSubtitle: string;
       pollenTitle: string;
       pollenSubtitle: string;
+      pollenError: string;
+      pollenHelperText: string;
     }
   };
 
@@ -122,10 +124,18 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('be.checked');
   });
 
-  it('check and change pollen information', () => {
+  it('check pollen information', () => {
     cy.get('#pollen-contam-no')
       .should('be.checked');
 
+    cy.get('#orchard-breading-perc')
+      .should('not.be.visible');
+
+    cy.get('#orchard-is-regional')
+      .should('not.be.visible');
+  });
+
+  it('change pollen information', () => {
     cy.get('#pollen-contam-yes')
       .check({ force: true });
 
@@ -140,5 +150,51 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-is-regional')
       .should('be.checked');
+
+    // Check pollen breeding % error msg
+    cy.get('#orchard-breading-perc')
+      .clear()
+      .type('-1')
+      .blur();
+
+    cy.get('#orchard-breading-perc-error-msg')
+      .should('have.text', regFormData.orchard.pollenError);
+
+    cy.get('#orchard-breading-perc')
+      .clear()
+      .type('101')
+      .blur();
+
+    cy.get('#orchard-breading-perc-error-msg')
+      .should('have.text', regFormData.orchard.pollenError);
+
+    cy.get('#orchard-breading-perc')
+      .clear()
+      .type('21.1576')
+      .blur();
+
+    cy.get('#orchard-breading-perc-error-msg')
+      .should('have.text', regFormData.orchard.pollenError);
+
+    // Check '+' and '-' buttons for pollen breeding %
+    cy.get('#orchard-breading-perc')
+      .clear()
+      .type('5')
+      .blur();
+
+    cy.get('#orchard-breading-perc-helper-text')
+      .should('have.text', regFormData.orchard.pollenHelperText);
+
+    cy.get(`button.${prefix}number__control-btn[title="Increment number"]`)
+      .click();
+
+    cy.get('#orchard-breading-perc')
+      .should('have.value', '15');
+
+    cy.get(`button.${prefix}number__control-btn[title="Decrement number"]`)
+      .click();
+
+    cy.get('#orchard-breading-perc')
+      .should('have.value', '5');
   });
 });
