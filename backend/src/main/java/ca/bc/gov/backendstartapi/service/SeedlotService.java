@@ -238,7 +238,7 @@ public class SeedlotService {
    * Retrieve a single seedlot information.
    *
    * @param seedlotNumber the seedlot number of the seedlot to fetch the information
-   * @return A Seedlot entity.
+   * @return A {@link SeedlotDto}.
    * @throws SeedlotNotFoundException in case of errors.
    */
   public SeedlotDto getSingleSeedlotInfo(@NonNull String seedlotNumber) {

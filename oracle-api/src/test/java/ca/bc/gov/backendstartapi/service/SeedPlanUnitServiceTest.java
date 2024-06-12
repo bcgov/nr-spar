@@ -36,7 +36,6 @@ public class SeedPlanUnitServiceTest {
   void getSpuDtoById__shouldSucceed() {
     Integer spuId = 5000;
     Integer spzId = 7000;
-    String spzCode = "M";
 
     SeedPlanUnit spu = new SeedPlanUnit();
     spu.setSeedPlanUnitId(spuId);
@@ -47,6 +46,8 @@ public class SeedPlanUnitServiceTest {
     SeedPlanZone spz = new SeedPlanZone();
     spz.setSeedPlanZoneId(spzId);
     SeedPlanZoneCode spzCodeEntity = new SeedPlanZoneCode();
+
+    String spzCode = "M";
     spzCodeEntity.setSpzCode(spzCode);
     spz.setSeedPlanZoneCode(spzCodeEntity);
 

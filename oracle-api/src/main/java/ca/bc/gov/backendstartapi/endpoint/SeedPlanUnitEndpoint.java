@@ -29,7 +29,7 @@ public class SeedPlanUnitEndpoint {
   }
 
   /**
-   * Retrieve a SPU object with a given SPU ID
+   * Retrieve a SPU object with a given SPU ID.
    *
    * @return an Optional {@link SpuDto} with all found result
    */
