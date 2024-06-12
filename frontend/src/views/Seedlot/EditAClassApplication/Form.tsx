@@ -58,7 +58,8 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
   const seedlotQuery = useQuery({
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
-    enabled: vegCodeQuery.isFetched
+    enabled: vegCodeQuery.isFetched,
+    select: (data) => data.seedlot
   });
 
   useEffect(() => {

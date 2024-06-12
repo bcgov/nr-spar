@@ -53,10 +53,10 @@ class GeneticClassEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType("application/json"))
-        .andExpect(jsonPath("$[0].code").value(firstMethod.code()))
-        .andExpect(jsonPath("$[0].description").value(firstMethod.description()))
-        .andExpect(jsonPath("$[1].code").value(secondMethod.code()))
-        .andExpect(jsonPath("$[1].description").value(secondMethod.description()))
+        .andExpect(jsonPath("$[0].code").value(firstMethod.getCode()))
+        .andExpect(jsonPath("$[0].description").value(firstMethod.getDescription()))
+        .andExpect(jsonPath("$[1].code").value(secondMethod.getCode()))
+        .andExpect(jsonPath("$[1].description").value(secondMethod.getDescription()))
         .andReturn();
   }
 

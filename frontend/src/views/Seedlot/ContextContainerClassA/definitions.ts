@@ -6,6 +6,7 @@ import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/Orchar
 import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 export type ParentTreeStepDataObj = {
   tableRowData: RowDataDictType, // table row data used in Cone & Pollen and the SMP Success tabs
@@ -56,4 +57,24 @@ export type RegFormProps = {
 
 export type ClientAgenciesByCode = {
   [key: string]: MultiOptionsObj
+};
+
+export type AreaOfUseDataType = {
+  primarySpz: OptionsInputType,
+  additionalSpzList: OptionsInputType[],
+  minElevation: StringInputType,
+  maxElevation: StringInputType,
+  minLatDeg: StringInputType,
+  maxLatDeg: StringInputType,
+  minLatMinute: StringInputType,
+  maxLatMinute: StringInputType,
+  minLatSec: StringInputType,
+  maxLatSec: StringInputType,
+  minLongDeg: StringInputType,
+  maxLongDeg: StringInputType,
+  minLongMinute: StringInputType,
+  maxLongMinute: StringInputType,
+  minLongSec: StringInputType,
+  maxLongSec: StringInputType,
+  comment: StringInputType
 };

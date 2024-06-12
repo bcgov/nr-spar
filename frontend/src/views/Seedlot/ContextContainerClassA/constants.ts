@@ -1,9 +1,11 @@
+import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
   CollectionFormSubmitType, ExtractionFormSubmitType, InterimFormSubmitType, OrchardFormSubmitType,
   SingleOwnerFormSubmitType
 } from '../../../types/SeedlotType';
-import { ProgressIndicatorConfig, StepMap } from './definitions';
+import { getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
+import { AreaOfUseDataType, ProgressIndicatorConfig, StepMap } from './definitions';
 
 export const MAX_EDIT_BEFORE_SAVE = 5;
 
@@ -151,4 +153,24 @@ export const emptyExtractionStep: ExtractionFormSubmitType = {
   storageLocnCode: '',
   temporaryStrgStartDate: '',
   temporaryStrgEndDate: ''
+};
+
+export const initialAreaOfUseData: AreaOfUseDataType = {
+  primarySpz: getOptionsInputObj('area-of-use-primary-spz', EmptyMultiOptObj),
+  additionalSpzList: [],
+  minElevation: getStringInputObj('area-of-use-min-elevation', ''),
+  maxElevation: getStringInputObj('area-of-use-max-elevation', ''),
+  minLatDeg: getStringInputObj('area-of-use-min-lat-deg', ''),
+  maxLatDeg: getStringInputObj('area-of-use-max-lat-deg', ''),
+  minLatMinute: getStringInputObj('area-of-use-min-lat-minute', ''),
+  maxLatMinute: getStringInputObj('area-of-use-max-lat-minute', ''),
+  minLatSec: getStringInputObj('area-of-use-min-lat-second', ''),
+  maxLatSec: getStringInputObj('area-of-use-max-lat-second', ''),
+  minLongDeg: getStringInputObj('area-of-use-min-long-deg', ''),
+  maxLongDeg: getStringInputObj('area-of-use-max-long-deg', ''),
+  minLongMinute: getStringInputObj('area-of-use-min-long-minute', ''),
+  maxLongMinute: getStringInputObj('area-of-use-max-long-minute', ''),
+  minLongSec: getStringInputObj('area-of-use-min-long-sec', ''),
+  maxLongSec: getStringInputObj('area-of-use-max-long-sec', ''),
+  comment: getStringInputObj('area-of-use-comment', '')
 };
