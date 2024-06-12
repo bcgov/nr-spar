@@ -232,4 +232,17 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#orchard-breading-perc')
       .should('have.value', '5');
   });
+
+  it('check complete checkmark on progress bar', () => {
+    // Press next button
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Next')
+      .click();
+
+    // Check svg with complete checkmark on Step 3
+    cy.get('ul.spar-seedlot-reg-progress-bar li')
+      .eq(4)
+      .should('have.class', `${prefix}--progress-step--complete`);
+  });
 });
