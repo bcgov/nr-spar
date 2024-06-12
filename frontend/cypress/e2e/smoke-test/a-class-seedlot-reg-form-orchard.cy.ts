@@ -6,6 +6,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     orchard: {
       title: string;
       subtitle: string;
+      singleOrchardError: string;
+      doubleOrchardError: string;
+      additionalOrchardLabel: string;
       gameteTitle: string;
       gameteSubtitle: string;
       pollenTitle: string;
@@ -68,6 +71,130 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .eq(2)
       .should('have.text', regFormData.orchard.pollenSubtitle);
   });
+
+  it('check orchard dropdown section', () => {
+    cy.get('.orchard-row')
+      .find(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+      .click();
+
+    cy.get('.orchard-row')
+      .find('ul li')
+      .as('orchardDropdown')
+      .eq(1)
+      .click();
+
+    // Go to next step to get error msg
+    cy.get('.seedlot-registration-progress')
+      .find(`button.${prefix}--progress-step-button`)
+      .as('progressBar')
+      .contains('Parent tree and SMP')
+      .click();
+
+    cy.get('@progressBar')
+      .contains('Orchard')
+      .click();
+
+    cy.get('.orchard-row')
+      .find(`button.${prefix}--list-box__menu-icon[title="Clear selected item"]`)
+      .as('cancelOrchard')
+      .click();
+
+    // Check change orchard modal is visible
+    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
+      .find(`h3.${prefix}--modal-header__heading`)
+      .should('have.text', regFormData.orchard.singleOrchardError);
+
+    // Check 'Cancel' button of change orchard modal
+    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
+      .find(`button.${prefix}--btn`)
+      .contains('Cancel')
+      .click();
+
+    cy.get('#orchard-combobox-0')
+      .should('have.value', '140 - MT. NEWTON - S - PRD');
+
+    // Check 'Change orchard' button of change orchard modal
+    cy.get('@cancelOrchard')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
+      .find(`button.${prefix}--btn`)
+      .contains('Change orchard')
+      .click();
+
+    cy.get('#orchard-combobox-0')
+      .should('have.value', '');
+
+    // Add additional orchard
+    cy.get('.seedlot-orchard-add-orchard')
+      .find('button')
+      .contains('Add additional orchard')
+      .click();
+
+    cy.get('.orchard-row')
+      .eq(1)
+      .find('label')
+      .should('have.text', regFormData.orchard.additionalOrchardLabel);
+
+    cy.get('.orchard-row')
+      .eq(1)
+      .find(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+      .click();
+
+    cy.get('.orchard-row')
+      .eq(1)
+      .find('ul li')
+      .eq(5)
+      .click();
+
+    // Delete additional orchard
+    cy.get('.seedlot-orchard-add-orchard')
+      .find('button')
+      .contains('Delete additional orchard')
+      .as('deleteOrchard')
+      .click();
+
+    // Check delete orchard modal is visible
+    cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
+      .find(`h3.${prefix}--modal-header__heading`)
+      .should('have.text', regFormData.orchard.doubleOrchardError);
+
+    // Check 'Cancel' button of change orchard modal
+    cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
+      .find(`button.${prefix}--btn`)
+      .contains('Cancel')
+      .click();
+
+    cy.get('#orchard-combobox-1')
+      .should('have.value', '198 - SAANICHTON - S - PRD');
+
+    cy.get('@deleteOrchard')
+      .click();
+
+    // Check 'Delete additional orchard' button of change orchard modal
+    cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
+      .find(`button.${prefix}--btn`)
+      .contains('Delete additional orchard')
+      .click();
+
+    cy.get('#orchard-combobox-1')
+      .should('have.value', '');
+  });
+
+  // it('check linkage between orchard and parent tree step', () => {
+  //   cy.get('.orchard-row')
+  //     .find(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+  //     .click();
+
+  //   cy.get('#downshift-99-item-1')
+  //     .click();
+  // });
 
   it('check default gamete information', () => {
     cy.get('#seedlot-species-text-input')
