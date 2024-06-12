@@ -117,6 +117,8 @@ public class SeedlotService {
 
   private final ParentTreeService parentTreeService;
 
+  private final TscAdminService tscAdminService;
+
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
 
@@ -594,10 +596,18 @@ public class SeedlotService {
 
     setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
-    setParentTreeContribution(
-        seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+    if (!isTscAdmin) {
+      setParentTreeContribution(
+          seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+      setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+    } else {
+      tscAdminService.updateSeedPlanZones(seedlot, form.seedlotReviewSeedPlanZones());
+      tscAdminService.updateElevationLatLong(seedlot, form.seedlotReviewElevationLatLong());
+      tscAdminService.updateSeedlotGeneticWorth(seedlot, form.seedlotReviewGeneticWorth());
 
-    setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+      // seedlot genetic worth - review next line
+      // seedlotGeneticWorthService.saveSeedlotFormStep5(Seedlot seedlot,)
+    }
 
     setSeedlotStatus(seedlot, statusOnSuccess);
 
