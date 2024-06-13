@@ -26,7 +26,7 @@ With that you should be able to get:
 - Backend service up and running, including all migrations
 - Schema Spy updated files inside `schemaspy` directory.
 
-Now open up the file `schemaspy/index.html` on your browser and enjoy :)
+Now open up the file `schemaspy/output/spar/index.html` on your browser and enjoy :)
 
 ## Config file
 

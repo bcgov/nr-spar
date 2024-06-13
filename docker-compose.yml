@@ -133,3 +133,5 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      backend:
+        condition: service_healthy
