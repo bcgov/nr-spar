@@ -108,18 +108,22 @@ class database_connection(object):
         print("TEMP TABLE {} created: {}".format(table_name, query) )
         self.conn.execute(text(query), None)
 
-    def execute_upsert(self, dataframe:object, table_name:str, table_pk:str, db_type: str) -> int:
+    def execute_upsert(self, dataframe:object, table_name:str, table_pk:str, db_type: str, db_config:object) -> int:
         if db_type=="POSTGRES":
-            n = 1000
+            if db_config["max_rows_upsert"]>0:
+                # Splitting dataframe in small chunks to improve performance
+                n = db_config['max_rows_upsert'] 
+                list_df = numpy.array_split(dataframe, math.ceil(len(dataframe)/n))
+                logger.debug(f"Dataframe being processed into Postgres by chunks of {n} rows.")
+            else:
+                list_df = [dataframe]
+
             i = 0
-            k = 0 
-            list_df = numpy.array_split(dataframe, math.ceil(len(dataframe)/n))
-            logger.debug(f"Dataframe being processed into Postgres by chunks of {n} rows.")
-            # Splitting dataframe in small chunks to improve performance
+            k = 0
             for df in list_df:
                 k = k + 1
                 logger.debug(f"Dataframe being processed into Postgres chunks {k} / {len(list_df)}.")
-                i = i + self.bulk_upsert_postgres(dataframe=df,table_name=table_name,table_pk=table_pk,if_data_exists="append",index_data=False)
+                i = i + self.bulk_upsert_postgres(dataframe=df,table_name=table_name,table_pk=table_pk, version_column=db_config["version_column"])
 
             return i
         
@@ -129,16 +133,23 @@ class database_connection(object):
         
         return None
 
-    def bulk_upsert_postgres(self, dataframe:object, table_name:str, table_pk:str, if_data_exists: str, index_data:bool ) -> int:
+    def bulk_upsert_postgres(self, dataframe:object, table_name:str, table_pk:str, version_column:str) -> int:
         onconflictstatement = ""
         logger.debug('Starting UPSERT statement in Postgres Database')
-        table_clean = clean_table_from_schema(table_name)
+        table_clean = clean_table_from_schema(table_name) # Gathe only table name, instead schema.table
+        version_sttm = ""
+        if version_column in dataframe:
+            version_sttm = f",{version_column}={table_clean}.{version_column} + 1 "
+
         if table_pk != "":
             columnspk = table_pk.split(",")
-            df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation   
+            df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation            
+            if version_column in dataframe:
+                df2 = dataframe.drop(columns=version_column)  # Remove Version Column from the column lists for SET operation
+            
             onconflictstatement = f"""
             ON CONFLICT ({table_pk})               
-            DO UPDATE SET {' , '.join(df2.columns.values + '= EXCLUDED.'+df2.columns.values)} 
+            DO UPDATE SET {' , '.join(df2.columns.values + '= EXCLUDED.'+df2.columns.values)} {version_sttm}
             WHERE {' OR '.join(table_clean+"."+df2.columns.values + '!= EXCLUDED.'+df2.columns.values)}
             """
        

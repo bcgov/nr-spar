@@ -195,7 +195,8 @@ def execute_process(base_dir, track_db_conn, track_db_schema, process, oracle_co
                     stored_metrics['rows_target_processed'] = target_db_conn.execute_upsert(dataframe=table_df, 
                                                                         table_name=process["target_table"],
                                                                         table_pk=process["target_primary_key"], 
-                                                                        db_type=process["target_db_type"])
+                                                                        db_type=process["target_db_type"],
+                                                                        db_config = target_config)
 
                     # READ FROM TEMP TABLE:
                     logger.debug('Target Database data load finished')
