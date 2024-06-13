@@ -93,7 +93,8 @@ const SeedlotDetails = () => {
       if (err.response?.status === 404) {
         navigate('/404');
       }
-    }
+    },
+    select: (data) => data.seedlot
   });
 
   useEffect(() => {
@@ -197,7 +198,11 @@ const SeedlotDetails = () => {
                   applicant={applicantData}
                   isFetching={forestClientQuery?.isFetching}
                 />
-                <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
+                {
+                  seedlotData?.seedlotStatus === 'Submitted'
+                    ? <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
+                    : null
+                }
               </TabPanel>
             </TabPanels>
           </Tabs>

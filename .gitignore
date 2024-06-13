@@ -203,3 +203,6 @@ dist
 # Data
 sync/data/
 **/__pycache__
+
+# Schema Spy output
+schemaspy/output

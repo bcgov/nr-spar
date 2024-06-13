@@ -10,9 +10,11 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
@@ -57,6 +59,8 @@ import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -238,14 +242,56 @@ public class SeedlotService {
    * @return A Seedlot entity.
    * @throws SeedlotNotFoundException in case of errors.
    */
-  public Seedlot getSingleSeedlotInfo(@NonNull String seedlotNumber) {
+  public SeedlotDto getSingleSeedlotInfo(@NonNull String seedlotNumber) {
     SparLog.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
-    Seedlot seedlotInfo =
+    Seedlot seedlotEntity =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
-    return seedlotInfo;
+
+    SeedlotDto seedlotDto = new SeedlotDto();
+
+    seedlotDto.setSeedlot(seedlotEntity);
+
+    SparLog.info("Finding associated seedlot SPZs for seedlot {}", seedlotNumber);
+
+    List<SeedlotSeedPlanZoneEntity> spzList =
+        seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber);
+
+    SparLog.info("Found {} SPZs for seedlot {}", spzList.size(), seedlotNumber);
+
+    SeedPlanZoneDto primarySpz = null;
+
+    List<SeedPlanZoneDto> additionalSpzList = new ArrayList<>();
+
+    if (spzList.size() > 0) {
+      List<SeedlotSeedPlanZoneEntity> primarySpzList =
+          spzList.stream().filter(spz -> spz.getIsPrimary()).toList();
+
+      if (primarySpzList.size() > 0) {
+        SeedlotSeedPlanZoneEntity primarySpzEntity = primarySpzList.get(0);
+        primarySpz =
+            new SeedPlanZoneDto(
+                primarySpzEntity.getSpzCode(),
+                primarySpzEntity.getSpzDescription(),
+                primarySpzEntity.getIsPrimary());
+      }
+
+      additionalSpzList =
+          spzList.stream()
+              .filter(spz -> !spz.getIsPrimary())
+              .map(
+                  spz ->
+                      new SeedPlanZoneDto(
+                          spz.getSpzCode(), spz.getSpzDescription(), spz.getIsPrimary()))
+              .toList();
+    }
+
+    seedlotDto.setPrimarySpz(primarySpz);
+
+    seedlotDto.setAdditionalSpzList(additionalSpzList);
+    return seedlotDto;
   }
 
   /**
@@ -612,6 +658,11 @@ public class SeedlotService {
 
     setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
+    // Only set declaration info for pending seedlots
+    if (currentSeedlotStauts.equals("PND")) {
+      setSeedlotDeclaredInfo(seedlot);
+    }
+
     setSeedlotStatus(seedlot, statusOnSuccess);
 
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
@@ -824,6 +875,20 @@ public class SeedlotService {
       throw new SeedlotStatusNotFoundException();
     }
     seedlot.setSeedlotStatus(sseOptional.get());
+  }
+
+  private void setSeedlotDeclaredInfo(Seedlot seedlot) {
+    String userId = loggedUserService.getLoggedUserId();
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    seedlot.setDeclarationOfTrueInformationUserId(userId);
+    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
+
+    SparLog.info(
+        "Declaration data set, for seedlot {} for user {} at {}",
+        seedlot.getId(),
+        seedlot.getDeclarationOfTrueInformationUserId(),
+        dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp())
+    );
   }
 
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {

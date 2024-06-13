@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import BigNumber from 'bignumber.js';
 import { AxiosError } from 'axios';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
@@ -20,12 +19,14 @@ import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
 import {
   CollectionFormSubmitType, ExtractionFormSubmitType, InterimFormSubmitType,
-  OrchardFormSubmitType, ParentTreeFormSubmitType, SeedlotAClassSubmitType, SingleOwnerFormSubmitType
+  OrchardFormSubmitType, ParentTreeFormSubmitType, RichSeedlotType,
+  SeedlotAClassSubmitType, SingleOwnerFormSubmitType
 } from '../../../types/SeedlotType';
 import { dateStringToISO } from '../../../utils/DateUtils';
 import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
+import { getOptionsInputObj } from '../../../utils/FormInputUtils';
 
 import {
   emptyCollectionStep, emptyExtractionStep, emptyInterimStep,
@@ -33,6 +34,7 @@ import {
 } from './constants';
 import {
   AllStepData,
+  AreaOfUseDataType,
   ClientAgenciesByCode,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
@@ -124,11 +126,14 @@ export const initOwnershipState = (
     ownerState.ownerAgency.value = clientData && !useDefault
       ? clientData[curOwner.ownerClientNumber]
       : defaultAgency;
-    ownerState.useDefaultAgencyInfo.value = ownerState.ownerAgency.value.code === defaultAgencyNumber;
+    ownerState.useDefaultAgencyInfo.value = ownerState
+      .ownerAgency.value.code === defaultAgencyNumber;
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
     if (methodsOfPayment && fundingSource) {
-      const payment = methodsOfPayment.filter((data: MultiOptionsObj) => data.code === curOwner.methodOfPaymentCode)[0];
-      const fundSource = fundingSource.filter((data: MultiOptionsObj) => data.code === curOwner.sparFundSrceCode)[0];
+      const payment = methodsOfPayment
+        .filter((data: MultiOptionsObj) => data.code === curOwner.methodOfPaymentCode)[0];
+      const fundSource = fundingSource
+        .filter((data: MultiOptionsObj) => data.code === curOwner.sparFundSrceCode)[0];
       ownerState.methodOfPayment.value = payment;
       ownerState.fundingSource.value = fundSource;
     }
@@ -212,11 +217,16 @@ export const initOrchardState = (
   gameticMethodology?: Array<MultiOptionsObj>
 ): OrchardForm => (
   {
-    orchards: convertToOrchardsType(possibleOrchards, orchardStepData.primaryOrchardId, orchardStepData.secondaryOrchardId),
+    orchards: convertToOrchardsType(
+      possibleOrchards,
+      orchardStepData.primaryOrchardId,
+      orchardStepData.secondaryOrchardId
+    ),
     femaleGametic: {
       id: 'orchard-female-gametic',
       value: gameticMethodology
-        ? gameticMethodology.filter((data) => data.code === orchardStepData.femaleGameticMthdCode)[0]
+        ? gameticMethodology
+          .filter((data) => data.code === orchardStepData.femaleGameticMthdCode)[0]
         : EmptyMultiOptObj,
       isInvalid: false
     },
@@ -658,7 +668,10 @@ export const verifyExtractionStepCompleteness = (
 /**
  * Check if all steps are completed
  */
-export const checkAllStepsCompletion = (status: ProgressIndicatorConfig, isExtractionStepComplete: boolean) => {
+export const checkAllStepsCompletion = (
+  status: ProgressIndicatorConfig,
+  isExtractionStepComplete: boolean
+) => {
   let allStepsComplete = true;
 
   Object.keys(status).forEach((key: string) => {
@@ -683,10 +696,13 @@ export const convertCollection = (collectionData: CollectionForm): CollectionFor
   volPerContainer: +collectionData.volumePerContainers.value,
   clctnVolume: +collectionData.volumeOfCones.value,
   seedlotComment: collectionData.comments.value,
-  coneCollectionMethodCodes: collectionData.selectedCollectionCodes.value.map((code) => parseInt(code, 10))
+  coneCollectionMethodCodes: collectionData
+    .selectedCollectionCodes.value.map((code) => parseInt(code, 10))
 });
 
-export const convertOwnership = (ownershipData: Array<SingleOwnerForm>): Array<SingleOwnerFormSubmitType> => (
+export const convertOwnership = (
+  ownershipData: Array<SingleOwnerForm>
+): Array<SingleOwnerFormSubmitType> => (
   ownershipData.map((owner: SingleOwnerForm) => ({
     ownerClientNumber: owner.ownerAgency.value.code,
     ownerLocnCode: owner.ownerCode.value,
@@ -707,7 +723,10 @@ export const convertInterim = (interimData: InterimForm): InterimFormSubmitType 
   intermFacilityCode: interimData.facilityType.value
 });
 
-export const convertOrchard = (orchardData: OrchardForm, parentTreeRows: RowDataDictType): OrchardFormSubmitType => {
+export const convertOrchard = (
+  orchardData: OrchardForm,
+  parentTreeRows: RowDataDictType
+): OrchardFormSubmitType => {
   const deDuppedOrchards = processOrchards(orchardData.orchards);
   let primaryOrchardId: string = '';
   let secondaryOrchardId = null;
@@ -735,7 +754,10 @@ export const convertOrchard = (orchardData: OrchardForm, parentTreeRows: RowData
   });
 };
 
-export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlotNumber: string): Array<ParentTreeFormSubmitType> => {
+export const convertParentTree = (
+  parentTreeData: ParentTreeStepDataObj,
+  seedlotNumber: string
+): Array<ParentTreeFormSubmitType> => {
   const parentTreePayload: Array<ParentTreeFormSubmitType> = [];
 
   // Each key is a parent tree number
@@ -757,7 +779,10 @@ export const convertParentTree = (parentTreeData: ParentTreeStepDataObj, seedlot
   return parentTreePayload;
 };
 
-export const convertSmpParentTree = (smpParentTreeData: ParentTreeStepDataObj, seedlotNumber: string): Array<ParentTreeFormSubmitType> => {
+export const convertSmpParentTree = (
+  smpParentTreeData: ParentTreeStepDataObj,
+  seedlotNumber: string
+): Array<ParentTreeFormSubmitType> => {
   const { allParentTreeData } = smpParentTreeData;
   const smpMixPayload: Array<ParentTreeFormSubmitType> = [];
 
@@ -774,10 +799,12 @@ export const convertSmpParentTree = (smpParentTreeData: ParentTreeStepDataObj, s
           coneCount: +smpParentTreeData.mixTabData[key].coneCount.value,
           pollenCount: +smpParentTreeData.mixTabData[key].pollenCount.value,
           smpSuccessPct: +smpParentTreeData.mixTabData[key].smpSuccessPerc.value,
-          nonOrchardPollenContamPct: +smpParentTreeData.mixTabData[key].nonOrchardPollenContam.value,
+          nonOrchardPollenContamPct: +smpParentTreeData
+            .mixTabData[key].nonOrchardPollenContam.value,
           amountOfMaterial: +smpParentTreeData.mixTabData[key].volume.value,
           proportion: +smpParentTreeData.mixTabData[key].proportion.value,
-          parentTreeGeneticQualities: smpParentTreeData.allParentTreeData[curParentTree].parentTreeGeneticQualities
+          parentTreeGeneticQualities: smpParentTreeData
+            .allParentTreeData[curParentTree].parentTreeGeneticQualities
         });
       }
     });
@@ -786,7 +813,9 @@ export const convertSmpParentTree = (smpParentTreeData: ParentTreeStepDataObj, s
   return smpMixPayload;
 };
 
-export const convertExtraction = (extractionData: ExtractionStorageForm): ExtractionFormSubmitType => ({
+export const convertExtraction = (
+  extractionData: ExtractionStorageForm
+): ExtractionFormSubmitType => ({
   extractoryClientNumber: extractionData.extraction.agency.value.code,
   extractoryLocnCode: extractionData.extraction.locationCode.value,
   extractionStDate: dateStringToISO(extractionData.extraction.startDate.value),
@@ -914,3 +943,80 @@ export const resDataToState = (
     )
   }
 );
+
+export const fillAreaOfUseData = (
+  seedlotData: RichSeedlotType,
+  areaOfUseData: AreaOfUseDataType
+): AreaOfUseDataType => {
+  const clonedAreaOfUse = structuredClone(areaOfUseData);
+  // Primary SPZ
+  if (seedlotData.primarySpz) {
+    clonedAreaOfUse.primarySpz.value.code = seedlotData.primarySpz.code;
+    clonedAreaOfUse.primarySpz.value.description = seedlotData.primarySpz.description;
+    clonedAreaOfUse.primarySpz.value.label = `${seedlotData.primarySpz.code} - ${seedlotData.primarySpz.description}`;
+  }
+  // Additional SPZs
+  if (seedlotData.additionalSpzList) {
+    clonedAreaOfUse.additionalSpzList = seedlotData.additionalSpzList.map((spz, index) => (
+      getOptionsInputObj(
+        `area-of-use-additional-spz-${index}`,
+        {
+          code: spz.code,
+          description: spz.description,
+          label: `${spz.code} - ${spz.description}`
+        }
+      )
+    ));
+  }
+  // Elevation
+  if (seedlotData.seedlot.elevationMin !== null) {
+    clonedAreaOfUse.minElevation.value = seedlotData.seedlot.elevationMin.toString();
+  }
+  if (seedlotData.seedlot.elevationMax !== null) {
+    clonedAreaOfUse.maxElevation.value = seedlotData.seedlot.elevationMax.toString();
+  }
+  // Lat
+  if (seedlotData.seedlot.latitudeDegMin !== null) {
+    clonedAreaOfUse.minLatDeg.value = seedlotData.seedlot.latitudeDegMin.toString();
+  }
+  if (seedlotData.seedlot.latitudeDegMax !== null) {
+    clonedAreaOfUse.maxLatDeg.value = seedlotData.seedlot.latitudeDegMax.toString();
+  }
+  if (seedlotData.seedlot.latitudeMinMin !== null) {
+    clonedAreaOfUse.minLatMinute.value = seedlotData.seedlot.latitudeMinMin.toString();
+  }
+  if (seedlotData.seedlot.latitudeMinMax !== null) {
+    clonedAreaOfUse.maxLatMinute.value = seedlotData.seedlot.latitudeMinMax.toString();
+  }
+  if (seedlotData.seedlot.latitudeSecMin !== null) {
+    clonedAreaOfUse.minLatSec.value = seedlotData.seedlot.latitudeSecMin.toString();
+  }
+  if (seedlotData.seedlot.latitudeSecMax !== null) {
+    clonedAreaOfUse.maxLatSec.value = seedlotData.seedlot.latitudeSecMax.toString();
+  }
+  // Long
+  if (seedlotData.seedlot.longitudeDegMin !== null) {
+    clonedAreaOfUse.minLongDeg.value = seedlotData.seedlot.longitudeDegMin.toString();
+  }
+  if (seedlotData.seedlot.longitudeDegMax !== null) {
+    clonedAreaOfUse.maxLongDeg.value = seedlotData.seedlot.longitudeDegMax.toString();
+  }
+  if (seedlotData.seedlot.longitudeMinMin !== null) {
+    clonedAreaOfUse.minLongMinute.value = seedlotData.seedlot.longitudeMinMin.toString();
+  }
+  if (seedlotData.seedlot.longitudeMinMax !== null) {
+    clonedAreaOfUse.maxLongMinute.value = seedlotData.seedlot.longitudeMinMax.toString();
+  }
+  if (seedlotData.seedlot.longitudeSecMin !== null) {
+    clonedAreaOfUse.minLongSec.value = seedlotData.seedlot.longitudeSecMin.toString();
+  }
+  if (seedlotData.seedlot.longitudeSecMax !== null) {
+    clonedAreaOfUse.maxLongSec.value = seedlotData.seedlot.longitudeSecMax.toString();
+  }
+  // Comment
+  if (seedlotData.seedlot.areaOfUseComment !== null) {
+    clonedAreaOfUse.comment.value = seedlotData.seedlot.areaOfUseComment;
+  }
+
+  return clonedAreaOfUse;
+};
