@@ -129,7 +129,7 @@ class database_connection(object):
         
         if db_type=="ORACLE":
             orcldataframe = convertTypesToOracle(dataframe)
-            return self.bulk_upsert_oracle(dataframe=orcldataframe, table_name=table_name,table_pk=table_pk)
+            return self.bulk_upsert_oracle(dataframe=orcldataframe, table_name=table_name,table_pk=table_pk, version_column=db_config["version_column"])
         
         return None
 
@@ -162,13 +162,15 @@ class database_connection(object):
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
     
-    def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str ) -> int:
+    def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str , version_column:str) -> int:
         onconflictstatement = ""
         logger.debug('Starting UPSERT statement in Oracle Database')
         i = 0
+        version_sttm = ''
+        if version_column in dataframe:
+            version_sttm = f",{version_column}={version_column} + 1 "
         for row in dataframe.itertuples():
             i = i + 1
-            logger.debug(f'---Including row {i}')
             params = {}
             for column in dataframe.columns.values:
                 params[column] = getattr(row,column)
@@ -180,6 +182,8 @@ class database_connection(object):
                     whStatement = f"""{whStatement}  AND  {column} = :p_{column}"""                
 
                 df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation 
+                if version_column in dataframe:
+                    df2 = dataframe.drop(columns=version_column)  # Remove table PK from the column lists for SET operation 
                 whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
                 for column in dataframe.columns.values:
                     params["s_"+column] = getattr(row,column)
@@ -188,7 +192,7 @@ class database_connection(object):
                 EXCEPTION
                 WHEN DUP_VAL_ON_INDEX THEN
                     UPDATE  {table_name} 
-                    SET {' , '.join(df2.columns.values + '= :s_'+df2.columns.values)} 
+                    SET {' , '.join(df2.columns.values + '= :s_'+df2.columns.values)} {version_sttm}
                     {whStatement} {whStatement2};"""
         
             sql_text = f""" 
