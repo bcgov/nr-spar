@@ -86,7 +86,7 @@ const BrowserRoutes: Array<RouteObject> = [
     )
   },
   {
-    path: ROUTES.REVIEW_SEEDLOTS,
+    path: ROUTES.TSC_SEEDLOTS_TABLE,
     element: (
       <ReviewSeedlots />
     )

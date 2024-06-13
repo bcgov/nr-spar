@@ -35,7 +35,7 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     image: 'TableSplit',
     header: 'Review Seedlots',
     description: 'Check all seedlots that are waiting for approval',
-    link: ROUTES.REVIEW_SEEDLOTS,
+    link: ROUTES.TSC_SEEDLOTS_TABLE,
     highlighted: false
   },
   unknown: {

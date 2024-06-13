@@ -29,7 +29,7 @@ const RecentSeedlots = () => {
         {
           isTscAdmin
             ? (
-              <IconButton className="std-card-button" kind="ghost" label="Go" align="bottom" onClick={() => { navigate(ROUTES.REVIEW_SEEDLOTS); }}>
+              <IconButton className="std-card-button" kind="ghost" label="Go" align="bottom" onClick={() => { navigate(ROUTES.TSC_SEEDLOTS_TABLE); }}>
                 <ArrowRight />
               </IconButton>
             )
