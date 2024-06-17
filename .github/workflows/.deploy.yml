@@ -124,6 +124,8 @@ jobs:
           - name: sync
             file: sync/openshift.deploy.yml
             overwrite: true
+            parameters:
+              -p TEST_MODE=${{ github.event_name == 'pull_request' && '1' || '0' }}
             # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.RUN_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
             # triggers: ('sync/')
 

@@ -26,7 +26,7 @@ jobs:
     with:
       markdown_links: |
         - [Frontend](https://${{ github.event.repository.name }}-${{ needs.init.outputs.mod-tag }}-frontend.apps.silver.devops.gov.bc.ca/)
-        - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/actuator/health)
+        - [Backend](https://${{ github.event.repository.name }}-${{ github.event.number }}-backend.apps.silver.devops.gov.bc.ca/swagger-ui/index.html)
         - [Oracle-API](https://${{ github.event.repository.name }}-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca/actuator/health)
 
   results:

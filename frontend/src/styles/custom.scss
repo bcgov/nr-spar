@@ -407,3 +407,8 @@ label.#{vars.$bcgov-prefix}--label--disabled {
 .no-padding {
   padding: 0;
 }
+
+.danger-tertiary-btn{
+  border-color: var(--#{vars.$bcgov-prefix}-button-danger-secondary, colors.$red-70);
+  color: var(--#{vars.$bcgov-prefix}-button-danger-secondary, colors.$red-70);
+}

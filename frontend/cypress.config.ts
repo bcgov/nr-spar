@@ -26,11 +26,12 @@ export default defineConfig({
       '**/edit-applicant-seedlot-info.cy.ts',
       '**/my-seedlots.cy.ts',
       '**/a-class-seedlot-reg-form-collection-interim.cy.ts',
+      '**/a-class-seedlot-reg-form-ownership.cy.ts',
       '**/a-class-seedlot-reg-form-orchard.cy.ts'
     ],
     chromeWebSecurity: false,
     retries: {
-      runMode: 4
+      runMode: 2
     },
     defaultCommandTimeout: TEN_SECONDS,
     video: true,
