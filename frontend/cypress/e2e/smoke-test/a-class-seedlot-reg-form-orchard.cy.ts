@@ -87,12 +87,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .eq(1)
       .click();
 
-    // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
-      .click();
-
     // Go to next step to get error msg
     cy.get('.seedlot-registration-progress')
       .find(`button.${prefix}--progress-step-button`)
@@ -100,15 +94,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    cy.get('.title-row')
-      .find('h2')
-      .should('have.text', 'Cone and pollen count and SMP data');
-
-    // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
-      .click();
+    // Wait for the table in Step 5 to load
+    cy.get('#parentTreeNumber');
 
     cy.get('@progressBar')
       .contains('Orchard')
@@ -174,12 +161,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .eq(5)
       .click();
 
-    // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
-      .click();
-
     // Go to next step to get error msg
     cy.get('.seedlot-registration-progress')
       .find(`button.${prefix}--progress-step-button`)
@@ -187,15 +168,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    cy.get('.title-row')
-      .find('h2')
-      .should('have.text', 'Cone and pollen count and SMP data');
-
-    // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
-      .click();
+    // Wait for the table in Step 5 to load
+    cy.get('#parentTreeNumber');
 
     cy.get('@progressBar')
       .contains('Orchard')
@@ -256,6 +230,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
+    // Wait for the table in Step 5 to load
+    cy.get('#parentTreeNumber');
+
     // Push first 5 parent tree number in an array
     for (let i = 0; i < 5; i += 1) {
       cy.get('.parent-tree-step-table-container-col')
@@ -267,12 +244,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
           firstParentTreeArray.push($number);
         });
     }
-
-    // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
-      .click();
 
     // Go back to 'Orchard'
     cy.get('@progressBar')
@@ -310,6 +281,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .as('progressBar')
       .contains('Parent tree and SMP')
       .click();
+
+    // Wait for the table in Step 5 to load
+    cy.get('#parentTreeNumber');
 
     // Push first 5 parent tree number in an array
     for (let i = 0; i < 5; i += 1) {
@@ -354,6 +328,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .as('progressBar')
       .contains('Parent tree and SMP')
       .click();
+
+    // Wait for the table in Step 5 to load
+    cy.get('#parentTreeNumber');
 
     // Get parent tree number in an array
     for (let i = 0; i < uniqueArray.length; i += 1) {
