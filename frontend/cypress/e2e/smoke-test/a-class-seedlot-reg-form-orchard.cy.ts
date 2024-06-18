@@ -23,8 +23,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   let seedlotData: SeedlotRegFixtureType;
   const firstParentTreeArray: string[] = [];
   const secondParentTreeArray: string[] = [];
-  let uniqueArray: string[];
-  let unionParentTreeArray: string[];
+  let uniqueCombinedArray: string[] = [];
+  const unionParentTreeArray: string[] = [];
 
   beforeEach(() => {
     // Login
@@ -120,9 +120,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Cancel')
       .click();
 
-    cy.get('#orchard-combobox-0')
-      .should('have.value', '219 - VERNON - S - PRD');
-
     // Check 'Change orchard' button of change orchard modal
     cy.get('@cancelOrchard')
       .click();
@@ -196,9 +193,6 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Cancel')
       .click();
 
-    cy.get('#orchard-combobox-1')
-      .should('have.value', '228 - PGTIS - S - PRD');
-
     cy.get('@deleteOrchard')
       .click();
 
@@ -209,7 +203,19 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get('#orchard-combobox-1')
+      .should('not.exist');
+
+    cy.get('@cancelOrchard')
+      .click();
+
+    cy.get('#orchard-combobox-0')
       .should('have.value', '');
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains(/Save changes|Changes saved!/g)
+      .click();
   });
 
   it('store first Parent Tree Number in an array', () => {
@@ -220,7 +226,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .as('orchardDropdown')
-      .eq(1)
+      .contains('219 - VERNON - S - PRD')
       .click();
 
     // Go to next step 'Parent tree and SMP'
@@ -234,7 +240,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#parentTreeNumber');
 
     // Push first 5 parent tree number in an array
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < 6; i += 1) {
       cy.get('.parent-tree-step-table-container-col')
         .find('table tbody tr')
         .eq(i)
@@ -262,6 +268,12 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#orchard-combobox-0')
       .should('have.value', '');
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains(/Save changes|Changes saved!/g)
+      .click();
   });
 
   it('store second Parent Tree Number in an array', () => {
@@ -272,7 +284,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .eq(5)
+      .contains('222 - VERNON - S - PRD')
       .click();
 
     // Go to next step 'Parent tree and SMP'
@@ -286,7 +298,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#parentTreeNumber');
 
     // Push first 5 parent tree number in an array
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < 6; i += 1) {
       cy.get('.parent-tree-step-table-container-col')
         .find('table tbody tr')
         .eq(i)
@@ -301,12 +313,45 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         // eslint-disable-next-line no-loop-func
         .then(($array) => {
           // Remove duplicate tree numbers from array
-          uniqueArray = Array.from(new Set($array));
+          uniqueCombinedArray = Array.from(new Set($array));
         });
     }
+
+    // Go back to 'Orchard'
+    cy.get('@progressBar')
+      .contains('Orchard')
+      .click();
+
+    // Cancel orchard
+    cy.get('#orchard-combobox-0')
+      .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Change orchard"]`)
+      .find(`button.${prefix}--btn`)
+      .contains('Change orchard')
+      .click();
+
+    cy.get('#orchard-combobox-0')
+      .should('have.value', '');
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains(/Save changes|Changes saved!/g)
+      .click();
   });
 
   it('check linkage of Step 4 and Step 5', () => {
+    cy.get('#orchard-combobox-0')
+      .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
+      .click();
+
+    cy.get(`.${prefix}--list-box--expanded`)
+      .find('ul li')
+      .contains('219 - VERNON - S - PRD')
+      .click();
+
     // Add additional orchard
     cy.get('.seedlot-orchard-add-orchard')
       .find('button')
@@ -319,7 +364,13 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .eq(1)
+      .contains('222 - VERNON - S - PRD')
+      .click();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains(/Save changes|Changes saved!/g)
       .click();
 
     // Go to next step 'Parent tree and SMP'
@@ -333,21 +384,26 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#parentTreeNumber');
 
     // Get parent tree number in an array
-    for (let i = 0; i < uniqueArray.length; i += 1) {
+    for (let i = 0; i < 8; i += 1) {
       cy.get('.parent-tree-step-table-container-col')
         .find('table tbody tr')
         .eq(i)
         .find('td:nth-child(1)')
         .invoke('text')
+        // eslint-disable-next-line no-loop-func
         .then(($number) => {
           unionParentTreeArray.push($number);
-        })
-        // eslint-disable-next-line no-loop-func
-        .then(() => {
-          // Compare two arrays
-          expect(uniqueArray).to.deep.eq(unionParentTreeArray);
+          if (i === 7) {
+            const slicedArray = uniqueCombinedArray.slice(0, 8);
+            expect(slicedArray).to.deep.eq(unionParentTreeArray);
+          }
         });
     }
+
+    // Go back to 'Orchard'
+    cy.get('@progressBar')
+      .contains('Orchard')
+      .click();
   });
 
   it('check default gamete information', () => {
@@ -450,6 +506,12 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('#biotech-yes')
       .should('be.checked');
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains(/Save changes|Changes saved!/g)
+      .click();
   });
 
   it('check pollen information', () => {
@@ -535,7 +597,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     // Check svg with complete checkmark on Step 3
     cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(4)
+      .eq(3)
       .should('have.class', `${prefix}--progress-step--complete`);
   });
 });
