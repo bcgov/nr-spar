@@ -10,7 +10,7 @@
     "@carbon/icons-react": "^11.9.0",
     "@carbon/pictograms-react": "^11.38.0",
     "@carbon/react": "^1.22.0",
-    "@tanstack/react-query": "^4.29.1",
+    "@tanstack/react-query": "^4.36.1",
     "@tanstack/react-query-devtools": "^4.29.1",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.0.0",
@@ -68,7 +68,7 @@
     "eslint-plugin-react": "^7.31.8",
     "eslint-plugin-react-hooks": "4.6.2",
     "fork-ts-checker-webpack-plugin": "9.0.2",
-    "jest-environment-jsdom": "^29.0.1",
+    "jest-environment-jsdom": "^29.7.0",
     "nyc": "^15.1.0",
     "playwright-webkit": "^1.43.0",
     "source-map-support": "^0.5.21",
@@ -79,7 +79,10 @@
     "ip@<1.1.9": "1.1.9",
     "ip@2.0.0": "2.0.1",
     "postcss": "^8.4.31",
-    "tar@<6.2.1": "6.2.1"
+    "tar@<6.2.1": "6.2.1",
+    "ws@<6.2.3": "6.2.3",
+    "ws@7.5.9": "7.5.10",
+    "ws@8.16.0": "8.17.1"
   },
   "repository": {
     "type": "git",
