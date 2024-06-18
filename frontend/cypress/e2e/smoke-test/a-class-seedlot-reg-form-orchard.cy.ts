@@ -239,7 +239,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Wait for the table in Step 5 to load
     cy.get('#parentTreeNumber');
 
-    // Push first 5 parent tree number in an array
+    // Push first 6 parent tree number in an array
     for (let i = 0; i < 6; i += 1) {
       cy.get('.parent-tree-step-table-container-col')
         .find('table tbody tr')
@@ -297,7 +297,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Wait for the table in Step 5 to load
     cy.get('#parentTreeNumber');
 
-    // Push first 5 parent tree number in an array
+    // Push first 6 parent tree number in an array
     for (let i = 0; i < 6; i += 1) {
       cy.get('.parent-tree-step-table-container-col')
         .find('table tbody tr')
@@ -307,7 +307,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         // eslint-disable-next-line no-loop-func
         .then(($number) => {
           secondParentTreeArray.push($number);
-          const combinedArray = (firstParentTreeArray.concat(secondParentTreeArray)).sort();
+          const combinedArray = (firstParentTreeArray.concat(secondParentTreeArray))
+            .sort((a: any, b: any) => a - b);
           return combinedArray;
         })
         // eslint-disable-next-line no-loop-func
@@ -343,6 +344,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('check linkage of Step 4 and Step 5', () => {
+    const lengthOfUnionArray = Math.max(6, (uniqueCombinedArray.length / 2) + 1);
     cy.get('#orchard-combobox-0')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
@@ -384,7 +386,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#parentTreeNumber');
 
     // Get parent tree number in an array
-    for (let i = 0; i < 8; i += 1) {
+    for (let i = 0; i < lengthOfUnionArray; i += 1) {
       cy.get('.parent-tree-step-table-container-col')
         .find('table tbody tr')
         .eq(i)
@@ -393,8 +395,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
         // eslint-disable-next-line no-loop-func
         .then(($number) => {
           unionParentTreeArray.push($number);
-          if (i === 7) {
-            const slicedArray = uniqueCombinedArray.slice(0, 8);
+          if (i === lengthOfUnionArray - 1) {
+            const slicedArray = uniqueCombinedArray.slice(0, lengthOfUnionArray);
             expect(slicedArray).to.deep.eq(unionParentTreeArray);
           }
         });
