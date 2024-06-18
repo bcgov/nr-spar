@@ -43,7 +43,9 @@ const ApiConfig = {
 
   facilityTypes: `${oracleServerHost}/api/facility-types`,
 
-  oracleOrchards: `${oracleServerHost}/api/orchards`
+  oracleOrchards: `${oracleServerHost}/api/orchards`,
+
+  areaOfUseTestedPtSpz: `${oracleServerHost}/api/area-of-use/tested-parent-trees/spz-list`
 };
 
 export default ApiConfig;

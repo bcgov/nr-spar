@@ -28,12 +28,16 @@ import InterimReviewRead from '../../../components/SeedlotReviewSteps/Interim/Re
 import InterimReviewEdit from '../../../components/SeedlotReviewSteps/Interim/Edit';
 import OrchardReviewRead from '../../../components/SeedlotReviewSteps/Orchard/Read';
 import OrchardReviewEdit from '../../../components/SeedlotReviewSteps/Orchard/Edit';
+import ExtractionStorageReviewRead from '../../../components/SeedlotReviewSteps/ExtractionStorage/Read';
+import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/ExtractionStorage/Edit';
 
 import ContextContainerClassA from '../ContextContainerClassA';
 
 import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
+import AreaOfUseRead from '../../../components/SeedlotReviewSteps/AreaOfUse/Read';
+import AreaOfUseEdit from '../../../components/SeedlotReviewSteps/AreaOfUse/Edit';
 
 const SeedlotReview = () => {
   const navigate = useNavigate();
@@ -70,8 +74,8 @@ const SeedlotReview = () => {
   const [isReadMode, setIsReadMode] = useState(true);
 
   useEffect(() => {
-    if (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'INC'
-      || seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND'
+    if (seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'INC'
+      || seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'PND'
     ) {
       // Navigate back to the seedlot detail page if the seedlot is pending or incomplete
       navigate(`/seedlots/details/${seedlotNumber}`);
@@ -108,8 +112,8 @@ const SeedlotReview = () => {
         <Breadcrumbs crumbs={getBreadcrumbs(seedlotNumber ?? '')} />
         <Row>
           <PageTitle
-            title={`Review Seedlot ${seedlotQuery.data?.id}`}
-            subtitle={`${seedlotQuery.data?.seedlotStatus.description} status`}
+            title={`Review Seedlot ${seedlotQuery.data?.seedlot.id}`}
+            subtitle={`${seedlotQuery.data?.seedlot.seedlotStatus.description} status`}
           />
         </Row>
 
@@ -157,6 +161,15 @@ const SeedlotReview = () => {
         <Row className="section-title-row">
           <Column className="section-title-col">
             Area of use
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            {
+              isReadMode
+                ? <AreaOfUseRead />
+                : <AreaOfUseEdit />
+            }
           </Column>
         </Row>
 
@@ -230,6 +243,17 @@ const SeedlotReview = () => {
         <Row className="section-title-row">
           <Column className="section-title-col">
             Extraction and storage information
+          </Column>
+        </Row>
+        <Row className="section-row">
+          <Column>
+            {
+              isReadMode
+                ? <ExtractionStorageReviewRead />
+                : (
+                  <ExtractionStorageReviewEdit />
+                )
+            }
           </Column>
         </Row>
 

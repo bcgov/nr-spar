@@ -61,7 +61,7 @@ Cypress.Commands.add('login', () => {
           );
         }
       });
-      cy.get('.bx--contained-list-item__content').contains('MINISTRY OF FORESTS').click();
+      cy.get('.bx--contained-list-item__content').contains('WESTERN FOREST PRODUCTS INC.').click();
       cy.get('.action-btn').contains('Continue').click();
 
       cy.url().should('contains', '/dashboard');

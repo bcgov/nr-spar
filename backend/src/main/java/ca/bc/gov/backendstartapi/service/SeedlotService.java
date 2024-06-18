@@ -10,9 +10,11 @@ import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
 import ca.bc.gov.backendstartapi.dto.PtValsCalReqDto;
+import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormExtractionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormInterimDto;
@@ -37,6 +39,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
+import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
@@ -54,7 +57,10 @@ import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -195,15 +201,26 @@ public class SeedlotService {
   }
 
   /**
-   * Retrieve a paginated list of seedlot for a given user.
+   * Retrieve a paginated list of seedlot for the user selected client.
    *
-   * @param userId the id of the user to fetch the seedlots for
+   * @param clientId the id of the client to fetch the seedlots for
    * @param pageNumber the page number for the paginated search
    * @param pageSize the size of the page
    * @return a list of the user's seedlots
    */
-  public Optional<Page<Seedlot>> getUserSeedlots(String userId, int pageNumber, int pageSize) {
-    SparLog.info("Retrieving paginated list of seedlots for the user {}", userId);
+  public Optional<Page<Seedlot>> getSeedlotByClientId(
+      String clientId, int pageNumber, int pageSize) {
+    Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
+
+    if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
+      throw new ClientIdForbiddenException();
+    }
+
+    SparLog.info(
+        "Retrieving paginated list of seedlots for the user: {} with client id: {}",
+        userInfo.get().id(),
+        clientId);
+
     if (pageSize == 0) {
       SparLog.info("No given value for the page size, using default 10.");
       pageSize = 10;
@@ -215,7 +232,7 @@ public class SeedlotService {
             pageNumber, pageSize, Sort.by(Direction.DESC, "AuditInformation_UpdateTimestamp"));
 
     Page<Seedlot> seedlotPage =
-        seedlotRepository.findAllByAuditInformation_EntryUserId(userId, sortedPageable);
+        seedlotRepository.findAllByApplicantClientNumber(clientId, sortedPageable);
     SparLog.info("{} results and {} pages", seedlotPage.getNumber(), seedlotPage.getTotalPages());
     return Optional.of(seedlotPage);
   }
@@ -227,14 +244,56 @@ public class SeedlotService {
    * @return A Seedlot entity.
    * @throws SeedlotNotFoundException in case of errors.
    */
-  public Seedlot getSingleSeedlotInfo(@NonNull String seedlotNumber) {
+  public SeedlotDto getSingleSeedlotInfo(@NonNull String seedlotNumber) {
     SparLog.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
-    Seedlot seedlotInfo =
+    Seedlot seedlotEntity =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
-    return seedlotInfo;
+
+    SeedlotDto seedlotDto = new SeedlotDto();
+
+    seedlotDto.setSeedlot(seedlotEntity);
+
+    SparLog.info("Finding associated seedlot SPZs for seedlot {}", seedlotNumber);
+
+    List<SeedlotSeedPlanZoneEntity> spzList =
+        seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber);
+
+    SparLog.info("Found {} SPZs for seedlot {}", spzList.size(), seedlotNumber);
+
+    SeedPlanZoneDto primarySpz = null;
+
+    List<SeedPlanZoneDto> additionalSpzList = new ArrayList<>();
+
+    if (spzList.size() > 0) {
+      List<SeedlotSeedPlanZoneEntity> primarySpzList =
+          spzList.stream().filter(spz -> spz.getIsPrimary()).toList();
+
+      if (primarySpzList.size() > 0) {
+        SeedlotSeedPlanZoneEntity primarySpzEntity = primarySpzList.get(0);
+        primarySpz =
+            new SeedPlanZoneDto(
+                primarySpzEntity.getSpzCode(),
+                primarySpzEntity.getSpzDescription(),
+                primarySpzEntity.getIsPrimary());
+      }
+
+      additionalSpzList =
+          spzList.stream()
+              .filter(spz -> !spz.getIsPrimary())
+              .map(
+                  spz ->
+                      new SeedPlanZoneDto(
+                          spz.getSpzCode(), spz.getSpzDescription(), spz.getIsPrimary()))
+              .toList();
+    }
+
+    seedlotDto.setPrimarySpz(primarySpz);
+
+    seedlotDto.setAdditionalSpzList(additionalSpzList);
+    return seedlotDto;
   }
 
   /**
@@ -609,6 +668,11 @@ public class SeedlotService {
       // seedlotGeneticWorthService.saveSeedlotFormStep5(Seedlot seedlot,)
     }
 
+    // Only set declaration info for pending seedlots
+    if (currentSeedlotStauts.equals("PND")) {
+      setSeedlotDeclaredInfo(seedlot);
+    }
+
     setSeedlotStatus(seedlot, statusOnSuccess);
 
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
@@ -821,6 +885,20 @@ public class SeedlotService {
       throw new SeedlotStatusNotFoundException();
     }
     seedlot.setSeedlotStatus(sseOptional.get());
+  }
+
+  private void setSeedlotDeclaredInfo(Seedlot seedlot) {
+    String userId = loggedUserService.getLoggedUserId();
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    seedlot.setDeclarationOfTrueInformationUserId(userId);
+    seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
+
+    SparLog.info(
+        "Declaration data set, for seedlot {} for user {} at {}",
+        seedlot.getId(),
+        seedlot.getDeclarationOfTrueInformationUserId(),
+        dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp())
+    );
   }
 
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {

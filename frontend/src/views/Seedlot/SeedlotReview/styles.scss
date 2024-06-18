@@ -36,6 +36,30 @@
 
   .info-col {
     padding-top: 2rem;
+
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  .additional-spz-combobox-and-button {
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
+
+    .#{vars.$bcgov-prefix}--list-box__wrapper {
+      flex-grow: 1;
+    }
+
+    .#{vars.$bcgov-prefix}--popover-container {
+      margin-left: 1rem;
+    }
   }
 
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
@@ -43,6 +67,12 @@
       padding: 0;
       border: none;
       text-overflow: ellipsis;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--text-area__wrapper--readonly {
+    .#{vars.$bcgov-prefix}--text-area {
+      padding: 0;
     }
   }
 }

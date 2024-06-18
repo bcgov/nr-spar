@@ -79,9 +79,9 @@ class SeedlotSourceServiceTest {
 
     Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());
-    Assertions.assertEquals(testDtoList.get(0).code(), resultList.get(0).code());
-    Assertions.assertEquals(testDtoList.get(0).description(), resultList.get(0).description());
-    Assertions.assertEquals(testDtoList.get(1).code(), resultList.get(1).code());
-    Assertions.assertEquals(testDtoList.get(1).description(), resultList.get(1).description());
+    Assertions.assertEquals(testDtoList.get(0).getCode(), resultList.get(0).code());
+    Assertions.assertEquals(testDtoList.get(0).getDescription(), resultList.get(0).description());
+    Assertions.assertEquals(testDtoList.get(1).getCode(), resultList.get(1).code());
+    Assertions.assertEquals(testDtoList.get(1).getDescription(), resultList.get(1).description());
   }
 }
