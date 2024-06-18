@@ -344,7 +344,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('check linkage of Step 4 and Step 5', () => {
-    const lengthOfUnionArray = Math.max(6, (uniqueCombinedArray.length / 2) + 1);
+    const lengthOfUnionArray = Math.ceil(Math.max(6, (uniqueCombinedArray.length / 2) + 1));
     cy.get('#orchard-combobox-0')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
