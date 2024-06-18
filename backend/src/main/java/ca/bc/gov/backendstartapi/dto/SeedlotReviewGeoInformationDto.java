@@ -4,7 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 
 /** This record represents the Geographic Information form fields when reviewed by the TSC Admin. */
-@Schema(description = "")
+@Schema(
+    description =
+        """
+        This record represents the Geographic Information form fields when reviewed by the TSC
+        Admin.
+        """)
 public record SeedlotReviewGeoInformationDto(
     @Schema(
             description =
