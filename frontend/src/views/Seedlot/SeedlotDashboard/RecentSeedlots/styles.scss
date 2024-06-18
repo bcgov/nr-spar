@@ -16,11 +16,13 @@
   padding: 0;
 }
 
-.recent-seedlots-title {
+.recent-seedlots-title-section {
+  display: flex;
+  justify-content: space-between;
   padding-top: 1rem;
 }
 
-.recent-seedlots-title>h2 {
+.recent-seedlots-title-section h2 {
   @include type.type-style('heading-03');
   margin-bottom: 0.5rem;
 }
@@ -34,13 +36,13 @@
 }
 
 @media only screen and (max-width: 1584px) {
-  .recent-seedlots-title {
+  .recent-seedlots-title-section {
     padding-left: 3rem;
   }
 }
 
 @media only screen and (max-width: 672px) {
-  .recent-seedlots-title {
+  .recent-seedlots-title-section {
     padding-left: 2rem;
   }
 

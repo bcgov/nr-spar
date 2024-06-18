@@ -18,6 +18,22 @@ export const HeaderConfig: HeaderObj[] = [
     label: 'Status'
   },
   {
+    id: 'entryUserId',
+    label: 'Submitted by'
+  },
+  {
+    id: 'entryTimestamp',
+    label: 'Submitted at'
+  },
+  {
+    id: 'applicantAgency',
+    label: 'Applicant agency'
+  },
+  {
+    id: 'locationCode',
+    label: ''
+  },
+  {
     id: 'createdAt',
     label: 'Created at'
   },
@@ -39,9 +55,20 @@ export const TableText = {
   errorDescription: 'Could not display seedlot data',
   errorIcon: 'InProgressError',
   unknownIcon: 'WatsonHealthImageAvailabilityUnavailable',
-  unknownTitle: 'Something went wrong...'
+  unknownTitle: 'Something went wrong...',
+  admin: {
+    emptyTitle: 'All seedlots reviewed!',
+    emptyDescription: 'All seedlots have been reviewed, good job! Seedltos that are waiting for approval will be show here once they are submitted.'
+  }
 };
 
 export const PageSizesConfig = [
   10, 20, 30, 40, 50
+];
+
+export const ExclusiveAdminRows: Array<string> = [
+  'entryUserId',
+  'entryTimestamp',
+  'applicantAgency',
+  'locationCode'
 ];
