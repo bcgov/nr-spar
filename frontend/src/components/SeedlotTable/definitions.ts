@@ -2,6 +2,7 @@ import { SeedlotDisplayType } from '../../types/SeedlotType';
 
 export interface TableProps {
   userId: string,
+  isTscAdmin?: boolean
   isSortable?: boolean
   showSearch?: boolean
   showPagination?: boolean
@@ -14,7 +15,8 @@ export interface SeedlotDataTableProps {
   isSortable: boolean,
   showSearch: boolean,
   showPagination: boolean,
-  tablePagination: JSX.Element
+  tablePagination: JSX.Element,
+  isTscAdmin?: boolean
 }
 
 export type HeaderObj = {
