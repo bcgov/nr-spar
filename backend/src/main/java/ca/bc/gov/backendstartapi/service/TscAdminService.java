@@ -72,7 +72,7 @@ public class TscAdminService {
    * @param approved Boolean option defined if it was approved.
    */
   public Seedlot approveOrDisapproveSeedlot(String seedlotNumber, Boolean approved) {
-    SparLog.info("Received Seedlot number {} for approval or disapproval", seedlotNumber);
+    SparLog.info("Received Seedlot number {} for approval or disappoval", seedlotNumber);
 
     Optional<Seedlot> seedlot = seedlotRepository.findById(seedlotNumber);
     if (seedlot.isEmpty()) {
@@ -81,20 +81,20 @@ public class TscAdminService {
     }
 
     Seedlot seedlotEntity = seedlot.get();
-    String statusCode = null;
+    String statucCode = null;
 
     if (Boolean.TRUE.equals(approved)) {
       SparLog.info("Seedlot number {} approved! Updating it to Approved", seedlotNumber);
-      statusCode = "APP";
+      statucCode = "APP";
     } else {
       SparLog.info("Seedlot number {} disapproved! Sending it back to Pending", seedlotNumber);
-      statusCode = "PND";
+      statucCode = "PND";
     }
 
     Optional<SeedlotStatusEntity> seedlotStatus =
-        seedlotStatusService.getValidSeedlotStatus(statusCode);
+        seedlotStatusService.getValidSeedlotStatus(statucCode);
     if (seedlotStatus.isEmpty()) {
-      SparLog.warn("Seedlot status {} not found!", statusCode);
+      SparLog.warn("Seedlot status {} not found!", statucCode);
       throw new SeedlotStatusNotFoundException();
     }
 

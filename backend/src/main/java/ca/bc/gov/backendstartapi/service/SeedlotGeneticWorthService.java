@@ -54,12 +54,12 @@ public class SeedlotGeneticWorthService {
       List<String> sgwExistingList =
           new ArrayList<>(sgwList.stream().map(SeedlotGeneticWorth::getGeneticWorthCode).toList());
 
-      List<SeedlotGeneticWorthId> seedGenWorthIdList = new ArrayList<>();
+      List<SeedlotGeneticWorthId> sgwiList = new ArrayList<>();
       for (String genWorthCode : sgwExistingList) {
-        seedGenWorthIdList.add(new SeedlotGeneticWorthId(seedlot.getId(), genWorthCode));
+        sgwiList.add(new SeedlotGeneticWorthId(seedlot.getId(), genWorthCode));
       }
 
-      seedlotGeneticWorthRepository.deleteAllById(seedGenWorthIdList);
+      seedlotGeneticWorthRepository.deleteAllById(sgwiList);
     } else if (!sgwList.isEmpty() && !canDelete) {
       throw new SeedlotConflictDataException(seedlot.getId());
     }
@@ -85,7 +85,7 @@ public class SeedlotGeneticWorthService {
         genWorthCodeToInsert.size(),
         seedlot.getId());
 
-    List<SeedlotGeneticWorth> seedlotGenWorthList = new ArrayList<>();
+    List<SeedlotGeneticWorth> seedlotGeneticWorths = new ArrayList<>();
     for (ParentTreeGeneticQualityDto parentTreeGenQualityDto : genWorthCodeToInsert) {
 
       GeneticWorthEntity gwEntity =
@@ -96,10 +96,10 @@ public class SeedlotGeneticWorthService {
       SeedlotGeneticWorth sgw =
           new SeedlotGeneticWorth(seedlot, gwEntity, loggedUserService.createAuditCurrentUser());
       sgw.setGeneticQualityValue(parentTreeGenQualityDto.geneticQualityValue());
-      seedlotGenWorthList.add(sgw);
+      seedlotGeneticWorths.add(sgw);
     }
 
-    return seedlotGeneticWorthRepository.saveAll(seedlotGenWorthList);
+    return seedlotGeneticWorthRepository.saveAll(seedlotGeneticWorths);
   }
 
   /**
