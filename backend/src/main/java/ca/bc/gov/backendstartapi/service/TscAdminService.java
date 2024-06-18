@@ -3,9 +3,9 @@ package ca.bc.gov.backendstartapi.service;
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
-import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -72,7 +72,7 @@ public class TscAdminService {
    * @param approved Boolean option defined if it was approved.
    */
   public Seedlot approveOrDisapproveSeedlot(String seedlotNumber, Boolean approved) {
-    SparLog.info("Received Seedlot number {} for approval or disappoval", seedlotNumber);
+    SparLog.info("Received Seedlot number {} for approval or disapproval", seedlotNumber);
 
     Optional<Seedlot> seedlot = seedlotRepository.findById(seedlotNumber);
     if (seedlot.isEmpty()) {
@@ -81,20 +81,20 @@ public class TscAdminService {
     }
 
     Seedlot seedlotEntity = seedlot.get();
-    String statucCode = null;
+    String statusCode = null;
 
     if (Boolean.TRUE.equals(approved)) {
       SparLog.info("Seedlot number {} approved! Updating it to Approved", seedlotNumber);
-      statucCode = "APP";
+      statusCode = "APP";
     } else {
       SparLog.info("Seedlot number {} disapproved! Sending it back to Pending", seedlotNumber);
-      statucCode = "PND";
+      statusCode = "PND";
     }
 
     Optional<SeedlotStatusEntity> seedlotStatus =
-        seedlotStatusService.getValidSeedlotStatus(statucCode);
+        seedlotStatusService.getValidSeedlotStatus(statusCode);
     if (seedlotStatus.isEmpty()) {
-      SparLog.warn("Seedlot status {} not found!", statucCode);
+      SparLog.warn("Seedlot status {} not found!", statusCode);
       throw new SeedlotStatusNotFoundException();
     }
 
@@ -107,19 +107,24 @@ public class TscAdminService {
   }
 
   /**
-   * Update or Recreate all Seedlots Seed Plan Zone records.
+   * Update or recreate all Seedlots Seed Plan Zone records.
    *
    * @param seedlot The {@link Seedlot} to be updated.
    * @param seedlotReviewSeedPlanZones The List of SPZ possibly modified by the TSC Admin.
    */
   public void updateSeedPlanZones(
       Seedlot seedlot, List<SeedlotReviewSeedPlanZoneDto> seedlotReviewSeedPlanZones) {
+    SparLog.info("Update Seedlot Seed Plan Zones for Seedlot {}", seedlot.getId());
     List<SeedlotSeedPlanZoneEntity> seedlotSpzs =
         seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlot.getId());
 
     if (seedlotSpzs.isEmpty()) {
-      SparLog.info("No Seedlot Seed Plan Zones found for Seedlot number {}");
+      SparLog.info("No existing Seedlot Seed Plan Zones records found for Seedlot {}");
     } else {
+      SparLog.info(
+          "Deleting {} Seedlot Seed Plan Zones records for Seedlot {}",
+          seedlotSpzs.size(),
+          seedlot.getId());
       seedlotSeedPlanZoneRepository.deleteAll(seedlotSpzs);
       seedlotSeedPlanZoneRepository.flush();
     }
@@ -140,11 +145,27 @@ public class TscAdminService {
       sspzToSave.add(sspzEntity);
     }
 
-    seedlotSeedPlanZoneRepository.saveAllAndFlush(sspzToSave);
+    if (!sspzToSave.isEmpty()) {
+      seedlotSeedPlanZoneRepository.saveAllAndFlush(sspzToSave);
+      SparLog.info(
+          "{} Seedlot Seed Plan Zone records saved for Seedlot {}",
+          sspzToSave.size(),
+          seedlot.getId());
+    } else {
+      SparLog.info("No Seedlot Seed Plan Zone new records to save for Seedlot {}", seedlot.getId());
+    }
   }
 
+  /**
+   * Update all the Elevation, Lat and Long seedlot data reviewed by the TSC Admin.
+   *
+   * @param seedlot The Seedlot instance.
+   * @param seedlotReviewElevationLatLong The elevation, lat and long data reviewed.
+   */
   public void updateElevationLatLong(
       Seedlot seedlot, SeedlotReviewElevationLatLongDto seedlotReviewElevationLatLong) {
+    SparLog.info(
+        "Update Seedlot elevation, latitude and longitude for Seedlot {}", seedlot.getId());
     // Elevation
     seedlot.setElevationMax(seedlotReviewElevationLatLong.maxElevation());
     seedlot.setElevationMin(seedlotReviewElevationLatLong.minElevation());
@@ -174,11 +195,37 @@ public class TscAdminService {
     seedlot.setLongitudeSecMin(seedlotReviewElevationLatLong.minLongitudeSec());
   }
 
+  /**
+   * Updates removing existing Genetic Worth values and adding new ones changed by the TSC Admin.
+   *
+   * @param seedlot The Seedlot instance.
+   * @param seedlotReviewGeneticWorth List of Genetic Worth traits and its values.
+   */
   public void updateSeedlotGeneticWorth(
       Seedlot seedlot, List<GeneticWorthTraitsDto> seedlotReviewGeneticWorth) {
-    List<SeedlotGeneticWorth> genWorthData =
-        seedlotGeneticWorthService.getAllBySeedlotNumber(seedlot.getId());
+    seedlotGeneticWorthService.deleteAllForSeedlot(seedlot.getId());
+    seedlotGeneticWorthService.saveGenWorthListToSeedlot(seedlot, seedlotReviewGeneticWorth);
+  }
 
-    // keep going from here
+  /**
+   * Updates.
+   *
+   * @param seedlot The Seedlot instance.
+   * @param seedlotReviewGeographicInformation Seedlot Geo Information provided by TSC Admin.
+   */
+  public void updateSeedlotGeoInformation(
+      Seedlot seedlot, SeedlotReviewGeoInformationDto seedlotReviewDto) {
+    // Elevation
+    seedlot.setCollectionElevation(seedlotReviewDto.meanElevation());
+
+    // Latitude DMS
+    seedlot.setCollectionLatitudeDeg(seedlotReviewDto.meanLatitudeDegree());
+    seedlot.setCollectionLatitudeMin(seedlotReviewDto.meanLatitudeMinute());
+    seedlot.setCollectionLatitudeSec(seedlotReviewDto.meanLatitudeSecond());
+
+    // Longitude DMS
+    seedlot.setCollectionLongitudeDeg(seedlotReviewDto.meanLongitudeDegree());
+    seedlot.setCollectionLongitudeMin(seedlotReviewDto.meanLongitudeMinute());
+    seedlot.setCollectionLongitudeSec(seedlotReviewDto.meanLongitudeSecond());
   }
 }

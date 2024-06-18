@@ -108,6 +108,8 @@ class SeedlotServiceTest {
 
   @Mock ParentTreeService parentTreeService;
 
+  @Mock TscAdminService tscAdminService;
+
   @Mock Provider oracleApiProvider;
 
   private SeedlotService seedlotService;
@@ -167,6 +169,7 @@ class SeedlotServiceTest {
             orchardService,
             seedlotSeedPlanZoneRepository,
             parentTreeService,
+            tscAdminService,
             oracleApiProvider);
   }
 
@@ -509,7 +512,11 @@ class SeedlotServiceTest {
                 orchardId, null, null, null, null, null, null, null, null, null),
             sptDto,
             sptSmpMixDto,
-            new SeedlotFormExtractionDto(null, null, null, null, null, null, null, null));
+            new SeedlotFormExtractionDto(null, null, null, null, null, null, null, null),
+            List.of(),
+            null,
+            List.of(),
+            null);
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(responseFromService.seedlotData(), seedlotFormFields);

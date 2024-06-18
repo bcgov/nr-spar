@@ -548,7 +548,11 @@ public class SeedlotService {
                 orchardStep,
                 parentTreesInfo,
                 smpMixParentTreesInfo,
-                extractionStep),
+                extractionStep,
+                List.of(),
+                null,
+                List.of(),
+                null),
             calculatedGenWorth);
 
     SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
@@ -616,7 +620,7 @@ public class SeedlotService {
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
 
-    String currentSeedlotStauts = seedlot.getSeedlotStatus().getSeedlotStatusCode();
+    String currentSeedlotStatus = seedlot.getSeedlotStatus().getSeedlotStatusCode();
 
     /*
      * This determines whether delete actions can be performed
@@ -624,7 +628,7 @@ public class SeedlotService {
      * TSC admins can perform delete actions without regard of the seedlot's status
      */
     boolean canDelete =
-        currentSeedlotStauts.equals("PND") || currentSeedlotStauts.equals("INC") || isTscAdmin;
+        currentSeedlotStatus.equals("PND") || currentSeedlotStatus.equals("INC") || isTscAdmin;
 
     /*
      * Merging entities script:
@@ -663,13 +667,11 @@ public class SeedlotService {
       tscAdminService.updateSeedPlanZones(seedlot, form.seedlotReviewSeedPlanZones());
       tscAdminService.updateElevationLatLong(seedlot, form.seedlotReviewElevationLatLong());
       tscAdminService.updateSeedlotGeneticWorth(seedlot, form.seedlotReviewGeneticWorth());
-
-      // seedlot genetic worth - review next line
-      // seedlotGeneticWorthService.saveSeedlotFormStep5(Seedlot seedlot,)
+      tscAdminService.updateSeedlotGeoInformation(seedlot, form.seedlotReviewGeoInformation());
     }
 
     // Only set declaration info for pending seedlots
-    if (currentSeedlotStauts.equals("PND")) {
+    if (currentSeedlotStatus.equals("PND")) {
       setSeedlotDeclaredInfo(seedlot);
     }
 
@@ -897,8 +899,7 @@ public class SeedlotService {
         "Declaration data set, for seedlot {} for user {} at {}",
         seedlot.getId(),
         seedlot.getDeclarationOfTrueInformationUserId(),
-        dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp())
-    );
+        dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp()));
   }
 
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {

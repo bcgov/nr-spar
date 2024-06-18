@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 
 /** This record represents the Geographic Information form fields when reviewed by the TSC Admin. */
 @Schema(description = "")
-public record SeedotReviewGeoInformationDto(
+public record SeedlotReviewGeoInformationDto(
     @Schema(
             description =
                 """

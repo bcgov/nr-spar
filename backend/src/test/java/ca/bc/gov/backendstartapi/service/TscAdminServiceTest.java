@@ -8,7 +8,9 @@ import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
+import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +35,12 @@ class TscAdminServiceTest {
 
   @Mock SeedlotStatusService seedlotStatusService;
 
+  @Mock SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
+
+  @Mock GeneticClassRepository geneticClassRepository;
+
+  @Mock SeedlotGeneticWorthService seedlotGeneticWorthService;
+
   private TscAdminService tscAdminService;
 
   private SeedlotStatusEntity createValidStatus(String status) {
@@ -48,7 +56,13 @@ class TscAdminServiceTest {
 
   @BeforeEach
   void setup() {
-    tscAdminService = new TscAdminService(seedlotRepository, seedlotStatusService);
+    tscAdminService =
+        new TscAdminService(
+            seedlotRepository,
+            seedlotStatusService,
+            seedlotSeedPlanZoneRepository,
+            geneticClassRepository,
+            seedlotGeneticWorthService);
   }
 
   @Test
