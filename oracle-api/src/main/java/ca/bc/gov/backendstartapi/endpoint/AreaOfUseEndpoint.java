@@ -62,7 +62,7 @@ public class AreaOfUseEndpoint {
           @Parameter(name = "vegCode", in = ParameterIn.PATH, description = "The vegetation code.")
           String vegCode) {
 
-    SparLog.info("Recevied request to fetch all SPZs for vegetation code: {}", vegCode);
+    SparLog.info("Received request to fetch all SPZs for vegetation code: {}", vegCode);
 
     return areaOfUseService.getSpzByVegCode(vegCode.toUpperCase());
   }
