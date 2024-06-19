@@ -33,5 +33,11 @@
     "reservedAboveLimitError": "Value must be lower or equal to 100",
     "reservedBelowLimitError": "Value must be higher or equal to 0",
     "reservedDecimalError": "Value can have up to 2 decimal places"
+  },
+  "extraction": {
+    "extrationTitle": "Extraction information",
+    "extrationSubtitle": "Enter the extractory agency information and extraction's star and end dates for this seedlot",
+    "storageTitle": "Temporary seed storage",
+    "storageSubtitle": "Enter the seed storage agency information and storage's star and end dates for this seedlot"
   }
 }
