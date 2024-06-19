@@ -135,3 +135,13 @@ services:
         condition: service_healthy
       backend:
         condition: service_healthy
+
+  # PGAdmin
+  pgadmin:
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    image: dpage/pgadmin4
+    ports: [5050:80]
+    
