@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import Participants from '../../components/Participants';
-import '@testing-library/jest-dom';
 
 describe('Participants component', () => {
   const number = 12456;

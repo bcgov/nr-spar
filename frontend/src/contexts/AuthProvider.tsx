@@ -11,7 +11,7 @@ import { env } from '../env';
 import FamUser from '../types/FamUser';
 import LoginProviders from '../types/LoginProviders';
 import AuthContext, { AuthContextData } from './AuthContext';
-import { SPAR_REDIRECT_PATH } from '../shared-constants/shared-constants';
+import { SPAR_REDIRECT_PATH, TSC_ADMIN_ROLE } from '../shared-constants/shared-constants';
 import { TWO_MINUTE } from '../config/TimeUnits';
 import ROUTES from '../routes/constants';
 
@@ -128,13 +128,14 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
   const [provider, setProvider] = useState<string>('');
   const [intervalInstance, setIntervalInstance] = useState<NodeJS.Timeout | null>(null);
   const [selectedClientRoles, setSelectedClientRoles] = useState<UserClientRolesType | null>(null);
+  const [isTscAdmin, setIsTscAdmin] = useState<boolean>(false);
 
   const setClientRoles = (clientRoles: UserClientRolesType, reload?: boolean) => {
     localStorage.setItem(clientIdLocalStorageKey, clientRoles.clientId);
     if (clientRoles.clientName) {
       localStorage.setItem(clientNameLocalStorageKey, clientRoles.clientName);
     }
-
+    setIsTscAdmin(clientRoles.roles.includes(TSC_ADMIN_ROLE));
     setSelectedClientRoles(clientRoles);
     if (reload) {
       window.location.href = '/';
@@ -193,6 +194,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
         if (restoredClientName) {
           foundClient.clientName = restoredClientName;
         }
+        setIsTscAdmin(foundClient.roles.includes(TSC_ADMIN_ROLE));
         setSelectedClientRoles(foundClient);
       }
     }
@@ -228,6 +230,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
         setSigned(false);
         setUser(null);
         setProvider('');
+        setIsTscAdmin(false);
         if (intervalInstance) {
           console.log('stopping refresh token');
           clearInterval(intervalInstance);
@@ -268,8 +271,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     signOut,
     provider,
     selectedClientRoles,
-    setClientRoles
-  }), [signed, user, isCurrentAuthUser, signIn, signOut, provider, selectedClientRoles]);
+    setClientRoles,
+    isTscAdmin
+  }), [
+    signed, user, isCurrentAuthUser, signIn, signOut,
+    provider, selectedClientRoles, isTscAdmin
+  ]);
 
   return (
     <AuthContext.Provider value={contextValue}>

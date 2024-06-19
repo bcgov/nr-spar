@@ -9,6 +9,7 @@ import AuthContext from '../../contexts/AuthContext';
 import getVegCodes from '../../api-service/vegetationCodeAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { covertRawToDisplayObjArray } from '../../utils/SeedlotUtils';
+import { getSeedlotToReview } from '../../api-service/tscAdminAPI';
 import { getSeedlotByClientId } from '../../api-service/seedlotAPI';
 import { SeedlotDisplayType, SeedlotType } from '../../types/SeedlotType';
 import PaginationChangeType from '../../types/PaginationChangeType';
@@ -22,6 +23,7 @@ import './styles.scss';
 const SeedlotTable = (
   {
     userId,
+    isTscAdmin,
     isSortable,
     showSearch,
     showPagination,
@@ -50,12 +52,16 @@ const SeedlotTable = (
     }
   };
 
-  const getAllSeedlotQuery = useQuery({
-    queryKey: ['seedlots', 'users', selectedClientRoles?.clientId, { pageNumber: currPageNumber, pageSize: currPageSize }],
-    queryFn: () => getSeedlotByClientId(
-      selectedClientRoles!.clientId,
-      currPageNumber,
-      currPageSize
+  const queryKey = isTscAdmin
+    ? ['seedlots', { pageNumber: currPageNumber, pageSize: currPageSize }]
+    : ['seedlots', 'users', selectedClientRoles?.clientId, { pageNumber: currPageNumber, pageSize: currPageSize }];
+
+  const getAllSeedlotQueryByUser = useQuery({
+    queryKey,
+    queryFn: () => (
+      isTscAdmin
+        ? getSeedlotToReview(currPageNumber, currPageSize)
+        : getSeedlotByClientId(selectedClientRoles!.clientId, currPageNumber, currPageSize)
     ),
     enabled: userId.length > 0 && vegCodeQuery.isFetched,
     refetchOnMount: 'always'
@@ -63,12 +69,12 @@ const SeedlotTable = (
 
   useEffect(() => {
     if (
-      (getAllSeedlotQuery.isFetched || getAllSeedlotQuery.isFetchedAfterMount)
-      && getAllSeedlotQuery.data
+      (getAllSeedlotQueryByUser.isFetched || getAllSeedlotQueryByUser.isFetchedAfterMount)
+      && getAllSeedlotQueryByUser.data
     ) {
-      convertToTableObjs(getAllSeedlotQuery.data.seedlots);
+      convertToTableObjs(getAllSeedlotQueryByUser.data.seedlots);
     }
-  }, [getAllSeedlotQuery.isFetched, getAllSeedlotQuery.isFetchedAfterMount]);
+  }, [getAllSeedlotQueryByUser.isFetched, getAllSeedlotQueryByUser.isFetchedAfterMount]);
 
   const handlePagination = (paginationObj: PaginationChangeType) => {
     setCurrPageNumber(paginationObj.page - 1); // index starts at 0 on java.
@@ -82,7 +88,7 @@ const SeedlotTable = (
       pageSize={currPageSize}
       pageSizes={PageSizesConfig}
       itemsPerPageText=""
-      totalItems={getAllSeedlotQuery.data?.totalCount ?? 0}
+      totalItems={getAllSeedlotQueryByUser.data?.totalCount ?? 0}
       onChange={
         (paginationObj: PaginationChangeType) => {
           handlePagination(paginationObj);
@@ -93,14 +99,14 @@ const SeedlotTable = (
   /**
    * Show skeleton while fetching.
    */
-  if (getAllSeedlotQuery.isFetching || vegCodeQuery.isFetching) {
+  if (getAllSeedlotQueryByUser.isFetching || vegCodeQuery.isFetching) {
     return <DataTableSkeleton showToolbar={false} />;
   }
 
   /**
    * If either query resulted in an error, show it.
    */
-  if (vegCodeQuery.isError || getAllSeedlotQuery.isError) {
+  if (vegCodeQuery.isError || getAllSeedlotQueryByUser.isError) {
     return (
       <div className="empty-recent-seedlots">
         <EmptySection
@@ -111,7 +117,7 @@ const SeedlotTable = (
               <>
                 {`${TableText.errorDescription}.`}
                 <br />
-                {getAllSeedlotQuery.isError ? `Seedlot Request: ${getAllSeedlotQuery.error}.` : null}
+                {getAllSeedlotQueryByUser.isError ? `Seedlot Request: ${getAllSeedlotQueryByUser.error}.` : null}
                 <br />
                 {vegCodeQuery.isError ? `VegCode Request: ${vegCodeQuery.error}` : null}
               </>
@@ -125,7 +131,7 @@ const SeedlotTable = (
   /**
    * Display fetched data
    */
-  if (getAllSeedlotQuery.isFetched && getAllSeedlotQuery.data?.seedlots.length) {
+  if (getAllSeedlotQueryByUser.isFetched && getAllSeedlotQueryByUser.data?.seedlots.length) {
     return (
       <SeedlotDataTable
         seedlotData={seedlotData}
@@ -134,6 +140,7 @@ const SeedlotTable = (
         showSearch={showSearch ?? false}
         showPagination={showPagination ?? false}
         tablePagination={tablePagination()}
+        isTscAdmin={isTscAdmin}
       />
     );
   }
@@ -141,13 +148,13 @@ const SeedlotTable = (
   /**
    * Fetched data successfully but it's empty.
    */
-  if (getAllSeedlotQuery.isFetched && !getAllSeedlotQuery.data?.seedlots.length) {
+  if (getAllSeedlotQueryByUser.isFetched && !getAllSeedlotQueryByUser.data?.seedlots.length) {
     return (
       <div className="empty-recent-seedlots">
         <EmptySection
           pictogram={TableText.emptyPictogram}
-          title={TableText.emptyTitle}
-          description={TableText.emptyDescription}
+          title={isTscAdmin ? TableText.admin.emptyTitle : TableText.emptyTitle}
+          description={isTscAdmin ? TableText.admin.emptyDescription : TableText.emptyDescription}
         />
       </div>
     );

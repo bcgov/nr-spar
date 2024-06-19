@@ -1,7 +1,6 @@
 import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react';
 import SeedlotActivityHistory from '../../components/SeedlotActivityHistory/index';
-import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 
 describe('Test the Form Progress component', () => {
