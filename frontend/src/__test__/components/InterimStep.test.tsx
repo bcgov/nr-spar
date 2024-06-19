@@ -2,7 +2,6 @@ import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import '@testing-library/jest-dom';
 import SeedlotRegistrarionForm from '../../views/Seedlot/SeedlotRegistrationForm';
 import makeServer from '../../mock-server/server';
 import * as ReactQuery from '@tanstack/react-query';

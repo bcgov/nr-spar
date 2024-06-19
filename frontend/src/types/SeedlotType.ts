@@ -32,6 +32,10 @@ export type SeedlotDisplayType = {
   seedlotClass: string,
   seedlotSpecies: string,
   seedlotStatus: keyof typeof StatusColourMap,
+  entryUserId: string,
+  entryTimestamp: string,
+  applicantAgency: string,
+  locationCode: string,
   createdAt: string,
   lastUpdatedAt: string,
   approvedAt: string
