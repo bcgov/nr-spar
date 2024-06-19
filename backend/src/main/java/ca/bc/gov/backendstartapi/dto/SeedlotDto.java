@@ -19,10 +19,10 @@ public class SeedlotDto {
   @Schema(description = "The seedlot entity in the seedlot table")
   private Seedlot seedlot;
 
-  @Schema(description = "The pirmary seed plan unit")
+  @Schema(description = "The primary seed plan unit")
   private SpuDto primarySpu;
 
-  @Schema(description = "The pirmary seed plan zone")
+  @Schema(description = "The primary seed plan zone")
   private SeedPlanZoneDto primarySpz;
 
   @Schema(description = "A list of additional seed plan zones")

@@ -286,7 +286,7 @@ public class OracleApiProvider implements Provider {
               new HttpEntity<>(addHttpHeaders()),
               new ParameterizedTypeReference<SpuDto>() {},
               createParamsMap("spuId", spuId.toString()));
-      SparLog.info("GET orchard by id - Success response!");
+      SparLog.info("GET SPU by id - Success response!");
       return Optional.of(spuDtoRes.getBody());
     } catch (HttpClientErrorException httpExc) {
       SparLog.error("GET SPU by ID from oracle - Response code error: {}", httpExc.getStatusCode());

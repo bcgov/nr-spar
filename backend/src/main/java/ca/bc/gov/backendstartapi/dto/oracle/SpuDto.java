@@ -24,7 +24,7 @@ public class SpuDto {
   @Schema(description = "Seed Plan Zone Id", example = "346")
   private Integer seedPlanZoneId;
 
-  @Schema(description = "Maximum Elevation", example = "LOW")
+  @Schema(description = "Elevation Band", example = "LOW")
   private String elevationBand;
 
   @Schema(description = "Maximum Elevation", example = "300")
