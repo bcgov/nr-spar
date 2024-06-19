@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import StatusItem from '../../components/StatusItem';
-import '@testing-library/jest-dom';
 
 describe('Status item component', () => {
   it('should return the Pending status', () => {
