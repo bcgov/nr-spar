@@ -135,7 +135,37 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains('Save changes')
+      .contains(/Save changes|Changes saved!/g)
+      .click();
+  });
+
+  it('Extraction Date inputs', () => {
+    cy.get('#ext-end-date')
+      .clear()
+      .type('2024-05-28')
+      .blur();
+
+    // Invalid start date
+    cy.get('#ext-start-date')
+      .clear()
+      .type('2024-05-29')
+      .blur();
+
+    cy.get(`.${prefix}--date-picker`)
+      .find(`.${prefix}--form-requirement`)
+      .should('have.length', 2)
+      .and('contain.text', regFormData.extraction.invalidDateErrorMsg);
+
+    // Valid start date
+    cy.get('#ext-start-date')
+      .clear()
+      .type('2024-05-27')
+      .blur();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains(/Save changes|Changes saved!/g)
       .click();
   });
 });
