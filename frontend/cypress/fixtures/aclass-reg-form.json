@@ -39,6 +39,7 @@
     "extrationSubtitle": "Enter the extractory agency information and extraction's star and end dates for this seedlot",
     "storageTitle": "Temporary seed storage",
     "storageSubtitle": "Enter the seed storage agency information and storage's star and end dates for this seedlot",
+    "checkboxText": "The extractory agency is the Tree Seed Center (TSC)",
     "agencyErrorMsg": "Please enter a valid acronym that identifies the agency",
     "agencyValidationMsg": "Agency validation failed. Please retry verification",
     "locationErrorMsg": "This location code is not valid for the selected agency, please enter a valid one or change the agency",
