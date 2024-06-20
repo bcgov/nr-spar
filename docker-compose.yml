@@ -105,7 +105,7 @@ services:
   oracle-api:
     container_name: oracle-api
     environment:
-      DATABASE_HOST: ${DATABASE_HOST:-"nrcdb03.gov"}
+      DATABASE_HOST: ${DATABASE_HOST:-"nrcdb03.bcgov"}
       DATABASE_PORT: ${DATABASE_PORT:-"1543"}
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
