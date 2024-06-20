@@ -175,6 +175,9 @@ services:
       ORACLE_SERVICE: ${ORACLE_SERVICE:-"dbstr01.nrs.bcgov"}
       ORACLE_USER: ${ORACLE_USER}
       POSTGRES_HOST: database
+      POSTGRES_PORT: "5432"
+      POSTGRES_DATABASE: "postgres"
+      
     depends_on:
       database:
         condition: service_started
