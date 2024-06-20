@@ -141,4 +141,8 @@ class SeedlotGeneticWorthServiceTest {
     verify(seedlotGeneticWorthRepository, times(0)).deleteAll(any());
     verify(seedlotGeneticWorthRepository, times(0)).flush();
   }
+
+  void saveGenWorthListToSeedlot() {
+    // keep going from here
+  }
 }
