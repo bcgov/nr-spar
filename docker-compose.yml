@@ -130,7 +130,7 @@ services:
     container_name: schemaspy
     profiles: ["schemaspy"]
     image: schemaspy/schemaspy:6.2.4
-    # user: "${UID}:${GID}"
+    user: ${UID:-""}:${GID:-""}
     volumes:
       - "./schemaspy/output:/output"
       - "./schemaspy/postgres.properties:/schemaspy.properties"
