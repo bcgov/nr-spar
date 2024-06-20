@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import PageTitle from '../../components/PageTitle';
-import '@testing-library/jest-dom';
 import makeServer from '../../mock-server/server';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, beforeAll, it, expect } from 'vitest';

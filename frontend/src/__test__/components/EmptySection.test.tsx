@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import EmptySection from '../../components/EmptySection/index';
-import '@testing-library/jest-dom';
 
 describe('the Empty Section component', () => {
   it('should render correctly', () => {
