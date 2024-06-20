@@ -28,7 +28,9 @@ services:
     container_name: database
     environment:
       <<: *db-vars
-    volumes: ["/pgdata"]
+    volumes:
+      - "/pgdata"
+      - "./database/init_db:/init_db"
     ports: ["5432:5432"]
     healthcheck:
       test: pg_isready -U postgres
@@ -142,7 +144,7 @@ services:
     profiles: ["pgadmin"]
     entrypoint: sh -c "echo 'Browse => http://localhost:5050' && /entrypoint.sh"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_EMAIL: admin@qs.com
       PGADMIN_DEFAULT_PASSWORD: admin
     image: dpage/pgadmin4
     ports: [5050:80]
