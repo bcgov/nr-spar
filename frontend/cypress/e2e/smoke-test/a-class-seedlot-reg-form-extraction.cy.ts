@@ -129,7 +129,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     // Enter valid location code
     cy.get('#collection-location-code')
       .clear()
-      .type('02')
+      .type('00')
       .blur();
 
     // Save changes
@@ -158,6 +158,95 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
 
     // Valid start date
     cy.get('#ext-start-date')
+      .clear()
+      .type('2024-05-27')
+      .blur();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains(/Save changes|Changes saved!/g)
+      .click();
+  });
+
+  it('Edit Storage agency section details', () => {
+    // Change inputs
+    cy.get('#storage-use-tsc')
+      .uncheck({ force: true });
+
+    // Enter invalid acronym
+    cy.get('#str-agency-combobox')
+      .type('ggg')
+      .blur();
+
+    cy.get('#str-agency-combobox-error-msg')
+      .should('have.text', regFormData.extraction.agencyErrorMsg);
+
+    // Enter invalid acronym
+    cy.get('#str-agency-combobox')
+      .clear()
+      .type('-1')
+      .blur();
+
+    cy.get('#str-agency-combobox-error-msg')
+      .should('have.text', regFormData.extraction.agencyValidationMsg);
+
+    cy.get('.applicant-error-notification')
+      .should('be.visible');
+
+    // Enter valid test acronym
+    cy.get('#str-agency-combobox')
+      .clear()
+      .type(testAcronym)
+      .blur();
+
+    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+      .should('be.visible');
+
+    cy.get('.applicant-error-notification')
+      .should('not.be.visible');
+
+    // Enter invalid location code
+    cy.get('#str-location-code')
+      .clear()
+      .type('96', { delay: TYPE_DELAY })
+      .blur();
+
+    cy.get('#str-location-code-error-msg')
+      .should('have.text', regFormData.extraction.locationErrorMsg);
+
+    // Enter valid location code
+    cy.get('#str-location-code')
+      .clear()
+      .type('00')
+      .blur();
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains(/Save changes|Changes saved!/g)
+      .click();
+  });
+
+  it('Storage Date inputs', () => {
+    cy.get('#str-end-date')
+      .clear()
+      .type('2024-05-28')
+      .blur();
+
+    // Invalid start date
+    cy.get('#str-start-date')
+      .clear()
+      .type('2024-05-29')
+      .blur();
+
+    cy.get(`.${prefix}--date-picker`)
+      .find(`.${prefix}--form-requirement`)
+      .should('have.length', 2)
+      .and('contain.text', regFormData.extraction.invalidDateErrorMsg);
+
+    // Valid start date
+    cy.get('#str-start-date')
       .clear()
       .type('2024-05-27')
       .blur();
