@@ -166,14 +166,14 @@ services:
           target: ./sync/requirements.txt
     environment:
       <<: *db-vars
-      TEST_MODE: "0"
+      TEST_MODE: "1"
       EXECUTION_ID: "0"
       DATABASE_HOST: database
-      ORACLE_HOST: ${ORACLE_HOST:-"default"}
-      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-"default"}
-      ORACLE_PORT: ${ORACLE_PORT:-"default"}
-      ORACLE_SERVICE: ${ORACLE_SERVICE:-"default"}
-      ORACLE_USER: ${ORACLE_USER:-"default"}
+      ORACLE_HOST: ${ORACLE_HOST:-"142.34.84.58"}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      ORACLE_PORT: ${ORACLE_PORT:-"1532"}
+      ORACLE_SERVICE: ${ORACLE_SERVICE:-"dbstr01.nrs.bcgov"}
+      ORACLE_USER: ${ORACLE_USER}
     depends_on:
       database:
         condition: service_started
