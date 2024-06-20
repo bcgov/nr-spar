@@ -1,3 +1,6 @@
+import prefix from '../../../src/styles/classPrefix';
+import { SeedlotRegFixtureType } from '../../definitions';
+
 describe('A Class Seedlot Registration form, Extraction and Storage', () => {
   let regFormData: {
     extraction: {
@@ -5,6 +8,11 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       extrationSubtitle: string;
       storageTitle: string;
       storageSubtitle: string;
+      checkboxText: string;
+      agencyErrorMsg: string;
+      agencyValidationMsg: string;
+      locationErrorMsg: string;
+      invalidDateErrorMsg: string;
     }
   };
 
@@ -49,5 +57,25 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     cy.get('.temporary-seed-storage-title')
       .find('.subtitle-section')
       .should('have.text', regFormData.extraction.storageSubtitle);
+  });
+
+  it('Extraction agency section details', () => {
+    cy.get('#ext-agency-tsc-checkbox')
+      .should('be.checked');
+
+    cy.get('.agency-information-row')
+      .eq(0)
+      .find(`.${prefix}--checkbox-wrapper`)
+      .should('have.text', regFormData.extraction.checkboxText);
+  });
+
+  it('Storage agency section details', () => {
+    cy.get('#str-agency-tsc-checkbox')
+      .should('be.checked');
+
+    cy.get('.agency-information-row')
+      .eq(1)
+      .find(`.${prefix}--checkbox-wrapper`)
+      .should('have.text', regFormData.extraction.checkboxText);
   });
 });
