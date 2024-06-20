@@ -149,3 +149,18 @@ services:
     depends_on:
       database:
         condition: service_started
+
+  sync:
+    container_name: sync
+    profiles: ["sync"]
+    build: ./sync
+    environment:
+      <<: *db-vars
+      TEST_MODE: "0"
+      EXECUTION_ID: "0"
+      POSTGRES_HOST: "database"
+      ORACLE_HOST: ${ORACLE_HOST:-"default"}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-"default"}
+      ORACLE_PORT: ${ORACLE_PORT:-"default"}
+      ORACLE_SERVICE: ${ORACLE_SERVICE:-"default"}
+      ORACLE_USER: ${ORACLE_USER:-"default"}
