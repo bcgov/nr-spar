@@ -171,13 +171,10 @@ services:
       TEST_MODE: ${TEST_MODE:-0}
       EXECUTION_ID: ${EXECUTION_ID:-0}
       DATABASE_HOST: database
-      # ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
-      ORACLE_HOST: ${ORACLE_HOST:-"142.34.84.58"}
+      ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
       ORACLE_PASSWORD: ${ORACLE_PASSWORD}
-      # ORACLE_PORT: ${ORACLE_PORT:-1543}
-      ORACLE_PORT: ${ORACLE_PORT:-1532}
-      # ORACLE_SERVICE: ${ORACLE_SERVICE:-dbq01.nrs.bcgov}
-      ORACLE_SERVICE: ${ORACLE_SERVICE:-dbstr01.nrs.bcgov}
+      ORACLE_PORT: ${ORACLE_PORT:-1543}
+      ORACLE_SERVICE: ${ORACLE_SERVICE:-dbq01.nrs.bcgov}
       ORACLE_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
     depends_on:
       database:
