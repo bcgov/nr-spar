@@ -86,16 +86,16 @@ public class SeedlotGeneticWorthService {
         seedlot.getId());
 
     List<SeedlotGeneticWorth> seedlotGeneticWorths = new ArrayList<>();
-    for (ParentTreeGeneticQualityDto parentTreeGenQualityDto : genWorthCodeToInsert) {
+    for (ParentTreeGeneticQualityDto ptgqDto : genWorthCodeToInsert) {
 
       GeneticWorthEntity gwEntity =
           geneticWorthEntityDao
-              .getGeneticWorthEntity(parentTreeGenQualityDto.geneticWorthCode())
+              .getGeneticWorthEntity(ptgqDto.geneticWorthCode())
               .orElseThrow();
 
       SeedlotGeneticWorth sgw =
           new SeedlotGeneticWorth(seedlot, gwEntity, loggedUserService.createAuditCurrentUser());
-      sgw.setGeneticQualityValue(parentTreeGenQualityDto.geneticQualityValue());
+      sgw.setGeneticQualityValue(ptgqDto.geneticQualityValue());
       seedlotGeneticWorths.add(sgw);
     }
 

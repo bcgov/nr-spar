@@ -1,12 +1,14 @@
 package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
@@ -142,7 +144,35 @@ class SeedlotGeneticWorthServiceTest {
     verify(seedlotGeneticWorthRepository, times(0)).flush();
   }
 
-  void saveGenWorthListToSeedlot() {
-    // keep going from here
+  @Test
+  @DisplayName("Save a list of Genetic Worth Traits to a Seedlot happy path should succeed")
+  void saveGenWorthListToSeedlot_happyPath_shouldSucceed() {
+    GeneticWorthEntity gw = new GeneticWorthEntity();
+    gw.setGeneticWorthCode("GVO");
+    when(geneticWorthEntityDao.getGeneticWorthEntity("GVO")).thenReturn(Optional.of(gw));
+    
+    AuditInformation audit = new AuditInformation("userId");
+    when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
+
+    String seedlotNumber = "63111";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+
+    GeneticWorthTraitsDto genWorthTraits =
+        new GeneticWorthTraitsDto("GVO", null, new BigDecimal("16"), null);
+
+    seedlotGeneticWorthService.saveGenWorthListToSeedlot(seedlot, List.of(genWorthTraits));
+
+    verify(seedlotGeneticWorthRepository, times(1)).saveAllAndFlush(anyList());
+  }
+
+  @Test
+  @DisplayName("Save a list of Genetic Worth Traits to a Seedlot empty list should succeed")
+  void saveGenWorthListToSeedlot_emptyList_shouldSucceed() {
+    String seedlotNumber = "63111";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+
+    seedlotGeneticWorthService.saveGenWorthListToSeedlot(seedlot, List.of());
+
+    verify(seedlotGeneticWorthRepository, times(0)).saveAllAndFlush(anyList());
   }
 }

@@ -620,7 +620,7 @@ public class SeedlotService {
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
 
-    String currentSeedlotStauts = seedlot.getSeedlotStatus().getSeedlotStatusCode();
+    String currentSeedlotStatus = seedlot.getSeedlotStatus().getSeedlotStatusCode();
 
     /*
      * This determines whether delete actions can be performed
@@ -628,7 +628,7 @@ public class SeedlotService {
      * TSC admins can perform delete actions without regard of the seedlot's status
      */
     boolean canDelete =
-        currentSeedlotStauts.equals("PND") || currentSeedlotStauts.equals("INC") || isTscAdmin;
+        currentSeedlotStatus.equals("PND") || currentSeedlotStatus.equals("INC") || isTscAdmin;
 
     /*
      * Merging entities script:
@@ -671,7 +671,7 @@ public class SeedlotService {
     }
 
     // Only set declaration info for pending seedlots
-    if (currentSeedlotStauts.equals("PND")) {
+    if (currentSeedlotStatus.equals("PND")) {
       setSeedlotDeclaredInfo(seedlot);
     }
 

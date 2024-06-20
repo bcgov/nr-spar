@@ -211,7 +211,7 @@ public class TscAdminService {
    * Updates.
    *
    * @param seedlot The Seedlot instance.
-   * @param seedlotReviewGeographicInformation Seedlot Geo Information provided by TSC Admin.
+   * @param seedlotReviewDto Seedlot Geo Information provided by TSC Admin.
    */
   public void updateSeedlotGeoInformation(
       Seedlot seedlot, SeedlotReviewGeoInformationDto seedlotReviewDto) {
