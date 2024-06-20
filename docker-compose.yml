@@ -1,9 +1,11 @@
 ---
 
-x-db-vars: &db-vars
+x-postgres-vars: &postgres-vars
+  POSTGRES_DATABASE: spar
+  POSTGRES_HOST: database
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: default
-  POSTGRES_DB: postgres
+  POSTGRES_PORT: 5432
 
 x-frontend: &frontend
   depends_on:
@@ -27,7 +29,7 @@ services:
   database:
     container_name: database
     environment:
-      <<: *db-vars
+      <<: *postgres-vars
     volumes:
       - "/pgdata"
       - "./database/init_db:/init_db"
@@ -51,7 +53,7 @@ services:
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       POSTGRES_HOST: database
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
-      <<: *db-vars
+      <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.7-eclipse-temurin-17
     entrypoint: sh -c './encora-cert.sh'
@@ -165,19 +167,18 @@ services:
           path: ./sync/requirements.txt
           target: ./sync/requirements.txt
     environment:
-      <<: *db-vars
-      TEST_MODE: "1"
-      EXECUTION_ID: "0"
+      <<: *postgres-vars
+      TEST_MODE: ${TEST_MODE:-0}
+      EXECUTION_ID: ${EXECUTION_ID:-0}
       DATABASE_HOST: database
+      # ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
       ORACLE_HOST: ${ORACLE_HOST:-"142.34.84.58"}
       ORACLE_PASSWORD: ${ORACLE_PASSWORD}
-      ORACLE_PORT: ${ORACLE_PORT:-"1532"}
-      ORACLE_SERVICE: ${ORACLE_SERVICE:-"dbstr01.nrs.bcgov"}
-      ORACLE_USER: ${ORACLE_USER}
-      POSTGRES_HOST: database
-      POSTGRES_PORT: "5432"
-      POSTGRES_DATABASE: "postgres"
-      
+      # ORACLE_PORT: ${ORACLE_PORT:-1543}
+      ORACLE_PORT: ${ORACLE_PORT:-1532}
+      # ORACLE_SERVICE: ${ORACLE_SERVICE:-dbq01.nrs.bcgov}
+      ORACLE_SERVICE: ${ORACLE_SERVICE:-dbstr01.nrs.bcgov}
+      ORACLE_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
     depends_on:
       database:
         condition: service_started
