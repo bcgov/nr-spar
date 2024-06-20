@@ -14,7 +14,7 @@ ARG PIP_NO_CACHE_DIR="off" \
 # Copy files and install requirements
 WORKDIR /app
 COPY . .
-RUN pip install -r ./requirements.txt
+RUN pip install -r --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org ./requirements.txt
 
 # Start the app
 WORKDIR /app/src
