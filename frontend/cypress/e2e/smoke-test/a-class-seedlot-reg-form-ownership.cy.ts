@@ -157,6 +157,15 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('Client search modal', () => {
@@ -207,6 +216,15 @@ describe('A Class Seedlot Registration form, Ownership', () => {
         cy.get('#ownership-location-code-0')
           .should('have.value', locationCode);
       });
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('Owner portion %, reserved % and surplus % display default values', () => {
@@ -218,6 +236,15 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     cy.get('#ownership-surplus-0')
       .should('have.value', '0');
+
+    // Save changes
+    cy.get('.seedlot-registration-button-row')
+      .find('button.form-action-btn')
+      .contains('Save changes')
+      .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('Edit owner portion %, reserved % and surplus % values', () => {
@@ -281,38 +308,44 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('Funding source and method of payment default values and change the values', () => {
-    cy.get('#ownership-funding-source-0')
-      .should('have.value', '');
 
-    cy.get('.single-owner-combobox')
-      .eq(0)
-      .find(`button.${prefix}--list-box__menu-icon`)
+    //Expand the funding source combo box
+    cy.get('#ownership-funding-source-0')
+      .should('have.value', '')
       .click();
 
-    cy.get('li#downshift-1-item-5')
+    const fundingSource = 'FTM - Forests for Tomorrow MOF Admin';
+
+    cy.get(`.${prefix}--list-box__menu-item__option`)
+      .contains(fundingSource)
+      .scrollIntoView()
       .click();
 
     cy.get('#ownership-funding-source-0')
-      .should('have.value', 'FTM - Forests for Tomorrow MOF Admin');
+      .should('have.value', fundingSource);
+
+    // Method of Payment
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', '')
+      .click();
+
+    const methodOfPayment = 'CSH - Cash Sale';
+
+    cy.get(`.${prefix}--list-box__menu-item__option`)
+      .contains(methodOfPayment)
+      .scrollIntoView()
+      .click();
 
     cy.get('#ownership-method-payment-0')
-      .should('have.value', '');
-
-    cy.get('.single-owner-combobox')
-      .eq(1)
-      .find(`button.${prefix}--list-box__menu-icon`)
-      .click();
-
-    cy.get('li#downshift-3-item-1')
-      .click();
-
-    cy.get('#ownership-method-payment-0')
-      .should('have.value', 'CSH - Cash Sale');
+      .should('have.value', methodOfPayment);
 
     // Check 'x' button
     cy.get('.single-owner-combobox')
@@ -320,39 +353,44 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .find('[aria-label="Clear selected item"]')
       .click();
 
-    cy.get('#ownership-funding-source-0')
-      .should('have.value', '');
-
     cy.get('.single-owner-combobox')
       .eq(1)
       .find('[aria-label="Clear selected item"]')
       .click();
 
-    cy.get('#ownership-method-payment-0')
-      .should('have.value', '');
-
     // Enter funding source and method payment values again
-    cy.get('.single-owner-combobox')
-      .eq(0)
-      .find(`button.${prefix}--list-box__menu-icon`)
+    cy.get('#ownership-funding-source-0')
+      .should('have.value', '')
       .click();
 
-    cy.get('li#downshift-1-item-5')
+    cy.get(`.${prefix}--list-box__menu-item__option`)
+      .contains(fundingSource)
+      .scrollIntoView()
       .click();
 
-    cy.get('.single-owner-combobox')
-      .eq(1)
-      .find(`button.${prefix}--list-box__menu-icon`)
+    cy.get('#ownership-funding-source-0')
+      .should('have.value', fundingSource);
+
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', '')
       .click();
 
-    cy.get('li#downshift-3-item-1')
+    cy.get(`.${prefix}--list-box__menu-item__option`)
+      .contains(methodOfPayment)
+      .scrollIntoView()
       .click();
+
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', methodOfPayment);
 
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('Create and delete new owner agency section', () => {
@@ -450,8 +488,11 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('Complete checkmark for Ownership step', () => {
