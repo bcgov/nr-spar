@@ -22,8 +22,10 @@ public class SeedPlanUnitService {
   private final SeedPlanZoneRepository seedPlanZoneRepository;
 
   /**
-   * Get the description of a BEC Zone by a code, returns null if not found or code provided is
-   * null.
+   * Get the description of a BEC Zone by an ID
+   *
+   * @return a {@link SpuDto} if found
+   * @throws {@link SpuNotFoundException} or {@link SpzNotFoundException}
    */
   public SpuDto getSpuById(String spuId) {
     SparLog.info("Finding SPU with id {}", spuId);

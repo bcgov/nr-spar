@@ -33,21 +33,17 @@ public class SeedPlanUnitEndpoint {
    *
    * @return an Optional {@link SpuDto} with all found result
    */
-  @GetMapping(path = "/{spuId}")
+  @GetMapping("/{spuId}")
   @Operation(
       summary = "Retrieve a SPU object with a given SPU ID",
       description =
-          "Returns a data object that contains row data in the Seed_Plan_Unit table along with"
-              + " additional data such as SPZ code.")
+          """
+            Returns a data object that contains row data in the Seed_Plan_Unit table along with
+            additional data such as SPZ code.
+          """)
   @ApiResponses(
       value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Returns a SPU dto",
-            content =
-                @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = SpuDto.class))),
+        @ApiResponse(responseCode = "200", description = "Returns a SPU dto"),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
@@ -59,7 +55,8 @@ public class SeedPlanUnitEndpoint {
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public SpuDto getSpuById(
-      @PathVariable("spuId") @Parameter(description = "The Seed Plan Unit Id") String spuId) {
+      @PathVariable("spuId") @Parameter(description = "The Seed Plan Unit Id", required = true)
+          String spuId) {
 
     return seedPlanUnitService.getSpuById(spuId);
   }

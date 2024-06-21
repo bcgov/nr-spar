@@ -313,7 +313,7 @@ public class SeedlotService {
 
     // Do nothing if this seedlot does not have a primary orchard
     if (optionalSeedlotOrchard.isEmpty()) {
-      SparLog.info("No seedlot orchard found for seedlot: {}", seedlotNumber);
+      SparLog.info("No seedlot primary orchard found for seedlot: {}", seedlotNumber);
       return;
     }
 
@@ -321,7 +321,7 @@ public class SeedlotService {
 
     SparLog.info("Seedlot {} has primary orchard {}", seedlotNumber, orchardId);
 
-    // Find the active SPU id associated with this seedlot ochard
+    // Find the active SPU id associated with this seedlot orchard
     Optional<ActiveOrchardSpuEntity> optActiveSpu = orchardService.findSpuIdByOrchard(orchardId);
 
     if (optActiveSpu.isEmpty()) {
@@ -934,8 +934,7 @@ public class SeedlotService {
         "Declaration data set, for seedlot {} for user {} at {}",
         seedlot.getId(),
         seedlot.getDeclarationOfTrueInformationUserId(),
-        dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp())
-    );
+        dtf.format(seedlot.getDeclarationOfTrueInformationTimestamp()));
   }
 
   private void saveSeedlotFormStep3(Seedlot seedlot, SeedlotFormInterimDto formStep3) {
