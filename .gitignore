@@ -206,3 +206,6 @@ sync/data/
 
 # Schema Spy output
 schemaspy/output
+
+# local testing
+*.bat

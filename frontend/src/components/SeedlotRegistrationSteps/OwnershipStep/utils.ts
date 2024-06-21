@@ -69,8 +69,22 @@ const isDecimalValid = (value: string): boolean => {
 };
 
 export const validatePerc = (value: string): SingleInvalidObj => {
-  let invalidText = inputText.twoDecimal;
-  let isInvalid = !isDecimalValid(value);
+  let invalidText = inputText.lowerThan;
+  let isInvalid = true;
+
+  if (!value) {
+    return {
+      isInvalid,
+      invalidText
+    }
+  }
+
+  isInvalid = !isDecimalValid(value);
+
+  if (isInvalid) {
+    invalidText = inputText.twoDecimal;
+  }
+
   if (!isInvalid) {
     if (Number(value) > 100) {
       isInvalid = true;
