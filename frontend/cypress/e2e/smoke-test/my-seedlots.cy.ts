@@ -19,22 +19,14 @@ describe('My seedlots page', () => {
     });
   });
 
-  it('should render my seedlot page heading', () => {
+  it('Page title', () => {
     cy.get('.my-seedlot-title')
       .find('.title-favourite')
       .children('h1')
       .should('have.text', 'My Seedlots');
   });
 
-  it('arrow button works correctly', () => {
-    // Arrow button test
-    cy.get(`.${prefix}--pagination__right`)
-      .find(`.${prefix}--popover--top-right`)
-      .find(`button.${prefix}--btn--icon-only`)
-      .click({ force: true });
-  });
-
-  it('should sort table columns in ascending and descinding order - Seedlot number', () => {
+  it('Sort table by Seedlot number', () => {
     let ascendingFirstRow: string;
     let descendingFirstRow: string;
 
@@ -73,12 +65,12 @@ describe('My seedlots page', () => {
       .eq(1)
       .find('td:nth-child(1)').then(($seedlotNum) => {
         const descendingSecondRow: string = $seedlotNum.text();
-        // eslint-disable-next-line max-len
-        expect(parseInt(descendingFirstRow, 10)).to.be.greaterThan(parseInt(descendingSecondRow, 10));
+        expect(parseInt(descendingFirstRow, 10))
+          .to.be.greaterThan(parseInt(descendingSecondRow, 10));
       });
   });
 
-  it('should sort table columns in ascending and descinding order - Seedlot species', () => {
+  it('Sort table by Seedlot species', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -117,7 +109,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('should sort table columns in ascending and descinding order - Seedlot status', () => {
+  it('Sort table by Seedlot status', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -156,7 +148,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('should sort table columns in ascending and descinding order - Created at', () => {
+  it('Sort table by Created at', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -197,7 +189,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('should sort table columns in ascending and descinding order - Last updated', () => {
+  it('Sort table by Last updated', () => {
     let ascendingFirstRow: string;
 
     // Sorting test
@@ -238,7 +230,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('can use search bar to give correct results', () => {
+  it('Search bar', () => {
     // Search bar test
     cy.get('.my-seedlot-data-table-row').children(`.${prefix}--search`).find('input')
       .type('PLI');
@@ -255,16 +247,20 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('dropdown button and next page functionality', () => {
-    // Dropdown test
+  it('Pagination', () => {
+    // Number of item dropdown
     cy.get(`.${prefix}--pagination__left`)
       .find('select')
       .as('dropdownBtn')
       .select('10');
 
+    // @ngunner15 the drop down is selected with value 10, what we need here is to verify
+    // that the total number of rows on this page is actually 10.
+    // you might be able to do that by checking the total number of <tr> under <tbody>
     cy.get('@dropdownBtn')
       .should('have.value', '10');
-    // Next page test
+
+    // Forward Backward buttons
     cy.get(`.${prefix}--pagination__control-buttons`)
       .find(`button.${prefix}--pagination__button--forward`)
       .click();
@@ -280,9 +276,11 @@ describe('My seedlots page', () => {
     cy.get(`.${prefix}--pagination__right`)
       .find(`select.${prefix}--select-input`)
       .should('have.value', '1');
+
+    // @ngunner15 Need to test the page number dropdown
   });
 
-  it('should be able to select a seedlot row and redirect to its page', () => {
+  it('Select a seedlot row should redirect to its detail page', () => {
     cy.get('table.seedlot-data-table tbody tr')
       .as('tableContent');
 
@@ -299,7 +297,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('should have correct number of seedlots', () => {
+  it('Correct number of seedlots', () => {
     cypressSeedlots = NUM_OF_LOOPS * speciesKeys.length;
     //  Check total seedlots
     cy.get(`.${prefix}--pagination__left`)
@@ -314,7 +312,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it('should click register-a-class button', () => {
+  it('Register a new seedlot button', () => {
     // Button test
     cy.get('.my-seedlot-title')
       .find('button.reg-seedlot-btn')

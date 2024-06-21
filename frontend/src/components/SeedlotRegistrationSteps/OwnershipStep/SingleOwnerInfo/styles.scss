@@ -31,11 +31,24 @@
     }
 
     &.default-owner-col {
-      padding-top: 3.05rem
+      padding-top: 3.05rem;
     }
 
     &.other-owners-col {
       padding-top: 0.1rem;
+    }
+
+    .default-owner-col,
+    .other-owners-col {
+
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
     }
   }
 
@@ -77,6 +90,15 @@
 
   .reserved-surplus-input {
     width: 49.75%;
+
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
   }
 
   .owner-mod-btn {
@@ -84,6 +106,7 @@
   }
 
   .owner-code-text-input {
+
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
       -webkit-appearance: none;

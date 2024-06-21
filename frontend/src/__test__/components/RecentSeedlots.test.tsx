@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import RecentSeedlots from '../../components/RecentSeedlots';
-import '@testing-library/jest-dom';
 
 //TODO test Empty Section
 describe('MySeedlots Seedlot component', () => {

@@ -1,7 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import RightPanelTitle from '../../components/RightPanelTitle';
-import '@testing-library/jest-dom';
 
 describe('the right panel title component', () => {
   const func = vi.fn();

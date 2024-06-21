@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ActivityHistory from '../../components/ActivityHistory';
 import ActivityHistoryItems from '../../mock-server/fixtures/ActivityHistoryItems';
-import '@testing-library/jest-dom';
 
 describe('Activity History component', () => {
   it('should render seedlot number and steps correctly', () => {

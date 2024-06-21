@@ -12,6 +12,7 @@ export interface AuthContextData {
   signOut(): void;
   provider: string;
   setClientRoles: (clientRoles: UserClientRolesType, reload?: boolean) => void;
+  isTscAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);

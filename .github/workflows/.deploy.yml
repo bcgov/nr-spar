@@ -149,7 +149,7 @@ jobs:
           triggers: ${{ matrix.triggers }}
           verification_path: ${{ matrix.verification_path }}
           verification_retry_attempts: "5"
-          verification_retry_seconds: "15"
+          verification_retry_seconds: "20"
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 

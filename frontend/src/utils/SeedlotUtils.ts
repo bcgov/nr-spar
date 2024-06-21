@@ -36,6 +36,14 @@ export const covertRawToDisplayObj = (seedlot: SeedlotType, vegCodeData: MultiOp
   seedlotClass: `${seedlot.geneticClass.geneticClassCode}-class`,
   seedlotSpecies: getSpeciesLabelByCode(seedlot.vegetationCode, vegCodeData),
   seedlotStatus: seedlot.seedlotStatus.description,
+  entryUserId: seedlot.declarationOfTrueInformationUserId
+    ? seedlot.declarationOfTrueInformationUserId
+    : '--',
+  entryTimestamp: seedlot.declarationOfTrueInformationTimestamp
+    ? luxon.fromISO(seedlot.declarationOfTrueInformationTimestamp).toFormat(MONTH_DAY_YEAR)
+    : '--',
+  applicantAgency: seedlot.applicantClientNumber,
+  locationCode: seedlot.applicantLocationCode,
   createdAt: luxon.fromISO(seedlot.auditInformation.entryTimestamp).toFormat(MONTH_DAY_YEAR),
   lastUpdatedAt: luxon.fromISO(seedlot.auditInformation.updateTimestamp)
     .toFormat(MONTH_DAY_YEAR),

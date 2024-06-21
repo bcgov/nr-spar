@@ -1,7 +1,6 @@
 import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react';
 import ComboButton from '../../components/ComboButton/index';
-import '@testing-library/jest-dom';
 
 const manageOptions = [
   {
