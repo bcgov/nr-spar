@@ -46,8 +46,10 @@ public class AreaOfUseEndpoint {
         @ApiResponse(
             responseCode = "200",
             description =
-                "Successfully returned a list of SPZ under a vegetation code, an empty list is"
-                    + " returned if nothing is found.",
+                """
+                    Successfully returned a list of SPZ under a vegetation code, an empty list is
+                    returned if nothing is found.
+                """,
             content =
                 @Content(
                     mediaType = "application/json",
