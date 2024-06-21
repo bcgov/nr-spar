@@ -4,6 +4,7 @@ import {
   FlexGrid,
   Column,
   Row,
+  TextInput,
   NumberInput,
   CheckboxGroup,
   Checkbox,
@@ -231,56 +232,56 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
-          <NumberInput
+          <TextInput
             id={state.numberOfContainers.id}
+            type="number"
             name={fieldsConfig.numberOfContainers.name}
             value={state.numberOfContainers.value}
-            label={fieldsConfig.numberOfContainers.labelText}
+            labelText={fieldsConfig.numberOfContainers.labelText}
             readOnly={isFormSubmitted && !isReview}
             invalid={state.numberOfContainers.isInvalid}
             invalidText={fieldsConfig.numberOfContainers.invalidText}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleContainerNumAndVol(true, e.target.value);
             }}
-            hideSteppers
-            disableWheel
           />
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
-          <NumberInput
+          <TextInput
             id={state.volumePerContainers.id}
+            type="number"
             name={fieldsConfig.volumePerContainers.name}
             value={state.volumePerContainers.value}
-            label={fieldsConfig.volumePerContainers.labelText}
+            labelText={fieldsConfig.volumePerContainers.labelText}
             readOnly={isFormSubmitted && !isReview}
             invalid={state.volumePerContainers.isInvalid}
             invalidText={fieldsConfig.volumePerContainers.invalidText}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleContainerNumAndVol(false, e.target.value);
             }}
-            hideSteppers
-            disableWheel
           />
         </Column>
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={16} xlg={12}>
-          <NumberInput
+          <TextInput
             id={state.volumeOfCones.id}
+            type="number"
             name={fieldsConfig.volumeOfCones.name}
             value={state.volumeOfCones.value}
-            label={fieldsConfig.volumeOfCones.labelText}
+            labelText={fieldsConfig.volumeOfCones.labelText}
             invalid={state.volumeOfCones.isInvalid}
             invalidText={fieldsConfig.volumeOfCones.invalidText}
             helperText={isReview ? null : fieldsConfig.volumeOfCones.helperText}
             warn={isCalcWrong}
             readOnly={isFormSubmitted && !isReview}
             warnText={fieldsConfig.volumeOfCones.warnText}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleVolOfCones(e.target.value);
             }}
-            hideSteppers
-            disableWheel
           />
         </Column>
       </Row>
