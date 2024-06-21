@@ -45,7 +45,7 @@ public class AreaOfUseService {
    * @return a list of {@link SpzDto}
    */
   public List<SpzDto> getSpzByVegCode(String vegCode) {
-    SparLog.info("Begin to query tested_pt_area_of_use_spz table for a list of unique spz code");
+    SparLog.info("Begin to query SEED_PLAN_ZONE table for a list of unique spz code");
 
     List<SeedPlanZone> seedPlanZoneList =
         seedPlanZoneRepository.findAllByGeneticClassCode_AndVegetationCode_id('A', vegCode);
@@ -209,11 +209,11 @@ public class AreaOfUseService {
     areaOfUseSpuGeoDto.setLatitudeMinutesMax(maxLatMinute);
 
     // Min Lat Minute
-    List<SeedPlanUnit> filteredMinLatMiunteSpu =
+    List<SeedPlanUnit> filteredMinLatMinuteSpu =
         spuEntityList.stream().filter(spu -> spu.getLatitudeMinutesMin() != null).toList();
     Integer minLatMinute =
-        filteredMinLatMiunteSpu.size() > 0
-            ? filteredMinLatMiunteSpu.stream()
+        filteredMinLatMinuteSpu.size() > 0
+            ? filteredMinLatMinuteSpu.stream()
                 .min(Comparator.comparing(SeedPlanUnit::getLatitudeMinutesMin))
                 .get()
                 .getLatitudeMinutesMin()

@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +45,9 @@ public class AreaOfUseEndpoint {
       value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Successfully returned a list of SPZ under a vegetation code.",
+            description =
+                "Successfully returned a list of SPZ under a vegetation code, an empty list is"
+                    + " returned if nothing is found.",
             content =
                 @Content(
                     mediaType = "application/json",
@@ -59,7 +60,11 @@ public class AreaOfUseEndpoint {
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public List<SpzDto> getSpzByVegCode(
       @PathVariable
-          @Parameter(name = "vegCode", in = ParameterIn.PATH, description = "The vegetation code.")
+          @Parameter(
+              name = "vegCode",
+              in = ParameterIn.PATH,
+              description = "The vegetation code.",
+              required = true)
           String vegCode) {
 
     SparLog.info("Received request to fetch all SPZs for vegetation code: {}", vegCode);
@@ -73,7 +78,7 @@ public class AreaOfUseEndpoint {
    * @param spuId A seed plan unit id.
    * @return A {@link SpzSpuGeoDto} containing the results.
    */
-  @GetMapping(path = "/spu/{spuId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping("/spu/{spuId}")
   @Operation(
       summary = "Get area of use information given an SPU id",
       description = "Fetch geospatial data for the SPU along with a list of SPZ information.",
@@ -88,7 +93,8 @@ public class AreaOfUseEndpoint {
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public AreaOfUseDto getAreaOfUseData(
-      @Parameter(description = "The SPU (Seed Planning Unit) ID") @PathVariable("spuId")
+      @Parameter(description = "The SPU (Seed Planning Unit) ID", required = true, example = "7")
+          @PathVariable("spuId")
           Integer spuId) {
     return areaOfUseService.calcAreaOfUseData(spuId);
   }
