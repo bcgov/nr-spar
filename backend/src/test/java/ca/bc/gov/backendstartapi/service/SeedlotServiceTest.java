@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
@@ -610,5 +611,11 @@ class SeedlotServiceTest {
         testDto.seedlotSourceCode(), patchedSeedlot.getSeedlotSource().getSeedlotSourceCode());
     assertEquals(testDto.toBeRegistrdInd(), patchedSeedlot.getIntendedForCrownLand());
     assertEquals(testDto.bcSourceInd(), patchedSeedlot.getSourceInBc());
+  }
+
+  void updateSeedlotWithForm_tscAdmin_happyPath_shouldSucceed() {
+    String seedlotNumber = "63636";
+    SeedlotFormSubmissionDto form = mock(SeedlotFormSubmissionDto.class);
+    // keep going from here
   }
 }
