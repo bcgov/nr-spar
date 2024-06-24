@@ -225,7 +225,7 @@ public class OracleApiProvider implements Provider {
    */
   @Override
   public Optional<AreaOfUseDto> getAreaOfUseData(Integer spuId) {
-    String oracleApiUrl = String.format("%s/api/orchards/area-of-use/spu/{spuId}", rootUri);
+    String oracleApiUrl = String.format("%s/api/area-of-use/spu/{spuId}", rootUri);
 
     SparLog.info("Starting {} - {} request to {}", PROVIDER, "getAreaOfUseData", oracleApiUrl);
 
