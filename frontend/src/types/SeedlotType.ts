@@ -2,6 +2,7 @@ import { StatusColourMap } from '../components/StatusTag/definitions';
 import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/ContextContainerClassA/definitions';
 import { CodeDescResType } from './CodeDescResType';
 import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
+import { SpuDto } from './SpuDto';
 
 type EffectiveDateRange = {
   effectiveDate: string,
@@ -174,6 +175,7 @@ export type SeedPlanZoneOracleDto = {
  */
 export type RichSeedlotType = {
   seedlot: SeedlotType,
+  primarySpu: SpuDto | null,
   primarySpz: SeedPlanZoneDto | null,
   additionalSpzList: SeedPlanZoneDto[]
 }

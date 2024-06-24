@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -171,5 +172,38 @@ class SeedlotOrchardServiceTest {
         formStep4.contaminantPollenBv(), seedlot.getPollenContaminantBreedingValue());
     Assertions.assertEquals(
         formStep4.pollenContaminationMthdCode(), seedlot.getPollenContaminationMethodCode());
+  }
+
+  @Test
+  @DisplayName("Get Primary Seedlot Orchard should succeed")
+  void getPrimarySeedlotOrchard_shouldSucceed() {
+    String seedlotNumber = "54321";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+
+    SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, true, "555");
+
+    when(seedlotOrchardRepository.findBySeedlot_idAndIsPrimaryTrue(seedlotNumber))
+        .thenReturn(Optional.of(seedlotOrchard));
+
+    Optional<SeedlotOrchard> testSeedlotOrchard =
+        seedlotOrchardService.getPrimarySeedlotOrchard(seedlotNumber);
+
+    Assertions.assertTrue(testSeedlotOrchard.isPresent());
+
+    Assertions.assertEquals(seedlotOrchard, testSeedlotOrchard.get());
+  }
+
+  @Test
+  @DisplayName("Get Primary Seedlot Orchard should return empty if not found")
+  void getPrimarySeedlotOrchard_ReturnEmpty() {
+    String seedlotNumber = "54321";
+
+    when(seedlotOrchardRepository.findBySeedlot_idAndIsPrimaryTrue(seedlotNumber))
+        .thenReturn(Optional.empty());
+
+    Optional<SeedlotOrchard> testSeedlotOrchard =
+        seedlotOrchardService.getPrimarySeedlotOrchard(seedlotNumber);
+
+    Assertions.assertTrue(testSeedlotOrchard.isEmpty());
   }
 }

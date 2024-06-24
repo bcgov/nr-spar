@@ -20,6 +20,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
+import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
@@ -350,11 +351,13 @@ class SeedlotServiceTest {
 
     when(seedlotRepository.findById(seedlotId)).thenReturn(Optional.of(seedlotEntity));
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId)).thenReturn(List.of());
+    when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId)).thenReturn(Optional.empty());
 
     SeedlotDto responseFromService = seedlotService.getSingleSeedlotInfo(seedlotId);
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(seedlotEntity, responseFromService.getSeedlot());
+    Assertions.assertNull(responseFromService.getPrimarySpu());
   }
 
   @Test
@@ -375,8 +378,63 @@ class SeedlotServiceTest {
   }
 
   @Test
-  @DisplayName("findSingleSeedlotFullDataSuccessTest")
-  void findSingleSeedlotFullDataSuccessTest() {
+  @DisplayName("Get Seedlot by ID with active spu not found test")
+  void getSeedlotByIdWithActiveSpuNotFoundTest() {
+    String seedlotId = "0000000";
+    Seedlot seedlotEntity = new Seedlot(seedlotId);
+
+    when(seedlotRepository.findById(seedlotId)).thenReturn(Optional.of(seedlotEntity));
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId)).thenReturn(List.of());
+
+    String orchardId = "405";
+    SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlotEntity, true, orchardId);
+
+    when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId))
+        .thenReturn(Optional.of(seedlotOrchard));
+
+    when(orchardService.findSpuIdByOrchard(orchardId)).thenReturn(Optional.empty());
+
+    SeedlotDto responseFromService = seedlotService.getSingleSeedlotInfo(seedlotId);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(seedlotEntity, responseFromService.getSeedlot());
+    Assertions.assertNull(responseFromService.getPrimarySpu());
+  }
+
+  @Test
+  @DisplayName("Get Seedlot by ID with error from get spu from Oracle test.")
+  void getSeedlotByIdWithErrorFromOracleSpu() {
+    String seedlotId = "0000000";
+    Seedlot seedlotEntity = new Seedlot(seedlotId);
+
+    when(seedlotRepository.findById(seedlotId)).thenReturn(Optional.of(seedlotEntity));
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId)).thenReturn(List.of());
+
+    String orchardId = "405";
+    SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlotEntity, true, orchardId);
+
+    when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId))
+        .thenReturn(Optional.of(seedlotOrchard));
+
+    Integer spuId = 7;
+    ActiveOrchardSpuEntity activeOrchardSpuEntity =
+        new ActiveOrchardSpuEntity(orchardId, spuId, true, false, false);
+
+    when(orchardService.findSpuIdByOrchard(orchardId))
+        .thenReturn(Optional.of(activeOrchardSpuEntity));
+
+    when(oracleApiProvider.getSpuById(spuId)).thenReturn(Optional.empty());
+
+    SeedlotDto responseFromService = seedlotService.getSingleSeedlotInfo(seedlotId);
+
+    Assertions.assertNotNull(responseFromService);
+    Assertions.assertEquals(seedlotEntity, responseFromService.getSeedlot());
+    Assertions.assertNull(responseFromService.getPrimarySpu());
+  }
+
+  @Test
+  @DisplayName("A-Class Seedlot Form success test")
+  void findAclassSeedlotFormFullDataSuccessTest() {
     String seedlotNumber = "0000000";
     String orchardId = "100";
     String onwerNumber = "1234";

@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.dto;
 
+import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -18,7 +19,10 @@ public class SeedlotDto {
   @Schema(description = "The seedlot entity in the seedlot table")
   private Seedlot seedlot;
 
-  @Schema(description = "The pirmary seed plan zone")
+  @Schema(description = "The primary seed plan unit")
+  private SpuDto primarySpu;
+
+  @Schema(description = "The primary seed plan zone")
   private SeedPlanZoneDto primarySpz;
 
   @Schema(description = "A list of additional seed plan zones")
