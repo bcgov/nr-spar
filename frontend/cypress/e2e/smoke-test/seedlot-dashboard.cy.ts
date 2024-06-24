@@ -32,10 +32,10 @@ describe('Seedlot Dashboard test', () => {
     cy.get('.title-section')
       .find('.subtitle-section')
       .should('have.text', seedlotDashboardData.subtitle);
-    cy.get('.recent-seedlots-title')
+    cy.get('.recent-seedlots-title-section')
       .find('h2')
       .should('have.text', seedlotDashboardData.secondSectionTitle);
-    cy.get('.recent-seedlots-title')
+    cy.get('.recent-seedlots-title-section')
       .find('.recent-seedlots-subtitle')
       .should('have.text', seedlotDashboardData.secondSectionSubtitle);
   });
