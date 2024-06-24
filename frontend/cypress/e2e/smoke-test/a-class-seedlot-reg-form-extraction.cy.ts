@@ -141,6 +141,55 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .click();
   });
 
+  it('Extraction Client search modal', () => {
+    cy.get('.agency-information-section')
+      .eq(0)
+      .find('button.client-search-toggle-btn')
+      .click();
+
+    cy.get('#client-search-dropdown')
+      .find(`button.${prefix}--list-box__field`)
+      .click();
+
+    cy.get('#client-search-dropdown')
+      .find('li')
+      .contains('Acronym')
+      .click();
+
+    cy.get('#client-search-input')
+      .clear({ force: true })
+      .type(testPopupAcronym)
+      .blur();
+
+    cy.get('button.client-search-button')
+      .contains('Search')
+      .click({ force: true });
+
+    cy.get(`table.${prefix}--data-table tbody tr`)
+      .eq(0)
+      .find('td:nth-child(1)')
+      .find(`input.${prefix}--radio-button`)
+      .check({ force: true });
+
+    cy.get(`table.${prefix}--data-table tbody tr`)
+      .eq(0)
+      .find('td[id*="locationCode"]')
+      .invoke('text')
+      .then((text) => {
+        const locationCode = text;
+
+        cy.get(`button.${prefix}--btn--primary`)
+          .contains('Apply selected client')
+          .click({ force: true });
+
+        cy.get('#ext-agency-combobox')
+          .should('have.value', testPopupAcronym);
+
+        cy.get('#ext-location-code')
+          .should('have.value', locationCode);
+      });
+  });
+
   it('Extraction Date inputs', () => {
     cy.get('#ext-end-date')
       .clear()
@@ -228,6 +277,55 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .find('button.form-action-btn')
       .contains(/Save changes|Changes saved!/g)
       .click();
+  });
+
+  it('Storage Client search modal', () => {
+    cy.get('.agency-information-section')
+      .eq(1)
+      .find('button.client-search-toggle-btn')
+      .click();
+
+    cy.get('#client-search-dropdown')
+      .find(`button.${prefix}--list-box__field`)
+      .click({ force: true });
+
+    cy.get('#client-search-dropdown')
+      .find('li')
+      .contains('Acronym')
+      .click({ force: true });
+
+    cy.get('#client-search-input')
+      .clear()
+      .type(testPopupAcronym)
+      .blur();
+
+    cy.get('button.client-search-button')
+      .contains('Search')
+      .click({ force: true });
+
+    cy.get(`table.${prefix}--data-table tbody tr`)
+      .eq(0)
+      .find('td:nth-child(1)')
+      .find(`input.${prefix}--radio-button`)
+      .check({ force: true });
+
+    cy.get(`table.${prefix}--data-table tbody tr`)
+      .eq(0)
+      .find('td[id*="locationCode"]')
+      .invoke('text')
+      .then((text) => {
+        const locationCode = text;
+
+        cy.get(`button.${prefix}--btn--primary`)
+          .contains('Apply selected client')
+          .click();
+
+        cy.get('#str-agency-combobox')
+          .should('have.value', testPopupAcronym);
+
+        cy.get('#str-location-code')
+          .should('have.value', locationCode);
+      });
   });
 
   it('Storage Date inputs', () => {
