@@ -9,7 +9,8 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       extrationSubtitle: string;
       storageTitle: string;
       storageSubtitle: string;
-      checkboxText: string;
+      extractionCheckboxText: string;
+      storageCheckboxText: string;
       agencyErrorMsg: string;
       agencyValidationMsg: string;
       locationErrorMsg: string;
@@ -26,7 +27,6 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
   beforeEach(() => {
     // Login
     cy.login();
-
     cy.fixture('aclass-reg-form').then((fData) => {
       regFormData = fData;
     });
@@ -35,7 +35,9 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       seedlotData = fData;
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNum = sNumber as string;
-        cy.visit(`/seedlots/a-class-registration/${seedlotNum}`);
+        const url = `/seedlots/a-class-registration/${seedlotNum}?step=6`;
+        cy.visit(url);
+        cy.url().should('contains', url);
       });
       testAcronym = seedlotData.dr.agencyAcronym;
       testPopupAcronym = seedlotData.cw.agencyAcronym;
@@ -67,7 +69,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     cy.get('.agency-information-row')
       .eq(0)
       .find(`.${prefix}--checkbox-wrapper`)
-      .should('have.text', regFormData.extraction.checkboxText);
+      .should('have.text', regFormData.extraction.extractionCheckboxText);
   });
 
   it('Storage agency section details', () => {
@@ -75,9 +77,9 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .should('be.checked');
 
     cy.get('.agency-information-row')
-      .eq(1)
+      .eq(2)
       .find(`.${prefix}--checkbox-wrapper`)
-      .should('have.text', regFormData.extraction.checkboxText);
+      .should('have.text', regFormData.extraction.storageCheckboxText);
   });
 
   it('Edit Extraction agency section details', () => {
@@ -115,7 +117,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .should('be.visible');
 
     cy.get('.applicant-error-notification')
-      .should('not.be.visible');
+      .should('not.exist');
 
     // Enter invalid location code
     cy.get('#ext-location-code')
@@ -127,7 +129,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .should('have.text', regFormData.extraction.locationErrorMsg);
 
     // Enter valid location code
-    cy.get('#collection-location-code')
+    cy.get('#ext-location-code')
       .clear()
       .type('00')
       .blur();
@@ -171,7 +173,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
 
   it('Edit Storage agency section details', () => {
     // Change inputs
-    cy.get('#storage-use-tsc')
+    cy.get('#str-agency-tsc-checkbox')
       .uncheck({ force: true });
 
     // Enter invalid acronym
@@ -204,7 +206,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .should('be.visible');
 
     cy.get('.applicant-error-notification')
-      .should('not.be.visible');
+      .should('not.exist');
 
     // Enter invalid location code
     cy.get('#str-location-code')
