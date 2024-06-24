@@ -5,6 +5,7 @@ import {
 } from '@carbon/react';
 
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
+import { PLACE_HOLDER } from '../../../../shared-constants/shared-constants';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import { formatLatLong, formatSpz, spzListToString } from '../utils';
 import Divider from '../../../Divider';
@@ -157,7 +158,7 @@ const AreaOfUseRead = () => {
                   labelText="Area of use comment:"
                   readOnly
                   value={
-                    richSeedlotData?.seedlot.areaOfUseComment ?? ''
+                    richSeedlotData?.seedlot.areaOfUseComment ?? PLACE_HOLDER
                   }
                 />
               )

@@ -1,12 +1,16 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.SpzDto;
+import ca.bc.gov.backendstartapi.exception.SpuNotFoundException;
 import ca.bc.gov.backendstartapi.service.AreaOfUseService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -35,11 +39,12 @@ class AreaOfUseEndpointTest {
     SpzDto spzCp = new SpzDto("CP", "Central Plateau", null);
     List<SpzDto> spzList = List.of(spzBv, spzCp);
 
-    when(areaOfUseService.getAllSpz()).thenReturn(spzList);
+    String vegCode = "FDC";
+    when(areaOfUseService.getSpzByVegCode(vegCode)).thenReturn(spzList);
 
     mockMvc
         .perform(
-            get("/api/area-of-use/tested-parent-trees/spz-list")
+            get("/api/area-of-use/spz-list/vegetation-code/{vegCode}", vegCode)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
@@ -56,16 +61,92 @@ class AreaOfUseEndpointTest {
   @Test
   @DisplayName("Get a list of SPZ endpoint should be able to handle erros.")
   void getSpzListShouldHandleError() throws Exception {
-    when(areaOfUseService.getAllSpz())
+    String vegCode = "FDC";
+
+    when(areaOfUseService.getSpzByVegCode(vegCode))
         .thenThrow(new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT));
 
     mockMvc
         .perform(
-            get("/api/area-of-use/tested-parent-trees/spz-list")
+            get("/api/area-of-use/spz-list/vegetation-code/{vegCode}", vegCode)
                 .with(csrf().asHeader())
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isIAmATeapot())
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAreaOfUseDataBySpu_sucessTest")
+  void getAreaOfUseDataBySpu_sucessTest() throws Exception {
+    AreaOfUseDto responseDto = new AreaOfUseDto();
+    AreaOfUseSpuGeoDto aouSpuGeoDto = new AreaOfUseSpuGeoDto(11, 1200, 12, 130, 2, 45);
+    responseDto.setAreaOfUseSpuGeoDto(aouSpuGeoDto);
+
+    SpzDto spzDto1 = new SpzDto("GL", "Georgia Lowlands", false);
+    SpzDto spzDto2 = new SpzDto("M", "Maritime", true);
+
+    responseDto.setSpzList(List.of(spzDto1, spzDto2));
+
+    Integer spu = 1;
+    when(areaOfUseService.calcAreaOfUseData(spu)).thenReturn(responseDto);
+
+    mockMvc
+        .perform(
+            get("/api/area-of-use/spu/{spuId}", spu)
+                .with(csrf().asHeader())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.elevationMin")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getElevationMin()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.elevationMax")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getElevationMax()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.latitudeDegreesMin")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMin()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.latitudeDegreesMax")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMax()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.latitudeMinutesMin")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMin()))
+        .andExpect(
+            jsonPath("$.areaOfUseSpuGeoDto.latitudeMinutesMax")
+                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMax()))
+        // SPZ list test
+        .andExpect(jsonPath("$.spzList[0].code").value(responseDto.getSpzList().get(0).getCode()))
+        .andExpect(
+            jsonPath("$.spzList[0].description")
+                .value(responseDto.getSpzList().get(0).getDescription()))
+        .andExpect(
+            jsonPath("$.spzList[0].isPrimary")
+                .value(responseDto.getSpzList().get(0).getIsPrimary()))
+        .andExpect(jsonPath("$.spzList[1].code").value(responseDto.getSpzList().get(1).getCode()))
+        .andExpect(
+            jsonPath("$.spzList[1].description")
+                .value(responseDto.getSpzList().get(1).getDescription()))
+        .andExpect(
+            jsonPath("$.spzList[1].isPrimary")
+                .value(responseDto.getSpzList().get(1).getIsPrimary()))
+        .andReturn();
+  }
+
+  @Test
+  @DisplayName("getAreaOfUseDataBySpu_errorTest")
+  void getAreaOfUseDataBySpu_errorTest() throws Exception {
+    when(areaOfUseService.calcAreaOfUseData(any())).thenThrow(new SpuNotFoundException());
+
+    mockMvc
+        .perform(
+            get("/api/area-of-use/spu/{spuId}", "420")
+                .with(csrf().asHeader())
+                .header("Content-Type", "application/json")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
         .andReturn();
   }
 }
