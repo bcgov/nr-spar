@@ -49,17 +49,17 @@ const SeedlotInformation = (
   });
 
   const setDefaultSource = (sources: SeedlotSourceType[]) => {
-    sources.forEach((source) => {
-      if (source.isDefault) {
-        setSeedlotFormData((prevData) => ({
-          ...prevData,
-          sourceCode: {
-            ...prevData.sourceCode,
-            value: source.code
-          }
-        }));
-      }
-    });
+    const defaultSource = sources.filter((source) => source.isDefault).at(0) ?? null;
+
+    if (defaultSource) {
+      setSeedlotFormData((prevData) => ({
+        ...prevData,
+        sourceCode: {
+          ...prevData.sourceCode,
+          value: defaultSource.code
+        }
+      }));
+    }
   };
 
   /**
@@ -67,10 +67,10 @@ const SeedlotInformation = (
    *  we will need to set the default again here.
    */
   useEffect(() => {
-    if (seedlotSourcesQuery.isSuccess && !seedlotFormData.sourceCode.value) {
+    if (seedlotSourcesQuery.status === 'success' && !seedlotFormData.sourceCode.value) {
       setDefaultSource(seedlotSourcesQuery.data);
     }
-  }, [seedlotSourcesQuery.isFetched]);
+  }, [seedlotSourcesQuery.status]);
 
   const renderSources = () => {
     if (seedlotSourcesQuery.isFetched) {
