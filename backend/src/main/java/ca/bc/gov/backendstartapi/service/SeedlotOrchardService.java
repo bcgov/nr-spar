@@ -8,6 +8,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -97,5 +98,15 @@ public class SeedlotOrchardService {
    */
   public List<SeedlotOrchard> getAllSeedlotOrchardBySeedlotNumber(String seedlotNumber) {
     return seedlotOrchardRepository.findAllBySeedlot_id(seedlotNumber);
+  }
+
+  /**
+   * Get the primary {@link SeedlotOrchard} given a {@link Seedlot} id (seedlot number).
+   *
+   * @param seedlotNumber the seedlot id
+   * @return A List of SeedlotOrchard containing the found records or an empty list.
+   */
+  public Optional<SeedlotOrchard> getPrimarySeedlotOrchard(String seedlotNumber) {
+    return seedlotOrchardRepository.findBySeedlot_idAndIsPrimaryTrue(seedlotNumber);
   }
 }

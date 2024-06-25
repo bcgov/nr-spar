@@ -148,8 +148,8 @@ def print_process(process):
     print(f"--Process Execution ID: ({process['interface_id']}):")
     print(f"--Process Execution order: {process['execution_order']} ")
     print(f"--        Retry_errors:{process['truncate_before_run']}." )
-    print(f"--Process Source: {process['source_name']} (table: {process['source_table']}, file: {process['source_file']}." )
-    print(f"--Process Target: {process['target_name']} (table: {process['target_table']}, PK: {process['target_primary_key']}.") 
+    print(f"--Process Source: {process['source_name']} (table: {process['source_table']}, file: {process['source_file']})." )
+    print(f"--Process Target: {process['target_name']} (table: {process['target_table']}, PK: {process['target_primary_key']}).") 
     print("--------------------------")
 
 def get_config(oracle_config, postgres_config, db_type):

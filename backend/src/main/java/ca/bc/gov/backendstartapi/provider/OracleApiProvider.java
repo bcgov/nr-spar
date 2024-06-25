@@ -8,6 +8,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.List;
@@ -225,7 +226,7 @@ public class OracleApiProvider implements Provider {
    */
   @Override
   public Optional<AreaOfUseDto> getAreaOfUseData(Integer spuId) {
-    String oracleApiUrl = String.format("%s/api/orchards/area-of-use/spu/{spuId}", rootUri);
+    String oracleApiUrl = String.format("%s/api/area-of-use/spu/{spuId}", rootUri);
 
     SparLog.info("Starting {} - {} request to {}", PROVIDER, "getAreaOfUseData", oracleApiUrl);
 
@@ -266,6 +267,29 @@ public class OracleApiProvider implements Provider {
     } catch (HttpClientErrorException httpExc) {
       SparLog.error(
           "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
+    }
+
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<SpuDto> getSpuById(Integer spuId) {
+    String oracleApiUrl = String.format("%s/api/seed-plan-unit/{spuId}", rootUri);
+
+    SparLog.info("Starting {} - {} request to {}", PROVIDER, "getSpuById", oracleApiUrl);
+
+    try {
+      ResponseEntity<SpuDto> spuDtoRes =
+          restTemplate.exchange(
+              oracleApiUrl,
+              HttpMethod.GET,
+              new HttpEntity<>(addHttpHeaders()),
+              new ParameterizedTypeReference<SpuDto>() {},
+              createParamsMap("spuId", spuId.toString()));
+      SparLog.info("GET SPU by id - Success response!");
+      return Optional.of(spuDtoRes.getBody());
+    } catch (HttpClientErrorException httpExc) {
+      SparLog.error("GET SPU by ID from oracle - Response code error: {}", httpExc.getStatusCode());
     }
 
     return Optional.empty();

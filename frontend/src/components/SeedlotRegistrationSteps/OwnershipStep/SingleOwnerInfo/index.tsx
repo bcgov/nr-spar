@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import {
   NumberInput,
+  TextInput,
   FlexGrid,
   Column,
   ComboBox,
@@ -90,6 +91,7 @@ const SingleOwnerInfo = ({
   const handleReservedAndSurplus = (field: string, value: string) => {
     const clonedState = structuredClone(ownerInfo);
     const isReserved = field === 'reservedPerc';
+    console.log(value);
 
     // First validate the format of what is set on the value and
     // get the correct error message
@@ -165,95 +167,58 @@ const SingleOwnerInfo = ({
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
-            <NumberInput
+            <TextInput
               id={ownerInfo.ownerPortion.id}
               name="ownerPortion"
-              label={inputText.portion.label}
+              labelText={inputText.portion.label}
               defaultValue={ownerInfo.ownerPortion.value}
-              hideSteppers
-              max={100}
-              min={0}
               onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                 // The guard is needed here because onClick also trigger the onChange method
                 // but it does not pass in any value
-                if (e?.target?.name && e?.target?.value) {
+                if (e?.target?.name) {
                   handleOwnerPortion(e.target.value);
                 }
               }}
               invalid={ownerInfo.ownerPortion.isInvalid}
               invalidText={ownerPortionInvalidText}
-              onClick={
-                (
-                  _e: React.MouseEvent<HTMLButtonElement>,
-                  target: NumStepperVal | undefined
-                ) => {
-                  // A guard is needed here because any click on the input will emit a
-                  //   click event, not necessarily the + - buttons
-                  if (target?.value) {
-                    handleOwnerPortion(String(target.value));
-                  }
-                }
-              }
               readOnly={readOnly && !isReview}
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
             <div className="reserved-perc-container">
               <div className="reserved-surplus-input">
-                <NumberInput
+                <TextInput
                   id={ownerInfo.reservedPerc.id}
+                  type="number"
                   name="reservedPerc"
-                  label={inputText.reserved.label}
+                  labelText={inputText.reserved.label}
                   value={ownerInfo.reservedPerc.value}
-                  hideSteppers
-                  max={100}
-                  min={0}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    if (e?.target?.name && e?.target?.value) {
+                    if (e?.target?.name) {
                       handleReservedAndSurplus(e.target.name, e.target.value);
                     }
                   }}
+                  onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                   invalid={ownerInfo.reservedPerc.isInvalid}
                   invalidText={reservedInvalidText}
-                  onClick={
-                    (
-                      _e: React.MouseEvent<HTMLButtonElement>,
-                      target: NumStepperVal | undefined
-                    ) => {
-                      if (target?.value) {
-                        handleReservedAndSurplus('reservedPerc', String(target.value));
-                      }
-                    }
-                  }
                   readOnly={readOnly && !isReview}
                 />
               </div>
               <div className="reserved-surplus-input">
-                <NumberInput
+                <TextInput
                   id={ownerInfo.surplusPerc.id}
+                  type="number"
                   name="surplusPerc"
-                  label={inputText.surplus.label}
+                  labelText={inputText.surplus.label}
                   value={ownerInfo.surplusPerc.value}
-                  hideSteppers
-                  max={100}
-                  min={0}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    if (e?.target?.name && e?.target?.value) {
+                    if (e?.target?.name) {
                       handleReservedAndSurplus(e.target.name, e.target.value);
                     }
                   }}
+                  onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                   invalid={ownerInfo.surplusPerc.isInvalid}
                   invalidText={surplusInvalidText}
-                  onClick={
-                    (
-                      _e: React.MouseEvent<HTMLButtonElement>,
-                      target: NumStepperVal | undefined
-                    ) => {
-                      if (target?.value) {
-                        handleReservedAndSurplus('surplusPerc', String(target.value));
-                      }
-                    }
-                  }
                   readOnly={readOnly && !isReview}
                 />
               </div>

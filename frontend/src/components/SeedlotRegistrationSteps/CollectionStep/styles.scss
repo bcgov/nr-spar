@@ -1,14 +1,16 @@
 @use '@carbon/type';
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 
-.collection-step-container{
+.collection-step-container {
   padding: 0;
 
   .collection-step-row {
     margin-bottom: 1.5rem;
+
     h2 {
       @include type.type-style('heading-03');
     }
+
     .#{vars.$bcgov-prefix}--date-picker--single {
       width: 100%;
 
@@ -20,6 +22,15 @@
 
     fieldset .subtitle-section {
       margin-bottom: 0.5rem;
+    }
+
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
     }
   }
 
