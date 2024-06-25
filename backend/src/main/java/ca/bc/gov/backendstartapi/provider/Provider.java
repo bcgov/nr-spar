@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,10 @@ public interface Provider {
   }
 
   default Optional<OrchardDto> findOrchardById(String orchardId) {
+    return Optional.empty();
+  }
+
+  default Optional<SpuDto> getSpuById(Integer spuId) {
     return Optional.empty();
   }
 
