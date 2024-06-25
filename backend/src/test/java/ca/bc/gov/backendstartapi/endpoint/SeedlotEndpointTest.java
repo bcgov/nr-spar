@@ -20,6 +20,7 @@ import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
@@ -418,7 +419,7 @@ class SeedlotEndpointTest {
   }
 
   @Test
-  @DisplayName("getSingleSeedlotInfoNotFoundNoPageTest")
+  @DisplayName("Get seedlots by client ID return empty list")
   void getSingleSeedlotInfoNotFoundNoPageTest() throws Exception {
 
     Optional<Page<Seedlot>> pagedResult = Optional.of(new PageImpl<>(List.of()));
@@ -433,21 +434,29 @@ class SeedlotEndpointTest {
   }
 
   @Test
-  @DisplayName("getSingleSeedlotInfoTest")
+  @DisplayName("Get seedlot by id should succeed")
   void getSingleSeedlotInfoTest() throws Exception {
-    Seedlot seedlotEntity = new Seedlot("0000000");
+    String seedlotNumber = "0000000";
+    Seedlot seedlotEntity = new Seedlot(seedlotNumber);
 
     SeedlotDto seedlotDto = new SeedlotDto();
+
+    Integer spuId = 7;
+    SpuDto spuDto = new SpuDto();
+    spuDto.setSeedPlanUnitId(spuId);
 
     seedlotDto.setSeedlot(seedlotEntity);
     seedlotDto.setPrimarySpz(null);
     seedlotDto.setAdditionalSpzList(List.of());
+    seedlotDto.setPrimarySpu(spuDto);
 
     when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(seedlotDto);
 
     mockMvc
         .perform(get("/api/seedlots/0000000").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("$.seedlot.id").value(seedlotNumber))
+        .andExpect(jsonPath("$.primarySpu.seedPlanUnitId").value(spuId))
         .andReturn();
   }
 

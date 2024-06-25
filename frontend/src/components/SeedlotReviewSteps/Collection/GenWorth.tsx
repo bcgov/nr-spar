@@ -4,8 +4,7 @@ import {
 } from '@carbon/react';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-
-import { PLACE_HOLDER } from './constants';
+import { PLACE_HOLDER } from '../../../shared-constants/shared-constants';
 
 type props = {
   isRead?: boolean;

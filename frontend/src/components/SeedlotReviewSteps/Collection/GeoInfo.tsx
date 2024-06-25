@@ -3,8 +3,8 @@ import {
   Row, Column, TextInput, TextInputSkeleton
 } from '@carbon/react';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
-import { PLACE_HOLDER } from './constants';
 import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
+import { PLACE_HOLDER } from '../../../shared-constants/shared-constants';
 import { formatEmptyStr } from './utils';
 
 type props = {

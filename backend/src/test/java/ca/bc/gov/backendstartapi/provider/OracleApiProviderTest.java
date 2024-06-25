@@ -9,6 +9,7 @@ import ca.bc.gov.backendstartapi.config.ProvidersConfig;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.HashMap;
 import java.util.List;
@@ -229,17 +230,55 @@ class OracleApiProviderTest {
   }
 
   @Test
-  @DisplayName("Find orchard by id should return empty on error")
-  void findOrchardById_shouldReturnEmpty_onError() {
+  @DisplayName("Get SPU with ID success test")
+  void getSpuById_shouldSucceed() {
+    when(loggedUserService.getLoggedUserToken()).thenReturn("1f7a4k5e8t9o5k6e9n8h5e2r6e");
+
+    Integer spuId = 7;
+    String url = "/null/api/seed-plan-unit/" + spuId.toString();
+
+    String json =
+        """
+          {
+            "seedPlanUnitId": 7,
+            "primaryInd": false,
+            "seedPlanZoneId": 1284,
+            "elevationBand": "LOW",
+            "elevationMax": 700,
+            "elevationMin": 1,
+            "createDate": "2001-07-01",
+            "latitudeBand": null,
+            "latitudeDegreesMin": 48,
+            "latitudeMinutesMin": 0,
+            "latitudeDegreesMax": 52,
+            "latitudeMinutesMax": 0,
+            "seedPlanZoneCode": "M"
+          }
+        """;
+
+    mockRestServiceServer
+        .expect(requestTo(url))
+        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+    Optional<SpuDto> optSpuDto = oracleApiProvider.getSpuById(spuId);
+
+    Assertions.assertFalse(optSpuDto.isEmpty());
+    Assertions.assertEquals(spuId, optSpuDto.get().getSeedPlanUnitId());
+    Assertions.assertEquals("M", optSpuDto.get().getSeedPlanZoneCode());
+  }
+
+  @Test
+  @DisplayName("Get SPU by id should return empty on error")
+  void getSpuById_shouldReturnEmpty_onError() {
     when(loggedUserService.getLoggedUserToken()).thenReturn("");
 
-    String orchardId = "339";
-    String url = "/null/api/orchards/" + orchardId;
+    Integer spuId = 7;
+    String url = "/null/api/seed-plan-unit/" + spuId.toString();
 
     mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.BAD_REQUEST));
 
-    Optional<OrchardDto> orchardOpt = oracleApiProvider.findOrchardById(orchardId);
+    Optional<SpuDto> optSpuDto = oracleApiProvider.getSpuById(spuId);
 
-    Assertions.assertTrue(orchardOpt.isEmpty());
+    Assertions.assertTrue(optSpuDto.isEmpty());
   }
 }

@@ -1,0 +1,20 @@
+## Global settings for ETL Tool:
+
+# Postgres database behavior
+postgres:
+    # 0 for limitless
+    max_rows_upsert: 10000
+    # If set, this column will be incremented (+1) when a Update happens and column exists in DOWNSTREAM
+    version_column: revision_count
+    # If Y: database connection will require a SSL protocol / any other value will not require SSL protocol
+    ssl_required: Y
+    
+    
+oracle:
+    # 0 for limitless
+    max_rows_upsert: 10000
+    # If set, this column will be incremented (+1) when a Update happens and column exists in DOWNSTREAM
+    version_column: REVISION_COUNT
+    # If Y: database connection will require a SSL protocol / any other value will not require SSL protocol
+    ssl_required: Y
+    

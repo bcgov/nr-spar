@@ -1,9 +1,11 @@
 ---
 
-x-db-vars: &db-vars
+x-postgres-vars: &postgres-vars
+  POSTGRES_DATABASE: spar
+  POSTGRES_HOST: database
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: default
-  POSTGRES_DB: postgres
+  POSTGRES_PORT: 5432
 
 x-frontend: &frontend
   depends_on:
@@ -27,15 +29,17 @@ services:
   database:
     container_name: database
     environment:
-      <<: *db-vars
-    volumes: ["/pgdata"]
+      <<: *postgres-vars
+    volumes:
+      - "/pgdata"
+      - "./database/init_db:/init_db"
     ports: ["5432:5432"]
     healthcheck:
       test: pg_isready -U postgres
       interval: 5s
       timeout: 5s
       retries: 5
-    image: postgis/postgis:13-master
+    image: postgis/postgis:15-master
 
   backend:
     container_name: backend
@@ -49,7 +53,7 @@ services:
       ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
       POSTGRES_HOST: database
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
-      <<: *db-vars
+      <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
     image: maven:3.9.7-eclipse-temurin-17
     entrypoint: sh -c './encora-cert.sh'
@@ -98,19 +102,19 @@ services:
     volumes: ["./frontend:/app"]
     working_dir: /app
 
-  oracle:
-    container_name: oracle
+  oracle-api:
+    container_name: oracle-api
     environment:
-      DATABASE_HOST: ${DATABASE_HOST}
-      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_HOST: ${DATABASE_HOST:-"nrcdb03.bcgov"}
+      DATABASE_PORT: ${DATABASE_PORT:-"1543"}
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      SERVICE_NAME: ${SERVICE_NAME}
+      SERVICE_NAME: ${SERVICE_NAME:-"dbq01.nrs.bcgov"}
       SERVER_PORT: "8091"
       ORACLEDB_KEYSTORE: /app/jssecacerts
       ORACLEDB_SECRET: changeit
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
-    profiles: ["oracle"]
+    profiles: ["oracle-api"]
     network_mode: host
     image: maven:3.9.7-eclipse-temurin-17
     entrypoint: sh -c './startup.sh && mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5006"'
@@ -126,7 +130,7 @@ services:
     container_name: schemaspy
     profiles: ["schemaspy"]
     image: schemaspy/schemaspy:6.2.4
-    user: "${UID}:${GID}"
+    user: ${UID:-""}:${GID:-""}
     volumes:
       - "./schemaspy/output:/output"
       - "./schemaspy/postgres.properties:/schemaspy.properties"
@@ -142,10 +146,36 @@ services:
     profiles: ["pgadmin"]
     entrypoint: sh -c "echo 'Browse => http://localhost:5050' && /entrypoint.sh"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_EMAIL: admin@qs.com
       PGADMIN_DEFAULT_PASSWORD: admin
     image: dpage/pgadmin4
     ports: [5050:80]
+    depends_on:
+      database:
+        condition: service_started
+
+  sync:
+    container_name: sync
+    profiles: ["sync"]
+    build: ./sync
+    develop:
+      watch:
+        - action: sync
+          path: ./sync
+          target: ./sync
+        - action: rebuild
+          path: ./sync/requirements.txt
+          target: ./sync/requirements.txt
+    environment:
+      <<: *postgres-vars
+      TEST_MODE: ${TEST_MODE:-0}
+      EXECUTION_ID: ${EXECUTION_ID:-0}
+      DATABASE_HOST: database
+      ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      ORACLE_PORT: ${ORACLE_PORT:-1543}
+      ORACLE_SERVICE: ${ORACLE_SERVICE:-dbq01.nrs.bcgov}
+      ORACLE_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
     depends_on:
       database:
         condition: service_started

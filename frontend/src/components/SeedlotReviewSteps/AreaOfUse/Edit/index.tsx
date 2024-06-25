@@ -11,7 +11,7 @@ import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/cont
 import { AreaOfUseDataType } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
 import { FilterObj, filterInput } from '../../../../utils/FilterUtils';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
-import { getSpzList } from '../../../../api-service/areaOfUseAPI';
+import { getSpzByVegCodeList } from '../../../../api-service/areaOfUseAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../../../../shared-constants/shared-constants';
@@ -29,14 +29,15 @@ import { COMMENT_ERR_MSG, MAX_COMMENT_LENGTH } from '../constants';
 const AreaOfUseEdit = () => {
   const {
     isFetchingData: isFetchingContextData, areaOfUseData,
-    setAreaOfUseData
+    seedlotData, setAreaOfUseData
   } = useContext(ClassAContext);
 
   const spzListQuery = useQuery({
-    queryKey: ['area-of-use', 'tested-parent-trees', 'spz-list'],
-    queryFn: () => getSpzList(),
+    queryKey: ['area-of-use', 'spz-list', 'vegetation-code', seedlotData?.vegetationCode!],
+    queryFn: () => getSpzByVegCodeList(seedlotData!.vegetationCode!),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS,
+    enabled: !!seedlotData?.vegetationCode,
     select: (data) => spzListToMultiObj(data)
   });
 
