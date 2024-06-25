@@ -217,7 +217,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
   });
 
-  it('store first Parent Tree Number in an array', () => {
+  it('store first Orchard Parent Tree Number in an array', () => {
     cy.get('#orchard-combobox-0')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
@@ -276,7 +276,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
   });
 
-  it('store second Parent Tree Number in an array', () => {
+  it('store second Orchard Parent Tree Number in an array', () => {
     // Enter new orchard
     cy.get('#orchard-combobox-0')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
