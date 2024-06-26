@@ -35,7 +35,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       seedlotData = fData;
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNum = sNumber as string;
-        const url = `/seedlots/a-class-registration/${seedlotNum}?step=6`;
+        const url = `/seedlots/a-class-registration/${seedlotNum}/?step=6`;
         cy.visit(url);
         cy.url().should('contains', url);
       });
@@ -213,6 +213,9 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .type('2024-05-27')
       .blur();
 
+    cy.get('#ext-agency-tsc-checkbox')
+      .check({ force: true });
+
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
@@ -281,21 +284,20 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
 
   it('Storage Client search modal', () => {
     cy.get('.agency-information-section')
-      .eq(1)
       .find('button.client-search-toggle-btn')
       .click();
 
     cy.get('#client-search-dropdown')
       .find(`button.${prefix}--list-box__field`)
-      .click({ force: true });
+      .click();
 
     cy.get('#client-search-dropdown')
       .find('li')
       .contains('Acronym')
-      .click({ force: true });
+      .click();
 
     cy.get('#client-search-input')
-      .clear()
+      .clear({ force: true })
       .type(testPopupAcronym)
       .blur();
 
