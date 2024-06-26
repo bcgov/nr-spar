@@ -118,11 +118,14 @@ def main() -> None:
     else:
         this_is_a_test = os.environ.get("TEST_MODE")
         settings = read_settings()
+        print("<------------------ settings ----------------->")
+        print(settings)
+        print("<------------------ settings ----------------->")
         if this_is_a_test in definition_of_yes:
             print("Executing in Test mode")
             required_variables_exists()
-            testPostgresConnection(settings)
-            testOracleConnection(settings)
+            testPostgresConnection(settings["postgres"])
+            testOracleConnection(settings["oracle"])
             # Vault disabled
             # testVault()
         else:            
