@@ -21,7 +21,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   let seedlotNum: string;
   const speciesKey = 'pli';
   let seedlotData: SeedlotRegFixtureType;
-  let parentTreeSet = new Set();
+  const parentTreeSet = new Set();
   const unionParentTreeArray: string[] = [];
   const lengthOfArray = 6;
 
@@ -217,7 +217,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('store first Orchard Parent Tree Number in an array', () => {
@@ -279,7 +279,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('store second Orchard Parent Tree Number in an array', () => {
@@ -341,7 +341,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('Linkage of Step 4 and Step 5', () => {
@@ -376,7 +376,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
 
     // Go to next step 'Parent tree and SMP'
     cy.get('.seedlot-registration-progress')
@@ -401,7 +401,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
           if (i === lengthOfArray - 1) {
             // Convert Set to an Array
             const parentTreeArray = Array.from(parentTreeSet);
-            const combinedParentTreeArray = (parentTreeArray.sort((a: any, b: any) => a - b)).slice(0, 6);
+            const combinedParentTreeArray = (
+              parentTreeArray
+                .sort((a: any, b: any) => a - b)
+            )
+              .slice(0, 6);
             expect(combinedParentTreeArray).to.deep.eq(unionParentTreeArray);
           }
         });
@@ -521,7 +525,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('Pollen information', () => {
