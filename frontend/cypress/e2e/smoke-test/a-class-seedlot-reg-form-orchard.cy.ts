@@ -213,8 +213,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('store first Orchard Parent Tree Number in an array', () => {
@@ -272,8 +275,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('store second Orchard Parent Tree Number in an array', () => {
@@ -331,8 +337,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('Linkage of Step 4 and Step 5', () => {
@@ -363,8 +372,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
 
     // Go to next step 'Parent tree and SMP'
     cy.get('.seedlot-registration-progress')
@@ -505,8 +517,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('Pollen information', () => {
