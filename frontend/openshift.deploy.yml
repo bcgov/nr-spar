@@ -94,7 +94,7 @@ objects:
                 - name: VITE_SPAR_BUILD_VERSION
                   value: ${VITE_SPAR_BUILD_VERSION}
                 - name: VITE_SERVER_URL
-                  value: https://${NAME}-${ZONE}-backend.${DOMAIN}
+                  value: https://${NAME}-${ZONE}-frontend.${DOMAIN}
                 - name: VITE_NRSPARWEBAPP_VERSION
                   value: ${VITE_NRSPARWEBAPP_VERSION}
                 - name: VITE_ORACLE_SERVER_URL
