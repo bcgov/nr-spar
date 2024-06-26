@@ -28,6 +28,7 @@ jobs:
     with:
       tag: ${{ inputs.tag }} # Uses PR number if blank
       target: test
+      log_env_target: test
 
   deploy-prod:
     name: PROD
@@ -38,3 +39,4 @@ jobs:
     with:
       tag: ${{ inputs.tag }} # Uses PR number if blank
       target: prod
+      log_env_target: production

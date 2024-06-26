@@ -26,6 +26,10 @@ on:
         default: 10
         required: false
         type: number
+      log_env_target:
+        required: false
+        type: string
+        default: development
 
     outputs:
       triggered:
@@ -95,7 +99,7 @@ jobs:
             overwrite: true
             parameters:
               -p BUILD=snapshot-${{ inputs.target || github.event.number }}
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.log_env_target || 'development' }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
             verification_path: "actuator/health"
@@ -117,7 +121,7 @@ jobs:
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
+              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.log_env_target || 'development' }}
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
               ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
             verification_path: "actuator/health"
