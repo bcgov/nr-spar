@@ -25,6 +25,7 @@
     "aws-amplify": "^5.3.11",
     "axios": "^1.6.8",
     "bignumber.js": "^9.0.0",
+    "braces": "^3.0.3",
     "eslint-config-airbnb-typescript": "^18.0.0",
     "luxon": "^3.4.3",
     "moment": "^2.29.4",
