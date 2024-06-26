@@ -17,6 +17,13 @@
 		level "{$LOG_LEVEL}"
 	}
 
+	# Proxy requests to API service
+	reverse_proxy /api* {$VITE_SERVER_URL} {
+		header_up Host {http.reverse_proxy.upstream.hostport}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+	}
+
 	header {
 		X-Frame-Options "SAMEORIGIN"
 		X-XSS-Protection "1;mode=block"
