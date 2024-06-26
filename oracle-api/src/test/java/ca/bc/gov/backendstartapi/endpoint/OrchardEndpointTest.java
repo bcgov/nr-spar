@@ -8,15 +8,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
-import ca.bc.gov.backendstartapi.dto.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SpzDto;
-import ca.bc.gov.backendstartapi.exception.SpuNotFoundException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -317,80 +313,6 @@ class OrchardEndpointTest {
                 .header("Content-Type", "application/json")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isInternalServerError())
-        .andReturn();
-  }
-
-  @Test
-  @DisplayName("getAreaOfUseDataBySpu_sucessTest")
-  void getAreaOfUseDataBySpu_sucessTest() throws Exception {
-    AreaOfUseDto responseDto = new AreaOfUseDto();
-    AreaOfUseSpuGeoDto aouSpuGeoDto = new AreaOfUseSpuGeoDto(11, 1200, 12, 130, 2, 45);
-    responseDto.setAreaOfUseSpuGeoDto(aouSpuGeoDto);
-
-    SpzDto spzDto1 = new SpzDto("GL", "Georgia Lowlands", false);
-    SpzDto spzDto2 = new SpzDto("M", "Maritime", true);
-
-    responseDto.setSpzList(List.of(spzDto1, spzDto2));
-
-    Integer spu = 1;
-    when(orchardService.calcAreaOfUseData(spu)).thenReturn(responseDto);
-
-    mockMvc
-        .perform(
-            get("/api/orchards/area-of-use/spu/{spuId}", spu)
-                .with(csrf().asHeader())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(
-            jsonPath("$.areaOfUseSpuGeoDto.elevationMin")
-                .value(responseDto.getAreaOfUseSpuGeoDto().getElevationMin()))
-        .andExpect(
-            jsonPath("$.areaOfUseSpuGeoDto.elevationMax")
-                .value(responseDto.getAreaOfUseSpuGeoDto().getElevationMax()))
-        .andExpect(
-            jsonPath("$.areaOfUseSpuGeoDto.latitudeDegreesMin")
-                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMin()))
-        .andExpect(
-            jsonPath("$.areaOfUseSpuGeoDto.latitudeDegreesMax")
-                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeDegreesMax()))
-        .andExpect(
-            jsonPath("$.areaOfUseSpuGeoDto.latitudeMinutesMin")
-                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMin()))
-        .andExpect(
-            jsonPath("$.areaOfUseSpuGeoDto.latitudeMinutesMax")
-                .value(responseDto.getAreaOfUseSpuGeoDto().getLatitudeMinutesMax()))
-        // SPZ list test
-        .andExpect(jsonPath("$.spzList[0].code").value(responseDto.getSpzList().get(0).getCode()))
-        .andExpect(
-            jsonPath("$.spzList[0].description")
-                .value(responseDto.getSpzList().get(0).getDescription()))
-        .andExpect(
-            jsonPath("$.spzList[0].isPrimary")
-                .value(responseDto.getSpzList().get(0).getIsPrimary()))
-        .andExpect(jsonPath("$.spzList[1].code").value(responseDto.getSpzList().get(1).getCode()))
-        .andExpect(
-            jsonPath("$.spzList[1].description")
-                .value(responseDto.getSpzList().get(1).getDescription()))
-        .andExpect(
-            jsonPath("$.spzList[1].isPrimary")
-                .value(responseDto.getSpzList().get(1).getIsPrimary()))
-        .andReturn();
-  }
-
-  @Test
-  @DisplayName("getAreaOfUseDataBySpu_errorTest")
-  void getAreaOfUseDataBySpu_errorTest() throws Exception {
-    when(orchardService.calcAreaOfUseData(any())).thenThrow(new SpuNotFoundException());
-
-    mockMvc
-        .perform(
-            get("/api/orchards/area-of-use/spu/{spuId}", "420")
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
         .andReturn();
   }
 }

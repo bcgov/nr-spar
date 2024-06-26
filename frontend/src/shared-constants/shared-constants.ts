@@ -19,3 +19,5 @@ export const MEDIUM_SCREEN_WIDTH = 672;
 export const LARGE_SCREEN_WIDTH = 1056;
 
 export const TSC_ADMIN_ROLE = 'SPAR_TSC_ADMIN';
+
+export const PLACE_HOLDER = '--';

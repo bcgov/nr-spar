@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.dto.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
@@ -187,31 +186,5 @@ public class OrchardEndpoint {
       SparLog.error("Orchard endpoint error from findParentTreesWithVegCode: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
-  }
-
-  /**
-   * Get SPZ and SPU-geospatial information.
-   *
-   * @param spuId A seed plan unit id.
-   * @return A {@link SpzSpuGeoDto} containing the results.
-   */
-  @GetMapping(path = "/area-of-use/spu/{spuId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(
-      summary = "Get area of use information given an SPU id",
-      description = "Fetch geospatial data for the SPU along with a list of SPZ information.",
-      responses = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "A data object containing information found."),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Access token is missing or invalid",
-            content = @Content(schema = @Schema(implementation = Void.class)))
-      })
-  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public AreaOfUseDto getAreaOfUseData(
-      @Parameter(description = "The SPU (Seed Planning Unit) ID") @PathVariable("spuId")
-          Integer spuId) {
-    return orchardService.calcAreaOfUseData(spuId);
   }
 }

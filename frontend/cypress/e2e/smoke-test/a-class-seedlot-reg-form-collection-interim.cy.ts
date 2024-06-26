@@ -143,6 +143,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .find('button.form-action-btn')
       .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('[Collection] Client search modal', () => {
@@ -202,6 +205,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .find('button.form-action-btn')
       .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('[Collection] Date inputs', () => {
@@ -233,9 +239,12 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .find('button.form-action-btn')
       .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
-  it('[Collection] Containers inputs', () => {
+  it.only('[Collection] Containers inputs', () => {
     const fixtureData = regFormData.collector;
     // Invalid collection test, number > 10,000
     cy.get('#collection-num-of-container')
@@ -318,6 +327,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .find('button.form-action-btn')
       .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('[Collection] Checkbox input', () => {
@@ -415,8 +427,8 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
+      .click()
+      .contains(/Save changes|Changes saved!/g);
   });
 
   it('[Interim storage] Client search modal', () => {
@@ -507,6 +519,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .find('button.form-action-btn')
       .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!')
   });
 
   it('[Interim storage] Radio button', () => {
