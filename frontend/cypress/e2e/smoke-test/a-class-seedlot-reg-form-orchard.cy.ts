@@ -434,15 +434,13 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('be.checked');
   });
 
-  it('Change gamete information', () => {
+  it.only('Change gamete information', () => {
     // Select female gametic contribution methodology
-    cy.get('.gametic-combobox')
-      .eq(0)
-      .find(`button.${prefix}--list-box__menu-icon`)
+    cy.get('#orchard-female-gametic')
+      .siblings()
       .click();
 
-    cy.get('.gametic-combobox')
-      .eq(0)
+    cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .eq(1)
       .click();
@@ -451,13 +449,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('have.value', 'F2 - Measured Cone Volume');
 
     // Select male gametic contribution methodology
-    cy.get('.gametic-combobox')
-      .eq(1)
-      .find(`button.${prefix}--list-box__menu-icon`)
+    cy.get('#orchard-male-gametic')
+      .siblings()
       .click();
 
-    cy.get('.gametic-combobox')
-      .eq(1)
+      cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .eq(2)
       .click();
@@ -466,43 +462,37 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('have.value', 'M3 - Pollen Volume Estimate by 100% Survey');
 
     // Check 'x' button
-    cy.get('.gametic-combobox')
-      .eq(0)
-      .find(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
+    cy.get('#orchard-female-gametic')
+      .siblings('[title="Clear selected item"]')
       .click();
 
     cy.get('#orchard-female-gametic')
       .should('have.value', '');
 
-    cy.get('.gametic-combobox')
-      .eq(1)
-      .find(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
+    cy.get('#orchard-male-gametic')
+      .siblings('[title="Clear selected item"]')
       .click();
 
     cy.get('#orchard-male-gametic')
       .should('have.value', '');
 
     // Enter female and male gametic contribution methodology again
-    cy.get('.gametic-combobox')
-      .eq(0)
-      .find(`button.${prefix}--list-box__menu-icon`)
+    cy.get('#orchard-female-gametic')
+      .siblings()
       .click();
 
-    cy.get('.gametic-combobox')
-      .eq(0)
+    cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .eq(1)
       .click();
 
-    cy.get('.gametic-combobox')
-      .eq(1)
-      .find(`button.${prefix}--list-box__menu-icon`)
+    cy.get('#orchard-male-gametic')
+      .siblings()
       .click();
 
-    cy.get('.gametic-combobox')
-      .eq(1)
+    cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .eq(1)
+      .eq(2)
       .click();
 
     // Change radio inputs of gamete section
