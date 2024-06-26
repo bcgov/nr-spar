@@ -94,6 +94,7 @@ select --SYSTIMESTAMP CURRENT_TS,
 	,s.VEGETATION_CODE
 	,s.VOL_PER_CONTAINER
 FROM spar.seedlot s 
+WHERE s.GENETIC_CLASS_CODE = 'A'
 ) 
 SELECT applicant_client_number, applicant_email_address, APPLICANT_CLIENT_LOCN, approved_timestamp, approved_userid, bc_source_ind, bec_version_id, bgc_subzone_code, bgc_zone_code, 
 biotech_processes_ind, clctn_volume, COLLECTION_CLI_LOCN_CD, COLLECTION_CLI_NUMBER, collection_elevation, collection_elevation_max, collection_elevation_min, collection_end_date, 
