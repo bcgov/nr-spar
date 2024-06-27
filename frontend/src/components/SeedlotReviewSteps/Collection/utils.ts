@@ -4,8 +4,15 @@ import { CodeDescResType } from '../../../types/CodeDescResType';
 /**
  * Format collection codes into human friendly words, e.g. [4, 5] -> "raking, picking".
  */
-export const formatCollectionMethods = (codes: string[], methods: CodeDescResType[]): string => {
+export const formatCollectionMethods = (
+  codes: string[],
+  methods: CodeDescResType[] | undefined
+): string => {
   let formated = '';
+
+  if (!methods) {
+    return formated;
+  }
 
   codes.forEach((code) => {
     const found = methods.find((method) => method.code === code);
