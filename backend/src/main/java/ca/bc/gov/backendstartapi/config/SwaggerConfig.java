@@ -38,7 +38,7 @@ public class SwaggerConfig {
   @Bean
   public OpenAPI theRestApi() {
     StringBuilder titleAndVersion = new StringBuilder();
-    titleAndVersion.append("SPAR Postgres API ");
+    titleAndVersion.append("Backend API ");
     titleAndVersion.append("(").append(nrSparBackendSnapshot).append(")");
 
     Info info = new Info();
