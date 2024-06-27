@@ -1,26 +1,6 @@
 import { GenWorthValType, GeoInfoValType } from './definitions';
 
 export const INITIAL_GEO_INFO_VALS: GeoInfoValType = {
-  becZone: {
-    id: 'geo-info-bec-zone',
-    isInvalid: false,
-    value: ''
-  },
-  subZone: {
-    id: 'geo-info-sub-zone',
-    isInvalid: false,
-    value: ''
-  },
-  variant: {
-    id: 'geo-info-variant',
-    isInvalid: false,
-    value: ''
-  },
-  primarySpu: {
-    id: 'geo-info-primary-spu',
-    isInvalid: false,
-    value: ''
-  },
   meanElevation: {
     id: 'geo-info-mean-elevation',
     isInvalid: false,

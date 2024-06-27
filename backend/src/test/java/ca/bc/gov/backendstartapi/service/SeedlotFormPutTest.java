@@ -434,6 +434,7 @@ class SeedlotFormPutTest {
         Optional.of(new ActiveOrchardSpuEntity(primaryOrchardId, activeSpuId, true, false, false));
     when(orchardService.findSpuIdByOrchardWithActive(primaryOrchardId, true))
         .thenReturn(activeSpuOptional);
+    when(orchardService.findSpuIdByOrchard(primaryOrchardId)).thenReturn(activeSpuOptional);
 
     AreaOfUseDto areaOfUseDto = new AreaOfUseDto();
     AreaOfUseSpuGeoDto areaOfUseSpuGeoDto = new AreaOfUseSpuGeoDto(1, 100, null, null, 3, 5);
@@ -537,10 +538,10 @@ class SeedlotFormPutTest {
     assertEquals(oracleOrchardRet.becVersionId(), seedlot.getBecVersionId());
     // Declared Seedlot Value
     assertEquals(
-        loggedUserService.getLoggedUserId(),
-        seedlot.getDeclarationOfTrueInformationUserId());
+        loggedUserService.getLoggedUserId(), seedlot.getDeclarationOfTrueInformationUserId());
     assertTrue(
-        LocalDateTime.now().minusSeconds(15L).isBefore(
-            seedlot.getDeclarationOfTrueInformationTimestamp()));
+        LocalDateTime.now()
+            .minusSeconds(15L)
+            .isBefore(seedlot.getDeclarationOfTrueInformationTimestamp()));
   }
 }

@@ -1,3 +1,4 @@
+import React from 'react';
 import BigNumber from 'bignumber.js';
 import { AxiosError } from 'axios';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
@@ -27,6 +28,7 @@ import { ErrorDescriptionType } from '../../../types/ErrorDescriptionType';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getOptionsInputObj } from '../../../utils/FormInputUtils';
+import { GeoInfoValType } from '../SeedlotReview/definitions';
 
 import {
   emptyCollectionStep, emptyExtractionStep, emptyInterimStep,
@@ -1019,4 +1021,45 @@ export const fillAreaOfUseData = (
   }
 
   return clonedAreaOfUse;
+};
+
+export const fillGeoVals = (
+  setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,
+  data: RichSeedlotType
+) => {
+  setGeoInfoVals((prevVals) => ({
+    ...prevVals,
+    meanElevation: {
+      ...prevVals.meanElevation,
+      value: data.seedlot.collectionElevation?.toString() ?? ''
+    },
+    meanLatDeg: {
+      ...prevVals.meanLatDeg,
+      value: data.seedlot.collectionLatitudeDeg?.toString() ?? ''
+    },
+    meanLatMinute: {
+      ...prevVals.meanLatMinute,
+      value: data.seedlot.collectionLatitudeMin?.toString() ?? ''
+    },
+    meanLatSec: {
+      ...prevVals.meanLatSec,
+      value: data.seedlot.collectionLatitudeSec?.toString() ?? ''
+    },
+    meanLongDeg: {
+      ...prevVals.meanLongDeg,
+      value: data.seedlot.collectionLongitudeDeg?.toString() ?? ''
+    },
+    meanLongMinute: {
+      ...prevVals.meanLongMinute,
+      value: data.seedlot.collectionLongitudeMin?.toString() ?? ''
+    },
+    meanLongSec: {
+      ...prevVals.meanLongMinute,
+      value: data.seedlot.collectionLongitudeMin?.toString() ?? ''
+    },
+    effectivePopSize: {
+      ...prevVals.effectivePopSize,
+      value: data.seedlot.effectivePopulationSize?.toString() ?? ''
+    }
+  }));
 };
