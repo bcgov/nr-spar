@@ -37,14 +37,13 @@ public class SwaggerConfig {
    */
   @Bean
   public OpenAPI theRestApi() {
-    StringBuilder titleAndVersion = new StringBuilder();
-    titleAndVersion.append("Backend API ");
-    titleAndVersion.append("(").append(nrSparBackendSnapshot).append(")");
+    StringBuilder title = new StringBuilder();
+    title.append("Backend API ");
 
     Info info = new Info();
-    info.setTitle(titleAndVersion.toString());
+    info.setTitle(title.toString());
     info.setDescription(DESCRIPTION);
-    info.setVersion("v" + appVersion);
+    info.setVersion(nrSparBackendSnapshot);
     info.setTermsOfService(TERMS_OF_SERVICE);
 
     Contact contact = new Contact();

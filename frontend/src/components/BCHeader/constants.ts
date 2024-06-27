@@ -1,9 +1,8 @@
 import { env } from '../../env';
 import ROUTES from '../../routes/constants';
 import { RightPanelType } from './definitions';
-import { version } from '../../../package.json';
 
-export const VERSION: string = `v${version} (${env.VITE_NRSPARWEBAPP_VERSION} snapshot)`;
+export const VERSION: string = `${env.VITE_NRSPARWEBAPP_VERSION}`;
 
 export const HOME_LINK = ROUTES.DASHBOARD;
 

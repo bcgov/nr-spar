@@ -31,9 +31,6 @@ parameters:
     value: 300Mi
   - name: MEMORY_LIMIT
     value: 400Mi
-  - name: NR_SPAR_ORACLE_API_VERSION
-    description: Current service API release version
-    required: true
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
@@ -91,7 +88,7 @@ objects:
                   mountPath: /logs
               env:
                 - name: NR_SPAR_ORACLE_API_VERSION
-                  value: ${NR_SPAR_ORACLE_API_VERSION}
+                  value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
                 - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
                   value: ${NR_SPAR_ORACLE_API_ENV_OPENSEARCH}
                 - name: ALLOWED_ORIGINS

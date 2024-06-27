@@ -110,7 +110,6 @@ jobs:
             parameters:
               -p FAM_MODDED_ZONE=${{ inputs.target || needs.init.outputs.modded-tag }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
-              -p VITE_NRSPARWEBAPP_VERSION=${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
               ${{ inputs.target == 'prod' && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
@@ -120,7 +119,6 @@ jobs:
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.log_env_target }}
-              -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
               ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
             verification_path: "actuator/health"
           - name: sync

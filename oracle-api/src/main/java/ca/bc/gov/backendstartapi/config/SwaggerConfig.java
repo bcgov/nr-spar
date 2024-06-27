@@ -32,16 +32,16 @@ public class SwaggerConfig {
   /** General information about our API. */
   @Bean
   public OpenAPI theRestApi() {
-    StringBuilder titleAndVersion = new StringBuilder();
-    titleAndVersion.append("Oracle API ");
-    titleAndVersion.append("(").append(nrSparBackendSnapshot).append(")");
+    StringBuilder title = new StringBuilder();
+    title.append("Oracle API ");
+    title.append("(").append(nrSparBackendSnapshot).append(")");
 
     return new OpenAPI()
         .info(
             new Info()
                 .title("Oracle THE Database REST API")
                 .description("RESTful service API to serve New SPAR frontend web app.")
-                .version("v" + appVersion)
+                .version(appVersion)
                 .termsOfService(
                     "https://www2.gov.bc.ca/gov/content/data/open-data/api-terms-of-use-for-ogl-information")
                 .license(
