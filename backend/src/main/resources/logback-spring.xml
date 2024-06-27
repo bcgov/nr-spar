@@ -5,6 +5,7 @@
   <springProperty scope="context" name="applicationName" source="spring.application.name" />
   <springProperty scope="context" name="sparTeamEmail" source="nr-spar-team-email-address" />
   <springProperty scope="context" name="ecsVersion" source="nr-spar-ecs-version" />
+  <springProperty scope="context" name="appVersion" source="app.version" />
 
   <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
     <!-- https://logback.qos.ch/manual/layouts.html -->
@@ -24,7 +25,7 @@
   <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${LOGS}/postgres-api.log</file>
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <Pattern>{%nopex"labels.project":"${applicationName}","service.environment":"${serviceEnv}","@timestamp":"%date{yyyy-MM-dd HH:mm:ss.SSS}","log.level":"%p","log.logger":"%logger{36}","message":"%replace(%msg){'\"','\\"'}","ecs.version":"${ecsVersion}","event.category":"web","event.dataset":"application.log.utc","event.ingested":"diagnostic","event.kind":"event","organization.id":"${sparTeamEmail}","organization.name":"TeamSPAR"}%n</Pattern>
+      <Pattern>{%nopex"labels.project":"${applicationName}","service.version":"${appVersion}","service.environment":"${serviceEnv}","@timestamp":"%date{yyyy-MM-dd HH:mm:ss.SSS}","log.level":"%p","log.logger":"%logger{36}","message":"%replace(%msg){'\"','\\"'}","ecs.version":"${ecsVersion}","event.category":"web","event.dataset":"application.log.utc","event.ingested":"diagnostic","event.kind":"event","organization.id":"${sparTeamEmail}","organization.name":"TeamSPAR"}%n</Pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <!-- rollover daily and when the file reaches 10 MegaBytes -->
