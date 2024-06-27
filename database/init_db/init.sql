@@ -2850,34 +2850,6 @@ CREATE TRIGGER trg_seedlot_audit_DIU
  AFTER INSERT OR UPDATE OR DELETE ON spar.seedlot 
  FOR EACH ROW EXECUTE PROCEDURE spar.seedlot_if_modified_func();
 
-create table if not exists spar.ETL_EXECUTION_MAP(
-interface_id varchar(100) not null,
-source_file varchar(200),
-source_name varchar(100),
-source_table varchar(100),
-target_file varchar(200),
-target_name varchar(100),
-target_table varchar(100),
-truncate_before_run boolean default false not null,
-updated_at  timestamp   default now() not null,
-created_at  timestamp   default now() not null,
-constraint etl_execution_map_pk
-    primary key (interface_id)
-);
-
-comment on table spar.ETL_EXECUTION_MAP is 'ETL Tool monitoring table to store execution details of batch processing interfaces';
-comment on column spar.ETL_EXECUTION_MAP.interface_id               is 'Unique interface name to represent a batch execution';
-comment on column spar.ETL_EXECUTION_MAP.source_file                is 'Source instruction file for batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.source_name                is 'Source name of this batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.source_table               is 'Source table (if it is a single table) of this batch execution';
-comment on column spar.ETL_EXECUTION_MAP.target_file                is 'Target instruction file for batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.target_name                is 'Target name of this batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.target_table               is 'Target table (if it is a single table) of this batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.truncate_before_run        is 'If the target table should be truncated before the batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.updated_at                 is 'Timestamp of the last time this record was updated'; 
-comment on column spar.ETL_EXECUTION_MAP.created_at                 is 'Timestamp of the time this record was created'; 
-
-
 create table spar.ETL_EXECUTION_LOG(
 interface_id varchar(100) not null,
 last_run_ts timestamp,
@@ -2893,25 +2865,6 @@ comment on column spar.ETL_EXECUTION_LOG.last_run_ts                is 'Last tim
 comment on column spar.ETL_EXECUTION_LOG.current_run_ts             is 'Current timestamp this interface was executed of this batch execution'; 
 comment on column spar.ETL_EXECUTION_LOG.updated_at                 is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_LOG.created_at                 is 'Timestamp of the time this record was created'; 
-
-create table spar.ETL_EXECUTION_LOG_HIST(
-interface_id varchar(100) not null,
-last_run_ts timestamp,
-current_run_ts timestamp,
-execution_details text,
-updated_at  timestamp   default now() not null,
-created_at  timestamp   default now() not null
-);
-
-
-comment on table spar.ETL_EXECUTION_LOG_HIST is 'ETL Tool monitoring table to store all executed instances of batch processing interfaces';
-comment on column spar.ETL_EXECUTION_LOG_HIST.interface_id               is 'Unique interface name to represent a batch execution';
-comment on column spar.ETL_EXECUTION_LOG_HIST.last_run_ts                is 'Last timestamp this interface was executed for batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.current_run_ts             is 'Current timestamp this interface was executed of this batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.execution_details          is 'Reference text of this interface instance execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.updated_at                 is 'Timestamp of the last time this record was updated'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.created_at                 is 'Timestamp of the time this record was created'; 
-
 
 alter table spar.seedlot
   add column approved_timestamp     timestamp,
@@ -4731,7 +4684,9 @@ target_db_type 		  varchar(200),
 target_name 		  varchar(100),
 target_table 		  varchar(100),
 target_primary_key 	  varchar(100),
-truncate_before_run   boolean     default false not null,
+run_mode          varchar(25)     default 'UPSERT' not null
+   check(run_mode in ('DELETE_INSERT','UPSERT','UPSERT_WTIH_DELETE')),
+upsert_with_delete_key    varchar(100),
 retry_errors   		  boolean     default false not null,
 updated_at  		  timestamp   default now() not null,
 created_at  		  timestamp   default now() not null,
@@ -4753,8 +4708,9 @@ comment on column spar.ETL_EXECUTION_MAP.target_db_type             is 'Database
 comment on column spar.ETL_EXECUTION_MAP.target_name                is 'Target name of this batch execution'; 
 comment on column spar.ETL_EXECUTION_MAP.target_table               is 'Target table (if it is a single table) of this batch execution'; 
 comment on column spar.ETL_EXECUTION_MAP.target_primary_key         is 'Primary key of the target table of this batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.truncate_before_run        is 'If the target table should be truncated before the batch execution'; 
-comment on column spar.ETL_EXECUTION_MAP.retry_errors        		is 'If true, this process will execute again old instances with errors in ETL_EXECUTION_LOG_HIST'; 
+comment on column spar.ETL_EXECUTION_MAP.run_mode                   is 'Identifies how data is replicated:DELETE_INSERT,UPSERT,UPSERT_WTIH_DELETE'; 
+comment on column spar.ETL_EXECUTION_MAP.upsert_with_delete_key     is 'For run_mode UPSERT_WTIH_DELETE, specifies the WHERE clause columns for delete'; 
+comment on column spar.ETL_EXECUTION_MAP.retry_errors        		    is 'If true, this process will execute again old instances with errors in ETL_EXECUTION_LOG_HIST'; 
 comment on column spar.ETL_EXECUTION_MAP.updated_at                 is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_MAP.created_at                 is 'Timestamp of the time this record was created'; 
 
@@ -4827,8 +4783,7 @@ comment on column spar.ETL_EXECUTION_LOG_HIST.created_at                is 'Time
 
 /* ORACLE TO POSTGRES ORCHESTRATION: TEST EXECUTION */
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run , execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 0 				as execution_id, 
        null 			as execution_parent_id ,
        'ETL-RUN-ORACLE-TO-POSTGRES-TEST' 		as interface_id, 
@@ -4841,13 +4796,11 @@ select 0 				as execution_id,
        null 			as target_table, 
        null 			as target_db_type,
        null 			as target_primary_key, 
-       false 			as truncate_before_run ,
 	   0 				as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'ETL-RUN-ORACLE-TO-POSTGRES-TEST');
 
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 1 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -4860,15 +4813,12 @@ select 1 										as execution_id,
        'spar.seedlot' 							as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number' 						as target_primary_key, 
-       true 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   1 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-ORACLE-TO-POSTGRES-TEST');
 
 /* POSTGRES TO ORACLE ORCHESTRATION: TEST EXECUTION */
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run , execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 2 				as execution_id, 
        null 			as execution_parent_id ,
        'ETL-RUN-POSTGRES-TO-ORACLE-TEST' 		as interface_id, 
@@ -4881,13 +4831,11 @@ select 2 				as execution_id,
        null 			as target_table, 
        null 			as target_db_type, 
        null 			as target_primary_key, 
-       false 			as truncate_before_run ,
 	   0 				as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'ETL-RUN-POSTGRES-TO-ORACLE-TEST');
 
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run , retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 3 										as execution_id, 
        2 										as execution_parent_id ,
        'SEEDLOT-ORACLE-TO-SPAR-POSTGRES-TEST' 	    as interface_id, 
@@ -4900,8 +4848,6 @@ select 3 										as execution_id,
        'SEEDLOT' 							    as target_table, 
        'ORACLE' 							    as target_db_type, 
        'seedlot_number' 						as target_primary_key, 
-       false 									as truncate_before_run ,
-       true 									as retry_errors ,
 	   1 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SEEDLOT-ORACLE-TO-SPAR-POSTGRES-TEST');
 
@@ -4910,8 +4856,7 @@ where not exists (select 1 from spar.etl_execution_map where interface_id = 'SEE
 
 -- INCLUDING PROCESS SMP_MIX from Oracle to Postgres in EXECUTION_ID=0 
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 4 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SMPMIX-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -4924,14 +4869,11 @@ select 4 										as execution_id,
        'spar.smp_mix' 							as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,parent_tree_id' 			as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   2 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SMPMIX-ORACLE-TO-POSTGRES-TEST');
 
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 5 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SMPMIX-GEN-QLTY-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -4944,16 +4886,13 @@ select 5 										as execution_id,
        'spar.smp_mix_gen_qlty' 							as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code' 					as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   3 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SMPMIX-GEN-QLTY-ORACLE-TO-POSTGRES-TEST');
 
 
 -- INCLUDING PROCESS SEEDLOT_PARENT_TREE_SMP_MIX from Oracle to Postgres in EXECUTION_ID=0 
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 6 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-PARENT-TREE-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -4966,15 +4905,12 @@ select 6 										as execution_id,
        'spar.seedlot_parent_tree' 				as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,parent_tree_id'          as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   4 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-PARENT-TREE-ORACLE-TO-POSTGRES-TEST');
 
 -- INCLUDING PROCESS SEEDLOT_PARENT_TREE_SMP_MIX from Oracle to Postgres in EXECUTION_ID=0 
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 7 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-PARENT-TREE-SMPMIX-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -4987,15 +4923,12 @@ select 7 										as execution_id,
        'spar.seedlot_parent_tree_smp_mix' 							as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code' 					as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   5 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-PARENT-TREE-SMPMIX-ORACLE-TO-POSTGRES-TEST');
 
 -- INCLUDING PROCESS SEEDLOT_ORCHARD from Oracle to Postgres in EXECUTION_ID=0  
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 8 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-ORCHARD-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -5008,15 +4941,12 @@ select 8 										as execution_id,
        'spar.seedlot_orchard' 					as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,primary_ind' 			as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   6 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-ORCHARD-ORACLE-TO-POSTGRES-TEST');
 
 -- INCLUDING PROCESS SEEDLOT_GENETIC_WORTH from Oracle to Postgres in EXECUTION_ID=0  
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 9 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-GENETIC-WORTH-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -5029,8 +4959,6 @@ select 9 										as execution_id,
        'spar.seedlot_genetic_worth' 			as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,genetic_worth_code' 		as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   7 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-GENETIC-WORTH-ORACLE-TO-POSTGRES-TEST');
 
@@ -5038,8 +4966,7 @@ where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPA
 
 -- INCLUDING PROCESS SEEDLOT_OWNER_QUANTITY from Oracle to Postgres in EXECUTION_ID=0  
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 10 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-OWNER-QUANTITY-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -5052,8 +4979,6 @@ select 10 										as execution_id,
        'spar.seedlot_owner_quantity' 			as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,owner_client_number,owner_locn_code' 		as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   8 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-OWNER-QUANTITY-ORACLE-TO-POSTGRES-TEST');
 
@@ -5062,8 +4987,7 @@ where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPA
 
 -- INCLUDING PROCESS seedlot_collection_method from Oracle to Postgres in EXECUTION_ID=0  
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 11 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-COLLECTION-METHOD-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -5076,16 +5000,13 @@ select 11 										as execution_id,
        'spar.seedlot_collection_method' 		as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,cone_collection_method_code' 		as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   9 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-COLLECTION-METHOD-ORACLE-TO-POSTGRES-TEST');
 
 
 -- INCLUDING PROCESS SEEDLOT_PARENT_TREE_GEN_QLTY from Oracle to Postgres in EXECUTION_ID=0  
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 12 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-PARENT-TREE-GEN-QLTY-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -5098,16 +5019,13 @@ select 12 										as execution_id,
        'spar.seedlot_parent_tree_gen_qlty' 		as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code' 	as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   10 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-PARENT-TREE-GEN-QLTY-ORACLE-TO-POSTGRES-TEST');
 
 
 -- INCLUDING PROCESS SEEDLOT_SEED_PLAN_ZONE from Oracle to Postgres in EXECUTION_ID=0  
 insert into spar.etl_execution_map(execution_id, execution_parent_id ,interface_id, source_file,source_name, source_table, source_db_type,
-                                   target_file,target_name, target_table, target_db_type,target_primary_key, 
-								   truncate_before_run ,retry_errors, execution_order)
+                                   target_file,target_name, target_table, target_db_type,target_primary_key, execution_order)
 select 13 										as execution_id, 
        0 										as execution_parent_id ,
        'SPAR-SEEDLOT-SEED-PLAN-ZONE-ORACLE-TO-POSTGRES-TEST' 	    as interface_id, 
@@ -5120,7 +5038,5 @@ select 13 										as execution_id,
        'spar.seedlot_seed_plan_zone' 			as target_table, 
        'POSTGRES' 								as target_db_type, 
        'seedlot_number,seed_plan_zone_code' 	as target_primary_key, 
-       false 									as truncate_before_run ,
-       false 									as retry_errors ,
 	   11 										as execution_order
 where not exists (select 1 from spar.etl_execution_map where interface_id = 'SPAR-SEEDLOT-SEED-PLAN-ZONE-ORACLE-TO-POSTGRES-TEST');

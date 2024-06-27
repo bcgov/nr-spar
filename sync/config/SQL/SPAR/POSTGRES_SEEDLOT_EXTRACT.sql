@@ -1,11 +1,10 @@
 /* --- EXTRACT FROM POSTGRES spar.seedlot table */
-WITH CTE_SEEDLOT AS (
-select --SYSTIMESTAMP CURRENT_TS,
-	 s.APPLICANT_CLIENT_NUMBER
-	,s.APPLICANT_EMAIL_ADDRESS
-	,s.applicant_locn_code          			as APPLICANT_CLIENT_LOCN
-	,s.APPROVED_TIMESTAMP
-	,REPLACE(s.APPROVED_USERID,'\', '@') APPROVED_USERID  -- 'Replacing @ to \ for Provider@User
+SELECT 
+    s.applicant_client_number,
+    s.applicant_email_address,
+    s.applicant_locn_code                AS applicant_client_locn,
+    s.approved_timestamp,
+    replace(s.approved_userid, '\', '@') approved_userid  -- 'Replacing @ to \ for Provider@User
 	,CASE WHEN s.BC_SOURCE_IND THEN 'Y' ELSE 'N' END as BC_SOURCE_IND
 	,s.BEC_VERSION_ID
 	,s.BGC_SUBZONE_CODE
@@ -70,6 +69,8 @@ select --SYSTIMESTAMP CURRENT_TS,
 	,s.MALE_GAMETIC_MTHD_CODE
 	,s.NO_OF_CONTAINERS
 	,s.area_of_use_comment                  as ORCHARD_COMMENT
+    ,prim.orchard_id
+    ,sec.secondary_orchard_id
 	,case when s.POLLEN_CONTAMINATION_IND = True then 'Y' when  POLLEN_CONTAMINATION_IND = False then 'N' else '' end as POLLEN_CONTAMINATION_IND
 	,s.POLLEN_CONTAMINATION_MTHD_CODE
 	,s.POLLEN_CONTAMINATION_PCT
@@ -93,25 +94,18 @@ select --SYSTIMESTAMP CURRENT_TS,
 	,s.VARIANT                                          
 	,s.VEGETATION_CODE
 	,s.VOL_PER_CONTAINER
-FROM spar.seedlot s 
-WHERE s.GENETIC_CLASS_CODE = 'A'
-) 
-SELECT applicant_client_number, applicant_email_address, APPLICANT_CLIENT_LOCN, approved_timestamp, approved_userid, bc_source_ind, bec_version_id, bgc_subzone_code, bgc_zone_code, 
-biotech_processes_ind, clctn_volume, COLLECTION_CLI_LOCN_CD, COLLECTION_CLI_NUMBER, collection_elevation, collection_elevation_max, collection_elevation_min, collection_end_date, 
-collection_latitude_code, COLLECTION_LAT_DEG, COLLECTION_LAT_MIN, COLLECTION_LAT_SEC, collection_longitude_code, COLLECTION_LONG_DEG, COLLECTION_LONG_MIN, 
-COLLECTION_LONG_SEC, collection_start_date, contaminant_pollen_bv, controlled_cross_ind, declared_timestamp, declared_userid, effective_pop_size, elevation, elevation_max, 
-elevation_min, entry_timestamp, entry_userid, extraction_end_date, extraction_st_date, EXTRCT_CLI_NUMBER, EXTRCT_CLI_LOCN_CD, female_gametic_mthd_code, genetic_class_code, 
-interm_facility_code, INTERM_STRG_CLIENT_LOCN, interm_strg_client_number, interm_strg_end_date, interm_strg_locn, interm_strg_st_date, latitude_deg_max, latitude_deg_min, 
-latitude_degrees, latitude_min_max, latitude_min_min, latitude_minutes, latitude_sec_max, latitude_sec_min, latitude_seconds, longitude_deg_max, longitude_deg_min, longitude_degrees,
- longitude_min_max,longitude_min_min, longitude_minutes, longitude_sec_max, longitude_sec_min, longitude_seconds, male_gametic_mthd_code, no_of_containers, 
- ORCHARD_COMMENT,pollen_contamination_ind, pollen_contamination_mthd_code, pollen_contamination_pct, revision_count, seed_plan_unit_id, seedlot_comment, 
-seedlot_number, 
-seedlot_source_code, seedlot_status_code,
-SEED_STORE_CLIENT_LOCN, SEED_STORE_CLIENT_NUMBER, smp_mean_bv_growth, smp_parents_outside, smp_success_pct, TEMPORARY_STORAGE_END_DATE, TEMPORARY_STORAGE_START_DATE, to_be_registrd_ind, 
-total_parent_trees, update_timestamp, update_userid, variant, vegetation_code, vol_per_container
-FROM 
-	CTE_SEEDLOT C
+FROM spar.seedlot s
+LEFT OUTER JOIN (SELECT po.seedlot_number
+                      , po.orchard_id 
+                   FROM spar.seedlot_orchard po
+                  WHERE po.primary_ind = 'Y') prim 
+             ON prim.seedlot_number = s.seedlot_number
+LEFT OUTER JOIN (SELECT DISTINCT
+                        so.seedlot_number
+                      , FIRST_VALUE(so.orchard_id) OVER (PARTITION BY so.seedlot_number 
+                                                             ORDER BY so.entry_timestamp) secondary_orchard_id
+                   FROM spar.seedlot_orchard so
+                  WHERE so.primary_ind = 'N') sec
+             ON sec.seedlot_number = s.seedlot_number
 WHERE 
-	update_timestamp between %(start_time)s AND %(end_time)s 
-ORDER BY 
-	SEEDLOT_NUMBER DESC
+   update_timestamp between %(start_time)s AND % ( end_time ) s order by seedlot_number desc

@@ -165,12 +165,25 @@ class database_connection(object):
             if table_pk != "":
                 columnspk = table_pk.split(",")
                 whStatement = "WHERE 1=1"
+                #add pk to WHERE clause
                 for column in columnspk:
                     params["p_"+column] = getattr(row,column)
                     whStatement = f"""{whStatement}  AND  {column} = :p_{column}"""                
 
-                df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation 
-                whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
+                # Remove table PK from the column lists for SET operation 
+                df2 = dataframe.drop(columns=columnspk)  
+                #**add checking for changes to WHERE clause - RR this does not consider nulls -removing
+                #whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
+                whStatement2 = ""
+                
+                #TODO for test only
+                insertonlycols = []
+                if table_name.upper() == "THE.SEEDLOT_OWNER_QUANTITY":
+                    insertonlycols = ["qty_reserved","qty_rsrvd_cmtd_pln","qty_rsrvd_cmtd_apr","qty_surplus","qty_srpls_cmtd_pln","qty_srpls_cmtd_apr"]
+
+                #remove insert only cols from update col list
+                df2 = df2.drop(columns=insertonlycols)
+
                 for column in dataframe.columns.values:
                     params["s_"+column] = getattr(row,column)
                     params["q_"+column] = getattr(row,column)
@@ -188,7 +201,9 @@ class database_connection(object):
                 {onconflictstatement}
             END; """
             logger.debug(f'---Executing statement for row {i}')
-            result = self.conn.execute(text(sql_text), params)
+            print(sql_text)
+            #TODO REMOVE comment so merge runs
+            #result = self.conn.execute(text(sql_text), params)
         
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
