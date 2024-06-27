@@ -89,22 +89,22 @@ export const initCollectionState = (
   },
   numberOfContainers: {
     id: 'collection-num-of-container',
-    value: String(collectionStepData.noOfContainers),
+    value: collectionStepData.noOfContainers.toString(),
     isInvalid: false
   },
   volumePerContainers: {
     id: 'collection-vol-per-container',
-    value: String(collectionStepData.volPerContainer),
+    value: collectionStepData.volPerContainer.toString(),
     isInvalid: false
   },
   volumeOfCones: {
     id: 'collection-vol-of-cones',
-    value: String(collectionStepData.clctnVolume),
+    value: collectionStepData.clctnVolume.toString(),
     isInvalid: false
   },
   selectedCollectionCodes: {
     id: 'collection-selected-collection-code',
-    value: collectionStepData.coneCollectionMethodCodes.map((methodCode) => String(methodCode)),
+    value: collectionStepData.coneCollectionMethodCodes.map((methodCode) => methodCode.toString()),
     isInvalid: false
   },
   comments: {
