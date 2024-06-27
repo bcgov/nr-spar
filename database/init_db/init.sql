@@ -4687,6 +4687,7 @@ target_primary_key 	  varchar(100),
 run_mode          varchar(25)     default 'UPSERT' not null
    check(run_mode in ('DELETE_INSERT','UPSERT','UPSERT_WTIH_DELETE')),
 upsert_with_delete_key    varchar(100),
+ignore_columns_on_update  varchar(200),
 retry_errors   		  boolean     default false not null,
 updated_at  		  timestamp   default now() not null,
 created_at  		  timestamp   default now() not null,
@@ -4710,6 +4711,7 @@ comment on column spar.ETL_EXECUTION_MAP.target_table               is 'Target t
 comment on column spar.ETL_EXECUTION_MAP.target_primary_key         is 'Primary key of the target table of this batch execution'; 
 comment on column spar.ETL_EXECUTION_MAP.run_mode                   is 'Identifies how data is replicated:DELETE_INSERT,UPSERT,UPSERT_WTIH_DELETE'; 
 comment on column spar.ETL_EXECUTION_MAP.upsert_with_delete_key     is 'For run_mode UPSERT_WTIH_DELETE, specifies the WHERE clause columns for delete'; 
+comment on column spar.ETL_EXECUTION_MAP.ignore_columns_on_update   is 'Comma seperated list of columns to ignore when updating'; 
 comment on column spar.ETL_EXECUTION_MAP.retry_errors        		    is 'If true, this process will execute again old instances with errors in ETL_EXECUTION_LOG_HIST'; 
 comment on column spar.ETL_EXECUTION_MAP.updated_at                 is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_MAP.created_at                 is 'Timestamp of the time this record was created'; 
