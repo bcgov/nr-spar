@@ -2,17 +2,26 @@ import React, { useContext } from 'react';
 import {
   Row, Column, TextInput, TextInputSkeleton
 } from '@carbon/react';
+
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
 import { PLACE_HOLDER } from '../../../shared-constants/shared-constants';
-import { formatEmptyStr } from './utils';
+import ReadOnlyInput from '../../ReadOnlyInput';
+import {
+  validateDegreeRange, validateElevationRange, validateMinuteOrSecondRange
+} from '../AreaOfUse/utils';
+
+import { formatEmptyStr, validateEffectivePopSize } from './utils';
 
 type props = {
   isRead?: boolean;
 }
 
 const GeoInfo = ({ isRead }: props) => {
-  const { isFetchingData, geoInfoVals, setGeoInfoVal } = useContext(ClassAContext);
+  const {
+    isFetchingData, geoInfoVals, setGeoInfoInputObj,
+    seedlotData, richSeedlotData, seedlotSpecies
+  } = useContext(ClassAContext);
 
   const formatLatLong = (isLat: boolean): string => {
     let formatted = PLACE_HOLDER;
@@ -24,11 +33,41 @@ const GeoInfo = ({ isRead }: props) => {
       const second = isLat
         ? geoInfoVals.meanLatSec.value : geoInfoVals.meanLongSec.value;
 
-      if (degree && minute && second) {
-        formatted = `${degree}° ${minute}' ${second}"`;
-      }
+      formatted = `${Number(degree)}° ${Number(minute)}' ${Number(second)}"`;
     }
+
     return formatted;
+  };
+
+  const handleInput = (key: keyof GeoInfoValType, value: string | null) => {
+    let newObj = structuredClone(geoInfoVals[key]);
+
+    newObj.value = value ?? '';
+
+    // Validate Elevation
+    if (key === 'meanElevation') {
+      newObj = validateElevationRange(newObj);
+    }
+
+    // Validate Degree
+    if (key === 'meanLatDeg' || key === 'meanLongDeg') {
+      const isLat = key === 'meanLatDeg';
+      newObj = validateDegreeRange(newObj, isLat);
+    }
+
+    // Validate Minute and Second
+    if (key === 'meanLatMinute' || key === 'meanLongMinute'
+      || key === 'meanLatSec' || key === 'meanLongSec'
+    ) {
+      newObj = validateMinuteOrSecondRange(newObj);
+    }
+
+    // Validate Ne [0.1, 999.9]
+    if (key === 'effectivePopSize') {
+      newObj = validateEffectivePopSize(newObj);
+    }
+
+    setGeoInfoInputObj(key, newObj);
   };
 
   const renderLatLong = (isLat: boolean) => {
@@ -37,22 +76,14 @@ const GeoInfo = ({ isRead }: props) => {
     const minuteKey: keyof GeoInfoValType = isLat ? 'meanLatMinute' : 'meanLongMinute';
     const secKey: keyof GeoInfoValType = isLat ? 'meanLatSec' : 'meanLongSec';
 
-    if (isFetchingData) {
+    if (isRead || isFetchingData) {
       return (
         <Column className="info-col" sm={4} md={4} lg={4}>
-          <TextInputSkeleton />
-        </Column>
-      );
-    }
-
-    if (isRead) {
-      return (
-        <Column className="info-col" sm={4} md={4} lg={4}>
-          <TextInput
+          <ReadOnlyInput
             id={`geo-info-mean-${latLongStr}`}
-            labelText={`Mean ${latLongStr} of parent tree`}
-            defaultValue={formatLatLong(isLat)}
-            readOnly={isRead}
+            label={`Mean ${latLongStr} of parent tree`}
+            value={formatLatLong(isLat)}
+            showSkeleton={isFetchingData}
           />
         </Column>
       );
@@ -63,31 +94,43 @@ const GeoInfo = ({ isRead }: props) => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
             id={`geo-info-mean-${latLongStr}-deg`}
+            type="number"
             labelText={`Mean ${latLongStr} degree`}
             defaultValue={geoInfoVals[degKey].value}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setGeoInfoVal(degKey, e.target.value);
+              handleInput(degKey, e.target.value);
             }}
+            invalid={geoInfoVals[degKey].isInvalid}
+            invalidText={geoInfoVals[degKey].errMsg}
           />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
             id={`geo-info-mean-${latLongStr}-minute`}
+            type="number"
             labelText={`Mean ${latLongStr} minute`}
             defaultValue={geoInfoVals[minuteKey].value}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setGeoInfoVal(minuteKey, e.target.value);
+              handleInput(minuteKey, e.target.value);
             }}
+            invalid={geoInfoVals[minuteKey].isInvalid}
+            invalidText={geoInfoVals[minuteKey].errMsg}
           />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
             id={`geo-info-mean-${latLongStr}-sec`}
+            type="number"
             labelText={`Mean ${latLongStr} second`}
             defaultValue={geoInfoVals[secKey].value}
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              setGeoInfoVal(secKey, e.target.value);
+              handleInput(secKey, e.target.value);
             }}
+            invalid={geoInfoVals[secKey].isInvalid}
+            invalidText={geoInfoVals[secKey].errMsg}
           />
         </Column>
       </>
@@ -103,75 +146,40 @@ const GeoInfo = ({ isRead }: props) => {
       </Row>
       <Row>
         <Column className="info-col" sm={4} md={4} lg={4}>
-          {
-            isFetchingData
-              ? <TextInputSkeleton />
-              : (
-                <TextInput
-                  id={geoInfoVals.becZone.id}
-                  labelText="BEC zone"
-                  defaultValue={formatEmptyStr(geoInfoVals.becZone.value, isRead ?? false)}
-                  readOnly={isRead}
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setGeoInfoVal('becZone', e.target.value);
-                  }}
-                />
-              )
-          }
-
+          <ReadOnlyInput
+            id="geo-info-bec-zone"
+            label="BEC zone"
+            value={seedlotData ? `${seedlotData.bgcZoneCode} - ${seedlotData.bgcZoneDescription}` : PLACE_HOLDER}
+            showSkeleton={isFetchingData}
+          />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
-          {
-            isFetchingData
-              ? <TextInputSkeleton />
-              : (
-                <TextInput
-                  id={geoInfoVals.subZone.id}
-                  labelText="Subzone"
-                  defaultValue={formatEmptyStr(geoInfoVals.subZone.value, isRead ?? false)}
-                  readOnly={isRead}
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setGeoInfoVal('subZone', e.target.value);
-                  }}
-                />
-              )
-          }
+          <ReadOnlyInput
+            id="geo-info-bec-sub-zone"
+            label="Subzone"
+            value={seedlotData?.bgcSubzoneCode ?? PLACE_HOLDER}
+            showSkeleton={isFetchingData}
+          />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
-          {
-            isFetchingData
-              ? <TextInputSkeleton />
-              : (
-                <TextInput
-                  id={geoInfoVals.variant.id}
-                  labelText="Variant"
-                  defaultValue={formatEmptyStr(geoInfoVals.variant.value, isRead ?? false)}
-                  readOnly={isRead}
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setGeoInfoVal('variant', e.target.value);
-                  }}
-                />
-              )
-          }
+          <ReadOnlyInput
+            id="geo-info-bec-variant"
+            label="Variant"
+            value={seedlotData?.variant ?? PLACE_HOLDER}
+            showSkeleton={isFetchingData}
+          />
         </Column>
       </Row>
       <Row>
         <Column className="info-col" sm={4} md={4} lg={4}>
-          {
-            isFetchingData
-              ? <TextInputSkeleton />
-              : (
-                <TextInput
-                  id={geoInfoVals.primarySpu.id}
-                  labelText="Primary seed planning unit"
-                  defaultValue={formatEmptyStr(geoInfoVals.primarySpu.value, isRead ?? false)}
-                  readOnly={isRead}
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setGeoInfoVal('primarySpu', e.target.value);
-                  }}
-                />
-              )
-          }
+          <ReadOnlyInput
+            id="geo-info-primary-spu"
+            label="Primary seed planning unit"
+            value={
+              `${seedlotSpecies.code} ${richSeedlotData?.primarySpu?.seedPlanZoneCode} ${richSeedlotData?.primarySpu?.elevationBand}`
+            }
+            showSkeleton={isFetchingData}
+          />
         </Column>
       </Row>
       <Row>
@@ -182,12 +190,16 @@ const GeoInfo = ({ isRead }: props) => {
               : (
                 <TextInput
                   id={geoInfoVals.meanElevation.id}
+                  type="number"
                   labelText="Mean elevation of parent tree (m)"
                   defaultValue={formatEmptyStr(geoInfoVals.meanElevation.value, isRead ?? false)}
                   readOnly={isRead}
+                  onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                   onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setGeoInfoVal('meanElevation', e.target.value);
+                    handleInput('meanElevation', e.target.value);
                   }}
+                  invalid={geoInfoVals.meanElevation.isInvalid}
+                  invalidText={geoInfoVals.meanElevation.errMsg}
                 />
               )
           }
@@ -211,12 +223,16 @@ const GeoInfo = ({ isRead }: props) => {
               : (
                 <TextInput
                   id={geoInfoVals.effectivePopSize.id}
+                  type="number"
                   labelText="Effective population size"
                   defaultValue={formatEmptyStr(geoInfoVals.effectivePopSize.value, isRead ?? false)}
                   readOnly={isRead}
+                  onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                   onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setGeoInfoVal('effectivePopSize', e.target.value);
+                    handleInput('effectivePopSize', e.target.value);
                   }}
+                  invalid={geoInfoVals.effectivePopSize.isInvalid}
+                  invalidText={geoInfoVals.effectivePopSize.errMsg}
                 />
               )
           }
