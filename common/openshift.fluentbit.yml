@@ -21,7 +21,7 @@ parameters:
     value: "/fluent-bit/etc"
   - name: FLUENT_VERSION
     description: FluentBit version (docker tag). You may include a debug version.
-    value: "2.1"
+    value: "3.0"
   - name: LOGGING_CPU_LIMIT
     description: Limit Peak CPU per pod (in millicores ex. 1000m)
     displayName: CPU Limit

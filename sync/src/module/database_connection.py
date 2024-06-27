@@ -184,6 +184,9 @@ class database_connection(object):
                 #remove insert only cols from update col list
                 df2 = df2.drop(columns=insertonlycols)
 
+                df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation 
+                whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
+
                 for column in dataframe.columns.values:
                     params["s_"+column] = getattr(row,column)
                     params["q_"+column] = getattr(row,column)

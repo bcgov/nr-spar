@@ -22,7 +22,7 @@ public class SeedPlanUnitService {
   private final SeedPlanZoneRepository seedPlanZoneRepository;
 
   /**
-   * Get the description of a BEC Zone by an ID
+   * Get the description of a Seed Plan Unit by an ID
    *
    * @return a {@link SpuDto} if found
    * @throws {@link SpuNotFoundException} or {@link SpzNotFoundException}

@@ -29,6 +29,15 @@
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <!-- rollover daily and when the file reaches 10 MegaBytes -->
       <fileNamePattern>${LOGS}/archived/oracle-api-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <!-- keep logs for 7 days -->
+      <maxHistory>7</maxHistory>
+      <!--
+        Controls the total size of all archive files. Oldest archives are deleted asynchronously
+        when the total size cap is exceeded.
+        Half of the total available PVC size (75MB)
+        Learn more: https://logback.qos.ch/manual/appenders.html
+      -->
+      <totalSizeCap>30MB</totalSizeCap>
       <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
         <maxFileSize>10MB</maxFileSize>
       </timeBasedFileNamingAndTriggeringPolicy>

@@ -107,5 +107,6 @@ LEFT OUTER JOIN (SELECT DISTINCT
                    FROM spar.seedlot_orchard so
                   WHERE so.primary_ind = 'N') sec
              ON sec.seedlot_number = s.seedlot_number
+FROM spar.seedlot s 
 WHERE 
    update_timestamp between %(start_time)s AND % ( end_time ) s order by seedlot_number desc
