@@ -33,7 +33,7 @@ public class SwaggerConfig {
   @Bean
   public OpenAPI theRestApi() {
     StringBuilder title = new StringBuilder();
-    title.append("Oracle API ");
+    title.append("Oracle API");
     title.append("(").append(nrSparBackendSnapshot).append(")");
 
     return new OpenAPI()

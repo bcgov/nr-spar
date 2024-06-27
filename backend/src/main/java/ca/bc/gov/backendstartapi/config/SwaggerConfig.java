@@ -38,7 +38,7 @@ public class SwaggerConfig {
   @Bean
   public OpenAPI theRestApi() {
     StringBuilder title = new StringBuilder();
-    title.append("Backend API ");
+    title.append("Backend API");
 
     Info info = new Info();
     info.setTitle(title.toString());
