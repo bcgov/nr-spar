@@ -99,7 +99,7 @@ export const initCollectionState = (
   },
   volumeOfCones: {
     id: 'collection-vol-of-cones',
-    value: String(collectionStepData.clctnVolume.toString()),
+    value: String(collectionStepData.clctnVolume),
     isInvalid: false
   },
   selectedCollectionCodes: {
