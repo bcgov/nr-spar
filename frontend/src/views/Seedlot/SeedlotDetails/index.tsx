@@ -199,7 +199,7 @@ const SeedlotDetails = () => {
                   isFetching={forestClientQuery?.isFetching}
                 />
                 {
-                  seedlotData?.seedlotStatus === 'Submitted'
+                  (seedlotData?.seedlotStatus !== 'Pending' && seedlotData?.seedlotStatus !== 'Incomplete')
                     ? <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
                     : null
                 }
