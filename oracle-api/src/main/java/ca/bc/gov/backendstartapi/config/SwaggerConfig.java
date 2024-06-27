@@ -8,6 +8,8 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.security.SecurityScheme.Type;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,15 +24,25 @@ public class SwaggerConfig {
 
   private static final String BEARER_SECURITY_SCHEME_NAME = "bearerAuth";
 
+  @Value("${app.version}")
+  private String appVersion;
+
+  @Value("${nr-spar-backend-version}")
+  private String nrSparBackendSnapshot;
+
   /** General information about our API. */
   @Bean
   public OpenAPI theRestApi() {
+    StringBuilder titleAndVersion = new StringBuilder();
+    titleAndVersion.append("SPAR Oracle API ");
+    titleAndVersion.append("(").append(nrSparBackendSnapshot).append(")");
+
     return new OpenAPI()
         .info(
             new Info()
                 .title("Oracle THE Database REST API")
-                .description("A REST API to fetch information from the THE database.")
-                .version("v0.0.1")
+                .description("RESTful service API to serve New SPAR frontend web app.")
+                .version("v" + appVersion)
                 .termsOfService(
                     "https://www2.gov.bc.ca/gov/content/data/open-data/api-terms-of-use-for-ogl-information")
                 .license(

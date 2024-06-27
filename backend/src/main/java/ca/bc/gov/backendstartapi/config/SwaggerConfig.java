@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.security.SecurityScheme.Type;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,11 +18,17 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
   private static final String DESCRIPTION =
-      "A REST API to store new SPAR information into Postgres database.";
+      "RESTful service API to serve New SPAR frontend web app.";
   private static final String TERMS_OF_SERVICE =
       "https://www2.gov.bc.ca/gov/content/data/open-data/api-terms-of-use-for-ogl-information";
   private static final String LICENSE_URL =
       "https://www2.gov.bc.ca/gov/content/data/open-data/open-government-licence-bc";
+
+  @Value("${app.version}")
+  private String appVersion;
+
+  @Value("${nr-spar-backend-version}")
+  private String nrSparBackendSnapshot;
 
   /**
    * Creates an {@link OpenAPI} with all needed and related information.
@@ -30,10 +37,14 @@ public class SwaggerConfig {
    */
   @Bean
   public OpenAPI theRestApi() {
+    StringBuilder titleAndVersion = new StringBuilder();
+    titleAndVersion.append("SPAR Postgres API ");
+    titleAndVersion.append("(").append(nrSparBackendSnapshot).append(")");
+
     Info info = new Info();
-    info.setTitle("SPAR Postgres REST API");
+    info.setTitle(titleAndVersion.toString());
     info.setDescription(DESCRIPTION);
-    info.setVersion("0.0.1");
+    info.setVersion("v" + appVersion);
     info.setTermsOfService(TERMS_OF_SERVICE);
 
     Contact contact = new Contact();
