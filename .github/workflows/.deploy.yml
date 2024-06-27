@@ -5,13 +5,16 @@ on:
     inputs:
       ### Required
       # Nothing! Only `secrets: inherit` is required
-
       ### Typical / recommended
       etl:
         description: Run the cronjob and verify results?  [true|false]
         required: false
         type: boolean
         default: false
+      log_env_target:
+        required: false
+        type: string
+        default: development
       tag:
         description: Container tag; usually PR number
         required: false
@@ -95,7 +98,7 @@ jobs:
             overwrite: true
             parameters:
               -p BUILD=snapshot-${{ inputs.target || github.event.number }}
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.log_env_target }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
             verification_path: "actuator/health"
@@ -117,7 +120,7 @@ jobs:
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.target || github.event.number }}
+              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.log_env_target }}
               -p NR_SPAR_ORACLE_API_VERSION=snapshot-${{ inputs.target || github.event.number }}
               ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
             verification_path: "actuator/health"

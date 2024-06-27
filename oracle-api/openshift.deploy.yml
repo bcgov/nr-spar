@@ -36,7 +36,7 @@ parameters:
     required: true
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
-    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
   - name: DATABASE_HOST
     description: Where the database is hosted
     value: nrcdb03.bcgov

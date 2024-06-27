@@ -31,7 +31,7 @@ parameters:
     value: apps.silver.devops.gov.bc.ca
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
-    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
@@ -41,7 +41,7 @@ parameters:
   - name: MEMORY_REQUEST
     value: 100Mi
   - name: MEMORY_LIMIT
-    value: 250Mi
+    value: 350Mi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"
