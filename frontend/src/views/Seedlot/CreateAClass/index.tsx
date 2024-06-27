@@ -151,7 +151,7 @@ const CreateAClass = () => {
           <Button
             className="submit-button"
             renderIcon={DocumentAdd}
-            onClick={() => validateAndCreateSeedlot()}
+            onClick={validateAndCreateSeedlot}
           >
             Create seedlot number
           </Button>
