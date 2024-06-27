@@ -434,7 +434,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('be.checked');
   });
 
-  it.only('Change gamete information', () => {
+  it('Change gamete information', () => {
     // Select female gametic contribution methodology
     cy.get('#orchard-female-gametic')
       .siblings()
@@ -442,7 +442,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .eq(1)
+      .contains('F2 - Measured Cone Volume')
       .click();
 
     cy.get('#orchard-female-gametic')
@@ -455,7 +455,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
       cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .eq(2)
+      .contains('M3 - Pollen Volume Estimate by 100% Survey')
       .click();
 
     cy.get('#orchard-male-gametic')
@@ -483,7 +483,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .eq(1)
+      .contains('F2 - Measured Cone Volume')
       .click();
 
     cy.get('#orchard-male-gametic')
@@ -492,7 +492,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
-      .eq(2)
+      .contains('M3 - Pollen Volume Estimate by 100% Survey')
       .click();
 
     // Change radio inputs of gamete section
