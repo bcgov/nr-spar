@@ -1,10 +1,6 @@
 import { StringInputType } from '../../../types/FormInputType';
 
 export type GeoInfoValType = {
-  becZone: StringInputType,
-  subZone: StringInputType,
-  variant: StringInputType,
-  primarySpu: StringInputType,
   meanElevation: StringInputType,
   meanLatDeg: StringInputType,
   meanLatMinute: StringInputType,

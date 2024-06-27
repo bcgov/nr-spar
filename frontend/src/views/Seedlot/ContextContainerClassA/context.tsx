@@ -18,6 +18,7 @@ import {
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
 import { SummarySectionConfig } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { StringInputType } from '../../../types/FormInputType';
 
 export type ClassAContextType = {
   seedlotData: SeedlotType | undefined,
@@ -26,7 +27,7 @@ export type ClassAContextType = {
   geoInfoVals: GeoInfoValType,
   genWorthVals: GenWorthValType,
   setGenWorthVal: (traitCode: keyof GenWorthValType, newVal: string) => void,
-  setGeoInfoVal: (infoName: keyof GeoInfoValType, newVal: string) => void,
+  setGeoInfoInputObj: (infoName: keyof GeoInfoValType, inputObj: StringInputType) => void,
   seedlotNumber: string | undefined,
   allStepData: AllStepData,
   setStepData: (stepName: keyof AllStepData, stepData: any) => void,
@@ -105,7 +106,7 @@ const ClassAContext = createContext<ClassAContextType>({
   geoInfoVals: {} as GeoInfoValType,
   genWorthVals: {} as GenWorthValType,
   setGenWorthVal: () => { },
-  setGeoInfoVal: () => { },
+  setGeoInfoInputObj: () => { },
   genWorthInfoItems: {} as Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: () => { },
   weightedGwInfoItems: {} as Record<keyof RowItem, InfoDisplayObj>,
