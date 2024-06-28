@@ -22,10 +22,10 @@ public class SeedPlanUnitService {
   private final SeedPlanZoneRepository seedPlanZoneRepository;
 
   /**
-   * Get the description of a Seed Plan Unit by an ID
+   * Get the description of a Seed Plan Unit by an ID.
    *
    * @return a {@link SpuDto} if found
-   * @throws {@link SpuNotFoundException} or {@link SpzNotFoundException}
+   * @throws SpuNotFoundException or SpzNotFoundException
    */
   public SpuDto getSpuById(String spuId) {
     SparLog.info("Finding SPU with id {}", spuId);

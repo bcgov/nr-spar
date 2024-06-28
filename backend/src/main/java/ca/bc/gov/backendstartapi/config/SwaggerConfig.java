@@ -24,11 +24,8 @@ public class SwaggerConfig {
   private static final String LICENSE_URL =
       "https://www2.gov.bc.ca/gov/content/data/open-data/open-government-licence-bc";
 
-  @Value("${app.version}")
-  private String appVersion;
-
   @Value("${nr-spar-backend-version}")
-  private String nrSparBackendSnapshot;
+  private String nrSparBackendVersion;
 
   /**
    * Creates an {@link OpenAPI} with all needed and related information.
@@ -37,13 +34,10 @@ public class SwaggerConfig {
    */
   @Bean
   public OpenAPI theRestApi() {
-    StringBuilder title = new StringBuilder();
-    title.append("Backend API");
-
     Info info = new Info();
-    info.setTitle(title.toString());
+    info.setTitle("Backend API");
     info.setDescription(DESCRIPTION);
-    info.setVersion(nrSparBackendSnapshot);
+    info.setVersion(nrSparBackendVersion);
     info.setTermsOfService(TERMS_OF_SERVICE);
 
     Contact contact = new Contact();
