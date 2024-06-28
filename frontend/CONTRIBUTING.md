@@ -58,7 +58,6 @@ To do that, first you need to install required dependencies.
 Remember of setting up the required environment variables. You can create a `.env` file containing:
 
 ```
-VITE_NRSPARWEBAPP_VERSION=
 VITE_USER_POOLS_ID=<pools-id>
 VITE_USER_POOLS_WEB_CLIENT_ID=<pools-web-client-id>
 ```
