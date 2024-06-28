@@ -1,5 +1,4 @@
 import validator from 'validator';
-import BigNumber from 'bignumber.js';
 
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
 
@@ -13,6 +12,7 @@ import {
   SMP_SUCCESS_PERC_MAX, SMP_SUCCESS_PERC_MAX_PW, SMP_SUCCESS_PERC_MIN, VOLUME_MAX, VOLUME_MIN
 } from '../constants';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
+import { isFloatWithinRange } from '../../../../utils/NumberUtils';
 
 export const isPtNumberInvalid = (ptNumber: string, allParentTreeData: AllParentTreeMap) => (
   !Object.keys(allParentTreeData).includes(ptNumber)
@@ -105,14 +105,6 @@ const calculateSmpRow = (
 
 export const getPTNumberErrMsg = (value: string): string => (
   `"${value}" is an invalid parent tree number. Please provide a valid parent tree number and review the number you have entered.`
-);
-
-/**
- * A float validator, the validator.isFloat() cannot handle high precision comparing.
- */
-const isFloatWithinRange = (value: string, min: string, max: string): boolean => (
-  new BigNumber(value).isGreaterThanOrEqualTo(min)
-  && new BigNumber(value).isLessThanOrEqualTo(max)
 );
 
 export const isConeCountInvalid = (value: string): boolean => {

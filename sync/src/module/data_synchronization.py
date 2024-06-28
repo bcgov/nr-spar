@@ -69,6 +69,9 @@ def execute_instance(oracle_config, postgres_config, track_config, execution_id)
                 schedule_times = data_sync_ctl.get_scheduler(track_db_conn,track_config['schema'],process['execution_id'],process['interface_id'])
 
                 logger.info('Executing process')
+                print('SCHEDULER TIMES /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/')
+                print(schedule_times[0])
+                print('SCHEDULER TIMES /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/')
                 stored_metrics = execute_process(base_dir=current_cwd, 
                                                  track_db_conn=track_db_conn, 
                                                  track_db_schema=track_config['schema'], 
