@@ -1383,211 +1383,60 @@ comment on column spar.active_orchard_spu.active_ind is 'Indicates if the combin
 comment on column spar.active_orchard_spu.retired_ind is 'Indicates retired orchards that should only be used to show legacy information.';
 comment on column spar.active_orchard_spu.no_spu_ind is 'Indicates a new orchard that has not a SPU assigned yet.';
 /*
-* For entry timestamps
-*/
-create or replace function trigger_set_entry_timestamp() returns TRIGGER as $$
-begin
-new.entry_timestamp = now();
-return new;
-end;
-$$ language plpgsql;
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_collection_method
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_genetic_worth
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_orchard
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_owner_quantity
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_parent_tree
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_parent_tree_gen_qlty
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_parent_tree_smp_mix
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.smp_mix
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.smp_mix_gen_qlty
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-/*
 * For update timestamps
 * Alter table with column update_timestamp to use default current_timestamp instead of not null
 * Tables that end with '_list' does not need to be altered as they are done in V16
 */
-create or replace function trigger_set_update_timestamp() returns TRIGGER as $$
-begin
-new.update_timestamp = now();
-return new;
-end;
-$$ language plpgsql;
-
-create trigger set_update_timestamp
-before update on spar.cone_collection_method_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.gametic_methodology_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.genetic_class_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.genetic_worth_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.method_of_payment_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.seedlot
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.seedlot
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.seedlot_collection_method
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.seedlot_collection_method
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.seedlot_genetic_worth
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.seedlot_genetic_worth
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.seedlot_orchard
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.seedlot_orchard
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.seedlot_owner_quantity
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.seedlot_owner_quantity
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.seedlot_parent_tree
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.seedlot_parent_tree
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.seedlot_parent_tree_gen_qlty
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.seedlot_parent_tree_gen_qlty
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.seedlot_parent_tree_smp_mix
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.seedlot_parent_tree_smp_mix
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.seedlot_source_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.seedlot_status_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.smp_mix
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.smp_mix
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.smp_mix_gen_qlty
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.smp_mix_gen_qlty
-for each row
-execute procedure trigger_set_update_timestamp();
 alter table
   spar.favourite_activity drop column enabled;
 
@@ -1601,13 +1450,6 @@ alter table
 add
   update_timestamp timestamp default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.favourite_activity for each row execute procedure trigger_set_entry_timestamp();
-
-create trigger set_update_timestamp before
-update
-  on spar.favourite_activity for each row execute procedure trigger_set_update_timestamp();
 alter table
   spar.seedlot_source_list
 add
@@ -1966,20 +1808,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_genetic_worth for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_genetic_worth
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_genetic_worth for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_parent_tree
@@ -1991,20 +1825,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_parent_tree for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_parent_tree
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_parent_tree for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_parent_tree_gen_qlty
@@ -2016,20 +1842,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_parent_tree_gen_qlty for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_parent_tree_gen_qlty
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_parent_tree_gen_qlty for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_parent_tree_smp_mix
@@ -2041,20 +1859,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_parent_tree_smp_mix for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_parent_tree_smp_mix
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_parent_tree_smp_mix for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * smp_mix
@@ -2066,20 +1876,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.smp_mix for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.smp_mix
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.smp_mix for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * smp_mix_gen_qlty
@@ -2091,20 +1893,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.smp_mix_gen_qlty for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.smp_mix_gen_qlty
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.smp_mix_gen_qlty for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_smp_mix
@@ -2116,20 +1910,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_smp_mix for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_smp_mix
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_smp_mix for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_seed_plan_zone
@@ -2141,10 +1927,6 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_seed_plan_zone for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_seed_plan_zone
 alter column
@@ -2152,9 +1934,6 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_seed_plan_zone for each row execute procedure trigger_set_update_timestamp();
 create table spar.seedlot_registration_a_class_save (
   seedlot_number varchar(5) not null,
   all_step_data jsonb not null,
@@ -2168,13 +1947,6 @@ create table spar.seedlot_registration_a_class_save (
   constraint registration_form_a_class_seedlot_fk foreign key(seedlot_number) references spar.seedlot(seedlot_number)
 );
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_registration_a_class_save for each row execute procedure trigger_set_entry_timestamp();
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_registration_a_class_save for each row execute procedure trigger_set_update_timestamp();
 alter table
   spar.seedlot_seed_plan_zone
 add

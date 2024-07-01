@@ -37,6 +37,8 @@ class FavouriteActivityRepositoryTest {
     Assertions.assertEquals(USER_ID, created.getUserId());
     Assertions.assertEquals("SEEDLOT_REGISTRATION", created.getActivity());
     Assertions.assertFalse(created.getHighlighted());
+    Assertions.assertNotNull(created.getEntryTimestamp());
+    Assertions.assertNotNull(created.getUpdateTimestamp());
   }
 
   @Test
@@ -52,6 +54,8 @@ class FavouriteActivityRepositoryTest {
     Assertions.assertEquals("CREATE_A_CLASS_SEEDLOT", created.getActivity());
     Assertions.assertEquals(USER_ID, created.getUserId());
     Assertions.assertTrue(created.getHighlighted());
+    Assertions.assertNotNull(created.getEntryTimestamp());
+    Assertions.assertNotNull(created.getUpdateTimestamp());
   }
 
   @Test
@@ -86,6 +90,8 @@ class FavouriteActivityRepositoryTest {
     Assertions.assertEquals(USER_ID, saved.getUserId());
     Assertions.assertEquals("SEEDLOT_REGISTRATION", saved.getActivity());
     Assertions.assertTrue(saved.getHighlighted());
+    Assertions.assertNotNull(saved.getEntryTimestamp());
+    Assertions.assertNotNull(saved.getUpdateTimestamp());
   }
 
   @Test

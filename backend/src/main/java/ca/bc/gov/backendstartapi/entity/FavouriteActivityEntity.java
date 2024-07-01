@@ -6,7 +6,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,7 +46,24 @@ public class FavouriteActivityEntity {
       example = "false")
   private Boolean highlighted;
 
+  @Column(name = "entry_timestamp", nullable = false, updatable = false)
+  private LocalDateTime entryTimestamp;
+
+  @Column(name = "update_timestamp")
+  private LocalDateTime updateTimestamp;
+
   public FavouriteActivityEntity() {
     this.highlighted = false;
+  }
+
+  @PrePersist
+  private void prePersist() {
+    entryTimestamp = LocalDateTime.now();
+    updateTimestamp = entryTimestamp;
+  }
+
+  @PreUpdate
+  private void preUpdate() {
+    updateTimestamp = LocalDateTime.now();
   }
 }
