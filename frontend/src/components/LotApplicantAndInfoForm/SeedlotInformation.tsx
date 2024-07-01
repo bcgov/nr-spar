@@ -22,6 +22,10 @@ import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
 import { FilterObj, filterInput } from '../../utils/FilterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import { EmptyMultiOptObj } from '../../shared-constants/shared-constants';
+import MultiOptionsObj from '../../types/MultiOptionsObject';
+import VegCode from '../../types/VegetationCodeType';
+import { geneticWorthDict } from '../SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { getMultiOptList } from '../../utils/MultiOptionsUtils';
 
 import { speciesFieldConfig } from './constants';
 
@@ -35,10 +39,20 @@ const SeedlotInformation = (
 ) => {
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
     enabled: !isEdit,
     staleTime: THREE_HOURS, // will not refetch for 3 hours
-    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
+    cacheTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
+    select: (data) => {
+      let vegCodeOptions: Array<MultiOptionsObj> = [];
+      if (data) {
+        const aClassCodes = Object.keys(geneticWorthDict);
+        const filteredData = data
+          .filter((vegCode: VegCode) => aClassCodes.includes(vegCode.code));
+        vegCodeOptions = getMultiOptList(filteredData, true, true);
+      }
+      return vegCodeOptions;
+    }
   });
 
   const seedlotSourcesQuery = useQuery({

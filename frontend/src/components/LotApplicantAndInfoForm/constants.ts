@@ -28,3 +28,25 @@ export const speciesFieldConfig: ComboBoxPropsType = {
 // Template data for vegLot:
 export const vegLotAgency: OptionsInputType = { id: '', isInvalid: false, value: EmptyMultiOptObj };
 export const vegLotLocationCode: StringInputType = { id: '', isInvalid: false, value: '' };
+
+// Remove VegCodes with these codes
+export const VegCodesToFilter: Array<string> = [
+  'AMELALN',
+  'ARCTUVA',
+  'CEANSAN',
+  'CEANVEL',
+  'CORNSTO',
+  'DG',
+  'DRYADRU',
+  'LA',
+  'LARIDEC',
+  'LARIKAE',
+  'LD',
+  'MAHOREP',
+  'PINUSYL',
+  'POTEFRU',
+  'PRUNVIR',
+  'SA',
+  'SHEPCAN',
+  'SPIRBET'
+];
