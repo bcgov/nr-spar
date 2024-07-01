@@ -99,6 +99,8 @@ class SeedlotFormPutTest {
 
   @Mock ParentTreeService parentTreeService;
 
+  @Mock TscAdminService tscAdminService;
+
   @Mock Provider oracleApiProvider;
 
   @BeforeEach
@@ -125,6 +127,7 @@ class SeedlotFormPutTest {
             orchardService,
             seedlotSeedPlanZoneRepository,
             parentTreeService,
+            tscAdminService,
             oracleApiProvider);
   }
 
@@ -209,7 +212,11 @@ class SeedlotFormPutTest {
         orchardDto,
         List.of(parentTreeDto),
         List.of(parentTreeDto),
-        extractionDto);
+        extractionDto,
+        List.of(),
+        null,
+        List.of(),
+        null);
   }
 
   @Test

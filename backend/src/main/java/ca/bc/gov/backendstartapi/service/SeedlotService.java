@@ -124,6 +124,8 @@ public class SeedlotService {
 
   private final ParentTreeService parentTreeService;
 
+  private final TscAdminService tscAdminService;
+
   @Qualifier("oracleApi")
   private final Provider oracleApiProvider;
 
@@ -593,7 +595,11 @@ public class SeedlotService {
                 orchardStep,
                 parentTreesInfo,
                 smpMixParentTreesInfo,
-                extractionStep),
+                extractionStep,
+                List.of(),
+                null,
+                List.of(),
+                null),
             calculatedGenWorth);
 
     SparLog.info("Seedlot registration info found for seedlot {}", seedlotNumber);
@@ -661,7 +667,7 @@ public class SeedlotService {
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
 
-    String currentSeedlotStauts = seedlot.getSeedlotStatus().getSeedlotStatusCode();
+    String currentSeedlotStatus = seedlot.getSeedlotStatus().getSeedlotStatusCode();
 
     /*
      * This determines whether delete actions can be performed
@@ -669,7 +675,7 @@ public class SeedlotService {
      * TSC admins can perform delete actions without regard of the seedlot's status
      */
     boolean canDelete =
-        currentSeedlotStauts.equals("PND") || currentSeedlotStauts.equals("INC") || isTscAdmin;
+        currentSeedlotStatus.equals("PND") || currentSeedlotStatus.equals("INC") || isTscAdmin;
 
     /*
      * Merging entities script:
@@ -700,13 +706,19 @@ public class SeedlotService {
 
     setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
-    setParentTreeContribution(
-        seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
-
-    setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+    if (!isTscAdmin) {
+      setParentTreeContribution(
+          seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+      setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+    } else {
+      tscAdminService.updateSeedPlanZones(seedlot, form.seedlotReviewSeedPlanZones());
+      tscAdminService.updateElevationLatLong(seedlot, form.seedlotReviewElevationLatLong());
+      tscAdminService.updateSeedlotGeneticWorth(seedlot, form.seedlotReviewGeneticWorth());
+      tscAdminService.updateSeedlotGeoInformation(seedlot, form.seedlotReviewGeoInformation());
+    }
 
     // Only set declaration info for pending seedlots
-    if (currentSeedlotStauts.equals("PND")) {
+    if (currentSeedlotStatus.equals("PND")) {
       setSeedlotDeclaredInfo(seedlot);
     }
 
