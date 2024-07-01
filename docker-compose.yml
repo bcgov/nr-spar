@@ -36,10 +36,7 @@ services:
       - "./database/init_db:/init_db"
     ports: ["5432:5432"]
     healthcheck:
-      test: CMD ["psql", "-q", "-U", "$${POSTGRES_USER}", "-d", "$${POSTGRES_DB}", "-c", "SELECT 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      test: psql -q -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1'
 
   backend:
     container_name: backend
@@ -63,9 +60,6 @@ services:
       - $HOME/zscaler-certs:/certs
     healthcheck:
       test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   frontend:
     container_name: frontend
