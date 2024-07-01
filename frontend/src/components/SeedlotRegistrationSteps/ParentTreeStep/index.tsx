@@ -269,7 +269,6 @@ const ParentTreeStep = () => {
                 <DetailSection>
                   <DescriptionBox
                     header={summaryConfig[currentTab].title}
-                    description={summaryConfig[currentTab].description}
                   />
                   <InfoSection
                     infoItems={
