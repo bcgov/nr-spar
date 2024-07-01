@@ -740,12 +740,20 @@ public class SeedlotService {
             .findOrchardById(primaryOrchardId)
             .orElseThrow(OracleApiProviderException::new);
 
+    ActiveOrchardSpuEntity primarySeedPlanUnit =
+        orchardService
+            .findSpuIdByOrchard(primaryOrchardId)
+            .orElseThrow(NoSpuForOrchardException::new);
+
+    Integer primarySpuId = primarySeedPlanUnit.getSeedPlanningUnitId();
+
     // Not sure why it's called Bgc in seedlot instead of Bec in orchard
     seedlot.setBgcZoneCode(orchardDto.becZoneCode());
     seedlot.setBgcZoneDescription(orchardDto.becZoneDescription());
     seedlot.setBgcSubzoneCode(orchardDto.becSubzoneCode());
     seedlot.setVariant(orchardDto.variant());
     seedlot.setBecVersionId(orchardDto.becVersionId());
+    seedlot.setSeedPlanUnitId(primarySpuId);
 
     SparLog.info("BEC values set");
   }
