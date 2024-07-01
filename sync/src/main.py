@@ -36,7 +36,7 @@ def generate_db_config(type_,schema_,settings):
             "username": os.environ.get("POSTGRES_USER"),
             "password": os.environ.get("POSTGRES_PASSWORD"),
             "host": os.environ.get("POSTGRES_HOST"),
-            "database": os.environ.get("POSTGRES_DATABASE"),
+            "database": os.environ.get("POSTGRES_DB"),
             "port": os.environ.get("POSTGRES_PORT"),
             "schema": schema_,
             "test_query": "SELECT 'SUCCESS' a",
@@ -60,7 +60,7 @@ def required_variables_exists():
        not env_var_is_filled("POSTGRES_PORT") or  \
        not env_var_is_filled("POSTGRES_USER") or \
        not env_var_is_filled("POSTGRES_PASSWORD") or \
-       not env_var_is_filled("POSTGRES_DATABASE") or \
+       not env_var_is_filled("POSTGRES_DB") or \
        not env_var_is_filled("ORACLE_PORT") or \
        not env_var_is_filled("ORACLE_HOST") or \
        not env_var_is_filled("ORACLE_SERVICE") or \

@@ -1,9 +1,9 @@
 ---
 
 x-postgres-vars: &postgres-vars
-  POSTGRES_DATABASE: spar
+  POSTGRES_DB: spar
   POSTGRES_HOST: database
-  POSTGRES_USER: postgres
+  POSTGRES_USER: blorf
   POSTGRES_PASSWORD: default
   POSTGRES_PORT: 5432
 
