@@ -3,7 +3,7 @@
 x-postgres-vars: &postgres-vars
   POSTGRES_DB: spar
   POSTGRES_HOST: database
-  POSTGRES_USER: blorf
+  POSTGRES_USER: postgres
   POSTGRES_PASSWORD: default
   POSTGRES_PORT: 5432
 
@@ -28,6 +28,7 @@ x-frontend: &frontend
 services:
   database:
     container_name: database
+    build: ./database
     environment:
       <<: *postgres-vars
     volumes:
@@ -35,11 +36,10 @@ services:
       - "./database/init_db:/init_db"
     ports: ["5432:5432"]
     healthcheck:
-      test: pg_isready -U postgres
+      test: ["CMD", "psql", "-q", "-U", "postgres", "-d", "spar", "-c", "'SELECT 1'"]
       interval: 5s
       timeout: 5s
       retries: 5
-    image: postgis/postgis:15-master
 
   backend:
     container_name: backend
