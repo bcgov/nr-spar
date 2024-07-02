@@ -38,7 +38,7 @@ on:
 jobs:
   init:
     name: Initialize
-    environment: ${{ inputs.environment }}
+    environment: ${{ github.event_name == 'pull_request' && '' || inputs.target }}
     outputs:
       modded-tag: ${{ steps.mod-tag.outputs.modded-tag }}
       pr: ${{ steps.pr.outputs.pr }}
