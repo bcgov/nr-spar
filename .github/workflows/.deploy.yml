@@ -21,6 +21,7 @@ on:
         type: string
       target:
         description: Deployment target; usually PR number, test or prod
+        default: ''
         required: false
         type: string
       ### Usually a bad idea / not recommended
@@ -78,7 +79,7 @@ jobs:
 
   deploy:
     name: Deploy
-    environment: ${{ github.event_name == 'pull_request' && '' || inputs.target }}
+    environment: ${{ inputs.target }}
     needs: [init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
@@ -154,7 +155,7 @@ jobs:
   verify:
     name: Verify ETL
     if: inputs.etl == 'true'
-    environment: ${{ github.event_name == 'pull_request' && '' || inputs.target }}
+    environment: ${{ inputs.target }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
