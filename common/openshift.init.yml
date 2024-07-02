@@ -30,9 +30,6 @@ parameters:
   - name: AWS_KINESIS_ROLE_ARN
     description: AWS Kinesis Role ARN
     required: true
-  - name: ORACLE_PASSWORD
-    description: Oracle database password for API
-    required: true
   - name: ORACLE_HOST
     description: Oracle database host
     value: nrcdb03.bcgov
