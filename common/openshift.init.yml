@@ -42,7 +42,7 @@ parameters:
   - name: ORACLE_SERVICE
     description: Oracle service name
     value: dbq01.nrs.bcgov
-  - name: ORACLE_BD_USER
+  - name: ORACLE_DB_USER
     description: Oracle database username for API
     value: proxy_fsa_spar_read_only_user
   - name: ORACLE_DB_PASSWORD
