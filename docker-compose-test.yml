@@ -59,7 +59,6 @@ services:
     environment:
       VITE_SERVER_URL: http://localhost:8090
       VITE_ORACLE_SERVER_URL: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-      VITE_NRSPARWEBAPP_VERSION: test
       LOG_LEVEL: debug
       VITE_USER_POOLS_ID: ca-central-1_t2HSZBHur
       VITE_USER_POOLS_WEB_CLIENT_ID: 6jmscjfesregki1pvng2oiopc3
