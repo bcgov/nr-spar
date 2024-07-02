@@ -1,7 +1,7 @@
 ---
 
 x-postgres-vars: &postgres-vars
-  POSTGRES_DATABASE: spar
+  POSTGRES_DB: spar
   POSTGRES_HOST: database
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: default
@@ -20,14 +20,11 @@ x-frontend: &frontend
     VITE_ZONE: TEST
   healthcheck:
     test: timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/3000'
-    interval: 10s
-    timeout: 10s
-    retries: 5
-    start_period: 10s
 
 services:
   database:
     container_name: database
+    build: ./database
     environment:
       <<: *postgres-vars
     volumes:
@@ -35,11 +32,7 @@ services:
       - "./database/init_db:/init_db"
     ports: ["5432:5432"]
     healthcheck:
-      test: pg_isready -U postgres
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    image: postgis/postgis:15-master
+      test: psql -q -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1'
 
   backend:
     container_name: backend
@@ -63,9 +56,6 @@ services:
       - $HOME/zscaler-certs:/certs
     healthcheck:
       test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   frontend:
     container_name: frontend
@@ -122,9 +112,6 @@ services:
     volumes: ["./oracle-api:/app"]
     healthcheck:
       test: curl -f http://localhost:8091/actuator/health | grep '"status":"UP"'
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   schemaspy:
     container_name: schemaspy
