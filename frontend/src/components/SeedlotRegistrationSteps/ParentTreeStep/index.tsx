@@ -343,7 +343,6 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                 <DetailSection>
                   <DescriptionBox
                     header={summaryConfig[currentTab].title}
-                    description={summaryConfig[currentTab].description}
                   />
                   <InfoSection
                     infoItems={
