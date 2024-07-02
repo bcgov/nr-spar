@@ -99,9 +99,6 @@ jobs:
             parameters:
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.log_env_target }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
-              ${{ inputs.target == 'test' && '-p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
-              ${{ github.event.number && format('-p ORACLE_SERVER_URL=https://nr-spar-{0}-oracle-api.apps.silver.devops.gov.bc.ca', github.event.number) || '' }}
             verification_path: "actuator/health"
           - name: fluentbit
             file: common/openshift.fluentbit.yml
