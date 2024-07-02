@@ -717,8 +717,7 @@ export const PageSizesConfig = [
 
 export const SummarySectionConfig = {
   coneTab: {
-    title: 'Summary',
-    description: 'Check the parent tree contribution summary',
+    title: 'Parent tree contribution summary',
     infoItems: {
       totalCone: {
         name: 'Total number of cone count',
@@ -731,8 +730,7 @@ export const SummarySectionConfig = {
     }
   },
   successTab: {
-    title: 'Summary',
-    description: 'Check the SMP success on parent summary',
+    title: 'Parent tree contribution summary',
     infoItems: {
       avgSMPSuccess: {
         name: 'Average number of SMP success %',

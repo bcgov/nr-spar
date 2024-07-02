@@ -104,6 +104,21 @@ export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem):
   return sum.toString();
 };
 
+/**
+ * Calculate the total number of parent tress that contributes to a seedlot.
+ */
+const calcTotalContribParentTrees = (tableRows: RowItem[]): string => {
+  let total = 0;
+
+  tableRows.forEach((row) => {
+    if (Number(row.coneCount.value) > 0 || Number(row.pollenCount.value) > 0) {
+      total += 1;
+    }
+  });
+
+  return String(total);
+};
+
 export const calcSummaryItems = (
   setSummaryConfig: Function,
   summaryConfig: Record<string, any>,
@@ -113,7 +128,7 @@ export const calcSummaryItems = (
 
   // Calc Total Number of Parent Trees
   modifiedSummaryConfig.sharedItems
-    .totalParentTree.value = tableRows.length.toString();
+    .totalParentTree.value = calcTotalContribParentTrees(tableRows);
 
   // Calc Total number of cone count
   modifiedSummaryConfig.coneTab
