@@ -49,17 +49,17 @@ const SeedlotInformation = (
   });
 
   const setDefaultSource = (sources: SeedlotSourceType[]) => {
-    sources.forEach((source) => {
-      if (source.isDefault) {
-        setSeedlotFormData((prevData) => ({
-          ...prevData,
-          sourceCode: {
-            ...prevData.sourceCode,
-            value: source.code
-          }
-        }));
-      }
-    });
+    const defaultSource = sources.filter((source) => source.isDefault).at(0) ?? null;
+
+    if (defaultSource) {
+      setSeedlotFormData((prevData) => ({
+        ...prevData,
+        sourceCode: {
+          ...prevData.sourceCode,
+          value: defaultSource.code
+        }
+      }));
+    }
   };
 
   /**
@@ -67,24 +67,25 @@ const SeedlotInformation = (
    *  we will need to set the default again here.
    */
   useEffect(() => {
-    if (seedlotSourcesQuery.isSuccess && !seedlotFormData.sourceCode.value) {
+    if (seedlotSourcesQuery.status === 'success' && !seedlotFormData.sourceCode.value) {
       setDefaultSource(seedlotSourcesQuery.data);
     }
-  }, [seedlotSourcesQuery.isFetched]);
+  }, [seedlotSourcesQuery.status]);
 
   const renderSources = () => {
-    if (seedlotSourcesQuery.isFetched) {
-      return seedlotSourcesQuery.data.map((source: SeedlotSourceType) => (
-        <RadioButton
-          id={`seedlot-source-radio-btn-${source.code.toLowerCase()}`}
-          key={source.code}
-          checked={seedlotFormData.sourceCode.value === source.code}
-          labelText={source.description}
-          value={source.code}
-        />
-      ));
+    if (seedlotSourcesQuery.status === 'error') {
+      return <InputErrorText description="Could not retrieve seedlot sources." />;
     }
-    return <InputErrorText description="Could not retrieve seedlot sources." />;
+
+    return seedlotSourcesQuery.data.map((source: SeedlotSourceType) => (
+      <RadioButton
+        id={`seedlot-source-radio-btn-${source.code.toLowerCase()}`}
+        key={source.code}
+        checked={seedlotFormData.sourceCode.value === source.code}
+        labelText={source.description}
+        value={source.code}
+      />
+    ));
   };
 
   const handleBoolRadioGroup = (inputName: keyof SeedlotRegFormType, checked: boolean) => {
@@ -177,7 +178,7 @@ const SeedlotInformation = (
             onChange={(e: string) => handleSource(e)}
           >
             {
-              seedlotSourcesQuery.isFetching
+              seedlotSourcesQuery.status === 'loading'
                 ? <RadioButtonSkeleton />
                 : renderSources()
             }

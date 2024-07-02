@@ -129,7 +129,7 @@ const isDegreeOutOfRange = (value: string, isLat: boolean) => (
   )
 );
 
-const validateDegreeRange = (inputObj: StringInputType, isLat: boolean): StringInputType => {
+export const validateDegreeRange = (inputObj: StringInputType, isLat: boolean): StringInputType => {
   const validatedObj = inputObj;
   validatedObj.isInvalid = isDegreeOutOfRange(inputObj.value, isLat);
 
@@ -146,7 +146,7 @@ const isMinuteOrSecondOutOfRange = (value: string) => (
   !validator.isInt(value, { min: MIN_MINUTE_AND_SECOND_LIMIT, max: MAX_MINUTE_AND_SECOND_LIMIT })
 );
 
-const validateMinuteOrSecondRange = (inputObj: StringInputType): StringInputType => {
+export const validateMinuteOrSecondRange = (inputObj: StringInputType): StringInputType => {
   const validatedObj = inputObj;
   validatedObj.isInvalid = isMinuteOrSecondOutOfRange(inputObj.value);
 

@@ -124,7 +124,7 @@ const CollectionReviewRead = () => {
             value={
               formatCollectionMethods(
                 allStepData.collectionStep.selectedCollectionCodes.value,
-                coneCollectionMethodsQuery.data!
+                coneCollectionMethodsQuery.data
               )
             }
             showSkeleton={isFetchingData || coneCollectionMethodsQuery.isFetching}

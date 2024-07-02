@@ -62,6 +62,7 @@ def get_log_hist_schedules_to_process(track_db_conn,database_schema,execution_id
 
 
 def get_scheduler(track_db_conn:object, database_schema:str, execution_id:int, interface_id:str) -> list:
+    #TODO fix dates to 1900-01-01
     select_sync_id_stm = f"""
        select es.last_run_ts    as last_start_time,
 	        es.current_run_ts as current_start_time,
@@ -69,8 +70,8 @@ def get_scheduler(track_db_conn:object, database_schema:str, execution_id:int, i
         from {database_schema}.etl_execution_schedule es
         where  execution_id = {execution_id} and interface_id = '{interface_id}'
         union all 
-        select '1900-01-01'::timestamp as last_start_time,
-            '1900-01-01'::timestamp as current_start_time,
+        select '2024-06-20'::timestamp as last_start_time,
+            '2024-06-22'::timestamp as current_start_time,
             CURRENT_TIMESTAMP as current_end_time
         where not exists(select 1 from {database_schema}.etl_execution_schedule es 
                          where execution_id = {execution_id} and interface_id = '{interface_id}') """    
