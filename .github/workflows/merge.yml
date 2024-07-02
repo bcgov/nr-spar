@@ -32,7 +32,6 @@ jobs:
 
   deploy-prod:
     name: PROD
-    if: github.base_ref == ${{ github.event.repository.default_branch }}
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
