@@ -11,9 +11,8 @@ parameters:
     description: Postgres database name
     value: database
   - name: DB_PASSWORD
-    description: Password for the PostgreSQL connection user.
-    from: "[a-zA-Z0-9]{16}"
-    generate: expression
+    description: Password for the PostgreSQL connection user
+    required: true
   - name: DB_PORT
     description: Postgres database port
     value: "5432"
