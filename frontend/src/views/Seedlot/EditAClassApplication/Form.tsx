@@ -32,6 +32,7 @@ import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
 import { addParamToPath } from '../../../utils/PathUtils';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 
 import { getBreadcrumbs } from './utils';
 
@@ -50,7 +51,8 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
+    select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
