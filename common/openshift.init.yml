@@ -10,7 +10,7 @@ parameters:
   - name: PG_DATABASE
     description: Postgres database name
     value: database
-  - name: PG_DB_PASSWORD
+  - name: DB_PASSWORD
     description: Password for the PostgreSQL connection user
     required: true
   - name: PG_DB_PORT
@@ -54,7 +54,7 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       database-name: ${NAME}
-      database-password: ${PG_DB_PASSWORD}
+      database-password: ${DB_PASSWORD}
       database-port: ${PG_DB_PORT}
       database-user: ${NAME}
   - apiVersion: v1
