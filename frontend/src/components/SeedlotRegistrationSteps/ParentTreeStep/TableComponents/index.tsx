@@ -189,7 +189,8 @@ const renderTableCell = (
   state: ParentTreeStepDataObj,
   setStepData: Function,
   seedlotSpecies: MultiOptionsObj,
-  isFormSubmitted: boolean
+  isFormSubmitted: boolean,
+  editOnReview? : boolean
 ) => {
   const className = header.editable ? 'td-no-padding' : null;
   if (header.id === 'actions') {
@@ -214,7 +215,7 @@ const renderTableCell = (
                 state={state}
                 setStepData={setStepData}
                 seedlotSpecies={seedlotSpecies}
-                readOnly={isFormSubmitted}
+                readOnly={isFormSubmitted && !editOnReview}
               />
             )
             : (
@@ -236,7 +237,8 @@ export const renderTableBody = (
   state: ParentTreeStepDataObj,
   setStepData: Function,
   seedlotSpecies: MultiOptionsObj,
-  isFormSubmitted: boolean
+  isFormSubmitted: boolean,
+  editOnReview?: boolean
 ) => {
   if (currentTab === 'mixTab') {
     return (
@@ -261,7 +263,8 @@ export const renderTableBody = (
                       state,
                       setStepData,
                       seedlotSpecies,
-                      isFormSubmitted
+                      isFormSubmitted,
+                      editOnReview
                     );
                   })
               }
@@ -292,7 +295,8 @@ export const renderTableBody = (
                         state,
                         setStepData,
                         seedlotSpecies,
-                        isFormSubmitted
+                        isFormSubmitted,
+                        editOnReview
                       )
                     ))
                 }

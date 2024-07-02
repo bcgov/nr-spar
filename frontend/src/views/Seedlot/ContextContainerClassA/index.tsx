@@ -709,6 +709,8 @@ const ContextContainerClassA = ({ children }: props) => {
     }));
   };
 
+  const [isCalculatingPt, setIsCalculatingPt] = useState<boolean>(false);
+
   useEffect(() => {
     if (calculatedValues.length) {
       fillGenWorthVals();
@@ -724,6 +726,7 @@ const ContextContainerClassA = ({ children }: props) => {
         geoInfoVals,
         genWorthVals,
         setGeoInfoVal,
+        setGeoInfoVals,
         setGenWorthVal,
         seedlotNumber,
         allStepData,
@@ -771,7 +774,9 @@ const ContextContainerClassA = ({ children }: props) => {
         meanGeomInfos,
         setMeanGeomInfos,
         areaOfUseData,
-        setAreaOfUseData
+        setAreaOfUseData,
+        isCalculatingPt,
+        setIsCalculatingPt
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,

@@ -16,15 +16,17 @@ import {
   View, Settings, Upload, Add
 } from '@carbon/icons-react';
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
-import InfoSection from '../../InfoSection';
-import Subtitle from '../../Subtitle';
+import postForCalculation from '../../../api-service/parentTreeAPI';
 import { postFile } from '../../../api-service/seedlotAPI';
 import CheckboxType from '../../../types/CheckboxType';
-import EmptySection from '../../EmptySection';
+import { PtValsCalcReqPayload } from '../../../types/PtCalcTypes';
 import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
 import { recordValues } from '../../../utils/RecordUtils';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import InfoSection from '../../InfoSection';
+import Subtitle from '../../Subtitle';
+import EmptySection from '../../EmptySection';
 import DetailSection from '../../DetailSection';
 import DescriptionBox from '../../DescriptionBox';
 
@@ -32,6 +34,9 @@ import InputErrorNotification from './InputErrorNotification';
 import UploadWarnNotification from './UploadWarnNotification';
 import CalculateMetrics from './CalculateMetrics';
 import InfoSectionDivider from './InfoSectionDivider';
+import UnrelatedGenWorth from './UnrelatedGenWorth';
+import PopSize from './PopSize';
+import SpatialData from './SpatialData';
 import {
   renderColOptions, renderTableBody, renderNotification,
   renderDefaultInputs, renderPagination
@@ -53,12 +58,20 @@ import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
-  hasParentTreesForSelectedOrchards
+  hasParentTreesForSelectedOrchards,
+  fillCalculatedInfo,
+  generatePtValCalcPayload
 } from './utils';
 
 import './styles.scss';
+import EditGenWorth from './EditGenWorth';
 
-const ParentTreeStep = () => {
+type ParentTreeStepProps = {
+  isReviewDisplay?: boolean;
+  isReviewRead?: boolean;
+}
+
+const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) => {
   const {
     allStepData: { parentTreeStep: state },
     allStepData: { orchardStep: { orchards } },
@@ -74,7 +87,11 @@ const ParentTreeStep = () => {
     setPopSizeAndDiversityConfig,
     summaryConfig,
     setSummaryConfig,
-    meanGeomInfos
+    meanGeomInfos,
+    setMeanGeomInfos,
+    setIsCalculatingPt,
+    setGeoInfoVals,
+    setGenWorthVal
   } = useContext(ClassAContext);
 
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
@@ -110,7 +127,9 @@ const ParentTreeStep = () => {
   // Array that stores invalid p.t. numbers uploaded from users from composition tabs
   const [invalidPTNumbers, setInvalidPTNumbers] = useState<string[]>([]);
   const [isOrchardEmpty, setIsOrchardEmpty] = useState<boolean>(false);
-  const [showInfoSections, setShowInfoSections] = useState<boolean>(false);
+  const [showInfoSections, setShowInfoSections] = useState<boolean>(isReviewDisplay ?? false);
+
+  const [controlReviewData, setControlReviewData] = useState<boolean>(isReviewDisplay ?? false);
 
   const emptySectionDescription = getEmptySectionDescription(setStep);
 
@@ -167,7 +186,7 @@ const ParentTreeStep = () => {
         state
       );
     },
-    [state.mixTabData]
+    [state.mixTabData, disableOptions]
   );
 
   // Parent trees Query
@@ -188,7 +207,7 @@ const ParentTreeStep = () => {
     const disabled = orchardsData.length === 0;
     if (
       !disabled
-      && Object.keys(state.tableRowData).length === 0
+      && (Object.keys(state.tableRowData).length === 0 || controlReviewData)
       && allParentTreeQuery.isFetched
       && allParentTreeQuery.data
     ) {
@@ -205,6 +224,9 @@ const ParentTreeStep = () => {
           setSlicedRows,
           setStepData
         );
+        if (controlReviewData) {
+          setControlReviewData(false);
+        }
       } else {
         setDisableOptions(true);
         setIsOrchardEmpty(true);
@@ -221,7 +243,8 @@ const ParentTreeStep = () => {
     setHeaderConfig,
     weightedGwInfoItems,
     setWeightedGwInfoItems,
-    setApplicableGenWorths
+    setApplicableGenWorths,
+    isReviewDisplay ?? false
   ), [seedlotSpecies]);
 
   const uploadCompostion = useMutation({
@@ -258,6 +281,57 @@ const ParentTreeStep = () => {
     }
   });
 
+  const calculateGenWorthQuery = useMutation({
+    mutationFn: (data: PtValsCalcReqPayload) => postForCalculation(data),
+    onSuccess: (res) => fillCalculatedInfo(
+      res.data,
+      genWorthInfoItems,
+      setGenWorthInfoItems,
+      popSizeAndDiversityConfig,
+      setPopSizeAndDiversityConfig,
+      meanGeomInfos,
+      setMeanGeomInfos,
+      setIsCalculatingPt,
+      setGeoInfoVals,
+      setGenWorthVal,
+      isReviewDisplay
+    )
+  });
+
+  const [ctrlFirstLoadReview, setCtrlFirstLoadReview] = useState<boolean>(isReviewDisplay ?? false);
+
+  useEffect(() => {
+    if (ctrlFirstLoadReview && !controlReviewData) {
+      calculateGenWorthQuery.mutate(
+        generatePtValCalcPayload(
+          state,
+          geneticWorthDict,
+          seedlotSpecies
+        )
+      );
+      setCtrlFirstLoadReview(false);
+    }
+  }, [controlReviewData]);
+
+  const renderRecalcSection = () => {
+    if (isReviewDisplay && !isReviewRead) {
+      return (
+        <DetailSection>
+          <DescriptionBox
+            header="Update genetic worth, geospatial and area of use"
+            description="Recalculate values based on newly provided cone and pollen count data, overriding current entries"
+          />
+          <CalculateMetrics
+            disableOptions={disableOptions}
+            setShowInfoSections={setShowInfoSections}
+            isReview
+          />
+        </DetailSection>
+      );
+    }
+    return null;
+  };
+
   const renderInfoSections = () => (
     <Row className="info-sections-row">
       <Column className="info-sections-col">
@@ -280,6 +354,10 @@ const ParentTreeStep = () => {
                     }
                   />
                 </DetailSection>
+                {/* ------ Re-calculate Button Row - REVIEW ONLY ------ */}
+                {
+                  renderRecalcSection()
+                }
                 {/* -------- Calculate Button Row -------- */}
                 <DetailSection>
                   {
@@ -299,42 +377,91 @@ const ParentTreeStep = () => {
                     showInfoSections
                       ? (
                         <>
-                          <InfoSectionDivider />
-                          {/* ------ Genetic worth and percent of tested parent trees ------ */}
+                          {/* ---- Genetic worth and percent of tested parent trees ---- */}
+                          {
+                            !isReviewDisplay ? <InfoSectionDivider /> : null
+                          }
                           <Row className="info-section-sub-title">
                             <Column>
                               Genetic worth and percent of Tested parent tree contribution
                             </Column>
                           </Row>
-                          <InfoSection
-                            infoItems={[]}
-                          >
-                            {
-                              recordValues(genWorthInfoItems).map((gwTuple) => (
-                                <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
-                              ))
-                            }
-                          </InfoSection>
+                          {
+                            isReviewDisplay && !isReviewRead
+                              ? (
+                                <EditGenWorth genWorthValues={recordValues(genWorthInfoItems)} />
+                              )
+                              : (
+                                <InfoSection
+                                  infoItems={[]}
+                                >
+                                  {
+                                    recordValues(genWorthInfoItems).map((gwTuple) => (
+                                      <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
+                                    ))
+                                  }
+                                </InfoSection>
+                              )
+                          }
                           <InfoSectionDivider />
+                          {/* ---- Unrelated genetic worth - REVIEW ONLY ---- */}
+                          {
+                            isReviewDisplay
+                              ? (
+                                <>
+                                  <Row className="info-section-sub-title">
+                                    <Column>
+                                      Unrelated genetic worth
+                                    </Column>
+                                  </Row>
+                                  <UnrelatedGenWorth
+                                    isRead={isReviewRead}
+                                    validGenWorth={geneticWorthDict[seedlotSpecies.code]}
+                                  />
+                                  <InfoSectionDivider />
+                                </>
+                              )
+                              : null
+                          }
                           {/* -------- Effective population size and diversity -------- */}
                           <Row className="info-section-sub-title">
                             <Column>
                               Effective population size and diversity
                             </Column>
                           </Row>
-                          <InfoSection
-                            infoItems={Object.values(popSizeAndDiversityConfig)}
-                          />
+                          {
+                            isReviewDisplay && !isReviewRead
+                              ? (
+                                <PopSize />
+                              )
+                              : (
+                                <InfoSection
+                                  infoItems={Object.values(popSizeAndDiversityConfig)}
+                                />
+                              )
+                          }
                           <InfoSectionDivider />
                           {/* -------- Seedlot mean geospatial data -------- */}
                           <Row className="info-section-sub-title">
                             <Column>
-                              Orchard parent tree geospatial summary
+                              {
+                                !isReviewDisplay
+                                  ? 'Orchard parent tree geospatial summary'
+                                  : 'Mean geospatial data'
+                              }
                             </Column>
                           </Row>
-                          <InfoSection
-                            infoItems={Object.values(meanGeomInfos.seedlot)}
-                          />
+                          {
+                            isReviewDisplay && !isReviewRead
+                              ? (
+                                <SpatialData />
+                              )
+                              : (
+                                <InfoSection
+                                  infoItems={Object.values(meanGeomInfos.seedlot)}
+                                />
+                              )
+                          }
                         </>
                       )
                       : null
@@ -358,6 +485,10 @@ const ParentTreeStep = () => {
                     }
                   />
                 </DetailSection>
+                {/* ------ Re-calculate Button Row - REVIEW ONLY ------ */}
+                {
+                  renderRecalcSection()
+                }
                 {
                   <DetailSection>
                     {/* -------- SMP mix mean geospatial data -------- */}
@@ -367,7 +498,7 @@ const ParentTreeStep = () => {
                       />
                     </Row>
                     {
-                      !isFormSubmitted
+                      !isFormSubmitted || !(isReviewDisplay && isReviewRead)
                         ? (
                           <CalculateMetrics
                             disableOptions={disableOptions}
@@ -396,27 +527,35 @@ const ParentTreeStep = () => {
 
   return (
     <FlexGrid className="parent-tree-step-container">
-      <Row className="title-row">
-        <Column sm={4} md={8} lg={16}>
-          <h2>{pageText.stepTitle}</h2>
-          <Subtitle text={pageText.stepSubtitle} />
-        </Column>
-      </Row>
-      <Row>
-        <Column sm={4} md={8} lg={16}>
-          <Accordion className="instructions-accordion">
-            <AccordionItem open title="1. Data entry">
-              {dataEntryInstructions}
-            </AccordionItem>
-            <AccordionItem open title="2. Review data">
-              {reviewDataInstructions}
-            </AccordionItem>
-            <AccordionItem open title="3. Calculate seedlot metrics">
-              {calculateInstructions}
-            </AccordionItem>
-          </Accordion>
-        </Column>
-      </Row>
+      {
+        !isReviewDisplay
+          ? (
+            <>
+              <Row className="title-row">
+                <Column sm={4} md={8} lg={16}>
+                  <h2>{pageText.stepTitle}</h2>
+                  <Subtitle text={pageText.stepSubtitle} />
+                </Column>
+              </Row>
+              <Row>
+                <Column sm={4} md={8} lg={16}>
+                  <Accordion className="instructions-accordion">
+                    <AccordionItem open title="1. Data entry">
+                      {dataEntryInstructions}
+                    </AccordionItem>
+                    <AccordionItem open title="2. Review data">
+                      {reviewDataInstructions}
+                    </AccordionItem>
+                    <AccordionItem open title="3. Calculate seedlot metrics">
+                      {calculateInstructions}
+                    </AccordionItem>
+                  </Accordion>
+                </Column>
+              </Row>
+            </>
+          )
+          : null
+      }
       <Row>
         <Column sm={4} md={8} lg={16} xlg={16}>
           <Tabs onChange={
@@ -446,7 +585,7 @@ const ParentTreeStep = () => {
                 setInvalidPTNumbers={setInvalidPTNumbers}
               />
               {
-                currentTab === 'successTab'
+                currentTab === 'successTab' && !isReviewRead
                   ? (
                     <>
                       <Row className="smp-default-checkbox-row">
@@ -463,7 +602,11 @@ const ParentTreeStep = () => {
                                 setIsSMPDefaultValChecked(checked);
                               }
                             }
-                            disabled={disableOptions || isFormSubmitted}
+                            disabled={
+                              disableOptions
+                              || (isFormSubmitted
+                              && !(isReviewDisplay && !isReviewRead))
+                            }
                           />
                         </Column>
                       </Row>
@@ -495,7 +638,11 @@ const ParentTreeStep = () => {
                                 <Button
                                   kind="ghost"
                                   hasIconOnly
-                                  disabled={disableOptions || isFormSubmitted}
+                                  disabled={
+                                    disableOptions
+                                    || (isFormSubmitted
+                                    && !(isReviewDisplay && !isReviewRead))
+                                  }
                                   renderIcon={Add}
                                   iconDescription="Add a new row"
                                   onClick={() => addNewMixRow(state, setStepData)}
@@ -518,7 +665,11 @@ const ParentTreeStep = () => {
                             renderIcon={Settings}
                             iconDescription="More options"
                             menuOptionsClass="parent-tree-table-option-menu"
-                            disabled={disableOptions || isFormSubmitted}
+                            disabled={
+                              disableOptions
+                              || isFormSubmitted
+                              || (isReviewDisplay && !isReviewRead)
+                            }
                           >
                             <OverflowMenuItem
                               itemText={
@@ -550,6 +701,7 @@ const ParentTreeStep = () => {
                               disableOptions
                               || !allParentTreeQuery.isFetched
                               || isFormSubmitted
+                              || (isReviewDisplay && !isReviewRead)
                             }
                           >
                             Upload from file
@@ -602,7 +754,8 @@ const ParentTreeStep = () => {
                                   state,
                                   setStepData,
                                   seedlotSpecies,
-                                  isFormSubmitted
+                                  isFormSubmitted,
+                                  (isReviewDisplay && !isReviewRead)
                                 )
                             }
                           </Table>

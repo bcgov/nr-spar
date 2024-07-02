@@ -8,6 +8,7 @@ import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQu
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { recordKeys } from '../../../utils/RecordUtils';
 import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType } from '../../../types/PtCalcTypes';
+import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
 
 import {
   getConeCountErrMsg, getNonOrchardContamErrMsg, getPollenCountErrMsg,
@@ -134,7 +135,7 @@ export const calcSummaryItems = (
   setSummaryConfig(modifiedSummaryConfig);
 };
 
-const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
+export const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
   let sum = 0;
   const insidePtNums = Object.keys(state.tableRowData);
   const ptNumsInMixTab: string[] = [];
@@ -459,7 +460,8 @@ export const configHeaderOpt = (
   setHeaderConfig: Function,
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
-  setApplicableGenWorths: Function
+  setApplicableGenWorths: Function,
+  isReview: boolean
 ) => {
   const speciesHasGenWorth = Object.keys(geneticWorthDict);
   if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
@@ -472,6 +474,11 @@ export const configHeaderOpt = (
       const optionIndex = headerConfig.findIndex((header) => header.id === opt);
       // Enable option in the column customization
       clonedHeaders[optionIndex].isAnOption = true;
+
+      // When on review mode, display all columns
+      if (isReview) {
+        clonedHeaders[optionIndex].enabled = true;
+      }
 
       // Enable weighted option in mix tab
       const weightedIndex = headerConfig.findIndex((header) => header.id === `w_${opt}`);
@@ -514,7 +521,11 @@ export const fillCalculatedInfo = (
   popSizeAndDiversityConfig: Record<string, any>,
   setPopSizeAndDiversityConfig: Function,
   meanGeomInfos: MeanGeomInfoSectionConfigType,
-  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>
+  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>,
+  setIsCalculatingPt: Function,
+  setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,
+  setGenWorthVal: Function,
+  isReview?: boolean
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
@@ -526,9 +537,14 @@ export const fillCalculatedInfo = (
     if (traitIndex > -1) {
       const tuple = tempGenWorthItems[gwCode];
       const traitValueInfoObj = tuple.filter((obj) => obj.name.startsWith('Genetic'))[0];
-      traitValueInfoObj.value = geneticTraits[traitIndex].calculatedValue
-        ? (Number(geneticTraits[traitIndex].calculatedValue)).toFixed(1)
-        : EMPTY_NUMBER_STRING;
+      if (geneticTraits[traitIndex].calculatedValue) {
+        traitValueInfoObj.value = (Number(geneticTraits[traitIndex].calculatedValue)).toFixed(1);
+        if (isReview) {
+          setGenWorthVal(gwCode, geneticTraits[traitIndex].calculatedValue);
+        }
+      } else {
+        traitValueInfoObj.value = EMPTY_NUMBER_STRING;
+      }
       const testedPercInfoObj = tuple.filter((obj) => obj.name.startsWith('Tested'))[0];
       testedPercInfoObj.value = (
         Number(geneticTraits[traitIndex].testedParentTreePerc) * 100
@@ -575,6 +591,46 @@ export const fillCalculatedInfo = (
       }
     }
   }));
+
+  if (isReview) {
+    setGeoInfoVals((prevGeo) => ({
+      ...prevGeo,
+      meanElevation: {
+        ...prevGeo.meanElevation,
+        value: seedlotMeanGeom.meanElevation.toString()
+      },
+      meanLatDeg: {
+        ...prevGeo.meanLatDeg,
+        value: seedlotMeanGeom.meanLatitudeDegree.toString()
+      },
+      meanLatMinute: {
+        ...prevGeo.meanLatMinute,
+        value: seedlotMeanGeom.meanLatitudeMinute.toString()
+      },
+      meanLatSec: {
+        ...prevGeo.meanLatSec,
+        value: seedlotMeanGeom.meanLatitudeSecond.toString()
+      },
+      meanLongDeg: {
+        ...prevGeo.meanLongDeg,
+        value: seedlotMeanGeom.meanLongitudeDegree.toString()
+      },
+      meanLongMinute: {
+        ...prevGeo.meanLongMinute,
+        value: seedlotMeanGeom.meanLongitudeMinute.toString()
+      },
+      meanLongSec: {
+        ...prevGeo.meanLongSec,
+        value: seedlotMeanGeom.meanLongitudeSecond.toString()
+      },
+      effectivePopSize: {
+        ...prevGeo.effectivePopSize,
+        value: calculatedPtVals.neValue ? calculatedPtVals.neValue.toString() : ''
+      }
+    }));
+  }
+
+  setIsCalculatingPt(false);
 };
 
 const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): number => {

@@ -12,8 +12,6 @@ import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 import getConeCollectionMethod from '../../../../api-service/coneCollectionMethodAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { formatCollectionMethods } from '../utils';
-import GeoInfo from '../GeoInfo';
-import GenWorth from '../GenWorth';
 
 const CollectionReviewRead = () => {
   const {
@@ -143,15 +141,6 @@ const CollectionReviewRead = () => {
           />
         </Column>
       </Row>
-
-      <Divider />
-
-      <GeoInfo isRead />
-
-      <Divider />
-
-      <GenWorth isRead />
-
     </FlexGrid>
   );
 };

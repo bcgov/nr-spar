@@ -1,4 +1,3 @@
-import { PLACE_HOLDER } from '../../../shared-constants/shared-constants';
 import { CodeDescResType } from '../../../types/CodeDescResType';
 
 /**
@@ -16,14 +15,4 @@ export const formatCollectionMethods = (codes: string[], methods: CodeDescResTyp
   });
 
   return formated.substring(0, formated.length - 2);
-};
-
-/**
- * Display a place holder if val is empty.
- */
-export const formatEmptyStr = (val: string, isRead: boolean) => {
-  if (!val.length && isRead) {
-    return PLACE_HOLDER;
-  }
-  return val;
 };
