@@ -99,7 +99,6 @@ jobs:
             parameters:
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.log_env_target }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
             verification_path: "actuator/health"
           - name: fluentbit
             file: common/openshift.fluentbit.yml
@@ -112,7 +111,6 @@ jobs:
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-              ${{ inputs.target == 'prod' && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
