@@ -48,7 +48,7 @@ parameters:
     required: true
   - name: VITE_ORACLE_SERVER_URL
     description: Oracle server (can change!)
-    value: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
+    required: true
   - name: LOG_LEVEL
     description: Caddy log level (debug, info, warn, error, panic, fatal)
     value: "info"
