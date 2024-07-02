@@ -101,7 +101,7 @@ jobs:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
               ${{ inputs.target == 'test' && '-p ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
-              ${{ github.event.number && '-p ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
+              ${{ github.event.number && format('-p ORACLE_SERVER_URL=https://nr-spar-{0}-oracle-api.apps.silver.devops.gov.bc.ca', github.event.number) || '' }}
             verification_path: "actuator/health"
           - name: fluentbit
             file: common/openshift.fluentbit.yml
@@ -116,7 +116,7 @@ jobs:
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
               ${{ inputs.target == 'prod' && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
               ${{ inputs.target == 'test' && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
-              ${{ github.event.number && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-${{ github.event.number }}-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
+              ${{ github.event.number && format('-p VITE_ORACLE_SERVER_URL=https://nr-spar-{0}-oracle-api.apps.silver.devops.gov.bc.ca', github.event.number) || '' }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
