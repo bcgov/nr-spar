@@ -208,7 +208,7 @@ public class TscAdminService {
   }
 
   /**
-   * Updates.
+   * Updates the seedlot geographic information (elevation, latitude and longitude).
    *
    * @param seedlot The Seedlot instance.
    * @param seedlotReviewDto Seedlot Geo Information provided by TSC Admin.
