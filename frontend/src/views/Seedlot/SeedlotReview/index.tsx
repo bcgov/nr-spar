@@ -45,7 +45,7 @@ const SeedlotReview = () => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
