@@ -34,15 +34,6 @@ parameters:
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
-  - name: DATABASE_HOST
-    description: Where the database is hosted
-    value: nrcdb03.bcgov
-  - name: DATABASE_PORT
-    description: The port to be used for the connection to the database
-    value: "1543"
-  - name: SERVICE_NAME
-    description: The database's name
-    value: dbq01.nrs.bcgov
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "1"
@@ -94,11 +85,18 @@ objects:
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
                 - name: DATABASE_HOST
-                  value: ${DATABASE_HOST}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-host
                 - name: DATABASE_PORT
-                  value: ${DATABASE_PORT}
+                  secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-port
                 - name: SERVICE_NAME
-                  value: ${SERVICE_NAME}
+                  secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-service
                 - name: DATABASE_USER
                   valueFrom:
                     secretKeyRef:
