@@ -39,6 +39,8 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 		<sonar.organization>bcgov-sonarcloud</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <oci.revision>${project.version}</oci.revision>
+    <hibernate.version>6.4.4.Final</hibernate.version>
 	</properties>
 
 	<profiles>
@@ -65,6 +67,39 @@
 				<skip.unit.tests>true</skip.unit.tests>
 			</properties>
 		</profile>
+
+    <!-- cloud native -->
+    <profile>
+      <id>native</id>
+      <properties>
+        <build.profile.id>native</build.profile.id>
+        <skip.integration.tests>true</skip.integration.tests>
+        <skip.unit.tests>true</skip.unit.tests>
+        <jacoco.skip>true</jacoco.skip>
+      </properties>
+      <build>
+        <plugins>
+          <!--
+            GraalVM: Cloud Native support
+            More: https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html
+            Even more: https://graalvm.github.io/native-build-tools/latest/maven-plugin.html
+          -->
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>build-native</id>
+                <goals>
+                  <goal>compile-no-fork</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 	</profiles>
 
 	<dependencies>
@@ -151,6 +186,29 @@
 
 	<build>
 		<plugins>
+    <!--
+        Hibernate: Configs for Hibernate Cloud Native compatibility
+        More: https://vladmihalcea.com/maven-gradle-hibernate-enhance-plugin/
+      -->
+      <plugin>
+        <groupId>org.hibernate.orm.tooling</groupId>
+        <artifactId>hibernate-enhance-maven-plugin</artifactId>
+        <version>${hibernate.version}</version>
+        <executions>
+          <execution>
+            <id>enhance</id>
+            <goals>
+              <goal>enhance</goal>
+            </goals>
+            <configuration>
+              <enableLazyInitialization>true</enableLazyInitialization>
+              <enableDirtyTracking>true</enableDirtyTracking>
+              <enableAssociationManagement>true</enableAssociationManagement>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
