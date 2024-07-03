@@ -111,7 +111,7 @@ jobs:
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.fluentbit_target == 'prod' && 'production' || inputs.fluentbit_target }}
+              -p OPENSEARCH_ENV=${{ inputs.fluentbit_target == 'prod' && 'production' || inputs.fluentbit_target }}
             verification_path: "actuator/health"
           - name: frontend
             file: frontend/openshift.deploy.yml
@@ -126,7 +126,7 @@ jobs:
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.fluentbit_target == 'prod' && 'production' || inputs.fluentbit_target }}
+              -p OPENSEARCH_ENV=${{ inputs.fluentbit_target == 'prod' && 'production' || inputs.fluentbit_target }}
             verification_path: "actuator/health"
           - name: sync
             file: sync/openshift.deploy.yml

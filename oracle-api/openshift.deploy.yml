@@ -40,7 +40,7 @@ parameters:
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "2"
-  - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
+  - name: OPENSEARCH_ENV
     description: Oracle API environment for OpenSearch. # One of: development, test, production
     required: false
     value: development
@@ -80,8 +80,8 @@ objects:
               env:
                 - name: NR_SPAR_ORACLE_API_VERSION
                   value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
-                - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
-                  value: ${NR_SPAR_ORACLE_API_ENV_OPENSEARCH}
+                - name: OPENSEARCH_ENV
+                  value: ${OPENSEARCH_ENV}
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
                 - name: DATABASE_HOST
