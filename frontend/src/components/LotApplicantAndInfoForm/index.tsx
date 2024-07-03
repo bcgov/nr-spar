@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import {
@@ -12,9 +12,11 @@ import validator from 'validator';
 import Subtitle from '../Subtitle';
 import Divider from '../Divider';
 import ApplicantAgencyFields from '../ApplicantAgencyFields';
-import getApplicantAgenciesOptions from '../../api-service/applicantAgenciesAPI';
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../types/FormInputType';
 import { EmptyBooleanInputType } from '../../shared-constants/shared-constants';
+import AuthContext from '../../contexts/AuthContext';
+import { getForestClientByNumberOrAcronym } from '../../api-service/forestClientsAPI';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 
 import SeedlotInformation from './SeedlotInformation';
 import { FormProps } from './definitions';
@@ -36,11 +38,36 @@ const LotApplicantAndInfoForm = ({
   seedlotFormData,
   setSeedlotFormData
 }: FormProps) => {
-  const applicantAgencyQuery = useQuery({
-    queryKey: ['applicant-agencies'],
-    enabled: !isEdit,
-    queryFn: () => getApplicantAgenciesOptions()
-  });
+  const { selectedClientRoles } = useContext(AuthContext);
+
+  const defaultApplicantAgencyQuery = useQuery(
+    {
+      queryKey: ['forest-clients', selectedClientRoles?.clientId],
+      queryFn: () => getForestClientByNumberOrAcronym(selectedClientRoles?.clientId!),
+      enabled: !isEdit && !isReview && !!selectedClientRoles?.clientId,
+      staleTime: THREE_HOURS,
+      cacheTime: THREE_HALF_HOURS
+    }
+  );
+
+  useEffect(() => {
+    // Pre-fill the applicant acronym based on user selected role
+    if (defaultApplicantAgencyQuery.status === 'success' && !seedlotFormData?.client.value.code && setSeedlotFormData) {
+      const forestClient = defaultApplicantAgencyQuery.data;
+
+      setSeedlotFormData((prevForm) => ({
+        ...prevForm,
+        client: {
+          ...prevForm.client,
+          value: {
+            code: forestClient.clientNumber,
+            description: forestClient.clientName,
+            label: forestClient.acronym
+          }
+        }
+      }));
+    }
+  }, [defaultApplicantAgencyQuery.status]);
 
   const handleEmail = (value: string) => {
     const isEmailInvalid = !validator.isEmail(value);
@@ -89,7 +116,6 @@ const LotApplicantAndInfoForm = ({
             : vegLotLocationCode
         }
         fieldsProps={agencyFieldsProp}
-        agencyOptions={isEdit ? [] : applicantAgencyQuery.data ?? []}
         setAgencyAndCode={
           (
             _isDefault: BooleanInputType,

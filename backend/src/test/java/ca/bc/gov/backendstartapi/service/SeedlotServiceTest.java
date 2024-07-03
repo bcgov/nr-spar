@@ -468,8 +468,6 @@ class SeedlotServiceTest {
             parentTreeDto.pollenCount(),
             audit);
 
-    List<SeedlotParentTree> parentTreeData = List.of(spt);
-
     ParentTreeGeneticQualityDto sptgqDto = createParentTreeGenQuaDto();
 
     SeedlotParentTreeGeneticQuality sptgq =
@@ -515,10 +513,14 @@ class SeedlotServiceTest {
 
     SeedlotOwnerQuantity seedlotOwners =
         new SeedlotOwnerQuantity(seedlotEntity, onwerNumber, ownerLoc);
+    BigDecimal orginalPercOwned = new BigDecimal(100);
+    seedlotOwners.setOriginalPercentageOwned(orginalPercOwned);
     seedlotOwners.setMethodOfPayment(new MethodOfPaymentEntity(methodOfPayment, "", null));
 
     List<SeedlotOrchard> seedlotOrchards =
         List.of(new SeedlotOrchard(seedlotEntity, true, orchardId));
+
+    List<SeedlotParentTree> parentTreeData = List.of(spt);
 
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlotEntity));
     when(seedlotParentTreeService.getAllSeedlotParentTree(seedlotNumber))
@@ -572,7 +574,7 @@ class SeedlotServiceTest {
                 null, null, null, null, null, null, null, null, List.of(0)),
             List.of(
                 new SeedlotFormOwnershipDto(
-                    onwerNumber, ownerLoc, null, null, null, methodOfPayment, null)),
+                    onwerNumber, ownerLoc, orginalPercOwned, null, null, methodOfPayment, null)),
             new SeedlotFormInterimDto(null, null, null, null, null, null),
             new SeedlotFormOrchardDto(
                 orchardId, null, null, null, null, null, null, null, null, null),

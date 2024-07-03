@@ -1,17 +1,23 @@
-FROM openjdk:17.0.2 AS build
+FROM ghcr.io/graalvm/native-image:22.3.3 AS build
+
+# Copy
+WORKDIR /app
+COPY pom.xml mvnw ./
+COPY src ./src
+COPY .mvn/ ./.mvn
+COPY InstallCert.java .
 
 # Build
-WORKDIR /app
-COPY . ./
-RUN ./mvnw --no-transfer-progress --update-snapshots clean package -Dtests.skip=true -Dskip.unit.tests=true -Dspring-boot.run.profiles=prod && \
-    javac HealthCheck.java InstallCert.java
+RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true -Dspring-boot.run.profiles=prod && \
+  javac InstallCert.java
 
+  ### Deployer
 FROM eclipse-temurin:17.0.11_9-jdk-jammy AS deploy
 
 # Java vars
-ENV LANG en_CA.UTF-8
-ENV LANGUAGE en_CA.UTF-8
-ENV LC_ALL en_CA.UTF-8
+ENV LANG=en_CA.UTF-8
+ENV LANGUAGE=en_CA.UTF-8
+ENV LC_ALL=en_CA.UTF-8
 
 # Setup package/archive and supporting files
 WORKDIR /usr/share/service/

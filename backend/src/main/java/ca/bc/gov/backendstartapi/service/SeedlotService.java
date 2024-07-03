@@ -60,6 +60,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -246,12 +247,21 @@ public class SeedlotService {
    * @throws SeedlotNotFoundException in case of errors.
    */
   public SeedlotDto getSingleSeedlotInfo(@NonNull String seedlotNumber) {
+
     SparLog.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
     Seedlot seedlotEntity =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
+
+    String clientId = seedlotEntity.getApplicantClientNumber();
+    Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
+
+    if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
+      SparLog.info("User has no access to seedlot {}, request denied.", seedlotNumber);
+      throw new ClientIdForbiddenException();
+    }
 
     SeedlotDto seedlotDto = new SeedlotDto();
 
@@ -525,6 +535,10 @@ public class SeedlotService {
 
     List<SeedlotFormOwnershipDto> ownershipStep =
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
+            .filter(
+                owner ->
+                    owner.getOriginalPercentageOwned() != null
+                        && owner.getOriginalPercentageOwned().compareTo(BigDecimal.ZERO) > 0)
             .map(
                 owner ->
                     new SeedlotFormOwnershipDto(

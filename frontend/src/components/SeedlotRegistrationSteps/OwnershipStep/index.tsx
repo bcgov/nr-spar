@@ -49,7 +49,6 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
     setStepData,
     defaultAgencyObj: defaultAgency,
     defaultCode,
-    agencyOptions,
     isFormSubmitted
   } = useContext(ClassAContext);
 
@@ -173,7 +172,6 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
               >
                 <SingleOwnerInfo
                   ownerInfo={singleOwnerInfo}
-                  agencyOptions={agencyOptions}
                   defaultAgency={defaultAgency}
                   defaultCode={defaultCode}
                   fundingSourcesQuery={fundingSourcesQuery}
