@@ -1,7 +1,16 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
 @use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
 
+.section-row .parent-tree-review.sub-section-grid {
+  padding-bottom: 0;
+}
+
 .parent-tree-review {
+
+  .parent-tree-step-container {
+    padding-bottom: 0;
+  }
+
   .parent-tree-tab-container {
     margin-left: -3.5rem;
     margin-right: -3.5rem;
