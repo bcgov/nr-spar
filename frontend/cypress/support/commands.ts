@@ -6,6 +6,7 @@ import {
   HALF_SECOND, TYPE_DELAY
 } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
+import prefix from '../../src/styles/classPrefix';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
 
@@ -99,4 +100,14 @@ Cypress.Commands.overwrite('log', (log, ...args) => {
   // eslint-disable-next-line no-console
   console.log(...args);
   return log(...args);
+});
+
+Cypress.Commands.add('saveButton', () => {
+  cy.get('.seedlot-registration-button-row')
+    .find('button.form-action-btn')
+    .contains('Save changes')
+    .click();
+
+  cy.get(`.${prefix}--inline-loading__text`)
+    .contains('Changes saved!');
 });
