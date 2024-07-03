@@ -457,8 +457,6 @@ class SeedlotServiceTest {
             parentTreeDto.pollenCount(),
             audit);
 
-    List<SeedlotParentTree> parentTreeData = List.of(spt);
-
     ParentTreeGeneticQualityDto sptgqDto = createParentTreeGenQuaDto();
 
     SeedlotParentTreeGeneticQuality sptgq =
@@ -510,6 +508,8 @@ class SeedlotServiceTest {
 
     List<SeedlotOrchard> seedlotOrchards =
         List.of(new SeedlotOrchard(seedlotEntity, true, orchardId));
+
+    List<SeedlotParentTree> parentTreeData = List.of(spt);
 
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlotEntity));
     when(seedlotParentTreeService.getAllSeedlotParentTree(seedlotNumber))
