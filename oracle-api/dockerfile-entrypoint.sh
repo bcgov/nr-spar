@@ -8,4 +8,5 @@ java \
     -Djava.security.egd=file:/dev/./urandom \
     ${JAVA_OPTS} \
     -jar \
+    -Dspring.profiles.active=prod
     /usr/share/service/artifacts/nr-spar-oracle-api.jar
