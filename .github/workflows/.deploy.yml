@@ -126,7 +126,7 @@ jobs:
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.log_env_target }}
+              ${{ github.event_name == 'pull_request' && '' || '-p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.log_env_target }}' }}
             verification_path: "actuator/health"
           - name: sync
             file: sync/openshift.deploy.yml
