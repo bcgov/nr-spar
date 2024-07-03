@@ -75,7 +75,7 @@ jobs:
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
       - name: FluentBit
-        if: fluentbit_target != ''
+        if: inputs.fluentbit_target != ''
         uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
