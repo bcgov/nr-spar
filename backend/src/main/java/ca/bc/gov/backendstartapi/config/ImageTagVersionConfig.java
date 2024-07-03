@@ -14,6 +14,6 @@ public class ImageTagVersionConfig implements HealthIndicator {
 
   @Override
   public Health health() {
-    return Health.up().withDetail("ImageTag", nrSparBackendVersion).build();
+    return Health.up().withDetail("imageTag", nrSparBackendVersion).build();
   }
 }
