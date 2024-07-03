@@ -42,7 +42,6 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
     allStepData: { collectionStep: { collectorAgency } },
     allStepData: { collectionStep: { locationCode: collectorCode } },
     setStepData,
-    agencyOptions,
     isFormSubmitted
   } = useContext(ClassAContext);
 
@@ -160,7 +159,6 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
         agency={state.agencyName}
         locationCode={state.locationCode}
         fieldsProps={agencyFieldsProps}
-        agencyOptions={agencyOptions}
         defaultAgency={collectorAgency.value}
         defaultCode={collectorCode.value}
         setAgencyAndCode={(

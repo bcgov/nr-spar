@@ -244,12 +244,21 @@ public class SeedlotService {
    * @throws SeedlotNotFoundException in case of errors.
    */
   public SeedlotDto getSingleSeedlotInfo(@NonNull String seedlotNumber) {
+
     SparLog.info("Retrieving information for Seedlot number {}", seedlotNumber);
 
     Seedlot seedlotEntity =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
+
+    String clientId = seedlotEntity.getApplicantClientNumber();
+    Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
+
+    if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
+      SparLog.info("User has no access to seedlot {}, request denied.", seedlotNumber);
+      throw new ClientIdForbiddenException();
+    }
 
     SeedlotDto seedlotDto = new SeedlotDto();
 
