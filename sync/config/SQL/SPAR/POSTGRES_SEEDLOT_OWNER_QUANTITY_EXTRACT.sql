@@ -15,10 +15,7 @@ SELECT
 , spar_fund_srce_code
 , revision_count
  FROM spar.seedlot_owner_quantity soq
-WHERE soq.seedlot_number IN 
-           (SELECT soqin.seedlot_number
-              FROM spar.seedlot_owner_quantity soqin
-             WHERE soqin.update_timestamp between %(start_time)s AND %(end_time)s )
+WHERE soq.seedlot_number = %(p_seedlot_number)s
 ORDER BY seedlot_number
        , owner_client_number
        , owner_locn_code
