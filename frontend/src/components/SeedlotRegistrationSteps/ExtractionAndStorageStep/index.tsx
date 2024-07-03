@@ -42,7 +42,6 @@ const ExtractionAndStorage = (
   const {
     allStepData: { extractionStorageStep: state },
     setStepData,
-    agencyOptions,
     isFormSubmitted
   } = useContext(ClassAContext);
 
@@ -115,7 +114,6 @@ const ExtractionAndStorage = (
         agency={state.extraction.agency}
         locationCode={state.extraction.locationCode}
         fieldsProps={extractorAgencyFields}
-        agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
         setAgencyAndCode={(
@@ -205,7 +203,6 @@ const ExtractionAndStorage = (
         agency={state.seedStorage.agency}
         locationCode={state.seedStorage.locationCode}
         fieldsProps={storageAgencyFields}
-        agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
         setAgencyAndCode={(
