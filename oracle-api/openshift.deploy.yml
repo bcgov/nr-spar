@@ -90,11 +90,13 @@ objects:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-host
                 - name: DATABASE_PORT
-                  secretKeyRef:
+                  valueFrom:
+                    secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-port
                 - name: SERVICE_NAME
-                  secretKeyRef:
+                  valueFrom:
+                    secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-service
                 - name: DATABASE_USER
