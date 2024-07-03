@@ -8,7 +8,6 @@ interface ApplicantAgencyFieldsProps {
   agency: OptionsInputType;
   locationCode: StringInputType;
   fieldsProps: AgencyTextPropsType;
-  agencyOptions: Array<MultiOptionsObj>;
   setAgencyAndCode: Function;
   defaultAgency?: MultiOptionsObj;
   defaultCode?: string;
