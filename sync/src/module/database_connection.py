@@ -2,6 +2,7 @@ import logging
 #import cx_Oracle
 import oracledb
 import csv
+import pandas as pd
 import numpy
 import math
 
@@ -109,7 +110,7 @@ class database_connection(object):
         print("TEMP TABLE {} created: {}".format(table_name, query) )
         self.conn.execute(text(query), None)
 
-    def execute_upsert(self, dataframe:object, table_name:str, table_pk:str, db_type: str) -> int:
+    def execute_upsert(self, dataframe:object, table_name:str, table_pk:str, db_type:str, run_mode:str, ignore_columns_on_update:str) -> int:
         if db_type=="POSTGRES":
             n = 1000
             i = 0
@@ -126,7 +127,7 @@ class database_connection(object):
         
         if db_type=="ORACLE":
             orcldataframe = convertTypesToOracle(dataframe)
-            return self.bulk_upsert_oracle(dataframe=orcldataframe, table_name=table_name,table_pk=table_pk)
+            return self.bulk_upsert_oracle(dataframe=orcldataframe, table_name=table_name, table_pk=table_pk, run_mode=run_mode, ignore_columns_on_update=ignore_columns_on_update)
         
         return None
 
@@ -151,12 +152,36 @@ class database_connection(object):
         result = self.conn.execute(text(sql_text), dataframe.to_dict('records'))
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
-    
-    def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str ) -> int:
-        onconflictstatement = ""
+
+    def delete_seedlot_child_table(self, row:object, table_name:str, seedlot_number:str ) -> int:
+        print("-------------------processing delete on row-----------------")
+        print(row[0])
+        print("-------------------processing delete on row-----------------")
+        sql_text = f""" 
+            DELETE FROM {table_name}
+             WHERE seedlot_number = :p_seedlot_number ; """
+        params = {"p_seedlot_number":seedlot_number}
+        
+        print("-------------------delete text-----------------")
+        print(sql_text)
+        print("-------------------delete text-----------------")
+        #TODO REMOVE comment so merge runs
+        #result = self.conn.execute(text(sql_text), params)
+        
+        #self.commit()  # If everything is ok, a commit will be executed.
+        return 1#TODOresult.rowcount  # Number of rows affected
+
+    def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str, run_mode:str, ignore_columns_on_update:str ) -> int:
         logger.debug('Starting UPSERT statement in Oracle Database')
+        logger.debug('run_mode is '+run_mode)
+        onconflictstatement = ""
         i = 0
         for row in dataframe.itertuples():
+            if run_mode == "UPSERT_WITH_DELETE":
+                print(f"Deleting {table_name} for seedlot {dataframe.seedlot_number}")
+                #delete for seedlot 
+                self.delete_seedlot_child_table(row, table_name, dataframe.seedlot_number) #todo fill in seedlot
+
             i = i + 1
             logger.debug(f'---Including row {i}')
             params = {}
@@ -176,16 +201,10 @@ class database_connection(object):
                 #whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
                 whStatement2 = ""
                 
-                #TODO for test only
-                insertonlycols = []
-                if table_name.upper() == "THE.SEEDLOT_OWNER_QUANTITY":
-                    insertonlycols = ["qty_reserved","qty_rsrvd_cmtd_pln","qty_rsrvd_cmtd_apr","qty_surplus","qty_srpls_cmtd_pln","qty_srpls_cmtd_apr"]
-
-                #remove insert only cols from update col list
-                df2 = df2.drop(columns=insertonlycols)
-
-                df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation 
-                whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
+                #some tables will insert all columns in query but not update all. Find and remove them from the UPDATE col list
+                if ignore_columns_on_update:
+                    insertonlycols = ignore_columns_on_update.split(",")
+                    df2 = df2.drop(columns=insertonlycols)
 
                 for column in dataframe.columns.values:
                     params["s_"+column] = getattr(row,column)
@@ -208,55 +227,9 @@ class database_connection(object):
             #TODO REMOVE comment so merge runs
             #result = self.conn.execute(text(sql_text), params)
         
-        self.commit()  # If everything is ok, a commit will be executed.
-        return result.rowcount  # Number of rows affected
+        #self.commit()  # If everything is ok, a commit will be executed.
+        return 1 #TODOresult.rowcount  # Number of rows affected
 
-    def slow_bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str ) -> int:
-        onconflictstatement = ""
-        logger.debug('Starting UPSERT statement in Oracle Database')
-        i = 0
-        for row in dataframe.itertuples():
-            i = i + 1
-            logger.debug(f'---Including row {i}')
-            params = {}
-            whStatement2 = ''
-            for column in dataframe.columns.values:
-                params[column] = getattr(row,column)
-            if table_pk != "":
-                columnspk = table_pk.split(",")
-                whStatement = "WHERE 1=1"
-                for column in columnspk:
-                    params["p_"+column] = getattr(row,column)
-                    whStatement = f"""{whStatement}  AND  {column} = :p_{column}"""                
-
-                df2 = dataframe.drop(columns=columnspk)  # Remove table PK from the column lists for SET operation 
-                #whStatement2 = f" AND ({' OR '.join(df2.columns.values + '!= :q_' + df2.columns.values)})"
-                for column in dataframe.columns.values:
-                    params["s_"+column] = getattr(row,column)
-                   # params["q_"+column] = getattr(row,column)
-                onconflictstatement = f"""
-                EXCEPTION
-                WHEN DUP_VAL_ON_INDEX THEN
-                    UPDATE  {table_name} 
-                    SET {' , '.join(df2.columns.values + '= :s_'+df2.columns.values)} 
-                    {whStatement} {whStatement2};"""
-        
-            sql_text = f""" 
-            BEGIN
-                INSERT INTO {table_name}({', '.join(dataframe.columns.values)}) 
-                    VALUES(:{', :'.join(dataframe.columns.values)})   ;
-                {onconflictstatement}
-            END; """
-            logger.debug(f'---Executing statement for row {i}')
-            result = self.conn.execute(text(sql_text), params)
-        
-        self.commit()  # If everything is ok, a commit will be executed.
-        return result.rowcount  # Number of rows affected
-    
-    
-    def bulk_load(self, dataframe:object, table_name:str, if_data_exists: str, index_data:bool ) -> int:
-        return dataframe.to_sql(name=table_name,con=self.conn.engine,if_exists=if_data_exists, index=index_data, method=psql_insert_copy)
-     
 def convertTypesToOracle(dataframe):
     dataframe = dataframe.fillna(numpy.nan).replace([numpy.nan], [None])
     for column in dataframe.columns.values:
