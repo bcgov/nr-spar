@@ -502,6 +502,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     // Check svg with complete checkmark on Step 3
+    // FLAKY, needs investigation
     cy.get('ul.spar-seedlot-reg-progress-bar li')
       .eq(1)
       .should('have.class', `${prefix}--progress-step--complete`);
