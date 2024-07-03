@@ -48,9 +48,6 @@ parameters:
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
-  - name: ORACLE_SERVER_URL
-    description: Oracle back-end api URL
-    value: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
   - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
     description: Backend environment for OpenSearch. # One of: development, test, production
     required: true
@@ -104,7 +101,7 @@ objects:
                 - name: FORESTCLIENTAPI_ADDRESS
                   value: ${FORESTCLIENTAPI_ADDRESS}
                 - name: ORACLE_SERVER_URL
-                  value: ${ORACLE_SERVER_URL}
+                  value: https://${NAME}-${ZONE}-oracle-api.${DOMAIN}
                 - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
