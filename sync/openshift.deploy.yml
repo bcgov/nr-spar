@@ -85,31 +85,31 @@ objects:
                     - name: ORACLE_HOST
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle
+                          name: ${REPO}-${ZONE}-oracle-api
                           key: oracle-host
                     - name: ORACLE_PASSWORD
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle
+                          name: ${REPO}-${ZONE}-oracle-api
                           key: oracle-password
                     - name: ORACLE_PORT
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle
+                          name: ${REPO}-${ZONE}-oracle-api
                           key: oracle-port
                     - name: ORACLE_SERVICE
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle
+                          name: ${REPO}-${ZONE}-oracle-api
                           key: oracle-service
                     - name: ORACLE_USER
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle
+                          name: ${REPO}-${ZONE}-oracle-api
                           key: oracle-user
                     - name: POSTGRES_HOST
                       value: ${REPO}-${ZONE}-database
-                    - name: POSTGRES_DATABASE
+                    - name: POSTGRES_DB
                       valueFrom:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-database

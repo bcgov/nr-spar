@@ -28,13 +28,14 @@ jobs:
     with:
       tag: ${{ inputs.tag }} # Uses PR number if blank
       target: test
+      log_env_target: test
 
   deploy-prod:
     name: PROD
-    if: github.base_ref == ${{ github.event.repository.default_branch }}
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
       tag: ${{ inputs.tag }} # Uses PR number if blank
       target: prod
+      log_env_target: production

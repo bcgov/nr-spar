@@ -13,6 +13,7 @@ import { getSeedlotToReview } from '../../api-service/tscAdminAPI';
 import { getSeedlotByClientId } from '../../api-service/seedlotAPI';
 import { SeedlotDisplayType, SeedlotType } from '../../types/SeedlotType';
 import PaginationChangeType from '../../types/PaginationChangeType';
+import { getMultiOptList } from '../../utils/MultiOptionsUtils';
 
 import { TableText, PageSizesConfig } from './constants';
 import { TableProps } from './definitions';
@@ -40,7 +41,8 @@ const SeedlotTable = (
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
+    select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS, // will not refetch for 3 hours
     cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
   });

@@ -52,7 +52,6 @@ def get_log_hist_schedules_to_process(track_db_conn,database_schema,execution_id
     records = track_db_conn.select(select_sync_id_stm)
     return records.mappings().all()
 
-
 """
     Validate if the Execution map data is correct
 

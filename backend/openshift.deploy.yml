@@ -31,7 +31,7 @@ parameters:
     value: apps.silver.devops.gov.bc.ca
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
-    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
@@ -41,20 +41,13 @@ parameters:
   - name: MEMORY_REQUEST
     value: 100Mi
   - name: MEMORY_LIMIT
-    value: 250Mi
+    value: 350Mi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
-  - name: BUILD
-    description: Current SPAR backend API build version
-    required: true
-    value: nightly
-  - name: ORACLE_SERVER_URL
-    description: Oracle back-end api URL
-    value: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
   - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
     description: Backend environment for OpenSearch. # One of: development, test, production
     required: true
@@ -100,7 +93,7 @@ objects:
                   mountPath: /logs
               env:
                 - name: NR_SPAR_BACKEND_VERSION
-                  value: ${BUILD}
+                  value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
                 - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
                   value: ${NR_SPAR_BACKEND_ENV_OPENSEARCH}
                 - name: ALLOWED_ORIGINS
@@ -108,7 +101,7 @@ objects:
                 - name: FORESTCLIENTAPI_ADDRESS
                   value: ${FORESTCLIENTAPI_ADDRESS}
                 - name: ORACLE_SERVER_URL
-                  value: ${ORACLE_SERVER_URL}
+                  value: https://${NAME}-${ZONE}-oracle-api.${DOMAIN}
                 - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:

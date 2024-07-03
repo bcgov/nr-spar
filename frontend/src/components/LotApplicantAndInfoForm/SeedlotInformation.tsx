@@ -22,6 +22,10 @@ import getSeedlotSources from '../../api-service/SeedlotSourcesAPI';
 import { FilterObj, filterInput } from '../../utils/FilterUtils';
 import ComboBoxEvent from '../../types/ComboBoxEvent';
 import { EmptyMultiOptObj } from '../../shared-constants/shared-constants';
+import MultiOptionsObj from '../../types/MultiOptionsObject';
+import VegCode from '../../types/VegetationCodeType';
+import { geneticWorthDict } from '../SeedlotRegistrationSteps/ParentTreeStep/constants';
+import { getMultiOptList } from '../../utils/MultiOptionsUtils';
 
 import { speciesFieldConfig } from './constants';
 
@@ -35,10 +39,20 @@ const SeedlotInformation = (
 ) => {
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
     enabled: !isEdit,
     staleTime: THREE_HOURS, // will not refetch for 3 hours
-    cacheTime: THREE_HALF_HOURS // data is cached 3.5 hours then deleted
+    cacheTime: THREE_HALF_HOURS, // data is cached 3.5 hours then deleted
+    select: (data) => {
+      let vegCodeOptions: Array<MultiOptionsObj> = [];
+      if (data) {
+        const aClassCodes = Object.keys(geneticWorthDict);
+        const filteredData = data
+          .filter((vegCode: VegCode) => aClassCodes.includes(vegCode.code));
+        vegCodeOptions = getMultiOptList(filteredData, true, true);
+      }
+      return vegCodeOptions;
+    }
   });
 
   const seedlotSourcesQuery = useQuery({
@@ -49,17 +63,17 @@ const SeedlotInformation = (
   });
 
   const setDefaultSource = (sources: SeedlotSourceType[]) => {
-    sources.forEach((source) => {
-      if (source.isDefault) {
-        setSeedlotFormData((prevData) => ({
-          ...prevData,
-          sourceCode: {
-            ...prevData.sourceCode,
-            value: source.code
-          }
-        }));
-      }
-    });
+    const defaultSource = sources.filter((source) => source.isDefault).at(0) ?? null;
+
+    if (defaultSource) {
+      setSeedlotFormData((prevData) => ({
+        ...prevData,
+        sourceCode: {
+          ...prevData.sourceCode,
+          value: defaultSource.code
+        }
+      }));
+    }
   };
 
   /**
@@ -67,24 +81,25 @@ const SeedlotInformation = (
    *  we will need to set the default again here.
    */
   useEffect(() => {
-    if (seedlotSourcesQuery.isSuccess && !seedlotFormData.sourceCode.value) {
+    if (seedlotSourcesQuery.status === 'success' && !seedlotFormData.sourceCode.value) {
       setDefaultSource(seedlotSourcesQuery.data);
     }
-  }, [seedlotSourcesQuery.isFetched]);
+  }, [seedlotSourcesQuery.status]);
 
   const renderSources = () => {
-    if (seedlotSourcesQuery.isFetched) {
-      return seedlotSourcesQuery.data.map((source: SeedlotSourceType) => (
-        <RadioButton
-          id={`seedlot-source-radio-btn-${source.code.toLowerCase()}`}
-          key={source.code}
-          checked={seedlotFormData.sourceCode.value === source.code}
-          labelText={source.description}
-          value={source.code}
-        />
-      ));
+    if (seedlotSourcesQuery.status === 'error') {
+      return <InputErrorText description="Could not retrieve seedlot sources." />;
     }
-    return <InputErrorText description="Could not retrieve seedlot sources." />;
+
+    return seedlotSourcesQuery.data.map((source: SeedlotSourceType) => (
+      <RadioButton
+        id={`seedlot-source-radio-btn-${source.code.toLowerCase()}`}
+        key={source.code}
+        checked={seedlotFormData.sourceCode.value === source.code}
+        labelText={source.description}
+        value={source.code}
+      />
+    ));
   };
 
   const handleBoolRadioGroup = (inputName: keyof SeedlotRegFormType, checked: boolean) => {
@@ -177,7 +192,7 @@ const SeedlotInformation = (
             onChange={(e: string) => handleSource(e)}
           >
             {
-              seedlotSourcesQuery.isFetching
+              seedlotSourcesQuery.status === 'loading'
                 ? <RadioButtonSkeleton />
                 : renderSources()
             }

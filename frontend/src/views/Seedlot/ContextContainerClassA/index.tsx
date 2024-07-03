@@ -52,7 +52,8 @@ import {
   validateExtractionStep, verifyExtractionStepCompleteness, validateParentStep,
   verifyParentStepCompleteness, checkAllStepsCompletion, getSeedlotPayload,
   initEmptySteps, resDataToState,
-  fillAreaOfUseData
+  fillAreaOfUseData,
+  fillGeoVals
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE, initialAreaOfUseData,
@@ -60,6 +61,7 @@ import {
 } from './constants';
 
 import './styles.scss';
+import { StringInputType } from '../../../types/FormInputType';
 
 type props = {
   children: React.ReactNode
@@ -112,7 +114,8 @@ const ContextContainerClassA = ({ children }: props) => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
+    select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -142,12 +145,19 @@ const ContextContainerClassA = ({ children }: props) => {
    * and use it to fill the form
    */
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
+  const [geoInfoVals, setGeoInfoVals] = useState<GeoInfoValType>(() => INITIAL_GEO_INFO_VALS);
 
   useEffect(() => {
-    if (seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'SUB') {
-      setIsFormSubmitted(true);
+    if (seedlotQuery.status === 'success') {
+      if (seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'SUB') {
+        setIsFormSubmitted(true);
+      }
+
+      if (seedlotQuery.data) {
+        fillGeoVals(setGeoInfoVals, seedlotQuery.data);
+      }
     }
-  }, [seedlotQuery.isFetched]);
+  }, [seedlotQuery.status]);
 
   const getAllSeedlotInfoQuery = useQuery({
     queryKey: ['seedlot-full-form', seedlotNumber],
@@ -666,7 +676,6 @@ const ContextContainerClassA = ({ children }: props) => {
     }
   }, [getFormDraftQuery.status, getFormDraftQuery.isFetchedAfterMount, forestClientQuery.status]);
 
-  const [geoInfoVals, setGeoInfoVals] = useState<GeoInfoValType>(() => INITIAL_GEO_INFO_VALS);
   const [genWorthVals, setGenWorthVals] = useState<GenWorthValType>(() => INITIAL_GEN_WORTH_VALS);
 
   const fillGenWorthVals = () => {
@@ -699,13 +708,10 @@ const ContextContainerClassA = ({ children }: props) => {
   /**
    * Set a single geo info val
    */
-  const setGeoInfoVal = (infoName: keyof GeoInfoValType, newVal: string) => {
+  const setGeoInfoInputObj = (infoName: keyof GeoInfoValType, inputObj: StringInputType) => {
     setGeoInfoVals((prevVals) => ({
       ...prevVals,
-      [infoName]: {
-        ...prevVals[infoName],
-        value: newVal
-      }
+      [infoName]: inputObj
     }));
   };
 
@@ -723,7 +729,7 @@ const ContextContainerClassA = ({ children }: props) => {
         calculatedValues,
         geoInfoVals,
         genWorthVals,
-        setGeoInfoVal,
+        setGeoInfoInputObj,
         setGenWorthVal,
         seedlotNumber,
         allStepData,

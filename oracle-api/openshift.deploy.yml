@@ -31,21 +31,9 @@ parameters:
     value: 300Mi
   - name: MEMORY_LIMIT
     value: 400Mi
-  - name: NR_SPAR_ORACLE_API_VERSION
-    description: Current service API release version
-    required: true
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
-    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
-  - name: DATABASE_HOST
-    description: Where the database is hosted
-    value: nrcdb03.bcgov
-  - name: DATABASE_PORT
-    description: The port to be used for the connection to the database
-    value: "1543"
-  - name: SERVICE_NAME
-    description: The database's name
-    value: dbq01.nrs.bcgov
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "1"
@@ -91,17 +79,26 @@ objects:
                   mountPath: /logs
               env:
                 - name: NR_SPAR_ORACLE_API_VERSION
-                  value: ${NR_SPAR_ORACLE_API_VERSION}
+                  value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
                 - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
                   value: ${NR_SPAR_ORACLE_API_ENV_OPENSEARCH}
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
                 - name: DATABASE_HOST
-                  value: ${DATABASE_HOST}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-host
                 - name: DATABASE_PORT
-                  value: ${DATABASE_PORT}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-port
                 - name: SERVICE_NAME
-                  value: ${SERVICE_NAME}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-service
                 - name: DATABASE_USER
                   valueFrom:
                     secretKeyRef:
@@ -127,6 +124,8 @@ objects:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
               readinessProbe:
+                successThreshold: 1
+                failureThreshold: 5
                 httpGet:
                   path: /actuator/health
                   port: 8090
@@ -136,12 +135,12 @@ objects:
                 timeoutSeconds: 10
               livenessProbe:
                 successThreshold: 1
-                failureThreshold: 3
+                failureThreshold: 5
                 httpGet:
                   path: /actuator/health
                   port: 8090
                   scheme: HTTP
-                initialDelaySeconds: 120
+                initialDelaySeconds: 20
                 periodSeconds: 30
                 timeoutSeconds: 10
           volumes:

@@ -46,12 +46,6 @@ parameters:
   - name: VITE_SPAR_BUILD_VERSION
     description: Current sample app release version
     required: true
-  - name: VITE_NRSPARWEBAPP_VERSION
-    description: VITE_NRSPARWEBAPP_VERSION
-    required: true
-  - name: VITE_ORACLE_SERVER_URL
-    description: Oracle server (can change!)
-    value: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
   - name: LOG_LEVEL
     description: Caddy log level (debug, info, warn, error, panic, fatal)
     value: "info"
@@ -96,9 +90,9 @@ objects:
                 - name: VITE_SERVER_URL
                   value: https://${NAME}-${ZONE}-backend.${DOMAIN}
                 - name: VITE_NRSPARWEBAPP_VERSION
-                  value: ${VITE_NRSPARWEBAPP_VERSION}
+                  value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
                 - name: VITE_ORACLE_SERVER_URL
-                  value: ${VITE_ORACLE_SERVER_URL}
+                  value: https://${NAME}-${ZONE}-oracle-api.${DOMAIN}
                 - name: LOG_LEVEL
                   value: ${LOG_LEVEL}
                 - name: VITE_USER_POOLS_ID
