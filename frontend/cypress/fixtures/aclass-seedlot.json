@@ -15,7 +15,7 @@
     "agencyNumber": "01",
     "email": "apo@gov.bc.ca",
     "species": "CW - Western redcedar",
-    "source": "upt",
+    "source": "tpt",
     "toBeRegistered": false,
     "withinBc": true
   },
@@ -25,7 +25,7 @@
     "agencyNumber": "01",
     "email": "beane@gov.bc.ca",
     "species": "DR - Red alder",
-    "source": "cus",
+    "source": "tpt",
     "toBeRegistered": false,
     "withinBc": false
   },
@@ -45,7 +45,7 @@
     "agencyNumber": "01",
     "email": "dha@gov.bc.ca",
     "species": "FDC - Coastal Douglas-fir",
-    "source": "upt",
+    "source": "tpt",
     "toBeRegistered": false,
     "withinBc": false
   }
