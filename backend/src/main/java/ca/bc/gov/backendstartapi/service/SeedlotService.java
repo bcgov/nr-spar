@@ -707,13 +707,23 @@ public class SeedlotService {
     setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
     if (!isTscAdmin) {
+      // parent tree contribution - elevation, latitude and longitude for the seedlot collection
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+      
+      // seedlot elevation min max, latitude min max, and longitude min max (area of use)
       setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
     } else {
+      // seed plan zones for the seedlot 
       tscAdminService.updateSeedPlanZones(seedlot, form.seedlotReviewSeedPlanZones());
+      
+      // seedlot elevation min max, latitude min max, and longitude min max (area of use)
       tscAdminService.updateElevationLatLong(seedlot, form.seedlotReviewElevationLatLong());
+      
+      // seedlot genetic worth
       tscAdminService.updateSeedlotGeneticWorth(seedlot, form.seedlotReviewGeneticWorth());
+
+      // parent tree contribution - elevation, latitude and longitude for the seedlot collection
       tscAdminService.updateSeedlotGeoInformation(seedlot, form.seedlotReviewGeoInformation());
     }
 
