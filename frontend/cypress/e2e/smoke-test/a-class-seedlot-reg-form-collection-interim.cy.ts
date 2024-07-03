@@ -139,13 +139,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .blur();
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+    cy.saveButton();
   });
 
   it('[Collection] Client search modal', () => {
@@ -201,13 +195,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .blur();
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+    cy.saveButton();
   });
 
   it('[Collection] Date inputs', () => {
@@ -235,13 +223,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .blur();
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+    cy.saveButton();
   });
 
   it.only('[Collection] Containers inputs', () => {
@@ -323,13 +305,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .should('have.value', '30.000');
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+    cy.saveButton();
   });
 
   it('[Collection] Checkbox input', () => {
@@ -425,10 +401,8 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .click()
-      .contains(/Save changes|Changes saved!/g);
+    // Save changes
+    cy.saveButton();
   });
 
   it('[Interim storage] Client search modal', () => {
@@ -515,13 +489,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .blur();
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+    cy.saveButton();
   });
 
   it('[Interim storage] Radio button', () => {
