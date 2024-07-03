@@ -145,7 +145,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('[Collection] Client search modal', () => {
@@ -207,7 +207,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('[Collection] Date inputs', () => {
@@ -241,7 +241,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it.only('[Collection] Containers inputs', () => {
@@ -329,7 +329,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('[Collection] Checkbox input', () => {
@@ -521,7 +521,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('[Interim storage] Radio button', () => {

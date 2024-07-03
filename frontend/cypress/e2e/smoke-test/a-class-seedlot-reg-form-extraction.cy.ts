@@ -137,8 +137,11 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!');
   });
 
   it('Extraction Client search modal', () => {
@@ -164,6 +167,8 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     cy.get('button.client-search-button')
       .contains('Search')
       .click({ force: true });
+
+    cy.get(`.${prefix}--table-header-label`).contains('Acronym');
 
     cy.get(`table.${prefix}--data-table tbody tr`)
       .eq(0)
@@ -219,8 +224,11 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!');
   });
 
   it('Edit Storage agency section details', () => {
@@ -278,8 +286,11 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!');
   });
 
   it('Storage Client search modal', () => {
@@ -304,6 +315,8 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     cy.get('button.client-search-button')
       .contains('Search')
       .click({ force: true });
+
+    cy.get(`.${prefix}--table-header-label`).contains('Acronym');
 
     cy.get(`table.${prefix}--data-table tbody tr`)
       .eq(0)
@@ -356,7 +369,10 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
     // Save changes
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
-      .contains(/Save changes|Changes saved!/g)
+      .contains('Save changes')
       .click();
+
+    cy.get(`.${prefix}--inline-loading__text`)
+      .contains('Changes saved!');
   });
 });

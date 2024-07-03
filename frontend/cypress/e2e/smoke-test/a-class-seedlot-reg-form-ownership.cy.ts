@@ -165,7 +165,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('Client search modal', () => {
@@ -224,7 +224,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('Owner portion %, reserved % and surplus % display default values', () => {
@@ -244,7 +244,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('Edit owner portion %, reserved % and surplus % values', () => {
@@ -312,12 +312,11 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('Funding source and method of payment default values and change the values', () => {
-
-    //Expand the funding source combo box
+    // Expand the funding source combo box
     cy.get('#ownership-funding-source-0')
       .should('have.value', '')
       .click();
@@ -390,7 +389,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('Create and delete new owner agency section', () => {
@@ -492,7 +491,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .click();
 
     cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!')
+      .contains('Changes saved!');
   });
 
   it('Complete checkmark for Ownership step', () => {
