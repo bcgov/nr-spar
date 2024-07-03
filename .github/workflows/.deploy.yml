@@ -66,6 +66,7 @@ jobs:
           file: database/openshift.deploy.yml
           overwrite: false
           parameters:
+            -p TAG=${{ inputs.tag || needs.init.outputs.pr }}
             -p ZONE=${{ inputs.target || github.event.number }}
             -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p ORACLE_DB_USER='${{ vars.ORACLE_DB_USER }}'
