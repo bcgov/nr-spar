@@ -13,7 +13,7 @@ on:
         default: false
       fluentbit_target:
         description: FluentBit target; usually development, test or production
-        default: ''
+        default: development
         required: false
         type: string
       tag:
@@ -75,7 +75,7 @@ jobs:
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
 
       - name: FluentBit
-        if: inputs.fluentbit_target != ''
+        if: inputs.fluentbit_target != 'development'
         uses: bcgov-nr/action-deployer-openshift@v2.3.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -110,8 +110,8 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.fluentbit_target == 'prod' && 'production' || inputs.fluentbit_target }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.fluentbit_target == 'prod' && 'production' || inputs.fluentbit_target }}
             verification_path: "actuator/health"
           - name: frontend
             file: frontend/openshift.deploy.yml
@@ -126,7 +126,7 @@ jobs:
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              ${{ github.event_name == 'pull_request' && '' || '-p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.log_env_target }}' }}
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.fluentbit_target == 'prod' && 'production' || inputs.fluentbit_target }}
             verification_path: "actuator/health"
           - name: sync
             file: sync/openshift.deploy.yml
