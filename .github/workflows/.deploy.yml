@@ -21,6 +21,7 @@ on:
         type: string
       target:
         description: Deployment target; usually PR number, test or prod
+        default: ''
         required: false
         type: string
       ### Usually a bad idea / not recommended
@@ -38,7 +39,7 @@ on:
 jobs:
   init:
     name: Initialize
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.target }}
     outputs:
       modded-tag: ${{ steps.mod-tag.outputs.modded-tag }}
       pr: ${{ steps.pr.outputs.pr }}
@@ -66,19 +67,19 @@ jobs:
           overwrite: false
           parameters:
             -p ZONE=${{ inputs.target || github.event.number }}
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p ORACLE_DB_USER='${{ vars.ORACLE_DB_USER }}'
+            -p ORACLE_DB_PASSWORD='${{ secrets.ORACLE_DB_PASSWORD }}'
+            -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-            -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
-            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
 
   deploy:
     name: Deploy
-    environment: ${{ github.event_name == 'pull_request' && '' || inputs.target }}
+    environment: ${{ inputs.target }}
     needs: [init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
@@ -99,7 +100,6 @@ jobs:
             parameters:
               -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.log_env_target }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
-              ${{ inputs.target == 'prod' && '-p ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
             verification_path: "actuator/health"
           - name: fluentbit
             file: common/openshift.fluentbit.yml
@@ -112,14 +112,12 @@ jobs:
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
-              ${{ inputs.target == 'prod' && '-p VITE_ORACLE_SERVER_URL=https://nr-spar-prod-oracle-api.apps.silver.devops.gov.bc.ca' || '' }}
           - name: oracle-api
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
               -p NR_SPAR_ORACLE_API_ENV_OPENSEARCH=${{ inputs.log_env_target }}
-              ${{ inputs.target == 'prod' && '-p SERVICE_NAME=dbq01.nrs.bcgov' || '' }}
             verification_path: "actuator/health"
           - name: sync
             file: sync/openshift.deploy.yml
@@ -156,7 +154,7 @@ jobs:
   verify:
     name: Verify ETL
     if: inputs.etl == 'true'
-    environment: ${{ github.event_name == 'pull_request' && '' || inputs.target }}
+    environment: ${{ inputs.target }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:

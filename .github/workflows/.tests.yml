@@ -12,12 +12,6 @@ on:
         default: ${{ github.event.number }}
         type: string
 
-      ### Usually a bad idea / not recommended
-      target_oracle:
-        description: Oracle-API target, defaults to test
-        default: test
-        type: string
-
 jobs:
   cypress:
     name: Cypress
@@ -26,7 +20,7 @@ jobs:
       CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-backend.apps.silver.devops.gov.bc.ca
-      VITE_ORACLE_SERVER_URL: https://nr-spar-${{ inputs.target_oracle }}-oracle-api.apps.silver.devops.gov.bc.ca
+      VITE_ORACLE_SERVER_URL: https://nr-spar-${{ inputs.target }}-oracle-api.apps.silver.devops.gov.bc.ca
       VITE_USER_POOLS_ID: ${{ vars.VITE_USER_POOLS_ID }}
       VITE_USER_POOLS_WEB_CLIENT_ID: ${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
       VITE_ZONE: TEST
