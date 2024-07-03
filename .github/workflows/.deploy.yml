@@ -11,10 +11,11 @@ on:
         required: false
         type: boolean
         default: false
-      log_env_target:
+      fluentbit_target:
+        description: FluentBit target; usually development, test or production
+        default: ''
         required: false
         type: string
-        default: development
       tag:
         description: Container tag; usually PR number
         required: false
@@ -77,6 +78,16 @@ jobs:
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
 
+      - name: FluentBit
+        if: fluentbit_target != ''
+        uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          file: common/openshift.fluentbit.yml
+          overwrite: true
+
   deploy:
     name: Deploy
     environment: ${{ inputs.target }}
@@ -87,7 +98,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
-        name: [database, backend, fluentbit, frontend, oracle-api, sync]
+        name: [database, backend, frontend, oracle-api, sync]
         include:
           - name: database
             file: database/openshift.deploy.yml
@@ -98,12 +109,9 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.log_env_target }}
+              -p NR_SPAR_BACKEND_ENV_OPENSEARCH=${{ inputs.fluentbit_target == 'prod' && 'production' || inputs.fluentbit_target }}
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "actuator/health"
-          - name: fluentbit
-            file: common/openshift.fluentbit.yml
-            overwrite: true
           - name: frontend
             file: frontend/openshift.deploy.yml
             overwrite: true
