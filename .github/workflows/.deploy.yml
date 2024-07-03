@@ -67,15 +67,14 @@ jobs:
           overwrite: false
           parameters:
             -p ZONE=${{ inputs.target || github.event.number }}
-            -p ORACLE_DB_USER=${{ secrets.DB_USER }}
-            -p ORACLE_DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p ORACLE_DB_USER=${{ vars.ORACLE_DB_USER }}
+            -p ORACLE_DB_PASSWORD='${{ secrets.ORACLE_DB_PASSWORD }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
-            -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
-            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
 
   deploy:
     name: Deploy
