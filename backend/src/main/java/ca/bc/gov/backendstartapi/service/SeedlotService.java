@@ -60,6 +60,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -532,6 +533,7 @@ public class SeedlotService {
 
     List<SeedlotFormOwnershipDto> ownershipStep =
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
+        .filter(owner -> owner.getOriginalPercentageOwned().compareTo(BigDecimal.ZERO) > 0)
             .map(
                 owner ->
                     new SeedlotFormOwnershipDto(
