@@ -64,12 +64,12 @@ jobs:
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.init.yml
-          overwrite: false
+          overwrite: true
           parameters:
             -p ZONE=${{ inputs.target || github.event.number }}
             -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
-            -p ORACLE_DB_USER='${{ vars.ORACLE_DB_USER }}'
-            -p ORACLE_DB_PASSWORD='${{ secrets.ORACLE_DB_PASSWORD }}'
+            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
+            -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
