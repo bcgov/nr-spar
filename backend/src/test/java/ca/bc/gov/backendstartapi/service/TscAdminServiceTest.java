@@ -7,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
@@ -21,6 +20,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -49,8 +49,6 @@ class TscAdminServiceTest {
 
   @Mock GeneticClassRepository geneticClassRepository;
 
-  @Mock SeedlotGeneticWorthService seedlotGeneticWorthService;
-
   private TscAdminService tscAdminService;
 
   private SeedlotStatusEntity createValidStatus(String status) {
@@ -71,8 +69,7 @@ class TscAdminServiceTest {
             seedlotRepository,
             seedlotStatusService,
             seedlotSeedPlanZoneRepository,
-            geneticClassRepository,
-            seedlotGeneticWorthService);
+            geneticClassRepository);
   }
 
   @Test
@@ -172,7 +169,7 @@ class TscAdminServiceTest {
 
   @Test
   @DisplayName("Update Seed Plan Zones happy path should succeed")
-  void updateSeedPlanZones_happyPath_shouldSucceed() {
+  void overrideAreaOfUse_happyPath_shouldSucceed() {
     String seedlotNumber = "63126";
 
     SeedlotSeedPlanZoneEntity seedPlanZoneEntity = mock(SeedlotSeedPlanZoneEntity.class);
@@ -192,16 +189,15 @@ class TscAdminServiceTest {
     SeedlotReviewSeedPlanZoneDto seedPlanZoneGlDto =
         new SeedlotReviewSeedPlanZoneDto("GL", "Georgia lowlands", false);
 
-    tscAdminService.updateSeedPlanZones(seedlot, List.of(seedPlanZonePgDto, seedPlanZoneGlDto));
+    tscAdminService.overrideAreaOfUse(seedlot, List.of(seedPlanZonePgDto, seedPlanZoneGlDto));
 
     verify(seedlotSeedPlanZoneRepository, times(1)).deleteAll(any());
-    verify(seedlotSeedPlanZoneRepository, times(1)).flush();
     verify(seedlotSeedPlanZoneRepository, times(1)).saveAllAndFlush(any());
   }
 
   @Test
   @DisplayName("Update Seed plan Zones empty list should succeed")
-  void updateSeedPlanZones_emptyList_shouldSucceed() {
+  void overrideAreaOfUse_emptyList_shouldSucceed() {
     String seedlotNumber = "63126";
     SeedlotSeedPlanZoneEntity seedPlanZoneEntity = mock(SeedlotSeedPlanZoneEntity.class);
 
@@ -216,23 +212,22 @@ class TscAdminServiceTest {
     when(seedlotSeedPlanZoneRepository.saveAllAndFlush(any())).thenReturn(List.of());
     Seedlot seedlot = new Seedlot(seedlotNumber);
 
-    tscAdminService.updateSeedPlanZones(seedlot, List.of());
+    tscAdminService.overrideAreaOfUse(seedlot, List.of());
 
     verify(seedlotSeedPlanZoneRepository, times(1)).deleteAll(any());
-    verify(seedlotSeedPlanZoneRepository, times(1)).flush();
     verify(seedlotSeedPlanZoneRepository, times(0)).saveAllAndFlush(any());
   }
 
   @Test
   @DisplayName("Update Elevation Lat Long happy path should succeed")
-  void updateElevationLatLong_happyPath_shouldSucceed() {
+  void overrideElevLatLongMinMax_happyPath_shouldSucceed() {
     String seedlotNumber = "63126";
     Seedlot seedlot = new Seedlot(seedlotNumber);
 
     SeedlotReviewElevationLatLongDto elevationLatLongDto =
         mock(SeedlotReviewElevationLatLongDto.class);
 
-    tscAdminService.updateElevationLatLong(seedlot, elevationLatLongDto);
+    tscAdminService.overrideElevLatLongMinMax(seedlot, elevationLatLongDto);
 
     // Elevation
     Assertions.assertNotNull(seedlot.getElevationMax());
@@ -264,31 +259,28 @@ class TscAdminServiceTest {
   }
 
   @Test
-  @DisplayName("Update Seedlot Genetic Worth happy path should succeed")
-  void updateSeedlotGeneticWorth_happyPath_shouldSucceed() {
-    String seedlotNumber = "63129";
-    Seedlot seedlot = new Seedlot(seedlotNumber);
-
-    GeneticWorthTraitsDto genWorthTraits = mock(GeneticWorthTraitsDto.class);
-
-    tscAdminService.updateSeedlotGeneticWorth(seedlot, List.of(genWorthTraits));
-
-    doNothing().when(seedlotGeneticWorthService).deleteAllForSeedlot(seedlotNumber);
-    doNothing().when(seedlotGeneticWorthService).saveGenWorthListToSeedlot(any(), any());
-
-    verify(seedlotGeneticWorthService, times(1)).deleteAllForSeedlot(seedlotNumber);
-    verify(seedlotGeneticWorthService, times(1)).saveGenWorthListToSeedlot(any(), any());
-  }
-
-  @Test
   @DisplayName("Update Seedlot Geo Information happy path should succeed")
-  void updateSeedlotGeoInformation_happyPath_shouldSucceed() {
+  void overrideSeedlotCollElevLatLong_happyPath_shouldSucceed() {
     String seedlotNumber = "63126";
     Seedlot seedlot = new Seedlot(seedlotNumber);
 
-    SeedlotReviewGeoInformationDto geoInformationDto = mock(SeedlotReviewGeoInformationDto.class);
+    SeedlotReviewGeoInformationDto geoInformationDto =
+        new SeedlotReviewGeoInformationDto(
+            100,
+            new BigDecimal("2"),
+            3,
+            4,
+            0,
+            new BigDecimal("5"),
+            115,
+            60,
+            0,
+            new BigDecimal("17"));
 
-    tscAdminService.updateSeedlotGeoInformation(seedlot, geoInformationDto);
+    tscAdminService.overrideSeedlotCollElevLatLong(seedlot, geoInformationDto);
+
+    // Effective Population Size
+    // Assertions.assertNotNull(seedlot.getEffectivePopulationSize());
 
     // Elevation
     Assertions.assertNotNull(seedlot.getCollectionElevation());

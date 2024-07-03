@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
@@ -38,8 +37,6 @@ public class TscAdminService {
   private final SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
 
   private final GeneticClassRepository geneticClassRepository;
-
-  private final SeedlotGeneticWorthService seedlotGeneticWorthService;
 
   /**
    * Retrieve a paginated list of seedlot for a given user.
@@ -107,12 +104,12 @@ public class TscAdminService {
   }
 
   /**
-   * Update or recreate all Seedlots Seed Plan Zone records.
+   * Override or recreate all Seedlots Seed Plan Zone records.
    *
    * @param seedlot The {@link Seedlot} to be updated.
    * @param seedlotReviewSeedPlanZones The List of SPZ possibly modified by the TSC Admin.
    */
-  public void updateSeedPlanZones(
+  public void overrideAreaOfUse(
       Seedlot seedlot, List<SeedlotReviewSeedPlanZoneDto> seedlotReviewSeedPlanZones) {
     SparLog.info("Update Seedlot Seed Plan Zones for Seedlot {}", seedlot.getId());
     List<SeedlotSeedPlanZoneEntity> seedlotSpzs =
@@ -126,7 +123,6 @@ public class TscAdminService {
           seedlotSpzs.size(),
           seedlot.getId());
       seedlotSeedPlanZoneRepository.deleteAll(seedlotSpzs);
-      seedlotSeedPlanZoneRepository.flush();
     }
 
     GeneticClassEntity genAclass =
@@ -157,12 +153,12 @@ public class TscAdminService {
   }
 
   /**
-   * Update all the Elevation, Lat and Long seedlot data reviewed by the TSC Admin.
+   * Override all the Elevation, Lat and Long seedlot data reviewed by the TSC Admin.
    *
    * @param seedlot The Seedlot instance.
    * @param seedlotReviewElevationLatLong The elevation, lat and long data reviewed.
    */
-  public void updateElevationLatLong(
+  public void overrideElevLatLongMinMax(
       Seedlot seedlot, SeedlotReviewElevationLatLongDto seedlotReviewElevationLatLong) {
     SparLog.info(
         "Update Seedlot elevation, latitude and longitude for Seedlot {}", seedlot.getId());
@@ -196,25 +192,16 @@ public class TscAdminService {
   }
 
   /**
-   * Updates removing existing Genetic Worth values and adding new ones changed by the TSC Admin.
-   *
-   * @param seedlot The Seedlot instance.
-   * @param seedlotReviewGeneticWorth List of Genetic Worth traits and its values.
-   */
-  public void updateSeedlotGeneticWorth(
-      Seedlot seedlot, List<GeneticWorthTraitsDto> seedlotReviewGeneticWorth) {
-    seedlotGeneticWorthService.deleteAllForSeedlot(seedlot.getId());
-    seedlotGeneticWorthService.saveGenWorthListToSeedlot(seedlot, seedlotReviewGeneticWorth);
-  }
-
-  /**
-   * Updates the seedlot geographic information (elevation, latitude and longitude).
+   * Override the seedlot geographic information (collection elevation, latitude and longitude).
    *
    * @param seedlot The Seedlot instance.
    * @param seedlotReviewDto Seedlot Geo Information provided by TSC Admin.
    */
-  public void updateSeedlotGeoInformation(
+  public void overrideSeedlotCollElevLatLong(
       Seedlot seedlot, SeedlotReviewGeoInformationDto seedlotReviewDto) {
+    // Ne value
+    seedlot.setEffectivePopulationSize(seedlotReviewDto.effectivePopulationSize());
+
     // Elevation
     seedlot.setCollectionElevation(seedlotReviewDto.meanElevation());
 

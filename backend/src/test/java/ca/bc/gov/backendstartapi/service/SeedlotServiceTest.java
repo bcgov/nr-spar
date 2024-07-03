@@ -711,10 +711,9 @@ class SeedlotServiceTest {
     when(oracleApiProvider.findOrchardById(anyString())).thenReturn(Optional.of(orchardDto));
 
     // tscAdminService
-    doNothing().when(tscAdminService).updateSeedPlanZones(any(), any());
-    doNothing().when(tscAdminService).updateElevationLatLong(any(), any());
-    doNothing().when(tscAdminService).updateSeedlotGeneticWorth(any(), any());
-    doNothing().when(tscAdminService).updateSeedlotGeoInformation(any(), any());
+    doNothing().when(tscAdminService).overrideElevLatLongMinMax(any(), any());
+    doNothing().when(tscAdminService).overrideAreaOfUse(any(), any());
+    doNothing().when(tscAdminService).overrideSeedlotCollElevLatLong(any(), any());
 
     // setSeedlotStatus
     when(seedlotStatusService.getValidSeedlotStatus(statusOnSuccess))
@@ -747,9 +746,8 @@ class SeedlotServiceTest {
     Assertions.assertEquals(seedlotNumber, responseDto.seedlotNumber());
     Assertions.assertEquals(statusOnSuccess, responseDto.seedlotStatusCode());
 
-    verify(tscAdminService, times(1)).updateSeedPlanZones(any(), any());
-    verify(tscAdminService, times(1)).updateElevationLatLong(any(), any());
-    verify(tscAdminService, times(1)).updateSeedlotGeneticWorth(any(), any());
-    verify(tscAdminService, times(1)).updateSeedlotGeoInformation(any(), any());
+    verify(tscAdminService, times(1)).overrideElevLatLongMinMax(any(), any());
+    verify(tscAdminService, times(1)).overrideAreaOfUse(any(), any());
+    verify(tscAdminService, times(1)).overrideSeedlotCollElevLatLong(any(), any());
   }
 }

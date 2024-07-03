@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
@@ -89,9 +88,7 @@ public class SeedlotGeneticWorthService {
     for (ParentTreeGeneticQualityDto ptgqDto : genWorthCodeToInsert) {
 
       GeneticWorthEntity gwEntity =
-          geneticWorthEntityDao
-              .getGeneticWorthEntity(ptgqDto.geneticWorthCode())
-              .orElseThrow();
+          geneticWorthEntityDao.getGeneticWorthEntity(ptgqDto.geneticWorthCode()).orElseThrow();
 
       SeedlotGeneticWorth sgw =
           new SeedlotGeneticWorth(seedlot, gwEntity, loggedUserService.createAuditCurrentUser());
@@ -110,59 +107,5 @@ public class SeedlotGeneticWorthService {
    */
   public List<SeedlotGeneticWorth> getAllBySeedlotNumber(String seedlotNumber) {
     return seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlotNumber);
-  }
-
-  /**
-   * Deletes all {@link SeedlotGeneticWorth} to a {@link Seedlot}.
-   *
-   * @param seedlotNumber The Seedlot identification.
-   */
-  public void deleteAllForSeedlot(String seedlotNumber) {
-    SparLog.info("Delete all Seedlot Genetic Worth for seedlot {}", seedlotNumber);
-    List<SeedlotGeneticWorth> genWorthList = getAllBySeedlotNumber(seedlotNumber);
-
-    if (!genWorthList.isEmpty()) {
-      SparLog.info(
-          "Deleting {} existing Seedlot Genetic Worth record(s) for seedlot {}",
-          genWorthList.size(),
-          seedlotNumber);
-
-      seedlotGeneticWorthRepository.deleteAll(genWorthList);
-      seedlotGeneticWorthRepository.flush();
-      return;
-    }
-
-    SparLog.info("No existing Seedlot Genetic Worth for seedlot {}", seedlotNumber);
-  }
-
-  /**
-   * Saves a list of {@link GeneticWorthTraitsDto} to a {@link Seedlot}.
-   *
-   * @param seedlot The Seedlot instance.
-   * @param seedlotReviewGeneticWorth List of Genetic Worth traits and its values.
-   */
-  public void saveGenWorthListToSeedlot(
-      Seedlot seedlot, List<GeneticWorthTraitsDto> seedlotReviewGeneticWorth) {
-    SparLog.info("Save Seedlot Genetic Worth traits for Seedlot {}", seedlot.getId());
-    if (seedlotReviewGeneticWorth.isEmpty()) {
-      SparLog.info("No Genetic Worth traits value to save to seedlot {}", seedlot.getId());
-      return;
-    }
-
-    List<SeedlotGeneticWorth> seedlotGenWorthToSave = new ArrayList<>();
-    for (GeneticWorthTraitsDto genWorthDto : seedlotReviewGeneticWorth) {
-      SeedlotGeneticWorth seedlotGenWorth =
-          new SeedlotGeneticWorth(
-              seedlot,
-              geneticWorthEntityDao.getGeneticWorthEntity(genWorthDto.traitCode()).orElseThrow(),
-              loggedUserService.createAuditCurrentUser());
-      seedlotGenWorthToSave.add(seedlotGenWorth);
-    }
-
-    seedlotGeneticWorthRepository.saveAllAndFlush(seedlotGenWorthToSave);
-    SparLog.info(
-        "{} saved Seedlot Genetic Worth trait record(s) for Seedlot {}",
-        seedlotGenWorthToSave.size(),
-        seedlot.getId());
   }
 }

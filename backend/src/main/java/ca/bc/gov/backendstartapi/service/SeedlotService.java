@@ -685,53 +685,81 @@ public class SeedlotService {
      * 4. Add new ones
      */
 
-    // Collection step 1
+    // Step 1 (Collection methods)
+    // Update the Seedlot instance and tables [seedlot_collection_method]
     seedlotCollectionMethodService.saveSeedlotFormStep1(
         seedlot, form.seedlotFormCollectionDto(), canDelete);
-    // Owner step 2
+
+    // step 2 (Seedlot Owners)
+    // Update tables [seedlot_owner_quantity]
     seedlotOwnerQuantityService.saveSeedlotFormStep2(
         seedlot, form.seedlotFormOwnershipDtoList(), canDelete);
-    // Interim Step 3
+
+    // Step 3 (Interim)
+    // Update the Seedlot instance only
     saveSeedlotFormStep3(seedlot, form.seedlotFormInterimDto());
-    // Orchard Step 4
+
+    // Step 4 (Seedlot Orchards)
+    // Update the Seedlot instance and tables [seedlot_orchard]
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto(), canDelete);
-    // Parent Tree Step 5
+
+    // Step 5 (Parent Tree, SMP Mix, Area of Use, Parent Tree Contribution)
+    // Update the Seedlot instance and tables [
+    //   seedlot_parent_tree_gen_qlty
+    //   smp_mix_gen_qlty
+    //   seedlot_parent_tree
+    //   seedlot_parent_tree_smp_mix
+    //   smp_mix
+    //   seedlot_genetic_worth
+    // ]
     saveSeedlotFormStep5(
         seedlot,
         form.seedlotFormParentTreeDtoList(),
         form.seedlotFormParentTreeSmpDtoList(),
         canDelete);
-    // Extraction Step 6
+    
+    // Step 6 (Extraction)
+    // Update the Seedlot instance only
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
 
+    // Update the Seedlot instance only
+    // Fetch data from Oracle to get the primary Seed Plan Unit id
     setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
     if (!isTscAdmin) {
-      // parent tree contribution - elevation, latitude and longitude for the seedlot collection
+      // Update the Seedlot instance only
+      // Calculate Ne value (effective population size)
+      // Calculate Mean GeoSpatial (for SMP Mix, mean latitude, mean longitude, mean elevation)
+      // Calculate Seedlot GeoSpatial (for Seedlot, mean latitude, mean longitude, mean elevation)
+      // Calculate Genetic Worth
+      // Update Seedlot Ne, collection elevation, and collection lat long
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
-      
-      // seedlot elevation min max, latitude min max, and longitude min max (area of use)
+
+      // Update elevation min max, latitude min max, longitude min max, and SPZ
+      // Set values in the Seedlot instance and update tables [seedlot_seed_plan_zone]
+      // Fetch data from Oracle to get the active Seed Plan Unit id
       setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
     } else {
-      // seed plan zones for the seedlot 
-      tscAdminService.updateSeedPlanZones(seedlot, form.seedlotReviewSeedPlanZones());
-      
-      // seedlot elevation min max, latitude min max, and longitude min max (area of use)
-      tscAdminService.updateElevationLatLong(seedlot, form.seedlotReviewElevationLatLong());
-      
-      // seedlot genetic worth
-      tscAdminService.updateSeedlotGeneticWorth(seedlot, form.seedlotReviewGeneticWorth());
+      // Override Seedlot elevation min max, latitude min max, and longitude min max (area of use)
+      // Set values in the Seedlot instance only
+      tscAdminService.overrideElevLatLongMinMax(seedlot, form.seedlotReviewElevationLatLong());
 
-      // parent tree contribution - elevation, latitude and longitude for the seedlot collection
-      tscAdminService.updateSeedlotGeoInformation(seedlot, form.seedlotReviewGeoInformation());
+      // Override table [seedlot_seed_plan_zone] with values by the TSC (not fetching from Oracle)
+      tscAdminService.overrideAreaOfUse(seedlot, form.seedlotReviewSeedPlanZones());
+
+      // Override Seedlot Ne, collection elevation, and collection lat long
+      // Set values in the Seedlot instance only
+      tscAdminService.overrideSeedlotCollElevLatLong(seedlot, form.seedlotReviewGeoInformation());
     }
 
     // Only set declaration info for pending seedlots
+    // Update the Seedlot instance only
     if (currentSeedlotStatus.equals("PND")) {
       setSeedlotDeclaredInfo(seedlot);
     }
 
+    // Update the Seedlot instance only
     setSeedlotStatus(seedlot, statusOnSuccess);
 
     SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
@@ -783,6 +811,9 @@ public class SeedlotService {
 
     GeospatialRespondDto collectionGeoData =
         ptCalculationResDto.calculatedPtVals().getGeospatialData();
+
+    // Ne value
+    seedlot.setEffectivePopulationSize(ptCalculationResDto.calculatedPtVals().getNeValue());
 
     // Elevation
     seedlot.setCollectionElevation(collectionGeoData.getMeanElevation());
