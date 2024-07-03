@@ -110,7 +110,9 @@ const renderDeleteActionBtn = (
   rowData: RowItem,
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  isFormSubmitted?: boolean,
+  isReviewEdit?: boolean
 ) => (
   <Button
     kind="ghost"
@@ -118,6 +120,7 @@ const renderDeleteActionBtn = (
     renderIcon={TrashCan}
     iconDescription="Delete this row"
     onClick={() => deleteMixRow(rowData, applicableGenWorths, state, setStepData)}
+    disabled={isFormSubmitted && !isReviewEdit}
   />
 );
 
@@ -197,7 +200,14 @@ const renderTableCell = (
     return (
       <TableCell key={`${header.id}-${rowData.rowId}`} className={className} id={`${rowData.rowId}-action-btn-del`}>
         {
-          renderDeleteActionBtn(rowData, applicableGenWorths, state, setStepData)
+          renderDeleteActionBtn(
+            rowData,
+            applicableGenWorths,
+            state,
+            setStepData,
+            isFormSubmitted,
+            editOnReview
+          )
         }
       </TableCell>
     );

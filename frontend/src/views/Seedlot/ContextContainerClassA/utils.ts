@@ -301,9 +301,9 @@ export const initParentTreeState = (
     // are also available, so the check needs to be inside of the parent 'if'
     if (smpMixTrees) {
       smpMixTrees.forEach(
-        (curSmpMix) => {
+        (curSmpMix, index) => {
           const newRow: RowItem = structuredClone(rowTemplate);
-          newRow.rowId = curSmpMix.parentTreeId.toString();
+          newRow.rowId = index.toString();
           newRow.parentTreeNumber.value = curSmpMix.parentTreeNumber;
           newRow.isMixTab = true;
           newRow.proportion.value = curSmpMix.proportion.toString();
@@ -317,7 +317,7 @@ export const initParentTreeState = (
             }
           });
           smpMixRows = Object.assign(smpMixRows, {
-            [curSmpMix.parentTreeNumber]: newRow
+            [index]: newRow
           });
         }
       );
