@@ -18,18 +18,6 @@ parameters:
     value: "5432"
   - name: FORESTCLIENTAPI_KEY
     required: true
-  - name: AWS_ACCESS_KEY_ID
-    description: AWS Access Key ID
-    required: true
-  - name: AWS_ACCESS_KEY_SECRET
-    description: AWS Access Key Secret
-    required: true
-  - name: AWS_KINESIS_STREAM
-    description: AWS Kinesis stream name
-    required: true
-  - name: AWS_KINESIS_ROLE_ARN
-    description: AWS Kinesis Role ARN
-    required: true
   - name: ORACLE_HOST
     description: Oracle database host
     value: nrcdb03.bcgov
@@ -77,17 +65,6 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       forest-client-api-key: ${FORESTCLIENTAPI_KEY}
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${NAME}-${ZONE}-fluentbit
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      aws-access-key-id: ${AWS_ACCESS_KEY_ID}
-      aws-access-key-secret: ${AWS_ACCESS_KEY_SECRET}
-      aws-kinesis-stream: ${AWS_KINESIS_STREAM}
-      aws-kinesis-role-arn: ${AWS_KINESIS_ROLE_ARN}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:

@@ -73,10 +73,6 @@ jobs:
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
-            -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
-            -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
-            -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
 
       - name: FluentBit
         if: fluentbit_target != ''
@@ -87,6 +83,11 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           file: common/openshift.fluentbit.yml
           overwrite: true
+          parameters:
+            -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
+            -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
+            -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}
 
   deploy:
     name: Deploy
