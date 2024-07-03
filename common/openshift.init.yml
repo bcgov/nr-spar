@@ -39,10 +39,10 @@ parameters:
   - name: ORACLE_SERVICE
     description: Oracle service name
     value: dbq01.nrs.bcgov
-  - name: ORACLE_DB_USER
+  - name: ORACLE_USER
     description: Oracle database username for API
-    value: proxy_fsa_spar_read_only_user
-  - name: ORACLE_DB_PASSWORD
+    value: proxy_fsa_spar_sync_user
+  - name: ORACLE_PASSWORD
     description: Oracle database password for API
     required: true
 objects:
@@ -65,10 +65,10 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       oracle-host: ${ORACLE_HOST}
-      oracle-password: ${ORACLE_DB_PASSWORD}
+      oracle-password: ${ORACLE_PASSWORD}
       oracle-port: ${ORACLE_PORT}
       oracle-service: ${ORACLE_SERVICE}
-      oracle-user: ${ORACLE_DB_USER}
+      oracle-user: ${ORACLE_USER}
   - apiVersion: v1
     kind: Secret
     metadata:
