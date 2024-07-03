@@ -533,7 +533,10 @@ public class SeedlotService {
 
     List<SeedlotFormOwnershipDto> ownershipStep =
         seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
-        .filter(owner -> owner.getOriginalPercentageOwned().compareTo(BigDecimal.ZERO) > 0)
+            .filter(
+                owner ->
+                    owner.getOriginalPercentageOwned() != null
+                        && owner.getOriginalPercentageOwned().compareTo(BigDecimal.ZERO) > 0)
             .map(
                 owner ->
                     new SeedlotFormOwnershipDto(
