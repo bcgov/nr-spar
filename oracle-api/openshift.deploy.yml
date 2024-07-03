@@ -42,7 +42,7 @@ parameters:
     value: "2"
   - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
     description: Oracle API environment for OpenSearch. # One of: development, test, production
-    required: true
+    required: false
     value: development
   - name: ORACLEDB_KEYSTORE
     description: Keystore location path
