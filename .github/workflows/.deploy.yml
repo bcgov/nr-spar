@@ -81,6 +81,7 @@ jobs:
           file: common/openshift.fluentbit.yml
           overwrite: true
           parameters:
+            -p ZONE=${{ inputs.target }}
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}

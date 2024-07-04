@@ -12,8 +12,10 @@ parameters:
     required: true
   - name: AWS_KINESIS_STREAM
     description: AWS Kinesis Stream identifier
+    required: true
   - name: AWS_KINESIS_ROLE_ARN
     description: AWS OpenSearch/Kinesis Resource Name
+    required: true
   - name: FLUENT_CONF_HOME
     description: FluentBit configuration home
     value: "/fluent-bit/etc"
@@ -41,12 +43,6 @@ parameters:
     required: true
   - name: AWS_ACCESS_KEY_SECRET
     description: AWS Access Key Secret
-    required: true
-  - name: AWS_KINESIS_STREAM
-    description: AWS Kinesis stream name
-    required: true
-  - name: AWS_KINESIS_ROLE_ARN
-    description: AWS Kinesis Role ARN
     required: true
 objects:
   - kind: Deployment
