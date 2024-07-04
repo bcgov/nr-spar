@@ -125,23 +125,19 @@ objects:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
               readinessProbe:
-                failureThreshold: 5
                 httpGet:
                   path: /actuator/health
                   port: probe-port
                   scheme: HTTP
-                initialDelaySeconds: 5
+                failureThreshold: 5
                 periodSeconds: 15
-                timeoutSeconds: 5
               livenessProbe:
-                failureThreshold: 5
                 httpGet:
                   path: /actuator/health
                   port: probe-port
                   scheme: HTTP
-                initialDelaySeconds: 5
-                periodSeconds: 30
-                timeoutSeconds: 5
+                failureThreshold: 5
+                periodSeconds: 15
               startupProbe:
                 httpGet:
                   path: /actuator/health
