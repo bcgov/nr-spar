@@ -160,13 +160,14 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .click();
 
     cy.get('#client-search-input')
-      .clear({ force: true })
+      .clear()
       .type(testPopupAcronym)
       .blur();
 
     cy.get('button.client-search-button')
       .contains('Search')
-      .click({ force: true });
+      .focus()
+      .click();
 
     cy.get(`.${prefix}--table-header-label`).contains('Acronym');
 
@@ -308,13 +309,14 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .click();
 
     cy.get('#client-search-input')
-      .clear({ force: true })
+      .clear()
       .type(testPopupAcronym)
       .blur();
 
     cy.get('button.client-search-button')
       .contains('Search')
-      .click({ force: true });
+      .focus()
+      .click();
 
     cy.get(`.${prefix}--table-header-label`).contains('Acronym');
 
