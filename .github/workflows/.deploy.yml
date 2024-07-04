@@ -68,11 +68,23 @@ jobs:
           overwrite: true
           parameters:
             -p ZONE=${{ inputs.target || github.event.number }}
-            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
             -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+
+      - name: Database
+        uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          file: database/openshift.deploy.yml
+          overwrite: false
+          parameters:
+            -p ZONE=${{ inputs.target || github.event.number }}
+            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
 
       - name: FluentBit
         if: inputs.fluentbit_target != 'development'
@@ -99,13 +111,8 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api, sync]
+        name: [backend, frontend, oracle-api, sync]
         include:
-          - name: database
-            file: database/openshift.deploy.yml
-            parameters:
-              ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
-            overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
