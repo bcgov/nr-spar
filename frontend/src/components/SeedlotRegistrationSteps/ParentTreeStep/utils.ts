@@ -1,12 +1,14 @@
 import React from 'react';
-
+import validator from 'validator';
 import BigNumber from 'bignumber.js';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import { isFloatWithinRange } from '../../../utils/NumberUtils';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
+import { recordKeys } from '../../../utils/RecordUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { recordKeys } from '../../../utils/RecordUtils';
+import { StringInputType } from '../../../types/FormInputType';
 import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType } from '../../../types/PtCalcTypes';
 import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
 
@@ -24,7 +26,10 @@ import {
   HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType,
   MixUploadResponse, HeaderObjId, StrTypeRowItem, MeanGeomInfoSectionConfigType
 } from './definitions';
-import { DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate } from './constants';
+import {
+  DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate,
+  MAX_NE_DECIMAL, INVALID_NE_DECIMAL_MSG, MIN_NE, MAX_NE, INVALID_NE_RANGE_MSG
+} from './constants';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -785,4 +790,32 @@ export const fillMixTable = (
   newRows = updateCalculations(newRows, applicableGenWorths);
   clonedState.mixTabData = newRows;
   setStepData('parentTreeStep', clonedState);
+};
+
+/**
+ * Validate whether the NE value has the correct number of decimal place and is within range.
+ */
+export const validateEffectivePopSize = (inputObj: StringInputType): StringInputType => {
+  const validatedObj = inputObj;
+
+  const isOverDecimal = !validator.isDecimal(validatedObj.value, { decimal_digits: `0,${MAX_NE_DECIMAL}` });
+  validatedObj.isInvalid = isOverDecimal;
+
+  if (isOverDecimal) {
+    validatedObj.errMsg = INVALID_NE_DECIMAL_MSG;
+    return validatedObj;
+  }
+
+  const isOutOfRange = !isFloatWithinRange(validatedObj.value, MIN_NE, MAX_NE);
+
+  validatedObj.isInvalid = isOutOfRange;
+
+  if (isOutOfRange) {
+    validatedObj.errMsg = INVALID_NE_RANGE_MSG;
+    return validatedObj;
+  }
+
+  validatedObj.errMsg = undefined;
+
+  return validatedObj;
 };

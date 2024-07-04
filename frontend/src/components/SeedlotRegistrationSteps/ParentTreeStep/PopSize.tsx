@@ -3,33 +3,51 @@ import {
   Row, Column, TextInput, TextInputSkeleton
 } from '@carbon/react';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
 import { formatEmptyStr } from '../../SeedlotReviewSteps/ParentTrees/utils';
 import ReadOnlyInput from '../../ReadOnlyInput';
-import { getOutsideParentTreeNum } from './utils';
+import { getOutsideParentTreeNum, validateEffectivePopSize } from './utils';
 
 const PopSize = () => {
   const {
+    isFetchingData,
     isCalculatingPt,
     geoInfoVals,
-    setGeoInfoVal,
+    setGeoInfoInputObj,
     allStepData
   } = useContext(ClassAContext);
+
+  const handleInput = (key: keyof GeoInfoValType, value: string | null) => {
+    let newObj = structuredClone(geoInfoVals[key]);
+
+    newObj.value = value ?? '';
+
+    // Validate Ne [0.1, 999.9]
+    if (key === 'effectivePopSize') {
+      newObj = validateEffectivePopSize(newObj);
+    }
+
+    setGeoInfoInputObj(key, newObj);
+  };
 
   return (
     <Row>
       <Column className="info-col" sm={4} md={4} lg={4}>
         {
-          isCalculatingPt
+          isFetchingData || isCalculatingPt
             ? <TextInputSkeleton />
             : (
               <TextInput
                 id={geoInfoVals.effectivePopSize.id}
-                labelText="Effective population size"
                 type="number"
+                labelText="Effective population size"
                 defaultValue={formatEmptyStr(geoInfoVals.effectivePopSize.value, true)}
+                onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                 onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setGeoInfoVal('effectivePopSize', e.target.value);
+                  handleInput('effectivePopSize', e.target.value);
                 }}
+                invalid={geoInfoVals.effectivePopSize.isInvalid}
+                invalidText={geoInfoVals.effectivePopSize.errMsg}
               />
             )
         }
@@ -41,7 +59,7 @@ const PopSize = () => {
           value={
             formatEmptyStr(getOutsideParentTreeNum(allStepData.parentTreeStep), true)
           }
-          showSkeleton={isCalculatingPt}
+          showSkeleton={isFetchingData || isCalculatingPt}
         />
       </Column>
     </Row>
