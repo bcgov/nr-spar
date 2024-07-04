@@ -7,28 +7,7 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: PG_DATABASE
-    description: Postgres database name
-    value: database
-  - name: DB_PASSWORD
-    description: Password for the PostgreSQL connection user
-    required: true
-  - name: PG_DB_PORT
-    description: Postgres database port
-    value: "5432"
   - name: FORESTCLIENTAPI_KEY
-    required: true
-  - name: AWS_ACCESS_KEY_ID
-    description: AWS Access Key ID
-    required: true
-  - name: AWS_ACCESS_KEY_SECRET
-    description: AWS Access Key Secret
-    required: true
-  - name: AWS_KINESIS_STREAM
-    description: AWS Kinesis stream name
-    required: true
-  - name: AWS_KINESIS_ROLE_ARN
-    description: AWS Kinesis Role ARN
     required: true
   - name: ORACLE_HOST
     description: Oracle database host
@@ -49,17 +28,6 @@ objects:
   - apiVersion: v1
     kind: Secret
     metadata:
-      name: ${NAME}-${ZONE}-${PG_DATABASE}
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      database-name: ${NAME}
-      database-password: ${DB_PASSWORD}
-      database-port: ${PG_DB_PORT}
-      database-user: ${NAME}
-  - apiVersion: v1
-    kind: Secret
-    metadata:
       name: ${NAME}-${ZONE}-oracle-api
       labels:
         app: ${NAME}-${ZONE}
@@ -77,17 +45,6 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       forest-client-api-key: ${FORESTCLIENTAPI_KEY}
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${NAME}-${ZONE}-fluentbit
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      aws-access-key-id: ${AWS_ACCESS_KEY_ID}
-      aws-access-key-secret: ${AWS_ACCESS_KEY_SECRET}
-      aws-kinesis-stream: ${AWS_KINESIS_STREAM}
-      aws-kinesis-role-arn: ${AWS_KINESIS_ROLE_ARN}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
@@ -111,3 +68,16 @@ objects:
     spec:
       policyTypes:
         - Ingress
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-fluentbit-logs
+    spec:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: "75Mi"
+      storageClassName: netapp-file-standard

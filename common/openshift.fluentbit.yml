@@ -10,12 +10,12 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: TAG
-    description: Dummy image tag, actually used in other templates
   - name: AWS_KINESIS_STREAM
     description: AWS Kinesis Stream identifier
+    required: true
   - name: AWS_KINESIS_ROLE_ARN
     description: AWS OpenSearch/Kinesis Resource Name
+    required: true
   - name: FLUENT_CONF_HOME
     description: FluentBit configuration home
     value: "/fluent-bit/etc"
@@ -38,10 +38,12 @@ parameters:
     description: Requested Memory per pod (in gigabytes Gi or megabytes Mi ex. 500Mi)
     displayName: Memory Request
     value: 16Mi
-  - name: MIN_REPLICAS
-    description: Dummy value for workflow convenience
-  - name: MAX_REPLICAS
-    description: Dummy value for workflow convenience
+  - name: AWS_ACCESS_KEY_ID
+    description: AWS Access Key ID
+    required: true
+  - name: AWS_ACCESS_KEY_SECRET
+    description: AWS Access Key Secret
+    required: true
 objects:
   - kind: Deployment
     apiVersion: apps/v1
@@ -82,25 +84,13 @@ objects:
                   memory: "${LOGGING_MEMORY_LIMIT}"
               env:
                 - name: AWS_ACCESS_KEY_ID
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-fluentbit
-                      key: aws-access-key-id
+                  value: ${AWS_ACCESS_KEY_ID}
                 - name: AWS_SECRET_ACCESS_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-fluentbit
-                      key: aws-access-key-secret
+                  value: ${AWS_ACCESS_KEY_SECRET}
                 - name: STREAM_NAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-fluentbit
-                      key: aws-kinesis-stream
+                  value: ${AWS_KINESIS_STREAM}
                 - name: ROLE_ARN
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-fluentbit
-                      key: aws-kinesis-role-arn
+                  value: ${AWS_KINESIS_ROLE_ARN}
                 - name: FLUENT_CONF_HOME
                   value: ${FLUENT_CONF_HOME}
                 - name: FLUENT_VERSION
@@ -150,19 +140,6 @@ objects:
                   - key: timestamp.lua
                     path: timestamp.lua
                 defaultMode: 0644
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}-logs
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: "75Mi"
-      storageClassName: netapp-file-standard
   - kind: ConfigMap
     apiVersion: v1
     metadata:

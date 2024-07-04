@@ -58,7 +58,7 @@ public class ParentTreeService {
     BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals());
 
     CaculatedParentTreeValsDto calculatedVals = new CaculatedParentTreeValsDto();
-    calculatedVals.setNeValue(neValue);
+    calculatedVals.setNeValue(neValue); // <- review ne value being overwritten
 
     GeospatialRespondDto smpMixGeoData = calcMeanGeospatial(ptVals.smpMixIdAndProps());
     SparLog.info("SMP mix mean geospatial calculation complete.");
@@ -184,7 +184,7 @@ public class ParentTreeService {
   }
 
   /**
-   * All reference to Certification Template Col is labled with an id such as AM, AN or AL Find
+   * All reference to Certification Template Col is labelled with an id such as AM, AN or AL Find
    * these calculation definition in SPR01A_PTContribution.htm
    */
   private GeospatialRespondDto calcSeedlotGeoData(
