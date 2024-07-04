@@ -226,7 +226,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     cy.saveSeedlotRegFormProgress();
   });
 
-  it.only('[Collection] Containers inputs', () => {
+  it('[Collection] Containers inputs', () => {
     const fixtureData = regFormData.collector;
     // Invalid collection test, number > 10,000
     cy.get('#collection-num-of-container')
