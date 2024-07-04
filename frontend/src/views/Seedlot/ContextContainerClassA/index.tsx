@@ -16,7 +16,6 @@ import {
 } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
-import getApplicantAgenciesOptions from '../../../api-service/applicantAgenciesAPI';
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
@@ -114,7 +113,8 @@ const ContextContainerClassA = ({ children }: props) => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
+    select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -148,7 +148,8 @@ const ContextContainerClassA = ({ children }: props) => {
 
   useEffect(() => {
     if (seedlotQuery.status === 'success') {
-      if (seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode === 'SUB') {
+      const seedlotStatusCode = seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode;
+      if (seedlotStatusCode !== 'PND' && seedlotStatusCode !== 'INC') {
         setIsFormSubmitted(true);
       }
 
@@ -254,11 +255,6 @@ const ContextContainerClassA = ({ children }: props) => {
   });
 
   const getDefaultLocationCode = (): string => (seedlotQuery.data?.seedlot.applicantLocationCode ?? '');
-
-  const applicantAgencyQuery = useQuery({
-    queryKey: ['applicant-agencies'],
-    queryFn: getApplicantAgenciesOptions
-  });
 
   const updateStepStatus = (
     stepName: keyof ProgressIndicatorConfig,
@@ -741,7 +737,6 @@ const ContextContainerClassA = ({ children }: props) => {
         setStep,
         defaultAgencyObj: getAgencyObj(),
         defaultCode: getDefaultLocationCode(),
-        agencyOptions: applicantAgencyQuery.data ?? [],
         isFormSubmitted,
         isFormIncomplete,
         handleSaveBtn,
@@ -781,7 +776,7 @@ const ContextContainerClassA = ({ children }: props) => {
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
       vegCodeQuery.status, formStep, forestClientQuery.status,
-      applicantAgencyQuery.status, isFormSubmitted, isFormIncomplete,
+      isFormSubmitted, isFormIncomplete,
       saveStatus, saveDescription, lastSaveTimestamp, allStepCompleted,
       progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,
       methodsOfPaymentQuery.status, orchardQuery.status, gameticMethodologyQuery.status,

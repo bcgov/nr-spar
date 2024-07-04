@@ -6,9 +6,6 @@ SELECT
 , slpz.entry_timestamp
 , slpz.revision_count
  FROM spar.seedlot_seed_plan_zone slpz
-WHERE slpz.seedlot_number IN 
-           (SELECT spzin.seedlot_number
-              FROM spar.seedlot_seed_plan_zone spzin
-             WHERE spzin.update_timestamp between %(start_time)s AND %(end_time)s )
+WHERE slpz.seedlot_number = %(p_seedlot_number)s
 ORDER BY slpz.seedlot_number
        , slpz.primary_ind

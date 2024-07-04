@@ -26,7 +26,7 @@ parameters:
   - name: CPU_REQUEST
     value: 100m
   - name: CPU_LIMIT
-    value: 175m
+    value: 300m
   - name: MEMORY_REQUEST
     value: 300Mi
   - name: MEMORY_LIMIT
@@ -34,24 +34,15 @@ parameters:
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
-  - name: DATABASE_HOST
-    description: Where the database is hosted
-    value: nrcdb03.bcgov
-  - name: DATABASE_PORT
-    description: The port to be used for the connection to the database
-    value: "1543"
-  - name: SERVICE_NAME
-    description: The database's name
-    value: dbq01.nrs.bcgov
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "1"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "2"
-  - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
+  - name: OPENSEARCH_ENV
     description: Oracle API environment for OpenSearch. # One of: development, test, production
-    required: true
+    required: false
     value: development
   - name: ORACLEDB_KEYSTORE
     description: Keystore location path
@@ -89,16 +80,25 @@ objects:
               env:
                 - name: NR_SPAR_ORACLE_API_VERSION
                   value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
-                - name: NR_SPAR_ORACLE_API_ENV_OPENSEARCH
-                  value: ${NR_SPAR_ORACLE_API_ENV_OPENSEARCH}
+                - name: OPENSEARCH_ENV
+                  value: ${OPENSEARCH_ENV}
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
                 - name: DATABASE_HOST
-                  value: ${DATABASE_HOST}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-host
                 - name: DATABASE_PORT
-                  value: ${DATABASE_PORT}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-port
                 - name: SERVICE_NAME
-                  value: ${SERVICE_NAME}
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-service
                 - name: DATABASE_USER
                   valueFrom:
                     secretKeyRef:
@@ -113,9 +113,6 @@ objects:
                   value: ${ORACLEDB_KEYSTORE}
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
-              ports:
-                - containerPort: 8090
-                  protocol: TCP
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -123,24 +120,22 @@ objects:
                 limits:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
+              ports:
+                - name: container-port
+                  containerPort: 8090
+                  protocol: TCP
               readinessProbe:
                 httpGet:
                   path: /actuator/health
-                  port: 8090
-                  scheme: HTTP
-                initialDelaySeconds: 120
-                periodSeconds: 15
-                timeoutSeconds: 10
+                  port: container-port
               livenessProbe:
-                successThreshold: 1
-                failureThreshold: 3
                 httpGet:
                   path: /actuator/health
-                  port: 8090
-                  scheme: HTTP
-                initialDelaySeconds: 120
-                periodSeconds: 30
-                timeoutSeconds: 10
+                  port: container-port
+              startupProbe:
+                tcpSocket:
+                  port: container-port
+                failureThreshold: 45
           volumes:
             - name: ${NAME}-${ZONE}-fluentbit-logs
               persistentVolumeClaim:
