@@ -135,13 +135,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .blur();
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Extraction Client search modal', () => {
@@ -223,13 +217,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .check({ force: true });
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Edit Storage agency section details', () => {
@@ -285,13 +273,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .blur();
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Storage Client search modal', () => {
@@ -369,12 +351,6 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .blur();
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
   });
 });
