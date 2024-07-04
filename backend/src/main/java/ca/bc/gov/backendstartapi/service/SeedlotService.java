@@ -731,7 +731,7 @@ public class SeedlotService {
         form.seedlotFormParentTreeDtoList(),
         form.seedlotFormParentTreeSmpDtoList(),
         canDelete);
-    
+
     // Step 6 (Extraction)
     // Update the Seedlot instance only
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
