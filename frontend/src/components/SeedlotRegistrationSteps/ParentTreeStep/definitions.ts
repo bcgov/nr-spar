@@ -36,12 +36,7 @@ export type StrTypeRowItem = {
   w_wdu: StringInputType,
   w_wwd: StringInputType,
   w_dsg: StringInputType,
-  w_iws: StringInputType,
-  meanDegLat: StringInputType,
-  meanMinLat: StringInputType,
-  meanDegLong: StringInputType,
-  meanMinLong: StringInputType,
-  meanElevation: StringInputType,
+  w_iws: StringInputType
 }
 
 export type PrimitiveRowItem = {
