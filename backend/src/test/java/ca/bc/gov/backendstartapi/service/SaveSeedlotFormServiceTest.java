@@ -51,7 +51,7 @@ class SaveSeedlotFormServiceTest {
 
     JsonNode progressStatus = new ObjectMapper().readTree("{ \"f2\" : \"v2\" } ");
 
-    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus);
+    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus, 1);
 
     ResponseStatusException expectedException =
         assertThrows(
@@ -75,7 +75,7 @@ class SaveSeedlotFormServiceTest {
 
     JsonNode progressStatus = new ObjectMapper().readTree("{ \"f2\" : \"v2\" } ");
 
-    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus);
+    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus, 1);
 
     // Testing a void function, if there is no error then it means success.
     assertDoesNotThrow(() -> saveSeedlotFormService.saveFormClassA(SEEDLOT_NUMBER, saveDto));

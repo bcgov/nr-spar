@@ -63,7 +63,7 @@ public class SaveSeedlotFormService {
               parsedProgressStatus,
               loggedUserService.createAuditCurrentUser());
     } else {
-      SparLog.warn(
+      SparLog.info(
           "A-class seedlot progress for seedlot number {} exists, replacing with new values",
           seedlotNumber);
       entityToSave = optionalEntityToSave.get();
@@ -99,7 +99,8 @@ public class SaveSeedlotFormService {
             savedEntity ->
                 new SaveSeedlotFormDtoClassA(
                     mapper.convertValue(savedEntity.getAllStepData(), JsonNode.class),
-                    mapper.convertValue(savedEntity.getProgressStatus(), JsonNode.class)))
+                    mapper.convertValue(savedEntity.getProgressStatus(), JsonNode.class),
+                    form.get().getRevisionCount()))
         .orElseThrow(SeedlotFormProgressNotFoundException::new);
   }
 
