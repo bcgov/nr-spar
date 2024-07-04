@@ -211,13 +211,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('have.value', '');
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('store first Orchard Parent Tree Number in an array', () => {
@@ -273,13 +267,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('have.value', '');
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('store second Orchard Parent Tree Number in an array', () => {
@@ -335,13 +323,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('have.value', '');
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Linkage of Step 4 and Step 5', () => {
@@ -370,13 +352,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
 
     // Go to next step 'Parent tree and SMP'
     cy.get('.seedlot-registration-progress')
@@ -509,13 +485,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .should('be.checked');
 
     // Save changes
-    cy.get('.seedlot-registration-button-row')
-      .find('button.form-action-btn')
-      .contains('Save changes')
-      .click();
-
-    cy.get(`.${prefix}--inline-loading__text`)
-      .contains('Changes saved!');
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Pollen information', () => {
