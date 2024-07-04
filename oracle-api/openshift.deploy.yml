@@ -135,7 +135,7 @@ objects:
               startupProbe:
                 tcpSocket:
                   port: probe-port
-                failureThreshold: 30
+                failureThreshold: 45
           volumes:
             - name: ${NAME}-${ZONE}-fluentbit-logs
               persistentVolumeClaim:
