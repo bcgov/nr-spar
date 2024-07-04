@@ -38,6 +38,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
+      environment: test
       tag: ${{ inputs.tag || needs.init.outputs.pr }}
       target: test
       fluentbit_target: test
@@ -48,6 +49,7 @@ jobs:
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
+      environment: prod
       tag: ${{ inputs.tag || needs.init.outputs.pr }}
       target: prod
       fluentbit_target: production
