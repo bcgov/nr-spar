@@ -132,9 +132,6 @@ objects:
                   value: ${DB_POOL_MAX_LIFETIME}
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
-              ports:
-                - name: probe-port
-                  containerPort: 8090
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -142,12 +139,14 @@ objects:
                 limits:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
+              ports:
+                - name: probe-port
+                  containerPort: 8090
               readinessProbe:
                 failureThreshold: 5
                 httpGet:
                   path: /actuator/health
                   port: probe-port
-                  scheme: HTTP
                 initialDelaySeconds: 20
                 periodSeconds: 15
                 timeoutSeconds: 10
@@ -156,7 +155,6 @@ objects:
                 httpGet:
                   path: /actuator/health
                   port: probe-port
-                  scheme: HTTP
                 initialDelaySeconds: 20
                 periodSeconds: 30
                 timeoutSeconds: 10
