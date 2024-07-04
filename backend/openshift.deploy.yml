@@ -151,8 +151,7 @@ objects:
                   path: /actuator/health
                   port: probe-port
               startupProbe:
-                httpGet:
-                  path: /actuator/health
+                tcpSocket:
                   port: probe-port
                 failureThreshold: 30
           volumes:
