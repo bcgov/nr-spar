@@ -447,7 +447,7 @@ class SeedlotServiceTest {
   @DisplayName("A-Class Seedlot Form success test")
   void findAclassSeedlotFormFullDataSuccessTest() {
     String seedlotNumber = "0000000";
-    String orchardId = "100";
+    
     String onwerNumber = "1234";
     String ownerLoc = "01";
     String methodOfPayment = "TEST";
@@ -516,6 +516,8 @@ class SeedlotServiceTest {
     BigDecimal orginalPercOwned = new BigDecimal(100);
     seedlotOwners.setOriginalPercentageOwned(orginalPercOwned);
     seedlotOwners.setMethodOfPayment(new MethodOfPaymentEntity(methodOfPayment, "", null));
+
+    String orchardId = "100";
 
     List<SeedlotOrchard> seedlotOrchards =
         List.of(new SeedlotOrchard(seedlotEntity, true, orchardId));
