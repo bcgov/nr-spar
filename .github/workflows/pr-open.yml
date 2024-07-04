@@ -13,7 +13,7 @@ jobs:
     name: Builds
     runs-on: ubuntu-22.04
     outputs:
-      triggered: ${{ steps.database.outputs.triggered || steps.backend.outputs.triggered || steps.frontend.outputs.triggered || steps.oracle-api.outputs.triggered || steps.sync.outputs.triggered }}
+      triggered: ${{ steps.builds.outputs.triggered }}
     permissions:
       packages: write
     strategy:
@@ -21,7 +21,7 @@ jobs:
         package: [database, backend, frontend, oracle-api, sync]
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-        id: ${{ matrix.package }}
+        id: builds
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
