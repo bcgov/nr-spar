@@ -5,6 +5,7 @@ on:
     inputs:
       ### Required
       # Nothing! Only `secrets: inherit` is required
+
       ### Typical / recommended
       environment:
         description: GitHub/OpenShift environment; usually PR number, test or prod
