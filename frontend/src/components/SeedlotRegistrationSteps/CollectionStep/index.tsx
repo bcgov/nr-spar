@@ -5,7 +5,6 @@ import {
   Column,
   Row,
   TextInput,
-  NumberInput,
   CheckboxGroup,
   Checkbox,
   DatePickerInput,
@@ -46,7 +45,6 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
     setStepData,
     defaultAgencyObj: defaultAgency,
     defaultCode,
-    agencyOptions,
     isFormSubmitted
   } = useContext(ClassAContext);
 
@@ -157,7 +155,6 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
         agency={state.collectorAgency}
         locationCode={state.locationCode}
         fieldsProps={agencyFieldsProps}
-        agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
         setAgencyAndCode={
