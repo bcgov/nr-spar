@@ -446,7 +446,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                               {
                                 !isReviewDisplay
                                   ? 'Orchard parent tree geospatial summary'
-                                  : 'Mean geospatial data'
+                                  : 'Collection geospatial summary'
                               }
                             </Column>
                           </Row>
