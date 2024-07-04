@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import {
-  NumberInput,
   TextInput,
   FlexGrid,
   Column,
@@ -20,10 +19,7 @@ import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 
 import { validatePerc } from '../utils';
 
-import {
-  SingleOwnerForm,
-  NumStepperVal
-} from '../definitions';
+import { SingleOwnerForm } from '../definitions';
 import { inputText, DEFAULT_INDEX, agencyFieldsProps } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/FilterUtils';
 
@@ -32,7 +28,6 @@ import './styles.scss';
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
   deleteAnOwner: Function,
-  agencyOptions: Array<MultiOptionsObj>,
   defaultAgency: MultiOptionsObj,
   defaultCode: string,
   fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
@@ -44,7 +39,7 @@ interface SingleOwnerInfoProps {
 }
 
 const SingleOwnerInfo = ({
-  ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSourcesQuery,
+  ownerInfo, defaultAgency, defaultCode, fundingSourcesQuery,
   methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState, readOnly, isReview
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>(
@@ -91,7 +86,6 @@ const SingleOwnerInfo = ({
   const handleReservedAndSurplus = (field: string, value: string) => {
     const clonedState = structuredClone(ownerInfo);
     const isReserved = field === 'reservedPerc';
-    console.log(value);
 
     // First validate the format of what is set on the value and
     // get the correct error message
@@ -152,7 +146,6 @@ const SingleOwnerInfo = ({
               agency={ownerInfo.ownerAgency}
               locationCode={ownerInfo.ownerCode}
               fieldsProps={agencyFieldsProps}
-              agencyOptions={agencyOptions}
               defaultAgency={defaultAgency}
               defaultCode={defaultCode}
               setAgencyAndCode={

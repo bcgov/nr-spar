@@ -7,28 +7,7 @@ parameters:
   - name: ZONE
     description: Deployment zone, e.g. pr-### or prod
     required: true
-  - name: PG_DATABASE
-    description: Postgres database name
-    value: database
-  - name: DB_PASSWORD
-    description: Password for the PostgreSQL connection user
-    required: true
-  - name: PG_DB_PORT
-    description: Postgres database port
-    value: "5432"
   - name: FORESTCLIENTAPI_KEY
-    required: true
-  - name: AWS_ACCESS_KEY_ID
-    description: AWS Access Key ID
-    required: true
-  - name: AWS_ACCESS_KEY_SECRET
-    description: AWS Access Key Secret
-    required: true
-  - name: AWS_KINESIS_STREAM
-    description: AWS Kinesis stream name
-    required: true
-  - name: AWS_KINESIS_ROLE_ARN
-    description: AWS Kinesis Role ARN
     required: true
   - name: ORACLE_HOST
     description: Oracle database host
@@ -39,24 +18,13 @@ parameters:
   - name: ORACLE_SERVICE
     description: Oracle service name
     value: dbq01.nrs.bcgov
-  - name: ORACLE_DB_USER
+  - name: ORACLE_USER
     description: Oracle database username for API
-    value: proxy_fsa_spar_read_only_user
-  - name: ORACLE_DB_PASSWORD
+    value: proxy_fsa_spar_sync_user
+  - name: ORACLE_PASSWORD
     description: Oracle database password for API
     required: true
 objects:
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${NAME}-${ZONE}-${PG_DATABASE}
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      database-name: ${NAME}
-      database-password: ${DB_PASSWORD}
-      database-port: ${PG_DB_PORT}
-      database-user: ${NAME}
   - apiVersion: v1
     kind: Secret
     metadata:
@@ -65,10 +33,10 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       oracle-host: ${ORACLE_HOST}
-      oracle-password: ${ORACLE_DB_PASSWORD}
+      oracle-password: ${ORACLE_PASSWORD}
       oracle-port: ${ORACLE_PORT}
       oracle-service: ${ORACLE_SERVICE}
-      oracle-user: ${ORACLE_DB_USER}
+      oracle-user: ${ORACLE_USER}
   - apiVersion: v1
     kind: Secret
     metadata:
@@ -77,17 +45,6 @@ objects:
         app: ${NAME}-${ZONE}
     stringData:
       forest-client-api-key: ${FORESTCLIENTAPI_KEY}
-  - apiVersion: v1
-    kind: Secret
-    metadata:
-      name: ${NAME}-${ZONE}-fluentbit
-      labels:
-        app: ${NAME}-${ZONE}
-    stringData:
-      aws-access-key-id: ${AWS_ACCESS_KEY_ID}
-      aws-access-key-secret: ${AWS_ACCESS_KEY_SECRET}
-      aws-kinesis-stream: ${AWS_KINESIS_STREAM}
-      aws-kinesis-role-arn: ${AWS_KINESIS_ROLE_ARN}
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
@@ -111,3 +68,16 @@ objects:
     spec:
       policyTypes:
         - Ingress
+  - kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-fluentbit-logs
+    spec:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: "75Mi"
+      storageClassName: netapp-file-standard
