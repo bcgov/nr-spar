@@ -114,7 +114,7 @@ objects:
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
               ports:
-                - name: probePort
+                - name: probe-port
                   containerPort: 8090
                   protocol: TCP
               resources:
@@ -128,21 +128,24 @@ objects:
                 failureThreshold: 5
                 httpGet:
                   path: /actuator/health
-                  port: probePort
+                  port: probe-port
                   scheme: HTTP
+                initialDelaySeconds: 5
                 periodSeconds: 15
+                timeoutSeconds: 5
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
                   path: /actuator/health
-                  port: probePort
+                  port: probe-port
                   scheme: HTTP
-                initialDelaySeconds: 20
+                initialDelaySeconds: 5
                 periodSeconds: 30
+                timeoutSeconds: 5
               startupProbe:
                 httpGet:
                   path: /actuator/health
-                  port: probePort
+                  port: probe-port
                 failureThreshold: 30
                 periodSeconds: 10
           volumes:
