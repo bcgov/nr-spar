@@ -339,6 +339,9 @@ public class Seedlot implements Serializable {
   @Column(name = "approved_userid")
   private String approvedUserId;
 
+  @Column(name = "approved_timestamp")
+  private String approvedTimestamp;
+
   @Column(name = "mean_geom")
   private Point meanGeom;
 
