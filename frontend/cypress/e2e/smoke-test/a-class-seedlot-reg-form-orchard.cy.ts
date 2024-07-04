@@ -561,6 +561,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('#orchard-breading-perc')
       .should('have.value', '5');
 
+    // Save changes
+    cy.saveSeedlotRegFormProgress();
+
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
