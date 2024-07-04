@@ -9,6 +9,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class ClientIdForbiddenException extends ResponseStatusException {
 
   public ClientIdForbiddenException() {
-    super(HttpStatus.FORBIDDEN);
+    super(HttpStatus.FORBIDDEN, "No access due to client ID");
   }
 }

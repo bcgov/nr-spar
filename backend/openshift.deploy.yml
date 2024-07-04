@@ -48,7 +48,7 @@ parameters:
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
-  - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
+  - name: OPENSEARCH_ENV
     description: Backend environment for OpenSearch. # One of: development, test, production
     required: true
     value: development
@@ -94,8 +94,8 @@ objects:
               env:
                 - name: NR_SPAR_BACKEND_VERSION
                   value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
-                - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
-                  value: ${NR_SPAR_BACKEND_ENV_OPENSEARCH}
+                - name: OPENSEARCH_ENV
+                  value: ${OPENSEARCH_ENV}
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
                 - name: FORESTCLIENTAPI_ADDRESS
@@ -132,9 +132,6 @@ objects:
                   value: ${DB_POOL_MAX_LIFETIME}
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
-              ports:
-                - containerPort: 8090
-                  protocol: TCP
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -142,26 +139,21 @@ objects:
                 limits:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
+              ports:
+                - name: container-port
+                  containerPort: 8090
               readinessProbe:
-                successThreshold: 1
-                failureThreshold: 5
                 httpGet:
                   path: /actuator/health
-                  port: 8090
-                  scheme: HTTP
-                initialDelaySeconds: 20
-                periodSeconds: 15
-                timeoutSeconds: 10
+                  port: container-port
               livenessProbe:
-                successThreshold: 1
-                failureThreshold: 5
                 httpGet:
                   path: /actuator/health
-                  port: 8090
-                  scheme: HTTP
-                initialDelaySeconds: 20
-                periodSeconds: 30
-                timeoutSeconds: 10
+                  port: container-port
+              startupProbe:
+                tcpSocket:
+                  port: container-port
+                failureThreshold: 45
           volumes:
             - name: ${NAME}-${ZONE}-fluentbit-logs
               persistentVolumeClaim:
