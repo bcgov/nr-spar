@@ -144,19 +144,6 @@ objects:
                   - key: timestamp.lua
                     path: timestamp.lua
                 defaultMode: 0644
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}-logs
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: "75Mi"
-      storageClassName: netapp-file-standard
   - kind: ConfigMap
     apiVersion: v1
     metadata:
