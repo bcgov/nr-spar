@@ -28,10 +28,9 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
       cy.url().should('contains', '/register-a-class');
       // Check the applicant agency name
       cy.get('#applicant-info-input').should(
-        'have.text',
+        'have.value',
         regData.agencyAcronym
       );
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -115,12 +114,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .click();
       cy.url().should('contains', '/register-a-class');
       // Check the applicant agency name
-      cy.get('#applicant-info-input').should(
-        'have.text',
-        regData.agencyAcronym
-      );
-
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+      cy.get('#applicant-info-input')
+        .should(
+          'have.value',
+          regData.agencyAcronym
+        );
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -205,10 +203,10 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
       cy.url().should('contains', '/register-a-class');
       // Check the applicant agency name
       cy.get('#applicant-info-input').should(
-        'have.text',
+        'have.value',
         regData.agencyAcronym
       );
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -293,10 +291,10 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
       cy.url().should('contains', '/register-a-class');
       // Check the applicant agency name
       cy.get('#applicant-info-input').should(
-        'have.text',
+        'have.value',
         regData.agencyAcronym
       );
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -381,10 +379,10 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
       cy.url().should('contains', '/register-a-class');
       // Check the applicant agency name
       cy.get('#applicant-info-input').should(
-        'have.text',
+        'have.value',
         regData.agencyAcronym
       );
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
