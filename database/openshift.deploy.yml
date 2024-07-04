@@ -84,9 +84,6 @@ objects:
           containers:
             - name: ${NAME}-${ZONE}
               image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
-              ports:
-                - containerPort: 5432
-                  protocol: TCP
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -94,30 +91,23 @@ objects:
                 limits:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
+              ports:
+                - containerPort: 5432
+                  protocol: TCP
               readinessProbe:
                 exec:
                   command:
                     - /usr/bin/env
                     - bash
-                    - "-c"
-                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-                successThreshold: 1
-                failureThreshold: 5
-                initialDelaySeconds: 10
-                periodSeconds: 15
-                timeoutSeconds: 10
+                    - '-ce'
+                    - exec pg_isready -U $POSTGRES_USER -d "dbname=$POSTGRES_DB" -h 127.0.0.1 -p 5432
               livenessProbe:
                 exec:
                   command:
                     - /usr/bin/env
                     - bash
-                    - "-c"
-                    - psql -q $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-                successThreshold: 1
-                failureThreshold: 5
-                initialDelaySeconds: 10
-                periodSeconds: 15
-                timeoutSeconds: 10
+                    - '-ce'
+                    - exec pg_isready -U $POSTGRES_USER -d "dbname=$POSTGRES_DB" -h 127.0.0.1 -p 5432
               env:
                 - name: POSTGRES_DB
                   valueFrom:
