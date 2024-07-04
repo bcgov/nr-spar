@@ -125,27 +125,18 @@ objects:
                   containerPort: 8090
                   protocol: TCP
               readinessProbe:
-                failureThreshold: 5
                 httpGet:
                   path: /actuator/health
                   port: probe-port
-                initialDelaySeconds: 20
-                periodSeconds: 15
-                timeoutSeconds: 10
               livenessProbe:
-                failureThreshold: 5
                 httpGet:
                   path: /actuator/health
                   port: probe-port
-                initialDelaySeconds: 20
-                periodSeconds: 30
-                timeoutSeconds: 10
               startupProbe:
                 httpGet:
                   path: /actuator/health
                   port: probe-port
                 failureThreshold: 30
-                periodSeconds: 10
           volumes:
             - name: ${NAME}-${ZONE}-fluentbit-logs
               persistentVolumeClaim:
