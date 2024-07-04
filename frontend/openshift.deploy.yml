@@ -109,17 +109,17 @@ objects:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
               ports:
-                - name: probe-port
+                - name: container-port
                   containerPort: 3000
               readinessProbe:
                 httpGet:
-                  port: probe-port
+                  port: container-port
               livenessProbe:
                 httpGet:
-                  port: probe-port
+                  port: container-port
               startupProbe:
                 tcpSocket:
-                  port: probe-port
+                  port: container-port
                 failureThreshold: 10
   - apiVersion: v1
     kind: Service

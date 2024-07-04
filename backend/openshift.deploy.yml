@@ -140,19 +140,19 @@ objects:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
               ports:
-                - name: probe-port
+                - name: container-port
                   containerPort: 8090
               readinessProbe:
                 httpGet:
                   path: /actuator/health
-                  port: probe-port
+                  port: container-port
               livenessProbe:
                 httpGet:
                   path: /actuator/health
-                  port: probe-port
+                  port: container-port
               startupProbe:
                 tcpSocket:
-                  port: probe-port
+                  port: container-port
                 failureThreshold: 45
           volumes:
             - name: ${NAME}-${ZONE}-fluentbit-logs
