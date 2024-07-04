@@ -143,7 +143,6 @@ objects:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
               readinessProbe:
-                successThreshold: 1
                 failureThreshold: 5
                 httpGet:
                   path: /actuator/health
@@ -153,7 +152,6 @@ objects:
                 periodSeconds: 15
                 timeoutSeconds: 10
               livenessProbe:
-                successThreshold: 1
                 failureThreshold: 5
                 httpGet:
                   path: /actuator/health
