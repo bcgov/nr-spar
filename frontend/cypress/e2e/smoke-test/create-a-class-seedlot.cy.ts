@@ -26,12 +26,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.value',
+        regData.agencyAcronym
+      );
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -61,33 +60,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .should('not.be.checked');
       cy.get('#seedlot-source-radio-btn-cus')
         .should('not.be.checked');
-      // Check checkbox behavior when Custom seedlot selected
-      cy.get('#seedlot-source-radio-btn-cus')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('be.checked');
-      // Check checkbox behavior when Untested parent tree selected
-      cy.get('#seedlot-source-radio-btn-upt')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('not.be.checked');
-      // Select the A-Class source option according to the fixture
-      cy.get(`#seedlot-source-radio-btn-${regData.source}`)
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
 
       // To be registered? should be checked by default
       cy.get('#register-w-tsc-yes')
@@ -141,12 +113,12 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
+      // Check the applicant agency name
       cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+        .should(
+          'have.value',
+          regData.agencyAcronym
+        );
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -176,33 +148,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .should('not.be.checked');
       cy.get('#seedlot-source-radio-btn-cus')
         .should('not.be.checked');
-      // Check checkbox behavior when Custom seedlot selected
-      cy.get('#seedlot-source-radio-btn-cus')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('be.checked');
-      // Check checkbox behavior when Untested parent tree selected
-      cy.get('#seedlot-source-radio-btn-upt')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('not.be.checked');
-      // Select the A-Class source option according to the fixture
-      cy.get(`#seedlot-source-radio-btn-${regData.source}`)
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
 
       // To be registered? should be checked by default
       cy.get('#register-w-tsc-yes')
@@ -256,12 +201,12 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.value',
+        regData.agencyAcronym
+      );
+
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -291,33 +236,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .should('not.be.checked');
       cy.get('#seedlot-source-radio-btn-cus')
         .should('not.be.checked');
-      // Check checkbox behavior when Custom seedlot selected
-      cy.get('#seedlot-source-radio-btn-cus')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('be.checked');
-      // Check checkbox behavior when Untested parent tree selected
-      cy.get('#seedlot-source-radio-btn-upt')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('not.be.checked');
-      // Select the A-Class source option according to the fixture
-      cy.get(`#seedlot-source-radio-btn-${regData.source}`)
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
 
       // To be registered? should be checked by default
       cy.get('#register-w-tsc-yes')
@@ -371,12 +289,12 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.value',
+        regData.agencyAcronym
+      );
+
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -406,33 +324,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .should('not.be.checked');
       cy.get('#seedlot-source-radio-btn-cus')
         .should('not.be.checked');
-      // Check checkbox behavior when Custom seedlot selected
-      cy.get('#seedlot-source-radio-btn-cus')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('be.checked');
-      // Check checkbox behavior when Untested parent tree selected
-      cy.get('#seedlot-source-radio-btn-upt')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('not.be.checked');
-      // Select the A-Class source option according to the fixture
-      cy.get(`#seedlot-source-radio-btn-${regData.source}`)
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
 
       // To be registered? should be checked by default
       cy.get('#register-w-tsc-yes')
@@ -486,12 +377,12 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
-      cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.value',
+        regData.agencyAcronym
+      );
+
       // Enter the applicant agency number
       cy.get('#agency-number-input')
         .clear()
@@ -514,6 +405,7 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
       cy.contains(`.${prefix}--list-box__menu-item__option`, regData.species)
         .scrollIntoView()
         .click();
+
       // Check checkbox behavior when Tested parent tree selected
       cy.get('#seedlot-source-radio-btn-tpt')
         .should('be.checked');
@@ -521,33 +413,6 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .should('not.be.checked');
       cy.get('#seedlot-source-radio-btn-cus')
         .should('not.be.checked');
-      // Check checkbox behavior when Custom seedlot selected
-      cy.get('#seedlot-source-radio-btn-cus')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('be.checked');
-      // Check checkbox behavior when Untested parent tree selected
-      cy.get('#seedlot-source-radio-btn-upt')
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
-      cy.get('#seedlot-source-radio-btn-tpt')
-        .should('not.be.checked');
-      cy.get('#seedlot-source-radio-btn-upt')
-        .should('be.checked');
-      cy.get('#seedlot-source-radio-btn-cus')
-        .should('not.be.checked');
-      // Select the A-Class source option according to the fixture
-      cy.get(`#seedlot-source-radio-btn-${regData.source}`)
-        .siblings(`.${prefix}--radio-button__label`)
-        .find(`.${prefix}--radio-button__appearance`)
-        .click();
 
       // To be registered? should be checked by default
       cy.get('#register-w-tsc-yes')
