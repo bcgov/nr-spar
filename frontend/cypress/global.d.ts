@@ -51,6 +51,6 @@ declare namespace Cypress {
      * @example
      * cy.saveButton()
      */
-    saveButton(): void
+    saveSeedlotRegFormProgress(): void
   }
 }

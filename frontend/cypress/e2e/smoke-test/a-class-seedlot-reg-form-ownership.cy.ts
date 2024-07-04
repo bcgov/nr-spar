@@ -159,7 +159,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('be.visible');
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Client search modal', () => {
@@ -212,7 +212,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       });
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Owner portion %, reserved % and surplus % display default values', () => {
@@ -226,7 +226,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('have.value', '0');
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Edit owner portion %, reserved % and surplus % values', () => {
@@ -288,7 +288,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Funding source and method of payment default values and change the values', () => {
@@ -360,7 +360,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .should('have.value', methodOfPayment);
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Create and delete new owner agency section', () => {
@@ -456,7 +456,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .blur();
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('Complete checkmark for Ownership step', () => {

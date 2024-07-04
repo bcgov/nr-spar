@@ -139,7 +139,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .blur();
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('[Collection] Client search modal', () => {
@@ -195,7 +195,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .blur();
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('[Collection] Date inputs', () => {
@@ -223,7 +223,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .blur();
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it.only('[Collection] Containers inputs', () => {
@@ -305,7 +305,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .should('have.value', '30.000');
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('[Collection] Checkbox input', () => {
@@ -402,7 +402,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .should('be.visible');
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('[Interim storage] Client search modal', () => {
@@ -489,7 +489,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .blur();
 
     // Save changes
-    cy.saveButton();
+    cy.saveSeedlotRegFormProgress();
   });
 
   it('[Interim storage] Radio button', () => {

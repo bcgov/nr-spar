@@ -102,7 +102,7 @@ Cypress.Commands.overwrite('log', (log, ...args) => {
   return log(...args);
 });
 
-Cypress.Commands.add('saveButton', () => {
+Cypress.Commands.add('saveSeedlotRegFormProgress', () => {
   cy.get('.seedlot-registration-button-row')
     .find('button.form-action-btn')
     .contains('Save changes')
