@@ -28,6 +28,10 @@ jobs:
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
+      - run: |
+          # View outputs
+          echo "outputs: ${{ toJson(steps.builds) }}"
+
   check:
     name: Check Outputs
     runs-on: ubuntu-22.04
@@ -35,13 +39,7 @@ jobs:
     steps:
       - run: |
           # View outputs
-          echo "needs.*.outputs: ${{ toJson(needs.*.outputs) }}"
-
-      - if: contains(needs.*.outputs.triggered, 'true')
-        run: |
-          # Job triggered found
-          echo "At least one job has triggered"
-          exit 1
+          echo "needs.builds: ${{ toJson(needs.builds) }}"
 
   # deploys:
   #   name: Deploys
