@@ -12,6 +12,8 @@ jobs:
   builds:
     name: Builds
     runs-on: ubuntu-22.04
+    outputs:
+      triggered: ${{ steps.database.outputs.triggered || steps.backend.outputs.triggered || steps.frontend.outputs.triggered || steps.oracle-api.outputs.triggered || steps.sync.outputs.triggered }}
     permissions:
       packages: write
     strategy:
@@ -19,40 +21,56 @@ jobs:
         package: [database, backend, frontend, oracle-api, sync]
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+        id: ${{ matrix.package }}
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
-  deploys:
-    name: Deploys
-    needs: [builds]
-    secrets: inherit
-    uses: ./.github/workflows/.deploy.yml
-    with:
-      etl: true
-
-  tests:
-    name: Tests
-    if: needs.deploys.outputs.triggered == 'true'
-    needs: [deploys]
-    secrets: inherit
-    uses: ./.github/workflows/.tests.yml
-
-  results:
-    name: PR Results
-    if: always()
-    # Include all needs that could have failures!
-    needs: [builds, deploys, tests]
+  check:
+    name: Check Outputs
     runs-on: ubuntu-22.04
+    needs: [builds]
     steps:
       - run: |
-          # View results
-          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+          # View outputs
+          echo "needs.*.outputs: ${{ toJson(needs.*.outputs) }}"
 
-      - if: contains(needs.*.result, 'failure')
+      - if: contains(needs.*.outputs.triggered, 'true')
         run: |
-          # Job failure found
-          echo "At least one job has failed"
+          # Job triggered found
+          echo "At least one job has triggered"
           exit 1
+
+  # deploys:
+  #   name: Deploys
+  #   needs: [builds]
+  #   secrets: inherit
+  #   uses: ./.github/workflows/.deploy.yml
+  #   with:
+  #     etl: true
+
+  # tests:
+  #   name: Tests
+  #   if: needs.deploys.outputs.triggered == 'true'
+  #   needs: [deploys]
+  #   secrets: inherit
+  #   uses: ./.github/workflows/.tests.yml
+
+  # results:
+  #   name: PR Results
+  #   if: always()
+  #   # Include all needs that could have failures!
+  #   needs: [builds, deploys, tests]
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - run: |
+  #         # View results
+  #         echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+
+  #     - if: contains(needs.*.result, 'failure')
+  #       run: |
+  #         # Job failure found
+  #         echo "At least one job has failed"
+  #         exit 1
