@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import ca.bc.gov.backendstartapi.filter.RequestCorrelation;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class OracleApiProvider implements Provider {
       RestTemplateBuilder templateBuilder) {
     this.loggedUserService = loggedUserService;
     this.providersConfig = providersConfig;
-    this.restTemplate = templateBuilder.build();
+    this.restTemplate = templateBuilder.setConnectTimeout(Duration.ofMinutes(15L)).build();
     this.rootUri = this.providersConfig.getOracleApiBaseUri();
   }
 
