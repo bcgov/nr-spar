@@ -29,11 +29,17 @@ WHERE c.table_schema = '$DB_NAME'
 # Get Seedlot columns
 docker exec $CONTAINER_ID \
   psql -q -t -U $DB_USER -d $DB_NAME \
-  -c "$__SEEDLOT_QUERY" > /tmp/seedlot_check.txt
+  -c "$__SEEDLOT_QUERY" | sort > /tmp/seedlot_check.txt
 
 # Get Seedlot Audit columns
 docker exec $CONTAINER_ID \
   psql -q -t -U $DB_USER -d $DB_NAME \
-  -c "$__SEEDLOT_AUDIT_QUERY" > /tmp/seedlot_audit_check.txt
+  -c "$__SEEDLOT_AUDIT_QUERY" | sort > /tmp/seedlot_audit_check.txt
 
-diff /tmp/seedlot_check.txt /tmp/seedlot_audit_check.txt
+DIFF=$(diff /tmp/seedlot_check.txt /tmp/seedlot_audit_check.txt)
+if [ "$DIFF" == "" ]; then
+  echo "All good!"
+else
+  echo "Ooopss. You better check. Differences has been found!"
+  echo $DIFF
+fi
