@@ -26,11 +26,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.text',
+        regData.agencyAcronym
+      );
       cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
@@ -114,11 +114,12 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.text',
+        regData.agencyAcronym
+      );
+
       cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
@@ -202,11 +203,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.text',
+        regData.agencyAcronym
+      );
       cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
@@ -290,11 +291,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.text',
+        regData.agencyAcronym
+      );
       cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
@@ -378,11 +379,11 @@ Cypress._.times(NUM_OF_LOOPS, (currentLoop) => {
         .contains(SeedlotActivities.RegisterAClass)
         .click();
       cy.url().should('contains', '/register-a-class');
-      // Enter the applicant agency name
-      cy.get('#applicant-info-input')
-        .clear()
-        .type(regData.agencyAcronym, { delay: TYPE_DELAY })
-        .blur();
+      // Check the applicant agency name
+      cy.get('#applicant-info-input').should(
+        'have.text',
+        regData.agencyAcronym
+      );
       cy.get(`svg.${prefix}--inline-loading__checkmark-container`);
       // Enter the applicant agency number
       cy.get('#agency-number-input')
