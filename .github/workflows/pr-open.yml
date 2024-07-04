@@ -13,7 +13,8 @@ jobs:
     name: Builds
     runs-on: ubuntu-22.04
     outputs:
-      triggered: ${{ steps.builds.outputs.triggered }}
+      triggered: steps.builds.outputs.triggered
+      thing: steps.builds.outputs.thing
     permissions:
       packages: write
     strategy:
@@ -31,6 +32,10 @@ jobs:
       - run: |
           # View outputs
           echo "outputs: ${{ toJson(steps.builds) }}"
+
+      - run: |
+          # Thing
+          echo "thing=${{ matrix.package }}" >> $GITHUB_OUTPUT
 
   check:
     name: Check Outputs
