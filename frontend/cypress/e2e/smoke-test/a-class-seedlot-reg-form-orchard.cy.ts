@@ -569,7 +569,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .find('button.form-action-btn')
       .contains('Next')
       .click();
-  
+
+    cy.get('ul.spar-seedlot-reg-progress-bar').scrollIntoView({ easing: 'linear' })
+
     // Check svg with complete checkmark on Step 3
     cy.get('ul.spar-seedlot-reg-progress-bar li')
       .eq(3)
