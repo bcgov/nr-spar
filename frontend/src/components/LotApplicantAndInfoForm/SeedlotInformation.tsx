@@ -96,8 +96,20 @@ const SeedlotInformation = (
         id={`seedlot-source-radio-btn-${source.code.toLowerCase()}`}
         key={source.code}
         checked={seedlotFormData.sourceCode.value === source.code}
-        labelText={source.description}
+        labelText={
+          (
+            <p>
+              {source.description}
+              {
+                source.code !== 'TPT'
+                  ? <em> Coming soon</em>
+                  : null
+              }
+            </p>
+          )
+        }
         value={source.code}
+        disabled={source.code !== 'TPT'}
       />
     ));
   };
