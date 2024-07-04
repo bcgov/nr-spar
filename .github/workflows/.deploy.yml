@@ -82,6 +82,7 @@ jobs:
           file: database/openshift.deploy.yml
           overwrite: false
           parameters:
+            -p TAG=${{ inputs.tag || needs.init.outputs.pr }}
             -p ZONE=${{ inputs.target || github.event.number }}
             -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
             ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
