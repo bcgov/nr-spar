@@ -332,6 +332,103 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     return null;
   };
 
+  const renderCalcSection = (isSmpMix: boolean) => {
+    if (!isFormSubmitted && !isReviewDisplay) {
+      if (!isSmpMix) {
+        return (
+          <>
+            <DescriptionBox header="Genetic worth, effective population size and geospatial data" />
+            <CalculateMetrics
+              disableOptions={disableOptions}
+              setShowInfoSections={setShowInfoSections}
+            />
+          </>
+        );
+      }
+      return (
+        <CalculateMetrics
+          disableOptions={disableOptions}
+          setShowInfoSections={setShowInfoSections}
+        />
+      );
+    }
+    return null;
+  };
+
+  const renderSubSections = () => {
+    if (currentTab === 'mixTab' && !isReviewDisplay) {
+      return null;
+    }
+    return (
+      <>
+        {/* ---- Genetic worth and percent of tested parent trees ---- */}
+        {
+          !isReviewDisplay ? <InfoSectionDivider /> : null
+        }
+        <Row className="info-section-sub-title">
+          <Column>
+            Genetic worth and percent of Tested parent tree contribution
+          </Column>
+        </Row>
+        {
+          isReviewDisplay && !isReviewRead
+            ? (
+              <EditGenWorth genWorthValues={recordValues(genWorthInfoItems)} />
+            )
+            : (
+              <InfoSection
+                infoItems={[]}
+              >
+                {
+                  recordValues(genWorthInfoItems).map((gwTuple) => (
+                    <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
+                  ))
+                }
+              </InfoSection>
+            )
+        }
+        <InfoSectionDivider />
+        {/* ---- Unrelated genetic worth - REVIEW ONLY ---- */}
+        {
+          isReviewDisplay
+            ? (
+              <>
+                <Row className="info-section-sub-title">
+                  <Column>
+                    Unrelated genetic worth
+                  </Column>
+                </Row>
+                <UnrelatedGenWorth
+                  isRead={isReviewRead}
+                  validGenWorth={geneticWorthDict[seedlotSpecies.code]}
+                />
+                <InfoSectionDivider />
+              </>
+            )
+            : null
+        }
+        {/* -------- Effective population size and diversity -------- */}
+        <Row className="info-section-sub-title">
+          <Column>
+            Effective population size and diversity
+          </Column>
+        </Row>
+        {
+          isReviewDisplay && !isReviewRead
+            ? (
+              <PopSize />
+            )
+            : (
+              <InfoSection
+                infoItems={Object.values(popSizeAndDiversityConfig)}
+              />
+            )
+        }
+        <InfoSectionDivider />
+      </>
+    );
+  };
+
   const renderInfoSections = () => (
     <Row className="info-sections-row">
       <Column className="info-sections-col">
@@ -360,86 +457,15 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                 {/* -------- Calculate Button Row -------- */}
                 <DetailSection>
                   {
-                    !isFormSubmitted
-                      ? (
-                        <>
-                          <DescriptionBox header="Genetic worth, effective population size and geospatial data" />
-                          <CalculateMetrics
-                            disableOptions={disableOptions}
-                            setShowInfoSections={setShowInfoSections}
-                          />
-                        </>
-                      )
-                      : null
+                    renderCalcSection(false)
                   }
                   {
                     showInfoSections
                       ? (
                         <>
-                          {/* ---- Genetic worth and percent of tested parent trees ---- */}
                           {
-                            !isReviewDisplay ? <InfoSectionDivider /> : null
+                            renderSubSections()
                           }
-                          <Row className="info-section-sub-title">
-                            <Column>
-                              Genetic worth and percent of Tested parent tree contribution
-                            </Column>
-                          </Row>
-                          {
-                            isReviewDisplay && !isReviewRead
-                              ? (
-                                <EditGenWorth genWorthValues={recordValues(genWorthInfoItems)} />
-                              )
-                              : (
-                                <InfoSection
-                                  infoItems={[]}
-                                >
-                                  {
-                                    recordValues(genWorthInfoItems).map((gwTuple) => (
-                                      <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
-                                    ))
-                                  }
-                                </InfoSection>
-                              )
-                          }
-                          <InfoSectionDivider />
-                          {/* ---- Unrelated genetic worth - REVIEW ONLY ---- */}
-                          {
-                            isReviewDisplay
-                              ? (
-                                <>
-                                  <Row className="info-section-sub-title">
-                                    <Column>
-                                      Unrelated genetic worth
-                                    </Column>
-                                  </Row>
-                                  <UnrelatedGenWorth
-                                    isRead={isReviewRead}
-                                    validGenWorth={geneticWorthDict[seedlotSpecies.code]}
-                                  />
-                                  <InfoSectionDivider />
-                                </>
-                              )
-                              : null
-                          }
-                          {/* -------- Effective population size and diversity -------- */}
-                          <Row className="info-section-sub-title">
-                            <Column>
-                              Effective population size and diversity
-                            </Column>
-                          </Row>
-                          {
-                            isReviewDisplay && !isReviewRead
-                              ? (
-                                <PopSize />
-                              )
-                              : (
-                                <InfoSection
-                                  infoItems={Object.values(popSizeAndDiversityConfig)}
-                                />
-                              )
-                          }
-                          <InfoSectionDivider />
                           {/* -------- Seedlot mean geospatial data -------- */}
                           <Row className="info-section-sub-title">
                             <Column>
@@ -489,33 +515,53 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                   renderRecalcSection()
                 }
                 {
-                  <DetailSection>
-                    {/* -------- SMP mix mean geospatial data -------- */}
-                    <Row className="info-section-sub-title">
-                      <DescriptionBox
-                        header="SMP Mix geospatial summary"
-                      />
-                    </Row>
-                    {
-                      !isFormSubmitted || !(isReviewDisplay && isReviewRead)
-                        ? (
-                          <CalculateMetrics
-                            disableOptions={disableOptions}
-                            setShowInfoSections={setShowInfoSections}
+                  isReviewDisplay
+                    ? (
+                      <DetailSection>
+                        {
+                          renderSubSections()
+                        }
+                        {/* -------- Seedlot mean geospatial data -------- */}
+                        <Row className="info-section-sub-title">
+                          <Column>
+                            Collection geospatial summary
+                          </Column>
+                        </Row>
+                        {
+                          !isReviewRead
+                            ? (
+                              <SpatialData />
+                            )
+                            : (
+                              <InfoSection
+                                infoItems={Object.values(meanGeomInfos.smpMix)}
+                              />
+                            )
+                        }
+                      </DetailSection>
+                    )
+                    : (
+                      <DetailSection>
+                        {/* -------- SMP mix mean geospatial data -------- */}
+                        <Row className="info-section-sub-title">
+                          <DescriptionBox
+                            header="SMP Mix geospatial summary"
                           />
-                        )
-                        : null
-                    }
-                    {
-                      showInfoSections
-                        ? (
-                          <InfoSection
-                            infoItems={Object.values(meanGeomInfos.smpMix)}
-                          />
-                        )
-                        : null
-                    }
-                  </DetailSection>
+                        </Row>
+                        {
+                          renderCalcSection(true)
+                        }
+                        {
+                          showInfoSections
+                            ? (
+                              <InfoSection
+                                infoItems={Object.values(meanGeomInfos.smpMix)}
+                              />
+                            )
+                            : null
+                        }
+                      </DetailSection>
+                    )
                 }
               </>
             )
