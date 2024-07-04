@@ -4,8 +4,8 @@ SELECT
 , soqgq.genetic_type_code
 , soqgq.genetic_worth_code
 , soqgq.genetic_quality_value
-, soqgq.estimated_ind
-, soqgq.untested_ind
+, CASE soqgq.estimated_ind WHEN TRUE THEN 'Y' ELSE 'N' END   estimated_ind
+, CASE soqgq.untested_ind WHEN TRUE THEN 'Y' ELSE 'N' END    untested_ind
 , aos.seed_plan_unit_id
 , soqgq.revision_count
  FROM spar.seedlot_parent_tree_gen_qlty soqgq

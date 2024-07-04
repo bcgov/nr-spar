@@ -153,35 +153,36 @@ class database_connection(object):
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
 
-    def delete_seedlot_child_table(self, row:object, table_name:str, seedlot_number:str ) -> int:
+    def delete_seedlot_child_table(self, table_name:str, seedlot_number:str ) -> int:
         print("-------------------processing delete on row-----------------")
-        print(row[0])
+        print(f"seedlot number is {seedlot_number}")
         print("-------------------processing delete on row-----------------")
         sql_text = f""" 
             DELETE FROM {table_name}
-             WHERE seedlot_number = :p_seedlot_number ; """
-        params = {"p_seedlot_number":seedlot_number}
+             WHERE seedlot_number = :p_seedlot_number """
+        params = {}
+        params["p_seedlot_number"] = seedlot_number
         
         print("-------------------delete text-----------------")
         print(sql_text)
         print("-------------------delete text-----------------")
-        #TODO REMOVE comment so merge runs
-        #result = self.conn.execute(text(sql_text), params)
+        result = self.conn.execute(text(sql_text), params)
         
-        #self.commit()  # If everything is ok, a commit will be executed.
-        return 1#TODOresult.rowcount  # Number of rows affected
+        self.commit()  # If everything is ok, a commit will be executed.
+        return result.rowcount  # Number of rows affected
 
     def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str, run_mode:str, ignore_columns_on_update:str ) -> int:
         logger.debug('Starting UPSERT statement in Oracle Database')
         logger.debug('run_mode is '+run_mode)
         onconflictstatement = ""
+
+        if run_mode == "UPSERT_WITH_DELETE":
+            print(f"Deleting {table_name} for seedlot {dataframe.at[0,'seedlot_number']}")
+            #delete for seedlot 
+            self.delete_seedlot_child_table(table_name, dataframe.at[0,'seedlot_number']) 
+
         i = 0
         for row in dataframe.itertuples():
-            if run_mode == "UPSERT_WITH_DELETE":
-                print(f"Deleting {table_name} for seedlot {dataframe.seedlot_number}")
-                #delete for seedlot 
-                self.delete_seedlot_child_table(row, table_name, dataframe.seedlot_number) #todo fill in seedlot
-
             i = i + 1
             logger.debug(f'---Including row {i}')
             params = {}
@@ -224,11 +225,10 @@ class database_connection(object):
             END; """
             logger.debug(f'---Executing statement for row {i}')
             print(sql_text)
-            #TODO REMOVE comment so merge runs
-            #result = self.conn.execute(text(sql_text), params)
+            result = self.conn.execute(text(sql_text), params)
         
-        #self.commit()  # If everything is ok, a commit will be executed.
-        return 1 #TODOresult.rowcount  # Number of rows affected
+        self.commit()  # If everything is ok, a commit will be executed.
+        return result.rowcount  # Number of rows affected
 
 def convertTypesToOracle(dataframe):
     dataframe = dataframe.fillna(numpy.nan).replace([numpy.nan], [None])
