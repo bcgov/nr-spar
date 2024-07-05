@@ -224,7 +224,7 @@ const RegPage = () => {
                     <SubmitModal
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
-                      disableBtn={!allStepCompleted}
+                      disableBtn={!allStepCompleted || saveStatus === 'conflict'}
                       submitFn={() => {
                         submitSeedlot.mutate(getSeedlotPayload(allStepData, seedlotNumber));
                       }}
