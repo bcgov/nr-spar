@@ -12,6 +12,6 @@ public interface OrchardRepository extends JpaRepository<OrchardEntity, String> 
   @Query("from OrchardEntity o where o.stageCode <> 'RET' and o.id = ?1")
   Optional<OrchardEntity> findNotRetiredById(String id);
 
-  // Find all orchards that are not retired with a given vegCode
+  // Find all orchards with a given vegCode
   List<OrchardEntity> findAllByVegetationCode(String vegCode);
 }
