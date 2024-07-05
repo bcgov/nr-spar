@@ -143,7 +143,7 @@ class database_connection(object):
             DO UPDATE SET {' , '.join(df2.columns.values + '= EXCLUDED.'+df2.columns.values)} 
             WHERE {' OR '.join(table_clean+"."+df2.columns.values + '!= EXCLUDED.'+df2.columns.values)}
             """
-       
+        
         sql_text = f"""         
         INSERT INTO {table_name}({', '.join(dataframe.columns.values)})                
         VALUES(:{', :'.join(dataframe.columns.values)})                
@@ -153,13 +153,61 @@ class database_connection(object):
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
 
+    def delete_seedlot_owner_quantity(self,seedlot_number, table_name, soqdf) -> int:
+        #special delete processing for soq - delete any owners from oracle not in postgres
+        logger.debug('Executing seedlot_owner_quantity delete for seedlot '+seedlot_number)
+        log_message = ""
+        
+        # Initializing metric variables
+        #stored_metrics['process_start_time'] = time.time()
+        #stored_metrics['time_source_extract'] = None
+        #stored_metrics['rows_from_source'] = 0
+        #stored_metrics['time_conn_target'] = None
+        #stored_metrics['rows_target_processed'] = 0
+        #stored_metrics['time_target_load'] = None
+        #stored_metrics['time_conn_source'] = None
+
+        sql_text = f""" 
+            DELETE FROM {table_name}
+                WHERE seedlot_number = :p_seedlot_number 
+                    AND (seedlot_number,client_number,client_locn_code) NOT IN 
+                        (  """
+        params = {}
+        params["p_seedlot_number"] = seedlot_number
+        for owner in soqdf.itertuples():
+            params["p_seedlot_number"+str(owner.Index)] = seedlot_number
+            params["p_client_number"+str(owner.Index)] = owner.client_number
+            params["p_client_locn_code"+str(owner.Index)] = owner.client_locn_code
+            if owner.Index > 0:
+                sql_text = sql_text + ","
+            sql_text = sql_text + f""" (:p_seedlot_number{str(owner.Index)},:p_client_number{str(owner.Index)},:p_client_locn_code{str(owner.Index)}) """
+        
+        sql_text = sql_text + ")"
+        print("==================soq sql==========================================")
+        print(sql_text)
+        print(params)
+        print("===================================================================")
+
+        result = self.conn.execute(text(sql_text), params)
+        
+        self.commit()  # If everything is ok, a commit will be executed.
+
+        #process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
+        #                                                    log_message=log_message,
+        #                                                    execution_status='SKIPPED', ## No error, but
+        #                                                    )
+        logger.debug('Finished soq deletion')
+        #data_sync_ctl.save_execution_log(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
+
+        return result.rowcount
+
     def delete_seedlot_child_table(self, table_name:str, seedlot_number:str ) -> int:
         print("-------------------processing delete on row-----------------")
         print(f"seedlot number is {seedlot_number}")
         print("-------------------processing delete on row-----------------")
         sql_text = f""" 
             DELETE FROM {table_name}
-             WHERE seedlot_number = :p_seedlot_number """
+            WHERE seedlot_number = :p_seedlot_number """
         params = {}
         params["p_seedlot_number"] = seedlot_number
         
@@ -237,8 +285,6 @@ def convertTypesToOracle(dataframe):
             dataframe=dataframe.astype({column:int},errors="ignore")
     
     return dataframe
-
-
 
 def psql_insert_copy(table, conn, keys, data_iter):
     """
