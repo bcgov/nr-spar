@@ -27,6 +27,7 @@ export type ClassAContextType = {
   geoInfoVals: GeoInfoValType,
   genWorthVals: GenWorthValType,
   setGenWorthVal: (traitCode: keyof GenWorthValType, newVal: string) => void,
+  setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,
   setGeoInfoInputObj: (infoName: keyof GeoInfoValType, inputObj: StringInputType) => void,
   seedlotNumber: string | undefined,
   allStepData: AllStepData,
@@ -70,7 +71,9 @@ export type ClassAContextType = {
   meanGeomInfos: MeanGeomInfoSectionConfigType,
   setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>,
   areaOfUseData: AreaOfUseDataType,
-  setAreaOfUseData: React.Dispatch<React.SetStateAction<AreaOfUseDataType>>
+  setAreaOfUseData: React.Dispatch<React.SetStateAction<AreaOfUseDataType>>,
+  isCalculatingPt: boolean,
+  setIsCalculatingPt: Function
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -104,6 +107,7 @@ const ClassAContext = createContext<ClassAContextType>({
   geoInfoVals: {} as GeoInfoValType,
   genWorthVals: {} as GenWorthValType,
   setGenWorthVal: () => { },
+  setGeoInfoVals: () => { },
   setGeoInfoInputObj: () => { },
   genWorthInfoItems: {} as Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: () => { },
@@ -116,7 +120,9 @@ const ClassAContext = createContext<ClassAContextType>({
   meanGeomInfos: {} as MeanGeomInfoSectionConfigType,
   setMeanGeomInfos: () => { },
   areaOfUseData: {} as AreaOfUseDataType,
-  setAreaOfUseData: () => { }
+  setAreaOfUseData: () => { },
+  isCalculatingPt: false,
+  setIsCalculatingPt: () => { }
 });
 
 export default ClassAContext;
