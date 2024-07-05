@@ -32,12 +32,12 @@ jobs:
 
       - run: |
           # View outputs
-          echo "outputs: ${{ toJson(steps.builds) }}"
+          echo "outputs: ${{ toJson(steps.builds.outputs) }}"
 
       - id: thing
         run: |
           # Thing
-          echo "thing=thing" >> $GITHUB_OUTPUT
+          echo "thing=${{ matrix.package }}" >> $GITHUB_OUTPUT
 
   check:
     name: Check Outputs
