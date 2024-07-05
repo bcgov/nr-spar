@@ -24,7 +24,11 @@ const RecentSeedlots = () => {
       <Column
         sm={4}
         className={`recent-seedlots-title-section ${isTscAdmin ? 'review-seedlots-table-header' : ''}`}
-        onClick={() => { navigate(ROUTES.TSC_SEEDLOTS_TABLE); }}
+        onClick={() => {
+          if (isTscAdmin) {
+            navigate(ROUTES.TSC_SEEDLOTS_TABLE);
+          }
+        }}
       >
         <div>
           <h2>{getTitle(isTscAdmin)}</h2>

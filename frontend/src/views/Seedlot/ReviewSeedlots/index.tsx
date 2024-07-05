@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -22,9 +22,11 @@ const ReviewSeedlots = () => {
 
   const userId = user?.userId ?? '';
 
-  if (!isTscAdmin) {
-    navigate(ROUTES.FOUR_OH_FOUR);
-  }
+  useEffect(() => {
+    if (!isTscAdmin) {
+      navigate(ROUTES.FOUR_OH_FOUR);
+    }
+  }, [isTscAdmin]);
 
   return (
     <FlexGrid fullWidth className="review-seedlots-content">
