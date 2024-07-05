@@ -107,7 +107,7 @@ class database_connection(object):
             complement = " WHERE 1=2"
 
         query = "CREATE TEMP TABLE {} as SELECT * FROM {} {}".format(table_name,from_what_table,complement)
-        print("TEMP TABLE {} created: {}".format(table_name, query) )
+        logger.debug("TEMP TABLE {} created: {}".format(table_name, query) )
         self.conn.execute(text(query), None)
 
     def execute_upsert(self, dataframe:object, table_name:str, table_pk:str, db_type:str, run_mode:str, ignore_columns_on_update:str) -> int:
@@ -183,10 +183,10 @@ class database_connection(object):
             sql_text = sql_text + f""" (:p_seedlot_number{str(owner.Index)},:p_client_number{str(owner.Index)},:p_client_locn_code{str(owner.Index)}) """
         
         sql_text = sql_text + ")"
-        print("==================soq sql==========================================")
-        print(sql_text)
-        print(params)
-        print("===================================================================")
+        logger.debug("==================soq sql==========================================")
+        logger.debug(sql_text)
+        logger.debug(params)
+        logger.debug("===================================================================")
 
         result = self.conn.execute(text(sql_text), params)
         
@@ -202,18 +202,18 @@ class database_connection(object):
         return result.rowcount
 
     def delete_seedlot_child_table(self, table_name:str, seedlot_number:str ) -> int:
-        print("-------------------processing delete on row-----------------")
-        print(f"seedlot number is {seedlot_number}")
-        print("-------------------processing delete on row-----------------")
+        logger.debug("-------------------processing delete on row-----------------")
+        logger.debug(f"seedlot number is {seedlot_number}")
+        logger.debug("-------------------processing delete on row-----------------")
         sql_text = f""" 
             DELETE FROM {table_name}
             WHERE seedlot_number = :p_seedlot_number """
         params = {}
         params["p_seedlot_number"] = seedlot_number
         
-        print("-------------------delete text-----------------")
-        print(sql_text)
-        print("-------------------delete text-----------------")
+        logger.debug("-------------------delete text-----------------")
+        logger.debug(sql_text)
+        logger.debug("-------------------delete text-----------------")
         result = self.conn.execute(text(sql_text), params)
         
         self.commit()  # If everything is ok, a commit will be executed.
@@ -223,11 +223,6 @@ class database_connection(object):
         logger.debug('Starting UPSERT statement in Oracle Database')
         logger.debug('run_mode is '+run_mode)
         onconflictstatement = ""
-
-        #if run_mode == "UPSERT_WITH_DELETE":
-        #    print(f"Deleting {table_name} for seedlot {dataframe.at[0,'seedlot_number']}")
-        #    #delete for seedlot 
-        #    self.delete_seedlot_child_table(table_name, dataframe.at[0,'seedlot_number']) 
 
         i = 0
         for row in dataframe.itertuples():
@@ -272,7 +267,7 @@ class database_connection(object):
                 {onconflictstatement}
             END; """
             logger.debug(f'---Executing statement for row {i}')
-            print(sql_text)
+            logger.debug(sql_text)
             result = self.conn.execute(text(sql_text), params)
         
         self.commit()  # If everything is ok, a commit will be executed.

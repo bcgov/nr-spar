@@ -2623,18 +2623,18 @@ CREATE TRIGGER trg_seedlot_audit_DIU
  FOR EACH ROW EXECUTE PROCEDURE spar.seedlot_if_modified_func();
 
 create table spar.ETL_EXECUTION_LOG(
-interface_id varchar(100) not null,
-last_run_ts timestamp,
-current_run_ts timestamp,
+from_timestamp timestamp not null,
+to_timestamp   timestamp not null,
+run_status varchar(100) not null,
 updated_at  timestamp   default now() not null,
 created_at  timestamp   default now() not null
 );
 
 
 comment on table spar.ETL_EXECUTION_LOG is 'ETL Tool monitoring table to store execution current instance of batch processing interfaces';
-comment on column spar.ETL_EXECUTION_LOG.interface_id               is 'Unique interface name to represent a batch execution';
-comment on column spar.ETL_EXECUTION_LOG.last_run_ts                is 'Last timestamp this interface was executed for batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG.current_run_ts             is 'Current timestamp this interface was executed of this batch execution'; 
+comment on column spar.ETL_EXECUTION_LOG.from_timestamp             is 'From timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
+comment on column spar.ETL_EXECUTION_LOG.to_timestamp               is 'To timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
+comment on column spar.ETL_EXECUTION_LOG.run_status                 is 'Status of ETL execution'; 
 comment on column spar.ETL_EXECUTION_LOG.updated_at                 is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_LOG.created_at                 is 'Timestamp of the time this record was created'; 
 
@@ -4441,6 +4441,8 @@ DDL
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_MAP;
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_LOG;
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_LOG_HIST;
+DROP TABLE IF EXISTS spar.ETL_EXECUTION_SCHEDULE;
+
 
 create table if not exists spar.ETL_EXECUTION_MAP(
 interface_id 		  varchar(100) not null,

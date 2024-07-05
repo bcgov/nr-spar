@@ -1,7 +1,10 @@
+import logging
 import ast
 from datetime import datetime
 from pandas import DataFrame
 from datetime import timedelta
+
+logger = logging.getLogger(__name__)
 
 """
     Gets the Execution map data from this execution
@@ -31,12 +34,15 @@ def get_execution_map (track_db_conn: object,
     return records.mappings().all()
 
 def get_scheduler(track_db_conn:object, database_schema:str) -> list:
-    #TODO fix query = where will we get this?
+    #Start two days from last successful run (plus a microsecond so we don't get rows we selected last run)
+    #or two days ago if no successful run
     select_sync_id_stm = f"""
-        select '2024-06-20'::timestamp as last_start_time,
-            '2024-06-22'::timestamp as current_start_time,
+        select 
+            COALESCE(MAX(to_timestamp) + INTERVAL '1 microsecond'
+                   , CURRENT_TIMESTAMP - INTERVAL '2 days') as current_start_time,
             CURRENT_TIMESTAMP as current_end_time
-        where not exists(select 1 from {database_schema}.etl_execution_schedule es ) """    
+        from {database_schema}.etl_execution_log
+        where run_status = 'SUCCESS' """    
     records = track_db_conn.select(select_sync_id_stm)
     return records.mappings().all()
 
@@ -64,7 +70,7 @@ def get_log_hist_schedules_to_process(track_db_conn,database_schema,execution_id
 def validate_execution_map (execution_map) -> bool:
     ret = True
     exist_process = False
-    print("-- Validating the execution process to be executed")
+    logger.debug("-- Validating the execution process to be executed")
     for row in execution_map:
         if row["process_type"]=="ORCHESTRATION":
             print("--------------------------")
@@ -105,7 +111,7 @@ def validate_execution_map (execution_map) -> bool:
         list: All processes except the parent id orchestrator (if exists)
 """
 def get_processes_execution_map (execution_map) -> list:
-    print("-- Getting all processes to be executed in order ")
+    logger.debug("-- Getting all processes to be executed in order ")
     processes = []
     for row in execution_map:
         if row["process_type"] == "PROCESS":
@@ -319,24 +325,33 @@ def get_entity_id_for_retry(database_conn: object,
         
     return entity_ids  
 
-def insert_data_sync_control(database_conn: object, 
+def insert_execution_log(database_conn: object, 
                              database_schema: str,
-                             data_sync_id: str):
-    """
-    Inserts a new record in the data_sync_control table with a Running status.
+                             from_timestamp: str,
+                             to_timestamp: str,
+                             run_status: str):
+    insert_stm= f"""insert into {database_schema}.etl_execution_log 
+                    (from_timestamp,to_timestamp,run_status,updated_at,created_at)           
+                values                                                 
+                    (:from_timestamp, :to_timestamp, :run_status , current_timestamp, current_timestamp) """
 
-    Args:
-        database_conn (object): Database connection
-        database_schema (str): Database schema
-        data_sync_id (str): Next available data_sync_id
-    """
-    insert_stm= "insert into {}.data_sync_control                      \
-                    (data_sync_id, status, start_dt, end_dt)           \
-                values                                                 \
-                    (:data_sync_id, 'Running', current_timestamp, null)".format(database_schema)
-
-    params = {'data_sync_id': data_sync_id}
+    params = {'from_timestamp': from_timestamp, 'to_timestamp': to_timestamp, 'run_status': run_status}
     database_conn.select(insert_stm, params)
+    database_conn.commit()
+
+def update_execution_log(database_conn: object, 
+                        database_schema: str,
+                        from_timestamp: str,
+                        to_timestamp: str,
+                        run_status: str):
+    update_stm= f"""update {database_schema}.etl_execution_log 
+                       set run_status = :run_status
+                         , updated_at = current_timestamp
+                     where from_timestamp = :from_timestamp
+                       and to_timestamp = :to_timestamp  """
+
+    params = {'run_status': run_status, 'from_timestamp': from_timestamp, 'to_timestamp': to_timestamp}
+    database_conn.select(update_stm, params)
     database_conn.commit()
 
 def update_data_sync_control(database_conn: object, 
