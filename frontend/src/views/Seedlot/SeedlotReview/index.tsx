@@ -19,7 +19,7 @@ import RowGap from '../../../components/RowGap';
 import ApplicantAndSeedlotRead from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Read';
 import ApplicantAndSeedlotEdit from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Edit';
 import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
-import { InitialSeedlotFormData } from '../CreateAClass/constants';
+import { InitialSeedlotRegFormData } from '../CreateAClass/constants';
 import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collection/Read';
 import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
 import OwnershipReviewRead from '../../../components/SeedlotReviewSteps/Ownership/Read';
@@ -39,6 +39,7 @@ import ContextContainerClassA from '../ContextContainerClassA';
 import { getBreadcrumbs } from './utils';
 
 import './styles.scss';
+import { validateRegForm } from '../CreateAClass/utils';
 
 const SeedlotReview = () => {
   const navigate = useNavigate();
@@ -89,12 +90,27 @@ const SeedlotReview = () => {
   const [
     applicantData,
     setApplicantData
-  ] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
+  ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
+
+  const verifyFormData = (): boolean => {
+    let isValid = false;
+
+    if (!validateRegForm(applicantData, setApplicantData)) {
+      console.log(applicantData);
+      return isValid;
+    }
+
+    isValid = true;
+    return isValid;
+  };
 
   const handleEditSaveBtn = () => {
-    // eslint-disable-next-line no-console
-    console.log(applicantData);
-    setIsReadMode(!isReadMode);
+    const isFormDataValid = verifyFormData();
+    console.log('ahahah', isFormDataValid);
+
+    if (isFormDataValid) {
+      setIsReadMode(!isReadMode);
+    }
   };
 
   return (
