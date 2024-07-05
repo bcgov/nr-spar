@@ -153,7 +153,7 @@ public class SaveSeedlotFormService {
   }
 
   /**
-   * Verify if the service initiator has the correct access.
+   * Verify if the service initiator  has the correct access.
    *
    * @param seedlot to verify
    * @throw an {@link ClientIdForbiddenException}

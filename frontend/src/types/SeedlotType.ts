@@ -271,7 +271,7 @@ export type SeedlotAClassSubmitType = {
 export type SeedlotProgressPayloadType = {
   allStepData: AllStepData,
   progressStatus: ProgressIndicatorConfig,
-  revisionCount: number | null
+  revisionCount: number
 };
 
 export type SeedlotCalculationsResultsType = {

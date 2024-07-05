@@ -553,7 +553,7 @@ const ContextContainerClassA = ({ children }: props) => {
     return clonedStatus;
   };
 
-  const [formDraftRevCount, setFormDraftRevCount] = useState<number | null>(null);
+  const [formDraftRevCount, setFormDraftRevCount] = useState<number>(0);
 
   const saveProgress = useMutation({
     mutationFn: () => {
