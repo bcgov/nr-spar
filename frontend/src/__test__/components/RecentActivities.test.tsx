@@ -40,7 +40,7 @@ describe('Recent Activities component', () => {
     await waitFor(() => {
       const tabs = screen.getAllByRole('tab');
       expect(tabs[0].textContent).toEqual('Requests');
-      expect(tabs[1].textContent).toEqual('Files & Docs.');
+      expect(tabs[1].textContent).toEqual('Files & Docs');
 
       // Setting this small timeout so the component ends rendering
       // the loading status and render the content we want to test
