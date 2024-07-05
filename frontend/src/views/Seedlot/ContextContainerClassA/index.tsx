@@ -559,6 +559,8 @@ const ContextContainerClassA = ({ children }: props) => {
     return clonedStatus;
   };
 
+  const [formDraftRevCount, setFormDraftRevCount] = useState<number | null>(null);
+
   const saveProgress = useMutation({
     mutationFn: () => {
       const updatedProgressStatus = structuredClone(updateAllStepStatus());
@@ -573,7 +575,8 @@ const ContextContainerClassA = ({ children }: props) => {
         seedlotNumber ?? '',
         {
           allStepData,
-          progressStatus: updatedProgressStatus
+          progressStatus: updatedProgressStatus,
+          revisionCount: formDraftRevCount
         }
       );
     },
@@ -655,6 +658,7 @@ const ContextContainerClassA = ({ children }: props) => {
       const currStepName = stepMap[formStep];
       savedStatus[currStepName].isCurrent = true;
 
+      setFormDraftRevCount(getFormDraftQuery.data.revisionCount);
       setProgressStatus(getFormDraftQuery.data.progressStatus);
     }
     if (getFormDraftQuery.status === 'error') {

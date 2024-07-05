@@ -23,7 +23,7 @@ import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModa
 import ClassAContext from '../ContextContainerClassA/context';
 import { addParamToPath } from '../../../utils/PathUtils';
 import ROUTES from '../../../routes/constants';
-import { smartSaveText } from '../ContextContainerClassA/constants';
+import { completeProgressConfig, smartSaveText } from '../ContextContainerClassA/constants';
 
 const RegPage = () => {
   const navigate = useNavigate();
@@ -44,7 +44,8 @@ const RegPage = () => {
     getSeedlotPayload,
     updateProgressStatus,
     saveProgressStatus,
-    isFetchingData
+    isFetchingData,
+    seedlotData
   } = useContext(ClassAContext);
 
   return (
@@ -92,7 +93,11 @@ const RegPage = () => {
         <Row>
           <Column className="seedlot-registration-progress">
             <SeedlotRegistrationProgress
-              progressStatus={progressStatus}
+              progressStatus={
+                seedlotData?.seedlotStatus.seedlotStatusCode === 'PND' || seedlotData?.seedlotStatus.seedlotStatusCode === 'INC'
+                  ? progressStatus
+                  : completeProgressConfig
+              }
               interactFunction={(e: number) => {
                 updateProgressStatus(e, formStep);
                 setStep((e - formStep));

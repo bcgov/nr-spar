@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.JsonParsingException;
+import ca.bc.gov.backendstartapi.exception.RevisionCountMismatchException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
@@ -63,6 +64,20 @@ public class SaveSeedlotFormService {
               parsedProgressStatus,
               loggedUserService.createAuditCurrentUser());
     } else {
+      // Revision Count verification
+      Integer prevRevCount = data.revisionCount();
+      Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
+
+      if (prevRevCount != currRevCount) {
+        // Conflict detected
+        SparLog.info(
+            "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
+                + " revision count: {}",
+            prevRevCount,
+            currRevCount);
+        throw new RevisionCountMismatchException();
+      }
+
       SparLog.info(
           "A-class seedlot progress for seedlot number {} exists, replacing with new values",
           seedlotNumber);
