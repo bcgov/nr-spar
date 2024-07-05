@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       triggered: ${{ steps.builds.outputs.triggered }}
-      thing: ${{ steps.builds.outputs.thing}}
-      database: ${{ steps.builds.outputs.database}}
+      thing: ${{ steps.thing.outputs.thing }}
+      database: ${{ steps.builds.outputs.database }}
     permissions:
       packages: write
     strategy:
@@ -37,7 +37,7 @@ jobs:
       - id: thing
         run: |
           # Thing
-          echo "thing=${{ matrix.package }}" >> $GITHUB_OUTPUT
+          echo "thing=thing" >> $GITHUB_OUTPUT
 
   check:
     name: Check Outputs
