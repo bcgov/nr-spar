@@ -15,6 +15,7 @@ jobs:
     outputs:
       triggered: steps.builds.outputs.triggered
       thing: steps.builds.outputs.thing
+      database: steps.builds.outputs.database
     permissions:
       packages: write
     strategy:
@@ -33,7 +34,8 @@ jobs:
           # View outputs
           echo "outputs: ${{ toJson(steps.builds) }}"
 
-      - run: |
+      - id: thing
+        run: |
           # Thing
           echo "thing=${{ matrix.package }}" >> $GITHUB_OUTPUT
 
