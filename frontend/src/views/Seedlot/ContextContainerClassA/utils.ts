@@ -256,7 +256,7 @@ export const initOrchardState = (
     },
     breedingPercentage: {
       id: 'orchard-breading-perc',
-      value: orchardStepData.contaminantPollenBv.toString(),
+      value: String(orchardStepData.contaminantPollenBv),
       isInvalid: false
     },
     isRegional: {
@@ -279,10 +279,10 @@ export const initParentTreeState = (
       (curParentTree) => {
         const newRow: RowItem = structuredClone(rowTemplate);
         newRow.parentTreeNumber.value = curParentTree.parentTreeNumber;
-        newRow.coneCount.value = curParentTree.coneCount.toString();
-        newRow.pollenCount.value = curParentTree.pollenCount.toString();
-        newRow.smpSuccessPerc.value = curParentTree.smpSuccessPct.toString();
-        newRow.nonOrchardPollenContam.value = curParentTree.nonOrchardPollenContamPct.toString();
+        newRow.coneCount.value = String(curParentTree.coneCount);
+        newRow.pollenCount.value = String(curParentTree.pollenCount);
+        newRow.smpSuccessPerc.value = String(curParentTree.smpSuccessPct);
+        newRow.nonOrchardPollenContam.value = String(curParentTree.nonOrchardPollenContamPct);
         curParentTree.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
           const genWorthName = singleGenWorthObj.geneticWorthCode
             .toLowerCase() as keyof StrTypeRowItem;
@@ -303,11 +303,11 @@ export const initParentTreeState = (
       smpMixTrees.forEach(
         (curSmpMix) => {
           const newRow: RowItem = structuredClone(rowTemplate);
-          newRow.rowId = curSmpMix.parentTreeId.toString();
+          newRow.rowId = String(curSmpMix.parentTreeId);
           newRow.parentTreeNumber.value = curSmpMix.parentTreeNumber;
           newRow.isMixTab = true;
-          newRow.proportion.value = curSmpMix.proportion.toString();
-          newRow.volume.value = curSmpMix.amountOfMaterial.toString();
+          newRow.proportion.value = String(curSmpMix.proportion);
+          newRow.volume.value = String(curSmpMix.amountOfMaterial);
           curSmpMix.parentTreeGeneticQualities.forEach((singleGenWorthObj) => {
             const genWorthName = singleGenWorthObj.geneticWorthCode
               .toLowerCase() as keyof StrTypeRowItem;
@@ -1031,35 +1031,35 @@ export const fillGeoVals = (
     ...prevVals,
     meanElevation: {
       ...prevVals.meanElevation,
-      value: data.seedlot.collectionElevation?.toString() ?? ''
+      value: String(data.seedlot.collectionElevation)
     },
     meanLatDeg: {
       ...prevVals.meanLatDeg,
-      value: data.seedlot.collectionLatitudeDeg?.toString() ?? ''
+      value: String(data.seedlot.collectionLatitudeDeg)
     },
     meanLatMinute: {
       ...prevVals.meanLatMinute,
-      value: data.seedlot.collectionLatitudeMin?.toString() ?? ''
+      value: String(data.seedlot.collectionLatitudeMin)
     },
     meanLatSec: {
       ...prevVals.meanLatSec,
-      value: data.seedlot.collectionLatitudeSec?.toString() ?? ''
+      value: String(data.seedlot.collectionLatitudeSec)
     },
     meanLongDeg: {
       ...prevVals.meanLongDeg,
-      value: data.seedlot.collectionLongitudeDeg?.toString() ?? ''
+      value: String(data.seedlot.collectionLongitudeDeg)
     },
     meanLongMinute: {
       ...prevVals.meanLongMinute,
-      value: data.seedlot.collectionLongitudeMin?.toString() ?? ''
+      value: String(data.seedlot.collectionLongitudeMin)
     },
     meanLongSec: {
       ...prevVals.meanLongMinute,
-      value: data.seedlot.collectionLongitudeMin?.toString() ?? ''
+      value: String(data.seedlot.collectionLongitudeMin)
     },
     effectivePopSize: {
       ...prevVals.effectivePopSize,
-      value: data.seedlot.effectivePopulationSize?.toString() ?? ''
+      value: String(data.seedlot.effectivePopulationSize)
     }
   }));
 };

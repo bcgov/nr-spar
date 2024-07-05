@@ -21,21 +21,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  init:
+    name: Initialize
+    outputs:
+      pr: ${{ steps.pr.outputs.pr }}
+    runs-on: ubuntu-latest
+    steps:
+        # Get PR number for squash merges to main
+      - name: PR Number
+        id: pr
+        uses: bcgov-nr/action-get-pr@v0.0.1
+
   deploys:
     name: TEST
+    needs: [init]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
-      tag: ${{ inputs.tag }} # Uses PR number if blank
+      environment: test
+      tag: ${{ inputs.tag || needs.init.outputs.pr }}
       target: test
       fluentbit_target: test
 
   deploy-prod:
     name: PROD
-    needs: [deploys]
+    needs: [init, deploys]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
-      tag: ${{ inputs.tag }} # Uses PR number if blank
+      environment: prod
+      tag: ${{ inputs.tag || needs.init.outputs.pr }}
       target: prod
       fluentbit_target: production

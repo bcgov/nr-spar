@@ -447,7 +447,6 @@ class SeedlotServiceTest {
   @DisplayName("A-Class Seedlot Form success test")
   void findAclassSeedlotFormFullDataSuccessTest() {
     String seedlotNumber = "0000000";
-    
     String onwerNumber = "1234";
     String ownerLoc = "01";
     String methodOfPayment = "TEST";

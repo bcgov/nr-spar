@@ -5,12 +5,18 @@ on:
     inputs:
       ### Required
       # Nothing! Only `secrets: inherit` is required
+
       ### Typical / recommended
+      environment:
+        description: GitHub/OpenShift environment; usually PR number, test or prod
+        default: ''
+        required: false
+        type: string
       etl:
         description: Run the cronjob and verify results?  [true|false]
+        default: false
         required: false
         type: boolean
-        default: false
       fluentbit_target:
         description: FluentBit target; usually development, test or production
         default: development
@@ -18,11 +24,12 @@ on:
         type: string
       tag:
         description: Container tag; usually PR number
+        default: ${{ github.event.number }}
         required: false
         type: string
       target:
         description: Deployment target; usually PR number, test or prod
-        default: ''
+        default: ${{ github.event.number }}
         required: false
         type: string
       ### Usually a bad idea / not recommended
@@ -39,24 +46,16 @@ on:
 
 jobs:
   init:
-    name: Initialize
+    name: Deploy (init)
     environment: ${{ inputs.target }}
     outputs:
-      modded-tag: ${{ steps.mod-tag.outputs.modded-tag }}
-      pr: ${{ steps.pr.outputs.pr }}
-    permissions:
-      pull-requests: write
+      mod-tag: ${{ steps.mod-tag.outputs.mod-tag }}
     runs-on: ubuntu-22.04
     steps:
       - name: Get PR Number Mod 50
         if: github.event_name == 'pull_request'
         id: mod-tag
-        run: echo "modded-tag=$(( ${{ inputs.target || github.event.number }} % 50 ))" >> $GITHUB_OUTPUT
-
-      # Get PR number for squash merges to main
-      - name: PR Number
-        id: pr
-        uses: bcgov-nr/action-get-pr@v0.0.1
+        run: echo "mod-tag=$(( ${{ inputs.target }} % 50 ))" >> $GITHUB_OUTPUT
 
       - name: OpenShift Init
         uses: bcgov-nr/action-deployer-openshift@v2.3.0
@@ -67,8 +66,7 @@ jobs:
           file: common/openshift.init.yml
           overwrite: true
           parameters:
-            -p ZONE=${{ inputs.target || github.event.number }}
-            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            -p ZONE=${{ inputs.target }}
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
@@ -84,28 +82,43 @@ jobs:
           file: common/openshift.fluentbit.yml
           overwrite: true
           parameters:
+            -p ZONE=${{ inputs.target }}
             -p AWS_KINESIS_STREAM='${{ secrets.AWS_KINESIS_STREAM }}'
             -p AWS_KINESIS_ROLE_ARN='${{ secrets.AWS_KINESIS_ROLE_ARN }}'
             -p AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}
+            -p AWS_ACCESS_KEY_SECRET='${{ secrets.AWS_ACCESS_KEY_SECRET }}'
+
+  database:
+    name: Deploy (database)
+    environment: ${{ inputs.target }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Database
+        uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        with:
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          file: database/openshift.deploy.yml
+          overwrite: false
+          parameters:
+            -p TAG=${{ inputs.tag }}
+            -p ZONE=${{ inputs.target }}
+            -p DB_PASSWORD='${{ secrets.DB_PASSWORD }}'
+            ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
 
   deploy:
     name: Deploy
     environment: ${{ inputs.target }}
-    needs: [init]
+    needs: [database, init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
     runs-on: ubuntu-22.04
     timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
-        name: [database, backend, frontend, oracle-api, sync]
+        name: [backend, frontend, oracle-api, sync]
         include:
-          - name: database
-            file: database/openshift.deploy.yml
-            parameters:
-              ${{ github.event_name == 'pull_request' && '-p DB_PVC_SIZE=192Mi' || '' }}
-            overwrite: false
           - name: backend
             file: backend/openshift.deploy.yml
             overwrite: true
@@ -117,7 +130,7 @@ jobs:
             file: frontend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p FAM_MODDED_ZONE=${{ inputs.target || needs.init.outputs.modded-tag }}
+              -p FAM_MODDED_ZONE=${{ github.event_name == 'pull_request' && needs.init.outputs.mod-tag || inputs.target }}
               -p VITE_SPAR_BUILD_VERSION=snapshot-${{ inputs.target || github.event.number }}
               -p VITE_USER_POOLS_ID=${{ vars.VITE_USER_POOLS_ID }}
               -p VITE_USER_POOLS_WEB_CLIENT_ID=${{ vars.VITE_USER_POOLS_WEB_CLIENT_ID }}
@@ -147,8 +160,8 @@ jobs:
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
-            -p TAG=${{ inputs.tag || needs.init.outputs.pr }}
-            -p ZONE=${{ inputs.target || github.event.number }}
+            -p TAG=${{ inputs.tag }}
+            -p ZONE=${{ inputs.target }}
             ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
             ${{ matrix.parameters }}
@@ -184,7 +197,7 @@ jobs:
           oc project ${{ secrets.oc_namespace }} #Safeguard!
 
           # Create job
-          CRONJOB=${{ github.event.repository.name }}-${{ inputs.target || github.event.number }}-sync
+          CRONJOB=${{ github.event.repository.name }}-${{ inputs.target }}-sync
           RUN_JOB=${CRONJOB}-${{ github.run_number }}-${{ github.run_attempt}}
           oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
