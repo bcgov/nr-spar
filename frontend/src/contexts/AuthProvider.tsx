@@ -219,7 +219,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
     const appEnv = env.VITE_ZONE ?? 'DEV';
 
     Auth.federatedSignIn({
-      customProvider: `${(appEnv).toLocaleUpperCase()}-${signInProvider.toString()}`
+      customProvider: `${(appEnv).toLocaleUpperCase()}-${String(signInProvider)}`
     });
   };
 
