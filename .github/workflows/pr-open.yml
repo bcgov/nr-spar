@@ -20,7 +20,7 @@ jobs:
       matrix:
         package: [database, backend, frontend, oracle-api, sync]
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@feat/triggeredOutput
+      - uses: bcgov-nr/action-builder-ghcr@v2.1.0
         id: build
         with:
           package: ${{ matrix.package }}
@@ -41,34 +41,35 @@ jobs:
           # View outputs
           echo "needs.builds: ${{ toJson(needs.builds) }}"
 
-  # deploys:
-  #   name: Deploys
-  #   needs: [builds]
-  #   secrets: inherit
-  #   uses: ./.github/workflows/.deploy.yml
-  #   with:
-  #     etl: true
+  deploys:
+    name: Deploys
+    needs: [builds]
+    if: needs.builds.outputs.triggered == 'true'
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      etl: true
 
-  # tests:
-  #   name: Tests
-  #   if: needs.deploys.outputs.triggered == 'true'
-  #   needs: [deploys]
-  #   secrets: inherit
-  #   uses: ./.github/workflows/.tests.yml
+  tests:
+    name: Tests
+    if: needs.deploys.outputs.triggered == 'true'
+    needs: [deploys]
+    secrets: inherit
+    uses: ./.github/workflows/.tests.yml
 
-  # results:
-  #   name: PR Results
-  #   if: always()
-  #   # Include all needs that could have failures!
-  #   needs: [builds, deploys, tests]
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - run: |
-  #         # View results
-  #         echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+  results:
+    name: PR Results
+    if: always()
+    # Include all needs that could have failures!
+    needs: [builds, deploys, tests]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          # View results
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
 
-  #     - if: contains(needs.*.result, 'failure')
-  #       run: |
-  #         # Job failure found
-  #         echo "At least one job has failed"
-  #         exit 1
+      - if: contains(needs.*.result, 'failure')
+        run: |
+          # Job failure found
+          echo "At least one job has failed"
+          exit 1
