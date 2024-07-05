@@ -389,11 +389,11 @@ export const fillCompostitionTables = (
   const clonedState = cleanTable(state, headerConfig, currentTab, setStepData);
 
   data.forEach((row: CompUploadResponse) => {
-    const parentTreeNumber = row.parentTreeNumber.toString();
+    const parentTreeNumber = String(row.parentTreeNumber);
     // If the clone nubmer exist from user file then fill in the values
     if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
       // Cone count
-      const coneCountValue = row.coneCount.toString();
+      const coneCountValue = String(row.coneCount);
       let isInvalid = isConeCountInvalid(coneCountValue);
       clonedState.tableRowData[parentTreeNumber].coneCount.value = coneCountValue;
       clonedState.tableRowData[parentTreeNumber].coneCount.isInvalid = isInvalid;
@@ -401,7 +401,7 @@ export const fillCompostitionTables = (
         .errMsg = isInvalid ? getConeCountErrMsg() : '';
 
       // Pollen count
-      const pollenCountValue = row.pollenCount.toString();
+      const pollenCountValue = String(row.pollenCount);
       isInvalid = isPollenCountInvalid(pollenCountValue);
       clonedState.tableRowData[parentTreeNumber].pollenCount.value = pollenCountValue;
       clonedState.tableRowData[parentTreeNumber].pollenCount.isInvalid = isInvalid;
@@ -409,7 +409,7 @@ export const fillCompostitionTables = (
         .errMsg = isInvalid ? getPollenCountErrMsg() : '';
 
       // SMP Success percentage
-      const smpSuccessValue = row.smpSuccess.toString();
+      const smpSuccessValue = String(row.smpSuccess);
       isInvalid = isSmpSuccInvalid(smpSuccessValue, seedlotSpecies.code === 'PW');
       clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.value = smpSuccessValue;
       clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.isInvalid = isInvalid;
@@ -417,7 +417,7 @@ export const fillCompostitionTables = (
         .errMsg = isInvalid ? getSmpSuccErrMsg(smpSuccessValue) : '';
 
       // Non orchard pollen contamination percentage
-      const nonOrchardContamValue = row.pollenContamination.toString();
+      const nonOrchardContamValue = String(row.pollenContamination);
       isInvalid = isNonOrchardContamInvalid(nonOrchardContamValue);
       clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam
         .value = nonOrchardContamValue;
