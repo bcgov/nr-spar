@@ -365,31 +365,6 @@ export const rowTemplate: RowItem = {
     isInvalid: false,
     value: ''
   },
-  meanDegLat: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  meanMinLat: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  meanDegLong: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  meanMinLong: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  meanElevation: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
   isMixTab: false
 };
 
@@ -656,51 +631,6 @@ export const headerTemplate: Array<HeaderObj> = [
     availableInTabs: [undefined, undefined, 'mixTab']
   },
   {
-    id: 'meanDegLat',
-    name: 'Mean degrees latitude',
-    description: 'Mean degrees latitude',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
-    id: 'meanMinLat',
-    name: 'Mean minutes latitude',
-    description: 'Mean minutes latitude',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
-    id: 'meanDegLong',
-    name: 'Mean degrees longitude',
-    description: 'Mean degrees longitude',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
-    id: 'meanMinLong',
-    name: 'Mean minutes longitude',
-    description: 'Mean minutes longitude',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
-    id: 'meanElevation',
-    name: 'Mean elevation',
-    description: 'Mean elevation',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
     id: 'actions',
     name: 'Actions',
     description: 'Actions',
@@ -837,3 +767,13 @@ export const defaultMeanGeomConfig: MeanGeomInfoSectionConfigType = {
     }
   }
 };
+
+export const MIN_NE = '0.1';
+
+export const MAX_NE = '999.9';
+
+export const MAX_NE_DECIMAL = 1;
+
+export const INVALID_NE_RANGE_MSG = `Must be between ${MIN_NE} and ${MAX_NE}`;
+
+export const INVALID_NE_DECIMAL_MSG = `Cannot have more than ${MAX_NE_DECIMAL} decimal place`;

@@ -44,5 +44,13 @@ declare namespace Cypress {
      * cy.isPageTitle('Page Title')
      */
     toogleFavourite(): void
+
+    /**
+     * Custom command to save current form or section of page.
+     *
+     * @example
+     * cy.saveButton()
+     */
+    saveSeedlotRegFormProgress(): void
   }
 }
