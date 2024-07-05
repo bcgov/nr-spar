@@ -156,7 +156,7 @@ public class SaveSeedlotFormService {
    * Verify if the service initiator has the correct access.
    *
    * @param seedlot to verify
-   * @throws {@link ClientIdForbiddenException}
+   * @throw an {@link ClientIdForbiddenException}
    */
   private void verifySeedlotAccessPrivilege(String seedlotApplicantClientNumber) {
     Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
