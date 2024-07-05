@@ -13,9 +13,8 @@ jobs:
     name: Builds
     runs-on: ubuntu-22.04
     outputs:
-      triggered: ${{ steps.builds.outputs.triggered }}
-      thing: ${{ steps.thing.outputs.thing }}
-      database: ${{ steps.builds.outputs.database }}
+      triggered: ${{ steps.action.outputs.triggered }}
+      thing: ${{ steps.triggered.outputs.triggered }}
     permissions:
       packages: write
     strategy:
@@ -23,7 +22,7 @@ jobs:
         package: [database, backend, frontend, oracle-api, sync]
     steps:
       - uses: bcgov-nr/action-builder-ghcr@v2.0.2
-        id: builds
+        id: action
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
@@ -31,13 +30,11 @@ jobs:
           triggers: ('${{ matrix.package }}/')
 
       - run: |
-          # View outputs
-          echo "outputs: ${{ toJson(steps.builds.outputs) }}"
+          echo "outputs: ${{ toJson(steps.action.outputs) }}"
 
-      - id: thing
+      - id: triggered
         run: |
-          # Thing
-          echo "thing=${{ matrix.package }}" >> $GITHUB_OUTPUT
+          echo "triggered=${{ matrix.package }}" >> $GITHUB_OUTPUT
 
   check:
     name: Check Outputs
