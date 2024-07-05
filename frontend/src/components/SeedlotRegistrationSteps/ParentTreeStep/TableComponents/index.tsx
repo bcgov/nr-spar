@@ -110,7 +110,9 @@ const renderDeleteActionBtn = (
   rowData: RowItem,
   applicableGenWorths: string[],
   state: ParentTreeStepDataObj,
-  setStepData: Function
+  setStepData: Function,
+  isFormSubmitted?: boolean,
+  isReviewEdit?: boolean
 ) => (
   <Button
     kind="ghost"
@@ -118,6 +120,7 @@ const renderDeleteActionBtn = (
     renderIcon={TrashCan}
     iconDescription="Delete this row"
     onClick={() => deleteMixRow(rowData, applicableGenWorths, state, setStepData)}
+    disabled={isFormSubmitted && !isReviewEdit}
   />
 );
 
@@ -189,14 +192,22 @@ const renderTableCell = (
   state: ParentTreeStepDataObj,
   setStepData: Function,
   seedlotSpecies: MultiOptionsObj,
-  isFormSubmitted: boolean
+  isFormSubmitted: boolean,
+  editOnReview? : boolean
 ) => {
   const className = header.editable ? 'td-no-padding' : null;
   if (header.id === 'actions') {
     return (
       <TableCell key={`${header.id}-${rowData.rowId}`} className={className} id={`${rowData.rowId}-action-btn-del`}>
         {
-          renderDeleteActionBtn(rowData, applicableGenWorths, state, setStepData)
+          renderDeleteActionBtn(
+            rowData,
+            applicableGenWorths,
+            state,
+            setStepData,
+            isFormSubmitted,
+            editOnReview
+          )
         }
       </TableCell>
     );
@@ -214,7 +225,7 @@ const renderTableCell = (
                 state={state}
                 setStepData={setStepData}
                 seedlotSpecies={seedlotSpecies}
-                readOnly={isFormSubmitted}
+                readOnly={isFormSubmitted && !editOnReview}
               />
             )
             : (
@@ -236,7 +247,8 @@ export const renderTableBody = (
   state: ParentTreeStepDataObj,
   setStepData: Function,
   seedlotSpecies: MultiOptionsObj,
-  isFormSubmitted: boolean
+  isFormSubmitted: boolean,
+  editOnReview?: boolean
 ) => {
   if (currentTab === 'mixTab') {
     return (
@@ -261,7 +273,8 @@ export const renderTableBody = (
                       state,
                       setStepData,
                       seedlotSpecies,
-                      isFormSubmitted
+                      isFormSubmitted,
+                      editOnReview
                     );
                   })
               }
@@ -292,7 +305,8 @@ export const renderTableBody = (
                         state,
                         setStepData,
                         seedlotSpecies,
-                        isFormSubmitted
+                        isFormSubmitted,
+                        editOnReview
                       )
                     ))
                 }

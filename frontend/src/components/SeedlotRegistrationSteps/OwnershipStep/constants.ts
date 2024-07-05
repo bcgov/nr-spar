@@ -70,17 +70,17 @@ export const createOwnerTemplate = (
   },
   ownerPortion: {
     id: `ownership-portion-${newId}`,
-    value: ownerData.originalPctOwned.toString(),
+    value: String(ownerData.originalPctOwned),
     isInvalid: false
   },
   reservedPerc: {
     id: `ownership-reserved-${newId}`,
-    value: ownerData.originalPctRsrvd.toString(),
+    value: String(ownerData.originalPctRsrvd),
     isInvalid: false
   },
   surplusPerc: {
     id: `ownership-surplus-${newId}`,
-    value: ownerData.originalPctSrpls.toString(),
+    value: String(ownerData.originalPctSrpls),
     isInvalid: false
   },
   fundingSource: {

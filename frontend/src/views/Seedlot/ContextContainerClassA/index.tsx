@@ -680,7 +680,7 @@ const ContextContainerClassA = ({ children }: props) => {
     keys.forEach((key) => {
       const found = calculatedValues.find((calcedVal) => calcedVal.traitCode.toLowerCase() === key);
       if (found) {
-        clonedGenWorth[key].value = found.calculatedValue.toString();
+        clonedGenWorth[key].value = String(found.calculatedValue);
       }
     });
 
@@ -710,6 +710,8 @@ const ContextContainerClassA = ({ children }: props) => {
     }));
   };
 
+  const [isCalculatingPt, setIsCalculatingPt] = useState<boolean>(false);
+
   useEffect(() => {
     if (calculatedValues.length) {
       fillGenWorthVals();
@@ -724,6 +726,7 @@ const ContextContainerClassA = ({ children }: props) => {
         calculatedValues,
         geoInfoVals,
         genWorthVals,
+        setGeoInfoVals,
         setGeoInfoInputObj,
         setGenWorthVal,
         seedlotNumber,
@@ -771,7 +774,9 @@ const ContextContainerClassA = ({ children }: props) => {
         meanGeomInfos,
         setMeanGeomInfos,
         areaOfUseData,
-        setAreaOfUseData
+        setAreaOfUseData,
+        isCalculatingPt,
+        setIsCalculatingPt
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
