@@ -45,8 +45,11 @@ const RegPage = () => {
     updateProgressStatus,
     saveProgressStatus,
     isFetchingData,
-    seedlotData
+    seedlotData,
+    getFormDraftQuery
   } = useContext(ClassAContext);
+
+  const reloadFormDraft = () => getFormDraftQuery.refetch();
 
   return (
     <div className="seedlot-registration-page">
@@ -80,6 +83,7 @@ const RegPage = () => {
                             saveDescription={saveDescription}
                             mutationStatus={saveProgressStatus}
                             lastSaveTimestamp={lastSaveTimestamp}
+                            reloadFormDraft={reloadFormDraft}
                           />
                         </>
                       )
@@ -127,18 +131,18 @@ const RegPage = () => {
             : null
         }
         {
-          saveProgressStatus === 'error'
+          saveStatus === 'conflict' || saveStatus === 'error'
             ? (
               <Row>
                 <Column>
                   <ActionableNotification
-                    className="save-error-actionable-notification"
+                    className={saveStatus === 'conflict' ? 'save-conflict-actionable-notification' : 'save-error-actionable-notification'}
                     lowContrast
                     kind="error"
-                    title={`${smartSaveText.error}:\u00A0`}
-                    subtitle={smartSaveText.suggestion}
-                    actionButtonLabel={smartSaveText.idle}
-                    onActionButtonClick={() => handleSaveBtn()}
+                    title={saveStatus === 'conflict' ? `${smartSaveText.conflictTitle}` : `${smartSaveText.error}:\u00A0`}
+                    subtitle={saveStatus === 'conflict' ? smartSaveText.conflictSuggestion : smartSaveText.suggestion}
+                    actionButtonLabel={saveStatus === 'conflict' ? smartSaveText.reload : smartSaveText.idle}
+                    onActionButtonClick={saveStatus === 'conflict' ? reloadFormDraft : handleSaveBtn}
                   />
                 </Column>
               </Row>
@@ -194,9 +198,9 @@ const RegPage = () => {
                       size="lg"
                       className="form-action-btn"
                       onClick={() => handleSaveBtn()}
-                      disabled={saveProgressStatus === 'loading'}
+                      disabled={saveProgressStatus === 'loading' || saveStatus === 'conflict'}
                     >
-                      <InlineLoading status={saveStatus} description={saveDescription} />
+                      <InlineLoading status={saveStatus === 'conflict' ? 'error' : saveStatus} description={saveDescription} />
                     </Button>
                   </Column>
                 )
