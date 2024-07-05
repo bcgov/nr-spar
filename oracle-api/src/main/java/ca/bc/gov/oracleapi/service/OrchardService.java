@@ -134,12 +134,12 @@ public class OrchardService {
    * @return {@link Optional} of a {@link List} of {@link OrchardParentTreeDto}
    */
   public Optional<List<OrchardDto>> findNotRetOrchardsByVegCode(String vegCode) {
-    SparLog.info("Finding not retired Orchard by VegCode: {}", vegCode);
+    SparLog.info("Finding all Orchards by VegCode: {}", vegCode);
 
     List<OrchardDto> resultList = new ArrayList<>();
 
     List<OrchardEntity> orchardList =
-        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode.toUpperCase(), "RET");
+        orchardRepository.findAllByVegetationCode(vegCode.toUpperCase());
 
     orchardList.forEach(
         orchard -> {
