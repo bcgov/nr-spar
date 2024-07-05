@@ -93,6 +93,38 @@ def print_process_metrics(stored_metrics):
     logger.info(f"ETL Tool target database connection took {stored_metrics['time_conn_target']}")
     logger.info(f"ETL Tool target load data took {stored_metrics['time_target_load']} processing {stored_metrics['rows_target_processed']} rows")
 
+def delete_seedlot_child_tables(seedlot_number,target_db_conn, processes, stored_metrics):
+    logger.debug('Executing delete for seedlot '+seedlot_number)
+    log_message = ""
+    
+    # Initializing metric variables
+    stored_metrics['process_start_time'] = time.time()
+    stored_metrics['time_source_extract'] = None
+    stored_metrics['rows_from_source'] = 0
+    stored_metrics['time_conn_target'] = None
+    stored_metrics['rows_target_processed'] = 0
+    stored_metrics['time_target_load'] = None
+    stored_metrics['time_conn_source'] = None
+
+    #processes are in RI order - reverse order for deletes to avoid RI constraint errors
+    for tablerow in reversed(processes):
+        table = tablerow[0]
+        if table['target_table'] != "the.seedlot" and table['run_mode'] == "UPSERT_WITH_DELETE":
+            print(f"calling delete for {seedlot_number} table {table['target_table']}")
+            stored_metrics['rows_target_processed'] = target_db_conn.delete_seedlot_child_table(table['target_table'],seedlot_number)
+
+    stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
+    stored_metrics['process_end_time'] = datetime.now()
+                
+    #process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
+    #                                                    log_message=log_message,
+    #                                                    execution_status='SKIPPED', ## No error, but
+    #                                                    )
+    logger.debug('Finished deletions')
+    #data_sync_ctl.save_execution_log(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
+
+    return stored_metrics
+
 
 def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, target_db_conn, process, oracle_config, postgres_config, stored_metrics):
     logger.debug('Executing process for seedlot '+seedlot_number)
@@ -249,7 +281,6 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
             seedlots_df = pd.read_sql_query(sql=query_sql, con=source_db_conn.engine, params=params)
             logger.debug('Main driver SEEDLOT data loaded on in-memory dataframe')
             
-            #TODO Add more
             processes = [[{"interface_id":"SEEDLOT_EXTRACT","execution_id":"101","execution_order":"10","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_EXTRACT.sql","source_table":"spar.seedlot","source_db_type":"POSTGRES","target_table":"the.seedlot","target_primary_key":"seedlot_number","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"extraction_st_date,extraction_end_date,seed_store_client_number,seed_store_client_locn,temporary_storage_start_date,temporary_storage_end_date,seedlot_status_code"}]
                         ,[{"interface_id":"SEEDLOT_SEED_PLAN_ZONE_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_SEED_PLAN_ZONE_EXTRACT.sql","source_table":"spar.seedlot_seed_plan_zone","source_db_type":"POSTGRES","target_table":"the.seedlot_plan_zone","target_primary_key":"seedlot_number,seed_plan_zone_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                         ,[{"interface_id":"SEEDLOT_GENETIC_WORTH_EXTRACT","execution_id":"103","execution_order":"30","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_GENETIC_WORTH_EXTRACT.sql","source_table":"spar.seedlot_genetic_worth","source_db_type":"POSTGRES","target_table":"the.seedlot_genetic_worth","target_primary_key":"seedlot_number,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
@@ -258,11 +289,18 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                         ,[{"interface_id":"SEEDLOT_PARENT_TREE_GEN_QLTY","execution_id":"106","execution_order":"60","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_GEN_QLTY.sql","source_table":"spar.seedlot_parent_tree_gen_qlty","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                         ,[{"interface_id":"SEEDLOT_PARENT_TREE_SMP_MIX","execution_id":"107","execution_order":"70","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_SMP_MIX.sql","source_table":"spar.seedlot_parent_tree_smp_mix","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_smp_mix","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                         ,[{"interface_id":"SMP_MIX_EXTRACT","execution_id":"108","execution_order":"80","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_EXTRACT.sql","source_table":"spar.smp_mix","source_db_type":"POSTGRES","target_table":"the.smp_mix","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                        ,[{"interface_id":"SMP_MIX_GEN_QLTY_EXTRACT","execution_id":"109","execution_order":"90","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_GEN_QLTY_EXTRACT.sql","source_table":"spar.smp_mix_gen_qlty","source_db_type":"POSTGRES","target_table":"the.smp_mix_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]]
+                        ,[{"interface_id":"SMP_MIX_GEN_QLTY_EXTRACT","execution_id":"109","execution_order":"90","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_GEN_QLTY_EXTRACT.sql","source_table":"spar.smp_mix_gen_qlty","source_db_type":"POSTGRES","target_table":"the.smp_mix_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                        ]
 
             with db_conn.database_connection(oracle_config) as target_db_conn:
                 for seedlot in seedlots_df.itertuples():
                     temp_time = time.time()
+
+                    #delete all tables in RI order (reversing order of processes dataframe)
+                    stored_metrics = delete_seedlot_child_tables(seedlot_number=seedlot.seedlot_number,
+                                                    target_db_conn=target_db_conn,
+                                                    processes=processes, 
+                                                    stored_metrics=stored_metrics)
 
                     # All processes to be executed from configuration 
                     for processrow in processes:

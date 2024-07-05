@@ -176,10 +176,10 @@ class database_connection(object):
         logger.debug('run_mode is '+run_mode)
         onconflictstatement = ""
 
-        if run_mode == "UPSERT_WITH_DELETE":
-            print(f"Deleting {table_name} for seedlot {dataframe.at[0,'seedlot_number']}")
-            #delete for seedlot 
-            self.delete_seedlot_child_table(table_name, dataframe.at[0,'seedlot_number']) 
+        #if run_mode == "UPSERT_WITH_DELETE":
+        #    print(f"Deleting {table_name} for seedlot {dataframe.at[0,'seedlot_number']}")
+        #    #delete for seedlot 
+        #    self.delete_seedlot_child_table(table_name, dataframe.at[0,'seedlot_number']) 
 
         i = 0
         for row in dataframe.itertuples():

@@ -1,4 +1,10 @@
 /* --- EXTRACT FROM POSTGRES spar.seedlot table */
+WITH seedlot_coll_methods
+ AS
+ (SELECT seedlot_number
+       , TO_CHAR(cone_collection_method_code,'FM00') cone_collection_method_code
+	   , ROW_NUMBER() OVER (PARTITION BY seedlot_number ORDER BY entry_timestamp) rown
+	FROM spar.seedlot_collection_method)
 SELECT 
     s.applicant_client_number,
     s.applicant_email_address,
@@ -25,7 +31,9 @@ SELECT
 	,s.collection_longitude_deg            		as COLLECTION_LONG_DEG
 	,s.collection_longitude_min            		as COLLECTION_LONG_MIN
 	,s.collection_longitude_sec            		as COLLECTION_LONG_SEC
-	,s.COLLECTION_START_DATE 
+	,s.COLLECTION_START_DATE
+	,scm1.cone_collection_method_code
+	,scm2.cone_collection_method_code           as CONE_COLLECTION_METHOD2_CODE
 	,s.CONTAMINANT_POLLEN_BV
 	,case when s.CONTROLLED_CROSS_IND = True then 'Y' when  CONTROLLED_CROSS_IND = False then 'N' else '' end as CONTROLLED_CROSS_IND
 	,s.DECLARED_TIMESTAMP
@@ -95,6 +103,10 @@ SELECT
 	,s.VEGETATION_CODE
 	,s.VOL_PER_CONTAINER
 FROM spar.seedlot s
+LEFT OUTER JOIN seedlot_coll_methods scm1 
+             ON (scm1.seedlot_number = s.seedlot_number AND scm1.rown = 1)
+LEFT OUTER JOIN seedlot_coll_methods scm2
+             ON (scm2.seedlot_number = s.seedlot_number AND scm2.rown = 2)
 LEFT OUTER JOIN (SELECT po.seedlot_number
                       , po.orchard_id 
                    FROM spar.seedlot_orchard po
