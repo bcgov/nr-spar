@@ -68,7 +68,7 @@ public class SaveSeedlotFormService {
       Integer prevRevCount = data.revisionCount();
       Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
 
-      if (prevRevCount != currRevCount) {
+      if (!prevRevCount.equals(currRevCount)) {
         // Conflict detected
         SparLog.info(
             "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
@@ -153,7 +153,7 @@ public class SaveSeedlotFormService {
   }
 
   /**
-   * Verify if the service initiator  has the correct access.
+   * Verify if the service initiator has the correct access.
    *
    * @param seedlot to verify
    * @throw an {@link ClientIdForbiddenException}

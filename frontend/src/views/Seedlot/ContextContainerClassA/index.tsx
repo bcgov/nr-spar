@@ -38,6 +38,7 @@ import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/constants';
 import { MeanGeomInfoSectionConfigType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import { StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
@@ -60,7 +61,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import { StringInputType } from '../../../types/FormInputType';
 
 type props = {
   children: React.ReactNode
