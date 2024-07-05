@@ -13,9 +13,9 @@ jobs:
     name: Builds
     runs-on: ubuntu-22.04
     outputs:
-      triggered: steps.builds.outputs.triggered
-      thing: steps.builds.outputs.thing
-      database: steps.builds.outputs.database
+      triggered: ${{ steps.builds.outputs.triggered }}
+      thing: ${{ steps.builds.outputs.thing}}
+      database: ${{ steps.builds.outputs.database}}
     permissions:
       packages: write
     strategy:
