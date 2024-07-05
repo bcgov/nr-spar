@@ -11,10 +11,11 @@ import { geneticWorthDict } from './constants';
 
 type props = {
   disableOptions: boolean,
-  setShowInfoSections: React.Dispatch<React.SetStateAction<boolean>>
+  setShowInfoSections: React.Dispatch<React.SetStateAction<boolean>>,
+  isReview?: boolean
 }
 
-const CalculateMetrics = ({ disableOptions, setShowInfoSections }: props) => {
+const CalculateMetrics = ({ disableOptions, setShowInfoSections, isReview }: props) => {
   const {
     allStepData: { parentTreeStep: state },
     genWorthInfoItems,
@@ -24,10 +25,13 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections }: props) => {
     popSizeAndDiversityConfig,
     setPopSizeAndDiversityConfig,
     meanGeomInfos,
-    setMeanGeomInfos
+    setMeanGeomInfos,
+    setIsCalculatingPt,
+    setGeoInfoVals,
+    setGenWorthVal
   } = useContext(ClassAContext);
 
-  if (isFormSubmitted) {
+  if (isFormSubmitted && !isReview) {
     return null;
   }
 
@@ -40,7 +44,11 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections }: props) => {
       popSizeAndDiversityConfig,
       setPopSizeAndDiversityConfig,
       meanGeomInfos,
-      setMeanGeomInfos
+      setMeanGeomInfos,
+      setIsCalculatingPt,
+      setGeoInfoVals,
+      setGenWorthVal,
+      isReview
     )
   });
 
@@ -62,6 +70,7 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections }: props) => {
         }
         disabled={disableOptions}
         onClick={() => {
+          setIsCalculatingPt(true);
           calculateGenWorthQuery.mutate(
             generatePtValCalcPayload(
               state,
@@ -70,15 +79,19 @@ const CalculateMetrics = ({ disableOptions, setShowInfoSections }: props) => {
             )
           );
 
-          setShowInfoSections((show) => {
-            if (!show) {
-              return !show;
-            }
-            return show;
-          });
+          if (!isReview) {
+            setShowInfoSections((show) => {
+              if (!show) {
+                return !show;
+              }
+              return show;
+            });
+          }
         }}
       >
-        Calculate metrics
+        {
+          `${isReview ? 'Recalculate' : 'Calculate'} metrics`
+        }
       </Button>
     </Row>
   );

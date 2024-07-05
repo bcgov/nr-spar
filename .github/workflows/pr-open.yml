@@ -12,22 +12,39 @@ jobs:
   builds:
     name: Builds
     runs-on: ubuntu-22.04
+    outputs:
+      triggered: ${{ steps.build.outputs.triggered }}
     permissions:
       packages: write
     strategy:
       matrix:
         package: [database, backend, frontend, oracle-api, sync]
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@v2.0.2
+      - uses: bcgov-nr/action-builder-ghcr@v2.1.0
+        id: build
         with:
           package: ${{ matrix.package }}
           tag: ${{ github.event.number }}
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
+      - run: |
+          # View outputs
+          echo "outputs: ${{ toJson(needs.build.outputs) }}"
+
+  check:
+    name: Check Outputs
+    runs-on: ubuntu-22.04
+    needs: [builds]
+    steps:
+      - run: |
+          # View outputs
+          echo "needs.builds: ${{ toJson(needs.builds) }}"
+
   deploys:
     name: Deploys
     needs: [builds]
+    if: needs.builds.outputs.triggered == 'true'
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
