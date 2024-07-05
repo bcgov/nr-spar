@@ -1,4 +1,4 @@
-import { BooleanInputType, OptionsInputType, StringInputType } from './FormInputType';
+import { BooleanInputType, NumberInputType, OptionsInputType, StringInputType } from './FormInputType';
 
 /**
  * The form data obj used in seedlot creation.
@@ -32,4 +32,5 @@ export type SeedlotPatchPayloadType = {
   seedlotSourceCode: string,
   toBeRegistrdInd: boolean,
   bcSourceInd: boolean
+  revisionCount: number | undefined;
 }

@@ -116,13 +116,23 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
     ) => patchSeedlotApplicationInfo(seedlotNumber ?? '', payload),
     onSuccess: () => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? '')),
     onError: (err: AxiosError) => {
-      toast.error(
-        <ErrorToast
-          title="Save failure"
-          subtitle={`An unexpected error occurred while saving your edits. Please try again, and if the issue persists, contact support. ${err.code}: ${err.message}`}
-        />,
-        ErrToastOption
-      );
+      if (err.response?.status === 409) {
+        toast.error(
+          <ErrorToast
+            title="Save failure"
+            subtitle={'Unable to update Seedlot applicant information! The Seedlot record was updated by another user. Please refresh your page and try again!'}
+          />,
+          ErrToastOption
+        );
+      } else {
+        toast.error(
+          <ErrorToast
+            title="Save failure"
+            subtitle={`An unexpected error occurred while saving your edits. Please try again, and if the issue persists, contact support. ${err.code}: ${err.message}`}
+          />,
+          ErrToastOption
+        );
+      }
     }
   });
 
@@ -153,7 +163,8 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
       applicantEmailAddress: applicantData.email.value,
       seedlotSourceCode: applicantData.sourceCode.value,
       toBeRegistrdInd: applicantData.willBeRegistered.value,
-      bcSourceInd: applicantData.isBcSource.value
+      bcSourceInd: applicantData.isBcSource.value,
+      revisionCount: seedlotQuery.data?.revisionCount
     });
   };
 

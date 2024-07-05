@@ -348,7 +348,7 @@ public class SeedlotEndpoint {
   /**
    * PATCH an entry on the Seedlot table.
    *
-   * @param patchDto A {@link SeedlotApplicationPatchDto} containig all required field to get a new
+   * @param patchDto A {@link SeedlotApplicationPatchDto} containing all required field to get a new
    *     registration started.
    * @return A {@link Seedlot} with all updated values.
    */
@@ -400,7 +400,7 @@ public class SeedlotEndpoint {
           @Valid
           SeedlotApplicationPatchDto patchDto) {
 
-    return seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
+    return seedlotService.patchApplicantInfo(seedlotNumber, patchDto);
   }
 
   /**
