@@ -11,9 +11,16 @@
     padding: 0;
   }
 
-  .review-seedlots-title {
+  .review-seedlots-title,
+  .go-to-seedlot-section {
     justify-content: space-between;
     margin: 0 2.5rem 2.5rem 2.5rem;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   .reg-seedlot-btn {
@@ -40,8 +47,16 @@
     width: 100%;
   }
 
+  .review-seedlots-table-wrapper {
+    overflow: hidden;
+    background: var(--#{vars.$bcgov-prefix}-layer-01);
+  }
+
   .review-seedlots-data-table-row {
     margin-inline: 0;
+    margin: 2.5rem;
+    border: solid 1px var(--#{vars.$bcgov-prefix}-border-subtle-01);
+    border-radius: 4px;
   }
 
   .no-padding-col {
