@@ -312,7 +312,7 @@ class OrchardServiceTest {
 
     List<OrchardEntity> repoResult = List.of(firstOrchard, secondOrchard, expiredOrchard);
 
-    when(orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, "RET"))
+    when(orchardRepository.findAllByVegetationCode(vegCode))
         .thenReturn(repoResult);
 
     List<OrchardDto> listToTest = orchardService.findNotRetOrchardsByVegCode(vegCode).get();

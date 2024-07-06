@@ -384,7 +384,16 @@ const ContextContainerClassA = ({ children }: props) => {
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
     queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
-    enabled: seedlotQuery.status === 'success'
+    enabled: seedlotQuery.status === 'success',
+    select: (orchards) => orchards
+      .map((orchard) => (
+        ({
+          code: orchard.id,
+          description: orchard.name,
+          label: `${orchard.id} - ${orchard.name} - ${orchard.lotTypeCode} - ${orchard.stageCode}`
+        })
+      ))
+      .sort((a, b) => Number(a.code) - Number(b.code))
   });
 
   useEffect(() => {
