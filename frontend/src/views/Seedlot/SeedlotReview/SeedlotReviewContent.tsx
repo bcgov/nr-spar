@@ -35,7 +35,10 @@ import ExtractionStorageReviewRead from '../../../components/SeedlotReviewSteps/
 import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/ExtractionStorage/Edit';
 
 import { validateRegForm } from '../CreateAClass/utils';
-import { validateCollectionStep, verifyCollectionStepCompleteness } from '../ContextContainerClassA/utils';
+import {
+  validateCollectionStep, validateOwnershipStep, verifyCollectionStepCompleteness,
+  verifyOwnershipStepCompleteness
+} from '../ContextContainerClassA/utils';
 
 import { getBreadcrumbs } from './utils';
 import ClassAContext from '../ContextContainerClassA/context';
@@ -104,13 +107,23 @@ const SeedlotReviewContent = () => {
     }
 
     // Step 2: Collection
-    const isCollectionInvalid = validateCollectionStep(allStepData.collectionStep, focusOnInvalid);
-    if (isCollectionInvalid) {
+    if (validateCollectionStep(allStepData.collectionStep, focusOnInvalid)) {
       return isValid;
     }
     if (!verifyCollectionStepCompleteness(allStepData.collectionStep, focusOnIncompelte)) {
       return isValid;
     }
+
+    // Step 3: Ownership
+    if (validateOwnershipStep(allStepData.ownershipStep, focusOnInvalid)) {
+      return isValid;
+    }
+    if (!verifyOwnershipStepCompleteness(allStepData.ownershipStep, focusOnIncompelte)) {
+      return isValid;
+    }
+
+    // Step 4: Interim storage
+
 
     isValid = true;
     return isValid;

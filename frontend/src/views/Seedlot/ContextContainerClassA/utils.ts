@@ -425,16 +425,29 @@ export const validateCollectionStep = (
  * Validate Ownership Step.
  * Return true if it's invalid, false otherwise.
  */
-export const validateOwnershipStep = (ownershipData: Array<SingleOwnerForm>): boolean => {
+export const validateOwnershipStep = (
+  ownershipData: Array<SingleOwnerForm>,
+  focusOnInvalid?: boolean
+): boolean => {
   let isInvalid = false;
   const ownershipKeys = Object.keys(ownershipData[0]) as Array<keyof SingleOwnerForm>;
+  let idToFocus = '';
+
   ownershipData.forEach((owner) => {
     ownershipKeys.forEach((key) => {
       if (key !== 'id' && owner[key].isInvalid) {
         isInvalid = true;
+        if (!idToFocus) {
+          idToFocus = owner[key].id;
+        }
       }
     });
   });
+
+  if (focusOnInvalid) {
+    focusById(idToFocus);
+  }
+
   return isInvalid;
 };
 
@@ -502,20 +515,48 @@ export const verifyCollectionStepCompleteness = (
  * Verify if the ownership step is complete
  * Return true if it's complete, false otherwise
  */
-export const verifyOwnershipStepCompleteness = (ownershipData: Array<SingleOwnerForm>): boolean => {
+export const verifyOwnershipStepCompleteness = (
+  ownershipData: Array<SingleOwnerForm>,
+  focusOnIncomplete?: boolean
+): boolean => {
+  let isComplete = true;
+  let idToFocus = '';
+
   for (let i = 0; i < ownershipData.length; i += 1) {
-    if (!ownershipData[i].ownerAgency.value.code.length
-      || !ownershipData[i].ownerCode.value.length
-      || !ownershipData[i].ownerPortion.value.length
-      || !ownershipData[i].reservedPerc.value.length
-      || !ownershipData[i].surplusPerc.value.length
-      || !(ownershipData[i].fundingSource.value && ownershipData[i].fundingSource.value.code)
-      || !(ownershipData[i].methodOfPayment.value && ownershipData[i].methodOfPayment.value.code)
-    ) {
-      return false;
+    if (!ownershipData[i].ownerAgency.value.code.length) {
+      isComplete = false;
+      idToFocus = ownershipData[i].ownerAgency.id;
+    } else if (!ownershipData[i].ownerCode.value.length) {
+      isComplete = false;
+      idToFocus = ownershipData[i].ownerCode.id;
+    } else if (!ownershipData[i].ownerPortion.value.length) {
+      isComplete = false;
+      idToFocus = ownershipData[i].ownerPortion.id;
+    } else if (!ownershipData[i].reservedPerc.value.length) {
+      isComplete = false;
+      idToFocus = ownershipData[i].reservedPerc.id;
+    } else if (!ownershipData[i].surplusPerc.value.length) {
+      isComplete = false;
+      idToFocus = ownershipData[i].surplusPerc.id;
+    } else if (
+      !(ownershipData[i].fundingSource.value
+        && ownershipData[i].fundingSource.value.code
+      )) {
+      isComplete = false;
+      idToFocus = ownershipData[i].fundingSource.id;
+    } else if (
+      !(ownershipData[i].methodOfPayment.value
+        && ownershipData[i].methodOfPayment.value.code
+      )) {
+      isComplete = false;
+      idToFocus = ownershipData[i].methodOfPayment.id;
     }
   }
-  return true;
+  if (focusOnIncomplete) {
+    focusById(idToFocus);
+  }
+
+  return isComplete;
 };
 
 /**
