@@ -42,7 +42,10 @@ import {
   verifyParentStepCompleteness
 } from '../ContextContainerClassA/utils';
 
-import { getBreadcrumbs, validateAreaOfUse, validateCollectGeoVals, validateGeneticWorth } from './utils';
+import {
+  getBreadcrumbs, validateAreaOfUse, validateCollectGeoVals,
+  validateGeneticWorth
+} from './utils';
 import ClassAContext from '../ContextContainerClassA/context';
 
 const SeedlotReviewContent = () => {

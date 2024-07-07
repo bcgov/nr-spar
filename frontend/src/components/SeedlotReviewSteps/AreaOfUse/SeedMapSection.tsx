@@ -1,6 +1,8 @@
 import React from 'react';
 import { Row, Column, Button } from '@carbon/react';
 import { MapBoundaryVegetation } from '@carbon/icons-react';
+// eslint-disable-next-line import/no-unresolved
+import AreaOfUsePdf from '../../../assets/downloadable/test_parent_tree_AOU.pdf?url';
 
 const SeedMapSection = () => (
   <>
@@ -17,7 +19,7 @@ const SeedMapSection = () => (
           renderIcon={MapBoundaryVegetation}
           iconDescription="map icon"
           onClick={
-            () => window.open('https://www2.gov.bc.ca', '_blank', 'noopener')
+            () => window.open(AreaOfUsePdf, '_blank', 'noopener')
           }
         >
           View Tested Parent Tree Areas of Use
