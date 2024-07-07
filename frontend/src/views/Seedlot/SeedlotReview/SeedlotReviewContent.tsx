@@ -36,9 +36,10 @@ import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/
 
 import { validateRegForm } from '../CreateAClass/utils';
 import {
-  validateCollectionStep, validateInterimStep, validateOwnershipStep, verifyCollectionStepCompleteness,
-  verifyInterimStepCompleteness,
-  verifyOwnershipStepCompleteness
+  validateCollectionStep, validateInterimStep, validateOrchardStep,
+  validateOwnershipStep, validateParentStep, verifyCollectionStepCompleteness,
+  verifyInterimStepCompleteness, verifyOrchardStepCompleteness, verifyOwnershipStepCompleteness,
+  verifyParentStepCompleteness
 } from '../ContextContainerClassA/utils';
 
 import { getBreadcrumbs } from './utils';
@@ -100,7 +101,11 @@ const SeedlotReviewContent = () => {
   const verifyFormData = (): boolean => {
     let isValid = false;
     const focusOnInvalid = true;
-    const focusOnIncompelte = true;
+    const focusOnIncomplete = true;
+    const {
+      collectionStep, ownershipStep, interimStep,
+      orchardStep, parentTreeStep, extractionStorageStep
+    } = allStepData;
 
     // Step 1: Applicant and Seedlot
     if (!validateRegForm(applicantData, setApplicantData)) {
@@ -108,26 +113,42 @@ const SeedlotReviewContent = () => {
     }
 
     // Step 2: Collection
-    if (validateCollectionStep(allStepData.collectionStep, focusOnInvalid)) {
+    if (validateCollectionStep(collectionStep, focusOnInvalid)) {
       return isValid;
     }
-    if (!verifyCollectionStepCompleteness(allStepData.collectionStep, focusOnIncompelte)) {
+    if (!verifyCollectionStepCompleteness(collectionStep, focusOnIncomplete)) {
       return isValid;
     }
 
     // Step 3: Ownership
-    if (validateOwnershipStep(allStepData.ownershipStep, focusOnInvalid)) {
+    if (validateOwnershipStep(ownershipStep, focusOnInvalid)) {
       return isValid;
     }
-    if (!verifyOwnershipStepCompleteness(allStepData.ownershipStep, focusOnIncompelte)) {
+    if (!verifyOwnershipStepCompleteness(ownershipStep, focusOnIncomplete)) {
       return isValid;
     }
 
     // Step 4: Interim storage
-    if (validateInterimStep(allStepData.interimStep, focusOnInvalid)) {
+    if (validateInterimStep(interimStep, focusOnInvalid)) {
       return isValid;
     }
-    if (!verifyInterimStepCompleteness(allStepData.interimStep, focusOnIncompelte)) {
+    if (!verifyInterimStepCompleteness(interimStep, focusOnIncomplete)) {
+      return isValid;
+    }
+
+    // Step 5: Orchard
+    if (validateOrchardStep(orchardStep, focusOnInvalid)) {
+      return isValid;
+    }
+    if (!verifyOrchardStepCompleteness(orchardStep, focusOnIncomplete)) {
+      return isValid;
+    }
+
+    // Step 6: Parent Tree
+    if (validateParentStep(parentTreeStep, focusOnInvalid)) {
+      return isValid;
+    }
+    if (!verifyParentStepCompleteness(parentTreeStep, focusOnIncomplete)) {
       return isValid;
     }
 

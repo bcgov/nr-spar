@@ -444,7 +444,7 @@ export const validateOwnershipStep = (
     });
   });
 
-  if (focusOnInvalid) {
+  if (isInvalid && focusOnInvalid) {
     focusById(idToFocus);
   }
 
@@ -514,7 +514,7 @@ export const verifyCollectionStepCompleteness = (
     // assuming that there will always be a code 1 in the list of collection methods.
     idToFocus = 'cone-collection-method-checkbox-1';
   }
-  if (focusOnIncomplete) {
+  if (!isComplete && focusOnIncomplete) {
     focusById(idToFocus);
   }
 
@@ -562,7 +562,7 @@ export const verifyOwnershipStepCompleteness = (
       idToFocus = ownershipData[i].methodOfPayment.id;
     }
   }
-  if (focusOnIncomplete) {
+  if (!isComplete && focusOnIncomplete) {
     focusById(idToFocus);
   }
 
@@ -600,7 +600,7 @@ export const verifyInterimStepCompleteness = (
     isComplete = false;
   }
 
-  if (focusOnIncomplete) {
+  if (!isComplete && focusOnIncomplete) {
     focusById(idToFocus);
   }
 
@@ -625,18 +625,29 @@ export const getSpeciesOptionByCode = (
  * Validate Orchard Step.
  * Return true if it's Invalid, false otherwise.
  */
-export const validateOrchardStep = (orchardStepData: OrchardForm): boolean => {
+export const validateOrchardStep = (
+  orchardStepData: OrchardForm,
+  focusOnInvalid?: boolean
+): boolean => {
   let isInvalid = false;
+  let idToFocus = '';
 
-  if (
-    orchardStepData.femaleGametic.isInvalid
-    || orchardStepData.maleGametic.isInvalid
-    || orchardStepData.breedingPercentage.isInvalid
-  ) {
+  if (orchardStepData.femaleGametic.isInvalid) {
     isInvalid = true;
+    idToFocus = orchardStepData.femaleGametic.id;
+  } else if (orchardStepData.maleGametic.isInvalid) {
+    isInvalid = true;
+    idToFocus = orchardStepData.maleGametic.id;
+  } else if (orchardStepData.breedingPercentage.isInvalid) {
+    isInvalid = true;
+    idToFocus = orchardStepData.breedingPercentage.id;
+  }
+  // Booleans are either true or false so there's no need to check the rest.
+
+  if (isInvalid && focusOnInvalid) {
+    focusById(idToFocus);
   }
 
-  // Booleans are either true or false so there's no need to check them.
   return isInvalid;
 };
 
@@ -644,7 +655,10 @@ export const validateOrchardStep = (orchardStepData: OrchardForm): boolean => {
  * Verify if the orchard step is complete
  * Return true if it's complete, false otherwise
  */
-export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boolean => {
+export const verifyOrchardStepCompleteness = (
+  orchardStepData: OrchardForm,
+  focusOnIncomplete?: boolean
+): boolean => {
   let isComplete = false;
 
   orchardStepData.orchards.forEach((orchard) => {
@@ -658,11 +672,18 @@ export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boo
     return isComplete;
   }
 
-  if (
-    !orchardStepData.femaleGametic.value.code.length
-    || !orchardStepData.maleGametic.value.code.length
-  ) {
+  let idToFocus = '';
+
+  if (!orchardStepData.femaleGametic.value.code) {
     isComplete = false;
+    idToFocus = orchardStepData.femaleGametic.id;
+  } else if (!orchardStepData.maleGametic.value.code) {
+    isComplete = false;
+    idToFocus = orchardStepData.maleGametic.id;
+  }
+
+  if (!isComplete && focusOnIncomplete) {
+    focusById(idToFocus);
   }
 
   return isComplete;
@@ -672,8 +693,12 @@ export const verifyOrchardStepCompleteness = (orchardStepData: OrchardForm): boo
  * Validate Parent tree Step.
  * Return true if it's Invalid, false otherwise.
  */
-export const validateParentStep = (parentStepData: ParentTreeStepDataObj): boolean => {
+export const validateParentStep = (
+  parentStepData: ParentTreeStepDataObj,
+  focusOnInvalid?: boolean
+): boolean => {
   let isInvalid = false;
+  let idToFocus = '';
   // Possible invalid data are contained in tableRowData and mixTabData
   const { tableRowData, mixTabData } = parentStepData;
   // Combine the two data objects
@@ -691,12 +716,17 @@ export const validateParentStep = (parentStepData: ParentTreeStepDataObj): boole
         if (key !== 'isMixTab' && key !== 'rowId') {
           if (row[key].isInvalid) {
             isInvalid = true;
+            idToFocus = row[key].id;
             return stop;
           }
         }
       }
       return proceed;
     });
+  }
+
+  if (isInvalid && focusOnInvalid) {
+    focusById(idToFocus);
   }
 
   return isInvalid;
@@ -707,7 +737,10 @@ export const validateParentStep = (parentStepData: ParentTreeStepDataObj): boole
  * Return true if it's complete, false otherwise.
  * For this step, as long as there is at least 0.0000000001 (10 dec places) cone then it's complete.
  */
-export const verifyParentStepCompleteness = (parentStepData: ParentTreeStepDataObj): boolean => {
+export const verifyParentStepCompleteness = (
+  parentStepData: ParentTreeStepDataObj,
+  focusOnIncomplete?: boolean
+): boolean => {
   const { tableRowData } = parentStepData;
 
   const tableRows = Object.values(tableRowData);
@@ -718,6 +751,10 @@ export const verifyParentStepCompleteness = (parentStepData: ParentTreeStepDataO
   const smallestNumPossible = new BigNumber(1 / (10 ** MAX_DECIMAL_DIGITS));
 
   const isComplete = sum.gte(smallestNumPossible);
+
+  if (!isComplete && focusOnIncomplete) {
+    focusById('parent-tree-step-tab-list-id');
+  }
 
   return isComplete;
 };
