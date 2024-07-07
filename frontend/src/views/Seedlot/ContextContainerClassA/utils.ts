@@ -321,9 +321,8 @@ export const initParentTreeState = (
               newRow[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
             }
           });
-          smpMixRows = Object.assign(smpMixRows, {
-            [index]: newRow
-          });
+          smpMixRows = Object
+            .assign(smpMixRows, { [index]: populateStrInputId(String(index), newRow) });
         }
       );
     }
