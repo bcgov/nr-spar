@@ -1,6 +1,7 @@
 import ROUTES from '../../../routes/constants';
 import focusById from '../../../utils/FocusUtils';
 import { addParamToPath } from '../../../utils/PathUtils';
+import { AreaOfUseDataType } from '../ContextContainerClassA/definitions';
 import { GenWorthValType, GeoInfoValType } from './definitions';
 
 export const getBreadcrumbs = (seedlotNumber: string) => [
@@ -56,8 +57,42 @@ export const validateCollectGeoVals = (geoInfoVal: GeoInfoValType) => {
     const firstkey = invalidObjKeys[0];
 
     const idToFocus = geoInfoVal[firstkey].id;
-    console.log(idToFocus);
     focusById(idToFocus);
+  }
+
+  return isInvalid;
+};
+
+export const validateAreaOfUse = (areaOfUseData: AreaOfUseDataType) => {
+  const keys = Object.keys(areaOfUseData) as (keyof AreaOfUseDataType)[];
+
+  // Validate everything but additionalSpzList
+  const invalidObjKeys = keys.filter((key) => (
+    key !== 'additionalSpzList'
+    && areaOfUseData[key].isInvalid
+  ));
+
+  let isInvalid = false;
+
+  if (invalidObjKeys.length > 0) {
+    isInvalid = true;
+    const firstkey = invalidObjKeys[0];
+
+    if (firstkey !== 'additionalSpzList') {
+      const idToFocus = areaOfUseData[firstkey].id;
+      focusById(idToFocus);
+      return isInvalid;
+    }
+  }
+
+  // validate additionalSpzList
+  if (areaOfUseData.additionalSpzList.length > 0) {
+    const invalidSpzObjs = areaOfUseData.additionalSpzList.filter((spz) => spz.isInvalid);
+    if (invalidSpzObjs.length > 0) {
+      isInvalid = true;
+      const firstObjId = invalidSpzObjs[0].id;
+      focusById(firstObjId);
+    }
   }
 
   return isInvalid;
