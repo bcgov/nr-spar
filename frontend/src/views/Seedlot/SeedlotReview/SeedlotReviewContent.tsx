@@ -36,7 +36,8 @@ import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/
 
 import { validateRegForm } from '../CreateAClass/utils';
 import {
-  validateCollectionStep, validateOwnershipStep, verifyCollectionStepCompleteness,
+  validateCollectionStep, validateInterimStep, validateOwnershipStep, verifyCollectionStepCompleteness,
+  verifyInterimStepCompleteness,
   verifyOwnershipStepCompleteness
 } from '../ContextContainerClassA/utils';
 
@@ -123,7 +124,12 @@ const SeedlotReviewContent = () => {
     }
 
     // Step 4: Interim storage
-
+    if (validateInterimStep(allStepData.interimStep, focusOnInvalid)) {
+      return isValid;
+    }
+    if (!verifyInterimStepCompleteness(allStepData.interimStep, focusOnIncompelte)) {
+      return isValid;
+    }
 
     isValid = true;
     return isValid;

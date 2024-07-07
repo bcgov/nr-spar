@@ -455,14 +455,24 @@ export const validateOwnershipStep = (
  * Validate Interim Step.
  * Return true if it's invalid, false otherwise.
  */
-export const validateInterimStep = (interimData: InterimForm): boolean => {
+export const validateInterimStep = (
+  interimData: InterimForm,
+  focusOnInvalid?: boolean
+): boolean => {
   let isInvalid = false;
   const interimKeys = Object.keys(interimData) as Array<keyof InterimForm>;
-  interimKeys.forEach((key) => {
-    if (interimData[key].isInvalid) {
-      isInvalid = true;
+
+  const invalidObjs = interimKeys.filter((key) => interimData[key].isInvalid);
+
+  if (invalidObjs.length > 0) {
+    const firstInvalidKey = invalidObjs[0];
+    isInvalid = true;
+
+    if (focusOnInvalid) {
+      focusById(interimData[firstInvalidKey].id);
     }
-  });
+  }
+
   return isInvalid;
 };
 
@@ -563,17 +573,38 @@ export const verifyOwnershipStepCompleteness = (
  * Verify if the interim step is complete
  * Return true if it's complete, false otherwise
  */
-export const verifyInterimStepCompleteness = (interimData: InterimForm): boolean => {
-  if (!interimData.agencyName.value.code.length
-    || !interimData.locationCode.value.length
-    || !interimData.startDate.value.length
-    || !interimData.endDate.value.length
-    || !interimData.facilityType.value.length
-    || (interimData.facilityType.value === 'OTH' && !interimData.facilityOtherType.value.length)
-  ) {
-    return false;
+export const verifyInterimStepCompleteness = (
+  interimData: InterimForm,
+  focusOnIncomplete?: boolean
+): boolean => {
+  let isComplete = true;
+  let idToFocus = '';
+
+  if (!interimData.agencyName.value.code) {
+    isComplete = false;
+    idToFocus = interimData.agencyName.id;
+  } else if (!interimData.locationCode.value) {
+    isComplete = false;
+    idToFocus = interimData.locationCode.id;
+  } else if (!interimData.startDate.value) {
+    isComplete = false;
+    idToFocus = interimData.startDate.id;
+  } else if (!interimData.endDate.value) {
+    isComplete = false;
+    idToFocus = interimData.endDate.id;
+  } else if (!interimData.facilityType.value) {
+    isComplete = false;
+    idToFocus = interimData.facilityType.id;
+  } else if (interimData.facilityType.value === 'OTH' && !interimData.facilityOtherType.value) {
+    idToFocus = interimData.facilityOtherType.id;
+    isComplete = false;
   }
-  return true;
+
+  if (focusOnIncomplete) {
+    focusById(idToFocus);
+  }
+
+  return isComplete;
 };
 
 export const getSpeciesOptionByCode = (
