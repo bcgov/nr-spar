@@ -42,7 +42,7 @@ import {
   verifyParentStepCompleteness
 } from '../ContextContainerClassA/utils';
 
-import { getBreadcrumbs } from './utils';
+import { getBreadcrumbs, validateCollectGeoVals, validateGeneticWorth } from './utils';
 import ClassAContext from '../ContextContainerClassA/context';
 
 const SeedlotReviewContent = () => {
@@ -96,7 +96,7 @@ const SeedlotReviewContent = () => {
     setApplicantData
   ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
 
-  const { allStepData, genWorthVals } = useContext(ClassAContext);
+  const { allStepData, genWorthVals, geoInfoVals } = useContext(ClassAContext);
 
   const verifyFormData = (): boolean => {
     let isValid = false;
@@ -152,7 +152,15 @@ const SeedlotReviewContent = () => {
       return isValid;
     }
 
-    console.log(genWorthVals);
+    // Step 6-A: genetic worth values
+    if (validateGeneticWorth(genWorthVals)) {
+      return isValid;
+    }
+
+    // Step 6-B: geo info vals (collection lat long and effective pop size)
+    if (validateCollectGeoVals(geoInfoVals)) {
+      return isValid;
+    }
 
     isValid = true;
     return isValid;
