@@ -40,6 +40,7 @@ import {
   ClientAgenciesByCode,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
+import focusById from '../../../utils/FocusUtils';
 
 export const initProgressBar = (
   currentStep: number,
@@ -401,14 +402,22 @@ export const initExtractionStorageState = (
  * Validate Collection Step.
  * Return true if it's invalid, false otherwise.
  */
-export const validateCollectionStep = (collectionData: CollectionForm): boolean => {
+export const validateCollectionStep = (
+  collectionData: CollectionForm,
+  focusOnInvalid?: boolean
+): boolean => {
   let isInvalid = false;
   const collectionkeys = Object.keys(collectionData) as Array<keyof CollectionForm>;
-  collectionkeys.forEach((key) => {
-    if (collectionData[key].isInvalid) {
-      isInvalid = true;
+  const invalidObjs = collectionkeys.filter((key) => collectionData[key].isInvalid);
+
+  if (invalidObjs.length > 0) {
+    const firstInvalidKey = invalidObjs[0];
+    isInvalid = true;
+    if (focusOnInvalid) {
+      focusById(collectionData[firstInvalidKey].id);
     }
-  });
+  }
+
   return isInvalid;
 };
 
@@ -448,32 +457,45 @@ export const validateInterimStep = (interimData: InterimForm): boolean => {
  * Verify if the collection step is complete
  * Return true if it's complete, false otherwise
  */
-export const verifyCollectionStepCompleteness = (collectionData: CollectionForm): boolean => {
+export const verifyCollectionStepCompleteness = (
+  collectionData: CollectionForm,
+  focusOnIncomplete?: boolean
+): boolean => {
+  let isComplete = true;
+  let idToFocus = '';
+
   if (!collectionData.collectorAgency.value.code.length) {
-    return false;
+    isComplete = false;
+    idToFocus = collectionData.collectorAgency.id;
+  } else if (!collectionData.locationCode.value.length) {
+    isComplete = false;
+    idToFocus = collectionData.locationCode.id;
+  } else if (!collectionData.startDate.value.length) {
+    isComplete = false;
+    idToFocus = collectionData.startDate.id;
+  } else if (!collectionData.endDate.value.length) {
+    isComplete = false;
+    idToFocus = collectionData.endDate.id;
+  } else if (!collectionData.numberOfContainers.value.length) {
+    isComplete = false;
+    idToFocus = collectionData.numberOfContainers.id;
+  } else if (!collectionData.volumePerContainers.value.length) {
+    isComplete = false;
+    idToFocus = collectionData.volumePerContainers.id;
+  } else if (!collectionData.volumeOfCones.value.length) {
+    isComplete = false;
+    idToFocus = collectionData.volumeOfCones.id;
+  } else if (!collectionData.selectedCollectionCodes.value.length) {
+    isComplete = false;
+    // Have to hard code id to focus as they are generated dynamically,
+    // assuming that there will always be a code 1 in the list of collection methods.
+    idToFocus = 'cone-collection-method-checkbox-1';
   }
-  if (!collectionData.locationCode.value.length) {
-    return false;
+  if (focusOnIncomplete) {
+    focusById(idToFocus);
   }
-  if (!collectionData.startDate.value.length) {
-    return false;
-  }
-  if (!collectionData.endDate.value.length) {
-    return false;
-  }
-  if (!collectionData.numberOfContainers.value.length) {
-    return false;
-  }
-  if (!collectionData.volumePerContainers.value.length) {
-    return false;
-  }
-  if (!collectionData.volumeOfCones.value.length) {
-    return false;
-  }
-  if (!collectionData.selectedCollectionCodes.value.length) {
-    return false;
-  }
-  return true;
+
+  return isComplete;
 };
 
 /**
