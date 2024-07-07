@@ -96,7 +96,7 @@ const SeedlotReviewContent = () => {
     setApplicantData
   ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
 
-  const { allStepData } = useContext(ClassAContext);
+  const { allStepData, genWorthVals } = useContext(ClassAContext);
 
   const verifyFormData = (): boolean => {
     let isValid = false;
@@ -151,6 +151,8 @@ const SeedlotReviewContent = () => {
     if (!verifyParentStepCompleteness(parentTreeStep, focusOnIncomplete)) {
       return isValid;
     }
+
+    console.log(genWorthVals);
 
     isValid = true;
     return isValid;

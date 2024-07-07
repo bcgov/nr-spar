@@ -13,6 +13,7 @@ import {
 import { RowDataDictType, RowItem, StrTypeRowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import {
   calcAverage, calcSum, generateDefaultRows,
+  populateStrInputId,
   processOrchards
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
@@ -273,7 +274,7 @@ export const initParentTreeState = (
   smpMixTrees?: Array<ParentTreeFormSubmitType>
 ): ParentTreeStepDataObj => {
   const defaultRows = generateDefaultRows(DEFAULT_MIX_PAGE_ROWS);
-  let tableRowsData: RowDataDictType = {};
+  let tableRowData: RowDataDictType = {};
   let smpMixRows: RowDataDictType = {};
   if (parentTrees) {
     parentTrees.forEach(
@@ -292,8 +293,11 @@ export const initParentTreeState = (
             newRow[genWorthName].value = String(singleGenWorthObj.geneticQualityValue);
           }
         });
-        tableRowsData = Object.assign(tableRowsData, {
-          [curParentTree.parentTreeNumber]: newRow
+        tableRowData = Object.assign(tableRowData, {
+          [curParentTree.parentTreeNumber]: populateStrInputId(
+            curParentTree.parentTreeNumber,
+            newRow
+          )
         });
       }
     );
@@ -326,7 +330,7 @@ export const initParentTreeState = (
   }
 
   return {
-    tableRowData: tableRowsData,
+    tableRowData,
     mixTabData: Object.keys(smpMixRows).length === 0 ? defaultRows : smpMixRows,
     notifCtrl: structuredClone(notificationCtrlObj),
     allParentTreeData: {}
@@ -726,7 +730,7 @@ export const validateParentStep = (
   }
 
   if (isInvalid && focusOnInvalid) {
-    focusById(idToFocus);
+    focusById(`${idToFocus}-input`);
   }
 
   return isInvalid;
