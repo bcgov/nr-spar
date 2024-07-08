@@ -14,6 +14,8 @@ import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +39,8 @@ public class TscAdminService {
   private final SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
 
   private final GeneticClassRepository geneticClassRepository;
+
+  private final LoggedUserService loggedUserService;
 
   /**
    * Retrieve a paginated list of seedlot for a given user.
@@ -66,10 +70,10 @@ public class TscAdminService {
    * Method for approving or disapproving a {@link Seedlot} registration.
    *
    * @param seedlotNumber The {@link Seedlot} identification.
-   * @param approved Boolean option defined if it was approved.
+   * @param status String option defining the Seedlot status code.
    */
-  public Seedlot approveOrDisapproveSeedlot(String seedlotNumber, Boolean approved) {
-    SparLog.info("Received Seedlot number {} for approval or disappoval", seedlotNumber);
+  public Seedlot updateSeedlotStatus(String seedlotNumber, String status) {
+    SparLog.info("Received Seedlot number {} for approval or disapproval", seedlotNumber);
 
     Optional<Seedlot> seedlot = seedlotRepository.findById(seedlotNumber);
     if (seedlot.isEmpty()) {
@@ -78,27 +82,24 @@ public class TscAdminService {
     }
 
     Seedlot seedlotEntity = seedlot.get();
-    String statucCode = null;
-
-    if (Boolean.TRUE.equals(approved)) {
-      SparLog.info("Seedlot number {} approved! Updating it to Approved", seedlotNumber);
-      statucCode = "APP";
-    } else {
-      SparLog.info("Seedlot number {} disapproved! Sending it back to Pending", seedlotNumber);
-      statucCode = "PND";
-    }
 
     Optional<SeedlotStatusEntity> seedlotStatus =
-        seedlotStatusService.getValidSeedlotStatus(statucCode);
+        seedlotStatusService.getValidSeedlotStatus(status);
     if (seedlotStatus.isEmpty()) {
-      SparLog.warn("Seedlot status {} not found!", statucCode);
+      SparLog.warn("Seedlot status {} not found!", status);
       throw new SeedlotStatusNotFoundException();
+    }
+
+    // Update the Seedlot instance only
+    if (status.equals("APP")) {
+      seedlotEntity.setApprovedUserId(loggedUserService.getLoggedUserId());
+      seedlotEntity.setApprovedTimestamp(LocalDateTime.now());
     }
 
     seedlotEntity.setSeedlotStatus(seedlotStatus.get());
 
     Seedlot seedlotSaved = seedlotRepository.saveAndFlush(seedlotEntity);
-    SparLog.info("Seedlot number {} approval or disapproval request finished!", seedlotNumber);
+    SparLog.info("Seedlot number {} status updated to {}!", seedlotNumber, status);
 
     return seedlotSaved;
   }
@@ -137,6 +138,7 @@ public class TscAdminService {
               genAclass,
               seedlotSpz.isPrimary(),
               seedlotSpz.description());
+      sspzEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());
 
       sspzToSave.add(sspzEntity);
     }

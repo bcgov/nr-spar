@@ -2,6 +2,8 @@ import { StatusColourMap } from '../components/StatusTag/definitions';
 import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/ContextContainerClassA/definitions';
 import { CodeDescResType } from './CodeDescResType';
 import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
+import { GeneticTrait, MeanGeomDataType } from './PtCalcTypes';
+import { SeedlotPatchPayloadType } from './SeedlotRegistrationTypes';
 import { SpuDto } from './SpuDto';
 
 type EffectiveDateRange = {
@@ -158,6 +160,8 @@ export type SeedlotType = {
   longitudeSecMax: number | null,
   smpMeanBvGrowth: number,
   areaOfUseComment: string | null,
+  approvedUserId: string | null,
+  approvedTimestamp: string | null,
 }
 
 export type SeedPlanZoneDto = {
@@ -266,6 +270,36 @@ export type SeedlotAClassSubmitType = {
   seedlotFormParentTreeDtoList: Array<ParentTreeFormSubmitType>,
   seedlotFormParentTreeSmpDtoList: Array<ParentTreeFormSubmitType>,
   seedlotFormExtractionDto: ExtractionFormSubmitType
+}
+
+export type SeedlotReviewElevationLatLongDto = {
+  minElevation: number,
+  maxElevation: number,
+  minLatitudeDeg: number,
+  minLatitudeMin: number,
+  minLatitudeSec: number,
+  maxLatitudeDeg: number,
+  maxLatitudeMin: number,
+  maxLatitudeSec: number,
+  minLongitudeDeg: number,
+  minLongitudeMin: number,
+  minLongitudeSec: number,
+  maxLongitudeDeg: number,
+  maxLongitudeMin: number,
+  maxLongitudeSec: number,
+  areaOfUseComment: string
+}
+
+export type SeedlotReviewGeoInformationDto = MeanGeomDataType & {
+  effectivePopulationSize: number
+}
+
+export type TscSeedlotEditPayloadType = SeedlotAClassSubmitType & {
+  applicantAndSeedlotInfo: SeedlotPatchPayloadType,
+  seedlotReviewSeedPlanZones: SeedPlanZoneDto[],
+  seedlotReviewElevationLatLong: SeedlotReviewElevationLatLongDto,
+  seedlotReviewGeneticWorth: GeneticTrait[],
+  seedlotReviewGeoInformation: SeedlotReviewGeoInformationDto
 }
 
 export type SeedlotProgressPayloadType = {

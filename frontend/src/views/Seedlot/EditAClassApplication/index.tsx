@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { InitialSeedlotFormData } from '../CreateAClass/constants';
+import { InitialSeedlotRegFormData } from '../CreateAClass/constants';
 import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 
 import EditAClassApplicationForm from './Form';
@@ -21,7 +21,7 @@ const EditAClassApplication = (
   const [
     seedlotEditData,
     setSeedlotEditData
-  ] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
+  ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
 
   return (
     <EditAClassApplicationForm
