@@ -37,7 +37,10 @@ import AreaOfUseRead from '../../../components/SeedlotReviewSteps/AreaOfUse/Read
 import AreaOfUseEdit from '../../../components/SeedlotReviewSteps/AreaOfUse/Edit';
 import ExtractionStorageReviewRead from '../../../components/SeedlotReviewSteps/ExtractionStorage/Read';
 import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/ExtractionStorage/Edit';
-import { PutTscSeedlotMutationObj, StatusOnSaveType, putTscSeedlotWithStatus } from '../../../api-service/tscAdminAPI';
+import {
+  PutTscSeedlotMutationObj, StatusOnSaveType, putTscSeedlotWithStatus,
+  updateSeedlotStatus
+} from '../../../api-service/tscAdminAPI';
 import {
   SeedPlanZoneDto, SeedlotReviewElevationLatLongDto,
   SeedlotReviewGeoInformationDto, TscSeedlotEditPayloadType
@@ -299,6 +302,29 @@ const SeedlotReviewContent = () => {
     }
   });
 
+  const statusOnlyMutaion = useMutation({
+    mutationFn: (
+      { seedlotNum, statusOnSave }: Omit<PutTscSeedlotMutationObj, 'payload'>
+    ) => updateSeedlotStatus(seedlotNum, statusOnSave),
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ErrorToast
+          title="Edit seedlot failed"
+          subtitle={`Cannot update seedlot. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    },
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
+      await queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      if (variables.statusOnSave !== 'SUB') {
+        navigate(`/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`);
+      }
+      setIsReadMode(true);
+    }
+  });
+
   const handleEditSaveBtn = () => {
     // If the form is in read mode, then enable edit mode only.
     if (isReadMode) {
@@ -317,10 +343,14 @@ const SeedlotReviewContent = () => {
   };
 
   const handleSaveAndStatus = (statusOnSave: StatusOnSaveType) => {
-    const isFormDataValid = verifyFormData();
-    if (isFormDataValid) {
-      const payload = generatePaylod();
-      tscSeedlotMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave, payload });
+    if (isReadMode) {
+      statusOnlyMutaion.mutate({ seedlotNum: seedlotNumber!, statusOnSave });
+    } else {
+      const isFormDataValid = verifyFormData();
+      if (isFormDataValid) {
+        const payload = generatePaylod();
+        tscSeedlotMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave, payload });
+      }
     }
   };
 

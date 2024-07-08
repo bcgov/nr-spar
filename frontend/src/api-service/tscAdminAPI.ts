@@ -31,3 +31,12 @@ export const putTscSeedlotWithStatus = (
 
   return api.put(url.toString(), payload);
 };
+
+export const updateSeedlotStatus = (
+  seedlotNumber: string,
+  statusOnSave: StatusOnSaveType
+) => {
+  const url = ApiConfig.tscSeedlotStatusUpdate.replace('{seedlotNumber}', seedlotNumber).replace('{status}', statusOnSave);
+
+  return api.post(url, null);
+};

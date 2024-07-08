@@ -13,7 +13,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
-import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
@@ -113,7 +112,7 @@ class TscAdminServiceTest {
     when(seedlotStatusService.getValidSeedlotStatus("APP")).thenReturn(Optional.of(seedlotStatus));
     when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
 
-    Seedlot seedlotSaved = tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.TRUE);
+    Seedlot seedlotSaved = tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
 
     Assertions.assertNotNull(seedlotSaved);
     Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
@@ -134,7 +133,7 @@ class TscAdminServiceTest {
     when(seedlotStatusService.getValidSeedlotStatus("PND")).thenReturn(Optional.of(seedlotStatus));
     when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
 
-    Seedlot seedlotSaved = tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+    Seedlot seedlotSaved = tscAdminService.updateSeedlotStatus(seedlotNumber, "PND");
 
     Assertions.assertNotNull(seedlotSaved);
     Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
@@ -151,7 +150,7 @@ class TscAdminServiceTest {
     Assertions.assertThrows(
         SeedlotNotFoundException.class,
         () -> {
-          tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+          tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
         });
   }
 
@@ -169,7 +168,7 @@ class TscAdminServiceTest {
     Assertions.assertThrows(
         SeedlotStatusNotFoundException.class,
         () -> {
-          tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+          tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
         });
   }
 
