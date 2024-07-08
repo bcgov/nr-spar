@@ -306,6 +306,28 @@ public class SeedlotService {
     seedlotDto.setPrimarySpz(primarySpz);
 
     seedlotDto.setAdditionalSpzList(additionalSpzList);
+
+    SparLog.info("Finding Seedlot genetic worth for seedlot number {}", seedlotNumber);
+    List<SeedlotGeneticWorth> genWorthData =
+        seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<GeneticWorthTraitsDto> genWorthTraits = new ArrayList<>();
+    genWorthData.forEach(
+        (genWorth) -> {
+          GeneticWorthTraitsDto dto =
+              new GeneticWorthTraitsDto(
+                  genWorth.getGeneticWorthCode(),
+                  null,
+                  genWorth.getGeneticQualityValue(),
+                  genWorth.getTestedParentTreeContributionPercentage());
+          genWorthTraits.add(dto);
+        });
+    seedlotDto.setCalculatedValues(genWorthTraits);
+    SparLog.info(
+        "Found {} Seedlot genetic worth stored for seedlot number {}",
+        genWorthTraits.size(),
+        seedlotNumber);
+
     return seedlotDto;
   }
 

@@ -364,11 +364,28 @@ class SeedlotServiceTest {
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId)).thenReturn(List.of());
     when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId)).thenReturn(Optional.empty());
 
+    SeedlotGeneticWorth seedlotGenWor =
+        new SeedlotGeneticWorth(
+            seedlotEntity, new GeneticWorthEntity("GVO", "", null), new AuditInformation("userId"));
+    seedlotGenWor.setGeneticQualityValue(new BigDecimal("18"));
+    seedlotGenWor.setTestedParentTreeContributionPercentage(new BigDecimal("88"));
+
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotId))
+        .thenReturn(List.of(seedlotGenWor));
+
     SeedlotDto responseFromService = seedlotService.getSingleSeedlotInfo(seedlotId);
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(seedlotEntity, responseFromService.getSeedlot());
     Assertions.assertNull(responseFromService.getPrimarySpu());
+    Assertions.assertNotNull(responseFromService.getCalculatedValues());
+    Assertions.assertEquals(1, responseFromService.getCalculatedValues().size());
+    Assertions.assertEquals("GVO", responseFromService.getCalculatedValues().get(0).traitCode());
+    Assertions.assertEquals(
+        new BigDecimal("18"), responseFromService.getCalculatedValues().get(0).calculatedValue());
+    Assertions.assertEquals(
+        new BigDecimal("88"),
+        responseFromService.getCalculatedValues().get(0).testedParentTreePerc());
   }
 
   @Test
