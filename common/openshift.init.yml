@@ -23,13 +23,13 @@ parameters:
     required: true
   - name: ORACLE_USER
     description: Oracle database username for API
-    value: proxy_fsa_spar_sync_user
+    value: proxy_fsa_spar_read_only_user
   - name: ORACLE_SYNC_PASSWORD
     description: Oracle database password for Sync
     required: true
   - name: ORACLE_SYNC_USER
     description: Oracle database username for Sync
-    value: proxy_fsa_spar_read_only_user
+    value: proxy_fsa_spar_sync_user
 objects:
   - apiVersion: v1
     kind: Secret
