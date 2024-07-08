@@ -778,10 +778,14 @@ public class SeedlotService {
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
 
+      // If there is no area of use data already set:
       // Update elevation min max, latitude min max, longitude min max, and SPZ
       // Set values in the Seedlot instance and update tables [seedlot_seed_plan_zone]
       // Fetch data from Oracle to get the active Seed Plan Unit id
-      setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+      if (!hasAreaOfUseData(seedlot)) {
+        SparLog.info("Area of Use data has NOT been set previously, setting area of use data");
+        setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+      }
     } else {
       updateApplicantAndSeedlot(seedlot, form.applicantAndSeedlotInfo());
       // Override Seedlot elevation min max, latitude min max, and longitude min max (area of use)
@@ -930,6 +934,24 @@ public class SeedlotService {
             });
 
     return genTraitList;
+  }
+
+  private boolean hasAreaOfUseData(Seedlot seedlot) {
+    return seedlot.getElevationMax() != null
+        || seedlot.getElevationMin() != null
+        || seedlot.getLatitudeDegMax() != null
+        || seedlot.getLatitudeDegMin() != null
+        || seedlot.getLatitudeMinMax() != null
+        || seedlot.getLatitudeMinMin() != null
+        || seedlot.getLatitudeSecMax() != null
+        || seedlot.getLatitudeSecMin() != null
+        || seedlot.getLongitudeDegMax() != null
+        || seedlot.getLongitudeDegMin() != null
+        || seedlot.getLongitudeMinMax() != null
+        || seedlot.getLongitudeMinMin() != null
+        || seedlot.getLongitudeSecMax() != null
+        || seedlot.getLongitudeSecMin() != null
+        || seedlot.getAreaOfUseComment() != null;
   }
 
   /**

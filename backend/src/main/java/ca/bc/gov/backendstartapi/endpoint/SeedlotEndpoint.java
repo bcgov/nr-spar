@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
@@ -469,7 +470,7 @@ public class SeedlotEndpoint {
               + " for form submission.")
   @ApiResponses(
       value = {
-        @ApiResponse(responseCode = "204", description = "Successfully saved or updated."),
+        @ApiResponse(responseCode = "200", description = "Successfully saved or updated."),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
@@ -484,7 +485,7 @@ public class SeedlotEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public ResponseEntity<Void> saveFormProgressClassA(
+  public RevisionCountDto saveFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -496,9 +497,9 @@ public class SeedlotEndpoint {
           String seedlotNumber,
       @RequestBody SaveSeedlotFormDtoClassA data) {
 
-    saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
+    RevisionCountDto revCountDto = saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
 
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return revCountDto;
   }
 
   /** Retrieves the saved Seedlot reg form. */
