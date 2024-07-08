@@ -77,10 +77,26 @@ public class SeedlotGeneticWorthService {
    * @param seedlot The Seedlot instance.
    * @param seedlotGeneticWorthTraits Seedlot Genetic Worth data provided by the TSC Admin.
    */
+  public List<SeedlotGeneticWorth> saveSeedlotGenWorth(
+      Seedlot seedlot, List<GeneticWorthTraitsDto> seedlotGeneticWorthTraits) {
+    SparLog.info("Saving calculated Seedlot Genetic Worth for seedlot number {}", seedlot.getId());
+    return saveSeedlotGenWorthPrivate(seedlot, seedlotGeneticWorthTraits);
+  }
+
+  /**
+   * Override the seedlot genetic worth data.
+   *
+   * @param seedlot The Seedlot instance.
+   * @param seedlotGeneticWorthTraits Seedlot Genetic Worth data provided by the TSC Admin.
+   */
   public List<SeedlotGeneticWorth> overrideSeedlotGenWorth(
       Seedlot seedlot, List<GeneticWorthTraitsDto> seedlotGeneticWorthTraits) {
-    SparLog.info("Saving SeedlotGeneticWorth for seedlot number {}", seedlot.getId());
+    SparLog.info("Overriding saved Seedlot Genetic Worth for seedlot number {}", seedlot.getId());
+    return saveSeedlotGenWorthPrivate(seedlot, seedlotGeneticWorthTraits);
+  }
 
+  private List<SeedlotGeneticWorth> saveSeedlotGenWorthPrivate(
+      Seedlot seedlot, List<GeneticWorthTraitsDto> seedlotGeneticWorthTraits) {
     List<SeedlotGeneticWorth> sgwList =
         seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlot.getId());
 

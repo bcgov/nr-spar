@@ -774,6 +774,7 @@ public class SeedlotService {
       // Calculate Seedlot GeoSpatial (for Seedlot, mean latitude, mean longitude, mean elevation)
       // Calculate Genetic Worth
       // Update Seedlot Ne, collection elevation, and collection lat long
+      // Saved the Seedlot calculated Genetic Worth
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
 
@@ -873,6 +874,9 @@ public class SeedlotService {
     seedlot.setCollectionLongitudeMin(collectionGeoData.getMeanLongitudeMinute());
     seedlot.setCollectionLongitudeSec(collectionGeoData.getMeanLongitudeSecond());
     SparLog.info("Parent trees contribution set");
+
+    SparLog.info("Saving Seedlot genetic worth calculated values");
+    seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, ptCalculationResDto.geneticTraits());
   }
 
   private List<OrchardParentTreeValsDto> convertToPtVals(
