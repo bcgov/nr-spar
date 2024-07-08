@@ -37,6 +37,8 @@ import AreaOfUseRead from '../../../components/SeedlotReviewSteps/AreaOfUse/Read
 import AreaOfUseEdit from '../../../components/SeedlotReviewSteps/AreaOfUse/Edit';
 import ExtractionStorageReviewRead from '../../../components/SeedlotReviewSteps/ExtractionStorage/Read';
 import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/ExtractionStorage/Edit';
+import AuditInfo from '../../../components/SeedlotReviewSteps/AuditInfo';
+
 import {
   PutTscSeedlotMutationObj, StatusOnSaveType, putTscSeedlotWithStatus,
   updateSeedlotStatus
@@ -527,6 +529,11 @@ const SeedlotReviewContent = () => {
       <Row className="section-title-row">
         <Column className="section-title-col">
           Audit history
+        </Column>
+      </Row>
+      <Row className="section-row">
+        <Column>
+          <AuditInfo />
         </Column>
       </Row>
       <Row className="action-button-row">

@@ -15,6 +15,8 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,6 +89,12 @@ public class TscAdminService {
     if (seedlotStatus.isEmpty()) {
       SparLog.warn("Seedlot status {} not found!", status);
       throw new SeedlotStatusNotFoundException();
+    }
+
+    // Update the Seedlot instance only
+    if (status.equals("APP")) {
+      seedlotEntity.setApprovedUserId(loggedUserService.getLoggedUserId());
+      seedlotEntity.setApprovedTimestamp(LocalDateTime.now());
     }
 
     seedlotEntity.setSeedlotStatus(seedlotStatus.get());

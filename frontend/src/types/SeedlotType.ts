@@ -160,6 +160,8 @@ export type SeedlotType = {
   longitudeSecMax: number | null,
   smpMeanBvGrowth: number,
   areaOfUseComment: string | null,
+  approvedUserId: string | null,
+  approvedTimestamp: string | null,
 }
 
 export type SeedPlanZoneDto = {
