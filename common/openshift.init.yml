@@ -29,7 +29,7 @@ parameters:
     required: true
   - name: ORACLE_SYNC_USER
     description: Oracle database username for Sync
-    value: proxy_fsa_spar_sync_user
+    value: proxy_fsa_spar_read_only_user
 objects:
   - apiVersion: v1
     kind: Secret
