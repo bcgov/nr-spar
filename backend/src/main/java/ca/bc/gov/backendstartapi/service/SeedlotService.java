@@ -731,7 +731,7 @@ public class SeedlotService {
         form.seedlotFormParentTreeDtoList(),
         form.seedlotFormParentTreeSmpDtoList(),
         canDelete);
-    
+
     // Step 6 (Extraction)
     // Update the Seedlot instance only
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
@@ -771,6 +771,12 @@ public class SeedlotService {
     // Update the Seedlot instance only
     if (currentSeedlotStatus.equals("PND")) {
       setSeedlotDeclaredInfo(seedlot);
+    }
+
+    // Update the Seedlot instance only
+    if (currentSeedlotStatus.equals("APP")) {
+      seedlot.setApprovedUserId(loggedUserService.getLoggedUserId());
+      seedlot.setApprovedTimestamp(LocalDateTime.now());
     }
 
     // Update the Seedlot instance only
