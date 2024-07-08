@@ -7,7 +7,7 @@ import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context
 import ReadOnlyInput from '../../ReadOnlyInput';
 
 type UnrelatedGenWorthProps = {
-  validGenWorth: Array<string>;
+  validGenWorth: Array<string> | undefined;
   isRead?: boolean;
 }
 
@@ -15,6 +15,11 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
   const {
     isCalculatingPt, genWorthVals, setGenWorthVal
   } = useContext(ClassAContext);
+
+  // validGenWorth can be undefiend
+  if (!validGenWorth) {
+    return null;
+  }
 
   return (
     <Row>

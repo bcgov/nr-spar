@@ -10,7 +10,9 @@ import {
   Loading
 } from '@carbon/react';
 import { toast } from 'react-toastify';
-import { Edit, Save } from '@carbon/icons-react';
+import {
+  Edit, Save, Pending, Checkmark
+} from '@carbon/icons-react';
 
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -35,6 +37,14 @@ import AreaOfUseRead from '../../../components/SeedlotReviewSteps/AreaOfUse/Read
 import AreaOfUseEdit from '../../../components/SeedlotReviewSteps/AreaOfUse/Edit';
 import ExtractionStorageReviewRead from '../../../components/SeedlotReviewSteps/ExtractionStorage/Read';
 import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/ExtractionStorage/Edit';
+import { PutTscSeedlotMutationObj, StatusOnSaveType, putTscSeedlotWithStatus } from '../../../api-service/tscAdminAPI';
+import {
+  SeedPlanZoneDto, SeedlotReviewElevationLatLongDto,
+  SeedlotReviewGeoInformationDto, TscSeedlotEditPayloadType
+} from '../../../types/SeedlotType';
+import ErrorToast from '../../../components/Toast/ErrorToast';
+import { ErrToastOption } from '../../../config/ToastifyConfig';
+import { GeneticTrait } from '../../../types/PtCalcTypes';
 
 import ClassAContext from '../ContextContainerClassA/context';
 import { validateRegForm } from '../CreateAClass/utils';
@@ -51,14 +61,7 @@ import {
   getBreadcrumbs, validateAreaOfUse, validateCollectGeoVals,
   validateGeneticWorth
 } from './utils';
-import {
-  SeedPlanZoneDto, SeedlotReviewElevationLatLongDto, SeedlotReviewGeoInformationDto, TscSeedlotEditPayloadType
-} from '../../../types/SeedlotType';
-import { GeneticTrait } from '../../../types/PtCalcTypes';
 import { GenWorthValType } from './definitions';
-import { PutTscSeedlotMutationObj, StatusOnSaveType, putTscSeedlotWithStatus } from '../../../api-service/tscAdminAPI';
-import ErrorToast from '../../../components/Toast/ErrorToast';
-import { ErrToastOption } from '../../../config/ToastifyConfig';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
@@ -310,6 +313,19 @@ const SeedlotReviewContent = () => {
     }
   };
 
+  const handleSaveAndStatus = (statusOnSave: StatusOnSaveType) => {
+    const isFormDataValid = verifyFormData();
+    console.log('hahah');
+    const action = statusOnSave === 'PND' ? 'backToPending' : 'approved';
+    if (isFormDataValid) {
+      const payload = generatePaylod();
+      tscSeedlotMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave, payload });
+      queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
+      queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      navigate(`/seedlots/details/${seedlotNumber}/?action=${action}`);
+    }
+  };
+
   return (
     <FlexGrid className="seedlot-review-grid">
       <Loading
@@ -485,8 +501,26 @@ const SeedlotReviewContent = () => {
           Audit history
         </Column>
       </Row>
+      <Row className="action-button-row">
+        <Column className="action-button-col" sm={4} md={4} lg={4}>
+          <Button
+            kind="secondary"
+            renderIcon={Pending}
+            onClick={() => handleSaveAndStatus('PND')}
+          >
+            Send back to pending
+          </Button>
+        </Column>
+        <Column className="action-button-col" sm={4} md={4} lg={4}>
+          <Button
+            renderIcon={Checkmark}
+            onClick={() => handleSaveAndStatus('APP')}
+          >
+            Approve seedlot
+          </Button>
+        </Column>
+      </Row>
 
-      <RowGap gapSize={4} />
     </FlexGrid>
   );
 };
