@@ -76,7 +76,7 @@ export const validatePerc = (value: string): SingleInvalidObj => {
     return {
       isInvalid,
       invalidText
-    }
+    };
   }
 
   isInvalid = !isDecimalValid(value);

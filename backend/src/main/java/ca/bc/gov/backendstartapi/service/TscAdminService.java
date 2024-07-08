@@ -7,7 +7,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
-import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
@@ -70,10 +69,10 @@ public class TscAdminService {
    * Method for approving or disapproving a {@link Seedlot} registration.
    *
    * @param seedlotNumber The {@link Seedlot} identification.
-   * @param approved Boolean option defined if it was approved.
+   * @param status String option defining the Seedlot status code.
    */
   public Seedlot updateSeedlotStatus(String seedlotNumber, String status) {
-    SparLog.info("Received Seedlot number {} for approval or disappoval", seedlotNumber);
+    SparLog.info("Received Seedlot number {} for approval or disapproval", seedlotNumber);
 
     Optional<Seedlot> seedlot = seedlotRepository.findById(seedlotNumber);
     if (seedlot.isEmpty()) {
@@ -132,7 +131,7 @@ public class TscAdminService {
               genAclass,
               seedlotSpz.isPrimary(),
               seedlotSpz.description());
-      sspzEntity.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
+      sspzEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());
 
       sspzToSave.add(sspzEntity);
     }

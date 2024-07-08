@@ -20,21 +20,23 @@ export const getBreadcrumbs = (seedlotNumber: string) => [
 ];
 
 /**
- * Validate genetic worth values
- * Return true if invalid
+ * Validate genetic worth values.
+ *
+ * @param {GenWorthValType} genWorthValues The genetic worth values to be validated.
+ * @returns {boolean} true if invalid, false otherwise.
  */
-export const validateGeneticWorth = (genWorthVals: GenWorthValType) => {
-  const keys = Object.keys(genWorthVals) as (keyof GenWorthValType)[];
+export const validateGeneticWorth = (genWorthValues: GenWorthValType) => {
+  const keys = Object.keys(genWorthValues) as (keyof GenWorthValType)[];
 
-  const invalidObjKeys = keys.filter((key) => genWorthVals[key].isInvalid);
+  const invalidObjKeys = keys.filter((key) => genWorthValues[key].isInvalid);
 
   let isInvalid = false;
 
   if (invalidObjKeys.length > 0) {
     isInvalid = true;
-    const firstkey = invalidObjKeys[0];
+    const firstKey = invalidObjKeys[0];
 
-    const idToFocus = genWorthVals[firstkey].id;
+    const idToFocus = genWorthValues[firstKey].id;
     focusById(idToFocus);
   }
 

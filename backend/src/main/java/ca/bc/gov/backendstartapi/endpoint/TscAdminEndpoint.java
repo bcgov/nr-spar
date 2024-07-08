@@ -91,7 +91,7 @@ public class TscAdminEndpoint {
    * Enables a {@link Seedlot} registration approval or disapproval by the TSC Admin.
    *
    * @param seedlotNumber The {@link Seedlot} identification.
-   * @param isApproved Boolean option defining if it was approved.
+   * @param status String option defining the Seedlot status code.
    */
   @PostMapping("/seedlots/{seedlotNumber}/status/{status}")
   @Operation(
@@ -100,7 +100,7 @@ public class TscAdminEndpoint {
       responses = {
         @ApiResponse(
             responseCode = "204",
-            description = "The Seedlot's status is successfully updated. No content body.",
+            description = "Update the Seedlot's status as per the request. No content body.",
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(
             responseCode = "401",
