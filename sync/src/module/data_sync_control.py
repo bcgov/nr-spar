@@ -3,6 +3,8 @@ import ast
 from datetime import datetime
 from pandas import DataFrame
 from datetime import timedelta
+import json
+from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,11 @@ def get_scheduler(track_db_conn:object, database_schema:str) -> list:
         select 
             COALESCE(MAX(to_timestamp) + INTERVAL '1 microsecond'
                    , CURRENT_TIMESTAMP - INTERVAL '2 days') as current_start_time,
-            CURRENT_TIMESTAMP as current_end_time
+            CURRENT_TIMESTAMP as current_end_time,
+            (select run_status
+               from spar.etl_execution_log
+              order by from_timestamp desc
+              limit 1) as last_run_status
         from {database_schema}.etl_execution_log
         where run_status = 'SUCCESS' """    
     records = track_db_conn.select(select_sync_id_stm)
@@ -165,27 +171,20 @@ def update_schedule_times(db_conn, db_schema, interface_id, execution_id, schedu
     db_conn.commit()  # If everything is ok, a commit will be executed.
     return None
 
-def save_execution_log(db_conn, db_schema, interface_id, execution_id, process_log):
+def save_execution_log(db_conn, db_schema, process_log):
     
     sql_text = f"""         
-    INSERT INTO {db_schema}.ETL_EXECUTION_LOG_HIST(interface_id,execution_id,last_run_ts, current_run_ts,{', '.join(process_log.keys())})                
-    with CTE_1 as (
-    select '1900-01-01'::timestamp as last_run_ts,
-        current_timestamp as current_run_ts
-        where not EXISTS( select 1 from spar.ETL_EXECUTION_SCHEDULE 
-                            where interface_id = '{interface_id}' and execution_id = {execution_id})
-    union all 
-    select last_run_ts, current_run_ts 
-    from spar.ETL_EXECUTION_SCHEDULE  where interface_id = '{interface_id}' and execution_id = {execution_id}
-    )
-    select '{interface_id}' as interface_id,
-            {execution_id} as execution_id,
-            CTE_1.last_run_ts,
-            CTE_1.current_run_ts,
-            :{', :'.join(process_log.keys())}
-    from CTE_1     
+    INSERT INTO {db_schema}.etl_execution_log_hist (log_details)                
+    VALUES (:p_log_details) 
     """
-    result = db_conn.execute(sql_text, process_log)
+    params = {}
+    print("0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.")
+    print(process_log)
+    print(text(str(process_log)))
+    params['p_log_details'] = json.dumps(process_log)
+    print(params)
+    print("0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.")
+    result = db_conn.execute(sql_text,params)
     db_conn.commit()  # If everything is ok, a commit will be executed.
     
 def unset_reprocess(db_conn,db_schema,execution_id,interface_id,schedule):

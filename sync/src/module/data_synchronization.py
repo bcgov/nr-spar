@@ -7,6 +7,7 @@ import module.database_connection as db_conn
 import module.data_sync_control as data_sync_ctl
 import transformations as transf
 
+from collections import OrderedDict
 from typing import Tuple
 from os import listdir, path, sep as separator
 from datetime import timedelta, datetime
@@ -24,8 +25,8 @@ logger = logging.getLogger(__name__)
 """
 def execute_instance(oracle_config, postgres_config, track_config):
     stored_metrics = {}
-    stored_metrics['sync_start_time'] = time.time()
-    stored_metrics['record_start_time'] = datetime.now()
+    stored_metrics['sync_start_time'] = float(time.time())
+    stored_metrics['record_start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
     stored_metrics['rows_from_source'] = 0
     stored_metrics['rows_target_processed'] = 0
     stored_metrics['time_conn_monitor'] = None
@@ -40,12 +41,18 @@ def execute_instance(oracle_config, postgres_config, track_config):
     
     with db_conn.database_connection(track_config) as track_db_conn:
         temp_time = time.time()
-        logger.info('Get Delta times to load from source')
+        
+        logger.info('Get date range to load from source')
         schedule_times = data_sync_ctl.get_scheduler(track_db_conn,track_config['schema'])
         schedule_times = schedule_times[0]
         logger.debug("=============== s c h e d u l e   d a t e s ==================")
         logger.debug(schedule_times)
         logger.debug("=============== s c h e d u l e   d a t e s ==================")
+        
+        #if job is already running, stop
+        if schedule_times['last_run_status'] == "RUNNING":
+            raise Exception("Critical error: previous job still RUNNING or did not report SUCCESS or FAILURE")
+        
         logger.info('Insert execution log - signal RUNNING')
         data_sync_ctl.insert_execution_log(database_conn=track_db_conn, 
                                         database_schema=track_config['schema'],
@@ -107,40 +114,44 @@ def print_process_metrics(stored_metrics):
     logger.info(f"ETL Tool target database connection took {stored_metrics['time_conn_target']}")
     logger.info(f"ETL Tool target load data took {stored_metrics['time_target_load']} processing {stored_metrics['rows_target_processed']} rows")
 
-def delete_seedlot_child_tables(seedlot_number,target_db_conn, processes, stored_metrics):
+def delete_seedlot_child_tables(seedlot_number, track_db_conn, track_db_schema, target_db_conn, processes):
     logger.debug('Executing delete for seedlot '+seedlot_number)
     log_message = ""
     
     # Initializing metric variables
-    stored_metrics['process_start_time'] = time.time()
-    stored_metrics['time_source_extract'] = None
-    stored_metrics['rows_from_source'] = 0
-    stored_metrics['time_conn_target'] = None
-    stored_metrics['rows_target_processed'] = 0
-    stored_metrics['time_target_load'] = None
-    stored_metrics['time_conn_source'] = None
+    metrics = OrderedDict()
+    metrics['step'] = 'Delete Child Tables'
+    metrics['seedlot_nunber'] = seedlot_number
+    metrics['start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+
+    tablelist = []
 
     #processes are in RI order - reverse order for deletes to avoid RI constraint errors
     for tablerow in reversed(processes):
         table = tablerow[0]
         if table['target_table'] != "the.seedlot" and table['run_mode'] == "UPSERT_WITH_DELETE":
             logger.debug(f"calling delete for {seedlot_number} table {table['target_table']}")
-            stored_metrics['rows_target_processed'] = target_db_conn.delete_seedlot_child_table(table['target_table'],seedlot_number)
+            table_metrics = OrderedDict()
+            table_metrics['table_deleted'] = table['target_table']
+            start_time = time.time()
+            table_metrics['rows_deleted'] = target_db_conn.delete_seedlot_child_table(table['target_table'],seedlot_number)
+            table_metrics['delete_time_s'] = timedelta(seconds=(time.time()-start_time)).total_seconds()
+            tablelist.append(table_metrics)
 
-    stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
-    stored_metrics['process_end_time'] = datetime.now()
+    metrics['end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+    metrics['tables'] = tablelist
                 
     #process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
     #                                                    log_message=log_message,
     #                                                    execution_status='SKIPPED', ## No error, but
     #                                                    )
     logger.debug('Finished deletions')
-    #data_sync_ctl.save_execution_log(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
+    data_sync_ctl.save_execution_log(track_db_conn, track_db_schema, metrics)
 
-    return stored_metrics
+    return metrics
 
 
-def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, target_db_conn, process, oracle_config, postgres_config, stored_metrics):
+def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, target_db_conn, process, oracle_config, postgres_config):
     logger.debug('Executing process for seedlot '+seedlot_number)
     process_stop = False
     log_message = ""
@@ -148,17 +159,16 @@ def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, tar
     target_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["target_db_type"])
     
     # Initializing metric variables
-    stored_metrics['process_start_time'] = time.time()
-    stored_metrics['time_source_extract'] = None
+    stored_metrics = OrderedDict()
+    stored_metrics['operation'] = "Process Table"
+    stored_metrics['seedlot_number'] = seedlot_number
+    stored_metrics['target_table'] = process['target_table']
+    stored_metrics['process_start_time'] = float(time.time())
     stored_metrics['rows_from_source'] = 0
-    stored_metrics['time_conn_target'] = None
     stored_metrics['rows_target_processed'] = 0
-    stored_metrics['time_target_load'] = None
-    stored_metrics['time_conn_source'] = None
 
     logger.debug('Connecting into Source Database')
     with db_conn.database_connection(source_config) as source_db_conn:
-        stored_metrics['time_conn_source'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
         logger.debug('Source Database connection established')
         temp_time = time.time()
 
@@ -175,11 +185,11 @@ def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, tar
         table_df = pd.read_sql_query(sql=query_sql, con=source_db_conn.engine, params=params)
         logger.debug('Source Database data loaded on in-memory dataframe')
         
-        stored_metrics['time_source_extract'] = timedelta(seconds=(time.time()-temp_time))
+        stored_metrics['time_source_extract'] = timedelta(seconds=(time.time()-temp_time)).total_seconds()
         stored_metrics['rows_from_source'] = table_df.shape[0]
         if stored_metrics['rows_from_source'] < 1:
             process_stop = True
-            log_message = f"There is no data to extract from source for execution id: {process['execution_id']} and interface id: {process['interface_id']}. Process will be skipped."
+            log_message = f"There is no data to extract from source for table: {process["target_table"]}. Process will be skipped."
             logger.debug(log_message)
             logger.warning(log_message)
 
@@ -188,7 +198,7 @@ def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, tar
             logger.debug('Connecting into Target Database')
             with db_conn.database_connection(target_config) as target_db_conn:
                 logger.debug('Target Database connection established')
-                stored_metrics['time_conn_target'] = timedelta(seconds=(time.time()-temp_time))
+                stored_metrics['time_conn_target'] = timedelta(seconds=(time.time()-temp_time)).total_seconds()
                 temp_time = time.time()
                 
                 table_df=table_df.convert_dtypes()
@@ -219,25 +229,23 @@ def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, tar
 
                     # READ FROM TEMP TABLE:
                     logger.debug('Target Database data load finished')
-                    stored_metrics['time_target_load'] = timedelta(seconds=(time.time()-temp_time))
+                    stored_metrics['time_target_load'] = timedelta(seconds=(time.time()-temp_time)).total_seconds()
 
                 #RECORD LOG
 
                 log_message=f"Execution finished successfully"
-                stored_metrics['process_end_time']=datetime.now()
-                stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
+                stored_metrics['process_end_time']= datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time'])).total_seconds()
                 
                 #process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
                 #                                                    log_message=log_message,
                 #                                                    execution_status='SUCCESS')
                 
-                logger.debug('Updating schedule times for next execution')
-                #data_sync_ctl.update_schedule_times(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],schedule_times)
                 logger.debug('Including process execution log information')
                 #data_sync_ctl.save_execution_log   (track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
         else:
-            stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time']))
-            stored_metrics['process_end_time'] = datetime.now()
+            stored_metrics['process_delta'] = timedelta(seconds=(time.time()-stored_metrics['process_start_time'])).total_seconds()
+            stored_metrics['process_end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
             
             #process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
             #                                                    log_message=log_message,
@@ -245,11 +253,13 @@ def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, tar
             #                                                    )
             logger.debug('Including process execution log information')
             #data_sync_ctl.save_execution_log(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
+        
+        data_sync_ctl.save_execution_log(track_db_conn,track_db_schema,stored_metrics)
 
     return stored_metrics
 
 def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn, schedule_times):
-    stored_metrics = {}
+    metrics = {}
     is_error = False
     process_stop = False
     log_message = ""
@@ -264,10 +274,12 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
     
     logger.debug('Connecting into Source Database to get Seedlots')
     with db_conn.database_connection(postgres_config) as source_db_conn:
-        logger.debug('Source Database connection established')
-        temp_time = time.time()
+        metrics = OrderedDict()
+        metrics['operation'] = "Process Seedlots"
+        metrics['start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
-        #TODO FIX AND SAVE DATE LAST RUN
+        logger.debug('Source Database connection established')
+
         query_sql = """SELECT seedlot_number FROM spar.seedlot 
                         WHERE update_timestamp between %(start_time)s AND %(end_time)s 
                         ORDER BY seedlot_number """
@@ -278,32 +290,42 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
         logger.debug(params)
         logger.debug("*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_")
 
+        start_time = time.time()
         seedlots_df = pd.read_sql_query(sql=query_sql, con=source_db_conn.engine, params=params)
+        end_time = time.time()
+        
+        metrics['query_time_s'] = timedelta(seconds=(end_time-start_time)).total_seconds()
+
         logger.debug('Main driver SEEDLOT data loaded on in-memory dataframe')
         
         processes = [[{"interface_id":"SEEDLOT_EXTRACT","execution_id":"101","execution_order":"10","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_EXTRACT.sql","source_table":"spar.seedlot","source_db_type":"POSTGRES","target_table":"the.seedlot","target_primary_key":"seedlot_number","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"extraction_st_date,extraction_end_date,seed_store_client_number,seed_store_client_locn,temporary_storage_start_date,temporary_storage_end_date,seedlot_status_code"}]
                     ,[{"interface_id":"SEEDLOT_OWNER_QUANTITY_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_OWNER_QUANTITY_EXTRACT.sql","source_table":"spar.seedlot_owner_quantity","source_db_type":"POSTGRES","target_table":"the.seedlot_owner_quantity","target_primary_key":"seedlot_number,client_number,client_locn_code","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"qty_reserved,qty_rsrvd_cmtd_pln,qty_rsrvd_cmtd_apr,qty_surplus,qty_srpls_cmtd_pln,qty_srpls_cmtd_apr"}]
                     ,[{"interface_id":"SEEDLOT_SEED_PLAN_ZONE_EXTRACT","execution_id":"103","execution_order":"30","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_SEED_PLAN_ZONE_EXTRACT.sql","source_table":"spar.seedlot_seed_plan_zone","source_db_type":"POSTGRES","target_table":"the.seedlot_plan_zone","target_primary_key":"seedlot_number,seed_plan_zone_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                     ,[{"interface_id":"SEEDLOT_GENETIC_WORTH_EXTRACT","execution_id":"104","execution_order":"40","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_GENETIC_WORTH_EXTRACT.sql","source_table":"spar.seedlot_genetic_worth","source_db_type":"POSTGRES","target_table":"the.seedlot_genetic_worth","target_primary_key":"seedlot_number,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    ,[{"interface_id":"SEEDLOT_PARENT_TREE_EXTRACT","execution_id":"105","execution_order":"50","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_EXTRACT.sql","source_table":"spar.seedlot_parent_tree","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    ,[{"interface_id":"SEEDLOT_PARENT_TREE_GEN_QLTY","execution_id":"106","execution_order":"60","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_GEN_QLTY.sql","source_table":"spar.seedlot_parent_tree_gen_qlty","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    ,[{"interface_id":"SEEDLOT_PARENT_TREE_SMP_MIX","execution_id":"107","execution_order":"70","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_SMP_MIX.sql","source_table":"spar.seedlot_parent_tree_smp_mix","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_smp_mix","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    ,[{"interface_id":"SMP_MIX_EXTRACT","execution_id":"108","execution_order":"80","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_EXTRACT.sql","source_table":"spar.smp_mix","source_db_type":"POSTGRES","target_table":"the.smp_mix","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    ,[{"interface_id":"SMP_MIX_GEN_QLTY_EXTRACT","execution_id":"109","execution_order":"90","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_GEN_QLTY_EXTRACT.sql","source_table":"spar.smp_mix_gen_qlty","source_db_type":"POSTGRES","target_table":"the.smp_mix_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    #,[{"interface_id":"SEEDLOT_PARENT_TREE_EXTRACT","execution_id":"105","execution_order":"50","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_EXTRACT.sql","source_table":"spar.seedlot_parent_tree","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    #,[{"interface_id":"SEEDLOT_PARENT_TREE_GEN_QLTY","execution_id":"106","execution_order":"60","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_GEN_QLTY.sql","source_table":"spar.seedlot_parent_tree_gen_qlty","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    #,[{"interface_id":"SEEDLOT_PARENT_TREE_SMP_MIX","execution_id":"107","execution_order":"70","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_SMP_MIX.sql","source_table":"spar.seedlot_parent_tree_smp_mix","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_smp_mix","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    #,[{"interface_id":"SMP_MIX_EXTRACT","execution_id":"108","execution_order":"80","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_EXTRACT.sql","source_table":"spar.smp_mix","source_db_type":"POSTGRES","target_table":"the.smp_mix","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    #,[{"interface_id":"SMP_MIX_GEN_QLTY_EXTRACT","execution_id":"109","execution_order":"90","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_GEN_QLTY_EXTRACT.sql","source_table":"spar.smp_mix_gen_qlty","source_db_type":"POSTGRES","target_table":"the.smp_mix_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                     ]
-
         with db_conn.database_connection(oracle_config) as target_db_conn:
             try:
+                seedlotlst = []
                 for seedlot in seedlots_df.itertuples():
-                    temp_time = time.time()
+                    seedlot_metrics = OrderedDict()
+                    seedlot_metrics['step'] = "Seedlot"
+                    seedlot_metrics['seedlot_number'] = seedlot.seedlot_number
 
                     #delete all tables in RI order (reversing order of processes dataframe)
                     #note - special handling for seedlot_owner_quantity
-                    stored_metrics = delete_seedlot_child_tables(seedlot_number=seedlot.seedlot_number,
+                    delete_metrics = delete_seedlot_child_tables(seedlot_number=seedlot.seedlot_number,
+                                                    track_db_conn=track_db_conn,
+                                                    track_db_schema=track_config['schema'], 
                                                     target_db_conn=target_db_conn,
-                                                    processes=processes, 
-                                                    stored_metrics=stored_metrics)
+                                                    processes=processes)
+                    seedlot_metrics['delete_stats'] = delete_metrics
 
+                    processlst = []
                     # All processes to be executed from configuration 
                     for processrow in processes:
                         try:
@@ -311,29 +333,38 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                             
                             logger.info('Get Delta times to load from source')
                             
-                            stored_metrics = execute_process(seedlot_number=seedlot.seedlot_number,
+                            process_metrics = execute_process(seedlot_number=seedlot.seedlot_number,
                                                         base_dir=current_cwd, 
                                                         track_db_conn=track_db_conn, 
                                                         track_db_schema=track_config['schema'], 
                                                         target_db_conn=target_db_conn,
                                                         process=process, 
                                                         oracle_config=oracle_config, 
-                                                        postgres_config=postgres_config, 
-                                                        stored_metrics=stored_metrics)
+                                                        postgres_config=postgres_config)
+                            processlst.append(process_metrics)
                             logger.info('Execution process finished')
+
                         except Exception as err:
                             logger.critical("A fatal error has occurred", exc_info = True)
                             log_message =f"Error type: {type(err)}: {err}" 
-                    
-                    #data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
-                
+                            metrics['end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                            data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],metrics)
+                    seedlot_metrics['processes'] = processlst
+                    seedlotlst.append(seedlot_metrics)
+                metrics['seedlots'] = seedlotlst
+
             except Exception as err:
                 logger.critical("A fatal error has occurred", exc_info = True)
                 log_message =f"Error type: {type(err)}: {err}" 
+                metrics['end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+                data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],metrics)
             
             #data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],process["interface_id"],process["execution_id"],process_log)
             target_db_conn.commit
 
-    return stored_metrics
+            metrics['end_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+            data_sync_ctl.save_execution_log(track_db_conn,track_config['schema'],metrics)
+
+    return metrics
         
     
