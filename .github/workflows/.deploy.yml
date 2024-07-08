@@ -47,7 +47,7 @@ on:
 jobs:
   init:
     name: Deploy (init)
-    environment: ${{ inputs.target }}
+    environment: ${{ inputs.environment }}
     outputs:
       mod-tag: ${{ steps.mod-tag.outputs.mod-tag }}
     runs-on: ubuntu-22.04
@@ -92,7 +92,7 @@ jobs:
 
   database:
     name: Deploy (database)
-    environment: ${{ inputs.target }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     steps:
       - name: Database
@@ -111,7 +111,7 @@ jobs:
 
   deploy:
     name: Deploy
-    environment: ${{ inputs.target }}
+    environment: ${{ inputs.environment }}
     needs: [database, init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
@@ -177,7 +177,7 @@ jobs:
   verify:
     name: Verify ETL
     if: inputs.etl == 'true'
-    environment: ${{ inputs.target }}
+    environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
