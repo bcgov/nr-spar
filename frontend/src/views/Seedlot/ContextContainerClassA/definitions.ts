@@ -1,3 +1,4 @@
+import { QueryObserverResult } from '@tanstack/react-query';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
@@ -7,6 +8,7 @@ import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../compo
 import { MutationStatusType } from '../../../types/QueryStatusType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 
 export type ParentTreeStepDataObj = {
   tableRowData: RowDataDictType, // table row data used in Cone & Pollen and the SMP Success tabs
@@ -49,6 +51,7 @@ export type SaveTooltipProps = {
   mutationStatus: MutationStatusType;
   lastSaveTimestamp: string;
   handleSaveBtn: Function;
+  reloadFormDraft: () => Promise<QueryObserverResult<SeedlotProgressPayloadType, unknown>>
 }
 
 export type RegFormProps = {

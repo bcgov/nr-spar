@@ -7,7 +7,7 @@ import {
 import {
   useMutation, useQueries, useQuery, useQueryClient
 } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 import { DateTime } from 'luxon';
 
 import {
@@ -38,6 +38,7 @@ import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/constants';
 import { MeanGeomInfoSectionConfigType, RowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import { StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
@@ -60,7 +61,6 @@ import {
 } from './constants';
 
 import './styles.scss';
-import { StringInputType } from '../../../types/FormInputType';
 
 type props = {
   children: React.ReactNode
@@ -453,11 +453,6 @@ const ContextContainerClassA = ({ children }: props) => {
     clientNumbers
   ]);
 
-  const logState = () => {
-    // eslint-disable-next-line no-console
-    console.log(allStepData);
-  };
-
   /**
    * Update the progress indicator status
    */
@@ -507,7 +502,6 @@ const ContextContainerClassA = ({ children }: props) => {
   };
 
   const setStep = (delta: number) => {
-    logState();
     const prevStep = formStep;
     const newStep = prevStep + delta;
     updateProgressStatus(newStep, prevStep);
@@ -568,6 +562,8 @@ const ContextContainerClassA = ({ children }: props) => {
     return clonedStatus;
   };
 
+  const [formDraftRevCount, setFormDraftRevCount] = useState<number>(0);
+
   const saveProgress = useMutation({
     mutationFn: () => {
       const updatedProgressStatus = structuredClone(updateAllStepStatus());
@@ -582,7 +578,8 @@ const ContextContainerClassA = ({ children }: props) => {
         seedlotNumber ?? '',
         {
           allStepData,
-          progressStatus: updatedProgressStatus
+          progressStatus: updatedProgressStatus,
+          revisionCount: formDraftRevCount
         }
       );
     },
@@ -592,15 +589,26 @@ const ContextContainerClassA = ({ children }: props) => {
       setSaveStatus('finished');
       setSaveDescription(smartSaveText.success);
     },
-    onError: () => {
-      setSaveStatus('error');
-      setSaveDescription(smartSaveText.error);
-    },
-    onSettled: () => {
-      setTimeout(() => {
-        setSaveStatus(null);
+    onError: (error: any) => {
+      if (isAxiosError(error) && error.response?.data.status === 409) {
+        setSaveStatus('conflict');
         setSaveDescription(smartSaveText.idle);
-      }, FIVE_SECONDS);
+      } else {
+        setSaveStatus('error');
+        setSaveDescription(smartSaveText.error);
+      }
+    },
+    onSettled: (res, error) => {
+      // Reset button status and description only if the error isn't a conflict
+      if (
+        res
+        || (isAxiosError(error) && error.response?.data.status !== 409)
+      ) {
+        setTimeout(() => {
+          setSaveStatus(null);
+          setSaveDescription(smartSaveText.idle);
+        }, FIVE_SECONDS);
+      }
     },
     retry: 0
   });
@@ -630,20 +638,20 @@ const ContextContainerClassA = ({ children }: props) => {
    * For auto save on interval.
    */
   useEffect(() => {
-    if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE && isFormIncomplete) {
+    if (numOfEdit.current >= MAX_EDIT_BEFORE_SAVE && isFormIncomplete && saveStatus !== 'conflict') {
       if (!saveProgress.isLoading) {
         saveProgress.mutate();
       }
     }
 
     const interval = setInterval(() => {
-      if (numOfEdit.current > 0 && !saveProgress.isLoading && isFormIncomplete) {
+      if (numOfEdit.current > 0 && !saveProgress.isLoading && isFormIncomplete && saveStatus !== 'conflict') {
         saveProgress.mutate();
       }
     }, TEN_SECONDS);
 
     return () => clearInterval(interval);
-  }, [numOfEdit.current]);
+  }, [numOfEdit.current, saveStatus]);
 
   /**
    * Fetch the seedlot form draft only if the status of the seedlot is pending or incomplete.
@@ -664,7 +672,12 @@ const ContextContainerClassA = ({ children }: props) => {
       const currStepName = stepMap[formStep];
       savedStatus[currStepName].isCurrent = true;
 
+      setFormDraftRevCount(getFormDraftQuery.data.revisionCount);
       setProgressStatus(getFormDraftQuery.data.progressStatus);
+      setSaveStatus(null);
+      setSaveDescription(smartSaveText.idle);
+      setLastSaveTimestamp(DateTime.now().toISO());
+      numOfEdit.current = 0;
     }
     if (getFormDraftQuery.status === 'error') {
       const error = getFormDraftQuery.error as AxiosError;
@@ -678,7 +691,12 @@ const ContextContainerClassA = ({ children }: props) => {
         setDefaultAgencyAndCode(getAgencyObj(), getDefaultLocationCode());
       }
     }
-  }, [getFormDraftQuery.status, getFormDraftQuery.isFetchedAfterMount, forestClientQuery.status]);
+  }, [
+    getFormDraftQuery.status,
+    getFormDraftQuery.isFetchedAfterMount,
+    forestClientQuery.status,
+    getFormDraftQuery.isRefetching
+  ]);
 
   const [genWorthVals, setGenWorthVals] = useState<GenWorthValType>(() => INITIAL_GEN_WORTH_VALS);
 
@@ -771,6 +789,7 @@ const ContextContainerClassA = ({ children }: props) => {
           || orchardQuery.isFetching
           || gameticMethodologyQuery.isFetching
           || fundingSourcesQuery.isFetching
+          || getFormDraftQuery.isFetching
         ),
         genWorthInfoItems,
         setGenWorthInfoItems,
@@ -785,7 +804,8 @@ const ContextContainerClassA = ({ children }: props) => {
         areaOfUseData,
         setAreaOfUseData,
         isCalculatingPt,
-        setIsCalculatingPt
+        setIsCalculatingPt,
+        getFormDraftQuery
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,

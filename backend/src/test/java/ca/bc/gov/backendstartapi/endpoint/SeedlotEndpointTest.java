@@ -646,7 +646,7 @@ class SeedlotEndpointTest {
   @DisplayName("Get seedlot form progress should succeed")
   void getSeedlotFormProgress_shouldSucceed() throws Exception {
     when(saveSeedlotFormService.getFormClassA(any()))
-        .thenReturn(new SaveSeedlotFormDtoClassA(null, null));
+        .thenReturn(new SaveSeedlotFormDtoClassA(null, null, 1));
 
     mockMvc
         .perform(
