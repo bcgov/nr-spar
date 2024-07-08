@@ -12,7 +12,11 @@ const SeedlotReview = () => {
   const { isTscAdmin } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  useEffect(() => navigate('/'), [isTscAdmin]);
+  useEffect(() => {
+    if (!isTscAdmin) {
+      navigate('/');
+    }
+  }, [isTscAdmin]);
 
   if (!isTscAdmin) {
     return null;
