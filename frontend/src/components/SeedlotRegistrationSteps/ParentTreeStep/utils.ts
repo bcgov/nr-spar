@@ -540,7 +540,6 @@ export const fillCalculatedInfo = (
   setGenWorthInfoItems: Function,
   popSizeAndDiversityConfig: Record<string, any>,
   setPopSizeAndDiversityConfig: Function,
-  meanGeomInfos: MeanGeomInfoSectionConfigType,
   setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>,
   setIsCalculatingPt: Function,
   setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,

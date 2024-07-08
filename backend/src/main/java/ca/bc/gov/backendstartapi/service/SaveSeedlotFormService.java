@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -34,7 +35,8 @@ public class SaveSeedlotFormService {
   private final LoggedUserService loggedUserService;
 
   /** Saves the {@link SaveSeedlotFormDtoClassA} to table. */
-  public void saveFormClassA(@NonNull String seedlotNumber, SaveSeedlotFormDtoClassA data) {
+  public RevisionCountDto saveFormClassA(
+      @NonNull String seedlotNumber, SaveSeedlotFormDtoClassA data) {
     SparLog.info("Saving A-Class seedlot progress for seedlot number: {}", seedlotNumber);
 
     Seedlot relatedSeedlot =
@@ -68,7 +70,7 @@ public class SaveSeedlotFormService {
       Integer prevRevCount = data.revisionCount();
       Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
 
-      if (!prevRevCount.equals(currRevCount)) {
+      if (prevRevCount != null && !prevRevCount.equals(currRevCount)) {
         // Conflict detected
         SparLog.info(
             "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
@@ -86,9 +88,13 @@ public class SaveSeedlotFormService {
       entityToSave.setProgressStatus(parsedProgressStatus);
     }
 
-    saveSeedlotProgressRepositoryClassA.save(entityToSave);
+    SaveSeedlotProgressEntityClassA saved = saveSeedlotProgressRepositoryClassA.save(entityToSave);
+
     SparLog.info("A-class seedlot progress for seedlot number {} saved!", seedlotNumber);
-    return;
+
+    RevisionCountDto revCountDto = new RevisionCountDto(saved.getRevisionCount());
+
+    return revCountDto;
   }
 
   /**
