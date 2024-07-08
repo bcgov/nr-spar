@@ -12,7 +12,13 @@ export const getSeedlotToReview = (pageNumber: number, pageSize: number) => {
   ));
 };
 
-type StatusOnSaveType = 'PND' | 'SUB' | 'APP';
+export type StatusOnSaveType = 'PND' | 'SUB' | 'APP';
+
+export type PutTscSeedlotMutationObj = {
+  seedlotNum: string,
+  statusOnSave: StatusOnSaveType,
+  payload: TscSeedlotEditPayloadType
+}
 
 export const putTscSeedlotWithStatus = (
   seedlotNumber: string,

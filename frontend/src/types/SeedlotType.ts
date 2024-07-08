@@ -270,7 +270,7 @@ export type SeedlotAClassSubmitType = {
   seedlotFormExtractionDto: ExtractionFormSubmitType
 }
 
-type SeedlotReviewElevationLatLongDto = {
+export type SeedlotReviewElevationLatLongDto = {
   minElevation: number,
   maxElevation: number,
   minLatitudeDeg: number,
@@ -288,7 +288,7 @@ type SeedlotReviewElevationLatLongDto = {
   areaOfUseComment: string
 }
 
-type SeedlotReviewGeoInformationDto = MeanGeomDataType & {
+export type SeedlotReviewGeoInformationDto = MeanGeomDataType & {
   effectivePopulationSize: number
 }
 

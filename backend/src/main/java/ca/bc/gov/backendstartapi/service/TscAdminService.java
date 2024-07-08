@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
@@ -14,6 +15,7 @@ import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +39,8 @@ public class TscAdminService {
   private final SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
 
   private final GeneticClassRepository geneticClassRepository;
+
+  private final LoggedUserService loggedUserService;
 
   /**
    * Retrieve a paginated list of seedlot for a given user.
@@ -137,6 +141,7 @@ public class TscAdminService {
               genAclass,
               seedlotSpz.isPrimary(),
               seedlotSpz.description());
+      sspzEntity.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
 
       sspzToSave.add(sspzEntity);
     }

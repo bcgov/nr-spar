@@ -13,6 +13,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
@@ -20,6 +21,8 @@ import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.UserInfo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -49,6 +52,8 @@ class TscAdminServiceTest {
 
   @Mock GeneticClassRepository geneticClassRepository;
 
+  @Mock LoggedUserService loggedUserService;
+
   private TscAdminService tscAdminService;
 
   private SeedlotStatusEntity createValidStatus(String status) {
@@ -69,7 +74,8 @@ class TscAdminServiceTest {
             seedlotRepository,
             seedlotStatusService,
             seedlotSeedPlanZoneRepository,
-            geneticClassRepository);
+            geneticClassRepository,
+            loggedUserService);
   }
 
   @Test
@@ -170,9 +176,11 @@ class TscAdminServiceTest {
   @Test
   @DisplayName("Update Seed Plan Zones happy path should succeed")
   void overrideAreaOfUse_happyPath_shouldSucceed() {
+    when(loggedUserService.getLoggedUserId()).thenReturn(UserInfo.createDevUser().id());
     String seedlotNumber = "63126";
 
     SeedlotSeedPlanZoneEntity seedPlanZoneEntity = mock(SeedlotSeedPlanZoneEntity.class);
+
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber))
         .thenReturn(List.of(seedPlanZoneEntity));
     doNothing().when(seedlotSeedPlanZoneRepository).deleteAll(List.of(seedPlanZoneEntity));

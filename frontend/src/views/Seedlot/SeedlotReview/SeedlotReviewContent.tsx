@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import {
   Button,
   FlexGrid,
   Row,
-  Column
+  Column,
+  Loading
 } from '@carbon/react';
+import { toast } from 'react-toastify';
 import { Edit, Save } from '@carbon/icons-react';
 
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
@@ -18,7 +20,7 @@ import PageTitle from '../../../components/PageTitle';
 import RowGap from '../../../components/RowGap';
 import ApplicantAndSeedlotRead from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Read';
 import ApplicantAndSeedlotEdit from '../../../components/SeedlotReviewSteps/ApplicantAndSeedlot/Edit';
-import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
+import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 import { InitialSeedlotRegFormData } from '../CreateAClass/constants';
 import CollectionReviewRead from '../../../components/SeedlotReviewSteps/Collection/Read';
 import CollectionReviewEdit from '../../../components/SeedlotReviewSteps/Collection/Edit';
@@ -37,6 +39,7 @@ import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/
 import ClassAContext from '../ContextContainerClassA/context';
 import { validateRegForm } from '../CreateAClass/utils';
 import {
+  getSeedlotPayload,
   validateCollectionStep, validateExtractionStep, validateInterimStep, validateOrchardStep,
   validateOwnershipStep, validateParentStep, verifyCollectionStepCompleteness,
   verifyExtractionStepCompleteness,
@@ -48,6 +51,14 @@ import {
   getBreadcrumbs, validateAreaOfUse, validateCollectGeoVals,
   validateGeneticWorth
 } from './utils';
+import {
+  SeedPlanZoneDto, SeedlotReviewElevationLatLongDto, SeedlotReviewGeoInformationDto, TscSeedlotEditPayloadType
+} from '../../../types/SeedlotType';
+import { GeneticTrait } from '../../../types/PtCalcTypes';
+import { GenWorthValType } from './definitions';
+import { PutTscSeedlotMutationObj, StatusOnSaveType, putTscSeedlotWithStatus } from '../../../api-service/tscAdminAPI';
+import ErrorToast from '../../../components/Toast/ErrorToast';
+import { ErrToastOption } from '../../../config/ToastifyConfig';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
@@ -102,7 +113,7 @@ const SeedlotReviewContent = () => {
 
   const {
     allStepData, genWorthVals, geoInfoVals,
-    areaOfUseData
+    areaOfUseData, isFetchingData
   } = useContext(ClassAContext);
 
   const verifyFormData = (): boolean => {
@@ -186,6 +197,102 @@ const SeedlotReviewContent = () => {
     return isValid;
   };
 
+  const generatePaylod = (): TscSeedlotEditPayloadType => {
+    const regFormPayload = getSeedlotPayload(allStepData, seedlotNumber);
+
+    const applicantAndSeedlotInfo: SeedlotPatchPayloadType = {
+      applicantEmailAddress: applicantData.email.value,
+      seedlotSourceCode: applicantData.sourceCode.value,
+      toBeRegistrdInd: applicantData.willBeRegistered.value,
+      bcSourceInd: applicantData.isBcSource.value
+    };
+
+    const seedlotReviewSeedPlanZones: SeedPlanZoneDto[] = [{
+      code: areaOfUseData.primarySpz.value.code,
+      description: areaOfUseData.primarySpz.value.description,
+      isPrimary: true
+    }];
+
+    areaOfUseData.additionalSpzList.forEach((spz) => seedlotReviewSeedPlanZones.push({
+      code: spz.value.code,
+      description: spz.value.description,
+      isPrimary: false
+    }));
+
+    const seedlotReviewElevationLatLong: SeedlotReviewElevationLatLongDto = {
+      minElevation: Number(areaOfUseData.minElevation.value),
+      maxElevation: Number(areaOfUseData.maxElevation.value),
+      minLatitudeDeg: Number(areaOfUseData.minLatDeg.value),
+      minLatitudeMin: Number(areaOfUseData.minLatMinute.value),
+      minLatitudeSec: Number(areaOfUseData.minLatSec.value),
+      maxLatitudeDeg: Number(areaOfUseData.maxLatDeg.value),
+      maxLatitudeMin: Number(areaOfUseData.maxLatMinute.value),
+      maxLatitudeSec: Number(areaOfUseData.maxLatSec.value),
+      minLongitudeDeg: Number(areaOfUseData.minLongDeg.value),
+      minLongitudeMin: Number(areaOfUseData.minLongMinute.value),
+      minLongitudeSec: Number(areaOfUseData.minLongSec.value),
+      maxLongitudeDeg: Number(areaOfUseData.maxLongDeg.value),
+      maxLongitudeMin: Number(areaOfUseData.maxLongMinute.value),
+      maxLongitudeSec: Number(areaOfUseData.maxLongSec.value),
+      areaOfUseComment: areaOfUseData.comment.value
+    };
+
+    const seedlotReviewGeneticWorth: GeneticTrait[] = [];
+    (Object.keys(genWorthVals) as (keyof GenWorthValType)[])
+      .forEach((genWorthKey) => {
+        if (genWorthVals[genWorthKey].value) {
+          seedlotReviewGeneticWorth.push({
+            traitCode: genWorthKey,
+            traitValue: Number(genWorthVals[genWorthKey].value)
+          });
+        }
+      });
+
+    const seedlotReviewGeoInformation: SeedlotReviewGeoInformationDto = {
+      meanLatitudeDegree: Number(geoInfoVals.meanLatDeg.value),
+      meanLatitudeMinute: Number(geoInfoVals.meanLatMinute.value),
+      meanLatitudeSecond: Number(geoInfoVals.meanLatSec.value),
+      meanLongitudeDegree: Number(geoInfoVals.meanLongDeg.value),
+      meanLongitudeMinute: Number(geoInfoVals.meanLongMinute.value),
+      meanLongitudeSecond: Number(geoInfoVals.meanLongSec.value),
+      meanLatitude: 0,
+      meanLongitude: 0,
+      meanElevation: Number(geoInfoVals.meanElevation.value),
+      effectivePopulationSize: Number(geoInfoVals.effectivePopSize.value)
+    };
+
+    return {
+      ...regFormPayload,
+      applicantAndSeedlotInfo,
+      seedlotReviewSeedPlanZones,
+      seedlotReviewElevationLatLong,
+      seedlotReviewGeneticWorth,
+      seedlotReviewGeoInformation
+    };
+  };
+
+  const queryClient = useQueryClient();
+
+  const tscSeedlotMutation = useMutation({
+    mutationFn: (
+      { seedlotNum, statusOnSave, payload }: PutTscSeedlotMutationObj
+    ) => putTscSeedlotWithStatus(seedlotNum, statusOnSave, payload),
+    onError: (err: AxiosError) => {
+      toast.error(
+        <ErrorToast
+          title="Edit seedlot failed"
+          subtitle={`Cannot save seedlot. Please try again later. ${err.code}: ${err.message}`}
+        />,
+        ErrToastOption
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
+      queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      setIsReadMode(true);
+    }
+  });
+
   const handleEditSaveBtn = () => {
     // If the form is in read mode, then enable edit mode only.
     if (isReadMode) {
@@ -197,12 +304,17 @@ const SeedlotReviewContent = () => {
     const isFormDataValid = verifyFormData();
 
     if (isFormDataValid) {
+      const payload = generatePaylod();
+      tscSeedlotMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave: 'SUB', payload });
       setIsReadMode(!isReadMode);
     }
   };
 
   return (
     <FlexGrid className="seedlot-review-grid">
+      <Loading
+        active={tscSeedlotMutation.isLoading || isFetchingData}
+      />
       <Button
         kind="secondary"
         size="md"
