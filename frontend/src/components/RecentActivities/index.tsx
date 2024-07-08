@@ -14,7 +14,6 @@ import {
 } from '@carbon/react';
 
 import EmptySection from '../EmptySection';
-import Subtitle from '../Subtitle';
 import RecentActivitiesTable from './RecentActivitiesTable';
 
 import {
@@ -49,7 +48,6 @@ const RecentActivities = () => {
       <Row className="recent-activity-title-row">
         <Column>
           <h2>{componentTexts.title}</h2>
-          <Subtitle text={componentTexts.subtitle} className="recent-activity-subtitle" />
         </Column>
       </Row>
       <Row>

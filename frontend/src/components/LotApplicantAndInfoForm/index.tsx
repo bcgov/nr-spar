@@ -133,7 +133,7 @@ const LotApplicantAndInfoForm = ({
             name="email"
             type="email"
             labelText="Applicant email address"
-            helperText="The Tree Seed Centre will uses it to communicate with the applicant"
+            helperText="The Tree Seed Centre will use this to communicate with the applicant"
             invalid={seedlotFormData ? seedlotFormData.email.isInvalid : null}
             invalidText="Please enter a valid email"
             onBlur={(e: React.ChangeEvent<HTMLInputElement>) => handleEmail(e.target.value)}

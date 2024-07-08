@@ -17,7 +17,7 @@ const Dashboard = () => (
       <Column>
         <PageTitle
           title="Dashboard"
-          subtitle="See your favourite and recent activities inside SPAR system"
+          subtitle=""
         />
       </Column>
     </Row>
