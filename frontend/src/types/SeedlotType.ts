@@ -3,6 +3,7 @@ import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/ContextCo
 import { CodeDescResType } from './CodeDescResType';
 import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
 import { GeneticTrait, MeanGeomDataType } from './PtCalcTypes';
+import { SeedlotPatchPayloadType } from './SeedlotRegistrationTypes';
 import { SpuDto } from './SpuDto';
 
 type EffectiveDateRange = {
@@ -292,6 +293,7 @@ type SeedlotReviewGeoInformationDto = MeanGeomDataType & {
 }
 
 export type TscSeedlotEditPayloadType = SeedlotAClassSubmitType & {
+  applicantAndSeedlotInfo: SeedlotPatchPayloadType,
   seedlotReviewSeedPlanZones: SeedPlanZoneDto[],
   seedlotReviewElevationLatLong: SeedlotReviewElevationLatLongDto,
   seedlotReviewGeneticWorth: GeneticTrait[],
