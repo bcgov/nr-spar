@@ -793,6 +793,9 @@ public class SeedlotService {
       // Override Seedlot Ne, collection elevation, and collection lat long
       // Set values in the Seedlot instance only
       tscAdminService.overrideSeedlotCollElevLatLong(seedlot, form.seedlotReviewGeoInformation());
+
+      // Override Seedlot Genetic Worth values
+      seedlotGeneticWorthService.overrideSeedlotGenWorth(seedlot, form.seedlotReviewGeneticWorth());
     }
 
     // Only set declaration info for pending seedlots
@@ -1052,7 +1055,7 @@ public class SeedlotService {
     // If the facility type is Other, then a description is required.
     SparLog.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
     SparLog.info("FACILITY TYPE Desc", formStep3.intermOtherFacilityDesc());
-    if (formStep3.intermFacilityCode().equals("OTH")) {
+    if ("OTH".equals(formStep3.intermFacilityCode())) {
       SparLog.info("equal to OTH");
       if (formStep3.intermOtherFacilityDesc() == null
           || formStep3.intermOtherFacilityDesc().isEmpty()) {

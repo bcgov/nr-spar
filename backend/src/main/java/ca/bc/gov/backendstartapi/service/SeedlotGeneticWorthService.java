@@ -2,6 +2,7 @@ package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
@@ -68,6 +69,50 @@ public class SeedlotGeneticWorthService {
     }
 
     return addSeedlotGeneticWorth(seedlot, sgwInsertList);
+  }
+
+  /**
+   * Override the seedlot genetic worth data.
+   *
+   * @param seedlot The Seedlot instance.
+   * @param seedlotGeneticWorthTraits Seedlot Genetic Worth data provided by the TSC Admin.
+   */
+  public List<SeedlotGeneticWorth> overrideSeedlotGenWorth(
+      Seedlot seedlot, List<GeneticWorthTraitsDto> seedlotGeneticWorthTraits) {
+    SparLog.info("Saving SeedlotGeneticWorth for seedlot number {}", seedlot.getId());
+
+    List<SeedlotGeneticWorth> sgwList =
+        seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlot.getId());
+
+    if (!sgwList.isEmpty()) {
+      SparLog.info(
+          "Deleting {} previous records on the SeedlotGeneticWorth table for seedlot number {}",
+          sgwList.size(),
+          seedlot.getId());
+
+      List<String> sgwExistingList =
+          new ArrayList<>(sgwList.stream().map(SeedlotGeneticWorth::getGeneticWorthCode).toList());
+
+      List<SeedlotGeneticWorthId> sgwiList = new ArrayList<>();
+      for (String genWorthCode : sgwExistingList) {
+        sgwiList.add(new SeedlotGeneticWorthId(seedlot.getId(), genWorthCode));
+      }
+
+      seedlotGeneticWorthRepository.deleteAllById(sgwiList);
+    }
+
+    List<SeedlotGeneticWorth> seedlotGenWorthList = new ArrayList<>();
+    for (GeneticWorthTraitsDto traitDto : seedlotGeneticWorthTraits) {
+      GeneticWorthEntity gwEntity =
+          geneticWorthEntityDao.getGeneticWorthEntity(traitDto.traitCode()).orElseThrow();
+      SeedlotGeneticWorth sgw =
+          new SeedlotGeneticWorth(seedlot, gwEntity, loggedUserService.createAuditCurrentUser());
+      sgw.setGeneticQualityValue(traitDto.calculatedValue());
+      sgw.setTestedParentTreeContributionPercentage(traitDto.testedParentTreePerc());
+      seedlotGenWorthList.add(sgw);
+    }
+
+    return seedlotGeneticWorthRepository.saveAll(seedlotGenWorthList);
   }
 
   private List<SeedlotGeneticWorth> addSeedlotGeneticWorth(

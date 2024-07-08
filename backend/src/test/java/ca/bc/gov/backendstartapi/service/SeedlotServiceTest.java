@@ -699,6 +699,8 @@ class SeedlotServiceTest {
     assertEquals(testDto.bcSourceInd(), patchedSeedlot.getSourceInBc());
   }
 
+  @Test
+  @DisplayName("Update seedlot with form tsc admin happy path should succeed")
   void updateSeedlotWithForm_tscAdmin_happyPath_shouldSucceed() {
     String statusOnSuccess = "SUB";
     SeedlotStatusEntity seedlotStatusEntity =
@@ -712,45 +714,72 @@ class SeedlotServiceTest {
     seedlot.setSeedlotStatus(seedlotStatusEntity);
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
 
+    SeedlotFormCollectionDto collectionDto = mock(SeedlotFormCollectionDto.class);
+
     // Steps 1 to 4
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveSeedlotFormStep1(seedlot, collectionDto, true);
+
+    SeedlotFormOwnershipDto ownershipDto = mock(SeedlotFormOwnershipDto.class);
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, List.of(ownershipDto), true))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
+
+    SeedlotFormInterimDto formStep3 = mock(SeedlotFormInterimDto.class);
+    when(formStep3.intermFacilityCode()).thenReturn("A");
+
+    SeedlotFormOrchardDto formOrchardDto =
+        new SeedlotFormOrchardDto("405", null, null, null, null, false, false, 0, null, null);
+
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(seedlot, formOrchardDto, true);
 
     //  Step 5
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    SeedlotFormParentTreeSmpDto parentTreeSmpDto = mock(SeedlotFormParentTreeSmpDto.class);
+    when(seedlotParentTreeService.saveSeedlotFormStep5(seedlot, List.of(parentTreeSmpDto), true))
+        .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
+
+    when(seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, List.of(parentTreeSmpDto), true))
         .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), any());
+    doNothing()
+        .when(seedlotParentTreeSmpMixService)
+        .saveSeedlotFormStep5(seedlot, List.of(parentTreeSmpDto), true);
 
     // setBecValues
     OrchardDto orchardDto = mock(OrchardDto.class);
     when(oracleApiProvider.findOrchardById(anyString())).thenReturn(Optional.of(orchardDto));
+    when(orchardService.findSpuIdByOrchard(anyString()))
+        .thenReturn(Optional.of(mock(ActiveOrchardSpuEntity.class)));
 
     // tscAdminService
     doNothing().when(tscAdminService).overrideElevLatLongMinMax(any(), any());
     doNothing().when(tscAdminService).overrideAreaOfUse(any(), any());
     doNothing().when(tscAdminService).overrideSeedlotCollElevLatLong(any(), any());
+    when(seedlotGeneticWorthService.overrideSeedlotGenWorth(any(), any())).thenReturn(List.of());
 
     // setSeedlotStatus
     when(seedlotStatusService.getValidSeedlotStatus(statusOnSuccess))
         .thenReturn(Optional.of(seedlotStatusEntity));
+
+    when(seedlotSourceRepository.findById(anyString()))
+        .thenReturn(Optional.of(mock(SeedlotSourceEntity.class)));
 
     // saving
     when(seedlotRepository.save(any())).thenReturn(seedlot);
 
     SeedlotFormInterimDto formInterimDto = mock(SeedlotFormInterimDto.class);
 
+    SeedlotApplicationPatchDto applicationPatchDto =
+        new SeedlotApplicationPatchDto("email@bcgov.ca", "A", true, true);
+
     SeedlotFormSubmissionDto form =
         new SeedlotFormSubmissionDto(
             mock(SeedlotFormCollectionDto.class), // SeedlotFormCollectionDto
             List.of(mock(SeedlotFormOwnershipDto.class)), // List<SeedlotFormOwnershipDto>
             formInterimDto, // SeedlotFormInterimDto
-            mock(SeedlotFormOrchardDto.class), // SeedlotFormOrchardDto
+            formOrchardDto, // SeedlotFormOrchardDto
             List.of(mock(SeedlotFormParentTreeSmpDto.class)), // List<SeedlotFormParentTreeSmpDto>
             List.of(mock(SeedlotFormParentTreeSmpDto.class)), // List<SeedlotFormParentTreeSmpDto>
             mock(SeedlotFormExtractionDto.class), // SeedlotFormExtractionDto
@@ -758,7 +787,7 @@ class SeedlotServiceTest {
             mock(SeedlotReviewElevationLatLongDto.class), // SeedlotReviewElevationLatLongDto
             List.of(mock(GeneticWorthTraitsDto.class)), // List<GeneticWorthTraitsDto>
             mock(SeedlotReviewGeoInformationDto.class),
-            mock(SeedlotApplicationPatchDto.class)); // SeedlotReviewGeoInformationDto
+            applicationPatchDto); // SeedlotReviewGeoInformationDto
 
     boolean isTscAdmin = true;
 
@@ -771,5 +800,6 @@ class SeedlotServiceTest {
     verify(tscAdminService, times(1)).overrideElevLatLongMinMax(any(), any());
     verify(tscAdminService, times(1)).overrideAreaOfUse(any(), any());
     verify(tscAdminService, times(1)).overrideSeedlotCollElevLatLong(any(), any());
+    verify(seedlotGeneticWorthService, times(1)).overrideSeedlotGenWorth(any(), any());
   }
 }
