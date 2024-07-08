@@ -25,7 +25,7 @@ public interface ParentTreeRepository extends JpaRepository<ParentTreeEntity, Lo
               ON O.ORCHARD_ID = PTO.ORCHARD_ID
             JOIN PARENT_TREE_GENETIC_QUALITY Q
               ON PT.PARENT_TREE_ID = Q.PARENT_TREE_ID
-            WHERE O.ORCHARD_STAGE_CODE != 'RET' AND PT.VEGETATION_CODE = ?1
+            WHERE PT.VEGETATION_CODE = ?1
           """,
       nativeQuery = true)
   List<ParentTreeProj> findAllParentTreeWithVegCode(String vegCode);

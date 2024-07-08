@@ -62,23 +62,21 @@ class OrchardRepositoryTest {
   @DisplayName("findOrchardByVegCodeRepoSuccessTest")
   void findOrchardByVegCodeRepoSuccessTest() {
     String vegCode = "PLI";
-    String stageCode = "RET";
-    List<OrchardEntity> orchardRet =
-        orchardRepository.findAllByVegetationCodeAndStageCodeNot(vegCode, stageCode);
+    List<OrchardEntity> orchardRet = orchardRepository.findAllByVegetationCode(vegCode);
 
     Assertions.assertFalse(orchardRet.isEmpty());
     Assertions.assertEquals(2, orchardRet.size());
     Assertions.assertEquals(vegCode, orchardRet.get(0).getVegetationCode());
     Assertions.assertEquals(vegCode, orchardRet.get(1).getVegetationCode());
-    Assertions.assertNotEquals(stageCode, orchardRet.get(0).getStageCode());
-    Assertions.assertNotEquals(stageCode, orchardRet.get(1).getStageCode());
   }
 
   @Test
-  @DisplayName("findOrchardByVegCodeRepoErrorTest")
+  @DisplayName("Find orchard by veg code should include retired orchard")
   void findOrchardByVegCodeRepoErrorTest() {
     List<OrchardEntity> orchardRet =
-        orchardRepository.findAllByVegetationCodeAndStageCodeNot("SX", "RET");
+        orchardRepository.findAllByVegetationCode("FDC").stream()
+            .filter(orchard -> orchard.getStageCode() == "RET")
+            .toList();
 
     Assertions.assertTrue(orchardRet.isEmpty());
   }
