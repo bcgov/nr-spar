@@ -2623,18 +2623,18 @@ CREATE TRIGGER trg_seedlot_audit_DIU
  FOR EACH ROW EXECUTE PROCEDURE spar.seedlot_if_modified_func();
 
 create table spar.ETL_EXECUTION_LOG(
-interface_id varchar(100) not null,
-last_run_ts timestamp,
-current_run_ts timestamp,
+from_timestamp timestamp not null,
+to_timestamp   timestamp not null,
+run_status varchar(100) not null,
 updated_at  timestamp   default now() not null,
 created_at  timestamp   default now() not null
 );
 
 
 comment on table spar.ETL_EXECUTION_LOG is 'ETL Tool monitoring table to store execution current instance of batch processing interfaces';
-comment on column spar.ETL_EXECUTION_LOG.interface_id               is 'Unique interface name to represent a batch execution';
-comment on column spar.ETL_EXECUTION_LOG.last_run_ts                is 'Last timestamp this interface was executed for batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG.current_run_ts             is 'Current timestamp this interface was executed of this batch execution'; 
+comment on column spar.ETL_EXECUTION_LOG.from_timestamp             is 'From timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
+comment on column spar.ETL_EXECUTION_LOG.to_timestamp               is 'To timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
+comment on column spar.ETL_EXECUTION_LOG.run_status                 is 'Status of ETL execution'; 
 comment on column spar.ETL_EXECUTION_LOG.updated_at                 is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_LOG.created_at                 is 'Timestamp of the time this record was created'; 
 
@@ -4441,6 +4441,8 @@ DDL
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_MAP;
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_LOG;
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_LOG_HIST;
+DROP TABLE IF EXISTS spar.ETL_EXECUTION_SCHEDULE;
+
 
 create table if not exists spar.ETL_EXECUTION_MAP(
 interface_id 		  varchar(100) not null,
@@ -4508,48 +4510,13 @@ comment on column spar.ETL_EXECUTION_SCHEDULE.updated_at         is 'Timestamp o
 comment on column spar.ETL_EXECUTION_SCHEDULE.created_at         is 'Timestamp of the time this record was created'; 
 
 
-create table spar.ETL_EXECUTION_LOG_HIST(
-interface_id 				varchar(100) not null,
-execution_id 				integer 	 not null,
-execution_status 			varchar(100) not null,
-execution_details 			text,
-source_connect_timedelta 	interval,
-source_extract_timedelta 	interval,
-source_extract_row_count 	integer,
-target_connect_timedelta 	interval,
-target_load_timedelta 		interval,
-target_load_row_count 		integer,
-process_started_at 			timestamp,
-process_finished_at 		timestamp,
-process_timedelta   		interval,
-last_run_ts 				timestamp,
-current_run_ts 				timestamp,
-retry_process				boolean 	default false,
-updated_at  				timestamp   default now() not null,
-created_at  				timestamp   default now() not null
-);
-
+create table spar.etl_execution_log_hist
+( entry_timestamp timestamp(6) not null default current_timestamp
+, log_details jsonb not null)
 
 comment on table  spar.ETL_EXECUTION_LOG_HIST is 'ETL Tool monitoring table to store all executed instances of batch processing interfaces';
-comment on column spar.ETL_EXECUTION_LOG_HIST.interface_id       		is 'Unique interface name to represent a batch execution. Refer to EXECUTION_MAP table PK';
-comment on column spar.ETL_EXECUTION_LOG_HIST.execution_id       		is 'The execution ID that represent a batch execution. Refer to EXECUTION_MAP table PK';
-comment on column spar.ETL_EXECUTION_LOG_HIST.execution_status       	is 'Status of this execution. FAILED or SUCCESS expected.';
-comment on column spar.ETL_EXECUTION_LOG_HIST.execution_details         is 'Reference text of this interface instance execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.source_connect_timedelta  is 'Timedelta referring to how much time was needed to stablish a connection in the source database'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.source_extract_timedelta  is 'Timedelta referring to how much time was needed to execute a extract statement in the source database';
-comment on column spar.ETL_EXECUTION_LOG_HIST.source_extract_row_count  is 'Number of rows extracted from the source database for this execution.'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.target_connect_timedelta  is 'Timedelta referring to how much time was needed to stablish a connection in the target database'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.target_load_timedelta     is 'Timedelta referring to how much time was needed to load the extracted data in the target database';
-comment on column spar.ETL_EXECUTION_LOG_HIST.target_load_row_count     is 'Number of rows inserted or updated in the target database for this execution.'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.process_started_at        is 'Timestamp when this execution instance was started'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.process_finished_at       is 'Timestamp when this execution instance was finished'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.process_timedelta         is 'Timedelta referring how much time was spent to execute the whole process.'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.last_run_ts               is 'Last timestamp this interface instance was executed for batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.current_run_ts            is 'Current timestamp this interface instance was executed of this batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.retry_process             is 'If true, this log instance will be processed again (with last_run_ts and current_run_ts parameters)'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.updated_at                is 'Timestamp of the last time this record was updated'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.created_at                is 'Timestamp of the time this record was created'; 
-
+comment on column spar.ETL_EXECUTION_LOG_HIST.entry_timestamp      		  is 'The timestamp when the record was inserted';
+comment on column spar.ETL_EXECUTION_LOG_HIST.log_details       		    is 'JSON document with step statistics';
 
 /* 
 -- DML for Generic interface_id for generic running
