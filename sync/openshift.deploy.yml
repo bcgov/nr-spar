@@ -15,7 +15,7 @@ parameters:
     value: sync
   - name: EXECUTION_ID
     description: Process execution ID for running ETL Tool
-    value: "0"
+    value: "100"
   - name: ORG
     description: GitHub organization name
     value: bcgov
@@ -24,7 +24,7 @@ parameters:
     value: nr-spar
   - name: TEST_MODE
     description: "Run in test mode"
-    value: "0"
+    value: "true"
 
   ### Usually a bad idea - not recommended
   - name: CRON_MINUTES
