@@ -108,6 +108,7 @@ const SeedlotDataTable = (
         showSearch
           ? (
             <TableToolbarSearch
+              className={isTscAdmin ? 'tsc-admin-background' : ''}
               persistent
               placeholder="Search for seedlots"
               onChange={

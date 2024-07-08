@@ -85,7 +85,7 @@ const SeedlotTable = (
 
   const tablePagination = () => (
     <Pagination
-      className="general-data-table-pagination"
+      className={`general-data-table-pagination ${isTscAdmin ? 'tsc-admin-background' : ''}`}
       page={currPageNumber + 1}
       pageSize={currPageSize}
       pageSizes={PageSizesConfig}
