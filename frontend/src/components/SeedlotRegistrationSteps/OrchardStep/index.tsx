@@ -99,7 +99,17 @@ const OrchardStep = ({
   const orchardQuery = useQuery({
     queryKey: ['orchards', seedlotSpecies.code],
     queryFn: () => getOrchardByVegCode(seedlotSpecies.code),
-    enabled: !isFormSubmitted
+    enabled: !isFormSubmitted,
+    select: (orchards) => orchards
+      .filter((orchard) => (orchard.stageCode !== 'RET'))
+      .map((orchard) => (
+        ({
+          code: orchard.id,
+          description: orchard.name,
+          label: `${orchard.id} - ${orchard.name} - ${orchard.lotTypeCode} - ${orchard.stageCode}`
+        })
+      ))
+      .sort((a, b) => Number(a.code) - Number(b.code))
   });
 
   const setGametic = (event: ComboBoxEvent, isFemale: boolean) => {
