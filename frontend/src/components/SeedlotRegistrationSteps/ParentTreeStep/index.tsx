@@ -480,43 +480,26 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                   renderRecalcSection()
                 }
                 {
-                  isReviewDisplay
-                    ? (
-                      <DetailSection>
-                        {
-                          renderSubSections()
-                        }
-                        {/* -------- Seedlot mean geospatial data -------- */}
-                        <Row className="info-section-sub-title">
-                          <Column>
-                            Collection geospatial summary
-                          </Column>
-                        </Row>
-                        <SpatialData isReviewRead={isReviewRead ?? false} />
-                      </DetailSection>
-                    )
-                    : (
-                      <DetailSection>
-                        {/* -------- SMP mix mean geospatial data -------- */}
-                        <Row className="info-section-sub-title">
-                          <DescriptionBox
-                            header="SMP Mix geospatial summary"
+                  <DetailSection>
+                    {/* -------- SMP mix mean geospatial data -------- */}
+                    <Row className="info-section-sub-title">
+                      <DescriptionBox
+                        header="SMP Mix geospatial summary"
+                      />
+                    </Row>
+                    {
+                      renderCalcSection(true)
+                    }
+                    {
+                      showInfoSections || isReviewDisplay
+                        ? (
+                          <InfoSection
+                            infoItems={Object.values(meanGeomInfos.smpMix)}
                           />
-                        </Row>
-                        {
-                          renderCalcSection(true)
-                        }
-                        {
-                          showInfoSections
-                            ? (
-                              <InfoSection
-                                infoItems={Object.values(meanGeomInfos.smpMix)}
-                              />
-                            )
-                            : null
-                        }
-                      </DetailSection>
-                    )
+                        )
+                        : null
+                    }
+                  </DetailSection>
                 }
               </>
             )
