@@ -8,14 +8,46 @@ import { formatEmptyStr } from '../../SeedlotReviewSteps/ParentTrees/utils';
 import {
   validateElevationRange, validateDegreeRange, validateMinuteOrSecondRange
 } from '../../SeedlotReviewSteps/AreaOfUse/utils';
+import ReadOnlyInput from '../../ReadOnlyInput';
 
-const SpatialData = () => {
+/**
+ * Colletion
+ */
+const SpatialData = ({ isReviewRead }: { isReviewRead: boolean }) => {
   const {
     isFetchingData,
     isCalculatingPt,
     geoInfoVals,
     setGeoInfoInputObj
   } = useContext(ClassAContext);
+
+  if (isReviewRead) {
+    return (
+      <Row>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="collection-mean-lat"
+            label="Mean latitude"
+            value={`${geoInfoVals.meanLatDeg.value}° ${geoInfoVals.meanLatMinute.value}' ${geoInfoVals.meanLatSec.value}"`}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="collection-mean-long"
+            label="Mean longitude"
+            value={`${geoInfoVals.meanLongDeg.value}° ${geoInfoVals.meanLongMinute.value}' ${geoInfoVals.meanLongSec.value}"`}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="collection-mean-elev"
+            label="Mean elevation"
+            value={`${geoInfoVals.meanElevation.value} m`}
+          />
+        </Column>
+      </Row>
+    );
+  }
 
   const handleInput = (key: keyof GeoInfoValType, value: string | null) => {
     let newObj = structuredClone(geoInfoVals[key]);
@@ -61,7 +93,7 @@ const SpatialData = () => {
       <>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
-            id={`geo-info-mean-${latLongStr}-deg`}
+            id={geoInfoVals[degKey].id}
             type="number"
             labelText={`Mean ${latLongStr} degree`}
             defaultValue={geoInfoVals[degKey].value}
@@ -75,7 +107,7 @@ const SpatialData = () => {
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
-            id={`geo-info-mean-${latLongStr}-minute`}
+            id={geoInfoVals[minuteKey].id}
             type="number"
             labelText={`Mean ${latLongStr} minute`}
             defaultValue={geoInfoVals[minuteKey].value}
@@ -89,7 +121,7 @@ const SpatialData = () => {
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
-            id={`geo-info-mean-${latLongStr}-sec`}
+            id={geoInfoVals[secKey].id}
             type="number"
             labelText={`Mean ${latLongStr} second`}
             defaultValue={geoInfoVals[secKey].value}

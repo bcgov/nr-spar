@@ -15,6 +15,7 @@ import {
   MAX_VALUE_GEN_WORTH, MIN_VALUE_GEN_WORTH
 } from './constants';
 
+
 type UnrelatedGenWorthProps = {
   validGenWorth: Array<string> | undefined;
   isRead?: boolean;
@@ -73,7 +74,6 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       type="number"
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.ad.value}
-                      readOnly={isRead}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                         handleInput('ad', e.target.value);
                       }}
@@ -301,7 +301,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                   : (
                     <TextInput
                       id="gen-worth-gvo"
-                      labelText="Volume growth(GVO):"
+                      labelText="Volume growth (GVO):"
                       type="number"
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.gvo.value}

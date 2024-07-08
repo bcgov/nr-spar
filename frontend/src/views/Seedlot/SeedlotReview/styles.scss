@@ -75,4 +75,12 @@
       padding: 0;
     }
   }
+
+  .action-button-row {
+    padding: 2.5rem 0;
+    .#{vars.$bcgov-prefix}--btn{
+      max-width: none;
+      width: -webkit-fill-available;
+    }
+  }
 }

@@ -17,11 +17,10 @@ export const filesAndDocsHeaders: string[] = [
 
 export const componentTexts = {
   title: 'My recent activities',
-  subtitle: 'Check your recent requests and files',
   tabs: {
     ariaLabel: 'List of tabs',
     requests: 'Requests',
-    files: 'Files & Docs.'
+    files: 'Files & Docs'
   }
 };
 

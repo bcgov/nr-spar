@@ -540,7 +540,6 @@ export const fillCalculatedInfo = (
   setGenWorthInfoItems: Function,
   popSizeAndDiversityConfig: Record<string, any>,
   setPopSizeAndDiversityConfig: Function,
-  meanGeomInfos: MeanGeomInfoSectionConfigType,
   setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>,
   setIsCalculatingPt: Function,
   setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,
@@ -617,35 +616,35 @@ export const fillCalculatedInfo = (
       ...prevGeo,
       meanElevation: {
         ...prevGeo.meanElevation,
-        value: seedlotMeanGeom.meanElevation.toString()
+        value: String(seedlotMeanGeom.meanElevation)
       },
       meanLatDeg: {
         ...prevGeo.meanLatDeg,
-        value: seedlotMeanGeom.meanLatitudeDegree.toString()
+        value: String(seedlotMeanGeom.meanLatitudeDegree)
       },
       meanLatMinute: {
         ...prevGeo.meanLatMinute,
-        value: seedlotMeanGeom.meanLatitudeMinute.toString()
+        value: String(seedlotMeanGeom.meanLatitudeMinute)
       },
       meanLatSec: {
         ...prevGeo.meanLatSec,
-        value: seedlotMeanGeom.meanLatitudeSecond.toString()
+        value: String(seedlotMeanGeom.meanLatitudeSecond)
       },
       meanLongDeg: {
         ...prevGeo.meanLongDeg,
-        value: seedlotMeanGeom.meanLongitudeDegree.toString()
+        value: String(seedlotMeanGeom.meanLongitudeDegree)
       },
       meanLongMinute: {
         ...prevGeo.meanLongMinute,
-        value: seedlotMeanGeom.meanLongitudeMinute.toString()
+        value: String(seedlotMeanGeom.meanLongitudeMinute)
       },
       meanLongSec: {
         ...prevGeo.meanLongSec,
-        value: seedlotMeanGeom.meanLongitudeSecond.toString()
+        value: String(seedlotMeanGeom.meanLongitudeSecond)
       },
       effectivePopSize: {
         ...prevGeo.effectivePopSize,
-        value: calculatedPtVals.neValue ? calculatedPtVals.neValue.toString() : ''
+        value: String(calculatedPtVals.neValue)
       }
     }));
   }

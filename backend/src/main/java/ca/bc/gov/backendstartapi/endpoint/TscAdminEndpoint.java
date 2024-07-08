@@ -91,16 +91,16 @@ public class TscAdminEndpoint {
    * Enables a {@link Seedlot} registration approval or disapproval by the TSC Admin.
    *
    * @param seedlotNumber The {@link Seedlot} identification.
-   * @param isApproved Boolean option defining if it was approved.
+   * @param status String option defining the Seedlot status code.
    */
-  @PostMapping("/seedlots/{seedlotNumber}/approve/{isApproved}")
+  @PostMapping("/seedlots/{seedlotNumber}/status/{status}")
   @Operation(
       summary = "Enables a Seedlot registration approval or disapproval by the TSC Admin.",
       description = "The TSC Admin can either approve or disapprove a `Seedlot` registration.",
       responses = {
         @ApiResponse(
             responseCode = "204",
-            description = "The Seedlot was successfully approved or disapproved. No content body.",
+            description = "Update the Seedlot's status as per the request. No content body.",
             content = @Content(schema = @Schema(implementation = Void.class))),
         @ApiResponse(
             responseCode = "401",
@@ -112,7 +112,7 @@ public class TscAdminEndpoint {
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig("SPAR_TSC_ADMIN")
-  public ResponseEntity<Void> approveOrDisapproveSeedlot(
+  public ResponseEntity<Void> updateSeedlotStatus(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -122,15 +122,15 @@ public class TscAdminEndpoint {
           @PathVariable
           String seedlotNumber,
       @Parameter(
-              name = "isApproved",
+              name = "status",
               in = ParameterIn.PATH,
-              description = "Boolean option defining if the seedlot approval.",
+              description = "Seedlot status to be updated to",
               required = true,
               example = "true",
-              schema = @Schema(type = "boolean", example = "true"))
+              schema = @Schema(type = "string", example = "true"))
           @PathVariable
-          Boolean isApproved) {
-    tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, isApproved);
+          String status) {
+    tscAdminService.updateSeedlotStatus(seedlotNumber, status);
     return ResponseEntity.noContent().build();
   }
 

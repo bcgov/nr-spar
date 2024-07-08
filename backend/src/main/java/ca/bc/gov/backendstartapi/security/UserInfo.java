@@ -44,6 +44,8 @@ public record UserInfo(
     @NonNull List<String> clientIds,
     @NonNull String jwtToken) {
 
+  private static final String devClientNumber = "00011223";
+
   /** Ensure immutability for the user's roles. */
   public UserInfo {
     if (identityProvider.equals(IdentityProvider.IDIR)) {
@@ -70,7 +72,16 @@ public record UserInfo(
         null,
         IdentityProvider.IDIR,
         Set.of(),
-        List.of("00011223"),
+        List.of(devClientNumber),
         "abcdef123456");
+  }
+
+  /**
+   * Getter for devClientNumber.
+   *
+   * @return the mocked client number
+   */
+  public static String getDevClientNumber() {
+    return devClientNumber;
   }
 }

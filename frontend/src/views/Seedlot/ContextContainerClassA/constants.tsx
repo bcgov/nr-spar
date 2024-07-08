@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
@@ -96,8 +98,21 @@ export const smartSaveText = {
   loading: 'Saving...',
   error: 'Save changes failed',
   idle: 'Save changes',
+  reload: 'Reload form',
   success: 'Changes saved!',
-  suggestion: 'Your recent changes could not be saved. Please try saving the form manually to keep all of your changes.'
+  suggestion: 'Your recent changes could not be saved. Please try saving the form manually to keep all of your changes.',
+  conflictTitle: 'Conflict detected',
+  conflictSuggestion: (
+    <div className="conflict-suggestion-div">
+      Another user has updated this form. Please reload the page to view the latest information
+      <br />
+      <ul className="ul-disc">
+        <li>Saving and submitting are temporarily disabled to prevent overwriting</li>
+        <li>Reload the page to continue editing without losing further data</li>
+        <li>Any unsaved changes will be lost</li>
+      </ul>
+    </div>
+  )
 };
 
 export const emptyCollectionStep: CollectionFormSubmitType = {
