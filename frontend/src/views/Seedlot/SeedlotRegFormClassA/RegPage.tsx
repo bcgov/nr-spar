@@ -23,7 +23,7 @@ import SubmitModal from '../../../components/SeedlotRegistrationSteps/SubmitModa
 import ClassAContext from '../ContextContainerClassA/context';
 import { addParamToPath } from '../../../utils/PathUtils';
 import ROUTES from '../../../routes/constants';
-import { smartSaveText } from '../ContextContainerClassA/constants';
+import { completeProgressConfig, smartSaveText } from '../ContextContainerClassA/constants';
 
 const RegPage = () => {
   const navigate = useNavigate();
@@ -44,8 +44,12 @@ const RegPage = () => {
     getSeedlotPayload,
     updateProgressStatus,
     saveProgressStatus,
-    isFetchingData
+    isFetchingData,
+    seedlotData,
+    getFormDraftQuery
   } = useContext(ClassAContext);
+
+  const reloadFormDraft = () => getFormDraftQuery.refetch();
 
   return (
     <div className="seedlot-registration-page">
@@ -79,6 +83,7 @@ const RegPage = () => {
                             saveDescription={saveDescription}
                             mutationStatus={saveProgressStatus}
                             lastSaveTimestamp={lastSaveTimestamp}
+                            reloadFormDraft={reloadFormDraft}
                           />
                         </>
                       )
@@ -92,7 +97,11 @@ const RegPage = () => {
         <Row>
           <Column className="seedlot-registration-progress">
             <SeedlotRegistrationProgress
-              progressStatus={progressStatus}
+              progressStatus={
+                seedlotData?.seedlotStatus.seedlotStatusCode === 'PND' || seedlotData?.seedlotStatus.seedlotStatusCode === 'INC'
+                  ? progressStatus
+                  : completeProgressConfig
+              }
               interactFunction={(e: number) => {
                 updateProgressStatus(e, formStep);
                 setStep((e - formStep));
@@ -122,18 +131,18 @@ const RegPage = () => {
             : null
         }
         {
-          saveProgressStatus === 'error'
+          saveStatus === 'conflict' || saveStatus === 'error'
             ? (
               <Row>
                 <Column>
                   <ActionableNotification
-                    className="save-error-actionable-notification"
+                    className={saveStatus === 'conflict' ? 'save-conflict-actionable-notification' : 'save-error-actionable-notification'}
                     lowContrast
                     kind="error"
-                    title={`${smartSaveText.error}:\u00A0`}
-                    subtitle={smartSaveText.suggestion}
-                    actionButtonLabel={smartSaveText.idle}
-                    onActionButtonClick={() => handleSaveBtn()}
+                    title={saveStatus === 'conflict' ? `${smartSaveText.conflictTitle}` : `${smartSaveText.error}:\u00A0`}
+                    subtitle={saveStatus === 'conflict' ? smartSaveText.conflictSuggestion : smartSaveText.suggestion}
+                    actionButtonLabel={saveStatus === 'conflict' ? smartSaveText.reload : smartSaveText.idle}
+                    onActionButtonClick={saveStatus === 'conflict' ? reloadFormDraft : handleSaveBtn}
                   />
                 </Column>
               </Row>
@@ -189,9 +198,9 @@ const RegPage = () => {
                       size="lg"
                       className="form-action-btn"
                       onClick={() => handleSaveBtn()}
-                      disabled={saveProgressStatus === 'loading'}
+                      disabled={saveProgressStatus === 'loading' || saveStatus === 'conflict'}
                     >
-                      <InlineLoading status={saveStatus} description={saveDescription} />
+                      <InlineLoading status={saveStatus === 'conflict' ? 'error' : saveStatus} description={saveDescription} />
                     </Button>
                   </Column>
                 )
@@ -215,7 +224,7 @@ const RegPage = () => {
                     <SubmitModal
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
-                      disableBtn={!allStepCompleted}
+                      disableBtn={!allStepCompleted || saveStatus === 'conflict'}
                       submitFn={() => {
                         submitSeedlot.mutate(getSeedlotPayload(allStepData, seedlotNumber));
                       }}

@@ -304,7 +304,8 @@ export type TscSeedlotEditPayloadType = SeedlotAClassSubmitType & {
 
 export type SeedlotProgressPayloadType = {
   allStepData: AllStepData,
-  progressStatus: ProgressIndicatorConfig
+  progressStatus: ProgressIndicatorConfig,
+  revisionCount: number
 };
 
 export type SeedlotCalculationsResultsType = {

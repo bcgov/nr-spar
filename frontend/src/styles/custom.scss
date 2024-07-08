@@ -408,7 +408,11 @@ label.#{vars.$bcgov-prefix}--label--disabled {
   padding: 0;
 }
 
-.danger-tertiary-btn{
+.danger-tertiary-btn {
   border-color: var(--#{vars.$bcgov-prefix}-button-danger-secondary, colors.$red-70);
   color: var(--#{vars.$bcgov-prefix}-button-danger-secondary, colors.$red-70);
+}
+
+.ul-disc {
+  list-style-type: disc;
 }

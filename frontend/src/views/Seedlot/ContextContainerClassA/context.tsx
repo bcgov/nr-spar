@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext } from 'react';
-import { UseMutationResult } from '@tanstack/react-query';
+import { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
   RichSeedlotType, SeedlotAClassSubmitType,
-  SeedlotCalculationsResultsType, SeedlotType
+  SeedlotCalculationsResultsType, SeedlotProgressPayloadType, SeedlotType
 } from '../../../types/SeedlotType';
 
 import { AllStepData, AreaOfUseDataType, ProgressIndicatorConfig } from './definitions';
@@ -73,7 +73,8 @@ export type ClassAContextType = {
   areaOfUseData: AreaOfUseDataType,
   setAreaOfUseData: React.Dispatch<React.SetStateAction<AreaOfUseDataType>>,
   isCalculatingPt: boolean,
-  setIsCalculatingPt: Function
+  setIsCalculatingPt: Function,
+  getFormDraftQuery: UseQueryResult<SeedlotProgressPayloadType, unknown>
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -122,7 +123,8 @@ const ClassAContext = createContext<ClassAContextType>({
   areaOfUseData: {} as AreaOfUseDataType,
   setAreaOfUseData: () => { },
   isCalculatingPt: false,
-  setIsCalculatingPt: () => { }
+  setIsCalculatingPt: () => { },
+  getFormDraftQuery: {} as UseQueryResult<SeedlotProgressPayloadType, unknown>
 });
 
 export default ClassAContext;

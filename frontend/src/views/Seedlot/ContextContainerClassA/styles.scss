@@ -109,14 +109,21 @@
     }
   }
 
-  .save-error-actionable-notification {
+  .save-error-actionable-notification,
+  .save-conflict-actionable-notification {
     width: 100%;
     max-width: none;
     margin-bottom: 3rem;
 
     .#{vars.$bcgov-prefix}--actionable-notification__content {
-      display: flex;
-      flex-direction: row;
+      p {
+        font-size: 0.875rem;
+
+        ul {
+          margin-left: 1.5rem;
+          margin-top: 1.125rem;
+        }
+      }
     }
 
     .#{vars.$bcgov-prefix}--actionable-notification__details {
@@ -154,6 +161,20 @@
         border: inherit;
         color: var(--#{vars.$bcgov-prefix}-button-tertiary);
       }
+    }
+  }
+
+  .save-error-actionable-notification {
+    .#{vars.$bcgov-prefix}--actionable-notification__content {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+
+  .conflict-suggestion-div {
+    ul {
+      margin-left: 1.5rem;
+      margin-top: 1.125rem;
     }
   }
 }
