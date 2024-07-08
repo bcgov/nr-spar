@@ -30,6 +30,7 @@ import { addParamToPath } from '../../../utils/PathUtils';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
+import { StatusOnSaveType } from '../../../api-service/tscAdminAPI';
 
 import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
@@ -37,7 +38,6 @@ import FormProgress from './FormProgress';
 import TscReviewSection from './TscReviewSection';
 
 import './styles.scss';
-import { StatusOnSaveType } from '../../../api-service/tscAdminAPI';
 
 const SeedlotDetails = () => {
   const navigate = useNavigate();
@@ -189,6 +189,32 @@ const SeedlotDetails = () => {
                         kind="success"
                         title="Submitted:"
                         subtitle="Your seedlot registration was submitted with success and is now under review by the TSC"
+                      />
+                    )
+                    : null
+                }
+                {
+                  statusOnSave === 'APP' && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'APP')
+                    ? (
+                      <InlineNotification
+                        className="seedlot-submitted-notification"
+                        lowContrast
+                        kind="success"
+                        title="Seedlot approved::"
+                        subtitle="This seedlot have been reviewed and approved"
+                      />
+                    )
+                    : null
+                }
+                {
+                  statusOnSave === 'PND' && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND')
+                    ? (
+                      <InlineNotification
+                        className="seedlot-submitted-notification"
+                        lowContrast
+                        kind="error"
+                        title="Seedlot has been refused:"
+                        subtitle="This seedlot has been refused by the TSC due to an issue on its form. Please, edit this seedlot and try submitting it again "
                       />
                     )
                     : null
