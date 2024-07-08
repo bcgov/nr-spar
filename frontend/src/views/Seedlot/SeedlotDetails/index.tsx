@@ -37,6 +37,7 @@ import FormProgress from './FormProgress';
 import TscReviewSection from './TscReviewSection';
 
 import './styles.scss';
+import { StatusOnSaveType } from '../../../api-service/tscAdminAPI';
 
 const SeedlotDetails = () => {
   const navigate = useNavigate();
@@ -47,6 +48,8 @@ const SeedlotDetails = () => {
   const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
 
   const isSubmitSuccess = searchParams.get('isSubmitSuccess') === 'true';
+
+  const statusOnSave = searchParams.get('statusOnSave') as StatusOnSaveType | null;
 
   const manageOptions = [
     {
@@ -100,10 +103,10 @@ const SeedlotDetails = () => {
   });
 
   useEffect(() => {
-    if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount) {
+    if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount || seedlotQuery.status === 'success') {
       covertToDisplayObj(seedlotQuery.data);
     }
-  }, [seedlotQuery.isFetched, seedlotQuery.isFetchedAfterMount]);
+  }, [seedlotQuery.isFetched, seedlotQuery.isFetchedAfterMount, seedlotQuery.status]);
 
   const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
 
@@ -130,7 +133,7 @@ const SeedlotDetails = () => {
     if (forestClientQuery.isFetched && seedlotQuery.isFetchedAfterMount) {
       covertToClientObj();
     }
-  }, [forestClientQuery.isFetched, seedlotQuery.isFetchedAfterMount]);
+  }, [forestClientQuery.isFetched, seedlotQuery.isFetchedAfterMount, seedlotQuery.status]);
 
   return (
     <FlexGrid className="seedlot-details-page">

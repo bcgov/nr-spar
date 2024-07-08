@@ -289,9 +289,12 @@ const SeedlotReviewContent = () => {
         ErrToastOption
       );
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
-      queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
+      await queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
+      if (variables.statusOnSave !== 'SUB') {
+        navigate(`/seedlots/details/${seedlotNumber}/?statusOnSave=${variables.statusOnSave}`);
+      }
       setIsReadMode(true);
     }
   });
@@ -315,14 +318,9 @@ const SeedlotReviewContent = () => {
 
   const handleSaveAndStatus = (statusOnSave: StatusOnSaveType) => {
     const isFormDataValid = verifyFormData();
-    console.log('hahah');
-    const action = statusOnSave === 'PND' ? 'backToPending' : 'approved';
     if (isFormDataValid) {
       const payload = generatePaylod();
       tscSeedlotMutation.mutate({ seedlotNum: seedlotNumber!, statusOnSave, payload });
-      queryClient.invalidateQueries({ queryKey: ['seedlots', seedlotNumber] });
-      queryClient.invalidateQueries({ queryKey: ['seedlot-full-form', seedlotNumber] });
-      navigate(`/seedlots/details/${seedlotNumber}/?action=${action}`);
     }
   };
 
