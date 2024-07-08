@@ -697,7 +697,7 @@ const ContextContainerClassA = ({ children }: props) => {
   };
 
   /**
-   * Set a single gen worth val
+   * Set a single gen worth val - necessary for calculation results
    */
   const setGenWorthVal = (traitCode: keyof GenWorthValType, newVal: string) => {
     setGenWorthVals((prevVals) => ({
@@ -710,7 +710,17 @@ const ContextContainerClassA = ({ children }: props) => {
   };
 
   /**
-   * Set a single geo info val
+   * Set a single gen worth obj
+   */
+  const setGenWorthInputObj = (genWorthName: keyof GenWorthValType, inputObj: StringInputType) => {
+    setGenWorthVals((prevVals) => ({
+      ...prevVals,
+      [genWorthName]: inputObj
+    }));
+  };
+
+  /**
+   * Set a single geo info obj
    */
   const setGeoInfoInputObj = (infoName: keyof GeoInfoValType, inputObj: StringInputType) => {
     setGeoInfoVals((prevVals) => ({
@@ -738,6 +748,7 @@ const ContextContainerClassA = ({ children }: props) => {
         setGeoInfoVals,
         setGeoInfoInputObj,
         setGenWorthVal,
+        setGenWorthInputObj,
         seedlotNumber,
         allStepData,
         setStepData,
