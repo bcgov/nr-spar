@@ -766,19 +766,41 @@ export const verifyParentStepCompleteness = (
  * Validate Extraction and Storage Step.
  * Return true if it's Invalid, false otherwise.
  */
-export const validateExtractionStep = (extractionStepData: ExtractionStorageForm): boolean => {
+export const validateExtractionStep = (
+  extractionStepData: ExtractionStorageForm,
+  focusOnInvalid?: boolean
+): boolean => {
   let isInvalid = false;
-  if (
-    extractionStepData.extraction.agency.isInvalid
-    || extractionStepData.extraction.locationCode.isInvalid
-    || extractionStepData.extraction.startDate.isInvalid
-    || extractionStepData.extraction.endDate.isInvalid
-    || extractionStepData.seedStorage.agency.isInvalid
-    || extractionStepData.seedStorage.locationCode.isInvalid
-    || extractionStepData.seedStorage.startDate.isInvalid
-    || extractionStepData.seedStorage.endDate.isInvalid
-  ) {
+  let idToFocus = '';
+
+  if (extractionStepData.extraction.agency.isInvalid) {
     isInvalid = true;
+    idToFocus = extractionStepData.extraction.agency.id;
+  } else if (extractionStepData.extraction.locationCode.isInvalid) {
+    isInvalid = true;
+    idToFocus = extractionStepData.extraction.locationCode.id;
+  } else if (extractionStepData.extraction.startDate.isInvalid) {
+    isInvalid = true;
+    idToFocus = extractionStepData.extraction.startDate.id;
+  } else if (extractionStepData.extraction.endDate.isInvalid) {
+    isInvalid = true;
+    idToFocus = extractionStepData.extraction.endDate.id;
+  } else if (extractionStepData.seedStorage.agency.isInvalid) {
+    isInvalid = true;
+    idToFocus = extractionStepData.seedStorage.agency.id;
+  } else if (extractionStepData.seedStorage.locationCode.isInvalid) {
+    isInvalid = true;
+    idToFocus = extractionStepData.seedStorage.locationCode.id;
+  } else if (extractionStepData.seedStorage.startDate.isInvalid) {
+    isInvalid = true;
+    idToFocus = extractionStepData.seedStorage.startDate.id;
+  } else if (extractionStepData.seedStorage.endDate.isInvalid) {
+    isInvalid = true;
+    idToFocus = extractionStepData.seedStorage.endDate.id;
+  }
+
+  if (isInvalid && focusOnInvalid) {
+    focusById(idToFocus);
   }
 
   return isInvalid;
@@ -789,16 +811,30 @@ export const validateExtractionStep = (extractionStepData: ExtractionStorageForm
  * Return true if it's complete, false otherwise
  */
 export const verifyExtractionStepCompleteness = (
-  extractionStepData: ExtractionStorageForm
+  extractionStepData: ExtractionStorageForm,
+  focusOnIncomplete?: boolean
 ): boolean => {
-  if (!extractionStepData.extraction.agency.value.code.length
-    || !extractionStepData.extraction.locationCode.value.length
-    || !extractionStepData.seedStorage.agency.value.code.length
-    || !extractionStepData.seedStorage.locationCode.value.length
-  ) {
-    return false;
+  let isComplete = true;
+  let idToFocus = '';
+
+  if (!extractionStepData.extraction.agency.value.code) {
+    isComplete = false;
+    idToFocus = extractionStepData.extraction.agency.id;
+  } else if (!extractionStepData.extraction.locationCode.value) {
+    isComplete = false;
+    idToFocus = extractionStepData.extraction.locationCode.id;
+  } else if (!extractionStepData.seedStorage.agency.value.code) {
+    isComplete = false;
+    idToFocus = extractionStepData.seedStorage.agency.id;
+  } else if (!extractionStepData.seedStorage.locationCode.value) {
+    isComplete = false;
+    idToFocus = extractionStepData.seedStorage.locationCode.id;
   }
-  return true;
+
+  if (!isComplete && focusOnIncomplete) {
+    focusById(idToFocus);
+  }
+  return isComplete;
 };
 
 /**

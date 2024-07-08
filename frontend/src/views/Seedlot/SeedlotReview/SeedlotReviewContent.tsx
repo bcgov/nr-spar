@@ -34,10 +34,12 @@ import AreaOfUseEdit from '../../../components/SeedlotReviewSteps/AreaOfUse/Edit
 import ExtractionStorageReviewRead from '../../../components/SeedlotReviewSteps/ExtractionStorage/Read';
 import ExtractionStorageReviewEdit from '../../../components/SeedlotReviewSteps/ExtractionStorage/Edit';
 
+import ClassAContext from '../ContextContainerClassA/context';
 import { validateRegForm } from '../CreateAClass/utils';
 import {
-  validateCollectionStep, validateInterimStep, validateOrchardStep,
+  validateCollectionStep, validateExtractionStep, validateInterimStep, validateOrchardStep,
   validateOwnershipStep, validateParentStep, verifyCollectionStepCompleteness,
+  verifyExtractionStepCompleteness,
   verifyInterimStepCompleteness, verifyOrchardStepCompleteness, verifyOwnershipStepCompleteness,
   verifyParentStepCompleteness
 } from '../ContextContainerClassA/utils';
@@ -46,7 +48,6 @@ import {
   getBreadcrumbs, validateAreaOfUse, validateCollectGeoVals,
   validateGeneticWorth
 } from './utils';
-import ClassAContext from '../ContextContainerClassA/context';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
@@ -170,6 +171,14 @@ const SeedlotReviewContent = () => {
 
     // Step 7: Area of Use
     if (validateAreaOfUse(areaOfUseData)) {
+      return isValid;
+    }
+
+    // Step 8: Extraction
+    if (validateExtractionStep(extractionStorageStep, focusOnInvalid)) {
+      return isValid;
+    }
+    if (!verifyExtractionStepCompleteness(extractionStorageStep, focusOnIncomplete)) {
       return isValid;
     }
 
