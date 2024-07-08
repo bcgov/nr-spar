@@ -24,7 +24,7 @@ parameters:
     value: nr-spar
   - name: TEST_MODE
     description: "Run in test mode"
-    value: "0"
+    value: "true"
 
   ### Usually a bad idea - not recommended
   - name: CRON_MINUTES
