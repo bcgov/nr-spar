@@ -585,6 +585,7 @@ class SeedlotServiceTest {
             List.of(),
             null,
             List.of(),
+            null,
             null);
 
     Assertions.assertNotNull(responseFromService);
@@ -739,7 +740,8 @@ class SeedlotServiceTest {
             List.of(mock(SeedlotReviewSeedPlanZoneDto.class)), // List<SeedlotReviewSeedPlanZoneDto>
             mock(SeedlotReviewElevationLatLongDto.class), // SeedlotReviewElevationLatLongDto
             List.of(mock(GeneticWorthTraitsDto.class)), // List<GeneticWorthTraitsDto>
-            mock(SeedlotReviewGeoInformationDto.class)); // SeedlotReviewGeoInformationDto
+            mock(SeedlotReviewGeoInformationDto.class),
+            mock(SeedlotApplicationPatchDto.class)); // SeedlotReviewGeoInformationDto
 
     boolean isTscAdmin = true;
 
