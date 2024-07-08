@@ -167,20 +167,19 @@ class database_connection(object):
         #stored_metrics['time_target_load'] = None
         #stored_metrics['time_conn_source'] = None
 
+        #Delete will have multiple sets of (seedlot, cli, locn) - first one is just in case there are not rows - i.e then all will be deleted
         sql_text = f""" 
             DELETE FROM {table_name}
                 WHERE seedlot_number = :p_seedlot_number 
                     AND (seedlot_number,client_number,client_locn_code) NOT IN 
-                        (  """
+                        ( ('00000','00000000','00') """
         params = {}
         params["p_seedlot_number"] = seedlot_number
         for owner in soqdf.itertuples():
             params["p_seedlot_number"+str(owner.Index)] = seedlot_number
             params["p_client_number"+str(owner.Index)] = owner.client_number
             params["p_client_locn_code"+str(owner.Index)] = owner.client_locn_code
-            if owner.Index > 0:
-                sql_text = sql_text + ","
-            sql_text = sql_text + f""" (:p_seedlot_number{str(owner.Index)},:p_client_number{str(owner.Index)},:p_client_locn_code{str(owner.Index)}) """
+            sql_text = sql_text + f""" ,(:p_seedlot_number{str(owner.Index)},:p_client_number{str(owner.Index)},:p_client_locn_code{str(owner.Index)}) """
         
         sql_text = sql_text + ")"
         logger.debug("==================soq sql==========================================")

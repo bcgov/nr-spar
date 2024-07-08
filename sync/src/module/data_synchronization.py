@@ -7,7 +7,6 @@ import module.database_connection as db_conn
 import module.data_sync_control as data_sync_ctl
 import transformations as transf
 
-from collections import OrderedDict
 from typing import Tuple
 from os import listdir, path, sep as separator
 from datetime import timedelta, datetime
@@ -119,7 +118,7 @@ def delete_seedlot_child_tables(seedlot_number, track_db_conn, track_db_schema, 
     log_message = ""
     
     # Initializing metric variables
-    metrics = OrderedDict()
+    metrics = {}
     metrics['step'] = 'Delete Child Tables'
     metrics['seedlot_nunber'] = seedlot_number
     metrics['start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -131,7 +130,7 @@ def delete_seedlot_child_tables(seedlot_number, track_db_conn, track_db_schema, 
         table = tablerow[0]
         if table['target_table'] != "the.seedlot" and table['run_mode'] == "UPSERT_WITH_DELETE":
             logger.debug(f"calling delete for {seedlot_number} table {table['target_table']}")
-            table_metrics = OrderedDict()
+            table_metrics = {}
             table_metrics['table_deleted'] = table['target_table']
             start_time = time.time()
             table_metrics['rows_deleted'] = target_db_conn.delete_seedlot_child_table(table['target_table'],seedlot_number)
@@ -159,8 +158,8 @@ def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, tar
     target_config  = data_sync_ctl.get_config(oracle_config=oracle_config, postgres_config=postgres_config,db_type=process["target_db_type"])
     
     # Initializing metric variables
-    stored_metrics = OrderedDict()
-    stored_metrics['operation'] = "Process Table"
+    stored_metrics = {}
+    stored_metrics['step'] = "Process Table"
     stored_metrics['seedlot_number'] = seedlot_number
     stored_metrics['target_table'] = process['target_table']
     stored_metrics['process_start_time'] = float(time.time())
@@ -187,7 +186,8 @@ def execute_process(seedlot_number,base_dir, track_db_conn, track_db_schema, tar
         
         stored_metrics['time_source_extract'] = timedelta(seconds=(time.time()-temp_time)).total_seconds()
         stored_metrics['rows_from_source'] = table_df.shape[0]
-        if stored_metrics['rows_from_source'] < 1:
+        #seedlot_owner_quantity is special - still need to delete if no rows - other tables will already have been deleted in the child table delete process
+        if stored_metrics['rows_from_source'] < 1 and process['target_table'] != 'the.seedlot_owner_quantity':
             process_stop = True
             log_message = f"There is no data to extract from source for table: {process["target_table"]}. Process will be skipped."
             logger.debug(log_message)
@@ -274,8 +274,8 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
     
     logger.debug('Connecting into Source Database to get Seedlots')
     with db_conn.database_connection(postgres_config) as source_db_conn:
-        metrics = OrderedDict()
-        metrics['operation'] = "Process Seedlots"
+        metrics = {}
+        metrics['step'] = "Process Seedlots"
         metrics['start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
         logger.debug('Source Database connection established')
@@ -302,17 +302,17 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
                     ,[{"interface_id":"SEEDLOT_OWNER_QUANTITY_EXTRACT","execution_id":"102","execution_order":"20","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_OWNER_QUANTITY_EXTRACT.sql","source_table":"spar.seedlot_owner_quantity","source_db_type":"POSTGRES","target_table":"the.seedlot_owner_quantity","target_primary_key":"seedlot_number,client_number,client_locn_code","target_db_type":"ORACLE","run_mode":"UPSERT","ignore_columns_on_update":"qty_reserved,qty_rsrvd_cmtd_pln,qty_rsrvd_cmtd_apr,qty_surplus,qty_srpls_cmtd_pln,qty_srpls_cmtd_apr"}]
                     ,[{"interface_id":"SEEDLOT_SEED_PLAN_ZONE_EXTRACT","execution_id":"103","execution_order":"30","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_SEED_PLAN_ZONE_EXTRACT.sql","source_table":"spar.seedlot_seed_plan_zone","source_db_type":"POSTGRES","target_table":"the.seedlot_plan_zone","target_primary_key":"seedlot_number,seed_plan_zone_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                     ,[{"interface_id":"SEEDLOT_GENETIC_WORTH_EXTRACT","execution_id":"104","execution_order":"40","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_GENETIC_WORTH_EXTRACT.sql","source_table":"spar.seedlot_genetic_worth","source_db_type":"POSTGRES","target_table":"the.seedlot_genetic_worth","target_primary_key":"seedlot_number,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    #,[{"interface_id":"SEEDLOT_PARENT_TREE_EXTRACT","execution_id":"105","execution_order":"50","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_EXTRACT.sql","source_table":"spar.seedlot_parent_tree","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    #,[{"interface_id":"SEEDLOT_PARENT_TREE_GEN_QLTY","execution_id":"106","execution_order":"60","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_GEN_QLTY.sql","source_table":"spar.seedlot_parent_tree_gen_qlty","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    #,[{"interface_id":"SEEDLOT_PARENT_TREE_SMP_MIX","execution_id":"107","execution_order":"70","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_SMP_MIX.sql","source_table":"spar.seedlot_parent_tree_smp_mix","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_smp_mix","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    #,[{"interface_id":"SMP_MIX_EXTRACT","execution_id":"108","execution_order":"80","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_EXTRACT.sql","source_table":"spar.smp_mix","source_db_type":"POSTGRES","target_table":"the.smp_mix","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
-                    #,[{"interface_id":"SMP_MIX_GEN_QLTY_EXTRACT","execution_id":"109","execution_order":"90","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_GEN_QLTY_EXTRACT.sql","source_table":"spar.smp_mix_gen_qlty","source_db_type":"POSTGRES","target_table":"the.smp_mix_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    ,[{"interface_id":"SEEDLOT_PARENT_TREE_EXTRACT","execution_id":"105","execution_order":"50","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_EXTRACT.sql","source_table":"spar.seedlot_parent_tree","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    ,[{"interface_id":"SEEDLOT_PARENT_TREE_GEN_QLTY","execution_id":"106","execution_order":"60","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_GEN_QLTY.sql","source_table":"spar.seedlot_parent_tree_gen_qlty","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    ,[{"interface_id":"SEEDLOT_PARENT_TREE_SMP_MIX","execution_id":"107","execution_order":"70","source_file":"/SQL/SPAR/POSTGRES_SEEDLOT_PARENT_TREE_SMP_MIX.sql","source_table":"spar.seedlot_parent_tree_smp_mix","source_db_type":"POSTGRES","target_table":"the.seedlot_parent_tree_smp_mix","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    ,[{"interface_id":"SMP_MIX_EXTRACT","execution_id":"108","execution_order":"80","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_EXTRACT.sql","source_table":"spar.smp_mix","source_db_type":"POSTGRES","target_table":"the.smp_mix","target_primary_key":"seedlot_number,parent_tree_id","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
+                    ,[{"interface_id":"SMP_MIX_GEN_QLTY_EXTRACT","execution_id":"109","execution_order":"90","source_file":"/SQL/SPAR/POSTGRES_SMP_MIX_GEN_QLTY_EXTRACT.sql","source_table":"spar.smp_mix_gen_qlty","source_db_type":"POSTGRES","target_table":"the.smp_mix_gen_qlty","target_primary_key":"seedlot_number,parent_tree_id,genetic_type_code,genetic_worth_code","target_db_type":"ORACLE","run_mode":"UPSERT_WITH_DELETE","ignore_columns_on_update":""}]
                     ]
         with db_conn.database_connection(oracle_config) as target_db_conn:
             try:
                 seedlotlst = []
                 for seedlot in seedlots_df.itertuples():
-                    seedlot_metrics = OrderedDict()
+                    seedlot_metrics = {}
                     seedlot_metrics['step'] = "Seedlot"
                     seedlot_metrics['seedlot_number'] = seedlot.seedlot_number
 
