@@ -15,7 +15,6 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
