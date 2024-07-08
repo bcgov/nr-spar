@@ -340,7 +340,7 @@ public class Seedlot implements Serializable {
   private String approvedUserId;
 
   @Column(name = "approved_timestamp")
-  private String approvedTimestamp;
+  private LocalDateTime approvedTimestamp;
 
   @Column(name = "mean_geom")
   private Point meanGeom;
