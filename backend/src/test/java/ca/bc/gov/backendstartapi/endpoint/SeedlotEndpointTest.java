@@ -3,7 +3,6 @@ package ca.bc.gov.backendstartapi.endpoint;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -16,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotDto;
@@ -614,7 +614,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("Save seedlot form progress should Succeed")
   void saveSeedlotFormProgress_notFoundSeedlot_shouldSucceed() throws Exception {
-    doNothing().when(saveSeedlotFormService).saveFormClassA(any(), any());
+    when(saveSeedlotFormService.saveFormClassA(any(), any())).thenReturn(new RevisionCountDto(0));
 
     mockMvc
         .perform(
@@ -623,7 +623,7 @@ class SeedlotEndpointTest {
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(SEEDLOT_FORM_PROGRESS_JSON))
-        .andExpect(status().isNoContent())
+        .andExpect(status().isOk())
         .andReturn();
   }
 

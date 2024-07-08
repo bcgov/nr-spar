@@ -583,7 +583,8 @@ const ContextContainerClassA = ({ children }: props) => {
         }
       );
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setFormDraftRevCount(data.revisionCount);
       numOfEdit.current = 0;
       setLastSaveTimestamp(DateTime.now().toISO());
       setSaveStatus('finished');
