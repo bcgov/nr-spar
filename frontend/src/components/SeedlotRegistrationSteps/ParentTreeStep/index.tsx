@@ -16,10 +16,8 @@ import {
   View, Settings, Upload, Add
 } from '@carbon/icons-react';
 import { getAllParentTrees } from '../../../api-service/orchardAPI';
-import postForCalculation from '../../../api-service/parentTreeAPI';
 import { postFile } from '../../../api-service/seedlotAPI';
 import CheckboxType from '../../../types/CheckboxType';
-import { PtValsCalcReqPayload } from '../../../types/PtCalcTypes';
 import { sortAndSliceRows, sliceTableRowData } from '../../../utils/PaginationUtils';
 import { recordValues } from '../../../utils/RecordUtils';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -58,17 +56,20 @@ import {
   getTabString, processOrchards, combineObjectValues, calcSummaryItems,
   processParentTreeData, cleanTable, fillCompostitionTables, configHeaderOpt,
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
-  hasParentTreesForSelectedOrchards,
-  fillCalculatedInfo,
-  generatePtValCalcPayload
+  hasParentTreesForSelectedOrchards
 } from './utils';
 
 import './styles.scss';
 import EditGenWorth from './EditGenWorth';
 
 type ParentTreeStepProps = {
-  isReviewDisplay?: boolean;
-  isReviewRead?: boolean;
+  // Determines whether this component is used on the seedlot review screen
+  // True if it's used on seedlot review, false if it's used on the reg form
+  isReviewDisplay?: boolean,
+
+  // Determines whether this component is under Read mode on the seedlot review screen
+  // True if the mode is read, false if the mode is edit
+  isReviewRead?: boolean
 }
 
 const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) => {
@@ -87,11 +88,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     setPopSizeAndDiversityConfig,
     summaryConfig,
     setSummaryConfig,
-    meanGeomInfos,
-    setMeanGeomInfos,
-    setIsCalculatingPt,
-    setGeoInfoVals,
-    setGenWorthVal
+    meanGeomInfos
   } = useContext(ClassAContext);
 
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
@@ -281,38 +278,6 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     }
   });
 
-  const calculateGenWorthQuery = useMutation({
-    mutationFn: (data: PtValsCalcReqPayload) => postForCalculation(data),
-    onSuccess: (res) => fillCalculatedInfo(
-      res.data,
-      genWorthInfoItems,
-      setGenWorthInfoItems,
-      popSizeAndDiversityConfig,
-      setPopSizeAndDiversityConfig,
-      meanGeomInfos,
-      setMeanGeomInfos,
-      setIsCalculatingPt,
-      setGeoInfoVals,
-      setGenWorthVal,
-      isReviewDisplay
-    )
-  });
-
-  const [ctrlFirstLoadReview, setCtrlFirstLoadReview] = useState<boolean>(isReviewDisplay ?? false);
-
-  useEffect(() => {
-    if (ctrlFirstLoadReview && !controlReviewData) {
-      calculateGenWorthQuery.mutate(
-        generatePtValCalcPayload(
-          state,
-          geneticWorthDict,
-          seedlotSpecies
-        )
-      );
-      setCtrlFirstLoadReview(false);
-    }
-  }, [controlReviewData]);
-
   const renderRecalcSection = () => {
     if (isReviewDisplay && !isReviewRead) {
       return (
@@ -477,9 +442,9 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                             </Column>
                           </Row>
                           {
-                            isReviewDisplay && !isReviewRead
+                            isReviewDisplay
                               ? (
-                                <SpatialData />
+                                <SpatialData isReviewRead={isReviewRead ?? false} />
                               )
                               : (
                                 <InfoSection
@@ -515,53 +480,26 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                   renderRecalcSection()
                 }
                 {
-                  isReviewDisplay
-                    ? (
-                      <DetailSection>
-                        {
-                          renderSubSections()
-                        }
-                        {/* -------- Seedlot mean geospatial data -------- */}
-                        <Row className="info-section-sub-title">
-                          <Column>
-                            Collection geospatial summary
-                          </Column>
-                        </Row>
-                        {
-                          !isReviewRead
-                            ? (
-                              <SpatialData />
-                            )
-                            : (
-                              <InfoSection
-                                infoItems={Object.values(meanGeomInfos.smpMix)}
-                              />
-                            )
-                        }
-                      </DetailSection>
-                    )
-                    : (
-                      <DetailSection>
-                        {/* -------- SMP mix mean geospatial data -------- */}
-                        <Row className="info-section-sub-title">
-                          <DescriptionBox
-                            header="SMP Mix geospatial summary"
+                  <DetailSection>
+                    {/* -------- SMP mix mean geospatial data -------- */}
+                    <Row className="info-section-sub-title">
+                      <DescriptionBox
+                        header="SMP Mix geospatial summary"
+                      />
+                    </Row>
+                    {
+                      renderCalcSection(true)
+                    }
+                    {
+                      showInfoSections || isReviewDisplay
+                        ? (
+                          <InfoSection
+                            infoItems={Object.values(meanGeomInfos.smpMix)}
                           />
-                        </Row>
-                        {
-                          renderCalcSection(true)
-                        }
-                        {
-                          showInfoSections
-                            ? (
-                              <InfoSection
-                                infoItems={Object.values(meanGeomInfos.smpMix)}
-                              />
-                            )
-                            : null
-                        }
-                      </DetailSection>
-                    )
+                        )
+                        : null
+                    }
+                  </DetailSection>
                 }
               </>
             )

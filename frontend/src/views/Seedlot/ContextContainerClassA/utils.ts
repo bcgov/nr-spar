@@ -1193,7 +1193,7 @@ export const fillAreaOfUseData = (
   return clonedAreaOfUse;
 };
 
-export const fillGeoVals = (
+export const fillCollectionGeoData = (
   setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,
   data: RichSeedlotType
 ) => {

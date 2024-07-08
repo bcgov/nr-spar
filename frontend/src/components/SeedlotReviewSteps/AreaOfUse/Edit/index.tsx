@@ -230,7 +230,7 @@ const AreaOfUseEdit = () => {
 
       <Row>
         <Column className="sub-section-title-col">
-          Elevation, Latitude and Longitude
+          Elevation, latitude and longitude
         </Column>
       </Row>
 
