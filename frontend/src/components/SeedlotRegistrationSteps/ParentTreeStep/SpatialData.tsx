@@ -61,7 +61,7 @@ const SpatialData = () => {
       <>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
-            id={`geo-info-mean-${latLongStr}-deg`}
+            id={geoInfoVals[degKey].id}
             type="number"
             labelText={`Mean ${latLongStr} degree`}
             defaultValue={geoInfoVals[degKey].value}
@@ -75,7 +75,7 @@ const SpatialData = () => {
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
-            id={`geo-info-mean-${latLongStr}-minute`}
+            id={geoInfoVals[minuteKey].id}
             type="number"
             labelText={`Mean ${latLongStr} minute`}
             defaultValue={geoInfoVals[minuteKey].value}
@@ -89,7 +89,7 @@ const SpatialData = () => {
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
           <TextInput
-            id={`geo-info-mean-${latLongStr}-sec`}
+            id={geoInfoVals[secKey].id}
             type="number"
             labelText={`Mean ${latLongStr} second`}
             defaultValue={geoInfoVals[secKey].value}

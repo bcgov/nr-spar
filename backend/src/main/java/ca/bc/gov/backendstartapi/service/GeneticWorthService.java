@@ -123,7 +123,8 @@ public class GeneticWorthService {
 
     BigDecimal neValue = BigDecimal.ONE.divide(piSquareSum, 10, RoundingMode.HALF_UP);
     SparLog.debug("calculateNe - neValue {}", neValue);
-    return neValue;
+
+    return neValue.setScale(1, RoundingMode.HALF_UP);
   }
 
   /**
