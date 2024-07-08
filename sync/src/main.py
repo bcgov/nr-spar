@@ -109,7 +109,7 @@ def read_settings():
         
 
 def main() -> None:
-    definition_of_yes = ["Y","YES","1","T","TRUE"]
+    definition_of_yes = ["Y","YES","1","T","TRUE","t","true"]
     # print(os.environ.get("TEST_MODE"))
     if os.environ.get("TEST_MODE") is None:
         print("Error: test mode variable is None")
