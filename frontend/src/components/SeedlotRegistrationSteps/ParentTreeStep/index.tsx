@@ -607,7 +607,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
             (value: { selectedIndex: number }) => setCurrentTab(getTabString(value.selectedIndex))
           }
           >
-            <TabList className="parent-tree-step-tab-list" aria-label="List of tabs">
+            <TabList className="parent-tree-step-tab-list" aria-label="List of tabs" id="parent-tree-step-tab-list-id" tabIndex={-1}>
               <Tab>
                 {pageText.coneTab.tabTitle}
                 &nbsp;(required)
@@ -650,7 +650,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                             disabled={
                               disableOptions
                               || (isFormSubmitted
-                              && !(isReviewDisplay && !isReviewRead))
+                                && !(isReviewDisplay && !isReviewRead))
                             }
                           />
                         </Column>
@@ -686,7 +686,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                                   disabled={
                                     disableOptions
                                     || (isFormSubmitted
-                                    && !(isReviewDisplay && !isReviewRead))
+                                      && !(isReviewDisplay && !isReviewRead))
                                   }
                                   renderIcon={Add}
                                   iconDescription="Add a new row"

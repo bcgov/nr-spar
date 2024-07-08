@@ -149,6 +149,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
               <AccordionItem
                 className="single-accordion-item"
                 key={`${singleOwnerInfo.id}`}
+                id={`ownership-accordion-item-${singleOwnerInfo.id}`}
                 open={
                   Object.prototype.hasOwnProperty.call(accordionControls, singleOwnerInfo.id)
                     ? accordionControls[singleOwnerInfo.id]
