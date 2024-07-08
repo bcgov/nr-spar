@@ -87,11 +87,11 @@ objects:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-oracle-api
                           key: oracle-host
-                    - name: ORACLE_PASSWORD
+                    - name: ORACLE_SYNC_PASSWORD
                       valueFrom:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-oracle-api
-                          key: oracle-password
+                          key: oracle-sync-password
                     - name: ORACLE_PORT
                       valueFrom:
                         secretKeyRef:
@@ -102,11 +102,11 @@ objects:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-oracle-api
                           key: oracle-service
-                    - name: ORACLE_USER
+                    - name: ORACLE_SYNC_USER
                       valueFrom:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-oracle-api
-                          key: oracle-user
+                          key: oracle-sync-user
                     - name: POSTGRES_HOST
                       value: ${REPO}-${ZONE}-database
                     - name: POSTGRES_DB
