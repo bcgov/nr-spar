@@ -67,10 +67,12 @@ jobs:
           overwrite: true
           parameters:
             -p ZONE=${{ inputs.target }}
-            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
-            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
+            -p ORACLE_SYNC_USER='${{ vars.ORACLE_SYNC_USER }}'
+            -p ORACLE_SYNC_PASSWORD='${{ secrets.ORACLE_SYNC_PASSWORD }}'
 
       - name: FluentBit
         if: inputs.fluentbit_target != 'development'

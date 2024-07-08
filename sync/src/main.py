@@ -19,8 +19,8 @@ def generate_db_config(type_,schema_,settings):
     if type_ == "ORACLE":
         dbconfig = {
             "type": "ORACLE",
-            "username": os.environ.get("ORACLE_USER"),
-            "password": os.environ.get("ORACLE_PASSWORD"),
+            "username": os.environ.get("ORACLE_SYNC_USER"),
+            "password": os.environ.get("ORACLE_SYNC_PASSWORD"),
             "host": os.environ.get("ORACLE_HOST"),
             "port": os.environ.get("ORACLE_PORT"),
             "service_name": os.environ.get("ORACLE_SERVICE"),
@@ -64,8 +64,8 @@ def required_variables_exists():
        not env_var_is_filled("ORACLE_PORT") or \
        not env_var_is_filled("ORACLE_HOST") or \
        not env_var_is_filled("ORACLE_SERVICE") or \
-       not env_var_is_filled("ORACLE_USER") or \
-       not env_var_is_filled("ORACLE_PASSWORD"):
+       not env_var_is_filled("ORACLE_SYNC_USER") or \
+       not env_var_is_filled("ORACLE_SYNC_PASSWORD"):
        ret = False        
         
     if ret:
