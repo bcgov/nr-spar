@@ -53,7 +53,7 @@ import {
   verifyParentStepCompleteness, checkAllStepsCompletion, getSeedlotPayload,
   initEmptySteps, resDataToState,
   fillAreaOfUseData,
-  fillGeoVals
+  fillCollectionGeoData
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE, initialAreaOfUseData,
@@ -154,7 +154,8 @@ const ContextContainerClassA = ({ children }: props) => {
       }
 
       if (seedlotQuery.data) {
-        fillGeoVals(setGeoInfoVals, seedlotQuery.data);
+        // Collection geo data
+        fillCollectionGeoData(setGeoInfoVals, seedlotQuery.data);
       }
     }
   }, [seedlotQuery.status]);
