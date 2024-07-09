@@ -190,10 +190,6 @@ export type SeedlotCreateResponseType = {
   seedlotStatusCode: SeedlotStatusCode
 }
 
-export type RevisionCountDtoType = {
-  revisionCount: number
-}
-
 export type CollectionFormSubmitType = {
   collectionClientNumber: string,
   collectionLocnCode: string,
@@ -263,7 +259,6 @@ export type ExtractionFormSubmitType = {
 }
 
 export type SeedlotAClassSubmitType = {
-  revisionCountDto: RevisionCountDtoType,
   seedlotFormCollectionDto: CollectionFormSubmitType,
   seedlotFormOwnershipDtoList: Array<SingleOwnerFormSubmitType>,
   seedlotFormInterimDto: InterimFormSubmitType,

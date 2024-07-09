@@ -447,7 +447,7 @@ class SeedlotServiceTest {
   @DisplayName("A-Class Seedlot Form success test")
   void findAclassSeedlotFormFullDataSuccessTest() {
     String seedlotNumber = "0000000";
-    String onwerNumber = "1234";
+    String ownerNumber = "1234";
     String ownerLoc = "01";
     String methodOfPayment = "TEST";
     Seedlot seedlotEntity = new Seedlot(seedlotNumber);
@@ -511,9 +511,9 @@ class SeedlotServiceTest {
         List.of(new SeedlotCollectionMethod(seedlotEntity, new ConeCollectionMethodEntity()));
 
     SeedlotOwnerQuantity seedlotOwners =
-        new SeedlotOwnerQuantity(seedlotEntity, onwerNumber, ownerLoc);
-    BigDecimal orginalPercOwned = new BigDecimal(100);
-    seedlotOwners.setOriginalPercentageOwned(orginalPercOwned);
+        new SeedlotOwnerQuantity(seedlotEntity, ownerNumber, ownerLoc);
+    BigDecimal originalPercentOwned = new BigDecimal(100);
+    seedlotOwners.setOriginalPercentageOwned(originalPercentOwned);
     seedlotOwners.setMethodOfPayment(new MethodOfPaymentEntity(methodOfPayment, "", null));
 
     String orchardId = "100";
@@ -575,7 +575,13 @@ class SeedlotServiceTest {
                 null, null, null, null, null, null, null, null, List.of(0)),
             List.of(
                 new SeedlotFormOwnershipDto(
-                    onwerNumber, ownerLoc, orginalPercOwned, null, null, methodOfPayment, null)),
+                    ownerNumber,
+                    ownerLoc,
+                    originalPercentOwned,
+                    null,
+                    null,
+                    methodOfPayment,
+                    null)),
             new SeedlotFormInterimDto(null, null, null, null, null, null),
             new SeedlotFormOrchardDto(
                 orchardId, null, null, null, null, null, null, null, null, null),
@@ -624,12 +630,12 @@ class SeedlotServiceTest {
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", false, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", false, false, 0);
 
     Assertions.assertThrows(
         SeedlotNotFoundException.class,
         () -> {
-          seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
         });
   }
 
@@ -639,7 +645,7 @@ class SeedlotServiceTest {
     String seedlotNumber = "123456";
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false, 0);
 
     when(seedlotRepository.findById(seedlotNumber))
         .thenReturn(Optional.of(new Seedlot(seedlotNumber)));
@@ -650,7 +656,7 @@ class SeedlotServiceTest {
     Assertions.assertThrows(
         SeedlotSourceNotFoundException.class,
         () -> {
-          seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
         });
   }
 
@@ -660,7 +666,7 @@ class SeedlotServiceTest {
     String seedlotNumber = "123456";
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", true, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", true, false, 0);
 
     Seedlot testSeedlot = new Seedlot(seedlotNumber);
 
@@ -672,7 +678,7 @@ class SeedlotServiceTest {
     // Returns the seedlot that's about to be saved os we can compare the object.
     when(seedlotRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-    Seedlot patchedSeedlot = seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+    Seedlot patchedSeedlot = seedlotService.patchApplicantInfo(seedlotNumber, testDto);
 
     assertEquals(testDto.applicantEmailAddress(), patchedSeedlot.getApplicantEmailAddress());
     assertEquals(

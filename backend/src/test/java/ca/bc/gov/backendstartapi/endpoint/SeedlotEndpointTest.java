@@ -77,7 +77,8 @@ class SeedlotEndpointTest {
                 "applicantEmailAddress": "groot@wood.com",
                 "seedlotSourceCode": "CUS",
                 "toBeRegistrdInd": true,
-                "bcSourceInd": false
+                "bcSourceInd": false,
+                "revisionCount": 1
             }
         """;
 
@@ -500,7 +501,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("patchSeedlotApplicationBadSourceTest")
   void patchSeedlotApplicationBadSourceTest() throws Exception {
-    when(seedlotService.patchApplicantionInfo(any(), any()))
+    when(seedlotService.patchApplicantInfo(any(), any()))
         .thenThrow(new SeedlotSourceNotFoundException());
 
     mockMvc
@@ -517,7 +518,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("patchSeedlotApplicationBadIdTest")
   void patchSeedlotApplicationBadIdTest() throws Exception {
-    when(seedlotService.patchApplicantionInfo(any(), any()))
+    when(seedlotService.patchApplicantInfo(any(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
     mockMvc
@@ -537,7 +538,7 @@ class SeedlotEndpointTest {
     String seedlotNumber = "555888";
     Seedlot testSeedlot = new Seedlot(seedlotNumber);
 
-    when(seedlotService.patchApplicantionInfo(any(), any())).thenReturn(testSeedlot);
+    when(seedlotService.patchApplicantInfo(any(), any())).thenReturn(testSeedlot);
 
     String path = String.format("/api/seedlots/%s/application-info", seedlotNumber);
 

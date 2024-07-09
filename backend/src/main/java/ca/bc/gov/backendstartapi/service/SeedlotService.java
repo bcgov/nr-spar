@@ -22,7 +22,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotRevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
@@ -605,7 +604,6 @@ public class SeedlotService {
     SeedlotAclassFormDto seedlotAclassFullInfo =
         new SeedlotAclassFormDto(
             new SeedlotFormSubmissionDto(
-                new SeedlotRevisionCountDto(seedlotInfo.getRevisionCount()),
                 collectionStep,
                 ownershipStep,
                 interimStep,
@@ -688,11 +686,6 @@ public class SeedlotService {
 
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
-
-    if (!form.revisionCountDto().revisionCount().equals(seedlot.getRevisionCount())) {
-      SparLog.info("Seedlot number {} updated by another user", seedlotNumber);
-      throw new SeedlotConflictDataException(seedlotNumber);
-    }
 
     String currentSeedlotStatus = seedlot.getSeedlotStatus().getSeedlotStatusCode();
 

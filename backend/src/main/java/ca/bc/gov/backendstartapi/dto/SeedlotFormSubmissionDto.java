@@ -6,7 +6,6 @@ import java.util.List;
 /** This records represents a JSON body to be sent when saving the Seedlot Form. */
 @Schema(description = "The JSON object containing all the Seedlot registration form field values.")
 public record SeedlotFormSubmissionDto(
-    SeedlotRevisionCountDto revisionCountDto,
     SeedlotFormCollectionDto seedlotFormCollectionDto,
     List<SeedlotFormOwnershipDto> seedlotFormOwnershipDtoList,
     SeedlotFormInterimDto seedlotFormInterimDto,
