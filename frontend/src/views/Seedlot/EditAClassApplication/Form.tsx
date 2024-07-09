@@ -120,7 +120,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
         toast.error(
           <ErrorToast
             title="Save failure"
-            subtitle={'Unable to update Seedlot applicant information! The Seedlot record was updated by another user. Please refresh your page and try again!'}
+            subtitle="Unable to update Seedlot applicant information! The Seedlot record was updated by another user. Please refresh your page and try again!"
           />,
           ErrToastOption
         );
