@@ -76,16 +76,3 @@ objects:
     spec:
       policyTypes:
         - Ingress
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-fluentbit-logs
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: "75Mi"
-      storageClassName: netapp-file-standard
