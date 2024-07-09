@@ -36,6 +36,10 @@ const ApiConfig = {
 
   tscAdmin: `${serverHost}/api/tsc-admin`,
 
+  tscSeedlotEdit: `${serverHost}/api/tsc-admin/seedlots/{seedlotNumber}/edit`,
+
+  tscSeedlotStatusUpdate: `${serverHost}/api/tsc-admin/seedlots/{seedlotNumber}/status/{status}`,
+
   /**
    * ORACLE API
    */

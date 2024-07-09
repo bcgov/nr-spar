@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext } from 'react';
-import { UseMutationResult } from '@tanstack/react-query';
+import { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import {
   RichSeedlotType, SeedlotAClassSubmitType,
-  SeedlotCalculationsResultsType, SeedlotType
+  SeedlotCalculationsResultsType, SeedlotProgressPayloadType, SeedlotType
 } from '../../../types/SeedlotType';
 
 import { AllStepData, AreaOfUseDataType, ProgressIndicatorConfig } from './definitions';
@@ -27,6 +27,7 @@ export type ClassAContextType = {
   geoInfoVals: GeoInfoValType,
   genWorthVals: GenWorthValType,
   setGenWorthVal: (traitCode: keyof GenWorthValType, newVal: string) => void,
+  setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,
   setGeoInfoInputObj: (infoName: keyof GeoInfoValType, inputObj: StringInputType) => void,
   seedlotNumber: string | undefined,
   allStepData: AllStepData,
@@ -70,7 +71,10 @@ export type ClassAContextType = {
   meanGeomInfos: MeanGeomInfoSectionConfigType,
   setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>,
   areaOfUseData: AreaOfUseDataType,
-  setAreaOfUseData: React.Dispatch<React.SetStateAction<AreaOfUseDataType>>
+  setAreaOfUseData: React.Dispatch<React.SetStateAction<AreaOfUseDataType>>,
+  isCalculatingPt: boolean,
+  setIsCalculatingPt: Function,
+  getFormDraftQuery: UseQueryResult<SeedlotProgressPayloadType, unknown>
 }
 
 const ClassAContext = createContext<ClassAContextType>({
@@ -104,6 +108,7 @@ const ClassAContext = createContext<ClassAContextType>({
   geoInfoVals: {} as GeoInfoValType,
   genWorthVals: {} as GenWorthValType,
   setGenWorthVal: () => { },
+  setGeoInfoVals: () => { },
   setGeoInfoInputObj: () => { },
   genWorthInfoItems: {} as Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: () => { },
@@ -116,7 +121,10 @@ const ClassAContext = createContext<ClassAContextType>({
   meanGeomInfos: {} as MeanGeomInfoSectionConfigType,
   setMeanGeomInfos: () => { },
   areaOfUseData: {} as AreaOfUseDataType,
-  setAreaOfUseData: () => { }
+  setAreaOfUseData: () => { },
+  isCalculatingPt: false,
+  setIsCalculatingPt: () => { },
+  getFormDraftQuery: {} as UseQueryResult<SeedlotProgressPayloadType, unknown>
 });
 
 export default ClassAContext;

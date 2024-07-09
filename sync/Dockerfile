@@ -20,4 +20,4 @@ RUN pip install -r ./requirements.txt --trusted-host pypi.org --trusted-host pyp
 # Start the app
 WORKDIR /app/src
 USER nonroot
-CMD python3 main2.py
+CMD python3 main.py

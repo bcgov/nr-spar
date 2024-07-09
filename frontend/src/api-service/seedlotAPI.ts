@@ -1,3 +1,4 @@
+import RevisionCountDto from '../types/RevisionCountDto';
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
 import {
   RichSeedlotType, SeedlotAClassFullResponseType, SeedlotAClassSubmitType,
@@ -54,7 +55,7 @@ export const putAClassSeedlotProgress = (
   payload: SeedlotProgressPayloadType
 ) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-progress`;
-  return api.put(url, payload);
+  return api.put(url, payload).then((res): RevisionCountDto => res.data);
 };
 
 export const getAClassSeedlotProgressStatus = (seedlotNumber: string) => {

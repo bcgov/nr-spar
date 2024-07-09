@@ -307,6 +307,28 @@ public class SeedlotService {
     seedlotDto.setPrimarySpz(primarySpz);
 
     seedlotDto.setAdditionalSpzList(additionalSpzList);
+
+    SparLog.info("Finding Seedlot genetic worth for seedlot number {}", seedlotNumber);
+    List<SeedlotGeneticWorth> genWorthData =
+        seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<GeneticWorthTraitsDto> genWorthTraits = new ArrayList<>();
+    genWorthData.forEach(
+        (genWorth) -> {
+          GeneticWorthTraitsDto dto =
+              new GeneticWorthTraitsDto(
+                  genWorth.getGeneticWorthCode(),
+                  null,
+                  genWorth.getGeneticQualityValue(),
+                  genWorth.getTestedParentTreeContributionPercentage());
+          genWorthTraits.add(dto);
+        });
+    seedlotDto.setCalculatedValues(genWorthTraits);
+    SparLog.info(
+        "Found {} Seedlot genetic worth stored for seedlot number {}",
+        genWorthTraits.size(),
+        seedlotNumber);
+
     return seedlotDto;
   }
 
@@ -614,6 +636,7 @@ public class SeedlotService {
                 List.of(),
                 null,
                 List.of(),
+                null,
                 null),
             calculatedGenWorth);
 
@@ -643,23 +666,27 @@ public class SeedlotService {
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
 
-    seedlotInfo.setApplicantEmailAddress(patchDto.applicantEmailAddress());
+    updateApplicantAndSeedlot(seedlotInfo, patchDto);
+
+    Seedlot seedlotSaved = seedlotRepository.save(seedlotInfo);
+    SparLog.info("Seedlot number {} successfully patched", seedlotNumber);
+    return seedlotSaved;
+  }
+
+  private void updateApplicantAndSeedlot(Seedlot seedlot, SeedlotApplicationPatchDto patchDto) {
+    seedlot.setApplicantEmailAddress(patchDto.applicantEmailAddress());
 
     SeedlotSourceEntity updatedSource =
         seedlotSourceRepository
             .findById(patchDto.seedlotSourceCode())
             .orElseThrow(SeedlotSourceNotFoundException::new);
 
-    seedlotInfo.setSeedlotSource(updatedSource);
+    seedlot.setSeedlotSource(updatedSource);
 
-    seedlotInfo.setSourceInBc(patchDto.bcSourceInd());
+    seedlot.setSourceInBc(patchDto.bcSourceInd());
 
     // The field intendedForCrownLand == to be registered indicator.
-    seedlotInfo.setIntendedForCrownLand(patchDto.toBeRegistrdInd());
-
-    Seedlot seedlotSaved = seedlotRepository.save(seedlotInfo);
-    SparLog.info("Seedlot number {} successfully patched", seedlotNumber);
-    return seedlotSaved;
+    seedlot.setIntendedForCrownLand(patchDto.toBeRegistrdInd());
   }
 
   /**
@@ -753,14 +780,20 @@ public class SeedlotService {
       // Calculate Seedlot GeoSpatial (for Seedlot, mean latitude, mean longitude, mean elevation)
       // Calculate Genetic Worth
       // Update Seedlot Ne, collection elevation, and collection lat long
+      // Saved the Seedlot calculated Genetic Worth
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
 
+      // If there is no area of use data already set:
       // Update elevation min max, latitude min max, longitude min max, and SPZ
       // Set values in the Seedlot instance and update tables [seedlot_seed_plan_zone]
       // Fetch data from Oracle to get the active Seed Plan Unit id
-      setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+      if (!hasAreaOfUseData(seedlot)) {
+        SparLog.info("Area of Use data has NOT been set previously, setting area of use data");
+        setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+      }
     } else {
+      updateApplicantAndSeedlot(seedlot, form.applicantAndSeedlotInfo());
       // Override Seedlot elevation min max, latitude min max, and longitude min max (area of use)
       // Set values in the Seedlot instance only
       tscAdminService.overrideElevLatLongMinMax(seedlot, form.seedlotReviewElevationLatLong());
@@ -771,6 +804,9 @@ public class SeedlotService {
       // Override Seedlot Ne, collection elevation, and collection lat long
       // Set values in the Seedlot instance only
       tscAdminService.overrideSeedlotCollElevLatLong(seedlot, form.seedlotReviewGeoInformation());
+
+      // Override Seedlot Genetic Worth values
+      seedlotGeneticWorthService.overrideSeedlotGenWorth(seedlot, form.seedlotReviewGeneticWorth());
     }
 
     // Only set declaration info for pending seedlots
@@ -848,6 +884,9 @@ public class SeedlotService {
     seedlot.setCollectionLongitudeMin(collectionGeoData.getMeanLongitudeMinute());
     seedlot.setCollectionLongitudeSec(collectionGeoData.getMeanLongitudeSecond());
     SparLog.info("Parent trees contribution set");
+
+    SparLog.info("Saving Seedlot genetic worth calculated values");
+    seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, ptCalculationResDto.geneticTraits());
   }
 
   private List<OrchardParentTreeValsDto> convertToPtVals(
@@ -896,11 +935,29 @@ public class SeedlotService {
             genQual -> {
               GeneticWorthTraitsDto toAdd =
                   new GeneticWorthTraitsDto(
-                      genQual.geneticTypeCode(), genQual.geneticQualityValue(), null, null);
+                      genQual.geneticWorthCode(), genQual.geneticQualityValue(), null, null);
               genTraitList.add(toAdd);
             });
 
     return genTraitList;
+  }
+
+  private boolean hasAreaOfUseData(Seedlot seedlot) {
+    return seedlot.getElevationMax() != null
+        || seedlot.getElevationMin() != null
+        || seedlot.getLatitudeDegMax() != null
+        || seedlot.getLatitudeDegMin() != null
+        || seedlot.getLatitudeMinMax() != null
+        || seedlot.getLatitudeMinMin() != null
+        || seedlot.getLatitudeSecMax() != null
+        || seedlot.getLatitudeSecMin() != null
+        || seedlot.getLongitudeDegMax() != null
+        || seedlot.getLongitudeDegMin() != null
+        || seedlot.getLongitudeMinMax() != null
+        || seedlot.getLongitudeMinMin() != null
+        || seedlot.getLongitudeSecMax() != null
+        || seedlot.getLongitudeSecMin() != null
+        || seedlot.getAreaOfUseComment() != null;
   }
 
   /**
@@ -1030,7 +1087,7 @@ public class SeedlotService {
     // If the facility type is Other, then a description is required.
     SparLog.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
     SparLog.info("FACILITY TYPE Desc", formStep3.intermOtherFacilityDesc());
-    if (formStep3.intermFacilityCode().equals("OTH")) {
+    if ("OTH".equals(formStep3.intermFacilityCode())) {
       SparLog.info("equal to OTH");
       if (formStep3.intermOtherFacilityDesc() == null
           || formStep3.intermOtherFacilityDesc().isEmpty()) {

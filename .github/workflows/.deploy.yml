@@ -47,7 +47,7 @@ on:
 jobs:
   init:
     name: Deploy (init)
-    environment: ${{ inputs.target }}
+    environment: ${{ inputs.environment }}
     outputs:
       mod-tag: ${{ steps.mod-tag.outputs.mod-tag }}
     runs-on: ubuntu-22.04
@@ -67,10 +67,12 @@ jobs:
           overwrite: true
           parameters:
             -p ZONE=${{ inputs.target }}
-            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
+            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
             -p ORACLE_PASSWORD='${{ secrets.ORACLE_PASSWORD }}'
             -p ORACLE_SERVICE='${{ vars.ORACLE_SERVICE }}'
-            -p FORESTCLIENTAPI_KEY='${{ secrets.FORESTCLIENTAPI_KEY }}'
+            -p ORACLE_USER='${{ vars.ORACLE_USER }}'
+            -p ORACLE_SYNC_USER='${{ vars.ORACLE_SYNC_USER }}'
+            -p ORACLE_SYNC_PASSWORD='${{ secrets.ORACLE_SYNC_PASSWORD }}'
 
       - name: FluentBit
         if: inputs.fluentbit_target != 'development'
@@ -90,7 +92,7 @@ jobs:
 
   database:
     name: Deploy (database)
-    environment: ${{ inputs.target }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     steps:
       - name: Database
@@ -109,7 +111,7 @@ jobs:
 
   deploy:
     name: Deploy
-    environment: ${{ inputs.target }}
+    environment: ${{ inputs.environment }}
     needs: [database, init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
@@ -145,9 +147,8 @@ jobs:
             file: sync/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p TEST_MODE=${{ github.event_name == 'pull_request' && '1' || '0' }}
+              -p TEST_MODE=${{ github.event_name == 'pull_request' && 'true' || 'true' }} # Revise after TEST is ready!
             # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.RUN_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
-            # triggers: ('sync/')
 
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v2.3.0
@@ -176,7 +177,7 @@ jobs:
   verify:
     name: Verify ETL
     if: inputs.etl == 'true'
-    environment: ${{ inputs.target }}
+    environment: ${{ inputs.environment }}
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
