@@ -133,6 +133,10 @@ public class SeedlotGeneticWorthService {
       }
     }
 
+    if (seedlotGenWorthList.isEmpty()) {
+      return List.of();
+    }
+
     return seedlotGeneticWorthRepository.saveAll(seedlotGenWorthList);
   }
 
