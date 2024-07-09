@@ -929,7 +929,7 @@ public class SeedlotService {
             genQual -> {
               GeneticWorthTraitsDto toAdd =
                   new GeneticWorthTraitsDto(
-                      genQual.geneticTypeCode(), genQual.geneticQualityValue(), null, null);
+                      genQual.geneticWorthCode(), genQual.geneticQualityValue(), null, null);
               genTraitList.add(toAdd);
             });
 

@@ -14,6 +14,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -119,13 +120,17 @@ public class SeedlotGeneticWorthService {
 
     List<SeedlotGeneticWorth> seedlotGenWorthList = new ArrayList<>();
     for (GeneticWorthTraitsDto traitDto : seedlotGeneticWorthTraits) {
-      GeneticWorthEntity gwEntity =
-          geneticWorthEntityDao.getGeneticWorthEntity(traitDto.traitCode()).orElseThrow();
-      SeedlotGeneticWorth sgw =
-          new SeedlotGeneticWorth(seedlot, gwEntity, loggedUserService.createAuditCurrentUser());
-      sgw.setGeneticQualityValue(traitDto.calculatedValue());
-      sgw.setTestedParentTreeContributionPercentage(traitDto.testedParentTreePerc());
-      seedlotGenWorthList.add(sgw);
+      // Adding null check due to breeding values that did not match the minimum of
+      // 70% threshold, they should not be stored as valid
+      if (!Objects.isNull(traitDto.calculatedValue())) {
+        GeneticWorthEntity gwEntity =
+            geneticWorthEntityDao.getGeneticWorthEntity(traitDto.traitCode()).orElseThrow();
+        SeedlotGeneticWorth sgw =
+            new SeedlotGeneticWorth(seedlot, gwEntity, loggedUserService.createAuditCurrentUser());
+        sgw.setGeneticQualityValue(traitDto.calculatedValue());
+        sgw.setTestedParentTreeContributionPercentage(traitDto.testedParentTreePerc());
+        seedlotGenWorthList.add(sgw);
+      }
     }
 
     return seedlotGeneticWorthRepository.saveAll(seedlotGenWorthList);
