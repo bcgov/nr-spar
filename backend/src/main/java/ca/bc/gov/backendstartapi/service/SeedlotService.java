@@ -45,6 +45,7 @@ import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.exception.OracleApiProviderException;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
@@ -651,12 +652,17 @@ public class SeedlotService {
    * @throws SeedlotNotFoundException in case of seedlot not found error.
    * @throws SeedlotSourceNotFoundException in case of seedlot source not found error.
    */
-  public Seedlot patchApplicantionInfo(
+  public Seedlot patchApplicantInfo(
       @NonNull String seedlotNumber, SeedlotApplicationPatchDto patchDto) {
     SparLog.info("Patching seedlot entry for seedlot number {}", seedlotNumber);
 
     Seedlot seedlotInfo =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    if (!patchDto.revisionCount().equals(seedlotInfo.getRevisionCount())) {
+      SparLog.info("Seedlot number {} updated by another user", seedlotNumber);
+      throw new SeedlotConflictDataException(seedlotNumber);
+    }
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
 

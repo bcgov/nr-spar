@@ -37,6 +37,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
@@ -48,6 +49,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
@@ -361,7 +363,12 @@ class SeedlotServiceTest {
     Seedlot seedlotEntity = new Seedlot(seedlotId);
 
     when(seedlotRepository.findById(seedlotId)).thenReturn(Optional.of(seedlotEntity));
-    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId)).thenReturn(List.of());
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
+    SeedlotSeedPlanZoneEntity spzEntity =
+        new SeedlotSeedPlanZoneEntity(seedlotEntity, "AA", classEntity, true, "Description");
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId))
+        .thenReturn(List.of(spzEntity));
     when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId)).thenReturn(Optional.empty());
 
     SeedlotGeneticWorth seedlotGenWor =
@@ -464,7 +471,7 @@ class SeedlotServiceTest {
   @DisplayName("A-Class Seedlot Form success test")
   void findAclassSeedlotFormFullDataSuccessTest() {
     String seedlotNumber = "0000000";
-    String onwerNumber = "1234";
+    String ownerNumber = "1234";
     String ownerLoc = "01";
     String methodOfPayment = "TEST";
     Seedlot seedlotEntity = new Seedlot(seedlotNumber);
@@ -528,9 +535,9 @@ class SeedlotServiceTest {
         List.of(new SeedlotCollectionMethod(seedlotEntity, new ConeCollectionMethodEntity()));
 
     SeedlotOwnerQuantity seedlotOwners =
-        new SeedlotOwnerQuantity(seedlotEntity, onwerNumber, ownerLoc);
-    BigDecimal orginalPercOwned = new BigDecimal(100);
-    seedlotOwners.setOriginalPercentageOwned(orginalPercOwned);
+        new SeedlotOwnerQuantity(seedlotEntity, ownerNumber, ownerLoc);
+    BigDecimal originalPercentOwned = new BigDecimal(100);
+    seedlotOwners.setOriginalPercentageOwned(originalPercentOwned);
     seedlotOwners.setMethodOfPayment(new MethodOfPaymentEntity(methodOfPayment, "", null));
 
     String orchardId = "100";
@@ -592,7 +599,13 @@ class SeedlotServiceTest {
                 null, null, null, null, null, null, null, null, List.of(0)),
             List.of(
                 new SeedlotFormOwnershipDto(
-                    onwerNumber, ownerLoc, orginalPercOwned, null, null, methodOfPayment, null)),
+                    ownerNumber,
+                    ownerLoc,
+                    originalPercentOwned,
+                    null,
+                    null,
+                    methodOfPayment,
+                    null)),
             new SeedlotFormInterimDto(null, null, null, null, null, null),
             new SeedlotFormOrchardDto(
                 orchardId, null, null, null, null, null, null, null, null, null),
@@ -642,12 +655,12 @@ class SeedlotServiceTest {
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", false, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", false, false, 0);
 
     Assertions.assertThrows(
         SeedlotNotFoundException.class,
         () -> {
-          seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
         });
   }
 
@@ -657,7 +670,7 @@ class SeedlotServiceTest {
     String seedlotNumber = "123456";
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false, 0);
 
     when(seedlotRepository.findById(seedlotNumber))
         .thenReturn(Optional.of(new Seedlot(seedlotNumber)));
@@ -668,7 +681,25 @@ class SeedlotServiceTest {
     Assertions.assertThrows(
         SeedlotSourceNotFoundException.class,
         () -> {
-          seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
+        });
+  }
+
+  @Test
+  @DisplayName("Patch applicant info conflict should fail")
+  void patchApplicantInfo_conflict_shouldFail() {
+    String seedlotNumber = "123456";
+
+    when(seedlotRepository.findById(seedlotNumber))
+        .thenReturn(Optional.of(new Seedlot(seedlotNumber)));
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false, 46);
+
+    Assertions.assertThrows(
+        SeedlotConflictDataException.class,
+        () -> {
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
         });
   }
 
@@ -678,7 +709,7 @@ class SeedlotServiceTest {
     String seedlotNumber = "123456";
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", true, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", true, false, 0);
 
     Seedlot testSeedlot = new Seedlot(seedlotNumber);
 
@@ -690,7 +721,7 @@ class SeedlotServiceTest {
     // Returns the seedlot that's about to be saved os we can compare the object.
     when(seedlotRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-    Seedlot patchedSeedlot = seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+    Seedlot patchedSeedlot = seedlotService.patchApplicantInfo(seedlotNumber, testDto);
 
     assertEquals(testDto.applicantEmailAddress(), patchedSeedlot.getApplicantEmailAddress());
     assertEquals(
@@ -772,7 +803,7 @@ class SeedlotServiceTest {
     SeedlotFormInterimDto formInterimDto = mock(SeedlotFormInterimDto.class);
 
     SeedlotApplicationPatchDto applicationPatchDto =
-        new SeedlotApplicationPatchDto("email@bcgov.ca", "A", true, true);
+        new SeedlotApplicationPatchDto("email@bcgov.ca", "A", true, true, 0);
 
     SeedlotFormSubmissionDto form =
         new SeedlotFormSubmissionDto(
