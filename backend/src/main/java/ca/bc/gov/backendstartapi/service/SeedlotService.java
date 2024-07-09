@@ -306,6 +306,28 @@ public class SeedlotService {
     seedlotDto.setPrimarySpz(primarySpz);
 
     seedlotDto.setAdditionalSpzList(additionalSpzList);
+
+    SparLog.info("Finding Seedlot genetic worth for seedlot number {}", seedlotNumber);
+    List<SeedlotGeneticWorth> genWorthData =
+        seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<GeneticWorthTraitsDto> genWorthTraits = new ArrayList<>();
+    genWorthData.forEach(
+        (genWorth) -> {
+          GeneticWorthTraitsDto dto =
+              new GeneticWorthTraitsDto(
+                  genWorth.getGeneticWorthCode(),
+                  null,
+                  genWorth.getGeneticQualityValue(),
+                  genWorth.getTestedParentTreeContributionPercentage());
+          genWorthTraits.add(dto);
+        });
+    seedlotDto.setCalculatedValues(genWorthTraits);
+    SparLog.info(
+        "Found {} Seedlot genetic worth stored for seedlot number {}",
+        genWorthTraits.size(),
+        seedlotNumber);
+
     return seedlotDto;
   }
 
@@ -752,6 +774,7 @@ public class SeedlotService {
       // Calculate Seedlot GeoSpatial (for Seedlot, mean latitude, mean longitude, mean elevation)
       // Calculate Genetic Worth
       // Update Seedlot Ne, collection elevation, and collection lat long
+      // Saved the Seedlot calculated Genetic Worth
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
 
@@ -775,6 +798,9 @@ public class SeedlotService {
       // Override Seedlot Ne, collection elevation, and collection lat long
       // Set values in the Seedlot instance only
       tscAdminService.overrideSeedlotCollElevLatLong(seedlot, form.seedlotReviewGeoInformation());
+
+      // Override Seedlot Genetic Worth values
+      seedlotGeneticWorthService.overrideSeedlotGenWorth(seedlot, form.seedlotReviewGeneticWorth());
     }
 
     // Only set declaration info for pending seedlots
@@ -852,6 +878,9 @@ public class SeedlotService {
     seedlot.setCollectionLongitudeMin(collectionGeoData.getMeanLongitudeMinute());
     seedlot.setCollectionLongitudeSec(collectionGeoData.getMeanLongitudeSecond());
     SparLog.info("Parent trees contribution set");
+
+    SparLog.info("Saving Seedlot genetic worth calculated values");
+    seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, ptCalculationResDto.geneticTraits());
   }
 
   private List<OrchardParentTreeValsDto> convertToPtVals(
@@ -900,7 +929,7 @@ public class SeedlotService {
             genQual -> {
               GeneticWorthTraitsDto toAdd =
                   new GeneticWorthTraitsDto(
-                      genQual.geneticTypeCode(), genQual.geneticQualityValue(), null, null);
+                      genQual.geneticWorthCode(), genQual.geneticQualityValue(), null, null);
               genTraitList.add(toAdd);
             });
 
@@ -1052,7 +1081,7 @@ public class SeedlotService {
     // If the facility type is Other, then a description is required.
     SparLog.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
     SparLog.info("FACILITY TYPE Desc", formStep3.intermOtherFacilityDesc());
-    if (formStep3.intermFacilityCode().equals("OTH")) {
+    if ("OTH".equals(formStep3.intermFacilityCode())) {
       SparLog.info("equal to OTH");
       if (formStep3.intermOtherFacilityDesc() == null
           || formStep3.intermOtherFacilityDesc().isEmpty()) {

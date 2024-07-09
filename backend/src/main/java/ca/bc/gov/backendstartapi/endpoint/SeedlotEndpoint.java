@@ -503,7 +503,7 @@ public class SeedlotEndpoint {
   }
 
   /** Retrieves the saved Seedlot reg form. */
-  @GetMapping("{seedlotNumber}/a-class-form-progress")
+  @GetMapping("/{seedlotNumber}/a-class-form-progress")
   @Operation(
       summary = "Retrieve the progress and data of an a-class reg form.",
       description = "This endpoint retrieves the progress of an A-class registration form")
@@ -539,7 +539,7 @@ public class SeedlotEndpoint {
   }
 
   /** Retreive only the progress_status column from the form progress table. */
-  @GetMapping("{seedlotNumber}/a-class-form-progress/status")
+  @GetMapping("/{seedlotNumber}/a-class-form-progress/status")
   @Operation(
       summary = "Retrieve the progress status of an a-class reg form.",
       description =

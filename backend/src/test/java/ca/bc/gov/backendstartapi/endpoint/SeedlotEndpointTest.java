@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
@@ -32,6 +33,7 @@ import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
 import ca.bc.gov.backendstartapi.service.parser.SmpCalculationCsvTableParser;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -450,6 +452,12 @@ class SeedlotEndpointTest {
     seedlotDto.setAdditionalSpzList(List.of());
     seedlotDto.setPrimarySpu(spuDto);
 
+    GeneticWorthTraitsDto traitGvo =
+        new GeneticWorthTraitsDto("GVO", null, new BigDecimal("27"), new BigDecimal("85"));
+    GeneticWorthTraitsDto traitWwd =
+        new GeneticWorthTraitsDto("WWD", null, new BigDecimal("13"), new BigDecimal("87"));
+    seedlotDto.setCalculatedValues(List.of(traitGvo, traitWwd));
+
     when(seedlotService.getSingleSeedlotInfo(any())).thenReturn(seedlotDto);
 
     mockMvc
@@ -457,6 +465,18 @@ class SeedlotEndpointTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.seedlot.id").value(seedlotNumber))
         .andExpect(jsonPath("$.primarySpu.seedPlanUnitId").value(spuId))
+        .andExpect(jsonPath("$.calculatedValues[0].traitCode").value(traitGvo.traitCode()))
+        .andExpect(
+            jsonPath("$.calculatedValues[0].calculatedValue").value(traitGvo.calculatedValue()))
+        .andExpect(
+            jsonPath("$.calculatedValues[0].testedParentTreePerc")
+                .value(traitGvo.testedParentTreePerc()))
+        .andExpect(jsonPath("$.calculatedValues[1].traitCode").value(traitWwd.traitCode()))
+        .andExpect(
+            jsonPath("$.calculatedValues[1].calculatedValue").value(traitWwd.calculatedValue()))
+        .andExpect(
+            jsonPath("$.calculatedValues[1].testedParentTreePerc")
+                .value(traitWwd.testedParentTreePerc()))
         .andReturn();
   }
 
