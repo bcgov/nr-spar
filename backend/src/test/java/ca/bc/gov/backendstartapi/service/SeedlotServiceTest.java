@@ -778,7 +778,7 @@ class SeedlotServiceTest {
     SeedlotFormInterimDto formInterimDto = mock(SeedlotFormInterimDto.class);
 
     SeedlotApplicationPatchDto applicationPatchDto =
-        new SeedlotApplicationPatchDto("email@bcgov.ca", "A", true, true);
+        new SeedlotApplicationPatchDto("email@bcgov.ca", "A", true, true, 0);
 
     SeedlotFormSubmissionDto form =
         new SeedlotFormSubmissionDto(
