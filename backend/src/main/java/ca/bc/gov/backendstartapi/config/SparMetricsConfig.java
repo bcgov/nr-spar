@@ -37,8 +37,7 @@ public class SparMetricsConfig {
             "app", appName,
             "zone",appZone
         )
-        .meterFilter(ignoreTag())
-        .meterFilter(distribution());
+        .meterFilter(ignoreTag());
   }
 
   @Bean
@@ -50,20 +49,5 @@ public class SparMetricsConfig {
     return MeterFilter.ignoreTags("type");
   }
 
-  public MeterFilter distribution() {
-    return new MeterFilter() {
-
-      @Override
-      public DistributionStatisticConfig configure(Meter.Id id,
-          DistributionStatisticConfig config) {
-        return DistributionStatisticConfig
-            .builder()
-            .percentiles(0.5, 0.95, 0.99)
-            .percentilesHistogram(true)
-            .build()
-            .merge(config);
-      }
-    };
-  }
 
 }
