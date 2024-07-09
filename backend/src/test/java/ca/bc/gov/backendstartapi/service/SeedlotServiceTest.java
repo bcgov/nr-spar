@@ -37,6 +37,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
@@ -48,6 +49,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
@@ -361,7 +363,12 @@ class SeedlotServiceTest {
     Seedlot seedlotEntity = new Seedlot(seedlotId);
 
     when(seedlotRepository.findById(seedlotId)).thenReturn(Optional.of(seedlotEntity));
-    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId)).thenReturn(List.of());
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
+    SeedlotSeedPlanZoneEntity spzEntity =
+        new SeedlotSeedPlanZoneEntity(seedlotEntity, "AA", classEntity, true, "Description");
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId))
+        .thenReturn(List.of(spzEntity));
     when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId)).thenReturn(Optional.empty());
 
     SeedlotGeneticWorth seedlotGenWor =
@@ -673,6 +680,24 @@ class SeedlotServiceTest {
 
     Assertions.assertThrows(
         SeedlotSourceNotFoundException.class,
+        () -> {
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
+        });
+  }
+
+  @Test
+  @DisplayName("Patch applicant info conflict should fail")
+  void patchApplicantInfo_conflict_shouldFail() {
+    String seedlotNumber = "123456";
+
+    when(seedlotRepository.findById(seedlotNumber))
+        .thenReturn(Optional.of(new Seedlot(seedlotNumber)));
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false, 46);
+
+    Assertions.assertThrows(
+        SeedlotConflictDataException.class,
         () -> {
           seedlotService.patchApplicantInfo(seedlotNumber, testDto);
         });
