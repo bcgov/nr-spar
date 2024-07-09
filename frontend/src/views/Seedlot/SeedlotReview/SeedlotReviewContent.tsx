@@ -121,7 +121,7 @@ const SeedlotReviewContent = () => {
 
   const {
     allStepData, genWorthVals, geoInfoVals,
-    areaOfUseData, isFetchingData
+    areaOfUseData, isFetchingData, seedlotData
   } = useContext(ClassAContext);
 
   const verifyFormData = (): boolean => {
@@ -536,26 +536,31 @@ const SeedlotReviewContent = () => {
           <AuditInfo />
         </Column>
       </Row>
-      <Row className="action-button-row">
-        <Column className="action-button-col" sm={4} md={4} lg={4}>
-          <Button
-            kind="secondary"
-            renderIcon={Pending}
-            onClick={() => handleSaveAndStatus('PND')}
-          >
-            Send back to pending
-          </Button>
-        </Column>
-        <Column className="action-button-col" sm={4} md={4} lg={4}>
-          <Button
-            renderIcon={Checkmark}
-            onClick={() => handleSaveAndStatus('APP')}
-          >
-            Approve seedlot
-          </Button>
-        </Column>
-      </Row>
-
+      {
+        seedlotData?.seedlotStatus.seedlotStatusCode === 'SUB'
+          ? (
+            <Row className="action-button-row">
+              <Column className="action-button-col" sm={4} md={4} lg={4}>
+                <Button
+                  kind="secondary"
+                  renderIcon={Pending}
+                  onClick={() => handleSaveAndStatus('PND')}
+                >
+                  Send back to pending
+                </Button>
+              </Column>
+              <Column className="action-button-col" sm={4} md={4} lg={4}>
+                <Button
+                  renderIcon={Checkmark}
+                  onClick={() => handleSaveAndStatus('APP')}
+                >
+                  Approve seedlot
+                </Button>
+              </Column>
+            </Row>
+          )
+          : null
+      }
     </FlexGrid>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   FlexGrid,
@@ -31,6 +31,7 @@ import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants'
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import { StatusOnSaveType } from '../../../api-service/tscAdminAPI';
+import AuthContext from '../../../contexts/AuthContext';
 
 import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
@@ -42,6 +43,7 @@ import './styles.scss';
 const SeedlotDetails = () => {
   const navigate = useNavigate();
   const windowSize = useWindowSize();
+  const { isTscAdmin } = useContext(AuthContext);
   const { seedlotNumber } = useParams();
   const [searchParams] = useSearchParams();
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
@@ -230,7 +232,11 @@ const SeedlotDetails = () => {
                   isFetching={forestClientQuery?.isFetching}
                 />
                 {
-                  (seedlotData?.seedlotStatus !== 'Pending' && seedlotData?.seedlotStatus !== 'Incomplete')
+                  (
+                    isTscAdmin
+                    && seedlotData?.seedlotStatus !== 'Pending'
+                    && seedlotData?.seedlotStatus !== 'Incomplete'
+                  )
                     ? <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
                     : null
                 }
