@@ -83,7 +83,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .as('orchardDropdown')
-      .eq(1)
+      .contains('219 - VERNON - S - PRD')
       .click();
 
     // Go to next step to get error msg
@@ -137,7 +137,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get('@orchardDropdown')
-      .eq(1)
+      .contains('219 - VERNON - S - PRD')
       .click();
 
     // Add additional orchard
@@ -154,7 +154,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     cy.get('@orchardDropdown')
-      .eq(5)
+      .contains('222 - VERNON - S - PRD')
       .click();
 
     // Go to next step to get error msg
