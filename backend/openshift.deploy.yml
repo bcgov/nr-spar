@@ -148,11 +148,11 @@ objects:
                   containerPort: 8090
               readinessProbe:
                 httpGet:
-                  path: /actuator/health
+                  path: /health
                   port: container-port
               livenessProbe:
                 httpGet:
-                  path: /actuator/health
+                  path: /health
                   port: container-port
               startupProbe:
                 tcpSocket:
