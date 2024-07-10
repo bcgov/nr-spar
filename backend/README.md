@@ -78,11 +78,6 @@ If you want to have all frontend, backend and database, just run:
 docker compose up backend -d
 ```
 
-But if you can see only the backend and databse, run from the `backend` directory:
-```sh
-./mvnw spring-boot:run -Pdocker-compose -Dspring-boot.run.profiles=docker-compose
-```
-
 If you need to change the code, no problem. Once you hit Ctrl+S keys
 the service will be restarted! Enjoy
 
