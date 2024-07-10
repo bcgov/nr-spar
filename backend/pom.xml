@@ -157,6 +157,7 @@
       <artifactId>spring-boot-docker-compose</artifactId>
       <version>3.3.0</version>
       <optional>true</optional>
+      <scope>test</scope>
     </dependency>
 
     <!-- Geospatial -->
@@ -202,6 +203,7 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- Documentation -->
