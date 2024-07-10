@@ -392,7 +392,7 @@ public class SeedlotService {
 
     for (SeedlotParentTreeGeneticQuality parentTreeGenQual : genQualityData) {
       Integer curParentTreeId = parentTreeGenQual.getId().getSeedlotParentTree().getParentTreeId();
-      if (curParentTreeId == parentTreeId) {
+      if (curParentTreeId.equals(parentTreeId)) {
         ParentTreeGeneticQualityDto parentTreeGenQualDto =
             new ParentTreeGeneticQualityDto(
                 parentTreeGenQual.getGeneticTypeCode(),
