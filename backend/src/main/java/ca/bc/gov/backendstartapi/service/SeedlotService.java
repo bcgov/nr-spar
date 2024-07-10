@@ -221,7 +221,7 @@ public class SeedlotService {
 
     SparLog.info(
         "Retrieving paginated list of seedlots for the user: {} with client id: {}",
-        userInfo.get().id(),
+        userInfo.isPresent() ? userInfo.get().id() : null,
         clientId);
 
     if (pageSize == 0) {
@@ -392,7 +392,7 @@ public class SeedlotService {
 
     for (SeedlotParentTreeGeneticQuality parentTreeGenQual : genQualityData) {
       Integer curParentTreeId = parentTreeGenQual.getId().getSeedlotParentTree().getParentTreeId();
-      if (curParentTreeId == parentTreeId) {
+      if (curParentTreeId.equals(parentTreeId)) {
         ParentTreeGeneticQualityDto parentTreeGenQualDto =
             new ParentTreeGeneticQualityDto(
                 parentTreeGenQual.getGeneticTypeCode(),
