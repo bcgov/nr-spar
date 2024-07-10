@@ -12,7 +12,8 @@ export const cards = [
     isEmpty: false,
     emptyTitle: '',
     emptyDescription: '',
-    displayForAdmin: false
+    displayForAdmin: true,
+    displayForNonAdmin: true
   },
   // {
   //   id: '2',
@@ -37,7 +38,8 @@ export const cards = [
     isEmpty: false,
     emptyTitle: '',
     emptyDescription: '',
-    displayForAdmin: false
+    displayForAdmin: false,
+    displayForNonAdmin: true
   },
   {
     id: '4',
@@ -49,6 +51,7 @@ export const cards = [
     isEmpty: false,
     emptyTitle: '',
     emptyDescription: '',
-    displayForAdmin: true
+    displayForAdmin: true,
+    displayForNonAdmin: false
   }
 ];
