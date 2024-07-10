@@ -12,7 +12,6 @@ import org.springframework.security.web.SecurityFilterChain;
 /** This class contains all configurations for a dev security. */
 @Configuration
 @EnableMethodSecurity(prePostEnabled = false)
-@Profile("docker-compose")
 public class SecurityConfigDev {
   
   /**

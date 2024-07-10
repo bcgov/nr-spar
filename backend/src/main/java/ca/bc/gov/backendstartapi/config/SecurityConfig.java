@@ -27,7 +27,6 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@Profile("!docker-compose")
 public class SecurityConfig {
 
   @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")

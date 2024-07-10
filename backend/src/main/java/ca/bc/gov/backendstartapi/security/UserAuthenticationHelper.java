@@ -90,18 +90,6 @@ public class UserAuthenticationHelper {
 
     SparLog.info("User not authenticated!");
 
-    // Checks if it's the 'docker-compose' profile enabled (local dev env)
-    boolean isDockerComposeProfile = false;
-    if (!Objects.isNull(environment)) {
-      String[] profiles = environment.getActiveProfiles();
-      isDockerComposeProfile = Arrays.asList(profiles).contains("docker-compose");
-    }
-
-    if (isDockerComposeProfile) {
-      SparLog.info("Local development environment found! Using dev user!");
-      return Optional.of(UserInfo.createDevUser());
-    }
-
     return Optional.empty();
   }
 }
