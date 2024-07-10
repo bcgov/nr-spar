@@ -65,7 +65,7 @@ Run (from the project root):
 docker-compose up database -d
 ```
 
-Then head to http://localhost:8090/actuator/health to check if the service was successfully launched:
+Then head to http://localhost:8090/health to check if the service was successfully launched:
 the first `status` property should have the value **UP**.
 
 Before writing your first line of code, and learn more about the checks, including
