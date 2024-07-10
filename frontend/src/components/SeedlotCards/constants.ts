@@ -11,7 +11,8 @@ export const cards = [
     highlighted: false,
     isEmpty: false,
     emptyTitle: '',
-    emptyDescription: ''
+    emptyDescription: '',
+    displayForAdmin: false
   },
   // {
   //   id: '2',
@@ -35,6 +36,19 @@ export const cards = [
     highlighted: false,
     isEmpty: false,
     emptyTitle: '',
-    emptyDescription: ''
+    emptyDescription: '',
+    displayForAdmin: false
+  },
+  {
+    id: '4',
+    image: 'Sprout',
+    header: 'Review seedlots',
+    description: 'Check all seedlots that are waiting for approval',
+    link: ROUTES.TSC_SEEDLOTS_TABLE,
+    highlighted: false,
+    isEmpty: false,
+    emptyTitle: '',
+    emptyDescription: '',
+    displayForAdmin: true
   }
 ];
