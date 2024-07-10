@@ -921,8 +921,8 @@ export const convertOrchard = (
     pollenContaminationPct: +calcAverage(Object.values(parentTreeRows), 'nonOrchardPollenContam'),
     contaminantPollenBv: +orchardData.breedingPercentage.value,
     // This is a fixed field (for now at least) with the regional code,
-    // so the methodology code is always set to 'REG'
-    pollenContaminationMthdCode: 'REG'
+    // so the methodology code is always set to 'RPM'
+    pollenContaminationMthdCode: 'RPM'
   });
 };
 
