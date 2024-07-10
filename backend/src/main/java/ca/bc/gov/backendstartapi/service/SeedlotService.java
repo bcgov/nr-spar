@@ -221,7 +221,7 @@ public class SeedlotService {
 
     SparLog.info(
         "Retrieving paginated list of seedlots for the user: {} with client id: {}",
-        userInfo.get().id(),
+        userInfo.isPresent() ? userInfo.get().id() : null,
         clientId);
 
     if (pageSize == 0) {
