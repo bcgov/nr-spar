@@ -80,6 +80,10 @@ objects:
         type: RollingUpdate
       template:
         metadata:
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "8090"
+            prometheus.io/path: "/metrics"
           labels:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
@@ -144,11 +148,11 @@ objects:
                   containerPort: 8090
               readinessProbe:
                 httpGet:
-                  path: /actuator/health
+                  path: /health
                   port: container-port
               livenessProbe:
                 httpGet:
-                  path: /actuator/health
+                  path: /health
                   port: container-port
               startupProbe:
                 tcpSocket:
