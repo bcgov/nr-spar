@@ -104,7 +104,7 @@ jobs:
             file: backend/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "health"
           - name: frontend
             file: frontend/openshift.deploy.yml
@@ -118,7 +118,7 @@ jobs:
             file: oracle-api/openshift.deploy.yml
             overwrite: true
             parameters:
-              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.${{ vars.AWS_REGION }}.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
+              -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "actuator/health"
           - name: sync
             file: sync/openshift.deploy.yml
