@@ -55,7 +55,7 @@ services:
       - ./backend:/app
       - $HOME/zscaler-certs:/certs
     healthcheck:
-      test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+      test: curl -f http://localhost:8090/health | grep '"status":"UP"'
 
   frontend:
     container_name: frontend

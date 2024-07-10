@@ -92,9 +92,6 @@ objects:
             - name: ${NAME}-${ZONE}
               image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               imagePullPolicy: Always
-              volumeMounts:
-                - name: ${NAME}-${ZONE}-fluentbit-logs
-                  mountPath: /logs
               env:
                 - name: NR_SPAR_BACKEND_VERSION
                   value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
@@ -158,10 +155,6 @@ objects:
                 tcpSocket:
                   port: container-port
                 failureThreshold: 45
-          volumes:
-            - name: ${NAME}-${ZONE}-fluentbit-logs
-              persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-fluentbit-logs
   - apiVersion: v1
     kind: Service
     metadata:
