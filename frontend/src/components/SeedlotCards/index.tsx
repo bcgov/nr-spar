@@ -11,7 +11,7 @@ const SeedlotCards = () => {
   return (
     <Row className="seedlot-activities-cards">
       {
-        cards.filter(c => c.displayForAdmin === isTscAdmin).map((card) => (
+        cards.filter((c) => c.displayForAdmin === isTscAdmin).map((card) => (
           <Column sm={4} md={4} lg={8} xlg={8} max={4} key={card.id}>
             <StandardCard
               image={card.image}
@@ -27,6 +27,6 @@ const SeedlotCards = () => {
       }
     </Row>
   );
-}
+};
 
 export default SeedlotCards;
