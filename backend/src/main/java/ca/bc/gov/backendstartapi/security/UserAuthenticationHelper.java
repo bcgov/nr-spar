@@ -1,12 +1,8 @@
 package ca.bc.gov.backendstartapi.security;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,8 +12,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserAuthenticationHelper {
-
-  @Autowired private Environment environment;
 
   /**
    * Get the logged user information.
