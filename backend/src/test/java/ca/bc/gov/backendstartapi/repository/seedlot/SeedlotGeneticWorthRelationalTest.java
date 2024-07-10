@@ -10,14 +10,15 @@ import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
+@SpringBootTest
 @Transactional
 @DisplayName("Relational Test | Seedlot Genetic Worth")
 class SeedlotGeneticWorthRelationalTest extends SeedlotEntityRelationalTest {
@@ -30,9 +31,11 @@ class SeedlotGeneticWorthRelationalTest extends SeedlotEntityRelationalTest {
       GeneticClassRepository geneticClassRepository,
       GeneticWorthRepository geneticWorthRepository,
       SeedlotGeneticWorthRepository seedlotGeneticWorthRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository
+  ) {
     super(
-        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
+        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository, seedlotStatusRepository);
     this.seedlotGeneticWorthRepository = seedlotGeneticWorthRepository;
   }
 

@@ -13,15 +13,18 @@ import ca.bc.gov.backendstartapi.repository.MethodOfPaymentRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
+@SpringBootTest
 @Transactional
 @DisplayName("Relational Test | Seedlot Owner Quantity")
 class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
@@ -36,9 +39,11 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
       SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository,
       GeneticWorthRepository geneticWorthRepository,
       MethodOfPaymentRepository methodOfPaymentRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository
+  ) {
     super(
-        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
+        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository, seedlotStatusRepository);
     repository = seedlotOwnerQuantityRepository;
     this.methodOfPaymentRepository = methodOfPaymentRepository;
   }
@@ -55,6 +60,7 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
 
     var methodOfPayment =
         new MethodOfPaymentEntity("ITC", "Invoice to Client Address", effectiveDateRange);
+    methodOfPayment.setUpdateTimestamp(LocalDateTime.now().toInstant(ZoneOffset.UTC));
     methodOfPaymentRepository.saveAndFlush(methodOfPayment);
 
     seedlotOwnerQuantity.setOriginalPercentageOwned(new BigDecimal(0));

@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.repository.seedlot;
 import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
@@ -11,6 +12,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,16 +25,20 @@ abstract class SeedlotEntityRelationalTest extends AbstractTestContainerIntegrat
   protected GeneticClassRepository geneticClassRepository;
   protected GeneticWorthRepository geneticWorthRepository;
   protected SeedlotSourceRepository seedlotSourceRepository;
+  protected SeedlotStatusRepository seedlotStatusRepository;
 
   protected SeedlotEntityRelationalTest(
       SeedlotRepository seedlotRepository,
       GeneticClassRepository geneticClassRepository,
       GeneticWorthRepository geneticWorthRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository
+  ) {
     this.seedlotRepository = seedlotRepository;
     this.geneticClassRepository = geneticClassRepository;
     this.geneticWorthRepository = geneticWorthRepository;
     this.seedlotSourceRepository = seedlotSourceRepository;
+    this.seedlotStatusRepository = seedlotStatusRepository;
   }
 
   protected Seedlot createSeedlot(String id) {
@@ -51,8 +57,11 @@ abstract class SeedlotEntityRelationalTest extends AbstractTestContainerIntegrat
     var seedlotSource = new SeedlotSourceEntity("CUS", "Custom Lot", effectiveDateRange, null);
     seedlotSourceRepository.saveAndFlush(seedlotSource);
 
+    var seedlotStatus = seedlotStatusRepository.findById("SUB");
+
     var seedlot = new Seedlot(id);
 
+    seedlot.setSeedlotStatus(seedlotStatus.get());
     seedlot.setComment("A seedlot.");
     seedlot.setApplicantClientNumber("00000001");
     seedlot.setApplicantLocationCode("02");
@@ -78,8 +87,8 @@ abstract class SeedlotEntityRelationalTest extends AbstractTestContainerIntegrat
     seedlot.setInterimStorageEndDate(LocalDateTime.now());
     seedlot.setInterimStorageFacilityCode("007");
 
-    seedlot.setFemaleGameticContributionMethod("F");
-    seedlot.setMaleGameticContributionMethod("M");
+    seedlot.setFemaleGameticContributionMethod("F1");
+    seedlot.setMaleGameticContributionMethod("M1");
     seedlot.setProducedThroughControlledCross(true);
     seedlot.setProducedWithBiotechnologicalProcesses(true);
     seedlot.setPollenContaminationPresentInOrchard(true);

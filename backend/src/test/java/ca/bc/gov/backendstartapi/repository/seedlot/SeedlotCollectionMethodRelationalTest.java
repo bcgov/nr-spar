@@ -14,19 +14,21 @@ import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
-//@Transactional
+@SpringBootTest
+@Transactional
 @DisplayName("Relational Test | Seedlot Collection Method")
 class SeedlotCollectionMethodRelationalTest extends SeedlotEntityRelationalTest {
 
   private final SeedlotCollectionMethodRepository seedlotCollectionMethodTestRepo;
+
   private final ConeCollectionMethodRepository coneCollectionMethodTestRepo;
 
   @Autowired
@@ -36,9 +38,11 @@ class SeedlotCollectionMethodRelationalTest extends SeedlotEntityRelationalTest 
       SeedlotCollectionMethodRepository seedlotCollectionMethodRepo,
       ConeCollectionMethodRepository coneCollectionMethodRepo,
       GeneticWorthRepository geneticWorthRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository
+  ) {
     super(
-        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
+        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository, seedlotStatusRepository);
     seedlotCollectionMethodTestRepo = seedlotCollectionMethodRepo;
     coneCollectionMethodTestRepo = coneCollectionMethodRepo;
   }

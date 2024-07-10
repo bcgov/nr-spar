@@ -13,14 +13,15 @@ import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeGeneticQualityRepos
 import ca.bc.gov.backendstartapi.repository.SeedlotParentTreeRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
+@SpringBootTest
 @Transactional
 @DisplayName("Relational Test | Seedlot Parent Tree Genetic Quality")
 class SeedlotParentTreeGeneticQualityRelationalTest extends SeedlotEntityRelationalTest {
@@ -36,9 +37,11 @@ class SeedlotParentTreeGeneticQualityRelationalTest extends SeedlotEntityRelatio
       SeedlotParentTreeRepository seedlotParentTreeRepository,
       GeneticWorthRepository geneticWorthRepository,
       SeedlotParentTreeGeneticQualityRepository seedlotParentTreeGeneticQualityRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository
+  ) {
     super(
-        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
+        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository, seedlotStatusRepository);
     this.seedlotParentTreeRepository = seedlotParentTreeRepository;
     this.seedlotParentTreeGeneticQualityRepository = seedlotParentTreeGeneticQualityRepository;
   }
