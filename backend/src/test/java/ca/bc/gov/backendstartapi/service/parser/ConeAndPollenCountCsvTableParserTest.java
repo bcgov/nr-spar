@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
+import ca.bc.gov.backendstartapi.extension.AbstractTestContainerIntegrationTest;
 import ca.bc.gov.backendstartapi.vo.parser.ConeAndPollenCount;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +18,8 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
-class ConeAndPollenCountCsvTableParserTest {
+@DisplayName("Parser Test | Cone and Pollen Count CSV Table")
+class ConeAndPollenCountCsvTableParserTest extends AbstractTestContainerIntegrationTest {
 
   final ClassLoader classLoader = getClass().getClassLoader();
 

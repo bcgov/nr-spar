@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.repository;
 
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.extension.AbstractTestContainerIntegrationTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,9 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@DisplayName("Repository Test | Seedlot")
 @Sql(scripts = {"classpath:sql_scripts/SeedlotRepositoryTest.sql"})
-class SeedlotRepositoryTest {
+class SeedlotRepositoryTest extends AbstractTestContainerIntegrationTest {
 
   @Autowired private SeedlotRepository seedlotRepository;
 

@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.repository;
 
 import ca.bc.gov.backendstartapi.entity.FavouriteActivityEntity;
+import ca.bc.gov.backendstartapi.extension.AbstractTestContainerIntegrationTest;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -18,7 +19,8 @@ import org.springframework.test.context.jdbc.Sql;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @TestMethodOrder(OrderAnnotation.class)
-class FavouriteActivityRepositoryTest {
+@DisplayName("Repository Test | FavouriteActivity")
+class FavouriteActivityRepositoryTest extends AbstractTestContainerIntegrationTest {
 
   @Autowired private FavouriteActivityRepository favouriteActivityRepository;
 

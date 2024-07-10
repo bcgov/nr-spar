@@ -7,8 +7,10 @@ import ca.bc.gov.backendstartapi.enums.parser.SmpMixHeader;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("Parser Test | Csv Table Row Parser")
 class CsvTableRowParserTest {
 
   private final CsvTableRowParser<SmpMixHeader, SmpMixVolume> parser =

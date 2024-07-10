@@ -3,6 +3,7 @@ package ca.bc.gov.backendstartapi.repository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.bc.gov.backendstartapi.extension.AbstractTestContainerIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Sql(scripts = {"classpath:sql_scripts/GeneticWorthRepoTest.sql"})
-class GeneticWorthRepoTest {
+@DisplayName("Repository Test | GeneticWorth")
+class GeneticWorthRepoTest extends AbstractTestContainerIntegrationTest {
   @Autowired private GeneticWorthRepository geneticWorthRepository;
 
   @Test

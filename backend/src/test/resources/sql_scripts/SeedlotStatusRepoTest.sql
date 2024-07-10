@@ -1,5 +1,5 @@
 insert into
-  seedlot_status_list (
+  spar.seedlot_status_list (
     seedlot_status_code,
     description,
     effective_date,

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.bc.gov.backendstartapi.extension.AbstractTestContainerIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Sql(scripts = {"classpath:sql_scripts/ActiveOrchardSeedPlanningUnitRepositoryTest.sql"})
-class ActiveOrchardSeedPlanningUnitRepositoryTest {
+@DisplayName("Repository Test | ActiveOrchardSeedPlanningUnit")
+class ActiveOrchardSeedPlanningUnitRepositoryTest extends AbstractTestContainerIntegrationTest {
 
   @Autowired
   private ActiveOrchardSeedPlanningUnitRepository activeOrchardSeedPlanningUnitRepository;

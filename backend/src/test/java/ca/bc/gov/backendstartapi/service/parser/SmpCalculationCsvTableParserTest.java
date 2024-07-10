@@ -4,17 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
+import ca.bc.gov.backendstartapi.extension.AbstractTestContainerIntegrationTest;
 import ca.bc.gov.backendstartapi.vo.parser.SmpMixVolume;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.UrlResource;
 
 @SpringBootTest
-class SmpCalculationCsvTableParserTest {
+@DisplayName("Parser Test | Smp Calculation Csv Table Parser")
+class SmpCalculationCsvTableParserTest extends AbstractTestContainerIntegrationTest {
 
   final ClassLoader classLoader = getClass().getClassLoader();
 
