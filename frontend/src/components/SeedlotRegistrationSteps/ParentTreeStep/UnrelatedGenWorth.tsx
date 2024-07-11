@@ -1,10 +1,20 @@
 import React, { useContext } from 'react';
+import validator from 'validator';
 import {
   Row, Column, TextInput
 } from '@carbon/react';
 
-import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import ReadOnlyInput from '../../ReadOnlyInput';
+
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
+import { GenWorthValType } from '../../../views/Seedlot/SeedlotReview/definitions';
+import { isFloatWithinRange } from '../../../utils/NumberUtils';
+
+import {
+  GEN_WORTH_ERR_MSG, MAX_DECIMAL_DIGITS,
+  MAX_VALUE_GEN_WORTH, MIN_VALUE_GEN_WORTH
+} from './constants';
+
 
 type UnrelatedGenWorthProps = {
   validGenWorth: Array<string> | undefined;
@@ -13,13 +23,33 @@ type UnrelatedGenWorthProps = {
 
 const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) => {
   const {
-    isCalculatingPt, genWorthVals, setGenWorthVal
+    isCalculatingPt, genWorthVals, setGenWorthInputObj
   } = useContext(ClassAContext);
 
   // validGenWorth can be undefiend
   if (!validGenWorth) {
     return null;
   }
+
+  const handleInput = (key: keyof GenWorthValType, value: string | null) => {
+    const newObj = structuredClone(genWorthVals[key]);
+
+    newObj.value = value ?? '';
+
+    if (value) {
+      let isValid = isFloatWithinRange(value, MIN_VALUE_GEN_WORTH, MAX_VALUE_GEN_WORTH);
+      if (isValid) {
+        isValid = validator.isDecimal(value, { decimal_digits: `0,${MAX_DECIMAL_DIGITS}` });
+      }
+      newObj.isInvalid = !isValid;
+
+      if (!isValid) {
+        newObj.errMsg = GEN_WORTH_ERR_MSG;
+      }
+    }
+
+    setGenWorthInputObj(key, newObj);
+  };
 
   return (
     <Row>
@@ -45,8 +75,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.ad.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('ad', e.target.value);
+                        handleInput('ad', e.target.value);
                       }}
+                      invalid={genWorthVals.ad.isInvalid}
+                      invalidText={genWorthVals.ad.errMsg}
                     />
                   )
               }
@@ -76,8 +108,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.dfs.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('dfs', e.target.value);
+                        handleInput('dfs', e.target.value);
                       }}
+                      invalid={genWorthVals.dfs.isInvalid}
+                      invalidText={genWorthVals.dfs.errMsg}
                     />
                   )
               }
@@ -107,8 +141,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.dfu.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('dfu', e.target.value);
+                        handleInput('dfu', e.target.value);
                       }}
+                      invalid={genWorthVals.dfu.isInvalid}
+                      invalidText={genWorthVals.dfu.errMsg}
                     />
                   )
               }
@@ -138,8 +174,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.dfw.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('dfw', e.target.value);
+                        handleInput('dfw', e.target.value);
                       }}
+                      invalid={genWorthVals.dfw.isInvalid}
+                      invalidText={genWorthVals.dfw.errMsg}
                     />
                   )
               }
@@ -169,8 +207,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.dsb.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('dsb', e.target.value);
+                        handleInput('dsb', e.target.value);
                       }}
+                      invalid={genWorthVals.dsb.isInvalid}
+                      invalidText={genWorthVals.dsb.errMsg}
                     />
                   )
               }
@@ -200,8 +240,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.dsc.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('dsc', e.target.value);
+                        handleInput('dsc', e.target.value);
                       }}
+                      invalid={genWorthVals.dsc.isInvalid}
+                      invalidText={genWorthVals.dsc.errMsg}
                     />
                   )
               }
@@ -231,8 +273,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.dsg.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('dsg', e.target.value);
+                        handleInput('dsg', e.target.value);
                       }}
+                      invalid={genWorthVals.dsg.isInvalid}
+                      invalidText={genWorthVals.dsg.errMsg}
                     />
                   )
               }
@@ -262,8 +306,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.gvo.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('gvo', e.target.value);
+                        handleInput('gvo', e.target.value);
                       }}
+                      invalid={genWorthVals.gvo.isInvalid}
+                      invalidText={genWorthVals.gvo.errMsg}
                     />
                   )
               }
@@ -293,8 +339,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.iws.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('iws', e.target.value);
+                        handleInput('iws', e.target.value);
                       }}
+                      invalid={genWorthVals.iws.isInvalid}
+                      invalidText={genWorthVals.iws.errMsg}
                     />
                   )
               }
@@ -324,8 +372,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.wdu.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('wdu', e.target.value);
+                        handleInput('wdu', e.target.value);
                       }}
+                      invalid={genWorthVals.wdu.isInvalid}
+                      invalidText={genWorthVals.wdu.errMsg}
                     />
                   )
               }
@@ -355,8 +405,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.wve.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('wve', e.target.value);
+                        handleInput('wve', e.target.value);
                       }}
+                      invalid={genWorthVals.wve.isInvalid}
+                      invalidText={genWorthVals.wve.errMsg}
                     />
                   )
               }
@@ -386,8 +438,10 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                       defaultValue={genWorthVals.wwd.value}
                       onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setGenWorthVal('wwd', e.target.value);
+                        handleInput('wwd', e.target.value);
                       }}
+                      invalid={genWorthVals.wwd.isInvalid}
+                      invalidText={genWorthVals.wwd.errMsg}
                     />
                   )
               }
