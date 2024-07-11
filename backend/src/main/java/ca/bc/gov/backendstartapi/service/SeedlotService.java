@@ -257,14 +257,8 @@ public class SeedlotService {
     SparLog.info("Seedlot number {} found", seedlotNumber);
 
     String clientId = seedlotEntity.getApplicantClientNumber();
-    Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
 
-    if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
-      if (!userInfo.get().roles().contains("SPAR_TSC_ADMIN")) {
-        SparLog.info("User has no access to seedlot {}, request denied.", seedlotNumber);
-        throw new ClientIdForbiddenException();
-      }
-    }
+    loggedUserService.verifySeedlotAccessPrivilege(clientId);
 
     SeedlotDto seedlotDto = new SeedlotDto();
 
