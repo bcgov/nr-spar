@@ -38,12 +38,12 @@ export const cards = [
     isEmpty: false,
     emptyTitle: '',
     emptyDescription: '',
-    displayForAdmin: false,
+    displayForAdmin: true,
     displayForNonAdmin: true
   },
   {
     id: '4',
-    image: 'Sprout',
+    image: 'Farm_01',
     header: 'Review seedlots',
     description: 'Check all seedlots that are waiting for approval',
     link: ROUTES.TSC_SEEDLOTS_TABLE,
