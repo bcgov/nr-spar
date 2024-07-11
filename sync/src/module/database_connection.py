@@ -222,6 +222,7 @@ class database_connection(object):
         logger.debug('Starting UPSERT statement in Oracle Database')
         logger.debug('run_mode is '+run_mode)
         onconflictstatement = ""
+        rows_affected = 0
 
         i = 0
         for row in dataframe.itertuples():
@@ -268,9 +269,10 @@ class database_connection(object):
             logger.debug(f'---Executing statement for row {i}')
             logger.debug(sql_text)
             result = self.conn.execute(text(sql_text), params)
+            rows_affected = result.rowcount
         
         self.commit()  # If everything is ok, a commit will be executed.
-        return result.rowcount  # Number of rows affected
+        return rows_affected
 
 def convertTypesToOracle(dataframe):
     dataframe = dataframe.fillna(numpy.nan).replace([numpy.nan], [None])
