@@ -538,7 +538,7 @@ public class SeedlotEndpoint {
     return saveSeedlotFormService.getFormClassA(seedlotNumber);
   }
 
-  /** Retreive only the progress_status column from the form progress table. */
+  /** Retrieve only the progress_status column from the form progress table. */
   @GetMapping("/{seedlotNumber}/a-class-form-progress/status")
   @Operation(
       summary = "Retrieve the progress status of an a-class reg form.",

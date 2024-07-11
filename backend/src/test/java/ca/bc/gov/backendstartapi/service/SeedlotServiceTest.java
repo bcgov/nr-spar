@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -348,6 +349,10 @@ class SeedlotServiceTest {
   @DisplayName("findSeedlotsByUserClientIdForbidden")
   void getUserSeedlots_forbidden_shouldFail() {
     when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
+    doThrow(ClientIdForbiddenException.class)
+        .when(loggedUserService)
+        .verifySeedlotAccessPrivilege(any());
 
     Assertions.assertThrows(
         ClientIdForbiddenException.class,
