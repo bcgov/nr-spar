@@ -112,14 +112,16 @@ public class LoggedUserService {
   public void verifySeedlotAccessPrivilege(String clientId) {
     Optional<UserInfo> userInfo = getLoggedUserInfo();
 
+    if (userInfo.isEmpty()) {
+      throw new UserNotFoundException();
+    }
+
     if (userInfo.get().roles().contains("SPAR_TSC_ADMIN")) {
       SparLog.info("Request allowed, TSC Admin role found!");
       return;
     }
 
-    boolean isForbidden = userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId);
-
-    if (isForbidden) {
+    if (!userInfo.get().clientIds().contains(clientId)) {
       SparLog.info("Request denied due to user not having client id: {}", clientId);
       throw new ClientIdForbiddenException();
     }
