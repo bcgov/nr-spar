@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.bc.gov.oracleapi.entity.ParentTreeEntity;
+import ca.bc.gov.oracleapi.extensions.AbstractTestContainerIntegrationTest;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,8 @@ import org.springframework.test.context.jdbc.Sql;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Sql(scripts = {"classpath:scripts/ParentTreeRepository.sql"})
-class ParentTreeRepositoryTest {
+@DisplayName("Repository Test | ParentTreeRepository")
+class ParentTreeRepositoryTest extends AbstractTestContainerIntegrationTest {
 
   @Autowired private ParentTreeRepository parentTreeRepository;
 

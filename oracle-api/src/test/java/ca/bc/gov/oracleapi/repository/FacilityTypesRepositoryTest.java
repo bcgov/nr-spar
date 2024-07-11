@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.repository;
 
 import ca.bc.gov.oracleapi.entity.FacilityTypes;
+import ca.bc.gov.oracleapi.extensions.AbstractTestContainerIntegrationTest;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -14,7 +15,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-class FacilityTypesRepositoryTest {
+@DisplayName("Repository Test | FacilityTypesRepository")
+class FacilityTypesRepositoryTest extends AbstractTestContainerIntegrationTest {
 
   @Autowired private FacilityTypesRepository facilityTypesRepository;
 

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.bc.gov.oracleapi.entity.ParentTreeGeneticQuality;
+import ca.bc.gov.oracleapi.extensions.AbstractTestContainerIntegrationTest;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +18,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-class ParentTreeGeneticQualityRepositoryTest {
+@DisplayName("Repository Test | ParentTreeGeneticQualityRepository")
+class ParentTreeGeneticQualityRepositoryTest extends AbstractTestContainerIntegrationTest {
 
   @Autowired private ParentTreeGeneticQualityRepository parentTreeGeneticQualityRepository;
 

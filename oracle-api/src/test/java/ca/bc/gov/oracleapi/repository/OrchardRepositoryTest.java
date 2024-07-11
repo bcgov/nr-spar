@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.repository;
 
 import ca.bc.gov.oracleapi.entity.OrchardEntity;
 import ca.bc.gov.oracleapi.entity.OrchardLotTypeCode;
+import ca.bc.gov.oracleapi.extensions.AbstractTestContainerIntegrationTest;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +17,8 @@ import org.springframework.test.context.jdbc.Sql;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Sql(scripts = {"classpath:scripts/OrchardRepositoryTest.sql"})
-class OrchardRepositoryTest {
+@DisplayName("Repository Test | OrchardRepository")
+class OrchardRepositoryTest extends AbstractTestContainerIntegrationTest {
 
   @Autowired private OrchardRepository orchardRepository;
 

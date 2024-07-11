@@ -1,6 +1,7 @@
 package ca.bc.gov.oracleapi.repository;
 
 import ca.bc.gov.oracleapi.entity.FundingSource;
+import ca.bc.gov.oracleapi.extensions.AbstractTestContainerIntegrationTest;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -14,7 +15,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-class FundingSourceRepositoryTest {
+@DisplayName("Repository Test | FundingSourceRepository")
+class FundingSourceRepositoryTest extends AbstractTestContainerIntegrationTest {
 
   @Autowired private FundingSourceRepository fundingSourceRepository;
 
