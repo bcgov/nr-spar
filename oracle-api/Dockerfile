@@ -19,8 +19,8 @@ ENV LC_ALL=en_CA.UTF-8
 
 # Setup package/archive and supporting files
 WORKDIR /usr/share/service/
-COPY --from=build /app/target/*.jar /app/*.class ./artifacts/
-COPY entrypoint.sh /
+COPY --from=build /app/target/*.jar /app/*.class entrypoint.sh ./artifacts/
+
 # RUN mkdir config dump public && \
 #     chmod -R g+w . && \
 #     chmod g+x dockerfile-entrypoint.sh && \
@@ -32,4 +32,4 @@ EXPOSE 8091
 HEALTHCHECK CMD curl -f http://localhost:8091/actuator/health | grep '"status":"UP"'
 
 # Start
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/usr/share/service/artifacts/entrypoint.sh"]
