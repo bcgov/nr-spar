@@ -20,6 +20,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(SeedlotStatusEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class SeedlotStatusEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -34,7 +35,6 @@ class SeedlotStatusEndpointTest {
 
   @Test
   @DisplayName("getAllSeedlotStatus")
-  @WithMockUser(roles = "user_read")
   void getAllSeedlotStatus() throws Exception {
 
     CodeDescriptionDto firstMethod = new CodeDescriptionDto("APP", "Approved");
@@ -52,12 +52,12 @@ class SeedlotStatusEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType("application/json"))
-        .andExpect(jsonPath("$[0].code").value(firstMethod.code()))
-        .andExpect(jsonPath("$[0].description").value(firstMethod.description()))
-        .andExpect(jsonPath("$[1].code").value(secondMethod.code()))
-        .andExpect(jsonPath("$[1].description").value(secondMethod.description()))
-        .andExpect(jsonPath("$[2].code").value(thirdMethod.code()))
-        .andExpect(jsonPath("$[2].description").value(thirdMethod.description()))
+        .andExpect(jsonPath("$[0].code").value(firstMethod.getCode()))
+        .andExpect(jsonPath("$[0].description").value(firstMethod.getDescription()))
+        .andExpect(jsonPath("$[1].code").value(secondMethod.getCode()))
+        .andExpect(jsonPath("$[1].description").value(secondMethod.getDescription()))
+        .andExpect(jsonPath("$[2].code").value(thirdMethod.getCode()))
+        .andExpect(jsonPath("$[2].description").value(thirdMethod.getDescription()))
         .andReturn();
   }
 }

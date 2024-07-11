@@ -1,9 +1,9 @@
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import { SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
 
-export const InitialSeedlotFormData: SeedlotRegFormType = {
+export const InitialSeedlotRegFormData: SeedlotRegFormType = {
   client: {
-    id: 'applicant-info-combobox',
+    id: 'applicant-info-input',
     isInvalid: false,
     value: EmptyMultiOptObj
   },

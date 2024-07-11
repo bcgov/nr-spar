@@ -39,15 +39,19 @@ public class SeedlotParentTreeSmpMixService {
    * @param seedlotFormParentTreeDtoList A List of {@link SeedlotFormParentTreeSmpDto}
    */
   public void saveSeedlotFormStep5(
-      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
+      boolean canDelete) {
     SparLog.info("Saving SeedlotParentTreeSmpMix for seedlot number {}", seedlot.getId());
 
-    addSeedlotPtSmpMix(seedlot, seedlotFormParentTreeDtoList);
+    addSeedlotPtSmpMix(seedlot, seedlotFormParentTreeDtoList, canDelete);
   }
 
   // Form Step 5 Seedlot Parent Tree SMP Fix related
   private void addSeedlotPtSmpMix(
-      Seedlot seedlot, List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList) {
+      Seedlot seedlot,
+      List<SeedlotFormParentTreeSmpDto> seedlotFormParentTreeDtoList,
+      boolean canDelete) {
     if (seedlotFormParentTreeDtoList.isEmpty()) {
       SparLog.info(
           "No new records to be inserted on the SeedlotParentTreeSmpMix table for seedlot number"

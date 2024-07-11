@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.4</version>
+    <version>3.3.0</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>ca.bc.gov</groupId>
@@ -99,11 +99,6 @@
         </plugins>
       </build>
     </profile>
-
-    <!-- Docker compose native profile -->
-    <profile>
-      <id>docker-compose</id>
-    </profile>
   </profiles>
 
   <dependencies>
@@ -152,11 +147,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
+
+    <!-- Geospatial -->
     <dependency>
-    <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-docker-compose</artifactId>
-      <version>3.2.4</version>
-      <optional>true</optional>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-spatial</artifactId>
+        <version>${hibernate.version}</version>
     </dependency>
 
     <!-- Database -->
@@ -179,14 +175,11 @@
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
-      <!--<version>9.18.0</version>-->
     </dependency>
 
-    <!-- Functionalities -->
     <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi-ooxml</artifactId>
-      <version>5.2.5</version>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
     </dependency>
 
     <!-- Testing -->
@@ -198,6 +191,7 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- Documentation -->
@@ -207,11 +201,21 @@
       <version>2.5.0</version>
     </dependency>
 
+    <!-- Prometheus and Metrics -->
+     <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
   </dependencies>
+    
 
   <build>
     <plugins>
-      
+
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -231,7 +235,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.2.5</version>
+        <version>3.3.0</version>
         <executions>
           <execution>
             <id>integration-tests</id>
@@ -254,7 +258,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
+        <version>3.3.0</version>
         <configuration>
           <argLine>@{argLine} -Xmx1024m</argLine>
           <skipTests>${skip.unit.tests}</skipTests>
@@ -276,6 +280,7 @@
             <exclude>**/entity/**</exclude>
             <exclude>**/exception/**</exclude>
             <exclude>**/filter/**</exclude>
+            <exclude>**/interceptor/**</exclude>
             <exclude>**/response/**</exclude>
             <exclude>**/*$*Builder*</exclude>
             <exclude>**/RestExceptionEndpoint.*</exclude>
@@ -379,7 +384,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.6.3</version>
+        <version>3.7.0</version>
         <configuration>
           <source>17</source>
           <doctitle>Javadoc Documentation for ${project.name} ${project.version}</doctitle>
@@ -390,7 +395,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>default-cli</id>
@@ -430,12 +435,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>3.4.0</version>
         <dependencies>
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.15.0</version>
+            <version>10.17.0</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -462,7 +467,7 @@
     <finalName>nr-spar-backend</finalName>
   </build>
 
-  <!-- 
+  <!--
     Issue:
     - spring-boot-starter-oauth2-client (v3.1.1-latest) depends on
       - spring-security-oauth2-client (v6.1.1-latest) depends on
@@ -482,7 +487,7 @@
       <dependency>
         <groupId>com.nimbusds</groupId>
         <artifactId>nimbus-jose-jwt</artifactId>
-        <version>9.37.3</version>
+        <version>9.40</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

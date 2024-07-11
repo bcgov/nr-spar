@@ -91,7 +91,7 @@ class SeedlotParentTreeServiceTest {
     when(seedlotParentTreeRepository.saveAll(any())).thenReturn(List.of(spt));
 
     List<SeedlotParentTree> list =
-        seedlotParentTreeService.saveSeedlotFormStep5(seedlot, List.of(formStep5));
+        seedlotParentTreeService.saveSeedlotFormStep5(seedlot, List.of(formStep5), false);
 
     Assertions.assertFalse(list.isEmpty());
     Assertions.assertEquals(1, list.size());
@@ -121,7 +121,8 @@ class SeedlotParentTreeServiceTest {
     SeedlotFormParentTreeSmpDto formStep5Two = createFormDto(4024);
 
     List<SeedlotParentTree> list =
-        seedlotParentTreeService.saveSeedlotFormStep5(seedlot, List.of(formStep5, formStep5Two));
+        seedlotParentTreeService.saveSeedlotFormStep5(
+            seedlot, List.of(formStep5, formStep5Two), false);
 
     Assertions.assertFalse(list.isEmpty());
     Assertions.assertEquals(1, list.size());
@@ -151,7 +152,7 @@ class SeedlotParentTreeServiceTest {
     SeedlotFormParentTreeSmpDto formStep5Two = createFormDto(4024);
 
     List<SeedlotParentTree> list =
-        seedlotParentTreeService.saveSeedlotFormStep5(seedlot, List.of(formStep5Two));
+        seedlotParentTreeService.saveSeedlotFormStep5(seedlot, List.of(formStep5Two), false);
 
     Assertions.assertFalse(list.isEmpty());
     Assertions.assertEquals(1, list.size());

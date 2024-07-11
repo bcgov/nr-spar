@@ -10,8 +10,8 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,17 +29,10 @@ class SeedlotOrchardServiceTest {
 
   private SeedlotOrchardService seedlotOrchardService;
 
-  private SeedlotFormOrchardDto createFormDto(int size) {
-    List<String> orchardIdList = new ArrayList<>(size);
-    orchardIdList.add("405");
-    if (size > 1) {
-      size--;
-      for (int i = 0; i < size; i++) {
-        orchardIdList.add(String.format("%d", (i + 1 + size)));
-      }
-    }
+  private SeedlotFormOrchardDto createFormDto() {
+
     return new SeedlotFormOrchardDto(
-        orchardIdList, "F3", "M3", false, true, false, 22, new BigDecimal("45.6"), "true");
+        "405", "406", "F3", "M3", false, true, false, 22, new BigDecimal("45.6"), "true");
   }
 
   @BeforeEach
@@ -58,8 +51,8 @@ class SeedlotOrchardServiceTest {
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
     Seedlot seedlot = new Seedlot("54321");
-    SeedlotFormOrchardDto formStep4 = createFormDto(1);
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4);
+    SeedlotFormOrchardDto formStep4 = createFormDto();
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, false);
 
     Assertions.assertEquals(
         formStep4.femaleGameticMthdCode(), seedlot.getFemaleGameticContributionMethod());
@@ -84,7 +77,7 @@ class SeedlotOrchardServiceTest {
   void saveSeedlotFormStep4_updateSeedlotAdd_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
 
-    SeedlotOrchard so = new SeedlotOrchard(seedlot, "405");
+    SeedlotOrchard so = new SeedlotOrchard(seedlot, true, "405");
     when(seedlotOrchardRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(so));
 
     AuditInformation audit = new AuditInformation("userId");
@@ -92,8 +85,8 @@ class SeedlotOrchardServiceTest {
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    SeedlotFormOrchardDto formStep4 = createFormDto(2);
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4);
+    SeedlotFormOrchardDto formStep4 = createFormDto();
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
         formStep4.femaleGameticMthdCode(), seedlot.getFemaleGameticContributionMethod());
@@ -118,7 +111,7 @@ class SeedlotOrchardServiceTest {
   void saveSeedlotFormStep4_updateSeedlotEqual_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
 
-    SeedlotOrchard so = new SeedlotOrchard(seedlot, "400");
+    SeedlotOrchard so = new SeedlotOrchard(seedlot, true, "400");
     when(seedlotOrchardRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(so));
 
     AuditInformation audit = new AuditInformation("userId");
@@ -126,8 +119,8 @@ class SeedlotOrchardServiceTest {
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    SeedlotFormOrchardDto formStep4 = createFormDto(2);
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4);
+    SeedlotFormOrchardDto formStep4 = createFormDto();
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
         formStep4.femaleGameticMthdCode(), seedlot.getFemaleGameticContributionMethod());
@@ -152,7 +145,7 @@ class SeedlotOrchardServiceTest {
   void saveSeedlotFormStep4_updateSeedlotRemove_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
 
-    SeedlotOrchard so = new SeedlotOrchard(seedlot, "400");
+    SeedlotOrchard so = new SeedlotOrchard(seedlot, false, "400");
     when(seedlotOrchardRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(so));
 
     AuditInformation audit = new AuditInformation("userId");
@@ -160,8 +153,8 @@ class SeedlotOrchardServiceTest {
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
 
-    SeedlotFormOrchardDto formStep4 = createFormDto(1);
-    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4);
+    SeedlotFormOrchardDto formStep4 = createFormDto();
+    seedlotOrchardService.saveSeedlotFormStep4(seedlot, formStep4, true);
 
     Assertions.assertEquals(
         formStep4.femaleGameticMthdCode(), seedlot.getFemaleGameticContributionMethod());
@@ -179,5 +172,38 @@ class SeedlotOrchardServiceTest {
         formStep4.contaminantPollenBv(), seedlot.getPollenContaminantBreedingValue());
     Assertions.assertEquals(
         formStep4.pollenContaminationMthdCode(), seedlot.getPollenContaminationMethodCode());
+  }
+
+  @Test
+  @DisplayName("Get Primary Seedlot Orchard should succeed")
+  void getPrimarySeedlotOrchard_shouldSucceed() {
+    String seedlotNumber = "54321";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+
+    SeedlotOrchard seedlotOrchard = new SeedlotOrchard(seedlot, true, "555");
+
+    when(seedlotOrchardRepository.findBySeedlot_idAndIsPrimaryTrue(seedlotNumber))
+        .thenReturn(Optional.of(seedlotOrchard));
+
+    Optional<SeedlotOrchard> testSeedlotOrchard =
+        seedlotOrchardService.getPrimarySeedlotOrchard(seedlotNumber);
+
+    Assertions.assertTrue(testSeedlotOrchard.isPresent());
+
+    Assertions.assertEquals(seedlotOrchard, testSeedlotOrchard.get());
+  }
+
+  @Test
+  @DisplayName("Get Primary Seedlot Orchard should return empty if not found")
+  void getPrimarySeedlotOrchard_ReturnEmpty() {
+    String seedlotNumber = "54321";
+
+    when(seedlotOrchardRepository.findBySeedlot_idAndIsPrimaryTrue(seedlotNumber))
+        .thenReturn(Optional.empty());
+
+    Optional<SeedlotOrchard> testSeedlotOrchard =
+        seedlotOrchardService.getPrimarySeedlotOrchard(seedlotNumber);
+
+    Assertions.assertTrue(testSeedlotOrchard.isEmpty());
   }
 }

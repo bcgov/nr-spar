@@ -18,7 +18,7 @@ parameters:
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
-  - name: ORG_NAME
+  - name: ORG
     description: Organization name
     value: bcgov
   - name: PVC_MOUNT_PATH
@@ -36,11 +36,21 @@ parameters:
     description: Volume space available for data, e.g. 512Mi, 2Gi.
     displayName: Database Volume Capacity
     value: 256Mi
-  - name: MIN_REPLICAS
-    description: Dummy value for workflow convenience
-  - name: MAX_REPLICAS
-    description: Dummy value for workflow convenience
+  - name: DB_PASSWORD
+    description: Password for the PostgreSQL connection user
+    required: true
 objects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-${COMPONENT}
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      database-name: ${NAME}
+      database-password: ${DB_PASSWORD}
+      database-port: "5432"
+      database-user: ${NAME}
   - kind: PersistentVolumeClaim
     apiVersion: v1
     metadata:
@@ -54,42 +64,17 @@ objects:
         requests:
           storage: ${DB_PVC_SIZE}
       storageClassName: netapp-file-standard
-  - kind: ImageStream
-    apiVersion: v1
-    metadata:
-      name: ${NAME}-${ZONE}-${COMPONENT}
-      labels:
-        app: ${NAME}-${ZONE}
-    spec:
-      lookupPolicy:
-        local: false
-      tags:
-        - name: latest
-          from:
-            kind: DockerImage
-            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${TAG}
-          referencePolicy:
-            type: Local
-  - kind: DeploymentConfig
-    apiVersion: v1
+  - kind: Deployment
+    apiVersion: apps/v1
     metadata:
       name: ${NAME}-${ZONE}-${COMPONENT}
       labels:
         app: ${NAME}-${ZONE}
     spec:
       replicas: 1
-      triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - ${NAME}
-            from:
-              kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:latest
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
         type: Recreate
         recreateParams:
@@ -100,18 +85,15 @@ objects:
           name: ${NAME}-${ZONE}-${COMPONENT}
           labels:
             app: ${NAME}-${ZONE}
-            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+            deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           volumes:
             - name: ${NAME}-${ZONE}-${COMPONENT}
               persistentVolumeClaim:
                 claimName: ${NAME}-${ZONE}-${COMPONENT}
           containers:
-            - name: ${NAME}
-              image: ${NAME}-${ZONE}-${COMPONENT}:latest
-              ports:
-                - containerPort: 5432
-                  protocol: TCP
+            - name: ${NAME}-${ZONE}
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -119,30 +101,23 @@ objects:
                 limits:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
+              ports:
+                - containerPort: 5432
+                  protocol: TCP
               readinessProbe:
                 exec:
                   command:
                     - /usr/bin/env
                     - bash
-                    - "-c"
-                    - psql -q -U $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-                successThreshold: 1
-                failureThreshold: 5
-                initialDelaySeconds: 10
-                periodSeconds: 15
-                timeoutSeconds: 10
+                    - '-ce'
+                    - exec pg_isready -U $POSTGRES_USER -d "dbname=$POSTGRES_DB" -h 127.0.0.1 -p 5432
               livenessProbe:
                 exec:
                   command:
                     - /usr/bin/env
                     - bash
-                    - "-c"
-                    - psql -q $POSTGRES_USER -d $POSTGRES_DB -c 'SELECT 1'
-                successThreshold: 1
-                failureThreshold: 5
-                initialDelaySeconds: 10
-                periodSeconds: 15
-                timeoutSeconds: 10
+                    - '-ce'
+                    - exec pg_isready -U $POSTGRES_USER -d "dbname=$POSTGRES_DB" -h 127.0.0.1 -p 5432
               env:
                 - name: POSTGRES_DB
                   valueFrom:
@@ -183,6 +158,6 @@ objects:
           protocol: TCP
           targetPort: 5432
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        deployment: ${NAME}-${ZONE}-${COMPONENT}
       sessionAffinity: None
       type: ClusterIP

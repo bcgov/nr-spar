@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import {
-  NumberInput,
+  TextInput,
   FlexGrid,
   Column,
   ComboBox,
@@ -13,15 +13,13 @@ import { TrashCan } from '@carbon/icons-react';
 import ApplicantAgencyFields from '../../../ApplicantAgencyFields';
 
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../../types/FormInputType';
+import { EmptyBooleanInputType } from '../../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 
 import { validatePerc } from '../utils';
 
-import {
-  SingleOwnerForm,
-  NumStepperVal
-} from '../definitions';
+import { SingleOwnerForm } from '../definitions';
 import { inputText, DEFAULT_INDEX, agencyFieldsProps } from '../constants';
 import { FilterObj, filterInput } from '../../../../utils/FilterUtils';
 
@@ -30,19 +28,19 @@ import './styles.scss';
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
   deleteAnOwner: Function,
-  agencyOptions: Array<MultiOptionsObj>,
   defaultAgency: MultiOptionsObj,
   defaultCode: string,
   fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
   methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>,
   checkPortionSum: Function,
   setState: Function,
-  readOnly?: boolean
+  readOnly?: boolean,
+  isReview?: boolean
 }
 
 const SingleOwnerInfo = ({
-  ownerInfo, agencyOptions, defaultAgency, defaultCode, fundingSourcesQuery,
-  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState, readOnly
+  ownerInfo, defaultAgency, defaultCode, fundingSourcesQuery,
+  methodsOfPaymentQuery, deleteAnOwner, checkPortionSum, setState, readOnly, isReview
 }: SingleOwnerInfoProps) => {
   const [ownerPortionInvalidText, setOwnerPortionInvalidText] = useState<string>(
     inputText.portion.invalidText
@@ -50,7 +48,7 @@ const SingleOwnerInfo = ({
   const [reservedInvalidText, setReservedInvalidText] = useState<string>('');
   const [surplusInvalidText, setSurplusPortionInvalidText] = useState<string>('');
 
-  const colsClass = ownerInfo.id === DEFAULT_INDEX ? 'default-owner-col' : 'other-owners-col';
+  const colsClass = ownerInfo.id === DEFAULT_INDEX && !isReview ? 'default-owner-col' : 'other-owners-col';
 
   const setAgencyAndCode = (
     isDefault: BooleanInputType,
@@ -142,12 +140,12 @@ const SingleOwnerInfo = ({
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
             <ApplicantAgencyFields
+              showCheckbox={ownerInfo.id === DEFAULT_INDEX && !isReview}
               checkboxId={ownerInfo.id === DEFAULT_INDEX ? 'default-owner-checkbox' : ''}
-              isDefault={ownerInfo.useDefaultAgencyInfo}
+              isDefault={isReview ? EmptyBooleanInputType : ownerInfo.useDefaultAgencyInfo}
               agency={ownerInfo.ownerAgency}
               locationCode={ownerInfo.ownerCode}
               fieldsProps={agencyFieldsProps}
-              agencyOptions={agencyOptions}
               defaultAgency={defaultAgency}
               defaultCode={defaultCode}
               setAgencyAndCode={
@@ -157,102 +155,64 @@ const SingleOwnerInfo = ({
                   locationCode: StringInputType
                 ) => setAgencyAndCode(isDefault, agency, locationCode)
               }
-              showCheckbox={ownerInfo.id === DEFAULT_INDEX}
-              readOnly={readOnly ?? false}
+              readOnly={readOnly && !isReview}
               isFormSubmitted={readOnly}
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
-            <NumberInput
+            <TextInput
               id={ownerInfo.ownerPortion.id}
               name="ownerPortion"
-              label={inputText.portion.label}
+              labelText={inputText.portion.label}
               defaultValue={ownerInfo.ownerPortion.value}
-              hideSteppers
-              max={100}
-              min={0}
               onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                 // The guard is needed here because onClick also trigger the onChange method
                 // but it does not pass in any value
-                if (e?.target?.name && e?.target?.value) {
+                if (e?.target?.name) {
                   handleOwnerPortion(e.target.value);
                 }
               }}
               invalid={ownerInfo.ownerPortion.isInvalid}
               invalidText={ownerPortionInvalidText}
-              onClick={
-                (
-                  _e: React.MouseEvent<HTMLButtonElement>,
-                  target: NumStepperVal | undefined
-                ) => {
-                  // A guard is needed here because any click on the input will emit a
-                  //   click event, not necessarily the + - buttons
-                  if (target?.value) {
-                    handleOwnerPortion(String(target.value));
-                  }
-                }
-              }
-              readOnly={readOnly}
+              readOnly={readOnly && !isReview}
             />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
             <div className="reserved-perc-container">
               <div className="reserved-surplus-input">
-                <NumberInput
+                <TextInput
                   id={ownerInfo.reservedPerc.id}
+                  type="number"
                   name="reservedPerc"
-                  label={inputText.reserved.label}
+                  labelText={inputText.reserved.label}
                   value={ownerInfo.reservedPerc.value}
-                  hideSteppers
-                  max={100}
-                  min={0}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    if (e?.target?.name && e?.target?.value) {
+                    if (e?.target?.name) {
                       handleReservedAndSurplus(e.target.name, e.target.value);
                     }
                   }}
+                  onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                   invalid={ownerInfo.reservedPerc.isInvalid}
                   invalidText={reservedInvalidText}
-                  onClick={
-                    (
-                      _e: React.MouseEvent<HTMLButtonElement>,
-                      target: NumStepperVal | undefined
-                    ) => {
-                      if (target?.value) {
-                        handleReservedAndSurplus('reservedPerc', String(target.value));
-                      }
-                    }
-                  }
-                  readOnly={readOnly}
+                  readOnly={readOnly && !isReview}
                 />
               </div>
               <div className="reserved-surplus-input">
-                <NumberInput
+                <TextInput
                   id={ownerInfo.surplusPerc.id}
+                  type="number"
                   name="surplusPerc"
-                  label={inputText.surplus.label}
+                  labelText={inputText.surplus.label}
                   value={ownerInfo.surplusPerc.value}
-                  hideSteppers
-                  max={100}
-                  min={0}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    if (e?.target?.name && e?.target?.value) {
+                    if (e?.target?.name) {
                       handleReservedAndSurplus(e.target.name, e.target.value);
                     }
                   }}
+                  onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
                   invalid={ownerInfo.surplusPerc.isInvalid}
                   invalidText={surplusInvalidText}
-                  onClick={
-                    (
-                      _e: React.MouseEvent<HTMLButtonElement>,
-                      target: NumStepperVal | undefined
-                    ) => {
-                      if (target?.value) {
-                        handleReservedAndSurplus('surplusPerc', String(target.value));
-                      }
-                    }
-                  }
-                  readOnly={readOnly}
+                  readOnly={readOnly && !isReview}
                 />
               </div>
             </div>
@@ -279,7 +239,7 @@ const SingleOwnerInfo = ({
                     onChange={(e: ComboBoxEvent) => handleFundingSource(e.selectedItem)}
                     invalid={ownerInfo.fundingSource.isInvalid}
                     invalidText={inputText.funding.invalidText}
-                    readOnly={readOnly}
+                    readOnly={readOnly && !isReview}
                   />
                 )
             }
@@ -304,14 +264,14 @@ const SingleOwnerInfo = ({
                     onChange={(e: ComboBoxEvent) => handleMethodOfPayment(e.selectedItem)}
                     invalid={ownerInfo.methodOfPayment.isInvalid}
                     invalidText={inputText.payment.invalidText}
-                    readOnly={readOnly}
+                    readOnly={readOnly && !isReview}
                   />
 
                 )
             }
           </Column>
         </Row>
-        {(!readOnly) && (
+        {((!readOnly) || (readOnly && isReview)) && (
           <Row>
             {
               ownerInfo.id !== DEFAULT_INDEX

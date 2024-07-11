@@ -1,5 +1,5 @@
 ### Builder
-FROM ghcr.io/graalvm/native-image:ol8-java17-22 AS build
+FROM ghcr.io/graalvm/native-image:22.3.3 AS build
 
 # Copy
 WORKDIR /app
@@ -8,11 +8,11 @@ COPY src ./src
 COPY .mvn/ ./.mvn
 
 # Build
-RUN ./mvnw package -Pnative -DskipTests -Dspring-boot.run.profiles=prod
+RUN ./mvnw -B package -Pnative -DskipTests -Dspring-boot.run.profiles=prod
 
 
 ### Deployer
-FROM debian:bookworm-slim AS deploy
+FROM gcr.io/distroless/java-base:nonroot AS deploy
 ARG PORT=8090
 
 # Copy

@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(OrchardEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class OrchardEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -34,7 +35,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getParentTreeGeneticQualityDataSuccessTest")
-  @WithMockUser(roles = "user_read")
   void getParentTreeGeneticQualityDataSuccessTest() throws Exception {
     String orchardId = "123";
 
@@ -57,7 +57,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getParentTreeGeneticQualityDataNotFoundTest")
-  @WithMockUser(roles = "user_read")
   void getParentTreeGeneticQualityDataNotFoundTest() throws Exception {
     String orchardId = "222";
 
@@ -77,7 +76,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getParentTreeGeneticQualityDataNoSpuTest")
-  @WithMockUser(roles = "user_read")
   void getParentTreeGeneticQualityDataNoSpuTest() throws Exception {
     String orchardId = "222";
 
@@ -97,12 +95,35 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("findOrchardsWithVegCodeSuccessTest")
-  @WithMockUser(roles = "user_read")
   void findOrchardsWithVegCodeTest() throws Exception {
     String vegCode = "PLI";
 
-    OrchardDto firstOrchard = new OrchardDto("123", "smOrchard", vegCode, 'S', "Seed lot", "PRD");
-    OrchardDto secondOrchard = new OrchardDto("456", "xlOrchard", vegCode, 'S', "Seed lot", "TEST");
+    OrchardDto firstOrchard =
+        new OrchardDto(
+            "123",
+            "smOrchard",
+            vegCode,
+            'S',
+            "Seed lot",
+            "PRD",
+            "ICH",
+            "Interior Cedar -- Hemlock",
+            "dw",
+            '4',
+            5);
+    OrchardDto secondOrchard =
+        new OrchardDto(
+            "456",
+            "xlOrchard",
+            vegCode,
+            'S',
+            "Seed lot",
+            "TEST",
+            "IDF",
+            "Interior Douglas-fir",
+            "mk",
+            '1',
+            5);
 
     List<OrchardDto> testList =
         new ArrayList<>() {
@@ -124,15 +145,24 @@ class OrchardEndpointTest {
         .andExpect(jsonPath("$[0].id").value("123"))
         .andExpect(jsonPath("$[0].vegetationCode").value(vegCode))
         .andExpect(jsonPath("$[0].name").value("smOrchard"))
+        .andExpect(jsonPath("$[0].becZoneCode").value("ICH"))
+        .andExpect(jsonPath("$[0].becZoneDescription").value("Interior Cedar -- Hemlock"))
+        .andExpect(jsonPath("$[0].becSubzoneCode").value("dw"))
+        .andExpect(jsonPath("$[0].variant").value("4"))
+        .andExpect(jsonPath("$[0].becVersionId").value(5))
         .andExpect(jsonPath("$[1].id").value("456"))
         .andExpect(jsonPath("$[1].vegetationCode").value(vegCode))
         .andExpect(jsonPath("$[1].name").value("xlOrchard"))
+        .andExpect(jsonPath("$[1].becZoneCode").value("IDF"))
+        .andExpect(jsonPath("$[1].becZoneDescription").value("Interior Douglas-fir"))
+        .andExpect(jsonPath("$[1].becSubzoneCode").value("mk"))
+        .andExpect(jsonPath("$[1].variant").value("1"))
+        .andExpect(jsonPath("$[1].becVersionId").value(5))
         .andReturn();
   }
 
   @Test
   @DisplayName("findOrchardsWithVegCodeNotFoundTest")
-  @WithMockUser(roles = "user_read")
   void findOrchardsWithVegCodeNotFoundTest() throws Exception {
     String vegCode = "BEEF";
 
@@ -150,7 +180,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getAllParentTreeByVegCodeTest")
-  @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeTest() throws Exception {
     String vegCode = "PLI";
 
@@ -179,7 +208,6 @@ class OrchardEndpointTest {
 
   @Test
   @DisplayName("getAllParentTreeByVegCodeErrorTest")
-  @WithMockUser(roles = "user_read")
   void getAllParentTreeByVegCodeErrorTest() throws Exception {
     String vegCode = "LAMB";
 

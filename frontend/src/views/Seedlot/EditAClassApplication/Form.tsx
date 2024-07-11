@@ -19,7 +19,7 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
 import { SeedlotType } from '../../../types/SeedlotType';
 import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
-import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
@@ -32,6 +32,7 @@ import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
 import { addParamToPath } from '../../../utils/PathUtils';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 
 import { getBreadcrumbs } from './utils';
 
@@ -50,7 +51,8 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
+    select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -58,7 +60,8 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
   const seedlotQuery = useQuery({
     queryKey: ['seedlots', seedlotNumber],
     queryFn: () => getSeedlotById(seedlotNumber ?? ''),
-    enabled: vegCodeQuery.isFetched
+    enabled: vegCodeQuery.isFetched,
+    select: (data) => data.seedlot
   });
 
   useEffect(() => {
@@ -74,7 +77,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', applicantClientNumber],
-    queryFn: () => getForestClientByNumber(applicantClientNumber!),
+    queryFn: () => getForestClientByNumberOrAcronym(applicantClientNumber!),
     enabled: !!applicantClientNumber,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
@@ -113,13 +116,23 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
     ) => patchSeedlotApplicationInfo(seedlotNumber ?? '', payload),
     onSuccess: () => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlotNumber ?? '')),
     onError: (err: AxiosError) => {
-      toast.error(
-        <ErrorToast
-          title="Save failure"
-          subtitle={`An unexpected error occurred while saving your edits. Please try again, and if the issue persists, contact support. ${err.code}: ${err.message}`}
-        />,
-        ErrToastOption
-      );
+      if (err.response?.status === 409) {
+        toast.error(
+          <ErrorToast
+            title="Save failure"
+            subtitle="Unable to update Seedlot applicant information! The Seedlot record was updated by another user. Please refresh your page and try again!"
+          />,
+          ErrToastOption
+        );
+      } else {
+        toast.error(
+          <ErrorToast
+            title="Save failure"
+            subtitle={`An unexpected error occurred while saving your edits. Please try again, and if the issue persists, contact support. ${err.code}: ${err.message}`}
+          />,
+          ErrToastOption
+        );
+      }
     }
   });
 
@@ -150,7 +163,8 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
       applicantEmailAddress: applicantData.email.value,
       seedlotSourceCode: applicantData.sourceCode.value,
       toBeRegistrdInd: applicantData.willBeRegistered.value,
-      bcSourceInd: applicantData.isBcSource.value
+      bcSourceInd: applicantData.isBcSource.value,
+      revisionCount: seedlotQuery.data?.revisionCount
     });
   };
 

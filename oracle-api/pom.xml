@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.4</version>
+		<version>3.3.0</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ca.bc.gov</groupId>
@@ -39,6 +39,8 @@
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 		<sonar.organization>bcgov-sonarcloud</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <oci.revision>${project.version}</oci.revision>
+    <hibernate.version>6.4.4.Final</hibernate.version>
 	</properties>
 
 	<profiles>
@@ -65,6 +67,39 @@
 				<skip.unit.tests>true</skip.unit.tests>
 			</properties>
 		</profile>
+
+    <!-- cloud native -->
+    <profile>
+      <id>native</id>
+      <properties>
+        <build.profile.id>native</build.profile.id>
+        <skip.integration.tests>true</skip.integration.tests>
+        <skip.unit.tests>true</skip.unit.tests>
+        <jacoco.skip>true</jacoco.skip>
+      </properties>
+      <build>
+        <plugins>
+          <!--
+            GraalVM: Cloud Native support
+            More: https://docs.spring.io/spring-boot/docs/current/reference/html/native-image.html
+            Even more: https://graalvm.github.io/native-build-tools/latest/maven-plugin.html
+          -->
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>build-native</id>
+                <goals>
+                  <goal>compile-no-fork</goal>
+                </goals>
+                <phase>package</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 	</profiles>
 
 	<dependencies>
@@ -151,6 +186,29 @@
 
 	<build>
 		<plugins>
+    <!--
+        Hibernate: Configs for Hibernate Cloud Native compatibility
+        More: https://vladmihalcea.com/maven-gradle-hibernate-enhance-plugin/
+      -->
+      <plugin>
+        <groupId>org.hibernate.orm.tooling</groupId>
+        <artifactId>hibernate-enhance-maven-plugin</artifactId>
+        <version>${hibernate.version}</version>
+        <executions>
+          <execution>
+            <id>enhance</id>
+            <goals>
+              <goal>enhance</goal>
+            </goals>
+            <configuration>
+              <enableLazyInitialization>true</enableLazyInitialization>
+              <enableDirtyTracking>true</enableDirtyTracking>
+              <enableAssociationManagement>true</enableAssociationManagement>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -170,7 +228,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>3.2.5</version>
+				<version>3.3.0</version>
 				<executions>
 					<execution>
 						<id>integration-tests</id>
@@ -193,7 +251,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.2.5</version>
+				<version>3.3.0</version>
 				<configuration>
 					<argLine>@{argLine} -Xmx1024m</argLine>
 					<skipTests>${skip.unit.tests}</skipTests>
@@ -212,6 +270,7 @@
 					<excludes>
 						<exclude>**/config/**</exclude>
             <exclude>**/filter/**</exclude>
+            <exclude>**/interceptor/**</exclude>
 						<exclude>**/*$*Builder*</exclude>
 						<exclude>**/BackendStartApiApplication.*</exclude>
 					</excludes>
@@ -313,7 +372,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.6.3</version>
+				<version>3.7.0</version>
 				<configuration>
 					<source>17</source>
 					<doctitle>Javadoc Documentation for ${project.name} ${project.version}</doctitle>
@@ -324,7 +383,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.4.1</version>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<id>default-cli</id>
@@ -364,12 +423,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.0</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>10.15.0</version>
+						<version>10.17.0</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -416,7 +475,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.37.3</version>
+				<version>9.40</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

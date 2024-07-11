@@ -1,11 +1,52 @@
 {
-  "applicantAgency": {
-    "name": "00012797 - Ministry Of Forests - MOF",
-    "number": "30",
+  "pli": {
+    "agencyAcronym": "WFP",
+    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyNumber": "01",
     "email": "test@gov.bc.ca",
-    "invalidEmail": "test.com.br"
+    "species": "PLI - Lodgepole pine",
+    "source": "tpt",
+    "toBeRegistered": true,
+    "withinBc": true
   },
-  "seedlotInformation": {
-    "species": "PLI - Lodgepole pine"
+  "cw": {
+    "agencyAcronym": "WFP",
+    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyNumber": "01",
+    "email": "apo@gov.bc.ca",
+    "species": "CW - Western redcedar",
+    "source": "tpt",
+    "toBeRegistered": false,
+    "withinBc": true
+  },
+  "dr": {
+    "agencyAcronym": "WFP",
+    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyNumber": "01",
+    "email": "beane@gov.bc.ca",
+    "species": "DR - Red alder",
+    "source": "tpt",
+    "toBeRegistered": false,
+    "withinBc": false
+  },
+  "ep": {
+    "agencyAcronym": "WFP",
+    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyNumber": "01",
+    "email": "cidaw@gov.bc.ca",
+    "species": "EP - Paper birch",
+    "source": "tpt",
+    "toBeRegistered": true,
+    "withinBc": true
+  },
+  "fdc": {
+    "agencyAcronym": "WFP",
+    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyNumber": "01",
+    "email": "dha@gov.bc.ca",
+    "species": "FDC - Coastal Douglas-fir",
+    "source": "tpt",
+    "toBeRegistered": false,
+    "withinBc": false
   }
 }

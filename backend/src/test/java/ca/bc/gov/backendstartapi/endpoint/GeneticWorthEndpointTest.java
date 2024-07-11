@@ -1,21 +1,15 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.exception.NoGeneticWorthException;
 import ca.bc.gov.backendstartapi.service.GeneticWorthService;
-import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +21,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(GeneticWorthEndpoint.class)
+@WithMockUser(username = "SPARTest", roles = "SPAR_NONMINISTRY_ORCHARD")
 class GeneticWorthEndpointTest {
 
   @Autowired private MockMvc mockMvc;
@@ -39,73 +34,8 @@ class GeneticWorthEndpointTest {
 
   private static final String JSON = "application/json";
 
-  private String stringifySuccess() {
-    return """
-      [
-        {"parentTreeNumber": "129",
-        "coneCount": 13,
-        "pollenCount": 48.5,
-        "gvo": 18,
-        "wwd": -2.2},
-        {"parentTreeNumber": "212",
-        "coneCount": 8.5,
-        "pollenCount": 49,
-        "gvo": 20,
-        "wwd": 1.7},
-        {"parentTreeNumber": "300",
-        "coneCount": 129.5,
-        "pollenCount": 93,
-        "gvo": 15,
-        "wwd": -0.8},
-        {"parentTreeNumber": "3141",
-        "coneCount": 71.20833333,
-        "pollenCount": 35,
-        "gvo": 23,
-        "wwd": -2.1},
-        {"parentTreeNumber": "3144",
-        "coneCount": 42.541666667,
-        "pollenCount": 92.5,
-        "gvo": 25,
-        "wwd": -0.6},
-        {"parentTreeNumber": "3169",
-        "coneCount": 30.083333333,
-        "pollenCount": 27,
-        "gvo": 19,
-        "wwd": -2.3},
-        {"parentTreeNumber": "3210",
-        "coneCount": 6,
-        "pollenCount": 0,
-        "gvo": 17,
-        "wwd": 1.1},
-        {"parentTreeNumber": "3245",
-        "coneCount": 152,
-        "pollenCount": 154.5,
-        "gvo": 19,
-        "wwd": -2.3}
-      ]
-        """;
-  }
-
-  private String stringifyBadRequest() {
-    return """
-      [
-        {"parentTreeNumber": "",
-        "coneCount": 13,
-        "pollenCount": 48.5,
-        "gvo": 18,
-        "wwd": -2.2},
-        {"parentTreeNumber": "",
-        "coneCount": 8.5,
-        "pollenCount": 49,
-        "gvo": 20,
-        "wwd": 1.7},
-      ]
-      """;
-  }
-
   @Test
   @DisplayName("getAllGeneticWorthTest")
-  @WithMockUser(roles = "user_read")
   void getAllGeneticWorthTest() throws Exception {
 
     CodeDescriptionDto firstMethod =
@@ -124,16 +54,15 @@ class GeneticWorthEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType("application/json"))
-        .andExpect(jsonPath("$[0].code").value(firstMethod.code()))
-        .andExpect(jsonPath("$[0].description").value(firstMethod.description()))
-        .andExpect(jsonPath("$[1].code").value(secondMethod.code()))
-        .andExpect(jsonPath("$[1].description").value(secondMethod.description()))
+        .andExpect(jsonPath("$[0].code").value(firstMethod.getCode()))
+        .andExpect(jsonPath("$[0].description").value(firstMethod.getDescription()))
+        .andExpect(jsonPath("$[1].code").value(secondMethod.getCode()))
+        .andExpect(jsonPath("$[1].description").value(secondMethod.getDescription()))
         .andReturn();
   }
 
   @Test
   @DisplayName("getGeneticWorthByCodeTest")
-  @WithMockUser(roles = "user_read")
   void getGeneticWorthByCodeTest() throws Exception {
     var testCode = "AD";
     var testDescription = "Animal browse resistance (deer)";
@@ -158,7 +87,6 @@ class GeneticWorthEndpointTest {
 
   @Test
   @DisplayName("getGeneticWorthByCodeEmptyTest")
-  @WithMockUser(roles = "user_read")
   void getGeneticWorthByCodeEmptyTest() throws Exception {
     var testCode = "WWE";
     when(geneticWorthService.getGeneticWorthByCode(testCode))
@@ -170,71 +98,6 @@ class GeneticWorthEndpointTest {
                 .header(CONTENT_HEADER, JSON)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
-        .andReturn();
-  }
-
-  @Test
-  @DisplayName("calculateAll_NoData")
-  @WithMockUser(roles = "user_write")
-  void calculateAll_NoData() throws Exception {
-    GeneticWorthSummaryDto summaryDto = new GeneticWorthSummaryDto(List.of(), BigDecimal.ZERO);
-    when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
-
-    mockMvc
-        .perform(
-            post("/api/genetic-worth/calculate-all")
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON)
-                .content(stringifySuccess()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.geneticTraits", hasSize(0)))
-        .andReturn();
-  }
-
-  @Test
-  @DisplayName("calculateAll_BadRequest")
-  @WithMockUser(roles = "user_write")
-  void calculateAll_BadRequest() throws Exception {
-    mockMvc
-        .perform(
-            post("/api/genetic-worth/calculate-all")
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON)
-                .content(stringifyBadRequest()))
-        .andExpect(status().isBadRequest())
-        .andReturn();
-  }
-
-  @Test
-  @DisplayName("calculateAll_Success")
-  @WithMockUser(roles = "user_write")
-  void calculateAll_Success() throws Exception {
-    GeneticWorthTraitsDto gvoTrait =
-        new GeneticWorthTraitsDto("GVO", null, new BigDecimal("55"), new BigDecimal("67"));
-    GeneticWorthTraitsDto wwdTrait =
-        new GeneticWorthTraitsDto("WWD", null, new BigDecimal("56"), new BigDecimal("68"));
-    BigDecimal neValue = new BigDecimal("4.92586");
-    GeneticWorthSummaryDto summaryDto =
-        new GeneticWorthSummaryDto(List.of(gvoTrait, wwdTrait), neValue);
-    when(geneticWorthService.calculateGeneticWorth(any())).thenReturn(summaryDto);
-
-    mockMvc
-        .perform(
-            post("/api/genetic-worth/calculate-all")
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON)
-                .content(stringifySuccess()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.geneticTraits[0].traitCode").value("GVO"))
-        .andExpect(jsonPath("$.geneticTraits[0].calculatedValue").value("55"))
-        .andExpect(jsonPath("$.geneticTraits[0].testedParentTreePerc").value("67"))
-        .andExpect(jsonPath("$.geneticTraits[1].traitCode").value("WWD"))
-        .andExpect(jsonPath("$.geneticTraits[1].calculatedValue").value("56"))
-        .andExpect(jsonPath("$.geneticTraits[1].testedParentTreePerc").value("68"))
-        .andExpect(jsonPath("$.neValue").value(neValue.toString()))
         .andReturn();
   }
 }

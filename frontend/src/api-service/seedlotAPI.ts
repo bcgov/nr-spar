@@ -1,13 +1,14 @@
+import RevisionCountDto from '../types/RevisionCountDto';
 import { SeedlotPatchPayloadType, SeedlotRegPayloadType } from '../types/SeedlotRegistrationTypes';
 import {
-  SeedlotAClassFullResponseType, SeedlotAClassSubmitType, SeedlotProgressPayloadType,
-  SeedlotType, SeedlotsReturnType
+  RichSeedlotType, SeedlotAClassFullResponseType, SeedlotAClassSubmitType,
+  SeedlotProgressPayloadType, SeedlotsReturnType
 } from '../types/SeedlotType';
 import ApiConfig from './ApiConfig';
 import api from './api';
 
 export const putAClassSeedlot = (seedlotNumber: string, payload: SeedlotAClassSubmitType) => {
-  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-submission`;
+  const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-submission`;
   return api.put(url, payload);
 };
 
@@ -26,8 +27,8 @@ export const postFile = (
   return api.post(url, formData, true);
 };
 
-export const getSeedlotByUser = (userId: string, pageNumber: number, pageSize: number) => {
-  const url = `${ApiConfig.seedlots}/users/${userId}?page=${pageNumber}&size=${pageSize}`;
+export const getSeedlotByClientId = (clientId: string, pageNumber: number, pageSize: number) => {
+  const url = `${ApiConfig.seedlots}/clients/${clientId}?page=${pageNumber}&size=${pageSize}`;
   return api.get(url).then((res): SeedlotsReturnType => (
     {
       seedlots: res.data,
@@ -38,7 +39,7 @@ export const getSeedlotByUser = (userId: string, pageNumber: number, pageSize: n
 
 export const getSeedlotById = (seedlotNumber: string) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}`;
-  return api.get(url).then((res): SeedlotType => res.data);
+  return api.get(url).then((res): RichSeedlotType => res.data);
 };
 
 export const patchSeedlotApplicationInfo = (
@@ -54,7 +55,7 @@ export const putAClassSeedlotProgress = (
   payload: SeedlotProgressPayloadType
 ) => {
   const url = `${ApiConfig.seedlots}/${seedlotNumber}/a-class-form-progress`;
-  return api.put(url, payload);
+  return api.put(url, payload).then((res): RevisionCountDto => res.data);
 };
 
 export const getAClassSeedlotProgressStatus = (seedlotNumber: string) => {

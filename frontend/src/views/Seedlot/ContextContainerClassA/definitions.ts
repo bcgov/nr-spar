@@ -1,3 +1,4 @@
+import { QueryObserverResult } from '@tanstack/react-query';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
@@ -5,9 +6,12 @@ import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage
 import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { RowDataDictType, NotifCtrlType, AllParentTreeMap } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import { MutationStatusType } from '../../../types/QueryStatusType';
+import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 
 export type ParentTreeStepDataObj = {
-  tableRowData: RowDataDictType, // able row data used in Cone & Pollen and the SMP Success tabs
+  tableRowData: RowDataDictType, // table row data used in Cone & Pollen and the SMP Success tabs
   allParentTreeData: AllParentTreeMap // Contains all parent tree numbers under a species
   mixTabData: RowDataDictType, // table row data used exclusively for SMP mix tab
   notifCtrl: NotifCtrlType
@@ -47,8 +51,33 @@ export type SaveTooltipProps = {
   mutationStatus: MutationStatusType;
   lastSaveTimestamp: string;
   handleSaveBtn: Function;
+  reloadFormDraft: () => Promise<QueryObserverResult<SeedlotProgressPayloadType, unknown>>
 }
 
 export type RegFormProps = {
   cleanParentTables: Function
+};
+
+export type ClientAgenciesByCode = {
+  [key: string]: MultiOptionsObj
+};
+
+export type AreaOfUseDataType = {
+  primarySpz: OptionsInputType,
+  additionalSpzList: OptionsInputType[],
+  minElevation: StringInputType,
+  maxElevation: StringInputType,
+  minLatDeg: StringInputType,
+  maxLatDeg: StringInputType,
+  minLatMinute: StringInputType,
+  maxLatMinute: StringInputType,
+  minLatSec: StringInputType,
+  maxLatSec: StringInputType,
+  minLongDeg: StringInputType,
+  maxLongDeg: StringInputType,
+  minLongMinute: StringInputType,
+  maxLongMinute: StringInputType,
+  minLongSec: StringInputType,
+  maxLongSec: StringInputType,
+  comment: StringInputType
 };

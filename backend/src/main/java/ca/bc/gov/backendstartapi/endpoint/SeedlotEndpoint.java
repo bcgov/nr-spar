@@ -1,16 +1,18 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotCreateDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotCreateResponseDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
@@ -93,6 +95,7 @@ public class SeedlotEndpoint {
   @PostMapping(
       path = "/parent-trees-contribution/cone-pollen-count-table/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ResponseEntity<List<ConeAndPollenCount>> handleConeAndPollenCountTableUpload(
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
@@ -130,6 +133,7 @@ public class SeedlotEndpoint {
   @PostMapping(
       path = "/parent-trees-contribution/smp-calculation-table/upload",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public ResponseEntity<List<SmpMixVolume>> handleSmpCalculationTableUpload(
       @RequestParam("file")
           @Parameter(description = "The text file to be uploaded. It must contain a CSV table")
@@ -161,7 +165,7 @@ public class SeedlotEndpoint {
    *
    * @param createDto A {@link SeedlotCreateDto} containig all required field to get a new
    *     registration started.
-   * @return A {@link SeedlotCreateResponseDto} with all created values.
+   * @return A {@link SeedlotStatusResponseDto} with all created values.
    */
   @PostMapping(consumes = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @Operation(
@@ -191,51 +195,71 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public ResponseEntity<SeedlotCreateResponseDto> createSeedlot(
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public ResponseEntity<SeedlotStatusResponseDto> createSeedlot(
       @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Body containing minimum required fields to create a seedlot",
               required = true)
           @RequestBody
           @Valid
           SeedlotCreateDto createDto) {
-    SeedlotCreateResponseDto response = seedlotService.createSeedlot(createDto);
+    SeedlotStatusResponseDto response = seedlotService.createSeedlot(createDto);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   /**
-   * Resource to fetch all seedlots to a given user id.
+   * Resource to fetch all seedlots to a given client ID.
    *
-   * @param userId user identification to fetch seedlots to
+   * @param clientId client id to fetch seedlots to
    * @return A {@link List} of {@link Seedlot} populated or empty
    */
-  @GetMapping("/users/{userId}")
+  @GetMapping("/clients/{clientId}")
   @CrossOrigin(exposedHeaders = "X-TOTAL-COUNT")
   @Operation(
-      summary = "Fetch all seedlots registered by a given user.",
-      description = "Returns a paginated list containing the seedlots",
+      summary = "Fetch all seedlots registered by a given client id.",
+      description =
+          """
+          Returns a paginated list containing the seedlots. Note that the requested client id
+          should be present on the user organization.
+          """,
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "A list containing found Seedlots or an empty list"),
+            description = "A list containing the found Seedlots or an empty list"),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public ResponseEntity<List<Seedlot>> getUserSeedlots(
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public ResponseEntity<List<Seedlot>> getSeedlotByClientId(
       @PathVariable
           @Parameter(
-              name = "userId",
+              name = "clientId",
               in = ParameterIn.PATH,
-              description = "User's identification",
-              example = "dev-abcdef123456@idir")
-          String userId,
+              description = "Seedlot applicant's Forest Client ID",
+              required = true,
+              example = "12797")
+          String clientId,
       @RequestParam(value = "page", required = false, defaultValue = "0") int page,
       @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
-    Optional<Page<Seedlot>> optionalResult = seedlotService.getUserSeedlots(userId, page, size);
-    List<Seedlot> result = optionalResult.isEmpty() ? List.of() : optionalResult.get().getContent();
-    String totalCount =
-        optionalResult.isEmpty() ? "0" : String.valueOf(optionalResult.get().getTotalElements());
+    while (clientId.length() < 8) {
+      clientId = "0" + clientId;
+    }
+    Optional<Page<Seedlot>> optionalResult =
+        seedlotService.getSeedlotByClientId(clientId, page, size);
+    String totalCount = "0";
+    List<Seedlot> result = List.of();
+
+    if (!optionalResult.isEmpty()) {
+      totalCount = String.valueOf(optionalResult.get().getTotalElements());
+      result = optionalResult.get().getContent();
+    }
+
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set("X-TOTAL-COUNT", totalCount);
     return ResponseEntity.ok().headers(responseHeaders).body(result);
@@ -265,7 +289,8 @@ public class SeedlotEndpoint {
             responseCode = "404",
             description = "Could not find information for the given seedlot number")
       })
-  public Seedlot getSingleSeedlotInfo(
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public SeedlotDto getSingleSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -278,12 +303,12 @@ public class SeedlotEndpoint {
   }
 
   /**
-   * Get full information from a single seedlot, including parent trees and
-   * calculation results, divided by registration steps.
+   * Get full information from a single seedlot, including parent trees and calculation results,
+   * divided by registration steps.
    *
    * @param seedlotNumber the seedlot number to fetch the info for
-   * @return A {@link SeedlotAclassFormDto} with all the current information for
-   *         the seedlot and parent tree data.
+   * @return A {@link SeedlotAclassFormDto} with all the current information for the seedlot and
+   *     parent tree data.
    */
   @GetMapping("/{seedlotNumber}/a-class-full-form")
   @Operation(
@@ -308,6 +333,7 @@ public class SeedlotEndpoint {
             responseCode = "404",
             description = "Could not find information for the given seedlot number")
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public SeedlotAclassFormDto getFullSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
@@ -320,11 +346,10 @@ public class SeedlotEndpoint {
     return seedlotService.getAclassSeedlotFormInfo(seedlotNumber);
   }
 
-
   /**
    * PATCH an entry on the Seedlot table.
    *
-   * @param patchDto A {@link SeedlotApplicationPatchDto} containig all required field to get a new
+   * @param patchDto A {@link SeedlotApplicationPatchDto} containing all required field to get a new
    *     registration started.
    * @return A {@link Seedlot} with all updated values.
    */
@@ -359,6 +384,7 @@ public class SeedlotEndpoint {
             description = "Access token is missing or invalid",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public Seedlot patchApplicantAndSeedlotInfo(
       @Parameter(
               name = "seedlotNumber",
@@ -375,18 +401,18 @@ public class SeedlotEndpoint {
           @Valid
           SeedlotApplicationPatchDto patchDto) {
 
-    return seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
+    return seedlotService.patchApplicantInfo(seedlotNumber, patchDto);
   }
 
   /**
    * Saves the Seedlot submit form once submitted on step 6.
    *
    * @param form A {@link SeedlotFormSubmissionDto} containing all the form information
-   * @return A {@link SeedlotCreateResponseDto} containing the seedlot number and status
+   * @return A {@link SeedlotStatusResponseDto} containing the seedlot number and status
    */
-  @PutMapping("/{seedlotNumber}/a-class-form-submission")
+  @PutMapping("/{seedlotNumber}/a-class-submission")
   @Operation(
-      summary = "Saves the Seedlot form when submitted or edited",
+      summary = "Saves the Seedlot form when submitted",
       description =
           "This API is responsible for receiving the entire seedlot form, once submitted or"
               + " edited.")
@@ -408,9 +434,14 @@ public class SeedlotEndpoint {
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Data conflict while saving, usually caused by existing rows in table",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public ResponseEntity<SeedlotCreateResponseDto> submitSeedlotForm(
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public ResponseEntity<SeedlotStatusResponseDto> submitSeedlotForm(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -420,7 +451,8 @@ public class SeedlotEndpoint {
           @PathVariable
           String seedlotNumber,
       @RequestBody SeedlotFormSubmissionDto form) {
-    SeedlotCreateResponseDto createDto = seedlotService.submitSeedlotForm(seedlotNumber, form);
+    SeedlotStatusResponseDto createDto =
+        seedlotService.updateSeedlotWithForm(seedlotNumber, form, false, "SUB");
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 
@@ -438,13 +470,22 @@ public class SeedlotEndpoint {
               + " for form submission.")
   @ApiResponses(
       value = {
-        @ApiResponse(responseCode = "204", description = "Successfully saved or updated."),
+        @ApiResponse(responseCode = "200", description = "Successfully saved or updated."),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Data conflict while saving",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
-  public ResponseEntity<Void> saveFormProgressClassA(
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
+  public RevisionCountDto saveFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -456,13 +497,13 @@ public class SeedlotEndpoint {
           String seedlotNumber,
       @RequestBody SaveSeedlotFormDtoClassA data) {
 
-    saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
+    RevisionCountDto revCountDto = saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
 
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return revCountDto;
   }
 
   /** Retrieves the saved Seedlot reg form. */
-  @GetMapping("{seedlotNumber}/a-class-form-progress")
+  @GetMapping("/{seedlotNumber}/a-class-form-progress")
   @Operation(
       summary = "Retrieve the progress and data of an a-class reg form.",
       description = "This endpoint retrieves the progress of an A-class registration form")
@@ -470,14 +511,19 @@ public class SeedlotEndpoint {
       value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
         @ApiResponse(
-            responseCode = "404",
-            description = "Seedlot form progress not found",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot form progress not found",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public SaveSeedlotFormDtoClassA getFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
@@ -492,8 +538,8 @@ public class SeedlotEndpoint {
     return saveSeedlotFormService.getFormClassA(seedlotNumber);
   }
 
-  /** Retreive only the progress_status column from the form progress table. */
-  @GetMapping("{seedlotNumber}/a-class-form-progress/status")
+  /** Retrieve only the progress_status column from the form progress table. */
+  @GetMapping("/{seedlotNumber}/a-class-form-progress/status")
   @Operation(
       summary = "Retrieve the progress status of an a-class reg form.",
       description =
@@ -502,14 +548,19 @@ public class SeedlotEndpoint {
       value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
         @ApiResponse(
-            responseCode = "404",
-            description = "Seedlot form progress not found",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot form progress not found",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
+  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
   public JsonNode getFormProgressStatusClassA(
       @Parameter(
               name = "seedlotNumber",
@@ -521,43 +572,5 @@ public class SeedlotEndpoint {
           String seedlotNumber) {
 
     return saveSeedlotFormService.getFormStatusClassA(seedlotNumber);
-  }
-
-  /**
-   * Get all the seed plan zone information given a seedlot number.
-   *
-   * @param seedlotNumber the Seedlot id
-   * @return A list of {@link SeedPlanZoneDto} containing all records.
-   */
-  @GetMapping("/{seedlotNumber}/seed-plan-zone-data")
-  @Operation(
-      summary = "Get SPZ (Seed Plan Zone) data given a seedlot number.",
-      description = "Fetches all the seed plan zone information to a particular seedlot number")
-  @ApiResponses(
-      value = {
-        @ApiResponse(
-            responseCode = "200",
-            description =
-                "A list of `SeedPlanZoneDto` containing all the SPZ information if found."),
-        @ApiResponse(
-            responseCode = "404",
-            description = "If no seedlot record found, or if no Orchard Seedlot record found.",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Access token is missing or invalid",
-            content = @Content(schema = @Schema(implementation = Void.class)))
-      })
-  public List<SeedPlanZoneDto> getSeedPlanZoneData(
-      @Parameter(
-              name = "seedlotNumber",
-              in = ParameterIn.PATH,
-              description = "Seedlot number",
-              required = true,
-              schema = @Schema(type = "integer", format = "int64"))
-          @PathVariable
-          @NonNull
-          String seedlotNumber) {
-    return seedlotService.getSeedPlanZoneData(seedlotNumber);
   }
 }

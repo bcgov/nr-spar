@@ -109,7 +109,7 @@ public class SeedlotParentTreeGeneticQualityService {
    * @return A List of {@link SeedlotParentTreeGeneticQuality}
    */
   public List<SeedlotParentTreeGeneticQuality> getAllBySeedlotNumber(String seedlotNumber) {
-    return seedlotParentTreeGeneticQualityRepository
-        .findAllBySeedlotParentTree_Seedlot_id(seedlotNumber);
+    return seedlotParentTreeGeneticQualityRepository.findAllBySeedlotParentTree_Seedlot_id(
+        seedlotNumber);
   }
 }

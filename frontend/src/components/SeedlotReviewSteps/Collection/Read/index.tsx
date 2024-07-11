@@ -7,13 +7,12 @@ import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
-import { getForestClientByNumber } from '../../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
 import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 import getConeCollectionMethod from '../../../../api-service/coneCollectionMethodAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
 import { formatCollectionMethods } from '../utils';
 import GeoInfo from '../GeoInfo';
-import GenWorth from '../GenWorth';
 
 const CollectionReviewRead = () => {
   const {
@@ -25,7 +24,7 @@ const CollectionReviewRead = () => {
   const agencyQuery = useQuery(
     {
       queryKey: ['forest-clients', clientNumber],
-      queryFn: () => getForestClientByNumber(clientNumber!),
+      queryFn: () => getForestClientByNumberOrAcronym(clientNumber!),
       enabled: !!clientNumber
     }
   );
@@ -56,7 +55,7 @@ const CollectionReviewRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="applicant-and-seedlot-agency-loc-code"
-            label="Cone collector agency number"
+            label="Cone collector location code"
             value={allStepData.collectionStep.locationCode.value}
             showSkeleton={isFetchingData}
           />
@@ -126,7 +125,7 @@ const CollectionReviewRead = () => {
             value={
               formatCollectionMethods(
                 allStepData.collectionStep.selectedCollectionCodes.value,
-                coneCollectionMethodsQuery.data!
+                coneCollectionMethodsQuery.data
               )
             }
             showSkeleton={isFetchingData || coneCollectionMethodsQuery.isFetching}
@@ -146,12 +145,7 @@ const CollectionReviewRead = () => {
 
       <Divider />
 
-      <GeoInfo isRead />
-
-      <Divider />
-
-      <GenWorth isRead />
-
+      <GeoInfo />
     </FlexGrid>
   );
 };

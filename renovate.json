@@ -3,5 +3,15 @@
   "description": "Presets from https://github.com/bcgov/renovate-config",
   "extends": [
     "github>bcgov/renovate-config"
+  ],
+  "packageRules": [
+    {
+      "description": "Ignore vite-plugin-istanbul 6.0.0",
+      "matchCurrentVersion": "6.0.0",
+      "matchPackageNames": [
+        "vite-plugin-istanbul"
+      ],
+      "enabled": false
+    }
   ]
 }

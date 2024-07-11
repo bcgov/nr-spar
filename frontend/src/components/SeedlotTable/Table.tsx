@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import {
   TableHead,
   TableRow,
@@ -10,13 +11,16 @@ import {
 } from '@carbon/react';
 
 import StatusTag from '../StatusTag';
+import { getForestClientByNumberOrAcronym } from '../../api-service/forestClientsAPI';
 import { SeedlotDisplayType } from '../../types/SeedlotType';
-
-import { HeaderConfig } from './constants';
-import { sortByKey } from './utils';
-import { SeedlotDataTableProps } from './definitions';
+import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 import ROUTES from '../../routes/constants';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 import { addParamToPath } from '../../utils/PathUtils';
+
+import { ExclusiveAdminRows, HeaderConfig } from './constants';
+import { sortByKey } from './utils';
+import { HeaderObj, SeedlotDataTableProps } from './definitions';
 
 const SeedlotDataTable = (
   {
@@ -25,7 +29,8 @@ const SeedlotDataTable = (
     isSortable,
     showSearch,
     showPagination,
-    tablePagination
+    tablePagination,
+    isTscAdmin
   }: SeedlotDataTableProps
 ) => {
   const [sortThisHeader, setSortThisHeader] = useState<keyof SeedlotDisplayType | null>(null);
@@ -77,12 +82,33 @@ const SeedlotDataTable = (
     });
   };
 
+  const clientDataQuery = useQueries({
+    queries: seedlotData.map((seedlot) => ({
+      queryKey: ['forest-clients', seedlot.applicantAgency],
+      queryFn: () => getForestClientByNumberOrAcronym(seedlot.applicantAgency),
+      enable: isTscAdmin,
+      staleTime: THREE_HOURS,
+      cacheTime: THREE_HALF_HOURS
+    }))
+  });
+
+  const qc = useQueryClient();
+
+  const displayTableData = (seedlot: SeedlotDisplayType, curHeader: HeaderObj) => {
+    if (curHeader.id === 'applicantAgency' && clientDataQuery && clientDataQuery.every((client) => client.isSuccess)) {
+      const clientData: ForestClientType | undefined = qc.getQueryData(['forest-clients', seedlot.applicantAgency]);
+      return clientData?.clientName || seedlot[curHeader.id];
+    }
+    return seedlot[curHeader.id];
+  };
+
   return (
     <>
       {
         showSearch
           ? (
             <TableToolbarSearch
+              className={isTscAdmin ? 'tsc-admin-background' : ''}
               persistent
               placeholder="Search for seedlots"
               onChange={
@@ -96,7 +122,12 @@ const SeedlotDataTable = (
         <TableHead>
           <TableRow>
             {
-              HeaderConfig.map((header) => (
+              HeaderConfig.filter(
+                (header) => (
+                  isTscAdmin
+                    ? true
+                    : !ExclusiveAdminRows.includes(header.id))
+              ).map((header) => (
                 <TableHeader
                   key={header.id}
                   id={`seedlot-table-header-${header.id}`}
@@ -120,7 +151,12 @@ const SeedlotDataTable = (
                 onClick={() => navigate(addParamToPath(ROUTES.SEEDLOT_DETAILS, seedlot.seedlotNumber ?? ''))}
               >
                 {
-                  HeaderConfig.map((header) => (
+                  HeaderConfig.filter(
+                    (header) => (
+                      isTscAdmin
+                        ? true
+                        : !ExclusiveAdminRows.includes(header.id))
+                  ).map((header) => (
                     <TableCell
                       id={`seedlot-table-cell-${seedlot.seedlotNumber}-${header.id}`}
                       key={header.id}
@@ -128,7 +164,7 @@ const SeedlotDataTable = (
                       {
                         header.id === 'seedlotStatus'
                           ? <StatusTag type={seedlot.seedlotStatus} />
-                          : seedlot[header.id]
+                          : displayTableData(seedlot, header)
                       }
                     </TableCell>
                   ))

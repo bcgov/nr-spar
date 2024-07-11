@@ -20,11 +20,10 @@ import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../../types/Seedlo
 import { postSeedlot } from '../../../api-service/seedlotAPI';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
-import focusById from '../../../utils/FocusUtils';
 import ROUTES from '../../../routes/constants';
 
-import { InitialSeedlotFormData } from './constants';
-import { convertToPayload } from './utils';
+import { InitialSeedlotRegFormData } from './constants';
+import { convertToPayload, validateRegForm } from './utils';
 
 import './styles.scss';
 
@@ -33,7 +32,7 @@ const CreateAClass = () => {
   const [
     seedlotFormData,
     setSeedlotFormData
-  ] = useState<SeedlotRegFormType>(InitialSeedlotFormData);
+  ] = useState<SeedlotRegFormType>(InitialSeedlotRegFormData);
 
   const seedlotMutation = useMutation({
     mutationFn: (payload: SeedlotRegPayloadType) => postSeedlot(payload),
@@ -52,49 +51,14 @@ const CreateAClass = () => {
     })
   });
 
-  const setInputValidation = (inputName: keyof SeedlotRegFormType, isInvalid: boolean) => (
-    setSeedlotFormData((prevData) => ({
-      ...prevData,
-      [inputName]: {
-        ...prevData[inputName],
-        isInvalid
-      }
-    }))
-  );
-
   const validateAndCreateSeedlot = () => {
-    // Validate client
-    if (seedlotFormData.client.isInvalid || !seedlotFormData.client.value.code) {
-      setInputValidation('client', true);
-      focusById(seedlotFormData.client.id);
-      return;
-    }
-    // Validate location code
-    if (
-      seedlotFormData.locationCode.isInvalid
-      || !seedlotFormData.locationCode.value
-    ) {
-      setInputValidation('locationCode', true);
-      focusById(seedlotFormData.locationCode.id);
-      return;
-    }
-    // Validate email
-    if (seedlotFormData.email.isInvalid || !seedlotFormData.email.value) {
-      setInputValidation('email', true);
-      focusById(seedlotFormData.email.id);
-      return;
-    }
-    // Validate species
-    if (seedlotFormData.species.isInvalid || !seedlotFormData.species.value.code) {
-      setInputValidation('species', true);
-      focusById(seedlotFormData.species.id);
-      return;
-    }
-    // Source code, and the two booleans always have a default value so there's no need to check.
+    const isInvalid = validateRegForm(seedlotFormData, setSeedlotFormData);
 
     // Submit Seedlot.
-    const payload = convertToPayload(seedlotFormData);
-    seedlotMutation.mutate(payload);
+    if (isInvalid) {
+      const payload = convertToPayload(seedlotFormData);
+      seedlotMutation.mutate(payload);
+    }
   };
 
   return (
@@ -151,7 +115,7 @@ const CreateAClass = () => {
           <Button
             className="submit-button"
             renderIcon={DocumentAdd}
-            onClick={() => validateAndCreateSeedlot()}
+            onClick={validateAndCreateSeedlot}
           >
             Create seedlot number
           </Button>

@@ -31,7 +31,6 @@ test and deploy.
   - TypeScript
   - Context API
   - React Query
-  - MirageJS
   - React Testing Library
   - Jest
   - Cypress
@@ -54,7 +53,6 @@ head to http://localhost:3000.
 Be aware of the required environment variables:
 
 ```sh
-VITE_NRSPARWEBAPP_VERSION=dev
 VITE_SERVER_URL=http://localhost:8090
 VITE_USER_POOLS_ID='[pools-id-here]'
 VITE_USER_POOLS_WEB_CLIENT_ID='[pools-web-client-id-here]'

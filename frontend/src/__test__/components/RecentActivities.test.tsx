@@ -2,7 +2,6 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import RecentActivities from '../../components/RecentActivities';
-import '@testing-library/jest-dom';
 import makeServer from '../../mock-server/server';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -41,7 +40,7 @@ describe('Recent Activities component', () => {
     await waitFor(() => {
       const tabs = screen.getAllByRole('tab');
       expect(tabs[0].textContent).toEqual('Requests');
-      expect(tabs[1].textContent).toEqual('Files & Docs.');
+      expect(tabs[1].textContent).toEqual('Files & Docs');
 
       // Setting this small timeout so the component ends rendering
       // the loading status and render the content we want to test

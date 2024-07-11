@@ -1,0 +1,107 @@
+name: Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
+  schedule:
+    - cron: "0 11 * * 0" # 3 AM PST = 12 PM UDT, runs sundays
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Java CI
+    if: ${{ ! github.event.pull_request.draft }}
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        dir: [backend, oracle-api]
+        include:
+          - dir: backend
+            token: SONAR_BACKEND
+          - dir: oracle-api
+            token: SONAR_ORACLE_API
+    steps:
+      - uses: bcgov-nr/action-test-and-analyse-java@v1.0.2
+        with:
+          commands: mvn --no-transfer-progress clean compile verify package checkstyle:checkstyle -P all-tests
+          dir: ${{ matrix.dir }}
+          java-cache: maven
+          java-distribution: temurin
+          java-version: "17"
+          sonar_args:
+            -Dsonar.organization=bcgov-sonarcloud -Dsonar.projectKey=nr-spar_${{ matrix.dir }}
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/merged-test-report/jacoco.xml
+            -Dsonar.exclusions=**/config/**,*/dto/**,**/entity/**,**/exception/**,**/filter/**,**/interceptor/**,**/response/**,**/**Builder*,**/RestExceptionEndpoint.*,**/BackendStartApiApplication.*
+          sonar_token: ${{ secrets[matrix.token] }}
+
+  codeql:
+    name: Semantic Code Analysis
+    if: ${{ ! github.event.pull_request.draft }}
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize
+        uses: github/codeql-action/init@v3
+        with:
+          debug: true
+          languages: java,javascript
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+        # Build Java apps, JavaScript doesn't require
+      - name: Backend Build
+        working-directory: backend
+        run: mvn --update-snapshots -P prod clean package -Dmaven.test.skip
+
+        # Build Java apps, JavaScript doesn't require
+      - name: Oracle API Build
+        working-directory: oracle-api
+        run: mvn --update-snapshots package -Dmaven.test.skip
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  # https://github.com/marketplace/actions/aqua-security-trivy
+  trivy:
+    name: Security Scan
+    if: ${{ ! github.event.pull_request.draft }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.23.0
+        with:
+          format: "sarif"
+          output: "trivy-results.sarif"
+          ignore-unfixed: true
+          scan-type: "fs"
+          scanners: "vuln,secret,config"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  results:
+    name: Analysis Results
+    if: always() && (!failure()) && (!cancelled())
+    needs: [tests, codeql, trivy]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "Workflow completed successfully!"

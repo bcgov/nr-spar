@@ -3,9 +3,8 @@ package ca.bc.gov.backendstartapi.service;
 import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthSummaryDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
-import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsRequestDto;
+import ca.bc.gov.backendstartapi.dto.OrchardParentTreeValsDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
@@ -91,10 +90,12 @@ class GeneticWorthServiceTest {
 
     Assertions.assertEquals(testEntityList.size() - 1, resultList.size());
     Assertions.assertEquals(testDtoList.size(), resultList.size());
-    Assertions.assertEquals(testDtoList.get(0).code(), resultList.get(0).code());
-    Assertions.assertEquals(testDtoList.get(0).description(), resultList.get(0).description());
-    Assertions.assertEquals(testDtoList.get(1).code(), resultList.get(1).code());
-    Assertions.assertEquals(testDtoList.get(1).description(), resultList.get(1).description());
+    Assertions.assertEquals(testDtoList.get(0).getCode(), resultList.get(0).getCode());
+    Assertions.assertEquals(
+        testDtoList.get(0).getDescription(), resultList.get(0).getDescription());
+    Assertions.assertEquals(testDtoList.get(1).getCode(), resultList.get(1).getCode());
+    Assertions.assertEquals(
+        testDtoList.get(1).getDescription(), resultList.get(1).getDescription());
   }
 
   @Test
@@ -117,88 +118,116 @@ class GeneticWorthServiceTest {
 
     CodeDescriptionDto resultDto = geneticWorthService.getGeneticWorthByCode(testCode);
 
-    Assertions.assertEquals(testDto.code(), resultDto.code());
-    Assertions.assertEquals(testDto.description(), resultDto.description());
+    Assertions.assertEquals(testDto.getCode(), resultDto.getCode());
+    Assertions.assertEquals(testDto.getDescription(), resultDto.getDescription());
   }
 
   @Test
   @DisplayName("calculateGeneticWorth_Success")
   void calculateGeneticWorth_Success() {
-    List<GeneticWorthTraitsRequestDto> requestList = new ArrayList<>();
+    List<OrchardParentTreeValsDto> requestList = new ArrayList<>();
 
     // 129
     GeneticWorthTraitsDto dto129gvo = createDto("gvo", "18");
     GeneticWorthTraitsDto dto129wwd = createDto("wwd", "-2.2");
-    GeneticWorthTraitsRequestDto requestDto129 =
-        new GeneticWorthTraitsRequestDto(
-            "129", new BigDecimal("13"), new BigDecimal("48.5"), List.of(dto129gvo, dto129wwd));
+    OrchardParentTreeValsDto requestDto129 =
+        new OrchardParentTreeValsDto(
+            "1111",
+            "129",
+            new BigDecimal("13"),
+            new BigDecimal("48.5"),
+            23,
+            List.of(dto129gvo, dto129wwd));
     requestList.add(requestDto129);
 
     // 212
     GeneticWorthTraitsDto dto212gvo = createDto("gvo", "20");
     GeneticWorthTraitsDto dto212wwd = createDto("wwd", "1.7");
-    GeneticWorthTraitsRequestDto requestDto212 =
-        new GeneticWorthTraitsRequestDto(
-            "212", new BigDecimal("8.5"), new BigDecimal("49"), List.of(dto212gvo, dto212wwd));
+    OrchardParentTreeValsDto requestDto212 =
+        new OrchardParentTreeValsDto(
+            "22222",
+            "212",
+            new BigDecimal("8.5"),
+            new BigDecimal("49"),
+            11,
+            List.of(dto212gvo, dto212wwd));
     requestList.add(requestDto212);
 
     // 300
     GeneticWorthTraitsDto dto300gvo = createDto("gvo", "15");
     GeneticWorthTraitsDto dto300wwd = createDto("wwd", "-0.8");
-    GeneticWorthTraitsRequestDto requestDto300 =
-        new GeneticWorthTraitsRequestDto(
-            "300", new BigDecimal("129.5"), new BigDecimal("93"), List.of(dto300gvo, dto300wwd));
+    OrchardParentTreeValsDto requestDto300 =
+        new OrchardParentTreeValsDto(
+            "333333",
+            "300",
+            new BigDecimal("129.5"),
+            new BigDecimal("93"),
+            14,
+            List.of(dto300gvo, dto300wwd));
     requestList.add(requestDto300);
 
     // 3141
     GeneticWorthTraitsDto dto3141gvo = createDto("gvo", "23");
     GeneticWorthTraitsDto dto3141wwd = createDto("wwd", "-2.1");
-    GeneticWorthTraitsRequestDto requestDto3141 =
-        new GeneticWorthTraitsRequestDto(
+    OrchardParentTreeValsDto requestDto3141 =
+        new OrchardParentTreeValsDto(
+            "444444",
             "3141",
             new BigDecimal("71.20833333"),
             new BigDecimal("35"),
+            21,
             List.of(dto3141gvo, dto3141wwd));
     requestList.add(requestDto3141);
 
     // 3144
     GeneticWorthTraitsDto dto3144gvo = createDto("gvo", "25");
     GeneticWorthTraitsDto dto3144wwd = createDto("wwd", "-0.6");
-    GeneticWorthTraitsRequestDto requestDto3144 =
-        new GeneticWorthTraitsRequestDto(
+    OrchardParentTreeValsDto requestDto3144 =
+        new OrchardParentTreeValsDto(
+            "555555",
             "3144",
             new BigDecimal("42.541666667"),
             new BigDecimal("92.5"),
+            16,
             List.of(dto3144gvo, dto3144wwd));
     requestList.add(requestDto3144);
 
     // 3169
     GeneticWorthTraitsDto dto3169gvo = createDto("gvo", "19");
     GeneticWorthTraitsDto dto3169wwd = createDto("wwd", "-2.3");
-    GeneticWorthTraitsRequestDto requestDto3169 =
-        new GeneticWorthTraitsRequestDto(
+    OrchardParentTreeValsDto requestDto3169 =
+        new OrchardParentTreeValsDto(
+            "777777",
             "3169",
             new BigDecimal("30.083333333"),
             new BigDecimal("27"),
+            10,
             List.of(dto3169gvo, dto3169wwd));
     requestList.add(requestDto3169);
 
     // 3210
     GeneticWorthTraitsDto dto3210gvo = createDto("gvo", "17");
     GeneticWorthTraitsDto dto3210wwd = createDto("wwd", "1.1");
-    GeneticWorthTraitsRequestDto requestDto3210 =
-        new GeneticWorthTraitsRequestDto(
-            "3210", new BigDecimal("6"), new BigDecimal("0"), List.of(dto3210gvo, dto3210wwd));
+    OrchardParentTreeValsDto requestDto3210 =
+        new OrchardParentTreeValsDto(
+            "888888",
+            "3210",
+            new BigDecimal("6"),
+            new BigDecimal("0"),
+            9,
+            List.of(dto3210gvo, dto3210wwd));
     requestList.add(requestDto3210);
 
     // 3245
     GeneticWorthTraitsDto dto3245gvo = createDto("gvo", "19");
     GeneticWorthTraitsDto dto3245wwd = createDto("wwd", "-2.3");
-    GeneticWorthTraitsRequestDto requestDto3245 =
-        new GeneticWorthTraitsRequestDto(
+    OrchardParentTreeValsDto requestDto3245 =
+        new OrchardParentTreeValsDto(
+            "999999",
             "3245",
             new BigDecimal("152"),
             new BigDecimal("154.5"),
+            5,
             List.of(dto3245gvo, dto3245wwd));
     requestList.add(requestDto3245);
 
@@ -209,10 +238,10 @@ class GeneticWorthServiceTest {
     GeneticWorthEntity wwdGw = new GeneticWorthEntity("WWD", "Wood quality", dateRange);
     when(geneticWorthRepository.findAll()).thenReturn(List.of(gvoGw, wwdGw));
 
-    GeneticWorthSummaryDto summaryDto = geneticWorthService.calculateGeneticWorth(requestList);
+    List<GeneticWorthTraitsDto> summaryDto = geneticWorthService.calculateGeneticWorth(requestList);
 
     Assertions.assertNotNull(summaryDto);
-    Assertions.assertEquals(2, summaryDto.geneticTraits().size());
+    Assertions.assertEquals(2, summaryDto.size());
   }
 
   @Test
@@ -225,20 +254,17 @@ class GeneticWorthServiceTest {
     GeneticWorthEntity wwdGw = new GeneticWorthEntity("WWD", "Wood quality", dateRange);
     when(geneticWorthRepository.findAll()).thenReturn(List.of(gvoGw, wwdGw));
 
-    GeneticWorthSummaryDto summaryDto = geneticWorthService.calculateGeneticWorth(List.of());
+    List<GeneticWorthTraitsDto> summaryDto = geneticWorthService.calculateGeneticWorth(List.of());
 
     Assertions.assertNotNull(summaryDto);
-    Assertions.assertEquals(2, summaryDto.geneticTraits().size());
-    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.neValue());
-    Assertions.assertEquals("GVO", summaryDto.geneticTraits().get(0).traitCode());
-    Assertions.assertNull(summaryDto.geneticTraits().get(0).traitValue());
-    Assertions.assertNull(summaryDto.geneticTraits().get(0).calculatedValue());
-    Assertions.assertEquals(
-        BigDecimal.ZERO, summaryDto.geneticTraits().get(0).testedParentTreePerc());
-    Assertions.assertEquals("WWD", summaryDto.geneticTraits().get(1).traitCode());
-    Assertions.assertNull(summaryDto.geneticTraits().get(1).traitValue());
-    Assertions.assertNull(summaryDto.geneticTraits().get(1).calculatedValue());
-    Assertions.assertEquals(
-        BigDecimal.ZERO, summaryDto.geneticTraits().get(1).testedParentTreePerc());
+    Assertions.assertEquals(2, summaryDto.size());
+    Assertions.assertEquals("GVO", summaryDto.get(0).traitCode());
+    Assertions.assertNull(summaryDto.get(0).traitValue());
+    Assertions.assertNull(summaryDto.get(0).calculatedValue());
+    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.get(0).testedParentTreePerc());
+    Assertions.assertEquals("WWD", summaryDto.get(1).traitCode());
+    Assertions.assertNull(summaryDto.get(1).traitValue());
+    Assertions.assertNull(summaryDto.get(1).calculatedValue());
+    Assertions.assertEquals(BigDecimal.ZERO, summaryDto.get(1).testedParentTreePerc());
   }
 }

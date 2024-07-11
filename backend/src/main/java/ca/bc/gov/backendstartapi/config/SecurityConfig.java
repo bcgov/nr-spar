@@ -1,12 +1,12 @@
 package ca.bc.gov.backendstartapi.config;
 
-import java.util.ArrayList;
+import ca.bc.gov.backendstartapi.security.JwtSecurityUtil;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -26,7 +26,6 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@Profile("!docker-compose")
 public class SecurityConfig {
 
   @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
@@ -75,20 +74,8 @@ public class SecurityConfig {
         if (!jwt.getClaims().containsKey("cognito:groups")) {
           return List.of();
         }
-        Object clientRolesObj = jwt.getClaims().get("cognito:groups");
-        final List<String> realmAccess = new ArrayList<>();
-        if (clientRolesObj instanceof List<?> list) {
-          for (Object item : list) {
-            String role = String.valueOf(item);
-            // Removes Client Number
-            String clientNumber = role.substring(role.length() - 8);
-            if (clientNumber.replaceAll("[0-9]", "").isEmpty()) {
-              role = role.substring(0, role.length() - 9); // Removes dangling underscore
-            }
-            realmAccess.add(role);
-          }
-        }
-        return realmAccess.stream()
+        Set<String> roleSet = JwtSecurityUtil.getUserRolesFromJwt(jwt);
+        return roleSet.stream()
             .map(roleName -> "ROLE_" + roleName)
             .map(roleName -> (GrantedAuthority) new SimpleGrantedAuthority(roleName))
             .toList();

@@ -1,10 +1,31 @@
 package ca.bc.gov.backendstartapi.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.entity.GeneticClassEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
+import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
+import ca.bc.gov.backendstartapi.entity.embeddable.EffectiveDateRange;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
+import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
+import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
+import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.UserInfo;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,16 +45,41 @@ class TscAdminServiceTest {
 
   @Mock SeedlotRepository seedlotRepository;
 
+  @Mock SeedlotStatusService seedlotStatusService;
+
+  @Mock SeedlotSeedPlanZoneRepository seedlotSeedPlanZoneRepository;
+
+  @Mock GeneticClassRepository geneticClassRepository;
+
+  @Mock LoggedUserService loggedUserService;
+
   private TscAdminService tscAdminService;
+
+  private SeedlotStatusEntity createValidStatus(String status) {
+    SeedlotStatusEntity seedlotStatus = new SeedlotStatusEntity();
+    seedlotStatus.setSeedlotStatusCode(status);
+
+    LocalDate yesterday = LocalDate.now().minusDays(1L);
+    LocalDate tomorrow = yesterday.plusWeeks(1L);
+    seedlotStatus.setEffectiveDateRange(new EffectiveDateRange(yesterday, tomorrow));
+
+    return seedlotStatus;
+  }
 
   @BeforeEach
   void setup() {
-    tscAdminService = new TscAdminService(seedlotRepository);
+    tscAdminService =
+        new TscAdminService(
+            seedlotRepository,
+            seedlotStatusService,
+            seedlotSeedPlanZoneRepository,
+            geneticClassRepository,
+            loggedUserService);
   }
 
   @Test
   @DisplayName("get Seedlots for the TSC_Admin role")
-  void getTscAdminSeedlots_happyPath_shouldSuceed() {
+  void getTscAdminSeedlots_happyPath_shouldSucceed() {
     Integer page = 0;
     Integer size = 10;
 
@@ -51,5 +97,209 @@ class TscAdminServiceTest {
     Assertions.assertNotNull(pageResult);
     Assertions.assertEquals("63712", pageResult.getContent().get(0).getId());
     Assertions.assertEquals("00012345", pageResult.getContent().get(0).getApplicantClientNumber());
+  }
+
+  @Test
+  @DisplayName("Approves a seedlot number")
+  void approveOrDisapproveSeedlot_approve_shouldSucceed() {
+    SeedlotStatusEntity seedlotStatus = createValidStatus("APP");
+
+    String seedlotNumber = "63123";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setSeedlotStatus(seedlotStatus);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotStatusService.getValidSeedlotStatus("APP")).thenReturn(Optional.of(seedlotStatus));
+    when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
+
+    Seedlot seedlotSaved = tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
+
+    Assertions.assertNotNull(seedlotSaved);
+    Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
+    Assertions.assertEquals("APP", seedlotSaved.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  @Test
+  @DisplayName("Disapproves a seedlot number")
+  void approveOrDisapproveSeedlot_disapprove_shouldSucceed() {
+    SeedlotStatusEntity seedlotStatus = createValidStatus("PND");
+
+    String seedlotNumber = "63124";
+
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setSeedlotStatus(seedlotStatus);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotStatusService.getValidSeedlotStatus("PND")).thenReturn(Optional.of(seedlotStatus));
+    when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
+
+    Seedlot seedlotSaved = tscAdminService.updateSeedlotStatus(seedlotNumber, "PND");
+
+    Assertions.assertNotNull(seedlotSaved);
+    Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
+    Assertions.assertEquals("PND", seedlotSaved.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  @Test
+  @DisplayName("Seedlot approval attempt seedlot not found should fail")
+  void approveOrDisapproveSeedlot_seedlotNotFound_shouldFail() {
+    String seedlotNumber = "63125";
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
+
+    Assertions.assertThrows(
+        SeedlotNotFoundException.class,
+        () -> {
+          tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
+        });
+  }
+
+  @Test
+  @DisplayName("Seedlot approval attempt seedlot status not found should fail")
+  void approveOrDisapproveSeedlot_statusNotFound_shouldFail() {
+    String seedlotNumber = "63126";
+    SeedlotStatusEntity seedlotStatus = createValidStatus("PND");
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    seedlot.setSeedlotStatus(seedlotStatus);
+
+    when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
+    when(seedlotStatusService.getValidSeedlotStatus("APP")).thenReturn(Optional.empty());
+
+    Assertions.assertThrows(
+        SeedlotStatusNotFoundException.class,
+        () -> {
+          tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
+        });
+  }
+
+  @Test
+  @DisplayName("Update Seed Plan Zones happy path should succeed")
+  void overrideAreaOfUse_happyPath_shouldSucceed() {
+    when(loggedUserService.getLoggedUserId()).thenReturn(UserInfo.createDevUser().id());
+    String seedlotNumber = "63126";
+
+    SeedlotSeedPlanZoneEntity seedPlanZoneEntity = mock(SeedlotSeedPlanZoneEntity.class);
+
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber))
+        .thenReturn(List.of(seedPlanZoneEntity));
+    doNothing().when(seedlotSeedPlanZoneRepository).deleteAll(List.of(seedPlanZoneEntity));
+    doNothing().when(seedlotSeedPlanZoneRepository).flush();
+
+    GeneticClassEntity genClassEntity = mock(GeneticClassEntity.class);
+    when(geneticClassRepository.findById("A")).thenReturn(Optional.of(genClassEntity));
+
+    when(seedlotSeedPlanZoneRepository.saveAllAndFlush(any())).thenReturn(List.of());
+
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+    SeedlotReviewSeedPlanZoneDto seedPlanZonePgDto =
+        new SeedlotReviewSeedPlanZoneDto("PG", "Prince George", true);
+    SeedlotReviewSeedPlanZoneDto seedPlanZoneGlDto =
+        new SeedlotReviewSeedPlanZoneDto("GL", "Georgia lowlands", false);
+
+    tscAdminService.overrideAreaOfUse(seedlot, List.of(seedPlanZonePgDto, seedPlanZoneGlDto));
+
+    verify(seedlotSeedPlanZoneRepository, times(1)).deleteAll(any());
+    verify(seedlotSeedPlanZoneRepository, times(1)).saveAllAndFlush(any());
+  }
+
+  @Test
+  @DisplayName("Update Seed plan Zones empty list should succeed")
+  void overrideAreaOfUse_emptyList_shouldSucceed() {
+    String seedlotNumber = "63126";
+    SeedlotSeedPlanZoneEntity seedPlanZoneEntity = mock(SeedlotSeedPlanZoneEntity.class);
+
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber))
+        .thenReturn(List.of(seedPlanZoneEntity));
+    doNothing().when(seedlotSeedPlanZoneRepository).deleteAll(List.of(seedPlanZoneEntity));
+    doNothing().when(seedlotSeedPlanZoneRepository).flush();
+
+    GeneticClassEntity genClassEntity = mock(GeneticClassEntity.class);
+    when(geneticClassRepository.findById("A")).thenReturn(Optional.of(genClassEntity));
+
+    when(seedlotSeedPlanZoneRepository.saveAllAndFlush(any())).thenReturn(List.of());
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+
+    tscAdminService.overrideAreaOfUse(seedlot, List.of());
+
+    verify(seedlotSeedPlanZoneRepository, times(1)).deleteAll(any());
+    verify(seedlotSeedPlanZoneRepository, times(0)).saveAllAndFlush(any());
+  }
+
+  @Test
+  @DisplayName("Update Elevation Lat Long happy path should succeed")
+  void overrideElevLatLongMinMax_happyPath_shouldSucceed() {
+    String seedlotNumber = "63126";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+
+    SeedlotReviewElevationLatLongDto elevationLatLongDto =
+        mock(SeedlotReviewElevationLatLongDto.class);
+
+    tscAdminService.overrideElevLatLongMinMax(seedlot, elevationLatLongDto);
+
+    // Elevation
+    Assertions.assertNotNull(seedlot.getElevationMax());
+    Assertions.assertNotNull(seedlot.getElevationMin());
+
+    // Latitude Degree, use collection mean if value is null
+    Assertions.assertNotNull(seedlot.getLatitudeDegMax());
+    Assertions.assertNotNull(seedlot.getLatitudeDegMin());
+
+    // Latitude Minute, use collection mean if value is null
+    Assertions.assertNotNull(seedlot.getLatitudeMinMax());
+    Assertions.assertNotNull(seedlot.getLatitudeMinMin());
+
+    // Latitude second = 0, legacy spar does not provide a min max for seconds, collection
+    // lat/long second is not calculated and is defaulted to 0 since it's not accurate to use.
+    Assertions.assertNotNull(seedlot.getLatitudeSecMax());
+    Assertions.assertNotNull(seedlot.getLatitudeSecMin());
+
+    // Longitude data is not provided in A-Class tested parent tree area of use, default to
+    // collection data
+    Assertions.assertNotNull(seedlot.getLongitudeDegMax());
+    Assertions.assertNotNull(seedlot.getLongitudeDegMin());
+
+    Assertions.assertNotNull(seedlot.getLongitudeMinMax());
+    Assertions.assertNotNull(seedlot.getLongitudeMinMin());
+    // Seconds default to 0
+    Assertions.assertNotNull(seedlot.getLongitudeSecMax());
+    Assertions.assertNotNull(seedlot.getLongitudeSecMin());
+  }
+
+  @Test
+  @DisplayName("Update Seedlot Geo Information happy path should succeed")
+  void overrideSeedlotCollElevLatLong_happyPath_shouldSucceed() {
+    String seedlotNumber = "63126";
+    Seedlot seedlot = new Seedlot(seedlotNumber);
+
+    SeedlotReviewGeoInformationDto geoInformationDto =
+        new SeedlotReviewGeoInformationDto(
+            100,
+            new BigDecimal("2"),
+            3,
+            4,
+            0,
+            new BigDecimal("5"),
+            115,
+            60,
+            0,
+            new BigDecimal("17"));
+
+    tscAdminService.overrideSeedlotCollElevLatLong(seedlot, geoInformationDto);
+
+    // Effective Population Size
+    // Assertions.assertNotNull(seedlot.getEffectivePopulationSize());
+
+    // Elevation
+    Assertions.assertNotNull(seedlot.getCollectionElevation());
+
+    // Latitude DMS
+    Assertions.assertNotNull(seedlot.getCollectionLatitudeDeg());
+    Assertions.assertNotNull(seedlot.getCollectionLatitudeMin());
+    Assertions.assertNotNull(seedlot.getCollectionLatitudeSec());
+
+    // Longitude DMS
+    Assertions.assertNotNull(seedlot.getCollectionLongitudeDeg());
+    Assertions.assertNotNull(seedlot.getCollectionLongitudeMin());
+    Assertions.assertNotNull(seedlot.getCollectionLongitudeSec());
   }
 }

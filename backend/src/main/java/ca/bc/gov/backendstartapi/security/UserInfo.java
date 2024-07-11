@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.security;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.NonNull;
@@ -27,6 +28,7 @@ import lombok.NonNull;
  * @param identityProvider the identity provider used to authenticate this user. This prop comes
  *     from the JWT {@code identity_provider} claim
  * @param roles The user's roles. This prop comes from the JWT {@code cognito:groups} claim
+ * @param clientIds The user client ids. This prop comes from the JWT {@code cognito:groups} claim
  * @param jwtToken The user's JWT token
  */
 public record UserInfo(
@@ -39,7 +41,10 @@ public record UserInfo(
     String businessName,
     @NonNull IdentityProvider identityProvider,
     @NonNull Set<String> roles,
+    @NonNull List<String> clientIds,
     @NonNull String jwtToken) {
+
+  private static final String devClientNumber = "00011223";
 
   /** Ensure immutability for the user's roles. */
   public UserInfo {
@@ -52,5 +57,31 @@ public record UserInfo(
       Objects.requireNonNull(businessName);
     }
     roles = Collections.unmodifiableSet(roles);
+    clientIds = Collections.unmodifiableList(clientIds);
+  }
+
+  /** Mocks a dev user for testing purposes. */
+  public static UserInfo createDevUser() {
+    return new UserInfo(
+        "FSTACK",
+        "FullStack",
+        "Developer",
+        "fullstack-dev@email.com",
+        "Developer, FullStack LRWS:EX",
+        "DEV-IDIR",
+        null,
+        IdentityProvider.IDIR,
+        Set.of(),
+        List.of(devClientNumber),
+        "abcdef123456");
+  }
+
+  /**
+   * Getter for devClientNumber.
+   *
+   * @return the mocked client number
+   */
+  public static String getDevClientNumber() {
+    return devClientNumber;
   }
 }

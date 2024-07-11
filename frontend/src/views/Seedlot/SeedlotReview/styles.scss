@@ -16,7 +16,7 @@
     position: fixed;
     bottom: 2.5rem;
     right: 2.5rem;
-    z-index: 2;
+    z-index: 3;
   }
 
   .sub-section-grid {
@@ -36,6 +36,30 @@
 
   .info-col {
     padding-top: 2rem;
+
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  .additional-spz-combobox-and-button {
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
+
+    .#{vars.$bcgov-prefix}--list-box__wrapper {
+      flex-grow: 1;
+    }
+
+    .#{vars.$bcgov-prefix}--popover-container {
+      margin-left: 1rem;
+    }
   }
 
   .#{vars.$bcgov-prefix}--text-input-wrapper--readonly {
@@ -43,6 +67,20 @@
       padding: 0;
       border: none;
       text-overflow: ellipsis;
+    }
+  }
+
+  .#{vars.$bcgov-prefix}--text-area__wrapper--readonly {
+    .#{vars.$bcgov-prefix}--text-area {
+      padding: 0;
+    }
+  }
+
+  .action-button-row {
+    padding: 2.5rem 0;
+    .#{vars.$bcgov-prefix}--btn{
+      max-width: none;
+      width: -webkit-fill-available;
     }
   }
 }

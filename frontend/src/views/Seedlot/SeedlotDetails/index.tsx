@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   FlexGrid,
@@ -24,11 +24,14 @@ import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import { convertToApplicantInfoObj, covertRawToDisplayObj } from '../../../utils/SeedlotUtils';
-import { getForestClientByNumber } from '../../../api-service/forestClientsAPI';
+import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { MEDIUM_SCREEN_WIDTH } from '../../../shared-constants/shared-constants';
 import Breadcrumbs from '../../../components/Breadcrumbs';
+import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
+import { StatusOnSaveType } from '../../../api-service/tscAdminAPI';
+import AuthContext from '../../../contexts/AuthContext';
 
 import SeedlotSummary from './SeedlotSummary';
 import ApplicantInformation from './ApplicantInformation';
@@ -40,12 +43,15 @@ import './styles.scss';
 const SeedlotDetails = () => {
   const navigate = useNavigate();
   const windowSize = useWindowSize();
+  const { isTscAdmin } = useContext(AuthContext);
   const { seedlotNumber } = useParams();
   const [searchParams] = useSearchParams();
   const [seedlotData, setSeedlotData] = useState<SeedlotDisplayType>();
   const [applicantData, setApplicantData] = useState<SeedlotApplicantType>();
 
   const isSubmitSuccess = searchParams.get('isSubmitSuccess') === 'true';
+
+  const statusOnSave = searchParams.get('statusOnSave') as StatusOnSaveType | null;
 
   const manageOptions = [
     {
@@ -72,7 +78,8 @@ const SeedlotDetails = () => {
 
   const vegCodeQuery = useQuery({
     queryKey: ['vegetation-codes'],
-    queryFn: () => getVegCodes(true),
+    queryFn: () => getVegCodes(),
+    select: (data) => getMultiOptList(data, true, true),
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -93,20 +100,21 @@ const SeedlotDetails = () => {
       if (err.response?.status === 404) {
         navigate('/404');
       }
-    }
+    },
+    select: (data) => data.seedlot
   });
 
   useEffect(() => {
-    if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount) {
+    if (seedlotQuery.isFetched || seedlotQuery.isFetchedAfterMount || seedlotQuery.status === 'success') {
       covertToDisplayObj(seedlotQuery.data);
     }
-  }, [seedlotQuery.isFetched, seedlotQuery.isFetchedAfterMount]);
+  }, [seedlotQuery.isFetched, seedlotQuery.isFetchedAfterMount, seedlotQuery.status]);
 
   const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', applicantClientNumber],
-    queryFn: () => getForestClientByNumber(applicantClientNumber!),
+    queryFn: () => getForestClientByNumberOrAcronym(applicantClientNumber!),
     enabled: !!applicantClientNumber,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
@@ -127,7 +135,7 @@ const SeedlotDetails = () => {
     if (forestClientQuery.isFetched && seedlotQuery.isFetchedAfterMount) {
       covertToClientObj();
     }
-  }, [forestClientQuery.isFetched, seedlotQuery.isFetchedAfterMount]);
+  }, [forestClientQuery.isFetched, seedlotQuery.isFetchedAfterMount, seedlotQuery.status]);
 
   return (
     <FlexGrid className="seedlot-details-page">
@@ -138,7 +146,7 @@ const SeedlotDetails = () => {
         ]}
         />
       </Row>
-      <Row>
+      <Row className="page-title">
         <Column className={windowSize.innerWidth < MEDIUM_SCREEN_WIDTH ? 'summary-title-flex-col' : 'summary-title-flex-row'}>
           {
             seedlotQuery.isFetched
@@ -160,8 +168,11 @@ const SeedlotDetails = () => {
           }
         </Column>
       </Row>
-
-      <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
+      <Row>
+        <Column>
+          <SeedlotSummary seedlot={seedlotData} isFetching={seedlotQuery.isFetching} />
+        </Column>
+      </Row>
 
       <Row className="seedlot-details-content">
         <Column>
@@ -184,6 +195,32 @@ const SeedlotDetails = () => {
                     )
                     : null
                 }
+                {
+                  statusOnSave === 'APP' && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'APP')
+                    ? (
+                      <InlineNotification
+                        className="seedlot-submitted-notification"
+                        lowContrast
+                        kind="success"
+                        title="Seedlot approved::"
+                        subtitle="This seedlot have been reviewed and approved"
+                      />
+                    )
+                    : null
+                }
+                {
+                  statusOnSave === 'PND' && (seedlotQuery.data?.seedlotStatus.seedlotStatusCode === 'PND')
+                    ? (
+                      <InlineNotification
+                        className="seedlot-submitted-notification"
+                        lowContrast
+                        kind="error"
+                        title="Seedlot has been refused:"
+                        subtitle="This seedlot has been refused by the TSC due to an issue on its form. Please, edit this seedlot and try submitting it again "
+                      />
+                    )
+                    : null
+                }
                 <FormProgress
                   seedlotNumber={seedlotNumber}
                   seedlotStatusCode={seedlotQuery.data?.seedlotStatus.seedlotStatusCode}
@@ -194,7 +231,15 @@ const SeedlotDetails = () => {
                   applicant={applicantData}
                   isFetching={forestClientQuery?.isFetching}
                 />
-                <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
+                {
+                  (
+                    isTscAdmin
+                    && seedlotData?.seedlotStatus !== 'Pending'
+                    && seedlotData?.seedlotStatus !== 'Incomplete'
+                  )
+                    ? <TscReviewSection seedlotNumber={seedlotNumber ?? ''} />
+                    : null
+                }
               </TabPanel>
             </TabPanels>
           </Tabs>

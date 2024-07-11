@@ -1,13 +1,16 @@
 import React from 'react';
-
+import validator from 'validator';
 import BigNumber from 'bignumber.js';
 import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import { isFloatWithinRange } from '../../../utils/NumberUtils';
 import { sliceTableRowData } from '../../../utils/PaginationUtils';
+import { recordKeys } from '../../../utils/RecordUtils';
 import { ParentTreeStepDataObj } from '../../../views/Seedlot/ContextContainerClassA/definitions';
 import { ParentTreeGeneticQualityType } from '../../../types/ParentTreeGeneticQualityType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { recordKeys } from '../../../utils/RecordUtils';
-import { GenWorthCalcPayload, CalcPayloadResType } from '../../../types/GeneticWorthTypes';
+import { StringInputType } from '../../../types/FormInputType';
+import { PtValsCalcReqPayload, CalcPayloadResType, OrchardParentTreeValsType } from '../../../types/PtCalcTypes';
+import { GeoInfoValType } from '../../../views/Seedlot/SeedlotReview/definitions';
 
 import {
   getConeCountErrMsg, getNonOrchardContamErrMsg, getPollenCountErrMsg,
@@ -21,9 +24,12 @@ import { OrchardObj } from '../OrchardStep/definitions';
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
   HeaderObj, TabTypes, CompUploadResponse, GeneticWorthDictType,
-  MixUploadResponse, HeaderObjId, StrTypeRowItem
+  MixUploadResponse, HeaderObjId, StrTypeRowItem, MeanGeomInfoSectionConfigType
 } from './definitions';
-import { DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate } from './constants';
+import {
+  DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING, rowTemplate,
+  MAX_NE_DECIMAL, INVALID_NE_DECIMAL_MSG, MIN_NE, MAX_NE, INVALID_NE_RANGE_MSG
+} from './constants';
 
 export const getTabString = (selectedIndex: number) => {
   switch (selectedIndex) {
@@ -104,40 +110,52 @@ export const calcSum = (tableRows: Array<RowItem>, field: keyof StrTypeRowItem):
   return sum.toString();
 };
 
+/**
+ * Calculate the total number of parent tress that contributes to a seedlot.
+ */
+const calcTotalContribParentTrees = (tableRows: RowItem[]): string => {
+  let total = 0;
+
+  tableRows.forEach((row) => {
+    if (Number(row.coneCount.value) > 0 || Number(row.pollenCount.value) > 0) {
+      total += 1;
+    }
+  });
+
+  return String(total);
+};
+
 export const calcSummaryItems = (
-  disableOptions: boolean,
   setSummaryConfig: Function,
   summaryConfig: Record<string, any>,
   tableRows: RowItem[]
 ) => {
-  if (!disableOptions) {
-    const modifiedSummaryConfig = { ...summaryConfig };
+  const modifiedSummaryConfig = { ...summaryConfig };
 
-    // Calc Total Number of Parent Trees
-    modifiedSummaryConfig.sharedItems
-      .totalParentTree.value = tableRows.length.toString();
+  // Calc Total Number of Parent Trees
+  modifiedSummaryConfig.sharedItems
+    .totalParentTree.value = calcTotalContribParentTrees(tableRows);
 
-    // Calc Total number of cone count
-    modifiedSummaryConfig.coneTab
-      .infoItems.totalCone.value = calcSum(tableRows, 'coneCount');
+  // Calc Total number of cone count
+  modifiedSummaryConfig.coneTab
+    .infoItems.totalCone.value = calcSum(tableRows, 'coneCount');
 
-    // Calc Total number of pollen count
-    modifiedSummaryConfig.coneTab
-      .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
+  // Calc Total number of pollen count
+  modifiedSummaryConfig.coneTab
+    .infoItems.totalPollen.value = calcSum(tableRows, 'pollenCount');
 
-    // Calc AVG of SMP Success
-    modifiedSummaryConfig.successTab
-      .infoItems.avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
+  // Calc AVG of SMP Success
+  modifiedSummaryConfig.successTab
+    .infoItems.avgSMPSuccess.value = calcAverage(tableRows, 'smpSuccessPerc');
 
-    // Calc AVG of of non-orchard pollen contam.
-    modifiedSummaryConfig.successTab
-      .infoItems.avgNonOrchardContam.value = calcAverage(tableRows, 'nonOrchardPollenContam');
+  // Calc AVG of of non-orchard pollen contam.
+  modifiedSummaryConfig.successTab
+    .infoItems.avgNonOrchardContam.value = calcAverage(tableRows, 'nonOrchardPollenContam');
 
-    setSummaryConfig(modifiedSummaryConfig);
-  }
+  setSummaryConfig(modifiedSummaryConfig);
 };
 
-const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
+export const getOutsideParentTreeNum = (state: ParentTreeStepDataObj): string => {
   let sum = 0;
   const insidePtNums = Object.keys(state.tableRowData);
   const ptNumsInMixTab: string[] = [];
@@ -166,6 +184,8 @@ export const calcMixTabInfoItems = (
   applicableGenWorths: string[],
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
+  popSizeAndDiversityConfig: InfoSectionConfigType,
+  setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
   state: ParentTreeStepDataObj
 ) => {
   if (!disableOptions) {
@@ -173,7 +193,15 @@ export const calcMixTabInfoItems = (
     const tableRows = Object.values(state.mixTabData);
 
     // Calc number of SMP parents from outside
-    modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = getOutsideParentTreeNum(state);
+    const numOfOutsidePt = getOutsideParentTreeNum(state);
+    modifiedSummaryConfig.mixTab.infoItems.parentsOutside.value = numOfOutsidePt;
+    setPopSizeAndDiversityConfig((prevPop) => ({
+      ...prevPop,
+      outsideSMPParent: {
+        ...prevPop.outsideSMPParent,
+        value: numOfOutsidePt
+      }
+    }));
 
     // Total volume (ml)
     modifiedSummaryConfig.mixTab.infoItems.totalVolume.value = calcSum(tableRows, 'volume');
@@ -361,11 +389,11 @@ export const fillCompostitionTables = (
   const clonedState = cleanTable(state, headerConfig, currentTab, setStepData);
 
   data.forEach((row: CompUploadResponse) => {
-    const parentTreeNumber = row.parentTreeNumber.toString();
+    const parentTreeNumber = String(row.parentTreeNumber);
     // If the clone nubmer exist from user file then fill in the values
     if (Object.prototype.hasOwnProperty.call(clonedState.tableRowData, parentTreeNumber)) {
       // Cone count
-      const coneCountValue = row.coneCount.toString();
+      const coneCountValue = String(row.coneCount);
       let isInvalid = isConeCountInvalid(coneCountValue);
       clonedState.tableRowData[parentTreeNumber].coneCount.value = coneCountValue;
       clonedState.tableRowData[parentTreeNumber].coneCount.isInvalid = isInvalid;
@@ -373,7 +401,7 @@ export const fillCompostitionTables = (
         .errMsg = isInvalid ? getConeCountErrMsg() : '';
 
       // Pollen count
-      const pollenCountValue = row.pollenCount.toString();
+      const pollenCountValue = String(row.pollenCount);
       isInvalid = isPollenCountInvalid(pollenCountValue);
       clonedState.tableRowData[parentTreeNumber].pollenCount.value = pollenCountValue;
       clonedState.tableRowData[parentTreeNumber].pollenCount.isInvalid = isInvalid;
@@ -381,7 +409,7 @@ export const fillCompostitionTables = (
         .errMsg = isInvalid ? getPollenCountErrMsg() : '';
 
       // SMP Success percentage
-      const smpSuccessValue = row.smpSuccess.toString();
+      const smpSuccessValue = String(row.smpSuccess);
       isInvalid = isSmpSuccInvalid(smpSuccessValue, seedlotSpecies.code === 'PW');
       clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.value = smpSuccessValue;
       clonedState.tableRowData[parentTreeNumber].smpSuccessPerc.isInvalid = isInvalid;
@@ -389,7 +417,7 @@ export const fillCompostitionTables = (
         .errMsg = isInvalid ? getSmpSuccErrMsg(smpSuccessValue) : '';
 
       // Non orchard pollen contamination percentage
-      const nonOrchardContamValue = row.pollenContamination.toString();
+      const nonOrchardContamValue = String(row.pollenContamination);
       isInvalid = isNonOrchardContamInvalid(nonOrchardContamValue);
       clonedState.tableRowData[parentTreeNumber].nonOrchardPollenContam
         .value = nonOrchardContamValue;
@@ -452,7 +480,8 @@ export const configHeaderOpt = (
   setHeaderConfig: Function,
   weightedGwInfoItems: Record<keyof RowItem, InfoDisplayObj>,
   setWeightedGwInfoItems: Function,
-  setApplicableGenWorths: Function
+  setApplicableGenWorths: Function,
+  isReview: boolean
 ) => {
   const speciesHasGenWorth = Object.keys(geneticWorthDict);
   if (speciesHasGenWorth.includes(seedlotSpecies.code)) {
@@ -465,6 +494,11 @@ export const configHeaderOpt = (
       const optionIndex = headerConfig.findIndex((header) => header.id === opt);
       // Enable option in the column customization
       clonedHeaders[optionIndex].isAnOption = true;
+
+      // When on review mode, display all columns
+      if (isReview) {
+        clonedHeaders[optionIndex].enabled = true;
+      }
 
       // Enable weighted option in mix tab
       const weightedIndex = headerConfig.findIndex((header) => header.id === `w_${opt}`);
@@ -505,11 +539,16 @@ export const fillCalculatedInfo = (
   genWorthInfoItems: Record<keyof RowItem, InfoDisplayObj[]>,
   setGenWorthInfoItems: Function,
   popSizeAndDiversityConfig: Record<string, any>,
-  setPopSizeAndDiversityConfig: Function
+  setPopSizeAndDiversityConfig: Function,
+  setMeanGeomInfos: React.Dispatch<React.SetStateAction<MeanGeomInfoSectionConfigType>>,
+  setIsCalculatingPt: Function,
+  setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,
+  setGenWorthVal: Function,
+  isReview?: boolean
 ) => {
   const tempGenWorthItems = structuredClone(genWorthInfoItems);
   const gwCodesToFill = recordKeys(tempGenWorthItems);
-  const { geneticTraits, neValue }: CalcPayloadResType = data;
+  const { geneticTraits, calculatedPtVals, smpMixMeanGeoData }: CalcPayloadResType = data;
   // Fill in calculated gw values and percentage
   gwCodesToFill.forEach((gwCode) => {
     const upperCaseCode = String(gwCode).toUpperCase();
@@ -517,9 +556,14 @@ export const fillCalculatedInfo = (
     if (traitIndex > -1) {
       const tuple = tempGenWorthItems[gwCode];
       const traitValueInfoObj = tuple.filter((obj) => obj.name.startsWith('Genetic'))[0];
-      traitValueInfoObj.value = geneticTraits[traitIndex].calculatedValue
-        ? (Number(geneticTraits[traitIndex].calculatedValue)).toFixed(1)
-        : EMPTY_NUMBER_STRING;
+      if (geneticTraits[traitIndex].calculatedValue) {
+        traitValueInfoObj.value = (Number(geneticTraits[traitIndex].calculatedValue)).toFixed(1);
+        if (isReview) {
+          setGenWorthVal(gwCode, geneticTraits[traitIndex].calculatedValue);
+        }
+      } else {
+        traitValueInfoObj.value = EMPTY_NUMBER_STRING;
+      }
       const testedPercInfoObj = tuple.filter((obj) => obj.name.startsWith('Tested'))[0];
       testedPercInfoObj.value = (
         Number(geneticTraits[traitIndex].testedParentTreePerc) * 100
@@ -531,24 +575,112 @@ export const fillCalculatedInfo = (
 
   // Fill in Ne value
   const newPopAndDiversityConfig = { ...popSizeAndDiversityConfig };
-  newPopAndDiversityConfig.ne.value = neValue.toFixed(1);
+  newPopAndDiversityConfig.ne.value = calculatedPtVals.neValue ? calculatedPtVals.neValue.toFixed(1) : '';
   setPopSizeAndDiversityConfig(newPopAndDiversityConfig);
+
+  // Fill in mean geom data
+  const seedlotMeanGeom = calculatedPtVals.geospatialData;
+  setMeanGeomInfos((prevGeomInfo) => ({
+    seedlot: {
+      meanLatitudeDm: {
+        ...prevGeomInfo.seedlot.meanLatitudeDm,
+        value: `${seedlotMeanGeom.meanLatitudeDegree}° ${seedlotMeanGeom.meanLatitudeMinute}'`
+      },
+      meanLongitudeDm: {
+        ...prevGeomInfo.seedlot.meanLongitudeDm,
+        value: `${seedlotMeanGeom.meanLongitudeDegree}° ${seedlotMeanGeom.meanLongitudeMinute}'`
+      },
+      meanElevation: {
+        ...prevGeomInfo.seedlot.meanElevation,
+        value: `${seedlotMeanGeom.meanElevation} m`
+      }
+    },
+    smpMix: {
+      meanLatitudeDm: {
+        ...prevGeomInfo.smpMix.meanLatitudeDm,
+        value: `${smpMixMeanGeoData.meanLatitudeDegree}° ${smpMixMeanGeoData.meanLatitudeMinute}'`
+      },
+      meanLongitudeDm: {
+        ...prevGeomInfo.smpMix.meanLongitudeDm,
+        value: `${smpMixMeanGeoData.meanLongitudeDegree}° ${smpMixMeanGeoData.meanLongitudeMinute}'`
+      },
+      meanElevation: {
+        ...prevGeomInfo.smpMix.meanElevation,
+        value: `${smpMixMeanGeoData.meanElevation} m`
+      }
+    }
+  }));
+
+  if (isReview) {
+    setGeoInfoVals((prevGeo) => ({
+      ...prevGeo,
+      meanElevation: {
+        ...prevGeo.meanElevation,
+        value: String(seedlotMeanGeom.meanElevation)
+      },
+      meanLatDeg: {
+        ...prevGeo.meanLatDeg,
+        value: String(seedlotMeanGeom.meanLatitudeDegree)
+      },
+      meanLatMinute: {
+        ...prevGeo.meanLatMinute,
+        value: String(seedlotMeanGeom.meanLatitudeMinute)
+      },
+      meanLatSec: {
+        ...prevGeo.meanLatSec,
+        value: String(seedlotMeanGeom.meanLatitudeSecond)
+      },
+      meanLongDeg: {
+        ...prevGeo.meanLongDeg,
+        value: String(seedlotMeanGeom.meanLongitudeDegree)
+      },
+      meanLongMinute: {
+        ...prevGeo.meanLongMinute,
+        value: String(seedlotMeanGeom.meanLongitudeMinute)
+      },
+      meanLongSec: {
+        ...prevGeo.meanLongSec,
+        value: String(seedlotMeanGeom.meanLongitudeSecond)
+      },
+      effectivePopSize: {
+        ...prevGeo.effectivePopSize,
+        value: String(calculatedPtVals.neValue)
+      }
+    }));
+  }
+
+  setIsCalculatingPt(false);
 };
 
-export const generateGenWorthPayload = (
+const findParentTreeId = (state: ParentTreeStepDataObj, ptNumber: string): number => {
+  const found = Object.values(state.allParentTreeData)
+    .find((pt) => pt.parentTreeNumber === ptNumber);
+
+  if (!found) {
+    throw Error(`Cannot find parent tree id with parent tree number: ${ptNumber}`);
+  }
+  return found.parentTreeId;
+};
+
+export const generatePtValCalcPayload = (
   state: ParentTreeStepDataObj,
   geneticWorthDict: GeneticWorthDictType,
   seedlotSpecies: MultiOptionsObj
-): GenWorthCalcPayload[] => {
-  const { tableRowData } = state;
-  const payload: GenWorthCalcPayload[] = [];
+): PtValsCalcReqPayload => {
+  const { tableRowData, mixTabData } = state;
+  const payload: PtValsCalcReqPayload = {
+    orchardPtVals: [],
+    smpMixIdAndProps: []
+  };
   const rows = Object.values(tableRowData);
   const genWorthTypes = geneticWorthDict[seedlotSpecies.code];
   rows.forEach((row) => {
-    const newPayloadItem: GenWorthCalcPayload = {
+    const newPayloadItem: OrchardParentTreeValsType = {
+      parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
       parentTreeNumber: row.parentTreeNumber.value,
       coneCount: Number(row.coneCount.value),
       pollenCount: Number(row.pollenCount.value),
+      smpSuccessPerc: Number(row.smpSuccessPerc.value),
       geneticTraits: []
     };
     // Populate geneticTraits array
@@ -558,7 +690,17 @@ export const generateGenWorthPayload = (
         traitValue: Number(row[gwType as keyof StrTypeRowItem].value)
       });
     });
-    payload.push(newPayloadItem);
+    payload.orchardPtVals.push(newPayloadItem);
+  });
+
+  const smpMixRows = Object.values(mixTabData);
+  smpMixRows.forEach((row) => {
+    if (row.parentTreeNumber.value) {
+      payload.smpMixIdAndProps.push({
+        parentTreeId: findParentTreeId(state, row.parentTreeNumber.value),
+        proportion: Number(row.proportion.value)
+      });
+    }
   });
 
   return payload;
@@ -647,4 +789,32 @@ export const fillMixTable = (
   newRows = updateCalculations(newRows, applicableGenWorths);
   clonedState.mixTabData = newRows;
   setStepData('parentTreeStep', clonedState);
+};
+
+/**
+ * Validate whether the NE value has the correct number of decimal place and is within range.
+ */
+export const validateEffectivePopSize = (inputObj: StringInputType): StringInputType => {
+  const validatedObj = inputObj;
+
+  const isOverDecimal = !validator.isDecimal(validatedObj.value, { decimal_digits: `0,${MAX_NE_DECIMAL}` });
+  validatedObj.isInvalid = isOverDecimal;
+
+  if (isOverDecimal) {
+    validatedObj.errMsg = INVALID_NE_DECIMAL_MSG;
+    return validatedObj;
+  }
+
+  const isOutOfRange = !isFloatWithinRange(validatedObj.value, MIN_NE, MAX_NE);
+
+  validatedObj.isInvalid = isOutOfRange;
+
+  if (isOutOfRange) {
+    validatedObj.errMsg = INVALID_NE_RANGE_MSG;
+    return validatedObj;
+  }
+
+  validatedObj.errMsg = undefined;
+
+  return validatedObj;
 };

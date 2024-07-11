@@ -69,8 +69,22 @@ const isDecimalValid = (value: string): boolean => {
 };
 
 export const validatePerc = (value: string): SingleInvalidObj => {
-  let invalidText = inputText.twoDecimal;
-  let isInvalid = !isDecimalValid(value);
+  let invalidText = inputText.lowerThan;
+  let isInvalid = true;
+
+  if (!value) {
+    return {
+      isInvalid,
+      invalidText
+    };
+  }
+
+  isInvalid = !isDecimalValid(value);
+
+  if (isInvalid) {
+    invalidText = inputText.twoDecimal;
+  }
+
   if (!isInvalid) {
     if (Number(value) > 100) {
       isInvalid = true;
@@ -91,3 +105,8 @@ export const arePortionsValid = (ownershipArray: Array<SingleOwnerForm>): boolea
   });
   return Number(sum.toFixed(2)) === 100;
 };
+
+export const getOwnerAgencyTitle = (desc: string): string => desc.substring(
+  desc.indexOf('-') + 1,
+  desc.lastIndexOf('-')
+).trim();

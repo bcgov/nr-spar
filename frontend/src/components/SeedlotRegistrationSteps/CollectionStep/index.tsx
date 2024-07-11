@@ -4,7 +4,7 @@ import {
   FlexGrid,
   Column,
   Row,
-  NumberInput,
+  TextInput,
   CheckboxGroup,
   Checkbox,
   DatePickerInput,
@@ -17,6 +17,7 @@ import validator from 'validator';
 
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
+import { EmptyBooleanInputType } from '../../../shared-constants/shared-constants';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 
 import Subtitle from '../../Subtitle';
@@ -34,17 +35,16 @@ import { calcVolume, isNumNotInRange } from './utils';
 
 import './styles.scss';
 
-type props = {
+type CollectionStepProps = {
   isReview?: boolean
 }
 
-const CollectionStep = ({ isReview }: props) => {
+const CollectionStep = ({ isReview }: CollectionStepProps) => {
   const {
     allStepData: { collectionStep: state },
     setStepData,
     defaultAgencyObj: defaultAgency,
     defaultCode,
-    agencyOptions,
     isFormSubmitted
   } = useContext(ClassAContext);
 
@@ -149,13 +149,12 @@ const CollectionStep = ({ isReview }: props) => {
         </Column>
       </Row>
       <ApplicantAgencyFields
-        showCheckbox
-        isDefault={state.useDefaultAgencyInfo}
+        showCheckbox={!isReview}
+        isDefault={isReview ? EmptyBooleanInputType : state.useDefaultAgencyInfo}
         checkboxId="collection-step-default-checkbox"
         agency={state.collectorAgency}
         locationCode={state.locationCode}
         fieldsProps={agencyFieldsProps}
-        agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
         setAgencyAndCode={
@@ -230,56 +229,56 @@ const CollectionStep = ({ isReview }: props) => {
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={8} xlg={6}>
-          <NumberInput
+          <TextInput
             id={state.numberOfContainers.id}
+            type="number"
             name={fieldsConfig.numberOfContainers.name}
             value={state.numberOfContainers.value}
-            label={fieldsConfig.numberOfContainers.labelText}
+            labelText={fieldsConfig.numberOfContainers.labelText}
             readOnly={isFormSubmitted && !isReview}
             invalid={state.numberOfContainers.isInvalid}
             invalidText={fieldsConfig.numberOfContainers.invalidText}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleContainerNumAndVol(true, e.target.value);
             }}
-            hideSteppers
-            disableWheel
           />
         </Column>
         <Column sm={4} md={4} lg={8} xlg={6}>
-          <NumberInput
+          <TextInput
             id={state.volumePerContainers.id}
+            type="number"
             name={fieldsConfig.volumePerContainers.name}
             value={state.volumePerContainers.value}
-            label={fieldsConfig.volumePerContainers.labelText}
+            labelText={fieldsConfig.volumePerContainers.labelText}
             readOnly={isFormSubmitted && !isReview}
             invalid={state.volumePerContainers.isInvalid}
             invalidText={fieldsConfig.volumePerContainers.invalidText}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleContainerNumAndVol(false, e.target.value);
             }}
-            hideSteppers
-            disableWheel
           />
         </Column>
       </Row>
       <Row className="collection-step-row">
         <Column sm={4} md={4} lg={16} xlg={12}>
-          <NumberInput
+          <TextInput
             id={state.volumeOfCones.id}
+            type="number"
             name={fieldsConfig.volumeOfCones.name}
             value={state.volumeOfCones.value}
-            label={fieldsConfig.volumeOfCones.labelText}
+            labelText={fieldsConfig.volumeOfCones.labelText}
             invalid={state.volumeOfCones.isInvalid}
             invalidText={fieldsConfig.volumeOfCones.invalidText}
             helperText={isReview ? null : fieldsConfig.volumeOfCones.helperText}
             warn={isCalcWrong}
             readOnly={isFormSubmitted && !isReview}
             warnText={fieldsConfig.volumeOfCones.warnText}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+            onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               handleVolOfCones(e.target.value);
             }}
-            hideSteppers
-            disableWheel
           />
         </Column>
       </Row>

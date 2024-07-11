@@ -15,4 +15,6 @@ public record SaveSeedlotFormDtoClassA(
     @Schema(
             description = "The JSON object that stores the progress on the front-end",
             example = "any json object")
-        JsonNode progressStatus) {}
+        JsonNode progressStatus,
+    @Schema(description = "The amount of time this data have been revised", example = "46")
+        Integer revisionCount) {}

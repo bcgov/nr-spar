@@ -3,7 +3,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
 import SeedlotTable from '../../components/SeedlotTable';
 import MySeedlotsItems from '../../mock-server/fixtures/MySeedlotsItems';
-import '@testing-library/jest-dom';
 import { formatDate } from '../../utils/DateUtils'
 
 describe('Seedlot Table component', () => {

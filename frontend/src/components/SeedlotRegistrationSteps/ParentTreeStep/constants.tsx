@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@carbon/react';
 import {
   HeaderObj, RowItem, NotifCtrlType, GeneticWorthDictType,
-  InfoSectionConfigType, FileConfigType
+  InfoSectionConfigType, FileConfigType, MeanGeomInfoSectionConfigType
 } from './definitions';
 
 // eslint-disable-next-line import/no-unresolved
@@ -365,31 +365,6 @@ export const rowTemplate: RowItem = {
     isInvalid: false,
     value: ''
   },
-  meanDegLat: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  meanMinLat: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  meanDegLong: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  meanMinLong: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
-  meanElevation: {
-    id: '',
-    isInvalid: false,
-    value: ''
-  },
   isMixTab: false
 };
 
@@ -656,51 +631,6 @@ export const headerTemplate: Array<HeaderObj> = [
     availableInTabs: [undefined, undefined, 'mixTab']
   },
   {
-    id: 'meanDegLat',
-    name: 'Mean degrees latitude',
-    description: 'Mean degrees latitude',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
-    id: 'meanMinLat',
-    name: 'Mean minutes latitude',
-    description: 'Mean minutes latitude',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
-    id: 'meanDegLong',
-    name: 'Mean degrees longitude',
-    description: 'Mean degrees longitude',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
-    id: 'meanMinLong',
-    name: 'Mean minutes longitude',
-    description: 'Mean minutes longitude',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
-    id: 'meanElevation',
-    name: 'Mean elevation',
-    description: 'Mean elevation',
-    enabled: false,
-    editable: false,
-    isAnOption: true,
-    availableInTabs: [undefined, 'successTab']
-  },
-  {
     id: 'actions',
     name: 'Actions',
     description: 'Actions',
@@ -717,8 +647,7 @@ export const PageSizesConfig = [
 
 export const SummarySectionConfig = {
   coneTab: {
-    title: 'Summary',
-    description: 'Check the parent tree contribution summary',
+    title: 'Parent tree contribution summary',
     infoItems: {
       totalCone: {
         name: 'Total number of cone count',
@@ -731,8 +660,7 @@ export const SummarySectionConfig = {
     }
   },
   successTab: {
-    title: 'Summary',
-    description: 'Check the SMP success on parent summary',
+    title: 'Parent tree contribution summary',
     infoItems: {
       avgSMPSuccess: {
         name: 'Average number of SMP success %',
@@ -771,10 +699,10 @@ export const PopSizeAndDiversityConfig: InfoSectionConfigType = {
     name: 'Effective population size (Ne)',
     value: EMPTY_NUMBER_STRING
   },
-  coancestry: {
-    name: 'Coancestry (Sum PiPj * Cij)',
-    value: EMPTY_NUMBER_STRING
-  },
+  // coancestry: {
+  //   name: 'Coancestry (Sum PiPj * Cij)',
+  //   value: EMPTY_NUMBER_STRING
+  // },
   outsideSMPParent: {
     name: 'Number of SMP parents from outside',
     value: EMPTY_NUMBER_STRING
@@ -808,3 +736,44 @@ export const noParentTreeDescription = (
     No parent tree found under selected orchard(s)
   </span>
 );
+
+export const defaultMeanGeomConfig: MeanGeomInfoSectionConfigType = {
+  seedlot: {
+    meanLatitudeDm: {
+      name: 'Mean latitude',
+      value: ''
+    },
+    meanLongitudeDm: {
+      name: 'Mean longitude',
+      value: ''
+    },
+    meanElevation: {
+      name: 'Mean elevation',
+      value: ''
+    }
+  },
+  smpMix: {
+    meanLatitudeDm: {
+      name: 'Mean latitude',
+      value: ''
+    },
+    meanLongitudeDm: {
+      name: 'Mean longitude',
+      value: ''
+    },
+    meanElevation: {
+      name: 'Mean elevation',
+      value: ''
+    }
+  }
+};
+
+export const MIN_NE = '0.1';
+
+export const MAX_NE = '999.9';
+
+export const MAX_NE_DECIMAL = 1;
+
+export const INVALID_NE_RANGE_MSG = `Must be between ${MIN_NE} and ${MAX_NE}`;
+
+export const INVALID_NE_DECIMAL_MSG = `Cannot have more than ${MAX_NE_DECIMAL} decimal place`;

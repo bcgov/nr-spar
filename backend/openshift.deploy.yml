@@ -24,14 +24,14 @@ parameters:
   - name: REGISTRY
     description: Container registry to import from (internal is image-registry.openshift-image-registry.svc:5000)
     value: ghcr.io
-  - name: ORG_NAME
+  - name: ORG
     description: Organization name
     value: bcgov
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
-    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca"
+    value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"
   - name: FORESTCLIENTAPI_ADDRESS
     value: "https://nr-forest-client-api-prod.api.gov.bc.ca/api"
   - name: CPU_REQUEST
@@ -41,21 +41,14 @@ parameters:
   - name: MEMORY_REQUEST
     value: 100Mi
   - name: MEMORY_LIMIT
-    value: 250Mi
+    value: 350Mi
   - name: MIN_REPLICAS
     description: The minimum amount of replicas for the horizontal pod autoscaler.
     value: "3"
   - name: MAX_REPLICAS
     description: The maximum amount of replicas for the horizontal pod autoscaler.
     value: "5"
-  - name: BUILD
-    description: Current SPAR backend API build version
-    required: true
-    value: nightly
-  - name: ORACLE_SERVER_URL
-    description: Oracle back-end api URL
-    value: https://nr-spar-test-oracle-api.apps.silver.devops.gov.bc.ca
-  - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
+  - name: OPENSEARCH_ENV
     description: Backend environment for OpenSearch. # One of: development, test, production
     required: true
     value: development
@@ -72,68 +65,44 @@ parameters:
     description: AWS Cognito JWT Server URI
     required: true
 objects:
-  - apiVersion: v1
-    kind: ImageStream
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-${COMPONENT}
-    spec:
-      lookupPolicy:
-        local: false
-      tags:
-        - name: latest
-          from:
-            kind: DockerImage
-            name: ${REGISTRY}/${ORG_NAME}/${NAME}/${COMPONENT}:${TAG}
-          referencePolicy:
-            type: Local
-  - apiVersion: v1
-    kind: DeploymentConfig
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       labels:
         app: ${NAME}-${ZONE}
       name: ${NAME}-${ZONE}-${COMPONENT}
     spec:
       replicas: 1
-      triggers:
-        - type: ConfigChange
-        - type: ImageChange
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - ${NAME}
-            from:
-              kind: ImageStreamTag
-              name: ${NAME}-${ZONE}-${COMPONENT}:latest
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        matchLabels:
+          deployment: ${NAME}-${ZONE}-${COMPONENT}
       strategy:
-        type: Rolling
+        type: RollingUpdate
       template:
         metadata:
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "8090"
+            prometheus.io/path: "/metrics"
           labels:
             app: ${NAME}-${ZONE}
-            deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+            deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
           containers:
-            - image: ${NAME}-${ZONE}-${COMPONENT}:latest
+            - name: ${NAME}-${ZONE}
+              image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               imagePullPolicy: Always
-              name: ${NAME}
-              volumeMounts:
-                - name: ${NAME}-${ZONE}-fluentbit-logs
-                  mountPath: /logs
               env:
                 - name: NR_SPAR_BACKEND_VERSION
-                  value: ${BUILD}
-                - name: NR_SPAR_BACKEND_ENV_OPENSEARCH
-                  value: ${NR_SPAR_BACKEND_ENV_OPENSEARCH}
+                  value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
+                - name: OPENSEARCH_ENV
+                  value: ${OPENSEARCH_ENV}
                 - name: ALLOWED_ORIGINS
                   value: ${ALLOWED_ORIGINS}
                 - name: FORESTCLIENTAPI_ADDRESS
                   value: ${FORESTCLIENTAPI_ADDRESS}
                 - name: ORACLE_SERVER_URL
-                  value: ${ORACLE_SERVER_URL}
+                  value: https://${NAME}-${ZONE}-oracle-api.${DOMAIN}
                 - name: FORESTCLIENTAPI_KEY
                   valueFrom:
                     secretKeyRef:
@@ -164,9 +133,6 @@ objects:
                   value: ${DB_POOL_MAX_LIFETIME}
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
-              ports:
-                - containerPort: 8090
-                  protocol: TCP
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
@@ -174,30 +140,21 @@ objects:
                 limits:
                   cpu: ${CPU_LIMIT}
                   memory: ${MEMORY_LIMIT}
+              ports:
+                - name: container-port
+                  containerPort: 8090
               readinessProbe:
-                successThreshold: 1
-                failureThreshold: 5
                 httpGet:
-                  path: /actuator/health
-                  port: 8090
-                  scheme: HTTP
-                initialDelaySeconds: 20
-                periodSeconds: 15
-                timeoutSeconds: 10
+                  path: /health
+                  port: container-port
               livenessProbe:
-                successThreshold: 1
-                failureThreshold: 5
                 httpGet:
-                  path: /actuator/health
-                  port: 8090
-                  scheme: HTTP
-                initialDelaySeconds: 20
-                periodSeconds: 30
-                timeoutSeconds: 10
-          volumes:
-            - name: ${NAME}-${ZONE}-fluentbit-logs
-              persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-fluentbit-logs
+                  path: /health
+                  port: container-port
+              startupProbe:
+                tcpSocket:
+                  port: container-port
+                failureThreshold: 45
   - apiVersion: v1
     kind: Service
     metadata:
@@ -211,7 +168,7 @@ objects:
           port: 80
           targetPort: 8090
       selector:
-        deploymentconfig: ${NAME}-${ZONE}-${COMPONENT}
+        deployment: ${NAME}-${ZONE}-${COMPONENT}
   - apiVersion: route.openshift.io/v1
     kind: Route
     metadata:
@@ -236,7 +193,7 @@ objects:
     spec:
       scaleTargetRef:
         apiVersion: apps.openshift.io/v1
-        kind: DeploymentConfig
+        kind: Deployment
         name: ${NAME}-${ZONE}-${COMPONENT}
       minReplicas: ${{MIN_REPLICAS}}
       maxReplicas: ${{MAX_REPLICAS}}

@@ -1,6 +1,10 @@
 import { StatusColourMap } from '../components/StatusTag/definitions';
 import { AllStepData, ProgressIndicatorConfig } from '../views/Seedlot/ContextContainerClassA/definitions';
+import { CodeDescResType } from './CodeDescResType';
 import { SingleParentTreeGeneticObj } from './ParentTreeGeneticQualityType';
+import { GeneticTrait, MeanGeomDataType } from './PtCalcTypes';
+import { SeedlotPatchPayloadType } from './SeedlotRegistrationTypes';
+import { SpuDto } from './SpuDto';
 
 type EffectiveDateRange = {
   effectiveDate: string,
@@ -31,6 +35,10 @@ export type SeedlotDisplayType = {
   seedlotClass: string,
   seedlotSpecies: string,
   seedlotStatus: keyof typeof StatusColourMap,
+  entryUserId: string,
+  entryTimestamp: string,
+  applicantAgency: string,
+  locationCode: string,
   createdAt: string,
   lastUpdatedAt: string,
   approvedAt: string
@@ -113,44 +121,67 @@ export type SeedlotType = {
   },
   revisionCount: number,
   seedPlanUnitId: number,
-  bgcZoneCode: string,
-  bgcSubzoneCode: string,
-  variant: string,
-  becVersionId: number,
-  elevation: number,
-  latitudeDegrees: number,
-  latitudeMinutes: number,
-  latitudeSeconds: number,
-  longitudeDegrees: number,
-  longitudeMinutes: number,
-  longitudeSeconds: number,
-  collectionElevation: number,
-  collectionElevationMin: number,
-  collectionElevationMax: number,
-  collectionLatitudeDeg: number,
-  collectionLatitudeMin: number,
-  collectionLatitudeSec: number,
-  collectionLatitudeCode: string,
-  collectionLongitudeDeg: number,
-  collectionLongitudeMin: number,
-  collectionLongitudeSec: number,
-  collectionLongitudeCode: string,
-  elevationMin: number,
-  elevationMax: number,
-  latitudeDegMin: number,
-  latitudeMinMin: number,
-  latitudeSecMin: number,
-  latitudeDegMax: number,
-  latitudeMinMax: number,
-  latitudeSecMax: number,
-  longitudeDegMin: number,
-  longitudeMinMin: number,
-  longitudeSecMin: number,
-  longitudeDegMax: number,
-  longitudeMinMax: number,
-  longitudeSecMax: number,
+  bgcZoneCode: string | null,
+  bgcZoneDescription: string | null,
+  bgcSubzoneCode: string | null,
+  variant: string | null,
+  becVersionId: number | null,
+  elevation: number | null,
+  latitudeDegrees: number | null,
+  latitudeMinutes: number | null,
+  latitudeSeconds: number | null,
+  longitudeDegrees: number | null,
+  longitudeMinutes: number | null,
+  longitudeSeconds: number | null,
+  collectionElevation: number | null,
+  collectionElevationMin: number | null,
+  collectionElevationMax: number | null,
+  collectionLatitudeDeg: number | null,
+  collectionLatitudeMin: number | null,
+  collectionLatitudeSec: number | null,
+  collectionLatitudeCode: string | null,
+  collectionLongitudeDeg: number | null,
+  collectionLongitudeMin: number | null,
+  collectionLongitudeSec: number | null,
+  collectionLongitudeCode: string | null,
+  elevationMin: number | null,
+  elevationMax: number | null,
+  latitudeDegMin: number | null,
+  latitudeMinMin: number | null,
+  latitudeSecMin: number | null,
+  latitudeDegMax: number | null,
+  latitudeMinMax: number | null,
+  latitudeSecMax: number | null,
+  longitudeDegMin: number | null,
+  longitudeMinMin: number | null,
+  longitudeSecMin: number | null,
+  longitudeDegMax: number | null,
+  longitudeMinMax: number | null,
+  longitudeSecMax: number | null,
   smpMeanBvGrowth: number,
-  areaOfUseComment: string
+  areaOfUseComment: string | null,
+  approvedUserId: string | null,
+  approvedTimestamp: string | null,
+}
+
+export type SeedPlanZoneDto = {
+  isPrimary: boolean
+} & CodeDescResType;
+
+export type SeedPlanZoneOracleDto = {
+  effectiveDate: string,
+  expiryDate: string
+} & CodeDescResType;
+
+/**
+ * The seedlot data returned from backend that contains additional information
+ * such as seed plan zone.
+ */
+export type RichSeedlotType = {
+  seedlot: SeedlotType,
+  primarySpu: SpuDto | null,
+  primarySpz: SeedPlanZoneDto | null,
+  additionalSpzList: SeedPlanZoneDto[]
 }
 
 export type SeedlotsReturnType = {
@@ -195,7 +226,8 @@ export type InterimFormSubmitType = {
 }
 
 export type OrchardFormSubmitType = {
-  orchardsId: Array<string>,
+  primaryOrchardId: string,
+  secondaryOrchardId: string | null,
   femaleGameticMthdCode: string,
   maleGameticMthdCode: string,
   controlledCrossInd: boolean,
@@ -240,9 +272,40 @@ export type SeedlotAClassSubmitType = {
   seedlotFormExtractionDto: ExtractionFormSubmitType
 }
 
+export type SeedlotReviewElevationLatLongDto = {
+  minElevation: number,
+  maxElevation: number,
+  minLatitudeDeg: number,
+  minLatitudeMin: number,
+  minLatitudeSec: number,
+  maxLatitudeDeg: number,
+  maxLatitudeMin: number,
+  maxLatitudeSec: number,
+  minLongitudeDeg: number,
+  minLongitudeMin: number,
+  minLongitudeSec: number,
+  maxLongitudeDeg: number,
+  maxLongitudeMin: number,
+  maxLongitudeSec: number,
+  areaOfUseComment: string
+}
+
+export type SeedlotReviewGeoInformationDto = MeanGeomDataType & {
+  effectivePopulationSize: number
+}
+
+export type TscSeedlotEditPayloadType = SeedlotAClassSubmitType & {
+  applicantAndSeedlotInfo: SeedlotPatchPayloadType,
+  seedlotReviewSeedPlanZones: SeedPlanZoneDto[],
+  seedlotReviewElevationLatLong: SeedlotReviewElevationLatLongDto,
+  seedlotReviewGeneticWorth: GeneticTrait[],
+  seedlotReviewGeoInformation: SeedlotReviewGeoInformationDto
+}
+
 export type SeedlotProgressPayloadType = {
   allStepData: AllStepData,
-  progressStatus: ProgressIndicatorConfig
+  progressStatus: ProgressIndicatorConfig,
+  revisionCount: number
 };
 
 export type SeedlotCalculationsResultsType = {

@@ -19,30 +19,38 @@ declare namespace Cypress {
      * @example
      * cy.login()
      */
-     login(): void
+    login(): void
 
-     /**
-      * Custom command to navigate using the app side menu.
-      *
-      * @example
-      * cy.navigateTo('Menu Item Name')
-      */
-      navigateTo(menuItem: string): void
+    /**
+     * Custom command to navigate using the app side menu.
+     *
+     * @example
+     * cy.navigateTo('Menu Item Name')
+     */
+    navigateTo(menuItem: string): void
 
-      /**
-       * Custom command to check the current page title.
-       *
-       * @example
-       * cy.isPageTitle('Page Title')
-       */
-       isPageTitle(pageTitle: string): void
+    /**
+     * Custom command to check the current page title.
+     *
+     * @example
+     * cy.isPageTitle('Page Title')
+     */
+    isPageTitle(pageTitle: string): void
 
-       /**
-        * Custom command to toogle favourite feature of the current page.
-        *
-        * @example
-        * cy.isPageTitle('Page Title')
-        */
-        toogleFavourite(): void
+    /**
+     * Custom command to toogle favourite feature of the current page.
+     *
+     * @example
+     * cy.isPageTitle('Page Title')
+     */
+    toogleFavourite(): void
+
+    /**
+     * Custom command to save current form or section of page.
+     *
+     * @example
+     * cy.saveButton()
+     */
+    saveSeedlotRegFormProgress(): void
   }
 }

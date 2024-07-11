@@ -2,11 +2,12 @@ package ca.bc.gov.backendstartapi.provider;
 
 import ca.bc.gov.backendstartapi.dto.ForestClientDto;
 import ca.bc.gov.backendstartapi.dto.ForestClientLocationDto;
+import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeLocInfoDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
-import ca.bc.gov.backendstartapi.dto.SeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
+import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +50,20 @@ public interface Provider {
     return List.of();
   }
 
-  default List<SeedPlanZoneDto> getSpzInformationBySpuIds(List<Integer> spuIds) {
+  default List<GeospatialOracleResDto> getPtGeospatialDataByIdList(List<Long> ptIds) {
     return List.of();
   }
 
-  default List<ParentTreeLocInfoDto> getParentTreeLatLongByIdList(List<Integer> ptIds) {
-    return List.of();
+  default Optional<AreaOfUseDto> getAreaOfUseData(Integer spuId) {
+    return Optional.empty();
+  }
+
+  default Optional<OrchardDto> findOrchardById(String orchardId) {
+    return Optional.empty();
+  }
+
+  default Optional<SpuDto> getSpuById(Integer spuId) {
+    return Optional.empty();
   }
 
   // Common methods

@@ -6,6 +6,7 @@ import {
   HALF_SECOND, TYPE_DELAY
 } from '../constants';
 import { GenericSelectors, NavigationSelectors } from '../utils/selectors';
+import prefix from '../../src/styles/classPrefix';
 
 Cypress.Commands.add('getByDataTest', (selector) => cy.get(`[data-testid=${selector}]`));
 
@@ -23,8 +24,8 @@ Cypress.Commands.add('login', () => {
     () => {
       const loginBtnId = `landing-button__${config.loginService.toLowerCase()}`;
       const loginLogo = `#${config.loginService.toLowerCase()}Logo`;
-      const loginUrl = config.loginService === 'IDIR' ?
-          Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
+      const loginUrl = config.loginService === 'IDIR'
+        ? Cypress.env('idirLoginUrl') : Cypress.env('businessBceIdLoginUrl');
       cy.clearAllCookies();
       cy.clearAllLocalStorage();
       cy.clearAllSessionStorage();
@@ -61,6 +62,9 @@ Cypress.Commands.add('login', () => {
           );
         }
       });
+      cy.get('.bx--contained-list-item__content').contains('WESTERN FOREST PRODUCTS INC.').click();
+      cy.get('.action-btn').contains('Continue').click();
+
       cy.url().should('contains', '/dashboard');
       cy.setCookie('is-cypress-logged-in', 'true');
     },
@@ -96,4 +100,14 @@ Cypress.Commands.overwrite('log', (log, ...args) => {
   // eslint-disable-next-line no-console
   console.log(...args);
   return log(...args);
+});
+
+Cypress.Commands.add('saveSeedlotRegFormProgress', () => {
+  cy.get('.seedlot-registration-button-row')
+    .find('button.form-action-btn')
+    .contains('Save changes')
+    .click();
+
+  cy.get(`.${prefix}--inline-loading__text`)
+    .contains('Changes saved!');
 });

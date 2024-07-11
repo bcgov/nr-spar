@@ -27,20 +27,21 @@ import {
 import './styles.scss';
 
 interface ExtractionAndStorageProps {
-  defaultAgency: MultiOptionsObj
-  defaultCode: string
+  defaultAgency: MultiOptionsObj;
+  defaultCode: string;
+  isReview?: boolean
 }
 
 const ExtractionAndStorage = (
   {
     defaultAgency,
-    defaultCode
+    defaultCode,
+    isReview
   }: ExtractionAndStorageProps
 ) => {
   const {
     allStepData: { extractionStorageStep: state },
     setStepData,
-    agencyOptions,
     isFormSubmitted
   } = useContext(ClassAContext);
 
@@ -95,9 +96,15 @@ const ExtractionAndStorage = (
   return (
     <FlexGrid className="extraction-and-storage-form" fullWidth>
       <Row className="extraction-information-title">
-        <Column sm={4} md={8} lg={16}>
+        <Column className="section-title" sm={4} md={8} lg={16}>
           <h2>{inputText.extractionTitle.titleText}</h2>
-          <Subtitle text={inputText.extractionTitle.subtitleText} />
+          {
+            !isReview
+              ? (
+                <Subtitle text={inputText.extractionTitle.subtitleText} />
+              )
+              : null
+          }
         </Column>
       </Row>
       <ApplicantAgencyFields
@@ -107,7 +114,6 @@ const ExtractionAndStorage = (
         agency={state.extraction.agency}
         locationCode={state.extraction.locationCode}
         fieldsProps={extractorAgencyFields}
-        agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
         setAgencyAndCode={(
@@ -115,7 +121,7 @@ const ExtractionAndStorage = (
           agency: OptionsInputType,
           locationCode: StringInputType
         ) => setAgencyAndCode(isDefault, agency, locationCode, 'extraction')}
-        readOnly={isFormSubmitted}
+        readOnly={isFormSubmitted && !isReview}
         isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
       />
@@ -129,7 +135,7 @@ const ExtractionAndStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'extraction', selectedDate);
             }}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <DatePickerInput
               id={state.extraction.startDate.id}
@@ -152,7 +158,7 @@ const ExtractionAndStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'extraction', selectedDate);
             }}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <DatePickerInput
               id={state.extraction.endDate.id}
@@ -179,9 +185,15 @@ const ExtractionAndStorage = (
         </Column>
       </Row>
       <Row className="temporary-seed-storage-title">
-        <Column lg={16}>
+        <Column className="section-title" sm={4} md={8} lg={16}>
           <h2>{inputText.storageTitle.titleText}</h2>
-          <Subtitle text={inputText.storageTitle.subtitleText} />
+          {
+            !isReview
+              ? (
+                <Subtitle text={inputText.storageTitle.subtitleText} />
+              )
+              : null
+          }
         </Column>
       </Row>
       <ApplicantAgencyFields
@@ -191,7 +203,6 @@ const ExtractionAndStorage = (
         agency={state.seedStorage.agency}
         locationCode={state.seedStorage.locationCode}
         fieldsProps={storageAgencyFields}
-        agencyOptions={agencyOptions}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
         setAgencyAndCode={(
@@ -199,7 +210,7 @@ const ExtractionAndStorage = (
           agency: OptionsInputType,
           locationCode: StringInputType
         ) => setAgencyAndCode(isDefault, agency, locationCode, 'seedStorage')}
-        readOnly={isFormSubmitted}
+        readOnly={isFormSubmitted && !isReview}
         isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
       />
@@ -213,7 +224,7 @@ const ExtractionAndStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'seedStorage', selectedDate);
             }}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <DatePickerInput
               id={state.seedStorage.startDate.id}
@@ -236,7 +247,7 @@ const ExtractionAndStorage = (
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'seedStorage', selectedDate);
             }}
-            readOnly={isFormSubmitted}
+            readOnly={isFormSubmitted && !isReview}
           >
             <DatePickerInput
               id={state.seedStorage.endDate.id}

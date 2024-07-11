@@ -1,0 +1,65 @@
+@use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+
+.review-seedlots-content {
+  padding-inline: 0;
+
+  .review-seedlots-breadcrumb {
+    margin: 0 2.5rem 0.5rem 2.5rem;
+  }
+
+  .title-section {
+    padding: 0;
+  }
+
+  .review-seedlots-title,
+  .go-to-seedlot-section {
+    justify-content: space-between;
+    margin: 0 2.5rem 2.5rem 2.5rem;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .reg-seedlot-btn {
+    width: fit-content;
+    max-width: 16rem;
+    margin-top: 1rem;
+    white-space: nowrap;
+  }
+
+  .reg-btn-float-right {
+    float: right;
+  }
+
+  .empty-seedlots {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .#{vars.$bcgov-prefix}--data-table-content {
+    width: 100%;
+  }
+
+  .#{vars.$bcgov-prefix}--data-table-container {
+    width: 100%;
+  }
+
+  .review-seedlots-table-wrapper {
+    overflow: hidden;
+    background: var(--#{vars.$bcgov-prefix}-layer-01);
+  }
+
+  .review-seedlots-data-table-row {
+    margin-inline: 0;
+    margin: 2.5rem;
+    border: solid 1px var(--#{vars.$bcgov-prefix}-border-subtle-01);
+    border-radius: 4px;
+  }
+
+  .no-padding-col {
+    padding: 0;
+  }
+}

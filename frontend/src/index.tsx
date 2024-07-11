@@ -4,30 +4,18 @@ import ReactDOM from 'react-dom/client';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { env } from './env';
-import makeServer from './mock-server/server';
 import AuthProvider from './contexts/AuthProvider';
-
-const appVersion: string = env.VITE_NRSPARWEBAPP_VERSION || 'dev';
-
-const isDevEnv = appVersion === 'dev'
-  || appVersion.startsWith('test')
-  || appVersion.startsWith('PR-');
-
-if (isDevEnv) {
-  makeServer('development');
-}
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 root.render(
-  <AuthProvider>
-    <React.StrictMode>
+  <React.StrictMode>
+    <AuthProvider>
       <App />
-    </React.StrictMode>
-  </AuthProvider>
+    </AuthProvider>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
