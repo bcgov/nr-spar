@@ -12,7 +12,7 @@ RUN ./mvnw -B package -Pnative -DskipTests -Dspring-boot.run.profiles=prod
 
 
 ### Deployer
-FROM debian:bookworm-slim AS deploy
+FROM gcr.io/distroless/java-base:nonroot AS deploy
 ARG PORT=8090
 
 # Copy
