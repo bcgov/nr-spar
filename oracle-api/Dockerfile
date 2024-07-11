@@ -1,15 +1,16 @@
+### Builder
 FROM ghcr.io/graalvm/native-image:22.3.3 AS build
 
-# Copy
+# Copy and build
 WORKDIR /app
 COPY . ./
-
-# Build
 RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true -Dspring-boot.run.profiles=prod && \
-  javac InstallCert.java
+    javac InstallCert.java
 
-  ### Deployer
-FROM eclipse-temurin:17.0.11_9-jdk-jammy AS deploy
+
+### Deployer
+FROM gcr.io/distroless/java-base:nonroot
+# FROM eclipse-temurin:17.0.11_9-jdk-jammy
 
 # Java vars
 ENV LANG=en_CA.UTF-8
@@ -20,10 +21,10 @@ ENV LC_ALL=en_CA.UTF-8
 WORKDIR /usr/share/service/
 COPY --from=build /app/target/*.jar /app/*.class ./artifacts/
 COPY dockerfile-entrypoint.sh ./
-RUN mkdir config dump public && \
-    chmod -R g+w . && \
-    chmod g+x dockerfile-entrypoint.sh && \
-    chmod g+w ${JAVA_HOME}/lib/security/cacerts
+# RUN mkdir config dump public && \
+#     chmod -R g+w . && \
+#     chmod g+x dockerfile-entrypoint.sh && \
+#     chmod g+w ${JAVA_HOME}/lib/security/cacerts
 
 # User, port and healthcheck
 USER 1001
