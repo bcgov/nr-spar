@@ -19,7 +19,7 @@ ENV LC_ALL=en_CA.UTF-8
 
 # Setup package/archive and supporting files
 WORKDIR /usr/share/service/
-COPY --from=build /app/target/*.jar /app/*.class entrypoint.sh ./artifacts/
+COPY --from=build /app/target/*.jar /app/*.class /app/entrypoint.sh ./artifacts/
 
 # RUN mkdir config dump public && \
 #     chmod -R g+w . && \
