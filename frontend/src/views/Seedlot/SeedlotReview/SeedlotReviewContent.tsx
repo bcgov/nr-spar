@@ -212,7 +212,8 @@ const SeedlotReviewContent = () => {
       applicantEmailAddress: applicantData.email.value,
       seedlotSourceCode: applicantData.sourceCode.value,
       toBeRegistrdInd: applicantData.willBeRegistered.value,
-      bcSourceInd: applicantData.isBcSource.value
+      bcSourceInd: applicantData.isBcSource.value,
+      revisionCount: seedlotData?.revisionCount
     };
 
     const seedlotReviewSeedPlanZones: SeedPlanZoneDto[] = [{

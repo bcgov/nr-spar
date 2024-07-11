@@ -65,7 +65,7 @@ Run (from the project root):
 docker-compose up database -d
 ```
 
-Then head to http://localhost:8090/actuator/health to check if the service was successfully launched:
+Then head to http://localhost:8090/health to check if the service was successfully launched:
 the first `status` property should have the value **UP**.
 
 Before writing your first line of code, and learn more about the checks, including
@@ -76,11 +76,6 @@ tests, please take a moment and check out our [CONTRIBUTING](CONTRIBUTING.md) gu
 If you want to have all frontend, backend and database, just run:
 ```sh
 docker compose up backend -d
-```
-
-But if you can see only the backend and databse, run from the `backend` directory:
-```sh
-./mvnw spring-boot:run -Pdocker-compose -Dspring-boot.run.profiles=docker-compose
 ```
 
 If you need to change the code, no problem. Once you hit Ctrl+S keys

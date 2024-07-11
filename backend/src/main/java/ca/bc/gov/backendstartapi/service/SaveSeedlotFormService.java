@@ -5,7 +5,6 @@ import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
-import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.JsonParsingException;
 import ca.bc.gov.backendstartapi.exception.RevisionCountMismatchException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
@@ -13,7 +12,6 @@ import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
-import ca.bc.gov.backendstartapi.security.UserInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,7 +42,7 @@ public class SaveSeedlotFormService {
 
     String seedlotApplicantClientNumber = relatedSeedlot.getApplicantClientNumber();
 
-    verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
+    loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
 
     Optional<SaveSeedlotProgressEntityClassA> optionalEntityToSave =
         saveSeedlotProgressRepositoryClassA.findById(seedlotNumber);
@@ -98,7 +96,7 @@ public class SaveSeedlotFormService {
   }
 
   /**
-   * Retreives a {@link SaveSeedlotProgressEntityClassA} then convert it to {@link
+   * Retrieves a {@link SaveSeedlotProgressEntityClassA} then convert it to {@link
    * SaveSeedlotFormDtoClassA} upon return.
    */
   public SaveSeedlotFormDtoClassA getFormClassA(@NonNull String seedlotNumber) {
@@ -113,7 +111,7 @@ public class SaveSeedlotFormService {
       SparLog.info("A-class seedlot progress found for seedlot number {}", seedlotNumber);
 
       String seedlotApplicantClientNumber = form.get().getSeedlot().getApplicantClientNumber();
-      verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
+      loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
     }
 
     return form.map(
@@ -133,7 +131,7 @@ public class SaveSeedlotFormService {
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     String seedlotApplicantClientNumber = relatedSeedlot.getApplicantClientNumber();
-    verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
+    loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -155,22 +153,6 @@ public class SaveSeedlotFormService {
       return json;
     } catch (JsonProcessingException e) {
       throw new JsonParsingException();
-    }
-  }
-
-  /**
-   * Verify if the service initiator has the correct access.
-   *
-   * @param seedlot to verify
-   * @throw an {@link ClientIdForbiddenException}
-   */
-  private void verifySeedlotAccessPrivilege(String seedlotApplicantClientNumber) {
-    Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
-
-    if (userInfo.isEmpty() || !userInfo.get().clientIds().contains(seedlotApplicantClientNumber)) {
-      SparLog.info(
-          "Request denied due to user not having client id: {}", seedlotApplicantClientNumber);
-      throw new ClientIdForbiddenException();
     }
   }
 }

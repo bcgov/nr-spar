@@ -55,7 +55,7 @@ services:
       - ./backend:/app
       - $HOME/zscaler-certs:/certs
     healthcheck:
-      test: curl -f http://localhost:8090/actuator/health | grep '"status":"UP"'
+      test: curl -f http://localhost:8090/health | grep '"status":"UP"'
 
   frontend:
     container_name: frontend
@@ -161,8 +161,8 @@ services:
       ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
       ORACLE_PORT: ${ORACLE_PORT:-1543}
       ORACLE_SERVICE: ${ORACLE_SERVICE:-dbq01.nrs.bcgov}
-      ORACLE_SYNC_PASSWORD: ${ORACLE_PASSWORD}
-      ORACLE_SYNC_USER: ${ORACLE_USER:-proxy_fsa_spar_read_only_user}
+      ORACLE_SYNC_PASSWORD: ${ORACLE_SYNC_PASSWORD}
+      ORACLE_SYNC_USER: ${ORACLE_SYNC_USER:-proxy_fsa_spar_read_only_user}
     depends_on:
       database:
         condition: service_started

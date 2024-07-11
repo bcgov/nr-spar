@@ -206,6 +206,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }: Pro
       if (famUser.clientRoles.length === 1) {
         // If a user has only 1 client role then set it right away.
         setSelectedClientRoles(famUser.clientRoles[0]);
+        setIsTscAdmin(famUser.clientRoles[0].roles.includes(TSC_ADMIN_ROLE));
       } else {
         restoreSelectedClient(famUser);
       }
