@@ -40,7 +40,6 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
-import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
@@ -215,9 +214,7 @@ public class SeedlotService {
       String clientId, int pageNumber, int pageSize) {
     Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
 
-    if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
-      throw new ClientIdForbiddenException();
-    }
+    loggedUserService.verifySeedlotAccessPrivilege(clientId);
 
     SparLog.info(
         "Retrieving paginated list of seedlots for the user: {} with client id: {}",
