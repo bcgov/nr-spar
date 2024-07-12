@@ -17,7 +17,7 @@ jobs:
     name: Cypress
     env:
       CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-      CYPRESS_USERNAME: ${{ secrets.CYPRESS_USERNAME }}
+      CYPRESS_USERNAME: ${{ vars.CYPRESS_USERNAME }}
       CYPRESS_LOGIN_SERVICE: ${{ vars.CYPRESS_LOGIN_SERVICE }}
       VITE_SERVER_URL: https://${{ github.event.repository.name }}-${{ inputs.target }}-backend.apps.silver.devops.gov.bc.ca
       VITE_ORACLE_SERVER_URL: https://nr-spar-${{ inputs.target }}-oracle-api.apps.silver.devops.gov.bc.ca

@@ -1,12 +1,8 @@
 package ca.bc.gov.backendstartapi.security;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,8 +12,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserAuthenticationHelper {
-
-  @Autowired private Environment environment;
 
   /**
    * Get the logged user information.
@@ -89,18 +83,6 @@ public class UserAuthenticationHelper {
     }
 
     SparLog.info("User not authenticated!");
-
-    // Checks if it's the 'docker-compose' profile enabled (local dev env)
-    boolean isDockerComposeProfile = false;
-    if (!Objects.isNull(environment)) {
-      String[] profiles = environment.getActiveProfiles();
-      isDockerComposeProfile = Arrays.asList(profiles).contains("docker-compose");
-    }
-
-    if (isDockerComposeProfile) {
-      SparLog.info("Local development environment found! Using dev user!");
-      return Optional.of(UserInfo.createDevUser());
-    }
 
     return Optional.empty();
   }

@@ -40,11 +40,11 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
-import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.GeneticClassNotFoundException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.exception.OracleApiProviderException;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormValidationException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
@@ -214,13 +214,11 @@ public class SeedlotService {
       String clientId, int pageNumber, int pageSize) {
     Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
 
-    if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
-      throw new ClientIdForbiddenException();
-    }
+    loggedUserService.verifySeedlotAccessPrivilege(clientId);
 
     SparLog.info(
         "Retrieving paginated list of seedlots for the user: {} with client id: {}",
-        userInfo.get().id(),
+        userInfo.isPresent() ? userInfo.get().id() : null,
         clientId);
 
     if (pageSize == 0) {
@@ -256,12 +254,8 @@ public class SeedlotService {
     SparLog.info("Seedlot number {} found", seedlotNumber);
 
     String clientId = seedlotEntity.getApplicantClientNumber();
-    Optional<UserInfo> userInfo = loggedUserService.getLoggedUserInfo();
 
-    if (userInfo.isPresent() && !userInfo.get().clientIds().contains(clientId)) {
-      SparLog.info("User has no access to seedlot {}, request denied.", seedlotNumber);
-      throw new ClientIdForbiddenException();
-    }
+    loggedUserService.verifySeedlotAccessPrivilege(clientId);
 
     SeedlotDto seedlotDto = new SeedlotDto();
 
@@ -306,6 +300,28 @@ public class SeedlotService {
     seedlotDto.setPrimarySpz(primarySpz);
 
     seedlotDto.setAdditionalSpzList(additionalSpzList);
+
+    SparLog.info("Finding Seedlot genetic worth for seedlot number {}", seedlotNumber);
+    List<SeedlotGeneticWorth> genWorthData =
+        seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotNumber);
+
+    List<GeneticWorthTraitsDto> genWorthTraits = new ArrayList<>();
+    genWorthData.forEach(
+        (genWorth) -> {
+          GeneticWorthTraitsDto dto =
+              new GeneticWorthTraitsDto(
+                  genWorth.getGeneticWorthCode(),
+                  null,
+                  genWorth.getGeneticQualityValue(),
+                  genWorth.getTestedParentTreeContributionPercentage());
+          genWorthTraits.add(dto);
+        });
+    seedlotDto.setCalculatedValues(genWorthTraits);
+    SparLog.info(
+        "Found {} Seedlot genetic worth stored for seedlot number {}",
+        genWorthTraits.size(),
+        seedlotNumber);
+
     return seedlotDto;
   }
 
@@ -369,7 +385,7 @@ public class SeedlotService {
 
     for (SeedlotParentTreeGeneticQuality parentTreeGenQual : genQualityData) {
       Integer curParentTreeId = parentTreeGenQual.getId().getSeedlotParentTree().getParentTreeId();
-      if (curParentTreeId == parentTreeId) {
+      if (curParentTreeId.equals(parentTreeId)) {
         ParentTreeGeneticQualityDto parentTreeGenQualDto =
             new ParentTreeGeneticQualityDto(
                 parentTreeGenQual.getGeneticTypeCode(),
@@ -629,12 +645,17 @@ public class SeedlotService {
    * @throws SeedlotNotFoundException in case of seedlot not found error.
    * @throws SeedlotSourceNotFoundException in case of seedlot source not found error.
    */
-  public Seedlot patchApplicantionInfo(
+  public Seedlot patchApplicantInfo(
       @NonNull String seedlotNumber, SeedlotApplicationPatchDto patchDto) {
     SparLog.info("Patching seedlot entry for seedlot number {}", seedlotNumber);
 
     Seedlot seedlotInfo =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    if (!patchDto.revisionCount().equals(seedlotInfo.getRevisionCount())) {
+      SparLog.info("Seedlot number {} updated by another user", seedlotNumber);
+      throw new SeedlotConflictDataException(seedlotNumber);
+    }
 
     SparLog.info("Seedlot number {} found", seedlotNumber);
 
@@ -752,6 +773,7 @@ public class SeedlotService {
       // Calculate Seedlot GeoSpatial (for Seedlot, mean latitude, mean longitude, mean elevation)
       // Calculate Genetic Worth
       // Update Seedlot Ne, collection elevation, and collection lat long
+      // Saved the Seedlot calculated Genetic Worth
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
 
@@ -775,6 +797,9 @@ public class SeedlotService {
       // Override Seedlot Ne, collection elevation, and collection lat long
       // Set values in the Seedlot instance only
       tscAdminService.overrideSeedlotCollElevLatLong(seedlot, form.seedlotReviewGeoInformation());
+
+      // Override Seedlot Genetic Worth values
+      seedlotGeneticWorthService.overrideSeedlotGenWorth(seedlot, form.seedlotReviewGeneticWorth());
     }
 
     // Only set declaration info for pending seedlots
@@ -852,6 +877,9 @@ public class SeedlotService {
     seedlot.setCollectionLongitudeMin(collectionGeoData.getMeanLongitudeMinute());
     seedlot.setCollectionLongitudeSec(collectionGeoData.getMeanLongitudeSecond());
     SparLog.info("Parent trees contribution set");
+
+    SparLog.info("Saving Seedlot genetic worth calculated values");
+    seedlotGeneticWorthService.saveSeedlotGenWorth(seedlot, ptCalculationResDto.geneticTraits());
   }
 
   private List<OrchardParentTreeValsDto> convertToPtVals(
@@ -900,7 +928,7 @@ public class SeedlotService {
             genQual -> {
               GeneticWorthTraitsDto toAdd =
                   new GeneticWorthTraitsDto(
-                      genQual.geneticTypeCode(), genQual.geneticQualityValue(), null, null);
+                      genQual.geneticWorthCode(), genQual.geneticQualityValue(), null, null);
               genTraitList.add(toAdd);
             });
 
@@ -1052,7 +1080,7 @@ public class SeedlotService {
     // If the facility type is Other, then a description is required.
     SparLog.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
     SparLog.info("FACILITY TYPE Desc", formStep3.intermOtherFacilityDesc());
-    if (formStep3.intermFacilityCode().equals("OTH")) {
+    if ("OTH".equals(formStep3.intermFacilityCode())) {
       SparLog.info("equal to OTH");
       if (formStep3.intermOtherFacilityDesc() == null
           || formStep3.intermOtherFacilityDesc().isEmpty()) {

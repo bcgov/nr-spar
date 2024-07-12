@@ -1,11 +1,17 @@
 import React, { useContext } from 'react';
+import validator from 'validator';
 import {
   Row, Column, TextInput, TextInputSkeleton
 } from '@carbon/react';
-import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import ReadOnlyInput from '../../ReadOnlyInput';
-import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import { GenWorthValType } from '../../../views/Seedlot/SeedlotReview/definitions';
+import InfoDisplayObj from '../../../types/InfoDisplayObj';
+import { isFloatWithinRange } from '../../../utils/NumberUtils';
+import {
+  MIN_VALUE_GEN_WORTH, MAX_VALUE_GEN_WORTH,
+  MAX_DECIMAL_DIGITS, GEN_WORTH_ERR_MSG
+} from './constants';
 
 type EditGenWorthProps = {
   genWorthValues: InfoDisplayObj[][];
@@ -13,8 +19,28 @@ type EditGenWorthProps = {
 
 const EditGenWorth = ({ genWorthValues }: EditGenWorthProps) => {
   const {
-    isCalculatingPt, genWorthVals, setGenWorthVal
+    isCalculatingPt, genWorthVals, setGenWorthInputObj
   } = useContext(ClassAContext);
+
+  const handleInput = (key: keyof GenWorthValType, value: string | null) => {
+    const newObj = structuredClone(genWorthVals[key]);
+
+    newObj.value = value ?? '';
+
+    if (value) {
+      let isValid = isFloatWithinRange(value, MIN_VALUE_GEN_WORTH, MAX_VALUE_GEN_WORTH);
+      if (isValid) {
+        isValid = validator.isDecimal(value, { decimal_digits: `0,${MAX_DECIMAL_DIGITS}` });
+      }
+      newObj.isInvalid = !isValid;
+
+      if (!isValid) {
+        newObj.errMsg = GEN_WORTH_ERR_MSG;
+      }
+    }
+
+    setGenWorthInputObj(key, newObj);
+  };
 
   const displayTextInput = (genObj: InfoDisplayObj) => {
     if (isCalculatingPt) {
@@ -29,12 +55,15 @@ const EditGenWorth = ({ genWorthValues }: EditGenWorthProps) => {
         labelText={genObj.name}
         defaultValue={genObj.value}
         type="number"
+        onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
         onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
           const genWorthKeys = Object.keys(genWorthVals) as (keyof GenWorthValType)[];
           if (genWorthKeys.includes(genWorth)) {
-            setGenWorthVal(genWorth, e.target.value);
+            handleInput(genWorth, e.target.value);
           }
         }}
+        invalid={genWorthVals[genWorth].isInvalid}
+        invalidText={genWorthVals[genWorth].errMsg}
       />
     );
   };

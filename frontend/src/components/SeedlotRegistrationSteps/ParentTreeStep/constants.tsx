@@ -47,6 +47,12 @@ export const MAX_DECIMAL_DIGITS = 10;
 
 export const MAX_VISIBLE_PT_NUMBERS = 10;
 
+export const MAX_VALUE_GEN_WORTH = '100';
+
+export const MIN_VALUE_GEN_WORTH = '-100';
+
+export const GEN_WORTH_ERR_MSG = `Must be between ${MIN_VALUE_GEN_WORTH} and ${MAX_VALUE_GEN_WORTH}`;
+
 export const getDownloadUrl = (tabType: string) => {
   if (tabType === 'Calculation of SMP mix' || tabType === 'mixTab') {
     return SmpMixCsvTemplate;

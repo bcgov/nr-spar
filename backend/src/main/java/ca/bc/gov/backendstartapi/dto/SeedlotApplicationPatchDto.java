@@ -37,4 +37,9 @@ public record SeedlotApplicationPatchDto(
             description = "Indicates whether the source of the Seedlot is within British Columbia",
             example = "true")
         @NotNull
-        Boolean bcSourceInd) {}
+        Boolean bcSourceInd,
+    @Schema(
+            description = "Number representing the revision version of the seedlot record",
+            example = "42")
+        @NotNull
+        Integer revisionCount) {}

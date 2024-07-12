@@ -27,4 +27,7 @@ public class SeedlotDto {
 
   @Schema(description = "A list of additional seed plan zones")
   private List<SeedPlanZoneDto> additionalSpzList;
+
+  @Schema(description = "Seedlot genetic worth stored values in the database")
+  private List<GeneticWorthTraitsDto> calculatedValues;
 }

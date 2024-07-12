@@ -23,8 +23,8 @@ jobs:
         with:
           browser: chrome
         env:
-          CYPRESS_USERNAME: ${{ secrets.BCEID_USERNAME }}
-          CYPRESS_PASSWORD: ${{ secrets.BCEID_PASSWORD }}
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+          CYPRESS_USERNAME: ${{ vars.CYPRESS_USERNAME }}
       
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4
@@ -53,8 +53,8 @@ jobs:
       - name: Cypress run
         run: cypress run --browser firefox
         env:
-          CYPRESS_USERNAME: ${{ secrets.BCEID_USERNAME }}
-          CYPRESS_PASSWORD: ${{ secrets.BCEID_PASSWORD }}
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+          CYPRESS_USERNAME: ${{ vars.CYPRESS_USERNAME }}
       
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4

@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,6 +38,7 @@ import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTree;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeGeneticQuality;
 import ca.bc.gov.backendstartapi.entity.SeedlotParentTreeSmpMix;
+import ca.bc.gov.backendstartapi.entity.SeedlotSeedPlanZoneEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotSourceEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotStatusEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
@@ -48,6 +50,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOwnerQuantity;
 import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
+import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
@@ -347,6 +350,10 @@ class SeedlotServiceTest {
   void getUserSeedlots_forbidden_shouldFail() {
     when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
 
+    doThrow(ClientIdForbiddenException.class)
+        .when(loggedUserService)
+        .verifySeedlotAccessPrivilege(any());
+
     Assertions.assertThrows(
         ClientIdForbiddenException.class,
         () -> {
@@ -361,14 +368,36 @@ class SeedlotServiceTest {
     Seedlot seedlotEntity = new Seedlot(seedlotId);
 
     when(seedlotRepository.findById(seedlotId)).thenReturn(Optional.of(seedlotEntity));
-    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId)).thenReturn(List.of());
+
+    GeneticClassEntity classEntity = new GeneticClassEntity("A", "A class seedlot", DATE_RANGE);
+    SeedlotSeedPlanZoneEntity spzEntity =
+        new SeedlotSeedPlanZoneEntity(seedlotEntity, "AA", classEntity, true, "Description");
+    when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotId))
+        .thenReturn(List.of(spzEntity));
     when(seedlotOrchardService.getPrimarySeedlotOrchard(seedlotId)).thenReturn(Optional.empty());
+
+    SeedlotGeneticWorth seedlotGenWor =
+        new SeedlotGeneticWorth(
+            seedlotEntity, new GeneticWorthEntity("GVO", "", null), new AuditInformation("userId"));
+    seedlotGenWor.setGeneticQualityValue(new BigDecimal("18"));
+    seedlotGenWor.setTestedParentTreeContributionPercentage(new BigDecimal("88"));
+
+    when(seedlotGeneticWorthService.getAllBySeedlotNumber(seedlotId))
+        .thenReturn(List.of(seedlotGenWor));
 
     SeedlotDto responseFromService = seedlotService.getSingleSeedlotInfo(seedlotId);
 
     Assertions.assertNotNull(responseFromService);
     Assertions.assertEquals(seedlotEntity, responseFromService.getSeedlot());
     Assertions.assertNull(responseFromService.getPrimarySpu());
+    Assertions.assertNotNull(responseFromService.getCalculatedValues());
+    Assertions.assertEquals(1, responseFromService.getCalculatedValues().size());
+    Assertions.assertEquals("GVO", responseFromService.getCalculatedValues().get(0).traitCode());
+    Assertions.assertEquals(
+        new BigDecimal("18"), responseFromService.getCalculatedValues().get(0).calculatedValue());
+    Assertions.assertEquals(
+        new BigDecimal("88"),
+        responseFromService.getCalculatedValues().get(0).testedParentTreePerc());
   }
 
   @Test
@@ -447,7 +476,7 @@ class SeedlotServiceTest {
   @DisplayName("A-Class Seedlot Form success test")
   void findAclassSeedlotFormFullDataSuccessTest() {
     String seedlotNumber = "0000000";
-    String onwerNumber = "1234";
+    String ownerNumber = "1234";
     String ownerLoc = "01";
     String methodOfPayment = "TEST";
     Seedlot seedlotEntity = new Seedlot(seedlotNumber);
@@ -511,9 +540,9 @@ class SeedlotServiceTest {
         List.of(new SeedlotCollectionMethod(seedlotEntity, new ConeCollectionMethodEntity()));
 
     SeedlotOwnerQuantity seedlotOwners =
-        new SeedlotOwnerQuantity(seedlotEntity, onwerNumber, ownerLoc);
-    BigDecimal orginalPercOwned = new BigDecimal(100);
-    seedlotOwners.setOriginalPercentageOwned(orginalPercOwned);
+        new SeedlotOwnerQuantity(seedlotEntity, ownerNumber, ownerLoc);
+    BigDecimal originalPercentOwned = new BigDecimal(100);
+    seedlotOwners.setOriginalPercentageOwned(originalPercentOwned);
     seedlotOwners.setMethodOfPayment(new MethodOfPaymentEntity(methodOfPayment, "", null));
 
     String orchardId = "100";
@@ -575,7 +604,13 @@ class SeedlotServiceTest {
                 null, null, null, null, null, null, null, null, List.of(0)),
             List.of(
                 new SeedlotFormOwnershipDto(
-                    onwerNumber, ownerLoc, orginalPercOwned, null, null, methodOfPayment, null)),
+                    ownerNumber,
+                    ownerLoc,
+                    originalPercentOwned,
+                    null,
+                    null,
+                    methodOfPayment,
+                    null)),
             new SeedlotFormInterimDto(null, null, null, null, null, null),
             new SeedlotFormOrchardDto(
                 orchardId, null, null, null, null, null, null, null, null, null),
@@ -625,12 +660,12 @@ class SeedlotServiceTest {
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.empty());
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", false, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", false, false, 0);
 
     Assertions.assertThrows(
         SeedlotNotFoundException.class,
         () -> {
-          seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
         });
   }
 
@@ -640,7 +675,7 @@ class SeedlotServiceTest {
     String seedlotNumber = "123456";
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false, 0);
 
     when(seedlotRepository.findById(seedlotNumber))
         .thenReturn(Optional.of(new Seedlot(seedlotNumber)));
@@ -651,7 +686,25 @@ class SeedlotServiceTest {
     Assertions.assertThrows(
         SeedlotSourceNotFoundException.class,
         () -> {
-          seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
+        });
+  }
+
+  @Test
+  @DisplayName("Patch applicant info conflict should fail")
+  void patchApplicantInfo_conflict_shouldFail() {
+    String seedlotNumber = "123456";
+
+    when(seedlotRepository.findById(seedlotNumber))
+        .thenReturn(Optional.of(new Seedlot(seedlotNumber)));
+
+    SeedlotApplicationPatchDto testDto =
+        new SeedlotApplicationPatchDto("groot@wood.com", "PlanetX", false, false, 46);
+
+    Assertions.assertThrows(
+        SeedlotConflictDataException.class,
+        () -> {
+          seedlotService.patchApplicantInfo(seedlotNumber, testDto);
         });
   }
 
@@ -661,7 +714,7 @@ class SeedlotServiceTest {
     String seedlotNumber = "123456";
 
     SeedlotApplicationPatchDto testDto =
-        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", true, false);
+        new SeedlotApplicationPatchDto("groot@wood.com", "CUS", true, false, 0);
 
     Seedlot testSeedlot = new Seedlot(seedlotNumber);
 
@@ -673,7 +726,7 @@ class SeedlotServiceTest {
     // Returns the seedlot that's about to be saved os we can compare the object.
     when(seedlotRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-    Seedlot patchedSeedlot = seedlotService.patchApplicantionInfo(seedlotNumber, testDto);
+    Seedlot patchedSeedlot = seedlotService.patchApplicantInfo(seedlotNumber, testDto);
 
     assertEquals(testDto.applicantEmailAddress(), patchedSeedlot.getApplicantEmailAddress());
     assertEquals(
@@ -682,6 +735,8 @@ class SeedlotServiceTest {
     assertEquals(testDto.bcSourceInd(), patchedSeedlot.getSourceInBc());
   }
 
+  @Test
+  @DisplayName("Update seedlot with form tsc admin happy path should succeed")
   void updateSeedlotWithForm_tscAdmin_happyPath_shouldSucceed() {
     String statusOnSuccess = "SUB";
     SeedlotStatusEntity seedlotStatusEntity =
@@ -695,45 +750,72 @@ class SeedlotServiceTest {
     seedlot.setSeedlotStatus(seedlotStatusEntity);
     when(seedlotRepository.findById(seedlotNumber)).thenReturn(Optional.of(seedlot));
 
+    SeedlotFormCollectionDto collectionDto = mock(SeedlotFormCollectionDto.class);
+
     // Steps 1 to 4
-    doNothing().when(seedlotCollectionMethodService).saveSeedlotFormStep1(any(), any(), any());
-    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(any(), any(), any()))
+    doNothing()
+        .when(seedlotCollectionMethodService)
+        .saveSeedlotFormStep1(seedlot, collectionDto, true);
+
+    SeedlotFormOwnershipDto ownershipDto = mock(SeedlotFormOwnershipDto.class);
+    when(seedlotOwnerQuantityService.saveSeedlotFormStep2(seedlot, List.of(ownershipDto), true))
         .thenReturn(List.of());
-    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(any(), any(), any());
+
+    SeedlotFormInterimDto formStep3 = mock(SeedlotFormInterimDto.class);
+    when(formStep3.intermFacilityCode()).thenReturn("A");
+
+    SeedlotFormOrchardDto formOrchardDto =
+        new SeedlotFormOrchardDto("405", null, null, null, null, false, false, 0, null, null);
+
+    doNothing().when(seedlotOrchardService).saveSeedlotFormStep4(seedlot, formOrchardDto, true);
 
     //  Step 5
-    when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), any())).thenReturn(List.of());
+    SeedlotFormParentTreeSmpDto parentTreeSmpDto = mock(SeedlotFormParentTreeSmpDto.class);
+    when(seedlotParentTreeService.saveSeedlotFormStep5(seedlot, List.of(parentTreeSmpDto), true))
+        .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), any()))
+
+    when(seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, List.of(parentTreeSmpDto), true))
         .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    doNothing().when(seedlotParentTreeSmpMixService).saveSeedlotFormStep5(any(), any(), any());
+    doNothing()
+        .when(seedlotParentTreeSmpMixService)
+        .saveSeedlotFormStep5(seedlot, List.of(parentTreeSmpDto), true);
 
     // setBecValues
     OrchardDto orchardDto = mock(OrchardDto.class);
     when(oracleApiProvider.findOrchardById(anyString())).thenReturn(Optional.of(orchardDto));
+    when(orchardService.findSpuIdByOrchard(anyString()))
+        .thenReturn(Optional.of(mock(ActiveOrchardSpuEntity.class)));
 
     // tscAdminService
     doNothing().when(tscAdminService).overrideElevLatLongMinMax(any(), any());
     doNothing().when(tscAdminService).overrideAreaOfUse(any(), any());
     doNothing().when(tscAdminService).overrideSeedlotCollElevLatLong(any(), any());
+    when(seedlotGeneticWorthService.overrideSeedlotGenWorth(any(), any())).thenReturn(List.of());
 
     // setSeedlotStatus
     when(seedlotStatusService.getValidSeedlotStatus(statusOnSuccess))
         .thenReturn(Optional.of(seedlotStatusEntity));
+
+    when(seedlotSourceRepository.findById(anyString()))
+        .thenReturn(Optional.of(mock(SeedlotSourceEntity.class)));
 
     // saving
     when(seedlotRepository.save(any())).thenReturn(seedlot);
 
     SeedlotFormInterimDto formInterimDto = mock(SeedlotFormInterimDto.class);
 
+    SeedlotApplicationPatchDto applicationPatchDto =
+        new SeedlotApplicationPatchDto("email@bcgov.ca", "A", true, true, 0);
+
     SeedlotFormSubmissionDto form =
         new SeedlotFormSubmissionDto(
             mock(SeedlotFormCollectionDto.class), // SeedlotFormCollectionDto
             List.of(mock(SeedlotFormOwnershipDto.class)), // List<SeedlotFormOwnershipDto>
             formInterimDto, // SeedlotFormInterimDto
-            mock(SeedlotFormOrchardDto.class), // SeedlotFormOrchardDto
+            formOrchardDto, // SeedlotFormOrchardDto
             List.of(mock(SeedlotFormParentTreeSmpDto.class)), // List<SeedlotFormParentTreeSmpDto>
             List.of(mock(SeedlotFormParentTreeSmpDto.class)), // List<SeedlotFormParentTreeSmpDto>
             mock(SeedlotFormExtractionDto.class), // SeedlotFormExtractionDto
@@ -741,7 +823,7 @@ class SeedlotServiceTest {
             mock(SeedlotReviewElevationLatLongDto.class), // SeedlotReviewElevationLatLongDto
             List.of(mock(GeneticWorthTraitsDto.class)), // List<GeneticWorthTraitsDto>
             mock(SeedlotReviewGeoInformationDto.class),
-            mock(SeedlotApplicationPatchDto.class)); // SeedlotReviewGeoInformationDto
+            applicationPatchDto); // SeedlotReviewGeoInformationDto
 
     boolean isTscAdmin = true;
 
@@ -754,5 +836,6 @@ class SeedlotServiceTest {
     verify(tscAdminService, times(1)).overrideElevLatLongMinMax(any(), any());
     verify(tscAdminService, times(1)).overrideAreaOfUse(any(), any());
     verify(tscAdminService, times(1)).overrideSeedlotCollElevLatLong(any(), any());
+    verify(seedlotGeneticWorthService, times(1)).overrideSeedlotGenWorth(any(), any());
   }
 }

@@ -349,7 +349,7 @@ public class SeedlotEndpoint {
   /**
    * PATCH an entry on the Seedlot table.
    *
-   * @param patchDto A {@link SeedlotApplicationPatchDto} containig all required field to get a new
+   * @param patchDto A {@link SeedlotApplicationPatchDto} containing all required field to get a new
    *     registration started.
    * @return A {@link Seedlot} with all updated values.
    */
@@ -401,7 +401,7 @@ public class SeedlotEndpoint {
           @Valid
           SeedlotApplicationPatchDto patchDto) {
 
-    return seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
+    return seedlotService.patchApplicantInfo(seedlotNumber, patchDto);
   }
 
   /**
@@ -503,7 +503,7 @@ public class SeedlotEndpoint {
   }
 
   /** Retrieves the saved Seedlot reg form. */
-  @GetMapping("{seedlotNumber}/a-class-form-progress")
+  @GetMapping("/{seedlotNumber}/a-class-form-progress")
   @Operation(
       summary = "Retrieve the progress and data of an a-class reg form.",
       description = "This endpoint retrieves the progress of an A-class registration form")
@@ -538,8 +538,8 @@ public class SeedlotEndpoint {
     return saveSeedlotFormService.getFormClassA(seedlotNumber);
   }
 
-  /** Retreive only the progress_status column from the form progress table. */
-  @GetMapping("{seedlotNumber}/a-class-form-progress/status")
+  /** Retrieve only the progress_status column from the form progress table. */
+  @GetMapping("/{seedlotNumber}/a-class-form-progress/status")
   @Operation(
       summary = "Retrieve the progress status of an a-class reg form.",
       description =

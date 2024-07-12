@@ -18,12 +18,18 @@ parameters:
   - name: ORACLE_SERVICE
     description: Oracle service name
     value: dbq01.nrs.bcgov
-  - name: ORACLE_USER
-    description: Oracle database username for API
-    value: proxy_fsa_spar_sync_user
   - name: ORACLE_PASSWORD
     description: Oracle database password for API
     required: true
+  - name: ORACLE_USER
+    description: Oracle database username for API
+    value: proxy_fsa_spar_read_only_user
+  - name: ORACLE_SYNC_PASSWORD
+    description: Oracle database password for Sync
+    required: true
+  - name: ORACLE_SYNC_USER
+    description: Oracle database username for Sync
+    value: proxy_fsa_spar_sync_user
 objects:
   - apiVersion: v1
     kind: Secret
@@ -37,6 +43,8 @@ objects:
       oracle-port: ${ORACLE_PORT}
       oracle-service: ${ORACLE_SERVICE}
       oracle-user: ${ORACLE_USER}
+      oracle-sync-password: ${ORACLE_SYNC_PASSWORD}
+      oracle-sync-user: ${ORACLE_SYNC_USER}
   - apiVersion: v1
     kind: Secret
     metadata:
@@ -68,16 +76,3 @@ objects:
     spec:
       policyTypes:
         - Ingress
-  - kind: PersistentVolumeClaim
-    apiVersion: v1
-    metadata:
-      labels:
-        app: ${NAME}-${ZONE}
-      name: ${NAME}-${ZONE}-fluentbit-logs
-    spec:
-      accessModes:
-        - ReadWriteMany
-      resources:
-        requests:
-          storage: "75Mi"
-      storageClassName: netapp-file-standard
