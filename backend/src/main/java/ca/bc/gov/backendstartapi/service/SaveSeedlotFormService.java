@@ -1,10 +1,12 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
+import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.entity.SaveSeedlotProgressEntityClassA;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.JsonParsingException;
+import ca.bc.gov.backendstartapi.exception.RevisionCountMismatchException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
@@ -31,11 +33,16 @@ public class SaveSeedlotFormService {
   private final LoggedUserService loggedUserService;
 
   /** Saves the {@link SaveSeedlotFormDtoClassA} to table. */
-  public void saveFormClassA(@NonNull String seedlotNumber, SaveSeedlotFormDtoClassA data) {
+  public RevisionCountDto saveFormClassA(
+      @NonNull String seedlotNumber, SaveSeedlotFormDtoClassA data) {
     SparLog.info("Saving A-Class seedlot progress for seedlot number: {}", seedlotNumber);
 
     Seedlot relatedSeedlot =
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    String seedlotApplicantClientNumber = relatedSeedlot.getApplicantClientNumber();
+
+    loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
 
     Optional<SaveSeedlotProgressEntityClassA> optionalEntityToSave =
         saveSeedlotProgressRepositoryClassA.findById(seedlotNumber);
@@ -57,7 +64,21 @@ public class SaveSeedlotFormService {
               parsedProgressStatus,
               loggedUserService.createAuditCurrentUser());
     } else {
-      SparLog.warn(
+      // Revision Count verification
+      Integer prevRevCount = data.revisionCount();
+      Integer currRevCount = optionalEntityToSave.get().getRevisionCount();
+
+      if (prevRevCount != null && !prevRevCount.equals(currRevCount)) {
+        // Conflict detected
+        SparLog.info(
+            "Save progress failed due to revision count mismatch, prev revision count: {}, curr"
+                + " revision count: {}",
+            prevRevCount,
+            currRevCount);
+        throw new RevisionCountMismatchException();
+      }
+
+      SparLog.info(
           "A-class seedlot progress for seedlot number {} exists, replacing with new values",
           seedlotNumber);
       entityToSave = optionalEntityToSave.get();
@@ -65,13 +86,17 @@ public class SaveSeedlotFormService {
       entityToSave.setProgressStatus(parsedProgressStatus);
     }
 
-    saveSeedlotProgressRepositoryClassA.save(entityToSave);
+    SaveSeedlotProgressEntityClassA saved = saveSeedlotProgressRepositoryClassA.save(entityToSave);
+
     SparLog.info("A-class seedlot progress for seedlot number {} saved!", seedlotNumber);
-    return;
+
+    RevisionCountDto revCountDto = new RevisionCountDto(saved.getRevisionCount());
+
+    return revCountDto;
   }
 
   /**
-   * Retreives a {@link SaveSeedlotProgressEntityClassA} then convert it to {@link
+   * Retrieves a {@link SaveSeedlotProgressEntityClassA} then convert it to {@link
    * SaveSeedlotFormDtoClassA} upon return.
    */
   public SaveSeedlotFormDtoClassA getFormClassA(@NonNull String seedlotNumber) {
@@ -84,20 +109,30 @@ public class SaveSeedlotFormService {
 
     if (form.isPresent()) {
       SparLog.info("A-class seedlot progress found for seedlot number {}", seedlotNumber);
+
+      String seedlotApplicantClientNumber = form.get().getSeedlot().getApplicantClientNumber();
+      loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
     }
 
     return form.map(
             savedEntity ->
                 new SaveSeedlotFormDtoClassA(
                     mapper.convertValue(savedEntity.getAllStepData(), JsonNode.class),
-                    mapper.convertValue(savedEntity.getProgressStatus(), JsonNode.class)))
+                    mapper.convertValue(savedEntity.getProgressStatus(), JsonNode.class),
+                    form.get().getRevisionCount()))
         .orElseThrow(SeedlotFormProgressNotFoundException::new);
   }
 
   /** Retrieves the progress_status column then return it as a json object. */
   public JsonNode getFormStatusClassA(String seedlotNumber) {
-    SparLog.info(
-        "Retrieving A-class seedlot progress status for seedlot number {}", seedlotNumber);
+    SparLog.info("Retrieving A-class seedlot progress status for seedlot number {}", seedlotNumber);
+
+    Seedlot relatedSeedlot =
+        seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
+
+    String seedlotApplicantClientNumber = relatedSeedlot.getApplicantClientNumber();
+    loggedUserService.verifySeedlotAccessPrivilege(seedlotApplicantClientNumber);
+
     ObjectMapper mapper = new ObjectMapper();
 
     Optional<Object> form = saveSeedlotProgressRepositoryClassA.getStatusById(seedlotNumber);

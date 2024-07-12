@@ -20,6 +20,8 @@ import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.UserInfo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -49,6 +51,8 @@ class TscAdminServiceTest {
 
   @Mock GeneticClassRepository geneticClassRepository;
 
+  @Mock LoggedUserService loggedUserService;
+
   private TscAdminService tscAdminService;
 
   private SeedlotStatusEntity createValidStatus(String status) {
@@ -69,7 +73,8 @@ class TscAdminServiceTest {
             seedlotRepository,
             seedlotStatusService,
             seedlotSeedPlanZoneRepository,
-            geneticClassRepository);
+            geneticClassRepository,
+            loggedUserService);
   }
 
   @Test
@@ -107,7 +112,7 @@ class TscAdminServiceTest {
     when(seedlotStatusService.getValidSeedlotStatus("APP")).thenReturn(Optional.of(seedlotStatus));
     when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
 
-    Seedlot seedlotSaved = tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.TRUE);
+    Seedlot seedlotSaved = tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
 
     Assertions.assertNotNull(seedlotSaved);
     Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
@@ -128,7 +133,7 @@ class TscAdminServiceTest {
     when(seedlotStatusService.getValidSeedlotStatus("PND")).thenReturn(Optional.of(seedlotStatus));
     when(seedlotRepository.saveAndFlush(any())).thenReturn(seedlot);
 
-    Seedlot seedlotSaved = tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+    Seedlot seedlotSaved = tscAdminService.updateSeedlotStatus(seedlotNumber, "PND");
 
     Assertions.assertNotNull(seedlotSaved);
     Assertions.assertEquals(seedlotNumber, seedlotSaved.getId());
@@ -145,7 +150,7 @@ class TscAdminServiceTest {
     Assertions.assertThrows(
         SeedlotNotFoundException.class,
         () -> {
-          tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+          tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
         });
   }
 
@@ -163,16 +168,18 @@ class TscAdminServiceTest {
     Assertions.assertThrows(
         SeedlotStatusNotFoundException.class,
         () -> {
-          tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, Boolean.FALSE);
+          tscAdminService.updateSeedlotStatus(seedlotNumber, "APP");
         });
   }
 
   @Test
   @DisplayName("Update Seed Plan Zones happy path should succeed")
   void overrideAreaOfUse_happyPath_shouldSucceed() {
+    when(loggedUserService.getLoggedUserId()).thenReturn(UserInfo.createDevUser().id());
     String seedlotNumber = "63126";
 
     SeedlotSeedPlanZoneEntity seedPlanZoneEntity = mock(SeedlotSeedPlanZoneEntity.class);
+
     when(seedlotSeedPlanZoneRepository.findAllBySeedlot_id(seedlotNumber))
         .thenReturn(List.of(seedPlanZoneEntity));
     doNothing().when(seedlotSeedPlanZoneRepository).deleteAll(List.of(seedPlanZoneEntity));

@@ -107,7 +107,7 @@ class database_connection(object):
             complement = " WHERE 1=2"
 
         query = "CREATE TEMP TABLE {} as SELECT * FROM {} {}".format(table_name,from_what_table,complement)
-        print("TEMP TABLE {} created: {}".format(table_name, query) )
+        logger.debug("TEMP TABLE {} created: {}".format(table_name, query) )
         self.conn.execute(text(query), None)
 
     def execute_upsert(self, dataframe:object, table_name:str, table_pk:str, db_type:str, run_mode:str, ignore_columns_on_update:str) -> int:
@@ -143,7 +143,7 @@ class database_connection(object):
             DO UPDATE SET {' , '.join(df2.columns.values + '= EXCLUDED.'+df2.columns.values)} 
             WHERE {' OR '.join(table_clean+"."+df2.columns.values + '!= EXCLUDED.'+df2.columns.values)}
             """
-       
+        
         sql_text = f"""         
         INSERT INTO {table_name}({', '.join(dataframe.columns.values)})                
         VALUES(:{', :'.join(dataframe.columns.values)})                
@@ -153,35 +153,79 @@ class database_connection(object):
         self.commit()  # If everything is ok, a commit will be executed.
         return result.rowcount  # Number of rows affected
 
-    def delete_seedlot_child_table(self, row:object, table_name:str, seedlot_number:str ) -> int:
-        print("-------------------processing delete on row-----------------")
-        print(row[0])
-        print("-------------------processing delete on row-----------------")
+    def delete_seedlot_owner_quantity(self,seedlot_number, table_name, soqdf) -> int:
+        #special delete processing for soq - delete any owners from oracle not in postgres
+        logger.debug('Executing seedlot_owner_quantity delete for seedlot '+seedlot_number)
+        log_message = ""
+        
+        # Initializing metric variables
+        #stored_metrics['process_start_time'] = time.time()
+        #stored_metrics['time_source_extract'] = None
+        #stored_metrics['rows_from_source'] = 0
+        #stored_metrics['time_conn_target'] = None
+        #stored_metrics['rows_target_processed'] = 0
+        #stored_metrics['time_target_load'] = None
+        #stored_metrics['time_conn_source'] = None
+
+        #Delete will have multiple sets of (seedlot, cli, locn) - first one is just in case there are not rows - i.e then all will be deleted
         sql_text = f""" 
             DELETE FROM {table_name}
-             WHERE seedlot_number = :p_seedlot_number ; """
-        params = {"p_seedlot_number":seedlot_number}
+                WHERE seedlot_number = :p_seedlot_number 
+                    AND (seedlot_number,client_number,client_locn_code) NOT IN 
+                        ( ('00000','00000000','00') """
+        params = {}
+        params["p_seedlot_number"] = seedlot_number
+        for owner in soqdf.itertuples():
+            params["p_seedlot_number"+str(owner.Index)] = seedlot_number
+            params["p_client_number"+str(owner.Index)] = owner.client_number
+            params["p_client_locn_code"+str(owner.Index)] = owner.client_locn_code
+            sql_text = sql_text + f""" ,(:p_seedlot_number{str(owner.Index)},:p_client_number{str(owner.Index)},:p_client_locn_code{str(owner.Index)}) """
         
-        print("-------------------delete text-----------------")
-        print(sql_text)
-        print("-------------------delete text-----------------")
-        #TODO REMOVE comment so merge runs
-        #result = self.conn.execute(text(sql_text), params)
+        sql_text = sql_text + ")"
+        logger.debug("==================soq sql==========================================")
+        logger.debug(sql_text)
+        logger.debug(params)
+        logger.debug("===================================================================")
+
+        result = self.conn.execute(text(sql_text), params)
         
-        #self.commit()  # If everything is ok, a commit will be executed.
-        return 1#TODOresult.rowcount  # Number of rows affected
+        self.commit()  # If everything is ok, a commit will be executed.
+
+        #process_log = data_sync_ctl.include_process_log_info(stored_metrics=stored_metrics, 
+        #                                                    log_message=log_message,
+        #                                                    execution_status='SKIPPED', ## No error, but
+        #                                                    )
+        logger.debug('Finished soq deletion')
+        #data_sync_ctl.save_execution_log(track_db_conn,track_db_schema,process["interface_id"],process["execution_id"],process_log)
+
+        return result.rowcount
+
+    def delete_seedlot_child_table(self, table_name:str, seedlot_number:str ) -> int:
+        logger.debug("-------------------processing delete on row-----------------")
+        logger.debug(f"seedlot number is {seedlot_number}")
+        logger.debug("-------------------processing delete on row-----------------")
+        sql_text = f""" 
+            DELETE FROM {table_name}
+            WHERE seedlot_number = :p_seedlot_number """
+        params = {}
+        params["p_seedlot_number"] = seedlot_number
+        
+        logger.debug("-------------------delete text-----------------")
+        logger.debug(sql_text)
+        logger.debug("-------------------delete text-----------------")
+        result = self.conn.execute(text(sql_text), params)
+        
+        self.commit()  # If everything is ok, a commit will be executed.
+        return result.rowcount  # Number of rows affected
 
     def bulk_upsert_oracle(self, dataframe:object, table_name:str, table_pk:str, run_mode:str, ignore_columns_on_update:str ) -> int:
         logger.debug('Starting UPSERT statement in Oracle Database')
         logger.debug('run_mode is '+run_mode)
         onconflictstatement = ""
+        rows_affected = 0
+
         i = 0
         for row in dataframe.itertuples():
-            if run_mode == "UPSERT_WITH_DELETE":
-                print(f"Deleting {table_name} for seedlot {dataframe.seedlot_number}")
-                #delete for seedlot 
-                self.delete_seedlot_child_table(row, table_name, dataframe.seedlot_number) #todo fill in seedlot
-
             i = i + 1
             logger.debug(f'---Including row {i}')
             params = {}
@@ -223,12 +267,12 @@ class database_connection(object):
                 {onconflictstatement}
             END; """
             logger.debug(f'---Executing statement for row {i}')
-            print(sql_text)
-            #TODO REMOVE comment so merge runs
-            #result = self.conn.execute(text(sql_text), params)
+            logger.debug(sql_text)
+            result = self.conn.execute(text(sql_text), params)
+            rows_affected = result.rowcount
         
-        #self.commit()  # If everything is ok, a commit will be executed.
-        return 1 #TODOresult.rowcount  # Number of rows affected
+        self.commit()  # If everything is ok, a commit will be executed.
+        return rows_affected
 
 def convertTypesToOracle(dataframe):
     dataframe = dataframe.fillna(numpy.nan).replace([numpy.nan], [None])
@@ -237,8 +281,6 @@ def convertTypesToOracle(dataframe):
             dataframe=dataframe.astype({column:int},errors="ignore")
     
     return dataframe
-
-
 
 def psql_insert_copy(table, conn, keys, data_iter):
     """

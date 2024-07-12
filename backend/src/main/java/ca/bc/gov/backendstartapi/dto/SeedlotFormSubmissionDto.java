@@ -16,4 +16,5 @@ public record SeedlotFormSubmissionDto(
     List<SeedlotReviewSeedPlanZoneDto> seedlotReviewSeedPlanZones,
     SeedlotReviewElevationLatLongDto seedlotReviewElevationLatLong,
     List<GeneticWorthTraitsDto> seedlotReviewGeneticWorth,
-    SeedlotReviewGeoInformationDto seedlotReviewGeoInformation) {}
+    SeedlotReviewGeoInformationDto seedlotReviewGeoInformation,
+    SeedlotApplicationPatchDto applicantAndSeedlotInfo) {}

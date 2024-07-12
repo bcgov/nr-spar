@@ -58,7 +58,13 @@ const MySeedlots = () => {
         </Column>
       </Row>
       <Row className="my-seedlot-data-table-row">
-        <SeedlotTable userId={userId} isSortable showSearch showPagination defaultPageSize={20} />
+        <SeedlotTable
+          userId={userId}
+          isSortable
+          showSearch
+          showPagination
+          defaultPageSize={20}
+        />
       </Row>
     </FlexGrid>
   );

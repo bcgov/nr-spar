@@ -1383,211 +1383,60 @@ comment on column spar.active_orchard_spu.active_ind is 'Indicates if the combin
 comment on column spar.active_orchard_spu.retired_ind is 'Indicates retired orchards that should only be used to show legacy information.';
 comment on column spar.active_orchard_spu.no_spu_ind is 'Indicates a new orchard that has not a SPU assigned yet.';
 /*
-* For entry timestamps
-*/
-create or replace function trigger_set_entry_timestamp() returns TRIGGER as $$
-begin
-new.entry_timestamp = now();
-return new;
-end;
-$$ language plpgsql;
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_collection_method
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_genetic_worth
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_orchard
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_owner_quantity
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_parent_tree
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_parent_tree_gen_qlty
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.seedlot_parent_tree_smp_mix
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.smp_mix
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-create trigger set_entry_timestamp
-before insert on spar.smp_mix_gen_qlty
-for each row
-execute procedure trigger_set_entry_timestamp();
-
-/*
 * For update timestamps
 * Alter table with column update_timestamp to use default current_timestamp instead of not null
 * Tables that end with '_list' does not need to be altered as they are done in V16
 */
-create or replace function trigger_set_update_timestamp() returns TRIGGER as $$
-begin
-new.update_timestamp = now();
-return new;
-end;
-$$ language plpgsql;
-
-create trigger set_update_timestamp
-before update on spar.cone_collection_method_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.gametic_methodology_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.genetic_class_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.genetic_worth_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.method_of_payment_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.seedlot
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.seedlot
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.seedlot_collection_method
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.seedlot_collection_method
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.seedlot_genetic_worth
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.seedlot_genetic_worth
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.seedlot_orchard
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.seedlot_orchard
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.seedlot_owner_quantity
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.seedlot_owner_quantity
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.seedlot_parent_tree
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.seedlot_parent_tree
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.seedlot_parent_tree_gen_qlty
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.seedlot_parent_tree_gen_qlty
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.seedlot_parent_tree_smp_mix
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.seedlot_parent_tree_smp_mix
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.seedlot_source_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
-create trigger set_update_timestamp
-before update on spar.seedlot_status_list
-for each row
-execute procedure trigger_set_update_timestamp();
-
 alter table
   spar.smp_mix
 alter column
   update_timestamp set default current_timestamp;
-
-create trigger set_update_timestamp
-before update on spar.smp_mix
-for each row
-execute procedure trigger_set_update_timestamp();
 
 alter table
   spar.smp_mix_gen_qlty
 alter column
   update_timestamp set default current_timestamp;
 
-create trigger set_update_timestamp
-before update on spar.smp_mix_gen_qlty
-for each row
-execute procedure trigger_set_update_timestamp();
 alter table
   spar.favourite_activity drop column enabled;
 
@@ -1601,13 +1450,6 @@ alter table
 add
   update_timestamp timestamp default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.favourite_activity for each row execute procedure trigger_set_entry_timestamp();
-
-create trigger set_update_timestamp before
-update
-  on spar.favourite_activity for each row execute procedure trigger_set_update_timestamp();
 alter table
   spar.seedlot_source_list
 add
@@ -1966,20 +1808,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_genetic_worth for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_genetic_worth
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_genetic_worth for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_parent_tree
@@ -1991,20 +1825,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_parent_tree for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_parent_tree
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_parent_tree for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_parent_tree_gen_qlty
@@ -2016,20 +1842,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_parent_tree_gen_qlty for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_parent_tree_gen_qlty
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_parent_tree_gen_qlty for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_parent_tree_smp_mix
@@ -2041,20 +1859,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_parent_tree_smp_mix for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_parent_tree_smp_mix
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_parent_tree_smp_mix for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * smp_mix
@@ -2066,20 +1876,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.smp_mix for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.smp_mix
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.smp_mix for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * smp_mix_gen_qlty
@@ -2091,20 +1893,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.smp_mix_gen_qlty for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.smp_mix_gen_qlty
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.smp_mix_gen_qlty for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_smp_mix
@@ -2116,20 +1910,12 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_smp_mix for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_smp_mix
 alter column
   update_timestamp
 set
   default current_timestamp;
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_smp_mix for each row execute procedure trigger_set_update_timestamp();
 
 /**
  * seedlot_seed_plan_zone
@@ -2141,10 +1927,6 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_seed_plan_zone for each row execute procedure trigger_set_entry_timestamp();
-
 alter table
   spar.seedlot_seed_plan_zone
 alter column
@@ -2152,9 +1934,6 @@ alter column
 set
   default current_timestamp;
 
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_seed_plan_zone for each row execute procedure trigger_set_update_timestamp();
 create table spar.seedlot_registration_a_class_save (
   seedlot_number varchar(5) not null,
   all_step_data jsonb not null,
@@ -2168,13 +1947,6 @@ create table spar.seedlot_registration_a_class_save (
   constraint registration_form_a_class_seedlot_fk foreign key(seedlot_number) references spar.seedlot(seedlot_number)
 );
 
-create trigger set_entry_timestamp before
-insert
-  on spar.seedlot_registration_a_class_save for each row execute procedure trigger_set_entry_timestamp();
-
-create trigger set_update_timestamp before
-update
-  on spar.seedlot_registration_a_class_save for each row execute procedure trigger_set_update_timestamp();
 alter table
   spar.seedlot_seed_plan_zone
 add
@@ -2851,18 +2623,18 @@ CREATE TRIGGER trg_seedlot_audit_DIU
  FOR EACH ROW EXECUTE PROCEDURE spar.seedlot_if_modified_func();
 
 create table spar.ETL_EXECUTION_LOG(
-interface_id varchar(100) not null,
-last_run_ts timestamp,
-current_run_ts timestamp,
+from_timestamp timestamp not null,
+to_timestamp   timestamp not null,
+run_status varchar(100) not null,
 updated_at  timestamp   default now() not null,
 created_at  timestamp   default now() not null
 );
 
 
 comment on table spar.ETL_EXECUTION_LOG is 'ETL Tool monitoring table to store execution current instance of batch processing interfaces';
-comment on column spar.ETL_EXECUTION_LOG.interface_id               is 'Unique interface name to represent a batch execution';
-comment on column spar.ETL_EXECUTION_LOG.last_run_ts                is 'Last timestamp this interface was executed for batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG.current_run_ts             is 'Current timestamp this interface was executed of this batch execution'; 
+comment on column spar.ETL_EXECUTION_LOG.from_timestamp             is 'From timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
+comment on column spar.ETL_EXECUTION_LOG.to_timestamp               is 'To timestamp for the run (i.e. update_timestamp between from_timestamp and to_timetsamp)'; 
+comment on column spar.ETL_EXECUTION_LOG.run_status                 is 'Status of ETL execution'; 
 comment on column spar.ETL_EXECUTION_LOG.updated_at                 is 'Timestamp of the last time this record was updated'; 
 comment on column spar.ETL_EXECUTION_LOG.created_at                 is 'Timestamp of the time this record was created'; 
 
@@ -4669,6 +4441,8 @@ DDL
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_MAP;
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_LOG;
 DROP TABLE IF EXISTS spar.ETL_EXECUTION_LOG_HIST;
+DROP TABLE IF EXISTS spar.ETL_EXECUTION_SCHEDULE;
+
 
 create table if not exists spar.ETL_EXECUTION_MAP(
 interface_id 		  varchar(100) not null,
@@ -4736,48 +4510,13 @@ comment on column spar.ETL_EXECUTION_SCHEDULE.updated_at         is 'Timestamp o
 comment on column spar.ETL_EXECUTION_SCHEDULE.created_at         is 'Timestamp of the time this record was created'; 
 
 
-create table spar.ETL_EXECUTION_LOG_HIST(
-interface_id 				varchar(100) not null,
-execution_id 				integer 	 not null,
-execution_status 			varchar(100) not null,
-execution_details 			text,
-source_connect_timedelta 	interval,
-source_extract_timedelta 	interval,
-source_extract_row_count 	integer,
-target_connect_timedelta 	interval,
-target_load_timedelta 		interval,
-target_load_row_count 		integer,
-process_started_at 			timestamp,
-process_finished_at 		timestamp,
-process_timedelta   		interval,
-last_run_ts 				timestamp,
-current_run_ts 				timestamp,
-retry_process				boolean 	default false,
-updated_at  				timestamp   default now() not null,
-created_at  				timestamp   default now() not null
-);
-
+create table spar.etl_execution_log_hist
+( entry_timestamp timestamp(6) not null default current_timestamp
+, log_details jsonb not null)
 
 comment on table  spar.ETL_EXECUTION_LOG_HIST is 'ETL Tool monitoring table to store all executed instances of batch processing interfaces';
-comment on column spar.ETL_EXECUTION_LOG_HIST.interface_id       		is 'Unique interface name to represent a batch execution. Refer to EXECUTION_MAP table PK';
-comment on column spar.ETL_EXECUTION_LOG_HIST.execution_id       		is 'The execution ID that represent a batch execution. Refer to EXECUTION_MAP table PK';
-comment on column spar.ETL_EXECUTION_LOG_HIST.execution_status       	is 'Status of this execution. FAILED or SUCCESS expected.';
-comment on column spar.ETL_EXECUTION_LOG_HIST.execution_details         is 'Reference text of this interface instance execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.source_connect_timedelta  is 'Timedelta referring to how much time was needed to stablish a connection in the source database'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.source_extract_timedelta  is 'Timedelta referring to how much time was needed to execute a extract statement in the source database';
-comment on column spar.ETL_EXECUTION_LOG_HIST.source_extract_row_count  is 'Number of rows extracted from the source database for this execution.'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.target_connect_timedelta  is 'Timedelta referring to how much time was needed to stablish a connection in the target database'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.target_load_timedelta     is 'Timedelta referring to how much time was needed to load the extracted data in the target database';
-comment on column spar.ETL_EXECUTION_LOG_HIST.target_load_row_count     is 'Number of rows inserted or updated in the target database for this execution.'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.process_started_at        is 'Timestamp when this execution instance was started'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.process_finished_at       is 'Timestamp when this execution instance was finished'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.process_timedelta         is 'Timedelta referring how much time was spent to execute the whole process.'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.last_run_ts               is 'Last timestamp this interface instance was executed for batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.current_run_ts            is 'Current timestamp this interface instance was executed of this batch execution'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.retry_process             is 'If true, this log instance will be processed again (with last_run_ts and current_run_ts parameters)'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.updated_at                is 'Timestamp of the last time this record was updated'; 
-comment on column spar.ETL_EXECUTION_LOG_HIST.created_at                is 'Timestamp of the time this record was created'; 
-
+comment on column spar.ETL_EXECUTION_LOG_HIST.entry_timestamp      		  is 'The timestamp when the record was inserted';
+comment on column spar.ETL_EXECUTION_LOG_HIST.log_details       		    is 'JSON document with step statistics';
 
 /* 
 -- DML for Generic interface_id for generic running

@@ -12,6 +12,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.repository.SaveSeedlotProgressRepositoryClassA;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.security.UserInfo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
@@ -35,11 +36,17 @@ class SaveSeedlotFormServiceTest {
 
   private static final String SEEDLOT_NUMBER = "678123";
 
+  private Seedlot testSeedlot = new Seedlot(SEEDLOT_NUMBER);
+
   @BeforeEach
   void setup() {
     saveSeedlotFormService =
         new SaveSeedlotFormService(
             saveSeedlotProgressRepositoryClassA, seedlotRepository, loggedUserService);
+
+    when(loggedUserService.getLoggedUserInfo()).thenReturn(Optional.of(UserInfo.createDevUser()));
+
+    testSeedlot.setApplicantClientNumber(UserInfo.getDevClientNumber());
   }
 
   @Test
@@ -51,7 +58,7 @@ class SaveSeedlotFormServiceTest {
 
     JsonNode progressStatus = new ObjectMapper().readTree("{ \"f2\" : \"v2\" } ");
 
-    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus);
+    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus, 1);
 
     ResponseStatusException expectedException =
         assertThrows(
@@ -64,7 +71,6 @@ class SaveSeedlotFormServiceTest {
   @Test
   @DisplayName("Save seedlot progress with missing seedlot should succeed.")
   void saveSeedlotProgress_shouldSucceed() throws Exception {
-    Seedlot testSeedlot = new Seedlot(SEEDLOT_NUMBER);
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
 
@@ -75,7 +81,7 @@ class SaveSeedlotFormServiceTest {
 
     JsonNode progressStatus = new ObjectMapper().readTree("{ \"f2\" : \"v2\" } ");
 
-    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus);
+    SaveSeedlotFormDtoClassA saveDto = new SaveSeedlotFormDtoClassA(allStepData, progressStatus, 1);
 
     // Testing a void function, if there is no error then it means success.
     assertDoesNotThrow(() -> saveSeedlotFormService.saveFormClassA(SEEDLOT_NUMBER, saveDto));
@@ -97,7 +103,6 @@ class SaveSeedlotFormServiceTest {
   @Test
   @DisplayName("Get seedlot progress should succeed.")
   void getSeedlotProgress_shouldSucceed() throws Exception {
-    Seedlot testSeedlot = new Seedlot(SEEDLOT_NUMBER);
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
 
@@ -126,7 +131,6 @@ class SaveSeedlotFormServiceTest {
   @Test
   @DisplayName("Get seedlot progress status should succeed.")
   void getSeedlotProgressStatus_shouldSucceed() throws Exception {
-    Seedlot testSeedlot = new Seedlot(SEEDLOT_NUMBER);
 
     when(seedlotRepository.findById(any())).thenReturn(Optional.of(testSeedlot));
 

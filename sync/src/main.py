@@ -19,8 +19,8 @@ def generate_db_config(type_,schema_,settings):
     if type_ == "ORACLE":
         dbconfig = {
             "type": "ORACLE",
-            "username": os.environ.get("ORACLE_USER"),
-            "password": os.environ.get("ORACLE_PASSWORD"),
+            "username": os.environ.get("ORACLE_SYNC_USER"),
+            "password": os.environ.get("ORACLE_SYNC_PASSWORD"),
             "host": os.environ.get("ORACLE_HOST"),
             "port": os.environ.get("ORACLE_PORT"),
             "service_name": os.environ.get("ORACLE_SERVICE"),
@@ -64,8 +64,8 @@ def required_variables_exists():
        not env_var_is_filled("ORACLE_PORT") or \
        not env_var_is_filled("ORACLE_HOST") or \
        not env_var_is_filled("ORACLE_SERVICE") or \
-       not env_var_is_filled("ORACLE_USER") or \
-       not env_var_is_filled("ORACLE_PASSWORD"):
+       not env_var_is_filled("ORACLE_SYNC_USER") or \
+       not env_var_is_filled("ORACLE_SYNC_PASSWORD"):
        ret = False        
         
     if ret:
@@ -109,7 +109,7 @@ def read_settings():
         
 
 def main() -> None:
-    definition_of_yes = ["Y","YES","1","T","TRUE"]
+    definition_of_yes = ["Y","YES","1","T","TRUE","t","true"]
     # print(os.environ.get("TEST_MODE"))
     if os.environ.get("TEST_MODE") is None:
         print("Error: test mode variable is None")
@@ -136,19 +136,16 @@ def main() -> None:
             dbOracle = generate_db_config("ORACLE","THE",settings["oracle"]) 
             dbPostgres = generate_db_config("POSTGRES","spar",settings["postgres"])
             
-            execute_etl(dbPostgres, dbOracle, os.environ.get("EXECUTION_ID"))
+            execute_etl(dbPostgres, dbOracle)
 
             print("-------------------------------------")
             print("ETL Main process finished ")
             print("-------------------------------------")
 
 # MAIN Execution
-def execute_etl(dbPostgres, dbOracle, execution_id) -> None:
-    #logging_config.fileConfig(os.path.join(os.path.dirname(__file__), "logging.ini"), disable_existing_loggers=False)   
+def execute_etl(dbPostgres, dbOracle) -> None:
     loggingBasicConfig(level=loggingDEBUG, stream=sys.stdout)
-    #loggingBasicConfig(level=loggingINFO, stream=sys.stdout)
-    # data_sync.data_sync( source_config = dbOracle, target_config = dbPostgres ,track_config = dbPostgres )
-    data_sync.execute_instance( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres, execution_id = execution_id)
+    data_sync.execute_instance( oracle_config = dbOracle, postgres_config = dbPostgres ,track_config = dbPostgres)
 
 if __name__ == '__main__':
     main()

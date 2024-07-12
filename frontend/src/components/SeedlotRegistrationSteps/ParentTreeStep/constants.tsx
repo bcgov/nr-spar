@@ -47,6 +47,12 @@ export const MAX_DECIMAL_DIGITS = 10;
 
 export const MAX_VISIBLE_PT_NUMBERS = 10;
 
+export const MAX_VALUE_GEN_WORTH = '100';
+
+export const MIN_VALUE_GEN_WORTH = '-100';
+
+export const GEN_WORTH_ERR_MSG = `Must be between ${MIN_VALUE_GEN_WORTH} and ${MAX_VALUE_GEN_WORTH}`;
+
 export const getDownloadUrl = (tabType: string) => {
   if (tabType === 'Calculation of SMP mix' || tabType === 'mixTab') {
     return SmpMixCsvTemplate;
@@ -767,3 +773,13 @@ export const defaultMeanGeomConfig: MeanGeomInfoSectionConfigType = {
     }
   }
 };
+
+export const MIN_NE = '0.1';
+
+export const MAX_NE = '999.9';
+
+export const MAX_NE_DECIMAL = 1;
+
+export const INVALID_NE_RANGE_MSG = `Must be between ${MIN_NE} and ${MAX_NE}`;
+
+export const INVALID_NE_DECIMAL_MSG = `Cannot have more than ${MAX_NE_DECIMAL} decimal place`;

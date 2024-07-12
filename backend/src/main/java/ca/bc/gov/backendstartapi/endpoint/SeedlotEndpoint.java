@@ -1,5 +1,6 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
+import ca.bc.gov.backendstartapi.dto.RevisionCountDto;
 import ca.bc.gov.backendstartapi.dto.SaveSeedlotFormDtoClassA;
 import ca.bc.gov.backendstartapi.dto.SeedlotAclassFormDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotApplicationPatchDto;
@@ -348,7 +349,7 @@ public class SeedlotEndpoint {
   /**
    * PATCH an entry on the Seedlot table.
    *
-   * @param patchDto A {@link SeedlotApplicationPatchDto} containig all required field to get a new
+   * @param patchDto A {@link SeedlotApplicationPatchDto} containing all required field to get a new
    *     registration started.
    * @return A {@link Seedlot} with all updated values.
    */
@@ -400,7 +401,7 @@ public class SeedlotEndpoint {
           @Valid
           SeedlotApplicationPatchDto patchDto) {
 
-    return seedlotService.patchApplicantionInfo(seedlotNumber, patchDto);
+    return seedlotService.patchApplicantInfo(seedlotNumber, patchDto);
   }
 
   /**
@@ -469,14 +470,22 @@ public class SeedlotEndpoint {
               + " for form submission.")
   @ApiResponses(
       value = {
-        @ApiResponse(responseCode = "204", description = "Successfully saved or updated."),
+        @ApiResponse(responseCode = "200", description = "Successfully saved or updated."),
         @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Data conflict while saving",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public ResponseEntity<Void> saveFormProgressClassA(
+  public RevisionCountDto saveFormProgressClassA(
       @Parameter(
               name = "seedlotNumber",
               in = ParameterIn.PATH,
@@ -488,13 +497,13 @@ public class SeedlotEndpoint {
           String seedlotNumber,
       @RequestBody SaveSeedlotFormDtoClassA data) {
 
-    saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
+    RevisionCountDto revCountDto = saveSeedlotFormService.saveFormClassA(seedlotNumber, data);
 
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return revCountDto;
   }
 
   /** Retrieves the saved Seedlot reg form. */
-  @GetMapping("{seedlotNumber}/a-class-form-progress")
+  @GetMapping("/{seedlotNumber}/a-class-form-progress")
   @Operation(
       summary = "Retrieve the progress and data of an a-class reg form.",
       description = "This endpoint retrieves the progress of an A-class registration form")
@@ -502,12 +511,16 @@ public class SeedlotEndpoint {
       value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
         @ApiResponse(
-            responseCode = "404",
-            description = "Seedlot form progress not found",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot form progress not found",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
@@ -525,8 +538,8 @@ public class SeedlotEndpoint {
     return saveSeedlotFormService.getFormClassA(seedlotNumber);
   }
 
-  /** Retreive only the progress_status column from the form progress table. */
-  @GetMapping("{seedlotNumber}/a-class-form-progress/status")
+  /** Retrieve only the progress_status column from the form progress table. */
+  @GetMapping("/{seedlotNumber}/a-class-form-progress/status")
   @Operation(
       summary = "Retrieve the progress status of an a-class reg form.",
       description =
@@ -535,12 +548,16 @@ public class SeedlotEndpoint {
       value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved."),
         @ApiResponse(
-            responseCode = "404",
-            description = "Seedlot form progress not found",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(
             responseCode = "401",
             description = "Access token is missing or invalid",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Client id requested not present on user profile and roles.",
+            content = @Content(schema = @Schema(implementation = Void.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Seedlot form progress not found",
             content = @Content(schema = @Schema(implementation = Void.class)))
       })
   @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})

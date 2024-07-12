@@ -46,5 +46,17 @@
     "pollenSubtitle": "Enter the pollen contaminant information",
     "pollenError": "Please enter a valid value between 0 and 100",
     "pollenHelperText": "If contaminant pollen was present and the contaminant pollen has a breeding value"
+  },
+  "extraction": {
+    "extrationTitle": "Extraction information",
+    "extrationSubtitle": "Enter the extractory agency information and extraction's star and end dates for this seedlot",
+    "storageTitle": "Temporary seed storage",
+    "storageSubtitle": "Enter the seed storage agency information and storage's star and end dates for this seedlot",
+    "extractionCheckboxText": "The extractory agency is the Tree Seed Center (TSC)",
+    "storageCheckboxText": "The seed storage agency is the Tree Seed Center (TSC)",
+    "agencyErrorMsg": "Please enter a valid acronym that identifies the agency",
+    "agencyValidationMsg": "Agency validation failed. Please retry verification",
+    "locationErrorMsg": "This location code is not valid for the selected agency, please enter a valid one or change the agency",
+    "invalidDateErrorMsg": "Please enter a valid date"
   }
 }

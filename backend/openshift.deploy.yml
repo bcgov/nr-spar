@@ -80,6 +80,10 @@ objects:
         type: RollingUpdate
       template:
         metadata:
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "8090"
+            prometheus.io/path: "/metrics"
           labels:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
@@ -88,9 +92,6 @@ objects:
             - name: ${NAME}-${ZONE}
               image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
               imagePullPolicy: Always
-              volumeMounts:
-                - name: ${NAME}-${ZONE}-fluentbit-logs
-                  mountPath: /logs
               env:
                 - name: NR_SPAR_BACKEND_VERSION
                   value: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
@@ -144,20 +145,16 @@ objects:
                   containerPort: 8090
               readinessProbe:
                 httpGet:
-                  path: /actuator/health
+                  path: /health
                   port: container-port
               livenessProbe:
                 httpGet:
-                  path: /actuator/health
+                  path: /health
                   port: container-port
               startupProbe:
                 tcpSocket:
                   port: container-port
                 failureThreshold: 45
-          volumes:
-            - name: ${NAME}-${ZONE}-fluentbit-logs
-              persistentVolumeClaim:
-                claimName: ${NAME}-${ZONE}-fluentbit-logs
   - apiVersion: v1
     kind: Service
     metadata:

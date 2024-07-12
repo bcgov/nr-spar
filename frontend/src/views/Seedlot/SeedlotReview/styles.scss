@@ -16,7 +16,7 @@
     position: fixed;
     bottom: 2.5rem;
     right: 2.5rem;
-    z-index: 2;
+    z-index: 3;
   }
 
   .sub-section-grid {
@@ -73,6 +73,14 @@
   .#{vars.$bcgov-prefix}--text-area__wrapper--readonly {
     .#{vars.$bcgov-prefix}--text-area {
       padding: 0;
+    }
+  }
+
+  .action-button-row {
+    padding: 2.5rem 0;
+    .#{vars.$bcgov-prefix}--btn{
+      max-width: none;
+      width: -webkit-fill-available;
     }
   }
 }

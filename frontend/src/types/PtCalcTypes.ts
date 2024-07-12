@@ -1,4 +1,4 @@
-type GeneticTrait = {
+export type GeneticTrait = {
   traitCode: string,
   traitValue?: number,
   // The fields below are used for data returned from API
@@ -6,7 +6,7 @@ type GeneticTrait = {
   testedParentTreePerc?: number
 }
 
-type MeanGeomDataType = {
+export type MeanGeomDataType = {
   meanLatitudeDegree: number,
   meanLatitudeMinute: number,
   meanLatitudeSecond: number,

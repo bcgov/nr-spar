@@ -4,6 +4,11 @@
   width: 100%;
 }
 
+.tsc-admin-background,
+.tsc-admin-background .#{vars.$bcgov-prefix}--search-input {
+  background: var(--#{vars.$bcgov-prefix}-layer-02);
+}
+
 .seedlot-data-table {
   width: 100%;
 

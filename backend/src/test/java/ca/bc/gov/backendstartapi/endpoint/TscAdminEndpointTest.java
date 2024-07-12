@@ -165,12 +165,12 @@ class TscAdminEndpointTest {
   @DisplayName("Approves a seedlot number")
   void approveOrDisapproveSeedlot_approve_shouldSuceed() throws Exception {
     String seedlotNumber = "63223";
-    Boolean approved = Boolean.TRUE;
+    String approved = "APP";
 
-    when(tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, approved))
+    when(tscAdminService.updateSeedlotStatus(seedlotNumber, approved))
         .thenReturn(new Seedlot(seedlotNumber));
 
-    String url = String.format("/api/tsc-admin/seedlots/%s/approve/%s", seedlotNumber, approved);
+    String url = String.format("/api/tsc-admin/seedlots/%s/status/%s", seedlotNumber, approved);
 
     mockMvc
         .perform(
@@ -186,12 +186,12 @@ class TscAdminEndpointTest {
   @DisplayName("Seedlot approval attempt seedlot not found should fail")
   void approveOrDisapproveSeedlot_seedlotNotFound_shouldFail() throws Exception {
     String seedlotNumber = "63223";
-    Boolean approved = Boolean.TRUE;
+    String approved = "APP";
 
-    when(tscAdminService.approveOrDisapproveSeedlot(seedlotNumber, approved))
+    when(tscAdminService.updateSeedlotStatus(seedlotNumber, approved))
         .thenThrow(new SeedlotNotFoundException());
 
-    String url = String.format("/api/tsc-admin/seedlots/%s/approve/%s", seedlotNumber, approved);
+    String url = String.format("/api/tsc-admin/seedlots/%s/status/%s", seedlotNumber, approved);
 
     mockMvc
         .perform(
