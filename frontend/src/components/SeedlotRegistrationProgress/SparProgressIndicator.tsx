@@ -6,6 +6,7 @@ import {
   Warning,
   CircleDash,
   Incomplete,
+  CircleFilled,
 } from '@carbon/icons-react';
 import prefix from '../../styles/classPrefix';
 
@@ -268,14 +269,21 @@ function SparProgressStep({
         </Warning>
       );
     }
-    if (current) {
+    if (current && !complete) {
       return (
         <Incomplete>
           <title>{description}</title>
         </Incomplete>
       );
     }
-    if (complete) {
+    if (current && complete) {
+      return (
+        <CircleFilled>
+          <title>{description}</title>
+        </CircleFilled>
+      );
+    }
+    if (complete && !current) {
       return (
         <CheckmarkFilled>
           <title>{description}</title>
