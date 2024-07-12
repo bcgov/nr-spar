@@ -12,6 +12,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.CsvTableParsingException;
 import ca.bc.gov.backendstartapi.response.DefaultSpringExceptionResponse;
 import ca.bc.gov.backendstartapi.response.ValidationExceptionResponse;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.RoleAccessConfig;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
@@ -71,6 +72,8 @@ public class SeedlotEndpoint {
   private final SeedlotService seedlotService;
 
   private final SaveSeedlotFormService saveSeedlotFormService;
+
+  private final LoggedUserService loggedUserService;
 
   /**
    * Parse the CSV table in {@code file} and return the data stored in it.
@@ -451,8 +454,9 @@ public class SeedlotEndpoint {
           @PathVariable
           String seedlotNumber,
       @RequestBody SeedlotFormSubmissionDto form) {
+    boolean isTscAdmin = loggedUserService.isTscAdminLogged();
     SeedlotStatusResponseDto createDto =
-        seedlotService.updateSeedlotWithForm(seedlotNumber, form, false, "SUB");
+        seedlotService.updateSeedlotWithForm(seedlotNumber, form, isTscAdmin, true, "SUB");
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 

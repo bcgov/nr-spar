@@ -229,7 +229,7 @@ class SeedlotFormPutTest {
         SeedlotNotFoundException.class,
         () -> {
           seedlotService.updateSeedlotWithForm(
-              "5432", mockSeedlotFormDto(null, null), false, "SUB");
+              "5432", mockSeedlotFormDto(null, null), false, true, "SUB");
         });
   }
 
@@ -251,7 +251,7 @@ class SeedlotFormPutTest {
         ConeCollectionMethodNotFoundException.class,
         () -> {
           seedlotService.updateSeedlotWithForm(
-              "5432", mockSeedlotFormDto(null, null), false, "SUB");
+              "5432", mockSeedlotFormDto(null, null), false, true, "SUB");
         });
   }
 
@@ -276,7 +276,7 @@ class SeedlotFormPutTest {
         MethodOfPaymentNotFoundException.class,
         () -> {
           seedlotService.updateSeedlotWithForm(
-              "5432", mockSeedlotFormDto(null, null), false, "SUB");
+              "5432", mockSeedlotFormDto(null, null), false, true, "SUB");
         });
   }
 
@@ -306,7 +306,7 @@ class SeedlotFormPutTest {
         SeedlotParentTreeNotFoundException.class,
         () -> {
           seedlotService.updateSeedlotWithForm(
-              "5432", mockSeedlotFormDto(null, null), false, "SUB");
+              "5432", mockSeedlotFormDto(null, null), false, true, "SUB");
         });
   }
 
@@ -340,7 +340,7 @@ class SeedlotFormPutTest {
         SmpMixNotFoundException.class,
         () -> {
           seedlotService.updateSeedlotWithForm(
-              "5432", mockSeedlotFormDto(null, null), false, "SUB");
+              "5432", mockSeedlotFormDto(null, null), false, true, "SUB");
         });
   }
 
@@ -378,13 +378,14 @@ class SeedlotFormPutTest {
         SeedlotFormValidationException.class,
         () -> {
           seedlotService.updateSeedlotWithForm(
-              "5432", mockSeedlotFormDto(null, "OTH"), false, "SUB");
+              "5432", mockSeedlotFormDto(null, "OTH"), false, true, "SUB");
         });
 
     Assertions.assertThrows(
         SeedlotFormValidationException.class,
         () -> {
-          seedlotService.updateSeedlotWithForm("5432", mockSeedlotFormDto("", "OTH"), false, "SUB");
+          seedlotService.updateSeedlotWithForm(
+              "5432", mockSeedlotFormDto("", "OTH"), false, true, "SUB");
         });
   }
 
@@ -479,7 +480,7 @@ class SeedlotFormPutTest {
     when(seedlotSeedPlanZoneRepository.saveAll(any())).thenReturn(List.of());
 
     SeedlotStatusResponseDto scDto =
-        seedlotService.updateSeedlotWithForm("5432", mockedForm, false, "SUB");
+        seedlotService.updateSeedlotWithForm("5432", mockedForm, false, true, "SUB");
 
     Assertions.assertNotNull(scDto);
     Assertions.assertEquals("5432", scDto.seedlotNumber());
