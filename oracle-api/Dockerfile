@@ -9,8 +9,8 @@ RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true -Dspring-boot.run
 
 
 ### Deployer
-FROM gcr.io/distroless/java-base:nonroot
-# FROM eclipse-temurin:17.0.11_9-jdk-jammy
+# FROM gcr.io/distroless/java-base:nonroot
+FROM eclipse-temurin:17.0.11_9-jdk-jammy
 
 # Java vars
 ENV LANG=en_CA.UTF-8
@@ -20,7 +20,7 @@ ENV LC_ALL=en_CA.UTF-8
 # Setup package/archive and supporting files
 WORKDIR /usr/share/service/
 COPY --from=build /app/target/*.jar /app/*.class /app/entrypoint.sh ./artifacts/
-
+WORKDIR /usr/share/service/artifacts/
 # RUN mkdir config dump public && \
 #     chmod -R g+w . && \
 #     chmod g+x dockerfile-entrypoint.sh && \
