@@ -29,6 +29,7 @@ import ca.bc.gov.backendstartapi.exception.InvalidSeedlotRequestException;
 import ca.bc.gov.backendstartapi.exception.SeedlotFormProgressNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
+import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.service.SaveSeedlotFormService;
 import ca.bc.gov.backendstartapi.service.SeedlotService;
 import ca.bc.gov.backendstartapi.service.parser.ConeAndPollenCountCsvTableParser;
@@ -68,6 +69,8 @@ class SeedlotEndpointTest {
   @MockBean SeedlotService seedlotService;
 
   @MockBean SaveSeedlotFormService saveSeedlotFormService;
+
+  @MockBean LoggedUserService loggedUserService;
 
   private final WebApplicationContext webApplicationContext;
 
@@ -538,8 +541,7 @@ class SeedlotEndpointTest {
   @Test
   @DisplayName("patchSeedlotApplicationBadIdTest")
   void patchSeedlotApplicationBadIdTest() throws Exception {
-    when(seedlotService.patchApplicantInfo(any(), any()))
-        .thenThrow(new SeedlotNotFoundException());
+    when(seedlotService.patchApplicantInfo(any(), any())).thenThrow(new SeedlotNotFoundException());
 
     mockMvc
         .perform(
@@ -581,6 +583,8 @@ class SeedlotEndpointTest {
     when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
+    when(loggedUserService.isTscAdminLogged()).thenReturn(false);
+
     mockMvc
         .perform(
             put("/api/seedlots/{seedlotNumber}/a-class-submission", 123)
@@ -593,13 +597,15 @@ class SeedlotEndpointTest {
   }
 
   @Test
-  @DisplayName("Seedlot Form subbmited with success")
+  @DisplayName("Seedlot Form submitted with success")
   @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
   void submitSeedlotForm_happyPath_shouldSucceed() throws Exception {
     SeedlotStatusResponseDto createResponseDto = new SeedlotStatusResponseDto("123", "PND");
 
     when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
         .thenReturn(createResponseDto);
+
+    when(loggedUserService.isTscAdminLogged()).thenReturn(false);
 
     mockMvc
         .perform(

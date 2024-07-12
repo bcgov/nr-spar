@@ -698,9 +698,6 @@ public class SeedlotService {
       boolean isTscAdmin,
       String statusOnSuccess) {
 
-    // Detects if it's actually TSC. It might be.
-    isTscAdmin = loggedUserService.isTscAdminLogged();
-
     if (isTscAdmin) {
       SparLog.info("Received request by TSC admin to update seedlot {}", seedlotNumber);
     } else {
