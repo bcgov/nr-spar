@@ -827,6 +827,8 @@ class SeedlotServiceTest {
 
     boolean isTscAdmin = true;
 
+    when(loggedUserService.isTscAdminLogged()).thenReturn(isTscAdmin);
+
     SeedlotStatusResponseDto responseDto =
         seedlotService.updateSeedlotWithForm(seedlotNumber, form, isTscAdmin, statusOnSuccess);
 
