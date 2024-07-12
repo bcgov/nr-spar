@@ -580,7 +580,7 @@ class SeedlotEndpointTest {
   @DisplayName("Seedlot Form submitted with not found seedlot")
   @WithMockUser(username = "SPARTest", roles = "SPAR_TSC_ADMIN")
   void submitSeedlotForm_notFoundSeedlot_shouldThrowException() throws Exception {
-    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), anyBoolean(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
     when(loggedUserService.isTscAdminLogged()).thenReturn(false);
@@ -602,7 +602,7 @@ class SeedlotEndpointTest {
   void submitSeedlotForm_happyPath_shouldSucceed() throws Exception {
     SeedlotStatusResponseDto createResponseDto = new SeedlotStatusResponseDto("123", "PND");
 
-    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), anyBoolean(), any()))
         .thenReturn(createResponseDto);
 
     when(loggedUserService.isTscAdminLogged()).thenReturn(false);

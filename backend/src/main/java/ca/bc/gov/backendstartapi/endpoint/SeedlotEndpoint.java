@@ -456,7 +456,7 @@ public class SeedlotEndpoint {
       @RequestBody SeedlotFormSubmissionDto form) {
     boolean isTscAdmin = loggedUserService.isTscAdminLogged();
     SeedlotStatusResponseDto createDto =
-        seedlotService.updateSeedlotWithForm(seedlotNumber, form, isTscAdmin, "SUB");
+        seedlotService.updateSeedlotWithForm(seedlotNumber, form, isTscAdmin, true, "SUB");
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 
