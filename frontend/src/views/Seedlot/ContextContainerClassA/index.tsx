@@ -29,10 +29,12 @@ import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotProgres
 import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import {
-  DEFAULT_MIX_PAGE_ROWS, PopSizeAndDiversityConfig, SummarySectionConfig, defaultMeanGeomConfig
+  DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING,
+  PopSizeAndDiversityConfig, SummarySectionConfig, defaultMeanGeomConfig
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
+import { recordKeys } from '../../../utils/RecordUtils';
 import ROUTES from '../../../routes/constants';
 import { GenWorthValType, GeoInfoValType } from '../SeedlotReview/definitions';
 import { INITIAL_GEN_WORTH_VALS, INITIAL_GEO_INFO_VALS } from '../SeedlotReview/constants';
@@ -51,9 +53,7 @@ import {
   verifyInterimStepCompleteness, validateOrchardStep, verifyOrchardStepCompleteness,
   validateExtractionStep, verifyExtractionStepCompleteness, validateParentStep,
   verifyParentStepCompleteness, checkAllStepsCompletion, getSeedlotPayload,
-  initEmptySteps, resDataToState,
-  fillAreaOfUseData,
-  fillCollectionGeoData
+  initEmptySteps, resDataToState, fillAreaOfUseData, fillCollectionGeoData
 } from './utils';
 import {
   MAX_EDIT_BEFORE_SAVE, initialAreaOfUseData,
@@ -750,6 +750,39 @@ const ContextContainerClassA = ({ children }: props) => {
   };
 
   const [isCalculatingPt, setIsCalculatingPt] = useState<boolean>(false);
+
+  const fillGwInfoItems = () => {
+    const keys = recordKeys(genWorthInfoItems);
+    const clonedInfoItems = structuredClone(genWorthInfoItems);
+
+    keys.forEach((key) => {
+      const upperCaseCode = String(key).toUpperCase();
+      const traitIndex = calculatedValues.map((trait) => trait.traitCode).indexOf(upperCaseCode);
+      const tuple = clonedInfoItems[key];
+      const traitValueInfoObj = tuple.filter((obj) => obj.name.startsWith('Genetic'))[0];
+      const testedPercInfoObj = tuple.filter((obj) => obj.name.startsWith('Tested'))[0];
+      if (calculatedValues[traitIndex]) {
+        traitValueInfoObj.value = (Number(calculatedValues[traitIndex].calculatedValue)).toFixed(1);
+        testedPercInfoObj.value = (
+          Number(calculatedValues[traitIndex].testedParentTreePerc) * 100
+        ).toFixed(2);
+      } else {
+        traitValueInfoObj.value = EMPTY_NUMBER_STRING;
+        testedPercInfoObj.value = EMPTY_NUMBER_STRING;
+      }
+      clonedInfoItems[key] = [traitValueInfoObj, testedPercInfoObj];
+    });
+    setGenWorthInfoItems(clonedInfoItems);
+  };
+
+  const [ctrlGwInfoItems, setCtrlGwInfoItems] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (ctrlGwInfoItems && Object.keys(genWorthInfoItems).length !== 0) {
+      fillGwInfoItems();
+      setCtrlGwInfoItems(false);
+    }
+  }, [calculatedValues, genWorthInfoItems]);
 
   useEffect(() => {
     if (calculatedValues.length) {
