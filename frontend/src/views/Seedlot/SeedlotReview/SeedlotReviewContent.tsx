@@ -121,7 +121,8 @@ const SeedlotReviewContent = () => {
 
   const {
     allStepData, genWorthVals, geoInfoVals,
-    areaOfUseData, isFetchingData, seedlotData
+    areaOfUseData, isFetchingData, seedlotData,
+    calculatedValues
   } = useContext(ClassAContext);
 
   const verifyFormData = (): boolean => {
@@ -250,9 +251,15 @@ const SeedlotReviewContent = () => {
     (Object.keys(genWorthVals) as (keyof GenWorthValType)[])
       .forEach((genWorthKey) => {
         if (genWorthVals[genWorthKey].value) {
+          const upperCaseCode = genWorthKey.toUpperCase();
+          const traitIndex = calculatedValues.map(
+            (trait) => trait.traitCode
+          ).indexOf(upperCaseCode);
           seedlotReviewGeneticWorth.push({
-            traitCode: genWorthKey,
-            traitValue: Number(genWorthVals[genWorthKey].value)
+            traitCode: upperCaseCode,
+            calculatedValue: Number(genWorthVals[genWorthKey].value),
+            // Use the same percentage value, since users can't edit it
+            testedParentTreePerc: calculatedValues[traitIndex].testedParentTreePerc
           });
         }
       });
