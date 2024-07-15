@@ -190,7 +190,7 @@ public class TscAdminEndpoint {
     }
 
     SeedlotStatusResponseDto updatedDto =
-        seedlotService.updateSeedlotWithForm(seedlotNumber, form, true, formattedStatus);
+        seedlotService.updateSeedlotWithForm(seedlotNumber, form, true, false, formattedStatus);
     return ResponseEntity.status(HttpStatus.OK).body(updatedDto);
   }
 }

@@ -688,6 +688,8 @@ public class SeedlotService {
    * @param seedlotNumber The Seedlot identification
    * @param form The {@link SeedlotFormSubmissionDto} containing all form fields
    * @param isTscAdmin determines whether this operation is initiated by a tsc admin
+   * @param isFromRegularForm determines where the request originated from. If it's from the regular
+   *     form, with 6 steps, it also could be sent by someone from the TSC Admin.
    * @param statusOnSuccess the status to set if the operation is successful
    * @return A {@link SeedlotStatusResponseDto} with the seedlot number and status
    */
@@ -696,13 +698,22 @@ public class SeedlotService {
       String seedlotNumber,
       SeedlotFormSubmissionDto form,
       boolean isTscAdmin,
+      boolean isFromRegularForm,
       String statusOnSuccess) {
 
+    StringBuilder sb = new StringBuilder();
+    sb.append("Received request ");
     if (isTscAdmin) {
-      SparLog.info("Received request by TSC admin to update seedlot {}", seedlotNumber);
-    } else {
-      SparLog.info("Received request to update seedlot {}", seedlotNumber);
+      sb.append("by TSC Admin ");
     }
+    if (isFromRegularForm) {
+      sb.append("from regular form ");
+    } else {
+      sb.append("from review form ");
+    }
+    sb.append("to update seedlot {}");
+
+    SparLog.info(sb.toString(), seedlotNumber);
 
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
@@ -766,7 +777,7 @@ public class SeedlotService {
     // Fetch data from Oracle to get the primary Seed Plan Unit id
     setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
 
-    if (!isTscAdmin) {
+    if (isFromRegularForm) {
       // Update the Seedlot instance only
       // Calculate Ne value (effective population size)
       // Calculate Mean GeoSpatial (for SMP Mix, mean latitude, mean longitude, mean elevation)

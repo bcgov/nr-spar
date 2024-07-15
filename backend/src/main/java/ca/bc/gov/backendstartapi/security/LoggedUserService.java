@@ -116,7 +116,7 @@ public class LoggedUserService {
       throw new UserNotFoundException();
     }
 
-    if (userInfo.get().roles().contains("SPAR_TSC_ADMIN")) {
+    if (isTscAdminLogged()) {
       SparLog.info("Request allowed, TSC Admin role found!");
       return;
     }
@@ -125,5 +125,20 @@ public class LoggedUserService {
       SparLog.info("Request denied due to user not having client id: {}", clientId);
       throw new ClientIdForbiddenException();
     }
+  }
+
+  /**
+   * Verify if the logged user has TSC_ADMIN role.
+   *
+   * @return true if it has, false otherwise.
+   */
+  public boolean isTscAdminLogged() {
+    Optional<UserInfo> userInfo = getLoggedUserInfo();
+
+    if (userInfo.isEmpty()) {
+      throw new UserNotFoundException();
+    }
+
+    return userInfo.get().roles().contains("SPAR_TSC_ADMIN");
   }
 }
