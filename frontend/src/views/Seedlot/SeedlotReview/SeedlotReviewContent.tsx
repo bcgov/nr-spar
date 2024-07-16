@@ -259,7 +259,10 @@ const SeedlotReviewContent = () => {
             traitCode: upperCaseCode,
             calculatedValue: Number(genWorthVals[genWorthKey].value),
             // Use the same percentage value, since users can't edit it
-            testedParentTreePerc: calculatedValues[traitIndex].testedParentTreePerc
+            testedParentTreePerc:
+              calculatedValues[traitIndex]
+                ? calculatedValues[traitIndex].testedParentTreePerc
+                : 0
           });
         }
       });

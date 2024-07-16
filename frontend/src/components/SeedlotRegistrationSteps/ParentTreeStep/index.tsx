@@ -10,7 +10,7 @@ import {
   TableToolbarContent, OverflowMenuItem, OverflowMenu,
   Button, Table, TableHead, TableRow, TableHeader,
   DataTableSkeleton, DefinitionTooltip, Modal,
-  Accordion, AccordionItem
+  Accordion, AccordionItem, TextInputSkeleton
 } from '@carbon/react';
 import {
   View, Settings, Upload, Add
@@ -88,7 +88,9 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     setPopSizeAndDiversityConfig,
     summaryConfig,
     setSummaryConfig,
-    meanGeomInfos
+    meanGeomInfos,
+    isCalculatingPt,
+    isFetchingData
   } = useContext(ClassAContext);
 
   const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
@@ -345,9 +347,14 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                 infoItems={[]}
               >
                 {
-                  recordValues(genWorthInfoItems).map((gwTuple) => (
-                    <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
-                  ))
+                  recordValues(genWorthInfoItems).map((gwTuple) => {
+                    if (isCalculatingPt || isFetchingData) {
+                      return (<TextInputSkeleton />);
+                    }
+                    return (
+                      <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
+                    );
+                  })
                 }
               </InfoSection>
             )

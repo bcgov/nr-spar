@@ -26,6 +26,7 @@ export type StrTypeRowItem = {
   wwd: StringInputType,
   dsg: StringInputType,
   iws: StringInputType,
+  wve: StringInputType,
   w_ad: StringInputType,
   w_dfs: StringInputType,
   w_dfu: StringInputType,
@@ -36,7 +37,8 @@ export type StrTypeRowItem = {
   w_wdu: StringInputType,
   w_wwd: StringInputType,
   w_dsg: StringInputType,
-  w_iws: StringInputType
+  w_iws: StringInputType,
+  w_wve: StringInputType
 }
 
 export type PrimitiveRowItem = {
