@@ -21,6 +21,7 @@ import ca.bc.gov.oracleapi.repository.ParentTreeOrchardRepository;
 import ca.bc.gov.oracleapi.repository.ParentTreeRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,8 +77,10 @@ class OrchardServiceTest {
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
 
-    when(sparBecCatalogueService.getBecDescriptionByCode(orchard.getBecZoneCode()))
-        .thenReturn("Interior Cedar -- Hemlock");
+    List<String> becZones = new ArrayList<>(List.of(orchard.getBecZoneCode()));
+    Map<String, String> becZoneDesc = new HashMap<>();
+    becZoneDesc.put(orchard.getBecZoneCode(), "Interior Cedar -- Hemlock");
+    when(sparBecCatalogueService.getBecDescriptionsByCode(becZones)).thenReturn(becZoneDesc);
 
     Optional<OrchardDto> descriptionDto = orchardService.findNotRetiredOrchardValidLotType("337");
 
@@ -119,8 +122,10 @@ class OrchardServiceTest {
     orchard.setOrchardLotTypeCode(lotTypeCode);
 
     when(orchardRepository.findNotRetiredById(any())).thenReturn(Optional.of(orchard));
-    when(sparBecCatalogueService.getBecDescriptionByCode(orchard.getBecZoneCode()))
-        .thenReturn("Interior Cedar -- Hemlock");
+    List<String> becZones = new ArrayList<>(List.of(orchard.getBecZoneCode()));
+    Map<String, String> becZoneDesc = new HashMap<>();
+    becZoneDesc.put(orchard.getBecZoneCode(), "Interior Cedar -- Hemlock");
+    when(sparBecCatalogueService.getBecDescriptionsByCode(becZones)).thenReturn(becZoneDesc);
 
     Optional<OrchardDto> descriptionDto = orchardService.findNotRetiredOrchardValidLotType("820");
 
@@ -312,8 +317,7 @@ class OrchardServiceTest {
 
     List<OrchardEntity> repoResult = List.of(firstOrchard, secondOrchard, expiredOrchard);
 
-    when(orchardRepository.findAllByVegetationCode(vegCode))
-        .thenReturn(repoResult);
+    when(orchardRepository.findAllByVegetationCode(vegCode)).thenReturn(repoResult);
 
     List<OrchardDto> listToTest = orchardService.findNotRetOrchardsByVegCode(vegCode).get();
 
