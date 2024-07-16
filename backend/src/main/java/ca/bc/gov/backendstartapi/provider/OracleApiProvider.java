@@ -90,36 +90,6 @@ public class OracleApiProvider implements Provider {
    * Finds all orchards with the provided vegCode from oracle-api.
    *
    * @param vegCode The vegetation code of a seedlot.
-   * @return An {@link List} of {@link OrchardDto}
-   */
-  @Override
-  public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    String oracleApiUrl = String.format("%s/api/orchards/vegetation-code/{vegCode}", rootUri);
-
-    SparLog.info("Starting {} - {} request to {}", PROVIDER, "findOrchardsByVegCode", oracleApiUrl);
-
-    try {
-      ResponseEntity<List<OrchardDto>> orchardsResult =
-          restTemplate.exchange(
-              oracleApiUrl,
-              HttpMethod.GET,
-              new HttpEntity<>(addHttpHeaders()),
-              new ParameterizedTypeReference<List<OrchardDto>>() {},
-              createParamsMap("vegCode", vegCode));
-      SparLog.info("GET orchards by vegCode from oracle - Success response!");
-      return orchardsResult.getBody();
-    } catch (HttpClientErrorException httpExc) {
-      SparLog.error(
-          "GET orchards by vegCode from oracle - Response code error: {}", httpExc.getStatusCode());
-    }
-
-    return List.of();
-  }
-
-  /**
-   * Finds all orchards with the provided vegCode from oracle-api.
-   *
-   * @param vegCode The vegetation code of a seedlot.
    * @return An {@link List} of {@link ParentTreeDto}
    */
   @Override

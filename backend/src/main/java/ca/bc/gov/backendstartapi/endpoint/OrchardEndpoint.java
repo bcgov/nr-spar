@@ -1,6 +1,5 @@
 package ca.bc.gov.backendstartapi.endpoint;
 
-import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
@@ -64,39 +63,6 @@ public class OrchardEndpoint {
               description = "Identifier of the Orchard.")
           String orchardId) {
     return orchardService.findParentTreeGeneticQualityData(orchardId);
-  }
-
-  /**
-   * Gets all orchards with vegCode.
-   *
-   * @param vegCode {@link Orchard}'s identification
-   * @return a {@link List} of {@link OrchardDto}
-   * @throws ResponseStatusException if no data is found
-   */
-  @GetMapping(path = "/vegetation-code/{vegCode}")
-  @Operation(
-      summary = "Fetch a list of orchard based on the provided vegCode",
-      description =
-          "Returns all non-retired orchards under the provided vegCode, this is a proxy that calls"
-              + " oracle-api.",
-      responses = {
-        @ApiResponse(responseCode = "200"),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Access token is missing or invalid",
-            content = @Content(schema = @Schema(implementation = Void.class))),
-        @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(hidden = true)))
-      })
-  @RoleAccessConfig({"SPAR_TSC_ADMIN", "SPAR_MINISTRY_ORCHARD", "SPAR_NONMINISTRY_ORCHARD"})
-  public List<OrchardDto> getOrchardsByVegCode(
-      @PathVariable("vegCode")
-          @Pattern(regexp = "^[a-zA-Z]{1,8}$")
-          @Parameter(
-              name = "vegCode",
-              in = ParameterIn.PATH,
-              description = "Identifier of the Orchard.")
-          String vegCode) {
-    return orchardService.findOrchardsByVegCode(vegCode);
   }
 
   /**

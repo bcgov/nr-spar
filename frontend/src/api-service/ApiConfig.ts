@@ -16,8 +16,6 @@ const ApiConfig = {
 
   orchards: `${serverHost}/api/orchards`,
 
-  orchardsVegCode: `${serverHost}/api/orchards/vegetation-code`,
-
   coneCollectionMethod: `${serverHost}/api/cone-collection-methods`,
 
   uploadConeAndPollen: `${serverHost}/api/seedlots/parent-trees-contribution/cone-pollen-count-table/upload`,
@@ -50,6 +48,8 @@ const ApiConfig = {
   facilityTypes: `${oracleServerHost}/api/facility-types`,
 
   oracleOrchards: `${oracleServerHost}/api/orchards`,
+
+  orchardsVegCode: `${oracleServerHost}/api/orchards/vegetation-code`,
 
   areaOfUseSpzList: `${oracleServerHost}/api/area-of-use/spz-list/vegetation-code`
 };
