@@ -1,9 +1,11 @@
 package ca.bc.gov.oracleapi.service;
 
 import ca.bc.gov.oracleapi.config.SparLog;
-import ca.bc.gov.oracleapi.entity.SparBecCatalogueEntity;
+import ca.bc.gov.oracleapi.dto.SparBecZoneDescriptionDto;
 import ca.bc.gov.oracleapi.repository.SparBecCatalogueRepository;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,26 +20,27 @@ public class SparBecCatalogueService {
    * Get the description of a BEC Zone by a code, returns null if not found or code provided is
    * null.
    */
-  public String getBecDescriptionByCode(String becZoneCode) {
+  public Map<String, String> getBecDescriptionsByCode(List<String> becZoneCodes) {
     SparLog.info("Begin service request to find the description of a given BEC zone code");
 
-    if (becZoneCode == null) {
-      SparLog.info("BEC Zone code param is null, returning null value for BEC zone description");
-      return null;
+    if (becZoneCodes.isEmpty()) {
+      SparLog.info("No BEC Zone code param, returning empty values for BEC zone descriptions");
+      return Map.of();
     }
 
-    List<SparBecCatalogueEntity> sparBecList =
-        sparBecCatalogueRepository.findAllByBecCodeOrderByUpdateTimeStampDesc(becZoneCode);
+    List<SparBecZoneDescriptionDto> sparBecList =
+        sparBecCatalogueRepository.findAllBecZonesByCodeIn(becZoneCodes);
 
     if (sparBecList.isEmpty()) {
-      SparLog.info(
-          "Cannot find a BEC zone code entity, returning null value for BEC zone description");
-      return null;
+      SparLog.info("Cannot find BEC zones codes, returning empty values for BEC zone descriptions");
+      return Map.of();
     }
 
-    String description = sparBecList.get(0).getBecZoneDescription();
+    Map<String, String> map = new HashMap<>();
+    sparBecList.forEach(dto -> map.put(dto.getBecZoneCode(), dto.getBecZoneName()));
+
     SparLog.info(
-        "Spar BEC Catalogue entity found, returning the description with value: {}", description);
-    return description;
+        "Spar BEC Catalogue entity found, returning {} descriptions found", sparBecList.size());
+    return map;
   }
 }

@@ -61,6 +61,11 @@ public class OrchardService {
         return Optional.empty();
       }
 
+      List<String> bacZones = new ArrayList<>(1);
+      bacZones.add(orchardEntity.getBecZoneCode());
+      Map<String, String> becZoneDescMap =
+          sparBecCatalogueService.getBecDescriptionsByCode(bacZones);
+
       OrchardDto orchardDto =
           new OrchardDto(
               orchardEntity.getId(),
@@ -70,7 +75,7 @@ public class OrchardService {
               orchardLotTypeCode.getDescription(),
               orchardEntity.getStageCode(),
               orchardEntity.getBecZoneCode(),
-              sparBecCatalogueService.getBecDescriptionByCode(orchardEntity.getBecZoneCode()),
+              becZoneDescMap.get(orchardEntity.getBecZoneCode()),
               orchardEntity.getBecSubzoneCode(),
               orchardEntity.getVariant(),
               orchardEntity.getBecVersionId());
@@ -141,6 +146,15 @@ public class OrchardService {
     List<OrchardEntity> orchardList =
         orchardRepository.findAllByVegetationCode(vegCode.toUpperCase());
 
+    List<String> bacZones = new ArrayList<>();
+    for (OrchardEntity orchard : orchardList) {
+      if (!bacZones.contains(orchard.getBecZoneCode())) {
+        bacZones.add(orchard.getBecZoneCode());
+      }
+    }
+
+    Map<String, String> becZoneDescMap = sparBecCatalogueService.getBecDescriptionsByCode(bacZones);
+
     orchardList.forEach(
         orchard -> {
           OrchardLotTypeCode orchardLotTypeCode = orchard.getOrchardLotTypeCode();
@@ -154,7 +168,7 @@ public class OrchardService {
                     orchardLotTypeCode.getDescription(),
                     orchard.getStageCode(),
                     orchard.getBecZoneCode(),
-                    sparBecCatalogueService.getBecDescriptionByCode(orchard.getBecZoneCode()),
+                    becZoneDescMap.get(orchard.getBecZoneCode()),
                     orchard.getBecSubzoneCode(),
                     orchard.getVariant(),
                     orchard.getBecVersionId());
