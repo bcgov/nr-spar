@@ -155,7 +155,7 @@ const ContextContainerClassA = ({ children }: props) => {
 
       if (seedlotQuery.data) {
         // Collection geo data
-        fillCollectionGeoData(setGeoInfoVals, seedlotQuery.data);
+        fillCollectionGeoData(setGeoInfoVals, setPopSizeAndDiversityConfig, seedlotQuery.data);
       }
     }
   }, [seedlotQuery.status]);
