@@ -33,14 +33,6 @@ services:
     ports: ["5432:5432"]
     healthcheck:
       test: psql -q -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1'
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 250m
-        reservations:
-          cpus: '1.15'
-          memory: 150m
 
   backend:
     container_name: backend
@@ -64,15 +56,6 @@ services:
       - $HOME/zscaler-certs:/certs
     healthcheck:
       test: curl -f http://localhost:8090/health | grep '"status":"UP"'
-    deploy:
-      resources:
-        limits:
-          cpus: '1.5'
-          memory: 500m
-        reservations:
-          cpus: '2.5'
-          memory: 100m
-    
 
   frontend:
     container_name: frontend
@@ -83,14 +66,6 @@ services:
     volumes: ["./frontend:/app"]
     working_dir: /app
     <<: *frontend
-    deploy:
-      resources:
-        limits:
-          cpus: '1.50'
-          memory: 500m
-        reservations:
-          cpus: '2'
-          memory: 30m
 
   caddy:
     container_name: caddy
