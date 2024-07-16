@@ -6,11 +6,11 @@ RUN apt update && \
     useradd -M nonroot
 
 # Disable cache dir, disable upgrade message, create .venv in project dir
-ENV PIP_NO_CACHE_DIR="off" \
-    PIP_DISABLE_PIP_VERSION_CHECK="on" \
-    PIP_DEFAULT_TIMEOUT="100" \
-    PYTHONDONTWRITEBYTECODE="1" \
-    PYTHONUNBUFFERED="1"
+ENV PIP_NO_CACHE_DIR="off"
+ENV PIP_DISABLE_PIP_VERSION_CHECK="on"
+ENV PIP_DEFAULT_TIMEOUT="100"
+ENV PYTHONDONTWRITEBYTECODE="1"
+ENV PYTHONUNBUFFERED="1"
 
 # Copy files and install requirements
 WORKDIR /app
