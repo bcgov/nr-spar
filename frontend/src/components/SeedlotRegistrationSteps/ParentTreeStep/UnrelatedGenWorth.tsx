@@ -15,7 +15,6 @@ import {
   MAX_VALUE_GEN_WORTH, MIN_VALUE_GEN_WORTH
 } from './constants';
 
-
 type UnrelatedGenWorthProps = {
   validGenWorth: Array<string> | undefined;
   isRead?: boolean;
