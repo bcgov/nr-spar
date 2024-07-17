@@ -1,4 +1,4 @@
-name: Scheduled ETL Sync
+name: ETL Sync
 
 on:
   schedule: [cron: "0 */2 * * *"] # Every other hour on the hour
