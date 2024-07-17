@@ -11,10 +11,10 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK="1"
 ENV PYTHONDONTWRITEBYTECODE="1"
 
 # Copy files and install requirements
+USER nonroot
 WORKDIR /app
-COPY . ./
+COPY --chown=nonroot . ./
 RUN pip install -r ./requirements.txt
 
 # Start the app
-USER nonroot
 CMD ["python3", "/app/src/main.py"]
