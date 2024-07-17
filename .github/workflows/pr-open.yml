@@ -34,7 +34,7 @@ jobs:
           echo "deploy=true" >> $GITHUB_OUTPUT
 
   check:
-    name: Check Outputs
+    name: Build Outputs
     runs-on: ubuntu-22.04
     needs: [builds]
     steps:
