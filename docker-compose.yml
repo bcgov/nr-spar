@@ -155,7 +155,7 @@ services:
           target: ./sync/requirements.txt
     environment:
       <<: *postgres-vars
-      TEST_MODE: ${TEST_MODE:-true}
+      TEST_MODE: ${TEST_MODE:-false}
       EXECUTION_ID: ${EXECUTION_ID:-100}
       DATABASE_HOST: database
       ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
