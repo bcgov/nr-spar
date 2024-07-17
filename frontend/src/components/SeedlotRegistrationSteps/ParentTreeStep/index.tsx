@@ -349,7 +349,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                 {
                   recordValues(genWorthInfoItems).map((gwTuple) => {
                     if (isCalculatingPt || isFetchingData) {
-                      return (<TextInputSkeleton />);
+                      return (<TextInputSkeleton key={gwTuple[0].name} />);
                     }
                     return (
                       <InfoSectionRow key={gwTuple[0].name} items={gwTuple} />
