@@ -54,7 +54,7 @@ class SeedlotCollectionMethodServiceTest {
   }
 
   @Test
-  @DisplayName("Save Seedlot Collection Method first submmit")
+  @DisplayName("Save Seedlot Collection Method first submit")
   void saveSeedlotFormStep1_firstSubmit_shouldSucceed() {
     when(seedlotCollectionMethodRepository.findAllBySeedlot_id(any())).thenReturn(List.of());
 
@@ -62,7 +62,7 @@ class SeedlotCollectionMethodServiceTest {
     ccme.setConeCollectionMethodCode(1);
     when(coneCollectionMethodService.getAllValidConeCollectionMethods()).thenReturn(List.of(ccme));
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
@@ -98,7 +98,7 @@ class SeedlotCollectionMethodServiceTest {
     when(coneCollectionMethodService.getAllValidConeCollectionMethods())
         .thenReturn(List.of(ccme1, ccme2));
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
@@ -137,7 +137,7 @@ class SeedlotCollectionMethodServiceTest {
     when(coneCollectionMethodService.getAllValidConeCollectionMethods())
         .thenReturn(List.of(ccme1, ccme2));
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());
@@ -174,7 +174,7 @@ class SeedlotCollectionMethodServiceTest {
     when(coneCollectionMethodService.getAllValidConeCollectionMethods())
         .thenReturn(List.of(ccme1, ccme2));
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotCollectionMethodRepository.saveAllAndFlush(any())).thenReturn(List.of());

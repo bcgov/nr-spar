@@ -378,7 +378,7 @@ class SeedlotServiceTest {
 
     SeedlotGeneticWorth seedlotGenWor =
         new SeedlotGeneticWorth(
-            seedlotEntity, new GeneticWorthEntity("GVO", "", null), new AuditInformation("userId"));
+            seedlotEntity, new GeneticWorthEntity("GVO", "", null), new AuditInformation());
     seedlotGenWor.setGeneticQualityValue(new BigDecimal("18"));
     seedlotGenWor.setTestedParentTreeContributionPercentage(new BigDecimal("88"));
 
@@ -482,7 +482,7 @@ class SeedlotServiceTest {
     Seedlot seedlotEntity = new Seedlot(seedlotNumber);
     Integer parentTreeId = 4023;
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     SeedlotFormParentTreeSmpDto parentTreeDto = createParentTreeDto(parentTreeId);

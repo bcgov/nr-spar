@@ -6,6 +6,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
@@ -19,6 +20,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /** Quantification of a given genetic quality in a seedlot. */
 @Entity
@@ -26,6 +28,7 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class SaveSeedlotProgressEntityClassA {
   @Id
   @Column(name = "seedlot_number")

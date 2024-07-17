@@ -51,11 +51,11 @@ class SmpMixServiceTest {
   }
 
   @Test
-  @DisplayName("Save SmpMix first submmit")
+  @DisplayName("Save SmpMix first submit")
   void saveSeedlotFormStep5_firstSubmit_shouldSucceed() {
     when(smpMixRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
@@ -83,7 +83,7 @@ class SmpMixServiceTest {
   void saveSeedlotFormStep5_updateSeedlotAdd_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
     SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     SmpMix smpMix =
         new SmpMix(
             seedlot,
@@ -109,7 +109,7 @@ class SmpMixServiceTest {
   void getAllBySeedlotNumber_simpleFetch_shouldSucceed() {
     SmpMix smpMix =
         new SmpMix(
-            new Seedlot("1123"), 1, "11", 1, BigDecimal.ONE, new AuditInformation("userId"), 0);
+            new Seedlot("1123"), 1, "11", 1, BigDecimal.ONE, new AuditInformation(), 0);
 
     when(smpMixRepository.findAllBySeedlot_id("1123")).thenReturn(List.of(smpMix));
 

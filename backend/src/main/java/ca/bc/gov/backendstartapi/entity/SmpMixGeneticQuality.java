@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -19,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /** The calculated Genetic Worth value(s) for the Supplemental Mass Pollination mix. */
 @Entity
@@ -28,6 +30,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class SmpMixGeneticQuality {
 
   // region Identifier

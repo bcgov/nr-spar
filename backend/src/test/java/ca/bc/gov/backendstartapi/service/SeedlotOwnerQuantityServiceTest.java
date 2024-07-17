@@ -73,7 +73,7 @@ class SeedlotOwnerQuantityServiceTest {
     mope.setMethodOfPaymentCode("CLA");
     when(methodOfPaymentService.getAllValidMethodOfPayments()).thenReturn(List.of(mope));
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     Seedlot seedlot = new Seedlot("54321");
@@ -102,7 +102,7 @@ class SeedlotOwnerQuantityServiceTest {
     mope.setMethodOfPaymentCode("CLA");
     when(methodOfPaymentService.getAllValidMethodOfPayments()).thenReturn(List.of(mope));
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     SeedlotOwnerQuantity soq2 = new SeedlotOwnerQuantity(seedlot, "00012797", "02");
@@ -132,7 +132,7 @@ class SeedlotOwnerQuantityServiceTest {
     mope.setMethodOfPaymentCode("CLA");
     when(methodOfPaymentService.getAllValidMethodOfPayments()).thenReturn(List.of(mope));
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq, soq2));
@@ -160,7 +160,7 @@ class SeedlotOwnerQuantityServiceTest {
     mope.setMethodOfPaymentCode("CLA");
     when(methodOfPaymentService.getAllValidMethodOfPayments()).thenReturn(List.of(mope));
 
-    AuditInformation audit = new AuditInformation("userId");
+    AuditInformation audit = new AuditInformation();
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq));

@@ -65,4 +65,21 @@ public final class JwtSecurityUtil {
     }
     return fullList;
   }
+
+  /**
+   * Get logged user ID from JWT token in the format of provider@username.
+   *
+   * @param jwtPrincipal The token to be read.
+   * @return String containing user id.
+   */
+  public static String getUserIdFromJwt(Jwt jwtPrincipal) {
+    // Provider IDIR or BCeID & username
+    String provider = jwtPrincipal.getClaimAsString("custom:idp_name");
+    String idpUsername = jwtPrincipal.getClaimAsString("custom:idp_username");
+
+    // User id {IDIR@USERNAME}
+    String cappedUsername = idpUsername.toUpperCase();
+    String cappedProvider = provider.toUpperCase();
+    return String.format("%s@%s", cappedProvider, cappedUsername);
+  }
 }

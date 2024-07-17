@@ -46,11 +46,12 @@ class SeedlotParentTreeSmpMixRelationalTest extends SeedlotEntityRelationalTest 
     var seedlot = createSeedlot("00000");
     var seedlotParentTree =
         new SeedlotParentTree(
-            seedlot, 1, "1", new BigDecimal(10), new BigDecimal(10), new AuditInformation("user1"));
+            seedlot, 1, "1", new BigDecimal(10), new BigDecimal(10), new AuditInformation());
     seedlotParentTree.setSmpSuccessPercentage(1);
     seedlotParentTree.setNonOrchardPollenContaminationCount(1);
+    seedlotParentTree.getAuditInformation().setEntryUserId("userId");
+    seedlotParentTree.getAuditInformation().setUpdateUserId("userId");
 
-    var savedSeedlotParentTree = seedlotParentTreeRepository.save(seedlotParentTree);
     var geneticWorth = geneticWorthRepository.findAll().get(0);
 
     var seedlotParentTreeSmpMix =
@@ -59,7 +60,10 @@ class SeedlotParentTreeSmpMixRelationalTest extends SeedlotEntityRelationalTest 
             "GC",
             geneticWorth,
             new BigDecimal(10),
-            new AuditInformation("user1"));
+            new AuditInformation());
+    seedlotParentTreeSmpMix.getAuditInformation().setEntryUserId("userId");
+    seedlotParentTreeSmpMix.getAuditInformation().setUpdateUserId("userId");
+    var savedSeedlotParentTree = seedlotParentTreeRepository.save(seedlotParentTree);
 
     seedlotParentTreeSmpMixRepository.saveAndFlush(seedlotParentTreeSmpMix);
 

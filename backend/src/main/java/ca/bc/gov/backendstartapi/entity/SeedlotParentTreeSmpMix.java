@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.idclass.SeedlotParentTreeSmpMixId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Supplemental Mass Polination for a given Seedlot, Parent Tree, Genetic Type and Genetic worth
@@ -31,6 +33,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class SeedlotParentTreeSmpMix {
 
   // region Identifier

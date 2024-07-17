@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodI
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /** The method used for the collection of a lot of seeds. */
 @Entity
@@ -29,6 +31,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode
+@EntityListeners(AuditingEntityListener.class)
 public class SeedlotCollectionMethod {
   // region Identifier
   @Id

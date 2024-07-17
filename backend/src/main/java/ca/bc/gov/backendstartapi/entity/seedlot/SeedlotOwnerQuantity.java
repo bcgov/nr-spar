@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOwnerQuantityId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /** Relational entity between a {@link Seedlot} and a ForestClient. */
 @Entity
@@ -28,6 +30,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class SeedlotOwnerQuantity {
 
   // region Identifier

@@ -33,8 +33,8 @@ class SeedlotRelationalTest extends SeedlotEntityRelationalTest {
     var savedSeedlot = createSeedlot("00000");
     var audit = savedSeedlot.getAuditInformation();
 
-    assertEquals("user1", audit.getEntryUserId());
-    assertEquals("user1", audit.getUpdateUserId());
+    assertEquals("userId", audit.getEntryUserId());
+    assertEquals("userId", audit.getUpdateUserId());
     assertNotNull(audit.getEntryTimestamp());
     assertEquals(audit.getEntryTimestamp(), audit.getUpdateTimestamp());
     assertTrue(audit.getEntryTimestamp().until(LocalDateTime.now(), ChronoUnit.SECONDS) < 5);

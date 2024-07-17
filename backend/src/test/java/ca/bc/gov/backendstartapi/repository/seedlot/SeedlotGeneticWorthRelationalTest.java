@@ -39,8 +39,10 @@ class SeedlotGeneticWorthRelationalTest extends SeedlotEntityRelationalTest {
     var seedlot = createSeedlot("00000");
     var geneticWorth = geneticWorthRepository.findAll().get(0);
     var seedlotGeneticWorth =
-        new SeedlotGeneticWorth(seedlot, geneticWorth, new AuditInformation("user1"));
+        new SeedlotGeneticWorth(seedlot, geneticWorth, new AuditInformation());
     seedlotGeneticWorth.setGeneticQualityValue(new BigDecimal(10));
+    seedlotGeneticWorth.getAuditInformation().setEntryUserId("userId");
+    seedlotGeneticWorth.getAuditInformation().setUpdateUserId("userId");
 
     seedlotGeneticWorthRepository.saveAndFlush(seedlotGeneticWorth);
 

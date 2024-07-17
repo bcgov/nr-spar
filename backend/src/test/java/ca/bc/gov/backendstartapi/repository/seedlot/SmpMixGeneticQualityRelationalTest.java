@@ -44,15 +44,20 @@ class SmpMixGeneticQualityRelationalTest extends SeedlotEntityRelationalTest {
   @Test
   void create() {
     var seedlot = createSeedlot("00000");
-    var smpMix = new SmpMix(seedlot, 1, "1", 1, null, new AuditInformation("user1"), 0);
+    var smpMix = new SmpMix(seedlot, 1, "1", 1, null, new AuditInformation(), 0);
     smpMix.setProportion(new BigDecimal(10));
+    smpMix.getAuditInformation().setEntryUserId("userId");
+    smpMix.getAuditInformation().setUpdateUserId("userId");
 
-    var savedSmpMix = smpMixRepository.save(smpMix);
     var geneticWorth = geneticWorthRepository.findAll().get(0);
 
     var smpMixGeneticQuality =
         new SmpMixGeneticQuality(
-            smpMix, "GC", geneticWorth, new BigDecimal(10), true, new AuditInformation("user1"), 0);
+            smpMix, "GC", geneticWorth, new BigDecimal(10), true, new AuditInformation(), 0);
+    smpMixGeneticQuality.getAuditInformation().setEntryUserId("userId");
+    smpMixGeneticQuality.getAuditInformation().setUpdateUserId("userId");
+
+    var savedSmpMix = smpMixRepository.save(smpMix);
 
     repository.saveAndFlush(smpMixGeneticQuality);
 

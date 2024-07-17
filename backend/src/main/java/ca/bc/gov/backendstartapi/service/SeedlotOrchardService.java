@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -71,23 +72,27 @@ public class SeedlotOrchardService {
   private void saveSeedlotOrchards(
       Seedlot seedlot, String primaryOrchardId, String secondaryOrchardId) {
 
+    List<SeedlotOrchard> seedlotsToSaveList = new ArrayList<>();
+
     SeedlotOrchard primary = new SeedlotOrchard(seedlot, true, primaryOrchardId);
     primary.setAuditInformation(loggedUserService.createAuditCurrentUser());
-    seedlotOrchardRepository.save(primary);
+    seedlotsToSaveList.add(primary);
     SparLog.info(
-        "Primary orchard id {} inserted on Seedlot_Orchard table for seedlot number {}",
+        "Primary orchard id {} to be saved for Seedlot number {}",
         primaryOrchardId,
         seedlot.getId());
 
     if (secondaryOrchardId != null) {
       SeedlotOrchard secondary = new SeedlotOrchard(seedlot, false, secondaryOrchardId);
       secondary.setAuditInformation(loggedUserService.createAuditCurrentUser());
-      seedlotOrchardRepository.save(secondary);
+      seedlotsToSaveList.add(secondary);
       SparLog.info(
-          "Secondary orchard id {} inserted on Seedlot_Orchard table for seedlot number {}",
+          "Secondary orchard id {} to be saved for Seedlot number {}",
           secondaryOrchardId,
           seedlot.getId());
     }
+
+    seedlotOrchardRepository.saveAll(seedlotsToSaveList);
   }
 
   /**
