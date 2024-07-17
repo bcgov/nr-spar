@@ -12,11 +12,11 @@ on:
         default: ''
         required: false
         type: string
-      etl:
-        description: Run the cronjob and verify results?  [true|false]
-        default: false
-        required: false
-        type: boolean
+      # etl:
+      #   description: Run the cronjob and verify results?  [true|false]
+      #   default: false
+      #   required: false
+      #   type: boolean
       tag:
         description: Container tag; usually PR number
         default: ${{ github.event.number }}
