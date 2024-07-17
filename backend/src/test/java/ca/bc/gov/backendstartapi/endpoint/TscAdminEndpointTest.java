@@ -208,7 +208,8 @@ class TscAdminEndpointTest {
   void editSeedlot_shouldSucceed() throws Exception {
     String seedlotNumber = "63012";
     SeedlotStatusResponseDto res = new SeedlotStatusResponseDto(seedlotNumber, "SUB");
-    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any())).thenReturn(res);
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), anyBoolean(), any()))
+        .thenReturn(res);
     mockMvc
         .perform(
             put(
@@ -227,7 +228,7 @@ class TscAdminEndpointTest {
   @DisplayName("Edit seedlot should fail upon seedlot not found.")
   void editSeedlot_shouldFail() throws Exception {
     String seedlotNumber = "63999";
-    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), anyBoolean(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
     mockMvc
@@ -248,7 +249,7 @@ class TscAdminEndpointTest {
   @DisplayName("Edit seedlot should fail with invalid seedlot status.")
   void editSeedlot_invalidStatus_shouldFail() throws Exception {
     String seedlotNumber = "63999";
-    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), any()))
+    when(seedlotService.updateSeedlotWithForm(any(), any(), anyBoolean(), anyBoolean(), any()))
         .thenThrow(new SeedlotNotFoundException());
 
     mockMvc

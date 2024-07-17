@@ -28,12 +28,13 @@ jobs:
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
-      - run: |
-          # View outputs
-          echo "outputs: ${{ toJson(needs.build.outputs) }}"
+      - if: steps.build.outputs.triggered == 'true'
+        run: |
+          # Trigger deploys
+          echo "deploy=true" >> $GITHUB_OUTPUT
 
   check:
-    name: Check Outputs
+    name: Build Outputs
     runs-on: ubuntu-22.04
     needs: [builds]
     steps:
@@ -47,8 +48,8 @@ jobs:
     if: needs.builds.outputs.triggered == 'true'
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
-    with:
-      etl: true
+    # with:
+    #   etl: true
 
   tests:
     name: Tests

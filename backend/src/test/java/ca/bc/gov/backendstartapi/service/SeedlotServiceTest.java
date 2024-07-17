@@ -830,7 +830,8 @@ class SeedlotServiceTest {
     when(loggedUserService.isTscAdminLogged()).thenReturn(isTscAdmin);
 
     SeedlotStatusResponseDto responseDto =
-        seedlotService.updateSeedlotWithForm(seedlotNumber, form, isTscAdmin, statusOnSuccess);
+        seedlotService.updateSeedlotWithForm(
+            seedlotNumber, form, isTscAdmin, false, statusOnSuccess);
 
     Assertions.assertEquals(seedlotNumber, responseDto.seedlotNumber());
     Assertions.assertEquals(statusOnSuccess, responseDto.seedlotStatusCode());

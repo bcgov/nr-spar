@@ -14,7 +14,8 @@ const PopSize = () => {
     isCalculatingPt,
     geoInfoVals,
     setGeoInfoInputObj,
-    allStepData
+    allStepData,
+    setPopSizeAndDiversityConfig
   } = useContext(ClassAContext);
 
   const handleInput = (key: keyof GeoInfoValType, value: string | null) => {
@@ -25,6 +26,13 @@ const PopSize = () => {
     // Validate Ne [0.1, 999.9]
     if (key === 'effectivePopSize') {
       newObj = validateEffectivePopSize(newObj);
+      setPopSizeAndDiversityConfig((prevVal) => ({
+        ...prevVal,
+        ne: {
+          ...prevVal.ne,
+          value: value ?? ''
+        }
+      }));
     }
 
     setGeoInfoInputObj(key, newObj);
