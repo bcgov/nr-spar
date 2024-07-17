@@ -15,7 +15,6 @@ import {
   MAX_VALUE_GEN_WORTH, MIN_VALUE_GEN_WORTH
 } from './constants';
 
-
 type UnrelatedGenWorthProps = {
   validGenWorth: Array<string> | undefined;
   isRead?: boolean;
@@ -23,7 +22,7 @@ type UnrelatedGenWorthProps = {
 
 const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) => {
   const {
-    isCalculatingPt, genWorthVals, setGenWorthInputObj
+    isCalculatingPt, genWorthVals, setGenWorthInputObj, isFetchingData
   } = useContext(ClassAContext);
 
   // validGenWorth can be undefiend
@@ -64,7 +63,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-ad-readonly"
                       label="Deer browse (AD)"
                       value={genWorthVals.ad.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -97,7 +96,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-dfs-readonly"
                       label="Dothistroma needle blight (DFS):"
                       value={genWorthVals.dfs.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -130,7 +129,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-dfu-readonly"
                       label="Cedar leaf blight (DFU):"
                       value={genWorthVals.dfu.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -163,7 +162,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-dfw-readonly"
                       label="Swiss needle cast (DFW):"
                       value={genWorthVals.dfw.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -196,7 +195,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-dsb-readonly"
                       label="White pine blister rust (DSB):"
                       value={genWorthVals.dsb.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -229,7 +228,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-dsc-readonly"
                       label="Comandra blister rust (DSC):"
                       value={genWorthVals.dsc.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -262,7 +261,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-dsg-readonly"
                       label="Western gall rust (DSG):"
                       value={genWorthVals.dsg.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -295,7 +294,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-gvo-readonly"
                       label="Volume growth (GVO):"
                       value={genWorthVals.gvo.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -328,7 +327,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-iws-readonly"
                       label="White pine terminal weevil (IWS):"
                       value={genWorthVals.iws.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -361,7 +360,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-wdu-readonly"
                       label="Durability (WDU):"
                       value={genWorthVals.wdu.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -394,7 +393,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-wve-readonly"
                       label="Wood velocity measures (WVE):"
                       value={genWorthVals.wve.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (
@@ -427,7 +426,7 @@ const UnrelatedGenWorth = ({ isRead, validGenWorth }: UnrelatedGenWorthProps) =>
                       id="gen-worth-wwd-readonly"
                       label="Wood density (WWD):"
                       value={genWorthVals.wwd.value}
-                      showSkeleton={isCalculatingPt}
+                      showSkeleton={isCalculatingPt || isFetchingData}
                     />
                   )
                   : (

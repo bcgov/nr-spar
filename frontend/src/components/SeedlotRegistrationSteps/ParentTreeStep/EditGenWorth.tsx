@@ -12,6 +12,7 @@ import {
   MIN_VALUE_GEN_WORTH, MAX_VALUE_GEN_WORTH,
   MAX_DECIMAL_DIGITS, GEN_WORTH_ERR_MSG
 } from './constants';
+import { recordKeys } from '../../../utils/RecordUtils';
 
 type EditGenWorthProps = {
   genWorthValues: InfoDisplayObj[][];
@@ -19,8 +20,11 @@ type EditGenWorthProps = {
 
 const EditGenWorth = ({ genWorthValues }: EditGenWorthProps) => {
   const {
-    isCalculatingPt, genWorthVals, setGenWorthInputObj
+    isCalculatingPt, genWorthVals, setGenWorthInputObj,
+    isFetchingData, genWorthInfoItems, setGenWorthInfoItems
   } = useContext(ClassAContext);
+
+  const genInfoItemsKeys = recordKeys(genWorthInfoItems);
 
   const handleInput = (key: keyof GenWorthValType, value: string | null) => {
     const newObj = structuredClone(genWorthVals[key]);
@@ -39,11 +43,17 @@ const EditGenWorth = ({ genWorthValues }: EditGenWorthProps) => {
       }
     }
 
+    if (genInfoItemsKeys.includes(key)) {
+      const clonedInfoItems = structuredClone(genWorthInfoItems);
+      clonedInfoItems[key][0].value = value ?? '';
+      setGenWorthInfoItems(clonedInfoItems);
+    }
+
     setGenWorthInputObj(key, newObj);
   };
 
   const displayTextInput = (genObj: InfoDisplayObj) => {
-    if (isCalculatingPt) {
+    if (isCalculatingPt || isFetchingData) {
       return <TextInputSkeleton />;
     }
     const strArray = genObj.name.split(' ');

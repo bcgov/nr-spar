@@ -30,7 +30,7 @@ parameters:
   - name: MEMORY_REQUEST
     value: 300Mi
   - name: MEMORY_LIMIT
-    value: 400Mi
+    value: 500Mi
   - name: ALLOWED_ORIGINS
     description: Sets all the allowed request origins
     value: "http://localhost:300*,https://*.apps.silver.devops.gov.bc.ca,https://*.nrs.gov.bc.ca"

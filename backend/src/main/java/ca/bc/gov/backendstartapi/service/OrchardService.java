@@ -1,7 +1,6 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.entity.ActiveOrchardSpuEntity;
@@ -107,20 +106,6 @@ public class OrchardService {
     SparLog.info("Finished fetching Parent Tree data for Orchard ID: {}", orchardId);
 
     return parentTreeDto.orElseThrow(NoParentTreeDataException::new);
-  }
-
-  /**
-   * Finds all orchards with the provided vegCode.
-   *
-   * @param vegCode Orchard's identification.
-   * @return An {@link List} of {@link OrchardDto} from oracle-api
-   */
-  public List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    SparLog.info("Finding all orchards by veg code for code {}", vegCode);
-
-    List<OrchardDto> list = oracleApiProvider.findOrchardsByVegCode(vegCode.toUpperCase());
-    SparLog.info("{} orchards found for veg code {}", list.size(), vegCode);
-    return list;
   }
 
   /**

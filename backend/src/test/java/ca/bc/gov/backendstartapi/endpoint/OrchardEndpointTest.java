@@ -6,13 +6,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.SameSpeciesTreeDto;
 import ca.bc.gov.backendstartapi.exception.NoParentTreeDataException;
 import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.service.OrchardService;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -90,91 +88,6 @@ class OrchardEndpointTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andExpect(status().reason("No active SPU for the given Orchard ID!"))
-        .andReturn();
-  }
-
-  @Test
-  @DisplayName("findOrchardsWithVegCodeSuccessTest")
-  void findOrchardsWithVegCodeTest() throws Exception {
-    String vegCode = "PLI";
-
-    OrchardDto firstOrchard =
-        new OrchardDto(
-            "123",
-            "smOrchard",
-            vegCode,
-            'S',
-            "Seed lot",
-            "PRD",
-            "ICH",
-            "Interior Cedar -- Hemlock",
-            "dw",
-            '4',
-            5);
-    OrchardDto secondOrchard =
-        new OrchardDto(
-            "456",
-            "xlOrchard",
-            vegCode,
-            'S',
-            "Seed lot",
-            "TEST",
-            "IDF",
-            "Interior Douglas-fir",
-            "mk",
-            '1',
-            5);
-
-    List<OrchardDto> testList =
-        new ArrayList<>() {
-          {
-            add(firstOrchard);
-            add(secondOrchard);
-          }
-        };
-
-    when(orchardService.findOrchardsByVegCode(vegCode)).thenReturn(testList);
-
-    mockMvc
-        .perform(
-            get("/api/orchards/vegetation-code/{vegCode}", vegCode)
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].id").value("123"))
-        .andExpect(jsonPath("$[0].vegetationCode").value(vegCode))
-        .andExpect(jsonPath("$[0].name").value("smOrchard"))
-        .andExpect(jsonPath("$[0].becZoneCode").value("ICH"))
-        .andExpect(jsonPath("$[0].becZoneDescription").value("Interior Cedar -- Hemlock"))
-        .andExpect(jsonPath("$[0].becSubzoneCode").value("dw"))
-        .andExpect(jsonPath("$[0].variant").value("4"))
-        .andExpect(jsonPath("$[0].becVersionId").value(5))
-        .andExpect(jsonPath("$[1].id").value("456"))
-        .andExpect(jsonPath("$[1].vegetationCode").value(vegCode))
-        .andExpect(jsonPath("$[1].name").value("xlOrchard"))
-        .andExpect(jsonPath("$[1].becZoneCode").value("IDF"))
-        .andExpect(jsonPath("$[1].becZoneDescription").value("Interior Douglas-fir"))
-        .andExpect(jsonPath("$[1].becSubzoneCode").value("mk"))
-        .andExpect(jsonPath("$[1].variant").value("1"))
-        .andExpect(jsonPath("$[1].becVersionId").value(5))
-        .andReturn();
-  }
-
-  @Test
-  @DisplayName("findOrchardsWithVegCodeNotFoundTest")
-  void findOrchardsWithVegCodeNotFoundTest() throws Exception {
-    String vegCode = "BEEF";
-
-    when(orchardService.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
-    mockMvc
-        .perform(
-            get("/api/orchards/vegetation-code/{vegCode}", vegCode)
-                .with(csrf().asHeader())
-                .header("Content-Type", "application/json")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.length()").value(0))
         .andReturn();
   }
 
