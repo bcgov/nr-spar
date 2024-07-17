@@ -12,11 +12,6 @@ on:
         default: ''
         required: false
         type: string
-      # etl:
-      #   description: Run the cronjob and verify results?  [true|false]
-      #   default: false
-      #   required: false
-      #   type: boolean
       tag:
         description: Container tag; usually PR number
         default: ${{ github.event.number }}
@@ -141,8 +136,6 @@ jobs:
           - name: sync
             file: sync/openshift.deploy.yml
             overwrite: true
-            parameters:
-            # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.RUN_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
 
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v3.0.0
@@ -167,45 +160,3 @@ jobs:
           verification_retry_seconds: "20"
       - id: trigger
         run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
-
-  verify:
-    name: Verify ETL
-    if: inputs.etl == 'true' && needs.init.outputs.triggered == 'true'
-    environment: ${{ inputs.environment }}
-    needs: [deploy, init]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Override OpenShift version
-        env:
-          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
-        run: |
-          curl --silent ${{ env.OC }} | tar -xzvf - oc
-          oc version
-        working-directory: /usr/local/bin/
-
-      - name: Job
-        run: |
-          # Run and verify job
-
-          # Login
-          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
-          oc project ${{ secrets.oc_namespace }} #Safeguard!
-
-          # Create job
-          CRONJOB=${{ github.event.repository.name }}-${{ inputs.target }}-sync
-          RUN_JOB=${CRONJOB}-${{ github.run_number }}-${{ github.run_attempt}}
-          oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
-
-          # Follow
-          oc wait --for=jsonpath='{.status.failed}'=4 job/${RUN_JOB} --timeout=10m || true
-          oc logs -l job-name=${RUN_JOB} --tail=50 --follow
-
-          # Results and exit code
-          oc get job ${RUN_JOB}
-
-          if [ $(oc get job ${RUN_JOB} -o jsonpath='{.status.ready}') -eq 0 ]; then
-            echo "Job successful!"
-          else
-            echo "Job failed!"
-            exit 1
-          fi

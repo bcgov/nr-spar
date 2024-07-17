@@ -1,0 +1,51 @@
+name: Scheduled ETL Sync
+
+on:
+  schedule: [cron: "0 */2 * * *"] # Every other hour on the hour
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Override OpenShift version
+        env:
+          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
+        run: |
+          curl --silent ${{ env.OC }} | tar -xzvf - oc
+          oc version
+        working-directory: /usr/local/bin/
+
+      - name: ETL Sync
+        run: |
+          # Run and verify job
+
+          # Login
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ secrets.oc_namespace }} #Safeguard!
+
+          # Create job
+          CRONJOB=${{ github.event.repository.name }}-test-sync
+          RUN_JOB=${CRONJOB}-${{ github.run_number }}-${{ github.run_attempt}}
+          oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
+
+          # Follow
+          oc wait --for=jsonpath='{.status.failed}'=4 job/${RUN_JOB} --timeout=10m || true
+          oc logs -l job-name=${RUN_JOB} --tail=50 --follow
+
+          # Results
+          oc get job ${RUN_JOB}
+
+          # Handle exit code
+          if [ $(oc get job ${RUN_JOB} -o jsonpath='{.status.ready}') -eq 0 ]; then
+            echo "Job successful!"
+          else
+            echo "Job failed!"
+            exit 1
+          fi
