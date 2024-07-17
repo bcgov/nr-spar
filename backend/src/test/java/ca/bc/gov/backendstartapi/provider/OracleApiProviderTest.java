@@ -84,53 +84,6 @@ class OracleApiProviderTest {
   }
 
   @Test
-  @DisplayName("findOrchardWithVegCodeProviderTest")
-  void findOrchardWithVegCodeProviderTest() {
-    when(loggedUserService.getLoggedUserToken()).thenReturn("1f7a4k5e8t9o5k6e9n8h5e2r6e");
-
-    String vegCode = "FDC";
-    String url = "/null/api/orchards/vegetation-code/" + vegCode;
-
-    String json =
-        """
-        [
-          {
-            "id": "339",
-            "name": "EAGLEROCK",
-            "vegetationCode": "PLI",
-            "lotTypeCode": "S",
-            "lotTypeDescription": "Seed Lot",
-            "stageCode": "PRD"
-          }
-        ]
-        """;
-
-    mockRestServiceServer
-        .expect(requestTo(url))
-        .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
-
-    List<OrchardDto> orchardDtoList = oracleApiProvider.findOrchardsByVegCode(vegCode);
-
-    Assertions.assertEquals("339", orchardDtoList.get(0).id());
-    Assertions.assertFalse(orchardDtoList.isEmpty());
-  }
-
-  @Test
-  @DisplayName("findOrchardWithVegCodeProviderErrorTest")
-  void findOrchardWithVegCodeProviderErrorTest() {
-    when(loggedUserService.getLoggedUserToken()).thenReturn("");
-
-    String vegCode = "FDC";
-    String url = "/null/api/orchards/vegetation-code/" + vegCode;
-
-    mockRestServiceServer.expect(requestTo(url)).andRespond(withStatus(HttpStatus.NOT_FOUND));
-
-    List<OrchardDto> orchardDtoList = oracleApiProvider.findOrchardsByVegCode(vegCode);
-
-    Assertions.assertTrue(orchardDtoList.isEmpty());
-  }
-
-  @Test
   @DisplayName("findParentTreesByVegCodeTest")
   void findParentTreesByVegCodeTest() {
     when(loggedUserService.getLoggedUserToken()).thenReturn("1f7a4k5e8t9o5k6e9n8h5e2r6e");

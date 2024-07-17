@@ -8,12 +8,6 @@ on:
       - '.github/**'
       - '.github/graphics/**'
       - '!.github/workflows/**'
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Container tag; e.g. PR number or latest"
-        type: string
-        default: latest
 
 concurrency:
   # Do not interrupt previous workflows
@@ -39,15 +33,15 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     with:
       environment: test
-      tag: ${{ inputs.tag || needs.init.outputs.pr }}
+      tag: ${{ needs.init.outputs.pr }}
       target: test
 
-  deploy-prod:
-    name: PROD
-    needs: [init, deploys]
-    secrets: inherit
-    uses: ./.github/workflows/.deploy.yml
-    with:
-      environment: prod
-      tag: ${{ inputs.tag || needs.init.outputs.pr }}
-      target: prod
+  # deploy-prod:
+  #   name: PROD
+  #   needs: [init, deploys]
+  #   secrets: inherit
+  #   uses: ./.github/workflows/.deploy.yml
+  #   with:
+  #     environment: prod
+  #     tag: ${{ needs.init.outputs.pr }}
+  #     target: prod
