@@ -53,7 +53,7 @@ jobs:
         run: echo "mod-tag=$(( ${{ inputs.target }} % 50 ))" >> $GITHUB_OUTPUT
 
       - name: OpenShift Init
-        uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        uses: bcgov-nr/action-deployer-openshift@v3.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Database
-        uses: bcgov-nr/action-deployer-openshift@v2.3.0
+        uses: bcgov-nr/action-deployer-openshift@v3.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
@@ -128,7 +128,7 @@ jobs:
             # post_rollout: ${{ inputs.etl == 'true' && 'oc create job ${{ env.RUN_JOB }} --from=cronjob/${{ env.CRONJOB }}' || ''}}
 
     steps:
-      - uses: bcgov-nr/action-deployer-openshift@v2.3.0
+      - uses: bcgov-nr/action-deployer-openshift@v3.0.0
         id: deploys
         with:
           file: ${{ matrix.file }}
