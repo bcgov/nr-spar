@@ -20,7 +20,7 @@ RUN apk add --no-cache ca-certificates curl
 # Copy files and run formatting
 COPY --from=build /app/build/ /app/dist
 COPY Caddyfile /etc/caddy/Caddyfile
-RUN caddy fmt /etc/caddy/Caddyfile
+RUN caddy fmt --overwrite /etc/caddy/Caddyfile
 
 # User, port and healthcheck
 EXPOSE 3000
