@@ -173,6 +173,13 @@ export type SeedPlanZoneOracleDto = {
   expiryDate: string
 } & CodeDescResType;
 
+export type SeedlotCalculationsResultsType = {
+  traitCode: string,
+  traitValue: number,
+  calculatedValue: number,
+  testedParentTreePerc: number
+}
+
 /**
  * The seedlot data returned from backend that contains additional information
  * such as seed plan zone.
@@ -181,7 +188,8 @@ export type RichSeedlotType = {
   seedlot: SeedlotType,
   primarySpu: SpuDto | null,
   primarySpz: SeedPlanZoneDto | null,
-  additionalSpzList: SeedPlanZoneDto[]
+  additionalSpzList: SeedPlanZoneDto[],
+  calculatedValues: SeedlotCalculationsResultsType[]
 }
 
 export type SeedlotsReturnType = {
@@ -307,13 +315,6 @@ export type SeedlotProgressPayloadType = {
   progressStatus: ProgressIndicatorConfig,
   revisionCount: number
 };
-
-export type SeedlotCalculationsResultsType = {
-  traitCode: string,
-  traitValue: number,
-  calculatedValue: number,
-  testedParentTreePerc: number
-}
 
 export type SeedlotAClassFullResponseType = {
   seedlotData: SeedlotAClassSubmitType,

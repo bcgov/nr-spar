@@ -529,7 +529,9 @@ export const configHeaderOpt = (
       });
     });
     setHeaderConfig(clonedHeaders);
-    setGenWorthInfoItems(clonedGwItems);
+    if (Object.keys(genWorthInfoItems).length === 0) {
+      setGenWorthInfoItems(clonedGwItems);
+    }
     setWeightedGwInfoItems(clonedWeightedGwItems);
   }
 };
