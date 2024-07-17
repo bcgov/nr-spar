@@ -1,4 +1,4 @@
-name: Scheduled ETL Sync
+name: ETL Sync
 
 on:
   schedule: [cron: "0 */2 * * *"] # Every other hour on the hour
@@ -32,7 +32,7 @@ jobs:
 
           # Create job
           CRONJOB=${{ github.event.repository.name }}-test-sync
-          RUN_JOB=${CRONJOB}-$(nr-spar: date +"%Y-%m-%d_%H:%M:%S")
+          RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
           oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
           # Follow
