@@ -27,6 +27,10 @@ on:
         default: ${{ github.event.number }}
         required: false
         type: string
+      triggers:
+        description: Deployment trigger; omit = build; e.g. ('backend/' 'frontend/')
+        required: false
+        type: string
       ### Usually a bad idea / not recommended
       timeout-minutes:
         description: 'Timeout minutes'
@@ -45,14 +49,27 @@ jobs:
     environment: ${{ inputs.environment }}
     outputs:
       mod-tag: ${{ steps.mod-tag.outputs.mod-tag }}
+      triggered: ${{ steps.triggers.outputs.triggered }}
     runs-on: ubuntu-22.04
     steps:
+      # Check triggers (omitted or matched), exiting successfully if not fired/required
+      - uses: bcgov-nr/action-diff-triggers@v0.2.0
+        id: triggers
+        with:
+          triggers: ${{ inputs.triggers }}
+
+      - if: steps.triggers.outputs.triggered == 'false'
+        run: |
+          echo "No deployment required/triggered!"
+          exit 0
+
       - name: Get PR Number Mod 50
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.triggers.outputs.triggered == 'true'
         id: mod-tag
         run: echo "mod-tag=$(( ${{ inputs.target }} % 50 ))" >> $GITHUB_OUTPUT
 
       - name: OpenShift Init
+        if: github.event_name != 'pull_request' || steps.triggers.outputs.triggered == 'true'
         uses: bcgov-nr/action-deployer-openshift@v3.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -72,6 +89,8 @@ jobs:
   database:
     name: Deploy (database)
     environment: ${{ inputs.environment }}
+    if: github.event_name != 'pull_request' || needs.init.outputs.triggered == 'true'
+    needs: [init]
     runs-on: ubuntu-22.04
     steps:
       - name: Database
@@ -91,6 +110,7 @@ jobs:
   deploy:
     name: Deploy
     environment: ${{ inputs.environment }}
+    if: github.event_name != 'pull_request' || needs.init.outputs.triggered == 'true'
     needs: [database, init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
@@ -144,7 +164,7 @@ jobs:
             ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
             ${{ matrix.parameters }}
           post_rollout: ${{ matrix.post_rollout }}
-          triggers: ${{ matrix.triggers }}
+          triggers: ${{ inputs.triggers }}
           verification_path: ${{ matrix.verification_path }}
           verification_retry_attempts: "5"
           verification_retry_seconds: "20"
@@ -153,9 +173,9 @@ jobs:
 
   verify:
     name: Verify ETL
-    if: inputs.etl == 'true'
+    if: inputs.etl == 'true' && needs.init.outputs.triggered == 'true'
     environment: ${{ inputs.environment }}
-    needs: [deploy]
+    needs: [deploy, init]
     runs-on: ubuntu-latest
     steps:
       - name: Override OpenShift version
