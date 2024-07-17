@@ -41,10 +41,6 @@ public interface Provider {
     return Optional.empty();
   }
 
-  default List<OrchardDto> findOrchardsByVegCode(String vegCode) {
-    return List.of();
-  }
-
   default List<SameSpeciesTreeDto> findParentTreesByVegCode(
       String vegCode, Map<String, String> orchardSpuMap) {
     return List.of();

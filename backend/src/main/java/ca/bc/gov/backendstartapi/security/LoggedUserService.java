@@ -1,6 +1,8 @@
 package ca.bc.gov.backendstartapi.security;
 
+import ca.bc.gov.backendstartapi.config.SparLog;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
+import ca.bc.gov.backendstartapi.exception.ClientIdForbiddenException;
 import ca.bc.gov.backendstartapi.exception.UserNotFoundException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -99,5 +101,44 @@ public class LoggedUserService {
    */
   public AuditInformation createAuditCurrentUser() {
     return new AuditInformation(getLoggedUserId());
+  }
+
+  /**
+   * Verify if the service initiator has the correct access.
+   *
+   * @param clientId to verify
+   * @throw an {@link ClientIdForbiddenException}
+   */
+  public void verifySeedlotAccessPrivilege(String clientId) {
+    Optional<UserInfo> userInfo = getLoggedUserInfo();
+
+    if (userInfo.isEmpty()) {
+      throw new UserNotFoundException();
+    }
+
+    if (isTscAdminLogged()) {
+      SparLog.info("Request allowed, TSC Admin role found!");
+      return;
+    }
+
+    if (!userInfo.get().clientIds().contains(clientId)) {
+      SparLog.info("Request denied due to user not having client id: {}", clientId);
+      throw new ClientIdForbiddenException();
+    }
+  }
+
+  /**
+   * Verify if the logged user has TSC_ADMIN role.
+   *
+   * @return true if it has, false otherwise.
+   */
+  public boolean isTscAdminLogged() {
+    Optional<UserInfo> userInfo = getLoggedUserInfo();
+
+    if (userInfo.isEmpty()) {
+      throw new UserNotFoundException();
+    }
+
+    return userInfo.get().roles().contains("SPAR_TSC_ADMIN");
   }
 }
