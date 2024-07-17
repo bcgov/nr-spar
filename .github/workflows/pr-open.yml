@@ -31,7 +31,6 @@ jobs:
   deploys:
     name: Deploys
     needs: [builds]
-    if: needs.builds.outputs.triggered == 'true'
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
@@ -39,10 +38,11 @@ jobs:
 
   tests:
     name: Tests
-    if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
+    with:
+      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
 
   results:
     name: PR Results

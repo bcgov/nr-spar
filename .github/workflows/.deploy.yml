@@ -52,16 +52,14 @@ jobs:
       triggered: ${{ steps.triggers.outputs.triggered }}
     runs-on: ubuntu-22.04
     steps:
-      # Check triggers (omitted or matched), exiting successfully if not fired/required
+      # Check triggers (omitted or matched)
       - uses: bcgov-nr/action-diff-triggers@v0.2.0
         id: triggers
         with:
           triggers: ${{ inputs.triggers }}
 
       - if: steps.triggers.outputs.triggered == 'false'
-        run: |
-          echo "No deployment required/triggered!"
-          exit 0
+        run: echo "No deployment required/triggered!"
 
       - name: Get PR Number Mod 50
         if: github.event_name == 'pull_request' && steps.triggers.outputs.triggered == 'true'
