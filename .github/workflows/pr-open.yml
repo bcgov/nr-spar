@@ -36,7 +36,7 @@ jobs:
 
   tests:
     name: Tests
-    if: needs.builds.outputs.run_tests == 'true'
+    if: needs.builds.outputs.run_tests == true
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
