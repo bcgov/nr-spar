@@ -156,9 +156,12 @@ objects:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-password
                 - name: ORACLEDB_KEYSTORE
-                  value: ${ORACLEDB_KEYSTORE}
+                  value: /cert/jssecacerts
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
+              volumeMounts:
+                - name: ${NAME}-${ZONE}-${COMPONENT}-certs
+                  mountPath: /cert
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}
