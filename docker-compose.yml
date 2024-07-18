@@ -48,7 +48,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
       <<: *postgres-vars
     ports: ["8090:8090", "5005:5005"]
-    image: maven:3.9.7-eclipse-temurin-17
+    image: maven:3.9.8-eclipse-temurin-17
     entrypoint: sh -c './encora-cert.sh'
     working_dir: /app
     volumes:
@@ -106,7 +106,7 @@ services:
       AWS_COGNITO_ISSUER_URI: "https://cognito-idp.ca-central-1.amazonaws.com/ca-central-1_t2HSZBHur"
     profiles: ["oracle-api"]
     network_mode: host
-    image: maven:3.9.7-eclipse-temurin-17
+    image: maven:3.9.8-eclipse-temurin-17
     entrypoint: sh -c './startup.sh && mvn -ntp spring-boot:run -Dspring-boot.run.jvmArguments="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5006"'
     working_dir: /app
     volumes: ["./oracle-api:/app"]
@@ -155,7 +155,7 @@ services:
           target: ./sync/requirements.txt
     environment:
       <<: *postgres-vars
-      TEST_MODE: ${TEST_MODE:-true}
+      TEST_MODE: ${TEST_MODE:-false}
       EXECUTION_ID: ${EXECUTION_ID:-100}
       DATABASE_HOST: database
       ORACLE_HOST: ${ORACLE_HOST:-nrcdb03.bcgov}
