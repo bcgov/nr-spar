@@ -16,7 +16,6 @@ const FavouriteActivityMap: Record<string, FavActivityType> = {
     type: 'registerAClass',
     image: 'TaskAdd',
     header: 'Create A-class seedlot',
-    description: 'Register a new A-class seedlot',
     link: ROUTES.SEEDLOTS_A_CLASS_CREATION,
     highlighted: false
   },
