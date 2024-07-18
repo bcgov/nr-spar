@@ -142,7 +142,7 @@ jobs:
   # ETL testing will only run on Pull Requests if the sync/ directory is modified
   etl:
     name: ETL Sync
-    if: github.event_name != 'pull_request' || steps.init.outputs.triggers_sync == 'true'
+    if: github.event_name != 'pull_request' || needs.init.outputs.triggers_sync == 'true'
     needs: [init]
     runs-on: ubuntu-latest
     steps:
