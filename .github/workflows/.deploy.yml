@@ -42,12 +42,12 @@ jobs:
       - uses: bcgov-nr/action-diff-triggers@v0.2.0
         id: triggers_core
         with:
-          triggers: ${{ github.event_name != 'pull_request' && '' || ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/') }}
+          triggers: ${{ github.event_name != 'pull_request' && '' || "('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')" }}
 
       - uses: bcgov-nr/action-diff-triggers@v0.2.0
         id: triggers_sync
         with:
-          triggers: ${{ github.event_name != 'pull_request' && '' || ('common/' 'sync/') }}
+          triggers: ${{ github.event_name != 'pull_request' && '' || "('common/' 'sync/')" }}
 
       - name: Get PR Number Mod 50
         if: github.event_name == 'pull_request'
