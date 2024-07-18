@@ -196,7 +196,7 @@ jobs:
           set -eu
 
           # Create job
-          CRONJOB=nr-spar-test-syncd
+          CRONJOB=nr-spar-test-sync
           RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
           oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
