@@ -108,7 +108,7 @@ jobs:
   deploy:
     name: Deploy
     environment: ${{ inputs.environment }}
-    if: github.event_name != 'pull_request' || needs.init.outputs.triggered == 'true'
+    # if: github.event_name != 'pull_request' || needs.init.outputs.triggered == 'true'
     # needs: [database, init]
     outputs:
       triggered: ${{ steps.trigger.outputs.triggered }}
