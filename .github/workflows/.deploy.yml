@@ -144,7 +144,7 @@ jobs:
             overwrite: true
             parameters:
               ${{ github.event_name == 'pull_request' && '-p TEST_MODE=true' || '' }}
-            post_rollout: ${{ inputs.etl == 'true' && 'oc create job nr-spar-${{ inputs.target }}-sync-$(date +"%Y-%m-%d--%H-%M-%S") --from=cronjob/nr-spar-${{ inputs.target }}-sync' || ''}}
+            post_rollout: ${{ inputs.etl == 'true' && 'oc create job nr-spar-${{ inputs.target }}-sync-${{ github.run_attempt}} --from=cronjob/nr-spar-${{ inputs.target }}-sync' || ''}}
 
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v3.0.0
