@@ -25,7 +25,7 @@ on:
 
     outputs:
       run_tests:
-        description: 'Run Cypress tests?  Required if core apps have changed, excludes sync'
+        # description: 'Run Cypress tests?  Required if core apps have changed, excludes sync'
         value: ${{ jobs.init.outputs.triggers_core }}
 
 jobs:
