@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.springframework.lang.NonNull;
@@ -83,7 +84,7 @@ public class GeneticWorthService {
         SparLog.info("Calculating Genetic Worth for {} trait", trait.getCode());
         calculatedValue = calculateTraitGeneticWorth(traitsDto, trait);
       } else {
-        SparLog.info(
+        SparLog.debug(
             "No Genetic Worth calculations for trait {}, threshold not met.", trait.getCode());
       }
 
@@ -102,18 +103,35 @@ public class GeneticWorthService {
    *     to be calculated.
    * @return A {@link BigDecimal} representing the calculated value.
    */
-  public BigDecimal calculateNe(List<OrchardParentTreeValsDto> traitsDto) {
+  public BigDecimal calculateNe(List<OrchardParentTreeValsDto> traitsDto, Map<String, BigDecimal> valueHolder) {
     SparLog.info("Started Ne calculation");
-    BigDecimal malePollenSum = reducePollenCount(traitsDto);
-    BigDecimal femaleConeSum = reduceConeCount(traitsDto);
+    //BigDecimal malePollenSum = reducePollenCount(traitsDto);
+    //BigDecimal femaleConeSum = reduceConeCount(traitsDto);
 
+    Integer numOfPtOutside = 0;
+
+    if (numOfPtOutside > 0) {
+      return BigDecimal.ZERO;
+    } else {
+      double square = Math.sqrt(valueHolder.get("parentPropContrib").doubleValue());
+      BigDecimal v_ne_no_smp_contrib = new BigDecimal(String.valueOf(square));
+      BigDecimal neValue = BigDecimal.ONE.divide(v_ne_no_smp_contrib, 10, RoundingMode.HALF_UP);
+      neValue = neValue.setScale(1, RoundingMode.HALF_UP);
+      SparLog.info("Finished Ne calculation (neValue={})", neValue);
+
+      return neValue;
+    }
+
+    /*
     BigDecimal piSquareSum = BigDecimal.ZERO;
     for (OrchardParentTreeValsDto dto : traitsDto) {
-      BigDecimal pi = calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);
-      BigDecimal piSquare = pi.multiply(pi);
+      if (hasValue(dto.pollenCount()) && hasValue(dto.coneCount())) {
+        BigDecimal pi = calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);
+        BigDecimal piSquare = pi.multiply(pi);
 
-      piSquareSum = piSquareSum.add(piSquare);
-      SparLog.debug("calculateNe - piSquareSum {}", piSquareSum);
+        piSquareSum = piSquareSum.add(piSquare);
+        SparLog.debug("calculateNe - piSquareSum {}", piSquareSum);
+      }
     }
 
     if (piSquareSum.compareTo(BigDecimal.ZERO) == 0) {
@@ -122,9 +140,14 @@ public class GeneticWorthService {
     }
 
     BigDecimal neValue = BigDecimal.ONE.divide(piSquareSum, 10, RoundingMode.HALF_UP);
-    SparLog.debug("calculateNe - neValue {}", neValue);
+    SparLog.info("Finished Ne calculation (neValue={})", neValue);
 
     return neValue.setScale(1, RoundingMode.HALF_UP);
+    */
+  }
+
+  private boolean hasValue(BigDecimal value) {
+    return !Objects.isNull(value) && value.compareTo(BigDecimal.ZERO) > 0;
   }
 
   /**
@@ -142,7 +165,7 @@ public class GeneticWorthService {
 
     for (OrchardParentTreeValsDto dto : traitsDto) {
       BigDecimal traitBreedingValue = getTraitValue(dto, trait);
-      if (!Objects.isNull(traitBreedingValue) && traitBreedingValue.floatValue() != 0) {
+      if (hasValue(traitBreedingValue) && hasValue(dto.pollenCount()) && hasValue(dto.coneCount())) {
         BigDecimal pi =
             calculatePi(dto.pollenCount(), dto.coneCount(), malePollenSum, femaleConeSum);
         BigDecimal gwValue = traitBreedingValue.multiply(pi);
@@ -175,7 +198,7 @@ public class GeneticWorthService {
 
     for (OrchardParentTreeValsDto traitFor : traitsDto) {
       BigDecimal traitBreedingValue = getTraitValue(traitFor, trait);
-      if (!Objects.isNull(traitBreedingValue) && traitBreedingValue.floatValue() != 0) {
+      if (hasValue(traitBreedingValue) && hasValue(traitFor.coneCount()) && hasValue(traitFor.pollenCount())) {
         BigDecimal pi =
             calculatePi(traitFor.pollenCount(), traitFor.coneCount(), malePollenSum, femaleConeSum);
         sumPi = sumPi.add(pi);
