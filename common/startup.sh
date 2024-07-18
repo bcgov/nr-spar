@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CERT_DEST_FOLDER="/app"
+CERT_DEST_FOLDER="/cert"
 CERT_FILE="jssecacerts"
 
 generate_cert() {

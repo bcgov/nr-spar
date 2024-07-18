@@ -78,6 +78,7 @@ jobs:
             -p ORACLE_USER='${{ vars.ORACLE_USER }}'
             -p ORACLE_SYNC_USER='${{ vars.ORACLE_SYNC_USER }}'
             -p ORACLE_SYNC_PASSWORD='${{ secrets.ORACLE_SYNC_PASSWORD }}'
+            -p ORACLE_CERT_SECRET='${{ secrets.ORACLE_CERT_SECRET }}'
 
   database:
     name: Deploy (database)

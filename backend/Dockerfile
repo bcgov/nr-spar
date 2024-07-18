@@ -8,7 +8,7 @@ COPY src ./src
 COPY .mvn/ ./.mvn
 
 # Build
-RUN ./mvnw -B package -Pnative -DskipTests -Dspring.profiles.active=prod
+RUN ./mvnw -B package -Pnative -DskipTests
 
 
 ### Deployer
@@ -25,4 +25,4 @@ EXPOSE ${PORT}
 HEALTHCHECK CMD timeout 10s bash -c 'true > /dev/tcp/127.0.0.1/8090'
 
 # Startup
-ENTRYPOINT ["/app/nr-spar-backend"]
+ENTRYPOINT ["/app/nr-spar-backend", "-Dspring.profiles.active=prod"]
