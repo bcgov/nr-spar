@@ -36,11 +36,10 @@ jobs:
 
   tests:
     name: Tests
+    if: needs.builds.outputs.run_tests == 'true'
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
-    with:
-      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
 
   results:
     name: PR Results
