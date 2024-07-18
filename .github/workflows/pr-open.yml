@@ -9,55 +9,55 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # builds:
-  #   name: Builds
-  #   runs-on: ubuntu-22.04
-  #   outputs:
-  #     triggered: ${{ steps.build.outputs.triggered }}
-  #   permissions:
-  #     packages: write
-  #   strategy:
-  #     matrix:
-  #       package: [database, backend, frontend, oracle-api, sync]
-  #   steps:
-  #     - uses: bcgov-nr/action-builder-ghcr@v2.2.0
-  #       id: build
-  #       with:
-  #         package: ${{ matrix.package }}
-  #         tag: ${{ github.event.number }}
-  #         tag_fallback: latest
-  #         triggers: ('${{ matrix.package }}/')
+  builds:
+    name: Builds
+    runs-on: ubuntu-22.04
+    outputs:
+      triggered: ${{ steps.build.outputs.triggered }}
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        package: [database, backend, frontend, oracle-api, sync]
+    steps:
+      - uses: bcgov-nr/action-builder-ghcr@v2.2.0
+        id: build
+        with:
+          package: ${{ matrix.package }}
+          tag: ${{ github.event.number }}
+          tag_fallback: latest
+          triggers: ('${{ matrix.package }}/')
 
   deploys:
     name: Deploys
-    # needs: [builds]
+    needs: [builds]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
     with:
       etl: true
-      # triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/' 'sync/')
+      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/' 'sync/')
 
-  # tests:
-  #   name: Tests
-  #   needs: [deploys]
-  #   secrets: inherit
-  #   uses: ./.github/workflows/.tests.yml
-  #   with:
-  #     triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
+  tests:
+    name: Tests
+    needs: [deploys]
+    secrets: inherit
+    uses: ./.github/workflows/.tests.yml
+    with:
+      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
 
-  # results:
-  #   name: PR Results
-  #   if: always()
-  #   # Include all needs that could have failures!
-  #   needs: [builds, deploys, tests]
-  #   runs-on: ubuntu-22.04
-  #   steps:
-  #     - run: |
-  #         # View results
-  #         echo "needs.*.result: ${{ toJson(needs.*.result) }}"
+  results:
+    name: PR Results
+    if: always()
+    # Include all needs that could have failures!
+    needs: [builds, deploys, tests]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          # View results
+          echo "needs.*.result: ${{ toJson(needs.*.result) }}"
 
-  #     - if: contains(needs.*.result, 'failure')
-  #       run: |
-  #         # Job failure found
-  #         echo "At least one job has failed"
-  #         exit 1
+      - if: contains(needs.*.result, 'failure')
+        run: |
+          # Job failure found
+          echo "At least one job has failed"
+          exit 1
