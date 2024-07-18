@@ -12,11 +12,6 @@ on:
         default: ''
         required: false
         type: string
-      etl:
-        description: Run the cronjob and verify results?  [true|false]
-        default: false
-        required: false
-        type: boolean
       tag:
         description: Container tag; usually PR number
         default: ${{ github.event.number }}
@@ -27,21 +22,6 @@ on:
         default: ${{ github.event.number }}
         required: false
         type: string
-      triggers:
-        description: Deployment trigger; omit = build; e.g. ('backend/' 'frontend/')
-        required: false
-        type: string
-      ### Usually a bad idea / not recommended
-      timeout-minutes:
-        description: 'Timeout minutes'
-        default: 10
-        required: false
-        type: number
-
-    outputs:
-      triggered:
-        description: 'Has a deployment has been triggered?'
-        value: ${{ jobs.deploy.outputs.triggered }}
 
 jobs:
   init:
@@ -54,20 +34,22 @@ jobs:
     steps:
       # Check triggers (omitted or matched)
       - uses: bcgov-nr/action-diff-triggers@v0.2.0
-        id: triggers
+        id: triggers_core
         with:
-          triggers: ${{ inputs.triggers }}
+          triggers: ${{ github.event_name != 'pull_request' && '' || ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/') }}
 
-      - if: steps.triggers.outputs.triggered == 'false'
-        run: echo "No deployment required/triggered!"
+      - uses: bcgov-nr/action-diff-triggers@v0.2.0
+        id: triggers_sync
+        with:
+          triggers: ${{ github.event_name != 'pull_request' && '' || ('common/' 'sync/') }}
 
       - name: Get PR Number Mod 50
-        if: github.event_name == 'pull_request' && steps.triggers.outputs.triggered == 'true'
+        if: github.event_name == 'pull_request'
         id: mod-tag
         run: echo "mod-tag=$(( ${{ inputs.target }} % 50 ))" >> $GITHUB_OUTPUT
 
       - name: OpenShift Init
-        if: github.event_name != 'pull_request' || steps.triggers.outputs.triggered == 'true'
+        if: steps.triggers.outputs.triggered_core == 'true' || steps.triggers.outputs.triggered_sync == 'true'
         uses: bcgov-nr/action-deployer-openshift@v3.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -84,14 +66,8 @@ jobs:
             -p ORACLE_SYNC_USER='${{ vars.ORACLE_SYNC_USER }}'
             -p ORACLE_SYNC_PASSWORD='${{ secrets.ORACLE_SYNC_PASSWORD }}'
 
-  database:
-    name: Deploy (database)
-    environment: ${{ inputs.environment }}
-    if: github.event_name != 'pull_request' || needs.init.outputs.triggered == 'true'
-    needs: [init]
-    runs-on: ubuntu-22.04
-    steps:
       - name: Database
+        if: steps.triggers.outputs.triggered_core == 'true' || steps.triggers.outputs.triggered_sync == 'true'
         uses: bcgov-nr/action-deployer-openshift@v3.0.0
         with:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
@@ -107,13 +83,11 @@ jobs:
 
   deploy:
     name: Deploy
+    if: steps.triggers.outputs.triggered_core == 'true'
     environment: ${{ inputs.environment }}
-    if: github.event_name != 'pull_request' || needs.init.outputs.triggered == 'true'
-    needs: [database, init]
-    outputs:
-      triggered: ${{ steps.trigger.outputs.triggered }}
+    needs: [init]
     runs-on: ubuntu-22.04
-    timeout-minutes: ${{ inputs.timeout-minutes }}
+    timeout-minutes: 10
     strategy:
       matrix:
         name: [backend, frontend, oracle-api, sync]
@@ -138,12 +112,6 @@ jobs:
             parameters:
               -p AWS_COGNITO_ISSUER_URI=https://cognito-idp.ca-central-1.amazonaws.com/${{ vars.VITE_USER_POOLS_ID }}
             verification_path: "actuator/health"
-          - name: sync
-            file: sync/openshift.deploy.yml
-            oc_version: "4.13"
-            overwrite: true
-            parameters:
-              ${{ github.event_name == 'pull_request' && '-p TEST_MODE=true' || '' }}
 
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v3.0.0
@@ -155,34 +123,40 @@ jobs:
           oc_token: ${{ secrets.OC_TOKEN }}
           oc_version: ${{ matrix.oc_version }}
           overwrite: ${{ matrix.overwrite }}
-          penetration_test: false
           parameters:
             -p TAG=${{ inputs.tag }}
             -p ZONE=${{ inputs.target }}
             ${{ github.event_name == 'pull_request' && '-p MIN_REPLICAS=1' || '' }}
             ${{ github.event_name == 'pull_request' && '-p MAX_REPLICAS=2' || '' }}
             ${{ matrix.parameters }}
-          triggers: ${{ inputs.triggers }}
+          triggers: ${{ github.event_name == 'pull_request' && ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/' 'sync/') || '' }}
           verification_path: ${{ matrix.verification_path }}
           verification_retry_attempts: "5"
           verification_retry_seconds: "20"
-      - id: trigger
-        run: echo "triggered=${{ steps.deploys.outputs.triggered }}" >> $GITHUB_OUTPUT
 
+  # ETL testing will only run on Pull Requests if the sync/ directory is modified
   etl:
     name: ETL Sync
-    environment: ${{ inputs.environment }}
-    if: ${{ github.event_name == 'pull_request' && inputs.etl }}
-    needs: [deploy]
+    if: steps.triggers.outputs.triggered_sync == 'true'
+    needs: [init]
     runs-on: ubuntu-latest
     steps:
-      - uses: bcgov-nr/action-diff-triggers@v0.2.0
-        id: triggers
+      - name: Deploy (sync)
+        uses: bcgov-nr/action-deployer-openshift@v3.0.0
         with:
-          triggers: ('sync/')
+          file: sync/openshift.deploy.yml
+          oc_namespace: ${{ vars.OC_NAMESPACE }}
+          oc_server: ${{ vars.OC_SERVER }}
+          oc_token: ${{ secrets.OC_TOKEN }}
+          oc_version: "4.13"
+          overwrite: true
+          parameters:
+            -p TAG=${{ inputs.tag }}
+            -p ZONE=${{ inputs.target }}
+            -p TEST_MODE=true
 
       - name: Override OpenShift version
-        if: steps.triggers.outputs.triggered == 'true'
+        if: github.event_name == 'pull_request'
         env:
           OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
         run: |
@@ -192,7 +166,7 @@ jobs:
         working-directory: /usr/local/bin/
 
       - name: ETL Sync
-        if: steps.triggers.outputs.triggered == 'true'
+        if: github.event_name == 'pull_request'
         run: |
           # Run and verify job
 
