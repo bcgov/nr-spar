@@ -12,6 +12,11 @@ on:
         default: ''
         required: false
         type: string
+      etl:
+        description: Run the cronjob and verify results?  [true|false]
+        default: false
+        required: false
+        type: boolean
       tag:
         description: Container tag; usually PR number
         default: ${{ github.event.number }}
@@ -135,7 +140,11 @@ jobs:
             verification_path: "actuator/health"
           - name: sync
             file: sync/openshift.deploy.yml
+            oc_version: "4.13"
             overwrite: true
+            parameters:
+              ${{ github.event_name == 'pull_request' && '-p TEST_MODE=true' || '' }}
+            post_rollout: ${{ inputs.etl == 'true' && 'oc create job nr-spar-${{ inputs.target }}-sync-$(date +"%Y-%m-%d--%H-%M-%S") --from=cronjob/nr-spar-${{ inputs.target }}-sync' || ''}}
 
     steps:
       - uses: bcgov-nr/action-deployer-openshift@v3.0.0
@@ -145,6 +154,7 @@ jobs:
           oc_namespace: ${{ vars.OC_NAMESPACE }}
           oc_server: ${{ vars.OC_SERVER }}
           oc_token: ${{ secrets.OC_TOKEN }}
+          oc_version: ${{ matrix.oc_version }}
           overwrite: ${{ matrix.overwrite }}
           penetration_test: false
           parameters:
