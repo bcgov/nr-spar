@@ -163,7 +163,7 @@ public class SeedlotService {
 
     seedlot.setIntendedForCrownLand(createDto.toBeRegistrdInd());
     seedlot.setSourceInBc(createDto.bcSourceInd());
-    seedlot.setAuditInformation(new AuditInformation());
+    seedlot.setAuditInformation(new AuditInformation(loggedUserService.getLoggedUserId()));
 
     SparLog.debug("Seedlot to insert: {}", seedlot);
 
@@ -1050,7 +1050,7 @@ public class SeedlotService {
     List<SeedlotSeedPlanZoneEntity> spzSaveList = new ArrayList<>();
     GeneticClassEntity genAclass =
         geneticClassRepository.findById("A").orElseThrow(GeneticClassNotFoundException::new);
-    AuditInformation currentUser = new AuditInformation();
+    AuditInformation currentUser = new AuditInformation(loggedUserService.getLoggedUserId());
     areaOfUseDto.getSpzList().stream()
         .forEach(
             spzDto -> {
