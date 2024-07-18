@@ -64,6 +64,6 @@ export const inputText = {
   },
   storageTitle: {
     titleText: 'Temporary seed storage',
-    subtitleText: 'Enter the seed storage agency information and storage\'s star and end dates for this seedlot'
+    subtitleText: 'Enter the seed storage agency information and storage\'s start and end dates for this seedlot'
   }
 };
