@@ -8,7 +8,7 @@ COPY src ./src
 COPY .mvn/ ./.mvn
 
 # Build
-RUN ./mvnw -B package -Pnative -DskipTests -Dspring-boot.run.profiles=prod
+RUN ./mvnw -B package -Pnative -DskipTests -Dspring.profiles.active=prod
 
 
 ### Deployer

@@ -74,7 +74,7 @@ class SeedlotParentTreeServiceTest {
   void saveSeedlotFormStep5_firstSubmit_shouldSucceed() {
     when(seedlotParentTreeRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
 
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
@@ -102,7 +102,7 @@ class SeedlotParentTreeServiceTest {
   void saveSeedlotFormStep5_updateSeedlotAdd_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
     SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     SeedlotParentTree spt =
         new SeedlotParentTree(
             seedlot,
@@ -133,7 +133,7 @@ class SeedlotParentTreeServiceTest {
   void saveSeedlotFormStep4_updateSeedlotRemove_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
     SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     SeedlotParentTree spt =
         new SeedlotParentTree(
             seedlot,

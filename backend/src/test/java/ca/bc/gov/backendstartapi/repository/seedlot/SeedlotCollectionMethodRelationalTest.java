@@ -57,9 +57,7 @@ class SeedlotCollectionMethodRelationalTest extends SeedlotEntityRelationalTest 
     // seedlotCollectionMethod.setConeCollectionMethod(coneCollectionMethod);
     seedlotCollectionMethod.setConeCollectionMethodOtherDescription(
         coneCollectionMethod.getDescription());
-    seedlotCollectionMethod.setAuditInformation(new AuditInformation());
-    seedlotCollectionMethod.getAuditInformation().setEntryUserId("userId");
-    seedlotCollectionMethod.getAuditInformation().setUpdateUserId("userId");
+    seedlotCollectionMethod.setAuditInformation(new AuditInformation("user1"));
 
     seedlotCollectionMethodTestRepo.saveAndFlush(seedlotCollectionMethod);
 

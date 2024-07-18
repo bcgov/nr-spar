@@ -60,9 +60,7 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
     seedlotOwnerQuantity.setOriginalPercentageSurplus(new BigDecimal(0));
     seedlotOwnerQuantity.setMethodOfPayment(methodOfPayment);
     seedlotOwnerQuantity.setFundingSourceCode("ABC");
-    seedlotOwnerQuantity.setAuditInformation(new AuditInformation());
-    seedlotOwnerQuantity.getAuditInformation().setEntryUserId("userId");
-    seedlotOwnerQuantity.getAuditInformation().setUpdateUserId("userId");
+    seedlotOwnerQuantity.setAuditInformation(new AuditInformation("user1"));
 
     repository.saveAndFlush(seedlotOwnerQuantity);
 

@@ -56,12 +56,17 @@ public class UserAuthenticationHelper {
           lastName = displayName.substring(indexFirstSpace).trim();
         }
 
+        // User id {IDIR@USERNAME}
+        String cappedUsername = idpUsername.toUpperCase();
+        String cappedProvider = provider.toUpperCase();
+        String userId = String.format("%s@%s", cappedProvider, cappedUsername);
+
         // Email will be empty, until next FAM release
         String email = jwtPrincipal.getClaimAsString("email");
 
         UserInfo userInfo =
             new UserInfo(
-                JwtSecurityUtil.getUserIdFromJwt(jwtPrincipal),
+                userId,
                 firstName,
                 lastName,
                 email,

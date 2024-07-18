@@ -7,7 +7,6 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -23,7 +22,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
 import org.locationtech.jts.geom.Point;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /** A registered seedlot. */
 @Entity
@@ -32,7 +30,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @ToString
-@EntityListeners(AuditingEntityListener.class)
 public class Seedlot implements Serializable {
   @Id
   @Column(name = "seedlot_number", length = 5)

@@ -7,7 +7,6 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -21,7 +20,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * The Parent Trees that contributed to the Supplemental Mass Pollination mix of an Orchard Seedlot
@@ -34,7 +32,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class)
 public class SmpMix {
 
   // region Identifier
@@ -47,7 +44,6 @@ public class SmpMix {
   @Id
   @Column(name = "parent_tree_id", nullable = false)
   private int parentTreeId;
-
   // endregion
 
   @Column(name = "parent_tree_number", nullable = false)

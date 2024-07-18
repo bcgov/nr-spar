@@ -61,7 +61,7 @@ class SeedlotGeneticWorthServiceTest {
   }
 
   private AuditInformation mockAudit() {
-    return new AuditInformation();
+    return new AuditInformation("userId");
   }
 
   private GeneticWorthEntity mockGeneticWorthEntity(String traitCode) {
@@ -79,7 +79,7 @@ class SeedlotGeneticWorthServiceTest {
   void saveSeedlotFormStep5_firstSubmit_shouldSucceed() {
     when(seedlotGeneticWorthRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
 
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     Seedlot seedlot = new Seedlot("54321");
@@ -104,7 +104,7 @@ class SeedlotGeneticWorthServiceTest {
   @DisplayName("Save Seedlot Genetic Worth with one new method")
   void saveSeedlotFormStep5_updateSeedlotAdd_shouldSucceed() {
     Seedlot seedlot = new Seedlot("54321");
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     GeneticWorthEntity gw = new GeneticWorthEntity();
     gw.setGeneticWorthCode("GVO");
 

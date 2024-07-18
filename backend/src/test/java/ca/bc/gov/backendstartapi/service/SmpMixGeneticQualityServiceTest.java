@@ -57,7 +57,7 @@ class SmpMixGeneticQualityServiceTest {
 
     Seedlot seedlot = new Seedlot(seedlotNumber);
 
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     SmpMix smpMix = new SmpMix(seedlot, 4032, "37", 50, new BigDecimal("25"), audit, 0);
@@ -93,7 +93,7 @@ class SmpMixGeneticQualityServiceTest {
   @DisplayName("findAllBySmpMixTest")
   void findAllBySmpMixTest() {
     String seedlotNumber = "63001";
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     Seedlot seedlot = new Seedlot(seedlotNumber);
     SmpMix smpMix = new SmpMix(seedlot, 4032, "37", 50, new BigDecimal("25"), audit, 0);
     GeneticWorthEntity genEntity = new GeneticWorthEntity();

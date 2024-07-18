@@ -46,11 +46,11 @@ class SeedlotParentTreeGeneticQualityRelationalTest extends SeedlotEntityRelatio
     var seedlot = createSeedlot("00000");
     var seedlotParentTree =
         new SeedlotParentTree(
-            seedlot, 1, "1", new BigDecimal(10), new BigDecimal(10), new AuditInformation());
+            seedlot, 1, "1", new BigDecimal(10), new BigDecimal(10), new AuditInformation("user1"));
     seedlotParentTree.setSmpSuccessPercentage(1);
     seedlotParentTree.setNonOrchardPollenContaminationCount(1);
-    seedlotParentTree.getAuditInformation().setEntryUserId("userId");
-    seedlotParentTree.getAuditInformation().setUpdateUserId("userId");
+
+    var savedSeedlotParentTree = seedlotParentTreeRepository.save(seedlotParentTree);
 
     var geneticWorth = geneticWorthRepository.findAll().get(0);
 
@@ -60,12 +60,8 @@ class SeedlotParentTreeGeneticQualityRelationalTest extends SeedlotEntityRelatio
             "GC",
             geneticWorth,
             new BigDecimal(10),
-            new AuditInformation());
+            new AuditInformation("user1"));
     seedlotParentTreeGeneticQuality.setQualityValueEstimated(true);
-    seedlotParentTreeGeneticQuality.getAuditInformation().setEntryUserId("userId");
-    seedlotParentTreeGeneticQuality.getAuditInformation().setUpdateUserId("userId");
-
-    var savedSeedlotParentTree = seedlotParentTreeRepository.save(seedlotParentTree);
 
     seedlotParentTreeGeneticQualityRepository.saveAndFlush(seedlotParentTreeGeneticQuality);
 

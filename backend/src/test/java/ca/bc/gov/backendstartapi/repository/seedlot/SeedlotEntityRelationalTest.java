@@ -101,9 +101,7 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setDeclarationOfTrueInformationUserId("user1");
     seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());
-    seedlot.setAuditInformation(new AuditInformation());
-    seedlot.getAuditInformation().setEntryUserId("userId");
-    seedlot.getAuditInformation().setUpdateUserId("userId");
+    seedlot.setAuditInformation(new AuditInformation("user1"));
 
     return seedlotRepository.saveAndFlush(seedlot);
   }

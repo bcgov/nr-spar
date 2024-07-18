@@ -6,7 +6,6 @@ import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotSeedPlanZoneId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -19,7 +18,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /** This class represents a Seedlot Seed Plan Zone entity. */
 @Entity
@@ -29,7 +27,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class)
 public class SeedlotSeedPlanZoneEntity {
 
   // region Identifier

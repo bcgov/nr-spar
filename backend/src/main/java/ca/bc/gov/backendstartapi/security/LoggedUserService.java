@@ -100,7 +100,7 @@ public class LoggedUserService {
    * @return a {@link AuditInformation}
    */
   public AuditInformation createAuditCurrentUser() {
-    return new AuditInformation();
+    return new AuditInformation(getLoggedUserId());
   }
 
   /**

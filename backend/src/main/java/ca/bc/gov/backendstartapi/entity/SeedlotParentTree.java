@@ -6,7 +6,6 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -21,7 +20,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /** The contribution of each tree to a seedlot. */
 @Entity
@@ -32,7 +30,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @Setter
 @ToString
-@EntityListeners(AuditingEntityListener.class)
 public class SeedlotParentTree {
 
   // region Identifier

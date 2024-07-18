@@ -45,7 +45,7 @@ class SeedlotOrchardServiceTest {
   void saveSeedlotFormStep4_firstSubmit_shouldSucceed() {
     when(seedlotOrchardRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
 
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
@@ -80,7 +80,7 @@ class SeedlotOrchardServiceTest {
     SeedlotOrchard so = new SeedlotOrchard(seedlot, true, "405");
     when(seedlotOrchardRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(so));
 
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
@@ -114,7 +114,7 @@ class SeedlotOrchardServiceTest {
     SeedlotOrchard so = new SeedlotOrchard(seedlot, true, "400");
     when(seedlotOrchardRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(so));
 
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());
@@ -148,7 +148,7 @@ class SeedlotOrchardServiceTest {
     SeedlotOrchard so = new SeedlotOrchard(seedlot, false, "400");
     when(seedlotOrchardRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(so));
 
-    AuditInformation audit = new AuditInformation();
+    AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     when(seedlotOrchardRepository.saveAllAndFlush(any())).thenReturn(List.of());

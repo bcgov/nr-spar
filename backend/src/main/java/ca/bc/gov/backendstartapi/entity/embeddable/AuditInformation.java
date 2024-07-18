@@ -13,8 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.LastModifiedBy;
 
 /** Used to track the changes made in a registry. */
 @Embeddable
@@ -27,8 +25,6 @@ public class AuditInformation implements Serializable {
 
   /** User that entered the registry in the system. */
   @Column(name = "entry_userid", length = 30, nullable = false, updatable = false)
-  @CreatedBy
-  @Setter
   private String entryUserId;
 
   @Column(name = "entry_timestamp", nullable = true, updatable = false)
@@ -37,12 +33,16 @@ public class AuditInformation implements Serializable {
   /** User who last updated this registry. */
   @NonNull
   @Setter
-  @LastModifiedBy
   @Column(name = "update_userid", length = 30, nullable = false)
   private String updateUserId;
 
   @Column(name = "update_timestamp", nullable = true)
   private LocalDateTime updateTimestamp;
+
+  public AuditInformation(@NonNull String userId) {
+    entryUserId = userId;
+    updateUserId = userId;
+  }
 
   @PrePersist
   private void prePersist() {
