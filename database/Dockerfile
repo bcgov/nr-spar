@@ -8,3 +8,5 @@ RUN sed -i '/EXISTS postgis_tiger_geocoder;*/a CREATE EXTENSION IF NOT EXISTS pg
 USER postgres
 EXPOSE 5432
 HEALTHCHECK CMD ["psql", "-q", "-U", "$${POSTGRES_USER}", "-d", "$${POSTGRES_DB}", "-c", "SELECT 1"]
+
+# Trigger!
