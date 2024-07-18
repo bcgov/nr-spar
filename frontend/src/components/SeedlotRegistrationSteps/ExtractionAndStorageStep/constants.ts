@@ -5,7 +5,7 @@ export const DATE_FORMAT = 'Y/m/d';
 export const extractorAgencyFields: AgencyTextPropsType = {
   useDefaultCheckbox: {
     name: 'extractor-use-tsc',
-    labelText: 'The extractory agency is the Tree Seed Center (TSC)'
+    labelText: 'The extractory agency is the Tree Seed Centre (TSC)'
   },
   agencyInput: {
     titleText: 'Extractory agency',
@@ -20,7 +20,7 @@ export const extractorAgencyFields: AgencyTextPropsType = {
 export const storageAgencyFields: AgencyTextPropsType = {
   useDefaultCheckbox: {
     name: 'storage-use-tsc',
-    labelText: 'The seed storage agency is the Tree Seed Center (TSC)'
+    labelText: 'The seed storage agency is the Tree Seed Centre (TSC)'
   },
   agencyInput: {
     titleText: 'Seed storage agency',
@@ -35,7 +35,7 @@ export const storageAgencyFields: AgencyTextPropsType = {
 export const inputText = {
   extractionTitle: {
     titleText: 'Extraction information',
-    subtitleText: 'Enter the extractory agency information and extraction\'s star and end dates for this seedlot'
+    subtitleText: 'Enter the extractory agency information and extraction\'s start and end dates for this seedlot'
   },
   date: {
     extraction: {
@@ -64,6 +64,6 @@ export const inputText = {
   },
   storageTitle: {
     titleText: 'Temporary seed storage',
-    subtitleText: 'Enter the seed storage agency information and storage\'s star and end dates for this seedlot'
+    subtitleText: 'Enter the seed storage agency information and storage\'s start and end dates for this seedlot'
   }
 };
