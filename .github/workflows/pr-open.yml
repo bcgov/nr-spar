@@ -20,7 +20,7 @@ jobs:
       matrix:
         package: [database, backend, frontend, oracle-api, sync]
     steps:
-      - uses: bcgov-nr/action-builder-ghcr@v2.1.0
+      - uses: bcgov-nr/action-builder-ghcr@v2.2.0
         id: build
         with:
           package: ${{ matrix.package }}
@@ -28,35 +28,21 @@ jobs:
           tag_fallback: latest
           triggers: ('${{ matrix.package }}/')
 
-      - if: steps.build.outputs.triggered == 'true'
-        run: |
-          # Trigger deploys
-          echo "deploy=true" >> $GITHUB_OUTPUT
-
-  check:
-    name: Build Outputs
-    runs-on: ubuntu-22.04
-    needs: [builds]
-    steps:
-      - run: |
-          # View outputs
-          echo "needs.builds: ${{ toJson(needs.builds) }}"
-
   deploys:
     name: Deploys
     needs: [builds]
-    if: needs.builds.outputs.triggered == 'true'
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
-    # with:
-    #   etl: true
+    with:
+      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/' 'sync/')
 
   tests:
     name: Tests
-    if: needs.deploys.outputs.triggered == 'true'
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
+    with:
+      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
 
   results:
     name: PR Results
