@@ -27,6 +27,7 @@ import Subtitle from '../../Subtitle';
 import EmptySection from '../../EmptySection';
 import DetailSection from '../../DetailSection';
 import DescriptionBox from '../../DescriptionBox';
+import ScrollToTop from '../../ScrollToTop';
 
 import InputErrorNotification from './InputErrorNotification';
 import UploadWarnNotification from './UploadWarnNotification';
@@ -516,317 +517,323 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
   );
 
   return (
-    <FlexGrid className="parent-tree-step-container">
-      {
-        !isReviewDisplay
-          ? (
-            <>
-              <Row className="title-row">
-                <Column sm={4} md={8} lg={16}>
-                  <h2>{pageText.stepTitle}</h2>
-                  <Subtitle text={pageText.stepSubtitle} />
-                </Column>
-              </Row>
-              <Row>
-                <Column sm={4} md={8} lg={16}>
-                  <Accordion className="instructions-accordion">
-                    <AccordionItem open title="1. Data entry">
-                      {dataEntryInstructions}
-                    </AccordionItem>
-                    <AccordionItem open title="2. Review data">
-                      {reviewDataInstructions}
-                    </AccordionItem>
-                    <AccordionItem open title="3. Calculate seedlot metrics">
-                      {calculateInstructions}
-                    </AccordionItem>
-                  </Accordion>
-                </Column>
-              </Row>
-            </>
-          )
-          : null
-      }
-      <Row>
-        <Column sm={4} md={8} lg={16} xlg={16}>
-          <Tabs onChange={
-            (value: { selectedIndex: number }) => setCurrentTab(getTabString(value.selectedIndex))
-          }
-          >
-            <TabList className="parent-tree-step-tab-list" aria-label="List of tabs" id="parent-tree-step-tab-list-id" tabIndex={-1}>
-              <Tab>
-                {pageText.coneTab.tabTitle}
-                &nbsp;(required)
-              </Tab>
-              <Tab>{pageText.successTab.tabTitle}</Tab>
-              <Tab>{pageText.mixTab.tabTitle}</Tab>
-            </TabList>
-            <FlexGrid className="parent-tree-tab-container">
-              {
-                renderNotification(
-                  state,
-                  currentTab,
-                  orchardsData,
-                  setStepData
-                )
-              }
-              <InputErrorNotification state={state} headerConfig={headerConfig} />
-              <UploadWarnNotification
-                invalidPTNumbers={invalidPTNumbers}
-                setInvalidPTNumbers={setInvalidPTNumbers}
-              />
-              {
-                currentTab === 'successTab' && !isReviewRead
-                  ? (
-                    <>
-                      <Row className="smp-default-checkbox-row">
-                        <Column>
-                          <Checkbox
-                            id="smp-default-vals-checkbox"
-                            checked={isSMPDefaultValChecked}
-                            labelText={pageText.successTab.defaultCheckBoxDesc}
-                            onChange={
-                              (
-                                _event: React.ChangeEvent<HTMLInputElement>,
-                                { checked }: CheckboxType
-                              ) => {
-                                setIsSMPDefaultValChecked(checked);
-                              }
-                            }
-                            disabled={
-                              disableOptions
-                              || (isFormSubmitted
-                                && !(isReviewDisplay && !isReviewRead))
-                            }
-                          />
-                        </Column>
-                      </Row>
-                      {
-                        renderDefaultInputs(
-                          isSMPDefaultValChecked,
-                          state,
-                          setStepData,
-                          seedlotSpecies
-                        )
-                      }
-                    </>
+    <>
+      <ScrollToTop />
+      <FlexGrid className="parent-tree-step-container">
+        {
+          !isReviewDisplay
+            ? (
+              <>
+                <Row className="title-row">
+                  <Column sm={4} md={8} lg={16}>
+                    <h2>{pageText.stepTitle}</h2>
+                    <Subtitle text={pageText.stepSubtitle} />
+                  </Column>
+                </Row>
+                <Row>
+                  <Column sm={4} md={8} lg={16}>
+                    <Accordion className="instructions-accordion">
+                      <AccordionItem open title="1. Data entry">
+                        {dataEntryInstructions}
+                      </AccordionItem>
+                      <AccordionItem open title="2. Review data">
+                        {reviewDataInstructions}
+                      </AccordionItem>
+                      <AccordionItem open title="3. Calculate seedlot metrics">
+                        {calculateInstructions}
+                      </AccordionItem>
+                    </Accordion>
+                  </Column>
+                </Row>
+              </>
+            )
+            : null
+        }
+        <Row>
+          <Column sm={4} md={8} lg={16} xlg={16}>
+            <Tabs onChange={
+              (value: { selectedIndex: number }) => setCurrentTab(getTabString(value.selectedIndex))
+            }
+            >
+              <TabList className="parent-tree-step-tab-list" aria-label="List of tabs" id="parent-tree-step-tab-list-id" tabIndex={-1}>
+                <Tab>
+                  {pageText.coneTab.tabTitle}
+                  &nbsp;(required)
+                </Tab>
+                <Tab>{pageText.successTab.tabTitle}</Tab>
+                <Tab>{pageText.mixTab.tabTitle}</Tab>
+              </TabList>
+              <FlexGrid className="parent-tree-tab-container">
+                {
+                  renderNotification(
+                    state,
+                    currentTab,
+                    orchardsData,
+                    setStepData
                   )
-                  : null
-              }
-              <Row className="parent-tree-step-table-container">
-                <Column className="parent-tree-step-table-container-col">
-                  <TableContainer
-                    title={pageText[currentTab].tabTitle}
-                    description={pageText[currentTab].tableDescription}
-                    className={(!disableOptions) ? 'sticky-table-title' : undefined}
-                  >
-                    <div className={(!disableOptions) ? 'sticky-toolbar' : undefined}>
-                      <TableToolbar aria-label="data table toolbar">
-                        <TableToolbarContent>
-                          {
-                            currentTab === 'mixTab'
-                              ? (
-                                <Button
-                                  kind="ghost"
-                                  hasIconOnly
-                                  disabled={
-                                    disableOptions
-                                    || (isFormSubmitted
-                                      && !(isReviewDisplay && !isReviewRead))
-                                  }
-                                  renderIcon={Add}
-                                  iconDescription="Add a new row"
-                                  onClick={() => addNewMixRow(state, setStepData)}
-                                />
-                              )
-                              : null
-                          }
-                          <OverflowMenu
-                            menuOptionsClass="parent-tree-table-toggle-menu"
-                            renderIcon={View}
-                            iconDescription="Show/hide columns"
-                            flipped
-                            disabled={disableOptions}
-                          >
-                            {
-                              renderColOptions(headerConfig, currentTab, setHeaderConfig)
-                            }
-                          </OverflowMenu>
-                          <OverflowMenu
-                            renderIcon={Settings}
-                            iconDescription="More options"
-                            menuOptionsClass="parent-tree-table-option-menu"
-                            disabled={
-                              disableOptions
-                              || isFormSubmitted
-                              || (isReviewDisplay && !isReviewRead)
-                            }
-                          >
-                            <OverflowMenuItem
-                              itemText={
+                }
+                <InputErrorNotification state={state} headerConfig={headerConfig} />
+                <UploadWarnNotification
+                  invalidPTNumbers={invalidPTNumbers}
+                  setInvalidPTNumbers={setInvalidPTNumbers}
+                />
+                {
+                  currentTab === 'successTab' && !isReviewRead
+                    ? (
+                      <>
+                        <Row className="smp-default-checkbox-row">
+                          <Column>
+                            <Checkbox
+                              id="smp-default-vals-checkbox"
+                              checked={isSMPDefaultValChecked}
+                              labelText={pageText.successTab.defaultCheckBoxDesc}
+                              onChange={
                                 (
-                                  <Link
-                                    ref={linkRef}
-                                    to={getDownloadUrl(currentTab)}
-                                    target="_blank"
-                                  >
-                                    Download table template
-                                  </Link>
-                                )
-                              }
-                              onClick={() => linkRef.current?.click()}
-                            />
-                            <OverflowMenuItem itemText="Export table as CSV file" disabled />
-                            <OverflowMenuItem
-                              itemText="Clean table data"
-                              onClick={() => setIsCleanWarnOpen(true)}
-                            />
-                          </OverflowMenu>
-                          <Button
-                            className="upload-button"
-                            size="lg"
-                            kind="primary"
-                            renderIcon={Upload}
-                            onClick={() => setIsUploadOpen(true)}
-                            disabled={
-                              disableOptions
-                              || !allParentTreeQuery.isFetched
-                              || isFormSubmitted
-                              || (isReviewDisplay && !isReviewRead)
-                            }
-                          >
-                            Upload from file
-                          </Button>
-                        </TableToolbarContent>
-                      </TableToolbar>
-                    </div>
-                    {
-                      // Check if it's fetching parent tree data
-                      (!disableOptions && allParentTreeQuery.isFetching)
-                        ? (
-                          <DataTableSkeleton
-                            showToolbar={false}
-                            showHeader={false}
-                            zebra
-                          />
-                        )
-                        : (
-                          <Table useZebraStyles>
-                            <TableHead className="table-header">
-                              <TableRow>
-                                {
-                                  headerConfig.map((header) => (
-                                    (header.availableInTabs.includes(currentTab) && header.enabled)
-                                      ? (
-                                        <TableHeader id={header.id} key={header.id}>
-                                          <DefinitionTooltip
-                                            align="top"
-                                            openOnHover
-                                            definition={header.description}
-                                          >
-                                            {header.name}
-                                          </DefinitionTooltip>
-                                        </TableHeader>
-                                      )
-                                      : null
-                                  ))
+                                  _event: React.ChangeEvent<HTMLInputElement>,
+                                  { checked }: CheckboxType
+                                ) => {
+                                  setIsSMPDefaultValChecked(checked);
                                 }
-                              </TableRow>
-                            </TableHead>
+                              }
+                              disabled={
+                                disableOptions
+                                || (isFormSubmitted
+                                  && !(isReviewDisplay && !isReviewRead))
+                              }
+                            />
+                          </Column>
+                        </Row>
+                        {
+                          renderDefaultInputs(
+                            isSMPDefaultValChecked,
+                            state,
+                            setStepData,
+                            seedlotSpecies
+                          )
+                        }
+                      </>
+                    )
+                    : null
+                }
+                <Row className="parent-tree-step-table-container">
+                  <Column className="parent-tree-step-table-container-col">
+                    <TableContainer
+                      title={pageText[currentTab].tabTitle}
+                      description={pageText[currentTab].tableDescription}
+                      className={(!disableOptions) ? 'sticky-table-title' : undefined}
+                    >
+                      <div className={(!disableOptions) ? 'sticky-toolbar' : undefined}>
+                        <TableToolbar aria-label="data table toolbar">
+                          <TableToolbarContent>
                             {
-                              disableOptions
-                                ? null
-                                : renderTableBody(
-                                  currentTab,
-                                  slicedRows,
-                                  slicedMixRows,
-                                  headerConfig,
-                                  applicableGenWorths,
-                                  state,
-                                  setStepData,
-                                  seedlotSpecies,
-                                  isFormSubmitted,
-                                  (isReviewDisplay && !isReviewRead)
+                              currentTab === 'mixTab'
+                                ? (
+                                  <Button
+                                    kind="ghost"
+                                    hasIconOnly
+                                    disabled={
+                                      disableOptions
+                                      || (isFormSubmitted
+                                        && !(isReviewDisplay && !isReviewRead))
+                                    }
+                                    renderIcon={Add}
+                                    iconDescription="Add a new row"
+                                    onClick={() => addNewMixRow(state, setStepData)}
+                                  />
                                 )
+                                : null
                             }
-                          </Table>
-                        )
-                    }
-                    {
-                      disableOptions
-                        ? (
-                          <EmptySection
-                            title={
-                              isOrchardEmpty
-                                ? pageText.emptySection.emptyOrchard
-                                : pageText.emptySection.title
-                            }
-                            description={
-                              isOrchardEmpty
-                                ? noParentTreeDescription
-                                : emptySectionDescription
-                            }
-                            pictogram={
-                              isOrchardEmpty
-                                ? 'Question'
-                                : 'CloudyWindy'
-                            }
-                          />
-                        )
-                        : renderPagination(
-                          state,
-                          currentTab,
-                          currPageSize,
-                          setCurrentPage,
-                          setCurrPageSize,
-                          setSlicedRows,
-                          currMixPageSize,
-                          setCurrMixPageSize,
-                          setCurrentMixPage,
-                          setSlicedMixRows
-                        )
-                    }
-                  </TableContainer>
-                </Column>
-              </Row>
-              {
-                renderInfoSections()
+                            <OverflowMenu
+                              menuOptionsClass="parent-tree-table-toggle-menu"
+                              renderIcon={View}
+                              iconDescription="Show/hide columns"
+                              flipped
+                              disabled={disableOptions}
+                            >
+                              {
+                                renderColOptions(headerConfig, currentTab, setHeaderConfig)
+                              }
+                            </OverflowMenu>
+                            <OverflowMenu
+                              renderIcon={Settings}
+                              iconDescription="More options"
+                              menuOptionsClass="parent-tree-table-option-menu"
+                              disabled={
+                                disableOptions
+                                || isFormSubmitted
+                                || (isReviewDisplay && !isReviewRead)
+                              }
+                            >
+                              <OverflowMenuItem
+                                itemText={
+                                  (
+                                    <Link
+                                      ref={linkRef}
+                                      to={getDownloadUrl(currentTab)}
+                                      target="_blank"
+                                    >
+                                      Download table template
+                                    </Link>
+                                  )
+                                }
+                                onClick={() => linkRef.current?.click()}
+                              />
+                              <OverflowMenuItem itemText="Export table as CSV file" disabled />
+                              <OverflowMenuItem
+                                itemText="Clean table data"
+                                onClick={() => setIsCleanWarnOpen(true)}
+                              />
+                            </OverflowMenu>
+                            <Button
+                              className="upload-button"
+                              size="lg"
+                              kind="primary"
+                              renderIcon={Upload}
+                              onClick={() => setIsUploadOpen(true)}
+                              disabled={
+                                disableOptions
+                                || !allParentTreeQuery.isFetched
+                                || isFormSubmitted
+                                || (isReviewDisplay && !isReviewRead)
+                              }
+                            >
+                              Upload from file
+                            </Button>
+                          </TableToolbarContent>
+                        </TableToolbar>
+                      </div>
+                      {
+                        // Check if it's fetching parent tree data
+                        (!disableOptions && allParentTreeQuery.isFetching)
+                          ? (
+                            <DataTableSkeleton
+                              showToolbar={false}
+                              showHeader={false}
+                              zebra
+                            />
+                          )
+                          : (
+                            <Table useZebraStyles>
+                              <TableHead className="table-header">
+                                <TableRow>
+                                  {
+                                    headerConfig.map((header) => (
+                                      (
+                                        header.availableInTabs.includes(currentTab)
+                                        && header.enabled
+                                      )
+                                        ? (
+                                          <TableHeader id={header.id} key={header.id}>
+                                            <DefinitionTooltip
+                                              align="top"
+                                              openOnHover
+                                              definition={header.description}
+                                            >
+                                              {header.name}
+                                            </DefinitionTooltip>
+                                          </TableHeader>
+                                        )
+                                        : null
+                                    ))
+                                  }
+                                </TableRow>
+                              </TableHead>
+                              {
+                                disableOptions
+                                  ? null
+                                  : renderTableBody(
+                                    currentTab,
+                                    slicedRows,
+                                    slicedMixRows,
+                                    headerConfig,
+                                    applicableGenWorths,
+                                    state,
+                                    setStepData,
+                                    seedlotSpecies,
+                                    isFormSubmitted,
+                                    (isReviewDisplay && !isReviewRead)
+                                  )
+                              }
+                            </Table>
+                          )
+                      }
+                      {
+                        disableOptions
+                          ? (
+                            <EmptySection
+                              title={
+                                isOrchardEmpty
+                                  ? pageText.emptySection.emptyOrchard
+                                  : pageText.emptySection.title
+                              }
+                              description={
+                                isOrchardEmpty
+                                  ? noParentTreeDescription
+                                  : emptySectionDescription
+                              }
+                              pictogram={
+                                isOrchardEmpty
+                                  ? 'Question'
+                                  : 'CloudyWindy'
+                              }
+                            />
+                          )
+                          : renderPagination(
+                            state,
+                            currentTab,
+                            currPageSize,
+                            setCurrentPage,
+                            setCurrPageSize,
+                            setSlicedRows,
+                            currMixPageSize,
+                            setCurrMixPageSize,
+                            setCurrentMixPage,
+                            setSlicedMixRows
+                          )
+                      }
+                    </TableContainer>
+                  </Column>
+                </Row>
+                {
+                  renderInfoSections()
+                }
+              </FlexGrid>
+            </Tabs>
+          </Column>
+        </Row>
+        <UploadFileModal
+          open={isUploadOpen}
+          setOpen={setIsUploadOpen}
+          onSubmit={
+            (file: File) => {
+              if (currentTab === 'mixTab') {
+                uploadMixFile.mutate(file);
+              } else {
+                uploadCompostion.mutate(file);
               }
-            </FlexGrid>
-          </Tabs>
-        </Column>
-      </Row>
-      <UploadFileModal
-        open={isUploadOpen}
-        setOpen={setIsUploadOpen}
-        onSubmit={
-          (file: File) => {
-            if (currentTab === 'mixTab') {
-              uploadMixFile.mutate(file);
-            } else {
-              uploadCompostion.mutate(file);
             }
           }
-        }
-        fileUploadConfig={fileUploadConfig}
-        setFileUploadConfig={setFileUploadConfig}
-        resetFileUploadConfig={resetFileUploadConfig}
-      />
-      <Modal
-        className="clean-data-modal"
-        open={isCleanWarnOpen}
-        onRequestClose={() => setIsCleanWarnOpen(false)}
-        onRequestSubmit={() => {
-          cleanTable(state, headerConfig, currentTab, setStepData);
-          setIsCleanWarnOpen(false);
-        }}
-        danger
-        size="sm"
-        modalHeading={pageText[currentTab].cleanModalHeading}
-        modalLabel={pageText.cleanModal.label}
-        primaryButtonText={pageText.cleanModal.primaryButtonText}
-        secondaryButtonText={pageText.cleanModal.secondaryButtonText}
-      />
-    </FlexGrid>
+          fileUploadConfig={fileUploadConfig}
+          setFileUploadConfig={setFileUploadConfig}
+          resetFileUploadConfig={resetFileUploadConfig}
+        />
+        <Modal
+          className="clean-data-modal"
+          open={isCleanWarnOpen}
+          onRequestClose={() => setIsCleanWarnOpen(false)}
+          onRequestSubmit={() => {
+            cleanTable(state, headerConfig, currentTab, setStepData);
+            setIsCleanWarnOpen(false);
+          }}
+          danger
+          size="sm"
+          modalHeading={pageText[currentTab].cleanModalHeading}
+          modalLabel={pageText.cleanModal.label}
+          primaryButtonText={pageText.cleanModal.primaryButtonText}
+          secondaryButtonText={pageText.cleanModal.secondaryButtonText}
+        />
+      </FlexGrid>
+    </>
   );
 };
 

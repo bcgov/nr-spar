@@ -15,6 +15,7 @@ import {
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
+import ScrollToTop from '../../ScrollToTop';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
@@ -139,136 +140,139 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
   };
 
   return (
-    <FlexGrid className="interim-agency-storage-form" fullWidth>
-      <Row className="interim-title-row">
-        <Column className="section-title" sm={4} md={8} lg={16}>
-          <h2>{pageTexts.interimTitleSection.title}</h2>
+    <>
+      <ScrollToTop />
+      <FlexGrid className="interim-agency-storage-form" fullWidth>
+        <Row className="interim-title-row">
+          <Column className="section-title" sm={4} md={8} lg={16}>
+            <h2>{pageTexts.interimTitleSection.title}</h2>
+            {
+              !isReview
+                ? (
+                  <Subtitle text={pageTexts.interimTitleSection.subtitle} />
+                )
+                : null
+            }
+          </Column>
+        </Row>
+        <ApplicantAgencyFields
+          showCheckbox={!isReview}
+          checkboxId={state.useCollectorAgencyInfo.id}
+          isDefault={isReview ? EmptyBooleanInputType : state.useCollectorAgencyInfo}
+          agency={state.agencyName}
+          locationCode={state.locationCode}
+          fieldsProps={agencyFieldsProps}
+          defaultAgency={collectorAgency.value}
+          defaultCode={collectorCode.value}
+          setAgencyAndCode={(
+            isDefault: BooleanInputType,
+            agency: OptionsInputType,
+            locationCode: StringInputType
+          ) => setAgencyAndCode(agency, locationCode, isDefault)}
+          isFormSubmitted={isFormSubmitted}
+          readOnly={isFormSubmitted && !isReview}
+          maxInputColSize={6}
+        />
+        <Row className="interim-storage-row">
+          <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>
+            <DatePicker
+              datePickerType="single"
+              name="startDate"
+              dateFormat={DATE_FORMAT}
+              value={state.startDate.value}
+              onChange={(_e: Array<Date>, selectedDate: string) => {
+                handleStorageDates(true, selectedDate);
+              }}
+              readOnly={isFormSubmitted && !isReview}
+            >
+              <DatePickerInput
+                id="start-date-input"
+                labelText={pageTexts.storageDate.labelTextStart}
+                helperText={pageTexts.storageDate.helperText}
+                placeholder={pageTexts.storageDate.placeholder}
+                invalid={state.startDate.isInvalid}
+                invalidText={pageTexts.storageDate.invalidText}
+                readOnly={isFormSubmitted}
+                autoComplete="off"
+              />
+            </DatePicker>
+          </Column>
+          <Column className="end-date-col" sm={4} md={4} lg={8} xlg={6}>
+            <DatePicker
+              datePickerType="single"
+              name="endDate"
+              dateFormat={DATE_FORMAT}
+              minDate={state.startDate.value}
+              value={state.endDate.value}
+              onChange={(_e: Array<Date>, selectedDate: string) => {
+                handleStorageDates(false, selectedDate);
+              }}
+              readOnly={isFormSubmitted && !isReview}
+            >
+              <DatePickerInput
+                id="end-date-input"
+                labelText={pageTexts.storageDate.labelTextEnd}
+                helperText={pageTexts.storageDate.helperText}
+                placeholder={pageTexts.storageDate.placeholder}
+                invalid={state.startDate.isInvalid}
+                invalidText={pageTexts.storageDate.invalidText}
+                readOnly={isFormSubmitted}
+                autoComplete="off"
+              />
+            </DatePicker>
+          </Column>
+        </Row>
+        <Row className="storage-type-radio">
+          <Column sm={4} md={8} lg={16}>
+            <RadioButtonGroup
+              legendText={pageTexts.storageFacility.labelText}
+              name="storage-type-radiogroup"
+              orientation="vertical"
+              defaultSelected={state.facilityType.value}
+              onChange={(e: string) => handleFacilityType(e)}
+              readOnly={isFormSubmitted && !isReview}
+            >
+              {
+                facilityTypesQuery.isFetching
+                  ? (
+                    <>
+                      <RadioButtonSkeleton />
+                      <RadioButtonSkeleton />
+                      <RadioButtonSkeleton />
+                      <RadioButtonSkeleton />
+                    </>
+                  )
+                  : renderFacilityTypes(facilityTypesQuery.data ?? [])
+              }
+            </RadioButtonGroup>
+          </Column>
           {
-            !isReview
+            otherChecked
               ? (
-                <Subtitle text={pageTexts.interimTitleSection.subtitle} />
+                <Column className="storage-facility-type" sm={4} md={4} lg={16} xlg={12}>
+                  <TextInput
+                    id={state.facilityOtherType.id}
+                    name="storage-facility"
+                    defaultValue={state.facilityOtherType.value}
+                    labelText={pageTexts.storageFacility.labelText}
+                    placeholder={pageTexts.storageFacility.otherInput.placeholder}
+                    helperText={pageTexts.storageFacility.otherInput.helperText}
+                    invalid={state.facilityOtherType.isInvalid}
+                    invalidText={pageTexts.storageFacility.otherInput.invalidText}
+                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      handleOtherFacilityTypeInput(e.target.value);
+                    }}
+                    readOnly={isFormSubmitted && !isReview}
+                    enableCounter
+                    maxCount={MAX_FACILITY_DESC_CHAR}
+                  />
+                </Column>
               )
               : null
           }
-        </Column>
-      </Row>
-      <ApplicantAgencyFields
-        showCheckbox={!isReview}
-        checkboxId={state.useCollectorAgencyInfo.id}
-        isDefault={isReview ? EmptyBooleanInputType : state.useCollectorAgencyInfo}
-        agency={state.agencyName}
-        locationCode={state.locationCode}
-        fieldsProps={agencyFieldsProps}
-        defaultAgency={collectorAgency.value}
-        defaultCode={collectorCode.value}
-        setAgencyAndCode={(
-          isDefault: BooleanInputType,
-          agency: OptionsInputType,
-          locationCode: StringInputType
-        ) => setAgencyAndCode(agency, locationCode, isDefault)}
-        isFormSubmitted={isFormSubmitted}
-        readOnly={isFormSubmitted && !isReview}
-        maxInputColSize={6}
-      />
-      <Row className="interim-storage-row">
-        <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>
-          <DatePicker
-            datePickerType="single"
-            name="startDate"
-            dateFormat={DATE_FORMAT}
-            value={state.startDate.value}
-            onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleStorageDates(true, selectedDate);
-            }}
-            readOnly={isFormSubmitted && !isReview}
-          >
-            <DatePickerInput
-              id="start-date-input"
-              labelText={pageTexts.storageDate.labelTextStart}
-              helperText={pageTexts.storageDate.helperText}
-              placeholder={pageTexts.storageDate.placeholder}
-              invalid={state.startDate.isInvalid}
-              invalidText={pageTexts.storageDate.invalidText}
-              readOnly={isFormSubmitted}
-              autoComplete="off"
-            />
-          </DatePicker>
-        </Column>
-        <Column className="end-date-col" sm={4} md={4} lg={8} xlg={6}>
-          <DatePicker
-            datePickerType="single"
-            name="endDate"
-            dateFormat={DATE_FORMAT}
-            minDate={state.startDate.value}
-            value={state.endDate.value}
-            onChange={(_e: Array<Date>, selectedDate: string) => {
-              handleStorageDates(false, selectedDate);
-            }}
-            readOnly={isFormSubmitted && !isReview}
-          >
-            <DatePickerInput
-              id="end-date-input"
-              labelText={pageTexts.storageDate.labelTextEnd}
-              helperText={pageTexts.storageDate.helperText}
-              placeholder={pageTexts.storageDate.placeholder}
-              invalid={state.startDate.isInvalid}
-              invalidText={pageTexts.storageDate.invalidText}
-              readOnly={isFormSubmitted}
-              autoComplete="off"
-            />
-          </DatePicker>
-        </Column>
-      </Row>
-      <Row className="storage-type-radio">
-        <Column sm={4} md={8} lg={16}>
-          <RadioButtonGroup
-            legendText={pageTexts.storageFacility.labelText}
-            name="storage-type-radiogroup"
-            orientation="vertical"
-            defaultSelected={state.facilityType.value}
-            onChange={(e: string) => handleFacilityType(e)}
-            readOnly={isFormSubmitted && !isReview}
-          >
-            {
-              facilityTypesQuery.isFetching
-                ? (
-                  <>
-                    <RadioButtonSkeleton />
-                    <RadioButtonSkeleton />
-                    <RadioButtonSkeleton />
-                    <RadioButtonSkeleton />
-                  </>
-                )
-                : renderFacilityTypes(facilityTypesQuery.data ?? [])
-            }
-          </RadioButtonGroup>
-        </Column>
-        {
-          otherChecked
-            ? (
-              <Column className="storage-facility-type" sm={4} md={4} lg={16} xlg={12}>
-                <TextInput
-                  id={state.facilityOtherType.id}
-                  name="storage-facility"
-                  defaultValue={state.facilityOtherType.value}
-                  labelText={pageTexts.storageFacility.labelText}
-                  placeholder={pageTexts.storageFacility.otherInput.placeholder}
-                  helperText={pageTexts.storageFacility.otherInput.helperText}
-                  invalid={state.facilityOtherType.isInvalid}
-                  invalidText={pageTexts.storageFacility.otherInput.invalidText}
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    handleOtherFacilityTypeInput(e.target.value);
-                  }}
-                  readOnly={isFormSubmitted && !isReview}
-                  enableCounter
-                  maxCount={MAX_FACILITY_DESC_CHAR}
-                />
-              </Column>
-            )
-            : null
-        }
-      </Row>
-    </FlexGrid>
+        </Row>
+      </FlexGrid>
+    </>
   );
 };
 
