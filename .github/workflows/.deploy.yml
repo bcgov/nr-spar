@@ -25,7 +25,7 @@ on:
 
     outputs:
       run_tests:
-        # description: 'Run Cypress tests?  Required if core apps have changed, excludes sync'
+        description: Run Cypress tests if the core apps have changed (excludes sync)
         value: ${{ jobs.init.outputs.triggers_core }}
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
       - uses: bcgov-nr/action-diff-triggers@v0.2.0
         id: triggers_sync
         with:
-          triggers: ('common/' 'sync/')"
+          triggers: ('common/' 'sync/')
 
       - name: Get PR Number Mod 50
         if: github.event_name == 'pull_request'
