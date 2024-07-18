@@ -44,7 +44,6 @@ import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSaveInMemoryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
-import ca.bc.gov.backendstartapi.dto.UserDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
@@ -123,7 +122,6 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     SeedlotReviewSeedPlanZoneDto.class,
     SeedlotSourceDto.class,
     SeedlotStatusResponseDto.class,
-    UserDto.class,
     AreaOfUseDto.class,
     AreaOfUseSpuGeoDto.class,
     SpuDto.class,
