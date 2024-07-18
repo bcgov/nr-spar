@@ -30,22 +30,18 @@ jobs:
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ secrets.oc_namespace }} #Safeguard!
 
+          # Exit on errors or unset variables
+          set -eu
+
           # Create job
-          CRONJOB=${{ github.event.repository.name }}-test-sync
+          CRONJOB=nr-spar-test-sync
           RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
           oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
 
           # Follow
-          oc wait --for=jsonpath='{.status.failed}'=4 job/${RUN_JOB} --timeout=10m || true
+          oc wait --for=condition=ready pod --selector=job-name=${RUN_JOB} --timeout=1m
           oc logs -l job-name=${RUN_JOB} --tail=50 --follow
 
-          # Results
-          oc get job ${RUN_JOB}
-
-          # Handle exit code
-          if [ $(oc get job ${RUN_JOB} -o jsonpath='{.status.ready}') -eq 0 ]; then
-            echo "Job successful!"
-          else
-            echo "Job failed!"
-            exit 1
-          fi
+          # Verify successful completion
+          oc wait --for jsonpath='{.status.phase}'=Succeeded pod --selector=job-name=${RUN_JOB} --timeout=1m
+          echo "Job successful!"
