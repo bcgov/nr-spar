@@ -24,7 +24,7 @@ const ClientSearchFields = ({
       <Column sm={4} md={4} lg={16} xlg={16}>
         <p className="client-modal-description">
           Search for a specific client or agency, you can search by name, acronym or number.
-          To view more information about the client, you can
+          To view more information about the client,
           {' '}
           <Link to="">
             go to client search screen.
