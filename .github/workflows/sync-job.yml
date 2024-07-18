@@ -18,7 +18,8 @@ jobs:
         env:
           OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
         run: |
-          curl --silent ${{ env.OC }} | tar -xzvf - oc
+          # Download and extract
+          wget ${{ env.OC }} -qcO - | tar -xzvf - oc
           oc version
         working-directory: /usr/local/bin/
 
