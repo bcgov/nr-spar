@@ -64,11 +64,11 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
       List<String> rolesRequired, List<String> userRoles) {
     for (String requiredRole : rolesRequired) {
       if (userRoles.contains(requiredRole)) {
-        SparLog.info("Request allowed by user role: {}", requiredRole);
+        SparLog.debug("Request allowed by user role: {}", requiredRole);
         return true;
       }
     }
-    SparLog.info("Request denied. No enough access levels!");
+    SparLog.debug("Request denied. No enough access levels!");
     return false;
   }
 
@@ -81,11 +81,11 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
   private List<String> getUserRoles(HttpServletRequest request) {
     if (request.getUserPrincipal() instanceof JwtAuthenticationToken jwtToken) {
       Set<String> roles = JwtSecurityUtil.getUserRolesFromJwt(jwtToken.getToken());
-      SparLog.info("User roles: {}", roles);
+      SparLog.debug("User roles: {}", roles);
       return new ArrayList<>(roles);
     }
 
-    // Test fix!
+    // Fix for unit testing
     SecurityContext context = SecurityContextHolder.getContext();
     if (context.getAuthentication().getName().equals("SPARTest")) {
       List<String> grantedList = new ArrayList<>();
@@ -96,7 +96,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
           grantedList.add(grant.substring(5));
         }
       }
-      SparLog.info("SPAR Test User roles: {}", grantedList);
+      SparLog.debug("SPAR Test User roles: {}", grantedList);
       return grantedList;
     }
 
@@ -142,7 +142,7 @@ public class RoleAccessInterceptor implements HandlerInterceptor {
         }
 
         List<String> roles = Arrays.asList(annotation.value());
-        SparLog.info("Access level required for {}: {}", uri, roles);
+        SparLog.debug("Access level required for {}: {}", uri, roles);
         return roles;
       }
     } catch (Exception e) {
