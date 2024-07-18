@@ -96,7 +96,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        name: [backend, frontend, oracle-api, sync]
+        name: [backend, frontend, oracle-api]
         include:
           - name: backend
             file: backend/openshift.deploy.yml
