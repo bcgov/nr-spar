@@ -8,7 +8,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
@@ -424,7 +424,7 @@ class SeedlotFormPutTest {
     when(seedlotStatusService.getValidSeedlotStatus(any())).thenReturn(Optional.of(ssEntity));
 
     // Parent tree contribution mock
-    CaculatedParentTreeValsDto caculatedParentTreeValsDto = new CaculatedParentTreeValsDto();
+    CalculatedParentTreeValsDto caculatedParentTreeValsDto = new CalculatedParentTreeValsDto();
     caculatedParentTreeValsDto.setNeValue(BigDecimal.valueOf(0));
     GeospatialRespondDto geospatialRespondDto =
         new GeospatialRespondDto(

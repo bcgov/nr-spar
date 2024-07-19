@@ -24,6 +24,9 @@ parameters:
   - name: ORACLE_USER
     description: Oracle database username for API
     value: proxy_fsa_spar_read_only_user
+  - name: ORACLE_CERT_SECRET
+    description: Oracle database keystore secret
+    required: true
   - name: ORACLE_SYNC_PASSWORD
     description: Oracle database password for Sync
     required: true
@@ -43,6 +46,7 @@ objects:
       oracle-port: ${ORACLE_PORT}
       oracle-service: ${ORACLE_SERVICE}
       oracle-user: ${ORACLE_USER}
+      oracle-secret: ${ORACLE_CERT_SECRET}
       oracle-sync-password: ${ORACLE_SYNC_PASSWORD}
       oracle-sync-user: ${ORACLE_SYNC_USER}
   - apiVersion: v1

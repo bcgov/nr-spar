@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
@@ -57,8 +57,8 @@ public class ParentTreeService {
 
     BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals());
 
-    CaculatedParentTreeValsDto calculatedVals = new CaculatedParentTreeValsDto();
-    calculatedVals.setNeValue(neValue); // <- review ne value being overwritten
+    CalculatedParentTreeValsDto calculatedVals = new CalculatedParentTreeValsDto();
+    calculatedVals.setNeValue(neValue);
 
     GeospatialRespondDto smpMixGeoData = calcMeanGeospatial(ptVals.smpMixIdAndProps());
     SparLog.info("SMP mix mean geospatial calculation complete.");

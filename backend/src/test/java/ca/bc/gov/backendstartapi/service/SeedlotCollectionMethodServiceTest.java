@@ -54,7 +54,7 @@ class SeedlotCollectionMethodServiceTest {
   }
 
   @Test
-  @DisplayName("Save Seedlot Collection Method first submmit")
+  @DisplayName("Save Seedlot Collection Method first submit")
   void saveSeedlotFormStep1_firstSubmit_shouldSucceed() {
     when(seedlotCollectionMethodRepository.findAllBySeedlot_id(any())).thenReturn(List.of());
 
