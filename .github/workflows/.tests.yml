@@ -11,6 +11,10 @@ on:
         description: PR number, test or prod; defaults to PR number
         default: ${{ github.event.number }}
         type: string
+      triggers:
+        description: Deployment trigger; omit = build; e.g. ('backend/' 'frontend/')
+        required: false
+        type: string
 
 jobs:
   cypress:
@@ -26,8 +30,20 @@ jobs:
       VITE_ZONE: TEST
     runs-on: ubuntu-22.04
     steps:
+      # Check triggers (omitted or matched)
+      - uses: bcgov-nr/action-diff-triggers@v0.2.0
+        id: triggers
+        with:
+          triggers: ${{ inputs.triggers }}
+
+      - if: steps.triggers.outputs.triggered == 'false'
+        run: echo "No tests required/triggered!"
+
       - uses: actions/checkout@v4
+        if: steps.triggers.outputs.triggered == 'true'
+
       - name: Run Cypress CI
+        if: steps.triggers.outputs.triggered == 'true'
         uses: bcgov-nr/action-test-and-analyse@v1.2.1
         with:
           node_version: "18"

@@ -316,6 +316,11 @@ export const rowTemplate: RowItem = {
     isInvalid: false,
     value: ''
   },
+  wve: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
   w_ad: {
     id: '',
     isInvalid: false,
@@ -367,6 +372,11 @@ export const rowTemplate: RowItem = {
     value: ''
   },
   w_wwd: {
+    id: '',
+    isInvalid: false,
+    value: ''
+  },
+  w_wve: {
     id: '',
     isInvalid: false,
     value: ''

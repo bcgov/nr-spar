@@ -2,7 +2,6 @@ package ca.bc.gov.backendstartapi.service;
 
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.OrchardDto;
 import ca.bc.gov.backendstartapi.dto.OrchardSpuDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticInfoDto;
 import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
@@ -12,7 +11,6 @@ import ca.bc.gov.backendstartapi.exception.NoSpuForOrchardException;
 import ca.bc.gov.backendstartapi.provider.OracleApiProvider;
 import ca.bc.gov.backendstartapi.repository.ActiveOrchardSeedPlanningUnitRepository;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -151,68 +149,6 @@ class OrchardServiceTest {
 
     Assertions.assertEquals(
         "404 NOT_FOUND \"No active SPU for the given Orchard ID!\"", exc.getMessage());
-  }
-
-  @Test
-  @DisplayName("findOrchardByVegCodeSuccessServiceTest")
-  void findOrchardByVegCodeSuccessServiceTest() {
-    String vegCode = "FDI";
-
-    OrchardDto firstOrchard =
-        new OrchardDto(
-            "123",
-            "smOrchard",
-            vegCode,
-            'S',
-            "Seed lot",
-            "PRD",
-            "ICH",
-            "Interior Cedar -- Hemlock",
-            "dw",
-            '4',
-            5);
-    OrchardDto secondOrchard =
-        new OrchardDto(
-            "456",
-            "xlOrchard",
-            vegCode,
-            'S',
-            "Seed lot",
-            "TEST",
-            "IDF",
-            "Interior Douglas-fir",
-            "mk",
-            '1',
-            5);
-
-    List<OrchardDto> testList =
-        new ArrayList<>() {
-          {
-            add(firstOrchard);
-            add(secondOrchard);
-          }
-        };
-
-    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(testList);
-
-    List<OrchardDto> responseFromService = orchardService.findOrchardsByVegCode(vegCode);
-
-    Assertions.assertNotNull(responseFromService);
-    Assertions.assertEquals(testList.size(), responseFromService.size());
-    Assertions.assertEquals(testList, responseFromService);
-  }
-
-  @Test
-  @DisplayName("findOrchardByVegCodeEmptyServiceTest")
-  void findOrchardByVegCodeEmptyServiceTest() {
-    String vegCode = "FDI";
-
-    when(oracleApiProvider.findOrchardsByVegCode(vegCode)).thenReturn(List.of());
-
-    List<OrchardDto> responseFromService = orchardService.findOrchardsByVegCode(vegCode);
-
-    Assertions.assertNotNull(responseFromService);
-    Assertions.assertEquals(0, responseFromService.size());
   }
 
   @Test

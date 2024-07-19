@@ -10,7 +10,10 @@ import {
   DEFAULT_MIX_PAGE_ROWS, MAX_DECIMAL_DIGITS, notificationCtrlObj,
   rowTemplate
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/constants';
-import { RowDataDictType, RowItem, StrTypeRowItem } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
+import {
+  InfoSectionConfigType, RowDataDictType, RowItem,
+  StrTypeRowItem
+} from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import {
   calcAverage, calcSum, generateDefaultRows,
   populateStrInputId,
@@ -1195,6 +1198,7 @@ export const fillAreaOfUseData = (
 
 export const fillCollectionGeoData = (
   setGeoInfoVals: React.Dispatch<React.SetStateAction<GeoInfoValType>>,
+  setPopSizeAndDiversityConfig: React.Dispatch<React.SetStateAction<InfoSectionConfigType>>,
   data: RichSeedlotType
 ) => {
   setGeoInfoVals((prevVals) => ({
@@ -1230,6 +1234,13 @@ export const fillCollectionGeoData = (
     effectivePopSize: {
       ...prevVals.effectivePopSize,
       value: String(data.seedlot.effectivePopulationSize)
+    }
+  }));
+  setPopSizeAndDiversityConfig((prevVal) => ({
+    ...prevVal,
+    ne: {
+      ...prevVal.ne,
+      value: data.seedlot.effectivePopulationSize ? String(data.seedlot.effectivePopulationSize) : ''
     }
   }));
 };
