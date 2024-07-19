@@ -1,6 +1,6 @@
 package ca.bc.gov.backendstartapi.config;
 
-import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.CodeDescriptionDto;
 import ca.bc.gov.backendstartapi.dto.DescribedEnumDto;
 import ca.bc.gov.backendstartapi.dto.FavouriteActivityCreateDto;
@@ -41,9 +41,9 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewElevationLatLongDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewGeoInformationDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotReviewSeedPlanZoneDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSaveInMemoryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotSourceDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
-import ca.bc.gov.backendstartapi.dto.UserDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseSpuGeoDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
@@ -79,7 +79,7 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     AreaOfUseDto.class,
     AreaOfUseSpuGeoDto.class,
     SpzDto.class,
-    CaculatedParentTreeValsDto.class,
+    CalculatedParentTreeValsDto.class,
     CodeDescriptionDto.class,
     DescribedEnumDto.class,
     FavouriteActivityCreateDto.class,
@@ -122,7 +122,6 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     SeedlotReviewSeedPlanZoneDto.class,
     SeedlotSourceDto.class,
     SeedlotStatusResponseDto.class,
-    UserDto.class,
     AreaOfUseDto.class,
     AreaOfUseSpuGeoDto.class,
     SpuDto.class,
@@ -135,7 +134,8 @@ import org.springframework.context.annotation.ImportRuntimeHints;
     LongitudeCodeEnum.class,
     ConeAndPollenCountHeader.class,
     CsvParsingHeader.class,
-    SmpMixHeader.class
+    SmpMixHeader.class,
+    SeedlotSaveInMemoryDto.class,
 })
 @ImportRuntimeHints(value = {HttpServletRequestRuntimeHint.class})
 public class NativeImageConfig {

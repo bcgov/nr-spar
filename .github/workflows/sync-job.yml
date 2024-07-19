@@ -1,0 +1,48 @@
+name: ETL Sync
+
+on:
+  schedule: [cron: "0 */2 * * *"] # Every other hour on the hour
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Override OpenShift version
+        env:
+          OC: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-4.13/openshift-client-linux.tar.gz
+        run: |
+          # Download and extract with retry, continuing on error
+          (wget ${{ env.OC }} -qcO - | tar -xzvf - oc)|| !! || true
+          oc version
+        working-directory: /usr/local/bin/
+
+      - name: ETL Sync
+        run: |
+          # Run and verify job
+
+          # Login
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ secrets.oc_namespace }} #Safeguard!
+
+          # Exit on errors or unset variables
+          set -eu
+
+          # Create job
+          CRONJOB=nr-spar-test-sync
+          RUN_JOB=${CRONJOB}--$(date +"%Y-%m-%d--%H-%M-%S")
+          oc create job ${RUN_JOB} --from=cronjob/${CRONJOB}
+
+          # Follow
+          oc wait --for=condition=ready pod --selector=job-name=${RUN_JOB} --timeout=1m
+          oc logs -l job-name=${RUN_JOB} --tail=50 --follow
+
+          # Verify successful completion
+          oc wait --for jsonpath='{.status.phase}'=Succeeded pod --selector=job-name=${RUN_JOB} --timeout=1m
+          echo "Job successful!"
