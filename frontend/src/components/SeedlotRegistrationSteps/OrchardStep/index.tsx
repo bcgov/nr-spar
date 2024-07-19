@@ -346,10 +346,16 @@ const OrchardStep = ({
     <>
       <ScrollToTop />
       <FlexGrid className="seedlot-orchard-step-form">
-        <Row className="seedlot-orchard-title-row">
-          <Column sm={4} md={8} lg={16}>
+        <Row className={`seedlot-orchard-title-row ${isReview ? 'remove-bottom-margin' : ''}`}>
+          <Column className="section-title" sm={4} md={8} lg={16}>
             <h2>{orchardStepText.orchardSection.title}</h2>
-            <Subtitle text={orchardStepText.orchardSection.subtitle} />
+            {
+              !isReview
+                ? (
+                  <Subtitle text={orchardStepText.orchardSection.subtitle} />
+                )
+                : null
+            }
           </Column>
         </Row>
         {
@@ -359,9 +365,15 @@ const OrchardStep = ({
           renderOrchardButtons()
         }
         <Row className="seedlot-orchard-title-row">
-          <Column sm={4} md={8} lg={16}>
+          <Column className="section-title" sm={4} md={8} lg={16}>
             <h2>{orchardStepText.gameteSection.title}</h2>
-            <Subtitle text={orchardStepText.gameteSection.subtitle} />
+            {
+              !isReview
+                ? (
+                  <Subtitle text={orchardStepText.gameteSection.subtitle} />
+                )
+                : null
+            }
           </Column>
         </Row>
         <Row className="orchard-row">
@@ -478,9 +490,15 @@ const OrchardStep = ({
           </Column>
         </Row>
         <Row className="seedlot-orchard-title-row">
-          <Column sm={4} md={8} lg={16}>
+          <Column className="section-title" sm={4} md={8} lg={16}>
             <h2>{orchardStepText.pollenSection.title}</h2>
-            <Subtitle text={orchardStepText.pollenSection.subtitle} />
+            {
+              !isReview
+                ? (
+                  <Subtitle text={orchardStepText.pollenSection.subtitle} />
+                )
+                : null
+            }
           </Column>
         </Row>
         <Row>
