@@ -10,7 +10,7 @@ import {
 import { Login } from '@carbon/icons-react';
 
 import BCGovLogo from '../../components/BCGovLogo';
-import Seeding from '../../assets/img/seeding.png';
+import Seeding from '../../assets/img/cone.jpeg';
 import LoginProviders from '../../types/LoginProviders';
 import AuthContext from '../../contexts/AuthContext';
 
