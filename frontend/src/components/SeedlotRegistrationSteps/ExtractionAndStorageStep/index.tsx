@@ -96,7 +96,9 @@ const ExtractionAndStorage = (
 
   return (
     <>
-      <ScrollToTop />
+      {
+        !isReview ? (<ScrollToTop />) : null
+      }
       <FlexGrid className="extraction-and-storage-form" fullWidth>
         <Row className="extraction-information-title">
           <Column className="section-title" sm={4} md={8} lg={16}>

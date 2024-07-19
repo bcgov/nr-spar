@@ -518,7 +518,9 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
 
   return (
     <>
-      <ScrollToTop />
+      {
+        !isReviewDisplay ? (<ScrollToTop />) : null
+      }
       <FlexGrid className="parent-tree-step-container">
         {
           !isReviewDisplay

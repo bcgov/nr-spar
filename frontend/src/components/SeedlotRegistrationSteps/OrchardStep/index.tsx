@@ -344,7 +344,9 @@ const OrchardStep = ({
 
   return (
     <>
-      <ScrollToTop />
+      {
+        !isReview ? (<ScrollToTop />) : null
+      }
       <FlexGrid className="seedlot-orchard-step-form">
         <Row className={`seedlot-orchard-title-row ${isReview ? 'remove-bottom-margin' : ''}`}>
           <Column className="section-title" sm={4} md={8} lg={16}>

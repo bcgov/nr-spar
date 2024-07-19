@@ -139,7 +139,9 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
 
   return (
     <>
-      <ScrollToTop />
+      {
+        !isReview ? (<ScrollToTop />) : null
+      }
       <FlexGrid className="collection-step-container">
         <Row className="collection-step-row">
           <Column className="section-title" sm={4} md={8} lg={16} xlg={16}>

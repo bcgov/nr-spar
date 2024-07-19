@@ -141,7 +141,9 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
 
   return (
     <>
-      <ScrollToTop />
+      {
+        !isReview ? (<ScrollToTop />) : null
+      }
       <FlexGrid className="interim-agency-storage-form" fullWidth>
         <Row className="interim-title-row">
           <Column className="section-title" sm={4} md={8} lg={16}>
