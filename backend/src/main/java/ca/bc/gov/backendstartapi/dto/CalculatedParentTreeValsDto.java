@@ -14,7 +14,7 @@ import lombok.Setter;
         """)
 @Getter
 @Setter
-public class CaculatedParentTreeValsDto {
+public class CalculatedParentTreeValsDto {
   private BigDecimal neValue;
   private GeospatialRespondDto geospatialData;
 }

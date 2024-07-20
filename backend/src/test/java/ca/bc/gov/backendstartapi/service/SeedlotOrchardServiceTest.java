@@ -41,7 +41,7 @@ class SeedlotOrchardServiceTest {
   }
 
   @Test
-  @DisplayName("Save Seedlot Orchard first submmit")
+  @DisplayName("Save Seedlot Orchard first submit")
   void saveSeedlotFormStep4_firstSubmit_shouldSucceed() {
     when(seedlotOrchardRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
 
