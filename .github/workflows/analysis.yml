@@ -65,7 +65,7 @@ jobs:
   results:
     name: Analysis Results
     if: always() && (!failure()) && (!cancelled())
-    needs: [tests, codeql, trivy]
+    needs: [tests, trivy]
     runs-on: ubuntu-22.04
     steps:
       - run: echo "Workflow completed successfully!"
