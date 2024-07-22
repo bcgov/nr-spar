@@ -105,7 +105,7 @@ const LotApplicantAndInfoForm = ({
           }
         </Column>
       </Row>
-      <ApplicantAgencyFields
+      {/* <ApplicantAgencyFields
         showCheckbox={false}
         isDefault={EmptyBooleanInputType}
         checkboxId="lot-information-default-checkbox"
@@ -125,7 +125,7 @@ const LotApplicantAndInfoForm = ({
         }
         readOnly={isEdit}
         maxInputColSize={6}
-      />
+      /> */}
       <Row className="agency-email-row">
         <Column sm={4} md={8} lg={16} xlg={12}>
           <TextInput

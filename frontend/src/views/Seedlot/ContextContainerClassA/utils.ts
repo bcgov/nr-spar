@@ -41,7 +41,6 @@ import {
 import {
   AllStepData,
   AreaOfUseDataType,
-  ClientAgenciesByCode,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
 import focusById from '../../../utils/FocusUtils';
@@ -63,7 +62,7 @@ export const initProgressBar = (
 };
 
 export const initCollectionState = (
-  defaultAgency: MultiOptionsObj,
+  defaultAgencyNumber: string,
   collectionStepData: CollectionFormSubmitType,
   useDefaultAgency = true
 ): CollectionForm => ({
@@ -74,7 +73,7 @@ export const initCollectionState = (
   },
   collectorAgency: {
     id: 'collection-collector-agency',
-    value: defaultAgency,
+    value: defaultAgencyNumber,
     isInvalid: false
   },
   locationCode: {
@@ -125,14 +124,17 @@ export const initOwnershipState = (
   useDefault?: boolean,
   methodsOfPayment?: Array<MultiOptionsObj>,
   fundingSource?: Array<MultiOptionsObj>,
-  clientData?: ClientAgenciesByCode,
   defaultAgencyNumber = ''
 ): Array<SingleOwnerForm> => {
   const seedlotOwners: Array<SingleOwnerForm> = ownersStepData.map((curOwner, index) => {
     const ownerState = createOwnerTemplate(index, curOwner);
-    ownerState.ownerAgency.value = clientData && !useDefault
-      ? clientData[curOwner.ownerClientNumber]
-      : defaultAgency;
+    ownerState.ownerAgency.value = useDefault
+      ? defaultAgency
+      : {
+        code: curOwner.ownerClientNumber,
+        description: '',
+        label: ''
+      };
     ownerState.useDefaultAgencyInfo.value = ownerState
       .ownerAgency.value.code === defaultAgencyNumber;
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
@@ -150,7 +152,7 @@ export const initOwnershipState = (
 };
 
 export const initInterimState = (
-  defaultAgency: MultiOptionsObj,
+  defaultAgencyNumber: string,
   interimStepData: InterimFormSubmitType,
   useDefaultAgency = true
 ): InterimForm => ({
@@ -161,7 +163,11 @@ export const initInterimState = (
   },
   agencyName: {
     id: 'interim-agency',
-    value: defaultAgency,
+    value: {
+      code: defaultAgencyNumber,
+      description: '',
+      label: ''
+    },
     isInvalid: false
   },
   locationCode: {
@@ -340,8 +346,8 @@ export const initParentTreeState = (
 };
 
 export const initExtractionStorageState = (
-  defaultExtractAgency: MultiOptionsObj,
-  defaultStorageAgency: MultiOptionsObj,
+  defaultExtractAgencyNumber: string,
+  defaultStorageAgencyNumber: string,
   extractionStepData: ExtractionFormSubmitType,
   useTSCExtract = true,
   useTSCStorage = true
@@ -355,7 +361,11 @@ export const initExtractionStorageState = (
       },
       agency: {
         id: 'ext-agency-combobox',
-        value: defaultExtractAgency,
+        value: {
+          code: defaultExtractAgencyNumber,
+          description: '',
+          label: ''
+        },
         isInvalid: false
       },
       locationCode: {
@@ -382,7 +392,11 @@ export const initExtractionStorageState = (
       },
       agency: {
         id: 'str-agency-combobox',
-        value: defaultStorageAgency,
+        value: {
+          code: defaultStorageAgencyNumber,
+          description: '',
+          label: ''
+        },
         isInvalid: false
       },
       locationCode: {
@@ -1058,14 +1072,14 @@ export const getSeedlotPayload = (
 });
 
 export const initEmptySteps = () => ({
-  collectionStep: initCollectionState(EmptyMultiOptObj, emptyCollectionStep),
+  collectionStep: initCollectionState('', emptyCollectionStep),
   ownershipStep: initOwnershipState(EmptyMultiOptObj, emptyOwnershipStep, true),
-  interimStep: initInterimState(EmptyMultiOptObj, emptyInterimStep),
+  interimStep: initInterimState('', emptyInterimStep),
   orchardStep: initOrchardState(emptyOrchardStep),
   parentTreeStep: initParentTreeState(),
   extractionStorageStep: initExtractionStorageState(
-    tscAgencyObj,
-    tscAgencyObj,
+    '',
+    tscAgencyObj.code,
     emptyExtractionStep
   )
 });
@@ -1076,12 +1090,12 @@ export const resDataToState = (
   methodsOfPaymentData: MultiOptionsObj[],
   fundingSourcesData: MultiOptionsObj[],
   orchardQueryData: MultiOptionsObj[],
-  gameticMethodologyData: MultiOptionsObj[],
-  clientData: ClientAgenciesByCode
-): AllStepData => (
-  {
+  gameticMethodologyData: MultiOptionsObj[]
+): AllStepData => {
+  console.log('convvvv');
+  return {
     collectionStep: initCollectionState(
-      clientData[fullFormData.seedlotFormCollectionDto.collectionClientNumber],
+      fullFormData.seedlotFormCollectionDto.collectionClientNumber,
       fullFormData.seedlotFormCollectionDto,
       fullFormData.seedlotFormCollectionDto.collectionClientNumber === defaultAgencyNumber
     ),
@@ -1091,14 +1105,13 @@ export const resDataToState = (
       false,
       methodsOfPaymentData,
       fundingSourcesData,
-      clientData,
       defaultAgencyNumber
     ),
     interimStep: initInterimState(
-      clientData[fullFormData.seedlotFormInterimDto.intermStrgClientNumber],
+      fullFormData.seedlotFormInterimDto.intermStrgClientNumber,
       fullFormData.seedlotFormInterimDto,
-      // eslint-disable-next-line max-len
-      fullFormData.seedlotFormInterimDto.intermStrgClientNumber === fullFormData.seedlotFormCollectionDto.collectionClientNumber
+      fullFormData.seedlotFormInterimDto.intermStrgClientNumber
+      === fullFormData.seedlotFormCollectionDto.collectionClientNumber
     ),
     orchardStep: initOrchardState(
       fullFormData.seedlotFormOrchardDto,
@@ -1110,14 +1123,14 @@ export const resDataToState = (
       fullFormData.seedlotFormParentTreeSmpDtoList
     ),
     extractionStorageStep: initExtractionStorageState(
-      clientData[fullFormData.seedlotFormExtractionDto.extractoryClientNumber],
-      clientData[fullFormData.seedlotFormExtractionDto.storageClientNumber],
+      fullFormData.seedlotFormExtractionDto.extractoryClientNumber,
+      fullFormData.seedlotFormExtractionDto.storageClientNumber,
       fullFormData.seedlotFormExtractionDto,
       fullFormData.seedlotFormExtractionDto.extractoryClientNumber === tscAgencyObj.code,
       fullFormData.seedlotFormExtractionDto.storageClientNumber === tscAgencyObj.code
     )
-  }
-);
+  };
+};
 
 export const fillAreaOfUseData = (
   seedlotData: RichSeedlotType,

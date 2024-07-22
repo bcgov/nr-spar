@@ -367,6 +367,16 @@ const SeedlotReviewContent = () => {
     }
   };
 
+  const handleCancelClick = () => {
+    if (isReadMode) {
+      navigate(`/seedlots/details/${seedlotNumber}`);
+    } else {
+      setIsReadMode(true);
+      queryClient.refetchQueries(['seedlots', seedlotNumber]);
+      queryClient.refetchQueries(['seedlot-full-form', seedlotNumber]);
+    }
+  };
+
   return (
     <FlexGrid className="seedlot-review-grid">
       <Loading
@@ -551,6 +561,15 @@ const SeedlotReviewContent = () => {
         seedlotData?.seedlotStatus.seedlotStatusCode === 'SUB'
           ? (
             <Row className="action-button-row">
+              <Column sm={4} md={4} lg={4}>
+                <Button
+                  kind="secondary"
+                  onClick={handleCancelClick}
+                >
+                  {isReadMode ? 'Back' : 'Cancel'}
+                </Button>
+              </Column>
+
               <Column className="action-button-col" sm={4} md={4} lg={4}>
                 <Button
                   kind="secondary"

@@ -52,7 +52,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
 
   const setAgencyAndCode = (
     isDefault: BooleanInputType,
-    agency: OptionsInputType,
+    agency: StringInputType,
     locationCode: StringInputType
   ) => {
     const clonedState = structuredClone(state);
@@ -152,7 +152,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
         showCheckbox={!isReview}
         isDefault={isReview ? EmptyBooleanInputType : state.useDefaultAgencyInfo}
         checkboxId="collection-step-default-checkbox"
-        agency={state.collectorAgency}
+        clientNumberInput={state.collectorAgency}
         locationCode={state.locationCode}
         fieldsProps={agencyFieldsProps}
         defaultAgency={defaultAgency}
@@ -160,7 +160,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
         setAgencyAndCode={
           (
             isDefault: BooleanInputType,
-            agency: OptionsInputType,
+            agency: StringInputType,
             locationCode: StringInputType
           ) => setAgencyAndCode(isDefault, agency, locationCode)
         }

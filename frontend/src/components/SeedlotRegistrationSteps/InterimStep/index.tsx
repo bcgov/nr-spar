@@ -152,7 +152,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
           }
         </Column>
       </Row>
-      <ApplicantAgencyFields
+      {/* <ApplicantAgencyFields
         showCheckbox={!isReview}
         checkboxId={state.useCollectorAgencyInfo.id}
         isDefault={isReview ? EmptyBooleanInputType : state.useCollectorAgencyInfo}
@@ -169,7 +169,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
         isFormSubmitted={isFormSubmitted}
         readOnly={isFormSubmitted && !isReview}
         maxInputColSize={6}
-      />
+      /> */}
       <Row className="interim-storage-row">
         <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker

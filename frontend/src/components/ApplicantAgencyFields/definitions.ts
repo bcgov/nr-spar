@@ -5,10 +5,14 @@ import MultiOptionsObj from '../../types/MultiOptionsObject';
 interface ApplicantAgencyFieldsProps {
   checkboxId: string;
   isDefault: BooleanInputType;
-  agency: OptionsInputType;
+  clientNumberInput: StringInputType;
   locationCode: StringInputType;
   fieldsProps: AgencyTextPropsType;
-  setAgencyAndCode: Function;
+  setAgencyAndCode: (
+    isDefault: BooleanInputType,
+    agency: StringInputType,
+    locationCode: StringInputType
+    ) => void
   defaultAgency?: MultiOptionsObj;
   defaultCode?: string;
   showCheckbox?: boolean;

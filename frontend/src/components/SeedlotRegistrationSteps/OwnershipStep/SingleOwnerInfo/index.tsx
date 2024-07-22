@@ -139,7 +139,7 @@ const SingleOwnerInfo = ({
       <FlexGrid fullWidth>
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            <ApplicantAgencyFields
+            {/* <ApplicantAgencyFields
               showCheckbox={ownerInfo.id === DEFAULT_INDEX && !isReview}
               checkboxId={ownerInfo.id === DEFAULT_INDEX ? 'default-owner-checkbox' : ''}
               isDefault={isReview ? EmptyBooleanInputType : ownerInfo.useDefaultAgencyInfo}
@@ -157,7 +157,7 @@ const SingleOwnerInfo = ({
               }
               readOnly={readOnly && !isReview}
               isFormSubmitted={readOnly}
-            />
+            /> */}
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
             <TextInput

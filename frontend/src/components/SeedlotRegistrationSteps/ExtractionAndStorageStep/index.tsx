@@ -107,7 +107,7 @@ const ExtractionAndStorage = (
           }
         </Column>
       </Row>
-      <ApplicantAgencyFields
+      {/* <ApplicantAgencyFields
         showCheckbox
         checkboxId={state.extraction.useTSC.id}
         isDefault={state.extraction.useTSC}
@@ -124,7 +124,7 @@ const ExtractionAndStorage = (
         readOnly={isFormSubmitted && !isReview}
         isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
-      />
+      /> */}
       <Row className="extraction-date-row">
         <Column className="extraction-start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
@@ -196,7 +196,7 @@ const ExtractionAndStorage = (
           }
         </Column>
       </Row>
-      <ApplicantAgencyFields
+      {/* <ApplicantAgencyFields
         showCheckbox
         checkboxId={state.seedStorage.useTSC.id}
         isDefault={state.seedStorage.useTSC}
@@ -213,7 +213,7 @@ const ExtractionAndStorage = (
         readOnly={isFormSubmitted && !isReview}
         isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
-      />
+      /> */}
       <Row className="storage-date-row">
         <Column className="storage-start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker

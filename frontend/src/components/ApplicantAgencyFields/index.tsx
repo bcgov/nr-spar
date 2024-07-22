@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 import {
   Row, Column, TextInput, Checkbox, Tooltip,
   InlineLoading, ActionableNotification, FlexGrid
 } from '@carbon/react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import validator from 'validator';
 
 import ClientSearchModal from './ClientSearchModal';
@@ -13,52 +13,53 @@ import { getForestClientByNumberOrAcronym, getForestClientLocation } from '../..
 
 import MultiOptionsObj from '../../types/MultiOptionsObject';
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
-import { ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
+import { ClientNumLocCodeType, ForestClientType } from '../../types/ForestClientTypes/ForestClientType';
 import { EmptyMultiOptObj, LOCATION_CODE_LIMIT } from '../../shared-constants/shared-constants';
 import { getForestClientLabel } from '../../utils/ForestClientUtils';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
 
 import ApplicantAgencyFieldsProps from './definitions';
 import supportTexts, { getErrorMessageTitle } from './constants';
 import { formatLocationCode } from './utils';
 
 import './styles.scss';
+import { StringInputType } from '../../types/FormInputType';
 
 const ApplicantAgencyFields = ({
-  checkboxId, isDefault, agency, locationCode, fieldsProps, defaultAgency,
+  checkboxId, isDefault, clientNumberInput, locationCode, fieldsProps, defaultAgency,
   defaultCode, setAgencyAndCode, readOnly, showCheckbox, maxInputColSize
 }: ApplicantAgencyFieldsProps) => {
   const [showSuccessIconAgency, setShowSuccessIconAgency] = useState<boolean>(true);
+
   const [showSuccessIconLocCode, setShowSuccessIconLocCode] = useState<boolean>(false);
 
   const [showErrorBanner, setShowErrorBanner] = useState<boolean>(false);
+
   const [invalidAcronymMessage, setInvalidAcronymMessage] = useState<string>(
     supportTexts.agency.invalidAcronym
   );
 
   const [invalidLocationMessage, setInvalidLocationMessage] = useState<string>(
-    locationCode.isInvalid && agency.value
+    locationCode.isInvalid && clientNumberInput.value
       ? supportTexts.locationCode.invalidLocationForSelectedAgency
       : supportTexts.locationCode.invalidText
   );
+
   const [locationCodeHelperText, setLocationCodeHelperText] = useState<string>(
     supportTexts.locationCode.helperTextDisabled
   );
 
   const updateAfterAgencyValidation = (isInvalid: boolean, clientData?: ForestClientType) => {
-    let updatedAgency;
+    let updatedAgency: StringInputType;
     if (clientData) {
       updatedAgency = {
-        ...agency,
-        value: {
-          label: clientData.acronym,
-          code: clientData.clientNumber,
-          description: `${clientData.clientNumber} - ${clientData.clientName} - ${clientData.acronym}`
-        },
+        ...clientNumberInput,
+        value: clientData.acronym,
         isInvalid
       };
     } else {
       updatedAgency = {
-        ...agency,
+        ...clientNumberInput,
         isInvalid
       };
     }
@@ -76,13 +77,41 @@ const ApplicantAgencyFields = ({
       isInvalid
     };
     setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
-    setAgencyAndCode(isDefault, agency, updatedLocationCode);
+    setAgencyAndCode(isDefault, clientNumberInput, updatedLocationCode);
   };
 
+  const forestClientQuery = useQuery({
+    queryKey: ['forest-clients', clientNumberInput.value],
+    queryFn: () => getForestClientByNumberOrAcronym(clientNumberInput.value),
+    enabled: !!clientNumberInput.value,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  useEffect(() => {
+    if (forestClientQuery.status === 'success') {
+      console.log('aaaaa settting', {
+        code: forestClientQuery.data.clientNumber,
+        description: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`,
+        label: forestClientQuery.data.acronym
+      });
+      setAgencyAndCode(
+        isDefault,
+        {
+          ...clientNumberInput,
+          value: forestClientQuery.data.acronym
+        },
+        locationCode
+      );
+    }
+  }, [forestClientQuery.status]);
+
   const validateLocationCodeMutation = useMutation({
-    mutationFn: (queryParams: string[]) => getForestClientLocation(
-      queryParams[0],
-      queryParams[1]
+    mutationFn: (
+      numAndCode: ClientNumLocCodeType
+    ) => getForestClientLocation(
+      numAndCode.clientNumber,
+      numAndCode.locationCode
     ),
     onError: (err: AxiosError) => {
       // Request failed
@@ -118,7 +147,10 @@ const ApplicantAgencyFields = ({
       setShowErrorBanner(false);
       updateAfterAgencyValidation(false, res);
       if (locationCode.value !== '') {
-        validateLocationCodeMutation.mutate([res.clientNumber, locationCode.value]);
+        validateLocationCodeMutation.mutate({
+          clientNumber: res.clientNumber,
+          locationCode: locationCode.value
+        });
       }
     }
   });
@@ -130,15 +162,15 @@ const ApplicantAgencyFields = ({
         : supportTexts.locationCode.helperTextDisabled
     );
 
-    const updatedAgency = {
-      ...agency,
-      value: checked ? defaultAgency : EmptyMultiOptObj,
+    const updatedAgency: StringInputType = {
+      ...clientNumberInput,
+      value: checked ? defaultAgency?.code ?? '' : '',
       isInvalid: checked && defaultAgency?.label === ''
     };
 
     const updatedLocationCode = {
       ...locationCode,
-      value: checked ? defaultCode : '',
+      value: checked ? defaultCode ?? '' : '',
       isInvalid: checked && defaultCode === ''
     };
 
@@ -152,16 +184,11 @@ const ApplicantAgencyFields = ({
     setAgencyAndCode(updatedIsDefault, updatedAgency, updatedLocationCode);
   };
 
-  const updateAgencyFn = (value: string) => (
+  const updateAgencyFn = (value: string | null) => (
     {
-      ...agency,
+      ...clientNumberInput,
       isInvalid: false,
-      value: value
-        ? {
-          ...EmptyMultiOptObj,
-          label: value
-        }
-        : EmptyMultiOptObj
+      value: value ?? ''
     }
   );
 
@@ -182,27 +209,24 @@ const ApplicantAgencyFields = ({
           className="input-loading-tooltip"
           label={tooltipLabel}
         >
-          {
-            // eslint-disable-next-line jsx-a11y/control-has-associated-label
-            <button className="tooltip-trigger" type="button">
-              <InlineLoading
-                status={loadingStatus}
-              />
-            </button>
-          }
+          <button className="tooltip-trigger" type="button" aria-label="loading-status-display">
+            <InlineLoading
+              status={loadingStatus}
+            />
+          </button>
         </Tooltip>
       );
     }
     return null;
   };
 
-  const handleAgencyInput = (value: string) => {
-    // Create a "mock" MultiOptObj, just to display
-    // the correct acronym
-    const updatedAgency = updateAgencyFn(value);
+  // const handleAgencyInput = (value: string) => {
+  //   // Create a "mock" MultiOptObj, just to display
+  //   // the correct acronym
+  //   const updatedAgency = updateAgencyFn(value);
 
-    setAgencyAndCode(isDefault, updatedAgency, locationCode);
-  };
+  //   setAgencyAndCode(isDefault, updatedAgency, locationCode);
+  // };
 
   const handleAgencyBlur = (value: string) => {
     const updatedAgency = updateAgencyFn(value);
@@ -237,7 +261,7 @@ const ApplicantAgencyFields = ({
       isInvalid: updatedIsInvalid
     };
 
-    setAgencyAndCode(isDefault, agency, updatedLocationCode);
+    setAgencyAndCode(isDefault, clientNumberInput, updatedLocationCode);
   };
 
   const handleLocationCodeBlur = (value: string) => {
@@ -247,21 +271,27 @@ const ApplicantAgencyFields = ({
       value: formatedCode,
       isInvalid: false
     };
-    setAgencyAndCode(isDefault, agency, updatedLocationCode);
+    setAgencyAndCode(isDefault, clientNumberInput, updatedLocationCode);
     if (formatedCode === '') {
       setShowSuccessIconLocCode(false);
       return;
     }
     setShowSuccessIconLocCode(true);
-    validateLocationCodeMutation.mutate([agency.value.code, formatedCode]);
+
+    if (forestClientQuery.data?.clientNumber) {
+      validateLocationCodeMutation.mutate({
+        clientNumber: forestClientQuery.data.clientNumber,
+        locationCode: formatedCode
+      });
+    }
   };
 
   return (
-    <FlexGrid className="agency-information-section">
+    <FlexGrid className="clientNumberInput-information-section">
       {
         showCheckbox
           ? (
-            <Row className="agency-information-row">
+            <Row className="clientNumberInput-information-row">
               <Column sm={4} md={8} lg={16} xlg={16}>
                 <Checkbox
                   id={checkboxId}
@@ -278,23 +308,24 @@ const ApplicantAgencyFields = ({
           )
           : null
       }
-      <Row className="agency-information-row">
+      <Row className="clientNumberInput-information-row">
         <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
           <div className="loading-input-wrapper">
             <TextInput
-              className="agency-input"
-              id={agency.id}
+              className="clientNumberInput-input"
+              id={clientNumberInput.id}
               labelText={fieldsProps.agencyInput.titleText}
-              value={agency.value.label}
-              helperText={(readOnly || isDefault.value) ? null : supportTexts.agency.helperText}
-              invalid={agency.isInvalid}
+              defaultValue={forestClientQuery.data?.acronym}
+              helperText={
+                (readOnly || isDefault.value)
+                  ? null
+                  : supportTexts.agency.helperText
+              }
+              invalid={clientNumberInput.isInvalid}
               invalidText={invalidAcronymMessage}
               readOnly={isDefault.value || readOnly}
               enableCounter
               maxCount={8}
-              onChange={
-                (e: React.ChangeEvent<HTMLInputElement>) => handleAgencyInput(e.target.value)
-              }
               onWheel={(e: React.ChangeEvent<HTMLInputElement>) => e.target.blur()}
               onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                 if (!e.target.readOnly) {
@@ -320,7 +351,7 @@ const ApplicantAgencyFields = ({
               name={fieldsProps.locationCode.name}
               value={locationCode.value}
               type="number"
-              placeholder={!agency.value.code ? '' : supportTexts.locationCode.placeholder}
+              placeholder={!clientNumberInput.value ? '' : supportTexts.locationCode.placeholder}
               labelText={fieldsProps.locationCode.labelText}
               helperText={(readOnly || isDefault.value) ? null : locationCodeHelperText}
               invalid={locationCode.isInvalid}
@@ -328,7 +359,7 @@ const ApplicantAgencyFields = ({
                 ? supportTexts.locationCode.invalidTextInterimSpecific
                 : invalidLocationMessage}
               readOnly={(isDefault.value && locationCode.value !== '') || readOnly}
-              disabled={!agency.value.code || (isDefault.value && locationCode.value === '')}
+              disabled={!clientNumberInput.value || (isDefault.value && locationCode.value === '')}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 handleLocationCodeChange(e.target.value);
               }}
@@ -364,7 +395,7 @@ const ApplicantAgencyFields = ({
                   actionButtonLabel="Retry"
                   onActionButtonClick={() => {
                     if (validateAgencyAcronymMutation.isError) {
-                      handleAgencyBlur(agency.value.label);
+                      handleAgencyBlur(clientNumberInput.value);
                     } else {
                       handleLocationCodeBlur(locationCode.value);
                     }
@@ -376,13 +407,13 @@ const ApplicantAgencyFields = ({
           )
           : null
       }
-      {
+      {/* {
         !isDefault.value && !readOnly
           ? (
             <Row className="applicant-client-search-row">
               <Column sm={4} md={4} lg={16} xlg={16}>
                 <p>
-                  If you don&apos;t remember the agency information you can
+                  If you don&apos;t remember the clientNumberInput information you can
                   {' '}
                   <ClientSearchModal
                     linkText="open the client search"
@@ -394,9 +425,9 @@ const ApplicantAgencyFields = ({
                         description: getForestClientLabel(client)
                       };
 
-                      const selectedAgency = {
-                        ...agency,
-                        value: agencyObj,
+                      const selectedAgency: StringInputType = {
+                        ...clientNumberInput,
+                        value: agencyObj.code,
                         isInvalid: false
                       };
 
@@ -420,7 +451,7 @@ const ApplicantAgencyFields = ({
             </Row>
           )
           : null
-      }
+      } */}
     </FlexGrid>
   );
 };

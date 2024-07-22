@@ -5,7 +5,7 @@ import {
   useNavigate, useParams, useSearchParams, useLocation
 } from 'react-router-dom';
 import {
-  useMutation, useQueries, useQuery, useQueryClient
+  useMutation, useQuery
 } from '@tanstack/react-query';
 import { AxiosError, isAxiosError } from 'axios';
 import { DateTime } from 'luxon';
@@ -26,7 +26,6 @@ import {
 
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
-import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import {
   DEFAULT_MIX_PAGE_ROWS, EMPTY_NUMBER_STRING,
@@ -44,8 +43,7 @@ import { StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext, { ClassAContextType } from './context';
 import {
-  AllStepData, AreaOfUseDataType, ClientAgenciesByCode,
-  ProgressIndicatorConfig, ProgressStepStatus
+  AllStepData, AreaOfUseDataType, ProgressIndicatorConfig, ProgressStepStatus
 } from './definitions';
 import {
   initProgressBar, getSpeciesOptionByCode, validateCollectionStep, verifyCollectionStepCompleteness,
@@ -146,20 +144,6 @@ const ContextContainerClassA = ({ children }: props) => {
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
   const [geoInfoVals, setGeoInfoVals] = useState<GeoInfoValType>(() => INITIAL_GEO_INFO_VALS);
 
-  useEffect(() => {
-    if (seedlotQuery.status === 'success') {
-      const seedlotStatusCode = seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode;
-      if (seedlotStatusCode !== 'PND' && seedlotStatusCode !== 'INC') {
-        setIsFormSubmitted(true);
-      }
-
-      if (seedlotQuery.data) {
-        // Collection geo data
-        fillCollectionGeoData(setGeoInfoVals, setPopSizeAndDiversityConfig, seedlotQuery.data);
-      }
-    }
-  }, [seedlotQuery.status]);
-
   const getAllSeedlotInfoQuery = useQuery({
     queryKey: ['seedlot-full-form', seedlotNumber],
     queryFn: () => getAClassSeedlotFullForm(seedlotNumber ?? ''),
@@ -216,16 +200,7 @@ const ContextContainerClassA = ({ children }: props) => {
   };
 
   const [clientNumber, setClientNumber] = useState<string>('');
-  const [clientNumbers, setClientNumbers] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (seedlotQuery.status === 'success') {
-      setClientNumber(seedlotQuery.data.seedlot.applicantClientNumber ?? '');
-
-      // Set area of use data
-      setAreaOfUseData(fillAreaOfUseData(seedlotQuery.data, areaOfUseData));
-    }
-  }, [seedlotQuery.status]);
+  // const [clientNumbers, setClientNumbers] = useState<string[]>([]);
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', clientNumber],
@@ -235,19 +210,17 @@ const ContextContainerClassA = ({ children }: props) => {
     cacheTime: THREE_HALF_HOURS
   });
 
-  const allClientsQuery = useQueries({
-    queries: clientNumbers.map((client) => ({
-      queryKey: ['forest-clients', client],
-      queryFn: () => getForestClientByNumberOrAcronym(client),
-      enabled: getAllSeedlotInfoQuery.isFetched,
-      staleTime: THREE_HOURS,
-      cacheTime: THREE_HALF_HOURS
-    }))
-  });
+  // const allClientsQuery = useQueries({
+  //   queries: clientNumbers.map((client) => ({
+  //     queryKey: ['forest-clients', client],
+  //     queryFn: () => getForestClientByNumberOrAcronym(client),
+  //     enabled: getAllSeedlotInfoQuery.isFetched,
+  //     staleTime: THREE_HOURS,
+  //     cacheTime: THREE_HALF_HOURS
+  //   }))
+  // });
 
-  const allClientsFinished = allClientsQuery.every((client) => client.isSuccess);
-
-  const qc = useQueryClient();
+  // const qc = useQueryClient();
 
   const getAgencyObj = (): MultiOptionsObj => ({
     code: forestClientQuery.data?.clientNumber ?? '',
@@ -324,35 +297,6 @@ const ContextContainerClassA = ({ children }: props) => {
     numOfEdit.current += 1;
   };
 
-  // This useEffect fetchs all data regarding agencies on the
-  // form steps
-  useEffect(() => {
-    if (getAllSeedlotInfoQuery.status === 'success') {
-      // Set seedlot data
-      const { seedlotData } = getAllSeedlotInfoQuery.data;
-      const clientNumbersArray: string[] = [];
-      clientNumbersArray.push(seedlotData.seedlotFormCollectionDto.collectionClientNumber);
-      clientNumbersArray.push(seedlotData.seedlotFormInterimDto.intermStrgClientNumber);
-      seedlotData.seedlotFormOwnershipDtoList.forEach((owner: any) => {
-        clientNumbersArray.push(owner.ownerClientNumber);
-      });
-      clientNumbersArray.push(seedlotData.seedlotFormExtractionDto.extractoryClientNumber);
-      clientNumbersArray.push(seedlotData.seedlotFormExtractionDto.storageClientNumber);
-      setClientNumbers([...new Set(clientNumbersArray)]);
-
-      // Set calculated result
-      setCalculatedValues(getAllSeedlotInfoQuery.data.calculatedValues);
-
-      // Set progress status
-      const clonedStatus = structuredClone(progressStatus);
-      const stepNames = Object.keys(clonedStatus) as Array<keyof ProgressIndicatorConfig>;
-      stepNames.forEach((step) => {
-        clonedStatus[step].isComplete = true;
-      });
-      setProgressStatus(clonedStatus);
-    }
-  }, [getAllSeedlotInfoQuery.status]);
-
   const fundingSourcesQuery = useQuery({
     queryKey: ['funding-sources'],
     queryFn: getFundingSources,
@@ -397,6 +341,35 @@ const ContextContainerClassA = ({ children }: props) => {
       .sort((a, b) => Number(a.code) - Number(b.code))
   });
 
+  /**
+   * seedlotQuery Effects
+   */
+  useEffect(() => {
+    if (seedlotQuery.status === 'success') {
+      const seedlotStatusCode = seedlotQuery.data?.seedlot.seedlotStatus.seedlotStatusCode;
+      if (seedlotStatusCode !== 'PND' && seedlotStatusCode !== 'INC') {
+        setIsFormSubmitted(true);
+      }
+
+      fillCollectionGeoData(setGeoInfoVals, setPopSizeAndDiversityConfig, seedlotQuery.data);
+
+      setClientNumber(seedlotQuery.data.seedlot.applicantClientNumber ?? '');
+
+      // Set area of use data
+      setAreaOfUseData(fillAreaOfUseData(seedlotQuery.data, areaOfUseData));
+    }
+  }, [seedlotQuery.status]);
+
+  /**
+   * getAllSeedlotInfoQuery Effects
+   */
+  useEffect(() => {
+    if (getAllSeedlotInfoQuery.status === 'success') {
+      // Set calculated result
+      setCalculatedValues(getAllSeedlotInfoQuery.data.calculatedValues);
+    }
+  }, [getAllSeedlotInfoQuery.status]);
+
   useEffect(() => {
     if (
       getAllSeedlotInfoQuery.status === 'success'
@@ -404,25 +377,11 @@ const ContextContainerClassA = ({ children }: props) => {
       && methodsOfPaymentQuery.status === 'success'
       && gameticMethodologyQuery.status === 'success'
       && orchardQuery.status === 'success'
-      && allClientsFinished
-      && clientNumbers.length
+      && seedlotQuery.status === 'success'
     ) {
       const fullFormData = getAllSeedlotInfoQuery.data.seedlotData;
       const defaultAgencyNumber = seedlotQuery.data?.seedlot.applicantClientNumber;
-      let clientAgencies: ClientAgenciesByCode = {};
-
-      clientNumbers.forEach((curNumber) => {
-        const clientData: ForestClientType | undefined = qc.getQueryData(['forest-clients', curNumber]);
-        if (clientData) {
-          clientAgencies = Object.assign(clientAgencies, {
-            [curNumber]: {
-              code: clientData.clientNumber,
-              description: `${clientData.clientNumber} - ${clientData.clientName} - ${clientData.acronym}`,
-              label: clientData.acronym
-            }
-          });
-        }
-      });
+      // let clientAgencies: ClientAgenciesByCode = {};
 
       setAllStepData(
         resDataToState(
@@ -431,8 +390,7 @@ const ContextContainerClassA = ({ children }: props) => {
           methodsOfPaymentQuery.data,
           fundingSourcesQuery.data,
           orchardQuery.data,
-          gameticMethodologyQuery.data,
-          clientAgencies
+          gameticMethodologyQuery.data
         )
       );
     } else if (getAllSeedlotInfoQuery.status === 'error') {
@@ -445,13 +403,11 @@ const ContextContainerClassA = ({ children }: props) => {
     }
   }, [
     getAllSeedlotInfoQuery.status,
-    getAllSeedlotInfoQuery.isFetched,
-    fundingSourcesQuery.isFetched,
-    methodsOfPaymentQuery.isFetched,
-    gameticMethodologyQuery.isFetched,
-    orchardQuery.isFetched,
-    allClientsFinished,
-    clientNumbers
+    fundingSourcesQuery.status,
+    methodsOfPaymentQuery.status,
+    gameticMethodologyQuery.status,
+    orchardQuery.status,
+    seedlotQuery.status
   ]);
 
   /**
@@ -667,6 +623,9 @@ const ContextContainerClassA = ({ children }: props) => {
     retry: 1
   });
 
+  /**
+   * Form Draft Effects.
+   */
   useEffect(() => {
     if (getFormDraftQuery.status === 'success') {
       setAllStepData(getFormDraftQuery.data.allStepData);
