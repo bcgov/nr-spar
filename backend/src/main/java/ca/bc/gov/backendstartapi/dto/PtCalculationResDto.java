@@ -14,6 +14,6 @@ public record PtCalculationResDto(
     @Schema(description = "Contains a list of calculated traits.")
         List<GeneticWorthTraitsDto> geneticTraits,
     @Schema(description = "Various calculated value for the orchard parent trees.")
-        CaculatedParentTreeValsDto calculatedPtVals,
+        CalculatedParentTreeValsDto calculatedPtVals,
     @Schema(description = "The calculated mean geospatial values for SMP mix.")
         GeospatialRespondDto smpMixMeanGeoData) {}
