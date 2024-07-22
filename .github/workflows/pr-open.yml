@@ -33,16 +33,13 @@ jobs:
     needs: [builds]
     secrets: inherit
     uses: ./.github/workflows/.deploy.yml
-    with:
-      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/' 'sync/')
 
   tests:
     name: Tests
+    if: needs.deploys.outputs.run_tests == 'true'
     needs: [deploys]
     secrets: inherit
     uses: ./.github/workflows/.tests.yml
-    with:
-      triggers: ('backend/' 'common/' 'database/' 'frontend/' 'oracle-api/')
 
   results:
     name: PR Results
