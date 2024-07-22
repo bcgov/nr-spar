@@ -1,4 +1,4 @@
-name: Scheduled
+name: Nightly
 
 on:
   schedule: [cron: "0 11 * * 6"] # 3 AM PST = 12 PM UDT, Saturdays
@@ -14,7 +14,7 @@ jobs:
     env:
       # https://tecadmin.net/getting-yesterdays-date-in-bash/
       DATE: "1 week ago"
-      TYPE: "po,image,pvc"
+      TYPE: "all,secret,pvc,cm"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -27,16 +27,18 @@ jobs:
             awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
             xargs --no-run-if-empty oc delete ${{ env.TYPE }}
 
-  # tests:
-  #   name: Tests
-  #   secrets: inherit
-  #   uses: ./.github/workflows/.tests.yml
-  #   with:
-  #     target: test
+  tests:
+    name: Tests
+    secrets: inherit
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: test
 
   zap_scan:
     runs-on: ubuntu-latest
     name: Penetration Tests
+    # Run after other tests to avoid rate limiting
+    needs: [tests]
     env:
       DOMAIN: apps.silver.devops.gov.bc.ca
       PREFIX: ${{ github.event.repository.name }}-test
