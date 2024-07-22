@@ -29,27 +29,27 @@ jobs:
             awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
             xargs --no-run-if-empty oc delete ${{ env.TYPE }}
 
-  # tests:
-  #   name: Tests
-  #   secrets: inherit
-  #   uses: ./.github/workflows/.tests.yml
-  #   with:
-  #     target: test
+  tests:
+    name: Tests
+    secrets: inherit
+    uses: ./.github/workflows/.tests.yml
+    with:
+      target: test
 
-  # zap_scan:
-  #   runs-on: ubuntu-latest
-  #   name: Penetration Tests
-  #   # Run after other tests to avoid rate limiting
-  #   needs: [tests]
-  #   env:
-  #     DOMAIN: apps.silver.devops.gov.bc.ca
-  #     PREFIX: ${{ github.event.repository.name }}-test
-  #   steps:
-  #     - name: ZAP Scan
-  #       uses: zaproxy/action-full-scan@v0.10.0
-  #       with:
-  #         allow_issue_writing: true
-  #         artifact_name: "zap_frontend"
-  #         cmd_options: "-a"
-  #         issue_title: "ZAP: frontend"
-  #         target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Penetration Tests
+    # Run after other tests to avoid rate limiting
+    needs: [tests]
+    env:
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      PREFIX: ${{ github.event.repository.name }}-test
+    steps:
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          allow_issue_writing: true
+          artifact_name: "zap_frontend"
+          cmd_options: "-a"
+          issue_title: "ZAP: frontend"
+          target: https://${{ env.PREFIX }}-frontend.${{ env.DOMAIN }}
