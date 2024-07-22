@@ -4,8 +4,9 @@
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 #### Workflows
-[![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
 [![Analysis](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml)
+[![ETL Sync](https://github.com/bcgov/nr-spar/actions/workflows/sync-job.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/sync-job.yml)
+[![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
 [![Scheduled](https://github.com/bcgov/nr-spar/actions/workflows/scheduled.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/scheduled.yml)
 
 #### Frontend
