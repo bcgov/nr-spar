@@ -22,6 +22,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormOrchardDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormOwnershipDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotFormSubmissionDto;
+import ca.bc.gov.backendstartapi.dto.SeedlotSaveInMemoryDto;
 import ca.bc.gov.backendstartapi.dto.SeedlotStatusResponseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.AreaOfUseDto;
 import ca.bc.gov.backendstartapi.dto.oracle.SpuDto;
@@ -736,6 +737,9 @@ public class SeedlotService {
      * 4. Add new ones
      */
 
+    // Object to hold data in memory, avoid querying same data
+    final SeedlotSaveInMemoryDto inMemoryDto = new SeedlotSaveInMemoryDto();
+
     // Step 1 (Collection methods)
     // Update the Seedlot instance and tables [seedlot_collection_method]
     seedlotCollectionMethodService.saveSeedlotFormStep1(
@@ -775,7 +779,7 @@ public class SeedlotService {
 
     // Update the Seedlot instance only
     // Fetch data from Oracle to get the primary Seed Plan Unit id
-    setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+    setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId(), inMemoryDto);
 
     if (isFromRegularForm) {
       // Update the Seedlot instance only
@@ -794,7 +798,7 @@ public class SeedlotService {
       // Fetch data from Oracle to get the active Seed Plan Unit id
       if (!hasAreaOfUseData(seedlot)) {
         SparLog.info("Area of Use data has NOT been set previously, setting area of use data");
-        setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId());
+        setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId(), inMemoryDto);
       }
     } else {
       updateApplicantAndSeedlot(seedlot, form.applicantAndSeedlotInfo());
@@ -830,7 +834,8 @@ public class SeedlotService {
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
   }
 
-  private void setBecValues(Seedlot seedlot, String primaryOrchardId) {
+  private void setBecValues(
+      Seedlot seedlot, String primaryOrchardId, SeedlotSaveInMemoryDto inMemoryDto) {
     SparLog.info("Begin to set BEC values");
 
     OrchardDto orchardDto =
@@ -844,6 +849,7 @@ public class SeedlotService {
             .orElseThrow(NoSpuForOrchardException::new);
 
     Integer primarySpuId = primarySeedPlanUnit.getSeedPlanningUnitId();
+    inMemoryDto.setPrimarySpuId(primarySpuId);
 
     // Not sure why it's called Bgc in seedlot instead of Bec in orchard
     seedlot.setBgcZoneCode(orchardDto.becZoneCode());
@@ -970,13 +976,19 @@ public class SeedlotService {
    * @param seedlot the seedlot object to set data to
    * @param primaryOrchardId the primary orchard Id to find the spu for
    */
-  private void setAreaOfUse(Seedlot seedlot, String primaryOrchardId) {
+  private void setAreaOfUse(
+      Seedlot seedlot, String primaryOrchardId, SeedlotSaveInMemoryDto inMemoryDto) {
     SparLog.info("Begin to set Area of Use values");
-    ActiveOrchardSpuEntity activeSpuEntity =
-        orchardService
-            .findSpuIdByOrchardWithActive(primaryOrchardId, true)
-            .orElseThrow(NoSpuForOrchardException::new);
-    Integer activeSpuId = activeSpuEntity.getSeedPlanningUnitId();
+
+    Integer activeSpuId = inMemoryDto.getPrimarySpuId();
+    if (Objects.isNull(activeSpuId)) {
+      ActiveOrchardSpuEntity activeSpuEntity =
+          orchardService
+              .findSpuIdByOrchardWithActive(primaryOrchardId, true)
+              .orElseThrow(NoSpuForOrchardException::new);
+      activeSpuId = activeSpuEntity.getSeedPlanningUnitId();
+    }
+
     AreaOfUseDto areaOfUseDto =
         oracleApiProvider
             .getAreaOfUseData(activeSpuId)
@@ -1038,6 +1050,7 @@ public class SeedlotService {
     List<SeedlotSeedPlanZoneEntity> spzSaveList = new ArrayList<>();
     GeneticClassEntity genAclass =
         geneticClassRepository.findById("A").orElseThrow(GeneticClassNotFoundException::new);
+    AuditInformation currentUser = new AuditInformation(loggedUserService.getLoggedUserId());
     areaOfUseDto.getSpzList().stream()
         .forEach(
             spzDto -> {
@@ -1048,8 +1061,7 @@ public class SeedlotService {
                       genAclass,
                       spzDto.getIsPrimary(),
                       spzDto.getDescription());
-              sspzToSave.setAuditInformation(
-                  new AuditInformation(loggedUserService.getLoggedUserId()));
+              sspzToSave.setAuditInformation(currentUser);
               spzSaveList.add(sspzToSave);
             });
     seedlotSeedPlanZoneRepository.saveAll(spzSaveList);

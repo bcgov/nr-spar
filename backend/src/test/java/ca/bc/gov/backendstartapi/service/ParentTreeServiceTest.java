@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
@@ -139,7 +139,7 @@ class ParentTreeServiceTest {
     List<GeneticWorthTraitsDto> traitsToTest = resDtoToTest.geneticTraits();
     assertTrue(traitsToTest.isEmpty());
 
-    CaculatedParentTreeValsDto ptValsToTest = resDtoToTest.calculatedPtVals();
+    CalculatedParentTreeValsDto ptValsToTest = resDtoToTest.calculatedPtVals();
     assertTrue(mockNeValue.equals(ptValsToTest.getNeValue()));
 
     GeospatialRespondDto ptGeoDataToTest = ptValsToTest.getGeospatialData();

@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRespondDto;
 import ca.bc.gov.backendstartapi.dto.PtCalculationResDto;
@@ -35,7 +35,7 @@ class ParentTreeEndpointTest {
   @DisplayName("calcMeanGeospatialSuccessTest")
   void calcMeanGeospatialSuccessTest() throws Exception {
     /* ********* RESPONSE DATA ********* */
-    CaculatedParentTreeValsDto cacledPtValsDto = new CaculatedParentTreeValsDto();
+    CalculatedParentTreeValsDto cacledPtValsDto = new CalculatedParentTreeValsDto();
     BigDecimal neValue = new BigDecimal("4.92586");
     cacledPtValsDto.setNeValue(neValue);
     GeospatialRespondDto geoResDto = new GeospatialRespondDto();
