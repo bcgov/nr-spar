@@ -13,8 +13,8 @@ jobs:
     name: PR Env Purge
     env:
       # https://tecadmin.net/getting-yesterdays-date-in-bash/
-      DATE: "1 week ago"
-      TYPE: "all,secret,pvc,cm"
+      DATE: "4 days ago"
+      TYPE: "deployments"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -24,6 +24,7 @@ jobs:
           oc project ${{ vars.OC_NAMESPACE }} # Safeguard!
 
           oc get ${{ env.TYPE }} -o go-template --template '{{range .items}}{{.metadata.name}} {{.metadata.creationTimestamp}}{{"\n"}}{{end}}' | \
+            grep -v workspace | \
             awk '$2 <= "'$(date -d '${{ env.DATE }}' -Ins --utc | sed 's/+0000/Z/')'" { print $1 }' | \
             xargs --no-run-if-empty oc delete ${{ env.TYPE }}
 
