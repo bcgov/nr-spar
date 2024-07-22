@@ -6,7 +6,6 @@
 #### Workflows
 [![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
 [![Analysis](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml)
-[![Cypress Nightly](https://github.com/bcgov/nr-spar/actions/workflows/cypress-nightly.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/cypress-nightly.yml)
 [![Scheduled](https://github.com/bcgov/nr-spar/actions/workflows/scheduled.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/scheduled.yml)
 
 #### Frontend
