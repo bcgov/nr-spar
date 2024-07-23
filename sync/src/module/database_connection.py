@@ -5,6 +5,7 @@ import csv
 import pandas as pd
 import numpy
 import math
+import time
 
 from io import StringIO
 from sqlalchemy import create_engine, text
@@ -257,9 +258,19 @@ class database_connection(object):
                 EXCEPTION
                 WHEN DUP_VAL_ON_INDEX THEN
                     UPDATE  {table_name} 
-                    SET {' , '.join(df2.columns.values + '= :s_'+df2.columns.values)} 
-                    {whStatement} {whStatement2};"""
-        
+                    SET {' , '.join(df2.columns.values + '= :s_'+df2.columns.values)} """
+                #special handling for seedlot_status_code
+                if table_name == "the.seedlot":
+                    onconflictstatement += """, seedlot_status_code =
+                                            CASE 
+                                            WHEN (:s_seedlot_status_code='INC' AND seedlot_status_code = 'INC') 
+                                            OR (:s_seedlot_status_code='PND' AND seedlot_status_code IN ('INC','PND')) 
+                                            OR (:s_seedlot_status_code='SUB' AND seedlot_status_code IN ('INC','PND','SUB'))
+                                            OR (:s_seedlot_status_code='APP' AND seedlot_status_code IN ('INC','PND','SUB','APP'))
+                                            OR (:s_seedlot_status_code='COM' AND seedlot_status_code IN ('INC','PND','SUB','APP','COM')) THEN :s_seedlot_status_code
+                                            ELSE seedlot_status_code END """
+                    print(params)
+                onconflictstatement += f"{whStatement} {whStatement2};"       
             sql_text = f""" 
             BEGIN
                 INSERT INTO {table_name}({', '.join(dataframe.columns.values)}) 

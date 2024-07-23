@@ -24,7 +24,7 @@ parameters:
     value: nr-spar
   - name: TEST_MODE
     description: "Run in test mode"
-    value: "true"
+    value: "false"
 
   ### Usually a bad idea - not recommended
   - name: CRON_MINUTES
@@ -44,9 +44,6 @@ parameters:
     description: Source container registry
     value: ghcr.io
 
-  ### Dummy values for workflow convenience
-  - name: MIN_REPLICAS
-  - name: MAX_REPLICAS
 objects:
   - kind: CronJob
     apiVersion: "batch/v1"

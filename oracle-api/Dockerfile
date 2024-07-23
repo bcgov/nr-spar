@@ -8,7 +8,7 @@ COPY .mvn/ ./.mvn
 COPY InstallCert.java .
 
 # Build
-RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true -Dspring-boot.run.profiles=prod && \
+RUN ./mvnw package -Pnative -DskipTests -Dskip.unit.tests=true && \
   javac InstallCert.java
 
   ### Deployer
@@ -20,13 +20,9 @@ ENV LANGUAGE=en_CA.UTF-8
 ENV LC_ALL=en_CA.UTF-8
 
 # Setup package/archive and supporting files
-WORKDIR /usr/share/service/
-COPY --from=build /app/target/*.jar /app/*.class ./artifacts/
-COPY dockerfile-entrypoint.sh ./
-RUN mkdir config dump public && \
-    chmod -R g+w . && \
-    chmod g+x dockerfile-entrypoint.sh && \
-    chmod g+w ${JAVA_HOME}/lib/security/cacerts
+WORKDIR /app
+COPY --from=build /app/target/nr-spar-oracle-api ./nr-spar-oracle-api
+COPY --from=build /app/*.class ./artifacts/
 
 # User, port and healthcheck
 USER 1001
@@ -34,4 +30,4 @@ EXPOSE 8091
 HEALTHCHECK CMD curl -f http://localhost:8091/actuator/health | grep '"status":"UP"'
 
 # Start
-ENTRYPOINT ["/usr/share/service/dockerfile-entrypoint.sh"]
+ENTRYPOINT ["/app/nr-spar-oracle-api", "-Dspring.profiles.active=prod"]
