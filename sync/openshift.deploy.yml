@@ -27,10 +27,6 @@ parameters:
     value: "false"
 
   ### Usually a bad idea - not recommended
-  - name: CRON_MINUTES
-    description: Random number, 0-60, for scheduling cronjobs
-    from: "[0-5]{1}[0-9]{1}"
-    generate: expression
   - name: JOB_BACKOFF_LIMIT
     description: "The number of attempts to try for a successful job outcome"
     value: "3"
@@ -53,7 +49,6 @@ objects:
         app: ${REPO}-${ZONE}
         cronjob: ${REPO}-${ZONE}
     spec:
-      schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
       startingDeadlineSeconds: 60
       concurrencyPolicy: "Replace"
       successfulJobsHistoryLimit: "${{JOB_HISTORY_SUCCESS}}"
@@ -64,7 +59,7 @@ objects:
             app: ${REPO}-${ZONE}
             cronjob: ${REPO}-${ZONE}
         spec:
-          backoffLimit: ${{JOB_BACKOFF_LIMIT}}
+          backoffLimit: "${{JOB_BACKOFF_LIMIT}}"
           template:
             metadata:
               labels:
