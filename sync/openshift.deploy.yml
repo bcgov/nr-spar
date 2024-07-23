@@ -54,7 +54,7 @@ objects:
         cronjob: ${REPO}-${ZONE}
     spec:
       # schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
-      schedule: "${CRON_MINUTES} 0 0 0 0" # Never runs automatically
+      schedule: "0 0 0 0 0" # Never runs automatically
       startingDeadlineSeconds: 60
       concurrencyPolicy: "Replace"
       successfulJobsHistoryLimit: "${{JOB_HISTORY_SUCCESS}}"
