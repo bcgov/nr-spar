@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { SparProgressIndicator, SparProgressStep } from './SparProgressIndicator';
+import { SparProgressIndicator } from './SparProgressIndicator';
+import { SparProgressStep } from './SparProgressStep';
 import { ProgressIndicatorConfig } from '../../views/Seedlot/ContextContainerClassA/definitions';
 import { MEDIUM_SCREEN_WIDTH } from '../../shared-constants/shared-constants';
 import useWindowSize from '../../hooks/UseWindowSize';
