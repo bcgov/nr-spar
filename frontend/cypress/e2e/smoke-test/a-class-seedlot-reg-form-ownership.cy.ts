@@ -456,15 +456,13 @@ describe('A Class Seedlot Registration form, Ownership', () => {
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
-  });
 
-  it('Complete checkmark for Ownership step', () => {
     // Press next button
     cy.get('.seedlot-registration-button-row')
       .find('button.form-action-btn')
       .contains('Next')
       .click();
-
+  
     // Check svg with complete checkmark on Step 3
     // FLAKY, needs investigation
     cy.get('ul.spar-seedlot-reg-progress-bar li')
