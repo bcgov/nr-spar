@@ -17,7 +17,7 @@ concurrency:
 jobs:
   demo-routing:
     name: DEMO Routing
-    if: ${{ event.type == 'workflow_dispatch' || github.event.label.name == 'demo' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'demo' }}
     env:
       DEST: demo
       DOMAIN: apps.silver.devops.gov.bc.ca
