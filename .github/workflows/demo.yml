@@ -1,10 +1,12 @@
-name: DEMO
+name: DEMO Route
 
 on:
+  label:
+    types: [created]
   workflow_dispatch:
     inputs:
       target:
-        description: `PR number to receive DEMO URL routing`
+        description: 'PR number to receive DEMO URL routing'
         required: true
         type: number      
 
@@ -15,6 +17,7 @@ concurrency:
 jobs:
   demo-routing:
     name: DEMO Routing
+    if: ${{ event.type == 'workflow_dispatch' || github.event.label.name == 'demo' }}
     env:
       DEST: demo
       DOMAIN: apps.silver.devops.gov.bc.ca
@@ -23,15 +26,14 @@ jobs:
     steps:
       - name: Point DEMO URL to Existing Service
         run: |
-          # Run and verify job
+          # Set Up Routing
 
           # Login
           oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
           oc project ${{ secrets.oc_namespace }} #Safeguard!
 
-          # Exit on errors or unset variables
-          set -eu
-
           # Delete and replace route
-          oc delete route/${{ env.REPO }}-${{ env.DEST }}
-          oc create route edge ${{ env.REPO }}-${{ env.DEST }} --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend
+          oc delete route/${{ env.REPO }}-${{ env.DEST }} --ignore-not-found=true
+          oc create route edge ${{ env.REPO }}-${{ env.DEST }} \
+            --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} \
+            --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend
