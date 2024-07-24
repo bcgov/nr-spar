@@ -24,7 +24,7 @@ objects:
         app: ${REPO}-${DEST}
       name: ${REPO}-${DEST}-${COMPONENT}
     spec:
-      host: ${REPO}-${DEST}-${COMPONENT}.${DOMAIN}
+      host: ${REPO}-${DEST}.${DOMAIN}
       port:
         targetPort: 3000-tcp
       to:

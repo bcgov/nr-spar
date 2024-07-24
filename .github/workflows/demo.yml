@@ -1,0 +1,37 @@
+name: DEMO
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: `PR number to receive DEMO URL routing`
+        required: true
+        type: number      
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  demo-routing:
+    name: DEMO Routing
+    env:
+      DEST: demo
+      DOMAIN: apps.silver.devops.gov.bc.ca
+      REPO: ${{ github.event.repository.name }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Point DEMO URL to Existing Service
+        run: |
+          # Run and verify job
+
+          # Login
+          oc login --token=${{ secrets.oc_token }} --server=${{ vars.oc_server }}
+          oc project ${{ secrets.oc_namespace }} #Safeguard!
+
+          # Exit on errors or unset variables
+          set -eu
+
+          # Delete and replace route
+          oc delete route/${{ env.REPO }}-${{ env.DEST }}
+          oc create route edge ${{ env.REPO }}-${{ env.DEST }} --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend
