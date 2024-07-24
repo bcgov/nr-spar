@@ -1,0 +1,36 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+parameters:
+  ### Required, dynamic
+  - name: TARGET
+    description: PR number to receive DEST URL routing
+    required: true
+  
+  ### Optional, defaults provided
+  - name: COMPONENT
+    value: frontend
+  - name: DEST
+    description: Destination name
+    value: demo
+  - name: DOMAIN
+    value: apps.silver.devops.gov.bc.ca
+  - name: REPO
+    value: nr-spar
+objects:
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      labels:
+        app: ${REPO}-${DEST}
+      name: ${REPO}-${DEST}-${COMPONENT}
+    spec:
+      host: ${REPO}-${DEST}-${COMPONENT}.${DOMAIN}
+      port:
+        targetPort: 3000-tcp
+      to:
+        kind: Service
+        name: ${REPO}-${TARGET}-${COMPONENT}
+        weight: 100
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
