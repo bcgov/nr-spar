@@ -36,4 +36,5 @@ jobs:
           oc delete route/${{ env.REPO }}-${{ env.DEST }} --ignore-not-found=true
           oc create route edge ${{ env.REPO }}-${{ env.DEST }} \
             --hostname=${{ env.REPO }}-${{ env.DEST }}.${{ env.DOMAIN }} \
-            --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend
+            --service=${{ env.REPO }}-1436-frontend
+            # --service=${{ env.REPO }}-${{ github.event.number || inputs.target }}-frontend
