@@ -58,5 +58,18 @@
     "agencyValidationMsg": "Agency validation failed. Please retry verification",
     "locationErrorMsg": "This location code is not valid for the selected agency, please enter a valid one or change the agency",
     "invalidDateErrorMsg": "Please enter a valid date"
+  },
+  "parentTree": {
+    "parentTreeTitle": "Cone and pollen count and SMP data",
+    "parentTreeSubtitle": "Enter cone and pollen count (*required), SMP success on parent and SMP mix information",
+    "coneTitle": "Cone and pollen count",
+    "coneSubtitle": "Enter the estimative of Cone and pollen count for the orchard's seedlot (*required)",
+    "smpSuccessTitle": "SMP success on parent",
+    "smpSuccessSubtitle": "Enter the estimative of SMP success for the orchard's seedlot",
+    "calculationSMPTitle": "Calculation of SMP mix",
+    "calculationSMPSubtitle": "Enter the estimative volume of SMP mix used for each clone",
+    "smpSuccessCheckboxText": "Enter the same SMP success on parent or Non-orchard pollen contaminant to all parent trees",
+    "coneErrorMsg": "Invalid cone count entries",
+    "pollenErrorMsg": "Invalid pollen count entries"
   }
 }
