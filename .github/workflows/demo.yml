@@ -1,8 +1,8 @@
 name: DEMO Route
 
 on:
-  label:
-    types: [created]
+  pull_request:
+    types: [labeled]
   workflow_dispatch:
     inputs:
       target:
@@ -17,7 +17,7 @@ concurrency:
 jobs:
   demo-routing:
     name: DEMO Routing
-    if: ${{ event.type == 'workflow_dispatch' || github.event.label.name == 'demo' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'demo' }}
     env:
       DEST: demo
       DOMAIN: apps.silver.devops.gov.bc.ca
