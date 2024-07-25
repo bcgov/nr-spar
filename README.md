@@ -4,10 +4,10 @@
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 #### Workflows
-[![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
 [![Analysis](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/analysis.yml)
-[![Cypress Nightly](https://github.com/bcgov/nr-spar/actions/workflows/cypress-nightly.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/cypress-nightly.yml)
-[![Scheduled](https://github.com/bcgov/nr-spar/actions/workflows/scheduled.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/scheduled.yml)
+[![ETL Sync](https://github.com/bcgov/nr-spar/actions/workflows/job-sync.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/job-sync.yml)
+[![Merge](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/merge.yml)
+[![Nightly](https://github.com/bcgov/nr-spar/actions/workflows/job-nightly.yml/badge.svg)](https://github.com/bcgov/nr-spar/actions/workflows/job-nightly.yml)
 
 #### Frontend
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nr-spar_frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nr-spar_frontend)

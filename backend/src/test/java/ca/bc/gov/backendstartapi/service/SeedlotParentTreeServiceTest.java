@@ -70,7 +70,7 @@ class SeedlotParentTreeServiceTest {
   }
 
   @Test
-  @DisplayName("Save Seedlot Parent Tree first submmit")
+  @DisplayName("Save Seedlot Parent Tree first submit")
   void saveSeedlotFormStep5_firstSubmit_shouldSucceed() {
     when(seedlotParentTreeRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
 

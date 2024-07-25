@@ -51,7 +51,7 @@ class SmpMixServiceTest {
   }
 
   @Test
-  @DisplayName("Save SmpMix first submmit")
+  @DisplayName("Save SmpMix first submit")
   void saveSeedlotFormStep5_firstSubmit_shouldSucceed() {
     when(smpMixRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
 

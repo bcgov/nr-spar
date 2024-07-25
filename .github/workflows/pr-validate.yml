@@ -22,7 +22,7 @@ jobs:
   validate:
     name: Validate PR
     needs: [init]
-    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.6.0
+    uses: bcgov/quickstart-openshift-helpers/.github/workflows/.pr-validate.yml@v0.6.1
     with:
       markdown_links: |
         - [Frontend](https://${{ github.event.repository.name }}-${{ needs.init.outputs.mod-tag }}-frontend.apps.silver.devops.gov.bc.ca/)

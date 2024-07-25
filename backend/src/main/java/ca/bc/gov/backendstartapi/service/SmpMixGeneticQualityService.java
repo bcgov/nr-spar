@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SmpMix;
 import ca.bc.gov.backendstartapi.entity.SmpMixGeneticQuality;
+import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import ca.bc.gov.backendstartapi.entity.idclass.SmpMixId;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
@@ -76,6 +77,7 @@ public class SmpMixGeneticQualityService {
         smpMixService.getAllBySeedlotNumber(seedlot.getId()).stream()
             .collect(Collectors.toMap(SmpMix::getParentTreeId, Function.identity()));
 
+    final AuditInformation currentUser = loggedUserService.createAuditCurrentUser();
     List<SmpMixGeneticQuality> smpMixGenQltys = new ArrayList<>();
     for (SeedlotFormParentTreeSmpDto seedlotPtFormDto : seedlotFormParentTreeDtoList) {
       for (ParentTreeGeneticQualityDto seedlotGenQltyDto :
@@ -97,7 +99,7 @@ public class SmpMixGeneticQualityService {
                 gwe,
                 seedlotGenQltyDto.geneticQualityValue(),
                 Boolean.FALSE,
-                loggedUserService.createAuditCurrentUser(),
+                currentUser,
                 0);
 
         smpMixGenQltys.add(smpMixGeneticQuality);
