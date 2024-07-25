@@ -33,6 +33,7 @@ import ROUTES from '../../../routes/constants';
 import { addParamToPath } from '../../../utils/PathUtils';
 import { getOptionsInputObj } from '../../../utils/FormInputUtils';
 import { GeoInfoValType } from '../SeedlotReview/definitions';
+import focusById from '../../../utils/FocusUtils';
 
 import {
   emptyCollectionStep, emptyExtractionStep, emptyInterimStep,
@@ -43,7 +44,6 @@ import {
   AreaOfUseDataType,
   ParentTreeStepDataObj, ProgressIndicatorConfig
 } from './definitions';
-import focusById from '../../../utils/FocusUtils';
 
 export const initProgressBar = (
   currentStep: number,
@@ -149,11 +149,7 @@ export const initInterimState = (
   },
   agencyName: {
     id: 'interim-agency',
-    value: {
-      code: defaultAgencyNumber,
-      description: '',
-      label: ''
-    },
+    value: defaultAgencyNumber,
     isInvalid: false
   },
   locationCode: {
@@ -586,7 +582,7 @@ export const verifyInterimStepCompleteness = (
   let isComplete = true;
   let idToFocus = '';
 
-  if (!interimData.agencyName.value.code) {
+  if (!interimData.agencyName.value) {
     isComplete = false;
     idToFocus = interimData.agencyName.id;
   } else if (!interimData.locationCode.value) {
@@ -890,7 +886,7 @@ export const convertOwnership = (
 );
 
 export const convertInterim = (interimData: InterimForm): InterimFormSubmitType => ({
-  intermStrgClientNumber: interimData.agencyName.value.code,
+  intermStrgClientNumber: interimData.agencyName.value,
   intermStrgLocnCode: interimData.locationCode.value,
   intermStrgStDate: dateStringToISO(interimData.startDate.value),
   intermStrgEndDate: dateStringToISO(interimData.endDate.value),

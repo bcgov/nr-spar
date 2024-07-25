@@ -181,18 +181,18 @@ const ContextContainerClassA = ({ children }: props) => {
           ...singleOwner.ownerCode,
           value: locationCode
         }
-      }))
-      // interimStep: {
-      //   ...prevData.interimStep,
-      //   agencyName: {
-      //     ...prevData.interimStep.agencyName,
-      //     value: agency
-      //   },
-      //   locationCode: {
-      //     ...prevData.interimStep.locationCode,
-      //     value: locationCode
-      //   }
-      // }
+      })),
+      interimStep: {
+        ...prevData.interimStep,
+        agencyName: {
+          ...prevData.interimStep.agencyName,
+          value: clientNumber
+        },
+        locationCode: {
+          ...prevData.interimStep.locationCode,
+          value: locationCode
+        }
+      }
     }));
     numOfEdit.current += 1;
   };
@@ -250,8 +250,7 @@ const ContextContainerClassA = ({ children }: props) => {
     // agency also changes the values on the interim agency, when
     // necessary, also reflecting the invalid values
     if (stepName === 'collectionStep'
-      && allStepData.interimStep.useCollectorAgencyInfo.value
-      && !isFormSubmitted) {
+        && allStepData.interimStep.useCollectorAgencyInfo.value) {
       newData.interimStep.agencyName.value = stepData.collectorAgency.value;
       newData.interimStep.locationCode.value = stepData.locationCode.value;
       setProgressStatus((prevStatus) => (
@@ -374,7 +373,9 @@ const ContextContainerClassA = ({ children }: props) => {
     methodsOfPaymentQuery.status,
     gameticMethodologyQuery.status,
     orchardQuery.status,
-    seedlotQuery.status
+    seedlotQuery.status,
+    seedlotQuery.fetchStatus,
+    getAllSeedlotInfoQuery.fetchStatus
   ]);
 
   /**

@@ -1,5 +1,5 @@
 import ClientAndCodeInputTextType from '../../types/ClientAndCodeInputTextType';
-import { StringInputType } from '../../types/FormInputType';
+import { BooleanInputType, StringInputType } from '../../types/FormInputType';
 
 type ClientAndCodeInputProps = {
   checkboxId: string,
@@ -9,13 +9,15 @@ type ClientAndCodeInputProps = {
   textConfig: ClientAndCodeInputTextType,
   setClientAndCode: (
     clientInput: StringInputType,
-    locationCodeInput: StringInputType
+    locationCodeInput: StringInputType,
+    checkBoxInput?: BooleanInputType
     ) => void
   defaultClientNumber?: string,
   defaultLocCode?: string,
   showCheckbox?: boolean,
   readOnly?: boolean,
-  maxInputColSize?: number
+  maxInputColSize?: number,
+  checkBoxInput?: BooleanInputType
 }
 
 export default ClientAndCodeInputProps;

@@ -4,7 +4,7 @@ export const DATE_FORMAT = 'Y/m/d';
 
 export const MAX_FACILITY_DESC_CHAR = 50;
 
-export const agencyFieldsProps: ClientAndCodeInputTextType = {
+export const clientAndCodeTextConfig: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'useCollectorAgency',
     labelText: 'Use applicant collector agency as interim storage agency'

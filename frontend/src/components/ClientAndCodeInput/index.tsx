@@ -24,12 +24,20 @@ import './styles.scss';
 
 const ClientAndCodeInput = ({
   checkboxId, clientInput, locationCodeInput, textConfig, defaultClientNumber,
-  defaultLocCode, setClientAndCode, readOnly, showCheckbox, maxInputColSize
+  defaultLocCode, setClientAndCode, readOnly, showCheckbox, maxInputColSize,
+  checkBoxInput
 }: ClientAndCodeInputProps) => {
+  const getIsDefaultVal = () => (
+    checkBoxInput === undefined
+      ? !!clientInput.value && !!locationCodeInput.value
+      && clientInput.value === defaultClientNumber && locationCodeInput.value === defaultLocCode
+      : checkBoxInput.value
+  );
+
   const clientInputRef = useRef<HTMLInputElement>(null);
   const locCodeInputRef = useRef<HTMLInputElement>(null);
   const [isDefault, setIsDefault] = useState<boolean>(
-    () => clientInput.value === defaultClientNumber && locationCodeInput.value === defaultLocCode
+    () => getIsDefaultVal()
   );
 
   const [showClientValidationStatus, setShowClientValidationStatus] = useState<boolean>(true);
@@ -53,21 +61,21 @@ const ClientAndCodeInput = ({
   );
 
   useEffect(() => {
-    const areValsDefault = clientInput.value === defaultClientNumber
-     && locationCodeInput.value === defaultLocCode;
+    const areValsDefault = getIsDefaultVal();
 
     setIsDefault(areValsDefault);
+
     // Do not show validation status if isDefault is true
     if (areValsDefault) {
       setShowClientValidationStatus(false);
       setShowLocCodeValidationStatus(false);
     }
-  }, [clientInput, locationCodeInput, defaultClientNumber, defaultLocCode]);
+  }, [clientInput, locationCodeInput, defaultClientNumber, defaultLocCode, checkBoxInput]);
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', clientInput.value],
     queryFn: () => getForestClientByNumberOrAcronym(clientInput.value),
-    enabled: false,
+    enabled: !!clientInput.value,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -91,14 +99,8 @@ const ClientAndCodeInput = ({
       isInvalid
     };
 
-    const updatedClientInput = {
-      ...clientInput,
-      isInvalid: false,
-      value: forestClientQuery.data?.clientNumber ?? ''
-    };
-
     setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
-    setClientAndCode(updatedClientInput, updatedLocationCode);
+    setClientAndCode(clientInput, updatedLocationCode);
 
     setShowLocCodeValidationStatus(true);
   };
@@ -176,17 +178,17 @@ const ClientAndCodeInput = ({
       });
     },
     onSuccess: (data) => {
+      setClientAndCode({
+        ...clientInput,
+        value: data.clientNumber,
+        isInvalid: false
+      }, locationCodeInput);
+
       if (locationCodeInput.value !== '') {
         validateLocationCodeMutation.mutate({
           clientNumber: data.clientNumber,
           locationCode: locationCodeInput.value
         });
-      } else {
-        setClientAndCode({
-          ...clientInput,
-          value: data.clientNumber,
-          isInvalid: false
-        }, locationCodeInput);
       }
     }
   });
@@ -201,13 +203,13 @@ const ClientAndCodeInput = ({
     const updatedAgency: StringInputType = {
       ...clientInput,
       value: checked ? defaultClientNumber ?? '' : '',
-      isInvalid: checked && !defaultClientNumber
+      isInvalid: false
     };
 
     const updatedLocationCode = {
       ...locationCodeInput,
       value: checked ? defaultLocCode ?? '' : '',
-      isInvalid: checked && !defaultLocCode
+      isInvalid: false
     };
 
     if (!checked) {
@@ -221,8 +223,20 @@ const ClientAndCodeInput = ({
     setShowClientValidationStatus(false);
     setShowLocCodeValidationStatus(false);
 
-    setIsDefault(checked);
-    setClientAndCode(updatedAgency, updatedLocationCode);
+    setClientAndCode(
+      updatedAgency,
+      updatedLocationCode,
+      checkBoxInput !== undefined
+        ? {
+          ...checkBoxInput,
+          value: checked
+        }
+        : undefined
+    );
+
+    if (!checkBoxInput) {
+      setIsDefault(checked);
+    }
   };
 
   const renderLoading = (
@@ -320,7 +334,7 @@ const ClientAndCodeInput = ({
                   name={textConfig.useDefaultCheckbox.name}
                   labelText={textConfig.useDefaultCheckbox.labelText}
                   readOnly={readOnly}
-                  checked={isDefault}
+                  checked={checkBoxInput ? checkBoxInput.value : isDefault}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     handleDefaultCheckBox(e.target.checked);
                   }}
@@ -383,6 +397,7 @@ const ClientAndCodeInput = ({
               defaultValue={locationCodeInput.value}
               type="number"
               maxCount={LOCATION_CODE_LIMIT}
+              enableCounter
               placeholder={!clientInput.value ? '' : supportTexts.locationCode.placeholder}
               labelText={textConfig.locationCode.labelText}
               helperText={(readOnly || (showCheckbox && isDefault)) ? null : locationCodeHelperText}
