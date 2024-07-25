@@ -60,8 +60,8 @@
     "invalidDateErrorMsg": "Please enter a valid date"
   },
   "parentTree": {
-    "parentTreeTitle": "Cone and pollen count and SMP data",
-    "parentTreeSubtitle": "Enter cone and pollen count (*required), SMP success on parent and SMP mix information",
+    "title": "Cone and pollen count and SMP data",
+    "subtitle": "Enter cone and pollen count (*required), SMP success on parent and SMP mix information",
     "coneTitle": "Cone and pollen count",
     "coneSubtitle": "Enter the estimative of Cone and pollen count for the orchard's seedlot (*required)",
     "smpSuccessTitle": "SMP success on parent",
