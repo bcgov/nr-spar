@@ -2,7 +2,7 @@ import ClientAndCodeInputTextType from '../../../types/ClientAndCodeInputTextTyp
 
 export const DATE_FORMAT = 'Y/m/d';
 
-export const extractorAgencyFields: ClientAndCodeInputTextType = {
+export const extractorTextConfig: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'extractor-use-tsc',
     labelText: 'The extractory agency is the Tree Seed Center (TSC)'
@@ -17,7 +17,7 @@ export const extractorAgencyFields: ClientAndCodeInputTextType = {
   }
 };
 
-export const storageAgencyFields: ClientAndCodeInputTextType = {
+export const storageTextConfig: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'storage-use-tsc',
     labelText: 'The seed storage agency is the Tree Seed Center (TSC)'

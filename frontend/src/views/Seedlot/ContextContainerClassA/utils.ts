@@ -342,12 +342,8 @@ export const initExtractionStorageState = (
         isInvalid: false
       },
       agency: {
-        id: 'ext-agency-combobox',
-        value: {
-          code: defaultExtractAgencyNumber,
-          description: '',
-          label: ''
-        },
+        id: 'ext-agency-number',
+        value: defaultExtractAgencyNumber,
         isInvalid: false
       },
       locationCode: {
@@ -373,12 +369,8 @@ export const initExtractionStorageState = (
         isInvalid: false
       },
       agency: {
-        id: 'str-agency-combobox',
-        value: {
-          code: defaultStorageAgencyNumber,
-          description: '',
-          label: ''
-        },
+        id: 'str-agency-number',
+        value: defaultStorageAgencyNumber,
         isInvalid: false
       },
       locationCode: {
@@ -816,13 +808,13 @@ export const verifyExtractionStepCompleteness = (
   let isComplete = true;
   let idToFocus = '';
 
-  if (!extractionStepData.extraction.agency.value.code) {
+  if (!extractionStepData.extraction.agency.value) {
     isComplete = false;
     idToFocus = extractionStepData.extraction.agency.id;
   } else if (!extractionStepData.extraction.locationCode.value) {
     isComplete = false;
     idToFocus = extractionStepData.extraction.locationCode.id;
-  } else if (!extractionStepData.seedStorage.agency.value.code) {
+  } else if (!extractionStepData.seedStorage.agency.value) {
     isComplete = false;
     idToFocus = extractionStepData.seedStorage.agency.id;
   } else if (!extractionStepData.seedStorage.locationCode.value) {
@@ -987,11 +979,11 @@ export const convertSmpParentTree = (
 export const convertExtraction = (
   extractionData: ExtractionStorageForm
 ): ExtractionFormSubmitType => ({
-  extractoryClientNumber: extractionData.extraction.agency.value.code,
+  extractoryClientNumber: extractionData.extraction.agency.value,
   extractoryLocnCode: extractionData.extraction.locationCode.value,
   extractionStDate: dateStringToISO(extractionData.extraction.startDate.value),
   extractionEndDate: dateStringToISO(extractionData.extraction.endDate.value),
-  storageClientNumber: extractionData.seedStorage.agency.value.code,
+  storageClientNumber: extractionData.seedStorage.agency.value,
   storageLocnCode: extractionData.seedStorage.locationCode.value,
   temporaryStrgStartDate: dateStringToISO(extractionData.seedStorage.startDate.value),
   temporaryStrgEndDate: dateStringToISO(extractionData.seedStorage.endDate.value)
@@ -1060,7 +1052,7 @@ export const initEmptySteps = () => ({
   orchardStep: initOrchardState(emptyOrchardStep),
   parentTreeStep: initParentTreeState(),
   extractionStorageStep: initExtractionStorageState(
-    '',
+    tscAgencyObj.code,
     tscAgencyObj.code,
     emptyExtractionStep
   )
@@ -1073,43 +1065,40 @@ export const resDataToState = (
   fundingSourcesData: MultiOptionsObj[],
   orchardQueryData: MultiOptionsObj[],
   gameticMethodologyData: MultiOptionsObj[]
-): AllStepData => {
-  console.log('convvvv');
-  return {
-    collectionStep: initCollectionState(
-      fullFormData.seedlotFormCollectionDto.collectionClientNumber,
-      fullFormData.seedlotFormCollectionDto
-    ),
-    ownershipStep: initOwnershipState(
-      defaultAgencyNumber,
-      fullFormData.seedlotFormOwnershipDtoList,
-      methodsOfPaymentData,
-      fundingSourcesData
-    ),
-    interimStep: initInterimState(
-      fullFormData.seedlotFormInterimDto.intermStrgClientNumber,
-      fullFormData.seedlotFormInterimDto,
-      fullFormData.seedlotFormInterimDto.intermStrgClientNumber
+): AllStepData => ({
+  collectionStep: initCollectionState(
+    fullFormData.seedlotFormCollectionDto.collectionClientNumber,
+    fullFormData.seedlotFormCollectionDto
+  ),
+  ownershipStep: initOwnershipState(
+    defaultAgencyNumber,
+    fullFormData.seedlotFormOwnershipDtoList,
+    methodsOfPaymentData,
+    fundingSourcesData
+  ),
+  interimStep: initInterimState(
+    fullFormData.seedlotFormInterimDto.intermStrgClientNumber,
+    fullFormData.seedlotFormInterimDto,
+    fullFormData.seedlotFormInterimDto.intermStrgClientNumber
       === fullFormData.seedlotFormCollectionDto.collectionClientNumber
-    ),
-    orchardStep: initOrchardState(
-      fullFormData.seedlotFormOrchardDto,
-      orchardQueryData,
-      gameticMethodologyData
-    ),
-    parentTreeStep: initParentTreeState(
-      fullFormData.seedlotFormParentTreeDtoList,
-      fullFormData.seedlotFormParentTreeSmpDtoList
-    ),
-    extractionStorageStep: initExtractionStorageState(
-      fullFormData.seedlotFormExtractionDto.extractoryClientNumber,
-      fullFormData.seedlotFormExtractionDto.storageClientNumber,
-      fullFormData.seedlotFormExtractionDto,
-      fullFormData.seedlotFormExtractionDto.extractoryClientNumber === tscAgencyObj.code,
-      fullFormData.seedlotFormExtractionDto.storageClientNumber === tscAgencyObj.code
-    )
-  };
-};
+  ),
+  orchardStep: initOrchardState(
+    fullFormData.seedlotFormOrchardDto,
+    orchardQueryData,
+    gameticMethodologyData
+  ),
+  parentTreeStep: initParentTreeState(
+    fullFormData.seedlotFormParentTreeDtoList,
+    fullFormData.seedlotFormParentTreeSmpDtoList
+  ),
+  extractionStorageStep: initExtractionStorageState(
+    fullFormData.seedlotFormExtractionDto.extractoryClientNumber,
+    fullFormData.seedlotFormExtractionDto.storageClientNumber,
+    fullFormData.seedlotFormExtractionDto,
+    fullFormData.seedlotFormExtractionDto.extractoryClientNumber === tscAgencyObj.code,
+    fullFormData.seedlotFormExtractionDto.storageClientNumber === tscAgencyObj.code
+  )
+});
 
 export const fillAreaOfUseData = (
   seedlotData: RichSeedlotType,

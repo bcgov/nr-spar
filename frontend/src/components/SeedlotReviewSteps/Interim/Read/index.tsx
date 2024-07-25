@@ -10,6 +10,7 @@ import { getForestClientByNumberOrAcronym } from '../../../../api-service/forest
 import getFacilityTypes from '../../../../api-service/facilityTypesAPI';
 import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
+import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 
 const InterimReviewRead = () => {
   const {
@@ -22,7 +23,8 @@ const InterimReviewRead = () => {
     {
       queryKey: ['forest-clients', clientNumber],
       queryFn: () => getForestClientByNumberOrAcronym(clientNumber!),
-      enabled: !!clientNumber
+      enabled: !!clientNumber,
+      select: (fc) => getForestClientLabel(fc)
     }
   );
 
@@ -54,8 +56,8 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-agency-name"
             label="Interim agency acronym"
-            value={agencyQuery.data ? agencyQuery.data.acronym : ''}
-            showSkeleton={isFetchingData || agencyQuery.isFetching}
+            value={agencyQuery.data}
+            showSkeleton={isFetchingData || agencyQuery.fetchStatus === 'fetching'}
           />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
@@ -72,7 +74,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-start-date"
             label="Storage start date"
-            value={luxon.fromISO(state.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
+            value={luxon.fromISO(state.startDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -80,7 +82,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-end-date"
             label="Storage end date"
-            value={luxon.fromISO(state.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
+            value={luxon.fromISO(state.endDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
             showSkeleton={isFetchingData}
           />
         </Column>

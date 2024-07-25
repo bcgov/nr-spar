@@ -88,27 +88,27 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .uncheck({ force: true });
 
     // Enter invalid acronym
-    cy.get('#ext-agency-combobox')
+    cy.get('#ext-agency-number')
       .type('ggg')
       .blur();
 
-    cy.get('#ext-agency-combobox-error-msg')
+    cy.get('#ext-agency-number-error-msg')
       .should('have.text', regFormData.extraction.agencyErrorMsg);
 
     // Enter invalid acronym
-    cy.get('#ext-agency-combobox')
+    cy.get('#ext-agency-number')
       .clear()
       .type('-1')
       .blur();
 
-    cy.get('#ext-agency-combobox-error-msg')
+    cy.get('#ext-agency-number-error-msg')
       .should('have.text', regFormData.extraction.agencyValidationMsg);
 
     cy.get('.applicant-error-notification')
       .should('be.visible');
 
     // Enter valid test acronym
-    cy.get('#ext-agency-combobox')
+    cy.get('#ext-agency-number')
       .clear()
       .type(testAcronym)
       .blur();
@@ -182,7 +182,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
           .contains('Apply selected client')
           .click({ force: true });
 
-        cy.get('#ext-agency-combobox')
+        cy.get('#ext-agency-number')
           .should('have.value', testPopupAcronym);
 
         cy.get('#ext-location-code')
@@ -226,27 +226,27 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .uncheck({ force: true });
 
     // Enter invalid acronym
-    cy.get('#str-agency-combobox')
+    cy.get('#str-agency-number')
       .type('ggg')
       .blur();
 
-    cy.get('#str-agency-combobox-error-msg')
+    cy.get('#str-agency-number-error-msg')
       .should('have.text', regFormData.extraction.agencyErrorMsg);
 
     // Enter invalid acronym
-    cy.get('#str-agency-combobox')
+    cy.get('#str-agency-number')
       .clear()
       .type('-1')
       .blur();
 
-    cy.get('#str-agency-combobox-error-msg')
+    cy.get('#str-agency-number-error-msg')
       .should('have.text', regFormData.extraction.agencyValidationMsg);
 
     cy.get('.applicant-error-notification')
       .should('be.visible');
 
     // Enter valid test acronym
-    cy.get('#str-agency-combobox')
+    cy.get('#str-agency-number')
       .clear()
       .type(testAcronym)
       .blur();
@@ -319,7 +319,7 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
           .contains('Apply selected client')
           .click();
 
-        cy.get('#str-agency-combobox')
+        cy.get('#str-agency-number')
           .should('have.value', testPopupAcronym);
 
         cy.get('#str-location-code')

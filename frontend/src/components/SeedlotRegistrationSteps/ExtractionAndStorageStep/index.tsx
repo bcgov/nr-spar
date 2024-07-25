@@ -12,32 +12,26 @@ import {
 
 import Subtitle from '../../Subtitle';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
+import { tscAgencyObj, tscLocationCode } from '../../../views/Seedlot/ContextContainerClassA/constants';
 
 import {
   inputText,
   DATE_FORMAT,
-  storageAgencyFields,
-  extractorAgencyFields
+  storageTextConfig,
+  extractorTextConfig
 } from './constants';
 
 import './styles.scss';
 
 interface ExtractionAndStorageProps {
-  defaultAgency: MultiOptionsObj;
-  defaultCode: string;
   isReview?: boolean
 }
 
 const ExtractionAndStorage = (
-  {
-    defaultAgency,
-    defaultCode,
-    isReview
-  }: ExtractionAndStorageProps
+  { isReview }: ExtractionAndStorageProps
 ) => {
   const {
     allStepData: { extractionStorageStep: state },
@@ -49,15 +43,17 @@ const ExtractionAndStorage = (
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
 
   const setClientAndCode = (
-    isDefault: BooleanInputType,
-    agency: OptionsInputType,
+    agency: StringInputType,
     locationCode: StringInputType,
+    checkBoxInput: BooleanInputType,
     extractionOrStorage: ('extraction' | 'seedStorage')
   ) => {
     const clonedState = structuredClone(state);
-    clonedState[extractionOrStorage].useTSC = isDefault;
     clonedState[extractionOrStorage].agency = agency;
     clonedState[extractionOrStorage].locationCode = locationCode;
+    if (checkBoxInput) {
+      clonedState[extractionOrStorage].useTSC = checkBoxInput;
+    }
 
     setStepData('extractionStorageStep', clonedState);
   };
@@ -107,24 +103,23 @@ const ExtractionAndStorage = (
           }
         </Column>
       </Row>
-      {/* <ClientAndCodeInput
+      <ClientAndCodeInput
         showCheckbox
         checkboxId={state.extraction.useTSC.id}
-        isDefault={state.extraction.useTSC}
-        agency={state.extraction.agency}
-        locationCode={state.extraction.locationCode}
-        fieldsProps={extractorAgencyFields}
-        defaultAgency={defaultAgency}
-        defaultCode={defaultCode}
+        clientInput={state.extraction.agency}
+        locationCodeInput={state.extraction.locationCode}
+        textConfig={extractorTextConfig}
+        defaultClientNumber={tscAgencyObj.code}
+        defaultLocCode={tscLocationCode}
         setClientAndCode={(
-          isDefault: BooleanInputType,
-          agency: OptionsInputType,
-          locationCode: StringInputType
-        ) => setClientAndCode(isDefault, agency, locationCode, 'extraction')}
+          clientInput: StringInputType,
+          locationCodeInput: StringInputType,
+          checkBoxInput?: BooleanInputType
+        ) => setClientAndCode(clientInput, locationCodeInput, checkBoxInput!, 'extraction')}
         readOnly={isFormSubmitted && !isReview}
-        isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
-      /> */}
+        checkBoxInput={state.extraction.useTSC}
+      />
       <Row className="extraction-date-row">
         <Column className="extraction-start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker
@@ -196,24 +191,23 @@ const ExtractionAndStorage = (
           }
         </Column>
       </Row>
-      {/* <ClientAndCodeInput
+      <ClientAndCodeInput
         showCheckbox
         checkboxId={state.seedStorage.useTSC.id}
-        isDefault={state.seedStorage.useTSC}
-        agency={state.seedStorage.agency}
-        locationCode={state.seedStorage.locationCode}
-        fieldsProps={storageAgencyFields}
-        defaultAgency={defaultAgency}
-        defaultCode={defaultCode}
+        clientInput={state.seedStorage.agency}
+        locationCodeInput={state.seedStorage.locationCode}
+        textConfig={storageTextConfig}
+        defaultClientNumber={tscAgencyObj.code}
+        defaultLocCode={tscLocationCode}
         setClientAndCode={(
-          isDefault: BooleanInputType,
-          agency: OptionsInputType,
-          locationCode: StringInputType
-        ) => setClientAndCode(isDefault, agency, locationCode, 'seedStorage')}
+          client: StringInputType,
+          locationCode: StringInputType,
+          checkBoxInput?: BooleanInputType
+        ) => setClientAndCode(client, locationCode, checkBoxInput!, 'seedStorage')}
         readOnly={isFormSubmitted && !isReview}
-        isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
-      /> */}
+        checkBoxInput={state.seedStorage.useTSC}
+      />
       <Row className="storage-date-row">
         <Column className="storage-start-date-col" sm={4} md={4} lg={8} xlg={6}>
           <DatePicker

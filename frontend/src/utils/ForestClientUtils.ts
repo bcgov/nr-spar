@@ -13,8 +13,8 @@ export const getForestClientFullName = (client: ForestClientType | ForestClientS
 export const getForestClientLabel = (client: ForestClientType | ForestClientSearchType) => {
   const clientFullName = getForestClientFullName(client);
   return client.acronym
-    ? `${client.clientNumber} - ${clientFullName} - ${client.acronym}`
-    : `${client.clientNumber} - ${clientFullName}`;
+    ? `${client.acronym} - ${clientFullName} - ${client.clientNumber}`
+    : `${clientFullName} - ${client.clientNumber}`;
 };
 
 export const getForestClientOption = (client: ForestClientType): MultiOptionsObj => ({
