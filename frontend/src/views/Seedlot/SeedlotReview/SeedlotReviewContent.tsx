@@ -7,12 +7,14 @@ import {
   FlexGrid,
   Row,
   Column,
-  Loading
+  Loading,
+  Modal
 } from '@carbon/react';
 import { toast } from 'react-toastify';
 import {
   Edit, Save, Pending, Checkmark
 } from '@carbon/icons-react';
+import { Beforeunload } from 'react-beforeunload';
 
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -70,6 +72,10 @@ import { GenWorthValType } from './definitions';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
+  /**
+   * Back/Cancel button confirmation modal.
+   */
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { seedlotNumber } = useParams();
 
   const vegCodeQuery = useQuery({
@@ -371,10 +377,22 @@ const SeedlotReviewContent = () => {
     if (isReadMode) {
       navigate(`/seedlots/details/${seedlotNumber}`);
     } else {
-      setIsReadMode(true);
-      queryClient.refetchQueries(['seedlots', seedlotNumber]);
-      queryClient.refetchQueries(['seedlot-full-form', seedlotNumber]);
+      setIsModalOpen(true);
     }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  /**
+   * Discard changes without saving.
+   */
+  const discardChanges = () => {
+    setIsReadMode(true);
+    queryClient.refetchQueries(['seedlots', seedlotNumber]);
+    queryClient.refetchQueries(['seedlot-full-form', seedlotNumber]);
+    closeModal();
   };
 
   return (
@@ -566,7 +584,7 @@ const SeedlotReviewContent = () => {
                   kind="secondary"
                   onClick={handleCancelClick}
                 >
-                  {isReadMode ? 'Back' : 'Cancel'}
+                  {isReadMode ? 'Back' : 'Back to review'}
                 </Button>
               </Column>
 
@@ -590,6 +608,44 @@ const SeedlotReviewContent = () => {
             </Row>
           )
           : null
+      }
+      <Modal
+        className="cancel-confirm-modal"
+        open={isModalOpen}
+        modalHeading="Seedlot review"
+        primaryButtonText="Save Changes"
+        secondaryButtonText="Discard Changes"
+        onRequestClose={closeModal}
+        passiveModal
+      >
+        <div className="modal-content">
+          <p>
+            Would you like to save your changes before leaving?
+            <br />
+            This page may contain unsaved changes,
+            if you leave without saving, the changes will be discarded.
+          </p>
+          <div className="modal-button-group">
+            <Button kind="secondary" onClick={closeModal}>Cancel</Button>
+            <Button kind="secondary" onClick={discardChanges}>Discard changes</Button>
+            <Button
+              kind="primary"
+              onClick={() => {
+                closeModal();
+                handleEditSaveBtn();
+              }}
+              renderIcon={Save}
+            >
+              Save changes
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      {
+        !isReadMode
+        && (
+        <Beforeunload onBeforeunload={(event) => event.preventDefault()} />
+        )
       }
     </FlexGrid>
   );

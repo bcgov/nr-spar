@@ -78,9 +78,43 @@
 
   .action-button-row {
     padding: 2.5rem 0;
-    .#{vars.$bcgov-prefix}--btn{
+
+    .#{vars.$bcgov-prefix}--btn {
       max-width: none;
       width: -webkit-fill-available;
+    }
+  }
+
+  .cancel-confirm-modal {
+
+    .#{vars.$bcgov-prefix}--modal-header__heading {
+      font-size: 0.75rem;
+      color: var(--#{vars.$bcgov-prefix}-text-secondary, #606062);
+    }
+
+    .#{vars.$bcgov-prefix}--modal-content {
+      padding-bottom: 1rem;
+    }
+
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+
+      p {
+        @include type.type-style('heading-03');
+      }
+
+      .modal-button-group {
+        margin-top: 3rem;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+
+        .#{vars.$bcgov-prefix}--btn {
+          min-width: 11rem;
+          margin-left: 0.5rem;
+        }
+      }
     }
   }
 }
