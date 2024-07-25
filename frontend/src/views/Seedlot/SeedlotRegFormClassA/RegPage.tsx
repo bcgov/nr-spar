@@ -25,6 +25,8 @@ import { addParamToPath } from '../../../utils/PathUtils';
 import ROUTES from '../../../routes/constants';
 import { completeProgressConfig, smartSaveText } from '../ContextContainerClassA/constants';
 
+import './styles.scss';
+
 const RegPage = () => {
   const navigate = useNavigate();
   const {
