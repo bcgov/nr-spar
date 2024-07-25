@@ -63,14 +63,8 @@ export const initProgressBar = (
 
 export const initCollectionState = (
   defaultAgencyNumber: string,
-  collectionStepData: CollectionFormSubmitType,
-  useDefaultAgency = true
+  collectionStepData: CollectionFormSubmitType
 ): CollectionForm => ({
-  useDefaultAgencyInfo: {
-    id: 'collection-use-default-agency',
-    value: useDefaultAgency,
-    isInvalid: false
-  },
   collectorAgency: {
     id: 'collection-collector-agency',
     value: defaultAgencyNumber,
@@ -1096,8 +1090,7 @@ export const resDataToState = (
   return {
     collectionStep: initCollectionState(
       fullFormData.seedlotFormCollectionDto.collectionClientNumber,
-      fullFormData.seedlotFormCollectionDto,
-      fullFormData.seedlotFormCollectionDto.collectionClientNumber === defaultAgencyNumber
+      fullFormData.seedlotFormCollectionDto
     ),
     ownershipStep: initOwnershipState(
       EmptyMultiOptObj,

@@ -8,7 +8,7 @@ import EmailDisplay from '../../../EmailDisplay';
 
 const ApplicantAndSeedlotRead = () => {
   const {
-    defaultAgencyObj, defaultCode, seedlotData, seedlotSpecies, isFetchingData
+    defaultClientNumber, defaultCode, seedlotData, seedlotSpecies, isFetchingData
   } = useContext(ClassAContext);
 
   return (
@@ -23,7 +23,7 @@ const ApplicantAndSeedlotRead = () => {
           <ReadOnlyInput
             id="applicant-and-seedlot-agency-name"
             label="Applicant agency acronym"
-            value={defaultAgencyObj.label}
+            value={defaultClientNumber.label}
             showSkeleton={isFetchingData}
           />
         </Column>

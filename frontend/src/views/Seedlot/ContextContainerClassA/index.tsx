@@ -15,7 +15,6 @@ import {
   putAClassSeedlot, putAClassSeedlotProgress
 } from '../../../api-service/seedlotAPI';
 import getVegCodes from '../../../api-service/vegetationCodeAPI';
-import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import getMethodsOfPayment from '../../../api-service/methodsOfPaymentAPI';
 import getGameticMethodology from '../../../api-service/gameticMethodologyAPI';
@@ -24,7 +23,6 @@ import {
   TEN_SECONDS, THREE_HALF_HOURS, THREE_HOURS, FIVE_SECONDS
 } from '../../../config/TimeUnits';
 
-import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { SeedlotAClassSubmitType, SeedlotCalculationsResultsType, SeedlotProgressPayloadType } from '../../../types/SeedlotType';
 import { generateDefaultRows } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import {
@@ -159,74 +157,46 @@ const ContextContainerClassA = ({ children }: props) => {
   // Initialize all step's state here
   const [allStepData, setAllStepData] = useState<AllStepData>(() => initEmptySteps());
 
-  const setDefaultAgencyAndCode = (agency: MultiOptionsObj, locationCode: string) => {
+  const setDefaultClientAndCode = (clientNumber: string, locationCode: string) => {
     setAllStepData((prevData) => ({
       ...prevData,
       collectionStep: {
         ...prevData.collectionStep,
         collectorAgency: {
           ...prevData.collectionStep.collectorAgency,
-          value: agency
+          value: clientNumber
         },
         locationCode: {
           ...prevData.collectionStep.locationCode,
           value: locationCode
         }
-      },
-      ownershipStep: prevData.ownershipStep.map((singleOwner) => ({
-        ...singleOwner,
-        ownerAgency: {
-          ...singleOwner.ownerAgency,
-          value: agency
-        },
-        ownerCode: {
-          ...singleOwner.ownerCode,
-          value: locationCode
-        }
-      })),
-      interimStep: {
-        ...prevData.interimStep,
-        agencyName: {
-          ...prevData.interimStep.agencyName,
-          value: agency
-        },
-        locationCode: {
-          ...prevData.interimStep.locationCode,
-          value: locationCode
-        }
       }
+      // TODO
+      // ownershipStep: prevData.ownershipStep.map((singleOwner) => ({
+      //   ...singleOwner,
+      //   ownerAgency: {
+      //     ...singleOwner.ownerAgency,
+      //     value: agency
+      //   },
+      //   ownerCode: {
+      //     ...singleOwner.ownerCode,
+      //     value: locationCode
+      //   }
+      // })),
+      // interimStep: {
+      //   ...prevData.interimStep,
+      //   agencyName: {
+      //     ...prevData.interimStep.agencyName,
+      //     value: agency
+      //   },
+      //   locationCode: {
+      //     ...prevData.interimStep.locationCode,
+      //     value: locationCode
+      //   }
+      // }
     }));
     numOfEdit.current += 1;
   };
-
-  const [clientNumber, setClientNumber] = useState<string>('');
-  // const [clientNumbers, setClientNumbers] = useState<string[]>([]);
-
-  const forestClientQuery = useQuery({
-    queryKey: ['forest-clients', clientNumber],
-    queryFn: () => getForestClientByNumberOrAcronym(clientNumber),
-    enabled: seedlotQuery.isFetched && clientNumber !== '',
-    staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
-  });
-
-  // const allClientsQuery = useQueries({
-  //   queries: clientNumbers.map((client) => ({
-  //     queryKey: ['forest-clients', client],
-  //     queryFn: () => getForestClientByNumberOrAcronym(client),
-  //     enabled: getAllSeedlotInfoQuery.isFetched,
-  //     staleTime: THREE_HOURS,
-  //     cacheTime: THREE_HALF_HOURS
-  //   }))
-  // });
-
-  // const qc = useQueryClient();
-
-  const getAgencyObj = (): MultiOptionsObj => ({
-    code: forestClientQuery.data?.clientNumber ?? '',
-    description: `${forestClientQuery.data?.clientNumber} - ${forestClientQuery.data?.clientName} - ${forestClientQuery.data?.acronym}`,
-    label: forestClientQuery.data?.acronym ?? ''
-  });
 
   const getDefaultLocationCode = (): string => (seedlotQuery.data?.seedlot.applicantLocationCode ?? '');
 
@@ -352,8 +322,6 @@ const ContextContainerClassA = ({ children }: props) => {
       }
 
       fillCollectionGeoData(setGeoInfoVals, setPopSizeAndDiversityConfig, seedlotQuery.data);
-
-      setClientNumber(seedlotQuery.data.seedlot.applicantClientNumber ?? '');
 
       // Set area of use data
       setAreaOfUseData(fillAreaOfUseData(seedlotQuery.data, areaOfUseData));
@@ -646,16 +614,18 @@ const ContextContainerClassA = ({ children }: props) => {
         // eslint-disable-next-line no-alert
         alert(`Error retrieving form draft! ${error.message}`);
         navigate(`/seedlots/details/${seedlotNumber}`);
-      } else if (forestClientQuery.isFetched) {
+      } else if (seedlotQuery.status === 'success') {
         // set default agency and code only if the seedlot has no draft saved,
         // meaning this is their first time opening this form
-        setDefaultAgencyAndCode(getAgencyObj(), getDefaultLocationCode());
+        setDefaultClientAndCode(
+          seedlotQuery.data.seedlot.applicantClientNumber,
+          getDefaultLocationCode()
+        );
       }
     }
   }, [
     getFormDraftQuery.status,
     getFormDraftQuery.isFetchedAfterMount,
-    forestClientQuery.status,
     getFormDraftQuery.isRefetching
   ]);
 
@@ -770,7 +740,7 @@ const ContextContainerClassA = ({ children }: props) => {
         ),
         formStep,
         setStep,
-        defaultAgencyObj: getAgencyObj(),
+        defaultClientNumber: seedlotQuery.data?.seedlot.applicantClientNumber ?? '',
         defaultCode: getDefaultLocationCode(),
         isFormSubmitted,
         isFormIncomplete,
@@ -789,7 +759,6 @@ const ContextContainerClassA = ({ children }: props) => {
           vegCodeQuery.isFetching
           || seedlotQuery.isFetching
           || getAllSeedlotInfoQuery.isFetching
-          || forestClientQuery.isFetching
           || methodsOfPaymentQuery.isFetching
           || orchardQuery.isFetching
           || gameticMethodologyQuery.isFetching
@@ -814,7 +783,7 @@ const ContextContainerClassA = ({ children }: props) => {
       }),
     [
       seedlotNumber, calculatedValues, allStepData, seedlotQuery.status,
-      vegCodeQuery.status, formStep, forestClientQuery.status,
+      vegCodeQuery.status, formStep,
       isFormSubmitted, isFormIncomplete,
       saveStatus, saveDescription, lastSaveTimestamp, allStepCompleted,
       progressStatus, submitSeedlot, saveProgress.status, getAllSeedlotInfoQuery.status,

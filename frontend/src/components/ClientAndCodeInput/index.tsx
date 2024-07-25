@@ -53,15 +53,29 @@ const ClientAndCodeInput = ({
   );
 
   useEffect(() => {
-    setIsDefault(
-      clientInput.value === defaultClientNumber && locationCodeInput.value === defaultLocCode
-    );
+    const areValsDefault = clientInput.value === defaultClientNumber
+     && locationCodeInput.value === defaultLocCode;
+
+    setIsDefault(areValsDefault);
+    // Do not show validation status if isDefault is true
+    if (areValsDefault) {
+      setShowClientValidationStatus(false);
+      setShowLocCodeValidationStatus(false);
+    }
   }, [clientInput, locationCodeInput, defaultClientNumber, defaultLocCode]);
 
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', clientInput.value],
     queryFn: () => getForestClientByNumberOrAcronym(clientInput.value),
     enabled: !!clientInput.value,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  const defaultClientQuery = useQuery({
+    queryKey: ['forest-clients', defaultClientNumber],
+    queryFn: () => getForestClientByNumberOrAcronym(defaultClientNumber!),
+    enabled: !!defaultClientNumber,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -136,9 +150,9 @@ const ClientAndCodeInput = ({
   /**
    * Format the displayed acronym
    */
-  const formatDisplayedAcronym = () => {
+  const formatDisplayedAcronym = (formatedAcronym: string) => {
     if (clientInputRef.current) {
-      clientInputRef.current.value = clientInputRef.current.value.toUpperCase();
+      clientInputRef.current.value = formatedAcronym;
     }
   };
 
@@ -185,17 +199,27 @@ const ClientAndCodeInput = ({
     const updatedAgency: StringInputType = {
       ...clientInput,
       value: checked ? defaultClientNumber ?? '' : '',
-      isInvalid: checked && !!defaultClientNumber
+      isInvalid: checked && !defaultClientNumber
     };
 
     const updatedLocationCode = {
       ...locationCodeInput,
       value: checked ? defaultLocCode ?? '' : '',
-      isInvalid: checked && !!defaultLocCode
+      isInvalid: checked && !defaultLocCode
     };
 
-    setShowClientValidationStatus(checked);
-    setShowLocCodeValidationStatus(checked);
+    if (!checked) {
+      formatDisplayedAcronym('');
+      formatDisplayedLocCode('');
+    } else {
+      formatDisplayedAcronym(defaultClientQuery.data?.acronym ?? '');
+      formatDisplayedLocCode(updatedLocationCode.value);
+    }
+
+    setShowClientValidationStatus(false);
+    setShowLocCodeValidationStatus(false);
+
+    setIsDefault(checked);
     setClientAndCode(updatedAgency, updatedLocationCode);
   };
 
@@ -233,7 +257,7 @@ const ClientAndCodeInput = ({
     }
 
     setShowClientValidationStatus(true);
-    formatDisplayedAcronym();
+    formatDisplayedAcronym(clientInputRef.current?.value.toUpperCase() ?? '');
     validateClientAcronymMutation.mutate(value.toUpperCase());
   };
 
@@ -267,7 +291,7 @@ const ClientAndCodeInput = ({
     }
   };
 
-  if (forestClientQuery.status === 'loading') {
+  if (forestClientQuery.fetchStatus === 'fetching') {
     return (
       <FlexGrid className="agency-information-section">
         <Row className="agency-information-row">
@@ -309,7 +333,7 @@ const ClientAndCodeInput = ({
         <Column sm={4} md={4} lg={8} xlg={maxInputColSize ?? 8}>
           <div className="loading-input-wrapper">
             <TextInput
-              className="agency-input"
+              className={readOnly ? 'spar-display-only-input' : 'agency-input'}
               ref={clientInputRef}
               id={clientInput.id}
               autoCapitalize="on"

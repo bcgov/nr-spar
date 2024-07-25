@@ -22,6 +22,7 @@ import Subtitle from '../../Subtitle';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { StringInputType } from '../../../types/FormInputType';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -41,7 +42,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
   const {
     allStepData: { collectionStep: state },
     setStepData,
-    defaultAgencyObj: defaultAgency,
+    defaultClientNumber,
     defaultCode,
     isFormSubmitted
   } = useContext(ClassAContext);
@@ -150,7 +151,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
         clientInput={state.collectorAgency}
         locationCodeInput={state.locationCode}
         textConfig={agencyFieldsProps}
-        defaultClientNumber={defaultAgency.code}
+        defaultClientNumber={defaultClientNumber}
         defaultLocCode={defaultCode}
         setClientAndCode={
           (
