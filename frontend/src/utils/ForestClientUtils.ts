@@ -1,8 +1,8 @@
 import { ForestClientSearchType } from '../types/ForestClientTypes/ForestClientSearchType';
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
-import { OptionsInputType } from '../types/FormInputType';
+import { StringInputType } from '../types/FormInputType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
-import { getOptionsInputObj } from './FormInputUtils';
+import { getStringInputObj } from './FormInputUtils';
 
 export const getForestClientFullName = (client: ForestClientType | ForestClientSearchType) => (
   client.legalFirstName
@@ -23,7 +23,7 @@ export const getForestClientOption = (client: ForestClientType): MultiOptionsObj
   label: getForestClientLabel(client)
 });
 
-export const getForestClientOptionInput = (
+export const getForestClientStringInput = (
   id: string,
-  client: ForestClientType
-): OptionsInputType => (getOptionsInputObj(id, getForestClientOption(client)));
+  clientNumber: string
+): StringInputType => (getStringInputObj(id, clientNumber));

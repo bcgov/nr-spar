@@ -325,6 +325,7 @@ const ClientAndCodeInput = ({
               readOnly={
                 (showCheckbox && isDefault)
                 || validateClientAcronymMutation.isLoading
+                || readOnly
               }
               enableCounter
               maxCount={8}

@@ -79,7 +79,6 @@ const LotApplicantAndInfoForm = ({
   };
 
   const setClientAndCode = (client: StringInputType, locationCode: StringInputType) => {
-    console.log(locationCode);
     if (isSeedlot && setSeedlotFormData) {
       setSeedlotFormData((prevData) => ({
         ...prevData,

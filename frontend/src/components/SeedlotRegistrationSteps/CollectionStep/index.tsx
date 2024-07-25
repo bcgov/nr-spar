@@ -15,9 +15,7 @@ import {
 import moment from 'moment';
 import validator from 'validator';
 
-import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
-import { EmptyBooleanInputType } from '../../../shared-constants/shared-constants';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 
 import Subtitle from '../../Subtitle';
