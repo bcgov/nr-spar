@@ -70,6 +70,13 @@
     "calculationSMPSubtitle": "Enter the estimative volume of SMP mix used for each clone",
     "smpSuccessCheckboxText": "Enter the same SMP success on parent or Non-orchard pollen contaminant to all parent trees",
     "coneErrorMsg": "Invalid cone count entries",
-    "pollenErrorMsg": "Invalid pollen count entries"
+    "pollenErrorMsg": "Invalid pollen count entries",
+    "conePollenErrorMsg": "Invalid cone count and pollen count entries",
+    "smpSuccessErrorMsg": "Invalid SMP success on parent (%) entries",
+    "nonOrchardErrorMsg": "Invalid non-orchard pollen contam. (%) entries",
+    "smpSuccessNonOrchardErrorMsg": "Invalid SMP success on parent (%) and non-orchard pollen contam. (%) entries",
+    "parentTreeErrorMsg": "Invalid parent tree number entries",
+    "voulmeErrorMsg": "Invalid volume (ml) entries",
+    "parentTreeVolumeErrorMsg": "Invalid SMP success on parent (%) and non-orchard pollen contam. (%) entries"
   }
 }
