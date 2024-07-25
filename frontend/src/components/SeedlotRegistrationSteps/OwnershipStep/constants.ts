@@ -53,14 +53,9 @@ export const createOwnerTemplate = (
   ownerData: SingleOwnerFormSubmitType
 ): SingleOwnerForm => ({
   id: newId,
-  useDefaultAgencyInfo: {
-    id: 'ownership-use-default-agency',
-    value: newId === DEFAULT_INDEX,
-    isInvalid: false
-  },
   ownerAgency: {
     id: `ownership-agency-${newId}`,
-    value: EmptyMultiOptObj,
+    value: '',
     isInvalid: false
   },
   ownerCode: {

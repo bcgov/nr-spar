@@ -170,19 +170,18 @@ const ContextContainerClassA = ({ children }: props) => {
           ...prevData.collectionStep.locationCode,
           value: locationCode
         }
-      }
-      // TODO
-      // ownershipStep: prevData.ownershipStep.map((singleOwner) => ({
-      //   ...singleOwner,
-      //   ownerAgency: {
-      //     ...singleOwner.ownerAgency,
-      //     value: agency
-      //   },
-      //   ownerCode: {
-      //     ...singleOwner.ownerCode,
-      //     value: locationCode
-      //   }
-      // })),
+      },
+      ownershipStep: prevData.ownershipStep.map((singleOwner) => ({
+        ...singleOwner,
+        ownerAgency: {
+          ...singleOwner.ownerAgency,
+          value: clientNumber
+        },
+        ownerCode: {
+          ...singleOwner.ownerCode,
+          value: locationCode
+        }
+      }))
       // interimStep: {
       //   ...prevData.interimStep,
       //   agencyName: {

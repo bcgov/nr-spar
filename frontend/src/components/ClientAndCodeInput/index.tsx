@@ -67,7 +67,7 @@ const ClientAndCodeInput = ({
   const forestClientQuery = useQuery({
     queryKey: ['forest-clients', clientInput.value],
     queryFn: () => getForestClientByNumberOrAcronym(clientInput.value),
-    enabled: !!clientInput.value,
+    enabled: false,
     staleTime: THREE_HOURS,
     cacheTime: THREE_HALF_HOURS
   });
@@ -105,13 +105,15 @@ const ClientAndCodeInput = ({
 
   useEffect(() => {
     if (forestClientQuery.status === 'success') {
-      setClientAndCode(
-        {
-          ...clientInput,
-          value: forestClientQuery.data.clientNumber
-        },
-        locationCodeInput
-      );
+      if (!clientInput.value) {
+        setClientAndCode(
+          {
+            ...clientInput,
+            value: forestClientQuery.data.clientNumber
+          },
+          locationCodeInput
+        );
+      }
     }
   }, [forestClientQuery.status]);
 

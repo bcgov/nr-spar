@@ -113,24 +113,16 @@ export const initCollectionState = (
 });
 
 export const initOwnershipState = (
-  defaultAgency: MultiOptionsObj,
+  defaultAgencyNumber: string,
   ownersStepData: Array<SingleOwnerFormSubmitType>,
-  useDefault?: boolean,
   methodsOfPayment?: Array<MultiOptionsObj>,
-  fundingSource?: Array<MultiOptionsObj>,
-  defaultAgencyNumber = ''
+  fundingSource?: Array<MultiOptionsObj>
 ): Array<SingleOwnerForm> => {
   const seedlotOwners: Array<SingleOwnerForm> = ownersStepData.map((curOwner, index) => {
     const ownerState = createOwnerTemplate(index, curOwner);
-    ownerState.ownerAgency.value = useDefault
-      ? defaultAgency
-      : {
-        code: curOwner.ownerClientNumber,
-        description: '',
-        label: ''
-      };
-    ownerState.useDefaultAgencyInfo.value = ownerState
-      .ownerAgency.value.code === defaultAgencyNumber;
+
+    ownerState.ownerAgency.value = defaultAgencyNumber;
+
     ownerState.ownerCode.value = curOwner.ownerLocnCode;
     if (methodsOfPayment && fundingSource) {
       const payment = methodsOfPayment
@@ -547,7 +539,7 @@ export const verifyOwnershipStepCompleteness = (
   let idToFocus = '';
 
   for (let i = 0; i < ownershipData.length; i += 1) {
-    if (!ownershipData[i].ownerAgency.value.code.length) {
+    if (!ownershipData[i].ownerAgency.value.length) {
       isComplete = false;
       idToFocus = ownershipData[i].ownerAgency.id;
     } else if (!ownershipData[i].ownerCode.value.length) {
@@ -887,7 +879,7 @@ export const convertOwnership = (
   ownershipData: Array<SingleOwnerForm>
 ): Array<SingleOwnerFormSubmitType> => (
   ownershipData.map((owner: SingleOwnerForm) => ({
-    ownerClientNumber: owner.ownerAgency.value.code,
+    ownerClientNumber: owner.ownerAgency.value,
     ownerLocnCode: owner.ownerCode.value,
     originalPctOwned: +owner.ownerPortion.value,
     originalPctRsrvd: +owner.reservedPerc.value,
@@ -1067,7 +1059,7 @@ export const getSeedlotPayload = (
 
 export const initEmptySteps = () => ({
   collectionStep: initCollectionState('', emptyCollectionStep),
-  ownershipStep: initOwnershipState(EmptyMultiOptObj, emptyOwnershipStep, true),
+  ownershipStep: initOwnershipState('', emptyOwnershipStep),
   interimStep: initInterimState('', emptyInterimStep),
   orchardStep: initOrchardState(emptyOrchardStep),
   parentTreeStep: initParentTreeState(),
@@ -1080,7 +1072,7 @@ export const initEmptySteps = () => ({
 
 export const resDataToState = (
   fullFormData: SeedlotAClassSubmitType,
-  defaultAgencyNumber: string | undefined,
+  defaultAgencyNumber: string,
   methodsOfPaymentData: MultiOptionsObj[],
   fundingSourcesData: MultiOptionsObj[],
   orchardQueryData: MultiOptionsObj[],
@@ -1093,12 +1085,10 @@ export const resDataToState = (
       fullFormData.seedlotFormCollectionDto
     ),
     ownershipStep: initOwnershipState(
-      EmptyMultiOptObj,
+      defaultAgencyNumber,
       fullFormData.seedlotFormOwnershipDtoList,
-      false,
       methodsOfPaymentData,
-      fundingSourcesData,
-      defaultAgencyNumber
+      fundingSourcesData
     ),
     interimStep: initInterimState(
       fullFormData.seedlotFormInterimDto.intermStrgClientNumber,

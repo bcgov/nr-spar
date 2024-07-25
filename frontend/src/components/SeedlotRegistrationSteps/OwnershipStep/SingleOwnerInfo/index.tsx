@@ -12,8 +12,7 @@ import {
 import { TrashCan } from '@carbon/icons-react';
 import ClientAndCodeInput from '../../../ClientAndCodeInput';
 
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../../../types/FormInputType';
-import { EmptyBooleanInputType } from '../../../../shared-constants/shared-constants';
+import { StringInputType } from '../../../../types/FormInputType';
 import MultiOptionsObj from '../../../../types/MultiOptionsObject';
 import ComboBoxEvent from '../../../../types/ComboBoxEvent';
 
@@ -28,7 +27,7 @@ import './styles.scss';
 interface SingleOwnerInfoProps {
   ownerInfo: SingleOwnerForm,
   deleteAnOwner: Function,
-  defaultAgency: MultiOptionsObj,
+  defaultAgency: string,
   defaultCode: string,
   fundingSourcesQuery: UseQueryResult<MultiOptionsObj[], unknown>,
   methodsOfPaymentQuery: UseQueryResult<MultiOptionsObj[], unknown>,
@@ -51,14 +50,12 @@ const SingleOwnerInfo = ({
   const colsClass = ownerInfo.id === DEFAULT_INDEX && !isReview ? 'default-owner-col' : 'other-owners-col';
 
   const setClientAndCode = (
-    isDefault: BooleanInputType,
-    agency: OptionsInputType,
+    client: StringInputType,
     locationCode: StringInputType
   ) => {
     const clonedState = structuredClone(ownerInfo);
-    clonedState.ownerAgency = agency;
+    clonedState.ownerAgency = client;
     clonedState.ownerCode = locationCode;
-    clonedState.useDefaultAgencyInfo = isDefault;
     setState(clonedState, ownerInfo.id);
   };
 
@@ -139,25 +136,22 @@ const SingleOwnerInfo = ({
       <FlexGrid fullWidth>
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            {/* <ClientAndCodeInput
+            <ClientAndCodeInput
               showCheckbox={ownerInfo.id === DEFAULT_INDEX && !isReview}
               checkboxId={ownerInfo.id === DEFAULT_INDEX ? 'default-owner-checkbox' : ''}
-              isDefault={isReview ? EmptyBooleanInputType : ownerInfo.useDefaultAgencyInfo}
-              agency={ownerInfo.ownerAgency}
-              locationCode={ownerInfo.ownerCode}
-              fieldsProps={agencyFieldsProps}
-              defaultAgency={defaultAgency}
-              defaultCode={defaultCode}
+              clientInput={ownerInfo.ownerAgency}
+              locationCodeInput={ownerInfo.ownerCode}
+              textConfig={agencyFieldsProps}
+              defaultClientNumber={defaultAgency}
+              defaultLocCode={defaultCode}
               setClientAndCode={
                 (
-                  isDefault: BooleanInputType,
-                  agency: OptionsInputType,
+                  client: StringInputType,
                   locationCode: StringInputType
-                ) => setClientAndCode(isDefault, agency, locationCode)
+                ) => setClientAndCode(client, locationCode)
               }
               readOnly={readOnly && !isReview}
-              isFormSubmitted={readOnly}
-            /> */}
+            />
           </Column>
           <Column className={`single-owner-info-col ${colsClass}`} xs={4} sm={4} md={4} lg={4}>
             <TextInput
