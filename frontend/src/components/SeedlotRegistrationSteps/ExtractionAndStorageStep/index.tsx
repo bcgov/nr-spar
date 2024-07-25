@@ -11,7 +11,7 @@ import {
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
-import ApplicantAgencyFields from '../../ApplicantAgencyFields';
+import ClientAndCodeInput from '../../ClientAndCodeInput';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import ExtractionStorageForm from '../../../types/SeedlotTypes/ExtractionStorage';
@@ -48,7 +48,7 @@ const ExtractionAndStorage = (
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
 
-  const setAgencyAndCode = (
+  const setClientAndCode = (
     isDefault: BooleanInputType,
     agency: OptionsInputType,
     locationCode: StringInputType,
@@ -107,7 +107,7 @@ const ExtractionAndStorage = (
           }
         </Column>
       </Row>
-      {/* <ApplicantAgencyFields
+      {/* <ClientAndCodeInput
         showCheckbox
         checkboxId={state.extraction.useTSC.id}
         isDefault={state.extraction.useTSC}
@@ -116,11 +116,11 @@ const ExtractionAndStorage = (
         fieldsProps={extractorAgencyFields}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
-        setAgencyAndCode={(
+        setClientAndCode={(
           isDefault: BooleanInputType,
           agency: OptionsInputType,
           locationCode: StringInputType
-        ) => setAgencyAndCode(isDefault, agency, locationCode, 'extraction')}
+        ) => setClientAndCode(isDefault, agency, locationCode, 'extraction')}
         readOnly={isFormSubmitted && !isReview}
         isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}
@@ -196,7 +196,7 @@ const ExtractionAndStorage = (
           }
         </Column>
       </Row>
-      {/* <ApplicantAgencyFields
+      {/* <ClientAndCodeInput
         showCheckbox
         checkboxId={state.seedStorage.useTSC.id}
         isDefault={state.seedStorage.useTSC}
@@ -205,11 +205,11 @@ const ExtractionAndStorage = (
         fieldsProps={storageAgencyFields}
         defaultAgency={defaultAgency}
         defaultCode={defaultCode}
-        setAgencyAndCode={(
+        setClientAndCode={(
           isDefault: BooleanInputType,
           agency: OptionsInputType,
           locationCode: StringInputType
-        ) => setAgencyAndCode(isDefault, agency, locationCode, 'seedStorage')}
+        ) => setClientAndCode(isDefault, agency, locationCode, 'seedStorage')}
         readOnly={isFormSubmitted && !isReview}
         isFormSubmitted={isFormSubmitted}
         maxInputColSize={6}

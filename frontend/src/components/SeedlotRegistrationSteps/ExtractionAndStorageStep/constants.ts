@@ -1,8 +1,8 @@
-import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
+import ClientAndCodeInputTextType from '../../../types/ClientAndCodeInputTextType';
 
 export const DATE_FORMAT = 'Y/m/d';
 
-export const extractorAgencyFields: AgencyTextPropsType = {
+export const extractorAgencyFields: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'extractor-use-tsc',
     labelText: 'The extractory agency is the Tree Seed Center (TSC)'
@@ -17,7 +17,7 @@ export const extractorAgencyFields: AgencyTextPropsType = {
   }
 };
 
-export const storageAgencyFields: AgencyTextPropsType = {
+export const storageAgencyFields: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'storage-use-tsc',
     labelText: 'The seed storage agency is the Tree Seed Center (TSC)'

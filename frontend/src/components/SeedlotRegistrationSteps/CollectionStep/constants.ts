@@ -1,10 +1,10 @@
-import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
+import ClientAndCodeInputTextType from '../../../types/ClientAndCodeInputTextType';
 
 export const DATE_FORMAT = 'Y/m/d';
 export const MOMENT_DATE_FORMAT = 'YYYY/MM/DD';
 export const MAX_INPUT_DECIMAL = 9999.999;
 
-export const agencyFieldsProps: AgencyTextPropsType = {
+export const agencyFieldsProps: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'applicant',
     labelText: 'Use applicant agency as collector agency'

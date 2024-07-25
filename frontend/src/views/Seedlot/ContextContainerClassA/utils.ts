@@ -507,7 +507,7 @@ export const verifyCollectionStepCompleteness = (
   let isComplete = true;
   let idToFocus = '';
 
-  if (!collectionData.collectorAgency.value.code.length) {
+  if (!collectionData.collectorAgency.value.length) {
     isComplete = false;
     idToFocus = collectionData.collectorAgency.id;
   } else if (!collectionData.locationCode.value.length) {
@@ -877,7 +877,7 @@ export const checkAllStepsCompletion = (
 };
 
 export const convertCollection = (collectionData: CollectionForm): CollectionFormSubmitType => ({
-  collectionClientNumber: collectionData.collectorAgency.value.code,
+  collectionClientNumber: collectionData.collectorAgency.value,
   collectionLocnCode: collectionData.locationCode.value,
   collectionStartDate: dateStringToISO(collectionData.startDate.value),
   collectionEndDate: dateStringToISO(collectionData.endDate.value),
@@ -1242,7 +1242,7 @@ export const fillCollectionGeoData = (
     },
     meanLongSec: {
       ...prevVals.meanLongMinute,
-      value: String(data.seedlot.collectionLongitudeMin)
+      value: String(data.seedlot.collectionLongitudeSec)
     },
     effectivePopSize: {
       ...prevVals.effectivePopSize,

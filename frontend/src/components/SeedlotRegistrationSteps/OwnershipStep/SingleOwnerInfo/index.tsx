@@ -10,7 +10,7 @@ import {
   DropdownSkeleton
 } from '@carbon/react';
 import { TrashCan } from '@carbon/icons-react';
-import ApplicantAgencyFields from '../../../ApplicantAgencyFields';
+import ClientAndCodeInput from '../../../ClientAndCodeInput';
 
 import { BooleanInputType, OptionsInputType, StringInputType } from '../../../../types/FormInputType';
 import { EmptyBooleanInputType } from '../../../../shared-constants/shared-constants';
@@ -50,7 +50,7 @@ const SingleOwnerInfo = ({
 
   const colsClass = ownerInfo.id === DEFAULT_INDEX && !isReview ? 'default-owner-col' : 'other-owners-col';
 
-  const setAgencyAndCode = (
+  const setClientAndCode = (
     isDefault: BooleanInputType,
     agency: OptionsInputType,
     locationCode: StringInputType
@@ -139,7 +139,7 @@ const SingleOwnerInfo = ({
       <FlexGrid fullWidth>
         <Row>
           <Column className="single-owner-info-col" xs={4} sm={4} md={8} lg={8}>
-            {/* <ApplicantAgencyFields
+            {/* <ClientAndCodeInput
               showCheckbox={ownerInfo.id === DEFAULT_INDEX && !isReview}
               checkboxId={ownerInfo.id === DEFAULT_INDEX ? 'default-owner-checkbox' : ''}
               isDefault={isReview ? EmptyBooleanInputType : ownerInfo.useDefaultAgencyInfo}
@@ -148,12 +148,12 @@ const SingleOwnerInfo = ({
               fieldsProps={agencyFieldsProps}
               defaultAgency={defaultAgency}
               defaultCode={defaultCode}
-              setAgencyAndCode={
+              setClientAndCode={
                 (
                   isDefault: BooleanInputType,
                   agency: OptionsInputType,
                   locationCode: StringInputType
-                ) => setAgencyAndCode(isDefault, agency, locationCode)
+                ) => setClientAndCode(isDefault, agency, locationCode)
               }
               readOnly={readOnly && !isReview}
               isFormSubmitted={readOnly}

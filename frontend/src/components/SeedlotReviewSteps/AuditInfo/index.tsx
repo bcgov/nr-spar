@@ -32,7 +32,7 @@ const AuditInfo = () => {
             id="created-at"
             label="Created at:"
             value={
-              seedlotData
+              seedlotData?.auditInformation.entryTimestamp
                 ? luxon.fromISO(seedlotData.auditInformation.entryTimestamp.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
                 : '--'
             }
@@ -54,7 +54,7 @@ const AuditInfo = () => {
             id="last-updated-at"
             label="Last uptated at:"
             value={
-              seedlotData
+              seedlotData?.auditInformation.updateTimestamp
                 ? luxon.fromISO(seedlotData.auditInformation.updateTimestamp.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
                 : '--'
             }
@@ -76,7 +76,7 @@ const AuditInfo = () => {
             id="submitted-at"
             label="Submitted at:"
             value={
-              seedlotData
+              seedlotData?.declarationOfTrueInformationTimestamp
                 ? luxon.fromISO(seedlotData.declarationOfTrueInformationTimestamp.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
                 : '--'
             }

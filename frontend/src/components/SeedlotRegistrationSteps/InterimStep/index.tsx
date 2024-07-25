@@ -15,7 +15,7 @@ import {
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
-import ApplicantAgencyFields from '../../ApplicantAgencyFields';
+import ClientAndCodeInput from '../../ClientAndCodeInput';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
@@ -47,7 +47,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
 
-  const setAgencyAndCode = (
+  const setClientAndCode = (
     agencyData: OptionsInputType,
     locationCodeData: StringInputType,
     useDefaultData: BooleanInputType
@@ -152,7 +152,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
           }
         </Column>
       </Row>
-      {/* <ApplicantAgencyFields
+      {/* <ClientAndCodeInput
         showCheckbox={!isReview}
         checkboxId={state.useCollectorAgencyInfo.id}
         isDefault={isReview ? EmptyBooleanInputType : state.useCollectorAgencyInfo}
@@ -161,11 +161,11 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
         fieldsProps={agencyFieldsProps}
         defaultAgency={collectorAgency.value}
         defaultCode={collectorCode.value}
-        setAgencyAndCode={(
+        setClientAndCode={(
           isDefault: BooleanInputType,
           agency: OptionsInputType,
           locationCode: StringInputType
-        ) => setAgencyAndCode(agency, locationCode, isDefault)}
+        ) => setClientAndCode(agency, locationCode, isDefault)}
         isFormSubmitted={isFormSubmitted}
         readOnly={isFormSubmitted && !isReview}
         maxInputColSize={6}

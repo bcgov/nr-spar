@@ -1,5 +1,5 @@
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
-import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
+import ClientAndCodeInputTextType from '../../../types/ClientAndCodeInputTextType';
 import { SingleOwnerFormSubmitType } from '../../../types/SeedlotType';
 import { SingleOwnerForm } from './definitions';
 
@@ -7,7 +7,7 @@ export const DEFAULT_INDEX = 0;
 
 export const MAX_OWNERS = 100;
 
-export const agencyFieldsProps: AgencyTextPropsType = {
+export const agencyFieldsProps: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'useDefaultOwner',
     labelText: 'Use applicant agency as owner agency'
