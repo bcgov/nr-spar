@@ -4,4 +4,8 @@
   .#{vars.$bcgov-prefix}--progress-step {
     min-inline-size: unset;
   }
+
+  .#{vars.$bcgov-prefix}--progress-step-button--unclickable .#{vars.$bcgov-prefix}--progress-label {
+    font-weight: 700;
+  }
 }
