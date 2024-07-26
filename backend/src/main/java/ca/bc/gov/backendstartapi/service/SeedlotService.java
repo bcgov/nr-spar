@@ -703,7 +703,7 @@ public class SeedlotService {
       String statusOnSuccess) {
 
     StringBuilder sb = new StringBuilder();
-    sb.append("Received request ");
+    sb.append("\n\n\n\n\n-----\n\n\n\n\n ### Received request ");
     if (isTscAdmin) {
       sb.append("by TSC Admin ");
     }
@@ -712,12 +712,17 @@ public class SeedlotService {
     } else {
       sb.append("from review form ");
     }
-    sb.append("to update seedlot {}");
+    sb.append("to update seedlot {} with revision count {}");
 
-    SparLog.info(sb.toString(), seedlotNumber);
+    SparLog.info(sb.toString(), seedlotNumber, form.applicantAndSeedlotInfo().revisionCount());
 
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
+
+    if (seedlot.getRevisionCount() != form.applicantAndSeedlotInfo().revisionCount()) {
+      SparLog.info("Unable to update seedlot! Record already updated by another user!");
+      throw new SeedlotConflictDataException(seedlotNumber);
+    }
 
     String currentSeedlotStatus = seedlot.getSeedlotStatus().getSeedlotStatusCode();
 
@@ -826,7 +831,10 @@ public class SeedlotService {
     // Update the Seedlot instance only
     setSeedlotStatus(seedlot, statusOnSuccess);
 
-    SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
+    SparLog.info(
+        "Saving the Seedlot Entity for seedlot number {} and revision count {}",
+        seedlotNumber,
+        seedlot.getRevisionCount());
     seedlotRepository.save(seedlot);
 
     SparLog.info("Seedlot entity and related tables successfully saved.");

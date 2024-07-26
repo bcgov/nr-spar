@@ -50,7 +50,7 @@ public class SeedlotParentTreeService {
    * @return A list of {@link SeedlotParentTree}
    */
   public List<SeedlotParentTree> getAllSeedlotParentTree(String seedlotNumber) {
-    SparLog.info("Get All SeedlotPrentTree for seedlot number {}", seedlotNumber);
+    SparLog.info("Get All SeedlotParentTree for seedlot number {}", seedlotNumber);
     return seedlotParentTreeRepository.findAllBySeedlot_id(seedlotNumber);
   }
 

@@ -49,4 +49,12 @@ public class MethodOfPaymentService {
 
     return list;
   }
+
+  public List<MethodOfPaymentEntity> getAllMethodsByCodeList(List<String> methods) {
+    SparLog.info("Fetching list of payment methods with methods {}", methods);
+    List<MethodOfPaymentEntity> list =
+        methodOfPaymentRepository.findAllByMethodOfPaymentCodeIn(methods);
+    SparLog.info("{} payment methods found", list.size());
+    return list;
+  }
 }

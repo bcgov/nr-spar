@@ -50,4 +50,12 @@ public class ConeCollectionMethodService {
     SparLog.info("{} Cone Collection Methods found.", list.size());
     return list;
   }
+
+  public List<ConeCollectionMethodEntity> getAllByIdIn(List<Integer> ids) {
+    SparLog.info("Fetching list of Cone Collection Methods by Id with ids {}", ids);
+    List<ConeCollectionMethodEntity> list =
+        coneCollectionMethodRepository.findAllByConeCollectionMethodCodeIn(ids);
+    SparLog.info("{} Cone Collection Methods found.", list.size());
+    return list;
+  }
 }

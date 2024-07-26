@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodI
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -32,14 +33,14 @@ import lombok.ToString;
 public class SeedlotCollectionMethod {
   // region Identifier
   @Id
-  @JoinColumn(name = "seedlot_number")
-  @ManyToOne
+  @JoinColumn(name = "seedlot_number", updatable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private Seedlot seedlot;
 
   @Id
   @JoinColumn(name = "cone_collection_method_code")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private ConeCollectionMethodEntity coneCollectionMethod;
 

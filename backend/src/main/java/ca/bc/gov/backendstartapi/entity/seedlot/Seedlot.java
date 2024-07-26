@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -37,7 +38,7 @@ public class Seedlot implements Serializable {
   private String id;
 
   @JoinColumn(name = "seedlot_status_code")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private SeedlotStatusEntity seedlotStatus;
 
   @Column(name = "seedlot_comment", length = 2000)
@@ -60,11 +61,11 @@ public class Seedlot implements Serializable {
   private String vegetationCode;
 
   @JoinColumn(name = "genetic_class_code")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private GeneticClassEntity geneticClass;
 
   @JoinColumn(name = "seedlot_source_code")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private SeedlotSourceEntity seedlotSource;
 
   @Column(name = "to_be_registrd_ind")
