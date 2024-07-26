@@ -151,7 +151,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(1)
       .find('button')
-      .click();
+      .click()
+      .as('clickMoreOptionsBtn');
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
@@ -182,13 +183,45 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .blur();
 
     // Click 'Clean table data' option
-    cy.get(`.${prefix}--toolbar-content > span`)
-      .eq(1)
-      .find('button')
-      .click();
+    cy.get('@clickMoreOptionsBtn');
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
+      .contains('Clean table data')
+      .click()
+      .as('clickCleanTableBtn');
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .should('be.visible');
+
+    // Check Cancel button of 'Clean table data' dialog box
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .find('button')
+      .contains('Cancel')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .should('not.exist');
+
+    // Check 'X' button of 'Clean table data' dialog box
+    cy.get('@clickMoreOptionsBtn');
+
+    cy.get('@clickCleanTableBtn')
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .find('button[aria-label="close"]')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .should('not.exist');
+
+    // Check 'Clean table data' button of 'Clean table data' dialog box
+    cy.get('@clickMoreOptionsBtn');
+
+    cy.get('@clickCleanTableBtn')
+
+    cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
+      .find('button')
       .contains('Clean table data')
       .click();
 
