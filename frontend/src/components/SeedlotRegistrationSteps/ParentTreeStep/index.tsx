@@ -470,8 +470,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
               <>
                 <DetailSection>
                   <DescriptionBox
-                    header="Breeding value of SMP mix used"
-                    description="Check the breeding value of SMP mix used on parent"
+                    header="Breeding value of SMP mix used on parent"
                   />
                   <InfoSection
                     infoItems={
