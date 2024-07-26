@@ -27,7 +27,7 @@ const ClientSearchFields = ({
           To view more information about the client,
           {' '}
           <Link to="">
-            go to client search screen.
+            go to the client search screen.
           </Link>
         </p>
       </Column>
