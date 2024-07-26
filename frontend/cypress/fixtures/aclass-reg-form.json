@@ -34,6 +34,19 @@
     "reservedBelowLimitError": "Value must be higher or equal to 0",
     "reservedDecimalError": "Value can have up to 2 decimal places"
   },
+  "orchard": {
+    "title": "Orchard information",
+    "subtitle": "Enter the contributing orchard information",
+    "singleOrchardError": "Are you sure you want to change the orchard? If yes, then you will lose the parent tree and SMP information in Step 5",
+    "doubleOrchardError": "Are you sure you want to delete the additional orchard? If yes, then you will lose the parent tree and SMP information in Step 5",
+    "additionalOrchardLabel": "Select an additional orchard",
+    "gameteTitle": "Gamete information",
+    "gameteSubtitle": "Enter the seedlot gamete information",
+    "pollenTitle": "Pollen information",
+    "pollenSubtitle": "Enter the pollen contaminant information",
+    "pollenError": "Please enter a valid value between 0 and 100",
+    "pollenHelperText": "If contaminant pollen was present and the contaminant pollen has a breeding value"
+  },
   "extraction": {
     "extrationTitle": "Extraction information",
     "extrationSubtitle": "Enter the extractory agency information and extraction's start and end dates for this seedlot",

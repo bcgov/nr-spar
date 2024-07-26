@@ -53,7 +53,8 @@ objects:
         app: ${REPO}-${ZONE}
         cronjob: ${REPO}-${ZONE}
     spec:
-      schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
+      # 00:00 on day-of-month 1 in every 12000th month from January through December
+      schedule: "0 0 1 1/12000 *" # https://crontab.guru/#0_0_1_1/12000_*
       startingDeadlineSeconds: 60
       concurrencyPolicy: "Replace"
       successfulJobsHistoryLimit: "${{JOB_HISTORY_SUCCESS}}"

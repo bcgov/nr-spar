@@ -36,12 +36,12 @@ jobs:
       tag: ${{ needs.init.outputs.pr }}
       target: test
 
-  # deploy-prod:
-  #   name: PROD
-  #   needs: [init, deploys]
-  #   secrets: inherit
-  #   uses: ./.github/workflows/.deploy.yml
-  #   with:
-  #     environment: prod
-  #     tag: ${{ needs.init.outputs.pr }}
-  #     target: prod
+  deploy-prod:
+    name: PROD
+    needs: [init, deploys]
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: prod
+      tag: ${{ needs.init.outputs.pr }}
+      target: prod
