@@ -146,6 +146,71 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .blur();
   });
 
+  it('Check \'Show/hide columns\' button functionality', () => {
+    // Click 'Dothistroma needle blight (DFS)' checkbox
+    cy.get(`.${prefix}--toolbar-content > span`)
+      .eq(0)
+      .find('button')
+      .click()
+      .as('clickShowHideBtn');
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Dothistroma needle blight (DFS)')
+      .click();
+
+    cy.get('.parent-tree-step-table-container')
+      .find('h4')
+      .click()
+      .as('closeShowHideDropdown');
+
+    cy.get('thead.table-header')
+      .find('#dfs')
+      .should('exist');
+
+    // Click 'Comandra blister rust (DSC)' checkbox
+    cy.get('@clickShowHideBtn');
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Comandra blister rust (DSC)')
+      .click();
+
+    cy.get('@closeShowHideDropdown')
+
+    cy.get('thead.table-header')
+      .find('#dsc')
+      .should('exist');
+
+    // Click 'Western gall rust (DSG)' checkbox
+    cy.get('@clickShowHideBtn');
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Western gall rust (DSG)')
+      .click();
+
+    cy.get('@closeShowHideDropdown')
+
+    cy.get('thead.table-header')
+      .find('#dsg')
+      .should('exist');
+
+    // Click 'Volume growth (GVO)' checkbox
+    cy.get('@clickShowHideBtn');
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Volume growth (GVO)')
+      .click();
+
+    cy.get('@closeShowHideDropdown')
+
+    cy.get('thead.table-header')
+      .find('#gvo')
+      .should('exist');
+  });
+
   it('Check \'More Options\' button functionality', () => {
     // Check Download file option
     cy.get(`.${prefix}--toolbar-content > span`)
