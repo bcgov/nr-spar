@@ -135,5 +135,74 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     cy.get('@errorDialog')
       .should('have.text', regFormData.parentTree.conePollenErrorMsg);
+
+    // Empty the Pollen count and Cone count inputs
+    cy.get('#212-pollenCount-value-input')
+      .clear()
+      .blur();
+
+    cy.get('#212-coneCount-value-input')
+      .clear()
+      .blur();
+  });
+
+  it('Check \'More Options\' button functionality', () => {
+    // Check Download file option
+    cy.get(`.${prefix}--toolbar-content > span`)
+      .eq(1)
+      .find('button')
+      .click();
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Download table template')
+      .click();
+
+    cy.readFile(`${Cypress.config('downloadsFolder')}/Seedlot_composition_template.csv`);
+    
+    // Enter values in Cone count and Pollen count columns of the table
+    cy.get('#212-coneCount-value-input')
+      .clear()
+      .type('16')
+      .blur();
+
+    cy.get('#212-pollenCount-value-input')
+      .clear()
+      .type('17')
+      .blur();
+
+    cy.get('#219-coneCount-value-input')
+      .clear()
+      .type('23')
+      .blur();
+
+    cy.get('#219-pollenCount-value-input')
+      .clear()
+      .type('28')
+      .blur();
+
+    // Click 'Clean table data' option
+    cy.get(`.${prefix}--toolbar-content > span`)
+      .eq(1)
+      .find('button')
+      .click();
+
+    cy.get('ul.parent-tree-table-option-menu')
+      .find('li')
+      .contains('Clean table data')
+      .click();
+
+    // Check values in Cone count and Pollen count columns of the table
+    cy.get('#212-coneCount-value-input')
+      .should('have.value', '');
+
+    cy.get('#212-pollenCount-value-input')
+      .should('have.value', '');
+
+    cy.get('#219-coneCount-value-input')
+      .should('have.value', '');
+
+    cy.get('#219-pollenCount-value-input')
+      .should('have.value', '');
   });
 });
