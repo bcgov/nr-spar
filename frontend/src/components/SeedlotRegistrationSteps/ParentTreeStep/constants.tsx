@@ -145,7 +145,7 @@ const getPageText = () => ({
   errorDescription,
   coneTab: {
     tabTitle: 'Cone and pollen count',
-    tableDescription: "Enter the cone and pollen count estimate for the orchard's seedlot",
+    tableDescription: "Enter the cone and pollen count estimate for the orchard's seedlot (*required)",
     toggleName: 'Show breeding value',
     cleanModalHeading: getCleanTableDesc('Cone and pollen count')
   },
