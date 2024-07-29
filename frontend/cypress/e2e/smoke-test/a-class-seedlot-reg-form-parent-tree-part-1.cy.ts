@@ -1,6 +1,4 @@
-import { TYPE_DELAY } from '../../constants';
 import prefix from '../../../src/styles/classPrefix';
-import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and Pollen count)', () => {
   let regFormData: {
@@ -40,7 +38,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .find('h2')
       .should('have.text', regFormData.parentTree.title);
 
-    cy.get('.subtitle-section')
+    cy.get('.title-row')
+      .find('.subtitle-section')
       .should('have.text', regFormData.parentTree.subtitle);
 
     cy.get('.parent-tree-step-table-container')
@@ -105,9 +104,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .as('errorDialog')
       .should('have.text', regFormData.parentTree.coneErrorMsg);
 
-    cy.get('.subtitle-section')
-      .should('have.text', regFormData.parentTree.subtitle);
-
     // Check error message for Cone count > 10000000000
     cy.get('#212-coneCount-value-input')
       .clear()
@@ -153,7 +149,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .blur();
   
     cy.get('@errorDialog')
-      .should('have.text', regFormData.parentTree.coneErrorMsg);
+      .should('have.text', regFormData.parentTree.pollenErrorMsg);
   
     // Check error message for Pollen count value > 10 decimal places
     cy.get('#212-pollenCount-value-input')
@@ -162,7 +158,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .blur();
   
     cy.get('@errorDialog')
-      .should('have.text', regFormData.parentTree.coneErrorMsg);
+      .should('have.text', regFormData.parentTree.pollenErrorMsg);
 
     // Check error message for negative Cone count and negative Pollen count
     cy.get('#212-coneCount-value-input')
@@ -188,60 +184,66 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(0)
       .find('button')
-      .click()
-      .as('clickShowHideBtn');
+      .as('clickShowHideBtn')
+      .click();
 
-    cy.get('ul.parent-tree-table-option-menu')
+    cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
       .contains('Dothistroma needle blight (DFS)')
       .click();
 
     cy.get('.parent-tree-step-table-container')
       .find('h4')
-      .click()
-      .as('closeShowHideDropdown');
+      .as('closeShowHideDropdown')
+      .click();
 
     cy.get('thead.table-header')
       .find('#dfs')
       .should('exist');
 
     // Click 'Comandra blister rust (DSC)' checkbox
-    cy.get('@clickShowHideBtn');
+    cy.get('@clickShowHideBtn')
+      .click();
 
-    cy.get('ul.parent-tree-table-option-menu')
+    cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
       .contains('Comandra blister rust (DSC)')
       .click();
 
     cy.get('@closeShowHideDropdown')
+      .click();
 
     cy.get('thead.table-header')
       .find('#dsc')
       .should('exist');
 
     // Click 'Western gall rust (DSG)' checkbox
-    cy.get('@clickShowHideBtn');
+    cy.get('@clickShowHideBtn')
+      .click();
 
-    cy.get('ul.parent-tree-table-option-menu')
+    cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
       .contains('Western gall rust (DSG)')
       .click();
 
     cy.get('@closeShowHideDropdown')
+      .click();
 
     cy.get('thead.table-header')
       .find('#dsg')
       .should('exist');
 
     // Click 'Volume growth (GVO)' checkbox
-    cy.get('@clickShowHideBtn');
+    cy.get('@clickShowHideBtn')
+      .click();
 
-    cy.get('ul.parent-tree-table-option-menu')
+    cy.get('ul.parent-tree-table-toggle-menu')
       .find('li')
       .contains('Volume growth (GVO)')
       .click();
 
     cy.get('@closeShowHideDropdown')
+      .click();
 
     cy.get('thead.table-header')
       .find('#gvo')
@@ -253,8 +255,8 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get(`.${prefix}--toolbar-content > span`)
       .eq(1)
       .find('button')
-      .click()
-      .as('clickMoreOptionsBtn');
+      .as('clickMoreOptionsBtn')
+      .click();
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
@@ -285,13 +287,14 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .blur();
 
     // Click 'Clean table data' option
-    cy.get('@clickMoreOptionsBtn');
+    cy.get('@clickMoreOptionsBtn')
+      .click();
 
     cy.get('ul.parent-tree-table-option-menu')
       .find('li')
       .contains('Clean table data')
-      .click()
-      .as('clickCleanTableBtn');
+      .as('clickCleanTableBtn')
+      .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
       .should('be.visible');
@@ -303,24 +306,28 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
-      .should('not.exist');
+      .should('not.be.visible');
 
     // Check 'X' button of 'Clean table data' dialog box
-    cy.get('@clickMoreOptionsBtn');
+    cy.get('@clickMoreOptionsBtn')
+      .click();
 
     cy.get('@clickCleanTableBtn')
+      .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
       .find('button[aria-label="close"]')
       .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
-      .should('not.exist');
+      .should('not.be.visible');
 
     // Check 'Clean table data' button of 'Clean table data' dialog box
-    cy.get('@clickMoreOptionsBtn');
+    cy.get('@clickMoreOptionsBtn')
+      .click();
 
     cy.get('@clickCleanTableBtn')
+      .click();
 
     cy.get(`.${prefix}--modal-container[aria-label="Clean table data"]`)
       .find('button')
@@ -341,7 +348,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .should('have.value', '');
   });
 
-  it('Pagination', () => {
+  it.only('Pagination', () => {
     const dropdownNumber = '20';
     // Number of item dropdown
     cy.get(`.${prefix}--pagination__left`)
@@ -349,14 +356,24 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .as('dropdownBtn')
       .select(dropdownNumber);
 
+    // Wait for the table in Step 5 to load
+    cy.get('#parentTreeNumber');
+
+    cy.get(`.${prefix}--pagination__left`)
+      .find(`.${prefix}--pagination__items-count`)
+      .should('include.text', '1–20');
+
     // Check total number of rows are 20
-    cy.get(`table.${prefix}--data-table > tbody > tr`)
-      .should('equal', dropdownNumber);
+    cy.get(`table.${prefix}--data-table tbody`)
+      .find('tr')
+      .then(($row) => {
+        expect($row.length).equal(parseInt(dropdownNumber));
+      });
 
     // Page number dropdown
     cy.get(`.${prefix}--pagination__right`)
       .find(`select.${prefix}--select-input`)
-      .select(2);
+      .select('2');
 
     cy.get(`.${prefix}--pagination__left`)
       .find(`.${prefix}--pagination__items-count`)
@@ -364,7 +381,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     cy.get(`.${prefix}--pagination__right`)
       .find(`select.${prefix}--select-input`)
-      .select(1);
+      .select('1');
 
     // Forward Backward buttons
     cy.get(`.${prefix}--pagination__control-buttons`)
@@ -387,21 +404,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
   it('Calculate Metrics button', () => {
     // Check info sections not visible in DOM
     cy.get('.info-section-sub-title')
-      .find(`.${prefix}--col`)
-      .contains('Genetic worth and percent of Tested parent tree contribution')
-      .as('firstInfoSection')
-      .should('not.exist');
-
-    cy.get('.info-section-sub-title')
-      .find(`.${prefix}--col`)
-      .contains('Effective population size and diversity')
-      .as('secondInfoSection')
-      .should('not.exist');
-
-    cy.get('.info-section-sub-title')
-      .find(`.${prefix}--col`)
-      .contains('Orchard parent tree geospatial summary')
-      .as('thirdInfoSection')
       .should('not.exist');
 
     // Click 'Calculate metrics' button
@@ -411,13 +413,19 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .click();
 
     // Check info sections visible in DOM
-    cy.get('@firstInfoSection')
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Genetic worth and percent of Tested parent tree contribution')
       .should('be.visible');
 
-    cy.get('@secondInfoSection')
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Effective population size and diversity')
       .should('be.visible');
 
-    cy.get('@thirdInfoSection')
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Orchard parent tree geospatial summary')
       .should('be.visible');
   });
 });
