@@ -385,4 +385,41 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .find(`select.${prefix}--select-input`)
       .should('have.value', '1');
   });
+
+  it('Calculate Metrics button', () => {
+    // Check info sections not visible in DOM
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Genetic worth and percent of Tested parent tree contribution')
+      .as('firstInfoSection')
+      .should('not.exist');
+
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Effective population size and diversity')
+      .as('secondInfoSection')
+      .should('not.exist');
+
+    cy.get('.info-section-sub-title')
+      .find(`.${prefix}--col`)
+      .contains('Orchard parent tree geospatial summary')
+      .as('thirdInfoSection')
+      .should('not.exist');
+
+    // Click 'Calculate metrics' button
+    cy.get('.gen-worth-cal-row')
+      .find('button')
+      .contains('Calculate metrics')
+      .click();
+
+    // Check info sections visible in DOM
+    cy.get('@firstInfoSection')
+      .should('be.visible');
+
+    cy.get('@secondInfoSection')
+      .should('be.visible');
+
+    cy.get('@thirdInfoSection')
+      .should('be.visible');
+  });
 });
