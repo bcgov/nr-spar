@@ -10,6 +10,8 @@ public interface ParentTreeProj {
 
   Long getSpu();
 
+  Boolean getTested();
+
   void setParentTreeId(Long parentTreeId);
 
   void setParentTreeNumber(String parentTreeNumber);
@@ -17,4 +19,6 @@ public interface ParentTreeProj {
   void setOrchardId(String orchardId);
 
   void setSpu(Long spu);
+
+  void setTested(Boolean tested);
 }
