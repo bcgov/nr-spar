@@ -7,8 +7,6 @@ import static org.mockito.Mockito.when;
 
 import ca.bc.gov.backendstartapi.dao.GeneticWorthEntityDao;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
-import ca.bc.gov.backendstartapi.dto.ParentTreeGeneticQualityDto;
-import ca.bc.gov.backendstartapi.dto.SeedlotFormParentTreeSmpDto;
 import ca.bc.gov.backendstartapi.entity.GeneticWorthEntity;
 import ca.bc.gov.backendstartapi.entity.SeedlotGeneticWorth;
 import ca.bc.gov.backendstartapi.entity.embeddable.AuditInformation;
@@ -37,22 +35,6 @@ class SeedlotGeneticWorthServiceTest {
 
   private SeedlotGeneticWorthService seedlotGeneticWorthService;
 
-  private SeedlotFormParentTreeSmpDto createFormDto(Integer parentTreeId) {
-    ParentTreeGeneticQualityDto parentTreeGenQualityDto =
-        new ParentTreeGeneticQualityDto("BV", "GVO", new BigDecimal("18"));
-    return new SeedlotFormParentTreeSmpDto(
-        "85",
-        parentTreeId,
-        "87",
-        new BigDecimal("1"),
-        new BigDecimal("5"),
-        6,
-        2,
-        50,
-        new BigDecimal("100"),
-        List.of(parentTreeGenQualityDto));
-  }
-
   @BeforeEach
   void setup() {
     seedlotGeneticWorthService =
@@ -72,54 +54,6 @@ class SeedlotGeneticWorthServiceTest {
 
   private SeedlotGeneticWorth mockSeedlotGenWorth(Seedlot seedlot, String traitCode) {
     return new SeedlotGeneticWorth(seedlot, mockGeneticWorthEntity(traitCode), mockAudit());
-  }
-
-  @Test
-  @DisplayName("Save Seedlot Genetic Worth first submit")
-  void saveSeedlotFormStep5_firstSubmit_shouldSucceed() {
-    when(seedlotGeneticWorthRepository.findAllBySeedlot_id("54321")).thenReturn(List.of());
-
-    AuditInformation audit = new AuditInformation("userId");
-    when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
-
-    Seedlot seedlot = new Seedlot("54321");
-    GeneticWorthEntity gw = new GeneticWorthEntity();
-    gw.setGeneticWorthCode("GVO");
-
-    when(geneticWorthEntityDao.getGeneticWorthEntity("GVO")).thenReturn(Optional.of(gw));
-
-    SeedlotGeneticWorth sgw = new SeedlotGeneticWorth(seedlot, gw, audit);
-    when(seedlotGeneticWorthRepository.saveAll(any())).thenReturn(List.of(sgw));
-
-    SeedlotFormParentTreeSmpDto formStep5 = createFormDto(4023);
-
-    List<SeedlotGeneticWorth> list =
-        seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, List.of(formStep5), false);
-
-    Assertions.assertFalse(list.isEmpty());
-    Assertions.assertEquals(1, list.size());
-  }
-
-  @Test
-  @DisplayName("Save Seedlot Genetic Worth with one new method")
-  void saveSeedlotFormStep5_updateSeedlotAdd_shouldSucceed() {
-    Seedlot seedlot = new Seedlot("54321");
-    AuditInformation audit = new AuditInformation("userId");
-    GeneticWorthEntity gw = new GeneticWorthEntity();
-    gw.setGeneticWorthCode("GVO");
-
-    when(geneticWorthEntityDao.getGeneticWorthEntity("GVO")).thenReturn(Optional.of(gw));
-    SeedlotGeneticWorth sgw = new SeedlotGeneticWorth(seedlot, gw, audit);
-
-    when(seedlotGeneticWorthRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(sgw));
-    when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
-    when(seedlotGeneticWorthRepository.saveAllAndFlush(any())).thenReturn(List.of(sgw));
-
-    List<SeedlotGeneticWorth> list =
-        seedlotGeneticWorthService.saveSeedlotFormStep5(
-            seedlot, List.of(createFormDto(4025)), false);
-
-    Assertions.assertTrue(list.isEmpty());
   }
 
   @Test
@@ -189,8 +123,7 @@ class SeedlotGeneticWorthServiceTest {
     wwdGenWorth.setGeneticQualityValue(new BigDecimal("12.1"));
     wwdGenWorth.setTestedParentTreeContributionPercentage(new BigDecimal("96"));
 
-    when(seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlot.getId()))
-        .thenReturn(List.of());
+    when(seedlotGeneticWorthRepository.findAllBySeedlot_id(seedlot.getId())).thenReturn(List.of());
 
     when(geneticWorthEntityDao.getGeneticWorthEntity("GVO"))
         .thenReturn(Optional.of(mockGeneticWorthEntity("GVO")));
