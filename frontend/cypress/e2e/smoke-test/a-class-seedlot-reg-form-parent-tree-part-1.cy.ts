@@ -54,6 +54,45 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .should('have.text', regFormData.parentTree.coneSubtitle);
   });
 
+  it('Accordion', () => {
+    // Check default accordion behaviour
+    cy.get(`.${prefix}--accordion__wrapper`)
+      .should('be.visible');
+
+    // Check closing of first accordion
+    cy.get(`ul.${prefix}--accordion > li`)
+      .eq(0)
+      .find(`button.${prefix}--accordion__heading`)
+      .click();
+
+    cy.get(`ul.${prefix}--accordion > li`)
+      .eq(0)
+      .find(`.${prefix}--accordion__wrapper`)
+      .should('not.be.visible');
+
+    // Check closing of second accordion
+    cy.get(`ul.${prefix}--accordion > li`)
+      .eq(1)
+      .find(`button.${prefix}--accordion__heading`)
+      .click();
+
+    cy.get(`ul.${prefix}--accordion > li`)
+      .eq(1)
+      .find(`.${prefix}--accordion__wrapper`)
+      .should('not.be.visible');
+
+    // Check closing of third accordion
+    cy.get(`ul.${prefix}--accordion > li`)
+      .eq(2)
+      .find(`button.${prefix}--accordion__heading`)
+      .click();
+
+    cy.get(`ul.${prefix}--accordion > li`)
+      .eq(2)
+      .find(`.${prefix}--accordion__wrapper`)
+      .should('not.be.visible');
+  });
+
   it('Cone and pollen count table entries', () => {
     // Check error message for negative Cone count
     cy.get('#212-coneCount-value-input')
