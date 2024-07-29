@@ -303,4 +303,47 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get('#219-pollenCount-value-input')
       .should('have.value', '');
   });
+
+  it('Pagination', () => {
+    const dropdownNumber = '20';
+    // Number of item dropdown
+    cy.get(`.${prefix}--pagination__left`)
+      .find('select')
+      .as('dropdownBtn')
+      .select(dropdownNumber);
+
+    // Check total number of rows are 20
+    cy.get(`table.${prefix}--data-table > tbody > tr`)
+      .should('equal', dropdownNumber);
+
+    // Page number dropdown
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`select.${prefix}--select-input`)
+      .select(2);
+
+    cy.get(`.${prefix}--pagination__left`)
+      .find(`.${prefix}--pagination__items-count`)
+      .should('include.text', '21–40');
+
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`select.${prefix}--select-input`)
+      .select(1);
+
+    // Forward Backward buttons
+    cy.get(`.${prefix}--pagination__control-buttons`)
+      .find(`button.${prefix}--pagination__button--forward`)
+      .click();
+  
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`select.${prefix}--select-input`)
+      .should('have.value', '2');
+
+    cy.get(`.${prefix}--pagination__control-buttons`)
+      .find(`button.${prefix}--pagination__button--backward`)
+      .click();
+
+    cy.get(`.${prefix}--pagination__right`)
+      .find(`select.${prefix}--select-input`)
+      .should('have.value', '1');
+  });
 });
