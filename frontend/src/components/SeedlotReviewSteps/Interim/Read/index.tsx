@@ -55,7 +55,7 @@ const InterimReviewRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="interim-agency-name"
-            label="Interim agency acronym"
+            label="Interim agency"
             value={agencyQuery.data}
             showSkeleton={isFetchingData || agencyQuery.fetchStatus === 'fetching'}
           />
