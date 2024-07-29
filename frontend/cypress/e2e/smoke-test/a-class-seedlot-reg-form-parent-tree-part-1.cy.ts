@@ -17,7 +17,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
   let seedlotNum: string;
   const speciesKey = 'pli';
-  let seedlotData: SeedlotRegFixtureType;
 
   beforeEach(() => {
     // Login
@@ -27,7 +26,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     });
 
     cy.fixture('aclass-seedlot').then((fData) => {
-      seedlotData = fData;
       cy.task('getData', fData[speciesKey].species).then((sNumber) => {
         seedlotNum = sNumber as string;
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
