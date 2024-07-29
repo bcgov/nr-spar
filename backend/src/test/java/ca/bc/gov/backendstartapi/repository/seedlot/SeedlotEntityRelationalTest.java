@@ -63,16 +63,16 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setCollectionClientNumber("00000003");
     seedlot.setCollectionLocationCode("04");
-    seedlot.setCollectionStartDate(LocalDateTime.now());
-    seedlot.setCollectionEndDate(LocalDateTime.now());
+    seedlot.setCollectionStartDate(LocalDate.now());
+    seedlot.setCollectionEndDate(LocalDate.now());
     seedlot.setNumberOfContainers(new BigDecimal(10));
     seedlot.setContainerVolume(new BigDecimal(20));
     seedlot.setTotalConeVolume(new BigDecimal(200));
 
     seedlot.setInterimStorageClientNumber("00000005");
     seedlot.setInterimStorageLocationCode("06");
-    seedlot.setInterimStorageStartDate(LocalDateTime.now());
-    seedlot.setInterimStorageEndDate(LocalDateTime.now());
+    seedlot.setInterimStorageStartDate(LocalDate.now());
+    seedlot.setInterimStorageEndDate(LocalDate.now());
     seedlot.setInterimStorageFacilityCode("007");
 
     seedlot.setFemaleGameticContributionMethod("F");
@@ -92,12 +92,12 @@ abstract class SeedlotEntityRelationalTest {
 
     seedlot.setExtractionClientNumber("00000009");
     seedlot.setExtractionLocationCode("10");
-    seedlot.setExtractionStartDate(LocalDateTime.now());
-    seedlot.setExtractionEndDate(LocalDateTime.now());
+    seedlot.setExtractionStartDate(LocalDate.now());
+    seedlot.setExtractionEndDate(LocalDate.now());
     seedlot.setStorageClientNumber("00000011");
     seedlot.setStorageLocationCode("12");
-    seedlot.setTemporaryStorageStartDate(LocalDateTime.now());
-    seedlot.setTemporaryStorageEndDate(LocalDateTime.now());
+    seedlot.setTemporaryStorageStartDate(LocalDate.now());
+    seedlot.setTemporaryStorageEndDate(LocalDate.now());
 
     seedlot.setDeclarationOfTrueInformationUserId("user1");
     seedlot.setDeclarationOfTrueInformationTimestamp(LocalDateTime.now());

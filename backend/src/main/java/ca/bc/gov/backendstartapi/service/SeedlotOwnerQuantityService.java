@@ -89,16 +89,28 @@ public class SeedlotOwnerQuantityService {
     for (SeedlotFormOwnershipDto ownershipDto : sfodList) {
       SeedlotOwnerQuantity ownerQuantityEntity =
           new SeedlotOwnerQuantity(
-              seedlot, ownershipDto.ownerClientNumber(), ownershipDto.ownerLocnCode());
+              seedlot,
+              ownershipDto.ownerClientNumber(),
+              ownershipDto.ownerLocnCode(),
+              mopeMap.get(ownershipDto.methodOfPaymentCode()));
       ownerQuantityEntity.setOriginalPercentageOwned(ownershipDto.originalPctOwned());
       ownerQuantityEntity.setOriginalPercentageReserved(ownershipDto.originalPctRsrvd());
       ownerQuantityEntity.setOriginalPercentageSurplus(ownershipDto.originalPctSrpls());
       ownerQuantityEntity.setFundingSourceCode(ownershipDto.sparFundSrceCode());
       ownerQuantityEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());
-      ownerQuantityEntity.setMethodOfPayment(mopeMap.get(ownershipDto.methodOfPaymentCode()));
       soqList.add(ownerQuantityEntity);
     }
 
     return seedlotOwnerQuantityRepository.saveAll(soqList);
+  }
+
+  /**
+   * Find all seedlot owner quantity given a seedlot number.
+   *
+   * @param seedlotNumber The seedlot number.
+   * @return A list of found records, or an empty list.
+   */
+  public List<SeedlotOwnerQuantity> findAllBySeedlot(String seedlotNumber) {
+    return seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotNumber);
   }
 }

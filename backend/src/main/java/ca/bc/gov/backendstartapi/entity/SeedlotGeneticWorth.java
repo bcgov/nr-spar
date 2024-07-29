@@ -6,6 +6,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -33,13 +34,13 @@ public class SeedlotGeneticWorth {
   // region Identifier
   @Id
   @JoinColumn(name = "seedlot_number")
-  @ManyToOne(optional = false)
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private Seedlot seedlot;
 
   @Id
   @JoinColumn(name = "genetic_worth_code")
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private GeneticWorthEntity geneticWorth;
 

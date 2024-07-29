@@ -11,6 +11,7 @@ import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -39,11 +40,23 @@ public class SeedlotCollectionMethodService {
 
     seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
     seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());
-    seedlot.setCollectionStartDate(formStep1.collectionStartDate());
-    seedlot.setCollectionEndDate(formStep1.collectionEndDate());
-    seedlot.setNumberOfContainers(formStep1.noOfContainers());
-    seedlot.setContainerVolume(formStep1.volPerContainer());
-    seedlot.setTotalConeVolume(formStep1.clctnVolume());
+    if (!Objects.isNull(seedlot.getCollectionStartDate())
+        && !formStep1.collectionStartDate().isEqual(seedlot.getCollectionStartDate())) {
+      seedlot.setCollectionStartDate(formStep1.collectionStartDate());
+    }
+    if (!Objects.isNull(seedlot.getCollectionEndDate())
+        && !formStep1.collectionEndDate().isEqual(seedlot.getCollectionEndDate())) {
+      seedlot.setCollectionEndDate(formStep1.collectionEndDate());
+    }
+    if (formStep1.noOfContainers().compareTo(seedlot.getNumberOfContainers()) != 0) {
+      seedlot.setNumberOfContainers(formStep1.noOfContainers());
+    }
+    if (formStep1.volPerContainer().compareTo(seedlot.getContainerVolume()) != 0) {
+      seedlot.setContainerVolume(formStep1.volPerContainer());
+    }
+    if (formStep1.clctnVolume().compareTo(seedlot.getTotalConeVolume()) != 0) {
+      seedlot.setTotalConeVolume(formStep1.clctnVolume());
+    }
     seedlot.setComment(formStep1.seedlotComment());
 
     SparLog.info(
@@ -109,5 +122,17 @@ public class SeedlotCollectionMethodService {
     }
 
     seedlotCollectionMethodRepository.saveAll(scmList);
+  }
+
+  /**
+   * Get All Seedlot collection method codes given a seedlot number.
+   *
+   * @param seedlotNumber The seedlot number.
+   * @return List of collection method codes or an empty list.
+   */
+  public List<Integer> getAllSeedlotCollectionMethodsBySeedlot(String seedlotNumber) {
+    return seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotNumber).stream()
+        .map(col -> col.getConeCollectionMethod().getConeCollectionMethodCode())
+        .collect(Collectors.toList());
   }
 }

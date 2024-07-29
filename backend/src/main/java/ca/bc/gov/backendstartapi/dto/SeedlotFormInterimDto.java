@@ -2,7 +2,7 @@ package ca.bc.gov.backendstartapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /** This record represents the seedlot form step 3. */
 @Schema(description = "Seedlot interim information. Form step 3")
@@ -34,7 +34,7 @@ public record SeedlotFormInterimDto(
               """,
             example = "2023/12/20")
         @NotNull
-        LocalDateTime intermStrgStDate,
+        LocalDate intermStrgStDate,
     @Schema(
             description =
                 """
@@ -43,9 +43,10 @@ public record SeedlotFormInterimDto(
               """,
             example = "2023/12/21")
         @NotNull
-        LocalDateTime intermStrgEndDate,
+        LocalDate intermStrgEndDate,
     @Schema(
-            description = """
+            description =
+                """
                   Description of the storage facility type when 'Other' option is chosen.
               """,
             example = "Mini fridge",

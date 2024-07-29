@@ -44,7 +44,6 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
   @Test
   void create() {
     var seedlot = createSeedlot("00000");
-    var seedlotOwnerQuantity = new SeedlotOwnerQuantity(seedlot, "00020", "21");
 
     LocalDate now = LocalDate.now();
     var effectiveDate = now.minusDays(2);
@@ -53,6 +52,7 @@ class SeedlotOwnerQuantityRelationalTest extends SeedlotEntityRelationalTest {
 
     var methodOfPayment =
         new MethodOfPaymentEntity("ITC", "Invoice to Client Address", effectiveDateRange);
+    var seedlotOwnerQuantity = new SeedlotOwnerQuantity(seedlot, "00020", "21", methodOfPayment);
     methodOfPaymentRepository.saveAndFlush(methodOfPayment);
 
     seedlotOwnerQuantity.setOriginalPercentageOwned(new BigDecimal(0));

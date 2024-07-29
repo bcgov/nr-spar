@@ -38,7 +38,10 @@ public class SeedlotOrchardService {
     seedlot.setProducedWithBiotechnologicalProcesses(formStep4.biotechProcessesInd());
     seedlot.setPollenContaminationPresentInOrchard(formStep4.pollenContaminationInd());
     seedlot.setPollenContaminationPercentage(formStep4.pollenContaminationPct());
-    seedlot.setPollenContaminantBreedingValue(formStep4.contaminantPollenBv());
+    if (formStep4.contaminantPollenBv().compareTo(seedlot.getPollenContaminantBreedingValue())
+        != 0) {
+      seedlot.setPollenContaminantBreedingValue(formStep4.contaminantPollenBv());
+    }
     seedlot.setPollenContaminationMethodCode(formStep4.pollenContaminationMthdCode());
 
     SparLog.info(
@@ -61,6 +64,7 @@ public class SeedlotOrchardService {
           seedlot.getId());
 
       seedlotOrchardRepository.deleteAllBySeedlot_id(seedlot.getId());
+      seedlotOrchardRepository.flush();
     } else if (!seedlotOrchards.isEmpty() && !canDelete) {
       SparLog.info("Update seedlot {} orchard data failed due to conflict.", seedlot.getId());
       throw new SeedlotConflictDataException(seedlot.getId());

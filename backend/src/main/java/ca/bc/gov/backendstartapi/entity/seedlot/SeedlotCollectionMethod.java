@@ -33,13 +33,13 @@ import lombok.ToString;
 public class SeedlotCollectionMethod {
   // region Identifier
   @Id
-  @JoinColumn(name = "seedlot_number", updatable = false)
+  @JoinColumn(name = "seedlot_number", updatable = false, nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private Seedlot seedlot;
 
   @Id
-  @JoinColumn(name = "cone_collection_method_code")
+  @JoinColumn(name = "cone_collection_method_code", updatable = false, nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private ConeCollectionMethodEntity coneCollectionMethod;

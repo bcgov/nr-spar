@@ -15,8 +15,10 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -31,14 +33,16 @@ import org.locationtech.jts.geom.Point;
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
 public class Seedlot implements Serializable {
   @Id
   @Column(name = "seedlot_number", length = 5)
   @NonNull
   private String id;
 
-  @JoinColumn(name = "seedlot_status_code")
+  @JoinColumn(name = "seedlot_status_code", nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
+  @NonNull
   private SeedlotStatusEntity seedlotStatus;
 
   @Column(name = "seedlot_comment", length = 2000)
@@ -84,10 +88,10 @@ public class Seedlot implements Serializable {
   private String collectionLocationCode;
 
   @Column(name = "collection_start_date")
-  private LocalDateTime collectionStartDate;
+  private LocalDate collectionStartDate;
 
   @Column(name = "collection_end_date")
-  private LocalDateTime collectionEndDate;
+  private LocalDate collectionEndDate;
 
   @Column(name = "no_of_containers", precision = 6, scale = 2)
   private BigDecimal numberOfContainers;
@@ -112,10 +116,10 @@ public class Seedlot implements Serializable {
   private String interimStorageLocationCode;
 
   @Column(name = "interm_strg_st_date")
-  private LocalDateTime interimStorageStartDate;
+  private LocalDate interimStorageStartDate;
 
   @Column(name = "interm_strg_end_date")
-  private LocalDateTime interimStorageEndDate;
+  private LocalDate interimStorageEndDate;
 
   @Column(name = "interm_facility_code", length = 3)
   private String interimStorageFacilityCode;
@@ -179,10 +183,10 @@ public class Seedlot implements Serializable {
   private String extractionLocationCode;
 
   @Column(name = "extraction_st_date")
-  private LocalDateTime extractionStartDate;
+  private LocalDate extractionStartDate;
 
   @Column(name = "extraction_end_date")
-  private LocalDateTime extractionEndDate;
+  private LocalDate extractionEndDate;
 
   @Column(name = "temporary_strg_client_number", length = 8)
   private String storageClientNumber;
@@ -191,10 +195,10 @@ public class Seedlot implements Serializable {
   private String storageLocationCode;
 
   @Column(name = "temporary_strg_start_date")
-  private LocalDateTime temporaryStorageStartDate;
+  private LocalDate temporaryStorageStartDate;
 
   @Column(name = "temporary_strg_end_date")
-  private LocalDateTime temporaryStorageEndDate;
+  private LocalDate temporaryStorageEndDate;
 
   // endregion
 

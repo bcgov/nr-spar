@@ -52,12 +52,9 @@ import ca.bc.gov.backendstartapi.exception.SeedlotSourceNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotStatusNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.security.UserInfo;
 import jakarta.transaction.Transactional;
@@ -90,19 +87,13 @@ public class SeedlotService {
 
   private final SeedlotSourceRepository seedlotSourceRepository;
 
-  private final SeedlotStatusRepository seedlotStatusRepository;
-
   private final GeneticClassRepository geneticClassRepository;
 
   private final LoggedUserService loggedUserService;
 
   private final SeedlotCollectionMethodService seedlotCollectionMethodService;
 
-  private final SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
-
   private final SeedlotOwnerQuantityService seedlotOwnerQuantityService;
-
-  private final SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
 
   private final SeedlotOrchardService seedlotOrchardService;
 
@@ -145,7 +136,7 @@ public class SeedlotService {
     Seedlot seedlot = new Seedlot(nextSeedlotNumber(createDto.geneticClassCode()));
 
     Optional<SeedlotStatusEntity> seedLotStatusEntity =
-        seedlotStatusRepository.findById(Constants.CLASS_A_SEEDLOT_STATUS);
+        seedlotStatusService.findById(Constants.CLASS_A_SEEDLOT_STATUS);
     seedlot.setSeedlotStatus(seedLotStatusEntity.orElseThrow(InvalidSeedlotRequestException::new));
 
     seedlot.setApplicantClientNumber(createDto.applicantClientNumber());
@@ -533,9 +524,7 @@ public class SeedlotService {
         seedlotRepository.findById(seedlotNumber).orElseThrow(SeedlotNotFoundException::new);
 
     List<Integer> seedlotCollectionList =
-        seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
-            .map(col -> col.getConeCollectionMethod().getConeCollectionMethodCode())
-            .collect(Collectors.toList());
+        seedlotCollectionMethodService.getAllSeedlotCollectionMethodsBySeedlot(seedlotInfo.getId());
 
     // Divide the seedlot data to each respective step
     SeedlotFormCollectionDto collectionStep =
@@ -551,7 +540,7 @@ public class SeedlotService {
             seedlotCollectionList);
 
     List<SeedlotFormOwnershipDto> ownershipStep =
-        seedlotOwnerQuantityRepository.findAllBySeedlot_id(seedlotInfo.getId()).stream()
+        seedlotOwnerQuantityService.findAllBySeedlot(seedlotInfo.getId()).stream()
             .filter(
                 owner ->
                     owner.getOriginalPercentageOwned() != null
@@ -703,7 +692,7 @@ public class SeedlotService {
       String statusOnSuccess) {
 
     StringBuilder sb = new StringBuilder();
-    sb.append("\n\n\n\n\n-----\n\n\n\n\n ### Received request ");
+    sb.append("Received request ");
     if (isTscAdmin) {
       sb.append("by TSC Admin ");
     }
@@ -712,19 +701,16 @@ public class SeedlotService {
     } else {
       sb.append("from review form ");
     }
-    sb.append("to update seedlot {} with revision count {}");
+    sb.append("to update seedlot {}");
 
-    SparLog.info(sb.toString(), seedlotNumber, form.applicantAndSeedlotInfo().revisionCount());
+    SparLog.info(sb.toString(), seedlotNumber);
 
     Optional<Seedlot> seedlotEntity = seedlotRepository.findById(seedlotNumber);
     Seedlot seedlot = seedlotEntity.orElseThrow(SeedlotNotFoundException::new);
-
-    if (seedlot.getRevisionCount() != form.applicantAndSeedlotInfo().revisionCount()) {
-      SparLog.info("Unable to update seedlot! Record already updated by another user!");
-      throw new SeedlotConflictDataException(seedlotNumber);
-    }
+    logSeedlot(seedlot);
 
     String currentSeedlotStatus = seedlot.getSeedlotStatus().getSeedlotStatusCode();
+    logSeedlot(seedlot);
 
     /*
      * This determines whether delete actions can be performed
@@ -744,24 +730,29 @@ public class SeedlotService {
 
     // Object to hold data in memory, avoid querying same data
     final SeedlotSaveInMemoryDto inMemoryDto = new SeedlotSaveInMemoryDto();
+    logSeedlot(seedlot);
 
     // Step 1 (Collection methods)
     // Update the Seedlot instance and tables [seedlot_collection_method]
     seedlotCollectionMethodService.saveSeedlotFormStep1(
         seedlot, form.seedlotFormCollectionDto(), canDelete);
+    logSeedlot(seedlot);
 
     // step 2 (Seedlot Owners)
     // Update tables [seedlot_owner_quantity]
     seedlotOwnerQuantityService.saveSeedlotFormStep2(
         seedlot, form.seedlotFormOwnershipDtoList(), canDelete);
+    logSeedlot(seedlot);
 
     // Step 3 (Interim)
     // Update the Seedlot instance only
     saveSeedlotFormStep3(seedlot, form.seedlotFormInterimDto());
+    logSeedlot(seedlot);
 
     // Step 4 (Seedlot Orchards)
     // Update the Seedlot instance and tables [seedlot_orchard]
     seedlotOrchardService.saveSeedlotFormStep4(seedlot, form.seedlotFormOrchardDto(), canDelete);
+    logSeedlot(seedlot);
 
     // Step 5 (Parent Tree, SMP Mix, Area of Use, Parent Tree Contribution)
     // Update the Seedlot instance and tables [
@@ -777,14 +768,17 @@ public class SeedlotService {
         form.seedlotFormParentTreeDtoList(),
         form.seedlotFormParentTreeSmpDtoList(),
         canDelete);
+    logSeedlot(seedlot);
 
     // Step 6 (Extraction)
     // Update the Seedlot instance only
     saveSeedlotFormStep6(seedlot, form.seedlotFormExtractionDto());
+    logSeedlot(seedlot);
 
     // Update the Seedlot instance only
     // Fetch data from Oracle to get the primary Seed Plan Unit id
     setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId(), inMemoryDto);
+    logSeedlot(seedlot);
 
     if (isFromRegularForm) {
       // Update the Seedlot instance and table seedlot_genetic_worth
@@ -793,9 +787,10 @@ public class SeedlotService {
       // Calculate Seedlot GeoSpatial (for Seedlot, mean latitude, mean longitude, mean elevation)
       // Calculate Genetic Worth
       // Update Seedlot Ne, collection elevation, and collection lat long
-      // Saved the Seedlot calculated Genetic Worth
+      // Saves the Seedlot calculated Genetic Worth
       setParentTreeContribution(
           seedlot, form.seedlotFormParentTreeDtoList(), form.seedlotFormParentTreeSmpDtoList());
+      logSeedlot(seedlot);
 
       // If there is no area of use data already set:
       // Update elevation min max, latitude min max, longitude min max, and SPZ
@@ -805,6 +800,7 @@ public class SeedlotService {
         SparLog.info("Area of Use data has NOT been set previously, setting area of use data");
         setAreaOfUse(seedlot, form.seedlotFormOrchardDto().primaryOrchardId(), inMemoryDto);
       }
+      logSeedlot(seedlot);
     } else {
       updateApplicantAndSeedlot(seedlot, form.applicantAndSeedlotInfo());
       // Override Seedlot elevation min max, latitude min max, and longitude min max (area of use)
@@ -827,19 +823,24 @@ public class SeedlotService {
     if (currentSeedlotStatus.equals("PND")) {
       setSeedlotDeclaredInfo(seedlot);
     }
+    logSeedlot(seedlot);
 
     // Update the Seedlot instance only
     setSeedlotStatus(seedlot, statusOnSuccess);
+    logSeedlot(seedlot);
 
-    SparLog.info(
-        "Saving the Seedlot Entity for seedlot number {} and revision count {}",
-        seedlotNumber,
-        seedlot.getRevisionCount());
+    SparLog.info("Saving the Seedlot Entity for seedlot number {}", seedlotNumber);
     seedlotRepository.save(seedlot);
+    logSeedlot(seedlot);
 
     SparLog.info("Seedlot entity and related tables successfully saved.");
     return new SeedlotStatusResponseDto(
         seedlotNumber, seedlot.getSeedlotStatus().getSeedlotStatusCode());
+  }
+
+  private void logSeedlot(Seedlot seedlot) {
+    SparLog.info(
+        "Logging seedlot number {} version {}", seedlot.getId(), seedlot.getRevisionCount());
   }
 
   private void setBecValues(
@@ -887,7 +888,13 @@ public class SeedlotService {
         ptCalculationResDto.calculatedPtVals().getGeospatialData();
 
     // Ne value
-    seedlot.setEffectivePopulationSize(ptCalculationResDto.calculatedPtVals().getNeValue());
+    if (ptCalculationResDto
+            .calculatedPtVals()
+            .getNeValue()
+            .compareTo(seedlot.getEffectivePopulationSize())
+        != 0) {
+      seedlot.setEffectivePopulationSize(ptCalculationResDto.calculatedPtVals().getNeValue());
+    }
 
     // Elevation
     seedlot.setCollectionElevation(collectionGeoData.getMeanElevation());
@@ -1105,8 +1112,14 @@ public class SeedlotService {
 
     seedlot.setInterimStorageClientNumber(formStep3.intermStrgClientNumber());
     seedlot.setInterimStorageLocationCode(formStep3.intermStrgLocnCode());
-    seedlot.setInterimStorageStartDate(formStep3.intermStrgStDate());
-    seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
+    if (!Objects.isNull(seedlot.getInterimStorageStartDate())
+        && !formStep3.intermStrgStDate().isEqual(seedlot.getInterimStorageStartDate())) {
+      seedlot.setInterimStorageStartDate(formStep3.intermStrgStDate());
+    }
+    if (!Objects.isNull(seedlot.getInterimStorageEndDate())
+        && !formStep3.intermStrgEndDate().isEqual(seedlot.getInterimStorageEndDate())) {
+      seedlot.setInterimStorageEndDate(formStep3.intermStrgEndDate());
+    }
     seedlot.setInterimStorageFacilityCode(formStep3.intermFacilityCode());
     // If the facility type is Other, then a description is required.
     SparLog.info("{} FACILITY TYPE CODE", formStep3.intermFacilityCode());
@@ -1132,19 +1145,25 @@ public class SeedlotService {
         "Saving Seedlot Form Step-5 Parent Tree SMP Mix for seedlot number {}", seedlot.getId());
 
     seedlotParentTreeService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList, canDelete);
+    logSeedlot(seedlot);
     seedlotParentTreeGeneticQualityService.saveSeedlotFormStep5(
         seedlot, seedlotFormParentTreeDtoList);
+    logSeedlot(seedlot);
 
     // SMP Mix information is optional, so the array may be empty,
     // in this case there is no need to save the list
     if (!seedlotFormParentTreeSmpDtoList.isEmpty()) {
       smpMixService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
+      logSeedlot(seedlot);
       smpMixGeneticQualityService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeSmpDtoList);
+      logSeedlot(seedlot);
       seedlotParentTreeSmpMixService.saveSeedlotFormStep5(
           seedlot, seedlotFormParentTreeSmpDtoList, canDelete);
+      logSeedlot(seedlot);
     } else {
       SparLog.info("No SmpMix data for seedlot number {}", seedlot.getId());
     }
+    logSeedlot(seedlot);
   }
 
   private void saveSeedlotFormStep6(Seedlot seedlot, SeedlotFormExtractionDto formStep6) {
@@ -1153,12 +1172,24 @@ public class SeedlotService {
 
     seedlot.setExtractionClientNumber(formStep6.extractoryClientNumber());
     seedlot.setExtractionLocationCode(formStep6.extractoryLocnCode());
-    seedlot.setExtractionStartDate(formStep6.extractionStDate());
-    seedlot.setExtractionEndDate(formStep6.extractionEndDate());
+    if (!Objects.isNull(seedlot.getExtractionStartDate())
+        && !formStep6.extractionStDate().isEqual(seedlot.getExtractionStartDate())) {
+      seedlot.setExtractionStartDate(formStep6.extractionStDate());
+    }
+    if (!Objects.isNull(seedlot.getExtractionEndDate())
+        && !formStep6.extractionEndDate().isEqual(seedlot.getExtractionEndDate())) {
+      seedlot.setExtractionEndDate(formStep6.extractionEndDate());
+    }
 
     seedlot.setStorageClientNumber(formStep6.storageClientNumber());
     seedlot.setStorageLocationCode(formStep6.storageLocnCode());
-    seedlot.setTemporaryStorageStartDate(formStep6.temporaryStrgStartDate());
-    seedlot.setTemporaryStorageEndDate(formStep6.temporaryStrgEndDate());
+    if (!Objects.isNull(seedlot.getTemporaryStorageStartDate())
+        && !formStep6.temporaryStrgStartDate().isEqual(seedlot.getTemporaryStorageStartDate())) {
+      seedlot.setTemporaryStorageStartDate(formStep6.temporaryStrgStartDate());
+    }
+    if (!Objects.isNull(seedlot.getTemporaryStorageEndDate())
+        && !formStep6.temporaryStrgEndDate().isEqual(seedlot.getTemporaryStorageEndDate())) {
+      seedlot.setTemporaryStorageEndDate(formStep6.temporaryStrgEndDate());
+    }
   }
 }

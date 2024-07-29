@@ -33,7 +33,7 @@ public class SeedlotOwnerQuantity {
 
   // region Identifier
   @Id
-  @JoinColumn(name = "seedlot_number", updatable = false)
+  @JoinColumn(name = "seedlot_number", updatable = false, nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private Seedlot seedlot;
@@ -59,8 +59,9 @@ public class SeedlotOwnerQuantity {
   @Column(name = "original_pct_srpls", precision = 4, scale = 1, nullable = false)
   private BigDecimal originalPercentageSurplus;
 
-  @JoinColumn(name = "method_of_payment_code")
+  @JoinColumn(name = "method_of_payment_code", updatable = false, nullable = false)
   @ManyToOne(fetch = FetchType.LAZY)
+  @NonNull
   private MethodOfPaymentEntity methodOfPayment;
 
   @Column(name = "spar_fund_srce_code", length = 3)
@@ -72,5 +73,4 @@ public class SeedlotOwnerQuantity {
   @Version
   @Setter(AccessLevel.NONE)
   private int revisionCount;
-
 }

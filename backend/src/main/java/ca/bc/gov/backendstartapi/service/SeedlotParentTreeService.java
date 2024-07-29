@@ -212,9 +212,6 @@ public class SeedlotParentTreeService {
       seedlotPtListToInsert.add(seedlotParentTree);
     }
 
-    SparLog.info(
-        "3. seedlotParentTreeRepository size: {}", seedlotParentTreeRepository.findAll().size());
-
     return seedlotParentTreeRepository.saveAll(seedlotPtListToInsert);
   }
 }

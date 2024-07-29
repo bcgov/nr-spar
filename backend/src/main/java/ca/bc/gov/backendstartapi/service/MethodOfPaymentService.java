@@ -50,6 +50,12 @@ public class MethodOfPaymentService {
     return list;
   }
 
+  /**
+   * Get all methods of payments given its codes.
+   *
+   * @param methods All the method of payment codes.
+   * @return List of the method of payment entity.
+   */
   public List<MethodOfPaymentEntity> getAllMethodsByCodeList(List<String> methods) {
     SparLog.info("Fetching list of payment methods with methods {}", methods);
     List<MethodOfPaymentEntity> list =
