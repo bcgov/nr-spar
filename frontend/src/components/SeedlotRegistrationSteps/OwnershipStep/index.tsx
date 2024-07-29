@@ -124,9 +124,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
 
   return (
     <div>
-      {
-        !isReview ? (<ScrollToTop />) : null
-      }
+      <ScrollToTop enabled={!isReview} />
       <div className="ownership-header">
         <div className="ownership-step-title-box">
           {
