@@ -775,8 +775,6 @@ class SeedlotServiceTest {
         .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
 
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(seedlot, List.of(parentTreeSmpDto), true))
-        .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
     doNothing()
