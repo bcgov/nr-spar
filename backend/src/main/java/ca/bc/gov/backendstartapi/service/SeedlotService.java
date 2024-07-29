@@ -782,7 +782,7 @@ public class SeedlotService {
     setBecValues(seedlot, form.seedlotFormOrchardDto().primaryOrchardId(), inMemoryDto);
 
     if (isFromRegularForm) {
-      // Update the Seedlot instance only
+      // Update the Seedlot instance and table seedlot_genetic_worth
       // Calculate Ne value (effective population size)
       // Calculate Mean GeoSpatial (for SMP Mix, mean latitude, mean longitude, mean elevation)
       // Calculate Seedlot GeoSpatial (for Seedlot, mean latitude, mean longitude, mean elevation)
@@ -1126,8 +1126,6 @@ public class SeedlotService {
     seedlotParentTreeService.saveSeedlotFormStep5(seedlot, seedlotFormParentTreeDtoList, canDelete);
     seedlotParentTreeGeneticQualityService.saveSeedlotFormStep5(
         seedlot, seedlotFormParentTreeDtoList);
-    seedlotGeneticWorthService.saveSeedlotFormStep5(
-        seedlot, seedlotFormParentTreeDtoList, canDelete);
 
     // SMP Mix information is optional, so the array may be empty,
     // in this case there is no need to save the list
