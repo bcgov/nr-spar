@@ -29,6 +29,10 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-2(SMP succ
         const url = `/seedlots/a-class-registration/${seedlotNum}/?step=5`;
         cy.visit(url);
         cy.url().should('contains', url);
+        cy.get('#parent-tree-step-tab-list-id')
+          .find('button')
+          .contains('SMP success on parent')
+          .click();
       });
     });
   });
