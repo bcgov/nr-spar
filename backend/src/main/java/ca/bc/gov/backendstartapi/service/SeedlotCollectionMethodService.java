@@ -8,10 +8,10 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.util.ValueUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -40,21 +40,20 @@ public class SeedlotCollectionMethodService {
 
     seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
     seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());
-    if (!Objects.isNull(seedlot.getCollectionStartDate())
-        && !formStep1.collectionStartDate().isEqual(seedlot.getCollectionStartDate())) {
+    if (!ValueUtil.isValueEqual(
+        seedlot.getCollectionStartDate(), formStep1.collectionStartDate())) {
       seedlot.setCollectionStartDate(formStep1.collectionStartDate());
     }
-    if (!Objects.isNull(seedlot.getCollectionEndDate())
-        && !formStep1.collectionEndDate().isEqual(seedlot.getCollectionEndDate())) {
+    if (!ValueUtil.isValueEqual(seedlot.getCollectionEndDate(), formStep1.collectionEndDate())) {
       seedlot.setCollectionEndDate(formStep1.collectionEndDate());
     }
-    if (formStep1.noOfContainers().compareTo(seedlot.getNumberOfContainers()) != 0) {
+    if (!ValueUtil.isValueEqual(formStep1.noOfContainers(), seedlot.getNumberOfContainers())) {
       seedlot.setNumberOfContainers(formStep1.noOfContainers());
     }
-    if (formStep1.volPerContainer().compareTo(seedlot.getContainerVolume()) != 0) {
+    if (!ValueUtil.isValueEqual(formStep1.volPerContainer(), seedlot.getContainerVolume())) {
       seedlot.setContainerVolume(formStep1.volPerContainer());
     }
-    if (formStep1.clctnVolume().compareTo(seedlot.getTotalConeVolume()) != 0) {
+    if (!ValueUtil.isValueEqual(formStep1.clctnVolume(), seedlot.getTotalConeVolume())) {
       seedlot.setTotalConeVolume(formStep1.clctnVolume());
     }
     seedlot.setComment(formStep1.seedlotComment());

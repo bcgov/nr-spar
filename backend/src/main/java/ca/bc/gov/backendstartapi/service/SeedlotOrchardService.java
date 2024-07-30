@@ -7,6 +7,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotOrchard;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotOrchardRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.util.ValueUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,8 +39,8 @@ public class SeedlotOrchardService {
     seedlot.setProducedWithBiotechnologicalProcesses(formStep4.biotechProcessesInd());
     seedlot.setPollenContaminationPresentInOrchard(formStep4.pollenContaminationInd());
     seedlot.setPollenContaminationPercentage(formStep4.pollenContaminationPct());
-    if (formStep4.contaminantPollenBv().compareTo(seedlot.getPollenContaminantBreedingValue())
-        != 0) {
+    if (!ValueUtil.isValueEqual(
+        formStep4.contaminantPollenBv(), seedlot.getPollenContaminantBreedingValue())) {
       seedlot.setPollenContaminantBreedingValue(formStep4.contaminantPollenBv());
     }
     seedlot.setPollenContaminationMethodCode(formStep4.pollenContaminationMthdCode());

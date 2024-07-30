@@ -31,7 +31,10 @@ public class OrchardEntity {
   private String vegetationCode;
 
   @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JoinColumn(name = "ORCHARD_LOT_TYPE_CODE", referencedColumnName = "ORCHARD_LOT_TYPE_CODE", updatable = false)
+  @JoinColumn(
+      name = "ORCHARD_LOT_TYPE_CODE",
+      referencedColumnName = "ORCHARD_LOT_TYPE_CODE",
+      updatable = false)
   private OrchardLotTypeCode orchardLotTypeCode;
 
   @Column(name = "ORCHARD_STAGE_CODE", length = 3)
