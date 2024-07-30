@@ -37,34 +37,32 @@ const ExtractionStorageReviewRead = () => {
           />
         </Column>
       </Row>
-      {
-        state.extraction.startDate.value && state.extraction.endDate.value
-          ? (
-            <Row>
-              <Column className="info-col" sm={4} md={4} lg={4}>
-                <ReadOnlyInput
-                  id="extraction-start-date"
-                  label="Extraction start date"
-                  value={
-                    luxon.fromISO(state.extraction.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                  }
-                  showSkeleton={isFetchingData}
-                />
-              </Column>
-              <Column className="info-col" sm={4} md={4} lg={4}>
-                <ReadOnlyInput
-                  id="extraction-end-date"
-                  label="Extraction end date"
-                  value={
-                    luxon.fromISO(state.extraction.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                  }
-                  showSkeleton={isFetchingData}
-                />
-              </Column>
-            </Row>
-          )
-          : null
-      }
+      <Row>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="extraction-start-date"
+            label="Extraction start date"
+            value={
+              state.extraction.startDate.value
+                ? luxon.fromISO(state.extraction.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
+                : ''
+            }
+            showSkeleton={isFetchingData}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="extraction-end-date"
+            label="Extraction end date"
+            value={
+              state.extraction.endDate.value
+                ? luxon.fromISO(state.extraction.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
+                : ''
+            }
+            showSkeleton={isFetchingData}
+          />
+        </Column>
+      </Row>
 
       <Divider />
 
@@ -91,34 +89,32 @@ const ExtractionStorageReviewRead = () => {
           />
         </Column>
       </Row>
-      {
-        state.seedStorage.startDate.value && state.seedStorage.endDate.value
-          ? (
-            <Row>
-              <Column className="info-col" sm={4} md={4} lg={4}>
-                <ReadOnlyInput
-                  id="storage-start-date"
-                  label="Storage start date"
-                  value={
-                    luxon.fromISO(state.seedStorage.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                  }
-                  showSkeleton={isFetchingData}
-                />
-              </Column>
-              <Column className="info-col" sm={4} md={4} lg={4}>
-                <ReadOnlyInput
-                  id="storage-end-date"
-                  label="Storage end date"
-                  value={
-                    luxon.fromISO(state.seedStorage.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
-                  }
-                  showSkeleton={isFetchingData}
-                />
-              </Column>
-            </Row>
-          )
-          : null
-      }
+      <Row>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="storage-start-date"
+            label="Storage start date"
+            value={
+              state.seedStorage.startDate.value
+                ? luxon.fromISO(state.seedStorage.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
+                : ''
+            }
+            showSkeleton={isFetchingData}
+          />
+        </Column>
+        <Column className="info-col" sm={4} md={4} lg={4}>
+          <ReadOnlyInput
+            id="storage-end-date"
+            label="Storage end date"
+            value={
+              state.seedStorage.endDate.value
+                ? luxon.fromISO(state.seedStorage.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
+                : ''
+            }
+            showSkeleton={isFetchingData}
+          />
+        </Column>
+      </Row>
     </FlexGrid>
   );
 };
