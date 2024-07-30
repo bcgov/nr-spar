@@ -8,10 +8,13 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 /** This class contains methods for handling objects values and comparing. */
-public class ValueUtil {
+@NoArgsConstructor(access = AccessLevel.NONE)
+public final class ValueUtil {
 
   /**
    * Check if a variable has value. Note that only objects should be handled here, meaning that
@@ -51,16 +54,16 @@ public class ValueUtil {
     if (obj instanceof Double doubleValue) {
       return doubleValue != 0D;
     }
-    if (obj instanceof Page page) {
+    if (obj instanceof Page<?> page) {
       return page.hasContent();
     }
-    if (obj instanceof List list) {
+    if (obj instanceof List<?> list) {
       return !list.isEmpty();
     }
     if (obj instanceof Boolean) {
       return true;
     }
-    if (obj instanceof Optional opt) {
+    if (obj instanceof Optional<?> opt) {
       return opt.isPresent();
     }
     SparLog.warn("Class not handled {}", obj.getClass());
@@ -84,35 +87,15 @@ public class ValueUtil {
       return false;
     }
 
-    if (objOne instanceof String valOne && objTwo instanceof String valTwo) {
-      return valOne.equals(valTwo);
+    if (objOne.getClass() == BigDecimal.class) {
+      return BigDecimal.class.cast(objOne).compareTo(BigDecimal.class.cast(objTwo)) == 0;
     }
-    if (objOne instanceof BigDecimal valOne && objTwo instanceof BigDecimal valTwo) {
-      return valOne.compareTo(valTwo) == 0;
+    if (objOne.getClass() == LocalDateTime.class) {
+      return LocalDateTime.class.cast(objOne).isEqual(LocalDateTime.class.cast(objTwo));
     }
-    if (objOne instanceof Integer valOne && objTwo instanceof Integer valTwo) {
-      return valOne.equals(valTwo);
+    if (objOne.getClass() == LocalDate.class) {
+      return LocalDate.class.cast(objOne).isEqual(LocalDate.class.cast(objTwo));
     }
-    if (objOne instanceof Character valOne && objTwo instanceof Character valTwo) {
-      return valOne.charValue() == valTwo.charValue();
-    }
-    if (objOne instanceof LocalDateTime valOne && objTwo instanceof LocalDateTime valTwo) {
-      return valOne.isEqual(valTwo);
-    }
-    if (objOne instanceof LocalDate valOne && objTwo instanceof LocalDate valTwo) {
-      return valOne.isEqual(valTwo);
-    }
-    if (objOne instanceof Long valOne && objTwo instanceof Long valTwo) {
-      return valOne.equals(valTwo);
-    }
-    if (objOne instanceof Double valOne && objTwo instanceof Double valTwo) {
-      return valOne.equals(valTwo);
-    }
-    if (objOne instanceof Boolean valOne && objTwo instanceof Boolean valTwo) {
-      return valOne.equals(valTwo);
-    }
-
-    SparLog.warn("Class not handled {}", objOne.getClass());
-    return false;
+    return objOne.equals(objTwo);
   }
 }

@@ -54,6 +54,7 @@ class ValueUtilTest {
   void isValueEqualFalseTest() {
     Assertions.assertFalse(ValueUtil.isValueEqual(null, null));
     Assertions.assertFalse(ValueUtil.isValueEqual(0, "0"));
+    Assertions.assertFalse(ValueUtil.isValueEqual(Integer.valueOf(99), "99"));
     Assertions.assertFalse(ValueUtil.isValueEqual("0", "00"));
     Assertions.assertFalse(ValueUtil.isValueEqual(new BigDecimal("11"), new BigDecimal("1")));
     Assertions.assertFalse(ValueUtil.isValueEqual(Integer.valueOf(0), Integer.valueOf(0)));
