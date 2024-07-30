@@ -168,7 +168,7 @@ public class SeedlotEndpoint {
   /**
    * Created a new Seedlot in the system.
    *
-   * @param createDto A {@link SeedlotCreateDto} containig all required field to get a new
+   * @param createDto A {@link SeedlotCreateDto} containing all required field to get a new
    *     registration started.
    * @return A {@link SeedlotStatusResponseDto} with all created values.
    */
@@ -211,7 +211,7 @@ public class SeedlotEndpoint {
     long started = Instant.now().toEpochMilli();
     SeedlotStatusResponseDto response = seedlotService.createSeedlot(createDto);
     long finished = Instant.now().toEpochMilli();
-    SparLog.info("Time spent: {} ms", (finished - started));
+    SparLog.info("Time spent: {} ms - create seedlot first step", (finished - started));
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
@@ -464,7 +464,7 @@ public class SeedlotEndpoint {
     SeedlotStatusResponseDto createDto =
         seedlotService.updateSeedlotWithForm(seedlotNumber, form, isTscAdmin, true, "SUB");
     long finished = Instant.now().toEpochMilli();
-    SparLog.info("Time spent: {} ms", (finished - started));
+    SparLog.info("Time spent: {} ms - submit seedlot regular form", (finished - started));
     return ResponseEntity.status(HttpStatus.CREATED).body(createDto);
   }
 
