@@ -113,7 +113,8 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .type(testAcronym)
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+    cy.get('#ext-agency-number-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     cy.get('.applicant-error-notification')
@@ -133,6 +134,10 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .clear()
       .type('00')
       .blur();
+
+    cy.get('#ext-location-code-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
+      .should('be.visible');
 
     // Save changes
     cy.saveSeedlotRegFormProgress();
@@ -251,7 +256,8 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .type(testAcronym)
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+    cy.get('#str-agency-number-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     cy.get('.applicant-error-notification')
@@ -271,6 +277,10 @@ describe('A Class Seedlot Registration form, Extraction and Storage', () => {
       .clear()
       .type('00')
       .blur();
+
+    cy.get('#str-location-code-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
+      .should('be.visible');
 
     // Save changes
     cy.saveSeedlotRegFormProgress();

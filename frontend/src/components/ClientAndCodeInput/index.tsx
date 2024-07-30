@@ -178,6 +178,7 @@ const ClientAndCodeInput = ({
       });
     },
     onSuccess: (data) => {
+      setShowErrorBanner(false);
       setClientAndCode({
         ...clientInput,
         value: data.clientNumber,
@@ -242,7 +243,8 @@ const ClientAndCodeInput = ({
   const renderLoading = (
     isLoading: boolean,
     isSuccess: boolean,
-    showLoadingStatus: boolean
+    showLoadingStatus: boolean,
+    idPrefix: string
   ) => {
     if (
       (isLoading || isSuccess)
@@ -254,6 +256,7 @@ const ClientAndCodeInput = ({
         <Tooltip
           className="input-loading-tooltip"
           label={tooltipLabel}
+          id={`${idPrefix}-loading-status-tooltip`}
         >
           <button className="tooltip-trigger" type="button" aria-label="loading-status-display">
             <InlineLoading
@@ -381,7 +384,8 @@ const ClientAndCodeInput = ({
               renderLoading(
                 validateClientAcronymMutation.isLoading,
                 validateClientAcronymMutation.isSuccess,
-                showClientValidationStatus
+                showClientValidationStatus,
+                clientInput.id
               )
             }
           </div>
@@ -421,7 +425,8 @@ const ClientAndCodeInput = ({
               renderLoading(
                 validateLocationCodeMutation.isLoading,
                 validateLocationCodeMutation.isSuccess,
-                showLocCodeValidationStatus
+                showLocCodeValidationStatus,
+                locationCodeInput.id
               )
             }
           </div>
@@ -468,7 +473,7 @@ const ClientAndCodeInput = ({
                     applySelectedClient={(client: ForestClientSearchType) => {
                       const selectedClient: StringInputType = {
                         ...clientInput,
-                        value: client.acronym,
+                        value: client.clientNumber,
                         isInvalid: false
                       };
 
@@ -477,6 +482,9 @@ const ClientAndCodeInput = ({
                         value: client.locationCode,
                         isInvalid: false
                       };
+
+                      formatDisplayedAcronym(client.acronym);
+                      formatDisplayedLocCode(client.locationCode);
 
                       setLocationCodeHelperText(supportTexts.locationCode.helperTextEnabled);
                       setClientAndCode(selectedClient, selectedLocationCode);

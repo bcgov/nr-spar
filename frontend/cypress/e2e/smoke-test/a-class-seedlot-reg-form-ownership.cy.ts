@@ -137,7 +137,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .type(testAcronym, { delay: TYPE_DELAY })
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+    cy.get('#ownership-agency-0-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     // Enter invalid location code
@@ -155,7 +156,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .type('02', { delay: TYPE_DELAY })
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+    cy.get('#ownership-location-code-0-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     // Save changes
@@ -462,7 +464,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .find('button.form-action-btn')
       .contains('Next')
       .click();
-  
+
     // Check svg with complete checkmark on Step 3
     // FLAKY, needs investigation
     cy.get('ul.spar-seedlot-reg-progress-bar li')
