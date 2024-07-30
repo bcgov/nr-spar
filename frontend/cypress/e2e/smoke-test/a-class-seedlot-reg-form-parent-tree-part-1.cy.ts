@@ -368,7 +368,6 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     // Number of item dropdown
     cy.get(`.${prefix}--pagination__left`)
       .find('select')
-      .as('dropdownBtn')
       .select(dropdownNumber);
 
     // Wait for the table in Step 5 to load
