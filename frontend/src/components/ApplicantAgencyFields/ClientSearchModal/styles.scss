@@ -1,4 +1,5 @@
 @use '@bcgov-nr/nr-theme/design-tokens/variables.scss' as vars;
+@use '@bcgov-nr/nr-theme/design-tokens/colors.scss' as colors;
 @use '@carbon/type';
 
 .client-search-modal {
@@ -12,6 +13,14 @@
 
   .#{vars.$bcgov-prefix}--btn.#{vars.$bcgov-prefix}--btn--disabled {
     box-shadow: none;
+  }
+
+  .client-results-table {
+    background-color: #{colors.$white};
+  }
+
+  #client-search-input {
+    box-shadow: inset 4px -1px 0 1000px #{colors.$white};
   }
 
   .client-search-grid {

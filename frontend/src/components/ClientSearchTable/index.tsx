@@ -151,13 +151,14 @@ const ClientSearchTable = (
             }
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody className="client-results-table">
           {
             processedData.length
               ? processedData.map((client) => (
                 <TableRow
                   id={`client-table-row-${client.clientNumber}-${client.locationCode}`}
                   key={`${client.clientNumber}-${client.locationCode}`}
+                  className={client === currentSelected ? 'bx--data-table--selected' : ''}
                 >
                   {
                     typeof selectClientFn === 'function'
@@ -166,7 +167,7 @@ const ClientSearchTable = (
                           radio
                           ariaLabel={`Select client ${client.clientName} with location code ${client.locationCode}`}
                           id={`client-radio-${client.clientNumber}-${client.locationCode}`}
-                          name="client-radio"
+                          name={`client-radio-${client.clientNumber}-${client.locationCode}`}
                           checked={client === currentSelected}
                           onSelect={() => {
                             selectClientFn(client);
