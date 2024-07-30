@@ -247,7 +247,7 @@ describe('My seedlots page', () => {
       });
   });
 
-  it.only('Pagination', () => {
+  it('Pagination', () => {
     const dropdownNumber = '10';
     // Number of item dropdown
     cy.get(`.${prefix}--pagination__left`)
