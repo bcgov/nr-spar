@@ -74,7 +74,6 @@ const SubmitModal = (
             kind="info"
             title={inputText.modal.notification.title}
             subtitle={inputText.modal.notification.subtitle}
-            caption={inputText.modal.notification.link}
           />
         </Modal>
       )}
