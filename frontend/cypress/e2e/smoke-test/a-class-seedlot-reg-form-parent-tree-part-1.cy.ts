@@ -56,6 +56,21 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
     cy.get(`.${prefix}--accordion__wrapper`)
       .should('be.visible');
 
+    // Check template links
+    cy.get('ul.donwload-templates-list')
+      .find('li')
+      .contains('Download cone and pollen count and SMP success on parent template.')
+      .click();
+
+    cy.readFile(`${Cypress.config('downloadsFolder')}/Seedlot_composition_template.csv`);
+
+    cy.get('ul.donwload-templates-list')
+      .find('li')
+      .contains('Download calculation of SMP mix template.')
+      .click();
+
+    cy.readFile(`${Cypress.config('downloadsFolder')}/SMP_Mix_Volume_template.csv`);
+
     // Check closing of first accordion
     cy.get(`ul.${prefix}--accordion > li`)
       .eq(0)
