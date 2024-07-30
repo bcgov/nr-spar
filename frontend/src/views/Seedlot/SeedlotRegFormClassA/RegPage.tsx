@@ -64,30 +64,20 @@ const RegPage = () => {
         <Row>
           <Column className="seedlot-registration-title">
             <PageTitle
-              title="Seedlot Registration"
+              title={`Registration for seedlot ${seedlotNumber}`}
               subtitle={(
                 <div className="seedlot-form-subtitle">
-                  <span>
-                    {`Seedlot ${seedlotNumber}`}
-                  </span>
                   {
                     isFormIncomplete
                       ? (
-                        <>
-                          <span>
-                            &nbsp;
-                            -
-                            &nbsp;
-                          </span>
-                          <SaveTooltipLabel
-                            handleSaveBtn={handleSaveBtn}
-                            saveStatus={saveStatus}
-                            saveDescription={saveDescription}
-                            mutationStatus={saveProgressStatus}
-                            lastSaveTimestamp={lastSaveTimestamp}
-                            reloadFormDraft={reloadFormDraft}
-                          />
-                        </>
+                        <SaveTooltipLabel
+                          handleSaveBtn={handleSaveBtn}
+                          saveStatus={saveStatus}
+                          saveDescription={saveDescription}
+                          mutationStatus={saveProgressStatus}
+                          lastSaveTimestamp={lastSaveTimestamp}
+                          reloadFormDraft={reloadFormDraft}
+                        />
                       )
                       : null
                   }
