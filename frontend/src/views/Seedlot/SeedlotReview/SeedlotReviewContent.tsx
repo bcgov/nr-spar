@@ -371,6 +371,7 @@ const SeedlotReviewContent = () => {
     <FlexGrid className="seedlot-review-grid">
       <Loading
         active={tscSeedlotMutation.isLoading || isFetchingData}
+        className="loading-status-component"
       />
       <Button
         kind="secondary"

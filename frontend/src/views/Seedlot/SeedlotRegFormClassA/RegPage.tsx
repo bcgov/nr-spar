@@ -145,7 +145,7 @@ const RegPage = () => {
           <Column className="seedlot-registration-row">
             {
               isFetchingData || submitSeedlot.status === 'loading'
-                ? <Loading />
+                ? <Loading className="loading-status-component" />
                 : (
                   <RegForm
                     cleanParentTables={cleanParentTables}
