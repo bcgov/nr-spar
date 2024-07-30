@@ -47,7 +47,7 @@ const CollectionReviewRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="collection-agency-name"
-            label="Cone collector agency name"
+            label="Cone collector agency"
             value={agencyQuery.data ? getForestClientLabel(agencyQuery.data) : ''}
             showSkeleton={isFetchingData || agencyQuery.isFetching}
           />

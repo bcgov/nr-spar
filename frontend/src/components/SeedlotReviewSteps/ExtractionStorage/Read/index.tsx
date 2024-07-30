@@ -23,8 +23,8 @@ const ExtractionStorageReviewRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="extraction-agency-name"
-            label="Extractory agency acronym"
-            value={state.extraction.agency.value.label}
+            label="Extractory agency"
+            value={state.extraction.agency.value.description}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -77,8 +77,8 @@ const ExtractionStorageReviewRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="storage-agency-name"
-            label="Seed storage agency acronym"
-            value={state.seedStorage.agency.value.label}
+            label="Seed storage agency"
+            value={state.seedStorage.agency.value.description}
             showSkeleton={isFetchingData}
           />
         </Column>

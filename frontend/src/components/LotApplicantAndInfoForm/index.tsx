@@ -23,7 +23,7 @@ import { FormProps } from './definitions';
 import {
   vegLotAgency,
   vegLotLocationCode,
-  agencyFieldsProp
+  agencyFieldsText
 } from './constants';
 
 import './styles.scss';
@@ -115,7 +115,7 @@ const LotApplicantAndInfoForm = ({
             ? seedlotFormData.locationCode
             : vegLotLocationCode
         }
-        fieldsProps={agencyFieldsProp}
+        fieldsProps={agencyFieldsText(isReview)}
         setAgencyAndCode={
           (
             _isDefault: BooleanInputType,
@@ -132,7 +132,7 @@ const LotApplicantAndInfoForm = ({
             id={seedlotFormData?.email.id}
             name="email"
             type="email"
-            labelText="Applicant email address"
+            labelText="Email address"
             helperText="The Tree Seed Centre will use this to communicate with the applicant"
             invalid={seedlotFormData ? seedlotFormData.email.isInvalid : null}
             invalidText="Please enter a valid email"
