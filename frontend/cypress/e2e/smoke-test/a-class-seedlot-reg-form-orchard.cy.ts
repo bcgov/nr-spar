@@ -606,9 +606,8 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
     cy.get('ul.spar-seedlot-reg-progress-bar').scrollIntoView({ easing: 'linear' });
 
-    // Check svg with complete checkmark on Step 3
-    cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(3)
-      .should('have.class', `${prefix}--progress-step--complete`);
+    // Check step complete status
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Orchard');
   });
 });

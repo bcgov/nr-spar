@@ -56,11 +56,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
   it('Page title and accordion title', () => {
     cy.get('.seedlot-registration-title')
       .find('h1')
-      .should('have.text', 'Seedlot Registration');
-
-    cy.get('.seedlot-registration-title')
-      .find('.seedlot-form-subtitle')
-      .should('contain.text', `Seedlot ${seedlotNum}`);
+      .should('have.text', `Registration for seedlot ${seedlotNum}`);
 
     cy.get('.ownership-header')
       .find('h3')
@@ -465,10 +461,8 @@ describe('A Class Seedlot Registration form, Ownership', () => {
       .contains('Next')
       .click();
 
-    // Check svg with complete checkmark on Step 3
-    // FLAKY, needs investigation
-    cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(1)
-      .should('have.class', `${prefix}--progress-step--complete`);
+    // Check step complete status
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Ownership');
   });
 });

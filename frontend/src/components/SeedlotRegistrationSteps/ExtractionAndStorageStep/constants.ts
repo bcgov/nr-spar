@@ -35,7 +35,7 @@ export const storageTextConfig: ClientAndCodeInputTextType = {
 export const inputText = {
   extractionTitle: {
     titleText: 'Extraction information',
-    subtitleText: 'Enter the extractory agency information and extraction\'s star and end dates for this seedlot'
+    subtitleText: 'Enter the extractory agency information and extraction\'s start and end dates for this seedlot'
   },
   date: {
     extraction: {

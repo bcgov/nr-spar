@@ -57,11 +57,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
     cy.get('.seedlot-registration-title')
       .find('h1')
-      .should('have.text', 'Seedlot Registration');
-
-    cy.get('.seedlot-registration-title')
-      .find('.seedlot-form-subtitle')
-      .should('contain.text', `Seedlot ${seedlotNum}`);
+      .should('have.text', `Registration for seedlot ${seedlotNum}`);
 
     cy.get('.collection-step-row')
       .find('h2')
@@ -326,10 +322,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .contains('Next')
       .click();
 
-    // Check svg with complete checkmark on Step 1
-    cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(0)
-      .should('have.class', `${prefix}--progress-step--complete`);
+    // Check step complete status
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Collection');
   });
 
   // Step 3
@@ -520,9 +515,8 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .contains('Next')
       .click();
 
-    // Check svg with complete checkmark on Step 3
-    cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(2)
-      .should('have.class', `${prefix}--progress-step--complete`);
+    // Check step complete status
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Interim storage');
   });
 });
