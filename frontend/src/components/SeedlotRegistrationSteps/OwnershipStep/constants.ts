@@ -13,7 +13,7 @@ export const agencyFieldsProps: AgencyTextPropsType = {
     labelText: 'Use applicant agency as owner agency'
   },
   agencyInput: {
-    titleText: 'Owner agency',
+    titleText: 'Owner agency acronym',
     invalidText: 'Please choose a valid owner agency, filter with agency number, name or acronym'
   },
   locationCode: {

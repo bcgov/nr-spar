@@ -10,6 +10,7 @@ import { getForestClientByNumberOrAcronym } from '../../../../api-service/forest
 import getFacilityTypes from '../../../../api-service/facilityTypesAPI';
 import { MONTH_DAY_YEAR } from '../../../../config/DateFormat';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
+import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 
 const InterimReviewRead = () => {
   const {
@@ -54,7 +55,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-agency-name"
             label="Interim agency acronym"
-            value={agencyQuery.data ? agencyQuery.data.acronym : ''}
+            value={agencyQuery.data ? getForestClientLabel(agencyQuery.data) : ''}
             showSkeleton={isFetchingData || agencyQuery.isFetching}
           />
         </Column>

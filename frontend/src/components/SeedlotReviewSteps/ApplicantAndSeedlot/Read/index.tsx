@@ -22,8 +22,8 @@ const ApplicantAndSeedlotRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="applicant-and-seedlot-agency-name"
-            label="Applicant agency acronym"
-            value={defaultAgencyObj.label}
+            label="Applicant agency"
+            value={defaultAgencyObj.description}
             showSkeleton={isFetchingData}
           />
         </Column>
