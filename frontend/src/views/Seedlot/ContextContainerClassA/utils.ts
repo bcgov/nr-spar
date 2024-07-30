@@ -947,6 +947,9 @@ export const convertParentTree = (
     if (!parentTreeData.allParentTreeData) {
       console.log('no parentTreeData.allParentTreeData');
     }
+    if (!parentTreeData.allParentTreeData[key]) {
+      console.log('no parentTreeData.allParentTreeData[key] for key', key);
+    }
     parentTreePayload.push({
       seedlotNumber,
       parentTreeId: parentTreeData.allParentTreeData[key].parentTreeId,

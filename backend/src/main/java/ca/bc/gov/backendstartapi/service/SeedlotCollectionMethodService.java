@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import ca.bc.gov.backendstartapi.util.ValueUtil;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -66,6 +67,14 @@ public class SeedlotCollectionMethodService {
     List<SeedlotCollectionMethod> seedlotCollectionList =
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
 
+    boolean allEqual = 
+        areExistingEqualsNewOnes(seedlotCollectionList, formStep1.coneCollectionMethodCodes());
+
+    if (allEqual) {
+      SparLog.info("Do not need to touch seedlot cone collection methods, they are the same");
+      return;
+    }
+
     if (!seedlotCollectionList.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SeedlotCollectionMethod table for seedlot number {}",
@@ -80,6 +89,23 @@ public class SeedlotCollectionMethodService {
     }
 
     addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());
+  }
+
+  private boolean areExistingEqualsNewOnes(
+      List<SeedlotCollectionMethod> existing, List<Integer> newOnes) {
+    List<Integer> existingOnes =
+        existing.stream()
+            .map(
+                scm -> Integer.valueOf(scm.getConeCollectionMethod().getConeCollectionMethodCode()))
+            .toList();
+
+    List<Integer> sortedList1 = new ArrayList<>(existingOnes);
+    List<Integer> sortedList2 = new ArrayList<>(newOnes);
+
+    Collections.sort(sortedList1);
+    Collections.sort(sortedList2);
+
+    return sortedList1.equals(sortedList2);
   }
 
   /**

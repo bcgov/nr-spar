@@ -58,6 +58,12 @@ public class SeedlotOrchardService {
     }
     List<SeedlotOrchard> seedlotOrchards = getAllSeedlotOrchardBySeedlotNumber(seedlot.getId());
 
+    boolean allEqual = areExistingEqualsNewOnes(seedlotOrchards, formStep4);
+    if (allEqual) {
+      SparLog.info("Do not need to touch seedlot orchards, they are the same");
+      return;
+    }
+
     if (!seedlotOrchards.isEmpty() && canDelete) {
       SparLog.info(
           "Deleting {} previous records on the SeedlotOrchard table for seedlot number {}",
@@ -72,6 +78,31 @@ public class SeedlotOrchardService {
     }
 
     saveSeedlotOrchards(seedlot, formStep4.primaryOrchardId(), formStep4.secondaryOrchardId());
+  }
+
+  private boolean areExistingEqualsNewOnes(
+      List<SeedlotOrchard> seedlotOrchards, SeedlotFormOrchardDto formStep4) {
+    // Primary
+    Optional<SeedlotOrchard> primaryOpt =
+        seedlotOrchards.stream().filter(SeedlotOrchard::getIsPrimary).findFirst();
+
+    if (primaryOpt.isEmpty()) {
+      return false;
+    }
+
+    boolean primaryEqual = ValueUtil.isValueEqual(primaryOpt.get(), formStep4.primaryOrchardId());
+
+    // Secondary
+    Optional<SeedlotOrchard> secondaryOpt =
+        seedlotOrchards.stream().filter(so -> !so.getIsPrimary()).findFirst();
+
+    if (secondaryOpt.isEmpty()) {
+      return primaryEqual;
+    }
+
+    boolean secondaryEqual =
+        ValueUtil.isValueEqual(secondaryOpt.get(), formStep4.secondaryOrchardId());
+    return secondaryEqual && primaryEqual;
   }
 
   private void saveSeedlotOrchards(
