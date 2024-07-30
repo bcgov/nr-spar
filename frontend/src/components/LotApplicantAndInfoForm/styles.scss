@@ -20,6 +20,15 @@
   .agency-email-row{
     margin-bottom: 3rem;
   }
+
+  .#{vars.$bcgov-prefix}--radio-button__label-text {
+    p {
+      font-size: var(--#{vars.$bcgov-prefix}-body-compact-01-font-size, 0.875rem);
+      font-weight: var(--#{vars.$bcgov-prefix}-body-compact-01-font-weight, 400);
+      line-height: var(--#{vars.$bcgov-prefix}-body-compact-01-line-height, 1.28572);
+      letter-spacing: var(--#{vars.$bcgov-prefix}-body-compact-01-letter-spacing, 0.16px);
+    }
+  }
 }
 
 .applicant-info-input {

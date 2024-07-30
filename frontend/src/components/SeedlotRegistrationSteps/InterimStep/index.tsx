@@ -15,6 +15,7 @@ import {
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
+import ScrollToTop from '../../ScrollToTop';
 import ClientAndCodeInput from '../../ClientAndCodeInput';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
@@ -142,6 +143,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
 
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
+      <ScrollToTop enabled={!isReview} />
       <Row className="interim-title-row">
         <Column className="section-title" sm={4} md={8} lg={16}>
           <h2>{pageTexts.interimTitleSection.title}</h2>

@@ -8,7 +8,7 @@ export const extractorTextConfig: ClientAndCodeInputTextType = {
     labelText: 'The extractory agency is the Tree Seed Center (TSC)'
   },
   agencyInput: {
-    titleText: 'Extractory agency',
+    titleText: 'Extractory agency acronym',
     invalidText: 'Please choose a valid extractory agency, filter with agency number, name or acronym'
   },
   locationCode: {
@@ -23,8 +23,8 @@ export const storageTextConfig: ClientAndCodeInputTextType = {
     labelText: 'The seed storage agency is the Tree Seed Center (TSC)'
   },
   agencyInput: {
-    titleText: 'Seed storage agency',
-    invalidText: 'Please choose a valid extractory agency, filter with agency number, name or acronym'
+    titleText: 'Seed storage agency acronym',
+    invalidText: 'Please choose a valid seed storage agency, filter with agency number, name or acronym'
   },
   locationCode: {
     name: 'storage-locationCode',
@@ -64,6 +64,6 @@ export const inputText = {
   },
   storageTitle: {
     titleText: 'Temporary seed storage',
-    subtitleText: 'Enter the seed storage agency information and storage\'s star and end dates for this seedlot'
+    subtitleText: 'Enter the seed storage agency information and storage\'s start and end dates for this seedlot'
   }
 };

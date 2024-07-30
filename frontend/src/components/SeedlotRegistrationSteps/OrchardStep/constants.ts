@@ -58,7 +58,7 @@ export const orchardStepText = {
       checkbox: 'No, there was no pollen contamination present in the seed orchard'
     },
     breedingPercentage: {
-      label: 'Contaminant pollen breeding percentage (optional) (%)',
+      label: 'Contaminant pollen breeding value (optional) (%)',
       helper: 'If contaminant pollen was present and the contaminant pollen has a breeding value',
       invalid: 'Please enter a valid value between 0 and 100'
     },

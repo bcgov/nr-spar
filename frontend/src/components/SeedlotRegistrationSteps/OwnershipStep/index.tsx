@@ -18,6 +18,7 @@ import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import getFundingSources from '../../../api-service/fundingSourcesAPI';
 import TitleAccordion from '../../TitleAccordion';
+import ScrollToTop from '../../ScrollToTop';
 import SingleOwnerInfo from './SingleOwnerInfo';
 
 import {
@@ -138,6 +139,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
 
   return (
     <div>
+      <ScrollToTop enabled={!isReview} />
       <div className="ownership-header">
         <div className="ownership-step-title-box">
           {

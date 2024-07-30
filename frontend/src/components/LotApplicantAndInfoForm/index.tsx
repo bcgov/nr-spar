@@ -109,7 +109,7 @@ const LotApplicantAndInfoForm = ({
             ? seedlotFormData.locationCode
             : vegLotLocationCode
         }
-        textConfig={clientAndCodeInputText}
+        textConfig={clientAndCodeInputText(isReview)}
         setClientAndCode={
           (
             client: StringInputType,
@@ -125,7 +125,7 @@ const LotApplicantAndInfoForm = ({
             id={seedlotFormData?.email.id}
             name="email"
             type="email"
-            labelText="Applicant email address"
+            labelText="Email address"
             helperText="The Tree Seed Centre will use this to communicate with the applicant"
             invalid={seedlotFormData ? seedlotFormData.email.isInvalid : null}
             invalidText="Please enter a valid email"
