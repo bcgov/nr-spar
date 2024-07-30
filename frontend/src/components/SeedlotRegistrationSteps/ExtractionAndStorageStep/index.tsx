@@ -11,6 +11,7 @@ import {
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
+import ScrollToTop from '../../ScrollToTop';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
@@ -95,6 +96,7 @@ const ExtractionAndStorage = (
 
   return (
     <FlexGrid className="extraction-and-storage-form" fullWidth>
+      <ScrollToTop enabled={!isReview} />
       <Row className="extraction-information-title">
         <Column className="section-title" sm={4} md={8} lg={16}>
           <h2>{inputText.extractionTitle.titleText}</h2>
