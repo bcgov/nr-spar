@@ -220,6 +220,10 @@ const RegPage = () => {
                       submitFn={() => {
                         submitSeedlot.mutate(getSeedlotPayload(allStepData, seedlotNumber));
                       }}
+                      setStepFn={(e: number) => {
+                        updateProgressStatus(e, formStep);
+                        setStep((e - formStep));
+                      }}
                     />
                   )
               }

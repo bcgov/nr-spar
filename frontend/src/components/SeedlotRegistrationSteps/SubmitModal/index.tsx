@@ -3,7 +3,8 @@ import {
   Checkbox,
   Button,
   Modal,
-  ToastNotification
+  ActionableNotification,
+  Link
 } from '@carbon/react';
 import * as Icons from '@carbon/icons-react';
 
@@ -18,6 +19,7 @@ type SubmitModalProps = {
   renderIconName?: string;
   disableBtn: boolean;
   submitFn: Function;
+  setStepFn: Function;
 }
 
 const SubmitModal = (
@@ -25,7 +27,8 @@ const SubmitModal = (
     btnText,
     renderIconName,
     disableBtn,
-    submitFn
+    submitFn,
+    setStepFn
   }: SubmitModalProps
 ) => {
   const [declareTrue, setDeclareTrue] = useState<boolean>(false);
@@ -69,11 +72,28 @@ const SubmitModal = (
               setDeclareTrue(e.target.checked);
             }}
           />
-          <ToastNotification
+          <ActionableNotification
             lowContrast
             kind="info"
+            className="submit-notification"
             title={inputText.modal.notification.title}
-            subtitle={inputText.modal.notification.subtitle}
+            subtitle={(
+              <span>
+                {inputText.modal.notification.subtitle}
+                <br />
+                <br />
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                <Link
+                  tabIndex={0}
+                  href="#"
+                  onClick={() => {
+                    setStepFn(0);
+                  }}
+                >
+                  {inputText.modal.notification.link}
+                </Link>
+              </span>
+            )}
           />
         </Modal>
       )}
