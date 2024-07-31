@@ -22,6 +22,7 @@ import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAP
 
 import Subtitle from '../../Subtitle';
 import ApplicantAgencyFields from '../../ApplicantAgencyFields';
+import ScrollToTop from '../../ScrollToTop';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 
@@ -138,6 +139,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
 
   return (
     <FlexGrid className="collection-step-container">
+      <ScrollToTop enabled={!isReview} />
       <Row className="collection-step-row">
         <Column className="section-title" sm={4} md={8} lg={16} xlg={16}>
           <h2>{fieldsConfig.titleSection.title}</h2>

@@ -125,7 +125,7 @@ const OrchardReviewRead = () => {
                 <Column className="info-col" sm={4} md={8} lg={8}>
                   <ReadOnlyInput
                     id="orchard-pollen-percentage"
-                    label="Contaminant pollen breeding percentage"
+                    label="Contaminant pollen breeding value"
                     value={state.breedingPercentage.value}
                     showSkeleton={isFetchingData}
                   />

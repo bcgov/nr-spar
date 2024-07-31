@@ -27,6 +27,7 @@ import Subtitle from '../../Subtitle';
 import EmptySection from '../../EmptySection';
 import DetailSection from '../../DetailSection';
 import DescriptionBox from '../../DescriptionBox';
+import ScrollToTop from '../../ScrollToTop';
 
 import InputErrorNotification from './InputErrorNotification';
 import UploadWarnNotification from './UploadWarnNotification';
@@ -516,6 +517,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
 
   return (
     <FlexGrid className="parent-tree-step-container">
+      <ScrollToTop enabled={!isReviewDisplay} />
       {
         !isReviewDisplay
           ? (
@@ -714,7 +716,10 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                               <TableRow>
                                 {
                                   headerConfig.map((header) => (
-                                    (header.availableInTabs.includes(currentTab) && header.enabled)
+                                    (
+                                      header.availableInTabs.includes(currentTab)
+                                      && header.enabled
+                                    )
                                       ? (
                                         <TableHeader id={header.id} key={header.id}>
                                           <DefinitionTooltip

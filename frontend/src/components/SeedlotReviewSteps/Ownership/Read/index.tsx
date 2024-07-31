@@ -28,8 +28,8 @@ const OwnershipReviewRead = () => {
               <Column className="info-col" sm={4} md={4} lg={4}>
                 <ReadOnlyInput
                   id={`owner-${curOwner.id}-agency`}
-                  label="Owner agency acronym"
-                  value={curOwner.ownerAgency.value.label}
+                  label="Owner agency"
+                  value={curOwner.ownerAgency.value.description}
                   showSkeleton={isFetchingData}
                 />
               </Column>

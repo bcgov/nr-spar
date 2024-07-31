@@ -8,7 +8,7 @@ export const extractorAgencyFields: AgencyTextPropsType = {
     labelText: 'The extractory agency is the Tree Seed Centre (TSC)'
   },
   agencyInput: {
-    titleText: 'Extractory agency',
+    titleText: 'Extractory agency acronym',
     invalidText: 'Please choose a valid extractory agency, filter with agency number, name or acronym'
   },
   locationCode: {
@@ -23,8 +23,8 @@ export const storageAgencyFields: AgencyTextPropsType = {
     labelText: 'The seed storage agency is the Tree Seed Centre (TSC)'
   },
   agencyInput: {
-    titleText: 'Seed storage agency',
-    invalidText: 'Please choose a valid extractory agency, filter with agency number, name or acronym'
+    titleText: 'Seed storage agency acronym',
+    invalidText: 'Please choose a valid seed storage agency, filter with agency number, name or acronym'
   },
   locationCode: {
     name: 'storage-locationCode',
