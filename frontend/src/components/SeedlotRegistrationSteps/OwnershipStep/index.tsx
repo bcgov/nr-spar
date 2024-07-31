@@ -1,5 +1,6 @@
 import React, {
-  useState, useRef, useContext
+  useState, useRef, useContext,
+  useEffect
 } from 'react';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -101,19 +102,24 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
   const methodsOfPaymentQuery = useQuery({
     queryKey: ['methods-of-payment'],
     queryFn: getMethodsOfPayment,
-    onSuccess: (dataArr: MultiOptionsObj[]) => {
-      const defaultMethodArr = dataArr.filter((data: MultiOptionsObj) => data.isDefault);
+    select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS
+  });
+
+  // Set default method of payment for the first owner.
+  useEffect(() => {
+    if (methodsOfPaymentQuery.status === 'success') {
+      const methods = methodsOfPaymentQuery.data;
+      const defaultMethodArr = methods.filter((data: MultiOptionsObj) => data.isDefault);
       const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
       if (!state[0].methodOfPayment.value.code && !state[0].methodOfPayment.hasChanged) {
         const tempOwnershipData = structuredClone(state);
         tempOwnershipData[0].methodOfPayment.value = defaultMethod;
         setStepData('ownershipStep', tempOwnershipData);
       }
-    },
-    select: (data) => getMultiOptList(data, true, false, true, ['isDefault']),
-    staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
-  });
+    }
+  }, [methodsOfPaymentQuery.status, methodsOfPaymentQuery.fetchStatus]);
 
   const addAnOwner = () => {
     // Maximum # of ownership can be set

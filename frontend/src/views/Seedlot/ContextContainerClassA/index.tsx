@@ -347,7 +347,6 @@ const ContextContainerClassA = ({ children }: props) => {
     ) {
       const fullFormData = getAllSeedlotInfoQuery.data.seedlotData;
       const defaultAgencyNumber = seedlotQuery.data?.seedlot.applicantClientNumber;
-      // let clientAgencies: ClientAgenciesByCode = {};
 
       setAllStepData(
         resDataToState(
@@ -587,8 +586,7 @@ const ContextContainerClassA = ({ children }: props) => {
     queryFn: () => getAClassSeedlotDraft(seedlotNumber ?? ''),
     enabled: seedlotNumber !== undefined && seedlotNumber.length > 0 && isFormIncomplete,
     refetchOnMount: true,
-    select: (data) => data.data as SeedlotProgressPayloadType,
-    retry: 1
+    select: (data) => data.data as SeedlotProgressPayloadType
   });
 
   /**
@@ -625,8 +623,7 @@ const ContextContainerClassA = ({ children }: props) => {
     }
   }, [
     getFormDraftQuery.status,
-    getFormDraftQuery.isFetchedAfterMount,
-    getFormDraftQuery.isRefetching
+    getFormDraftQuery.fetchStatus
   ]);
 
   const [genWorthVals, setGenWorthVals] = useState<GenWorthValType>(() => INITIAL_GEN_WORTH_VALS);
