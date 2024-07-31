@@ -363,7 +363,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .should('have.value', '');
   });
 
-  it.only('Pagination', () => {
+  it('Pagination', () => {
     const dropdownNumber = '20';
     // Number of item dropdown
     cy.get(`.${prefix}--pagination__left`)
