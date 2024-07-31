@@ -12,6 +12,7 @@ import {
   DataTableSkeleton
 } from '@carbon/react';
 
+import prefix from '../../styles/classPrefix';
 import { ForestClientSearchType } from '../../types/ForestClientTypes/ForestClientSearchType';
 import PaginationChangeType from '../../types/PaginationChangeType';
 import { getForestClientFullName } from '../../utils/ForestClientUtils';
@@ -158,7 +159,7 @@ const ClientSearchTable = (
                 <TableRow
                   id={`client-table-row-${client.clientNumber}-${client.locationCode}`}
                   key={`${client.clientNumber}-${client.locationCode}`}
-                  className={client === currentSelected ? 'bx--data-table--selected' : ''}
+                  className={client === currentSelected ? `${prefix}--data-table--selected` : ''}
                 >
                   {
                     typeof selectClientFn === 'function'
