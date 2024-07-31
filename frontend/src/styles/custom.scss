@@ -428,10 +428,6 @@ label.#{vars.$bcgov-prefix}--label--disabled {
   list-style-type: disc;
 }
 
-.#{vars.$bcgov-prefix}--loading-overlay {
-  z-index: 10000;
-}
-
 .#{vars.$bcgov-prefix}--breadcrumb .#{vars.$bcgov-prefix}--link {
   cursor: pointer;
 }
