@@ -39,7 +39,7 @@
     "subtitle": "Enter the contributing orchard information",
     "singleOrchardError": "Are you sure you want to change the orchard? If yes, then you will lose the parent tree and SMP information in Step 5",
     "doubleOrchardError": "Are you sure you want to delete the additional orchard? If yes, then you will lose the parent tree and SMP information in Step 5",
-    "additionalOrchardLabel": "Select an additional orchard",
+    "additionalOrchardLabel": "Select a secondary orchard",
     "gameteTitle": "Gamete information",
     "gameteSubtitle": "Enter the seedlot gamete information",
     "pollenTitle": "Pollen information",

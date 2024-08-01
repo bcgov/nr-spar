@@ -647,7 +647,7 @@ export const verifyOrchardStepCompleteness = (
   orchardStepData: OrchardForm,
   focusOnIncomplete?: boolean
 ): boolean => {
-  let isComplete = false;
+  let isComplete = true;
   let idToFocus = '';
 
   if (!orchardStepData.orchards.primaryOrchard.value.code) {
