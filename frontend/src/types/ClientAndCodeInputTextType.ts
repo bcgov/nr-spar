@@ -1,4 +1,4 @@
-type AgencyTextPropsType = {
+type ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: string,
     labelText: string
@@ -13,4 +13,4 @@ type AgencyTextPropsType = {
   }
 }
 
-export default AgencyTextPropsType;
+export default ClientAndCodeInputTextType;

@@ -1,15 +1,28 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
+import { useQuery } from '@tanstack/react-query';
 
 import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import EmailDisplay from '../../../EmailDisplay';
+import { THREE_HALF_HOURS, THREE_HOURS } from '../../../../config/TimeUnits';
+import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
+import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 
 const ApplicantAndSeedlotRead = () => {
   const {
-    defaultAgencyObj, defaultCode, seedlotData, seedlotSpecies, isFetchingData
+    defaultClientNumber, defaultCode, seedlotData, seedlotSpecies, isFetchingData
   } = useContext(ClassAContext);
+
+  const forestClientQuery = useQuery({
+    queryKey: ['forest-clients', defaultClientNumber],
+    queryFn: () => getForestClientByNumberOrAcronym(defaultClientNumber),
+    enabled: !!defaultClientNumber,
+    staleTime: THREE_HOURS,
+    cacheTime: THREE_HALF_HOURS,
+    select: (fc) => getForestClientLabel(fc)
+  });
 
   return (
     <FlexGrid className="sub-section-grid">
@@ -23,8 +36,8 @@ const ApplicantAndSeedlotRead = () => {
           <ReadOnlyInput
             id="applicant-and-seedlot-agency-name"
             label="Applicant agency"
-            value={defaultAgencyObj.description}
-            showSkeleton={isFetchingData}
+            value={forestClientQuery.data}
+            showSkeleton={isFetchingData || forestClientQuery.fetchStatus === 'fetching'}
           />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>

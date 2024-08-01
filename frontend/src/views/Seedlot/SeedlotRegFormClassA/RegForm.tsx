@@ -9,7 +9,6 @@ import ExtractionAndStorage from '../../../components/SeedlotRegistrationSteps/E
 
 import ClassAContext from '../ContextContainerClassA/context';
 import { RegFormProps } from '../ContextContainerClassA/definitions';
-import { tscAgencyObj, tscLocationCode } from '../ContextContainerClassA/constants';
 
 const RegForm = (
   {
@@ -47,10 +46,7 @@ const RegForm = (
     // Extraction and Storage
     case 5:
       return (
-        <ExtractionAndStorage
-          defaultAgency={tscAgencyObj}
-          defaultCode={tscLocationCode}
-        />
+        <ExtractionAndStorage />
       );
     default:
       return null;

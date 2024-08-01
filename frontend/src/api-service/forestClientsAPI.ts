@@ -2,11 +2,12 @@ import ApiConfig from './ApiConfig';
 import api from './api';
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import { ForestClientSearchType } from '../types/ForestClientTypes/ForestClientSearchType';
-import { ClientSearchOptions } from '../components/ApplicantAgencyFields/ClientSearchModal/definitions';
+import { ClientSearchOptions } from '../components/ClientAndCodeInput/ClientSearchModal/definitions';
+import { ForestClientLocationType } from '../types/ForestClientTypes/ForestClientLocationType';
 
 export const getForestClientLocation = (clientNumber: string, locationCode: string) => {
   const url = `${ApiConfig.forestClient}/${clientNumber}/location/${locationCode}`;
-  return api.get(url).then((res) => res.data);
+  return api.get(url).then((res): ForestClientLocationType => res.data);
 };
 
 export const getForestClientByNumberOrAcronym = (numberOrAcronym: string) => {

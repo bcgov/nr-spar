@@ -19,7 +19,7 @@ import {
   isPtNumberInvalid, isSmpSuccInvalid, isVolumeInvalid,
   populateRowData, getPTNumberErrMsg
 } from './TableComponents/utils';
-import { OrchardObj } from '../OrchardStep/definitions';
+import { OrchardForm } from '../OrchardStep/definitions';
 
 import {
   RowItem, InfoSectionConfigType, RowDataDictType,
@@ -44,19 +44,20 @@ export const getTabString = (selectedIndex: number) => {
   }
 };
 
-// Returns a merged array of orchards, duplicated orchards are merged as one
-export const processOrchards = (orchards: Array<OrchardObj>): Array<OrchardObj> => {
-  const obj = {};
+// Returns a merged array of orchard ids, duplicated orchards are merged as one
+export const processOrchards = (orchardForm: OrchardForm): string[] => {
+  const orchardIds = [];
+  const primaryId = orchardForm.orchards.primaryOrchard.value.code;
+  const secondaryId = orchardForm.orchards.secondaryOrchard.value.code;
 
-  orchards.forEach((orchard) => {
-    if (orchard.selectedItem) {
-      Object.assign(obj, {
-        [orchard.selectedItem.code]: orchard
-      });
-    }
-  });
+  if (primaryId) {
+    orchardIds.push(primaryId);
+  }
+  if (secondaryId && !orchardIds.includes(secondaryId)) {
+    orchardIds.push(secondaryId);
+  }
 
-  return Object.values(obj);
+  return orchardIds;
 };
 
 export const combineObjectValues = (objs: Array<InfoSectionConfigType>): Array<InfoDisplayObj> => {
