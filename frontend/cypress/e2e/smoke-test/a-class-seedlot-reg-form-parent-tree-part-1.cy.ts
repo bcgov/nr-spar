@@ -391,7 +391,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .contains('Import file and continue')
       .click();
 
-    // Check values in Cone count and Pollen count columns of the table
+    // Compare values in Cone count and Pollen count columns of the table with the csv file
     cy.get('#212-coneCount-value-input')
       .should('have.value', '1');
 
@@ -412,7 +412,7 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
       .find('select')
       .select(dropdownNumber);
 
-    // Wait for the table in Step 5 to load
+    // Wait for the table to load
     cy.get('#parentTreeNumber');
 
     cy.get(`.${prefix}--pagination__left`)
