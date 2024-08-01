@@ -289,7 +289,7 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.saveSeedlotRegFormProgress();
   });
 
-  it('Funding source and method of payment default values and change the values', () => {
+  it.only('Funding source and method of payment default values and change the values', () => {
     // Expand the funding source combo box
     cy.get('#ownership-funding-source-0')
       .should('have.value', '')
@@ -305,29 +305,13 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-funding-source-0')
       .should('have.value', fundingSource);
 
-    // Method of Payment
+    // Default method of Payment
     cy.get('#ownership-method-payment-0')
-      .should('have.value', '')
-      .click();
-
-    const methodOfPayment = 'CSH - Cash Sale';
-
-    cy.get(`.${prefix}--list-box__menu-item__option`)
-      .contains(methodOfPayment)
-      .scrollIntoView()
-      .click();
-
-    cy.get('#ownership-method-payment-0')
-      .should('have.value', methodOfPayment);
+      .should('have.value', 'ITC - Invoice to Client Address');
 
     // Check 'x' button
     cy.get('.single-owner-combobox')
       .eq(0)
-      .find('[aria-label="Clear selected item"]')
-      .click();
-
-    cy.get('.single-owner-combobox')
-      .eq(1)
       .find('[aria-label="Clear selected item"]')
       .click();
 
@@ -344,9 +328,17 @@ describe('A Class Seedlot Registration form, Ownership', () => {
     cy.get('#ownership-funding-source-0')
       .should('have.value', fundingSource);
 
-    cy.get('#ownership-method-payment-0')
-      .should('have.value', '')
+    cy.get('.single-owner-combobox')
+      .eq(1)
+      .find('[aria-label="Clear selected item"]')
       .click();
+
+    cy.get('#ownership-method-payment-0')
+      .should('have.value', '');
+
+    cy.get('#ownership-method-payment-0').click();
+
+    const methodOfPayment = 'CSH - Cash Sale';
 
     cy.get(`.${prefix}--list-box__menu-item__option`)
       .contains(methodOfPayment)

@@ -113,7 +113,7 @@ const OwnershipStep = ({ isReview }: OwnershipStepProps) => {
       const methods = methodsOfPaymentQuery.data;
       const defaultMethodArr = methods.filter((data: MultiOptionsObj) => data.isDefault);
       const defaultMethod = defaultMethodArr.length === 0 ? EmptyMultiOptObj : defaultMethodArr[0];
-      if (!state[0].methodOfPayment.value.code && !state[0].methodOfPayment.hasChanged) {
+      if (!state[0].methodOfPayment.value?.code && !state[0].methodOfPayment.hasChanged) {
         const tempOwnershipData = structuredClone(state);
         tempOwnershipData[0].methodOfPayment.value = defaultMethod;
         setStepData('ownershipStep', tempOwnershipData);

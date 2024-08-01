@@ -3,12 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import {
-  Button,
-  FlexGrid,
-  Row,
-  Column,
-  Loading,
-  Modal
+  Button, FlexGrid, Row,
+  Column, Loading, Modal
 } from '@carbon/react';
 import { toast } from 'react-toastify';
 import {
@@ -69,13 +65,22 @@ import {
   validateGeneticWorth
 } from './utils';
 import { GenWorthValType } from './definitions';
+import { SaveStatusModalText } from './constants';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
   /**
    * Back/Cancel button confirmation modal.
    */
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+
+  /**
+   * Save and send to pending/approved
+   */
+  const [isSaveStatusModalOpen, setIsSaveStatusModalOpen] = useState(false);
+
+  const [statusToUpdateTo, setStatusToUpdateTo] = useState<StatusOnSaveType>('PND');
+
   const { seedlotNumber } = useParams();
 
   const vegCodeQuery = useQuery({
@@ -377,12 +382,21 @@ const SeedlotReviewContent = () => {
     if (isReadMode) {
       navigate(`/seedlots/details/${seedlotNumber}`);
     } else {
-      setIsModalOpen(true);
+      setIsCancelModalOpen(true);
     }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const closeCancelModal = () => {
+    setIsCancelModalOpen(false);
+  };
+
+  const closeSaveStatusModal = () => {
+    setIsSaveStatusModalOpen(false);
+  };
+
+  const openSaveStatusModal = (status: StatusOnSaveType) => {
+    setStatusToUpdateTo(status);
+    setIsSaveStatusModalOpen(true);
   };
 
   /**
@@ -392,7 +406,7 @@ const SeedlotReviewContent = () => {
     setIsReadMode(true);
     queryClient.refetchQueries(['seedlots', seedlotNumber]);
     queryClient.refetchQueries(['seedlot-full-form', seedlotNumber]);
-    closeModal();
+    closeCancelModal();
   };
 
   return (
@@ -592,7 +606,7 @@ const SeedlotReviewContent = () => {
                 <Button
                   kind="secondary"
                   renderIcon={Pending}
-                  onClick={() => handleSaveAndStatus('PND')}
+                  onClick={() => openSaveStatusModal('PND')}
                 >
                   Send back to pending
                 </Button>
@@ -600,7 +614,7 @@ const SeedlotReviewContent = () => {
               <Column className="action-button-col" sm={4} md={4} lg={4}>
                 <Button
                   renderIcon={Checkmark}
-                  onClick={() => handleSaveAndStatus('APP')}
+                  onClick={() => openSaveStatusModal('APP')}
                 >
                   Approve seedlot
                 </Button>
@@ -609,31 +623,88 @@ const SeedlotReviewContent = () => {
           )
           : null
       }
+
+      {/* Cancel Confirm Modal */}
+
       <Modal
         className="cancel-confirm-modal"
-        open={isModalOpen}
+        open={isCancelModalOpen}
         modalHeading="Seedlot review"
-        primaryButtonText="Save Changes"
-        secondaryButtonText="Discard Changes"
-        onRequestClose={closeModal}
+        onRequestClose={closeCancelModal}
         passiveModal
       >
         <div className="modal-content">
-          <p>
+          <h5 className="modal-header">
             Any changes you made will be discarded unless saved.
-          </p>
+          </h5>
           <div className="modal-button-group">
             <Button kind="secondary" onClick={discardChanges}>Discard changes</Button>
             <Button
               kind="primary"
               onClick={() => {
-                closeModal();
+                closeCancelModal();
                 handleEditSaveBtn();
               }}
               renderIcon={Save}
             >
               Save changes
             </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Save and update status confirm modal */}
+
+      <Modal
+        className="save-and-update-confirm-modal"
+        open={isSaveStatusModalOpen}
+        modalHeading={`Review seedlot ${seedlotNumber}`}
+        onRequestClose={closeSaveStatusModal}
+        passiveModal
+      >
+        <div className="modal-content">
+          {
+              statusToUpdateTo === 'PND'
+                ? (
+                  <div className="modal-text">
+                    {SaveStatusModalText.pendingHeader}
+                    {SaveStatusModalText.pendingBody}
+                  </div>
+                )
+                : (
+                  <div className="modal-text">{SaveStatusModalText.approveHeader}</div>
+                )
+            }
+          <div className="modal-button-group">
+            <Button kind="secondary" onClick={closeSaveStatusModal}>Cancel</Button>
+            {
+              statusToUpdateTo === 'PND'
+                ? (
+                  <Button
+                    kind="primary"
+                    onClick={() => {
+                      closeSaveStatusModal();
+                      handleSaveAndStatus('PND');
+                    }}
+                    disabled={tscSeedlotMutation.isLoading}
+                  >
+                    Send back to pending
+                  </Button>
+                )
+                : (
+                  <Button
+                    kind="primary"
+                    onClick={() => {
+                      closeSaveStatusModal();
+                      handleSaveAndStatus('APP');
+                    }}
+                    renderIcon={Checkmark}
+                    disabled={tscSeedlotMutation.isLoading}
+                  >
+                    Approve seedlot
+                  </Button>
+                )
+            }
           </div>
         </div>
       </Modal>

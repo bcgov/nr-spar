@@ -85,8 +85,9 @@
     }
   }
 
-  .cancel-confirm-modal {
 
+  .cancel-confirm-modal,
+  .save-and-update-confirm-modal {
     .#{vars.$bcgov-prefix}--modal-header__heading {
       font-size: 0.75rem;
       color: var(--#{vars.$bcgov-prefix}-text-secondary, #606062);
@@ -95,14 +96,12 @@
     .#{vars.$bcgov-prefix}--modal-content {
       padding-bottom: 1rem;
     }
+  }
 
+  .cancel-confirm-modal {
     .modal-content {
       display: flex;
       flex-direction: column;
-
-      p {
-        @include type.type-style('heading-03');
-      }
 
       .modal-button-group {
         margin-top: 3rem;
@@ -115,6 +114,31 @@
           margin-left: 0.5rem;
         }
       }
+    }
+  }
+
+  .save-and-update-confirm-modal {
+    .modal-button-group {
+      margin-top: 3rem;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+
+      .#{vars.$bcgov-prefix}--btn {
+        max-width: none;
+        width: 49%;
+      }
+    }
+  }
+
+  .modal-header {
+    @include type.type-style('heading-03');
+  }
+
+  .modal-text {
+    p {
+      padding-top: 1rem;
+      @include type.type-style('body-01');
     }
   }
 }
