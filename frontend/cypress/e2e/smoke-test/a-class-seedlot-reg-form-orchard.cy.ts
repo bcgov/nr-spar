@@ -1,4 +1,5 @@
 import prefix from '../../../src/styles/classPrefix';
+import { TWENTY_SECONDS } from '../../constants';
 import { SeedlotRegFixtureType } from '../../definitions';
 
 describe('A Class Seedlot Registration form, Orchard', () => {
@@ -76,7 +77,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('Orchard dropdown section', () => {
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -86,6 +87,12 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('219 - VERNON - S - PRD')
       .click();
 
+    // Intercept the call before step 5 mounts
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/orchards/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
     // Go to next step to get error msg
     cy.get('.seedlot-registration-progress')
       .find(`button.${prefix}--progress-step-button`)
@@ -93,14 +100,17 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    // Wait for the table in Step 5 to load
+    // Wait for the data for table in Step 5 to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: TWENTY_SECONDS }).its('response.statusCode').should('equal', 200);
+
+    // Verify table data is loaded
     cy.get('#parentTreeNumber');
 
     cy.get('@progressBar')
       .contains('Orchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
       .as('cancelOrchard')
       .click();
@@ -128,11 +138,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Change orchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
     // Add orchard from dropdown
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -146,10 +156,10 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Add additional orchard')
       .click();
 
-    cy.get(`label.${prefix}--label[for="orchard-combobox-1"]`)
+    cy.get(`label.${prefix}--label[for="secondary-orchard-selection"]`)
       .should('have.text', regFormData.orchard.additionalOrchardLabel);
 
-    cy.get('#orchard-combobox-1')
+    cy.get('#secondary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -164,17 +174,17 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    // Wait for the table in Step 5 to load
+    // Verify table data is loaded
     cy.get('#parentTreeNumber');
 
     cy.get('@progressBar')
       .contains('Orchard')
       .click();
 
-    // Delete additional orchard
+    // Delete secondary orchard
     cy.get('.seedlot-orchard-add-orchard')
       .find('button')
-      .contains('Delete additional orchard')
+      .contains('Delete secondary orchard')
       .as('deleteOrchard')
       .click();
 
@@ -195,19 +205,19 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('@deleteOrchard')
       .click();
 
-    // Check 'Delete additional orchard' button of change orchard modal
+    // Check 'Delete secondary orchard' button of change orchard modal
     cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
       .find(`button.${prefix}--btn`)
-      .contains('Delete additional orchard')
+      .contains('Delete secondary orchard')
       .click();
 
-    cy.get('#orchard-combobox-1')
+    cy.get('#secondary-orchard-selection')
       .should('not.exist');
 
     cy.get('@cancelOrchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
     // Save changes
@@ -215,7 +225,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('store first Orchard Parent Tree Number in an array', () => {
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -225,6 +235,12 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('219 - VERNON - S - PRD')
       .click();
 
+    // Intercept the call before step 5 mounts
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/orchards/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
     // Go to next step 'Parent tree and SMP'
     cy.get('.seedlot-registration-progress')
       .find(`button.${prefix}--progress-step-button`)
@@ -232,7 +248,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    // Wait for the table in Step 5 to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: TWENTY_SECONDS }).its('response.statusCode').should('equal', 200);
+
+    // Verify table data is loaded
     cy.get('#parentTreeNumber');
 
     // Push first 6 parent tree number in an array
@@ -254,7 +272,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     // Cancel orchard
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
       .click();
 
@@ -263,7 +281,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Change orchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
     // Save changes
@@ -272,7 +290,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
   it('store second Orchard Parent Tree Number in an array', () => {
     // Enter new orchard
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -281,6 +299,12 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('222 - VERNON - S - PRD')
       .click();
 
+    // Intercept the call before step 5 mounts
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/orchards/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
     // Go to next step 'Parent tree and SMP'
     cy.get('.seedlot-registration-progress')
       .find(`button.${prefix}--progress-step-button`)
@@ -288,7 +312,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    // Wait for the table in Step 5 to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: TWENTY_SECONDS }).its('response.statusCode').should('equal', 200);
+
+    // Verify table data is loaded
     cy.get('#parentTreeNumber');
 
     // Push first 6 parent tree number in an array
@@ -310,7 +336,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     // Cancel orchard
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
       .click();
 
@@ -319,7 +345,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Change orchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
     // Save changes
@@ -327,7 +353,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('Linkage of Step 4 and Step 5', () => {
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -342,7 +368,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Add additional orchard')
       .click();
 
-    cy.get('#orchard-combobox-1')
+    cy.get('#secondary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -354,6 +380,12 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
+    // Intercept the call before step 5 mounts
+    cy.intercept({
+      method: 'GET',
+      url: '**/api/orchards/parent-trees/vegetation-codes/*'
+    }).as('parentTreesUnderVegCode');
+
     // Go to next step 'Parent tree and SMP'
     cy.get('.seedlot-registration-progress')
       .find(`button.${prefix}--progress-step-button`)
@@ -361,7 +393,9 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Parent tree and SMP')
       .click();
 
-    // Wait for the table in Step 5 to load
+    cy.wait('@parentTreesUnderVegCode', { timeout: TWENTY_SECONDS }).its('response.statusCode').should('equal', 200);
+
+    // Verify table data is loaded
     cy.get('#parentTreeNumber');
 
     // Get parent tree number in an array
@@ -429,7 +463,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .siblings()
       .click();
 
-      cy.get(`.${prefix}--list-box--expanded`)
+    cy.get(`.${prefix}--list-box--expanded`)
       .find('ul li')
       .contains('M3 - Pollen Volume Estimate by 100% Survey')
       .click();
@@ -570,11 +604,10 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Next')
       .click();
 
-    cy.get('ul.spar-seedlot-reg-progress-bar').scrollIntoView({ easing: 'linear' })
+    cy.get('ul.spar-seedlot-reg-progress-bar').scrollIntoView({ easing: 'linear' });
 
-    // Check svg with complete checkmark on Step 3
-    cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(3)
-      .should('have.class', `${prefix}--progress-step--complete`);
+    // Check step complete status
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Orchard');
   });
 });

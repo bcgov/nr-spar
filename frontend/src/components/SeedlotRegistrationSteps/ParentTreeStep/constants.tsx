@@ -182,7 +182,7 @@ const getPageText = () => ({
     title: 'Nothing to show yet!',
     emptyOrchard: 'Empty orchard(s)!'
   },
-  invalidPTNumberMsg: 'One or more of the parent tree numbers entered are invalid because these numbers might not exist within your orchard composition.',
+  invalidPTNumberMsg: 'One or more of the parent tree numbers entered are invalid because these numbers might not exist under the species.',
   errNotifEndMsg: 'Please review your entries and remember to check all pages.',
   warnNotification: {
     title: 'Invalid parent tree number detected',

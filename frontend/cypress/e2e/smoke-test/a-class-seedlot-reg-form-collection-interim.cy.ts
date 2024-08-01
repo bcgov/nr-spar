@@ -57,11 +57,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
 
     cy.get('.seedlot-registration-title')
       .find('h1')
-      .should('have.text', 'Seedlot Registration');
-
-    cy.get('.seedlot-registration-title')
-      .find('.seedlot-form-subtitle')
-      .should('contain.text', `Seedlot ${seedlotNum}`);
+      .should('have.text', `Registration for seedlot ${seedlotNum}`);
 
     cy.get('.collection-step-row')
       .find('h2')
@@ -120,7 +116,8 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .type(testAcronym)
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+    cy.get('#collection-collector-agency-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     // Enter invalid location code
@@ -135,7 +132,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     // Enter valid location code
     cy.get('#collection-location-code')
       .clear()
-      .type('02')
+      .type('03')
       .blur();
 
     // Save changes
@@ -191,7 +188,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
     // Enter location code for linkage test
     cy.get('#collection-location-code')
       .clear()
-      .type('02')
+      .type('03')
       .blur();
 
     // Save changes
@@ -325,10 +322,9 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .contains('Next')
       .click();
 
-    // Check svg with complete checkmark on Step 1
-    cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(0)
-      .should('have.class', `${prefix}--progress-step--complete`);
+    // Check step complete status
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Collection');
   });
 
   // Step 3
@@ -354,7 +350,7 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .should('have.value', testPopupAcronym);
 
     cy.get('#interim-location-code')
-      .should('have.value', '02');
+      .should('have.value', '03');
 
     cy.get('#interim-use-collection-agency')
       .should('be.checked');
@@ -398,7 +394,8 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .type('01')
       .blur();
 
-    cy.get(`svg.${prefix}--inline-loading__checkmark-container`)
+    cy.get('#interim-location-code-loading-status-tooltip')
+      .find(`svg.${prefix}--inline-loading__checkmark-container`)
       .should('be.visible');
 
     // Save changes
@@ -518,9 +515,8 @@ describe('A Class Seedlot Registration form, Collection and Interim storage', ()
       .contains('Next')
       .click();
 
-    // Check svg with complete checkmark on Step 3
-    cy.get('ul.spar-seedlot-reg-progress-bar li')
-      .eq(2)
-      .should('have.class', `${prefix}--progress-step--complete`);
+    // Check step complete status
+    cy.get(`.${prefix}--progress-step--complete`)
+      .contains('Interim storage');
   });
 });
