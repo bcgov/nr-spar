@@ -189,7 +189,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             readOnly={isFormSubmitted && !isReview}
-            maxDate={maxDate}
+            maxDate={!isReview ? maxDate : null}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDateChange(true, selectedDate);
@@ -213,7 +213,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
-            maxDate={maxDate}
+            maxDate={!isReview ? maxDate : null}
             readOnly={isFormSubmitted && !isReview}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {

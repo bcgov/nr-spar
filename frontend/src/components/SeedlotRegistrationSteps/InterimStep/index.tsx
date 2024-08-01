@@ -48,9 +48,6 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
   } = useContext(ClassAContext);
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
-  const [endDateErrMessage, setEndDateErrMessage] = useState<string>(
-    pageTexts.storageDate.invalidText
-  );
 
   const today = new Date();
   const maxDate = today.toISOString().split('T')[0].replace(/-/g, '/');
@@ -89,20 +86,11 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
     const isInvalid = validateStorageDates(clonedState);
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
-    if (clonedState.endDate.isInvalid
-        && endDateErrMessage === pageTexts.storageDate.invalidDateBeforeCollection
-    ) {
-      setEndDateErrMessage(pageTexts.storageDate.invalidText);
-    }
+
     // Validate if end date is after collection end date
     if (!isStart && !isInvalid) {
       clonedState.endDate.isInvalid = moment(clonedState.endDate.value, 'YYYY/MM/DD')
         .isBefore(moment(endDate.value, 'YYYY/MM/DD'));
-      if (clonedState.endDate.isInvalid
-          && endDateErrMessage === pageTexts.storageDate.invalidText
-      ) {
-        setEndDateErrMessage(pageTexts.storageDate.invalidDateBeforeCollection);
-      }
     }
     setStepData('interimStep', clonedState);
   };
@@ -200,7 +188,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             datePickerType="single"
             name="startDate"
             dateFormat={DATE_FORMAT}
-            maxDate={maxDate}
+            maxDate={!isReview ? maxDate : null}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(true, selectedDate);
@@ -225,7 +213,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             name="endDate"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
-            maxDate={maxDate}
+            maxDate={!isReview ? maxDate : null}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(false, selectedDate);
@@ -238,7 +226,14 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
               helperText={pageTexts.storageDate.helperText}
               placeholder={pageTexts.storageDate.placeholder}
               invalid={state.endDate.isInvalid}
-              invalidText={endDateErrMessage}
+              // If start date field is invalid, it means that the end date is also
+              // invalid and the error message can stay the same, else, shows the
+              // exclusive end date error message
+              invalidText={
+                state.startDate.isInvalid
+                  ? pageTexts.storageDate.invalidText
+                  : pageTexts.storageDate.invalidDateBeforeCollection
+              }
               readOnly={isFormSubmitted}
               autoComplete="off"
             />

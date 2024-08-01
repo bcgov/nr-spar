@@ -227,7 +227,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageStartDate"
             dateFormat={DATE_FORMAT}
-            maxDate={maxDate}
+            maxDate={!isReview ? maxDate : null}
             value={state.seedStorage.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'seedStorage', selectedDate);
@@ -251,7 +251,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageEndDate"
             dateFormat={DATE_FORMAT}
-            maxDate={maxDate}
+            maxDate={!isReview ? maxDate : null}
             value={state.seedStorage.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'seedStorage', selectedDate);
