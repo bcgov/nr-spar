@@ -44,7 +44,7 @@ const AuditInfo = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="last-updated-by"
-            label="Last uptated by:"
+            label="Last updated by:"
             value={seedlotData?.auditInformation.updateUserId}
             showSkeleton={isFetchingData}
           />
@@ -52,7 +52,7 @@ const AuditInfo = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="last-updated-at"
-            label="Last uptated at:"
+            label="Last updated at:"
             value={
               seedlotData?.auditInformation.updateTimestamp
                 ? luxon.fromISO(seedlotData.auditInformation.updateTimestamp.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)

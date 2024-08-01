@@ -122,9 +122,9 @@ const ClientAndCodeInput = ({
   /**
    * Format the displayed location code
    */
-  const formatDisplayedLocCode = (formatedCode: string) => {
+  const formatDisplayedLocCode = (formattedCode: string) => {
     if (locCodeInputRef.current) {
-      locCodeInputRef.current.value = formatedCode;
+      locCodeInputRef.current.value = formattedCode;
     }
   };
 
@@ -154,9 +154,9 @@ const ClientAndCodeInput = ({
   /**
    * Format the displayed acronym
    */
-  const formatDisplayedAcronym = (formatedAcronym: string) => {
+  const formatDisplayedAcronym = (formattedAcronym: string) => {
     if (clientInputRef.current) {
-      clientInputRef.current.value = formatedAcronym;
+      clientInputRef.current.value = formattedAcronym;
     }
   };
 
@@ -281,18 +281,18 @@ const ClientAndCodeInput = ({
   };
 
   const handleLocationCodeBlur = (value: string) => {
-    const formatedCode = value ? formatLocationCode(value) : '';
-    formatDisplayedLocCode(formatedCode);
+    const formattedCode = value ? formatLocationCode(value) : '';
+    formatDisplayedLocCode(formattedCode);
 
     const updatedLocationCode = {
       ...locationCodeInput,
-      value: formatedCode,
+      value: formattedCode,
       isInvalid: false
     };
 
-    const isInRange = validator.isInt(formatedCode, { min: 0, max: 99 });
+    const isInRange = validator.isInt(formattedCode, { min: 0, max: 99 });
 
-    if (!formatedCode && !isInRange) {
+    if (!formattedCode && !isInRange) {
       setShowLocCodeValidationStatus(false);
       setInvalidLocationMessage(supportTexts.locationCode.invalidText);
       updatedLocationCode.isInvalid = true;
@@ -305,7 +305,7 @@ const ClientAndCodeInput = ({
     if (clientInput.value) {
       validateLocationCodeMutation.mutate({
         clientNumber: clientInput.value,
-        locationCode: formatedCode
+        locationCode: formattedCode
       });
     }
   };

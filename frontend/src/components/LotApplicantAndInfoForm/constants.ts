@@ -2,7 +2,9 @@ import ClientAndCodeInputTextType from '../../types/ClientAndCodeInputTextType';
 import { StringInputType } from '../../types/FormInputType';
 import { ComboBoxPropsType } from './definitions';
 
-export const clientAndCodeInputText = (isReview: boolean | undefined): ClientAndCodeInputTextType => ({
+export const clientAndCodeInputText = (
+  isReview: boolean | undefined
+): ClientAndCodeInputTextType => ({
   useDefaultCheckbox: {
     name: '',
     labelText: ''

@@ -87,7 +87,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('219 - VERNON - S - PRD')
       .click();
 
-    // Intercept the call before step 5 monuts
+    // Intercept the call before step 5 mounts
     cy.intercept({
       method: 'GET',
       url: '**/api/orchards/parent-trees/vegetation-codes/*'
@@ -235,7 +235,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('219 - VERNON - S - PRD')
       .click();
 
-    // Intercept the call before step 5 monuts
+    // Intercept the call before step 5 mounts
     cy.intercept({
       method: 'GET',
       url: '**/api/orchards/parent-trees/vegetation-codes/*'
@@ -299,7 +299,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('222 - VERNON - S - PRD')
       .click();
 
-    // Intercept the call before step 5 monuts
+    // Intercept the call before step 5 mounts
     cy.intercept({
       method: 'GET',
       url: '**/api/orchards/parent-trees/vegetation-codes/*'
@@ -380,7 +380,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     // Save changes
     cy.saveSeedlotRegFormProgress();
 
-    // Intercept the call before step 5 monuts
+    // Intercept the call before step 5 mounts
     cy.intercept({
       method: 'GET',
       url: '**/api/orchards/parent-trees/vegetation-codes/*'
