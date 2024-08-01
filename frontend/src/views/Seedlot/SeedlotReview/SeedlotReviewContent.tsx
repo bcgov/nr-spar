@@ -620,13 +620,9 @@ const SeedlotReviewContent = () => {
       >
         <div className="modal-content">
           <p>
-            Would you like to save your changes before leaving?
-            <br />
-            This page may contain unsaved changes,
-            if you leave without saving, the changes will be discarded.
+            Any changes you made will be discarded unless saved.
           </p>
           <div className="modal-button-group">
-            <Button kind="secondary" onClick={closeModal}>Cancel</Button>
             <Button kind="secondary" onClick={discardChanges}>Discard changes</Button>
             <Button
               kind="primary"
