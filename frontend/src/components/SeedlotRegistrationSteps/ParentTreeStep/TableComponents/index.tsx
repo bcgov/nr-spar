@@ -10,7 +10,6 @@ import {
   HeaderObj, RowItem, StrTypeRowItem, TabTypes
 } from '../definitions';
 import { ParentTreeStepDataObj } from '../../../../views/Seedlot/ContextContainerClassA/definitions';
-import { OrchardObj } from '../../OrchardStep/definitions';
 import PaginationChangeType from '../../../../types/PaginationChangeType';
 import blurOnEnter from '../../../../utils/KeyboardUtil';
 import { handlePagination } from '../../../../utils/PaginationUtils';
@@ -321,10 +320,10 @@ export const renderTableBody = (
 export const renderNotification = (
   state: ParentTreeStepDataObj,
   currentTab: TabTypes,
-  orchardsData: Array<OrchardObj>,
+  orchardIds: string[],
   setStepData: Function
 ) => {
-  if (state.notifCtrl[currentTab].showError && orchardsData.length === 0) {
+  if (state.notifCtrl[currentTab].showError && orchardIds.length === 0) {
     return (
       <Row className="notification-row">
         <Column>

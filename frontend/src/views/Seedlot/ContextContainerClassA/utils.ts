@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { AxiosError } from 'axios';
 import { CollectionForm } from '../../../components/SeedlotRegistrationSteps/CollectionStep/definitions';
 import InterimForm from '../../../components/SeedlotRegistrationSteps/InterimStep/definitions';
-import { OrchardForm, OrchardObj } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
+import { OrchardForm } from '../../../components/SeedlotRegistrationSteps/OrchardStep/definitions';
 import { createOwnerTemplate } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/constants';
 import { SingleOwnerForm } from '../../../components/SeedlotRegistrationSteps/OwnershipStep/definitions';
 import {
@@ -16,8 +16,7 @@ import {
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/definitions';
 import {
   calcAverage, calcSum, generateDefaultRows,
-  populateStrInputId,
-  processOrchards
+  populateStrInputId
 } from '../../../components/SeedlotRegistrationSteps/ParentTreeStep/utils';
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
@@ -180,30 +179,17 @@ export const initInterimState = (
 });
 
 const convertToOrchardsType = (
-  orchards: Array<MultiOptionsObj> | undefined,
-  primaryOrchardId: string,
-  secondaryOrchardId: string | null
-): Array<OrchardObj> => {
-  if (orchards) {
-    const orchardsIds: string[] = [primaryOrchardId];
-    if (secondaryOrchardId) {
-      orchardsIds.push(secondaryOrchardId);
+  selectedOrchardId: string | null,
+  orchards: Array<MultiOptionsObj> | undefined
+): MultiOptionsObj => {
+  if (orchards && selectedOrchardId) {
+    const filteredOrchards = orchards.find((orchard) => orchard.code === selectedOrchardId);
+    if (filteredOrchards) {
+      return filteredOrchards;
     }
-    const filteredOrchards = orchards.filter((curOrch) => orchardsIds.includes(curOrch.code));
-    return filteredOrchards.map((curFilteredOrch, index) => ({
-      inputId: index,
-      selectedItem: curFilteredOrch,
-      isInvalid: false
-    }));
   }
 
-  return [
-    {
-      inputId: 0,
-      selectedItem: null,
-      isInvalid: false
-    }
-  ];
+  return EmptyMultiOptObj;
 };
 
 export const initOrchardState = (
@@ -212,11 +198,19 @@ export const initOrchardState = (
   gameticMethodology?: Array<MultiOptionsObj>
 ): OrchardForm => (
   {
-    orchards: convertToOrchardsType(
-      possibleOrchards,
-      orchardStepData.primaryOrchardId,
-      orchardStepData.secondaryOrchardId
-    ),
+    orchards: {
+      primaryOrchard: {
+        id: 'primary-orchard-selection',
+        value: convertToOrchardsType(orchardStepData.primaryOrchardId, possibleOrchards),
+        isInvalid: false
+      },
+      secondaryOrchard: {
+        id: 'secondary-orchard-selection',
+        value: convertToOrchardsType(orchardStepData.secondaryOrchardId, possibleOrchards),
+        isInvalid: false,
+        enabled: !!orchardStepData.secondaryOrchardId
+      }
+    },
     femaleGametic: {
       id: 'orchard-female-gametic',
       value: gameticMethodology
@@ -654,21 +648,17 @@ export const verifyOrchardStepCompleteness = (
   focusOnIncomplete?: boolean
 ): boolean => {
   let isComplete = false;
-
-  orchardStepData.orchards.forEach((orchard) => {
-    // if one of the orchard object is populated then it's complete for this field
-    if (orchard.selectedItem?.code) {
-      isComplete = true;
-    }
-  });
-
-  if (!isComplete) {
-    return isComplete;
-  }
-
   let idToFocus = '';
 
-  if (!orchardStepData.femaleGametic.value.code) {
+  if (!orchardStepData.orchards.primaryOrchard.value.code) {
+    isComplete = false;
+    idToFocus = orchardStepData.orchards.primaryOrchard.id;
+  } else if (orchardStepData.orchards.secondaryOrchard.enabled
+    && !orchardStepData.orchards.secondaryOrchard.value.code
+  ) {
+    isComplete = false;
+    idToFocus = orchardStepData.orchards.secondaryOrchard.id;
+  } else if (!orchardStepData.femaleGametic.value.code) {
     isComplete = false;
     idToFocus = orchardStepData.femaleGametic.id;
   } else if (!orchardStepData.maleGametic.value.code) {
@@ -890,16 +880,11 @@ export const convertOrchard = (
   orchardData: OrchardForm,
   parentTreeRows: RowDataDictType
 ): OrchardFormSubmitType => {
-  const deDuppedOrchards = processOrchards(orchardData.orchards);
-  let primaryOrchardId: string = '';
-  let secondaryOrchardId = null;
-
-  if (deDuppedOrchards.length > 0) {
-    primaryOrchardId = deDuppedOrchards[0].selectedItem!.code;
-  }
-  if (deDuppedOrchards.length > 1) {
-    secondaryOrchardId = deDuppedOrchards[1].selectedItem!.code;
-  }
+  const primaryOrchardId = orchardData.orchards.primaryOrchard.value.code;
+  const secondaryOrchardId = (orchardData.orchards.primaryOrchard.value.code
+    !== orchardData.orchards.secondaryOrchard.value.code)
+    ? orchardData.orchards.secondaryOrchard.value.code
+    : null;
 
   return ({
     primaryOrchardId,
