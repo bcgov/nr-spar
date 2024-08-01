@@ -42,11 +42,15 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
     allStepData: { interimStep: state },
     allStepData: { collectionStep: { collectorAgency } },
     allStepData: { collectionStep: { locationCode: collectorCode } },
+    allStepData: { collectionStep: { endDate } },
     setStepData,
     isFormSubmitted
   } = useContext(ClassAContext);
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
+  const [endDateErrMessage, setEndDateErrMessage] = useState<string>(
+    pageTexts.storageDate.invalidText
+  );
 
   const today = new Date();
   const maxDate = today.toISOString().split('T')[0].replace(/-/g, '/');
@@ -85,6 +89,21 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
     const isInvalid = validateStorageDates(clonedState);
     clonedState.startDate.isInvalid = isInvalid;
     clonedState.endDate.isInvalid = isInvalid;
+    if (clonedState.endDate.isInvalid
+        && endDateErrMessage === pageTexts.storageDate.invalidDateBeforeCollection
+    ) {
+      setEndDateErrMessage(pageTexts.storageDate.invalidText);
+    }
+    // Validate if end date is after collection end date
+    if (!isStart && !isInvalid) {
+      clonedState.endDate.isInvalid = moment(clonedState.endDate.value, 'YYYY/MM/DD')
+        .isBefore(moment(endDate.value, 'YYYY/MM/DD'));
+      if (clonedState.endDate.isInvalid
+          && endDateErrMessage === pageTexts.storageDate.invalidText
+      ) {
+        setEndDateErrMessage(pageTexts.storageDate.invalidDateBeforeCollection);
+      }
+    }
     setStepData('interimStep', clonedState);
   };
 
@@ -218,8 +237,8 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
               labelText={pageTexts.storageDate.labelTextEnd}
               helperText={pageTexts.storageDate.helperText}
               placeholder={pageTexts.storageDate.placeholder}
-              invalid={state.startDate.isInvalid}
-              invalidText={pageTexts.storageDate.invalidText}
+              invalid={state.endDate.isInvalid}
+              invalidText={endDateErrMessage}
               readOnly={isFormSubmitted}
               autoComplete="off"
             />
