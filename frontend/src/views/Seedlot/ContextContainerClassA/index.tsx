@@ -344,6 +344,8 @@ const ContextContainerClassA = ({ children }: props) => {
       && gameticMethodologyQuery.status === 'success'
       && orchardQuery.status === 'success'
       && seedlotQuery.status === 'success'
+      && seedlotQuery.fetchStatus !== 'fetching'
+      && getAllSeedlotInfoQuery.fetchStatus !== 'fetching'
     ) {
       const fullFormData = getAllSeedlotInfoQuery.data.seedlotData;
       const defaultAgencyNumber = seedlotQuery.data?.seedlot.applicantClientNumber;
