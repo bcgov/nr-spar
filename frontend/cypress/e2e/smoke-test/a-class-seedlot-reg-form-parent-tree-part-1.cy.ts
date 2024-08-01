@@ -361,6 +361,48 @@ describe('A Class Seedlot Registration form, Parent Tree and SMP part-1(Cone and
 
     cy.get('#219-pollenCount-value-input')
       .should('have.value', '');
+
+    // Check upload button functionality
+    cy.get('button.upload-button')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('be.visible');
+
+    cy.get('button')
+      .contains('Cancel')
+      .click();
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('not.be.visible');
+
+    // Check file upload functionality
+    cy.get('button.upload-button')
+      .click({force: true});
+
+    cy.get(`.${prefix}--modal-container[aria-label="Seedlot registration"]`)
+      .should('be.visible');
+
+    cy.get(`.${prefix}--file`)
+      .find(`input.${prefix}--file-input`)
+      .selectFile('cypress/fixtures/Seedlot_composition_template.csv', {force: true});
+
+    cy.get('button')
+      .contains('Import file and continue')
+      .click();
+
+    // Check values in Cone count and Pollen count columns of the table
+    cy.get('#212-coneCount-value-input')
+      .should('have.value', '1');
+
+    cy.get('#212-pollenCount-value-input')
+      .should('have.value', '46');
+
+    cy.get('#219-coneCount-value-input')
+      .should('have.value', '2');
+
+    cy.get('#219-pollenCount-value-input')
+      .should('have.value', '22');
   });
 
   it('Pagination', () => {
