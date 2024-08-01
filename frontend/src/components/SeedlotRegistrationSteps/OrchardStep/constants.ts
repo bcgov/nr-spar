@@ -1,20 +1,10 @@
-import { OrchardObj } from './definitions';
-
-export const MAX_ORCHARDS = 2;
-
-export const initialStagedOrchard: OrchardObj = {
-  inputId: -1,
-  selectedItem: null,
-  isInvalid: false
-};
-
 export const orchardStepText = {
   orchardSection: {
     title: 'Orchard information',
     subtitle: 'Enter the contributing orchard information',
     orchardInput: {
-      label: 'Select an orchard',
-      optLabel: 'Select an additional orchard',
+      label: 'Select a primary orchard',
+      secondaryLabel: 'Select a secondary orchard',
       placeholder: 'ID - Name - Lot type - Stage code',
       fetchError: 'Failed to fetch orchard data'
     },
@@ -24,7 +14,7 @@ export const orchardStepText = {
     },
     buttons: {
       add: 'Add additional orchard',
-      delete: 'Delete additional orchard'
+      delete: 'Delete secondary orchard'
     }
   },
   gameteSection: {

@@ -4,7 +4,7 @@ import focusById from '../../../utils/FocusUtils';
 import { SeedlotRegFormType, SeedlotRegPayloadType } from '../../../types/SeedlotRegistrationTypes';
 
 export const convertToPayload = (formData: SeedlotRegFormType): SeedlotRegPayloadType => ({
-  applicantClientNumber: formData.client.value.code,
+  applicantClientNumber: formData.client.value,
   applicantLocationCode: formData.locationCode.value,
   applicantEmailAddress: formData.email.value,
   vegetationCode: formData.species.value.code,
@@ -34,7 +34,7 @@ export const validateRegForm = (
 ): boolean => {
   let isValid = false;
   // Validate client
-  if (seedlotFormData.client.isInvalid || !seedlotFormData.client.value.code) {
+  if (seedlotFormData.client.isInvalid || !seedlotFormData.client.value) {
     setInputValidation('client', true, setSeedlotFormData);
     focusById(seedlotFormData.client.id);
     return isValid;

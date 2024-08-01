@@ -23,7 +23,8 @@ const InterimReviewRead = () => {
     {
       queryKey: ['forest-clients', clientNumber],
       queryFn: () => getForestClientByNumberOrAcronym(clientNumber!),
-      enabled: !!clientNumber
+      enabled: !!clientNumber,
+      select: (fc) => getForestClientLabel(fc)
     }
   );
 
@@ -54,9 +55,9 @@ const InterimReviewRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="interim-agency-name"
-            label="Interim agency acronym"
-            value={agencyQuery.data ? getForestClientLabel(agencyQuery.data) : ''}
-            showSkeleton={isFetchingData || agencyQuery.isFetching}
+            label="Interim agency"
+            value={agencyQuery.data}
+            showSkeleton={isFetchingData || agencyQuery.fetchStatus === 'fetching'}
           />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
@@ -73,7 +74,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-start-date"
             label="Storage start date"
-            value={luxon.fromISO(state.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
+            value={luxon.fromISO(state.startDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
             showSkeleton={isFetchingData}
           />
         </Column>
@@ -81,7 +82,7 @@ const InterimReviewRead = () => {
           <ReadOnlyInput
             id="interim-end-date"
             label="Storage end date"
-            value={luxon.fromISO(state.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
+            value={luxon.fromISO(state.endDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)}
             showSkeleton={isFetchingData}
           />
         </Column>

@@ -5,6 +5,7 @@ import { MONTH_DAY_YEAR } from '../config/DateFormat';
 import { ForestClientType } from '../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../types/MultiOptionsObject';
 import { EmptyMultiOptObj } from '../shared-constants/shared-constants';
+import { getForestClientLabel } from './ForestClientUtils';
 
 /**
  * Generate a species label in the form of `{code} - {description}`.
@@ -86,7 +87,7 @@ export const convertToApplicantInfoObj = (
   vegCodeData: MultiOptionsObj[],
   forestClient: ForestClientType
 ): SeedlotApplicantType => ({
-  agency: `${forestClient.clientNumber} - ${forestClient.clientName} - ${forestClient.acronym}`,
+  agency: getForestClientLabel(forestClient),
   locationCode: seedlot.applicantLocationCode,
   email: seedlot.applicantEmailAddress,
   species: getSpeciesLabelByCode(seedlot.vegetationCode, vegCodeData),

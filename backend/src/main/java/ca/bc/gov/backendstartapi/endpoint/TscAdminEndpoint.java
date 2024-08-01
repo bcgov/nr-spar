@@ -124,13 +124,13 @@ public class TscAdminEndpoint {
       @Parameter(
               name = "status",
               in = ParameterIn.PATH,
-              description = "Seedlot status to be updated to",
+              description = "Seedlot status to be updated to, either PND or APP",
               required = true,
-              example = "true",
+              example = "PND",
               schema = @Schema(type = "string", example = "true"))
           @PathVariable
           String status) {
-    tscAdminService.updateSeedlotStatus(seedlotNumber, status);
+    tscAdminService.updateSeedlotStatus(seedlotNumber, status.toUpperCase());
     return ResponseEntity.noContent().build();
   }
 

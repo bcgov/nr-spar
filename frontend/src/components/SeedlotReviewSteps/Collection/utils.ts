@@ -8,21 +8,21 @@ export const formatCollectionMethods = (
   codes: string[],
   methods: CodeDescResType[] | undefined
 ): string => {
-  let formated = '';
+  let formatted = '';
 
   if (!methods) {
-    return formated;
+    return formatted;
   }
 
   codes.forEach((code) => {
     const found = methods.find((method) => method.code === code);
 
     if (found) {
-      formated += `${found.description}, `;
+      formatted += `${found.description}, `;
     }
   });
 
-  return formated.substring(0, formated.length - 2);
+  return formatted.substring(0, formatted.length - 2);
 };
 
 /**

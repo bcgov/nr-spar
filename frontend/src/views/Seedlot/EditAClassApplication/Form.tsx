@@ -19,7 +19,6 @@ import getVegCodes from '../../../api-service/vegetationCodeAPI';
 import LotApplicantAndInfoForm from '../../../components/LotApplicantAndInfoForm';
 import { SeedlotType } from '../../../types/SeedlotType';
 import { SeedlotPatchPayloadType, SeedlotRegFormType } from '../../../types/SeedlotRegistrationTypes';
-import { getForestClientByNumberOrAcronym } from '../../../api-service/forestClientsAPI';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import PageTitle from '../../../components/PageTitle';
 import focusById from '../../../utils/FocusUtils';
@@ -27,8 +26,7 @@ import ROUTES from '../../../routes/constants';
 import ErrorToast from '../../../components/Toast/ErrorToast';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import { ErrToastOption } from '../../../config/ToastifyConfig';
-import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
-import { getForestClientOptionInput } from '../../../utils/ForestClientUtils';
+import { getForestClientStringInput } from '../../../utils/ForestClientUtils';
 import { getBooleanInputObj, getOptionsInputObj, getStringInputObj } from '../../../utils/FormInputUtils';
 import { getSpeciesOptionByCode } from '../../../utils/SeedlotUtils';
 import { addParamToPath } from '../../../utils/PathUtils';
@@ -75,21 +73,12 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
 
   const applicantClientNumber = seedlotQuery.data?.applicantClientNumber;
 
-  const forestClientQuery = useQuery({
-    queryKey: ['forest-clients', applicantClientNumber],
-    queryFn: () => getForestClientByNumberOrAcronym(applicantClientNumber!),
-    enabled: !!applicantClientNumber,
-    staleTime: THREE_HOURS,
-    cacheTime: THREE_HALF_HOURS
-  });
-
   const convertToSeedlotForm = (
     seedlot: SeedlotType,
-    vegCodes: MultiOptionsObj[],
-    client: ForestClientType
+    vegCodes: MultiOptionsObj[]
   ) => {
     setApplicantData({
-      client: getForestClientOptionInput('edit-client-read-only', client),
+      client: getForestClientStringInput('edit-client-read-only', applicantClientNumber!),
       locationCode: getStringInputObj('edit-seedlot-location-code', seedlot.applicantLocationCode),
       email: getStringInputObj('edit-seedlot-email', seedlot.applicantEmailAddress),
       species: getOptionsInputObj('edit-seedlot-species', getSpeciesOptionByCode(seedlot.vegetationCode, vegCodes)),
@@ -100,15 +89,10 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
   };
 
   useEffect(() => {
-    if (
-      forestClientQuery.isFetched
-      && forestClientQuery.data
-      && seedlotQuery.data
-      && vegCodeQuery.data
-    ) {
-      convertToSeedlotForm(seedlotQuery.data, vegCodeQuery.data, forestClientQuery.data);
+    if (applicantClientNumber && seedlotQuery.status === 'success') {
+      convertToSeedlotForm(seedlotQuery.data, vegCodeQuery.data!);
     }
-  }, [forestClientQuery.isFetched]);
+  }, [applicantClientNumber, seedlotQuery.status]);
 
   const seedlotPatchMutation = useMutation({
     mutationFn: (
@@ -214,7 +198,7 @@ const EditAClassApplicationForm = ({ isReview, applicantData, setApplicantData }
       <Row>
         <Column>
           {
-            forestClientQuery.isFetched && applicantData
+            applicantData
               ? (
                 <LotApplicantAndInfoForm
                   isSeedlot
