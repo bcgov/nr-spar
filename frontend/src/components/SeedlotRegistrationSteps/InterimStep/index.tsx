@@ -48,6 +48,9 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
 
+  const today = new Date();
+  const maxDate = today.toISOString().split('T')[0].replace(/-/g, '/');
+
   const setAgencyAndCode = (
     agencyData: OptionsInputType,
     locationCodeData: StringInputType,
@@ -178,6 +181,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             datePickerType="single"
             name="startDate"
             dateFormat={DATE_FORMAT}
+            maxDate={maxDate}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(true, selectedDate);
@@ -202,6 +206,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
             name="endDate"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
+            maxDate={maxDate}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleStorageDates(false, selectedDate);

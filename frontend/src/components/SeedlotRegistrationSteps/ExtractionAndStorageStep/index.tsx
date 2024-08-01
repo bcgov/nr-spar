@@ -49,6 +49,9 @@ const ExtractionAndStorage = (
   const [isExtractorHintOpen, setIsExtractorHintOpen] = useState<boolean>(true);
   const [isStorageHintOpen, setIsStorageHintOpen] = useState<boolean>(true);
 
+  const today = new Date();
+  const maxDate = today.toISOString().split('T')[0].replace(/-/g, '/');
+
   const setAgencyAndCode = (
     isDefault: BooleanInputType,
     agency: OptionsInputType,
@@ -133,6 +136,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionStartDate"
             dateFormat={DATE_FORMAT}
+            maxDate={maxDate}
             value={state.extraction.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'extraction', selectedDate);
@@ -156,6 +160,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="extractionEndDate"
             dateFormat={DATE_FORMAT}
+            maxDate={maxDate}
             value={state.extraction.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'extraction', selectedDate);
@@ -222,6 +227,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageStartDate"
             dateFormat={DATE_FORMAT}
+            maxDate={maxDate}
             value={state.seedStorage.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(true, 'seedStorage', selectedDate);
@@ -245,6 +251,7 @@ const ExtractionAndStorage = (
             datePickerType="single"
             name="storageEndDate"
             dateFormat={DATE_FORMAT}
+            maxDate={maxDate}
             value={state.seedStorage.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDates(false, 'seedStorage', selectedDate);

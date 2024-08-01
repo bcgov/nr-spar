@@ -49,6 +49,9 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
     isFormSubmitted
   } = useContext(ClassAContext);
 
+  const today = new Date();
+  const maxDate = today.toISOString().split('T')[0].replace(/-/g, '/');
+
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
   const setAgencyAndCode = (
@@ -186,6 +189,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             readOnly={isFormSubmitted && !isReview}
+            maxDate={maxDate}
             value={state.startDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
               handleDateChange(true, selectedDate);
@@ -209,6 +213,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
             datePickerType="single"
             dateFormat={DATE_FORMAT}
             minDate={state.startDate.value}
+            maxDate={maxDate}
             readOnly={isFormSubmitted && !isReview}
             value={state.endDate.value}
             onChange={(_e: Array<Date>, selectedDate: string) => {
