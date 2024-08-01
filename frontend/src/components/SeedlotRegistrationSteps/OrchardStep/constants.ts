@@ -14,7 +14,7 @@ export const orchardStepText = {
     },
     buttons: {
       add: 'Add additional orchard',
-      delete: 'Delete additional orchard'
+      delete: 'Delete secondary orchard'
     }
   },
   gameteSection: {

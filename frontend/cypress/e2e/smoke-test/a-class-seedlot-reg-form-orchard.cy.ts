@@ -77,7 +77,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('Orchard dropdown section', () => {
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -110,7 +110,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Orchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
       .as('cancelOrchard')
       .click();
@@ -138,11 +138,11 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Change orchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
     // Add orchard from dropdown
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -156,10 +156,10 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Add additional orchard')
       .click();
 
-    cy.get(`label.${prefix}--label[for="orchard-combobox-1"]`)
+    cy.get(`label.${prefix}--label[for="secondary-orchard-selection"]`)
       .should('have.text', regFormData.orchard.additionalOrchardLabel);
 
-    cy.get('#orchard-combobox-1')
+    cy.get('#secondary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -181,10 +181,10 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Orchard')
       .click();
 
-    // Delete additional orchard
+    // Delete secondary orchard
     cy.get('.seedlot-orchard-add-orchard')
       .find('button')
-      .contains('Delete additional orchard')
+      .contains('Delete secondary orchard')
       .as('deleteOrchard')
       .click();
 
@@ -205,19 +205,19 @@ describe('A Class Seedlot Registration form, Orchard', () => {
     cy.get('@deleteOrchard')
       .click();
 
-    // Check 'Delete additional orchard' button of change orchard modal
+    // Check 'Delete secondary orchard' button of change orchard modal
     cy.get(`.${prefix}--modal-container[aria-label="Delete orchard"]`)
       .find(`button.${prefix}--btn`)
-      .contains('Delete additional orchard')
+      .contains('Delete secondary orchard')
       .click();
 
-    cy.get('#orchard-combobox-1')
+    cy.get('#secondary-orchard-selection')
       .should('not.exist');
 
     cy.get('@cancelOrchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
     // Save changes
@@ -225,7 +225,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('store first Orchard Parent Tree Number in an array', () => {
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -272,7 +272,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     // Cancel orchard
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
       .click();
 
@@ -281,7 +281,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Change orchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
     // Save changes
@@ -290,7 +290,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
 
   it('store second Orchard Parent Tree Number in an array', () => {
     // Enter new orchard
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -336,7 +336,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .click();
 
     // Cancel orchard
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__selection[title="Clear selected item"]`)
       .click();
 
@@ -345,7 +345,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Change orchard')
       .click();
 
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .should('have.value', '');
 
     // Save changes
@@ -353,7 +353,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
   });
 
   it('Linkage of Step 4 and Step 5', () => {
-    cy.get('#orchard-combobox-0')
+    cy.get('#primary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 
@@ -368,7 +368,7 @@ describe('A Class Seedlot Registration form, Orchard', () => {
       .contains('Add additional orchard')
       .click();
 
-    cy.get('#orchard-combobox-1')
+    cy.get('#secondary-orchard-selection')
       .siblings(`button.${prefix}--list-box__menu-icon[title="Open"]`)
       .click();
 

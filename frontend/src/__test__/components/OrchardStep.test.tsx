@@ -96,11 +96,11 @@ describe.skip('Orchard Step test', () => {
     });
   });
 
-  it('should show and click Delete additional orchard button', () => {
+  it('should show and click Delete secondary orchard button', () => {
     const addButton = screen.getByText('Add orchard');
     fireEvent.click(addButton);
 
-    const deleteButton = screen.getByText('Delete additional orchard');
+    const deleteButton = screen.getByText('Delete secondary orchard');
     fireEvent.click(deleteButton);
   });
 
