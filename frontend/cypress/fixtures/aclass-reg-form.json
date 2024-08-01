@@ -50,7 +50,6 @@
   "extraction": {
     "extrationTitle": "Extraction information",
     "extrationSubtitle": "Enter the extractory agency information and extraction's start and end dates for this seedlot",
-    "extrationSubtitle": "Enter the extractory agency information and extraction's start and end dates for this seedlot",
     "storageTitle": "Temporary seed storage",
     "storageSubtitle": "Enter the seed storage agency information and storage's start and end dates for this seedlot",
     "extractionCheckboxText": "The extractory agency is the Tree Seed Center (TSC)",
