@@ -21,5 +21,5 @@ jobs:
     uses: ./.github/workflows/.deploy.yml
     with:
       environment: prod
-      tag: ${{ inputs.tag || prod }}
+      tag: ${{ inputs.tag || 'prod' }}
       target: prod
