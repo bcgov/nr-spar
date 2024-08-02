@@ -86,24 +86,24 @@ objects:
                     - name: ORACLE_HOST
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
+                          name: ${REPO}-${ZONE}-sync
                           key: oracle-host
                     - name: ORACLE_SYNC_PASSWORD
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
+                          name: ${REPO}-${ZONE}-sync
                           key: oracle-sync-password
                     - name: DATABASE_PORT
                       value: ${DATABASE_PORT}
                     - name: ORACLE_SERVICE
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
+                          name: ${REPO}-${ZONE}-sync
                           key: oracle-service
                     - name: ORACLE_SYNC_USER
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
+                          name: ${REPO}-${ZONE}-sync
                           key: oracle-sync-user
                     - name: POSTGRES_HOST
                       value: ${REPO}-${ZONE}-database
