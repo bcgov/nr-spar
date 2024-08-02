@@ -26,7 +26,7 @@ parameters:
   - name: CPU_REQUEST
     value: 100m
   - name: CPU_LIMIT
-    value: 300m
+    value: 500m
   - name: MEMORY_REQUEST
     value: 300Mi
   - name: MEMORY_LIMIT
@@ -44,13 +44,31 @@ parameters:
     description: Oracle API environment for OpenSearch. # One of: development, test, production
     required: false
     value: development
+  - name: DATABASE_PORT
+    description: Oracle database port
+    value: "1543"
   - name: ORACLEDB_KEYSTORE
     description: Keystore location path
-    value: /usr/share/service/jssecacerts
   - name: AWS_COGNITO_ISSUER_URI
     description: AWS Cognito JWT Server URI
     required: true
+  - name: CERT_PVC_SIZE
+    description: The amount of storage the cert PVC should have
+    value: 25Mi
 objects:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app: ${NAME}-${ZONE}
+      name: ${NAME}-${ZONE}-${COMPONENT}
+    spec:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: ${CERT_PVC_SIZE}
+      storageClassName: netapp-file-standard
   - apiVersion: apps/v1
     kind: Deployment
     metadata:
@@ -70,6 +88,37 @@ objects:
             app: ${NAME}-${ZONE}
             deployment: ${NAME}-${ZONE}-${COMPONENT}
         spec:
+          volumes:
+            - name: ${NAME}-${ZONE}-${COMPONENT}-certs
+              persistentVolumeClaim:
+                claimName: ${NAME}-${ZONE}-${COMPONENT}
+          initContainers:
+            - name: ${NAME}-${ZONE}-${COMPONENT}-init
+              image: ${REGISTRY}/${ORG}/${NAME}/common:${TAG}
+              imagePullPolicy: Always
+              env:
+                - name: DATABASE_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-host
+                - name: ORACLEDB_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-secret
+                - name: DATABASE_PORT
+                  value: ${DATABASE_PORT}
+              volumeMounts:
+                - name: ${NAME}-${ZONE}-${COMPONENT}-certs
+                  mountPath: /cert
+              resources:
+                limits:
+                  cpu: ${CPU_LIMIT}
+                  memory: ${MEMORY_LIMIT}
+                requests:
+                  cpu: ${CPU_REQUEST}
+                  memory: ${MEMORY_REQUEST}
           containers:
             - name: ${NAME}-${ZONE}
               image: ${REGISTRY}/${ORG}/${NAME}/${COMPONENT}:${TAG}
@@ -87,10 +136,7 @@ objects:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-host
                 - name: DATABASE_PORT
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: oracle-port
+                  value: ${DATABASE_PORT}
                 - name: SERVICE_NAME
                   valueFrom:
                     secretKeyRef:
@@ -106,10 +152,18 @@ objects:
                     secretKeyRef:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-password
+                - name: ORACLEDB_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${ZONE}-${COMPONENT}
+                      key: oracle-secret
                 - name: ORACLEDB_KEYSTORE
-                  value: ${ORACLEDB_KEYSTORE}
+                  value: /cert/jssecacerts
                 - name: AWS_COGNITO_ISSUER_URI
                   value: ${AWS_COGNITO_ISSUER_URI}
+              volumeMounts:
+                - name: ${NAME}-${ZONE}-${COMPONENT}-certs
+                  mountPath: /cert
               resources:
                 requests:
                   cpu: ${CPU_REQUEST}

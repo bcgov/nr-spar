@@ -1,5 +1,5 @@
 import { EmptyMultiOptObj } from '../../../shared-constants/shared-constants';
-import AgencyTextPropsType from '../../../types/AgencyTextPropsType';
+import ClientAndCodeInputTextType from '../../../types/ClientAndCodeInputTextType';
 import { SingleOwnerFormSubmitType } from '../../../types/SeedlotType';
 import { SingleOwnerForm } from './definitions';
 
@@ -7,13 +7,13 @@ export const DEFAULT_INDEX = 0;
 
 export const MAX_OWNERS = 100;
 
-export const agencyFieldsProps: AgencyTextPropsType = {
+export const agencyFieldsProps: ClientAndCodeInputTextType = {
   useDefaultCheckbox: {
     name: 'useDefaultOwner',
     labelText: 'Use applicant agency as owner agency'
   },
   agencyInput: {
-    titleText: 'Owner agency',
+    titleText: 'Owner agency acronym',
     invalidText: 'Please choose a valid owner agency, filter with agency number, name or acronym'
   },
   locationCode: {
@@ -53,14 +53,9 @@ export const createOwnerTemplate = (
   ownerData: SingleOwnerFormSubmitType
 ): SingleOwnerForm => ({
   id: newId,
-  useDefaultAgencyInfo: {
-    id: 'ownership-use-default-agency',
-    value: newId === DEFAULT_INDEX,
-    isInvalid: false
-  },
   ownerAgency: {
     id: `ownership-agency-${newId}`,
-    value: EmptyMultiOptObj,
+    value: '',
     isInvalid: false
   },
   ownerCode: {

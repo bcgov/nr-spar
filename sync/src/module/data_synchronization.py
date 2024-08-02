@@ -280,8 +280,12 @@ def process_seedlots(oracle_config, postgres_config, track_config, track_db_conn
 
         logger.debug('Source Database connection established')
 
-        query_sql = """SELECT seedlot_number FROM spar.seedlot 
-                        WHERE update_timestamp between %(start_time)s AND %(end_time)s 
+        query_sql = """SELECT s.seedlot_number 
+                         FROM spar.seedlot s
+                         FULL OUTER JOIN spar.seedlot_registration_a_class_save drft
+                         ON drft.seedlot_number = s.seedlot_number
+                        WHERE s.update_timestamp between %(start_time)s AND %(end_time)s 
+                           OR drft.update_timestamp between %(start_time)s AND %(end_time)s 
                         ORDER BY seedlot_number """
         logger.debug(f"Main driver query to be executed in Source database is: {query_sql}")
         

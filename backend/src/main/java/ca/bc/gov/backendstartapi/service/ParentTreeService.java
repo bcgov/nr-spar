@@ -59,53 +59,53 @@ public class ParentTreeService {
     // BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals());
     BigDecimal coancestry = null;
 
-    BigDecimal v_total_cone_count =
+    BigDecimal varTotalConeCount =
         ptVals.orchardPtVals().stream()
             .map(OrchardParentTreeValsDto::coneCount)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    BigDecimal v_total_pollen_count =
+    BigDecimal varTotalPollenCount =
         ptVals.orchardPtVals().stream()
             .map(OrchardParentTreeValsDto::pollenCount)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     // Get the v_sum_orch_gamete_contr:
-    BigDecimal v_sum_orch_gamete_contr = BigDecimal.ZERO;
-    BigDecimal v_female_crop_pop = BigDecimal.ZERO;
-    BigDecimal v_parent_prop_orch_poll = BigDecimal.ZERO;
-    BigDecimal v_orch_gamete_contr = null;
+    BigDecimal varSumOrchGameteContr = BigDecimal.ZERO;
+    BigDecimal varFemaleCropPop = BigDecimal.ZERO;
+    BigDecimal varParentPropOrchPoll = BigDecimal.ZERO;
+    BigDecimal varOrchGameteContr = null;
     for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
       boolean hasConeCount = orchardPtVals.coneCount().compareTo(BigDecimal.ZERO) > 0;
       boolean hasPollenCount = orchardPtVals.pollenCount().compareTo(BigDecimal.ZERO) > 0;
       if (hasConeCount || hasPollenCount) {
         // --col:V
-        if (v_total_cone_count.compareTo(BigDecimal.ZERO) == 0) {
-          v_female_crop_pop = BigDecimal.ZERO;
+        if (varTotalConeCount.compareTo(BigDecimal.ZERO) == 0) {
+          varFemaleCropPop = BigDecimal.ZERO;
         } else {
-          v_female_crop_pop =
-              orchardPtVals.coneCount().divide(v_total_cone_count, DIVISION_SCALE, halfUp);
+          varFemaleCropPop =
+              orchardPtVals.coneCount().divide(varTotalConeCount, DIVISION_SCALE, halfUp);
         }
 
         // --col:W
-        if (v_total_cone_count.compareTo(BigDecimal.ZERO) == 0) {
-          v_parent_prop_orch_poll = BigDecimal.ZERO;
+        if (varTotalConeCount.compareTo(BigDecimal.ZERO) == 0) {
+          varParentPropOrchPoll = BigDecimal.ZERO;
         } else {
-          v_parent_prop_orch_poll =
-              orchardPtVals.pollenCount().divide(v_total_pollen_count, DIVISION_SCALE, halfUp);
+          varParentPropOrchPoll =
+              orchardPtVals.pollenCount().divide(varTotalPollenCount, DIVISION_SCALE, halfUp);
         }
 
         // --col:AQ
         BigDecimal threeQuarters = new BigDecimal("0.75");
-        BigDecimal threeQuartTimesParentPropOrch = threeQuarters.multiply(v_parent_prop_orch_poll);
-        BigDecimal femaleCropPropDiv = v_female_crop_pop.add(threeQuartTimesParentPropOrch);
-        femaleCropPropDiv = femaleCropPropDiv.divide(new BigDecimal("2,2"), DIVISION_SCALE, halfUp);
-        v_orch_gamete_contr = femaleCropPropDiv.pow(2);
+        BigDecimal threeQuartTimesParentPropOrch = threeQuarters.multiply(varParentPropOrchPoll);
+        BigDecimal femaleCropPropDiv = varFemaleCropPop.add(threeQuartTimesParentPropOrch);
+        femaleCropPropDiv = femaleCropPropDiv.divide(new BigDecimal("2.2"), DIVISION_SCALE, halfUp);
+        varOrchGameteContr = femaleCropPropDiv.pow(2);
 
-        v_sum_orch_gamete_contr = v_sum_orch_gamete_contr.add(v_orch_gamete_contr);
+        varSumOrchGameteContr = varSumOrchGameteContr.add(varOrchGameteContr);
       }
     }
 
-    BigDecimal neValue = calculateNe(coancestry, v_sum_orch_gamete_contr);
+    BigDecimal neValue = calculateNe(coancestry, varSumOrchGameteContr);
 
     CalculatedParentTreeValsDto calculatedVals = new CalculatedParentTreeValsDto();
     calculatedVals.setNeValue(neValue);
@@ -128,53 +128,53 @@ public class ParentTreeService {
   /**
    * Calculate the Ne value (Effective Population Size.
    *
-   * @param g_coancestry The coancestry value for the Ne calculation.
-   * @param v_sum_orch_gamete_contr The sum or gamete for the Orchard.
+   * @param globalCoancestry The coancestry value for the Ne calculation.
+   * @param varSumOrchGameteContr The sum or gamete for the Orchard.
    * @return BigDecimal representing the Ne value.
    */
-  public BigDecimal calculateNe(BigDecimal g_coancestry, BigDecimal v_sum_orch_gamete_contr) {
-    BigDecimal v_effective_pop_size = BigDecimal.ZERO;
-    BigDecimal v_smp_parents_outside = null;
-    // gb_smp_parents_outside: starts with 'N', then if called the set method, it becomes an 'Y'
-    // however, the only place that calls the set method is on the recalc() function. So I
+  public BigDecimal calculateNe(BigDecimal globalCoancestry, BigDecimal varSumOrchGameteContr) {
+    BigDecimal varEffectivePopSize = BigDecimal.ZERO;
+    BigDecimal varSmpParentsOutside = null;
+    // globalBoolSmpParentsOutside: starts with 'N', then if called the set method, it becomes an
+    // 'Y' however, the only place that calls the set method is on the recalc() function. So I
     // understand this will be 'N' for the first calculation, and 'Y' for the others.
     // I'll keep as 'N', simulating to be always the first time, for now.
-    char gb_smp_parents_outside = 'N';
-    BigDecimal r_previous_smp_parents_outside = null; // <- review here
+    char globalBoolSmpParentsOutside = 'N';
+    BigDecimal previousSmpParentsOutside = null; // <- review here
 
-    if (gb_smp_parents_outside == 'Y') {
-      v_smp_parents_outside =
-          v_smp_parents_outside == null ? BigDecimal.ZERO : v_smp_parents_outside;
+    if (globalBoolSmpParentsOutside == 'Y') {
+      varSmpParentsOutside =
+          varSmpParentsOutside == null ? BigDecimal.ZERO : varSmpParentsOutside;
     } else {
-      v_smp_parents_outside =
-          r_previous_smp_parents_outside == null ? BigDecimal.ZERO : r_previous_smp_parents_outside;
+      varSmpParentsOutside =
+          previousSmpParentsOutside == null ? BigDecimal.ZERO : previousSmpParentsOutside;
     }
 
-    if (g_coancestry != null) {
+    if (globalCoancestry != null) {
       // --Effective Population Size with Coancestry considered
-      if (g_coancestry.compareTo(BigDecimal.ZERO) != 0) {
-        v_effective_pop_size = BigDecimal.ZERO;
+      if (globalCoancestry.compareTo(BigDecimal.ZERO) != 0) {
+        varEffectivePopSize = BigDecimal.ZERO;
       } else {
-        v_effective_pop_size =
-            new BigDecimal("0.5").divide(v_effective_pop_size, DIVISION_SCALE, halfUp);
+        varEffectivePopSize =
+            new BigDecimal("0.5").divide(varEffectivePopSize, DIVISION_SCALE, halfUp);
       }
-    } else if (v_smp_parents_outside.compareTo(BigDecimal.ZERO) != 0) {
+    } else if (varSmpParentsOutside.compareTo(BigDecimal.ZERO) != 0) {
       // --Effective Population Size with SMP (for Growth)
-      // Original equation: v_effective_pop_size = Math.round(1/(v_sum_orch_gamete_contr + (
-      // Math.power(0.25/(2*v_smp_parents_outside),2) * v_smp_parents_outside )) ,1);
+      // Original equation: varEffectivePopSize = Math.round(1/(v_sum_orch_gamete_contr + (
+      // Math.power(0.25/(2*varSmpParentsOutside),2) * varSmpParentsOutside )) ,1);
       BigDecimal oneQuarter = new BigDecimal("0.25");
       BigDecimal two = new BigDecimal("2");
-      BigDecimal twoTimesSmpParentOutside = two.multiply(v_smp_parents_outside);
+      BigDecimal twoTimesSmpParentOutside = two.multiply(varSmpParentsOutside);
       BigDecimal oneQuarterDividedByTwoTimesSmpParent =
           oneQuarter.divide(twoTimesSmpParentOutside, DIVISION_SCALE, halfUp);
       BigDecimal power = oneQuarterDividedByTwoTimesSmpParent.pow(2);
-      BigDecimal powerPlusParentTreeOutside = power.multiply(v_smp_parents_outside);
-      BigDecimal sumOrchGameteContrPower = v_sum_orch_gamete_contr.add(powerPlusParentTreeOutside);
-      v_effective_pop_size = ONE.divide(sumOrchGameteContrPower, DIVISION_SCALE, halfUp);
-      v_effective_pop_size = v_effective_pop_size.setScale(1, halfUp);
+      BigDecimal powerPlusParentTreeOutside = power.multiply(varSmpParentsOutside);
+      BigDecimal sumOrchGameteContrPower = varSumOrchGameteContr.add(powerPlusParentTreeOutside);
+      varEffectivePopSize = ONE.divide(sumOrchGameteContrPower, DIVISION_SCALE, halfUp);
+      varEffectivePopSize = varEffectivePopSize.setScale(1, halfUp);
     }
 
-    return v_effective_pop_size;
+    return varEffectivePopSize;
   }
 
   /**

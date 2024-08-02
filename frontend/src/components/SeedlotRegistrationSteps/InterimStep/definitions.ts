@@ -1,8 +1,8 @@
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 
 type InterimForm = {
   useCollectorAgencyInfo: BooleanInputType,
-  agencyName: OptionsInputType,
+  agencyName: StringInputType,
   locationCode: StringInputType,
   startDate: StringInputType,
   endDate: StringInputType,

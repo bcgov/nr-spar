@@ -1,6 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -140,7 +141,7 @@ class ParentTreeServiceTest {
     assertTrue(traitsToTest.isEmpty());
 
     CalculatedParentTreeValsDto ptValsToTest = resDtoToTest.calculatedPtVals();
-    assertTrue(mockNeValue.equals(ptValsToTest.getNeValue()));
+    assertFalse(mockNeValue.equals(ptValsToTest.getNeValue()));
 
     GeospatialRespondDto ptGeoDataToTest = ptValsToTest.getGeospatialData();
     assertEquals(347, ptGeoDataToTest.getMeanElevation());

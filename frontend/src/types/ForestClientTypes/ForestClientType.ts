@@ -7,3 +7,8 @@ export type ForestClientType = {
   clientTypeCode: string,
   acronym: string
 };
+
+export type ClientNumLocCodeType = {
+  clientNumber: string,
+  locationCode: string
+};

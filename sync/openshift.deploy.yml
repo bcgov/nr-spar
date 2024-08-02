@@ -13,6 +13,9 @@ parameters:
   - name: APP
     description: Application/component name
     value: sync
+  - name: ORACLE_PORT
+    description: Oracle database port
+    value: "1543"
   - name: EXECUTION_ID
     description: Process execution ID for running ETL Tool
     value: "100"
@@ -44,9 +47,6 @@ parameters:
     description: Source container registry
     value: ghcr.io
 
-  ### Dummy values for workflow convenience
-  - name: MIN_REPLICAS
-  - name: MAX_REPLICAS
 objects:
   - kind: CronJob
     apiVersion: "batch/v1"
@@ -56,7 +56,8 @@ objects:
         app: ${REPO}-${ZONE}
         cronjob: ${REPO}-${ZONE}
     spec:
-      schedule: "${CRON_MINUTES} 8 * * *" # Run daily at 8:xx AM UTC
+      # 00:00 on day-of-month 1 in every 12000th month from January through December
+      schedule: "0 0 1 1/12000 *" # https://crontab.guru/#0_0_1_1/12000_*
       startingDeadlineSeconds: 60
       concurrencyPolicy: "Replace"
       successfulJobsHistoryLimit: "${{JOB_HISTORY_SUCCESS}}"
@@ -85,27 +86,24 @@ objects:
                     - name: ORACLE_HOST
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
+                          name: ${REPO}-${ZONE}-sync
                           key: oracle-host
                     - name: ORACLE_SYNC_PASSWORD
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
+                          name: ${REPO}-${ZONE}-sync
                           key: oracle-sync-password
                     - name: ORACLE_PORT
-                      valueFrom:
-                        secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
-                          key: oracle-port
+                      value: ${ORACLE_PORT}
                     - name: ORACLE_SERVICE
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
+                          name: ${REPO}-${ZONE}-sync
                           key: oracle-service
                     - name: ORACLE_SYNC_USER
                       valueFrom:
                         secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
+                          name: ${REPO}-${ZONE}-sync
                           key: oracle-sync-user
                     - name: POSTGRES_HOST
                       value: ${REPO}-${ZONE}-database

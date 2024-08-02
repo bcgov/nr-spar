@@ -1,5 +1,5 @@
 import React from 'react';
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
+import { OptionsInputType, StringInputType } from '../../../types/FormInputType';
 
 export type AccordionItemHeadClick = {
   isOpen: boolean,
@@ -11,8 +11,7 @@ export type AccordionCtrlObj = {
 
 export type SingleOwnerForm = {
   id: number,
-  useDefaultAgencyInfo: BooleanInputType,
-  ownerAgency: OptionsInputType,
+  ownerAgency: StringInputType,
   ownerCode: StringInputType,
   ownerPortion: StringInputType,
   reservedPerc: StringInputType,

@@ -37,14 +37,12 @@ import ca.bc.gov.backendstartapi.exception.SeedlotParentTreeNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SmpMixNotFoundException;
 import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.repository.GeneticClassRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotOwnerQuantityRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSeedPlanZoneRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
-import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -63,19 +61,13 @@ class SeedlotFormPutTest {
 
   @Mock SeedlotSourceRepository seedlotSourceRepository;
 
-  @Mock SeedlotStatusRepository seedlotStatusRepository;
-
   @Mock GeneticClassRepository geneticClassRepository;
 
   @Mock LoggedUserService loggedUserService;
 
   @Mock SeedlotCollectionMethodService seedlotCollectionMethodService;
 
-  @Mock SeedlotCollectionMethodRepository seedlotCollectionMethodRepository;
-
   @Mock SeedlotOwnerQuantityService seedlotOwnerQuantityService;
-
-  @Mock SeedlotOwnerQuantityRepository seedlotOwnerQuantityRepository;
 
   @Mock SeedlotOrchardService seedlotOrchardService;
 
@@ -109,13 +101,10 @@ class SeedlotFormPutTest {
         new SeedlotService(
             seedlotRepository,
             seedlotSourceRepository,
-            seedlotStatusRepository,
             geneticClassRepository,
             loggedUserService,
             seedlotCollectionMethodService,
-            seedlotCollectionMethodRepository,
             seedlotOwnerQuantityService,
-            seedlotOwnerQuantityRepository,
             seedlotOrchardService,
             seedlotParentTreeService,
             seedlotParentTreeGeneticQualityService,
@@ -143,8 +132,8 @@ class SeedlotFormPutTest {
         new SeedlotFormCollectionDto(
             "00012797",
             "02",
-            LocalDateTime.now(),
-            LocalDateTime.now(),
+            LocalDate.now(),
+            LocalDate.now(),
             new BigDecimal("2"),
             new BigDecimal("4"),
             new BigDecimal("8"),
@@ -167,8 +156,8 @@ class SeedlotFormPutTest {
         new SeedlotFormInterimDto(
             "00012797",
             "02",
-            LocalDateTime.now(),
-            LocalDateTime.now(),
+            LocalDate.now(),
+            LocalDate.now(),
             itermFacilityDesc,
             optionalFacilityCode);
 
@@ -198,12 +187,12 @@ class SeedlotFormPutTest {
         new SeedlotFormExtractionDto(
             "00012797",
             "02",
-            LocalDateTime.now(),
-            LocalDateTime.now(),
+            LocalDate.now(),
+            LocalDate.now(),
             "00012797",
             "02",
-            LocalDateTime.now(),
-            LocalDateTime.now());
+            LocalDate.now(),
+            LocalDate.now());
 
     return new SeedlotFormSubmissionDto(
         collectionDto,
@@ -328,8 +317,6 @@ class SeedlotFormPutTest {
     when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
         .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
-        .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
 
     doThrow(new SmpMixNotFoundException())
@@ -362,8 +349,6 @@ class SeedlotFormPutTest {
     when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
         .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
-        .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
     doNothing()
@@ -411,8 +396,6 @@ class SeedlotFormPutTest {
     when(seedlotParentTreeService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
         .thenReturn(List.of());
     doNothing().when(seedlotParentTreeGeneticQualityService).saveSeedlotFormStep5(any(), any());
-    when(seedlotGeneticWorthService.saveSeedlotFormStep5(any(), any(), anyBoolean()))
-        .thenReturn(List.of());
     when(smpMixService.saveSeedlotFormStep5(any(), any())).thenReturn(List.of());
     doNothing().when(smpMixGeneticQualityService).saveSeedlotFormStep5(any(), any());
     doNothing()

@@ -36,12 +36,35 @@ jobs:
       tag: ${{ needs.init.outputs.pr }}
       target: test
 
-  # deploy-prod:
-  #   name: PROD
-  #   needs: [init, deploys]
-  #   secrets: inherit
-  #   uses: ./.github/workflows/.deploy.yml
-  #   with:
-  #     environment: prod
-  #     tag: ${{ needs.init.outputs.pr }}
-  #     target: prod
+  promote:
+    name: Promote Images
+    env:
+      target: ${{ needs.init.outputs.pr }}
+      tag: prod
+    needs: [init, deploys]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [backend, common, database, frontend, oracle-api, sync]
+    steps:
+      - uses: shrink/actions-docker-registry-tag@v4
+        with:
+          registry: ghcr.io
+          repository: ${{ github.repository }}/${{ matrix.package }}
+          target: ${{ env.target }}
+          tags: ${{ env.tag }}
+
+      - run: |
+          # Verify tagging
+          INSPECT="docker manifest inspect ghcr.io/${{ github.repository }}/${{ matrix.package }}"
+          TARGET=$(${INSPECT}:${{ env.target }} | jq -r '.manifests[] | select(.platform.architecture=="amd64") | .digest')
+          TAG=$(${INSPECT}:${{ env.tag }} | jq -r '.manifests[] | select(.platform.architecture=="amd64") | .digest')
+          echo "TARGET: ${TARGET}"
+          echo "TAG: ${TAG}"
+          if [ "${TARGET}" != "${TAG}" ]; then
+            echo "ERROR: Tagging failed!"
+            echo "RETRY=true" >> $GITHUB_ENV
+          else
+            echo "ERROR: Tagging success!"
+            echo "RETRY=false" >> $GITHUB_ENV
+          fi

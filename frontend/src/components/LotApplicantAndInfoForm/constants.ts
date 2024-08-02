@@ -1,22 +1,23 @@
-import { EmptyMultiOptObj } from '../../shared-constants/shared-constants';
-import AgencyTextPropsType from '../../types/AgencyTextPropsType';
-import { OptionsInputType, StringInputType } from '../../types/FormInputType';
+import ClientAndCodeInputTextType from '../../types/ClientAndCodeInputTextType';
+import { StringInputType } from '../../types/FormInputType';
 import { ComboBoxPropsType } from './definitions';
 
-export const agencyFieldsProp: AgencyTextPropsType = {
+export const clientAndCodeInputText = (
+  isReview: boolean | undefined
+): ClientAndCodeInputTextType => ({
   useDefaultCheckbox: {
     name: '',
     labelText: ''
   },
   agencyInput: {
-    titleText: 'Applicant agency acronym',
+    titleText: `Applicant agency ${isReview ? '' : 'acronym'}`,
     invalidText: 'Acronym that identifies the agency'
   },
   locationCode: {
     name: 'seedlotCreationLocationCode',
-    labelText: 'Applicant agency number'
+    labelText: 'Agency location code'
   }
-};
+});
 
 export const speciesFieldConfig: ComboBoxPropsType = {
   placeholder: 'Enter or choose an species for the seedlot',
@@ -26,7 +27,7 @@ export const speciesFieldConfig: ComboBoxPropsType = {
 };
 
 // Template data for vegLot:
-export const vegLotAgency: OptionsInputType = { id: '', isInvalid: false, value: EmptyMultiOptObj };
+export const vegLotAgency: StringInputType = { id: '', isInvalid: false, value: '' };
 export const vegLotLocationCode: StringInputType = { id: '', isInvalid: false, value: '' };
 
 // Remove VegCodes with these codes

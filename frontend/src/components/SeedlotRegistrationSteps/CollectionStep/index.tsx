@@ -15,15 +15,15 @@ import {
 import moment from 'moment';
 import validator from 'validator';
 
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
-import { EmptyBooleanInputType } from '../../../shared-constants/shared-constants';
 import getConeCollectionMethod from '../../../api-service/coneCollectionMethodAPI';
 
 import Subtitle from '../../Subtitle';
-import ApplicantAgencyFields from '../../ApplicantAgencyFields';
+import ClientAndCodeInput from '../../ClientAndCodeInput';
+import ScrollToTop from '../../ScrollToTop';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
+import { StringInputType } from '../../../types/FormInputType';
 
 import {
   DATE_FORMAT, MOMENT_DATE_FORMAT, agencyFieldsProps, fieldsConfig
@@ -43,20 +43,18 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
   const {
     allStepData: { collectionStep: state },
     setStepData,
-    defaultAgencyObj: defaultAgency,
+    defaultClientNumber,
     defaultCode,
     isFormSubmitted
   } = useContext(ClassAContext);
 
   const [isCalcWrong, setIsCalcWrong] = useState<boolean>(false);
 
-  const setAgencyAndCode = (
-    isDefault: BooleanInputType,
-    agency: OptionsInputType,
+  const setClientAndCode = (
+    agency: StringInputType,
     locationCode: StringInputType
   ) => {
     const clonedState = structuredClone(state);
-    clonedState.useDefaultAgencyInfo = isDefault;
     clonedState.collectorAgency = agency;
     clonedState.locationCode = locationCode;
     setStepData('collectionStep', clonedState);
@@ -138,6 +136,7 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
 
   return (
     <FlexGrid className="collection-step-container">
+      <ScrollToTop enabled={!isReview} />
       <Row className="collection-step-row">
         <Column className="section-title" sm={4} md={8} lg={16} xlg={16}>
           <h2>{fieldsConfig.titleSection.title}</h2>
@@ -148,23 +147,20 @@ const CollectionStep = ({ isReview }: CollectionStepProps) => {
           }
         </Column>
       </Row>
-      <ApplicantAgencyFields
+      <ClientAndCodeInput
         showCheckbox={!isReview}
-        isDefault={isReview ? EmptyBooleanInputType : state.useDefaultAgencyInfo}
         checkboxId="collection-step-default-checkbox"
-        agency={state.collectorAgency}
-        locationCode={state.locationCode}
-        fieldsProps={agencyFieldsProps}
-        defaultAgency={defaultAgency}
-        defaultCode={defaultCode}
-        setAgencyAndCode={
+        clientInput={state.collectorAgency}
+        locationCodeInput={state.locationCode}
+        textConfig={agencyFieldsProps}
+        defaultClientNumber={defaultClientNumber}
+        defaultLocCode={defaultCode}
+        setClientAndCode={
           (
-            isDefault: BooleanInputType,
-            agency: OptionsInputType,
+            agency: StringInputType,
             locationCode: StringInputType
-          ) => setAgencyAndCode(isDefault, agency, locationCode)
+          ) => setClientAndCode(agency, locationCode)
         }
-        isFormSubmitted={isFormSubmitted}
         readOnly={isFormSubmitted && !isReview}
         maxInputColSize={6}
       />

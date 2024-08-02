@@ -15,18 +15,18 @@ import {
 } from '@carbon/react';
 
 import Subtitle from '../../Subtitle';
-import ApplicantAgencyFields from '../../ApplicantAgencyFields';
+import ScrollToTop from '../../ScrollToTop';
+import ClientAndCodeInput from '../../ClientAndCodeInput';
 
 import getFacilityTypes from '../../../api-service/facilityTypesAPI';
 import { getMultiOptList } from '../../../utils/MultiOptionsUtils';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../../types/FormInputType';
-import { EmptyBooleanInputType } from '../../../shared-constants/shared-constants';
+import { BooleanInputType, StringInputType } from '../../../types/FormInputType';
 
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 import InterimForm from './definitions';
 import {
-  DATE_FORMAT, MAX_FACILITY_DESC_CHAR, agencyFieldsProps, pageTexts
+  DATE_FORMAT, MAX_FACILITY_DESC_CHAR, clientAndCodeTextConfig, pageTexts
 } from './constants';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
 
@@ -47,15 +47,18 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
 
   const [otherChecked, setOtherChecked] = useState(state.facilityType.value === 'OTH');
 
-  const setAgencyAndCode = (
-    agencyData: OptionsInputType,
-    locationCodeData: StringInputType,
-    useDefaultData: BooleanInputType
+  const setClientAndCode = (
+    clientInput: StringInputType,
+    locationCodeInput: StringInputType,
+    checkBoxInput: BooleanInputType
   ) => {
     const clonedState = structuredClone(state);
-    clonedState.agencyName = agencyData;
-    clonedState.locationCode = locationCodeData;
-    clonedState.useCollectorAgencyInfo = useDefaultData;
+    clonedState.agencyName = clientInput;
+    clonedState.locationCode = locationCodeInput;
+    if (checkBoxInput) {
+      clonedState.useCollectorAgencyInfo = checkBoxInput;
+    }
+
     setStepData('interimStep', clonedState);
   };
 
@@ -140,6 +143,7 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
 
   return (
     <FlexGrid className="interim-agency-storage-form" fullWidth>
+      <ScrollToTop enabled={!isReview} />
       <Row className="interim-title-row">
         <Column className="section-title" sm={4} md={8} lg={16}>
           <h2>{pageTexts.interimTitleSection.title}</h2>
@@ -152,23 +156,22 @@ const InterimStep = ({ isReview }:InterimStepProps) => {
           }
         </Column>
       </Row>
-      <ApplicantAgencyFields
+      <ClientAndCodeInput
         showCheckbox={!isReview}
         checkboxId={state.useCollectorAgencyInfo.id}
-        isDefault={isReview ? EmptyBooleanInputType : state.useCollectorAgencyInfo}
-        agency={state.agencyName}
-        locationCode={state.locationCode}
-        fieldsProps={agencyFieldsProps}
-        defaultAgency={collectorAgency.value}
-        defaultCode={collectorCode.value}
-        setAgencyAndCode={(
-          isDefault: BooleanInputType,
-          agency: OptionsInputType,
-          locationCode: StringInputType
-        ) => setAgencyAndCode(agency, locationCode, isDefault)}
-        isFormSubmitted={isFormSubmitted}
+        clientInput={state.agencyName}
+        locationCodeInput={state.locationCode}
+        textConfig={clientAndCodeTextConfig}
+        defaultClientNumber={collectorAgency.value}
+        defaultLocCode={collectorCode.value}
+        setClientAndCode={(
+          clientInput: StringInputType,
+          locationCodeInput: StringInputType,
+          checkBoxInput?: BooleanInputType
+        ) => setClientAndCode(clientInput, locationCodeInput, checkBoxInput!)}
         readOnly={isFormSubmitted && !isReview}
         maxInputColSize={6}
+        checkBoxInput={state.useCollectorAgencyInfo}
       />
       <Row className="interim-storage-row">
         <Column className="start-date-col" sm={4} md={4} lg={8} xlg={6}>
