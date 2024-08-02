@@ -23,7 +23,7 @@ parameters:
     value: ghcr.io
   - name: ORG
     description: Organization name
-    value: bcgov    
+    value: bcgov
   - name: DOMAIN
     value: apps.silver.devops.gov.bc.ca
   - name: CPU_REQUEST
