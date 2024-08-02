@@ -11,9 +11,8 @@ import validator from 'validator';
 
 import Subtitle from '../Subtitle';
 import Divider from '../Divider';
-import ApplicantAgencyFields from '../ApplicantAgencyFields';
-import { BooleanInputType, OptionsInputType, StringInputType } from '../../types/FormInputType';
-import { EmptyBooleanInputType } from '../../shared-constants/shared-constants';
+import ClientAndCodeInput from '../ClientAndCodeInput';
+import { StringInputType } from '../../types/FormInputType';
 import AuthContext from '../../contexts/AuthContext';
 import { getForestClientByNumberOrAcronym } from '../../api-service/forestClientsAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../config/TimeUnits';
@@ -23,7 +22,7 @@ import { FormProps } from './definitions';
 import {
   vegLotAgency,
   vegLotLocationCode,
-  agencyFieldsText
+  clientAndCodeInputText
 } from './constants';
 
 import './styles.scss';
@@ -51,19 +50,15 @@ const LotApplicantAndInfoForm = ({
   );
 
   useEffect(() => {
-    // Pre-fill the applicant acronym based on user selected role
-    if (defaultApplicantAgencyQuery.status === 'success' && !seedlotFormData?.client.value.code && setSeedlotFormData) {
+    // Pre-fill the applicant client number based on user selected role
+    if (defaultApplicantAgencyQuery.status === 'success' && !seedlotFormData?.client.value && setSeedlotFormData) {
       const forestClient = defaultApplicantAgencyQuery.data;
 
       setSeedlotFormData((prevForm) => ({
         ...prevForm,
         client: {
           ...prevForm.client,
-          value: {
-            code: forestClient.clientNumber,
-            description: forestClient.clientName,
-            label: forestClient.acronym
-          }
+          value: forestClient.clientNumber
         }
       }));
     }
@@ -83,11 +78,11 @@ const LotApplicantAndInfoForm = ({
     }
   };
 
-  const setAgencyAndCode = (agency: OptionsInputType, locationCode: StringInputType) => {
+  const setClientAndCode = (client: StringInputType, locationCode: StringInputType) => {
     if (isSeedlot && setSeedlotFormData) {
       setSeedlotFormData((prevData) => ({
         ...prevData,
-        client: agency,
+        client,
         locationCode
       }));
     }
@@ -105,23 +100,21 @@ const LotApplicantAndInfoForm = ({
           }
         </Column>
       </Row>
-      <ApplicantAgencyFields
+      <ClientAndCodeInput
         showCheckbox={false}
-        isDefault={EmptyBooleanInputType}
         checkboxId="lot-information-default-checkbox"
-        agency={isSeedlot && seedlotFormData ? seedlotFormData.client : vegLotAgency}
-        locationCode={
+        clientInput={isSeedlot && seedlotFormData ? seedlotFormData.client : vegLotAgency}
+        locationCodeInput={
           isSeedlot && seedlotFormData
             ? seedlotFormData.locationCode
             : vegLotLocationCode
         }
-        fieldsProps={agencyFieldsText(isReview)}
-        setAgencyAndCode={
+        textConfig={clientAndCodeInputText(isReview)}
+        setClientAndCode={
           (
-            _isDefault: BooleanInputType,
-            agency: OptionsInputType,
+            client: StringInputType,
             locationCode: StringInputType
-          ) => setAgencyAndCode(agency, locationCode)
+          ) => setClientAndCode(client, locationCode)
         }
         readOnly={isEdit}
         maxInputColSize={6}

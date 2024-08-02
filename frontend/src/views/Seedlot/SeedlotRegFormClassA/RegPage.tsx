@@ -216,7 +216,13 @@ const RegPage = () => {
                     <SubmitModal
                       btnText="Submit Registration"
                       renderIconName="CheckmarkOutline"
-                      disableBtn={!allStepCompleted || saveStatus === 'conflict'}
+                      disableBtn={
+                        !allStepCompleted
+                        || saveStatus === 'conflict'
+                        || !seedlotData
+                        || (seedlotData.seedlotStatus.seedlotStatusCode !== 'PND'
+                        && seedlotData.seedlotStatus.seedlotStatusCode !== 'INC')
+                      }
                       submitFn={() => {
                         submitSeedlot.mutate(getSeedlotPayload(allStepData, seedlotNumber));
                       }}

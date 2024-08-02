@@ -33,12 +33,13 @@ import Subtitle from '../../Subtitle';
 import ReadOnlyInput from '../../ReadOnlyInput';
 import ClassAContext from '../../../views/Seedlot/ContextContainerClassA/context';
 
-import { OrchardForm, OrchardObj } from './definitions';
-import { initialStagedOrchard, MAX_ORCHARDS, orchardStepText } from './constants';
+import { OrchardForm } from './definitions';
+import { orchardStepText } from './constants';
 import OrchardWarnModal from './OrchardWarnModal';
 import orchardModalOptions from './OrchardWarnModal/definitions';
 
 import './styles.scss';
+import { OptionsInputType } from '../../../types/FormInputType';
 
 type NumStepperVal = {
   value: number,
@@ -65,7 +66,7 @@ const OrchardStep = ({
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalType, setModalType] = useState<keyof orchardModalOptions>('change');
   // Store the orchard selection until the user has confirmed the warning modal
-  const [stagedOrchard, setStagedOrchard] = useState<OrchardObj>(initialStagedOrchard);
+  const [stagedOrchard, setStagedOrchard] = useState<OptionsInputType | null>(null);
 
   const gameticMethodologyQuery = useQuery({
     queryKey: ['gametic-methodologies'],
@@ -143,64 +144,60 @@ const OrchardStep = ({
 
   const addOrchardObj = () => {
     const orchards = structuredClone(state.orchards);
-    const numOfOrchard = orchards.length;
-    if (numOfOrchard < MAX_ORCHARDS) {
-      const newOrchard: OrchardObj = {
-        inputId: numOfOrchard,
-        selectedItem: null,
-        isInvalid: false
-      };
-      orchards.push(newOrchard);
-      setStepData(
-        'orchardStep',
-        {
-          ...state,
-          orchards
-        }
-      );
-    }
-  };
-
-  const deleteOrchardObj = () => {
-    const orchards = structuredClone(state.orchards);
-    const numOfOrchard = orchards.length;
-    const newOrchards = orchards.filter((orchard) => orchard.inputId !== (numOfOrchard - 1));
+    orchards.secondaryOrchard.enabled = true;
     setStepData(
       'orchardStep',
       {
         ...state,
-        orchards: newOrchards
+        orchards
       }
     );
   };
 
-  const setOrchard = (inputId: number, selectedItem: MultiOptionsObj | null) => {
+  const deleteOrchardObj = () => {
     const orchards = structuredClone(state.orchards);
-    const selectedOrchardIndex = orchards.findIndex((orchard) => orchard.inputId === inputId);
-    if (selectedOrchardIndex > -1) {
-      orchards[selectedOrchardIndex].selectedItem = selectedItem;
-      setStepData(
-        'orchardStep',
-        {
-          ...state,
-          orchards
-        }
-      );
+    orchards.secondaryOrchard.enabled = false;
+    orchards.secondaryOrchard.value = EmptyMultiOptObj;
+    setStepData(
+      'orchardStep',
+      {
+        ...state,
+        orchards
+      }
+    );
+  };
+
+  const setOrchard = (
+    isPrimary: boolean,
+    selectedItem: MultiOptionsObj | null
+  ) => {
+    const orchards = structuredClone(state.orchards);
+
+    if (isPrimary) {
+      orchards.primaryOrchard.value = selectedItem ?? EmptyMultiOptObj;
+    } else {
+      orchards.secondaryOrchard.value = selectedItem ?? EmptyMultiOptObj;
     }
+
+    setStepData(
+      'orchardStep',
+      {
+        ...state,
+        orchards
+      }
+    );
   };
 
   // Remove options that are already selected by a user
   const removeSelectedOption = (data: MultiOptionsObj[]) => {
     const filteredOptions: MultiOptionsObj[] = structuredClone(data);
-    state.orchards.forEach((orchard) => {
-      const orchardId = orchard.selectedItem?.code;
-      // The index of a matching orchard in filteredOptions
-      const orchardOptIndex = filteredOptions.findIndex((option) => option.code === orchardId);
-      if (orchardOptIndex > -1) {
-        // Remove found option
-        filteredOptions.splice(orchardOptIndex, 1);
-      }
-    });
+    const orchardId = state.orchards.primaryOrchard.value.code;
+    // The index of a matching orchard in filteredOptions
+    const orchardOptIndex = filteredOptions.findIndex((option) => option.code === orchardId);
+    if (orchardOptIndex > -1) {
+      // Remove found option
+      filteredOptions.splice(orchardOptIndex, 1);
+    }
     return filteredOptions;
   };
 
@@ -211,14 +208,17 @@ const OrchardStep = ({
     if (modalType === 'delete') {
       deleteOrchardObj();
     }
-    if (modalType === 'change') {
-      setOrchard(stagedOrchard.inputId, stagedOrchard.selectedItem);
+    if (modalType === 'change' && stagedOrchard) {
+      setOrchard(
+        stagedOrchard.id === state.orchards.primaryOrchard.id,
+        stagedOrchard.value
+      );
     }
   };
 
   const renderOrchardButtons = () => {
     if (!isFormSubmitted && !isReview) {
-      return state.orchards.length !== 1
+      return state.orchards.secondaryOrchard.enabled
         ? (
           <Row className="seedlot-orchard-add-orchard">
             <Column sm={4} md={4} lg={10}>
@@ -228,7 +228,7 @@ const OrchardStep = ({
                 renderIcon={TrashCan}
                 onClick={() => {
                   // Show warning only if the table is not empty and an item has been selected
-                  if (!isTableEmpty && state.orchards[1].selectedItem) {
+                  if (!isTableEmpty && state.orchards.secondaryOrchard.value.code) {
                     setModalType('delete');
                     setModalOpen(true);
                   } else deleteOrchardObj();
@@ -261,51 +261,54 @@ const OrchardStep = ({
     if (isFormSubmitted && isReview) {
       return (
         <div className="orchard-fields-review-only">
+          <Row>
+            <Column sm={4} md={4} lg={4}>
+              <ReadOnlyInput
+                id={state.orchards.primaryOrchard.id}
+                label="Orchard ID or number"
+                value={state.orchards.primaryOrchard.value.label}
+              />
+            </Column>
+          </Row>
           {
-            state.orchards.map((orchard: OrchardObj, index: number) => (
-              <Row key={`orchard-${index + 1}`}>
-                <Column sm={4} md={4} lg={4}>
-                  <ReadOnlyInput
-                    id={`orchard-${index + 1}-number`}
-                    label="Orchard ID or number"
-                    value={orchard.selectedItem?.code ?? ''}
-                  />
-                </Column>
-                <Column sm={4} md={4} lg={4}>
-                  <ReadOnlyInput
-                    id={`orchard-${index + 1}-name`}
-                    label="Orchard name"
-                    value={orchard.selectedItem?.label ?? ''}
-                  />
-                </Column>
-              </Row>
-            ))
+            state.orchards.secondaryOrchard.value.label
+              ? (
+                <Row>
+                  <Column sm={4} md={4} lg={4}>
+                    <ReadOnlyInput
+                      id={state.orchards.secondaryOrchard.id}
+                      label="Orchard ID or number"
+                      value={state.orchards.secondaryOrchard.value.label}
+                    />
+                  </Column>
+                </Row>
+              )
+              : null
           }
         </div>
       );
     }
-    return (state.orchards.map((orchard: OrchardObj) => (
-      <Row className="orchard-row" key={orchard.inputId}>
-        <Column sm={4} md={4} lg={8} xlg={6}>
-          {
+    return (
+      <>
+        <Row className="orchard-row">
+          <Column sm={4} md={4} lg={8} xlg={6}>
+            {
             orchardQuery.isFetching ? (
               <TextInputSkeleton />
             )
               : (
                 <>
                   <ComboBox
-                    id={`orchard-combobox-${orchard.inputId}`}
+                    id={state.orchards.primaryOrchard.id}
                     placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
                     items={
-                      orchardQuery.isSuccess
+                      orchardQuery.status === 'success'
                         ? removeSelectedOption(orchardQuery.data)
                         : []
                     }
-                    selectedItem={orchard.selectedItem}
+                    selectedItem={state.orchards.primaryOrchard.value}
                     titleText={
-                      orchard.inputId === 0
-                        ? orchardStepText.orchardSection.orchardInput.label
-                        : orchardStepText.orchardSection.orchardInput.optLabel
+                      orchardStepText.orchardSection.orchardInput.label
                     }
                     shouldFilterItem={
                       ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
@@ -315,12 +318,11 @@ const OrchardStep = ({
                         if (!isTableEmpty) {
                           setModalType('change');
                           setStagedOrchard({
-                            inputId: orchard.inputId,
-                            selectedItem: e.selectedItem,
-                            isInvalid: orchard.isInvalid
+                            ...state.orchards.primaryOrchard,
+                            value: e.selectedItem
                           });
                           setModalOpen(true);
-                        } else setOrchard(orchard.inputId, e.selectedItem);
+                        } else setOrchard(true, e.selectedItem);
                       }
                     }
                     readOnly={isFormSubmitted || isReview}
@@ -337,9 +339,68 @@ const OrchardStep = ({
                 </>
               )
           }
-        </Column>
-      </Row>
-    )));
+          </Column>
+        </Row>
+        {/* Secondary Orchard */}
+        {
+        state.orchards.secondaryOrchard.enabled
+          ? (
+            <Row className="orchard-row">
+              <Column sm={4} md={4} lg={8} xlg={6}>
+                {
+              orchardQuery.isFetching ? (
+                <TextInputSkeleton />
+              )
+                : (
+                  <>
+                    <ComboBox
+                      id={state.orchards.secondaryOrchard.id}
+                      placeholder={orchardStepText.orchardSection.orchardInput.placeholder}
+                      items={
+                        orchardQuery.status === 'success'
+                          ? removeSelectedOption(orchardQuery.data)
+                          : []
+                      }
+                      selectedItem={state.orchards.secondaryOrchard.value}
+                      titleText={
+                        orchardStepText.orchardSection.orchardInput.secondaryLabel
+                      }
+                      shouldFilterItem={
+                        ({ item, inputValue }: FilterObj) => filterInput({ item, inputValue })
+                      }
+                      onChange={
+                        (e: ComboBoxEvent) => {
+                          if (!isTableEmpty) {
+                            setModalType('change');
+                            setStagedOrchard({
+                              ...state.orchards.secondaryOrchard,
+                              value: e.selectedItem
+                            });
+                            setModalOpen(true);
+                          } else setOrchard(false, e.selectedItem);
+                        }
+                      }
+                      readOnly={isFormSubmitted || isReview}
+                    />
+                    {
+                      orchardQuery.isError && !isFormSubmitted
+                        ? (
+                          <InputErrorText
+                            description={orchardStepText.orchardSection.orchardInput.fetchError}
+                          />
+                        )
+                        : null
+                    }
+                  </>
+                )
+            }
+              </Column>
+            </Row>
+          )
+          : null
+      }
+      </>
+    );
   };
 
   return (
