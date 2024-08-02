@@ -1,8 +1,13 @@
-name: Release
+name: PROD
 
 on:
   release:
-    types: [published, updated]
+    types: [published]
+workflow_call:
+  inputs:
+    tag:
+      description: 'The tag set to deploy; e.g. prod or PR number'
+      required: true
 
 concurrency:
   # Do not interrupt previous workflows
@@ -10,30 +15,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  dump:
-    name: Dump Contexts
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug GitHub Action
-        uses: raven-actions/debug@v1.1.0
-    
-  # init:
-  #   name: Initialize
-  #   outputs:
-  #     pr: ${{ steps.pr.outputs.pr }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #       # Get PR number for squash merges to main
-  #     - name: PR Number
-  #       id: pr
-  #       uses: bcgov-nr/action-get-pr@v0.0.1
-
-  # deploy-prod:
-  #   name: PROD
-  #   needs: [init]
-  #   secrets: inherit
-  #   uses: ./.github/workflows/.deploy.yml
-  #   with:
-  #     environment: prod
-  #     tag: ${{ needs.init.outputs.pr }}
-  #     target: prod
+  deploy-prod:
+    name: PROD
+    secrets: inherit
+    uses: ./.github/workflows/.deploy.yml
+    with:
+      environment: prod
+      tag: ${{ inputs.tag || prod }}
+      target: prod
