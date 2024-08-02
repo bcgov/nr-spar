@@ -1,3 +1,4 @@
+import { ForestClientType } from '../../../types/ForestClientTypes/ForestClientType';
 import MultiOptionsObj from '../../../types/MultiOptionsObject';
 import { emptyOwnershipStep } from '../../../views/Seedlot/ContextContainerClassA/constants';
 import { inputText, createOwnerTemplate } from './constants';
@@ -106,7 +107,10 @@ export const arePortionsValid = (ownershipArray: Array<SingleOwnerForm>): boolea
   return Number(sum.toFixed(2)) === 100;
 };
 
-export const getOwnerAgencyTitle = (desc: string): string => desc.substring(
-  desc.indexOf('-') + 1,
-  desc.lastIndexOf('-')
-).trim();
+export const getOwnerAgencyTitle = (fc: ForestClientType | undefined): string => {
+  if (!fc) {
+    return 'Owner agency name';
+  }
+
+  return fc.clientName;
+};

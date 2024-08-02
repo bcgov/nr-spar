@@ -27,6 +27,7 @@ import Subtitle from '../../Subtitle';
 import EmptySection from '../../EmptySection';
 import DetailSection from '../../DetailSection';
 import DescriptionBox from '../../DescriptionBox';
+import ScrollToTop from '../../ScrollToTop';
 
 import InputErrorNotification from './InputErrorNotification';
 import UploadWarnNotification from './UploadWarnNotification';
@@ -39,7 +40,6 @@ import {
   renderColOptions, renderTableBody, renderNotification,
   renderDefaultInputs, renderPagination
 } from './TableComponents';
-import { OrchardObj } from '../OrchardStep/definitions';
 import UploadFileModal from './UploadFileModal';
 import InfoSectionRow from '../../InfoSection/InfoSectionRow';
 import {
@@ -58,9 +58,9 @@ import {
   addNewMixRow, calcMixTabInfoItems, fillMixTable,
   hasParentTreesForSelectedOrchards
 } from './utils';
+import EditGenWorth from './EditGenWorth';
 
 import './styles.scss';
-import EditGenWorth from './EditGenWorth';
 
 type ParentTreeStepProps = {
   // Determines whether this component is used on the seedlot review screen
@@ -75,7 +75,7 @@ type ParentTreeStepProps = {
 const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) => {
   const {
     allStepData: { parentTreeStep: state },
-    allStepData: { orchardStep: { orchards } },
+    allStepData: { orchardStep },
     setStepData,
     setStep,
     seedlotSpecies,
@@ -93,8 +93,8 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
     isFetchingData
   } = useContext(ClassAContext);
 
-  const [orchardsData, setOrchardsData] = useState<Array<OrchardObj>>(
-    () => processOrchards(orchards)
+  const [orchardsData, setOrchardsData] = useState<string[]>(
+    () => processOrchards(orchardStep)
   );
   const [currentTab, setCurrentTab] = useState<TabTypes>('coneTab');
   const [headerConfig, setHeaderConfig] = useState<Array<HeaderObj>>(
@@ -137,12 +137,12 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
 
   useEffect(
     () => {
-      const processedOrchard = processOrchards(orchards);
+      const processedOrchard = processOrchards(orchardStep);
       const disabled = processedOrchard.length === 0;
       setDisableOptions(disabled);
       setOrchardsData(processedOrchard);
     },
-    [orchards]
+    [orchardStep.orchards]
   );
 
   // Effects for 'Cone and Pollen' and 'SMP Success' tabs
@@ -210,14 +210,12 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
       && allParentTreeQuery.isFetched
       && allParentTreeQuery.data
     ) {
-      const orchardIds = orchardsData.map((o) => o.selectedItem?.code);
-
-      if (hasParentTreesForSelectedOrchards(orchardIds, allParentTreeQuery.data)) {
+      if (hasParentTreesForSelectedOrchards(orchardsData, allParentTreeQuery.data)) {
         setDisableOptions(false);
         processParentTreeData(
           allParentTreeQuery.data,
           state,
-          orchardsData.map((o) => o.selectedItem?.code),
+          orchardsData,
           currentPage,
           currPageSize,
           setSlicedRows,
@@ -517,6 +515,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
 
   return (
     <FlexGrid className="parent-tree-step-container">
+      <ScrollToTop enabled={!isReviewDisplay} />
       {
         !isReviewDisplay
           ? (
@@ -715,7 +714,10 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                               <TableRow>
                                 {
                                   headerConfig.map((header) => (
-                                    (header.availableInTabs.includes(currentTab) && header.enabled)
+                                    (
+                                      header.availableInTabs.includes(currentTab)
+                                      && header.enabled
+                                    )
                                       ? (
                                         <TableHeader id={header.id} key={header.id}>
                                           <DefinitionTooltip

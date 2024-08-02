@@ -25,7 +25,8 @@ const CollectionReviewRead = () => {
     {
       queryKey: ['forest-clients', clientNumber],
       queryFn: () => getForestClientByNumberOrAcronym(clientNumber!),
-      enabled: !!clientNumber
+      enabled: !!clientNumber,
+      select: (fc) => getForestClientLabel(fc)
     }
   );
 
@@ -47,9 +48,9 @@ const CollectionReviewRead = () => {
         <Column className="info-col" sm={4} md={4} lg={4}>
           <ReadOnlyInput
             id="collection-agency-name"
-            label="Cone collector agency name"
-            value={agencyQuery.data ? getForestClientLabel(agencyQuery.data) : ''}
-            showSkeleton={isFetchingData || agencyQuery.isFetching}
+            label="Cone collector agency"
+            value={agencyQuery.data}
+            showSkeleton={isFetchingData || agencyQuery.fetchStatus === 'fetching'}
           />
         </Column>
         <Column className="info-col" sm={4} md={4} lg={4}>
@@ -75,7 +76,7 @@ const CollectionReviewRead = () => {
             id="collection-start-date"
             label="Collection start date"
             value={
-              luxon.fromISO(allStepData.collectionStep.startDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
+              luxon.fromISO(allStepData.collectionStep.startDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
             }
             showSkeleton={isFetchingData}
           />
@@ -85,7 +86,7 @@ const CollectionReviewRead = () => {
             id="collection-end-date"
             label="Collection end date"
             value={
-              luxon.fromISO(allStepData.collectionStep.endDate.value.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
+              luxon.fromISO(allStepData.collectionStep.endDate.value?.replaceAll('/', '-')).toFormat(MONTH_DAY_YEAR)
             }
             showSkeleton={isFetchingData}
           />

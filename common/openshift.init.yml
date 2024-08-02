@@ -12,9 +12,6 @@ parameters:
   - name: ORACLE_HOST
     description: Oracle database host
     value: nrcdb03.bcgov
-  - name: ORACLE_PORT
-    description: Oracle database port
-    value: "1543"
   - name: ORACLE_SERVICE
     description: Oracle service name
     value: dbq01.nrs.bcgov
@@ -43,10 +40,18 @@ objects:
     stringData:
       oracle-host: ${ORACLE_HOST}
       oracle-password: ${ORACLE_PASSWORD}
-      oracle-port: ${ORACLE_PORT}
       oracle-service: ${ORACLE_SERVICE}
       oracle-user: ${ORACLE_USER}
       oracle-secret: ${ORACLE_CERT_SECRET}
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ${NAME}-${ZONE}-sync
+      labels:
+        app: ${NAME}-${ZONE}
+    stringData:
+      oracle-host: ${ORACLE_HOST}
+      oracle-service: ${ORACLE_SERVICE}
       oracle-sync-password: ${ORACLE_SYNC_PASSWORD}
       oracle-sync-user: ${ORACLE_SYNC_USER}
   - apiVersion: v1
