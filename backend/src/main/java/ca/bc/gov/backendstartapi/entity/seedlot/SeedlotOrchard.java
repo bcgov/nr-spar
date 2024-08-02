@@ -5,6 +5,7 @@ import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotOrchardId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -33,8 +34,8 @@ public class SeedlotOrchard {
 
   // region Identifier
   @Id
-  @JoinColumn(name = "seedlot_number")
-  @ManyToOne
+  @JoinColumn(name = "seedlot_number", updatable = false)
+  @ManyToOne(fetch = FetchType.LAZY)
   @NonNull
   private Seedlot seedlot;
 

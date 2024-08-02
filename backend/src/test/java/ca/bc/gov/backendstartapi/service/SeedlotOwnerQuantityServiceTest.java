@@ -71,13 +71,13 @@ class SeedlotOwnerQuantityServiceTest {
 
     MethodOfPaymentEntity mope = new MethodOfPaymentEntity();
     mope.setMethodOfPaymentCode("CLA");
-    when(methodOfPaymentService.getAllValidMethodOfPayments()).thenReturn(List.of(mope));
+    when(methodOfPaymentService.getAllMethodsByCodeList(List.of("CLA"))).thenReturn(List.of(mope));
 
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
     Seedlot seedlot = new Seedlot("54321");
-    SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "02");
+    SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "02", mope);
     when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq));
 
     List<SeedlotOwnerQuantity> soqList =
@@ -90,22 +90,22 @@ class SeedlotOwnerQuantityServiceTest {
   @Test
   @DisplayName("Save Seedlot Owner Quantity with one new method")
   void saveSeedlotFormStep2_updateSeedlotAdd_shouldSucceed() {
-    Seedlot seedlot = new Seedlot("54321");
-
     ConeCollectionMethodEntity ccme1 = new ConeCollectionMethodEntity();
     ccme1.setConeCollectionMethodCode(1);
 
-    SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "01");
-    when(seedlotOwnerQuantityRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(soq));
-
     MethodOfPaymentEntity mope = new MethodOfPaymentEntity();
     mope.setMethodOfPaymentCode("CLA");
-    when(methodOfPaymentService.getAllValidMethodOfPayments()).thenReturn(List.of(mope));
+    when(methodOfPaymentService.getAllMethodsByCodeList(List.of("CLA"))).thenReturn(List.of(mope));
+
+    Seedlot seedlot = new Seedlot("54321");
+
+    SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "01", mope);
+    when(seedlotOwnerQuantityRepository.findAllBySeedlot_id("54321")).thenReturn(List.of(soq));
 
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
 
-    SeedlotOwnerQuantity soq2 = new SeedlotOwnerQuantity(seedlot, "00012797", "02");
+    SeedlotOwnerQuantity soq2 = new SeedlotOwnerQuantity(seedlot, "00012797", "02", mope);
     when(seedlotOwnerQuantityRepository.saveAll(any())).thenReturn(List.of(soq, soq2));
 
     List<SeedlotOwnerQuantity> soqList =
@@ -118,19 +118,19 @@ class SeedlotOwnerQuantityServiceTest {
   @Test
   @DisplayName("Save Seedlot Owner Quantity with two already existing")
   void saveSeedlotFormStep2_updateSeedlotEqual_shouldSucceed() {
-    Seedlot seedlot = new Seedlot("54321");
-
     ConeCollectionMethodEntity ccme1 = new ConeCollectionMethodEntity();
     ccme1.setConeCollectionMethodCode(1);
 
-    SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "01");
-    SeedlotOwnerQuantity soq2 = new SeedlotOwnerQuantity(seedlot, "00012797", "02");
-    when(seedlotOwnerQuantityRepository.findAllBySeedlot_id("54321"))
-        .thenReturn(List.of(soq, soq2));
-
     MethodOfPaymentEntity mope = new MethodOfPaymentEntity();
     mope.setMethodOfPaymentCode("CLA");
-    when(methodOfPaymentService.getAllValidMethodOfPayments()).thenReturn(List.of(mope));
+    when(methodOfPaymentService.getAllMethodsByCodeList(List.of("CLA"))).thenReturn(List.of(mope));
+
+    Seedlot seedlot = new Seedlot("54321");
+
+    SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "01", mope);
+    SeedlotOwnerQuantity soq2 = new SeedlotOwnerQuantity(seedlot, "00012797", "02", mope);
+    when(seedlotOwnerQuantityRepository.findAllBySeedlot_id("54321"))
+        .thenReturn(List.of(soq, soq2));
 
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);
@@ -146,19 +146,19 @@ class SeedlotOwnerQuantityServiceTest {
   @Test
   @DisplayName("Save Seedlot Owner Quantity with one method removed")
   void saveSeedlotFormStep2_updateSeedlotRemove_shouldSucceed() {
-    Seedlot seedlot = new Seedlot("54321");
-
     ConeCollectionMethodEntity ccme1 = new ConeCollectionMethodEntity();
     ccme1.setConeCollectionMethodCode(1);
 
-    SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "01");
-    SeedlotOwnerQuantity soq2 = new SeedlotOwnerQuantity(seedlot, "00012797", "02");
-    when(seedlotOwnerQuantityRepository.findAllBySeedlot_id("54321"))
-        .thenReturn(List.of(soq, soq2));
-
     MethodOfPaymentEntity mope = new MethodOfPaymentEntity();
     mope.setMethodOfPaymentCode("CLA");
-    when(methodOfPaymentService.getAllValidMethodOfPayments()).thenReturn(List.of(mope));
+    when(methodOfPaymentService.getAllMethodsByCodeList(List.of("CLA"))).thenReturn(List.of(mope));
+
+    Seedlot seedlot = new Seedlot("54321");
+
+    SeedlotOwnerQuantity soq = new SeedlotOwnerQuantity(seedlot, "00012797", "01", mope);
+    SeedlotOwnerQuantity soq2 = new SeedlotOwnerQuantity(seedlot, "00012797", "02", mope);
+    when(seedlotOwnerQuantityRepository.findAllBySeedlot_id("54321"))
+        .thenReturn(List.of(soq, soq2));
 
     AuditInformation audit = new AuditInformation("userId");
     when(loggedUserService.createAuditCurrentUser()).thenReturn(audit);

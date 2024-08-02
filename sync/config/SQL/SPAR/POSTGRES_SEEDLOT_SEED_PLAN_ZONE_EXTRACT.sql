@@ -6,6 +6,9 @@ SELECT
 , slpz.entry_timestamp
 , slpz.revision_count
  FROM spar.seedlot_seed_plan_zone slpz
+ JOIN spar.seedlot s
+   ON s.seedlot_number = slpz.seedlot_number
 WHERE slpz.seedlot_number = %(p_seedlot_number)s
+  AND s.seedlot_status_code != 'PND'
 ORDER BY slpz.seedlot_number
        , slpz.primary_ind
