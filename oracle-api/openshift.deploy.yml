@@ -44,6 +44,9 @@ parameters:
     description: Oracle API environment for OpenSearch. # One of: development, test, production
     required: false
     value: development
+  - name: DATABASE_PORT
+    description: Oracle database port
+    value: "1543"
   - name: ORACLEDB_KEYSTORE
     description: Keystore location path
   - name: AWS_COGNITO_ISSUER_URI
@@ -105,10 +108,7 @@ objects:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-secret
                 - name: DATABASE_PORT
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: oracle-port
+                  value: ${DATABASE_PORT}
               volumeMounts:
                 - name: ${NAME}-${ZONE}-${COMPONENT}-certs
                   mountPath: /cert
@@ -136,10 +136,7 @@ objects:
                       name: ${NAME}-${ZONE}-${COMPONENT}
                       key: oracle-host
                 - name: DATABASE_PORT
-                  valueFrom:
-                    secretKeyRef:
-                      name: ${NAME}-${ZONE}-${COMPONENT}
-                      key: oracle-port
+                  value: ${DATABASE_PORT}
                 - name: SERVICE_NAME
                   valueFrom:
                     secretKeyRef:

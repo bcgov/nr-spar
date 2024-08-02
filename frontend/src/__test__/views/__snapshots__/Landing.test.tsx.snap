@@ -98,7 +98,7 @@ exports[`Landing component test > should match the snapshot 1`] = `
     <img
       alt="Small green seedling on the dirt and watered"
       className="seeding-img"
-      src="/src/assets/img/seeding.png"
+      src="/src/assets/img/cone.jpeg"
     />
   </div>
 </div>

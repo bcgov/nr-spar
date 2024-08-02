@@ -8,7 +8,7 @@ import {
  * The form data obj used in seedlot creation.
  */
 export type SeedlotRegFormType = {
-  client: OptionsInputType;
+  client: StringInputType;
   locationCode: StringInputType;
   email: StringInputType;
   species: OptionsInputType;
