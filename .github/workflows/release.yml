@@ -3,11 +3,11 @@ name: PROD
 on:
   release:
     types: [published]
-workflow_dispatch:
-  inputs:
-    tag:
-      description: 'The tag set to deploy; e.g. prod or PR number'
-      required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag set to deploy; e.g. prod or PR number'
+        required: true
 
 concurrency:
   # Do not interrupt previous workflows
