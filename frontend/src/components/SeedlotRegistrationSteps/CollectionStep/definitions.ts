@@ -1,13 +1,10 @@
 import {
-  BooleanInputType,
-  OptionsInputType,
   StringArrInputType,
   StringInputType
 } from '../../../types/FormInputType';
 
 export type CollectionForm = {
-  useDefaultAgencyInfo: BooleanInputType,
-  collectorAgency: OptionsInputType,
+  collectorAgency: StringInputType,
   locationCode: StringInputType,
   startDate: StringInputType,
   endDate: StringInputType,

@@ -52,8 +52,7 @@ const FormProgress = (
     queryFn: () => getAClassSeedlotProgressStatus(seedlotNumber ?? ''),
     enabled: getSeedlotQueryStatus === 'success'
       && (seedlotStatusCode === 'PND' || seedlotStatusCode === 'INC'),
-    refetchOnMount: true,
-    retry: 1
+    refetchOnMount: true
   });
 
   useEffect(() => {

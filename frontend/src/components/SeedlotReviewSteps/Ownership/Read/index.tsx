@@ -1,16 +1,32 @@
 import React, { useContext } from 'react';
 import { Column, Row, FlexGrid } from '@carbon/react';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import Divider from '../../../Divider';
 import ReadOnlyInput from '../../../ReadOnlyInput';
 import ClassAContext from '../../../../views/Seedlot/ContextContainerClassA/context';
 import { SingleOwnerForm } from '../../../SeedlotRegistrationSteps/OwnershipStep/definitions';
 import { getOwnerAgencyTitle } from '../../../SeedlotRegistrationSteps/OwnershipStep/utils';
+import { getForestClientByNumberOrAcronym } from '../../../../api-service/forestClientsAPI';
+import { ForestClientType } from '../../../../types/ForestClientTypes/ForestClientType';
+import { getForestClientLabel } from '../../../../utils/ForestClientUtils';
 
 const OwnershipReviewRead = () => {
   const {
     isFetchingData, allStepData: { ownershipStep: state }
   } = useContext(ClassAContext);
+
+  const qc = useQueryClient();
+
+  useQueries({
+    queries: state.map((curOwner) => ({
+      queryKey: ['forest-clients', curOwner.ownerAgency.value],
+      queryFn: () => getForestClientByNumberOrAcronym(curOwner.ownerAgency.value),
+      enabled: !!curOwner.ownerAgency.value
+    }))
+  });
+
+  const getFcQuery = (clientNumber: string): ForestClientType | undefined => qc.getQueryData(['forest-clients', clientNumber]);
 
   return (
     <FlexGrid className="sub-section-grid">
@@ -20,7 +36,7 @@ const OwnershipReviewRead = () => {
             <Row>
               <Column className="sub-section-title-col">
                 {
-                  getOwnerAgencyTitle(curOwner.ownerAgency.value.description)
+                  getOwnerAgencyTitle(getFcQuery(curOwner.ownerAgency.value))
                 }
               </Column>
             </Row>
@@ -29,7 +45,11 @@ const OwnershipReviewRead = () => {
                 <ReadOnlyInput
                   id={`owner-${curOwner.id}-agency`}
                   label="Owner agency"
-                  value={curOwner.ownerAgency.value.description}
+                  value={
+                    getFcQuery(curOwner.ownerAgency.value)
+                      ? getForestClientLabel(getFcQuery(curOwner.ownerAgency.value)!)
+                      : undefined
+                    }
                   showSkeleton={isFetchingData}
                 />
               </Column>

@@ -43,7 +43,7 @@ export const cards = [
   },
   {
     id: '4',
-    image: 'Farm_01',
+    image: 'AiExplainability',
     header: 'Review seedlots',
     description: 'Check all seedlots that are waiting for approval',
     link: ROUTES.TSC_SEEDLOTS_TABLE,

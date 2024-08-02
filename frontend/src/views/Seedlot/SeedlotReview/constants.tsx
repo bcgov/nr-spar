@@ -1,3 +1,4 @@
+import React from 'react';
 import { GenWorthValType, GeoInfoValType } from './definitions';
 
 export const INITIAL_GEO_INFO_VALS: GeoInfoValType = {
@@ -104,4 +105,26 @@ export const INITIAL_GEN_WORTH_VALS: GenWorthValType = {
     isInvalid: false,
     value: ''
   }
+};
+
+export const SaveStatusModalText = {
+  pendingHeader: (
+    <h5 className="modal-header">
+      Send seedlot back to pending
+    </h5>
+  ),
+  pendingBody: (
+    <p>
+      Confirm this action if there is something wrong with this seedlot,
+      this will change the seedlot status from submitted back to pending,
+      allowing the applicant agency to edit the form again.
+    </p>
+  ),
+  approveHeader: (
+    <h5 className="modal-header">
+      Are you sure you want to approve this seedlot?
+      <br />
+      This seedlot status will change from submitted to approved.
+    </h5>
+  )
 };
