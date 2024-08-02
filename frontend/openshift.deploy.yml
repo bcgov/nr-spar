@@ -166,6 +166,12 @@ objects:
             target:
               type: Utilization
               averageUtilization: 80
+        - type: Resource
+          resource:
+            name: memory
+            target:
+              type: Utilization
+              averageUtilization: 80
   - apiVersion: networking.k8s.io/v1
     kind: NetworkPolicy
     metadata:
