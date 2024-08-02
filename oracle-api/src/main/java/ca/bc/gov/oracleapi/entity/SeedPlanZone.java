@@ -2,6 +2,7 @@ package ca.bc.gov.oracleapi.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -26,11 +27,11 @@ public class SeedPlanZone {
   @Column(name = "GENETIC_CLASS_CODE", nullable = false)
   private Character geneticClassCode;
 
-  @ManyToOne
-  @JoinColumn(name = "SEED_PLAN_ZONE_CODE")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "SEED_PLAN_ZONE_CODE", updatable = false)
   private SeedPlanZoneCode seedPlanZoneCode;
 
-  @ManyToOne
-  @JoinColumn(name = "VEGETATION_CODE")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "VEGETATION_CODE", updatable = false)
   private VegetationCode vegetationCode;
 }

@@ -5,15 +5,14 @@ import ca.bc.gov.backendstartapi.dto.SeedlotFormCollectionDto;
 import ca.bc.gov.backendstartapi.entity.ConeCollectionMethodEntity;
 import ca.bc.gov.backendstartapi.entity.seedlot.Seedlot;
 import ca.bc.gov.backendstartapi.entity.seedlot.SeedlotCollectionMethod;
-import ca.bc.gov.backendstartapi.entity.seedlot.idclass.SeedlotCollectionMethodId;
-import ca.bc.gov.backendstartapi.exception.ConeCollectionMethodNotFoundException;
 import ca.bc.gov.backendstartapi.exception.SeedlotConflictDataException;
 import ca.bc.gov.backendstartapi.repository.SeedlotCollectionMethodRepository;
 import ca.bc.gov.backendstartapi.security.LoggedUserService;
+import ca.bc.gov.backendstartapi.util.ValueUtil;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -42,20 +41,39 @@ public class SeedlotCollectionMethodService {
 
     seedlot.setCollectionClientNumber(formStep1.collectionClientNumber());
     seedlot.setCollectionLocationCode(formStep1.collectionLocnCode());
-    seedlot.setCollectionStartDate(formStep1.collectionStartDate());
-    seedlot.setCollectionEndDate(formStep1.collectionEndDate());
-    seedlot.setNumberOfContainers(formStep1.noOfContainers());
-    seedlot.setContainerVolume(formStep1.volPerContainer());
-    seedlot.setTotalConeVolume(formStep1.clctnVolume());
+    if (!ValueUtil.isValueEqual(
+        seedlot.getCollectionStartDate(), formStep1.collectionStartDate())) {
+      seedlot.setCollectionStartDate(formStep1.collectionStartDate());
+    }
+    if (!ValueUtil.isValueEqual(seedlot.getCollectionEndDate(), formStep1.collectionEndDate())) {
+      seedlot.setCollectionEndDate(formStep1.collectionEndDate());
+    }
+    if (!ValueUtil.isValueEqual(formStep1.noOfContainers(), seedlot.getNumberOfContainers())) {
+      seedlot.setNumberOfContainers(formStep1.noOfContainers());
+    }
+    if (!ValueUtil.isValueEqual(formStep1.volPerContainer(), seedlot.getContainerVolume())) {
+      seedlot.setContainerVolume(formStep1.volPerContainer());
+    }
+    if (!ValueUtil.isValueEqual(formStep1.clctnVolume(), seedlot.getTotalConeVolume())) {
+      seedlot.setTotalConeVolume(formStep1.clctnVolume());
+    }
     seedlot.setComment(formStep1.seedlotComment());
 
     SparLog.info(
-        "Received {} SeedlotCollectionMethod record(s) for seedlot number {}",
+        "Received {} collection method(s) for seedlot number {}",
         formStep1.coneCollectionMethodCodes().size(),
         seedlot.getId());
 
     List<SeedlotCollectionMethod> seedlotCollectionList =
         seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlot.getId());
+
+    boolean allEqual = 
+        areExistingEqualsNewOnes(seedlotCollectionList, formStep1.coneCollectionMethodCodes());
+
+    if (allEqual) {
+      SparLog.info("Do not need to touch seedlot cone collection methods, they are the same");
+      return;
+    }
 
     if (!seedlotCollectionList.isEmpty() && canDelete) {
       SparLog.info(
@@ -63,22 +81,31 @@ public class SeedlotCollectionMethodService {
           seedlotCollectionList.size(),
           seedlot.getId());
 
-      List<SeedlotCollectionMethodId> idsToDelete = new ArrayList<>();
-
-      for (SeedlotCollectionMethod methdCodeToRemove : seedlotCollectionList) {
-        idsToDelete.add(
-            new SeedlotCollectionMethodId(
-                seedlot.getId(),
-                methdCodeToRemove.getConeCollectionMethod().getConeCollectionMethodCode()));
-      }
-
-      seedlotCollectionMethodRepository.deleteAllById(idsToDelete);
+      seedlotCollectionMethodRepository.deleteAllBySeedlot_id(seedlot.getId());
+      seedlotCollectionMethodRepository.flush();
     } else if (!seedlotCollectionList.isEmpty() && !canDelete) {
       SparLog.info("Update seedlot {} collection data failed due to conflict.", seedlot.getId());
       throw new SeedlotConflictDataException(seedlot.getId());
     }
 
     addSeedlotCollectionMethod(seedlot, formStep1.coneCollectionMethodCodes());
+  }
+
+  private boolean areExistingEqualsNewOnes(
+      List<SeedlotCollectionMethod> existing, List<Integer> newOnes) {
+    List<Integer> existingOnes =
+        existing.stream()
+            .map(
+                scm -> Integer.valueOf(scm.getConeCollectionMethod().getConeCollectionMethodCode()))
+            .toList();
+
+    List<Integer> sortedList1 = new ArrayList<>(existingOnes);
+    List<Integer> sortedList2 = new ArrayList<>(newOnes);
+
+    Collections.sort(sortedList1);
+    Collections.sort(sortedList2);
+
+    return sortedList1.equals(sortedList2);
   }
 
   /**
@@ -101,9 +128,9 @@ public class SeedlotCollectionMethodService {
         methods.size(),
         seedlot.getId());
 
-    // Map of Cone Collection Methots
+    // Map of Cone Collection Methods
     Map<Integer, ConeCollectionMethodEntity> ccmeMap =
-        coneCollectionMethodService.getAllValidConeCollectionMethods().stream()
+        coneCollectionMethodService.getAllByIdIn(methods).stream()
             .collect(
                 Collectors.toMap(
                     ConeCollectionMethodEntity::getConeCollectionMethodCode, Function.identity()));
@@ -111,19 +138,26 @@ public class SeedlotCollectionMethodService {
     List<SeedlotCollectionMethod> scmList = new ArrayList<>();
 
     for (Integer methodCode : methods) {
-      ConeCollectionMethodEntity coneCollectionEntity = ccmeMap.get(methodCode);
-      if (Objects.isNull(coneCollectionEntity)) {
-        throw new ConeCollectionMethodNotFoundException();
-      }
-
       SeedlotCollectionMethod methodEntity = new SeedlotCollectionMethod();
       methodEntity.setSeedlot(seedlot);
-      methodEntity.setConeCollectionMethod(coneCollectionEntity);
+      methodEntity.setConeCollectionMethod(ccmeMap.get(methodCode));
       methodEntity.setAuditInformation(loggedUserService.createAuditCurrentUser());
 
       scmList.add(methodEntity);
     }
 
     seedlotCollectionMethodRepository.saveAll(scmList);
+  }
+
+  /**
+   * Get All Seedlot collection method codes given a seedlot number.
+   *
+   * @param seedlotNumber The seedlot number.
+   * @return List of collection method codes or an empty list.
+   */
+  public List<Integer> getAllSeedlotCollectionMethodsBySeedlot(String seedlotNumber) {
+    return seedlotCollectionMethodRepository.findAllBySeedlot_id(seedlotNumber).stream()
+        .map(col -> col.getConeCollectionMethod().getConeCollectionMethodCode())
+        .collect(Collectors.toList());
   }
 }

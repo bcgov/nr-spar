@@ -10,6 +10,7 @@ import ca.bc.gov.backendstartapi.repository.GeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotGeneticWorthRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotRepository;
 import ca.bc.gov.backendstartapi.repository.SeedlotSourceRepository;
+import ca.bc.gov.backendstartapi.repository.SeedlotStatusRepository;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,14 @@ class SeedlotGeneticWorthRelationalTest extends SeedlotEntityRelationalTest {
       GeneticClassRepository geneticClassRepository,
       GeneticWorthRepository geneticWorthRepository,
       SeedlotGeneticWorthRepository seedlotGeneticWorthRepository,
-      SeedlotSourceRepository seedlotSourceRepository) {
+      SeedlotSourceRepository seedlotSourceRepository,
+      SeedlotStatusRepository seedlotStatusRepository) {
     super(
-        seedlotRepository, geneticClassRepository, geneticWorthRepository, seedlotSourceRepository);
+        seedlotRepository,
+        geneticClassRepository,
+        geneticWorthRepository,
+        seedlotSourceRepository,
+        seedlotStatusRepository);
     this.seedlotGeneticWorthRepository = seedlotGeneticWorthRepository;
   }
 

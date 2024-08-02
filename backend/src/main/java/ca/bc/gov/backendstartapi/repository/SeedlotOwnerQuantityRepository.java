@@ -10,4 +10,6 @@ public interface SeedlotOwnerQuantityRepository
     extends JpaRepository<SeedlotOwnerQuantity, SeedlotOwnerQuantityId> {
 
   List<SeedlotOwnerQuantity> findAllBySeedlot_id(String seedlotNumber);
+
+  void deleteAllBySeedlot_id(String seedlotNumber);
 }
