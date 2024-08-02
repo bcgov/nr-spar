@@ -1,7 +1,7 @@
 package ca.bc.gov.backendstartapi.service;
 
 import ca.bc.gov.backendstartapi.config.SparLog;
-import ca.bc.gov.backendstartapi.dto.CaculatedParentTreeValsDto;
+import ca.bc.gov.backendstartapi.dto.CalculatedParentTreeValsDto;
 import ca.bc.gov.backendstartapi.dto.GeneticWorthTraitsDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialOracleResDto;
 import ca.bc.gov.backendstartapi.dto.GeospatialRequestDto;
@@ -14,7 +14,6 @@ import ca.bc.gov.backendstartapi.provider.Provider;
 import ca.bc.gov.backendstartapi.util.LatLongUtil;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,7 +39,8 @@ public class ParentTreeService {
   static BigDecimal PERC_DIVISOR = new BigDecimal(100);
   static BigDecimal HALF_DIVISOR = new BigDecimal(2);
   static BigDecimal PROP_DIVISOR = new BigDecimal(200);
-  static BigDecimal MAX_PROPORTION = new BigDecimal(1);
+  static BigDecimal ONE = BigDecimal.ONE;
+  static RoundingMode halfUp = RoundingMode.HALF_UP;
 
   /**
    * Does the calculation for each genetic trait. PS: if the threshold of 70% of contribution from
@@ -56,18 +56,65 @@ public class ParentTreeService {
         ptVals.orchardPtVals().size(),
         ptVals.smpMixIdAndProps().size());
 
-    Map<String, BigDecimal> valueHolder = new HashMap<>();
+    // BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals());
+    BigDecimal coancestry = null;
 
-    CaculatedParentTreeValsDto calculatedVals = new CaculatedParentTreeValsDto();
+    BigDecimal v_total_cone_count =
+        ptVals.orchardPtVals().stream()
+            .map(OrchardParentTreeValsDto::coneCount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    BigDecimal v_total_pollen_count =
+        ptVals.orchardPtVals().stream()
+            .map(OrchardParentTreeValsDto::pollenCount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    // Get the v_sum_orch_gamete_contr:
+    BigDecimal v_sum_orch_gamete_contr = BigDecimal.ZERO;
+    BigDecimal v_female_crop_pop = BigDecimal.ZERO;
+    BigDecimal v_parent_prop_orch_poll = BigDecimal.ZERO;
+    BigDecimal v_orch_gamete_contr = null;
+    for (OrchardParentTreeValsDto orchardPtVals : ptVals.orchardPtVals()) {
+      boolean hasConeCount = orchardPtVals.coneCount().compareTo(BigDecimal.ZERO) > 0;
+      boolean hasPollenCount = orchardPtVals.pollenCount().compareTo(BigDecimal.ZERO) > 0;
+      if (hasConeCount || hasPollenCount) {
+        // --col:V
+        if (v_total_cone_count.compareTo(BigDecimal.ZERO) == 0) {
+          v_female_crop_pop = BigDecimal.ZERO;
+        } else {
+          v_female_crop_pop =
+              orchardPtVals.coneCount().divide(v_total_cone_count, DIVISION_SCALE, halfUp);
+        }
+
+        // --col:W
+        if (v_total_cone_count.compareTo(BigDecimal.ZERO) == 0) {
+          v_parent_prop_orch_poll = BigDecimal.ZERO;
+        } else {
+          v_parent_prop_orch_poll =
+              orchardPtVals.pollenCount().divide(v_total_pollen_count, DIVISION_SCALE, halfUp);
+        }
+
+        // --col:AQ
+        BigDecimal threeQuarters = new BigDecimal("0.75");
+        BigDecimal threeQuartTimesParentPropOrch = threeQuarters.multiply(v_parent_prop_orch_poll);
+        BigDecimal femaleCropPropDiv = v_female_crop_pop.add(threeQuartTimesParentPropOrch);
+        femaleCropPropDiv = femaleCropPropDiv.divide(new BigDecimal("2,2"), DIVISION_SCALE, halfUp);
+        v_orch_gamete_contr = femaleCropPropDiv.pow(2);
+
+        v_sum_orch_gamete_contr = v_sum_orch_gamete_contr.add(v_orch_gamete_contr);
+      }
+    }
+
+    BigDecimal neValue = calculateNe(coancestry, v_sum_orch_gamete_contr);
+
+    CalculatedParentTreeValsDto calculatedVals = new CalculatedParentTreeValsDto();
+    calculatedVals.setNeValue(neValue);
 
     GeospatialRespondDto smpMixGeoData = calcMeanGeospatial(ptVals.smpMixIdAndProps());
     SparLog.info("SMP mix mean geospatial calculation complete.");
 
-    calculatedVals.setGeospatialData(calcSeedlotGeoData(ptVals, smpMixGeoData, valueHolder));
+    calculatedVals.setGeospatialData(calcSeedlotGeoData(ptVals, smpMixGeoData));
     SparLog.info("Seedlot mean geospatial calculation complete.");
-
-    BigDecimal neValue = geneticWorthService.calculateNe(ptVals.orchardPtVals(), valueHolder);
-    calculatedVals.setNeValue(neValue);
 
     List<GeneticWorthTraitsDto> calculatedGws =
         geneticWorthService.calculateGeneticWorth(ptVals.orchardPtVals());
@@ -76,6 +123,58 @@ public class ParentTreeService {
         new PtCalculationResDto(calculatedGws, calculatedVals, smpMixGeoData);
 
     return summaryDto;
+  }
+
+  /**
+   * Calculate the Ne value (Effective Population Size.
+   *
+   * @param g_coancestry The coancestry value for the Ne calculation.
+   * @param v_sum_orch_gamete_contr The sum or gamete for the Orchard.
+   * @return BigDecimal representing the Ne value.
+   */
+  public BigDecimal calculateNe(BigDecimal g_coancestry, BigDecimal v_sum_orch_gamete_contr) {
+    BigDecimal v_effective_pop_size = BigDecimal.ZERO;
+    BigDecimal v_smp_parents_outside = null;
+    // gb_smp_parents_outside: starts with 'N', then if called the set method, it becomes an 'Y'
+    // however, the only place that calls the set method is on the recalc() function. So I
+    // understand this will be 'N' for the first calculation, and 'Y' for the others.
+    // I'll keep as 'N', simulating to be always the first time, for now.
+    char gb_smp_parents_outside = 'N';
+    BigDecimal r_previous_smp_parents_outside = null; // <- review here
+
+    if (gb_smp_parents_outside == 'Y') {
+      v_smp_parents_outside =
+          v_smp_parents_outside == null ? BigDecimal.ZERO : v_smp_parents_outside;
+    } else {
+      v_smp_parents_outside =
+          r_previous_smp_parents_outside == null ? BigDecimal.ZERO : r_previous_smp_parents_outside;
+    }
+
+    if (g_coancestry != null) {
+      // --Effective Population Size with Coancestry considered
+      if (g_coancestry.compareTo(BigDecimal.ZERO) != 0) {
+        v_effective_pop_size = BigDecimal.ZERO;
+      } else {
+        v_effective_pop_size =
+            new BigDecimal("0.5").divide(v_effective_pop_size, DIVISION_SCALE, halfUp);
+      }
+    } else if (v_smp_parents_outside.compareTo(BigDecimal.ZERO) != 0) {
+      // --Effective Population Size with SMP (for Growth)
+      // Original equation: v_effective_pop_size = Math.round(1/(v_sum_orch_gamete_contr + (
+      // Math.power(0.25/(2*v_smp_parents_outside),2) * v_smp_parents_outside )) ,1);
+      BigDecimal oneQuarter = new BigDecimal("0.25");
+      BigDecimal two = new BigDecimal("2");
+      BigDecimal twoTimesSmpParentOutside = two.multiply(v_smp_parents_outside);
+      BigDecimal oneQuarterDividedByTwoTimesSmpParent =
+          oneQuarter.divide(twoTimesSmpParentOutside, DIVISION_SCALE, halfUp);
+      BigDecimal power = oneQuarterDividedByTwoTimesSmpParent.pow(2);
+      BigDecimal powerPlusParentTreeOutside = power.multiply(v_smp_parents_outside);
+      BigDecimal sumOrchGameteContrPower = v_sum_orch_gamete_contr.add(powerPlusParentTreeOutside);
+      v_effective_pop_size = ONE.divide(sumOrchGameteContrPower, DIVISION_SCALE, halfUp);
+      v_effective_pop_size = v_effective_pop_size.setScale(1, halfUp);
+    }
+
+    return v_effective_pop_size;
   }
 
   /**
@@ -90,13 +189,11 @@ public class ParentTreeService {
         "{} parent tree record(s) received to calculate lat long and elevation",
         ptreeIdAndProportions.size());
 
-    List<GeospatialOracleResDto> oracleDtoList = List.of();
-    if (!ptreeIdAndProportions.isEmpty()) {
-      List<Long> ptIds =
+    List<Long> ptIds =
         ptreeIdAndProportions.stream().map(GeospatialRequestDto::parentTreeId).toList();
 
-      oracleDtoList = oracleApiProvider.getPtGeospatialDataByIdList(ptIds);
-    }
+    List<GeospatialOracleResDto> oracleDtoList =
+        oracleApiProvider.getPtGeospatialDataByIdList(ptIds);
 
     if (oracleDtoList.isEmpty() && !ptreeIdAndProportions.isEmpty()) {
       SparLog.info(
@@ -109,7 +206,7 @@ public class ParentTreeService {
         oracleDtoList.stream()
             .collect(Collectors.toMap(GeospatialOracleResDto::parentTreeId, Function.identity()));
 
-    // Accumulators of weigthed values, convert DMS to minutes (legacy algo) then sum it up.
+    // Accumulators of weighted values, convert DMS to minutes (legacy algo) then sum it up.
     BigDecimal meanLatMinSum = BigDecimal.ZERO;
     BigDecimal meanLongMinSum = BigDecimal.ZERO;
     BigDecimal meanElevationSum = BigDecimal.ZERO;
@@ -129,7 +226,7 @@ public class ParentTreeService {
       // Definition: weighted value = proportion * value
 
       BigDecimal proportion = dto.proportion();
-      if (proportion.compareTo(MAX_PROPORTION) >= 0) {
+      if (proportion.compareTo(ONE) >= 0) {
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             String.format(
@@ -193,7 +290,7 @@ public class ParentTreeService {
    * these calculation definition in SPR01A_PTContribution.htm
    */
   private GeospatialRespondDto calcSeedlotGeoData(
-      PtValsCalReqDto ptValDtos, GeospatialRespondDto smpMixGeoData, Map<String, BigDecimal> valueHolder) {
+      PtValsCalReqDto ptValDtos, GeospatialRespondDto smpMixGeoData) {
     List<OrchardParentTreeValsDto> orchardPtVals = ptValDtos.orchardPtVals();
 
     BigDecimal totalConeCount =
@@ -236,7 +333,7 @@ public class ParentTreeService {
 
       BigDecimal femaleCropPop = calcFemaleCropPop(ptVal, totalConeCount);
 
-      BigDecimal proportion = calcProportion(ptVal, femaleCropPop, totalPollenCount, valueHolder);
+      BigDecimal proportion = calcProportion(ptVal, femaleCropPop, totalPollenCount);
 
       BigDecimal smpSuccessPerc = new BigDecimal(ptVal.smpSuccessPerc());
 
@@ -347,7 +444,7 @@ public class ParentTreeService {
    * @return prop = v_p_prop_contrib-((v_female_crop_pop*v_a_smp_success_pct)/200)
    */
   private BigDecimal calcProportion(
-      OrchardParentTreeValsDto ptValDto, BigDecimal femaleCropPop, BigDecimal totalPollenCount, Map<String, BigDecimal> valueHolder) {
+      OrchardParentTreeValsDto ptValDto, BigDecimal femaleCropPop, BigDecimal totalPollenCount) {
     /*
      * REFERENCE v_parent_prop_orch_poll
      * --col:W
@@ -357,7 +454,7 @@ public class ParentTreeService {
      *  v_parent_prop_orch_poll := NVL(p_pt(i).pollen_count,0) / v_total_pollen_count;
      */
     BigDecimal parentPropOrchPoll = BigDecimal.ZERO;
-    if (totalPollenCount.compareTo(BigDecimal.ZERO) > 0) {
+    if (!totalPollenCount.equals(BigDecimal.ZERO)) {
       parentPropOrchPoll =
           ptValDto.pollenCount().divide(totalPollenCount, DIVISION_SCALE, RoundingMode.HALF_UP);
     }
@@ -371,12 +468,11 @@ public class ParentTreeService {
      *  v_p_prop_contrib := (v_female_crop_pop + v_parent_prop_orch_poll) / 2;
      */
     BigDecimal parentPropContrib;
-    if (totalPollenCount.compareTo(BigDecimal.ZERO) == 0) {
+    if (totalPollenCount.equals(BigDecimal.ZERO)) {
       parentPropContrib = femaleCropPop;
     } else {
       parentPropContrib = (femaleCropPop.add(parentPropOrchPoll)).divide(HALF_DIVISOR);
     }
-    valueHolder.put("parentPropContrib", parentPropContrib);
 
     BigDecimal smpSuccessPerc = new BigDecimal(ptValDto.smpSuccessPerc()).divide(PERC_DIVISOR);
 
@@ -399,7 +495,7 @@ public class ParentTreeService {
      */
     BigDecimal femaleCropPop = BigDecimal.ZERO;
 
-    if (totalConeCount.compareTo(BigDecimal.ZERO) > 0) {
+    if (!totalConeCount.equals(BigDecimal.ZERO)) {
       femaleCropPop =
           ptValDto.coneCount().divide(totalConeCount, DIVISION_SCALE, RoundingMode.HALF_UP);
     }

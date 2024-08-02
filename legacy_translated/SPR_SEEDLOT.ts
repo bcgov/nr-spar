@@ -385,14 +385,14 @@ const CONST_CLASS_A_COPY_MAX  : string; // CONSTANT VARCHAR2(5) = '62999';
  */
 function get_previous_seedlot_values(p_force: boolean = false) {
   // Previous: SELECT * FROM seedlotWHERE seedlot_number = g_seedlot_number;
-  // --if (record == empty or caller specified FORCE option
+  // --if record == empty or caller specified FORCE option
   if (r_previous.seedlot_number == null || p_force) {
     // OPEN c_previous;
     // FETCH c_previous INTO r_previous;
     // CLOSE c_previous;
-    // --Don't populate old values into vars if (seedlot was not found
+    // --Don't populate old values into vars if seedlot was not found
     if (g_seedlot_number == r_previous.seedlot_number) {
-      //--Populate vars with previous values (don't get revision_count)
+      // --Populate vars with previous values (don't get revision_count)
       g_seed_plan_zone_code         = r_previous.seed_plan_zone_code;
       g_applicant_client_locn       = r_previous.applicant_client_locn;
       g_applicant_client_number     = r_previous.applicant_client_number;
@@ -3783,7 +3783,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   let b_bv_WVE_not_estimated: boolean = false;
   let b_bv_WWD_not_estimated: boolean = false;
       
-  // --Get current GQ values if (required && load array from saved data if (not passed
+  // --Get current GQ values if required && load array from saved data if not passed
   load_array(p_pt,p_get_current_tests);
   // --Contam pollen bv used in calc - use set value if (it has been set, otherwise
   // --use the previous value...in either case, convert null to 0 as Excel would
@@ -3792,7 +3792,7 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
   } else {
     v_contaminant_pollen_bv = r_previous.contaminant_pollen_bv == null? 0 : r_previous.contaminant_pollen_bv;
   }
-  // --SMP Parents Outside used in calc - use set value if (it has been set, otherwise
+  // --SMP Parents Outside used in calc - use set value if it has been set, otherwise
   // --use the previous value...in either case, convert null to 0 as Excel would
   if (gb_smp_parents_outside == 'Y') {
     v_smp_parents_outside = g_smp_parents_outside == null? 0 : g_smp_parents_outside;
@@ -4053,13 +4053,13 @@ function calc_pt_contrib( p_ptZ: any[], p_get_current_tests: boolean) {
       // --col:U
       v_long = (v_a_smp_mix_longitude_degrees*3600) + (v_a_smp_mix_longitude_minutes*60);
       // --col:V
-      if (v_total_cone_count = 0) {
+      if (v_total_cone_count == 0) {
         v_female_crop_pop = 0;
       } else {
         v_female_crop_pop = v_a_cone_count / v_total_cone_count;
       }
       // --col:W
-      if (v_total_pollen_count = 0) {
+      if (v_total_pollen_count == 0) {
         v_parent_prop_orch_poll = 0;
       } else {
         v_parent_prop_orch_poll = v_a_pollen_count / v_total_pollen_count;
