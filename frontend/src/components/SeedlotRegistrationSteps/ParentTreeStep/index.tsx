@@ -724,6 +724,7 @@ const ParentTreeStep = ({ isReviewDisplay, isReviewRead }: ParentTreeStepProps) 
                                             align="top"
                                             openOnHover
                                             definition={header.description}
+                                            tabIndex={-1}
                                           >
                                             {header.name}
                                           </DefinitionTooltip>
