@@ -83,11 +83,11 @@ const App: React.FC = () => {
             if (failureCount > MAX_RETRIES) {
               return false;
             }
-            if (
-              isAxiosError(error)
-              && HTTP_STATUS_TO_NOT_RETRY.includes(error.response?.status ?? 0)
-            ) {
-              return false;
+            if (isAxiosError(error)) {
+              const status = error.response?.status;
+              if (status && HTTP_STATUS_TO_NOT_RETRY.includes(status)) {
+                return false;
+              }
             }
             return true;
           }

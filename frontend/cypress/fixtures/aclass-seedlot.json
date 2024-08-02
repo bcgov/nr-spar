@@ -1,7 +1,7 @@
 {
   "pli": {
     "agencyAcronym": "WFP",
-    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyName": "WFP - WESTERN FOREST PRODUCTS INC. - 00149081",
     "agencyNumber": "01",
     "email": "test@gov.bc.ca",
     "species": "PLI - Lodgepole pine",
@@ -11,7 +11,7 @@
   },
   "cw": {
     "agencyAcronym": "WFP",
-    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyName": "WFP - WESTERN FOREST PRODUCTS INC. - 00149081",
     "agencyNumber": "01",
     "email": "apo@gov.bc.ca",
     "species": "CW - Western redcedar",
@@ -21,7 +21,7 @@
   },
   "dr": {
     "agencyAcronym": "WFP",
-    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyName": "WFP - WESTERN FOREST PRODUCTS INC. - 00149081",
     "agencyNumber": "01",
     "email": "beane@gov.bc.ca",
     "species": "DR - Red alder",
@@ -31,7 +31,7 @@
   },
   "ep": {
     "agencyAcronym": "WFP",
-    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyName": "WFP - WESTERN FOREST PRODUCTS INC. - 00149081",
     "agencyNumber": "01",
     "email": "cidaw@gov.bc.ca",
     "species": "EP - Paper birch",
@@ -41,7 +41,7 @@
   },
   "fdc": {
     "agencyAcronym": "WFP",
-    "agencyName": "00149081 - WESTERN FOREST PRODUCTS INC. - WFP",
+    "agencyName": "WFP - WESTERN FOREST PRODUCTS INC. - 00149081",
     "agencyNumber": "01",
     "email": "dha@gov.bc.ca",
     "species": "FDC - Coastal Douglas-fir",

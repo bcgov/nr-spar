@@ -3,16 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import {
-  Button,
-  FlexGrid,
-  Row,
-  Column,
-  Loading
+  Button, FlexGrid, Row,
+  Column, Loading, Modal
 } from '@carbon/react';
 import { toast } from 'react-toastify';
 import {
   Edit, Save, Pending, Checkmark
 } from '@carbon/icons-react';
+import { Beforeunload } from 'react-beforeunload';
 
 import { getSeedlotById } from '../../../api-service/seedlotAPI';
 import { THREE_HALF_HOURS, THREE_HOURS } from '../../../config/TimeUnits';
@@ -67,9 +65,22 @@ import {
   validateGeneticWorth
 } from './utils';
 import { GenWorthValType } from './definitions';
+import { SaveStatusModalText } from './constants';
 
 const SeedlotReviewContent = () => {
   const navigate = useNavigate();
+  /**
+   * Back/Cancel button confirmation modal.
+   */
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+
+  /**
+   * Save and send to pending/approved
+   */
+  const [isSaveStatusModalOpen, setIsSaveStatusModalOpen] = useState(false);
+
+  const [statusToUpdateTo, setStatusToUpdateTo] = useState<StatusOnSaveType>('PND');
+
   const { seedlotNumber } = useParams();
 
   const vegCodeQuery = useQuery({
@@ -367,6 +378,37 @@ const SeedlotReviewContent = () => {
     }
   };
 
+  const handleCancelClick = () => {
+    if (isReadMode) {
+      navigate(`/seedlots/details/${seedlotNumber}`);
+    } else {
+      setIsCancelModalOpen(true);
+    }
+  };
+
+  const closeCancelModal = () => {
+    setIsCancelModalOpen(false);
+  };
+
+  const closeSaveStatusModal = () => {
+    setIsSaveStatusModalOpen(false);
+  };
+
+  const openSaveStatusModal = (status: StatusOnSaveType) => {
+    setStatusToUpdateTo(status);
+    setIsSaveStatusModalOpen(true);
+  };
+
+  /**
+   * Discard changes without saving.
+   */
+  const discardChanges = () => {
+    setIsReadMode(true);
+    queryClient.refetchQueries(['seedlots', seedlotNumber]);
+    queryClient.refetchQueries(['seedlot-full-form', seedlotNumber]);
+    closeCancelModal();
+  };
+
   return (
     <FlexGrid className="seedlot-review-grid">
       <Loading
@@ -551,11 +593,20 @@ const SeedlotReviewContent = () => {
         seedlotData?.seedlotStatus.seedlotStatusCode === 'SUB'
           ? (
             <Row className="action-button-row">
+              <Column sm={4} md={4} lg={4}>
+                <Button
+                  kind="secondary"
+                  onClick={handleCancelClick}
+                >
+                  {isReadMode ? 'Back' : 'Back to review'}
+                </Button>
+              </Column>
+
               <Column className="action-button-col" sm={4} md={4} lg={4}>
                 <Button
                   kind="secondary"
                   renderIcon={Pending}
-                  onClick={() => handleSaveAndStatus('PND')}
+                  onClick={() => openSaveStatusModal('PND')}
                 >
                   Send back to pending
                 </Button>
@@ -563,7 +614,7 @@ const SeedlotReviewContent = () => {
               <Column className="action-button-col" sm={4} md={4} lg={4}>
                 <Button
                   renderIcon={Checkmark}
-                  onClick={() => handleSaveAndStatus('APP')}
+                  onClick={() => openSaveStatusModal('APP')}
                 >
                   Approve seedlot
                 </Button>
@@ -571,6 +622,97 @@ const SeedlotReviewContent = () => {
             </Row>
           )
           : null
+      }
+
+      {/* Cancel Confirm Modal */}
+
+      <Modal
+        className="cancel-confirm-modal"
+        open={isCancelModalOpen}
+        modalHeading="Seedlot review"
+        onRequestClose={closeCancelModal}
+        passiveModal
+      >
+        <div className="modal-content">
+          <h5 className="modal-header">
+            Any changes you made will be discarded unless saved.
+          </h5>
+          <div className="modal-button-group">
+            <Button kind="secondary" onClick={discardChanges}>Discard changes</Button>
+            <Button
+              kind="primary"
+              onClick={() => {
+                closeCancelModal();
+                handleEditSaveBtn();
+              }}
+              renderIcon={Save}
+            >
+              Save changes
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Save and update status confirm modal */}
+
+      <Modal
+        className="save-and-update-confirm-modal"
+        open={isSaveStatusModalOpen}
+        modalHeading={`Review seedlot ${seedlotNumber}`}
+        onRequestClose={closeSaveStatusModal}
+        passiveModal
+      >
+        <div className="modal-content">
+          {
+              statusToUpdateTo === 'PND'
+                ? (
+                  <div className="modal-text">
+                    {SaveStatusModalText.pendingHeader}
+                    {SaveStatusModalText.pendingBody}
+                  </div>
+                )
+                : (
+                  <div className="modal-text">{SaveStatusModalText.approveHeader}</div>
+                )
+            }
+          <div className="modal-button-group">
+            <Button kind="secondary" onClick={closeSaveStatusModal}>Cancel</Button>
+            {
+              statusToUpdateTo === 'PND'
+                ? (
+                  <Button
+                    kind="primary"
+                    onClick={() => {
+                      closeSaveStatusModal();
+                      handleSaveAndStatus('PND');
+                    }}
+                    disabled={tscSeedlotMutation.isLoading}
+                  >
+                    Send back to pending
+                  </Button>
+                )
+                : (
+                  <Button
+                    kind="primary"
+                    onClick={() => {
+                      closeSaveStatusModal();
+                      handleSaveAndStatus('APP');
+                    }}
+                    renderIcon={Checkmark}
+                    disabled={tscSeedlotMutation.isLoading}
+                  >
+                    Approve seedlot
+                  </Button>
+                )
+            }
+          </div>
+        </div>
+      </Modal>
+      {
+        !isReadMode
+        && (
+        <Beforeunload onBeforeunload={(event) => event.preventDefault()} />
+        )
       }
     </FlexGrid>
   );

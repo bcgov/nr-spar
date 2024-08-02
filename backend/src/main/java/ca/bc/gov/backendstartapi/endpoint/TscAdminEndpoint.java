@@ -126,14 +126,14 @@ public class TscAdminEndpoint {
       @Parameter(
               name = "status",
               in = ParameterIn.PATH,
-              description = "Seedlot status to be updated to",
+              description = "Seedlot status to be updated to, either PND or APP",
               required = true,
-              example = "true",
+              example = "PND",
               schema = @Schema(type = "string", example = "true"))
           @PathVariable
           String status) {
     long started = Instant.now().toEpochMilli();
-    tscAdminService.updateSeedlotStatus(seedlotNumber, status);
+    tscAdminService.updateSeedlotStatus(seedlotNumber, status.toUpperCase());
     long finished = Instant.now().toEpochMilli();
     SparLog.info("Time spent: {} ms - approve or disapprove seedlot by tsc", (finished - started));
     return ResponseEntity.noContent().build();
