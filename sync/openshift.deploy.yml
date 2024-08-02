@@ -13,6 +13,9 @@ parameters:
   - name: APP
     description: Application/component name
     value: sync
+  - name: DATABASE_PORT
+    description: Oracle database port
+    value: "1543"
   - name: EXECUTION_ID
     description: Process execution ID for running ETL Tool
     value: "100"
@@ -90,11 +93,8 @@ objects:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-oracle-api
                           key: oracle-sync-password
-                    - name: ORACLE_PORT
-                      valueFrom:
-                        secretKeyRef:
-                          name: ${REPO}-${ZONE}-oracle-api
-                          key: oracle-port
+                    - name: DATABASE_PORT
+                      value: ${DATABASE_PORT}
                     - name: ORACLE_SERVICE
                       valueFrom:
                         secretKeyRef:
@@ -117,11 +117,8 @@ objects:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-database
                           key: database-password
-                    - name: POSTGRES_PORT
-                      valueFrom:
-                        secretKeyRef:
-                          name: ${REPO}-${ZONE}-database
-                          key: database-port
+                    - name: DATABASE_PORT
+                      value: ${DATABASE_PORT}
                     - name: POSTGRES_USER
                       valueFrom:
                         secretKeyRef:
