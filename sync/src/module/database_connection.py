@@ -254,6 +254,7 @@ class database_connection(object):
                 for column in dataframe.columns.values:
                     params["s_"+column] = getattr(row,column)
                     params["q_"+column] = getattr(row,column)
+                additionalprocessing = ""
                 onconflictstatement = f"""
                 EXCEPTION
                 WHEN DUP_VAL_ON_INDEX THEN
@@ -264,22 +265,40 @@ class database_connection(object):
                     onconflictstatement += """, seedlot_status_code =
                                             CASE 
                                             WHEN (:s_seedlot_status_code='INC' AND seedlot_status_code = 'INC') 
-                                            OR (:s_seedlot_status_code='PND' AND seedlot_status_code IN ('INC','PND')) 
+                                            --SUB is a special case for when new spar reverts from SUB to PND
+                                            OR (:s_seedlot_status_code='PND' AND seedlot_status_code IN ('INC','PND','SUB'))  
                                             OR (:s_seedlot_status_code='SUB' AND seedlot_status_code IN ('INC','PND','SUB'))
                                             OR (:s_seedlot_status_code='APP' AND seedlot_status_code IN ('INC','PND','SUB','APP'))
                                             OR (:s_seedlot_status_code='COM' AND seedlot_status_code IN ('INC','PND','SUB','APP','COM')) THEN :s_seedlot_status_code
                                             ELSE seedlot_status_code END """
+                    additionalprocessing += f"""UPDATE the.seedlot s 
+                                                    SET   (       s.bec_version_id, s.bgc_zone_code, s.bgc_subzone_code, s.variant)
+                                                    = (SELECT o.bec_version_id, o.bec_zone,      o.bec_subzone,      o.variant
+                                                        FROM the.orchard o
+                                                        WHERE o.orchard_id = s.orchard_id)
+                                                    , seed_plan_zone_code = (SELECT spz.seed_plan_zone_code
+                                                                            FROM seed_plan_unit spu 
+                                                                            JOIN seed_plan_zone spz
+                                                                                ON spz.seed_plan_zone_id = spu.seed_plan_zone_id
+                                                                            WHERE spu.seed_plan_unit_id = s.seed_plan_unit_id)
+                                                {whStatement}
+                                                AND s.seedlot_status_code = 'PND';"""
                     print(params)
                 onconflictstatement += f"{whStatement} {whStatement2};"       
             sql_text = f""" 
-            BEGIN
-                INSERT INTO {table_name}({', '.join(dataframe.columns.values)}) 
-                    VALUES(:{', :'.join(dataframe.columns.values)})   ;
-                {onconflictstatement}
-            END; """
+                        BEGIN
+                            BEGIN
+                                INSERT INTO {table_name}({', '.join(dataframe.columns.values)}) 
+                                    VALUES(:{', :'.join(dataframe.columns.values)})   ;
+                            {onconflictstatement} 
+                            END; 
+                        {additionalprocessing}  
+                        END;"""
+
             logger.debug(f'---Executing statement for row {i}')
             logger.debug(sql_text)
             result = self.conn.execute(text(sql_text), params)
+            #TODO rowcount will not be accurate due to additionalprocessing
             rows_affected = result.rowcount
         
         self.commit()  # If everything is ok, a commit will be executed.
