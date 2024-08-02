@@ -13,7 +13,7 @@ parameters:
   - name: APP
     description: Application/component name
     value: sync
-  - name: DATABASE_PORT
+  - name: ORACLE_PORT
     description: Oracle database port
     value: "1543"
   - name: EXECUTION_ID
@@ -93,8 +93,8 @@ objects:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-sync
                           key: oracle-sync-password
-                    - name: DATABASE_PORT
-                      value: ${DATABASE_PORT}
+                    - name: ORACLE_PORT
+                      value: ${ORACLE_PORT}
                     - name: ORACLE_SERVICE
                       valueFrom:
                         secretKeyRef:
@@ -117,8 +117,11 @@ objects:
                         secretKeyRef:
                           name: ${REPO}-${ZONE}-database
                           key: database-password
-                    - name: DATABASE_PORT
-                      value: ${DATABASE_PORT}
+                    - name: POSTGRES_PORT
+                      valueFrom:
+                        secretKeyRef:
+                          name: ${REPO}-${ZONE}-database
+                          key: database-port
                     - name: POSTGRES_USER
                       valueFrom:
                         secretKeyRef:
