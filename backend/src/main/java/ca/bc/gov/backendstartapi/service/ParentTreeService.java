@@ -140,7 +140,7 @@ public class ParentTreeService {
     // understand this will be 'N' for the first calculation, and 'Y' for the others.
     // I'll keep as 'N', simulating to be always the first time, for now.
     char globalBoolSmpParentsOutside = 'N';
-    BigDecimal previousSmpParentsOutside = null; // <- review here
+    BigDecimal previousSmpParentsOutside = getPreviousParentTreeOutside(globalCoancestry); // <- review here
 
     if (globalBoolSmpParentsOutside == 'Y') {
       varSmpParentsOutside =
@@ -175,6 +175,16 @@ public class ParentTreeService {
     }
 
     return varEffectivePopSize;
+  }
+
+  private BigDecimal getPreviousParentTreeOutside(BigDecimal globalCoancestry) {
+    SparLog.info("Temporary previous always null");
+    BigDecimal previous = null;
+    if (globalCoancestry != null) {
+      SparLog.info("Received globalCoancestry {}", globalCoancestry);
+      previous = BigDecimal.ZERO;
+    }
+    return previous;
   }
 
   /**
